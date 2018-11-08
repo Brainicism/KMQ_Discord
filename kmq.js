@@ -35,7 +35,7 @@ client.on('message', message => {
         let guess = cleanSongName(message.content);
         if (currentSong && guess === cleanSongName(currentSong)) {
             //this should be atomic
-            scoreboard[getMention(message.author.id)] = (scoreboard[getMention(message.author.id)] || 0) + 1;
+            scoreboard[getUserIdentifier(message.author)] = (scoreboard[getUserIdentifier(message.author)] || 0) + 1;
             message.channel.send("Correct answer was: " + currentSong + " by " + currentArtist + "\n" + JSON.stringify(scoreboard));
             gameInSession = false;
             currentSong = null;
@@ -56,6 +56,7 @@ const startGame = (message) => {
         let random = rows[Math.floor(Math.random() * rows.length)];
         currentSong = random.name;
         currentArtist = random.artist;
+        console.log(currentSong);
         fetchVideoInfo(random.youtube_link, (err, videoInfo) => {
             playSong(random.youtube_link, videoInfo.duration, message);
         })
@@ -95,7 +96,7 @@ const cleanSongName = (name) => {
     return name.toLowerCase().split("(")[0].replace(/[^\x00-\x7F|]/g, "").replace(/|/g, "").replace(/ /g, "").trim();
 }
 
-const getMention = (id) => {
-    return `<@!${id}>`
+const getUserIdentifier = (user) => {
+    return `${user.username}#${user.discriminator}`
 }
 client.login(config.bot_token);
