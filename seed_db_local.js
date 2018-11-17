@@ -8,14 +8,15 @@ const db = new sqlite3.Database('./main.db', (err) => {
         return;
     }
     console.log('Connected to database.');
+    console.log('Building database...');
 
 });
 const video_source = 'kpop_videos_mv_aoimirai.csv';
 const artist_source = 'kpop_artists_mv_aoimirai.csv';
 const video_contents = fs.readFileSync(video_source);
 const artist_contents = fs.readFileSync(artist_source);
-const videos = parse(video_contents, { comment: '#', relax_column_count: true })
-const artists = parse(artist_contents, { comment: '#', relax: true, relax_column_count: true })
+const videos = parse(video_contents, { comment: '#', relax_column_count: true });
+const artists = parse(artist_contents, { comment: '#', relax: true, relax_column_count: true });
 const video_insert_query = "INSERT INTO videos(id, parentID, artistID, name, video_type, youtube_link, views, likes, publish_date, last_updated, dead) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 const artist_insert_query = "INSERT INTO artists(id, name, stylized_name, gender, is_solo, parent_groupID, formation_date, disband_date, social_media, followers, max_followers) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -51,7 +52,6 @@ db.serialize(() => {
         console.log("Importing artist data");
         for (let i = 0; i < artists.length; i++) {
             let artist = artists[i];
-            console.log("Processing artist " + i);
             db.run(artist_insert_query,
                 [parseInt(artist[0]), // id (artist)
                     artist[1], // name
