@@ -71,6 +71,7 @@ const disconnectVoiceConnection = (message) => {
     }
     message.channel.send("no vc");
 }
+
 const playSong = (link, duration, message) => {
     var voiceChannel = message.member.voiceChannel;
     const streamOptions = { volume: 0.1 };
