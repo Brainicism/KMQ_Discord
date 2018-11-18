@@ -9,7 +9,7 @@
             "name": "random",
             "description": [
                 "Bot plays a random song in VC; ",
-                "type in your guess first to get a point"
+                "type in your guess first to get a point."
             ],
             "usage": "!random",
             "arguments": []
@@ -17,7 +17,7 @@
         {
             "name": "stop",
             "description": [
-                "The bot leaves VC and reveals the answer to any ongoing games"
+                "The bot leaves VC and reveals the answer to any ongoing games."
             ],
             "usage": "!stop",
             "arguments": []

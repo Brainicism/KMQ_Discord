@@ -76,7 +76,7 @@ const help = (action) => {
         helpMessages.actions.forEach(function(action) {
             embed_fields.push({
                 name: action.name,
-                value: action.description.join("")
+                value: action.description.join("") + " " + action.usage
             })
         });
     }
