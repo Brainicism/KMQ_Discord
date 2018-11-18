@@ -18,7 +18,7 @@ var currentArtist = null;
 var currentSongLink = null;
 var gameInSession = false;
 
-const sendSongMessage = (message, currentSong, currentArtist, currentSongLink, isQuit) => {
+const sendSongMessage = (message, isQuit) => {
     message.channel.send({embed: {
         color: RED,
         author: {
@@ -40,7 +40,10 @@ const sendScoreboard = (message, scoreboard) => {
     message.channel.send({embed: {
         color: RED,
         title: "**Results**",
-        fields: scoreboardArr.sort((a, b) => { return b.value - a.value })
+        fields: Object.keys(scoreboard).map(x => {
+            return {name: x, value: scoreboard[x].value}
+        })
+            .sort((a, b) => { return b.value - a.value })
     }})
 }
 
@@ -54,7 +57,7 @@ client.on('message', message => {
     if (command) {
         if (command.action === "stop") {
             gameInSession = false;
-            sendSongMessage(message, currentSong, currentArtist, currentSongLink, true);
+            sendSongMessage(message, true);
             disconnectVoiceConnection(message);
         }
         else if (command.action === "random") {
@@ -81,7 +84,7 @@ client.on('message', message => {
                 scoreboard[userID].value++;
             }
 
-            sendSongMessage(message, currentSong, currentArtist, currentSongLink, false);
+            sendSongMessage(message, false);
             sendScoreboard(message, scoreboard);
             gameInSession = false;
             currentSong = null;
@@ -100,12 +103,11 @@ const startGame = (message) => {
     gameInSession = true;
     let query = `SELECT videos.youtube_link as youtube_link, videos.name, DATE(videos.publish_date) as date, artists.name as artist FROM videos INNER JOIN artists on videos.artistID = artists.id WHERE gender = "female" ORDER BY views DESC LIMIT 500`;
     db.all(query, (err, rows) => {
-        console.log(err);
+        if (err) console.error(err);
         let random = rows[Math.floor(Math.random() * rows.length)];
         currentSong = random.name;
         currentArtist = random.artist;
         currentSongLink = random.youtube_link;
-        console.log(currentSong);
         fetchVideoInfo(currentSongLink, (err, videoInfo) => {
             playSong(currentSongLink, videoInfo.duration, message);
         })
