@@ -1,42 +1,46 @@
 const Discord = require('discord.js');
-const client = new Discord.Client();
 const ytdl = require('ytdl-core');
-const botPrefix = '!';
 const fetchVideoInfo = require('youtube-info');
 const sqlite3 = require('sqlite3').verbose();
 const config = require("./config.json")
+const client = new Discord.Client();
+const botPrefix = '!';
+const RED = 15158332;
 const db = new sqlite3.Database('./main.db', (err) => {
     if (err) {
         console.error(err);
         return;
     }
 });
-var scoreboard = [];
+var scoreboard = {};
 var currentSong = null;
 var currentArtist = null;
 var currentSongLink = null;
 var gameInSession = false;
 
-const songInfoMessage = (message, currentSong, currentArtist, currentSongLink, isQuit) => {
+const sendSongMessage = (message, currentSong, currentArtist, currentSongLink, isQuit) => {
     message.channel.send({embed: {
-        color: 15158332, // Red
+        color: RED,
         author: {
             name: isQuit ? null : message.author.username,
             icon_url: isQuit ? null : message.author.avatarURL
         },
-        title: currentSong + " - " + currentArtist,
-        description: "https://youtube.com/watch?v=" + currentSongLink,
+        title: `${currentSong} - ${currentArtist}`,
+        description: `https://youtube.com/watch?v=${currentSongLink}`,
         image: {
-            url: "https://img.youtube.com/vi/" + currentSongLink + "/hqdefault.jpg"
+            url: `https://img.youtube.com/vi/${currentSongLink}/hqdefault.jpg`
         }
     }})
 }
 
 const sendScoreboard = (message, scoreboard) => {
+    var scoreboardArr = Object.keys(scoreboard).map(x => {
+        return {name: x, value: scoreboard[x].value}
+    })
     message.channel.send({embed: {
-        color: 15158332,
+        color: RED,
         title: "**Results**",
-        fields: scoreboard
+        fields: scoreboardArr.sort((a, b) => { return b.value - a.value })
     }})
 }
 
@@ -50,7 +54,7 @@ client.on('message', message => {
     if (command) {
         if (command.action === "stop") {
             gameInSession = false;
-            songInfoMessage(message, currentSong, currentArtist, currentSongLink, true);
+            sendSongMessage(message, currentSong, currentArtist, currentSongLink, true);
             disconnectVoiceConnection(message);
         }
         else if (command.action === "random") {
@@ -59,33 +63,25 @@ client.on('message', message => {
         else if (command.action === "end") {
             if (scoreboard.length > 0) {
                 disconnectVoiceConnection(message);
-                message.channel.send(scoreboard[0].name + " wins!");
+                message.channel.send(`${scoreboard[0].name} wins!`);
                 sendScoreboard(message, scoreboard);
-                scoreboard = [];
+                scoreboard = {};
             }
         }
     }
     else {
         let guess = cleanSongName(message.content);
         if (currentSong && guess === cleanSongName(currentSong)) {
-            //this should be atomic
-            let index = -1;
-            for (let i = 0; i < scoreboard.length; i++) {
-                if (scoreboard[i].name === getUserIdentifier(message.author)) {
-                    index = i;
-                }
+            // this should be atomic
+            let userID = getUserIdentifier(message.author);
+            if (!scoreboard[userID]) {
+                scoreboard[userID] = ({name: userID, value: 1});
             }
-
-            if (index === -1) {
-                // Either scoreboard is empty or user isn't in scoreboard
-                scoreboard.push({name: getUserIdentifier(message.author), value: 1});
-            }
-
             else {
-                scoreboard[index].value++;
+                scoreboard[userID].value++;
             }
 
-            songInfoMessage(message, currentSong, currentArtist, currentSongLink, false);
+            sendSongMessage(message, currentSong, currentArtist, currentSongLink, false);
             sendScoreboard(message, scoreboard);
             gameInSession = false;
             currentSong = null;
@@ -122,7 +118,7 @@ const disconnectVoiceConnection = (message) => {
         voiceConnection.disconnect();
         return;
     }
-    message.channel.send("no vc");
+    message.channel.send("No VC to connect to. Please issue the command again when you are in a voice channel.");
 }
 
 const playSong = (link, duration, message) => {
