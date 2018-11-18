@@ -65,7 +65,7 @@ client.on('message', message => {
             startGame(message);
         }
         else if (command.action === "help") {
-            help(command.argument);
+            help(message, command.argument);
         }
         else if (command.action === "end") {
             if (scoreboard.length > 0) {
@@ -100,7 +100,7 @@ client.on('message', message => {
 });
 
 // Usage: `!help [action]` or `!help`
-const help = (action) => {
+const help = (message, action) => {
     var embed_title = "";
     var embed_desc = "";
     var embed_fields = [];
@@ -127,7 +127,7 @@ const help = (action) => {
         helpMessages.actions.forEach(function(action) {
             embed_fields.push({
                 name: action.name,
-                value: action.description.join("") + " " + action.usage
+                value: action.description.join("") + " Usage: " + action.usage
             })
         });
     }
