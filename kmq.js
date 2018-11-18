@@ -11,6 +11,7 @@ const db = new sqlite3.Database('./main.db', (err) => {
         return;
     }
 });
+const helpMessages = require('./help_strings.json');
 var scoreboard = {};
 var currentSong = null;
 var currentArtist = null;
@@ -30,6 +31,9 @@ client.on('message', message => {
         else if (command.action === "random") {
             startGame(message);
         }
+        else if (command.action === "help") {
+            help(command.argument);
+        }
     }
     else {
         let guess = cleanSongName(message.content);
@@ -43,6 +47,47 @@ client.on('message', message => {
         }
     }
 });
+
+// Usage: `!help [action]` or `!help`
+const help = (action) => {
+    var embed_title = "";
+    var embed_desc = "";
+    var embed_fields = [];
+    if (action) {
+        var helpActionList = helpMessages.actions.map(a => a.name);
+        if (!helpActionList.includes(action)) {
+            message.channel.send("Sorry, there is no documentation on " + action);
+            return;
+        }
+
+        var detailedAction = helpMessages.actions.find(a => a.name === action)
+        embed_title = detailedAction.name;
+        embed_desc = detailedAction.description.join("");
+        detailedAction.arguments.forEach(function(argument) {
+            embed_fields.push({
+                name: argument.name,
+                value: argument.description.join("")
+            })
+        });
+    }
+    else {
+        embed_title = "KMQ Command Help"
+        embed_desc = helpMessages.rules.join("")
+        helpMessages.actions.forEach(function(action) {
+            embed_fields.push({
+                name: action.name,
+                value: action.description.join("")
+            })
+        });
+    }
+
+    message.channel.send({embed: {
+            title: embed_title,
+            description: embed_desc,
+            fields: embed_fields
+        }
+    })
+}
 
 const startGame = (message) => {
     if (gameInSession) {
