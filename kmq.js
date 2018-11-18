@@ -109,8 +109,6 @@ const startGame = (message) => {
         currentSong = random.name;
         currentArtist = random.artist;
         currentSongLink = random.youtube_link;
-        // REMOVE
-        console.log(currentSong);
         fetchVideoInfo(currentSongLink, (err, videoInfo) => {
             playSong(currentSongLink, videoInfo.duration, message);
         })
