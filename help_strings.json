@@ -1,6 +1,6 @@
 {
     "rules": [
-      "Welcome to KMQ. Type '!random' in chat and the bot will play ",
+      "Type '!random' in chat and the bot will play ",
       "a random kpoop song in VC. The goal of this game is to be the first ",
       "person to guess the song name in chat."
     ],
@@ -30,7 +30,7 @@
             ],
             "usage": "!end",
             "arguments": []
-        }
+        },
         {
             "name": "help",
             "description": [
