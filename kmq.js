@@ -51,7 +51,7 @@ client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
-client.on('message', message => {
+client.on('message', (message) => {
     if (message.author.equals(client.user)) return;
     let command = parseCommand(message.content) || null;
     if (command) {
@@ -64,9 +64,10 @@ client.on('message', message => {
             startGame(message);
         }
         else if (command.action === "end") {
-            if (scoreboard.length > 0) {
-                disconnectVoiceConnection(message);
-                message.channel.send(`${scoreboard[0].name} wins!`);
+            if (Object.keys(scoreboard).length) {
+                let voiceConnection = client.voiceConnections.get(message.guild.id);
+                if (voiceConnection) voiceConnection.disconnect();
+                message.channel.send(`${Object.keys(scoreboard)[0]} wins!`);
                 sendScoreboard(message, scoreboard);
                 scoreboard = {};
             }
@@ -108,6 +109,8 @@ const startGame = (message) => {
         currentSong = random.name;
         currentArtist = random.artist;
         currentSongLink = random.youtube_link;
+        // REMOVE
+        console.log(currentSong);
         fetchVideoInfo(currentSongLink, (err, videoInfo) => {
             playSong(currentSongLink, videoInfo.duration, message);
         })
@@ -153,4 +156,10 @@ const getUserIdentifier = (user) => {
     return `${user.username}#${user.discriminator}`
 }
 
-client.login(config.bot_token);
+if (!config.bot_token) {
+    console.error("No bot token set. Please update config.json!")
+    return;
+}
+else {
+    client.login(config.bot_token);
+}
