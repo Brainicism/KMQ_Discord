@@ -1,10 +1,11 @@
 const Discord = require('discord.js');
-const client = new Discord.Client();
 const ytdl = require('ytdl-core');
-const botPrefix = '!';
 const fetchVideoInfo = require('youtube-info');
 const sqlite3 = require('sqlite3').verbose();
 const config = require("./config.json")
+const client = new Discord.Client();
+const botPrefix = '!';
+const RED = 15158332;
 const db = new sqlite3.Database('./main.db', (err) => {
     if (err) {
         console.error(err);
@@ -15,17 +16,49 @@ const helpMessages = require('./help_strings.json');
 var scoreboard = {};
 var currentSong = null;
 var currentArtist = null;
+var currentSongLink = null;
 var gameInSession = false;
+
+const sendSongMessage = (message, isQuit) => {
+    message.channel.send({embed: {
+        color: RED,
+        author: {
+            name: isQuit ? null : message.author.username,
+            icon_url: isQuit ? null : message.author.avatarURL
+        },
+        title: `${currentSong} - ${currentArtist}`,
+        description: `https://youtube.com/watch?v=${currentSongLink}`,
+        image: {
+            url: `https://img.youtube.com/vi/${currentSongLink}/hqdefault.jpg`
+        }
+    }})
+}
+
+const sendScoreboard = (message, scoreboard) => {
+    var scoreboardArr = Object.keys(scoreboard).map(x => {
+        return {name: x, value: scoreboard[x].value}
+    })
+    message.channel.send({embed: {
+        color: RED,
+        title: "**Results**",
+        fields: Object.keys(scoreboard).map(x => {
+            return {name: x, value: scoreboard[x].value}
+        })
+            .sort((a, b) => { return b.value - a.value })
+    }})
+}
+
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
+
 client.on('message', message => {
     if (message.author.equals(client.user)) return;
     let command = parseCommand(message.content) || null;
     if (command) {
         if (command.action === "stop") {
             gameInSession = false;
-            message.channel.send("The correct song was: " + currentSong + " by " + currentArtist);
+            sendSongMessage(message, true);
             disconnectVoiceConnection(message);
         }
         else if (command.action === "random") {
@@ -34,15 +67,33 @@ client.on('message', message => {
         else if (command.action === "help") {
             help(command.argument);
         }
+        else if (command.action === "end") {
+            if (scoreboard.length > 0) {
+                disconnectVoiceConnection(message);
+                message.channel.send(`${scoreboard[0].name} wins!`);
+                sendScoreboard(message, scoreboard);
+                scoreboard = {};
+            }
+        }
     }
     else {
         let guess = cleanSongName(message.content);
         if (currentSong && guess === cleanSongName(currentSong)) {
-            //this should be atomic
-            scoreboard[getUserIdentifier(message.author)] = (scoreboard[getUserIdentifier(message.author)] || 0) + 1;
-            message.channel.send("Correct answer was: " + currentSong + " by " + currentArtist + "\n" + JSON.stringify(scoreboard));
+            // this should be atomic
+            let userID = getUserIdentifier(message.author);
+            if (!scoreboard[userID]) {
+                scoreboard[userID] = ({name: userID, value: 1});
+            }
+            else {
+                scoreboard[userID].value++;
+            }
+
+            sendSongMessage(message, false);
+            sendScoreboard(message, scoreboard);
             gameInSession = false;
             currentSong = null;
+            currentArtist = null
+            currentSongLink = null;
             disconnectVoiceConnection(message);
         }
     }
@@ -97,13 +148,13 @@ const startGame = (message) => {
     gameInSession = true;
     let query = `SELECT videos.youtube_link as youtube_link, videos.name, DATE(videos.publish_date) as date, artists.name as artist FROM videos INNER JOIN artists on videos.artistID = artists.id WHERE gender = "female" ORDER BY views DESC LIMIT 500`;
     db.all(query, (err, rows) => {
-        console.log(err);
+        if (err) console.error(err);
         let random = rows[Math.floor(Math.random() * rows.length)];
         currentSong = random.name;
         currentArtist = random.artist;
-        console.log(currentSong);
-        fetchVideoInfo(random.youtube_link, (err, videoInfo) => {
-            playSong(random.youtube_link, videoInfo.duration, message);
+        currentSongLink = random.youtube_link;
+        fetchVideoInfo(currentSongLink, (err, videoInfo) => {
+            playSong(currentSongLink, videoInfo.duration, message);
         })
     })
 }
@@ -114,7 +165,7 @@ const disconnectVoiceConnection = (message) => {
         voiceConnection.disconnect();
         return;
     }
-    message.channel.send("no vc");
+    message.channel.send("No VC to connect to. Please issue the command again when you are in a voice channel.");
 }
 
 const playSong = (link, duration, message) => {
@@ -138,6 +189,7 @@ const parseCommand = (message) => {
         message
     }
 }
+
 const cleanSongName = (name) => {
     return name.toLowerCase().split("(")[0].replace(/[^\x00-\x7F|]/g, "").replace(/|/g, "").replace(/ /g, "").trim();
 }
@@ -145,4 +197,5 @@ const cleanSongName = (name) => {
 const getUserIdentifier = (user) => {
     return `${user.username}#${user.discriminator}`
 }
+
 client.login(config.bot_token);

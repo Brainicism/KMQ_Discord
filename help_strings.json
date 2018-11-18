@@ -17,11 +17,20 @@
         {
             "name": "stop",
             "description": [
-                "The bot leaves VC and reveals the answer to any ongoing games."
+                "The game will be suspended and the bot will reveal the answer ",
+                "to any ongoing games in session."
             ],
             "usage": "!stop",
             "arguments": []
         },
+        {
+            "name": "end",
+            "description": [
+                "Finishes the current game and decides on a winner."
+            ],
+            "usage": "!end",
+            "arguments": []
+        }
         {
             "name": "help",
             "description": [
