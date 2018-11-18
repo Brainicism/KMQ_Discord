@@ -28,7 +28,7 @@ const songInfoMessage = (message, currentSong, currentArtist, currentSongLink, i
         description: "https://youtube.com/watch?v=" + currentSongLink,
         image: {
             url: "https://img.youtube.com/vi/" + currentSongLink + "/hqdefault.jpg"
-        },
+        }
     }})
 }
 
