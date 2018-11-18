@@ -29,10 +29,6 @@ const songInfoMessage = (message, currentSong, currentArtist, currentSongLink, i
         image: {
             url: "https://img.youtube.com/vi/" + currentSongLink + "/hqdefault.jpg"
         },
-        footer: {
-            icon_url: client.user.avatarURL,
-            text: "i love kpop"
-        }
     }})
 }
 
