@@ -101,20 +101,20 @@ client.on('message', message => {
 
 // Usage: `!help [action]` or `!help`
 const help = (message, action) => {
-    var embed_title = "";
-    var embed_desc = "";
-    var embed_fields = [];
+    let embed_title = "";
+    let embed_desc = "";
+    let embed_fields = [];
     if (action) {
-        var helpActionList = helpMessages.actions.map(a => a.name);
+        let helpActionList = helpMessages.actions.map(a => a.name);
         if (!helpActionList.includes(action)) {
             message.channel.send("Sorry, there is no documentation on " + action);
             return;
         }
 
-        var detailedAction = helpMessages.actions.find(a => a.name === action)
+        let detailedAction = helpMessages.actions.find(a => a.name === action)
         embed_title = detailedAction.name;
         embed_desc = detailedAction.description.join("");
-        detailedAction.arguments.forEach(function(argument) {
+        detailedAction.arguments.forEach((argument) => {
             embed_fields.push({
                 name: argument.name,
                 value: argument.description.join("")
@@ -124,7 +124,7 @@ const help = (message, action) => {
     else {
         embed_title = "KMQ Command Help"
         embed_desc = helpMessages.rules.join("")
-        helpMessages.actions.forEach(function(action) {
+        helpMessages.actions.forEach((action) => {
             embed_fields.push({
                 name: action.name,
                 value: action.description.join("") + " Usage: " + action.usage
@@ -170,6 +170,7 @@ const disconnectVoiceConnection = (message) => {
 
 const playSong = (link, duration, message) => {
     var voiceChannel = message.member.voiceChannel;
+    console.log("Voice channel: " + voiceChannel.name);
     const streamOptions = { volume: 0.1 };
     voiceChannel.join().then(connection => {
         let options = { begin: duration / 2, quality: 'highest' };
