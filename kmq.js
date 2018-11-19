@@ -13,65 +13,45 @@ const db = new sqlite3.Database('./main.db', (err) => {
     }
 });
 const helpMessages = require('./help_strings.json');
-var scoreboard = {};
 var currentSong = null;
 var currentArtist = null;
 var currentSongLink = null;
 var gameInSession = false;
+var scoreboard = {};
 
-const sendSongMessage = (message, isQuit) => {
-    message.channel.send({embed: {
-        color: RED,
-        author: {
-            name: isQuit ? null : message.author.username,
-            icon_url: isQuit ? null : message.author.avatarURL
-        },
-        title: `${currentSong} - ${currentArtist}`,
-        description: `https://youtube.com/watch?v=${currentSongLink}`,
-        image: {
-            url: `https://img.youtube.com/vi/${currentSongLink}/hqdefault.jpg`
-        }
-    }})
-}
-
-const sendScoreboard = (message, scoreboard) => {
-    var scoreboardArr = Object.keys(scoreboard).map(x => {
-        return {name: x, value: scoreboard[x].value}
-    })
-    message.channel.send({embed: {
-        color: RED,
-        title: "**Results**",
-        fields: Object.keys(scoreboard).map(x => {
-            return {name: x, value: scoreboard[x].value}
-        })
-            .sort((a, b) => { return b.value - a.value })
-    }})
-}
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
-client.on('message', message => {
+client.on('message', (message) => {
     if (message.author.equals(client.user)) return;
     let command = parseCommand(message.content) || null;
     if (command) {
         if (command.action === "stop") {
-            gameInSession = false;
-            sendSongMessage(message, true);
-            disconnectVoiceConnection(message);
+            if (gameInSession) {
+                sendSongMessage(message, true);
+                disconnectVoiceConnection(message);
+                resetGameState();
+            }
         }
         else if (command.action === "random") {
-            startGame(message);
+            if (!message.member.voiceChannel) {
+                message.channel.send("Send `!random` again when you are in a voice channel.");
+            }
+            else {
+                startGame(message);
+            }
         }
         else if (command.action === "help") {
             help(message, command.argument);
         }
         else if (command.action === "end") {
-            if (scoreboard.length > 0) {
+            if (Object.keys(scoreboard).length) {
                 disconnectVoiceConnection(message);
-                message.channel.send(`${scoreboard[0].name} wins!`);
+                message.channel.send(`${Object.keys(scoreboard)[0]} wins!`);
                 sendScoreboard(message, scoreboard);
+                resetGameState();
                 scoreboard = {};
             }
         }
@@ -90,10 +70,7 @@ client.on('message', message => {
 
             sendSongMessage(message, false);
             sendScoreboard(message, scoreboard);
-            gameInSession = false;
-            currentSong = null;
-            currentArtist = null
-            currentSongLink = null;
+            resetGameState();
             disconnectVoiceConnection(message);
         }
     }
@@ -159,13 +136,41 @@ const startGame = (message) => {
     })
 }
 
+const sendSongMessage = (message, isQuit) => {
+    message.channel.send({embed: {
+        color: RED,
+        author: {
+            name: isQuit ? null : message.author.username,
+            icon_url: isQuit ? null : message.author.avatarURL
+        },
+        title: `${currentSong} - ${currentArtist}`,
+        description: `https://youtube.com/watch?v=${currentSongLink}`,
+        image: {
+            url: `https://img.youtube.com/vi/${currentSongLink}/hqdefault.jpg`
+        }
+    }})
+}
+
+const sendScoreboard = (message, scoreboard) => {
+    var scoreboardArr = Object.keys(scoreboard).map(x => {
+        return {name: x, value: scoreboard[x].value}
+    })
+    message.channel.send({embed: {
+        color: RED,
+        title: "**Results**",
+        fields: Object.keys(scoreboard).map(x => {
+            return {name: x, value: scoreboard[x].value}
+        })
+        .sort((a, b) => { return b.value - a.value })
+    }})
+}
+
 const disconnectVoiceConnection = (message) => {
     let voiceConnection = client.voiceConnections.get(message.guild.id);
     if (voiceConnection) {
         voiceConnection.disconnect();
         return;
     }
-    message.channel.send("No VC to connect to. Please issue the command again when you are in a voice channel.");
 }
 
 const playSong = (link, duration, message) => {
@@ -199,4 +204,18 @@ const getUserIdentifier = (user) => {
     return `${user.username}#${user.discriminator}`
 }
 
-client.login(config.bot_token);
+const resetGameState = () => {
+    // Note: scoreboard is reset manually when !end is called
+    currentSong = null;
+    currentArtist = null;
+    currentSongLink = null;
+    gameInSession = false;
+}
+
+if (!config.bot_token) {
+    console.error("No bot token set. Please update config.json!")
+    process.exit(1);
+}
+else {
+    client.login(config.bot_token);
+}
