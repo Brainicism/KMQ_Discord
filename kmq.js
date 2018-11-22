@@ -70,11 +70,11 @@ client.on("message", (message) => {
 });
 
 const startGame = (message) => {
-    resetGameState();
     if (gameInSession) {
-        message.channel.send("Game already in session");
+        message.channel.send("Game already in session.");
         return;
     }
+    resetGameState();
     gameInSession = true;
     let query = `SELECT videos.youtube_link as youtube_link, videos.name, DATE(videos.publish_date) as date, artists.name as artist, videos.video_type as video_type, videos.dead as dead FROM videos INNER JOIN artists on videos.artistID = artists.id WHERE gender = "female" AND video_type = "main" AND dead = "n" ORDER BY views DESC LIMIT 500`;
     db.all(query, (err, rows) => {
