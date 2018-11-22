@@ -31,7 +31,6 @@ client.on("message", (message) => {
             if (gameInSession) {
                 sendSongMessage(message, true);
                 disconnectVoiceConnection(message);
-                resetGameState();
             }
         }
         else if (command.action === "random") {
@@ -47,7 +46,6 @@ client.on("message", (message) => {
                 disconnectVoiceConnection(message);
                 message.channel.send(`${Object.keys(scoreboard)[0]} wins!`);
                 sendScoreboard(message, scoreboard);
-                resetGameState();
                 scoreboard = {};
             }
         }
@@ -66,13 +64,13 @@ client.on("message", (message) => {
 
             sendSongMessage(message, false);
             sendScoreboard(message, scoreboard);
-            resetGameState();
             disconnectVoiceConnection(message);
         }
     }
 });
 
 const startGame = (message) => {
+    resetGameState();
     if (gameInSession) {
         message.channel.send("Game already in session");
         return;
@@ -142,7 +140,6 @@ const playSong = (link, message) => {
     }).catch((err) => {
         console.error(err);
         // Attempt to restart game with different song
-        resetGameState();
         startGame(message);
     })
 }
