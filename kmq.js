@@ -45,8 +45,18 @@ client.on("message", (message) => {
         else if (command.action === "end") {
             if (Object.keys(scoreboard).length) {
                 disconnectVoiceConnection(message);
-                message.channel.send(`${Object.keys(scoreboard)[0]} wins!`);
+                let sortedScoreboard = Object.keys(scoreboard).map(x => {
+                    return { name: x, value: scoreboard[x].value }
+                }).sort((a, b) => { return b.value - a.value })
+                for (let i = 0; i < sortedScoreboard.length; i++) {
+                    if (sortedScoreboard[i] === sortedScoreboard[0]) {
+                        // In case of a tie
+                        message.channel.send(`${sortedScoreboard[i].name} wins!`);
+                    }
+                    else break;
+                }
                 sendScoreboard(message, scoreboard);
+                resetGameState();
                 scoreboard = {};
             }
         }
@@ -66,6 +76,7 @@ client.on("message", (message) => {
             sendSongMessage(message, false);
             sendScoreboard(message, scoreboard);
             disconnectVoiceConnection(message);
+            resetGameState();
         }
     }
 });
@@ -75,7 +86,6 @@ const startGame = (message) => {
         message.channel.send("Game already in session.");
         return;
     }
-    resetGameState();
     gameInSession = true;
     let query = `SELECT videos.youtube_link as youtube_link, videos.name, DATE(videos.publish_date) as date, artists.name as artist, videos.video_type as video_type, videos.dead as dead FROM videos INNER JOIN artists on videos.artistID = artists.id WHERE gender = "female" AND video_type = "main" AND dead = "n" ORDER BY views DESC LIMIT 500`;
     db.all(query, (err, rows) => {
@@ -141,6 +151,7 @@ const playSong = (link, message) => {
     }).catch((err) => {
         console.error(err);
         // Attempt to restart game with different song
+        resetGameState();
         startGame(message);
     })
 }
