@@ -19,7 +19,9 @@ const videos = parse(video_contents, { comment: '#', relax_column_count: true })
 const artists = parse(artist_contents, { comment: '#', relax: true, relax_column_count: true });
 const video_insert_query = "INSERT INTO videos(id, parentID, artistID, name, video_type, youtube_link, views, likes, publish_date, last_updated, dead) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 const artist_insert_query = "INSERT INTO artists(id, name, stylized_name, gender, is_solo, parent_groupID, formation_date, disband_date, social_media, followers, max_followers) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
+const cleanApostrophe = (text) => {
+    return text.replace("&#39;", "'");
+}
 
 db.serialize(() => {
     db.run(`DROP TABLE IF EXISTS videos`);
@@ -34,7 +36,7 @@ db.serialize(() => {
                 [parseInt(video[0]), // id (video)
                     parseInt(video[1]), // parentID
                     video[2], //artistID
-                    video[3], // name
+                    cleanApostrophe(video[3]), // name
                     video[4], // video_type
                     video[5], // youtube_link
                     parseInt(video[6]), // views
@@ -54,7 +56,7 @@ db.serialize(() => {
             let artist = artists[i];
             db.run(artist_insert_query,
                 [parseInt(artist[0]), // id (artist)
-                    artist[1], // name
+                    cleanApostrophe(artist[1]), // name
                     artist[2], // stylized_name
                     artist[3], // gender
                     artist[4], // is_solo
