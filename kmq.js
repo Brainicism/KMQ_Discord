@@ -31,6 +31,7 @@ client.on("message", (message) => {
             if (gameInSession) {
                 sendSongMessage(message, true);
                 disconnectVoiceConnection(message);
+                resetGameState();
             }
         }
         else if (command.action === "random") {
