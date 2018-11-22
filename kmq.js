@@ -78,7 +78,7 @@ const startGame = (message) => {
         return;
     }
     gameInSession = true;
-    let query = `SELECT videos.youtube_link as youtube_link, videos.name, DATE(videos.publish_date) as date, artists.name as artist FROM videos INNER JOIN artists on videos.artistID = artists.id WHERE gender = "female" ORDER BY views DESC LIMIT 500`;
+    let query = `SELECT videos.youtube_link as youtube_link, videos.name, DATE(videos.publish_date) as date, artists.name as artist, videos.video_type as video_type, videos.dead as dead FROM videos INNER JOIN artists on videos.artistID = artists.id WHERE gender = "female" AND video_type = "main" AND dead = "n" ORDER BY views DESC LIMIT 500`;
     db.all(query, (err, rows) => {
         if (err) console.error(err);
         let random = rows[Math.floor(Math.random() * rows.length)];
@@ -86,7 +86,7 @@ const startGame = (message) => {
         currentArtist = random.artist;
         currentSongLink = random.youtube_link;
         fetchVideoInfo(currentSongLink, (err, videoInfo) => {
-            playSong(currentSongLink, videoInfo.duration, message);
+            playSong(currentSongLink, message);
         })
     })
 }
@@ -132,14 +132,19 @@ const disconnectVoiceConnection = (message) => {
     }
 }
 
-const playSong = (link, duration, message) => {
+const playSong = (link, message) => {
     let voiceChannel = message.member.voiceChannel;
     const streamOptions = { volume: 0.1 };
     voiceChannel.join().then(connection => {
-        let options = { begin: duration / 2, quality: "highest" };
+        let options = { filter: "audioonly", quality: "highest" };
         const stream = ytdl(link, options);
         const dispatcher = connection.playStream(stream, streamOptions);
-    }).catch(err => console.log(err));
+    }).catch((err) => {
+        console.error(err);
+        // Attempt to restart game with different song
+        resetGameState();
+        startGame(message);
+    })
 }
 
 const parseCommand = (message) => {
