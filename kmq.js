@@ -90,21 +90,21 @@ const help = (message, action) => {
 
         let detailedAction = helpMessages.actions.find(a => a.name === action)
         embed_title = detailedAction.name;
-        embed_desc = detailedAction.description.join("");
+        embed_desc = detailedAction.description;
         detailedAction.arguments.forEach((argument) => {
             embed_fields.push({
                 name: argument.name,
-                value: argument.description.join("")
+                value: argument.description
             })
         });
     }
     else {
         embed_title = "KMQ Command Help"
-        embed_desc = helpMessages.rules.join("")
+        embed_desc = helpMessages.rules
         helpMessages.actions.forEach((action) => {
             embed_fields.push({
                 name: action.name,
-                value: action.description.join("") + " Usage: " + action.usage
+                value: action.description + " Usage: " + action.usage
             })
         });
     }
