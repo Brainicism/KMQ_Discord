@@ -1,30 +1,29 @@
-const Discord = require('discord.js');
-const ytdl = require('ytdl-core');
-const fetchVideoInfo = require('youtube-info');
-const sqlite3 = require('sqlite3').verbose();
+const Discord = require("discord.js");
+const ytdl = require("ytdl-core");
+const fetchVideoInfo = require("youtube-info");
+const sqlite3 = require("sqlite3").verbose();
 const config = require("./config.json")
 const client = new Discord.Client();
-const botPrefix = '!';
+const botPrefix = "!";
 const RED = 15158332;
-const db = new sqlite3.Database('./main.db', (err) => {
+const db = new sqlite3.Database("./main.db", (err) => {
     if (err) {
         console.error(err);
         return;
     }
 });
 const helpMessages = require('./help_strings.json');
-var currentSong = null;
-var currentArtist = null;
-var currentSongLink = null;
-var gameInSession = false;
-var scoreboard = {};
+let currentSong = null;
+let currentArtist = null;
+let currentSongLink = null;
+let gameInSession = false;
+let scoreboard = {};
 
-
-client.on('ready', () => {
+client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
-client.on('message', (message) => {
+client.on("message", (message) => {
     if (message.author.equals(client.user)) return;
     let command = parseCommand(message.content) || null;
     if (command) {
@@ -51,7 +50,6 @@ client.on('message', (message) => {
                 disconnectVoiceConnection(message);
                 message.channel.send(`${Object.keys(scoreboard)[0]} wins!`);
                 sendScoreboard(message, scoreboard);
-                resetGameState();
                 scoreboard = {};
             }
         }
@@ -62,7 +60,7 @@ client.on('message', (message) => {
             // this should be atomic
             let userID = getUserIdentifier(message.author);
             if (!scoreboard[userID]) {
-                scoreboard[userID] = ({name: userID, value: 1});
+                scoreboard[userID] = ({ name: userID, value: 1 });
             }
             else {
                 scoreboard[userID].value++;
@@ -70,7 +68,6 @@ client.on('message', (message) => {
 
             sendSongMessage(message, false);
             sendScoreboard(message, scoreboard);
-            resetGameState();
             disconnectVoiceConnection(message);
         }
     }
@@ -119,11 +116,12 @@ const help = (message, action) => {
 
 const startGame = (message) => {
     if (gameInSession) {
-        message.channel.send("Game already in session");
+        message.channel.send("Game already in session.");
         return;
     }
+    resetGameState();
     gameInSession = true;
-    let query = `SELECT videos.youtube_link as youtube_link, videos.name, DATE(videos.publish_date) as date, artists.name as artist FROM videos INNER JOIN artists on videos.artistID = artists.id WHERE gender = "female" ORDER BY views DESC LIMIT 500`;
+    let query = `SELECT videos.youtube_link as youtube_link, videos.name, DATE(videos.publish_date) as date, artists.name as artist, videos.video_type as video_type, videos.dead as dead FROM videos INNER JOIN artists on videos.artistID = artists.id WHERE gender = "female" AND video_type = "main" AND dead = "n" ORDER BY views DESC LIMIT 500`;
     db.all(query, (err, rows) => {
         if (err) console.error(err);
         let random = rows[Math.floor(Math.random() * rows.length)];
@@ -131,38 +129,42 @@ const startGame = (message) => {
         currentArtist = random.artist;
         currentSongLink = random.youtube_link;
         fetchVideoInfo(currentSongLink, (err, videoInfo) => {
-            playSong(currentSongLink, videoInfo.duration, message);
+            playSong(currentSongLink, message);
         })
     })
 }
 
 const sendSongMessage = (message, isQuit) => {
-    message.channel.send({embed: {
-        color: RED,
-        author: {
-            name: isQuit ? null : message.author.username,
-            icon_url: isQuit ? null : message.author.avatarURL
-        },
-        title: `${currentSong} - ${currentArtist}`,
-        description: `https://youtube.com/watch?v=${currentSongLink}`,
-        image: {
-            url: `https://img.youtube.com/vi/${currentSongLink}/hqdefault.jpg`
+    message.channel.send({
+        embed: {
+            color: RED,
+            author: {
+                name: isQuit ? null : message.author.username,
+                icon_url: isQuit ? null : message.author.avatarURL
+            },
+            title: `${currentSong} - ${currentArtist}`,
+            description: `https://youtube.com/watch?v=${currentSongLink}`,
+            image: {
+                url: `https://img.youtube.com/vi/${currentSongLink}/hqdefault.jpg`
+            }
         }
-    }})
+    })
 }
 
 const sendScoreboard = (message, scoreboard) => {
-    var scoreboardArr = Object.keys(scoreboard).map(x => {
-        return {name: x, value: scoreboard[x].value}
+    let scoreboardArr = Object.keys(scoreboard).map(x => {
+        return { name: x, value: scoreboard[x].value }
     })
-    message.channel.send({embed: {
-        color: RED,
-        title: "**Results**",
-        fields: Object.keys(scoreboard).map(x => {
-            return {name: x, value: scoreboard[x].value}
-        })
-        .sort((a, b) => { return b.value - a.value })
-    }})
+    message.channel.send({
+        embed: {
+            color: RED,
+            title: "**Results**",
+            fields: Object.keys(scoreboard).map(x => {
+                return { name: x, value: scoreboard[x].value }
+            })
+                .sort((a, b) => { return b.value - a.value })
+        }
+    })
 }
 
 const disconnectVoiceConnection = (message) => {
@@ -173,22 +175,25 @@ const disconnectVoiceConnection = (message) => {
     }
 }
 
-const playSong = (link, duration, message) => {
-    var voiceChannel = message.member.voiceChannel;
-    console.log("Voice channel: " + voiceChannel.name);
+const playSong = (link, message) => {
+    let voiceChannel = message.member.voiceChannel;
     const streamOptions = { volume: 0.1 };
     voiceChannel.join().then(connection => {
-        let options = { begin: duration / 2, quality: 'highest' };
+        let options = { filter: "audioonly", quality: "highest" };
         const stream = ytdl(link, options);
         const dispatcher = connection.playStream(stream, streamOptions);
-    }).catch(err => console.log(err));
+    }).catch((err) => {
+        console.error(err);
+        // Attempt to restart game with different song
+        startGame(message);
+    })
 }
 
 const parseCommand = (message) => {
     if (message.charAt(0) !== botPrefix) return null;
-    let components = message.split(' ');
+    let components = message.split(" ");
     let action = components.shift().substring(1);
-    let argument = components.join(' ');
+    let argument = components.join(" ");
     return {
         action,
         argument,
@@ -212,10 +217,13 @@ const resetGameState = () => {
     gameInSession = false;
 }
 
-if (!config.bot_token) {
-    console.error("No bot token set. Please update config.json!")
-    process.exit(1);
-}
-else {
-    client.login(config.bot_token);
-}
+
+(() => {
+    if (!config.bot_token) {
+        console.error("No bot token set. Please update config.json!")
+        process.exit(1);
+    }
+    else {
+        client.login(config.bot_token);
+    }
+})();
