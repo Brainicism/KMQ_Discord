@@ -9,7 +9,7 @@ module.exports = class Scoreboard {
         this._highestScore = 0;
     }
 
-    getWinner() {
+    getWinnerMessage() {
         let winnerStr = "";
 
         if (this._firstPlace.length == 1) {
@@ -17,16 +17,18 @@ module.exports = class Scoreboard {
         }
 
         for (let i = 0; i < this._firstPlace.length; i++) {
+            winnerStr += this._firstPlace[i].getName();
             if (i == this._firstPlace.length - 1) {
                 // Last entry -- append just the username
-                winnerStr += this._firstPlace[i].getName() + " ";
+                winnerStr += " ";
             }
             else if (i == this._firstPlace.length - 2) {
                 // Second last entry -- use "and"
-                winnerStr += this._firstPlace[i].getName() + " and ";
+                winnerStr += " and ";
             }
             else {
-                winnerStr += this._firstPlace[i].getName() + ", ";
+                // At least two more entries -- separate by ","
+                winnerStr += ", ";
             }
         }
         winnerStr += "win!";
@@ -55,8 +57,7 @@ module.exports = class Scoreboard {
         else if (this._players[winnerID].getScore() > this._highestScore) {
             // If user is first, reset first place array and add them
             this._highestScore = this._players[winnerID].getScore();
-            this._firstPlace = [];
-            this._firstPlace.push(this._players[winnerID]);
+            this._firstPlace = [this._players[winnerID]];
         }
     }
 

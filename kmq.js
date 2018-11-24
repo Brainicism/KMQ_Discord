@@ -3,7 +3,7 @@ const ytdl = require("ytdl-core");
 const fetchVideoInfo = require("youtube-info");
 const sqlite3 = require("sqlite3").verbose();
 const config = require("./config.json")
-const GameSession = require("./gamesession.js")
+const GameSession = require("./game-session.js")
 const helpMessages = require('./help_strings.json');
 const client = new Discord.Client();
 const botPrefix = "!";
@@ -53,7 +53,7 @@ client.on("message", (message) => {
             if (!gameSession.scoreboard.isEmpty()) {
                 if (gameSession.gameInSession()) sendSongMessage(message, true);
                 disconnectVoiceConnection(message);
-                message.channel.send(gameSession.scoreboard.getWinner());
+                message.channel.send(gameSession.scoreboard.getWinnerMessage());
                 sendScoreboard(message, gameSession.scoreboard);
                 gameSession.endGame();
             }
