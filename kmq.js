@@ -75,9 +75,9 @@ client.on("message", (message) => {
 
 // Usage: `!help [action]` or `!help`
 const help = (message, action) => {
-    let embed_title = "";
-    let embed_desc = "";
-    let embed_fields = [];
+    let embedTitle = "";
+    let embedDesc = "";
+    let embedFields = [];
     if (action) {
         let helpActionList = helpMessages.actions.map(a => a.name);
         if (!helpActionList.includes(action)) {
@@ -86,30 +86,31 @@ const help = (message, action) => {
         }
 
         let detailedAction = helpMessages.actions.find(a => a.name === action)
-        embed_title = detailedAction.name;
-        embed_desc = detailedAction.description;
+        embedTitle = detailedAction.name;
+        embedDesc = detailedAction.description;
         detailedAction.arguments.forEach((argument) => {
-            embed_fields.push({
+            embedFields.push({
                 name: argument.name,
                 value: argument.description
             })
         });
     }
     else {
-        embed_title = "KMQ Command Help"
-        embed_desc = helpMessages.rules
+        embedTitle = "KMQ Command Help"
+        embedDesc = helpMessages.rules
         helpMessages.actions.forEach((action) => {
-            embed_fields.push({
+            embedFields.push({
                 name: action.name,
                 value: action.description + " Usage: " + action.usage
             })
         });
     }
 
-    message.channel.send({embed: {
-            title: embed_title,
-            description: embed_desc,
-            fields: embed_fields
+    message.channel.send({
+        embed: {
+            title: embedTitle,
+            description: embedDesc,
+            fields: embedFields
         }
     })
 }
@@ -121,13 +122,13 @@ const startGame = (message) => {
     }
     resetGameState();
     gameInSession = true;
-    let query = `SELECT videos.youtube_link as youtube_link, videos.name, DATE(videos.publish_date) as date, artists.name as artist, videos.video_type as video_type, videos.dead as dead FROM videos INNER JOIN artists on videos.artistID = artists.id WHERE gender = "female" AND video_type = "main" AND dead = "n" ORDER BY views DESC LIMIT 500`;
+    let query = `SELECT videos.youtube_link as youtubeLink, videos.name, DATE(videos.publish_date) as date, artists.name as artist, videos.video_type as video_type, videos.dead as dead FROM videos INNER JOIN artists on videos.artistID = artists.id WHERE gender = "female" AND video_type = "main" AND dead = "n" ORDER BY views DESC LIMIT 500`;
     db.all(query, (err, rows) => {
         if (err) console.error(err);
         let random = rows[Math.floor(Math.random() * rows.length)];
         currentSong = random.name;
         currentArtist = random.artist;
-        currentSongLink = random.youtube_link;
+        currentSongLink = random.youtubeLink;
         fetchVideoInfo(currentSongLink, (err, videoInfo) => {
             playSong(currentSongLink, message);
         })
@@ -219,11 +220,11 @@ const resetGameState = () => {
 
 
 (() => {
-    if (!config.bot_token) {
+    if (!config.botToken) {
         console.error("No bot token set. Please update config.json!")
         process.exit(1);
     }
     else {
-        client.login(config.bot_token);
+        client.login(config.botToken);
     }
 })();
