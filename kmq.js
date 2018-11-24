@@ -3,6 +3,8 @@ const ytdl = require("ytdl-core");
 const fetchVideoInfo = require("youtube-info");
 const sqlite3 = require("sqlite3").verbose();
 const config = require("./config.json")
+const GameSession = require("./game-session.js")
+const helpMessages = require('./help_strings.json');
 const client = new Discord.Client();
 const botPrefix = "!";
 const RED = 15158332;
@@ -12,12 +14,8 @@ const db = new sqlite3.Database("./main.db", (err) => {
         return;
     }
 });
-const helpMessages = require('./help_strings.json');
-let currentSong = null;
-let currentArtist = null;
-let currentSongLink = null;
-let gameInSession = false;
-let scoreboard = {};
+
+let gameSessions = {};
 
 client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -26,12 +24,18 @@ client.on("ready", () => {
 client.on("message", (message) => {
     if (message.author.equals(client.user)) return;
     let command = parseCommand(message.content) || null;
+
+    if (!gameSessions[message.guild.id]) {
+        gameSessions[message.guild.id] = new GameSession();
+    }
+
+    let gameSession = gameSessions[message.guild.id];
     if (command) {
         if (command.action === "stop") {
-            if (gameInSession) {
+            if (gameSession.gameInSession()) {
                 sendSongMessage(message, true);
                 disconnectVoiceConnection(message);
-                resetGameState();
+                gameSession.endRound();
             }
         }
         else if (command.action === "random") {
@@ -46,29 +50,26 @@ client.on("message", (message) => {
             help(message, command.argument);
         }
         else if (command.action === "end") {
-            if (Object.keys(scoreboard).length) {
+            if (!gameSession.scoreboard.isEmpty()) {
+                if (gameSession.gameInSession()) sendSongMessage(message, true);
                 disconnectVoiceConnection(message);
-                message.channel.send(`${Object.keys(scoreboard)[0]} wins!`);
-                sendScoreboard(message, scoreboard);
-                scoreboard = {};
+                message.channel.send(gameSession.scoreboard.getWinnerMessage());
+                sendScoreboard(message, gameSession.scoreboard);
+                gameSession.endGame();
             }
         }
     }
     else {
         let guess = cleanSongName(message.content);
-        if (currentSong && guess === cleanSongName(currentSong)) {
+        if (gameSession.getSong() && guess === cleanSongName(gameSession.getSong())) {
             // this should be atomic
-            let userID = getUserIdentifier(message.author);
-            if (!scoreboard[userID]) {
-                scoreboard[userID] = ({ name: userID, value: 1 });
-            }
-            else {
-                scoreboard[userID].value++;
-            }
+            let userTag = getUserIdentifier(message.author);
+            gameSession.scoreboard.updateScoreboard(userTag, message.author.id);
 
             sendSongMessage(message, false);
-            sendScoreboard(message, scoreboard);
+            sendScoreboard(message, gameSession.scoreboard);
             disconnectVoiceConnection(message);
+            gameSession.endRound();
         }
     }
 });
@@ -116,54 +117,50 @@ const help = (message, action) => {
 }
 
 const startGame = (message) => {
-    if (gameInSession) {
+
+    let gameSession = gameSessions[message.guild.id];
+
+    if (gameSession.gameInSession()) {
         message.channel.send("Game already in session.");
         return;
     }
-    resetGameState();
-    gameInSession = true;
+
     let query = `SELECT videos.youtube_link as youtubeLink, videos.name, DATE(videos.publish_date) as date, artists.name as artist, videos.video_type as video_type, videos.dead as dead FROM videos INNER JOIN artists on videos.artistID = artists.id WHERE gender = "female" AND video_type = "main" AND dead = "n" ORDER BY views DESC LIMIT 500`;
     db.all(query, (err, rows) => {
         if (err) console.error(err);
         let random = rows[Math.floor(Math.random() * rows.length)];
-        currentSong = random.name;
-        currentArtist = random.artist;
-        currentSongLink = random.youtubeLink;
-        fetchVideoInfo(currentSongLink, (err, videoInfo) => {
-            playSong(currentSongLink, message);
+        gameSession.startRound(random.name, random.artist, random.youtubeLink);
+        fetchVideoInfo(gameSession.getLink(), (err, videoInfo) => {
+            playSong(gameSession.getLink(), message);
         })
     })
 }
 
-const sendSongMessage = (message, isQuit) => {
+const sendSongMessage = (message, isForfeit) => {
+    let gameSession = gameSessions[message.guild.id];
     message.channel.send({
         embed: {
             color: RED,
             author: {
-                name: isQuit ? null : message.author.username,
-                icon_url: isQuit ? null : message.author.avatarURL
+                name: isForfeit ? null : message.author.username,
+                icon_url: isForfeit ? null : message.author.avatarURL
             },
-            title: `${currentSong} - ${currentArtist}`,
-            description: `https://youtube.com/watch?v=${currentSongLink}`,
+            title: `${gameSession.getSong()} - ${gameSession.getArtist()}`,
+            description: `https://youtube.com/watch?v=${gameSession.link}`,
             image: {
-                url: `https://img.youtube.com/vi/${currentSongLink}/hqdefault.jpg`
+                url: `https://img.youtube.com/vi/${gameSession.getLink()}/hqdefault.jpg`
             }
         }
     })
 }
 
 const sendScoreboard = (message, scoreboard) => {
-    let scoreboardArr = Object.keys(scoreboard).map(x => {
-        return { name: x, value: scoreboard[x].value }
-    })
+    let gameSession = gameSessions[message.guild.id];
     message.channel.send({
         embed: {
             color: RED,
             title: "**Results**",
-            fields: Object.keys(scoreboard).map(x => {
-                return { name: x, value: scoreboard[x].value }
-            })
-                .sort((a, b) => { return b.value - a.value })
+            fields: gameSession.scoreboard.getScoreboard()
         }
     })
 }
@@ -178,6 +175,7 @@ const disconnectVoiceConnection = (message) => {
 
 const playSong = (link, message) => {
     let voiceChannel = message.member.voiceChannel;
+    let gameSession = gameSessions[message.guild.id];
     const streamOptions = { volume: 0.1 };
     voiceChannel.join().then(connection => {
         let options = { filter: "audioonly", quality: "highest" };
@@ -186,6 +184,7 @@ const playSong = (link, message) => {
     }).catch((err) => {
         console.error(err);
         // Attempt to restart game with different song
+        gameSession.endRound();
         startGame(message);
     })
 }
@@ -209,15 +208,6 @@ const cleanSongName = (name) => {
 const getUserIdentifier = (user) => {
     return `${user.username}#${user.discriminator}`
 }
-
-const resetGameState = () => {
-    // Note: scoreboard is reset manually when !end is called
-    currentSong = null;
-    currentArtist = null;
-    currentSongLink = null;
-    gameInSession = false;
-}
-
 
 (() => {
     if (!config.botToken) {
