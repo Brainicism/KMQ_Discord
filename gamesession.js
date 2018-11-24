@@ -13,14 +13,14 @@ module.exports = class GameSession {
         this._song = song;
         this._artist = artist;
         this._link = link;
-        this.inSession = true;
+        this._inSession = true;
     }
 
     endRound() {
         this._song = null;
         this._artist = null;
         this._link = null;
-        this.inSession = false;
+        this._inSession = false;
     }
 
     endGame() {
@@ -40,7 +40,7 @@ module.exports = class GameSession {
         return this._link;
     }
 
-    inSession() {
+    gameInSession() {
         return this._inSession;
     }
 };

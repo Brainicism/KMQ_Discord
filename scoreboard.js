@@ -2,25 +2,26 @@ const Player = require("./player.js")
 
 module.exports = class Scoreboard {
     constructor() {
-        // players stores each entry as:
-        // {name: "username", value: SCORE_VAL }
-        this._players = [];
+        // _players stores each entry as:
+        // "USER_ID": Player {_name: "username", _value: SCORE_VAL }
+        this._players = {};
         this._firstPlace = [];
-        // Both players and firstPlace are arrays of Player objects
+        this._highestScore = 0;
     }
 
     getWinner() {
         let winnerStr = "";
-        let isTie = (this._firstPlace.length > 1);
+
+        if (this._firstPlace.length == 1) {
+            return this._firstPlace[0].getName() + " wins!";
+        }
+
         for (let i = 0; i < this._firstPlace.length; i++) {
-            if (this._firstPlace.length == 1) {
-                winnerStr = this._firstPlace[i].getName() + " ";
-            }
-            else if (this._firstPlace.length - i == 1) {
+            if (i == this._firstPlace.length - 1) {
                 // Last entry -- append just the username
                 winnerStr += this._firstPlace[i].getName() + " ";
             }
-            else if (this._firstPlace.length - i == 2) {
+            else if (i == this._firstPlace.length - 2) {
                 // Second last entry -- use "and"
                 winnerStr += this._firstPlace[i].getName() + " and ";
             }
@@ -28,54 +29,39 @@ module.exports = class Scoreboard {
                 winnerStr += this._firstPlace[i].getName() + ", ";
             }
         }
-        if (isTie) winnerStr += "win!";
-        else winnerStr += "wins!";
+        winnerStr += "win!";
         return winnerStr;
     }
 
-    updateWinner() {
-        // Requires: scoreboard must be sorted
-        this._firstPlace = [];
-        let highScore = this._players[0].getScore();
-        for (let i = 0; i < this._players.length; i++) {
-            if (this._players[i].getScore() == highScore) {
-                this._firstPlace.push(this._players[i]);
-            }
-            else break;
-        }
-    }
-
     getScoreboard() {
-        return this._players.map((x) => {
+        return Object.values(this._players).map((x) => {
             return { name: x.getName(), value: x.getScore() }
         })
+            .sort((a, b) => { return b.value - a.value; })
     }
 
-    sortScoreboard() {
-        this._players.sort((a, b) => { return b.getScore() - a.getScore(); })
-    }
-
-    updateScoreboard(winner) {
-        let index = -1;
-        for (let i = 0; i < this._players.length; i++) {
-            if (this._players[i].getName() == winner) {
-                index = i;
-                break;
-            }
-        }
-        if (index == -1) {
-            this._players.push(new Player(winner));
-            this.updateWinner();
+    updateScoreboard(winner, winnerID) {
+        if (!this._players[winnerID]) {
+            this._players[winnerID] = new Player(winner);
         }
         else {
-            this._players[index].incrementScore();
-            this.sortScoreboard();
-            this.updateWinner();
+            this._players[winnerID].incrementScore();
+        }
+
+        if (this._players[winnerID].getScore() == this._highestScore) {
+            // If user is tied for first, add them to the first place array
+            this._firstPlace.push(this._players[winnerID]);
+        }
+        else if (this._players[winnerID].getScore() > this._highestScore) {
+            // If user is first, reset first place array and add them
+            this._highestScore = this._players[winnerID].getScore();
+            this._firstPlace = [];
+            this._firstPlace.push(this._players[winnerID]);
         }
     }
 
     isEmpty() {
-        if (this._players.length) return false;
+        if (Object.keys(this._players).length) return false;
         return true;
     }
 };

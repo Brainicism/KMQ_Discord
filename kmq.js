@@ -32,7 +32,7 @@ client.on("message", (message) => {
     let gameSession = gameSessions[message.guild.id];
     if (command) {
         if (command.action === "stop") {
-            if (gameSession.inSession) {
+            if (gameSession.gameInSession()) {
                 sendSongMessage(message, true);
                 disconnectVoiceConnection(message);
                 gameSession.endRound();
@@ -51,6 +51,7 @@ client.on("message", (message) => {
         }
         else if (command.action === "end") {
             if (!gameSession.scoreboard.isEmpty()) {
+                if (gameSession.gameInSession()) sendSongMessage(message, true);
                 disconnectVoiceConnection(message);
                 message.channel.send(gameSession.scoreboard.getWinner());
                 sendScoreboard(message, gameSession.scoreboard);
@@ -62,8 +63,8 @@ client.on("message", (message) => {
         let guess = cleanSongName(message.content);
         if (gameSession.getSong() && guess === cleanSongName(gameSession.getSong())) {
             // this should be atomic
-            let userID = getUserIdentifier(message.author);
-            gameSession.scoreboard.updateScoreboard(userID);
+            let userTag = getUserIdentifier(message.author);
+            gameSession.scoreboard.updateScoreboard(userTag, message.author.id);
 
             sendSongMessage(message, false);
             sendScoreboard(message, gameSession.scoreboard);
@@ -119,16 +120,16 @@ const startGame = (message) => {
 
     let gameSession = gameSessions[message.guild.id];
 
-    if (gameSession.inSession) {
+    if (gameSession.gameInSession()) {
         message.channel.send("Game already in session.");
         return;
     }
 
-    let query = `SELECT videos.youtube_link as youtube_link, videos.name, DATE(videos.publish_date) as date, artists.name as artist, videos.video_type as video_type, videos.dead as dead FROM videos INNER JOIN artists on videos.artistID = artists.id WHERE gender = "female" AND video_type = "main" AND dead = "n" ORDER BY views DESC LIMIT 500`;
+    let query = `SELECT videos.youtube_link as youtubeLink, videos.name, DATE(videos.publish_date) as date, artists.name as artist, videos.video_type as video_type, videos.dead as dead FROM videos INNER JOIN artists on videos.artistID = artists.id WHERE gender = "female" AND video_type = "main" AND dead = "n" ORDER BY views DESC LIMIT 500`;
     db.all(query, (err, rows) => {
         if (err) console.error(err);
         let random = rows[Math.floor(Math.random() * rows.length)];
-        gameSession.startRound(random.name, random.artist, random.youtube_link);
+        gameSession.startRound(random.name, random.artist, random.youtubeLink);
         fetchVideoInfo(gameSession.getLink(), (err, videoInfo) => {
             playSong(gameSession.getLink(), message);
         })
