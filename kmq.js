@@ -4,6 +4,7 @@ const fetchVideoInfo = require("youtube-info");
 const sqlite3 = require("sqlite3").verbose();
 const config = require("./config.json")
 const GameSession = require("./gamesession.js")
+const helpMessages = require('./help_strings.json');
 const client = new Discord.Client();
 const botPrefix = "!";
 const RED = 15158332;
@@ -45,6 +46,9 @@ client.on("message", (message) => {
                 startGame(message);
             }
         }
+        else if (command.action === "help") {
+            help(message, command.argument);
+        }
         else if (command.action === "end") {
             if (!gameSession.scoreboard.isEmpty()) {
                 disconnectVoiceConnection(message);
@@ -69,6 +73,48 @@ client.on("message", (message) => {
     }
 });
 
+// Usage: `!help [action]` or `!help`
+const help = (message, action) => {
+    let embedTitle = "";
+    let embedDesc = "";
+    let embedFields = [];
+    if (action) {
+        let helpActionList = helpMessages.actions.map(a => a.name);
+        if (!helpActionList.includes(action)) {
+            message.channel.send("Sorry, there is no documentation on " + action);
+            return;
+        }
+
+        let detailedAction = helpMessages.actions.find(a => a.name === action)
+        embedTitle = detailedAction.name;
+        embedDesc = detailedAction.description;
+        detailedAction.arguments.forEach((argument) => {
+            embedFields.push({
+                name: argument.name,
+                value: argument.description
+            })
+        });
+    }
+    else {
+        embedTitle = "KMQ Command Help"
+        embedDesc = helpMessages.rules
+        helpMessages.actions.forEach((action) => {
+            embedFields.push({
+                name: action.name,
+                value: action.description + " Usage: " + action.usage
+            })
+        });
+    }
+
+    message.channel.send({
+        embed: {
+            title: embedTitle,
+            description: embedDesc,
+            fields: embedFields
+        }
+    })
+}
+
 const startGame = (message) => {
 
     let gameSession = gameSessions[message.guild.id];
@@ -83,7 +129,6 @@ const startGame = (message) => {
         if (err) console.error(err);
         let random = rows[Math.floor(Math.random() * rows.length)];
         gameSession.startRound(random.name, random.artist, random.youtube_link);
-        console.log(gameSession.song);
         fetchVideoInfo(gameSession.link, (err, videoInfo) => {
             playSong(gameSession.link, message);
         })
@@ -164,11 +209,11 @@ const getUserIdentifier = (user) => {
 }
 
 (() => {
-    if (!config.bot_token) {
+    if (!config.botToken) {
         console.error("No bot token set. Please update config.json!")
         process.exit(1);
     }
     else {
-        client.login(config.bot_token);
+        client.login(config.botToken);
     }
 })();

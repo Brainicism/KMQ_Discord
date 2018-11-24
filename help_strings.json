@@ -1,0 +1,34 @@
+{
+    "rules": "Type '!random' in chat and the bot will play a random kpoop song in VC. The goal of this game is to be the first person to guess the song name in chat.",
+    "actions": [
+        {
+            "name": "random",
+            "description": "Bot plays a random song in VC; type in your guess first to get a point.",
+            "usage": "!random",
+            "arguments": []
+        },
+        {
+            "name": "stop",
+            "description": "The game will be suspended and the bot will reveal the answer to any ongoing games in session.",
+            "usage": "!stop",
+            "arguments": []
+        },
+        {
+            "name": "end",
+            "description": "Finishes the current game and decides on a winner.",
+            "usage": "!end",
+            "arguments": []
+        },
+        {
+            "name": "help",
+            "description": "Get help about the game's commands. Add the action as an argument to get information about specific arguments.",
+            "usage": "!help [action]",
+            "arguments": [
+                {
+                    "name": "action",
+                    "description": "Any valid command for the KMQ bot"
+                }
+            ]
+        }
+    ]
+}

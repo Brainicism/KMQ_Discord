@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "secret.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "seed": "node seed_db_local.js",
+    "start": "node kmq.js"
   },
   "author": "",
   "license": "ISC",
