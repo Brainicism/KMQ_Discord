@@ -1,21 +1,18 @@
-class Player {
-    #name;
-    #score;
-
+module.exports = class Player {
     constructor(name) {
-        this.name = name;
-        this.score = 1;
+        this._name = name;
+        this._score = 1;
     }
 
     getName() {
-        return name;
+        return this._name;
     }
 
     getScore() {
-        return score;
+        return this._score;
     }
 
     incrementScore() {
-        score++;
+        this._score++;
     }
-}
+};
