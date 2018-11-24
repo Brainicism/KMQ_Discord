@@ -2,24 +2,24 @@ const Scoreboard = require("./scoreboard.js");
 
 module.exports = class GameSession {
     constructor() {
-        this.song = null;
-        this.artist = null;
-        this.link = null;
-        this.inSession = false;
+        this._song = null;
+        this._artist = null;
+        this._link = null;
+        this._inSession = false;
         this.scoreboard = new Scoreboard();
     }
 
     startRound(song, artist, link) {
-        this.song = song;
-        this.artist = artist;
-        this.link = link;
+        this._song = song;
+        this._artist = artist;
+        this._link = link;
         this.inSession = true;
     }
 
     endRound() {
-        this.song = null;
-        this.artist = null;
-        this.link = null;
+        this._song = null;
+        this._artist = null;
+        this._link = null;
         this.inSession = false;
     }
 
@@ -29,14 +29,18 @@ module.exports = class GameSession {
     }
 
     getSong() {
-        return this.song;
+        return this._song;
     }
 
     getArtist() {
-        return this.currentArtist;
+        return this._artist;
     }
 
     getLink() {
-        return this.currentSongLink;
+        return this._link;
+    }
+
+    inSession() {
+        return this._inSession;
     }
 };

@@ -60,7 +60,7 @@ client.on("message", (message) => {
     }
     else {
         let guess = cleanSongName(message.content);
-        if (gameSession.song && guess === cleanSongName(gameSession.song)) {
+        if (gameSession.getSong() && guess === cleanSongName(gameSession.getSong())) {
             // this should be atomic
             let userID = getUserIdentifier(message.author);
             gameSession.scoreboard.updateScoreboard(userID);
@@ -129,8 +129,8 @@ const startGame = (message) => {
         if (err) console.error(err);
         let random = rows[Math.floor(Math.random() * rows.length)];
         gameSession.startRound(random.name, random.artist, random.youtube_link);
-        fetchVideoInfo(gameSession.link, (err, videoInfo) => {
-            playSong(gameSession.link, message);
+        fetchVideoInfo(gameSession.getLink(), (err, videoInfo) => {
+            playSong(gameSession.getLink(), message);
         })
     })
 }
@@ -144,10 +144,10 @@ const sendSongMessage = (message, isForfeit) => {
                 name: isForfeit ? null : message.author.username,
                 icon_url: isForfeit ? null : message.author.avatarURL
             },
-            title: `${gameSession.song} - ${gameSession.artist}`,
+            title: `${gameSession.getSong()} - ${gameSession.getArtist()}`,
             description: `https://youtube.com/watch?v=${gameSession.link}`,
             image: {
-                url: `https://img.youtube.com/vi/${gameSession.link}/hqdefault.jpg`
+                url: `https://img.youtube.com/vi/${gameSession.getLink()}/hqdefault.jpg`
             }
         }
     })
