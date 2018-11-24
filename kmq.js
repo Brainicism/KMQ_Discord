@@ -12,12 +12,12 @@ const db = new sqlite3.Database("./main.db", (err) => {
         return;
     }
 });
+const helpMessages = require('./help_strings.json');
 let currentSong = null;
 let currentArtist = null;
 let currentSongLink = null;
 let gameInSession = false;
 let scoreboard = {};
-
 
 client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -41,6 +41,9 @@ client.on("message", (message) => {
             else {
                 startGame(message);
             }
+        }
+        else if (command.action === "help") {
+            help(message, command.argument);
         }
         else if (command.action === "end") {
             if (Object.keys(scoreboard).length) {
@@ -69,6 +72,47 @@ client.on("message", (message) => {
         }
     }
 });
+
+// Usage: `!help [action]` or `!help`
+const help = (message, action) => {
+    let embed_title = "";
+    let embed_desc = "";
+    let embed_fields = [];
+    if (action) {
+        let helpActionList = helpMessages.actions.map(a => a.name);
+        if (!helpActionList.includes(action)) {
+            message.channel.send("Sorry, there is no documentation on " + action);
+            return;
+        }
+
+        let detailedAction = helpMessages.actions.find(a => a.name === action)
+        embed_title = detailedAction.name;
+        embed_desc = detailedAction.description;
+        detailedAction.arguments.forEach((argument) => {
+            embed_fields.push({
+                name: argument.name,
+                value: argument.description
+            })
+        });
+    }
+    else {
+        embed_title = "KMQ Command Help"
+        embed_desc = helpMessages.rules
+        helpMessages.actions.forEach((action) => {
+            embed_fields.push({
+                name: action.name,
+                value: action.description + " Usage: " + action.usage
+            })
+        });
+    }
+
+    message.channel.send({embed: {
+            title: embed_title,
+            description: embed_desc,
+            fields: embed_fields
+        }
+    })
+}
 
 const startGame = (message) => {
     if (gameInSession) {
