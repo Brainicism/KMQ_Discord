@@ -146,7 +146,7 @@ const sendSongMessage = (message, isForfeit) => {
                 icon_url: isForfeit ? null : message.author.avatarURL
             },
             title: `${gameSession.getSong()} - ${gameSession.getArtist()}`,
-            description: `https://youtube.com/watch?v=${gameSession.link}`,
+            description: `https://youtube.com/watch?v=${gameSession.getLink()}`,
             image: {
                 url: `https://img.youtube.com/vi/${gameSession.getLink()}/hqdefault.jpg`
             }
