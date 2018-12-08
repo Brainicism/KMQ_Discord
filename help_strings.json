@@ -29,6 +29,17 @@
                     "description": "Any valid command for the KMQ bot"
                 }
             ]
+        },
+        {
+            "name": "cutoff",
+            "description": "Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen. The absence of a year input will reset the cutoff.",
+            "usage": "!cutoff [year]",
+            "arguments": [
+                {
+                    "name": "year",
+                    "description": "Songs typically range from 2008 to 2018."
+                }
+            ]
         }
     ]
 }
