@@ -59,22 +59,22 @@ client.on("message", (message) => {
             }
         }
         else if (command.action === "cutoff") {
-            if (command.components.length != 1) {
-                // Handle resetting the cutoff and invalid # of inputs in one step
-                gameSession.resetCutoffYear();
-                message.channel.send(`The new cutoff year is \`${gameSession.getCutoffYear()}\`.`);
+            if (command.components.length === 0) {
+                gameSession.resetBeginningCutoffYear();
+                message.channel.send(`The new cutoff year is \`${gameSession.getBeginningCutoffYear()}\`.`);
             }
-            else if ((command.components[0] > (new Date()).getFullYear()) ||
-                    (command.components[0] < gameSession.getDefaultCutoffYear())) {
-                // Unrealistic cutoffs warn the user
-                message.channel.send(`Please enter a valid cutoff year (\`${gameSession.getDefaultCutoffYear()} <= cutoff <= ${(new Date()).getFullYear()}\`).`);
+            else if (command.components.length !== 1 ||
+                    isNaN(command.components[0]) ||
+                    (command.components[0] > (new Date()).getFullYear()) ||
+                    (command.components[0] < gameSession.getDefaultBeginningCutoffYear())) {
+                // Incorrectly-passed input or unrealistic cutoffs warn the user
+                message.channel.send(`Please enter a valid cutoff year (\`${gameSession.getDefaultBeginningCutoffYear()} <= cutoff <= ${(new Date()).getFullYear()}\`).`);
             }
             else {
-                gameSession.setCutoffYear(command.components[0]);
-                message.channel.send(`The new cutoff year is \`${gameSession.getCutoffYear()}\`.`);
+                gameSession.setBeginningCutoffYear(command.components[0]);
+                message.channel.send(`The new cutoff year is \`${gameSession.getBeginningCutoffYear()}\`.`);
             }
         }
-
     }
     else {
         let guess = cleanSongName(message.content);
@@ -142,7 +142,7 @@ const startGame = (message) => {
         return;
     }
 
-    let query = `SELECT videos.youtube_link as youtubeLink, videos.name, DATE(videos.publish_date) as date, artists.name as artist, videos.video_type as video_type, videos.dead as dead FROM videos INNER JOIN artists on videos.artistID = artists.id WHERE gender = "female" AND video_type = "main" AND dead = "n" AND date >= '${gameSession.getCutoffYear()}-01-01' ORDER BY views DESC LIMIT 500`;
+    let query = `SELECT videos.youtube_link as youtubeLink, videos.name, DATE(videos.publish_date) as date, artists.name as artist, videos.video_type as video_type, videos.dead as dead FROM videos INNER JOIN artists on videos.artistID = artists.id WHERE gender = "female" AND video_type = "main" AND dead = "n" AND date >= '${gameSession.getBeginningCutoffYear()}-01-01' ORDER BY views DESC LIMIT 500`;
     db.all(query, (err, rows) => {
         if (err) console.error(err);
         let random = rows[Math.floor(Math.random() * rows.length)];

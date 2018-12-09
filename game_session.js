@@ -1,5 +1,6 @@
 const Scoreboard = require("./scoreboard.js");
-const CUTOFF_YEAR = 2008;
+const BEGINNING_SEARCH_YEAR = 2008;
+const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR }
 
 module.exports = class GameSession {
 
@@ -8,7 +9,7 @@ module.exports = class GameSession {
         this._artist = null;
         this._link = null;
         this._inSession = false;
-        this._cutoffYear = CUTOFF_YEAR;
+        this._gameOptions = DEFAULT_OPTIONS;
         this.scoreboard = new Scoreboard();
     }
 
@@ -47,20 +48,19 @@ module.exports = class GameSession {
         return this._inSession;
     }
 
-    setCutoffYear(year) {
-        this._cutoffYear = year;
+    setBeginningCutoffYear(year) {
+        this._gameOptions.beginningYear = year;
     }
 
-    resetCutoffYear() {
-        this._cutoffYear = CUTOFF_YEAR;
+    resetBeginningCutoffYear() {
+        this._gameOptions.beginningYear = BEGINNING_SEARCH_YEAR;
     }
 
-    getCutoffYear() {
-        return this._cutoffYear;
+    getBeginningCutoffYear() {
+        return this._gameOptions.beginningYear;
     }
 
-    getDefaultCutoffYear() {
-        // Return the constant cutoff year value defined in this file
-        return CUTOFF_YEAR;
+    getDefaultBeginningCutoffYear() {
+        return BEGINNING_SEARCH_YEAR;
     }
 };
