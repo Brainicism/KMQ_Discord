@@ -75,7 +75,30 @@ client.on("message", (message) => {
                 message.channel.send(`The new cutoff year is \`${gameSession.getBeginningCutoffYear()}\`.`);
             }
         }
+        else if (command.action === "gender") {
+            if (gameSession.setGender(command.components)) {
+                let selectedGenderArray = gameSession.getGenderArray();
+                let selectedGenderStr = "";
+                for (let i = 0; i < selectedGenderArray.length; i++) {
+                    selectedGenderStr += `\`${selectedGenderArray[i]}\``;
+                    if (i === selectedGenderArray.length - 1) {
+                        break;
+                    }
+                    else if (i === selectedGenderArray.length - 2) {
+                        selectedGenderStr += " and ";
+                    }
+                    else {
+                        selectedGenderStr += ", ";
+                    }
+                }
+                message.channel.send(`Songs will be played from ${selectedGenderStr} artists.`);
+            }
+            else {
+                message.channel.send(`Please enter valid genders only (\`male\`, \`female\`, and/or \`coed\`).`)
+            }
+        }
     }
+
     else {
         let guess = cleanSongName(message.content);
         if (gameSession.getSong() && guess === cleanSongName(gameSession.getSong())) {
@@ -142,7 +165,7 @@ const startGame = (message) => {
         return;
     }
 
-    let query = `SELECT videos.youtube_link as youtubeLink, videos.name, DATE(videos.publish_date) as date, artists.name as artist, videos.video_type as video_type, videos.dead as dead FROM videos INNER JOIN artists on videos.artistID = artists.id WHERE gender = "female" AND video_type = "main" AND dead = "n" AND date >= '${gameSession.getBeginningCutoffYear()}-01-01' ORDER BY views DESC LIMIT 500`;
+    let query = `SELECT videos.youtube_link as youtubeLink, videos.name, DATE(videos.publish_date) as date, artists.name as artist, videos.video_type as video_type, videos.dead as dead FROM videos INNER JOIN artists on videos.artistID = artists.id WHERE gender = ${gameSession.getSQLGender()} AND video_type = "main" AND dead = "n" AND date >= '${gameSession.getBeginningCutoffYear()}-01-01' ORDER BY views DESC LIMIT 500`;
     db.all(query, (err, rows) => {
         if (err) console.error(err);
         let random = rows[Math.floor(Math.random() * rows.length)];

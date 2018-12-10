@@ -1,6 +1,9 @@
 const Scoreboard = require("./scoreboard.js");
 const BEGINNING_SEARCH_YEAR = 2008;
-const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR }
+const MALE = "male";
+const FEMALE = "female";
+const COED = "coed";
+const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [ FEMALE ] }
 
 module.exports = class GameSession {
 
@@ -62,5 +65,49 @@ module.exports = class GameSession {
 
     getDefaultBeginningCutoffYear() {
         return BEGINNING_SEARCH_YEAR;
+    }
+
+    resetGender() {
+        this._gameOptions.gender = [ FEMALE ];
+    }
+
+    setGender(genderArr) {
+        // Return true when gender is successfully updated, false otherwise
+        if (genderArr.length === 0) {
+            this.resetGender();
+        }
+        else {
+            genderArr.map((gender, i) => { genderArr[i] = genderArr[i].toLowerCase(); })
+            this._gameOptions.gender = [];
+            for (let i = 0; i < genderArr.length; i++) {
+                if (!this._gameOptions.gender.includes(genderArr[i]) &&
+                    ((genderArr[i] === MALE) ||
+                     (genderArr[i] === FEMALE) ||
+                     (genderArr[i] === COED))) {
+                    this._gameOptions.gender.push(genderArr[i]);
+                }
+            }
+            if (this._gameOptions.gender.length === 0) {
+                // User gave invalid inputs only
+                this.resetGender();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    getSQLGender() {
+        let genderStr = "";
+        this._gameOptions.gender.map((gender, i) => {
+            genderStr += `"${gender}"`;
+            if (this._gameOptions.gender.length !== i + 1) {
+                genderStr += " OR ";
+            }
+        })
+        return genderStr;
+    }
+
+    getGenderArray() {
+        return this._gameOptions.gender;
     }
 };
