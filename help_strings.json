@@ -40,6 +40,17 @@
                     "description": "Songs typically range from 2008 to 2018."
                 }
             ]
+        },
+        {
+            "name": "gender",
+            "description": "Choose the gender of the artists you'd like to hear from.",
+            "usage": "!gender [male|female|coed]",
+            "arguments": [
+                {
+                    "name": "male|female|coed",
+                    "description": "To choose between multiple genders, enter each gender separated by a space."
+                }
+            ]
         }
     ]
 }

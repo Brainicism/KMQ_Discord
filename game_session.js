@@ -1,9 +1,7 @@
 const Scoreboard = require("./scoreboard.js");
 const BEGINNING_SEARCH_YEAR = 2008;
-const MALE = "male";
-const FEMALE = "female";
-const COED = "coed";
-const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [ FEMALE ] }
+const GENDER = { MALE: "male", FEMALE: "female", COED: "coed" }
+const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [ GENDER.FEMALE ] }
 
 module.exports = class GameSession {
 
@@ -68,7 +66,7 @@ module.exports = class GameSession {
     }
 
     resetGender() {
-        this._gameOptions.gender = [ FEMALE ];
+        this._gameOptions.gender = [ GENDER.FEMALE ];
     }
 
     setGender(genderArr) {
@@ -77,20 +75,21 @@ module.exports = class GameSession {
             this.resetGender();
         }
         else {
+            let tempArr = [];
             genderArr.map((gender, i) => { genderArr[i] = genderArr[i].toLowerCase(); })
-            this._gameOptions.gender = [];
             for (let i = 0; i < genderArr.length; i++) {
-                if (!this._gameOptions.gender.includes(genderArr[i]) &&
-                    ((genderArr[i] === MALE) ||
-                     (genderArr[i] === FEMALE) ||
-                     (genderArr[i] === COED))) {
-                    this._gameOptions.gender.push(genderArr[i]);
+                if (!tempArr.includes(genderArr[i]) &&
+                   (Object.values(GENDER).includes(genderArr[i]))) {
+                    // Prevent duplicates and allow valid genders only
+                    tempArr.push(genderArr[i]);
                 }
             }
-            if (this._gameOptions.gender.length === 0) {
+            if (tempArr.length === 0) {
                 // User gave invalid inputs only
-                this.resetGender();
                 return false;
+            }
+            else {
+                this._gameOptions.gender = tempArr;
             }
         }
         return true;
@@ -100,7 +99,7 @@ module.exports = class GameSession {
         let genderStr = "";
         this._gameOptions.gender.map((gender, i) => {
             genderStr += `"${gender}"`;
-            if (this._gameOptions.gender.length !== i + 1) {
+            if (i !== this._gameOptions.gender.length - 1) {
                 genderStr += " OR ";
             }
         })
