@@ -1,8 +1,7 @@
 const Scoreboard = require("./scoreboard.js");
-const BEGINNING_SEARCH_YEAR = 2008;
-const GENDER = { MALE: "male", FEMALE: "female", COED: "coed" }
-const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [ GENDER.FEMALE ] }
-
+const BEGINNING_SEARCH_YEAR = require("../commands/cutoff").BEGINNING_SEARCH_YEAR;
+const GENDER = require("../commands/gender").GENDER
+const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.FEMALE] }
 module.exports = class GameSession {
 
     constructor() {
@@ -66,30 +65,11 @@ module.exports = class GameSession {
     }
 
     resetGender() {
-        this._gameOptions.gender = [ GENDER.FEMALE ];
+        this._gameOptions.gender = [GENDER.FEMALE];
     }
 
     setGender(genderArr) {
-        // Return true when gender is successfully updated, false otherwise
-        if (genderArr.length === 0) {
-            this.resetGender();
-        }
-        else {
-            let tempArr = [];
-            genderArr.map((gender, i) => { genderArr[i] = genderArr[i].toLowerCase(); })
-            for (let i = 0; i < genderArr.length; i++) {
-                if (!tempArr.includes(genderArr[i]) &&
-                   (Object.values(GENDER).includes(genderArr[i]))) {
-                    // Prevent duplicates and allow valid genders only
-                    tempArr.push(genderArr[i]);
-                }
-            }
-            if (tempArr.length === 0) {
-                // User gave invalid inputs only
-                return null;
-            }
-            this._gameOptions.gender = tempArr;
-        }
+        this._gameOptions.gender = genderArr.map(gender => gender.toLowerCase());;
         return this._gameOptions.gender;
     }
 

@@ -6,6 +6,7 @@ const fs = require("fs");
 const client = new Discord.Client();
 const botPrefix = "!";
 const guessSong = require("./helpers/guess_song")
+const validate = require("./helpers/validate");
 let commands = {};
 const db = new sqlite3.Database("./main.db", (err) => {
     if (err) {
@@ -22,24 +23,25 @@ client.on("ready", () => {
 
 client.on("message", (message) => {
     if (message.author.equals(client.user)) return;
-    let command = parseCommand(message.content) || null;
+    let parsedMessage = parseMessage(message.content) || null;
 
     if (!gameSessions[message.guild.id]) {
         gameSessions[message.guild.id] = new GameSession();
     }
 
     let gameSession = gameSessions[message.guild.id];
-    if (command && commands[command.action]) {
-        commands[command.action]({ client, gameSession, message, db, command })
+    if (parsedMessage && commands[parsedMessage.action]) {
+        let command = commands[parsedMessage.action]
+        if (validate(message, parsedMessage, command.validations)) {
+            command.call({ client, gameSession, message, db, parsedMessage })
+        }
     }
-
     else {
         guessSong({ client, message, gameSession });
     }
 });
 
-
-const parseCommand = (message) => {
+const parseMessage = (message) => {
     if (message.charAt(0) !== botPrefix) return null;
     let components = message.split(" ");
     let action = components.shift().substring(1);
