@@ -1,7 +1,9 @@
 const helpMessages = require('../data/help_strings.json');
 
-module.exports = ({ client, command, message }) => {
-    help(message, command.argument);
+module.exports = {
+    call: ({ client, parsedMessage, message }) => {
+        help(message, parsedMessage.argument);
+    }
 }
 
 // Usage: `!help [action]` or `!help`
