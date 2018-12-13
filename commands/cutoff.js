@@ -1,4 +1,4 @@
-module.exports = (message, command, gameSession) => {
+module.exports = ({ message, command, gameSession }) => {
     if (command.components.length === 0) {
         gameSession.resetBeginningCutoffYear();
         message.channel.send(`The new cutoff year is \`${gameSession.getBeginningCutoffYear()}\`.`);

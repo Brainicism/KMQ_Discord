@@ -51,6 +51,12 @@ module.exports = {
                 playSong(gameSession, message);
             })
         })
+    },
+    getUserIdentifier: (user) => {
+        return `${user.username}#${user.discriminator}`
+    },
+    cleanSongName: (name) => {
+        return name.toLowerCase().split("(")[0].replace(/[^\x00-\x7F|]/g, "").replace(/|/g, "").replace(/ /g, "").trim();
     }
 }
 const playSong = (gameSession, message) => {

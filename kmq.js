@@ -2,14 +2,11 @@ const Discord = require("discord.js");
 const sqlite3 = require("sqlite3").verbose();
 const config = require("./config.json");
 const GameSession = require("./game_session.js");
+const fs = require("fs");
 const client = new Discord.Client();
 const botPrefix = "!";
-const RED = 15158332;
-
-const sendScoreboard = require("./utils.js").sendScoreboard
-const sendSongMessage = require("./utils.js").sendSongMessage
-const disconnectVoiceConnection = require("./utils.js").disconnectVoiceConnection
-const startGame = require("./utils.js").startGame
+const guessSong = require("./helpers/guess_song")
+let commands = {};
 const db = new sqlite3.Database("./main.db", (err) => {
     if (err) {
         console.error(err);
@@ -23,6 +20,16 @@ client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
+fs.readdir("./commands/", (err, files) => {
+    if (err) return console.error(err);
+    files.forEach(file => {
+        if (!file.endsWith(".js")) return;
+        let command = require(`./commands/${file}`);
+        let commandName = file.split(".")[0];
+        commands[commandName] = command;
+    });
+});
+
 client.on("message", (message) => {
     if (message.author.equals(client.user)) return;
     let command = parseCommand(message.content) || null;
@@ -32,34 +39,11 @@ client.on("message", (message) => {
     }
 
     let gameSession = gameSessions[message.guild.id];
-    if (command) {
-        if (command.action === "stop") {
-            require("./commands/stop.js")(gameSession, client, message);
-        }
-        else if (command.action === "random") {
-            require("./commands/random.js")(message, db, gameSession);
-        }
-        else if (command.action === "help") {
-            require("./commands/help.js")(client, command, message);
-        }
-        else if (command.action === "end") {
-            require("./commands/end.js")(client, gameSession, command, message);
-        }
-        else if (command.action === "cutoff") {
-            require("./commands/cutoff.js")(message, command, gameSession);
-        }
+    if (command && commands[command.action]) {
+        commands[command.action]({ client, gameSession, message, db, command })
     }
     else {
-        let guess = cleanSongName(message.content);
-        if (gameSession.getSong() && guess === cleanSongName(gameSession.getSong())) {
-            // this should be atomic
-            let userTag = getUserIdentifier(message.author);
-            gameSession.scoreboard.updateScoreboard(userTag, message.author.id);
-            sendSongMessage(message, gameSession, false);
-            sendScoreboard(message, gameSession);
-            disconnectVoiceConnection(client, message);
-            gameSession.endRound();
-        }
+        guessSong({ client, message, gameSession });
     }
 });
 
@@ -75,14 +59,6 @@ const parseCommand = (message) => {
         message,
         components
     }
-}
-
-const cleanSongName = (name) => {
-    return name.toLowerCase().split("(")[0].replace(/[^\x00-\x7F|]/g, "").replace(/|/g, "").replace(/ /g, "").trim();
-}
-
-const getUserIdentifier = (user) => {
-    return `${user.username}#${user.discriminator}`
 }
 
 (() => {
