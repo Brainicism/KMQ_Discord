@@ -20,16 +20,6 @@ client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
-fs.readdir("./commands/", (err, files) => {
-    if (err) return console.error(err);
-    files.forEach(file => {
-        if (!file.endsWith(".js")) return;
-        let command = require(`./commands/${file}`);
-        let commandName = file.split(".")[0];
-        commands[commandName] = command;
-    });
-});
-
 client.on("message", (message) => {
     if (message.author.equals(client.user)) return;
     let command = parseCommand(message.content) || null;
@@ -42,6 +32,7 @@ client.on("message", (message) => {
     if (command && commands[command.action]) {
         commands[command.action]({ client, gameSession, message, db, command })
     }
+
     else {
         guessSong({ client, message, gameSession });
     }
@@ -69,4 +60,14 @@ const parseCommand = (message) => {
     else {
         client.login(config.botToken);
     }
+
+    fs.readdir("./commands/", (err, files) => {
+        if (err) return console.error(err);
+        files.forEach(file => {
+            if (!file.endsWith(".js")) return;
+            let command = require(`./commands/${file}`);
+            let commandName = file.split(".")[0];
+            commands[commandName] = command;
+        });
+    });
 })();
