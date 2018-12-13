@@ -18,11 +18,11 @@ module.exports = class Scoreboard {
 
         for (let i = 0; i < this._firstPlace.length; i++) {
             winnerStr += this._firstPlace[i].getName();
-            if (i == this._firstPlace.length - 1) {
+            if (i === this._firstPlace.length - 1) {
                 // Last entry -- append just the username
                 winnerStr += " ";
             }
-            else if (i == this._firstPlace.length - 2) {
+            else if (i === this._firstPlace.length - 2) {
                 // Second last entry -- use "and"
                 winnerStr += " and ";
             }
