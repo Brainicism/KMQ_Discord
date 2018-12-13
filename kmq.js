@@ -1,7 +1,7 @@
 const Discord = require("discord.js");
 const sqlite3 = require("sqlite3").verbose();
 const config = require("./config.json");
-const GameSession = require("./game_session.js");
+const GameSession = require("./models/game_session.js");
 const fs = require("fs");
 const client = new Discord.Client();
 const botPrefix = "!";

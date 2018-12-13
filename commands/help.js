@@ -1,4 +1,4 @@
-const helpMessages = require('../help_strings.json');
+const helpMessages = require('../data/help_strings.json');
 
 module.exports = ({ client, command, message }) => {
     help(message, command.argument);
