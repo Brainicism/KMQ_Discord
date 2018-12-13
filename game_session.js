@@ -86,13 +86,11 @@ module.exports = class GameSession {
             }
             if (tempArr.length === 0) {
                 // User gave invalid inputs only
-                return false;
+                return null;
             }
-            else {
-                this._gameOptions.gender = tempArr;
-            }
+            this._gameOptions.gender = tempArr;
         }
-        return true;
+        return this._gameOptions.gender;
     }
 
     getSQLGender() {
@@ -104,9 +102,5 @@ module.exports = class GameSession {
             }
         })
         return genderStr;
-    }
-
-    getGenderArray() {
-        return this._gameOptions.gender;
     }
 };

@@ -76,8 +76,8 @@ client.on("message", (message) => {
             }
         }
         else if (command.action === "gender") {
-            if (gameSession.setGender(command.components)) {
-                let selectedGenderArray = gameSession.getGenderArray();
+            let selectedGenderArray = gameSession.setGender(command.components);
+            if (selectedGenderArray) {
                 let selectedGenderStr = "";
                 for (let i = 0; i < selectedGenderArray.length; i++) {
                     selectedGenderStr += `\`${selectedGenderArray[i]}\``;
