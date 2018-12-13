@@ -37,7 +37,7 @@ module.exports = (message, parsedMessage, validations) => {
                 let enums = validation.enums;
                 arg = arg.toLowerCase();
                 if (!enums.includes(arg)) {
-                    message.channel.send(`Expected \`${JSON.stringify(enums)}\` for \`${validation.name}\`.`)
+                    message.channel.send(`Expected one of the following valid \`${validation.name}\` values: (${arrayToString(enums)}).`)
                     return false;
                 }
                 break;
@@ -46,4 +46,11 @@ module.exports = (message, parsedMessage, validations) => {
         }
     }
     return true;
+}
+
+const arrayToString = (elements) => {
+    elements = elements.map(element => `\`${element}\``);
+    if (elements.length == 1) return elements[0]
+    let lastElement = elements.splice(-1);
+    return `${elements.join(", ")} and ${lastElement}`
 }
