@@ -11,8 +11,8 @@ const db = new sqlite3.Database('./main.db', (err) => {
     console.log('Building database...');
 
 });
-const video_source = 'kpop_videos_mv_aoimirai.csv';
-const artist_source = 'kpop_artists_mv_aoimirai.csv';
+const video_source = '../kpop_videos_mv_aoimirai.csv';
+const artist_source = '../kpop_artists_mv_aoimirai.csv';
 const video_contents = fs.readFileSync(video_source);
 const artist_contents = fs.readFileSync(artist_source);
 const videos = parse(video_contents, { comment: '#', relax_column_count: true });
@@ -34,16 +34,16 @@ db.serialize(() => {
             let video = videos[i];
             db.run(video_insert_query,
                 [parseInt(video[0]), // id (video)
-                    parseInt(video[1]), // parentID
-                    video[2], //artistID
-                    cleanApostrophe(video[3]), // name
-                    video[4], // video_type
-                    video[5], // youtube_link
-                    parseInt(video[6]), // views
-                    parseInt(video[7]), // likes
-                    video[8], // publish_date
-                    video[9], //last_updated
-                    video[10]], // dead
+                parseInt(video[1]), // parentID
+                video[2], //artistID
+                cleanApostrophe(video[3]), // name
+                video[4], // video_type
+                video[5], // youtube_link
+                parseInt(video[6]), // views
+                parseInt(video[7]), // likes
+                video[8], // publish_date
+                video[9], //last_updated
+                video[10]], // dead
                 (err) => {
                     if (err) {
                         console.log("Failed inserting video: " + err)
@@ -56,16 +56,16 @@ db.serialize(() => {
             let artist = artists[i];
             db.run(artist_insert_query,
                 [parseInt(artist[0]), // id (artist)
-                    cleanApostrophe(artist[1]), // name
-                    artist[2], // stylized_name
-                    artist[3], // gender
-                    artist[4], // is_solo
-                    artist[5], // parent_groupID
-                    artist[6], // formation_date
-                    artist[7], // disband_date
-                    artist[8], // social_media
-                    artist[9], // followers
-                    parseInt(artist[10])], // max_followers
+                cleanApostrophe(artist[1]), // name
+                artist[2], // stylized_name
+                artist[3], // gender
+                artist[4], // is_solo
+                artist[5], // parent_groupID
+                artist[6], // formation_date
+                artist[7], // disband_date
+                artist[8], // social_media
+                artist[9], // followers
+                parseInt(artist[10])], // max_followers
                 (err) => {
                     if (err) {
                         console.error("Failed inserting artist: " + err);
