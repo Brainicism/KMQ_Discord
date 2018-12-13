@@ -1,4 +1,4 @@
-const RED = 15158332;
+const RED = 0xE74C3C;
 const ytdl = require("ytdl-core");
 const fetchVideoInfo = require("youtube-info");
 
@@ -47,7 +47,6 @@ module.exports = {
             let random = rows[Math.floor(Math.random() * rows.length)];
             gameSession.startRound(random.name, random.artist, random.youtubeLink);
             fetchVideoInfo(gameSession.getLink(), (err, videoInfo) => {
-                console.log(random)
                 playSong(gameSession, message);
             })
         })
