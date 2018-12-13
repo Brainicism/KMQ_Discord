@@ -69,7 +69,8 @@ module.exports = class GameSession {
     }
 
     setGender(genderArr) {
-        this._gameOptions.gender = genderArr.map(gender => gender.toLowerCase());;
+        let tempArr = genderArr.map(gender => gender.toLowerCase());
+        this._gameOptions.gender = [...new Set(tempArr)];
         return this._gameOptions.gender;
     }
 
