@@ -1,7 +1,7 @@
 const BEGINNING_SEARCH_YEAR = 2008;
 module.exports = {
     call: ({ message, parsedMessage, gameSession }) => {
-        gameSession.setBeginningCutoffYear(parsedMessage.components[0]);
+        gameSession.setBeginningCutoffYear(parseInt(parsedMessage.components[0]));
         message.channel.send(`The new cutoff year is \`${gameSession.getBeginningCutoffYear()}\`.`);
     },
     validations: {
