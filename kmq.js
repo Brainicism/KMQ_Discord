@@ -8,11 +8,12 @@ const botPrefix = "!";
 const guessSong = require("./helpers/guess_song")
 const validate = require("./helpers/validate");
 let commands = {};
-const db = new sqlite3.Database("./main.db", (err) => {
-    if (err) {
-        console.error(err);
-        return;
-    }
+var mysql      = require('mysql');
+var db = mysql.createConnection({
+  host     : 'localhost',
+  user     : 'root',
+  password : '',
+  database : 'kmq'
 });
 
 let gameSessions = {};

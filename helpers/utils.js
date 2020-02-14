@@ -41,12 +41,15 @@ module.exports = {
             return;
         }
 
-        let query = `SELECT videos.youtube_link as youtubeLink, videos.name, DATE(videos.publish_date) as date, artists.name as artist, videos.video_type as video_type, videos.dead as dead FROM videos INNER JOIN artists on videos.artistID = artists.id WHERE gender = ? AND video_type = "main" AND dead = "n" AND date >= '?-01-01' ORDER BY views DESC LIMIT 500`;
-        db.all(query,
-            [gameSession.getSQLGender(), gameSession.getBeginningCutoffYear()],
-            (err, rows) => {
-            if (err) console.error(err);
-            let random = rows[Math.floor(Math.random() * rows.length)];
+        let query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM app_kpop INNER JOIN app_kpop_group ON app_kpop.id_artist = app_kpop_group.id
+        WHERE members = ? AND dead = "n" AND publishedon > "?-01-01" AND vtype = "main"
+        ORDER BY app_kpop.views DESC LIMIT 500;`;
+        db.query(query, [gameSession.getSQLGender(), gameSession.getBeginningCutoffYear()], (err, result, fields) => {
+            if (err) {
+                message.channel.send(err);
+                return;
+            }
+            let random = result[Math.floor(Math.random() * result.length)];
             gameSession.startRound(random.name, random.artist, random.youtubeLink);
             fetchVideoInfo(gameSession.getLink(), (err, videoInfo) => {
                 playSong(gameSession, message);

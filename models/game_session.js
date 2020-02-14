@@ -77,7 +77,7 @@ module.exports = class GameSession {
     getSQLGender() {
         let genderStr = "";
         this._gameOptions.gender.map((gender, i) => {
-            genderStr += `"${gender}"`;
+            genderStr += `${gender}`;
             if (i !== this._gameOptions.gender.length - 1) {
                 genderStr += " OR ";
             }
