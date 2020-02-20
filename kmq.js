@@ -1,21 +1,15 @@
 const Discord = require("discord.js");
-const sqlite3 = require("sqlite3").verbose();
 const config = require("./config.json");
+const mysql = require("promise-mysql");
+
 const GameSession = require("./models/game_session.js");
 const fs = require("fs");
 const client = new Discord.Client();
 const botPrefix = config.prefix;
 const guessSong = require("./helpers/guess_song")
 const validate = require("./helpers/validate");
+let db;
 let commands = {};
-var mysql      = require('mysql');
-var db = mysql.createConnection({
-  host     : 'localhost',
-  user     : 'root',
-  password : '',
-  database : 'kmq'
-});
-
 let gameSessions = {};
 
 client.on("ready", () => {
@@ -55,14 +49,19 @@ const parseMessage = (message) => {
     }
 }
 
-(() => {
+(async () => {
+    db = await mysql.createConnection({
+        host: "localhost",
+        user: "root",
+        password: "",
+        database: "kmq"
+    });
     if (!config.botToken || config.botToken === "YOUR BOT TOKEN HERE") {
         console.error("No bot token set. Please update config.json!")
         process.exit(1);
     }
-    else {
-        client.login(config.botToken);
-    }
+
+    client.login(config.botToken);
 
     fs.readdir("./commands/", (err, files) => {
         if (err) return console.error(err);
