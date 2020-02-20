@@ -10,6 +10,8 @@ module.exports = class GameSession {
         this._link = null;
         this._inSession = false;
         this._gameOptions = DEFAULT_OPTIONS;
+        this._participants = new Set();
+        this._skippers = new Set();
         this.scoreboard = new Scoreboard();
     }
 
@@ -25,6 +27,8 @@ module.exports = class GameSession {
         this._artist = null;
         this._link = null;
         this._inSession = false;
+        this._participants = new Set();
+        this._skippers = new Set();
     }
 
     endGame() {
@@ -83,5 +87,21 @@ module.exports = class GameSession {
             }
         })
         return genderStr;
+    }
+
+    addParticipant(user) {
+        this._participants.add(user);
+    }
+
+    getNumParticipants() {
+        return this._participants.size;
+    }
+
+    userSkipped(user) {
+        this._skippers.add(user);
+    }
+
+    getNumSkippers() {
+        return this._skippers.size;
     }
 };

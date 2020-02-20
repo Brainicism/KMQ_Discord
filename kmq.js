@@ -31,8 +31,9 @@ client.on("message", (message) => {
     }
 
     let gameSession = gameSessions[message.guild.id];
+    gameSession.addParticipant(message.author);
     if (parsedMessage && commands[parsedMessage.action]) {
-        let command = commands[parsedMessage.action]
+        let command = commands[parsedMessage.action];
         if (validate(message, parsedMessage, command.validations)) {
             command.call({ client, gameSession, message, db, parsedMessage })
         }
