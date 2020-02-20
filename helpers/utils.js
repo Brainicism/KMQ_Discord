@@ -52,13 +52,7 @@ module.exports = {
         .then((result) => {
             let random = result[Math.floor(Math.random() * result.length)];
             gameSession.startRound(random.name, random.artist, random.youtubeLink);
-            fetchVideoInfo(gameSession.getLink(), (err, videoInfo) => {
-                if (err){
-                 message.channel.send(err.toString());
-                 return;
-                }
-                playSong(gameSession, message);
-            })
+            playSong(gameSession, message);
         })
         .catch((err) => {
             console.log(err);
