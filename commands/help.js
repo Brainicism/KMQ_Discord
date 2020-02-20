@@ -34,7 +34,7 @@ const help = (message, action) => {
         helpMessages.actions.forEach((action) => {
             embedFields.push({
                 name: action.name,
-                value: action.description + " Usage: " + action.usage
+                value: action.description + "\n Usage: " + action.usage
             })
         });
     }

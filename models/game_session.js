@@ -1,7 +1,8 @@
 const Scoreboard = require("./scoreboard.js");
 const BEGINNING_SEARCH_YEAR = require("../commands/cutoff").BEGINNING_SEARCH_YEAR;
+const DEFAULT_LIMIT = require("../commands/limit").DEFAULT_LIMIT;
 const GENDER = require("../commands/gender").GENDER
-const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.FEMALE] }
+const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.FEMALE], limit: DEFAULT_LIMIT }
 module.exports = class GameSession {
 
     constructor() {
@@ -48,6 +49,17 @@ module.exports = class GameSession {
         return this._inSession;
     }
 
+    setLimit(limit) {
+        this._gameOptions.limit = limit;
+    }
+
+    resetLimit() {
+        this._gameOptions.limit = DEFAULT_LIMIT;
+    }
+
+    getLimit() {
+        return this._gameOptions.limit;
+    }
     setBeginningCutoffYear(year) {
         this._gameOptions.beginningYear = year;
     }

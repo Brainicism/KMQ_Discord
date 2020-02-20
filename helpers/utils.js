@@ -47,8 +47,8 @@ module.exports = {
         }
         let query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM app_kpop INNER JOIN app_kpop_group ON app_kpop.id_artist = app_kpop_group.id
         WHERE members = ? AND dead = "n" AND publishedon >= "?-01-01" AND vtype = "main"
-        ORDER BY app_kpop.views DESC LIMIT 500;`;
-        db.query(query, [gameSession.getSQLGender(), gameSession.getBeginningCutoffYear()])
+        ORDER BY app_kpop.views DESC LIMIT ?;`;
+        db.query(query, [gameSession.getSQLGender(), gameSession.getBeginningCutoffYear(), gameSession.getLimit()])
         .then((result) => {
             let random = result[Math.floor(Math.random() * result.length)];
             gameSession.startRound(random.name, random.artist, random.youtubeLink);
