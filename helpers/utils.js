@@ -37,21 +37,31 @@ module.exports = {
     },
     startGame: (gameSession, db, message) => {
         if (gameSession.gameInSession()) {
-            message.channel.send("Game already in session.");
+            message.channel.send({
+                embed: {
+                    color: RED,
+                    title: `Game already in session`                  
+                }
+            })
             return;
         }
-
         let query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM app_kpop INNER JOIN app_kpop_group ON app_kpop.id_artist = app_kpop_group.id
-        WHERE members = ? AND dead = "n" AND publishedon > "?-01-01" AND vtype = "main"
+        WHERE members = ? AND dead = "n" AND publishedon >= "?-01-01" AND vtype = "main"
         ORDER BY app_kpop.views DESC LIMIT 500;`;
         db.query(query, [gameSession.getSQLGender(), gameSession.getBeginningCutoffYear()], (err, result, fields) => {
             if (err) {
-                message.channel.send(err);
+                console.log(err.toString())
+                message.channel.send(err.toString());
                 return;
             }
+
             let random = result[Math.floor(Math.random() * result.length)];
             gameSession.startRound(random.name, random.artist, random.youtubeLink);
             fetchVideoInfo(gameSession.getLink(), (err, videoInfo) => {
+                if (err){
+                 message.channel.send(err.toString());
+                 return;
+                }
                 playSong(gameSession, message);
             })
         })

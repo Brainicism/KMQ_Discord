@@ -62,7 +62,6 @@ module.exports = class Scoreboard {
     }
 
     isEmpty() {
-        if (Object.keys(this._players).length) return false;
-        return true;
+        return !(Object.keys(this._players).length);
     }
 };

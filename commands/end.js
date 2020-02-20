@@ -3,11 +3,16 @@ const { sendSongMessage, disconnectVoiceConnection, sendScoreboard } = require("
 module.exports = {
     call: ({ client, gameSession, message }) => {
         if (!gameSession.scoreboard.isEmpty()) {
-            if (gameSession.gameInSession()) sendSongMessage(message, gameSession, true);
-            disconnectVoiceConnection(client, message);
+            if (gameSession.gameInSession()) {
+                sendSongMessage(message, gameSession, true);
+            }
             message.channel.send(gameSession.scoreboard.getWinnerMessage());
             sendScoreboard(message, gameSession);
-            gameSession.endGame();
         }
+        else {
+            message.channel.send("Nobody won :(");
+        }
+        disconnectVoiceConnection(client, message);
+        gameSession.endGame();
     }
 }
