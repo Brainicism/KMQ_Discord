@@ -1,4 +1,5 @@
-const { sendSongMessage, disconnectVoiceConnection, sendScoreboard } = require("../helpers/utils.js")
+const { sendSongMessage, disconnectVoiceConnection } = require("../helpers/utils.js")
+const GREEN = 0x32CD32;
 
 module.exports = {
     call: ({ client, gameSession, message }) => {
@@ -6,11 +7,20 @@ module.exports = {
             if (gameSession.gameInSession()) {
                 sendSongMessage(message, gameSession, true);
             }
-            message.channel.send(gameSession.scoreboard.getWinnerMessage());
-            sendScoreboard(message, gameSession);
+            message.channel.send({
+                embed: {
+                    color: GREEN,
+                    title: gameSession.scoreboard.getWinnerMessage()
+                }
+            });
         }
         else if (gameSession.gameInSession()) {
-            message.channel.send("Nobody won :(");
+            message.channel.send({
+                embed: {
+                    title: "Nobody won :(",
+                    color: GREEN
+                }
+            });
         }
         disconnectVoiceConnection(client, message);
         gameSession.endGame();

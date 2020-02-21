@@ -1,4 +1,4 @@
-const { sendScoreboard, sendSongMessage, disconnectVoiceConnection, getUserIdentifier, cleanSongName, startGame } = require("./utils.js");
+const { sendSongMessage, getUserIdentifier, cleanSongName, startGame } = require("./utils.js");
 
 module.exports = ({ client, message, gameSession, db }) => {
     let guess = cleanSongName(message.content);
@@ -7,7 +7,6 @@ module.exports = ({ client, message, gameSession, db }) => {
         let userTag = getUserIdentifier(message.author);
         gameSession.scoreboard.updateScoreboard(userTag, message.author.id);
         sendSongMessage(message, gameSession, false);
-        sendScoreboard(message, gameSession);
         gameSession.endRound();
         startGame(gameSession, db, message);
     }

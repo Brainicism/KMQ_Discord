@@ -15,7 +15,8 @@ module.exports = {
                 description: `https://youtube.com/watch?v=${gameSession.getLink()}`,
                 image: {
                     url: `https://img.youtube.com/vi/${gameSession.getLink()}/hqdefault.jpg`
-                }
+                },
+                fields: gameSession.scoreboard.getScoreboard()
             }
         })
     },
