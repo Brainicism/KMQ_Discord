@@ -28,24 +28,6 @@ module.exports = {
             }
         })
     },
-    sendSkipWarning: (message, gameSession) => {
-        message.channel.send({
-            embed: {
-                color: RED,
-                title: "**Skip warning**",
-                description: `${gameSession.getNumSkippers()}/${Math.ceil(gameSession.getNumParticipants() * 0.5)} skips achieved.`
-            }
-        })
-    },
-    sendSkipMessage: (message, gameSession) => {
-        message.channel.send({
-            embed: {
-                color: RED,
-                title: "**Skipping**",
-                description: `${gameSession.getNumSkippers()}/${Math.floor(gameSession.getNumParticipants() * 0.5) + 1} skips achieved, skipping...`
-            }
-        })
-    },
     disconnectVoiceConnection: (client, message) => {
         let voiceConnection = client.voiceConnections.get(message.guild.id);
         if (voiceConnection) {
@@ -89,9 +71,6 @@ module.exports = {
     },
     cleanSongName: (name) => {
         return name.toLowerCase().split("(")[0].replace(/[^\x00-\x7F|]/g, "").replace(/|/g, "").replace(/ /g, "").trim();
-    },
-    isSkipMajority: (gameSession) => {
-        return (gameSession.getNumSkippers() / gameSession.getNumParticipants() >= 0.5);
     }
 }
 const playSong = (gameSession, message) => {

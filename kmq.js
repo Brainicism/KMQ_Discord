@@ -11,8 +11,8 @@ let commands = {};
 var mysql      = require('mysql');
 var db = mysql.createConnection({
   host     : 'localhost',
-  user     : 'root',
-  password : '',
+  user     : config.dbUser,
+  password : config.dbPassword,
   database : 'kmq'
 });
 

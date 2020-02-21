@@ -1,7 +1,8 @@
 const Scoreboard = require("./scoreboard.js");
 const BEGINNING_SEARCH_YEAR = require("../commands/cutoff").BEGINNING_SEARCH_YEAR;
-const GENDER = require("../commands/gender").GENDER
-const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.FEMALE] }
+const GENDER = require("../commands/gender").GENDER;
+const { getUserIdentifier } = require("../helpers/utils.js");
+const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.FEMALE] };
 module.exports = class GameSession {
 
     constructor() {
@@ -27,8 +28,8 @@ module.exports = class GameSession {
         this._artist = null;
         this._link = null;
         this._inSession = false;
-        this._participants = new Set();
-        this._skippers = new Set();
+        this._participants.clear();
+        this._skippers.clear();
     }
 
     endGame() {
@@ -90,7 +91,7 @@ module.exports = class GameSession {
     }
 
     addParticipant(user) {
-        this._participants.add(user);
+        this._participants.add(getUserIdentifier(user));
     }
 
     getNumParticipants() {
