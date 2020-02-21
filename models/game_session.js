@@ -96,7 +96,7 @@ module.exports = class GameSession {
         this._gameOptions.gender.map((gender, i) => {
             genderStr += `${gender}`;
             if (i !== this._gameOptions.gender.length - 1) {
-                genderStr += " OR ";
+                genderStr += ",";
             }
         })
         return genderStr;
