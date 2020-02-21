@@ -37,7 +37,7 @@ module.exports = class Scoreboard {
 
     getScoreboard() {
         return Object.values(this._players).map((x) => {
-            return { name: x.getName(), value: x.getScore() }
+            return { name: x.getName(), value: x.getScore(), inline: true}
         })
             .sort((a, b) => { return b.value - a.value; })
     }
