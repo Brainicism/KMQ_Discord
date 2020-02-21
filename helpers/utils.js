@@ -11,7 +11,7 @@ module.exports = {
                     name: isForfeit ? null : message.author.username,
                     icon_url: isForfeit ? null : message.author.avatarURL
                 },
-                title: `${gameSession.getSong()} - ${gameSession.getArtist()}`,
+                title: `"${gameSession.getSong()}" - ${gameSession.getArtist()}`,
                 description: `https://youtube.com/watch?v=${gameSession.getLink()}\n\n**Scoreboard**`,
                 image: {
                     url: `https://img.youtube.com/vi/${gameSession.getLink()}/hqdefault.jpg`
