@@ -62,6 +62,12 @@
                     "description": "To choose between multiple genders, enter each gender separated by a space."
                 }
             ]
+        },
+        {
+            "name": "skip",
+            "description": "Vote to skip the current song. A song is skipped when majority of participants vote to skip it.",
+            "usage": "!skip",
+            "arguments": []
         }
     ]
 }

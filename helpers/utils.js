@@ -40,7 +40,7 @@ module.exports = {
             message.channel.send({
                 embed: {
                     color: RED,
-                    title: `Game already in session`                  
+                    title: `Game already in session`
                 }
             })
             return;

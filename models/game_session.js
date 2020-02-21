@@ -1,8 +1,9 @@
 const Scoreboard = require("./scoreboard.js");
 const BEGINNING_SEARCH_YEAR = require("../commands/cutoff").BEGINNING_SEARCH_YEAR;
 const DEFAULT_LIMIT = require("../commands/limit").DEFAULT_LIMIT;
-const GENDER = require("../commands/gender").GENDER
-const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.FEMALE], limit: DEFAULT_LIMIT }
+const GENDER = require("../commands/gender").GENDER;
+const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.FEMALE], limit: DEFAULT_LIMIT };
+const { getUserIdentifier } = require("../helpers/utils.js");
 module.exports = class GameSession {
 
     constructor() {
@@ -11,6 +12,8 @@ module.exports = class GameSession {
         this._link = null;
         this._inSession = false;
         this._gameOptions = DEFAULT_OPTIONS;
+        this._participants = new Set();
+        this._skippers = new Set();
         this.scoreboard = new Scoreboard();
     }
 
@@ -26,6 +29,8 @@ module.exports = class GameSession {
         this._artist = null;
         this._link = null;
         this._inSession = false;
+        this._participants.clear();
+        this._skippers.clear();
     }
 
     endGame() {
@@ -95,5 +100,21 @@ module.exports = class GameSession {
             }
         })
         return genderStr;
+    }
+
+    addParticipant(user) {
+        this._participants.add(getUserIdentifier(user));
+    }
+
+    getNumParticipants() {
+        return this._participants.size;
+    }
+
+    userSkipped(user) {
+        this._skippers.add(user);
+    }
+
+    getNumSkippers() {
+        return this._skippers.size;
     }
 };

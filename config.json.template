@@ -1,4 +1,6 @@
 {
     "botToken": "YOUR BOT TOKEN HERE",
-    "prefix": "?"
+    "prefix": "?",
+    "dbUser": "root",
+    "dbPassword": ""
 }
