@@ -9,7 +9,7 @@ module.exports = {
             message.channel.send(gameSession.scoreboard.getWinnerMessage());
             sendScoreboard(message, gameSession);
         }
-        else {
+        else if (gameSession.gameInSession()) {
             message.channel.send("Nobody won :(");
         }
         disconnectVoiceConnection(client, message);
