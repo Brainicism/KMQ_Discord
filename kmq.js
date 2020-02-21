@@ -33,7 +33,7 @@ client.on("message", (message) => {
         }
     }
     else {
-        guessSong({ client, message, gameSession });
+        guessSong({ client, message, gameSession, db });
     }
 });
 

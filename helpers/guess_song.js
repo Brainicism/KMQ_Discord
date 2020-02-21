@@ -1,6 +1,6 @@
-const { sendScoreboard, sendSongMessage, disconnectVoiceConnection, getUserIdentifier, cleanSongName } = require("./utils.js");
+const { sendScoreboard, sendSongMessage, disconnectVoiceConnection, getUserIdentifier, cleanSongName, startGame } = require("./utils.js");
 
-module.exports = ({ client, message, gameSession }) => {
+module.exports = ({ client, message, gameSession, db }) => {
     let guess = cleanSongName(message.content);
     if (gameSession.getSong() && guess === cleanSongName(gameSession.getSong())) {
         // this should be atomic
@@ -8,8 +8,8 @@ module.exports = ({ client, message, gameSession }) => {
         gameSession.scoreboard.updateScoreboard(userTag, message.author.id);
         sendSongMessage(message, gameSession, false);
         sendScoreboard(message, gameSession);
-        disconnectVoiceConnection(client, message);
         gameSession.endRound();
+        startGame(gameSession, db, message);
     }
 }
 

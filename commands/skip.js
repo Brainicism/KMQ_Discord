@@ -1,4 +1,4 @@
-const { disconnectVoiceConnection, startGame } = require("../helpers/utils.js");
+const { disconnectVoiceConnection, startGame, sendSongMessage } = require("../helpers/utils.js");
 const RED = 0xE74C3C;
 
 module.exports = {
@@ -8,7 +8,7 @@ module.exports = {
         }
         gameSession.userSkipped(message.author);
         if (isSkipMajority(gameSession)) {
-            disconnectVoiceConnection(client, message);
+            sendSongMessage(message, gameSession, false);
             sendSkipMessage(message, gameSession);
             gameSession.endRound();
             startGame(gameSession, db, message);
