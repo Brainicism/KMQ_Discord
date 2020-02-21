@@ -53,8 +53,8 @@ const parseMessage = (message) => {
 (async () => {
     db = await mysql.createConnection({
         host: "localhost",
-        user: "root",
-        password: "",
+        user: config.dbUser,
+        password: config.dbPassword,
         database: "kmq"
     });
     if (!config.botToken || config.botToken === "YOUR BOT TOKEN HERE") {
