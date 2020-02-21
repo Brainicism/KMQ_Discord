@@ -1,8 +1,9 @@
 const Scoreboard = require("./scoreboard.js");
 const BEGINNING_SEARCH_YEAR = require("../commands/cutoff").BEGINNING_SEARCH_YEAR;
+const DEFAULT_LIMIT = require("../commands/limit").DEFAULT_LIMIT;
 const GENDER = require("../commands/gender").GENDER;
+const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.FEMALE], limit: DEFAULT_LIMIT };
 const { getUserIdentifier } = require("../helpers/utils.js");
-const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.FEMALE] };
 module.exports = class GameSession {
 
     constructor() {
