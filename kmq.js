@@ -17,7 +17,7 @@ client.on("ready", () => {
 });
 
 client.on("message", (message) => {
-    if (message.author.equals(client.user)) return;
+    if (message.author.equals(client.user) || message.author.bot) return;
     let parsedMessage = parseMessage(message.content) || null;
 
     if (!gameSessions[message.guild.id]) {
