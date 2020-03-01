@@ -65,6 +65,9 @@ module.exports = {
     },
     cleanSongName: (name) => {
         return name.toLowerCase().split("(")[0].replace(/[^\x00-\x7F|]/g, "").replace(/|/g, "").replace(/ /g, "").trim();
+    },
+    areUserAndBotInSameVoiceChannel: (message) => {
+        return message.member.voiceChannel === message.guild.voiceConnection.channel;
     }
 }
 const playSong = (gameSession, message) => {

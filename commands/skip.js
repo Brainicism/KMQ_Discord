@@ -1,9 +1,9 @@
-const { disconnectVoiceConnection, startGame, sendSongMessage } = require("../helpers/utils.js");
+const { disconnectVoiceConnection, startGame, sendSongMessage, areUserAndBotInSameVoiceChannel } = require("../helpers/utils.js");
 const RED = 0xE74C3C;
 
 module.exports = {
     call: ({ gameSession, client, message, db }) => {
-        if (!gameSession.gameInSession()) {
+        if (!gameSession.gameInSession() || !areUserAndBotInSameVoiceChannel(message)) {
             return;
         }
         gameSession.userSkipped(message.author);

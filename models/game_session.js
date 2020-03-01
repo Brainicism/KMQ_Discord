@@ -3,7 +3,7 @@ const BEGINNING_SEARCH_YEAR = require("../commands/cutoff").BEGINNING_SEARCH_YEA
 const DEFAULT_LIMIT = require("../commands/limit").DEFAULT_LIMIT;
 const GENDER = require("../commands/gender").GENDER;
 const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.FEMALE], limit: DEFAULT_LIMIT };
-const { getUserIdentifier } = require("../helpers/utils.js");
+const { getUserIdentifier, areUserAndBotInSameVoiceChannel } = require("../helpers/utils.js");
 module.exports = class GameSession {
 
     constructor() {
@@ -95,8 +95,14 @@ module.exports = class GameSession {
         return this._gameOptions.gender.join(",");
     }
 
-    addParticipant(user) {
-        this._participants.add(getUserIdentifier(user));
+    addParticipant(message) {
+        if (!message.guild.voiceConnection) {
+            return;
+        }
+        let user = message.author;
+        if (areUserAndBotInSameVoiceChannel(message)) {
+            this._participants.add(getUserIdentifier(user));
+        }
     }
 
     getNumParticipants() {
