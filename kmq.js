@@ -6,7 +6,7 @@ const GameSession = require("./models/game_session.js");
 const fs = require("fs");
 const client = new Discord.Client();
 const botPrefix = config.prefix;
-const guessSong = require("./helpers/guess_song")
+const guessSong = require("./helpers/guess_song");
 const validate = require("./helpers/validate");
 let db;
 let commands = {};
@@ -25,7 +25,7 @@ client.on("message", (message) => {
     }
 
     let gameSession = gameSessions[message.guild.id];
-    gameSession.addParticipant(message.author);
+    gameSession.addParticipant(message);
     if (parsedMessage && commands[parsedMessage.action]) {
         let command = commands[parsedMessage.action];
         if (validate(message, parsedMessage, command.validations)) {
