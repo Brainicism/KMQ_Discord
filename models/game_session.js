@@ -12,7 +12,6 @@ module.exports = class GameSession {
         this._link = null;
         this._inSession = false;
         this._gameOptions = DEFAULT_OPTIONS;
-        this._participants = new Set();
         this._skippers = new Set();
         this.scoreboard = new Scoreboard();
     }
@@ -29,7 +28,6 @@ module.exports = class GameSession {
         this._artist = null;
         this._link = null;
         this._inSession = false;
-        this._participants.clear();
         this._skippers.clear();
     }
 
@@ -93,20 +91,6 @@ module.exports = class GameSession {
 
     getSQLGender() {
         return this._gameOptions.gender.join(",");
-    }
-
-    addParticipant(message) {
-        if (!message.guild.voiceConnection) {
-            return;
-        }
-        let user = message.author;
-        if (areUserAndBotInSameVoiceChannel(message)) {
-            this._participants.add(getUserIdentifier(user));
-        }
-    }
-
-    getNumParticipants() {
-        return this._participants.size;
     }
 
     userSkipped(user) {

@@ -68,6 +68,10 @@ module.exports = {
     },
     areUserAndBotInSameVoiceChannel: (message) => {
         return message.member.voiceChannel === message.guild.voiceConnection.channel;
+    },
+    getNumParticipants: (message) => {
+        // Don't include the bot as a participant
+        return message.member.voiceChannel.members.size - 1;
     }
 }
 const playSong = (gameSession, message) => {
