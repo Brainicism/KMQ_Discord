@@ -1,4 +1,9 @@
-const { disconnectVoiceConnection, startGame, sendSongMessage, areUserAndBotInSameVoiceChannel } = require("../helpers/utils.js");
+const {
+    disconnectVoiceConnection,
+    startGame,
+    sendSongMessage,
+    areUserAndBotInSameVoiceChannel,
+    getNumParticipants } = require("../helpers/utils.js");
 const RED = 0xE74C3C;
 
 module.exports = {
@@ -7,7 +12,7 @@ module.exports = {
             return;
         }
         gameSession.userSkipped(message.author);
-        if (isSkipMajority(gameSession)) {
+        if (isSkipMajority(message, gameSession)) {
             sendSongMessage(message, gameSession, false);
             sendSkipMessage(message, gameSession);
             gameSession.endRound();
@@ -24,7 +29,7 @@ function sendSkipNotification(message, gameSession) {
         embed: {
             color: RED,
             title: "**Skip**",
-            description: `${gameSession.getNumSkippers()}/${Math.floor(gameSession.getNumParticipants() * 0.5) + 1} skips achieved.`
+            description: `${gameSession.getNumSkippers()}/${Math.floor(getNumParticipants(message) * 0.5) + 1} skips achieved.`
         }
     });
 }
@@ -34,11 +39,11 @@ function sendSkipMessage(message, gameSession) {
         embed: {
             color: RED,
             title: "**Skip**",
-            description: `${gameSession.getNumSkippers()}/${Math.floor(gameSession.getNumParticipants() * 0.5) + 1} skips achieved, skipping...`
+            description: `${gameSession.getNumSkippers()}/${Math.floor(getNumParticipants(message) * 0.5) + 1} skips achieved, skipping...`
         }
     });
 }
 
-function isSkipMajority(gameSession) {
-    return (gameSession.getNumSkippers() / gameSession.getNumParticipants() >= 0.5);
+function isSkipMajority(message, gameSession) {
+    return (gameSession.getNumSkippers() / getNumParticipants(message) >= 0.5);
 }
