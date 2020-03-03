@@ -1,4 +1,7 @@
 const helpMessages = require('../data/help_strings.json');
+const config = require("../config.json");
+const botPrefix = config.prefix;
+const placeholder = "!";
 
 module.exports = {
     call: ({ client, parsedMessage, message }) => {
@@ -29,12 +32,12 @@ const help = (message, action) => {
         });
     }
     else {
-        embedTitle = "KMQ Command Help"
-        embedDesc = helpMessages.rules
+        embedTitle = "KMQ Command Help";
+        embedDesc = helpMessages.rules.replace(placeholder, botPrefix);
         helpMessages.actions.forEach((action) => {
             embedFields.push({
                 name: action.name,
-                value: action.description + "\n Usage: " + action.usage
+                value: `${action.description}\nUsage: \`${action.usage.replace(placeholder, botPrefix)}\``
             })
         });
     }
