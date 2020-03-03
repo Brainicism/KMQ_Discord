@@ -1,4 +1,7 @@
 const helpMessages = require('../data/help_strings.json');
+const config = require("../config.json");
+const botPrefix = config.prefix;
+const placeholder = "!";
 
 module.exports = {
     call: ({ client, parsedMessage, message }) => {
@@ -19,7 +22,7 @@ const help = (message, action) => {
         }
 
         let detailedAction = helpMessages.actions.find(a => a.name === action)
-        embedTitle = detailedAction.name;
+        embedTitle = `\`${detailedAction.usage.replace(placeholder, botPrefix)}\``;
         embedDesc = detailedAction.description;
         detailedAction.arguments.forEach((argument) => {
             embedFields.push({
