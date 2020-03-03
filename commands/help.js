@@ -22,7 +22,7 @@ const help = (message, action) => {
         }
 
         let detailedAction = helpMessages.actions.find(a => a.name === action)
-        embedTitle = detailedAction.name;
+        embedTitle = `\`${detailedAction.usage.replace(placeholder, botPrefix)}\``;
         embedDesc = detailedAction.description;
         detailedAction.arguments.forEach((argument) => {
             embedFields.push({
