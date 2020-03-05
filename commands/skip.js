@@ -29,7 +29,7 @@ function sendSkipNotification(message, gameSession) {
         embed: {
             color: RED,
             title: "**Skip**",
-            description: `${gameSession.getNumSkippers()}/${Math.floor(getNumParticipants(message) * 0.5) + 1} skips achieved.`
+            description: `${gameSession.getNumSkippers()}/${getSkipsRequired(message)} skips achieved.`
         }
     });
 }
@@ -39,11 +39,15 @@ function sendSkipMessage(message, gameSession) {
         embed: {
             color: RED,
             title: "**Skip**",
-            description: `${gameSession.getNumSkippers()}/${Math.floor(getNumParticipants(message) * 0.5) + 1} skips achieved, skipping...`
+            description: `${gameSession.getNumSkippers()}/${getSkipsRequired(message)} skips achieved, skipping...`
         }
     });
 }
 
 function isSkipMajority(message, gameSession) {
-    return (gameSession.getNumSkippers() / getNumParticipants(message) >= 0.5);
+    return gameSession.getNumSkippers() >= getSkipsRequired(message);
+}
+
+function getSkipsRequired(message) {
+    return Math.floor(getNumParticipants(message) * 0.5) + 1;
 }
