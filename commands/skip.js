@@ -28,20 +28,31 @@ function sendSkipNotification(message, gameSession) {
     message.channel.send({
         embed: {
             color: RED,
+            author: {
+                name: message.author.username,
+                icon_url: message.author.avatarURL
+            },
             title: "**Skip**",
             description: `${gameSession.getNumSkippers()}/${getSkipsRequired(message)} skips achieved.`
         }
-    });
+    })
+    .then((message) => message.delete(5000));
 }
 
 function sendSkipMessage(message, gameSession) {
     message.channel.send({
         embed: {
             color: RED,
+            author: {
+                name: message.author.username,
+                icon_url: message.author.avatarURL
+
+            },
             title: "**Skip**",
             description: `${gameSession.getNumSkippers()}/${getSkipsRequired(message)} skips achieved, skipping...`
         }
-    });
+    })
+    .then((message) => message.delete(5000));
 }
 
 function isSkipMajority(message, gameSession) {
