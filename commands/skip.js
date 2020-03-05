@@ -13,8 +13,8 @@ module.exports = {
         }
         gameSession.userSkipped(message.author);
         if (isSkipMajority(message, gameSession)) {
-            sendSongMessage(message, gameSession, false);
             sendSkipMessage(message, gameSession);
+            sendSongMessage(message, gameSession, false);
             gameSession.endRound();
             startGame(gameSession, db, message);
         }
@@ -33,7 +33,7 @@ function sendSkipNotification(message, gameSession) {
                 icon_url: message.author.avatarURL
             },
             title: "**Skip**",
-            description: `${gameSession.getNumSkippers()}/${getSkipsRequired(message)} skips achieved.`
+            description: `${gameSession.getNumSkippers()}/${getSkipsRequired(message)} skips received.`
         }
     })
     .then((message) => message.delete(5000));
