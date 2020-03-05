@@ -12,7 +12,7 @@ module.exports = {
                 name: 'limit',
                 type: 'number',
                 minValue: 1,
-                maxValue: Number.MAX_VALUE
+                maxValue: 10000
             }
         ]
     },
