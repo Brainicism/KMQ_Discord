@@ -64,7 +64,12 @@ module.exports = {
         return `${user.username}#${user.discriminator}`
     },
     cleanSongName: (name) => {
-        return name.toLowerCase().split("(")[0].replace(/[^\x00-\x7F|]/g, "").replace(/|/g, "").replace(/ /g, "").trim();
+        return name.toLowerCase()
+                   .split("(")[0]
+                   .normalize("NFD")
+                   .replace(/[^\x00-\x7F|]/g, "")
+                   .replace(/|/g, "")
+                   .replace(/ /g, "").trim();
     },
     areUserAndBotInSameVoiceChannel: (message) => {
         return message.member.voiceChannel === message.guild.voiceConnection.channel;
