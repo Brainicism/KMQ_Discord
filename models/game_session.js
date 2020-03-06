@@ -3,6 +3,7 @@ const BEGINNING_SEARCH_YEAR = require("../commands/cutoff").BEGINNING_SEARCH_YEA
 const DEFAULT_LIMIT = require("../commands/limit").DEFAULT_LIMIT;
 const GENDER = require("../commands/gender").GENDER;
 const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.FEMALE], limit: DEFAULT_LIMIT };
+const DEFAULT_BOT_PREFIX = "!";
 const { getUserIdentifier, areUserAndBotInSameVoiceChannel } = require("../helpers/utils.js");
 module.exports = class GameSession {
 
@@ -13,6 +14,7 @@ module.exports = class GameSession {
         this._inSession = false;
         this._gameOptions = DEFAULT_OPTIONS;
         this._skippers = new Set();
+        this._botPrefix = DEFAULT_BOT_PREFIX;
         this.scoreboard = new Scoreboard();
     }
 
@@ -99,5 +101,13 @@ module.exports = class GameSession {
 
     getNumSkippers() {
         return this._skippers.size;
+    }
+
+    setBotPrefix(prefix) {
+        this._botPrefix = prefix;
+    }
+
+    getBotPrefix() {
+        return this._botPrefix;
     }
 };

@@ -1,16 +1,15 @@
 const helpMessages = require('../data/help_strings.json');
 const config = require("../config.json");
-const botPrefix = config.prefix;
 const placeholder = "!";
 
 module.exports = {
-    call: ({ client, parsedMessage, message }) => {
-        help(message, parsedMessage.argument);
+    call: ({ parsedMessage, message, botPrefix }) => {
+        help(message, parsedMessage.argument, botPrefix);
     }
 }
 
 // Usage: `!help [action]` or `!help`
-const help = (message, action) => {
+const help = (message, action, botPrefix) => {
     let embedTitle = "";
     let embedDesc = "";
     let embedFields = [];

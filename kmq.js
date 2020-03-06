@@ -5,7 +5,6 @@ const mysql = require("promise-mysql");
 const GameSession = require("./models/game_session.js");
 const fs = require("fs");
 const client = new Discord.Client();
-const botPrefix = config.prefix;
 const guessSong = require("./helpers/guess_song");
 const validate = require("./helpers/validate");
 let db;
@@ -18,17 +17,18 @@ client.on("ready", () => {
 
 client.on("message", (message) => {
     if (message.author.equals(client.user) || message.author.bot) return;
-    let parsedMessage = parseMessage(message.content) || null;
-
     if (!gameSessions[message.guild.id]) {
         gameSessions[message.guild.id] = new GameSession();
     }
 
     let gameSession = gameSessions[message.guild.id];
+    let botPrefix = gameSession.getBotPrefix();
+    let parsedMessage = parseMessage(message.content, botPrefix) || null;
+
     if (parsedMessage && commands[parsedMessage.action]) {
         let command = commands[parsedMessage.action];
-        if (validate(message, parsedMessage, command.validations)) {
-            command.call({ client, gameSession, message, db, parsedMessage })
+        if (validate(message, parsedMessage, command.validations, botPrefix)) {
+            command.call({ client, gameSession, message, db, parsedMessage, botPrefix })
         }
     }
     else {
@@ -36,7 +36,7 @@ client.on("message", (message) => {
     }
 });
 
-const parseMessage = (message) => {
+const parseMessage = (message, botPrefix) => {
     if (message.charAt(0) !== botPrefix) return null;
     let components = message.split(" ");
     let action = components.shift().substring(1);
