@@ -1,8 +1,8 @@
-module.exports = (message, parsedMessage, validations) => {
+module.exports = (message, parsedMessage, validations, botPrefix) => {
     if (!validations) return true;
     let args = parsedMessage.components;
     if (args.length > validations.maxArgCount || args.length < validations.minArgCount) {
-        message.channel.send(`Incorrect number of arguments. See \`!help ${parsedMessage.action}\` for usage.`);
+        message.channel.send(`Incorrect number of arguments. See \`${botPrefix}help ${parsedMessage.action}\` for usage.`);
         return false;
     }
     for (let i = 0; i < args.length; i++) {
@@ -30,7 +30,7 @@ module.exports = (message, parsedMessage, validations) => {
                 arg = arg.toLowerCase();
                 if (!(arg == "false" || arg == "true")) {
                     message.channel.send(`Expected true/false value for \`${validation.name}\`.`)
-                    return false
+                    return false;
                 }
                 break;
             case "enum":
@@ -38,6 +38,12 @@ module.exports = (message, parsedMessage, validations) => {
                 arg = arg.toLowerCase();
                 if (!enums.includes(arg)) {
                     message.channel.send(`Expected one of the following valid \`${validation.name}\` values: (${arrayToString(enums)}).`)
+                    return false;
+                }
+                break;
+            case "char":
+                if (arg.length !== 1) {
+                    message.channel.send(`Expected a character for \`${validation.name}\`.`)
                     return false;
                 }
                 break;
