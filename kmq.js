@@ -36,6 +36,24 @@ client.on("message", (message) => {
     }
 });
 
+client.on("voiceStateUpdate", (oldState, newState) => {
+    let oldUserChannel = oldState.voiceChannel;
+    let newUserChannel = newState.voiceChannel;
+    if (newUserChannel === undefined) {
+        // User left voice channel, check if bot is only one left
+        if (oldUserChannel.members.size === 1) {
+            let guildID = oldUserChannel.guild.id;
+            let voiceConnection = client.voiceConnections.get(guildID);
+            if (voiceConnection) {
+                voiceConnection.disconnect();
+                let gameSession = gameSessions[guildID];
+                gameSession.endRound();
+                return;
+            }
+        }
+    }
+});
+
 const parseMessage = (message, botPrefix) => {
     if (message.charAt(0) !== botPrefix) return null;
     let components = message.split(" ");
