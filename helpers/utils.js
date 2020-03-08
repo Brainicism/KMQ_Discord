@@ -1,6 +1,7 @@
 const RED = 0xE74C3C;
 const ytdl = require("ytdl-core");
 const fetchVideoInfo = require("youtube-info");
+const hangulRomanization = require('hangul-romanization');
 
 module.exports = {
     sendSongMessage: (message, gameSession, isForfeit) => {
@@ -64,12 +65,17 @@ module.exports = {
         return `${user.username}#${user.discriminator}`
     },
     cleanSongName: (name) => {
-        return name.toLowerCase()
-                   .split("(")[0]
-                   .normalize("NFD")
-                   .replace(/[^\x00-\x7F|]/g, "")
-                   .replace(/|/g, "")
-                   .replace(/ /g, "").trim();
+        let cleanName =  name.toLowerCase()
+            .split("(")[0]
+           .normalize("NFD")
+           .replace(/[^\x00-\x7F|]/g, "")
+           .replace(/|/g, "")
+           .replace(/ /g, "").trim();
+        if (!cleanName) {
+            // Odds are the song name is in hangul
+            return hangulRomanization.convert(name);
+        }
+        return cleanName;
     },
     areUserAndBotInSameVoiceChannel: (message) => {
         return message.member.voiceChannel === message.guild.voiceConnection.channel;
