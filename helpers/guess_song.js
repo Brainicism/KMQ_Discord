@@ -1,6 +1,6 @@
 const { sendSongMessage, getUserIdentifier, cleanSongName, startGame } = require("./utils.js");
 
-module.exports = ({ client, message, gameSession, db }) => {
+module.exports = ({ client, message, gameSession, guildPreference, db }) => {
     let guess = cleanSongName(message.content);
     if (gameSession.getSong() && guess === cleanSongName(gameSession.getSong())) {
         // this should be atomic
@@ -8,7 +8,7 @@ module.exports = ({ client, message, gameSession, db }) => {
         gameSession.scoreboard.updateScoreboard(userTag, message.author.id);
         sendSongMessage(message, gameSession, false);
         gameSession.endRound();
-        startGame(gameSession, db, message);
+        startGame(gameSession, guildPreference, db, message);
     }
 }
 

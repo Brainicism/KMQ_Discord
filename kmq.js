@@ -3,6 +3,7 @@ const config = require("./config.json");
 const mysql = require("promise-mysql");
 
 const GameSession = require("./models/game_session.js");
+const GuildPreference = require("./models/guild_preference.js");
 const fs = require("fs");
 const client = new Discord.Client();
 const guessSong = require("./helpers/guess_song");
@@ -10,6 +11,7 @@ const validate = require("./helpers/validate");
 let db;
 let commands = {};
 let gameSessions = {};
+let guildPreferences = {};
 
 client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -17,18 +19,31 @@ client.on("ready", () => {
 
 client.on("message", (message) => {
     if (message.author.equals(client.user) || message.author.bot) return;
+    if (!guildPreferences[message.guild.id]) {
+        guildPreferences[message.guild.id] = new GuildPreference();
+    }
     if (!gameSessions[message.guild.id]) {
         gameSessions[message.guild.id] = new GameSession();
     }
 
     let gameSession = gameSessions[message.guild.id];
-    let botPrefix = gameSession.getBotPrefix();
+    let guildPreference = guildPreferences[message.guild.id];
+
+    let botPrefix = guildPreference.getBotPrefix();
     let parsedMessage = parseMessage(message.content, botPrefix) || null;
 
     if (parsedMessage && commands[parsedMessage.action]) {
         let command = commands[parsedMessage.action];
         if (validate(message, parsedMessage, command.validations, botPrefix)) {
-            command.call({ client, gameSession, message, db, parsedMessage, botPrefix })
+            command.call({
+                client,
+                gameSession,
+                guildPreference,
+                message,
+                db,
+                parsedMessage,
+                botPrefix
+            })
         }
     }
     else {
