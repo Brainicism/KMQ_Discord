@@ -20,6 +20,8 @@ client.on("message", (message) => {
     if (message.author.equals(client.user) || message.author.bot) return;
     if (!guildPreferences[message.guild.id]) {
         guildPreferences[message.guild.id] = new GuildPreference();
+        let guildPreferencesInsert = `INSERT INTO guildPreferences VALUES(?, ?)`;
+        db.query(guildPreferencesInsert, [message.guild.id, JSON.stringify(guildPreferences[message.guild.id])]);
     }
 
     let guildPreference = guildPreferences[message.guild.id];
@@ -38,11 +40,15 @@ client.on("message", (message) => {
                 db,
                 parsedMessage,
                 botPrefix
-            })
+            });
+            let guildPreferencesUpdate = `UPDATE guildPreferences SET guildPreference = ? WHERE guildID = ?;`;
+            db.query(guildPreferencesUpdate, [JSON.stringify(guildPreference), message.guild.id]);
         }
     }
     else {
-        guessSong({ client, message, gameSessions, db });
+        if (gameSessions[message.guild.id]) {
+            guessSong({ client, message, gameSessions, db });
+        }
     }
 });
 
@@ -88,6 +94,22 @@ const parseMessage = (message, botPrefix) => {
         console.error("No bot token set. Please update config.json!")
         process.exit(1);
     }
+    let guildPreferencesTableCreation = `CREATE TABLE IF NOT EXISTS guildPreferences(
+        guildID TEXT NOT NULL,
+        guildPreference JSON NOT NULL
+    );`;
+
+    db.query(guildPreferencesTableCreation).catch((err) => {
+        console.error(err);
+    });
+
+    db.query(`SELECT * FROM guildPreferences`, (results, fields) => {
+        fields.forEach((field) => {
+            guildPreferences[field.guildID] = new GuildPreference(JSON.parse(field.guildPreference));
+        });
+    }).catch((err) => {
+        console.error(err);
+    });
 
     client.login(config.botToken);
 

@@ -6,9 +6,14 @@ const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.
 
 module.exports = class GuildPreference {
 
-    constructor() {
-        this._gameOptions = DEFAULT_OPTIONS;
-        this._botPrefix = DEFAULT_BOT_PREFIX;
+    constructor(json) {
+        if (!json) {
+            this._gameOptions = DEFAULT_OPTIONS;
+            this._botPrefix = DEFAULT_BOT_PREFIX;
+            return;
+        }
+        this._gameOptions = json._gameOptions;
+        this._botPrefix = json._botPrefix;
     }
 
     setLimit(limit) {
