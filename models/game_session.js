@@ -26,11 +26,6 @@ module.exports = class GameSession {
         this._skippers.clear();
     }
 
-    endGame() {
-        this.endRound();
-        this.scoreboard = new Scoreboard();
-    }
-
     getSong() {
         return this._song;
     }

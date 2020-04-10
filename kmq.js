@@ -2,7 +2,6 @@ const Discord = require("discord.js");
 const config = require("./config.json");
 const mysql = require("promise-mysql");
 
-const GameSession = require("./models/game_session.js");
 const GuildPreference = require("./models/guild_preference.js");
 const fs = require("fs");
 const client = new Discord.Client();
@@ -22,11 +21,7 @@ client.on("message", (message) => {
     if (!guildPreferences[message.guild.id]) {
         guildPreferences[message.guild.id] = new GuildPreference();
     }
-    if (!gameSessions[message.guild.id]) {
-        gameSessions[message.guild.id] = new GameSession();
-    }
 
-    let gameSession = gameSessions[message.guild.id];
     let guildPreference = guildPreferences[message.guild.id];
 
     let botPrefix = guildPreference.getBotPrefix();
@@ -37,7 +32,7 @@ client.on("message", (message) => {
         if (validate(message, parsedMessage, command.validations, botPrefix)) {
             command.call({
                 client,
-                gameSession,
+                gameSessions,
                 guildPreference,
                 message,
                 db,
@@ -47,7 +42,7 @@ client.on("message", (message) => {
         }
     }
     else {
-        guessSong({ client, message, gameSession, db });
+        guessSong({ client, message, gameSessions, db });
     }
 });
 

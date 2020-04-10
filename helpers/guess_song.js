@@ -1,7 +1,8 @@
 const { sendSongMessage, getUserIdentifier, cleanSongName, startGame } = require("./utils.js");
 
-module.exports = ({ client, message, gameSession, guildPreference, db }) => {
+module.exports = ({ client, message, gameSessions, guildPreference, db }) => {
     let guess = cleanSongName(message.content);
+    let gameSession = gameSessions[message.guild.id];
     if (gameSession.getSong() && guess === cleanSongName(gameSession.getSong())) {
         // this should be atomic
         let userTag = getUserIdentifier(message.author);

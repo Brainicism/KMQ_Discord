@@ -2,7 +2,8 @@ const { sendSongMessage, disconnectVoiceConnection } = require("../helpers/utils
 const GREEN = 0x32CD32;
 
 module.exports = {
-    call: ({ client, gameSession, message }) => {
+    call: ({ client, gameSessions, message }) => {
+        let gameSession = gameSessions[message.guild.id];
         if (!gameSession.scoreboard.isEmpty()) {
             if (gameSession.gameInSession()) {
                 sendSongMessage(message, gameSession, true);
@@ -23,6 +24,6 @@ module.exports = {
             });
         }
         disconnectVoiceConnection(client, message);
-        gameSession.endGame();
+        delete gameSessions[message.guild.id];
     }
 }
