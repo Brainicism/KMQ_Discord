@@ -1,4 +1,4 @@
-const DEFAULT_BOT_PREFIX = "!";
+const DEFAULT_BOT_PREFIX = ",";
 module.exports = {
     call: ({ message, parsedMessage, guildPreference, db }) => {
         guildPreference.setBotPrefix(parsedMessage.components[0], db);
