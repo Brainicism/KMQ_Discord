@@ -3,7 +3,7 @@ const { sendSongMessage, disconnectVoiceConnection } = require("../helpers/utils
 module.exports = {
     call: ({ gameSessions, client, message }) => {
         let gameSession = gameSessions[message.guild.id];
-        if (gameSession.gameInSession()) {
+        if (gameSession && gameSession.gameInSession()) {
             sendSongMessage(message, gameSession, true);
             disconnectVoiceConnection(client, message);
             gameSession.endRound();

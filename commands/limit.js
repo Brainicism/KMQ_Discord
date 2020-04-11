@@ -1,7 +1,7 @@
 const DEFAULT_LIMIT = 500;
 module.exports = {
-    call: ({ message, parsedMessage, guildPreference }) => {
-        guildPreference.setLimit(parseInt(parsedMessage.components[0]));
+    call: ({ message, parsedMessage, guildPreference, db }) => {
+        guildPreference.setLimit(parseInt(parsedMessage.components[0]), db);
         message.channel.send(`The limit is \`${guildPreference.getLimit()}\`.`);
     },
     validations: {

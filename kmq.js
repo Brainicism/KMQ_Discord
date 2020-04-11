@@ -18,14 +18,7 @@ client.on("ready", () => {
 
 client.on("message", (message) => {
     if (message.author.equals(client.user) || message.author.bot) return;
-    if (!guildPreferences[message.guild.id]) {
-        guildPreferences[message.guild.id] = new GuildPreference();
-        let guildPreferencesInsert = `INSERT INTO guildPreferences VALUES(?, ?)`;
-        db.query(guildPreferencesInsert, [message.guild.id, JSON.stringify(guildPreferences[message.guild.id])]);
-    }
-
-    let guildPreference = guildPreferences[message.guild.id];
-
+    let guildPreference = getGuildPreference(guildPreferences, message.guild.id);
     let botPrefix = guildPreference.getBotPrefix();
     let parsedMessage = parseMessage(message.content, botPrefix) || null;
 
@@ -41,8 +34,6 @@ client.on("message", (message) => {
                 parsedMessage,
                 botPrefix
             });
-            let guildPreferencesUpdate = `UPDATE guildPreferences SET guildPreference = ? WHERE guildID = ?;`;
-            db.query(guildPreferencesUpdate, [JSON.stringify(guildPreference), message.guild.id]);
         }
     }
     else {
@@ -70,6 +61,15 @@ client.on("voiceStateUpdate", (oldState, newState) => {
     }
 });
 
+const getGuildPreference = (guildPreferences, guildID) => {
+    if (!guildPreferences[guildID]) {
+        guildPreferences[guildID] = new GuildPreference(guildID);
+        let guildPreferencesInsert = `INSERT INTO guild_preferences VALUES(?, ?)`;
+        db.query(guildPreferencesInsert, [guildID, JSON.stringify(guildPreferences[guildID])]);
+    }
+    return guildPreferences[guildID];
+}
+
 const parseMessage = (message, botPrefix) => {
     if (message.charAt(0) !== botPrefix) return null;
     let components = message.split(" ");
@@ -94,21 +94,17 @@ const parseMessage = (message, botPrefix) => {
         console.error("No bot token set. Please update config.json!")
         process.exit(1);
     }
-    let guildPreferencesTableCreation = `CREATE TABLE IF NOT EXISTS guildPreferences(
-        guildID TEXT NOT NULL,
-        guildPreference JSON NOT NULL
+    let guildPreferencesTableCreation = `CREATE TABLE IF NOT EXISTS guild_preferences(
+        guild_id TEXT NOT NULL,
+        guild_preference JSON NOT NULL
     );`;
 
-    db.query(guildPreferencesTableCreation).catch((err) => {
-        console.error(err);
-    });
+    await db.query(guildPreferencesTableCreation);
 
-    db.query(`SELECT * FROM guildPreferences`, (results, fields) => {
-        fields.forEach((field) => {
-            guildPreferences[field.guildID] = new GuildPreference(JSON.parse(field.guildPreference));
-        });
-    }).catch((err) => {
-        console.error(err);
+    let fields = await db.query(`SELECT * FROM guild_preferences`);
+
+    fields.forEach((field) => {
+        guildPreferences[field.guild_id] = new GuildPreference(field.guild_id, JSON.parse(field.guild_preference));
     });
 
     client.login(config.botToken);

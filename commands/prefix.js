@@ -1,6 +1,6 @@
 module.exports = {
-    call: ({ message, parsedMessage, guildPreference }) => {
-        guildPreference.setBotPrefix(parsedMessage.components[0]);
+    call: ({ message, parsedMessage, guildPreference, db }) => {
+        guildPreference.setBotPrefix(parsedMessage.components[0], db);
         message.channel.send(`The prefix is \`${guildPreference.getBotPrefix()}\`.`);
     },
     validations: {

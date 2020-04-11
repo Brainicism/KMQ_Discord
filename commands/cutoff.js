@@ -1,7 +1,7 @@
 const BEGINNING_SEARCH_YEAR = 2008;
 module.exports = {
-    call: ({ message, parsedMessage, guildPreference }) => {
-        guildPreference.setBeginningCutoffYear(parseInt(parsedMessage.components[0]));
+    call: ({ message, parsedMessage, guildPreference, db }) => {
+        guildPreference.setBeginningCutoffYear(parseInt(parsedMessage.components[0]), db);
         message.channel.send(`The new cutoff year is \`${guildPreference.getBeginningCutoffYear()}\`.`);
     },
     validations: {

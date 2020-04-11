@@ -9,7 +9,7 @@ const RED = 0xE74C3C;
 module.exports = {
     call: ({ gameSessions, guildPreference, client, message, db }) => {
         let gameSession = gameSessions[message.guild.id];
-        if (!gameSession.gameInSession() || !areUserAndBotInSameVoiceChannel(message)) {
+        if (!gameSession || !gameSession.gameInSession() || !areUserAndBotInSameVoiceChannel(message)) {
             return;
         }
         gameSession.userSkipped(message.author);
