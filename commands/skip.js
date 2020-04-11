@@ -7,8 +7,9 @@ const {
 const RED = 0xE74C3C;
 
 module.exports = {
-    call: ({ gameSession, client, message, db }) => {
-        if (!gameSession.gameInSession() || !areUserAndBotInSameVoiceChannel(message)) {
+    call: ({ gameSessions, guildPreference, client, message, db }) => {
+        let gameSession = gameSessions[message.guild.id];
+        if (!gameSession || !gameSession.gameInSession() || !areUserAndBotInSameVoiceChannel(message)) {
             return;
         }
         gameSession.userSkipped(message.author);
@@ -16,7 +17,7 @@ module.exports = {
             sendSkipMessage(message, gameSession);
             sendSongMessage(message, gameSession, false);
             gameSession.endRound();
-            startGame(gameSession, db, message);
+            startGame(gameSession, guildPreference, db, message);
         }
         else {
             sendSkipNotification(message, gameSession);

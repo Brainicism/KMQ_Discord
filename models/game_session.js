@@ -1,9 +1,4 @@
 const Scoreboard = require("./scoreboard.js");
-const BEGINNING_SEARCH_YEAR = require("../commands/cutoff").BEGINNING_SEARCH_YEAR;
-const DEFAULT_LIMIT = require("../commands/limit").DEFAULT_LIMIT;
-const GENDER = require("../commands/gender").GENDER;
-const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.FEMALE], limit: DEFAULT_LIMIT };
-const DEFAULT_BOT_PREFIX = "!";
 const { getUserIdentifier, areUserAndBotInSameVoiceChannel } = require("../helpers/utils.js");
 module.exports = class GameSession {
 
@@ -12,9 +7,7 @@ module.exports = class GameSession {
         this._artist = null;
         this._link = null;
         this._inSession = false;
-        this._gameOptions = DEFAULT_OPTIONS;
         this._skippers = new Set();
-        this._botPrefix = DEFAULT_BOT_PREFIX;
         this.scoreboard = new Scoreboard();
     }
 
@@ -33,11 +26,6 @@ module.exports = class GameSession {
         this._skippers.clear();
     }
 
-    endGame() {
-        this.endRound();
-        this.scoreboard = new Scoreboard();
-    }
-
     getSong() {
         return this._song;
     }
@@ -54,60 +42,11 @@ module.exports = class GameSession {
         return this._inSession;
     }
 
-    setLimit(limit) {
-        this._gameOptions.limit = limit;
-    }
-
-    resetLimit() {
-        this._gameOptions.limit = DEFAULT_LIMIT;
-    }
-
-    getLimit() {
-        return this._gameOptions.limit;
-    }
-    setBeginningCutoffYear(year) {
-        this._gameOptions.beginningYear = year;
-    }
-
-    resetBeginningCutoffYear() {
-        this._gameOptions.beginningYear = BEGINNING_SEARCH_YEAR;
-    }
-
-    getBeginningCutoffYear() {
-        return this._gameOptions.beginningYear;
-    }
-
-    getDefaultBeginningCutoffYear() {
-        return BEGINNING_SEARCH_YEAR;
-    }
-
-    resetGender() {
-        this._gameOptions.gender = [GENDER.FEMALE];
-    }
-
-    setGender(genderArr) {
-        let tempArr = genderArr.map(gender => gender.toLowerCase());
-        this._gameOptions.gender = [...new Set(tempArr)];
-        return this._gameOptions.gender;
-    }
-
-    getSQLGender() {
-        return this._gameOptions.gender.join(",");
-    }
-
     userSkipped(user) {
         this._skippers.add(user);
     }
 
     getNumSkippers() {
         return this._skippers.size;
-    }
-
-    setBotPrefix(prefix) {
-        this._botPrefix = prefix;
-    }
-
-    getBotPrefix() {
-        return this._botPrefix;
     }
 };

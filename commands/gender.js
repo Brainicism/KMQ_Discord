@@ -1,7 +1,7 @@
 const GENDER = { MALE: "male", FEMALE: "female", COED: "coed" }
 module.exports = {
-    call: ({ gameSession, message, parsedMessage }) => {
-        let selectedGenderArray = gameSession.setGender(parsedMessage.components);
+    call: ({ guildPreference, message, parsedMessage, db }) => {
+        let selectedGenderArray = guildPreference.setGender(parsedMessage.components, db);
         if (selectedGenderArray) {
             let selectedGenderStr = "";
             for (let i = 0; i < selectedGenderArray.length; i++) {

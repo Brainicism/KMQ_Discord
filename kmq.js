@@ -2,7 +2,7 @@ const Discord = require("discord.js");
 const config = require("./config.json");
 const mysql = require("promise-mysql");
 
-const GameSession = require("./models/game_session.js");
+const GuildPreference = require("./models/guild_preference.js");
 const fs = require("fs");
 const client = new Discord.Client();
 const guessSong = require("./helpers/guess_song");
@@ -10,6 +10,7 @@ const validate = require("./helpers/validate");
 let db;
 let commands = {};
 let gameSessions = {};
+let guildPreferences = {};
 
 client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -17,22 +18,28 @@ client.on("ready", () => {
 
 client.on("message", (message) => {
     if (message.author.equals(client.user) || message.author.bot) return;
-    if (!gameSessions[message.guild.id]) {
-        gameSessions[message.guild.id] = new GameSession();
-    }
-
-    let gameSession = gameSessions[message.guild.id];
-    let botPrefix = gameSession.getBotPrefix();
+    let guildPreference = getGuildPreference(guildPreferences, message.guild.id);
+    let botPrefix = guildPreference.getBotPrefix();
     let parsedMessage = parseMessage(message.content, botPrefix) || null;
 
     if (parsedMessage && commands[parsedMessage.action]) {
         let command = commands[parsedMessage.action];
         if (validate(message, parsedMessage, command.validations, botPrefix)) {
-            command.call({ client, gameSession, message, db, parsedMessage, botPrefix })
+            command.call({
+                client,
+                gameSessions,
+                guildPreference,
+                message,
+                db,
+                parsedMessage,
+                botPrefix
+            });
         }
     }
     else {
-        guessSong({ client, message, gameSession, db });
+        if (gameSessions[message.guild.id]) {
+            guessSong({ client, message, gameSessions, db });
+        }
     }
 });
 
@@ -53,6 +60,15 @@ client.on("voiceStateUpdate", (oldState, newState) => {
         }
     }
 });
+
+const getGuildPreference = (guildPreferences, guildID) => {
+    if (!guildPreferences[guildID]) {
+        guildPreferences[guildID] = new GuildPreference(guildID);
+        let guildPreferencesInsert = `INSERT INTO guild_preferences VALUES(?, ?)`;
+        db.query(guildPreferencesInsert, [guildID, JSON.stringify(guildPreferences[guildID])]);
+    }
+    return guildPreferences[guildID];
+}
 
 const parseMessage = (message, botPrefix) => {
     if (message.charAt(0) !== botPrefix) return null;
@@ -78,6 +94,18 @@ const parseMessage = (message, botPrefix) => {
         console.error("No bot token set. Please update config.json!")
         process.exit(1);
     }
+    let guildPreferencesTableCreation = `CREATE TABLE IF NOT EXISTS guild_preferences(
+        guild_id TEXT NOT NULL,
+        guild_preference JSON NOT NULL
+    );`;
+
+    await db.query(guildPreferencesTableCreation);
+
+    let fields = await db.query(`SELECT * FROM guild_preferences`);
+
+    fields.forEach((field) => {
+        guildPreferences[field.guild_id] = new GuildPreference(field.guild_id, JSON.parse(field.guild_preference));
+    });
 
     client.login(config.botToken);
 
