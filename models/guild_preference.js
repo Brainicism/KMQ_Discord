@@ -1,8 +1,9 @@
 const BEGINNING_SEARCH_YEAR = require("../commands/cutoff").BEGINNING_SEARCH_YEAR;
-const DEFAULT_BOT_PREFIX = "!";
+const DEFAULT_BOT_PREFIX = require("../commands/prefix").DEFAULT_BOT_PREFIX;
 const DEFAULT_LIMIT = require("../commands/limit").DEFAULT_LIMIT;
+const DEFAULT_VOLUME = require("../commands/volume").DEFAULT_VOLUME;
 const GENDER = require("../commands/gender").GENDER;
-const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.FEMALE], limit: DEFAULT_LIMIT };
+const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.FEMALE], limit: DEFAULT_LIMIT, volume: DEFAULT_VOLUME };
 
 module.exports = class GuildPreference {
 
@@ -72,6 +73,15 @@ module.exports = class GuildPreference {
 
     getBotPrefix() {
         return this._botPrefix;
+    }
+
+    setVolume(volume, db) {
+        this._gameOptions.volume = volume / 500;
+        this.updateGuildPreferences(db);
+    }
+
+    getVolume() {
+        return this._gameOptions.volume;
     }
 
     updateGuildPreferences(db) {

@@ -68,6 +68,28 @@
             "description": "Vote to skip the current song. A song is skipped when majority of participants vote to skip it.",
             "usage": "!skip",
             "arguments": []
+        },
+        {
+            "name": "prefix",
+            "description": "Set the character used to summon the bot.",
+            "usage": "!prefix [character]",
+            "arguments": [
+                {
+                    "name": "character",
+                    "description": "You can only use a single character as the bot prefix. The default prefix is `!`."
+                }
+            ]
+        },
+        {
+            "name": "volume",
+            "description": "Set the volume at which the bot will output your music.",
+            "usage": "!volume [percentage]",
+            "arguments": [
+                {
+                    "name": "percentage",
+                    "description": "A valid volume value is from 1 to 100. You do not need to include the percentage symbol. The default volume is 50%."
+                }
+            ]
         }
     ]
 }
