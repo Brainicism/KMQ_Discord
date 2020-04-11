@@ -91,11 +91,11 @@ module.exports = {
 
 const playSong = (gameSession, guildPreference, db, message) => {
     let voiceChannel = message.member.voiceChannel;
-    const streamOptions = { volume: 0.1, bitrate: 192000 };
+    const streamOptions = { volume: guildPreference.getVolume(), bitrate: 192000 };
     voiceChannel.join().then(connection => {
         let options = { filter: "audioonly", quality: "highest" };
         const stream = ytdl(gameSession.getLink(), options);
-        const dispatcher = connection.playStream(stream, streamOptions);
+        gameSession.dispatcher = connection.playStream(stream, streamOptions);
         stream.on('end', () => {
             sendSongMessage(message, gameSession, true);
             gameSession.endRound();
