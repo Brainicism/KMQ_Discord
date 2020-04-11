@@ -38,7 +38,7 @@ client.on("message", (message) => {
     }
     else {
         if (gameSessions[message.guild.id]) {
-            guessSong({ client, message, gameSessions, db });
+            guessSong({ client, message, gameSessions, guildPreference, db });
         }
     }
 });
