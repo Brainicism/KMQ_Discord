@@ -17,7 +17,7 @@ A kpop game in Discord, using [Aoimirai's database](http://www.aoimirai.net/kpop
 4. `npm start` to start the KMQ bot
 
 # Gameplay
-Gameplay is initiated via `!random`, which invites the bot to a voice channel. The bot will begin to play a random kpop song based on the game options. Users can guess the song by typing the name of the song. 
+Gameplay is initiated via `,random`, which invites the bot to a voice channel. The bot will begin to play a random kpop song based on the game options. Users can guess the song by typing the name of the song. 
 
 ![alt text](/images/scoreboard.png)
 
@@ -26,4 +26,6 @@ Supported game options include:
 - `limit`: Set a maximum number of results in the song query. This effectively sets the 'Top X number of songs' based on the selected filters.
 - `gender`: Choose the gender of the artists you'd like to hear from.
 
-Full command list can be found using `!help`
+Full command list can be found using `,help`
+
+You can invite the bot [using this link](https://discordapp.com/oauth2/authorize?client_id=508759831755096074&scope=bot&permissions=3165184).
