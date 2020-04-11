@@ -5,9 +5,8 @@ const { execSync } = require("child_process");
 const unzipper = require("unzipper")
 const mysql = require("promise-mysql");
 const config = require("../config.json");
-
+const rmfr = require('rmfr');
 const fileUrl = "http://kpop.aoimirai.net/download.php";
-
 
 //TODO: this is probably not how you use promises fix later
 
@@ -20,7 +19,8 @@ let options = {
     }
 }
 const kmqTempDir = "/tmp/kmq";
-mkdirp(kmqTempDir)
+rmfr(kmqTempDir);
+mkdirp(kmqTempDir);
 mkdirp(`${kmqTempDir}/sql`)
 const output = `${kmqTempDir}/bootstrap.zip`
 
@@ -71,5 +71,6 @@ let main = async function() {
             })
         })
         .catch(e => console.log(e))
-}
+};
+
 main()
