@@ -15,7 +15,7 @@ module.exports = {
         gameSession.userSkipped(message.author);
         if (isSkipMajority(message, gameSession)) {
             sendSkipMessage(message, gameSession);
-            sendSongMessage(message, gameSession, false);
+            sendSongMessage(message, gameSession, true);
             gameSession.endRound();
             startGame(gameSession, guildPreference, db, message);
         }
