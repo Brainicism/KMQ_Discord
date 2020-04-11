@@ -1,4 +1,4 @@
-DEFAULT_VOLUME = 0.1;
+const DEFAULT_VOLUME = 0.1;
 module.exports = {
     call: ({ message, parsedMessage, gameSessions, guildPreference, db }) => {
         guildPreference.setVolume(parseInt(parsedMessage.components[0]), db);
