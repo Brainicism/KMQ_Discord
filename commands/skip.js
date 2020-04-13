@@ -53,7 +53,7 @@ function sendSkipMessage(message, gameSession) {
             description: `${gameSession.getNumSkippers()}/${getSkipsRequired(message)} skips achieved, skipping...`
         }
     })
-    .then((message) => message.delete(5000));
+    .then((message) => message.delete({ timeout: 5000 }));
 }
 
 function isSkipMajority(message, gameSession) {

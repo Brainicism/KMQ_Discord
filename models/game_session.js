@@ -1,5 +1,5 @@
 const Scoreboard = require("./scoreboard.js");
-const { getUserIdentifier, areUserAndBotInSameVoiceChannel } = require("../helpers/utils.js");
+const { getUserIdentifier } = require("../helpers/utils.js");
 module.exports = class GameSession {
 
     constructor() {

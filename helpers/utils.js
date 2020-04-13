@@ -58,7 +58,7 @@ module.exports = {
         })
     },
     disconnectVoiceConnection: (client, message) => {
-        let voiceConnection = client.voiceConnections.get(message.guild.id);
+        let voiceConnection = client.voice.connections.get(message.guild.id);
         if (voiceConnection) {
             voiceConnection.disconnect();
             return;
@@ -81,22 +81,22 @@ module.exports = {
         return cleanName;
     },
     areUserAndBotInSameVoiceChannel: (message) => {
-        return message.member.voiceChannel === message.guild.voiceConnection.channel;
+        return message.member.voice.channel === message.guild.voice.channel;
     },
     getNumParticipants: (message) => {
         // Don't include the bot as a participant
-        return message.member.voiceChannel.members.size - 1;
+        return message.member.voice.channel.members.size - 1;
     }
 }
 
 const playSong = (gameSession, guildPreference, db, message) => {
-    let voiceChannel = message.member.voiceChannel;
-    const streamOptions = { volume: guildPreference.getVolume(), bitrate: 192000 };
+    let voiceChannel = message.member.voice.channel;
+    const streamOptions = { volume: guildPreference.getVolume(), bitrate: voiceChannel.bitrate };
     voiceChannel.join().then(connection => {
         let options = { filter: "audioonly", quality: "highest" };
         const stream = ytdl(gameSession.getLink(), options);
-        gameSession.dispatcher = connection.playStream(stream, streamOptions);
-        stream.on('end', () => {
+        gameSession.dispatcher = connection.play(stream, streamOptions);
+        stream.on('finish', () => {
             sendSongMessage(message, gameSession, true);
             gameSession.endRound();
             startGame(gameSession, guildPreference, db, message);
