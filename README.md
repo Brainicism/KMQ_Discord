@@ -7,7 +7,7 @@ A kpop game in Discord, using [Aoimirai's database](http://www.aoimirai.net/kpop
 ## Prerequisites
 - MySQL (tested on 5.7)
     - add `sql-mode=""` under `[mysqld]` in `my.cnf` (required due to the way the Aoimirai database dump handles null values)
-- NodeJS (tested on 8.8.1)
+- NodeJS (Requires at least v12)
 
 ## Setup
 ------------
