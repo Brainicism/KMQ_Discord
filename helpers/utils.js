@@ -93,10 +93,10 @@ const playSong = (gameSession, guildPreference, db, message) => {
     let voiceChannel = message.member.voice.channel;
     const streamOptions = { volume: guildPreference.getVolume(), bitrate: voiceChannel.bitrate };
     voiceChannel.join().then(connection => {
-        let options = { filter: "audioonly", quality: "highest" };
+        let options = { filter: "audioonly", quality: "highest", highWaterMark: 1 << 25 };
         const stream = ytdl(gameSession.getLink(), options);
         gameSession.dispatcher = connection.play(stream, streamOptions);
-        stream.on('finish', () => {
+        gameSession.dispatcher.on('finish', () => {
             sendSongMessage(message, gameSession, true);
             gameSession.endRound();
             startGame(gameSession, guildPreference, db, message);
