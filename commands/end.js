@@ -7,10 +7,11 @@ module.exports = {
         if (!gameSession) {
             return;
         }
+        if (gameSession.gameInSession()) {
+            sendSongMessage(message, gameSession, true);
+        }
+
         if (!gameSession.scoreboard.isEmpty()) {
-            if (gameSession.gameInSession()) {
-                sendSongMessage(message, gameSession, true);
-            }
             message.channel.send({
                 embed: {
                     color: GREEN,
