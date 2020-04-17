@@ -9,9 +9,6 @@ module.exports = class GameSession {
         this._inSession = false;
         this._skippers = new Set();
         this.scoreboard = new Scoreboard();
-
-        // dispatcher initalized in utils/playSong
-        this.dispatcher = null;
     }
 
     startRound(song, artist, link) {
@@ -27,7 +24,6 @@ module.exports = class GameSession {
         this._link = null;
         this._inSession = false;
         this._skippers.clear();
-        this.dispatcher = null;
     }
 
     getSong() {
