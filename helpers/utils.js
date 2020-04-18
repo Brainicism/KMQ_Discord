@@ -95,7 +95,12 @@ module.exports = {
 const playSong = (gameSession, guildPreference, db, message) => {
     let voiceChannel = message.member.voice.channel;
     const streamOptions = {
-        volume: guildPreference.getVolume(),
+        volume: guildPreference.getStreamVolume(),
+        bitrate: voiceChannel.bitrate
+    };
+
+    const cacheStreamOptions = {
+        volume: guildPreference.getCachedStreamVolume(),
         bitrate: voiceChannel.bitrate
     };
 
@@ -109,9 +114,8 @@ const playSong = (gameSession, guildPreference, db, message) => {
     };
 
     const songLocation = `${CACHE_DIR}/${gameSession.getLink()}.mp3`;
-    let isSongCached = true;
     if (!fs.existsSync(songLocation)) {
-        isSongCached = false;
+        gameSession.isSongCached = false;
         const tempLocation = `${songLocation}.part`;
         if (!fs.existsSync(tempLocation)) {
             let cacheStream = fs.createWriteStream(tempLocation);
@@ -128,8 +132,8 @@ const playSong = (gameSession, guildPreference, db, message) => {
         // because it terminates the download when the dispatcher is destroyed
         // (i.e when a song is skipped)
         gameSession.dispatcher = connection.play(
-            isSongCached ? songLocation : ytdl(gameSession.getLink(), ytdlOptions),
-            streamOptions);
+            gameSession.isSongCached ? songLocation : ytdl(gameSession.getLink(), ytdlOptions),
+            gameSession.isSongCached ? cacheStreamOptions : streamOptions);
         gameSession.dispatcher.on('finish', () => {
             sendSongMessage(message, gameSession, true);
             gameSession.endRound();

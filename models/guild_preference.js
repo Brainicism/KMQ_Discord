@@ -76,12 +76,20 @@ module.exports = class GuildPreference {
     }
 
     setVolume(volume, db) {
-        this._gameOptions.volume = volume / 500;
+        this._gameOptions.volume = volume;
         this.updateGuildPreferences(db);
     }
 
     getVolume() {
         return this._gameOptions.volume;
+    }
+
+    getStreamVolume() {
+        return this.getVolume() / 500;
+    }
+
+    getCachedStreamVolume() {
+        return this.getVolume() / 150;
     }
 
     updateGuildPreferences(db) {
