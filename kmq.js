@@ -1,12 +1,14 @@
 const Discord = require("discord.js");
-const config = require("./config.json");
 const mysql = require("promise-mysql");
 
-const GuildPreference = require("./models/guild_preference.js");
 const fs = require("fs");
 const client = new Discord.Client();
+
+const config = require("./config.json");
+const GuildPreference = require("./models/guild_preference");
 const guessSong = require("./helpers/guess_song");
 const validate = require("./helpers/validate");
+const { clearPartiallyCachedSongs } = require("./helpers/utils");
 let db;
 let commands = {};
 let gameSessions = {};
@@ -118,4 +120,6 @@ const parseMessage = (message, botPrefix) => {
             commands[commandName] = command;
         });
     });
+
+    clearPartiallyCachedSongs();
 })();

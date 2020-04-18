@@ -1,5 +1,6 @@
 {
     "botToken": "YOUR BOT TOKEN HERE",
     "dbUser": "root",
-    "dbPassword": ""
+    "dbPassword": "",
+    "songCacheDir": "./.cache"
 }

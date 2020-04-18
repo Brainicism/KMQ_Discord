@@ -1,7 +1,10 @@
 const RED = 0xE74C3C;
+const SONG_CACHE_DIR = require("../config.json").songCacheDir;
 const ytdl = require("ytdl-core");
 const fetchVideoInfo = require("youtube-info");
-const hangulRomanization = require('hangul-romanization');
+const hangulRomanization = require("hangul-romanization");
+const fs = require("fs");
+
 
 const startGame = (gameSession, guildPreference, db, message) => {
     if (gameSession.gameInSession()) {
@@ -36,9 +39,9 @@ const sendSongMessage = (message, gameSession, isForfeit) => {
                 icon_url: isForfeit ? null : message.author.avatarURL
             },
             title: `"${gameSession.getSong()}" - ${gameSession.getArtist()}`,
-            description: `https://youtube.com/watch?v=${gameSession.getLink()}\n\n**Scoreboard**`,
+            description: `https://youtube.com/watch?v=${gameSession.getVideoID()}\n\n**Scoreboard**`,
             image: {
-                url: `https://img.youtube.com/vi/${gameSession.getLink()}/hqdefault.jpg`
+                url: `https://img.youtube.com/vi/${gameSession.getVideoID()}/hqdefault.jpg`
             },
             fields: gameSession.scoreboard.getScoreboard()
         }
@@ -86,16 +89,78 @@ module.exports = {
     getNumParticipants: (message) => {
         // Don't include the bot as a participant
         return message.member.voice.channel.members.size - 1;
+    },
+    clearPartiallyCachedSongs: () => {
+        if (!fs.existsSync(SONG_CACHE_DIR)) {
+            return;
+        }
+        fs.readdir(SONG_CACHE_DIR, (error, files) => {
+            if (error) {
+                return console.error(error);
+            }
+
+            const endingWithPartRegex = new RegExp('\\.part$');
+            const partFiles = files.filter((file) => file.match(endingWithPartRegex));
+            partFiles.forEach((partFile) => {
+                fs.unlink(`${SONG_CACHE_DIR}/${partFile}`, (err) => {
+                    if (err) {
+                        console.error(err);
+                    }
+                })
+            })
+            if (partFiles.length) {
+                console.log(`${partFiles.length} stale cached songs deleted.`);
+            }
+        });
     }
 }
 
 const playSong = (gameSession, guildPreference, db, message) => {
     let voiceChannel = message.member.voice.channel;
-    const streamOptions = { volume: guildPreference.getVolume(), bitrate: voiceChannel.bitrate };
+    const streamOptions = {
+        volume: guildPreference.getStreamVolume(),
+        bitrate: voiceChannel.bitrate
+    };
+
+    const cacheStreamOptions = {
+        volume: guildPreference.getCachedStreamVolume(),
+        bitrate: voiceChannel.bitrate
+    };
+
+    if (!fs.existsSync(SONG_CACHE_DIR)) {
+        fs.mkdirSync(SONG_CACHE_DIR)
+    }
+
+    const ytdlOptions = {
+        filter: "audioonly",
+        quality: "highest"
+    };
+
+    const cachedSongLocation = `${SONG_CACHE_DIR}/${gameSession.getVideoID()}.mp3`;
+    gameSession.isSongCached = fs.existsSync(cachedSongLocation);
+    if (!gameSession.isSongCached) {
+        const tempLocation = `${cachedSongLocation}.part`;
+        if (!fs.existsSync(tempLocation)) {
+            let cacheStream = fs.createWriteStream(tempLocation);
+            ytdl(gameSession.getVideoID(), ytdlOptions)
+                .pipe(cacheStream);
+            cacheStream.on('finish', () => {
+                fs.rename(tempLocation, cachedSongLocation, (error) => {
+                    if (error) {
+                        console.error(error);
+                    }
+                })
+            })
+        }
+    }
+
     voiceChannel.join().then(connection => {
-        let options = { filter: "audioonly", quality: "highest", highWaterMark: 1 << 25 };
-        const stream = ytdl(gameSession.getLink(), options);
-        gameSession.dispatcher = connection.play(stream, streamOptions);
+        // We are unable to pipe the above ytdl stream into Discord.js's play
+        // because it terminates the download when the dispatcher is destroyed
+        // (i.e when a song is skipped)
+        gameSession.dispatcher = connection.play(
+            gameSession.isSongCached ? cachedSongLocation : ytdl(gameSession.getVideoID(), ytdlOptions),
+            gameSession.isSongCached ? cacheStreamOptions : streamOptions);
         gameSession.dispatcher.on('finish', () => {
             sendSongMessage(message, gameSession, true);
             gameSession.endRound();
