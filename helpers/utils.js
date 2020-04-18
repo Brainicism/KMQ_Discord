@@ -89,6 +89,29 @@ module.exports = {
     getNumParticipants: (message) => {
         // Don't include the bot as a participant
         return message.member.voice.channel.members.size - 1;
+    },
+    clearPartiallyCachedSongs: () => {
+        if (!fs.existsSync(SONG_CACHE_DIR)) {
+            return;
+        }
+        fs.readdir(SONG_CACHE_DIR, (error, files) => {
+            if (error) {
+                return console.error(error);
+            }
+
+            const endingWithPartRegex = new RegExp('\\.part$');
+            const partFiles = files.filter((file) => file.match(endingWithPartRegex));
+            partFiles.forEach((partFile) => {
+                fs.unlink(`${SONG_CACHE_DIR}/${partFile}`, (err) => {
+                    if (err) {
+                        console.error(err);
+                    }
+                })
+            })
+            if (partFiles.length) {
+                console.log(`${partFiles.length} stale cached songs deleted.`);
+            }
+        });
     }
 }
 
@@ -122,7 +145,11 @@ const playSong = (gameSession, guildPreference, db, message) => {
             ytdl(gameSession.getVideoID(), ytdlOptions)
                 .pipe(cacheStream);
             cacheStream.on('finish', () => {
-                fs.renameSync(tempLocation, cachedSongLocation)
+                fs.rename(tempLocation, cachedSongLocation, (error) => {
+                    if (error) {
+                        console.error(error);
+                    }
+                })
             })
         }
     }
