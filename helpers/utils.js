@@ -1,5 +1,5 @@
 const RED = 0xE74C3C;
-const CACHE_DIR = "./.cache";
+const SONG_CACHE_DIR = require("../config.json").songCacheDir;
 const ytdl = require("ytdl-core");
 const fetchVideoInfo = require("youtube-info");
 const hangulRomanization = require("hangul-romanization");
@@ -39,9 +39,9 @@ const sendSongMessage = (message, gameSession, isForfeit) => {
                 icon_url: isForfeit ? null : message.author.avatarURL
             },
             title: `"${gameSession.getSong()}" - ${gameSession.getArtist()}`,
-            description: `https://youtube.com/watch?v=${gameSession.getLink()}\n\n**Scoreboard**`,
+            description: `https://youtube.com/watch?v=${gameSession.getVideoID()}\n\n**Scoreboard**`,
             image: {
-                url: `https://img.youtube.com/vi/${gameSession.getLink()}/hqdefault.jpg`
+                url: `https://img.youtube.com/vi/${gameSession.getVideoID()}/hqdefault.jpg`
             },
             fields: gameSession.scoreboard.getScoreboard()
         }
@@ -104,8 +104,8 @@ const playSong = (gameSession, guildPreference, db, message) => {
         bitrate: voiceChannel.bitrate
     };
 
-    if (!fs.existsSync(CACHE_DIR)) {
-        fs.mkdirSync(dir)
+    if (!fs.existsSync(SONG_CACHE_DIR)) {
+        fs.mkdirSync(SONG_CACHE_DIR)
     }
 
     const ytdlOptions = {
@@ -113,16 +113,16 @@ const playSong = (gameSession, guildPreference, db, message) => {
         quality: "highest"
     };
 
-    const songLocation = `${CACHE_DIR}/${gameSession.getLink()}.mp3`;
-    if (!fs.existsSync(songLocation)) {
-        gameSession.isSongCached = false;
-        const tempLocation = `${songLocation}.part`;
+    const cachedSongLocation = `${SONG_CACHE_DIR}/${gameSession.getVideoID()}.mp3`;
+    gameSession.isSongCached = fs.existsSync(cachedSongLocation);
+    if (!gameSession.isSongCached) {
+        const tempLocation = `${cachedSongLocation}.part`;
         if (!fs.existsSync(tempLocation)) {
             let cacheStream = fs.createWriteStream(tempLocation);
-            ytdl(gameSession.getLink(), ytdlOptions)
+            ytdl(gameSession.getVideoID(), ytdlOptions)
                 .pipe(cacheStream);
             cacheStream.on('finish', () => {
-                fs.renameSync(tempLocation, songLocation)
+                fs.renameSync(tempLocation, cachedSongLocation)
             })
         }
     }
@@ -132,7 +132,7 @@ const playSong = (gameSession, guildPreference, db, message) => {
         // because it terminates the download when the dispatcher is destroyed
         // (i.e when a song is skipped)
         gameSession.dispatcher = connection.play(
-            gameSession.isSongCached ? songLocation : ytdl(gameSession.getLink(), ytdlOptions),
+            gameSession.isSongCached ? cachedSongLocation : ytdl(gameSession.getVideoID(), ytdlOptions),
             gameSession.isSongCached ? cacheStreamOptions : streamOptions);
         gameSession.dispatcher.on('finish', () => {
             sendSongMessage(message, gameSession, true);

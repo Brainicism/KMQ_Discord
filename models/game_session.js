@@ -25,7 +25,7 @@ module.exports = class GameSession {
     endRound() {
         this._song = null;
         this._artist = null;
-        this._link = null;
+        this._videoID = null;
         this._inSession = false;
         this._skippers.clear();
         this.isSongCached = true;
@@ -39,7 +39,7 @@ module.exports = class GameSession {
         return this._artist;
     }
 
-    getLink() {
+    getVideoID() {
         return this._link;
     }
 
