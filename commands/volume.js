@@ -1,13 +1,14 @@
-const DEFAULT_VOLUME = 0.1;
+const DEFAULT_VOLUME = 50;
 module.exports = {
     call: ({ message, parsedMessage, gameSessions, guildPreference, db }) => {
         guildPreference.setVolume(parseInt(parsedMessage.components[0]), db);
         let gameSession = gameSessions[message.guild.id];
         if (gameSession && gameSession.dispatcher) {
-            gameSession.dispatcher.setVolume(guildPreference.getVolume());
+            gameSession.dispatcher.setVolume(
+            gameSession.isSongCached ? guildPreference.getCachedStreamVolume() : guildPreference.getStreamVolume()
+        );
         }
-        message.channel.send(`The volume is \`${guildPreference.getVolume() * 500}%\`.`);
-        // The internal max value volume is 0.2 (for now)
+        message.channel.send(`The volume is \`${guildPreference.getVolume()}%\`.`);
     },
     validations: {
         minArgCount: 1,
@@ -16,7 +17,7 @@ module.exports = {
             {
                 name: 'volume',
                 type: 'number',
-                minValue: 1,
+                minValue: 0,
                 maxValue: 100
             }
         ]

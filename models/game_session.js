@@ -9,6 +9,10 @@ module.exports = class GameSession {
         this._inSession = false;
         this._skippers = new Set();
         this.scoreboard = new Scoreboard();
+        this.isSongCached = true;
+
+        // dispatcher initalized in utils/playSong, used when changing volume
+        this.dispatcher = null;
     }
 
     startRound(song, artist, link) {
@@ -24,6 +28,7 @@ module.exports = class GameSession {
         this._link = null;
         this._inSession = false;
         this._skippers.clear();
+        this.isSongCached = true;
     }
 
     getSong() {
