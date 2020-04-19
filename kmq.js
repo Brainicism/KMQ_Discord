@@ -66,7 +66,7 @@ client.on("voiceStateUpdate", (oldState, newState) => {
 const getGuildPreference = (guildPreferences, guildID) => {
     if (!guildPreferences[guildID]) {
         guildPreferences[guildID] = new GuildPreference(guildID);
-        let guildPreferencesInsert = `INSERT INTO guild_preferences VALUES(?, ?)`;
+        let guildPreferencesInsert = `INSERT INTO kmq.guild_preferences VALUES(?, ?)`;
         db.query(guildPreferencesInsert, [guildID, JSON.stringify(guildPreferences[guildID])]);
     }
     return guildPreferences[guildID];
@@ -89,21 +89,20 @@ const parseMessage = (message, botPrefix) => {
     db = await mysql.createConnection({
         host: "localhost",
         user: config.dbUser,
-        password: config.dbPassword,
-        database: "kmq"
+        password: config.dbPassword
     });
     if (!config.botToken || config.botToken === "YOUR BOT TOKEN HERE") {
         console.error("No bot token set. Please update config.json!")
         process.exit(1);
     }
-    let guildPreferencesTableCreation = `CREATE TABLE IF NOT EXISTS guild_preferences(
+    let guildPreferencesTableCreation = `CREATE TABLE IF NOT EXISTS kmq.guild_preferences(
         guild_id TEXT NOT NULL,
         guild_preference JSON NOT NULL
     );`;
 
     await db.query(guildPreferencesTableCreation);
 
-    let fields = await db.query(`SELECT * FROM guild_preferences`);
+    let fields = await db.query(`SELECT * FROM kmq.guild_preferences`);
 
     fields.forEach((field) => {
         guildPreferences[field.guild_id] = new GuildPreference(field.guild_id, JSON.parse(field.guild_preference));

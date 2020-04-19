@@ -93,7 +93,7 @@ module.exports = class GuildPreference {
     }
 
     updateGuildPreferences(db) {
-        let guildPreferencesUpdate = `UPDATE guild_preferences SET guild_preference = ? WHERE guild_id = ?;`;
+        let guildPreferencesUpdate = `UPDATE kmq.guild_preferences SET guild_preference = ? WHERE guild_id = ?;`;
         db.query(guildPreferencesUpdate, [JSON.stringify(this), this._guildID]);
     }
 };
