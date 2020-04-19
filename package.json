@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "secret.js",
   "scripts": {
-    "seed": "node ./seed/seed_db.js",
+    "seed": "node seed/seed_db.js",
     "start": "node kmq.js"
   },
   "author": "",
