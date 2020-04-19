@@ -19,12 +19,12 @@ let options = {
     }
 }
 const kmqTempDir = "/tmp/kmq";
-rmfr(kmqTempDir);
-mkdirp(kmqTempDir);
-mkdirp(`${kmqTempDir}/sql`)
-const output = `${kmqTempDir}/bootstrap.zip`
 
-let main = async function() {
+let main = async function () {
+    await rmfr(kmqTempDir);
+    await mkdirp(kmqTempDir);
+    await mkdirp(`${kmqTempDir}/sql`)
+    const output = `${kmqTempDir}/bootstrap.zip`
     db = await mysql.createConnection({
         host: "localhost",
         user: config.dbUser,
