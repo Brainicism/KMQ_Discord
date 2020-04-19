@@ -16,9 +16,9 @@ const startGame = (gameSession, guildPreference, db, message) => {
         })
         return;
     }
-    let query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM kmq.app_kpop INNER JOIN kmq.app_kpop_group ON kmq.app_kpop.id_artist = kmq.app_kpop_group.id
+    let query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
     WHERE FIND_IN_SET(members, ?) AND dead = "n" AND publishedon >= "?-01-01" AND vtype = "main"
-    ORDER BY kmq.app_kpop.views DESC LIMIT ?;`;
+    ORDER BY kpop_videos.app_kpop.views DESC LIMIT ?;`;
     db.query(query, [guildPreference.getSQLGender(), guildPreference.getBeginningCutoffYear(), guildPreference.getLimit()])
     .then((result) => {
         let random = result[Math.floor(Math.random() * result.length)];
