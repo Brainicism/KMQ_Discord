@@ -58,13 +58,15 @@ let main = async function () {
         .then(async () => {
             return new Promise((resolve, reject) => {
                 fs.readdir(`${kmqTempDir}/sql`, async (err, files) => {
-                    console.log("Dropping KMQ database");
-                    await db.query("DROP DATABASE IF EXISTS kmq;");
-                    console.log("Creating KMQ database")
-                    await db.query("CREATE DATABASE kmq;");
-                    console.log("Seeding KMQ database");
-                    execSync(`mysql kmq < ${kmqTempDir}/sql/${files[0]}`)
+                    console.log("Dropping K-Pop video database");
+                    await db.query("DROP DATABASE IF EXISTS kpop_videos;");
+                    console.log("Creating K-Pop video database")
+                    await db.query("CREATE DATABASE kpop_videos;");
+                    console.log("Seeding K-Pop video database");
+                    execSync(`mysql kpop_videos < ${kmqTempDir}/sql/${files[0]}`)
                     console.log(`Imported database dump (${files[0]}) successfully`);
+                    console.log("Creating KMQ database");
+                    await db.query("CREATE DATABASE IF NOT EXISTS kmq");
                     //this is awful but idk why it won't end
                     process.exit();
                 })
