@@ -86,7 +86,8 @@ const parseMessage = (message, botPrefix) => {
 }
 
 (async () => {
-    db = await mysql.createConnection({
+    db = await mysql.createPool({
+        connectionLimit: 10,
         host: "localhost",
         user: config.dbUser,
         password: config.dbPassword
