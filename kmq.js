@@ -50,19 +50,18 @@ client.on("voiceStateUpdate", (oldState, newState) => {
     let newUserChannel = newState.channel;
     if (!newUserChannel) {
         let guildID = oldUserChannel.guild.id;
+        let gameSession = gameSessions[guildID];
         // User left voice channel, check if bot is only one left
         if (oldUserChannel.members.size === 1) {
             let voiceConnection = client.voice.connections.get(guildID);
             if (voiceConnection) {
                 voiceConnection.disconnect();
-                let gameSession = gameSessions[guildID];
                 gameSession.endRound();
                 return;
             }
         }
         // Bot was disconnected by another user
-        if (!oldUserChannel.members.find((user) => user === client)) {
-            let gameSession = gameSessions[guildID];
+        if (!oldUserChannel.members.has(client)) {
             gameSession.endRound();
             return;
         }
