@@ -3,6 +3,8 @@ KMQ-Bot
 
 A kpop game in Discord, using [Aoimirai's database](http://www.aoimirai.net/kpop/index.html) of songs. Test your reflexes by guessing the right song name before your friends!
 
+[![Discord Bots](https://top.gg/api/widget/508759831755096074.svg)](https://top.gg/bot/508759831755096074)
+
 # Instructions
 ## Prerequisites
 - MySQL (tested on 5.7)
