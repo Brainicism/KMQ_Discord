@@ -26,7 +26,7 @@
             "arguments": [
                 {
                     "name": "action",
-                    "description": "Any valid command for the KMQ bot"
+                    "description": "Any valid command for the K-pop Music Quiz bot"
                 }
             ]
         },

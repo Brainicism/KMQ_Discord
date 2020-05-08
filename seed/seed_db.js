@@ -60,12 +60,12 @@ let main = async function () {
                 fs.readdir(`${kmqTempDir}/sql`, async (err, files) => {
                     logger.info("Dropping K-Pop video database");
                     await db.query("DROP DATABASE IF EXISTS kpop_videos;");
-                    logger.info("Creating K-Pop video database")
+                    logger.info("Creating K-pop video database")
                     await db.query("CREATE DATABASE kpop_videos;");
                     logger.info("Seeding K-Pop video database");
                     execSync(`mysql kpop_videos < ${kmqTempDir}/sql/${files[0]}`)
                     logger.info(`Imported database dump (${files[0]}) successfully`);
-                    logger.info("Creating KMQ database");
+                    logger.info("Creating K-pop Music Quiz database");
                     await db.query("CREATE DATABASE IF NOT EXISTS kmq");
                     //this is awful but idk why it won't end
                     process.exit();
