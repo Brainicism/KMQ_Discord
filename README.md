@@ -29,5 +29,3 @@ Supported game options include:
 - `gender`: Choose the gender of the artists you'd like to hear from.
 
 Full command list can be found using `,help`
-
-You can invite the bot [using this link](https://discordapp.com/oauth2/authorize?client_id=508759831755096074&scope=bot&permissions=3165184).
