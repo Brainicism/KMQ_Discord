@@ -1,3 +1,4 @@
+const logger = require("../logger")("validate")
 module.exports = (message, parsedMessage, validations, botPrefix) => {
     if (!validations) return true;
     let args = parsedMessage.components;
@@ -48,7 +49,7 @@ module.exports = (message, parsedMessage, validations, botPrefix) => {
                 }
                 break;
             default:
-                console.err("Undefined argument type.")
+                logger.error(`Undefined argument type. ${validation}`)
         }
     }
     return true;

@@ -3,7 +3,7 @@ const mysql = require("promise-mysql");
 
 const fs = require("fs");
 const client = new Discord.Client();
-
+const logger = require('./logger')("kmq");
 const config = require("./config.json");
 const GuildPreference = require("./models/guild_preference");
 const guessSong = require("./helpers/guess_song");
@@ -15,7 +15,7 @@ let gameSessions = {};
 let guildPreferences = {};
 
 client.on("ready", () => {
-    console.log(`Logged in as ${client.user.tag}!`);
+    logger.info(`Logged in as ${client.user.tag}!`);
 });
 
 client.on("message", (message) => {
@@ -98,7 +98,7 @@ const parseMessage = (message, botPrefix) => {
         password: config.dbPassword
     });
     if (!config.botToken || config.botToken === "YOUR BOT TOKEN HERE") {
-        console.error("No bot token set. Please update config.json!")
+        logger.error("No bot token set. Please update config.json!")
         process.exit(1);
     }
     let guildPreferencesTableCreation = `CREATE TABLE IF NOT EXISTS kmq.guild_preferences(
@@ -113,7 +113,6 @@ const parseMessage = (message, botPrefix) => {
     fields.forEach((field) => {
         guildPreferences[field.guild_id] = new GuildPreference(field.guild_id, JSON.parse(field.guild_preference));
     });
-
     client.login(config.botToken);
 
     fs.readdir("./commands/", (err, files) => {

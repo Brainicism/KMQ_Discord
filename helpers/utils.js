@@ -4,7 +4,7 @@ const ytdl = require("ytdl-core");
 const fetchVideoInfo = require("youtube-info");
 const hangulRomanization = require("hangul-romanization");
 const fs = require("fs");
-
+const logger = require("../logger")("utils")
 
 const startGame = (gameSession, guildPreference, db, message) => {
     if (gameSession.gameInSession()) {
@@ -26,7 +26,7 @@ const startGame = (gameSession, guildPreference, db, message) => {
         playSong(gameSession, guildPreference, db, message);
     })
     .catch((err) => {
-        console.log(err);
+        logger.error(err);
         message.channel.send(err.toString());
     })
 }
@@ -96,7 +96,7 @@ module.exports = {
         }
         fs.readdir(SONG_CACHE_DIR, (error, files) => {
             if (error) {
-                return console.error(error);
+                return logger.error(error);
             }
 
             const endingWithPartRegex = new RegExp('\\.part$');
@@ -104,12 +104,12 @@ module.exports = {
             partFiles.forEach((partFile) => {
                 fs.unlink(`${SONG_CACHE_DIR}/${partFile}`, (err) => {
                     if (err) {
-                        console.error(err);
+                        logger.error(err);
                     }
                 })
             })
             if (partFiles.length) {
-                console.log(`${partFiles.length} stale cached songs deleted.`);
+                logger.log(`${partFiles.length} stale cached songs deleted.`);
             }
         });
     }
@@ -147,7 +147,7 @@ const playSong = (gameSession, guildPreference, db, message) => {
             cacheStream.on('finish', () => {
                 fs.rename(tempLocation, cachedSongLocation, (error) => {
                     if (error) {
-                        console.error(error);
+                        logger.error(error);
                     }
                 })
             })
@@ -167,7 +167,7 @@ const playSong = (gameSession, guildPreference, db, message) => {
             startGame(gameSession, guildPreference, db, message);
         })
     }).catch((err) => {
-        console.error(err);
+        logger.error(err);
         // Attempt to restart game with different song
         sendSongMessage(message, gameSession, true);
         gameSession.endRound();

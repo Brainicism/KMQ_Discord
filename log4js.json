@@ -1,0 +1,11 @@
+{
+    "appenders": {
+      "log": { "type": "dateFile", "filename": "./logs/log.log" },
+      "error": { "type": "dateFile", "filename": "./logs/error.log" },
+      "error-filtered": { "type": "logLevelFilter", "appender": "error", "level": "error" },
+      "console": { "type": "console" }
+    },
+    "categories": {
+        "default": { "appenders": ["error-filtered", "console", "log"], "level": "debug" }
+    }
+}

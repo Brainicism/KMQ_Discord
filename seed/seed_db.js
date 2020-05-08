@@ -7,7 +7,7 @@ const mysql = require("promise-mysql");
 const config = require("../config.json");
 const rmfr = require('rmfr');
 const fileUrl = "http://kpop.aoimirai.net/download.php";
-
+const logger = require("../logger")("seed_db")
 //TODO: this is probably not how you use promises fix later
 
 let options = {
@@ -35,7 +35,7 @@ let main = async function () {
         .then((resp, body) => {
             return new Promise((resolve, reject) => {
                 fs.writeFile(output, resp, function (err) {
-                    console.log("Downloaded database.zip");
+                    logger.info("Downloaded database.zip");
                     resolve();
                 });
             })
@@ -49,7 +49,7 @@ let main = async function () {
                         if (!err.toString().includes("invalid signature")) {
                             reject(err);
                         }
-                        console.log("Extracted database.zip");
+                        logger.info("Extracted database.zip");
                         resolve();
                     })
                     .on("finish", () => resolve())
@@ -58,21 +58,21 @@ let main = async function () {
         .then(async () => {
             return new Promise((resolve, reject) => {
                 fs.readdir(`${kmqTempDir}/sql`, async (err, files) => {
-                    console.log("Dropping K-Pop video database");
+                    logger.info("Dropping K-Pop video database");
                     await db.query("DROP DATABASE IF EXISTS kpop_videos;");
-                    console.log("Creating K-Pop video database")
+                    logger.info("Creating K-Pop video database")
                     await db.query("CREATE DATABASE kpop_videos;");
-                    console.log("Seeding K-Pop video database");
+                    logger.info("Seeding K-Pop video database");
                     execSync(`mysql kpop_videos < ${kmqTempDir}/sql/${files[0]}`)
-                    console.log(`Imported database dump (${files[0]}) successfully`);
-                    console.log("Creating KMQ database");
+                    logger.info(`Imported database dump (${files[0]}) successfully`);
+                    logger.info("Creating KMQ database");
                     await db.query("CREATE DATABASE IF NOT EXISTS kmq");
                     //this is awful but idk why it won't end
                     process.exit();
                 })
             })
         })
-        .catch(e => console.log(e))
+        .catch(e => logger.info(e))
 };
 
 main()

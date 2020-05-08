@@ -3,3 +3,4 @@ config.json
 main.db
 config.json
 .cache/
+logs/
