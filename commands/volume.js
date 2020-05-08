@@ -1,6 +1,8 @@
+const { EMBED_INFO_COLOR } = require("../helpers/utils.js");
 const DEFAULT_VOLUME = 50;
 const logger = require("../logger")("volume");
 const getDebugContext = require("../helpers/utils").getDebugContext
+
 module.exports = {
     call: ({ message, parsedMessage, gameSessions, guildPreference, db }) => {
         guildPreference.setVolume(parseInt(parsedMessage.components[0]), db);
@@ -10,7 +12,17 @@ module.exports = {
                 gameSession.isSongCached ? guildPreference.getCachedStreamVolume() : guildPreference.getStreamVolume()
             );
         }
-        message.channel.send(`The volume is \`${guildPreference.getVolume()}%\`.`);
+        message.channel.send({
+            embed: {
+                color: EMBED_INFO_COLOR,
+                author: {
+                    name: message.author.username,
+                    icon_url: message.author.avatarURL()
+                },
+                title: "**Volume**",
+                description: `The volume is \`${guildPreference.getVolume()}%\`.`
+            }
+        });
         logger.info(`${getDebugContext(message)} | Volume set to ${guildPreference.getVolume()}. cached = ${gameSession.isSongCached}`);
     },
     validations: {

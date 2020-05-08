@@ -1,10 +1,22 @@
+const { EMBED_INFO_COLOR } = require("../helpers/utils.js");
 const DEFAULT_LIMIT = 500;
 const logger = require("../logger")("limit");
 const getDebugContext = require("../helpers/utils").getDebugContext
+
 module.exports = {
     call: ({ message, parsedMessage, guildPreference, db }) => {
         guildPreference.setLimit(parseInt(parsedMessage.components[0]), db);
-        message.channel.send(`The limit is \`${guildPreference.getLimit()}\`.`);
+        message.channel.send({
+            embed: {
+                color: EMBED_INFO_COLOR,
+                author: {
+                    name: message.author.username,
+                    icon_url: message.author.avatarURL()
+                },
+                title: "**Limit**",
+                description: `The limit is \`${guildPreference.getLimit()}\`.`
+            }
+        });
         logger.info(`${getDebugContext(message)} | Limit set to ${guildPreference.getLimit()}`);
     },
     validations: {

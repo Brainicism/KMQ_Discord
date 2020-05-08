@@ -1,4 +1,5 @@
-const RED = 0xE74C3C;
+const EMBED_INFO_COLOR = 0x000000; // BLACK
+const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 const SONG_CACHE_DIR = require("../config.json").songCacheDir;
 const ytdl = require("ytdl-core");
 const fetchVideoInfo = require("youtube-info");
@@ -10,7 +11,7 @@ const startGame = (gameSession, guildPreference, db, message) => {
     if (gameSession.gameInSession()) {
         message.channel.send({
             embed: {
-                color: RED,
+                color: EMBED_ERROR_COLOR,
                 title: `Game already in session`
             }
         })
@@ -27,14 +28,20 @@ const startGame = (gameSession, guildPreference, db, message) => {
         logger.info(`${getDebugContext(message)} | Playing song: ${gameSession.getDebugSongDetails()}`);
     })
     .catch((err) => {
+        message.channel.send({
+            embed: {
+                color: EMBED_ERROR_COLOR,
+                title: "KMQ database query error",
+                description: err.toString()
+            }
+        });
         logger.error(`${getDebugContext(message)} | Error querying song: ${err}`);
-        message.channel.send(err.toString());
     })
 }
 const sendSongMessage = (message, gameSession, isForfeit) => {
     message.channel.send({
         embed: {
-            color: RED,
+            color: EMBED_INFO_COLOR,
             author: {
                 name: isForfeit ? null : message.author.username,
                 icon_url: isForfeit ? null : message.author.avatarURL()
@@ -58,7 +65,7 @@ module.exports = {
     sendScoreboard: (message, gameSession) => {
         message.channel.send({
             embed: {
-                color: RED,
+                color: EMBED_INFO_COLOR,
                 title: "**Results**",
                 fields: gameSession.scoreboard.getScoreboard()
             }
@@ -120,7 +127,9 @@ module.exports = {
                 logger.debug(`${partFiles.length} stale cached songs deleted.`);
             }
         });
-    }
+    },
+    EMBED_INFO_COLOR: EMBED_INFO_COLOR,
+    EMBED_ERROR_COLOR: EMBED_ERROR_COLOR
 }
 
 const playSong = (gameSession, guildPreference, db, message) => {

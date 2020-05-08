@@ -4,9 +4,9 @@ const {
     sendSongMessage,
     areUserAndBotInSameVoiceChannel,
     getNumParticipants,
+    EMBED_INFO_COLOR,
     getDebugContext } = require("../helpers/utils.js");
 const logger = require("../logger")("skip");
-const RED = 0xE74C3C;
 
 module.exports = {
     call: ({ gameSessions, guildPreference, client, message, db }) => {
@@ -33,7 +33,7 @@ module.exports = {
 function sendSkipNotification(message, gameSession) {
     message.channel.send({
         embed: {
-            color: RED,
+            color: EMBED_INFO_COLOR,
             author: {
                 name: message.author.username,
                 icon_url: message.author.avatarURL()
@@ -48,7 +48,7 @@ function sendSkipNotification(message, gameSession) {
 function sendSkipMessage(message, gameSession) {
     message.channel.send({
         embed: {
-            color: RED,
+            color: EMBED_INFO_COLOR,
             author: {
                 name: message.author.username,
                 icon_url: message.author.avatarURL()
