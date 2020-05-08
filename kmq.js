@@ -56,14 +56,17 @@ client.on("voiceStateUpdate", (oldState, newState) => {
             let voiceConnection = client.voice.connections.get(guildID);
             if (voiceConnection) {
                 voiceConnection.disconnect();
-                gameSession.endRound();
+                if (gameSession) {
+                    gameSession.endRound();
+                }
                 return;
             }
         }
         // Bot was disconnected by another user
         if (!oldUserChannel.members.has(client)) {
-            gameSession.endRound();
-            return;
+            if (gameSession) {
+                gameSession.endRound();
+            }
         }
     }
 });
