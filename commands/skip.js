@@ -36,7 +36,7 @@ function sendSkipNotification(message, gameSession) {
             color: RED,
             author: {
                 name: message.author.username,
-                icon_url: message.author.avatarURL
+                icon_url: message.author.avatarURL()
             },
             title: "**Skip**",
             description: `${gameSession.getNumSkippers()}/${getSkipsRequired(message)} skips received.`
@@ -51,7 +51,7 @@ function sendSkipMessage(message, gameSession) {
             color: RED,
             author: {
                 name: message.author.username,
-                icon_url: message.author.avatarURL
+                icon_url: message.author.avatarURL()
 
             },
             title: "**Skip**",

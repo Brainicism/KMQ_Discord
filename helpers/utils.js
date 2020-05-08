@@ -37,7 +37,7 @@ const sendSongMessage = (message, gameSession, isForfeit) => {
             color: RED,
             author: {
                 name: isForfeit ? null : message.author.username,
-                icon_url: isForfeit ? null : message.author.avatarURL
+                icon_url: isForfeit ? null : message.author.avatarURL()
             },
             title: `"${gameSession.getSong()}" - ${gameSession.getArtist()}`,
             description: `https://youtube.com/watch?v=${gameSession.getVideoID()}\n\n**Scoreboard**`,

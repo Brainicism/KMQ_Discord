@@ -33,7 +33,7 @@ const help = (message, action, botPrefix) => {
         });
     }
     else {
-        embedTitle = "KMQ Command Help";
+        embedTitle = "K-pop Music Quiz Command Help";
         embedDesc = helpMessages.rules.replace(placeholder, botPrefix);
         helpMessages.actions.forEach((action) => {
             embedFields.push({
