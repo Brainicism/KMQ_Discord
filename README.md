@@ -1,4 +1,4 @@
-KMQ-Bot
+K-pop Music Quiz
 =======
 
 A kpop game in Discord, using [Aoimirai's database](http://www.aoimirai.net/kpop/index.html) of songs. Test your reflexes by guessing the right song name before your friends!
@@ -16,7 +16,7 @@ A kpop game in Discord, using [Aoimirai's database](http://www.aoimirai.net/kpop
 1. Create `config.json` based on the template provided
 2. `npm install` to install Node dependeices
 3. `npm run seed` to seed MySQL database with latest data
-4. `npm start` to start the KMQ bot
+4. `npm start` to start the K-pop Music Quiz bot
 
 # Gameplay
 Gameplay is initiated via `,random`, which invites the bot to a voice channel. The bot will begin to play a random kpop song based on the game options. Users can guess the song by typing the name of the song. 
