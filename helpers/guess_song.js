@@ -1,4 +1,5 @@
-const { sendSongMessage, getUserIdentifier, cleanSongName, startGame } = require("./utils.js");
+const { sendSongMessage, getUserIdentifier, cleanSongName, startGame, getDebugContext } = require("./utils.js");
+const logger = require("../logger")("guess_song");
 
 module.exports = ({ client, message, gameSessions, guildPreference, db }) => {
     let guess = cleanSongName(message.content);
@@ -8,6 +9,7 @@ module.exports = ({ client, message, gameSessions, guildPreference, db }) => {
         let userTag = getUserIdentifier(message.author);
         gameSession.scoreboard.updateScoreboard(userTag, message.author.id);
         sendSongMessage(message, gameSession, false);
+        logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${gameSession.getSong()}`)
         gameSession.endRound();
         startGame(gameSession, guildPreference, db, message);
     }

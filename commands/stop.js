@@ -1,5 +1,5 @@
-const { sendSongMessage, disconnectVoiceConnection } = require("../helpers/utils.js");
-
+const { sendSongMessage, disconnectVoiceConnection, getDebugContext } = require("../helpers/utils.js");
+const logger = require("../logger")("stop");
 module.exports = {
     call: ({ gameSessions, client, message }) => {
         let gameSession = gameSessions[message.guild.id];
@@ -7,6 +7,7 @@ module.exports = {
             sendSongMessage(message, gameSession, true);
             disconnectVoiceConnection(client, message);
             gameSession.endRound();
+            logger.info(`${getDebugContext(message)} | Game round ended: ${gameSession.getDebugSongDetails()}`);
         }
     }
 }

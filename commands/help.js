@@ -1,5 +1,6 @@
 const helpMessages = require('../data/help_strings.json');
-const config = require("../config.json");
+const logger = require("../logger")("help");
+const getDebugContext = require("../helpers/utils").getDebugContext
 const placeholder = "!";
 
 module.exports = {
@@ -16,6 +17,7 @@ const help = (message, action, botPrefix) => {
     if (action) {
         let helpActionList = helpMessages.actions.map(a => a.name);
         if (!helpActionList.includes(action)) {
+            logger.warn(`${getDebugContext(message)} | Missing documentation: ${action}`);
             message.channel.send("Sorry, there is no documentation on " + action);
             return;
         }
