@@ -7,7 +7,7 @@ module.exports = {
     call: ({ message, parsedMessage, guildPreference, db }) => {
         guildPreference.setBeginningCutoffYear(parseInt(parsedMessage.components[0]), db);
         sendInfoMessage(message,
-            "**Cutoff year**",
+            "Cutoff year",
             `The new cutoff year is \`${guildPreference.getBeginningCutoffYear()}\`.`)
         logger.info(`${getDebugContext(message)} | Cutoff set to ${guildPreference.getBeginningCutoffYear()}`);
     },

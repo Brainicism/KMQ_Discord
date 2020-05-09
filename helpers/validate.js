@@ -80,6 +80,6 @@ const arrayToString = (elements) => {
 }
 
 const sendValidationErrorMessage = (message, warning, arg) => {
-    sendErrorMessage(message, "**Input validation error**", warning);
+    sendErrorMessage(message, "Input validation error", warning);
     logger.warn(`${getDebugContext(message)} | ${warning}. val = ${arg}`);
 }

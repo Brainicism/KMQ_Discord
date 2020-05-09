@@ -19,11 +19,11 @@ module.exports = {
                 selectedGenderStr += ", ";
             }
             sendInfoMessage(message,
-                "**Gender**",
+                "Gender",
                 `Songs will be played from ${selectedGenderStr} artists.`)
         }
         sendErrorMessage(message,
-            "**Gender**",
+            "Gender",
             `Please enter valid genders only (\`male\`, \`female\`, and/or \`coed\`).`)
         logger.info(`${getDebugContext(message)} | Genders set to ${selectedGenderStr}`);
     },

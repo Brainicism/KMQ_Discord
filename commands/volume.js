@@ -13,7 +13,7 @@ module.exports = {
             );
         }
         sendInfoMessage(message,
-            "**Volume**",
+            "Volume",
             `The volume is \`${guildPreference.getVolume()}%\`.`
         );
         logger.info(`${getDebugContext(message)} | Volume set to ${guildPreference.getVolume()}. cached = ${gameSession.isSongCached}`);

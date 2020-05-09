@@ -20,7 +20,7 @@ const help = (message, action, botPrefix) => {
         if (!helpActionList.includes(action)) {
             logger.warn(`${getDebugContext(message)} | Missing documentation: ${action}`);
             sendErrorMessage(message,
-                "**K-pop Music Quiz Command Help**",
+                "K-pop Music Quiz Command Help",
                 `Sorry, there is no documentation on ${action}`)
             return;
         }

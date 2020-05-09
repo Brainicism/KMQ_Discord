@@ -7,7 +7,7 @@ module.exports = {
     call: ({ message, parsedMessage, guildPreference, db }) => {
         guildPreference.setBotPrefix(parsedMessage.components[0], db);
         sendInfoMessage(message,
-            "**Bot prefix**",
+            "Bot prefix",
             `The prefix is \`${guildPreference.getBotPrefix()}\`.`
         );
         logger.info(`${getDebugContext(message)} | Prefix set to ${guildPreference.getBotPrefix()}`);
