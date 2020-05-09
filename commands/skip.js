@@ -42,7 +42,7 @@ function sendSkipNotification(message, gameSession) {
             description: `${gameSession.getNumSkippers()}/${getSkipsRequired(message)} skips received.`
         }
     })
-        .then((message) => message.delete(5000));
+        .then((message) => message.delete({ timeout: 5000 }));
 }
 
 function sendSkipMessage(message, gameSession) {
