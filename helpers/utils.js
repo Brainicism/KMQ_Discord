@@ -24,9 +24,10 @@ const startGame = (gameSession, guildPreference, db, message) => {
         let random = result[Math.floor(Math.random() * result.length)];
         gameSession.startRound(random.name, random.artist, random.youtubeLink);
         playSong(gameSession, guildPreference, db, message);
+        logger.info(`${getDebugContext(message)} | Playing song: ${gameSession.getDebugSongDetails()}`);
     })
     .catch((err) => {
-        logger.error(err);
+        logger.error(`${getDebugContext(message)} | Error querying song: ${err}`);
         message.channel.send(err.toString());
     })
 }
@@ -47,10 +48,13 @@ const sendSongMessage = (message, gameSession, isForfeit) => {
         }
     })
 }
-
+const getDebugContext = (message) => {
+    return `gid: ${message.guild.id}, uid: ${message.author.id}`
+}
 module.exports = {
     startGame,
     sendSongMessage,
+    getDebugContext,
     sendScoreboard: (message, gameSession) => {
         message.channel.send({
             embed: {
@@ -63,6 +67,7 @@ module.exports = {
     disconnectVoiceConnection: (client, message) => {
         let voiceConnection = client.voice.connections.get(message.guild.id);
         if (voiceConnection) {
+            logger.info(`${getDebugContext(message)} | Disconnected from voice channel`);
             voiceConnection.disconnect();
             return;
         }
@@ -79,7 +84,9 @@ module.exports = {
            .replace(/ /g, "").trim();
         if (!cleanName) {
             // Odds are the song name is in hangul
-            return hangulRomanization.convert(name);
+            let hangulRomanized = hangulRomanization.convert(name);
+            logger.debug(`cleanSongName result is empty, assuming hangul. Before: ${name}. After: ${hangulRomanized}`)
+            return hangulRomanized;
         }
         return cleanName;
     },
@@ -91,6 +98,7 @@ module.exports = {
         return message.member.voice.channel.members.size - 1;
     },
     clearPartiallyCachedSongs: () => {
+        logger.debug("Clearing partially cached songs");
         if (!fs.existsSync(SONG_CACHE_DIR)) {
             return;
         }
@@ -109,7 +117,7 @@ module.exports = {
                 })
             })
             if (partFiles.length) {
-                logger.log(`${partFiles.length} stale cached songs deleted.`);
+                logger.debug(`${partFiles.length} stale cached songs deleted.`);
             }
         });
     }
@@ -139,6 +147,7 @@ const playSong = (gameSession, guildPreference, db, message) => {
     const cachedSongLocation = `${SONG_CACHE_DIR}/${gameSession.getVideoID()}.mp3`;
     gameSession.isSongCached = fs.existsSync(cachedSongLocation);
     if (!gameSession.isSongCached) {
+        logger.debug(`${getDebugContext(message)} | Downloading uncached song: ${gameSession.getDebugSongDetails()}`);
         const tempLocation = `${cachedSongLocation}.part`;
         if (!fs.existsSync(tempLocation)) {
             let cacheStream = fs.createWriteStream(tempLocation);
@@ -147,8 +156,9 @@ const playSong = (gameSession, guildPreference, db, message) => {
             cacheStream.on('finish', () => {
                 fs.rename(tempLocation, cachedSongLocation, (error) => {
                     if (error) {
-                        logger.error(error);
+                        logger.error(`Error renaming temp song file from ${tempLocation} to ${cachedSongLocation}. err = ${error}`);
                     }
+                    logger.info(`Successfully cached song ${gameSession.getDebugSongDetails()}`);
                 })
             })
         }
@@ -161,13 +171,15 @@ const playSong = (gameSession, guildPreference, db, message) => {
         gameSession.dispatcher = connection.play(
             gameSession.isSongCached ? cachedSongLocation : ytdl(gameSession.getVideoID(), ytdlOptions),
             gameSession.isSongCached ? cacheStreamOptions : streamOptions);
+        logger.info(`${getDebugContext(message)} | Playing song in voice connection. cached = ${gameSession.isSongCached}. song = ${gameSession.getDebugSongDetails()}`);
         gameSession.dispatcher.on('finish', () => {
             sendSongMessage(message, gameSession, true);
             gameSession.endRound();
+            logger.info(`${getDebugContext(message)} | Song finished without being guessed. song = ${gameSession.getDebugSongDetails()}`);
             startGame(gameSession, guildPreference, db, message);
         })
     }).catch((err) => {
-        logger.error(err);
+        logger.error(`${getDebugContext(message)} | Error playing song in voice connection. cached = ${gameSession.isSongCached}. song = ${gameSession.getDebugSongDetails()} err = ${err}`);
         // Attempt to restart game with different song
         sendSongMessage(message, gameSession, true);
         gameSession.endRound();

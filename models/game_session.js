@@ -54,4 +54,8 @@ module.exports = class GameSession {
     getNumSkippers() {
         return this._skippers.size;
     }
+
+    getDebugSongDetails() { 
+        return `${this._song}:${this._artist}:${this._videoID}`;
+    }
 };
