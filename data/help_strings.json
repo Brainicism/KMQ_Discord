@@ -90,6 +90,12 @@
                     "description": "A valid volume value is from 1 to 100. You do not need to include the percentage symbol. The default volume is 50%."
                 }
             ]
+        },
+        {
+            "name": "options",
+            "description": "Displays the current game options.",
+            "usage": "!options",
+            "arguments": []
         }
     ]
 }

@@ -16,7 +16,7 @@ module.exports = {
             "Volume",
             `The volume is \`${guildPreference.getVolume()}%\`.`
         );
-        logger.info(`${getDebugContext(message)} | Volume set to ${guildPreference.getVolume()}. cached = ${gameSession.isSongCached}`);
+        logger.info(`${getDebugContext(message)} | Volume set to ${guildPreference.getVolume()}.`);
     },
     validations: {
         minArgCount: 1,
