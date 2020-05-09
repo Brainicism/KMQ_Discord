@@ -7,7 +7,7 @@ const hangulRomanization = require("hangul-romanization");
 const fs = require("fs");
 const logger = require("../logger")("utils")
 
-const startGame = (gameSession, guildPreference, db, message) => {
+const startGame = async (gameSession, guildPreference, db, message) => {
     if (gameSession.gameInSession()) {
         sendErrorMessage(message, `Game already in session`, null);
         return;
@@ -15,17 +15,17 @@ const startGame = (gameSession, guildPreference, db, message) => {
     let query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
     WHERE FIND_IN_SET(members, ?) AND dead = "n" AND publishedon >= "?-01-01" AND vtype = "main"
     ORDER BY kpop_videos.app_kpop.views DESC LIMIT ?;`;
-    db.query(query, [guildPreference.getSQLGender(), guildPreference.getBeginningCutoffYear(), guildPreference.getLimit()])
-    .then((result) => {
+    try {
+        let result = await db.query(query, [guildPreference.getSQLGender(), guildPreference.getBeginningCutoffYear(), guildPreference.getLimit()])
         let random = result[Math.floor(Math.random() * result.length)];
         gameSession.startRound(random.name, random.artist, random.youtubeLink);
         playSong(gameSession, guildPreference, db, message);
         logger.info(`${getDebugContext(message)} | Playing song: ${gameSession.getDebugSongDetails()}`);
-    })
-    .catch((err) => {
+    }
+    catch (err) {
         sendErrorMessage(message, "KMQ database query error", err.toString());
         logger.error(`${getDebugContext(message)} | Error querying song: ${err}`);
-    })
+    }
 }
 const sendSongMessage = (message, gameSession, isForfeit) => {
     message.channel.send({
@@ -104,12 +104,12 @@ module.exports = {
         return `${user.username}#${user.discriminator}`
     },
     cleanSongName: (name) => {
-        let cleanName =  name.toLowerCase()
+        let cleanName = name.toLowerCase()
             .split("(")[0]
-           .normalize("NFD")
-           .replace(/[^\x00-\x7F|]/g, "")
-           .replace(/|/g, "")
-           .replace(/ /g, "").trim();
+            .normalize("NFD")
+            .replace(/[^\x00-\x7F|]/g, "")
+            .replace(/|/g, "")
+            .replace(/ /g, "").trim();
         if (!cleanName) {
             // Odds are the song name is in hangul
             let hangulRomanized = hangulRomanization.convert(name);
