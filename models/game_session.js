@@ -5,7 +5,7 @@ module.exports = class GameSession {
     constructor() {
         this._song = null;
         this._artist = null;
-        this._link = null;
+        this._videoID = null;
         this._inSession = false;
         this._skippers = new Set();
         this.scoreboard = new Scoreboard();
@@ -18,7 +18,7 @@ module.exports = class GameSession {
     startRound(song, artist, link) {
         this._song = song;
         this._artist = artist;
-        this._link = link;
+        this._videoID = link;
         this._inSession = true;
     }
 
@@ -40,7 +40,7 @@ module.exports = class GameSession {
     }
 
     getVideoID() {
-        return this._link;
+        return this._videoID;
     }
 
     gameInSession() {
@@ -55,7 +55,7 @@ module.exports = class GameSession {
         return this._skippers.size;
     }
 
-    getDebugSongDetails() { 
+    getDebugSongDetails() {
         return `${this._song}:${this._artist}:${this._videoID}`;
     }
 };
