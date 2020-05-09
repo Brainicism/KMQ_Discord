@@ -18,13 +18,11 @@ module.exports = {
             else {
                 selectedGenderStr += ", ";
             }
-            sendInfoMessage(message,
-                "Gender",
-                `Songs will be played from ${selectedGenderStr} artists.`)
+
         }
-        sendErrorMessage(message,
+        sendInfoMessage(message,
             "Gender",
-            `Please enter valid genders only (\`male\`, \`female\`, and/or \`coed\`).`)
+            `Songs will be played from ${selectedGenderStr} artists.`)
         logger.info(`${getDebugContext(message)} | Genders set to ${selectedGenderStr}`);
     },
     validations: {
