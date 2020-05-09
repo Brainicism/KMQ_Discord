@@ -20,6 +20,7 @@ module.exports = {
             sendInfoMessage(message, "Nobody won :(")
         }
         disconnectVoiceConnection(client, message);
+        gameSession.finished = true;
         delete gameSessions[message.guild.id];
     }
 }

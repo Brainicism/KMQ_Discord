@@ -7,7 +7,10 @@ const hangulRomanization = require("hangul-romanization");
 const fs = require("fs");
 const logger = require("../logger")("utils")
 
-const startGame = async (gameSession, guildPreference, db, message) => {
+const startGame = async (gameSession, guildPreference, db, message, client) => {
+    if (!gameSession || gameSession.finished) {
+        return;
+    }
     if (gameSession.gameInSession()) {
         sendErrorMessage(message, `Game already in session`, null);
         return;
@@ -19,7 +22,7 @@ const startGame = async (gameSession, guildPreference, db, message) => {
         let result = await db.query(query, [guildPreference.getSQLGender(), guildPreference.getBeginningCutoffYear(), guildPreference.getLimit()])
         let random = result[Math.floor(Math.random() * result.length)];
         gameSession.startRound(random.name, random.artist, random.youtubeLink);
-        playSong(gameSession, guildPreference, db, message);
+        playSong(gameSession, guildPreference, db, message, client);
         logger.info(`${getDebugContext(message)} | Playing song: ${gameSession.getDebugSongDetails()}`);
     }
     catch (err) {
@@ -151,7 +154,7 @@ module.exports = {
     }
 }
 
-const playSong = (gameSession, guildPreference, db, message) => {
+const playSong = async (gameSession, guildPreference, db, message, client) => {
     let voiceChannel = message.member.voice.channel;
     const streamOptions = {
         volume: guildPreference.getStreamVolume(),
@@ -191,26 +194,37 @@ const playSong = (gameSession, guildPreference, db, message) => {
             })
         }
     }
+    if (!gameSession.connection || client.voice.connections.get(message.guild.id) == null) {
+        try {
+            let connection = await voiceChannel.join();
+            gameSession.connection = connection;
+        }
+        catch (err) {
+            logger.error(`${getDebugContext(message)} | Error joining voice connection. cached = ${gameSession.isSongCached}. song = ${gameSession.getDebugSongDetails()} err = ${err}`);
+        }
+    }
+    // We are unable to pipe the above ytdl stream into Discord.js's play
+    // because it terminates the download when the dispatcher is destroyed
+    // (i.e when a song is skipped)
+    gameSession.dispatcher = gameSession.connection.play(
+        gameSession.isSongCached ? cachedSongLocation : ytdl(gameSession.getVideoID(), ytdlOptions),
+        gameSession.isSongCached ? cacheStreamOptions : streamOptions);
+    logger.info(`${getDebugContext(message)} | Playing song in voice connection. cached = ${gameSession.isSongCached}. song = ${gameSession.getDebugSongDetails()}`);
 
-    voiceChannel.join().then(connection => {
-        // We are unable to pipe the above ytdl stream into Discord.js's play
-        // because it terminates the download when the dispatcher is destroyed
-        // (i.e when a song is skipped)
-        gameSession.dispatcher = connection.play(
-            gameSession.isSongCached ? cachedSongLocation : ytdl(gameSession.getVideoID(), ytdlOptions),
-            gameSession.isSongCached ? cacheStreamOptions : streamOptions);
-        logger.info(`${getDebugContext(message)} | Playing song in voice connection. cached = ${gameSession.isSongCached}. song = ${gameSession.getDebugSongDetails()}`);
-        gameSession.dispatcher.on('finish', () => {
-            sendSongMessage(message, gameSession, true);
-            gameSession.endRound();
-            logger.info(`${getDebugContext(message)} | Song finished without being guessed. song = ${gameSession.getDebugSongDetails()}`);
-            startGame(gameSession, guildPreference, db, message);
-        })
-    }).catch((err) => {
-        logger.error(`${getDebugContext(message)} | Error playing song in voice connection. cached = ${gameSession.isSongCached}. song = ${gameSession.getDebugSongDetails()} err = ${err}`);
+    gameSession.dispatcher.on('finish', () => {
+        sendSongMessage(message, gameSession, true);
+        gameSession.endRound(); 
+        logger.info(`${getDebugContext(message)} | Song finished without being guessed. song = ${gameSession.getDebugSongDetails()}`);
+        startGame(gameSession, guildPreference, db, message, client);
+    });
+
+    gameSession.dispatcher.on("error", () => {
+        logger.error(`${getDebugContext(message)} | Unknown error with stream dispatcher. song = ${gameSession.getDebugSongDetails()}`);
         // Attempt to restart game with different song
         sendSongMessage(message, gameSession, true);
         gameSession.endRound();
-        startGame(gameSession, guildPreference, db, message);
+        setTimeout(() => {
+            startGame(gameSession, guildPreference, db, message, client);
+        }, 2000);
     })
 }
