@@ -1,6 +1,6 @@
 const logger = require("../logger")("validate")
 const getDebugContext = require("../helpers/utils").getDebugContext;
-const { EMBED_ERROR_COLOR } = require("../helpers/utils.js");
+const { sendErrorMessage } = require("../helpers/utils.js");
 
 module.exports = (message, parsedMessage, validations, botPrefix) => {
     if (!validations) return true;
@@ -79,17 +79,7 @@ const arrayToString = (elements) => {
     return `${elements.join(", ")} and ${lastElement}`
 }
 
-const sendValidationErrorMessage = (message, warning, args) => {
-    message.channel.send({
-        embed: {
-            color: EMBED_ERROR_COLOR,
-            author: {
-                name: message.author.username,
-                icon_url: message.author.avatarURL()
-            },
-            title: "**Input validation error**",
-            description: warning
-        }
-    });
+const sendValidationErrorMessage = (message, warning, arg) => {
+    sendErrorMessage(message, "**Input validation error**", warning);
     logger.warn(`${getDebugContext(message)} | ${warning}. val = ${arg}`);
 }

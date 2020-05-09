@@ -9,12 +9,7 @@ const logger = require("../logger")("utils")
 
 const startGame = (gameSession, guildPreference, db, message) => {
     if (gameSession.gameInSession()) {
-        message.channel.send({
-            embed: {
-                color: EMBED_ERROR_COLOR,
-                title: `Game already in session`
-            }
-        })
+        sendErrorMessage(message, `Game already in session`, null);
         return;
     }
     let query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
@@ -28,13 +23,7 @@ const startGame = (gameSession, guildPreference, db, message) => {
         logger.info(`${getDebugContext(message)} | Playing song: ${gameSession.getDebugSongDetails()}`);
     })
     .catch((err) => {
-        message.channel.send({
-            embed: {
-                color: EMBED_ERROR_COLOR,
-                title: "KMQ database query error",
-                description: err.toString()
-            }
-        });
+        sendErrorMessage(message, "KMQ database query error", err.toString());
         logger.error(`${getDebugContext(message)} | Error querying song: ${err}`);
     })
 }
@@ -55,13 +44,45 @@ const sendSongMessage = (message, gameSession, isForfeit) => {
         }
     })
 }
+const sendInfoMessage = (message, title, description) => {
+    message.channel.send({
+        embed: {
+            color: EMBED_INFO_COLOR,
+            author: {
+                name: message.author.username,
+                icon_url: message.author.avatarURL()
+            },
+            title: `**${title}**`,
+            description: description
+        }
+    });
+}
+const sendErrorMessage = (message, title, description) => {
+    message.channel.send({
+        embed: {
+            color: EMBED_ERROR_COLOR,
+            author: {
+                name: message.author.username,
+                icon_url: message.author.avatarURL()
+            },
+            title: `**${title}**`,
+            description: description
+        }
+    });
+}
 const getDebugContext = (message) => {
     return `gid: ${message.guild.id}, uid: ${message.author.id}`
 }
 module.exports = {
+    EMBED_INFO_COLOR,
+    EMBED_ERROR_COLOR,
+
     startGame,
     sendSongMessage,
     getDebugContext,
+    sendInfoMessage,
+    sendErrorMessage,
+
     sendScoreboard: (message, gameSession) => {
         message.channel.send({
             embed: {
@@ -127,9 +148,7 @@ module.exports = {
                 logger.debug(`${partFiles.length} stale cached songs deleted.`);
             }
         });
-    },
-    EMBED_INFO_COLOR: EMBED_INFO_COLOR,
-    EMBED_ERROR_COLOR: EMBED_ERROR_COLOR
+    }
 }
 
 const playSong = (gameSession, guildPreference, db, message) => {
