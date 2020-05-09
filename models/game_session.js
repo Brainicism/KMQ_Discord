@@ -13,6 +13,8 @@ module.exports = class GameSession {
 
         // dispatcher initalized in utils/playSong, used when changing volume
         this.dispatcher = null;
+        this.connection = null;
+        this.finished = false;
     }
 
     startRound(song, artist, link) {

@@ -1,5 +1,6 @@
 const { sendSongMessage, getUserIdentifier, cleanSongName, startGame, getDebugContext } = require("./utils.js");
 const logger = require("../logger")("guess_song");
+const resolve = require('path').resolve
 
 module.exports = ({ client, message, gameSessions, guildPreference, db }) => {
     let guess = cleanSongName(message.content);
@@ -11,7 +12,12 @@ module.exports = ({ client, message, gameSessions, guildPreference, db }) => {
         sendSongMessage(message, gameSession, false);
         logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${gameSession.getSong()}`)
         gameSession.endRound();
-        startGame(gameSession, guildPreference, db, message);
+        if (gameSession.connection) {
+            gameSession.connection.play(resolve("assets/ring.wav"));
+        }
+        setTimeout(() => {
+            startGame(gameSession, guildPreference, db, message, client);
+        }, 2000);
     }
 }
 

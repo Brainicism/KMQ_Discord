@@ -20,7 +20,7 @@ module.exports = {
             sendSkipMessage(message, gameSession);
             sendSongMessage(message, gameSession, true);
             gameSession.endRound();
-            startGame(gameSession, guildPreference, db, message);
+            startGame(gameSession, guildPreference, db, message, client);
             logger.info(`${getDebugContext(message)} | Skip majority achieved.`);
         }
         else {

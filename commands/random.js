@@ -5,7 +5,7 @@ const logger = require("../logger")("random");
 const getDebugContext = require("../helpers/utils").getDebugContext
 
 module.exports = {
-    call: ({ message, db, gameSessions, guildPreference }) => {
+    call: ({ message, db, gameSessions, guildPreference, client }) => {
         if (!message.member.voice.channel) {
             sendErrorMessage(message,
                 "Join a voice channel",
@@ -17,7 +17,7 @@ module.exports = {
                 gameSessions[message.guild.id] = new GameSession();
                 logger.info(`${getDebugContext(message)} | Game session created`);
             }
-            startGame(gameSessions[message.guild.id], guildPreference, db, message);
+            startGame(gameSessions[message.guild.id], guildPreference, db, message, client);
         }
     }
 }
