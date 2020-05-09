@@ -1,6 +1,7 @@
 const helpMessages = require('../data/help_strings.json');
 const logger = require("../logger")("help");
 const getDebugContext = require("../helpers/utils").getDebugContext
+const { EMBED_INFO_COLOR, sendErrorMessage } = require("../helpers/utils.js");
 const placeholder = "!";
 
 module.exports = {
@@ -18,7 +19,9 @@ const help = (message, action, botPrefix) => {
         let helpActionList = helpMessages.actions.map(a => a.name);
         if (!helpActionList.includes(action)) {
             logger.warn(`${getDebugContext(message)} | Missing documentation: ${action}`);
-            message.channel.send("Sorry, there is no documentation on " + action);
+            sendErrorMessage(message,
+                "K-pop Music Quiz Command Help",
+                `Sorry, there is no documentation on ${action}`)
             return;
         }
 
@@ -46,6 +49,7 @@ const help = (message, action, botPrefix) => {
     message.channel.send({
         embed: {
             title: embedTitle,
+            color: EMBED_INFO_COLOR,
             description: embedDesc,
             fields: embedFields
         }

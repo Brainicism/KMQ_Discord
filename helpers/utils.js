@@ -1,4 +1,5 @@
-const RED = 0xE74C3C;
+const EMBED_INFO_COLOR = 0x000000; // BLACK
+const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 const SONG_CACHE_DIR = require("../config.json").songCacheDir;
 const ytdl = require("ytdl-core");
 const fetchVideoInfo = require("youtube-info");
@@ -8,12 +9,7 @@ const logger = require("../logger")("utils")
 
 const startGame = (gameSession, guildPreference, db, message) => {
     if (gameSession.gameInSession()) {
-        message.channel.send({
-            embed: {
-                color: RED,
-                title: `Game already in session`
-            }
-        })
+        sendErrorMessage(message, `Game already in session`, null);
         return;
     }
     let query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
@@ -27,14 +23,14 @@ const startGame = (gameSession, guildPreference, db, message) => {
         logger.info(`${getDebugContext(message)} | Playing song: ${gameSession.getDebugSongDetails()}`);
     })
     .catch((err) => {
+        sendErrorMessage(message, "KMQ database query error", err.toString());
         logger.error(`${getDebugContext(message)} | Error querying song: ${err}`);
-        message.channel.send(err.toString());
     })
 }
 const sendSongMessage = (message, gameSession, isForfeit) => {
     message.channel.send({
         embed: {
-            color: RED,
+            color: EMBED_INFO_COLOR,
             author: {
                 name: isForfeit ? null : message.author.username,
                 icon_url: isForfeit ? null : message.author.avatarURL()
@@ -48,17 +44,49 @@ const sendSongMessage = (message, gameSession, isForfeit) => {
         }
     })
 }
+const sendInfoMessage = (message, title, description) => {
+    message.channel.send({
+        embed: {
+            color: EMBED_INFO_COLOR,
+            author: {
+                name: message.author.username,
+                icon_url: message.author.avatarURL()
+            },
+            title: `**${title}**`,
+            description: description
+        }
+    });
+}
+const sendErrorMessage = (message, title, description) => {
+    message.channel.send({
+        embed: {
+            color: EMBED_ERROR_COLOR,
+            author: {
+                name: message.author.username,
+                icon_url: message.author.avatarURL()
+            },
+            title: `**${title}**`,
+            description: description
+        }
+    });
+}
 const getDebugContext = (message) => {
     return `gid: ${message.guild.id}, uid: ${message.author.id}`
 }
 module.exports = {
+    EMBED_INFO_COLOR,
+    EMBED_ERROR_COLOR,
+
     startGame,
     sendSongMessage,
     getDebugContext,
+    sendInfoMessage,
+    sendErrorMessage,
+
     sendScoreboard: (message, gameSession) => {
         message.channel.send({
             embed: {
-                color: RED,
+                color: EMBED_INFO_COLOR,
                 title: "**Results**",
                 fields: gameSession.scoreboard.getScoreboard()
             }

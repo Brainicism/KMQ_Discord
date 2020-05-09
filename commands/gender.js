@@ -1,6 +1,8 @@
 const GENDER = { MALE: "male", FEMALE: "female", COED: "coed" }
 const logger = require("../logger")("gender");
 const getDebugContext = require("../helpers/utils").getDebugContext
+const { sendErrorMessage, sendInfoMessage } = require("../helpers/utils.js");
+
 module.exports = {
     call: ({ guildPreference, message, parsedMessage, db }) => {
         let selectedGenderArray = guildPreference.setGender(parsedMessage.components, db);
@@ -16,10 +18,14 @@ module.exports = {
             else {
                 selectedGenderStr += ", ";
             }
+            sendInfoMessage(message,
+                "Gender",
+                `Songs will be played from ${selectedGenderStr} artists.`)
         }
-        message.channel.send(`Songs will be played from ${selectedGenderStr} artists.`);
+        sendErrorMessage(message,
+            "Gender",
+            `Please enter valid genders only (\`male\`, \`female\`, and/or \`coed\`).`)
         logger.info(`${getDebugContext(message)} | Genders set to ${selectedGenderStr}`);
-
     },
     validations: {
         minArgCount: 1,
