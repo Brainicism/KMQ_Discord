@@ -12,7 +12,7 @@ module.exports = {
     call: ({ gameSessions, guildPreference, client, message, db }) => {
         let gameSession = gameSessions[message.guild.id];
         if (!gameSession || !gameSession.gameInSession() || !areUserAndBotInSameVoiceChannel(message)) {
-            logger.warn(`${getDebugContext(message)} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.gameInSession(): ${gameSession && !gameSession.gameInSession()}. areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
+            logger.warn(`${getDebugContext(message)} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.gameInSession(): ${gameSession && !gameSession.gameInSession()}. areUserAndBotInSameVoiceChannel: ${areUserAndBotInSameVoiceChannel(message)}`);
             return;
         }
         gameSession.userSkipped(message.author);
