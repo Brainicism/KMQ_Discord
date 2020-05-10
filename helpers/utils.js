@@ -122,6 +122,9 @@ module.exports = {
         return cleanName;
     },
     areUserAndBotInSameVoiceChannel: (message) => {
+        if (!message.member.voice || !message.guild.voice) {
+            return false;
+        }
         return message.member.voice.channel === message.guild.voice.channel;
     },
     getNumParticipants: (message) => {
@@ -213,7 +216,7 @@ const playSong = async (gameSession, guildPreference, db, message, client) => {
 
     gameSession.dispatcher.on('finish', () => {
         sendSongMessage(message, gameSession, true);
-        gameSession.endRound(); 
+        gameSession.endRound();
         logger.info(`${getDebugContext(message)} | Song finished without being guessed. song = ${gameSession.getDebugSongDetails()}`);
         startGame(gameSession, guildPreference, db, message, client);
     });
