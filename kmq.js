@@ -8,6 +8,7 @@ const config = require("./config.json");
 const GuildPreference = require("./models/guild_preference");
 const guessSong = require("./helpers/guess_song");
 const validate = require("./helpers/validate");
+const options = require("./commands/options");
 const { clearPartiallyCachedSongs } = require("./helpers/utils");
 let db;
 let commands = {};
@@ -23,6 +24,11 @@ client.on("message", (message) => {
     let guildPreference = getGuildPreference(guildPreferences, message.guild.id);
     let botPrefix = guildPreference.getBotPrefix();
     let parsedMessage = parseMessage(message.content, botPrefix) || null;
+
+    if (message.mentions.has(client.user)) {
+        // Any message that mentions the bot sends the current options
+        options.call({message, guildPreference});
+    }
 
     if (parsedMessage && commands[parsedMessage.action]) {
         let command = commands[parsedMessage.action];
