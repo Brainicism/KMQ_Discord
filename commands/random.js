@@ -1,8 +1,6 @@
 const GameSession = require("../models/game_session.js");
-const { sendErrorMessage } = require("../helpers/utils.js");
-const { startGame } = require("../helpers/utils.js");
+const { sendErrorMessage, startGame, getDebugContext } = require("../helpers/utils.js");
 const logger = require("../logger")("random");
-const getDebugContext = require("../helpers/utils").getDebugContext
 
 module.exports = {
     call: ({ message, db, gameSessions, guildPreference, client }) => {

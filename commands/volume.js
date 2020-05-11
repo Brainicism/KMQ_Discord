@@ -1,7 +1,6 @@
-const { sendInfoMessage } = require("../helpers/utils.js");
+const { sendOptionsMessage, getDebugContext, GameOptions } = require("../helpers/utils.js");
 const DEFAULT_VOLUME = 50;
 const logger = require("../logger")("volume");
-const getDebugContext = require("../helpers/utils").getDebugContext
 
 module.exports = {
     call: ({ message, parsedMessage, gameSessions, guildPreference, db }) => {
@@ -12,10 +11,7 @@ module.exports = {
                 gameSession.isSongCached ? guildPreference.getCachedStreamVolume() : guildPreference.getStreamVolume()
             );
         }
-        sendInfoMessage(message,
-            "Volume",
-            `The volume is \`${guildPreference.getVolume()}%\`.`
-        );
+        sendOptionsMessage(message, guildPreference, GameOptions.VOLUME);
         logger.info(`${getDebugContext(message)} | Volume set to ${guildPreference.getVolume()}.`);
     },
     validations: {

@@ -1,7 +1,6 @@
 const helpMessages = require('../data/help_strings.json');
 const logger = require("../logger")("help");
-const getDebugContext = require("../helpers/utils").getDebugContext
-const { EMBED_INFO_COLOR, sendErrorMessage } = require("../helpers/utils.js");
+const { EMBED_INFO_COLOR, sendErrorMessage, getDebugContext } = require("../helpers/utils.js");
 const placeholder = "!";
 
 module.exports = {

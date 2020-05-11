@@ -1,7 +1,6 @@
-const { sendInfoMessage } = require("../helpers/utils.js");
+const { sendInfoMessage, getDebugContext } = require("../helpers/utils.js");
 const DEFAULT_BOT_PREFIX = ",";
 const logger = require("../logger")("prefix");
-const getDebugContext = require("../helpers/utils").getDebugContext
 
 module.exports = {
     call: ({ message, parsedMessage, guildPreference, db }) => {

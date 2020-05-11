@@ -1,7 +1,6 @@
 const GENDER = { MALE: "male", FEMALE: "female", COED: "coed" }
 const logger = require("../logger")("gender");
-const getDebugContext = require("../helpers/utils").getDebugContext
-const { sendErrorMessage, sendInfoMessage } = require("../helpers/utils.js");
+const { sendOptionsMessage, getDebugContext, GameOptions } = require("../helpers/utils.js");
 
 module.exports = {
     call: ({ guildPreference, message, parsedMessage, db }) => {
@@ -20,9 +19,7 @@ module.exports = {
             }
 
         }
-        sendInfoMessage(message,
-            "Gender",
-            `Songs will be played from ${selectedGenderStr} artists.`)
+        sendOptionsMessage(message, guildPreference, GameOptions.GENDER);
         logger.info(`${getDebugContext(message)} | Genders set to ${selectedGenderStr}`);
     },
     validations: {
