@@ -6,6 +6,7 @@ const fetchVideoInfo = require("youtube-info");
 const hangulRomanization = require("hangul-romanization");
 const fs = require("fs");
 const logger = require("../logger")("utils")
+const GameOptions = {"GENDER": "Gender", "CUTOFF": "Cutoff", "LIMIT": "Limit" , "VOLUME": "Volume"};
 
 const startGame = async (gameSession, guildPreference, db, message, client) => {
     if (!gameSession || gameSession.finished) {
@@ -73,19 +74,49 @@ const sendErrorMessage = (message, title, description) => {
         }
     });
 }
+
+const sendOptionsMessage = (message, guildPreference, updatedOption) => {
+    let cutoffString = `${guildPreference.getBeginningCutoffYear()}`;
+    let genderString = `${guildPreference.getSQLGender()}`;
+    let limitString = `${guildPreference.getLimit()}`;
+    let volumeString = `${guildPreference.getVolume()}`;
+
+    cutoffString = updatedOption == GameOptions.CUTOFF ? bold(cutoffString) : codeLine(cutoffString);
+    genderString = updatedOption == GameOptions.GENDER ? bold(genderString) : codeLine(genderString);
+    limitString = updatedOption == GameOptions.LIMIT ? bold(limitString) : codeLine(limitString);
+    volumeString = updatedOption == GameOptions.VOLUME ? bold(volumeString) : codeLine(volumeString);
+    
+    sendInfoMessage(message,
+        updatedOption == null ? "Options" : `${updatedOption} updated`,
+        `Now playing the ${limitString} most popular songs by ${genderString} artists starting from the year ${cutoffString} at ${volumeString}% volume.`
+    );
+}
 const getDebugContext = (message) => {
     return `gid: ${message.guild.id}, uid: ${message.author.id}`
 }
+
+const bold = (text) => {
+    return `**${text}**`;
+}
+
+const italicize = (text) => {
+    return `*${text}*`;
+}
+
+const codeLine = (text) => {
+    return `\`${text}\``
+}
+
 module.exports = {
     EMBED_INFO_COLOR,
     EMBED_ERROR_COLOR,
-
+    GameOptions,
     startGame,
     sendSongMessage,
     getDebugContext,
     sendInfoMessage,
     sendErrorMessage,
-
+    sendOptionsMessage,
     sendScoreboard: (message, gameSession) => {
         message.channel.send({
             embed: {

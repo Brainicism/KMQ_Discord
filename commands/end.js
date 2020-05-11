@@ -1,6 +1,5 @@
-const { sendSongMessage, disconnectVoiceConnection, sendInfoMessage } = require("../helpers/utils.js")
+const { sendSongMessage, disconnectVoiceConnection, sendInfoMessage, getDebugContext } = require("../helpers/utils.js")
 const logger = require ("../logger")("end");
-const getDebugContext = require("../helpers/utils").getDebugContext
 
 module.exports = {
     call: ({ client, gameSessions, message }) => {
