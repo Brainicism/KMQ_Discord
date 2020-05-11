@@ -52,7 +52,6 @@ const sendSongMessage = (message, gameSession, isForfeit) => {
     })
 }
 const sendInfoMessage = (message, title, description, footerText, footerImageWithPath) => {
-    let footerImage = footerImageWithPath ? path.basename(footerImageWithPath) : null;
     let embed = new Discord.MessageEmbed({
         color: EMBED_INFO_COLOR,
         author: {
@@ -60,15 +59,15 @@ const sendInfoMessage = (message, title, description, footerText, footerImageWit
             icon_url: message.author.avatarURL()
         },
         title: `**${title}**`,
-        description: description,
-        footer: {
-            text: footerText,
-            icon_url: `attachment://${footerImage}`
-        }
+        description: description
     })
+
     if (footerImageWithPath) {
         embed.attachFiles(footerImageWithPath);
+        let footerImage = path.basename(footerImageWithPath);
+        embed.setFooter(footerText, `attachment://${footerImage}`)
     }
+
     message.channel.send(embed);
 }
 const sendErrorMessage = (message, title, description) => {
