@@ -1,11 +1,14 @@
-const EMBED_INFO_COLOR = 0x000000; // BLACK
-const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 const SONG_CACHE_DIR = require("../config.json").songCacheDir;
 const ytdl = require("ytdl-core");
 const fetchVideoInfo = require("youtube-info");
 const hangulRomanization = require("hangul-romanization");
 const fs = require("fs");
 const logger = require("../logger")("utils")
+const path = require("path");
+const Discord = require("discord.js");
+
+const EMBED_INFO_COLOR = 0x000000; // BLACK
+const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 const GameOptions = {"GENDER": "Gender", "CUTOFF": "Cutoff", "LIMIT": "Limit" , "VOLUME": "Volume"};
 
 const startGame = async (gameSession, guildPreference, db, message, client) => {
@@ -48,18 +51,24 @@ const sendSongMessage = (message, gameSession, isForfeit) => {
         }
     })
 }
-const sendInfoMessage = (message, title, description) => {
-    message.channel.send({
-        embed: {
-            color: EMBED_INFO_COLOR,
-            author: {
-                name: message.author.username,
-                icon_url: message.author.avatarURL()
-            },
-            title: `**${title}**`,
-            description: description
-        }
-    });
+const sendInfoMessage = (message, title, description, footerText, footerImageWithPath) => {
+    let embed = new Discord.MessageEmbed({
+        color: EMBED_INFO_COLOR,
+        author: {
+            name: message.author.username,
+            icon_url: message.author.avatarURL()
+        },
+        title: `**${title}**`,
+        description: description
+    })
+
+    if (footerImageWithPath) {
+        embed.attachFiles(footerImageWithPath);
+        let footerImage = path.basename(footerImageWithPath);
+        embed.setFooter(footerText, `attachment://${footerImage}`)
+    }
+
+    message.channel.send(embed);
 }
 const sendErrorMessage = (message, title, description) => {
     message.channel.send({
@@ -85,10 +94,12 @@ const sendOptionsMessage = (message, guildPreference, updatedOption) => {
     genderString = updatedOption == GameOptions.GENDER ? bold(genderString) : codeLine(genderString);
     limitString = updatedOption == GameOptions.LIMIT ? bold(limitString) : codeLine(limitString);
     volumeString = updatedOption == GameOptions.VOLUME ? bold(volumeString) : codeLine(volumeString);
-    
+
     sendInfoMessage(message,
         updatedOption == null ? "Options" : `${updatedOption} updated`,
-        `Now playing the ${limitString} most popular songs by ${genderString} artists starting from the year ${cutoffString} at ${volumeString}% volume.`
+        `Now playing the ${limitString} most popular songs by ${genderString} artists starting from the year ${cutoffString} at ${volumeString}% volume.`,
+        updatedOption == null ? `Psst. Your bot prefix is \`${guildPreference.getBotPrefix()}\`.` : null,
+        updatedOption == null ? "assets/tsukasa.jpg" : null
     );
 }
 const getDebugContext = (message) => {
