@@ -3,6 +3,8 @@ K-pop Music Quiz
 
 A kpop game in Discord, using [Aoimirai's database](http://www.aoimirai.net/kpop/index.html) of songs. Test your reflexes by guessing the right song name before your friends!
 
+Join our [support server](https://discord.gg/RCuzwYV) for help and to play with us! We're open to feature requests/bug reports too!
+
 [![Discord Bots](https://top.gg/api/widget/508759831755096074.svg)](https://top.gg/bot/508759831755096074)
 
 # Instructions
