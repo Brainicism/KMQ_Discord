@@ -2,5 +2,6 @@
     "botToken": "YOUR BOT TOKEN HERE",
     "dbUser": "root",
     "dbPassword": "",
-    "songCacheDir": "./.cache"
+    "songCacheDir": "./.cache",
+    "topGGToken": ""
 }

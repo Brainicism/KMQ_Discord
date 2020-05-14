@@ -11,6 +11,7 @@
   "dependencies": {
     "@discordjs/opus": "^0.1.0",
     "csv-parse": "^4.8.8",
+    "dblapi.js": "^2.4.0",
     "discord.js": "^12.1.1",
     "hangul-romanization": "0.0.7",
     "log4js": "^6.2.1",
