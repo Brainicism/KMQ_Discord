@@ -118,6 +118,15 @@ const codeLine = (text) => {
     return `\`${text}\``
 }
 
+const touch = (filePath) => {
+    try {
+        let currentTime = new Date();
+        fs.utimesSync(filePath, currentTime, currentTime);
+      } catch (err) {
+        fs.closeSync(fs.openSync(filePath, 'w'));
+      }
+}
+
 module.exports = {
     EMBED_INFO_COLOR,
     EMBED_ERROR_COLOR,
@@ -238,6 +247,8 @@ const playSong = async (gameSession, guildPreference, db, message, client) => {
                 })
             })
         }
+    } else {
+        touch(cachedSongLocation);
     }
     if (!gameSession.connection || client.voice.connections.get(message.guild.id) == null) {
         try {
