@@ -25,7 +25,7 @@ client.on("message", (message) => {
     let botPrefix = guildPreference.getBotPrefix();
     let parsedMessage = parseMessage(message.content, botPrefix) || null;
 
-    if (message.mentions.has(client.user)) {
+    if (message.mentions.has(client.user) && message.content.split(" ").length == 1) {
         // Any message that mentions the bot sends the current options
         options.call({message, guildPreference});
     }
