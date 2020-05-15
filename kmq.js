@@ -1,7 +1,8 @@
 const Discord = require("discord.js");
 const mysql = require("promise-mysql");
-
 const fs = require("fs");
+const DBL = require("dblapi.js");
+
 const client = new Discord.Client();
 const logger = require('./logger')("kmq");
 const config = require("./config.json");
@@ -10,10 +11,25 @@ const guessSong = require("./helpers/guess_song");
 const validate = require("./helpers/validate");
 const options = require("./commands/options");
 const { clearPartiallyCachedSongs } = require("./helpers/utils");
+
 let db;
 let commands = {};
 let gameSessions = {};
 let guildPreferences = {};
+
+const dbl = config.topGGToken ? new DBL(config.topGGToken, client) : null;
+
+if (dbl) {
+    dbl.on('posted', () => {
+        logger.info('Server count posted!');
+    });
+    dbl.on('error', (e) => {
+        logger.error(`Server count post failed! ${e}`);
+    });
+}
+else {
+    logger.info("No top.gg token passed (check your config.json)! Ignoring posting top.gg server count.");
+}
 
 client.on("ready", () => {
     logger.info(`Logged in as ${client.user.tag}!`);
