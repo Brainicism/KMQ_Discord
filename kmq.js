@@ -43,7 +43,7 @@ client.on("message", (message) => {
 
     if (message.mentions.has(client.user) && message.content.split(" ").length == 1) {
         // Any message that mentions the bot sends the current options
-        options.call({message, guildPreference});
+        options.call({ message, guildPreference });
     }
 
     if (parsedMessage && commands[parsedMessage.action]) {
@@ -147,8 +147,12 @@ const parseMessage = (message, botPrefix) => {
             let command = require(`./commands/${file}`);
             let commandName = file.split(".")[0];
             commands[commandName] = command;
+            if (command.aliases) {
+                command.aliases.forEach((alias) => {
+                    commands[alias] = command;
+                });
+            }
         });
     });
-
     clearPartiallyCachedSongs();
 })();

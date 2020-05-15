@@ -20,7 +20,7 @@ Join our [support server](https://discord.gg/RCuzwYV) for help and to play with 
 4. `npm start` to start the K-pop Music Quiz bot
 
 # Gameplay
-Gameplay is initiated via `,random`, which invites the bot to a voice channel. The bot will begin to play a random kpop song based on the game options. Users can guess the song by typing the name of the song. 
+Gameplay is initiated via `,play`, which invites the bot to a voice channel. The bot will begin to play a random kpop song based on the game options. Users can guess the song by typing the name of the song. 
 
 ![alt text](/images/scoreboard.png)
 
