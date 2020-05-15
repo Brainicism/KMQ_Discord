@@ -1,13 +1,15 @@
-const request = require("request-promise")
-const fs = require("fs")
-const mkdirp = require("mkdirp")
+const request = require("request-promise");
+const fs = require("fs");
+const mkdirp = require("mkdirp");
 const { execSync } = require("child_process");
 const unzipper = require("unzipper")
 const mysql = require("promise-mysql");
 const config = require("../config.json");
 const rmfr = require('rmfr');
 const fileUrl = "http://kpop.aoimirai.net/download.php";
-const logger = require("../logger")("seed_db")
+const logger = require("../logger")("seed_db");
+const prependFile = require('prepend-file');
+
 //TODO: this is probably not how you use promises fix later
 
 let options = {
@@ -19,6 +21,10 @@ let options = {
     }
 }
 const kmqTempDir = "/tmp/kmq";
+
+let setSqlMode = (sqlFile) => {
+    prependFile.sync(sqlFile, `SET @@sql_mode="";\n`);
+}
 
 let main = async function () {
     await rmfr(kmqTempDir);
@@ -58,12 +64,14 @@ let main = async function () {
         .then(async () => {
             return new Promise((resolve, reject) => {
                 fs.readdir(`${kmqTempDir}/sql`, async (err, files) => {
+                    let seedFile = `${kmqTempDir}/sql/${files[0]}`;
                     logger.info("Dropping K-Pop video database");
                     await db.query("DROP DATABASE IF EXISTS kpop_videos;");
                     logger.info("Creating K-pop video database")
                     await db.query("CREATE DATABASE kpop_videos;");
                     logger.info("Seeding K-Pop video database");
-                    execSync(`mysql kpop_videos < ${kmqTempDir}/sql/${files[0]}`)
+                    setSqlMode(seedFile);
+                    execSync(`mysql kpop_videos < ${seedFile}`)
                     logger.info(`Imported database dump (${files[0]}) successfully`);
                     logger.info("Creating K-pop Music Quiz database");
                     await db.query("CREATE DATABASE IF NOT EXISTS kmq");

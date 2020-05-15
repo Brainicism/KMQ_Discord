@@ -10,7 +10,6 @@ Join our [support server](https://discord.gg/RCuzwYV) for help and to play with 
 # Instructions
 ## Prerequisites
 - MySQL (tested on 5.7)
-    - add `sql-mode=""` under `[mysqld]` in `my.cnf` (required due to the way the Aoimirai database dump handles null values)
 - NodeJS (Requires at least v12)
 
 ## Setup
