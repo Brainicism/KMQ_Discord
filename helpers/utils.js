@@ -257,6 +257,9 @@ const playSong = async (gameSession, guildPreference, db, message, client) => {
         }
         catch (err) {
             logger.error(`${getDebugContext(message)} | Error joining voice connection. cached = ${gameSession.isSongCached}. song = ${gameSession.getDebugSongDetails()} err = ${err}`);
+            sendErrorMessage(message, "Missing voice permissions", "The bot is unable to join the voice channel you are in.");
+            gameSession.endRound();
+            return;
         }
     }
     // We are unable to pipe the above ytdl stream into Discord.js's play
