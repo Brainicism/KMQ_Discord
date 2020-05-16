@@ -11,7 +11,7 @@ module.exports = {
                 gameSession.isSongCached ? guildPreference.getCachedStreamVolume() : guildPreference.getStreamVolume()
             );
         }
-        sendOptionsMessage(message, guildPreference, GameOptions.VOLUME);
+        sendOptionsMessage(message, guildPreference, db, GameOptions.VOLUME);
         logger.info(`${getDebugContext(message)} | Volume set to ${guildPreference.getVolume()}.`);
     },
     validations: {

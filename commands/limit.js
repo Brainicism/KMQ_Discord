@@ -1,11 +1,15 @@
-const { EMBED_INFO_COLOR, getDebugContext, sendOptionsMessage, GameOptions } = require("../helpers/utils.js");
+const { EMBED_INFO_COLOR, getDebugContext, sendOptionsMessage, getSongCount, GameOptions } = require("../helpers/utils.js");
 const DEFAULT_LIMIT = 500;
 const logger = require("../logger")("limit");
 
 module.exports = {
-    call: ({ message, parsedMessage, guildPreference, db }) => {
+    call: async ({ message, parsedMessage, guildPreference, db }) => {
         guildPreference.setLimit(parseInt(parsedMessage.components[0]), db);
-        sendOptionsMessage(message, guildPreference, GameOptions.LIMIT);
+        let songCount = await getSongCount(guildPreference, db);
+        if (guildPreference.getLimit() > songCount) {
+            guildPreference.setLimit(songCount, db);
+        }
+        sendOptionsMessage(message, guildPreference, db, GameOptions.LIMIT);
         logger.info(`${getDebugContext(message)} | Limit set to ${guildPreference.getLimit()}`);
     },
     validations: {
