@@ -43,6 +43,17 @@ module.exports = {
             }
         ]
     },
+    help: {
+        name: "gender",
+        description: "Choose the gender of the artists you'd like to hear from.",
+        usage: "!gender [gender1] [gender2] [gender3]",
+        arguments: [
+            {
+                name: "gender",
+                description: "To choose between multiple genders, enter each gender separated by a space. Valid values are \`female\`, \`male\`, and \`coed\`"
+            }
+        ]
+    },
     GENDER
 }
 

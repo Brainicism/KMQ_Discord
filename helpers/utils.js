@@ -106,6 +106,26 @@ const getDebugContext = (message) => {
     return `gid: ${message.guild.id}, uid: ${message.author.id}`
 }
 
+const getCommandFiles = () => {
+    return new Promise((resolve, reject) => {
+        let commandMap = {};
+        fs.readdir("./commands", (err, files) => {
+            if (err) {
+                reject();
+                return logger.error(`Unable to read commands error = ${err}`);
+            }
+            files = files.filter(x => x.endsWith(".js"));
+            files.forEach(file => {
+                let command = require(`../commands/${file}`);
+                let commandName = file.split(".")[0];
+
+                commandMap[commandName] = command;
+            })
+            resolve(commandMap);
+        });
+    })
+}
+
 const bold = (text) => {
     return `**${text}**`;
 }
@@ -132,6 +152,7 @@ module.exports = {
     EMBED_ERROR_COLOR,
     GameOptions,
     startGame,
+    getCommandFiles,
     sendSongMessage,
     getDebugContext,
     sendInfoMessage,

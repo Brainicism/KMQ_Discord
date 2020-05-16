@@ -18,5 +18,11 @@ module.exports = {
             startGame(gameSessions[message.guild.id], guildPreference, db, message, client);
         }
     },
-    aliases: ["random"]
+    aliases: ["random"],
+    help: {
+        name: "play",
+        description: "Bot plays a random song in VC; type in your guess first to get a point.",
+        usage: "!play",
+        arguments: []
+    }
 }

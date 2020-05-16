@@ -1,6 +1,6 @@
 const { sendOptionsMessage, GameOptions, getDebugContext } = require("../helpers/utils.js");
 const BEGINNING_SEARCH_YEAR = 2008;
-const logger = require ("../logger")("cutoff");
+const logger = require("../logger")("cutoff");
 
 module.exports = {
     call: ({ message, parsedMessage, guildPreference, db }) => {
@@ -17,6 +17,17 @@ module.exports = {
                 type: 'number',
                 minValue: BEGINNING_SEARCH_YEAR,
                 maxValue: (new Date()).getFullYear()
+            }
+        ]
+    },
+    help: {
+        name: "cutoff",
+        description: "Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen.",
+        usage: "!cutoff [year]",
+        arguments: [
+            {
+                name: "year",
+                description: "Songs typically range from 2008 to 2018."
             }
         ]
     },

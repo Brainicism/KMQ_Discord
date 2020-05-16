@@ -26,5 +26,16 @@ module.exports = {
             }
         ]
     },
+    help: {
+        name: "volume",
+        description: "Set the volume at which the bot will output your music.",
+        usage: "!volume [percentage]",
+        arguments: [
+            {
+                name: "percentage",
+                description: "A valid volume value is from 1 to 100. You do not need to include the percentage symbol. The default volume is 50%."
+            }
+        ]
+    },
     DEFAULT_VOLUME
 }

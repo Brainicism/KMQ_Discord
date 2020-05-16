@@ -12,6 +12,6 @@ module.exports = {
                 title: "**GIVE ME YOUR MONEY**",
             }
         })
-            .then((message) => message.delete({ timeout: 100 }));
+        .then((message) => message.delete({ timeout: 100 }));
     }
 }

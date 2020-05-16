@@ -1,48 +1,77 @@
 const helpMessages = require('../data/help_strings.json');
 const logger = require("../logger")("help");
-const { EMBED_INFO_COLOR, sendErrorMessage, getDebugContext } = require("../helpers/utils.js");
+const { EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, getCommandFiles } = require("../helpers/utils.js");
 const placeholder = "!";
-
 module.exports = {
     call: ({ parsedMessage, message, botPrefix }) => {
-        help(message, parsedMessage.argument, botPrefix);
+        helpMessage(message, parsedMessage.argument, botPrefix);
+    },
+    help:
+    {
+        "name": "help",
+        "description": "Get help about the game's commands. Add the action as an argument to get information about specific arguments.",
+        "usage": "!help [action]",
+        "arguments": [
+            {
+                "name": "action",
+                "description": "Any valid command for the K-pop Music Quiz bot"
+            }
+        ]
     }
 }
 
 // Usage: `!help [action]` or `!help`
-const help = (message, action, botPrefix) => {
+const helpMessage = async (message, action, botPrefix) => {
     let embedTitle = "";
     let embedDesc = "";
     let embedFields = [];
+    //TODO: potentially do some caching?
+    let commandFiles = await getCommandFiles();
+    let commandNamesWithAliases = Object.keys(commandFiles).filter((commandName) => commandFiles[commandName].aliases);
+    for (let commandName of commandNamesWithAliases) {
+        let aliases = commandFiles[commandName].aliases;
+        aliases.forEach(alias => {
+            commandFiles[alias] = commandFiles[commandName];
+        });
+    }
+    
+    let commandNamesWithHelp = Object.keys(commandFiles).filter((commandName) => commandFiles[commandName].help);   
+    let embedFooter = null;
     if (action) {
-        let helpActionList = helpMessages.actions.map(a => a.name);
-        if (!helpActionList.includes(action)) {
+        if (!(commandNamesWithHelp.includes(action))) {
             logger.warn(`${getDebugContext(message)} | Missing documentation: ${action}`);
             sendErrorMessage(message,
                 "K-pop Music Quiz Command Help",
                 `Sorry, there is no documentation on ${action}`)
             return;
         }
-
-        let detailedAction = helpMessages.actions.find(a => a.name === action)
-        embedTitle = `\`${detailedAction.usage.replace(placeholder, botPrefix)}\``;
-        embedDesc = detailedAction.description;
-        detailedAction.arguments.forEach((argument) => {
+        let helpManual = commandFiles[action].help;
+        embedTitle = `\`${helpManual.usage.replace(placeholder, botPrefix)}\``;
+        embedDesc = helpManual.description;
+        helpManual.arguments.forEach((argument) => {
             embedFields.push({
                 name: argument.name,
                 value: argument.description
             })
         });
+        if (commandFiles[action].aliases) {
+            embedFooter = {
+                text: `Aliases: ${commandFiles[action].aliases.join(", ")}`
+            }
+        }
+        
     }
     else {
         embedTitle = "K-pop Music Quiz Command Help";
         embedDesc = helpMessages.rules.replace(placeholder, botPrefix);
-        helpMessages.actions.forEach((action) => {
+        commandNamesWithHelp.forEach((commandName) => {
+            let helpManual = commandFiles[commandName].help;
             embedFields.push({
-                name: action.name,
-                value: `${action.description}\nUsage: \`${action.usage.replace(placeholder, botPrefix)}\``
+                name: helpManual.name,
+                value: `${helpManual.description}\nUsage: \`${helpManual.usage.replace(placeholder, botPrefix)}\``
             })
         });
+      
     }
 
     message.channel.send({
@@ -50,7 +79,8 @@ const help = (message, action, botPrefix) => {
             title: embedTitle,
             color: EMBED_INFO_COLOR,
             description: embedDesc,
-            fields: embedFields
+            fields: embedFields, 
+            footer: embedFooter
         }
     })
 }

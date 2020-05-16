@@ -20,5 +20,16 @@ module.exports = {
             }
         ]
     },
+    help: {
+        name: "limit",
+        description: "Set a maximum number of results in the song query. This effectively sets the 'Top X number of songs' based on the selected filters.",
+        usage: "!limit [limit]",
+        arguments: [
+            {
+                name: "limit",
+                description: "The higher the number, popular songs become less frequent."
+            }
+        ]
+    },
     DEFAULT_LIMIT
 }
