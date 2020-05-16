@@ -1,4 +1,4 @@
-const SONG_CACHE_DIR = require("../config.json").songCacheDir;
+const SONG_CACHE_DIR = require("../../config/app_config.json").songCacheDir;
 const ytdl = require("ytdl-core");
 const fetchVideoInfo = require("youtube-info");
 const hangulRomanization = require("hangul-romanization");

@@ -1,10 +1,10 @@
 {
   "name": "kmq",
   "version": "1.0.0",
-  "main": "secret.js",
+  "main": "src/kmq.js",
   "scripts": {
     "seed": "node seed/seed_db.js",
-    "start": "node kmq.js"
+    "start": "cd src/ && node kmq.js"
   },
   "author": "",
   "license": "ISC",
