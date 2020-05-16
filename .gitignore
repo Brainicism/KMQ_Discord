@@ -1,6 +1,6 @@
 node_modules/
 config.json
 main.db
-config.json
+config/app_config.json
 .cache/
 logs/

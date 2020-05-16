@@ -1,6 +1,6 @@
 const logger = require("../logger")("validate")
-const getDebugContext = require("../helpers/utils").getDebugContext;
-const { sendErrorMessage } = require("../helpers/utils.js");
+const getDebugContext = require("./utils").getDebugContext;
+const { sendErrorMessage } = require("./utils.js");
 
 module.exports = (message, parsedMessage, validations, botPrefix) => {
     if (!validations) return true;

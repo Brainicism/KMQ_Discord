@@ -5,7 +5,7 @@ const DBL = require("dblapi.js");
 
 const client = new Discord.Client();
 const logger = require('./logger')("kmq");
-const config = require("./config.json");
+const config = require("../config/app_config.json");
 const GuildPreference = require("./models/guild_preference");
 const guessSong = require("./helpers/guess_song");
 const validate = require("./helpers/validate");
