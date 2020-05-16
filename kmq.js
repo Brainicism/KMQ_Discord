@@ -6,6 +6,7 @@ const DBL = require("dblapi.js");
 const client = new Discord.Client();
 const logger = require('./logger')("kmq");
 const config = require("./config.json");
+const { validateConfig } = require("./config_validator");
 const GuildPreference = require("./models/guild_preference");
 const guessSong = require("./helpers/guess_song");
 const validate = require("./helpers/validate");
@@ -116,16 +117,18 @@ const parseMessage = (message, botPrefix) => {
 }
 
 (async () => {
+    if (!validateConfig(config)) {
+        logger.error("Invalid config, aborting.");
+        process.exit(1);
+    }
+    
     db = await mysql.createPool({
         connectionLimit: 10,
         host: "localhost",
         user: config.dbUser,
         password: config.dbPassword
     });
-    if (!config.botToken || config.botToken === "YOUR BOT TOKEN HERE") {
-        logger.error("No bot token set. Please update config.json!")
-        process.exit(1);
-    }
+
     let guildPreferencesTableCreation = `CREATE TABLE IF NOT EXISTS kmq.guild_preferences(
         guild_id TEXT NOT NULL,
         guild_preference JSON NOT NULL
@@ -138,8 +141,6 @@ const parseMessage = (message, botPrefix) => {
     fields.forEach((field) => {
         guildPreferences[field.guild_id] = new GuildPreference(field.guild_id, JSON.parse(field.guild_preference));
     });
-    client.login(config.botToken);
-
     fs.readdir("./commands/", (err, files) => {
         if (err) return console.error(err);
         files.forEach(file => {
@@ -155,4 +156,5 @@ const parseMessage = (message, botPrefix) => {
         });
     });
     clearPartiallyCachedSongs();
+    client.login(config.botToken);
 })();

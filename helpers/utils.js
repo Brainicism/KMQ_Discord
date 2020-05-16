@@ -9,7 +9,7 @@ const Discord = require("discord.js");
 
 const EMBED_INFO_COLOR = 0x000000; // BLACK
 const EMBED_ERROR_COLOR = 0xE74C3C; // RED
-const GameOptions = {"GENDER": "Gender", "CUTOFF": "Cutoff", "LIMIT": "Limit" , "VOLUME": "Volume"};
+const GameOptions = { "GENDER": "Gender", "CUTOFF": "Cutoff", "LIMIT": "Limit", "VOLUME": "Volume" };
 
 const startGame = async (gameSession, guildPreference, db, message, client) => {
     if (!gameSession || gameSession.finished) {
@@ -122,9 +122,25 @@ const touch = (filePath) => {
     try {
         let currentTime = new Date();
         fs.utimesSync(filePath, currentTime, currentTime);
-      } catch (err) {
+    } catch (err) {
         fs.closeSync(fs.openSync(filePath, 'w'));
-      }
+    }
+}
+
+const arraysEqual = (arr1, arr2) => {
+    if (arr1.length !== arr2.length) {
+        return false;
+    }
+
+    var arr1 = arr1.concat().sort();
+    var arr2 = arr2.concat().sort();
+
+    for (var i = 0; i < arr1.length; i++) {
+        if (arr1[i] !== arr2[i]) {
+            return false;
+        }
+    }
+    return true;
 }
 
 module.exports = {
@@ -137,6 +153,7 @@ module.exports = {
     sendInfoMessage,
     sendErrorMessage,
     sendOptionsMessage,
+    arraysEqual,
     sendScoreboard: (message, gameSession) => {
         message.channel.send({
             embed: {
