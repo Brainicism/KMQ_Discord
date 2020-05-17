@@ -11,7 +11,7 @@ const GuildPreference = require("./models/guild_preference");
 const guessSong = require("./helpers/guess_song");
 const validate = require("./helpers/validate");
 const options = require("./commands/options");
-const { clearPartiallyCachedSongs } = require("./helpers/utils");
+const { clearPartiallyCachedSongs, getCommandFiles } = require("./helpers/utils");
 
 let db;
 let commands = {};
@@ -141,20 +141,16 @@ const parseMessage = (message, botPrefix) => {
     fields.forEach((field) => {
         guildPreferences[field.guild_id] = new GuildPreference(field.guild_id, JSON.parse(field.guild_preference));
     });
-    fs.readdir("./commands/", (err, files) => {
-        if (err) return console.error(err);
-        files.forEach(file => {
-            if (!file.endsWith(".js")) return;
-            let command = require(`./commands/${file}`);
-            let commandName = file.split(".")[0];
-            commands[commandName] = command;
-            if (command.aliases) {
-                command.aliases.forEach((alias) => {
-                    commands[alias] = command;
-                });
-            }
-        });
-    });
+
+    let commandFiles = await getCommandFiles();
+    for (const [commandName, command] of Object.entries(commandFiles)) {
+        commands[commandName] = command;
+        if (command.aliases) {
+            command.aliases.forEach((alias) => {
+                commands[alias] = command;
+            });
+        }
+    }
     clearPartiallyCachedSongs();
     client.login(config.botToken);
 })();

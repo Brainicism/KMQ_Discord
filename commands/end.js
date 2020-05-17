@@ -1,5 +1,5 @@
 const { sendSongMessage, disconnectVoiceConnection, sendInfoMessage, getDebugContext } = require("../helpers/utils.js")
-const logger = require ("../logger")("end");
+const logger = require("../logger")("end");
 
 module.exports = {
     call: ({ client, gameSessions, message }) => {
@@ -21,5 +21,11 @@ module.exports = {
         disconnectVoiceConnection(client, message);
         gameSession.finished = true;
         delete gameSessions[message.guild.id];
+    },
+    help: {
+        name: "end",
+        description: "Finishes the current game and decides on a winner.",
+        usage: "!end",
+        arguments: []
     }
 }

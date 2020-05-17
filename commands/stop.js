@@ -9,5 +9,11 @@ module.exports = {
             gameSession.endRound();
             logger.info(`${getDebugContext(message)} | Game round ended: ${gameSession.getDebugSongDetails()}`);
         }
+    },
+    help: {
+        name: "stop",
+        description: "The game will be suspended and the bot will reveal the answer to any ongoing games in session.",
+        usage: "!stop",
+        arguments: []
     }
 }
