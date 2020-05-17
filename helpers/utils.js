@@ -83,8 +83,20 @@ const sendErrorMessage = (message, title, description) => {
         }
     });
 }
-
-const sendOptionsMessage = (message, guildPreference, updatedOption) => {
+const getSongCount = async (guildPreference, db) => {
+    let query = `SELECT count(*) as count FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
+    WHERE FIND_IN_SET(members, ?) AND dead = "n" AND publishedon >= "?-01-01" AND vtype = "main"
+    ORDER BY kpop_videos.app_kpop.views DESC LIMIT ?;`;
+    try {
+        let result = await db.query(query, [guildPreference.getSQLGender(), guildPreference.getBeginningCutoffYear(), guildPreference.getLimit()])
+        return result[0].count;
+    }
+    catch (e) {
+        logger.error(`Error retrieving song count. guildPreference = ${guildPreference}`);
+        return -1;
+    }
+}
+const sendOptionsMessage = async (message, guildPreference, db, updatedOption) => {
     let cutoffString = `${guildPreference.getBeginningCutoffYear()}`;
     let genderString = `${guildPreference.getSQLGender()}`;
     let limitString = `${guildPreference.getLimit()}`;
@@ -95,9 +107,10 @@ const sendOptionsMessage = (message, guildPreference, updatedOption) => {
     limitString = updatedOption == GameOptions.LIMIT ? bold(limitString) : codeLine(limitString);
     volumeString = updatedOption == GameOptions.VOLUME ? bold(volumeString) : codeLine(volumeString);
 
+    let totalSongs = await getSongCount(guildPreference, db);
     sendInfoMessage(message,
         updatedOption == null ? "Options" : `${updatedOption} updated`,
-        `Now playing the ${limitString} most popular songs by ${genderString} artists starting from the year ${cutoffString} at ${volumeString}% volume.`,
+        `Now playing the ${limitString} out of the __${totalSongs}__ most popular songs  by ${genderString} artists starting from the year ${cutoffString} at ${volumeString}% volume.`,
         updatedOption == null ? `Psst. Your bot prefix is \`${guildPreference.getBotPrefix()}\`.` : null,
         updatedOption == null ? "assets/tsukasa.jpg" : null
     );
@@ -153,6 +166,7 @@ module.exports = {
     sendInfoMessage,
     sendErrorMessage,
     sendOptionsMessage,
+    getSongCount,
     arraysEqual,
     sendScoreboard: (message, gameSession) => {
         message.channel.send({

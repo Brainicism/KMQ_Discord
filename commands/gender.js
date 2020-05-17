@@ -19,7 +19,7 @@ module.exports = {
             }
 
         }
-        sendOptionsMessage(message, guildPreference, GameOptions.GENDER);
+        sendOptionsMessage(message, guildPreference, db, GameOptions.GENDER);
         logger.info(`${getDebugContext(message)} | Genders set to ${selectedGenderStr}`);
     },
     validations: {
