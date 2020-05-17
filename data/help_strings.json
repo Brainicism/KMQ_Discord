@@ -1,10 +1,10 @@
 {
-    "rules": "Type `!random` in chat and the bot will play a random kpoop song in VC. The goal of this game is to be the first person to guess the song name in chat. [Join our support server for more help!](https://discord.gg/RCuzwYV)",
+    "rules": "Type `!play` in chat and the bot will play a random kpop song in VC. The goal of this game is to be the first person to guess the song name in chat. [Join our support server for more help!](https://discord.gg/RCuzwYV)",
     "actions": [
         {
-            "name": "random",
+            "name": "play",
             "description": "Bot plays a random song in VC; type in your guess first to get a point.",
-            "usage": "!random",
+            "usage": "!play",
             "arguments": []
         },
         {
