@@ -97,6 +97,7 @@ client.on("voiceStateUpdate", (oldState, newState) => {
 const getGuildPreference = (guildPreferences, guildID) => {
     if (!guildPreferences[guildID]) {
         guildPreferences[guildID] = new GuildPreference(guildID);
+        logger.info(`New server joined: ${guildID}`);
         let guildPreferencesInsert = `INSERT INTO kmq.guild_preferences VALUES(?, ?)`;
         db.query(guildPreferencesInsert, [guildID, JSON.stringify(guildPreferences[guildID])]);
     }

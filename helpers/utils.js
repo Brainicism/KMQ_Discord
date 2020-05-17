@@ -92,7 +92,7 @@ const getSongCount = async (guildPreference, db) => {
         return result[0].count;
     }
     catch (e) {
-        logger.error(`Error retrieving song count. guildPreference = ${guildPreference}`);
+        logger.error(`Error retrieving song count. query = ${query} error = ${e}`);
         return -1;
     }
 }
