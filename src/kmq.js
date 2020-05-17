@@ -5,8 +5,8 @@ const DBL = require("dblapi.js");
 
 const client = new Discord.Client();
 const logger = require('./logger')("kmq");
-const config = require("./config.json");
 const { validateConfig } = require("./config_validator");
+const config = require("../config/app_config.json");
 const GuildPreference = require("./models/guild_preference");
 const guessSong = require("./helpers/guess_song");
 const validate = require("./helpers/validate");
@@ -121,7 +121,7 @@ const parseMessage = (message, botPrefix) => {
         logger.error("Invalid config, aborting.");
         process.exit(1);
     }
-    
+
     db = await mysql.createPool({
         connectionLimit: 10,
         host: "localhost",

@@ -12,7 +12,7 @@ module.exports = {
     validateConfig: (config) => {
         let valid = true;
         //check for mismatch between template and this file
-        let templateOptions = JSON.parse(fs.readFileSync("./config.json.template"));
+        let templateOptions = JSON.parse(fs.readFileSync("../config/app_config.json.template"));
         if (!arraysEqual(Object.keys(allowedOptions), Object.keys(templateOptions))){
             logger.error(`Configuration template and allowed options mismatch\n Allowed Options: ${Object.keys(allowedOptions)}\n Template Options: ${Object.keys(templateOptions)}`);
             valid = false;
