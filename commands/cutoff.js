@@ -5,7 +5,7 @@ const logger = require("../logger")("cutoff");
 module.exports = {
     call: ({ message, parsedMessage, guildPreference, db }) => {
         guildPreference.setBeginningCutoffYear(parseInt(parsedMessage.components[0]), db);
-        sendOptionsMessage(message, guildPreference, GameOptions.CUTOFF);
+        sendOptionsMessage(message, guildPreference, db, GameOptions.CUTOFF);
         logger.info(`${getDebugContext(message)} | Cutoff set to ${guildPreference.getBeginningCutoffYear()}`);
     },
     validations: {
