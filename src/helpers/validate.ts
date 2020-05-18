@@ -1,8 +1,8 @@
 const logger = require("../logger")("validate")
 const getDebugContext = require("./utils").getDebugContext;
-const { sendErrorMessage } = require("./utils.js");
+const { sendErrorMessage } = require("./utils");
 
-module.exports = (message, parsedMessage, validations, botPrefix) => {
+export default (message, parsedMessage, validations, botPrefix) => {
     if (!validations) return true;
     let args = parsedMessage.components;
     if (args.length > validations.maxArgCount || args.length < validations.minArgCount) {

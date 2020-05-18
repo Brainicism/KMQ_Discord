@@ -4,7 +4,9 @@
   "main": "src/kmq.js",
   "scripts": {
     "seed": "node seed/seed_db.js",
-    "start": "cd src/ && node kmq.js"
+    "start": "cd src/ && node kmq.js",
+    "dev": "cd src && ts-node kmq",
+    "prod": "tsc && cd built && node kmq.js"
   },
   "author": "",
   "license": "ISC",
@@ -21,6 +23,8 @@
     "request": "^2.88.2",
     "request-promise": "^4.2.5",
     "rmfr": "^2.0.0",
+    "ts-node-dev": "^1.0.0-pre.44",
+    "typescript": "^3.9.2",
     "unzip": "^0.1.11",
     "unzipper": "^0.10.10",
     "youtube-info": "^1.3.1",

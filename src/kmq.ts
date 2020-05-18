@@ -1,16 +1,16 @@
-const Discord = require("discord.js");
-const mysql = require("promise-mysql");
-const fs = require("fs");
-const DBL = require("dblapi.js");
+import * as Discord from "discord.js";
+import * as mysql from "promise-mysql";
+import * as DBL from "dblapi.js";
 
 const client = new Discord.Client();
 const logger = require('./logger')("kmq");
+import { validateConfig } from "./config_validator";
 const config = require("../config/app_config.json");
-const GuildPreference = require("./models/guild_preference");
-const guessSong = require("./helpers/guess_song");
-const validate = require("./helpers/validate");
-const options = require("./commands/options");
-const { clearPartiallyCachedSongs } = require("./helpers/utils");
+import GuildPreference from "./models/guild_preference";
+import guessSong from "./helpers/guess_song";
+import validate from "./helpers/validate";
+import * as options from "./commands/options";
+import { clearPartiallyCachedSongs, getCommandFiles } from "./helpers/utils";
 
 let db;
 let commands = {};
@@ -43,9 +43,8 @@ client.on("message", (message) => {
 
     if (message.mentions.has(client.user) && message.content.split(" ").length == 1) {
         // Any message that mentions the bot sends the current options
-        options.call({ message, guildPreference });
+        options.call({ message, guildPreference, db });
     }
-
     if (parsedMessage && commands[parsedMessage.action]) {
         let command = commands[parsedMessage.action];
         if (validate(message, parsedMessage, command.validations, botPrefix)) {
@@ -85,7 +84,7 @@ client.on("voiceStateUpdate", (oldState, newState) => {
             }
         }
         // Bot was disconnected by another user
-        if (!oldUserChannel.members.has(client)) {
+        if (!oldUserChannel.members.has(client.user.id)) {
             if (gameSession) {
                 gameSession.endRound();
             }
@@ -96,6 +95,7 @@ client.on("voiceStateUpdate", (oldState, newState) => {
 const getGuildPreference = (guildPreferences, guildID) => {
     if (!guildPreferences[guildID]) {
         guildPreferences[guildID] = new GuildPreference(guildID);
+        logger.info(`New server joined: ${guildID}`);
         let guildPreferencesInsert = `INSERT INTO kmq.guild_preferences VALUES(?, ?)`;
         db.query(guildPreferencesInsert, [guildID, JSON.stringify(guildPreferences[guildID])]);
     }
@@ -103,7 +103,7 @@ const getGuildPreference = (guildPreferences, guildID) => {
 }
 
 const parseMessage = (message, botPrefix) => {
-    if (message.charAt(0) !== botPrefix) return null;
+    // if (message.charAt(0) !== botPrefix) return null;
     let components = message.split(" ");
     let action = components.shift().substring(1);
     let argument = components.join(" ");
@@ -116,16 +116,18 @@ const parseMessage = (message, botPrefix) => {
 }
 
 (async () => {
+    if (!validateConfig(config)) {
+        logger.error("Invalid config, aborting.");
+        process.exit(1);
+    }
+
     db = await mysql.createPool({
         connectionLimit: 10,
         host: "localhost",
         user: config.dbUser,
         password: config.dbPassword
     });
-    if (!config.botToken || config.botToken === "YOUR BOT TOKEN HERE") {
-        logger.error("No bot token set. Please update config.json!")
-        process.exit(1);
-    }
+
     let guildPreferencesTableCreation = `CREATE TABLE IF NOT EXISTS kmq.guild_preferences(
         guild_id TEXT NOT NULL,
         guild_preference JSON NOT NULL
@@ -134,25 +136,19 @@ const parseMessage = (message, botPrefix) => {
     await db.query(guildPreferencesTableCreation);
 
     let fields = await db.query(`SELECT * FROM kmq.guild_preferences`);
-
     fields.forEach((field) => {
         guildPreferences[field.guild_id] = new GuildPreference(field.guild_id, JSON.parse(field.guild_preference));
     });
-    client.login(config.botToken);
-
-    fs.readdir("./commands/", (err, files) => {
-        if (err) return console.error(err);
-        files.forEach(file => {
-            if (!file.endsWith(".js")) return;
-            let command = require(`./commands/${file}`);
-            let commandName = file.split(".")[0];
-            commands[commandName] = command;
-            if (command.aliases) {
-                command.aliases.forEach((alias) => {
-                    commands[alias] = command;
-                });
-            }
-        });
-    });
+    let commandFiles = await getCommandFiles();
+    for (const [commandName, command] of Object.entries(commandFiles)) {
+        commands[commandName] = command;
+        console.log("Adding: " + commandName);
+        if (command.aliases) {
+            command.aliases.forEach((alias) => {
+                commands[alias] = command;
+            });
+        }
+    }
     clearPartiallyCachedSongs();
+    client.login(config.botToken);
 })();

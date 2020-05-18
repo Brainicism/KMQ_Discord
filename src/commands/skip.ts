@@ -5,29 +5,37 @@ const {
     areUserAndBotInSameVoiceChannel,
     getNumParticipants,
     EMBED_INFO_COLOR,
-    getDebugContext } = require("../helpers/utils.js");
+    getDebugContext } = require("../helpers/utils");
 const logger = require("../logger")("skip");
 
-module.exports = {
-    call: ({ gameSessions, guildPreference, client, message, db }) => {
-        let gameSession = gameSessions[message.guild.id];
-        if (!gameSession || !gameSession.gameInSession() || !areUserAndBotInSameVoiceChannel(message)) {
-            logger.warn(`${getDebugContext(message)} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.gameInSession(): ${gameSession && !gameSession.gameInSession()}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
-            return;
-        }
-        gameSession.userSkipped(message.author);
-        if (isSkipMajority(message, gameSession)) {
-            sendSkipMessage(message, gameSession);
-            sendSongMessage(message, gameSession, true);
-            gameSession.endRound();
-            startGame(gameSession, guildPreference, db, message, client);
-            logger.info(`${getDebugContext(message)} | Skip majority achieved.`);
-        }
-        else {
-            sendSkipNotification(message, gameSession);
-            logger.info(`${getDebugContext(message)} | Skip vote received.`);
-        }
+function call({ gameSessions, guildPreference, client, message, db }) {
+    let gameSession = gameSessions[message.guild.id];
+    if (!gameSession || !gameSession.gameInSession() || !areUserAndBotInSameVoiceChannel(message)) {
+        logger.warn(`${getDebugContext(message)} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.gameInSession(): ${gameSession && !gameSession.gameInSession()}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
+        return;
     }
+    gameSession.userSkipped(message.author);
+    if (isSkipMajority(message, gameSession)) {
+        sendSkipMessage(message, gameSession);
+        sendSongMessage(message, gameSession, true);
+        gameSession.endRound();
+        startGame(gameSession, guildPreference, db, message, client);
+        logger.info(`${getDebugContext(message)} | Skip majority achieved.`);
+    }
+    else {
+        sendSkipNotification(message, gameSession);
+        logger.info(`${getDebugContext(message)} | Skip vote received.`);
+    }
+}
+const help = {
+    name: "skip",
+    description: "Vote to skip the current song. A song is skipped when majority of participants vote to skip it.",
+    usage: "!skip",
+    arguments: []
+}
+export {
+    call,
+    help
 }
 
 function sendSkipNotification(message, gameSession) {
