@@ -1,6 +1,7 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import { sendOptionsMessage, getDebugContext, GameOptions } from "../helpers/utils";
-const logger = require("../logger")("volume");
+import _logger from "../logger";
+const logger = _logger("volume");
 const DEFAULT_VOLUME = 50;
 
 class VolumeCommand implements BaseCommand {

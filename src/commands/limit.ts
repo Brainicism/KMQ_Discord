@@ -1,6 +1,7 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import { getDebugContext, sendOptionsMessage, getSongCount, GameOptions } from "../helpers/utils";
-const logger = require("../logger")("limit");
+import _logger from "../logger";
+const logger = _logger("limit");
 const DEFAULT_LIMIT = 500;
 
 class LimitCommand implements BaseCommand {

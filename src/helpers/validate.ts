@@ -2,7 +2,8 @@ import { getDebugContext, sendErrorMessage } from "./utils";
 import * as Discord from "discord.js";
 import { ParsedMessage } from "types";
 import { CommandValidations } from "commands/base_command";
-const logger = require("../logger")("validate")
+import _logger from "../logger";
+const logger = _logger("validate");
 
 export default (message: Discord.Message, parsedMessage: ParsedMessage, validations: CommandValidations, botPrefix: string) => {
     if (!validations) return true;

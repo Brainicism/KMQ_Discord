@@ -1,5 +1,4 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-
 import { EMBED_INFO_COLOR } from "../helpers/utils";
 
 class RansomCommand implements BaseCommand {

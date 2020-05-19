@@ -1,6 +1,7 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import { sendInfoMessage, getDebugContext } from "../helpers/utils";
-const logger = require("../logger")("prefix");
+import _logger from "../logger";
+const logger = _logger("prefix");
 const DEFAULT_BOT_PREFIX = ",";
 
 class PrefixCommand implements BaseCommand {

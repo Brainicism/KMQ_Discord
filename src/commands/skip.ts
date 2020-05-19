@@ -9,7 +9,8 @@ import {
     EMBED_INFO_COLOR,
     getDebugContext
 } from "../helpers/utils";
-const logger = require("../logger")("skip");
+import _logger from "../logger";
+const logger = _logger("skip");
 
 class SkipCommand implements BaseCommand {
     call({ gameSessions, guildPreference, client, message, db }: CommandArgs) {

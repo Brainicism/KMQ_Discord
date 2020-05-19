@@ -1,6 +1,7 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import { sendOptionsMessage, getDebugContext, GameOptions } from "../helpers/utils";
-const logger = require("../logger")("gender");
+import _logger from "../logger";
+const logger = _logger("gender");
 const GENDER = { MALE: "male", FEMALE: "female", COED: "coed" }
 
 class GenderCommand implements BaseCommand {

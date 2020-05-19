@@ -1,7 +1,8 @@
 import GameSession from "../models/game_session";
 import { sendErrorMessage, startGame, getDebugContext } from "../helpers/utils";
 import BaseCommand, { CommandArgs } from "./base_command";
-const logger = require("../logger")("play");
+import _logger from "../logger";
+const logger = _logger("play");
 
 class PlayCommand implements BaseCommand {
     call({ message, db, gameSessions, guildPreference, client }: CommandArgs) {

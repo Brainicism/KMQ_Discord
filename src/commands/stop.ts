@@ -1,6 +1,7 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import { sendSongMessage, disconnectVoiceConnection, getDebugContext } from "../helpers/utils";
-const logger = require("../logger")("stop");
+import _logger from "../logger";
+const logger = _logger("stop");
 
 class StopCommand implements BaseCommand {
     call({ gameSessions, client, message }: CommandArgs) {

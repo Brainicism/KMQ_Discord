@@ -1,6 +1,7 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import { sendOptionsMessage, GameOptions, getDebugContext } from "../helpers/utils";
-const logger = require("../logger")("cutoff");
+import _logger from "../logger";
+const logger = _logger("cutoff");
 const BEGINNING_SEARCH_YEAR = 2008;
 
 class CutoffCommand implements BaseCommand {

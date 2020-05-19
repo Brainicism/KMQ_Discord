@@ -1,6 +1,7 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import { sendSongMessage, disconnectVoiceConnection, sendInfoMessage, getDebugContext } from "../helpers/utils";
-const logger = require("../logger")("end");
+import _logger from "../logger";
+const logger = _logger("end");
 
 class EndCommand implements BaseCommand {
     call({ client, gameSessions, message }: CommandArgs) {

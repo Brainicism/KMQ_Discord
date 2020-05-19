@@ -1,6 +1,7 @@
 import { arraysEqual } from "./helpers/utils";
 import * as fs from "fs";
-const logger = require("./logger")("config_validator");
+import _logger from "./logger";
+const logger = _logger("config_validator");
 
 const allowedOptions = {
     botToken: { required: true },

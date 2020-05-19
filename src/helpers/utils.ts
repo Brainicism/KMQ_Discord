@@ -8,7 +8,8 @@ import * as Discord from "discord.js";
 import GuildPreference from "models/guild_preference";
 import GameSession from "../models/game_session";
 import BaseCommand from "commands/base_command";
-const logger = require("../logger")("utils")
+import _logger from "../logger";
+const logger = _logger("utils");
 const EMBED_INFO_COLOR = 0x000000; // BLACK
 const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 const GameOptions = { "GENDER": "Gender", "CUTOFF": "Cutoff", "LIMIT": "Limit", "VOLUME": "Volume" };

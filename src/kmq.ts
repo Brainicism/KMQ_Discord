@@ -8,15 +8,19 @@ import validate from "./helpers/validate";
 import { clearPartiallyCachedSongs, getCommandFiles } from "./helpers/utils";
 import { ParsedMessage } from "types";
 import * as _config from "../config/app_config.json";
-const logger = require("./logger")("kmq");
+import { Pool } from "promise-mysql";
+import BaseCommand from "commands/base_command";
+import GameSession from "models/game_session";
+import _logger from "./logger";
+const logger = _logger("kmq");
 
 const client = new Discord.Client();
 
 const config: any = _config;
-let db;
-let commands = {};
-let gameSessions = {};
-let guildPreferences = {};
+let db: Pool;
+let commands: { [commandName: string]: BaseCommand } = {};
+let gameSessions: { [guildID: string]: GameSession } = {};
+let guildPreferences: { [guildID: string]: GuildPreference } = {};
 
 const dbl = config.topGGToken ? new DBL(config.topGGToken, client) : null;
 
