@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "src/kmq.js",
   "scripts": {
-    "seed": "node seed/seed_db.js",
+    "seed": "cd seed && node seed_db.js",
     "start": "cd src/ && node kmq.js"
   },
   "author": "",
