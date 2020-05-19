@@ -1,6 +1,6 @@
 const { sendSongMessage, getUserIdentifier, cleanSongName, startGame, getDebugContext } = require("./utils");
 const logger = require("../logger")("guess_song");
-const resolve = require('path').resolve
+const resolve = require("path").resolve
 
 export default ({ client, message, gameSessions, guildPreference, db }) => {
     let guess = cleanSongName(message.content);

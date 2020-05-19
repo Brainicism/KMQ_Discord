@@ -5,10 +5,10 @@ const { execSync } = require("child_process");
 const unzipper = require("unzipper")
 const mysql = require("promise-mysql");
 const config = require("../app_config.json");
-const rmfr = require('rmfr');
+const rmfr = require("rmfr");
 const fileUrl = "http://kpop.aoimirai.net/download.php";
 const logger = require("../logger")("seed_db");
-const prependFile = require('prepend-file');
+const prependFile = require("prepend-file");
 
 //TODO: this is probably not how you use promises fix later
 

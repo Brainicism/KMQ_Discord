@@ -3,7 +3,7 @@ import * as mysql from "promise-mysql";
 import * as DBL from "dblapi.js";
 
 const client = new Discord.Client();
-const logger = require('./logger')("kmq");
+const logger = require("./logger")("kmq");
 import { validateConfig } from "./config_validator";
 const config = require("../config/app_config.json");
 import GuildPreference from "./models/guild_preference";
@@ -19,10 +19,10 @@ let guildPreferences = {};
 const dbl = config.topGGToken ? new DBL(config.topGGToken, client) : null;
 
 if (dbl) {
-    dbl.on('posted', () => {
-        logger.info('Server count posted!');
+    dbl.on("posted", () => {
+        logger.info("Server count posted!");
     });
-    dbl.on('error', (e) => {
+    dbl.on("error", (e) => {
         logger.error(`Server count post failed! ${e}`);
     });
 }

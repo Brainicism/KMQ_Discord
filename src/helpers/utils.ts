@@ -156,7 +156,7 @@ const touch = (filePath: string) => {
         let currentTime = new Date();
         fs.utimesSync(filePath, currentTime, currentTime);
     } catch (err) {
-        fs.closeSync(fs.openSync(filePath, 'w'));
+        fs.closeSync(fs.openSync(filePath, "w"));
     }
 }
 
@@ -206,7 +206,7 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
             let cacheStream = fs.createWriteStream(tempLocation);
             ytdl(gameSession.getVideoID(), ytdlOptions)
                 .pipe(cacheStream);
-            cacheStream.on('finish', () => {
+            cacheStream.on("finish", () => {
                 fs.rename(tempLocation, cachedSongLocation, (error) => {
                     if (error) {
                         logger.error(`Error renaming temp song file from ${tempLocation} to ${cachedSongLocation}. err = ${error}`);
@@ -238,7 +238,7 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
         gameSession.isSongCached ? cacheStreamOptions : streamOptions);
     logger.info(`${getDebugContext(message)} | Playing song in voice connection. cached = ${gameSession.isSongCached}. song = ${gameSession.getDebugSongDetails()}`);
 
-    gameSession.dispatcher.on('finish', () => {
+    gameSession.dispatcher.on("finish", () => {
         sendSongMessage(message, gameSession, true);
         gameSession.endRound();
         logger.info(`${getDebugContext(message)} | Song finished without being guessed. song = ${gameSession.getDebugSongDetails()}`);
@@ -318,7 +318,7 @@ export function clearPartiallyCachedSongs() {
             return logger.error(error);
         }
 
-        const endingWithPartRegex = new RegExp('\\.part$');
+        const endingWithPartRegex = new RegExp("\\.part$");
         const partFiles = files.filter((file) => file.match(endingWithPartRegex));
         partFiles.forEach((partFile) => {
             fs.unlink(`${SONG_CACHE_DIR}/${partFile}`, (err) => {

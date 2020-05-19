@@ -1,6 +1,6 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import * as Discord from "discord.js"
-const helpMessages = require('../../data/help_strings.json');
+const helpMessages = require("../../data/help_strings.json");
 const logger = require("../logger")("help");
 const { EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, getCommandFiles } = require("../helpers/utils");
 const placeholder = "!";

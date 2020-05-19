@@ -18,7 +18,7 @@ class SkipCommand implements BaseCommand {
             logger.warn(`${getDebugContext(message)} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.gameInSession(): ${gameSession && !gameSession.gameInSession()}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
             return;
         }
-        gameSession.userSkipped(message.author);
+        gameSession.userSkipped(message.author.id);
         if (isSkipMajority(message, gameSession)) {
             sendSkipMessage(message, gameSession);
             sendSongMessage(message, gameSession, true);
@@ -72,10 +72,10 @@ function sendSkipMessage(message: Discord.Message, gameSession: GameSession) {
         .then((message) => message.delete({ timeout: 5000 }));
 }
 
-function isSkipMajority(message: Discord.Message, gameSession: GameSession) {
+function isSkipMajority(message: Discord.Message, gameSession: GameSession): boolean {
     return gameSession.getNumSkippers() >= getSkipsRequired(message);
 }
 
-function getSkipsRequired(message: Discord.Message) {
+function getSkipsRequired(message: Discord.Message): number {
     return Math.floor(getNumParticipants(message) * 0.5) + 1;
 }
