@@ -1,8 +1,9 @@
-const { sendSongMessage, getUserIdentifier, cleanSongName, startGame, getDebugContext } = require("./utils");
+import { CommandArgs } from "commands/base_command";
+import { resolve } from "path"
+import { sendSongMessage, getUserIdentifier, cleanSongName, startGame, getDebugContext } from "./utils";
 const logger = require("../logger")("guess_song");
-const resolve = require("path").resolve
 
-export default ({ client, message, gameSessions, guildPreference, db }) => {
+export default ({ client, message, gameSessions, guildPreference, db }: CommandArgs) => {
     let guess = cleanSongName(message.content);
     let gameSession = gameSessions[message.guild.id];
     if (gameSession.getSong() && guess === cleanSongName(gameSession.getSong())) {

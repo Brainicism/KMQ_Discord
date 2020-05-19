@@ -5,7 +5,8 @@
         "target": "es6",
         "module": "commonjs",
         "moduleResolution": "node",
-        "baseUrl": "src"
+        "baseUrl": "src",
+        "resolveJsonModule": true
     },
     "include": [
         "./src/**/*"

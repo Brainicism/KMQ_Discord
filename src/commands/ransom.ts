@@ -1,6 +1,6 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 
-const { EMBED_INFO_COLOR } = require("../helpers/utils");
+import { EMBED_INFO_COLOR } from "../helpers/utils";
 
 class RansomCommand implements BaseCommand {
     call({ message }: CommandArgs) {

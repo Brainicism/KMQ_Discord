@@ -1,14 +1,14 @@
-const SONG_CACHE_DIR = require("../../config/app_config.json").songCacheDir;
+import {songCacheDir as SONG_CACHE_DIR} from "../../config/app_config.json";
 import * as ytdl from "ytdl-core";
-import * as fetchVideoInfo from "youtube-info";
 import * as hangulRomanization from "hangul-romanization";
 import * as fs from "fs";
 import { Pool } from "promise-mysql"
-const logger = require("../logger")("utils")
 import * as path from "path";
 import * as Discord from "discord.js";
 import GuildPreference from "models/guild_preference";
 import GameSession from "../models/game_session";
+import BaseCommand from "commands/base_command";
+const logger = require("../logger")("utils")
 const EMBED_INFO_COLOR = 0x000000; // BLACK
 const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 const GameOptions = { "GENDER": "Gender", "CUTOFF": "Cutoff", "LIMIT": "Limit", "VOLUME": "Volume" };
@@ -53,7 +53,7 @@ const sendSongMessage = (message: Discord.Message, gameSession: GameSession, isF
         }
     })
 }
-const sendInfoMessage = (message: Discord.Message, title: string, description: string, footerText: string, footerImageWithPath: string) => {
+const sendInfoMessage = (message: Discord.Message, title: string, description?: string, footerText?: string, footerImageWithPath?: string) => {
     let embed = new Discord.MessageEmbed({
         color: EMBED_INFO_COLOR,
         author: {
@@ -85,7 +85,7 @@ const sendErrorMessage = (message: Discord.Message, title: string, description: 
         }
     });
 }
-const getSongCount = async (guildPreference: GuildPreference, db: Pool) => {
+const getSongCount = async (guildPreference: GuildPreference, db: Pool): Promise<number> => {
     let query = `SELECT count(*) as count FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
     WHERE FIND_IN_SET(members, ?) AND dead = "n" AND publishedon >= "?-01-01" AND vtype = "main"
     ORDER BY kpop_videos.app_kpop.views DESC LIMIT ?;`;
@@ -117,11 +117,11 @@ const sendOptionsMessage = async (message: Discord.Message, guildPreference: Gui
         updatedOption == null ? "assets/tsukasa.jpg" : null
     );
 }
-const getDebugContext = (message: Discord.Message) => {
+const getDebugContext = (message: Discord.Message): string => {
     return `gid: ${message.guild.id}, uid: ${message.author.id}`
 }
 
-const getCommandFiles = () => {
+const getCommandFiles = (): Promise<{[commandName: string]: BaseCommand}> => {
     return new Promise((resolve, reject) => {
         let commandMap = {};
         fs.readdir("./commands", async (err, files) => {
@@ -139,15 +139,15 @@ const getCommandFiles = () => {
     })
 }
 
-const bold = (text: string) => {
+const bold = (text: string): string => {
     return `**${text}**`;
 }
 
-const italicize = (text: string) => {
+const italicize = (text: string): string => {
     return `*${text}*`;
 }
 
-const codeLine = (text: string) => {
+const codeLine = (text: string): string => {
     return `\`${text}\``
 }
 
@@ -160,7 +160,7 @@ const touch = (filePath: string) => {
     }
 }
 
-const arraysEqual = (arr1: Array<any>, arr2: Array<any>) => {
+const arraysEqual = (arr1: Array<any>, arr2: Array<any>): boolean => {
     if (arr1.length !== arr2.length) {
         return false;
     }
@@ -276,11 +276,11 @@ export function disconnectVoiceConnection(client: Discord.Client, message: Disco
     }
 }
 
-export function getUserIdentifier(user: Discord.User) {
+export function getUserIdentifier(user: Discord.User): string {
     return `${user.username}#${user.discriminator}`
 }
 
-export function cleanSongName(name: string) {
+export function cleanSongName(name: string): string {
     let cleanName = name.toLowerCase()
         .split("(")[0]
         .normalize("NFD")
@@ -296,14 +296,14 @@ export function cleanSongName(name: string) {
     return cleanName;
 }
 
-export function areUserAndBotInSameVoiceChannel(message: Discord.Message) {
+export function areUserAndBotInSameVoiceChannel(message: Discord.Message): boolean {
     if (!message.member.voice || !message.guild.voice) {
         return false;
     }
     return message.member.voice.channel === message.guild.voice.channel;
 }
 
-export function getNumParticipants(message: Discord.Message) {
+export function getNumParticipants(message: Discord.Message): number {
     // Don't include the bot as a participant
     return message.member.voice.channel.members.size - 1;
 }

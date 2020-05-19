@@ -1,4 +1,4 @@
-const { sendOptionsMessage } = require("../helpers/utils");
+import { sendOptionsMessage } from "../helpers/utils";
 import BaseCommand, { CommandArgs } from "./base_command";
 
 class OptionsCommand implements BaseCommand {

@@ -1,8 +1,7 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-
-const { sendOptionsMessage, GameOptions, getDebugContext } = require("../helpers/utils");
-const BEGINNING_SEARCH_YEAR = 2008;
+import { sendOptionsMessage, GameOptions, getDebugContext } from "../helpers/utils";
 const logger = require("../logger")("cutoff");
+const BEGINNING_SEARCH_YEAR = 2008;
 
 class CutoffCommand implements BaseCommand {
     call({ message, parsedMessage, guildPreference, db }: CommandArgs) {

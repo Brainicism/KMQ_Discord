@@ -1,6 +1,7 @@
-const logger = require("./logger")("config_validator");
 import { arraysEqual } from "./helpers/utils";
-import fs = require("fs");
+import * as fs from "fs";
+const logger = require("./logger")("config_validator");
+
 const allowedOptions = {
     botToken: { required: true },
     dbUser: { required: true },
@@ -8,7 +9,8 @@ const allowedOptions = {
     songCacheDir: { required: true },
     topGGToken: { required: false }
 };
-export function validateConfig(config) {
+
+export function validateConfig(config): boolean {
     let valid = true;
     //check for mismatch between template and this file
     let templateOptions = JSON.parse(fs.readFileSync("../config/app_config.json.template").toString());

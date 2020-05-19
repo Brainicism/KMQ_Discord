@@ -1,8 +1,8 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-
-const GENDER = { MALE: "male", FEMALE: "female", COED: "coed" }
+import { sendOptionsMessage, getDebugContext, GameOptions } from "../helpers/utils";
 const logger = require("../logger")("gender");
-const { sendOptionsMessage, getDebugContext, GameOptions } = require("../helpers/utils");
+const GENDER = { MALE: "male", FEMALE: "female", COED: "coed" }
+
 class GenderCommand implements BaseCommand {
     call({ guildPreference, message, parsedMessage, db }: CommandArgs) {
         let selectedGenderArray = guildPreference.setGender(parsedMessage.components, db);

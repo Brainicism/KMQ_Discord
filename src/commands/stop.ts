@@ -1,6 +1,5 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-
-const { sendSongMessage, disconnectVoiceConnection, getDebugContext } = require("../helpers/utils");
+import { sendSongMessage, disconnectVoiceConnection, getDebugContext } from "../helpers/utils";
 const logger = require("../logger")("stop");
 
 class StopCommand implements BaseCommand {

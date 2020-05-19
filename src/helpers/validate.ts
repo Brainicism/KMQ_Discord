@@ -1,8 +1,10 @@
+import { getDebugContext, sendErrorMessage } from "./utils";
+import * as Discord from "discord.js";
+import { ParsedMessage } from "types";
+import { CommandValidations } from "commands/base_command";
 const logger = require("../logger")("validate")
-const getDebugContext = require("./utils").getDebugContext;
-const { sendErrorMessage } = require("./utils");
 
-export default (message, parsedMessage, validations, botPrefix) => {
+export default (message: Discord.Message, parsedMessage: ParsedMessage, validations: CommandValidations, botPrefix: string) => {
     if (!validations) return true;
     let args = parsedMessage.components;
     if (args.length > validations.maxArgCount || args.length < validations.minArgCount) {
@@ -17,21 +19,21 @@ export default (message, parsedMessage, validations, botPrefix) => {
         //check arg type
         switch (validation.type) {
             case "number":
-                if (isNaN(arg)) {
+                if (isNaN(Number(arg))) {
                     sendValidationErrorMessage(message,
                         `Expected numeric value for \`${validation.name}\`.`,
                         arg);
                     return false;
                 }
                 //parse as integer for now, might cause problems later?
-                arg = parseInt(arg);
-                if (validation.minValue && arg < validation.minValue) {
+                let intArg = parseInt(arg);
+                if (validation.minValue && intArg < validation.minValue) {
                     sendValidationErrorMessage(message,
                         `Expected value greater than \`${validation.minValue}\` for \`${validation.name}\`.`,
                         arg);
                     return false;
                 }
-                if (validation.maxValue && arg > validation.maxValue) {
+                if (validation.maxValue && intArg > validation.maxValue) {
                     sendValidationErrorMessage(message,
                         `Expected value less than or equal to \`${validation.maxValue}\` for \`${validation.name}\`.`,
                         arg);
@@ -72,14 +74,14 @@ export default (message, parsedMessage, validations, botPrefix) => {
     return true;
 }
 
-const arrayToString = (elements) => {
+const arrayToString = (elements: Array<string>): string => {
     elements = elements.map(element => `\`${element}\``);
     if (elements.length == 1) return elements[0];
     let lastElement = elements.splice(-1);
     return `${elements.join(", ")} and ${lastElement}`
 }
 
-const sendValidationErrorMessage = (message, warning, arg) => {
+const sendValidationErrorMessage = (message: Discord.Message, warning: string, arg: string | Array<string>) => {
     sendErrorMessage(message, "Input validation error", warning);
     logger.warn(`${getDebugContext(message)} | ${warning}. val = ${arg}`);
 }

@@ -1,6 +1,5 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-
-const { sendSongMessage, disconnectVoiceConnection, sendInfoMessage, getDebugContext } = require("../helpers/utils")
+import { sendSongMessage, disconnectVoiceConnection, sendInfoMessage, getDebugContext } from "../helpers/utils";
 const logger = require("../logger")("end");
 
 class EndCommand implements BaseCommand {

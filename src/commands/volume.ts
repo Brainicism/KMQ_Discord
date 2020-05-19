@@ -1,8 +1,8 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-
-const { sendOptionsMessage, getDebugContext, GameOptions } = require("../helpers/utils");
-const DEFAULT_VOLUME = 50;
+import { sendOptionsMessage, getDebugContext, GameOptions } from "../helpers/utils";
 const logger = require("../logger")("volume");
+const DEFAULT_VOLUME = 50;
+
 class VolumeCommand implements BaseCommand {
     call({ message, parsedMessage, gameSessions, guildPreference, db }: CommandArgs) {
         guildPreference.setVolume(parseInt(parsedMessage.components[0]), db);

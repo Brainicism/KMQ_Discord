@@ -1,8 +1,8 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-
-const { sendInfoMessage, getDebugContext } = require("../helpers/utils");
-const DEFAULT_BOT_PREFIX = ",";
+import { sendInfoMessage, getDebugContext } from "../helpers/utils";
 const logger = require("../logger")("prefix");
+const DEFAULT_BOT_PREFIX = ",";
+
 class PrefixCommand implements BaseCommand {
     call({ message, parsedMessage, guildPreference, db }: CommandArgs) {
         guildPreference.setBotPrefix(parsedMessage.components[0], db);

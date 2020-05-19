@@ -5,7 +5,7 @@ import { Pool } from "promise-mysql";
 
 interface CommandArgs {
     client?: Discord.Client;
-    gameSessions?: Array<GameSession>;
+    gameSessions?: {[guildID: string]: GameSession}
     guildPreference?: GuildPreference;
     message?: Discord.Message;
     db?: Pool;
@@ -15,7 +15,17 @@ interface CommandArgs {
 interface CallFunc {
     (args: CommandArgs): void
 }
-
+interface CommandValidations {
+    minArgCount: number,
+    maxArgCount: number,
+    arguments: Array<{
+        type: "number" | "boolean" | "enum" | "char",
+        name: string,
+        minValue?: number,
+        maxValue?: number,
+        enums?: Array<string> 
+    }>
+}
 class BaseCommand {
     call: CallFunc;
     help: {
@@ -25,17 +35,11 @@ class BaseCommand {
         arguments: Array<{ name: string, description: string }>
     };
     aliases?: Array<string>;
-    validations?: {
-        minArgCount: number,
-        maxArgCount: number,
-        arguments: Array<{
-            type: "number" | "boolean" | "enum" | "char",
-            name: string
-        }>
-    }
+    validations?: CommandValidations 
 }
 
 export default BaseCommand;
 export {
-    CommandArgs
+    CommandArgs,
+    CommandValidations
 }

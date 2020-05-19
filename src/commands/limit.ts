@@ -1,8 +1,7 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-
-const { getDebugContext, sendOptionsMessage, getSongCount, GameOptions } = require("../helpers/utils");
-const DEFAULT_LIMIT = 500;
+import { getDebugContext, sendOptionsMessage, getSongCount, GameOptions } from "../helpers/utils";
 const logger = require("../logger")("limit");
+const DEFAULT_LIMIT = 500;
 
 class LimitCommand implements BaseCommand {
     async call({ message, parsedMessage, guildPreference, db }: CommandArgs) {

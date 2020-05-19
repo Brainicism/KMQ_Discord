@@ -1,14 +1,14 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import * as Discord from "discord.js"
 import GameSession from "models/game_session";
-const {
-    disconnectVoiceConnection,
+import {
     startGame,
     sendSongMessage,
     areUserAndBotInSameVoiceChannel,
     getNumParticipants,
     EMBED_INFO_COLOR,
-    getDebugContext } = require("../helpers/utils");
+    getDebugContext
+} from "../helpers/utils";
 const logger = require("../logger")("skip");
 
 class SkipCommand implements BaseCommand {

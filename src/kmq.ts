@@ -1,16 +1,18 @@
 import * as Discord from "discord.js";
 import * as mysql from "promise-mysql";
 import * as DBL from "dblapi.js";
-
-const client = new Discord.Client();
-const logger = require("./logger")("kmq");
 import { validateConfig } from "./config_validator";
-const config = require("../config/app_config.json");
 import GuildPreference from "./models/guild_preference";
 import guessSong from "./helpers/guess_song";
 import validate from "./helpers/validate";
 import { clearPartiallyCachedSongs, getCommandFiles } from "./helpers/utils";
+import { ParsedMessage } from "types";
+import * as _config from "../config/app_config.json";
+const logger = require("./logger")("kmq");
 
+const client = new Discord.Client();
+
+const config: any = _config;
 let db;
 let commands = {};
 let gameSessions = {};
@@ -34,7 +36,7 @@ client.on("ready", () => {
     logger.info(`Logged in as ${client.user.tag}!`);
 });
 
-client.on("message", (message) => {
+client.on("message", (message: Discord.Message) => {
     if (message.author.equals(client.user) || message.author.bot) return;
     let guildPreference = getGuildPreference(guildPreferences, message.guild.id);
     let botPrefix = guildPreference.getBotPrefix();
@@ -91,7 +93,7 @@ client.on("voiceStateUpdate", (oldState, newState) => {
     }
 });
 
-const getGuildPreference = (guildPreferences, guildID) => {
+const getGuildPreference = (guildPreferences: { [guildId: string]: GuildPreference }, guildID: string): GuildPreference => {
     if (!guildPreferences[guildID]) {
         guildPreferences[guildID] = new GuildPreference(guildID);
         logger.info(`New server joined: ${guildID}`);
@@ -101,7 +103,9 @@ const getGuildPreference = (guildPreferences, guildID) => {
     return guildPreferences[guildID];
 }
 
-const parseMessage = (message, botPrefix) => {
+
+
+const parseMessage = (message: string, botPrefix: string): ParsedMessage => {
     // if (message.charAt(0) !== botPrefix) return null;
     let components = message.split(" ");
     let action = components.shift().substring(1);
