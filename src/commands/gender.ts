@@ -1,8 +1,9 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-import { sendOptionsMessage, getDebugContext, GameOptions } from "../helpers/utils";
+import { sendOptionsMessage, getDebugContext } from "../helpers/discord_utils";
+import { GameOptions } from "../helpers/game_utils";
 import _logger from "../logger";
 const logger = _logger("gender");
-const GENDER = { MALE: "male", FEMALE: "female", COED: "coed" }
+const GENDER: { [gender: string]: string } = { MALE: "male", FEMALE: "female", COED: "coed" }
 
 class GenderCommand implements BaseCommand {
     call({ guildPreference, message, parsedMessage, db }: CommandArgs) {

@@ -3,9 +3,9 @@ import * as mysql from "promise-mysql";
 import * as DBL from "dblapi.js";
 import { validateConfig } from "./config_validator";
 import GuildPreference from "./models/guild_preference";
-import guessSong from "./helpers/guess_song";
+import { guessSong } from "./helpers/game_utils";
 import validate from "./helpers/validate";
-import { clearPartiallyCachedSongs, getCommandFiles } from "./helpers/utils";
+import { clearPartiallyCachedSongs, getCommandFiles } from "./helpers/discord_utils";
 import { ParsedMessage } from "types";
 import * as _config from "../config/app_config.json";
 import { Pool } from "promise-mysql";
@@ -150,7 +150,6 @@ const parseMessage = (message: string, botPrefix: string): ParsedMessage => {
     for (const [commandName, command] of Object.entries(commandFiles)) {
         if (commandName === "base_command") continue;
         commands[commandName] = command;
-        console.log("Adding: " + commandName);
         if (command.aliases) {
             command.aliases.forEach((alias) => {
                 commands[alias] = command;

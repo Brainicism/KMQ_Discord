@@ -1,5 +1,5 @@
 import Scoreboard from "./scoreboard";
-import { getUserIdentifier } from "../helpers/utils";
+import { getUserIdentifier } from "../helpers/discord_utils";
 import * as Discord from "discord.js";
 import { StreamDispatcher, VoiceConnection } from "discord.js"
 export default class GameSession {

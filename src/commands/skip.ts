@@ -2,13 +2,13 @@ import BaseCommand, { CommandArgs } from "./base_command";
 import * as Discord from "discord.js"
 import GameSession from "models/game_session";
 import {
-    startGame,
     sendSongMessage,
     areUserAndBotInSameVoiceChannel,
     getNumParticipants,
     EMBED_INFO_COLOR,
     getDebugContext
-} from "../helpers/utils";
+} from "../helpers/discord_utils";
+import { startGame } from "../helpers/game_utils";
 import _logger from "../logger";
 const logger = _logger("skip");
 

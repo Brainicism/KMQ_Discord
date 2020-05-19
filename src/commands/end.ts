@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-import { sendSongMessage, disconnectVoiceConnection, sendInfoMessage, getDebugContext } from "../helpers/utils";
+import { sendSongMessage, disconnectVoiceConnection, sendInfoMessage, getDebugContext } from "../helpers/discord_utils";
 import _logger from "../logger";
 const logger = _logger("end");
 

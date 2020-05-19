@@ -1,4 +1,4 @@
-import { arraysEqual } from "./helpers/utils";
+import { arraysEqual } from "./helpers/discord_utils";
 import * as fs from "fs";
 import _logger from "./logger";
 const logger = _logger("config_validator");

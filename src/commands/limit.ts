@@ -1,5 +1,6 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-import { getDebugContext, sendOptionsMessage, getSongCount, GameOptions } from "../helpers/utils";
+import { getDebugContext, sendOptionsMessage } from "../helpers/discord_utils";
+import { GameOptions, getSongCount } from "../helpers/game_utils";
 import _logger from "../logger";
 const logger = _logger("limit");
 const DEFAULT_LIMIT = 500;

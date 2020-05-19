@@ -1,5 +1,6 @@
 import GameSession from "../models/game_session";
-import { sendErrorMessage, startGame, getDebugContext } from "../helpers/utils";
+import { sendErrorMessage, getDebugContext } from "../helpers/discord_utils";
+import { startGame } from "../helpers/game_utils";
 import BaseCommand, { CommandArgs } from "./base_command";
 import _logger from "../logger";
 const logger = _logger("play");

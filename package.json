@@ -4,9 +4,8 @@
   "main": "src/kmq.js",
   "scripts": {
     "seed": "node seed/seed_db.js",
-    "start": "cd src/ && node kmq.js",
     "dev": "cd src && ts-node kmq",
-    "prod": "tsc && cd built && node kmq.js"
+    "prod": "tsc && cp -r ./config ./build && cd build/src && node kmq.js"
   },
   "author": "",
   "license": "ISC",

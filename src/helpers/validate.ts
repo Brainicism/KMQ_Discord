@@ -1,4 +1,4 @@
-import { getDebugContext, sendErrorMessage } from "./utils";
+import { getDebugContext, sendErrorMessage } from "./discord_utils";
 import * as Discord from "discord.js";
 import { ParsedMessage } from "types";
 import { CommandValidations } from "commands/base_command";

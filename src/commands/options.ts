@@ -1,4 +1,4 @@
-import { sendOptionsMessage } from "../helpers/utils";
+import { sendOptionsMessage } from "../helpers/discord_utils";
 import BaseCommand, { CommandArgs } from "./base_command";
 
 class OptionsCommand implements BaseCommand {

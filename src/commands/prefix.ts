@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-import { sendInfoMessage, getDebugContext } from "../helpers/utils";
+import { sendInfoMessage, getDebugContext } from "../helpers/discord_utils";
 import _logger from "../logger";
 const logger = _logger("prefix");
 const DEFAULT_BOT_PREFIX = ",";
