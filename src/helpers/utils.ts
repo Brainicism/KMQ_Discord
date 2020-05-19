@@ -132,7 +132,7 @@ const getCommandFiles = () => {
             for (const file of files) {
                 let command = await import(`../commands/${file}`);
                 let commandName = file.split(".")[0];
-                commandMap[commandName] = command;
+                commandMap[commandName] = new command.default()
             }
             resolve(commandMap);
         });

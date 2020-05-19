@@ -9,7 +9,6 @@ const config = require("../config/app_config.json");
 import GuildPreference from "./models/guild_preference";
 import guessSong from "./helpers/guess_song";
 import validate from "./helpers/validate";
-import * as options from "./commands/options";
 import { clearPartiallyCachedSongs, getCommandFiles } from "./helpers/utils";
 
 let db;
@@ -43,7 +42,7 @@ client.on("message", (message) => {
 
     if (message.mentions.has(client.user) && message.content.split(" ").length == 1) {
         // Any message that mentions the bot sends the current options
-        options.call({ message, guildPreference, db });
+        commands["options"].call({ message, guildPreference, db });
     }
     if (parsedMessage && commands[parsedMessage.action]) {
         let command = commands[parsedMessage.action];
@@ -141,6 +140,7 @@ const parseMessage = (message, botPrefix) => {
     });
     let commandFiles = await getCommandFiles();
     for (const [commandName, command] of Object.entries(commandFiles)) {
+        if (commandName === "base_command") continue;
         commands[commandName] = command;
         console.log("Adding: " + commandName);
         if (command.aliases) {

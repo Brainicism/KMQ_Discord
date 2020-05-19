@@ -1,3 +1,6 @@
+import BaseCommand, { CommandArgs } from "./base_command";
+import * as Discord from "discord.js"
+import GameSession from "models/game_session";
 const {
     disconnectVoiceConnection,
     startGame,
@@ -8,37 +11,37 @@ const {
     getDebugContext } = require("../helpers/utils");
 const logger = require("../logger")("skip");
 
-function call({ gameSessions, guildPreference, client, message, db }) {
-    let gameSession = gameSessions[message.guild.id];
-    if (!gameSession || !gameSession.gameInSession() || !areUserAndBotInSameVoiceChannel(message)) {
-        logger.warn(`${getDebugContext(message)} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.gameInSession(): ${gameSession && !gameSession.gameInSession()}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
-        return;
+class SkipCommand implements BaseCommand {
+    call({ gameSessions, guildPreference, client, message, db }: CommandArgs) {
+        let gameSession = gameSessions[message.guild.id];
+        if (!gameSession || !gameSession.gameInSession() || !areUserAndBotInSameVoiceChannel(message)) {
+            logger.warn(`${getDebugContext(message)} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.gameInSession(): ${gameSession && !gameSession.gameInSession()}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
+            return;
+        }
+        gameSession.userSkipped(message.author);
+        if (isSkipMajority(message, gameSession)) {
+            sendSkipMessage(message, gameSession);
+            sendSongMessage(message, gameSession, true);
+            gameSession.endRound();
+            startGame(gameSession, guildPreference, db, message, client);
+            logger.info(`${getDebugContext(message)} | Skip majority achieved.`);
+        }
+        else {
+            sendSkipNotification(message, gameSession);
+            logger.info(`${getDebugContext(message)} | Skip vote received.`);
+        }
     }
-    gameSession.userSkipped(message.author);
-    if (isSkipMajority(message, gameSession)) {
-        sendSkipMessage(message, gameSession);
-        sendSongMessage(message, gameSession, true);
-        gameSession.endRound();
-        startGame(gameSession, guildPreference, db, message, client);
-        logger.info(`${getDebugContext(message)} | Skip majority achieved.`);
+    help = {
+        name: "skip",
+        description: "Vote to skip the current song. A song is skipped when majority of participants vote to skip it.",
+        usage: "!skip",
+        arguments: []
     }
-    else {
-        sendSkipNotification(message, gameSession);
-        logger.info(`${getDebugContext(message)} | Skip vote received.`);
-    }
-}
-const help = {
-    name: "skip",
-    description: "Vote to skip the current song. A song is skipped when majority of participants vote to skip it.",
-    usage: "!skip",
-    arguments: []
-}
-export {
-    call,
-    help
 }
 
-function sendSkipNotification(message, gameSession) {
+export default SkipCommand;
+
+function sendSkipNotification(message: Discord.Message, gameSession: GameSession) {
     message.channel.send({
         embed: {
             color: EMBED_INFO_COLOR,
@@ -53,7 +56,7 @@ function sendSkipNotification(message, gameSession) {
         .then((message) => message.delete({ timeout: 5000 }));
 }
 
-function sendSkipMessage(message, gameSession) {
+function sendSkipMessage(message: Discord.Message, gameSession: GameSession) {
     message.channel.send({
         embed: {
             color: EMBED_INFO_COLOR,
@@ -69,10 +72,10 @@ function sendSkipMessage(message, gameSession) {
         .then((message) => message.delete({ timeout: 5000 }));
 }
 
-function isSkipMajority(message, gameSession) {
+function isSkipMajority(message: Discord.Message, gameSession: GameSession) {
     return gameSession.getNumSkippers() >= getSkipsRequired(message);
 }
 
-function getSkipsRequired(message) {
+function getSkipsRequired(message: Discord.Message) {
     return Math.floor(getNumParticipants(message) * 0.5) + 1;
 }

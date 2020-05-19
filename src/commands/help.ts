@@ -1,31 +1,32 @@
+import BaseCommand, { CommandArgs } from "./base_command";
+import * as Discord from "discord.js"
 const helpMessages = require('../../data/help_strings.json');
 const logger = require("../logger")("help");
 const { EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, getCommandFiles } = require("../helpers/utils");
 const placeholder = "!";
-function call ({ parsedMessage, message, botPrefix }) {
-    helpMessage(message, parsedMessage.argument, botPrefix);
-}
-const help =
-{
-    "name": "help",
-    "description": "Get help about the game's commands. Add the action as an argument to get information about specific arguments.",
-    "usage": "!help [action]",
-    "arguments": [
+
+class HelpCommand implements BaseCommand {
+    call({ parsedMessage, message, botPrefix }: CommandArgs) {
+        helpMessage(message, parsedMessage.argument, botPrefix);
+    }
+    help =
         {
-            "name": "action",
-            "description": "Any valid command for the K-pop Music Quiz bot"
+            "name": "help",
+            "description": "Get help about the game's commands. Add the action as an argument to get information about specific arguments.",
+            "usage": "!help [action]",
+            "arguments": [
+                {
+                    "name": "action",
+                    "description": "Any valid command for the K-pop Music Quiz bot"
+                }
+            ]
         }
-    ]
 }
 
-
-export {
-    call,
-    help
-}
+export default HelpCommand;
 
 // Usage: `!help [action]` or `!help`
-const helpMessage = async (message, action, botPrefix) => {
+const helpMessage = async (message: Discord.Message, action: string, botPrefix: string) => {
     let embedTitle = "";
     let embedDesc = "";
     let embedFields = [];
