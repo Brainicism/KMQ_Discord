@@ -1,6 +1,7 @@
 import Scoreboard from "./scoreboard";
 import { getUserIdentifier } from "../helpers/utils";
-import {StreamDispatcher, VoiceConnection} from "discord.js"
+import * as Discord from "discord.js";
+import { StreamDispatcher, VoiceConnection } from "discord.js"
 export default class GameSession {
     private song: string;
     private artist: string;
@@ -28,7 +29,7 @@ export default class GameSession {
         this.finished = false;
     }
 
-    startRound(song, artist, link) {
+    startRound(song: string, artist: string, link: string) {
         this.song = song;
         this.artist = artist;
         this.videoID = link;
@@ -44,31 +45,31 @@ export default class GameSession {
         this.isSongCached = true;
     }
 
-    getSong() {
+    getSong(): string {
         return this.song;
     }
 
-    getArtist() {
+    getArtist(): string {
         return this.artist;
     }
 
-    getVideoID() {
+    getVideoID(): string {
         return this.videoID;
     }
 
-    gameInSession() {
+    gameInSession(): boolean {
         return this.inSession;
     }
 
-    userSkipped(user) {
-        this.skippers.add(user);
+    userSkipped(userId: string) {
+        this.skippers.add(userId);
     }
 
-    getNumSkippers() {
+    getNumSkippers(): number {
         return this.skippers.size;
     }
 
-    getDebugSongDetails() {
+    getDebugSongDetails(): string {
         return `${this.song}:${this.artist}:${this.videoID}`;
     }
 };

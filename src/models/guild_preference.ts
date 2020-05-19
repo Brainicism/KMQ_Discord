@@ -3,8 +3,9 @@ import { DEFAULT_BOT_PREFIX } from "../commands/prefix";
 import { DEFAULT_LIMIT } from "../commands/limit";
 import { DEFAULT_VOLUME } from "../commands/volume";
 import { GENDER } from "../commands/gender";
-const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.FEMALE], limit: DEFAULT_LIMIT, volume: DEFAULT_VOLUME };
 import { Pool } from "promise-mysql";
+
+const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.FEMALE], limit: DEFAULT_LIMIT, volume: DEFAULT_VOLUME };
 interface GameOption {
     beginningYear: number;
     gender: string[];
@@ -38,7 +39,7 @@ class GuildPreference {
         this.updateGuildPreferences(db);
     }
 
-    getLimit() {
+    getLimit(): number {
         return this.gameOptions.limit;
     }
 
@@ -52,11 +53,11 @@ class GuildPreference {
         this.updateGuildPreferences(db);
     }
 
-    getBeginningCutoffYear() {
+    getBeginningCutoffYear(): number {
         return this.gameOptions.beginningYear;
     }
 
-    getDefaultBeginningCutoffYear() {
+    getDefaultBeginningCutoffYear(): number {
         return BEGINNING_SEARCH_YEAR;
     }
 
@@ -65,14 +66,14 @@ class GuildPreference {
         this.updateGuildPreferences(db);
     }
 
-    setGender(genderArr: string[], db: Pool) {
+    setGender(genderArr: string[], db: Pool): Array<string> {
         let tempArr = genderArr.map(gender => gender.toLowerCase());
         this.gameOptions.gender = [...new Set(tempArr)];
         this.updateGuildPreferences(db);
         return this.gameOptions.gender;
     }
 
-    getSQLGender() {
+    getSQLGender(): string {
         return this.gameOptions.gender.join(",");
     }
 
@@ -81,7 +82,7 @@ class GuildPreference {
         this.updateGuildPreferences(db);
     }
 
-    getBotPrefix() {
+    getBotPrefix(): string {
         return this.botPrefix;
     }
 
@@ -90,15 +91,15 @@ class GuildPreference {
         this.updateGuildPreferences(db);
     }
 
-    getVolume() {
+    getVolume(): number {
         return this.gameOptions.volume;
     }
 
-    getStreamVolume() {
+    getStreamVolume(): number {
         return this.getVolume() / 500;
     }
 
-    getCachedStreamVolume() {
+    getCachedStreamVolume(): number {
         return this.getVolume() / 150;
     }
 

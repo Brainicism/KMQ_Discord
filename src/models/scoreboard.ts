@@ -1,18 +1,16 @@
 import Player from "./player";
 
 export default class Scoreboard {
-    private players: {[userID: number]: Player}
+    private players: { [userID: number]: Player }
     private firstPlace: Array<Player>;
     private highestScore: number;
     constructor() {
-        // players stores each entry as:
-        // "USER_ID": Player {_name: "username", _value: SCORE_VAL }
         this.players = {};
         this.firstPlace = [];
         this.highestScore = 0;
     }
 
-    getWinnerMessage() {
+    getWinnerMessage(): string {
         let winnerStr = "";
 
         if (this.firstPlace.length == 1) {
@@ -38,16 +36,16 @@ export default class Scoreboard {
         return winnerStr;
     }
 
-    getScoreboard() {
+    getScoreboard(): Array<{ name: string, value: number, inline: boolean }> {
         return Object.values(this.players).map((x) => {
-            return { name: x.getName(), value: x.getScore(), inline: true}
+            return { name: x.getName(), value: x.getScore(), inline: true }
         })
             .sort((a, b) => { return b.value - a.value; })
     }
 
-    updateScoreboard(winner, winnerID) {
+    updateScoreboard(winnerTag: string, winnerID: string) {
         if (!this.players[winnerID]) {
-            this.players[winnerID] = new Player(winner);
+            this.players[winnerID] = new Player(winnerTag);
         }
         else {
             this.players[winnerID].incrementScore();
@@ -64,7 +62,7 @@ export default class Scoreboard {
         }
     }
 
-    isEmpty() {
+    isEmpty(): boolean {
         return !(Object.keys(this.players).length);
     }
 };
