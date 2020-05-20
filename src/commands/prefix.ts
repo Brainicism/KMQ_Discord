@@ -39,5 +39,3 @@ export default PrefixCommand;
 export {
     DEFAULT_BOT_PREFIX
 }
-
-

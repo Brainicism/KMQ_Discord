@@ -22,4 +22,3 @@ class StopCommand implements BaseCommand {
 
 }
 export default StopCommand;
-
