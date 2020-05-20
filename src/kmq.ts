@@ -110,7 +110,7 @@ const getGuildPreference = (guildPreferences: { [guildId: string]: GuildPreferen
 
 
 const parseMessage = (message: string, botPrefix: string): ParsedMessage => {
-    // if (message.charAt(0) !== botPrefix) return null;
+    if (message.charAt(0) !== botPrefix) return null;
     let components = message.split(" ");
     let action = components.shift().substring(1);
     let argument = components.join(" ");
