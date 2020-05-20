@@ -14,14 +14,14 @@ const GameOptions: { [option: string]: string } = { "GENDER": "Gender", "CUTOFF"
 
 const logger = _logger("game_utils");
 
-const guessSong = ({ client, message, gameSessions, guildPreference, db }: CommandArgs) => {
+const guessSong = async ({ client, message, gameSessions, guildPreference, db }: CommandArgs) => {
     let guess = cleanSongName(message.content);
     let gameSession = gameSessions[message.guild.id];
     if (gameSession.getSong() && guess === cleanSongName(gameSession.getSong())) {
         // this should be atomic
         let userTag = getUserIdentifier(message.author);
         gameSession.scoreboard.updateScoreboard(userTag, message.author.id);
-        sendSongMessage(message, gameSession, false);
+        await sendSongMessage(message, gameSession, false);
         logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${gameSession.getSong()}`)
         gameSession.endRound();
         if (gameSession.connection) {
@@ -39,7 +39,7 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
         return;
     }
     if (gameSession.gameInSession()) {
-        sendErrorMessage(message, `Game already in session`, null);
+        await sendErrorMessage(message, `Game already in session`, null);
         return;
     }
     let query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
@@ -53,7 +53,7 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
         logger.info(`${getDebugContext(message)} | Playing song: ${gameSession.getDebugSongDetails()}`);
     }
     catch (err) {
-        sendErrorMessage(message, "KMQ database query error", err.toString());
+        await sendErrorMessage(message, "KMQ database query error", err.toString());
         logger.error(`${getDebugContext(message)} | Error querying song: ${err}`);
     }
 }
@@ -107,7 +107,7 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
         }
         catch (err) {
             logger.error(`${getDebugContext(message)} | Error joining voice connection. cached = ${gameSession.isSongCached}. song = ${gameSession.getDebugSongDetails()} err = ${err}`);
-            sendErrorMessage(message, "Missing voice permissions", "The bot is unable to join the voice channel you are in.");
+            await sendErrorMessage(message, "Missing voice permissions", "The bot is unable to join the voice channel you are in.");
             gameSession.endRound();
             return;
         }
@@ -120,17 +120,17 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
         gameSession.isSongCached ? cacheStreamOptions : streamOptions);
     logger.info(`${getDebugContext(message)} | Playing song in voice connection. cached = ${gameSession.isSongCached}. song = ${gameSession.getDebugSongDetails()}`);
 
-    gameSession.dispatcher.on("finish", () => {
-        sendSongMessage(message, gameSession, true);
+    gameSession.dispatcher.on("finish", async () => {
+        await sendSongMessage(message, gameSession, true);
         gameSession.endRound();
         logger.info(`${getDebugContext(message)} | Song finished without being guessed. song = ${gameSession.getDebugSongDetails()}`);
         startGame(gameSession, guildPreference, db, message, client);
     });
 
-    gameSession.dispatcher.on("error", () => {
+    gameSession.dispatcher.on("error", async () => {
         logger.error(`${getDebugContext(message)} | Unknown error with stream dispatcher. song = ${gameSession.getDebugSongDetails()}`);
         // Attempt to restart game with different song
-        sendSongMessage(message, gameSession, true);
+        await sendSongMessage(message, gameSession, true);
         gameSession.endRound();
         setTimeout(() => {
             startGame(gameSession, guildPreference, db, message, client);

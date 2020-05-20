@@ -13,7 +13,7 @@ interface CommandArgs {
     botPrefix?: string;
 }
 interface CallFunc {
-    (args: CommandArgs): void
+    (args: CommandArgs): Promise<void>
 }
 interface CommandValidations {
     minArgCount: number,

@@ -7,8 +7,8 @@ const logger = _logger("help");
 const placeholder = "!";
 
 class HelpCommand implements BaseCommand {
-    call({ parsedMessage, message, botPrefix }: CommandArgs) {
-        helpMessage(message, parsedMessage.argument, botPrefix);
+    async call({ parsedMessage, message, botPrefix }: CommandArgs) {
+        await helpMessage(message, parsedMessage.argument, botPrefix);
     }
     help =
         {
@@ -46,7 +46,7 @@ const helpMessage = async (message: Discord.Message, action: string, botPrefix: 
     if (action) {
         if (!(commandNamesWithHelp.includes(action))) {
             logger.warn(`${getDebugContext(message)} | Missing documentation: ${action}`);
-            sendErrorMessage(message,
+            await sendErrorMessage(message,
                 "K-pop Music Quiz Command Help",
                 `Sorry, there is no documentation on ${action}`)
             return;

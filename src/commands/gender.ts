@@ -6,7 +6,7 @@ const logger = _logger("gender");
 const GENDER: { [gender: string]: string } = { MALE: "male", FEMALE: "female", COED: "coed" }
 
 class GenderCommand implements BaseCommand {
-    call({ guildPreference, message, parsedMessage, db }: CommandArgs) {
+    async call({ guildPreference, message, parsedMessage, db }: CommandArgs) {
         let selectedGenderArray = guildPreference.setGender(parsedMessage.components, db);
         let selectedGenderStr = "";
         for (let i = 0; i < selectedGenderArray.length; i++) {
@@ -22,7 +22,7 @@ class GenderCommand implements BaseCommand {
             }
 
         }
-        sendOptionsMessage(message, guildPreference, db, GameOptions.GENDER);
+        await sendOptionsMessage(message, guildPreference, db, GameOptions.GENDER);
         logger.info(`${getDebugContext(message)} | Genders set to ${selectedGenderStr}`);
     }
     validations = {

@@ -6,9 +6,9 @@ const logger = _logger("cutoff");
 const BEGINNING_SEARCH_YEAR = 2008;
 
 class CutoffCommand implements BaseCommand {
-    call({ message, parsedMessage, guildPreference, db }: CommandArgs) {
+    async call({ message, parsedMessage, guildPreference, db }: CommandArgs) {
         guildPreference.setBeginningCutoffYear(parseInt(parsedMessage.components[0]), db);
-        sendOptionsMessage(message, guildPreference, db, GameOptions.CUTOFF);
+        await sendOptionsMessage(message, guildPreference, db, GameOptions.CUTOFF);
         logger.info(`${getDebugContext(message)} | Cutoff set to ${guildPreference.getBeginningCutoffYear()}`);
     }
     validations = {

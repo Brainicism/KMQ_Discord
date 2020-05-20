@@ -13,7 +13,7 @@ import _logger from "../logger";
 const logger = _logger("skip");
 
 class SkipCommand implements BaseCommand {
-    call({ gameSessions, guildPreference, client, message, db }: CommandArgs) {
+    async call({ gameSessions, guildPreference, client, message, db }: CommandArgs) {
         let gameSession = gameSessions[message.guild.id];
         if (!gameSession || !gameSession.gameInSession() || !areUserAndBotInSameVoiceChannel(message)) {
             logger.warn(`${getDebugContext(message)} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.gameInSession(): ${gameSession && !gameSession.gameInSession()}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
@@ -21,14 +21,14 @@ class SkipCommand implements BaseCommand {
         }
         gameSession.userSkipped(message.author.id);
         if (isSkipMajority(message, gameSession)) {
-            sendSkipMessage(message, gameSession);
-            sendSongMessage(message, gameSession, true);
+            await sendSkipMessage(message, gameSession);
+            await sendSongMessage(message, gameSession, true);
             gameSession.endRound();
             startGame(gameSession, guildPreference, db, message, client);
             logger.info(`${getDebugContext(message)} | Skip majority achieved.`);
         }
         else {
-            sendSkipNotification(message, gameSession);
+            await sendSkipNotification(message, gameSession);
             logger.info(`${getDebugContext(message)} | Skip vote received.`);
         }
     }
@@ -42,8 +42,8 @@ class SkipCommand implements BaseCommand {
 
 export default SkipCommand;
 
-function sendSkipNotification(message: Discord.Message, gameSession: GameSession) {
-    message.channel.send({
+async function sendSkipNotification(message: Discord.Message, gameSession: GameSession) {
+    await message.channel.send({
         embed: {
             color: EMBED_INFO_COLOR,
             author: {
@@ -57,8 +57,8 @@ function sendSkipNotification(message: Discord.Message, gameSession: GameSession
         .then((message) => message.delete({ timeout: 5000 }));
 }
 
-function sendSkipMessage(message: Discord.Message, gameSession: GameSession) {
-    message.channel.send({
+async function sendSkipMessage(message: Discord.Message, gameSession: GameSession) {
+    await message.channel.send({
         embed: {
             color: EMBED_INFO_COLOR,
             author: {

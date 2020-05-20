@@ -2,8 +2,8 @@ import BaseCommand, { CommandArgs } from "./base_command";
 import { EMBED_INFO_COLOR } from "../helpers/discord_utils";
 
 class RansomCommand implements BaseCommand {
-    call({ message }: CommandArgs) {
-        message.channel.send({
+    async call({ message }: CommandArgs) {
+        await message.channel.send({
             embed: {
                 color: EMBED_INFO_COLOR,
                 author: {

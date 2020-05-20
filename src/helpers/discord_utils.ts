@@ -12,8 +12,8 @@ const logger = _logger("utils");
 const EMBED_INFO_COLOR = 0x000000; // BLACK
 const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 
-const sendSongMessage = (message: Discord.Message, gameSession: GameSession, isForfeit: boolean) => {
-    message.channel.send({
+const sendSongMessage = async (message: Discord.Message, gameSession: GameSession, isForfeit: boolean) => {
+    await message.channel.send({
         embed: {
             color: EMBED_INFO_COLOR,
             author: {
@@ -29,7 +29,7 @@ const sendSongMessage = (message: Discord.Message, gameSession: GameSession, isF
         }
     })
 }
-const sendInfoMessage = (message: Discord.Message, title: string, description?: string, footerText?: string, footerImageWithPath?: string) => {
+const sendInfoMessage = async (message: Discord.Message, title: string, description?: string, footerText?: string, footerImageWithPath?: string) => {
     let embed = new Discord.MessageEmbed({
         color: EMBED_INFO_COLOR,
         author: {
@@ -46,10 +46,10 @@ const sendInfoMessage = (message: Discord.Message, title: string, description?: 
         embed.setFooter(footerText, `attachment://${footerImage}`)
     }
 
-    message.channel.send(embed);
+    await message.channel.send(embed);
 }
-const sendErrorMessage = (message: Discord.Message, title: string, description: string) => {
-    message.channel.send({
+const sendErrorMessage = async (message: Discord.Message, title: string, description: string) => {
+    await message.channel.send({
         embed: {
             color: EMBED_ERROR_COLOR,
             author: {
@@ -74,7 +74,7 @@ const sendOptionsMessage = async (message: Discord.Message, guildPreference: Gui
     volumeString = updatedOption == GameOptions.VOLUME ? bold(volumeString) : codeLine(volumeString);
 
     let totalSongs = await getSongCount(guildPreference, db);
-    sendInfoMessage(message,
+    await sendInfoMessage(message,
         updatedOption == null ? "Options" : `${updatedOption} updated`,
         `Now playing the ${limitString} out of the __${totalSongs}__ most popular songs  by ${genderString} artists starting from the year ${cutoffString} at ${volumeString}% volume.`,
         updatedOption == null ? `Psst. Your bot prefix is \`${guildPreference.getBotPrefix()}\`.` : null,
@@ -139,18 +139,6 @@ const arraysEqual = (arr1: Array<any>, arr2: Array<any>): boolean => {
     }
     return true;
 }
-
-
-
-export function scoreBoard(message: Discord.Message, gameSession: GameSession) {
-    message.channel.send({
-        embed: {
-            color: EMBED_INFO_COLOR,
-            title: "**Results**",
-            fields: gameSession.scoreboard.getScoreboard()
-        }
-    })
-};
 
 export function disconnectVoiceConnection(client: Discord.Client, message: Discord.Message) {
     let voiceConnection = client.voice.connections.get(message.guild.id);

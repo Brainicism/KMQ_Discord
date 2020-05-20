@@ -12,7 +12,7 @@ class LimitCommand implements BaseCommand {
         if (guildPreference.getLimit() > songCount) {
             guildPreference.setLimit(songCount, db);
         }
-        sendOptionsMessage(message, guildPreference, db, GameOptions.LIMIT);
+        await sendOptionsMessage(message, guildPreference, db, GameOptions.LIMIT);
         logger.info(`${getDebugContext(message)} | Limit set to ${guildPreference.getLimit()}`);
     }
     validations = {

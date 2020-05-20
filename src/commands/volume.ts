@@ -6,7 +6,7 @@ const logger = _logger("volume");
 const DEFAULT_VOLUME = 50;
 
 class VolumeCommand implements BaseCommand {
-    call({ message, parsedMessage, gameSessions, guildPreference, db }: CommandArgs) {
+    async call({ message, parsedMessage, gameSessions, guildPreference, db }: CommandArgs) {
         guildPreference.setVolume(parseInt(parsedMessage.components[0]), db);
         let gameSession = gameSessions[message.guild.id];
         if (gameSession && gameSession.dispatcher) {
@@ -14,7 +14,7 @@ class VolumeCommand implements BaseCommand {
                 gameSession.isSongCached ? guildPreference.getCachedStreamVolume() : guildPreference.getStreamVolume()
             );
         }
-        sendOptionsMessage(message, guildPreference, db, GameOptions.VOLUME);
+        await sendOptionsMessage(message, guildPreference, db, GameOptions.VOLUME);
         logger.info(`${getDebugContext(message)} | Volume set to ${guildPreference.getVolume()}.`);
     }
     validations = {

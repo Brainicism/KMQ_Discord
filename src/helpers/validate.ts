@@ -82,7 +82,7 @@ const arrayToString = (elements: Array<string>): string => {
     return `${elements.join(", ")} and ${lastElement}`
 }
 
-const sendValidationErrorMessage = (message: Discord.Message, warning: string, arg: string | Array<string>) => {
-    sendErrorMessage(message, "Input validation error", warning);
+const sendValidationErrorMessage = async (message: Discord.Message, warning: string, arg: string | Array<string>) => {
+    await sendErrorMessage(message, "Input validation error", warning);
     logger.warn(`${getDebugContext(message)} | ${warning}. val = ${arg}`);
 }

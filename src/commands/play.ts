@@ -6,9 +6,9 @@ import _logger from "../logger";
 const logger = _logger("play");
 
 class PlayCommand implements BaseCommand {
-    call({ message, db, gameSessions, guildPreference, client }: CommandArgs) {
+    async call({ message, db, gameSessions, guildPreference, client }: CommandArgs) {
         if (!message.member.voice.channel) {
-            sendErrorMessage(message,
+            await sendErrorMessage(message,
                 "Join a voice channel",
                 `Send \`${guildPreference.getBotPrefix()}play\` again when you are in a voice channel.`);
             logger.warn(`${getDebugContext(message)} | User not in voice channel`);
