@@ -74,8 +74,8 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
         fs.mkdirSync(SONG_CACHE_DIR)
     }
 
-    const ytdlOptions: any = {
-        filter: "audioonly",
+    const ytdlOptions = {
+        filter: "audioonly" as const,
         quality: "highest"
     };
 

@@ -28,13 +28,13 @@ export default (message: Discord.Message, parsedMessage: ParsedMessage, validati
                 }
                 //parse as integer for now, might cause problems later?
                 let intArg = parseInt(arg);
-                if (validation.minValue && intArg < validation.minValue) {
+                if ("minValue" in validation && intArg < validation.minValue) {
                     sendValidationErrorMessage(message,
                         `Expected value greater than \`${validation.minValue}\` for \`${validation.name}\`.`,
                         arg);
                     return false;
                 }
-                if (validation.maxValue && intArg > validation.maxValue) {
+                if ("maxValue" in validation && intArg > validation.maxValue) {
                     sendValidationErrorMessage(message,
                         `Expected value less than or equal to \`${validation.maxValue}\` for \`${validation.name}\`.`,
                         arg);
