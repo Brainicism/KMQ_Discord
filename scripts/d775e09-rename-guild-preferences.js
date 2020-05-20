@@ -1,10 +1,10 @@
-```
+`
 Breaking change during typescript migration, removed underscores from
 previously underscored property keys. 
 
 This script removes the underscores from keys from kmq.guild_preferences.guild_preference
 
-```
+`
 const config = require("../config/app_config.json");
 const mysql = require("promise-mysql");
 
