@@ -2,6 +2,7 @@ import * as Discord from "discord.js";
 import GameSession from "../models/game_session";
 import GuildPreference from "../models/guild_preference";
 import { Pool } from "promise-mysql";
+import { ParsedMessage } from "types";
 
 interface CommandArgs {
     client?: Discord.Client;
@@ -9,7 +10,7 @@ interface CommandArgs {
     guildPreference?: GuildPreference;
     message?: Discord.Message;
     db?: Pool;
-    parsedMessage?: any
+    parsedMessage?: ParsedMessage,
     botPrefix?: string;
 }
 interface CallFunc {
