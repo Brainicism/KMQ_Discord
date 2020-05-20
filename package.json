@@ -5,7 +5,7 @@
   "scripts": {
     "seed": "cd seed && node seed_db.js",
     "dev": "cd src && ts-node kmq",
-    "prod": "tsc && cp -r ./config ./build && cd build/src && node kmq.js"
+    "prod": "tsc && cp -r config build && cd build/src && node kmq.js"
   },
   "author": "",
   "license": "ISC",

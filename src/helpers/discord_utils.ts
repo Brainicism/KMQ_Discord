@@ -36,7 +36,7 @@ const sendInfoMessage = async (message: Discord.Message, title: string, descript
             name: message.author.username,
             icon_url: message.author.avatarURL()
         },
-        title: `**${title}**`,
+        title: bold(title),
         description: description
     })
 
@@ -56,7 +56,7 @@ const sendErrorMessage = async (message: Discord.Message, title: string, descrip
                 name: message.author.username,
                 icon_url: message.author.avatarURL()
             },
-            title: `**${title}**`,
+            title: bold(title),
             description: description
         }
     });
@@ -129,8 +129,8 @@ const arraysEqual = (arr1: Array<any>, arr2: Array<any>): boolean => {
         return false;
     }
 
-    var arr1 = arr1.concat().sort();
-    var arr2 = arr2.concat().sort();
+    arr1 = arr1.concat().sort();
+    arr2 = arr2.concat().sort();
 
     for (var i = 0; i < arr1.length; i++) {
         if (arr1[i] !== arr2[i]) {

@@ -23,7 +23,7 @@ export default class GameSession {
         this.scoreboard = new Scoreboard();
         this.isSongCached = true;
 
-        // dispatcher initalized in utils/playSong, used when changing volume
+        // dispatcher initalized in game_utils/playSong, used when changing volume
         this.dispatcher = null;
         this.connection = null;
         this.finished = false;
