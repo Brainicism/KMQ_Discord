@@ -11,6 +11,5 @@ class OptionsCommand implements BaseCommand {
         usage: "!options",
         arguments: []
     }
-
 }
 export default OptionsCommand;

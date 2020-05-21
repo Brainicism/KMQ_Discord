@@ -19,6 +19,5 @@ class StopCommand implements BaseCommand {
         usage: "!stop",
         arguments: []
     }
-
 }
 export default StopCommand;
