@@ -15,6 +15,9 @@ const GameOptions: { [option: string]: string } = { "GENDER": "Gender", "CUTOFF"
 const logger = _logger("game_utils");
 
 const guessSong = async ({ client, message, gameSessions, guildPreference, db }: CommandArgs) => {
+    if (!client.voice.connections.get(message.guild.id).channel.members.has(message.author.id)) {
+        return;
+    }
     let guess = cleanSongName(message.content);
     let gameSession = gameSessions[message.guild.id];
     if (gameSession.getSong() && guess === cleanSongName(gameSession.getSong())) {

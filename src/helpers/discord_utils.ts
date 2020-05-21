@@ -169,7 +169,7 @@ export function getNumParticipants(message: Discord.Message): number {
 export function clearPartiallyCachedSongs() {
     logger.debug("Clearing partially cached songs");
     if (!fs.existsSync(SONG_CACHE_DIR)) {
-        return;
+        return logger.error("Song cache directory doesn't exist.");
     }
     fs.readdir(SONG_CACHE_DIR, (error, files) => {
         if (error) {
