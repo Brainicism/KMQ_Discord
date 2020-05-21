@@ -1,14 +1,15 @@
-const request = require("request-promise");
-const fs = require("fs");
-const mkdirp = require("mkdirp");
-const { execSync } = require("child_process");
-const unzipper = require("unzipper")
-const mysql = require("promise-mysql");
-const config = require("../config/app_config.json");
-const rmfr = require('rmfr');
+import * as request from "request-promise";
+import * as fs from "fs";
+import { execSync } from "child_process";
+import * as unzipper from "unzipper";
+import * as mysql from "promise-mysql";
+import * as _config from "../../config/app_config.json";
+import * as prependFile from 'prepend-file';
+import _logger from "../logger";
+import { Logger } from "log4js";
+const config: any = _config;
 const fileUrl = "http://kpop.aoimirai.net/download.php";
-const logger = require("../src/logger")("seed_db");
-const prependFile = require('prepend-file');
+const logger: Logger = _logger("seed_db");
 
 //TODO: this is probably not how you use promises fix later
 
@@ -20,6 +21,7 @@ let options = {
         "User-Agent": "PostmanRuntime/7.22.0"
     }
 }
+
 const kmqTempDir = "/tmp/kmq";
 
 let setSqlMode = (sqlFile) => {
@@ -27,11 +29,10 @@ let setSqlMode = (sqlFile) => {
 }
 
 let main = async function () {
-    await rmfr(kmqTempDir);
-    await mkdirp(kmqTempDir);
-    await mkdirp(`${kmqTempDir}/sql`)
+    await fs.promises.rmdir(kmqTempDir, {recursive: true});
+    await fs.promises.mkdir(`${kmqTempDir}/sql`, {recursive: true})
     const output = `${kmqTempDir}/bootstrap.zip`
-    db = await mysql.createConnection({
+    let db = await mysql.createConnection({
         host: "localhost",
         user: config.dbUser,
         password: config.dbPassword
