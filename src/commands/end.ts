@@ -1,31 +1,35 @@
-const { sendSongMessage, disconnectVoiceConnection, sendInfoMessage, getDebugContext } = require("../helpers/utils.js")
-const logger = require("../logger")("end");
+import BaseCommand, { CommandArgs } from "./base_command";
+import { sendSongMessage, disconnectVoiceConnection, sendInfoMessage, getDebugContext } from "../helpers/discord_utils";
+import _logger from "../logger";
+const logger = _logger("end");
 
-module.exports = {
-    call: ({ client, gameSessions, message }) => {
+class EndCommand implements BaseCommand {
+    async call({ client, gameSessions, message }: CommandArgs) {
         let gameSession = gameSessions[message.guild.id];
         if (!gameSession) {
             return;
         }
         if (gameSession.gameInSession()) {
-            sendSongMessage(message, gameSession, true);
+            await sendSongMessage(message, gameSession, true);
         }
         if (!gameSession.scoreboard.isEmpty()) {
             logger.info(`${getDebugContext(message)} | Game session ended, non-empty`);
-            sendInfoMessage(message, gameSession.scoreboard.getWinnerMessage())
+            await sendInfoMessage(message, gameSession.scoreboard.getWinnerMessage())
         }
         else if (gameSession.gameInSession()) {
             logger.info(`${getDebugContext(message)} | Game session ended, empty`);
-            sendInfoMessage(message, "Nobody won :(")
+            await sendInfoMessage(message, "Nobody won :(")
         }
         disconnectVoiceConnection(client, message);
         gameSession.finished = true;
         delete gameSessions[message.guild.id];
-    },
-    help: {
+    }
+    help = {
         name: "end",
         description: "Finishes the current game and decides on a winner.",
         usage: "!end",
         arguments: []
     }
 }
+
+export default EndCommand;

@@ -17,7 +17,7 @@ Join our [support server](https://discord.gg/RCuzwYV) for help and to play with 
 1. Create `config.json` based on the template provided
 2. `npm install` to install Node dependeices
 3. `npm run seed` to seed MySQL database with latest data
-4. `npm run start` to start the K-pop Music Quiz bot
+4. `npm run dev` to start the K-pop Music Quiz bot
 
 # Gameplay
 Gameplay is initiated via `,play`, which invites the bot to a voice channel. The bot will begin to play a random kpop song based on the game options. Users can guess the song by typing the name of the song. 

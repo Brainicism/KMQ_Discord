@@ -4,3 +4,4 @@ main.db
 config/app_config.json
 .cache/
 logs/
+build/

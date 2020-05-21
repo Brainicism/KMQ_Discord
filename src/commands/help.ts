@@ -1,27 +1,33 @@
-const helpMessages = require('../data/help_strings.json');
-const logger = require("../logger")("help");
-const { EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, getCommandFiles } = require("../helpers/utils.js");
+import BaseCommand, { CommandArgs } from "./base_command";
+import * as Discord from "discord.js"
+import * as helpMessages from "../../data/help_strings.json";
+import { EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, getCommandFiles } from "../helpers/discord_utils";
+import _logger from "../logger";
+const logger = _logger("help");
 const placeholder = "!";
-module.exports = {
-    call: ({ parsedMessage, message, botPrefix }) => {
-        helpMessage(message, parsedMessage.argument, botPrefix);
-    },
-    help:
-    {
-        "name": "help",
-        "description": "Get help about the game's commands. Add the action as an argument to get information about specific arguments.",
-        "usage": "!help [action]",
-        "arguments": [
-            {
-                "name": "action",
-                "description": "Any valid command for the K-pop Music Quiz bot"
-            }
-        ]
+
+class HelpCommand implements BaseCommand {
+    async call({ parsedMessage, message, botPrefix }: CommandArgs) {
+        await helpMessage(message, parsedMessage.argument, botPrefix);
     }
+    help =
+        {
+            "name": "help",
+            "description": "Get help about the game's commands. Add the action as an argument to get information about specific arguments.",
+            "usage": "!help [action]",
+            "arguments": [
+                {
+                    "name": "action",
+                    "description": "Any valid command for the K-pop Music Quiz bot"
+                }
+            ]
+        }
 }
 
+export default HelpCommand;
+
 // Usage: `!help [action]` or `!help`
-const helpMessage = async (message, action, botPrefix) => {
+const helpMessage = async (message: Discord.Message, action: string, botPrefix: string) => {
     let embedTitle = "";
     let embedDesc = "";
     let embedFields = [];
@@ -34,13 +40,13 @@ const helpMessage = async (message, action, botPrefix) => {
             commandFiles[alias] = commandFiles[commandName];
         });
     }
-    
-    let commandNamesWithHelp = Object.keys(commandFiles).filter((commandName) => commandFiles[commandName].help);   
+
+    let commandNamesWithHelp = Object.keys(commandFiles).filter((commandName) => commandFiles[commandName].help);
     let embedFooter = null;
     if (action) {
         if (!(commandNamesWithHelp.includes(action))) {
             logger.warn(`${getDebugContext(message)} | Missing documentation: ${action}`);
-            sendErrorMessage(message,
+            await sendErrorMessage(message,
                 "K-pop Music Quiz Command Help",
                 `Sorry, there is no documentation on ${action}`)
             return;
@@ -59,7 +65,7 @@ const helpMessage = async (message, action, botPrefix) => {
                 text: `Aliases: ${commandFiles[action].aliases.join(", ")}`
             }
         }
-        
+
     }
     else {
         embedTitle = "K-pop Music Quiz Command Help";
@@ -71,7 +77,7 @@ const helpMessage = async (message, action, botPrefix) => {
                 value: `${helpManual.description}\nUsage: \`${helpManual.usage.replace(placeholder, botPrefix)}\``
             })
         });
-      
+
     }
 
     message.channel.send({
@@ -79,7 +85,7 @@ const helpMessage = async (message, action, botPrefix) => {
             title: embedTitle,
             color: EMBED_INFO_COLOR,
             description: embedDesc,
-            fields: embedFields, 
+            fields: embedFields,
             footer: embedFooter
         }
     })
