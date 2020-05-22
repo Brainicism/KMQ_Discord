@@ -5,8 +5,9 @@ previously underscored property keys.
 This script removes the underscores from keys from kmq.guild_preferences.guild_preference
 
 `
-const config = require("../config/app_config.json");
-const mysql = require("promise-mysql");
+import * as _config from "../../config/app_config.json";
+let config: any = _config;
+import * as mysql from "promise-mysql";
 
 (async () => {
     const db = await mysql.createConnection({
@@ -20,7 +21,7 @@ const mysql = require("promise-mysql");
         let preference = JSON.parse(result["guild_preference"]);
         console.log("===============================")
         console.log(preference);
-        for (key in preference){
+        for (let key in preference){
             if (key.startsWith("_")){
                 delete Object.assign(preference, {[key.substr(1)]: preference[key] })[key];
             }
