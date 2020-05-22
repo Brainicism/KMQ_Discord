@@ -14,19 +14,32 @@ Join our [support server](https://discord.gg/RCuzwYV) for help and to play with 
 
 ## Setup
 ------------
-1. Create `config.json` based on the template provided
+1. Create `app_config.json` based on the template provided
 2. `npm install` to install Node dependeices
-3. `npm run seed` to seed MySQL database with latest data
+3. `npm run seed` to seed the database with latest kpop song data
 4. `npm run dev` to start the K-pop Music Quiz bot
 
 # Gameplay
 Gameplay is initiated via `,play`, which invites the bot to a voice channel. The bot will begin to play a random kpop song based on the game options. Users can guess the song by typing the name of the song. 
 
-![alt text](/images/scoreboard.png)
+![scoreboard](/images/scoreboard.png)
 
-Supported game options include:
-- `cutoff`: Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen.
-- `limit`: Set a maximum number of results in the song query. This effectively sets the 'Top X number of songs' based on the selected filters.
-- `gender`: Choose the gender of the artists you'd like to hear from.
+# Commands 
+## General Commands 
+- `,play`: Begin a game of KMQ. The bot will play a random song based on the currently chosen filters. Users are able to guess the name of the song by typing it in the chat. You will receive a point if you are the first correct guesser
+- `,stop`: Stop the current round of KMQ. The bot will leave the call and cease to play any new songs.
+- `,end`: Stop the current game of KMQ. The bot will display the winner of the game.
+- `,skip`: Starts a vote to skip the current playing song. Based on majority rule.
+- `,options`: Shows the current game options, which filter the songs that will be played
+- `,volume`: Specifies the volume at which songs are played
+- `,help`: Shows a general overview of available commands, as well as specific instructions for each command
+- `,prefix`: Specifies the bot's prefix
 
-Full command list can be found using `,help`
+## Game Option Commands 
+- `,cutoff`: Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen.
+- `,limit`: Set a maximum number of results in the song query. This effectively sets the 'Top X number of songs' based on the selected filters.
+- `,gender`: Choose the gender of the artists you'd like to hear from.
+
+![options](/images/game_options.png)
+
+Full command list can always be found using `,help`
