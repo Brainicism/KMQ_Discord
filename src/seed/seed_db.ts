@@ -22,16 +22,15 @@ let options = {
     }
 }
 
-const kmqTempDir = "/tmp/kmq";
+const databaseDownloadDir = "./kpop_db";
 
 let setSqlMode = (sqlFile) => {
     prependFile.sync(sqlFile, `SET @@sql_mode="";\n`);
 }
 
 let main = async function () {
-    await fs.promises.rmdir(kmqTempDir, { recursive: true });
-    await fs.promises.mkdir(`${kmqTempDir}/sql`, { recursive: true })
-    const output = `${kmqTempDir}/bootstrap.zip`
+    await fs.promises.mkdir(`${databaseDownloadDir}/sql`, { recursive: true })
+    const output = `${databaseDownloadDir}/bootstrap.zip`
     let db = await mysql.createConnection({
         host: "localhost",
         user: config.dbUser,
@@ -53,8 +52,8 @@ let main = async function () {
         })
         .then(() => {
             return new Promise((resolve, reject) => {
-                fs.createReadStream(`${kmqTempDir}/bootstrap.zip`)
-                    .pipe(unzipper.Extract({ path: `${kmqTempDir}/sql/` }))
+                fs.createReadStream(`${databaseDownloadDir}/bootstrap.zip`)
+                    .pipe(unzipper.Extract({ path: `${databaseDownloadDir}/sql/` }))
                     .on("error", (err) => {
                         // this throws an error even though it finished successfully
                         if (!err.toString().includes("invalid signature")) {
@@ -68,8 +67,8 @@ let main = async function () {
         })
         .then(async () => {
             return new Promise(async (resolve, reject) => {
-                let files = await fs.promises.readdir(`${kmqTempDir}/sql`);
-                let seedFile = `${kmqTempDir}/sql/${files[0]}`;
+                let files = await fs.promises.readdir(`${databaseDownloadDir}/sql`);
+                let seedFile = `${databaseDownloadDir}/sql/${files[0]}`;
                 logger.info("Dropping K-Pop video database");
                 await db.query("DROP DATABASE IF EXISTS kpop_videos;");
                 logger.info("Creating K-pop video database")
