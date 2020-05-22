@@ -42,6 +42,7 @@ client.on("ready", () => {
 
 client.on("message", (message: Discord.Message) => {
     if (message.author.equals(client.user) || message.author.bot) return;
+    if (!message.guild) return;
     let guildPreference = getGuildPreference(guildPreferences, message.guild.id);
     let botPrefix = guildPreference.getBotPrefix();
     let parsedMessage = parseMessage(message.content, botPrefix) || null;
