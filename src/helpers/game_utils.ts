@@ -67,9 +67,7 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
 }
 
 const selectRandomSong = (queriedSongList: Array<QueriedSong>, guild_preference: GuildPreference): QueriedSong => {
-    let attempts = 0;
-    let attemptedSongs = new Set();
-    
+    let attempts = 0;    
     if (queriedSongList.length == 0) {
         return null;
     }
@@ -84,7 +82,6 @@ const selectRandomSong = (queriedSongList: Array<QueriedSong>, guild_preference:
         const songLocation = `${SONG_CACHE_DIR}/${random.youtubeLink}.mp3`;
         if (!fs.existsSync(songLocation)) {
             logger.error(`Song not cached: ${songLocation}`);
-            attemptedSongs.add(random.youtubeLink);
             attempts++;
             continue;
         }

@@ -40,8 +40,16 @@ const downloadSong = (id: string) => {
         quality: "highest"
     };
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         console.log(`Downloading ${id}`)
+        try {
+            //check to see if the video is downloadable
+             await ytdl.getBasicInfo(`https://www.youtube.com/watch?v=${id}`);
+        } catch (e) {
+            resolve(`Failed to retrieve video metadata. error = ${e}`);
+            return;
+        }
+     
         ytdl(`https://www.youtube.com/watch?v=${id}`, ytdlOptions)
             .pipe(cacheStream);
         cacheStream.on('finish', () => {
