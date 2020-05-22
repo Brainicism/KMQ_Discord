@@ -86,20 +86,24 @@ const getDebugContext = (message: Discord.Message): string => {
 }
 
 const getCommandFiles = (): Promise<{ [commandName: string]: BaseCommand }> => {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         let commandMap = {};
-        fs.readdir("./commands", async (err, files) => {
-            if (err) {
-                reject();
-                return logger.error(`Unable to read commands error = ${err}`);
-            }
-            for (const file of files) {
-                let command = await import(`../commands/${file}`);
-                let commandName = file.split(".")[0];
-                commandMap[commandName] = new command.default()
-            }
-            resolve(commandMap);
-        });
+        let files: Array<string>;
+        try {
+            files = await fs.promises.readdir("./commands");
+        }
+        catch (err) {
+            reject();
+            return logger.error(`Unable to read commands error = ${err}`);
+        }
+
+        for (const file of files) {
+            let command = await import(`../commands/${file}`);
+            let commandName = file.split(".")[0];
+            commandMap[commandName] = new command.default()
+        }
+        resolve(commandMap);
+
     })
 }
 

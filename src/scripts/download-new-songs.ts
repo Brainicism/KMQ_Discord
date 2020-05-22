@@ -6,29 +6,33 @@ import { QueriedSong } from "types";
 import * as path from "path";
 let config: any = _config;
 
-export function clearPartiallyCachedSongs() {
+export async function clearPartiallyCachedSongs() {
     console.log("Clearing partially cached songs");
     if (!fs.existsSync(config.songCacheDir)) {
         return console.error("Song cache directory doesn't exist.");
     }
-    fs.readdir(config.songCacheDir, (error, files) => {
-        if (error) {
-            return console.error(error);
-        }
+    let files: Array<string>;
+    try {
+        files = await fs.promises.readdir(config.songCacheDir);
+    }
+    catch (err) {
+        return console.error(err);
+    }
 
-        const endingWithPartRegex = new RegExp("\\.part$");
-        const partFiles = files.filter((file) => file.match(endingWithPartRegex));
-        partFiles.forEach((partFile) => {
-            fs.unlink(`${config.songCacheDir}/${partFile}`, (err) => {
-                if (err) {
-                    console.error(err);
-                }
-            })
-        })
-        if (partFiles.length) {
-            console.log(`${partFiles.length} stale cached songs deleted.`);
+    const endingWithPartRegex = new RegExp("\\.part$");
+    const partFiles = files.filter((file) => file.match(endingWithPartRegex));
+    partFiles.forEach(async (partFile) => {
+        try {
+            await fs.promises.unlink(`${config.songCacheDir}/${partFile}`);
         }
-    });
+        catch (err) {
+            console.error(err);
+        }
+    })
+    if (partFiles.length) {
+        console.log(`${partFiles.length} stale cached songs deleted.`);
+    }
+
 }
 
 const downloadSong = (id: string) => {
@@ -44,24 +48,23 @@ const downloadSong = (id: string) => {
         console.log(`Downloading ${id}`)
         try {
             //check to see if the video is downloadable
-             await ytdl.getBasicInfo(`https://www.youtube.com/watch?v=${id}`);
+            await ytdl.getBasicInfo(`https://www.youtube.com/watch?v=${id}`);
         } catch (e) {
             resolve(`Failed to retrieve video metadata. error = ${e}`);
             return;
         }
-     
+
         ytdl(`https://www.youtube.com/watch?v=${id}`, ytdlOptions)
             .pipe(cacheStream);
-        cacheStream.on('finish', () => {
-            fs.rename(tempLocation, cachedSongLocation, (error) => {
-                if (error) {
-                    reject(`Error renaming temp song file from ${tempLocation} to ${cachedSongLocation}. err = ${error}`);
-                }
-                else {
-                    console.log(`Downloaded ${id} successfully`);
-                    resolve();
-                }
-            });
+        cacheStream.on('finish', async () => {
+            try {
+                await fs.promises.rename(tempLocation, cachedSongLocation);
+                console.log(`Downloaded ${id} successfully`);
+                resolve();
+            }
+            catch (err) {
+                reject(`Error renaming temp song file from ${tempLocation} to ${cachedSongLocation}. err = ${err}`);
+            }
         })
         cacheStream.on("error", (e) => reject(e));
     })

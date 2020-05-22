@@ -29,8 +29,8 @@ let setSqlMode = (sqlFile) => {
 }
 
 let main = async function () {
-    await fs.promises.rmdir(kmqTempDir, {recursive: true});
-    await fs.promises.mkdir(`${kmqTempDir}/sql`, {recursive: true})
+    await fs.promises.rmdir(kmqTempDir, { recursive: true });
+    await fs.promises.mkdir(`${kmqTempDir}/sql`, { recursive: true })
     const output = `${kmqTempDir}/bootstrap.zip`
     let db = await mysql.createConnection({
         host: "localhost",
@@ -40,11 +40,15 @@ let main = async function () {
 
     request(options)
         .then((resp, body) => {
-            return new Promise((resolve, reject) => {
-                fs.writeFile(output, resp, function (err) {
+            return new Promise(async (resolve, reject) => {
+                try {
+                    await fs.promises.writeFile(output, resp);
                     logger.info("Downloaded database.zip");
                     resolve();
-                });
+                }
+                catch (err) {
+                    reject(err);
+                }
             })
         })
         .then(() => {
@@ -63,22 +67,21 @@ let main = async function () {
             })
         })
         .then(async () => {
-            return new Promise((resolve, reject) => {
-                fs.readdir(`${kmqTempDir}/sql`, async (err, files) => {
-                    let seedFile = `${kmqTempDir}/sql/${files[0]}`;
-                    logger.info("Dropping K-Pop video database");
-                    await db.query("DROP DATABASE IF EXISTS kpop_videos;");
-                    logger.info("Creating K-pop video database")
-                    await db.query("CREATE DATABASE kpop_videos;");
-                    logger.info("Seeding K-Pop video database");
-                    setSqlMode(seedFile);
-                    execSync(`mysql kpop_videos < ${seedFile}`)
-                    logger.info(`Imported database dump (${files[0]}) successfully`);
-                    logger.info("Creating K-pop Music Quiz database");
-                    await db.query("CREATE DATABASE IF NOT EXISTS kmq");
-                    //this is awful but idk why it won't end
-                    process.exit();
-                })
+            return new Promise(async (resolve, reject) => {
+                let files = await fs.promises.readdir(`${kmqTempDir}/sql`);
+                let seedFile = `${kmqTempDir}/sql/${files[0]}`;
+                logger.info("Dropping K-Pop video database");
+                await db.query("DROP DATABASE IF EXISTS kpop_videos;");
+                logger.info("Creating K-pop video database")
+                await db.query("CREATE DATABASE kpop_videos;");
+                logger.info("Seeding K-Pop video database");
+                setSqlMode(seedFile);
+                execSync(`mysql kpop_videos < ${seedFile}`)
+                logger.info(`Imported database dump (${files[0]}) successfully`);
+                logger.info("Creating K-pop Music Quiz database");
+                await db.query("CREATE DATABASE IF NOT EXISTS kmq");
+                //this is awful but idk why it won't end
+                process.exit();
             })
         })
         .catch(e => logger.info(e))
