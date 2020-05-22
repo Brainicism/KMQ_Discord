@@ -71,7 +71,6 @@ const selectRandomSong = (queriedSongList: Array<QueriedSong>, guild_preference:
     if (queriedSongList.length == 0) {
         return null;
     }
-
     while (true) {
         // this case should rarely happen assuming our song cache is relatively up to date
         if (attempts > 5) {
