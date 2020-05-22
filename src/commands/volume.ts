@@ -10,9 +10,7 @@ class VolumeCommand implements BaseCommand {
         guildPreference.setVolume(parseInt(parsedMessage.components[0]), db);
         let gameSession = gameSessions[message.guild.id];
         if (gameSession && gameSession.dispatcher) {
-            gameSession.dispatcher.setVolume(
-                gameSession.isSongCached ? guildPreference.getCachedStreamVolume() : guildPreference.getStreamVolume()
-            );
+            gameSession.dispatcher.setVolume( guildPreference.getStreamVolume());
         }
         await sendOptionsMessage(message, guildPreference, db, GameOptions.VOLUME);
         logger.info(`${getDebugContext(message)} | Volume set to ${guildPreference.getVolume()}.`);

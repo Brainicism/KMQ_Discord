@@ -96,10 +96,6 @@ class GuildPreference {
     }
 
     getStreamVolume(): number {
-        return this.getVolume() / 500;
-    }
-
-    getCachedStreamVolume(): number {
         return this.getVolume() / 150;
     }
 

@@ -5,6 +5,13 @@ interface ParsedMessage {
     components: Array<string>
 }
 
+interface QueriedSong {
+    name: string;
+    artist: string;
+    youtubeLink: string;
+}
+
 export {
-    ParsedMessage
+    ParsedMessage,
+    QueriedSong
 }
