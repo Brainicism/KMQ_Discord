@@ -8,11 +8,12 @@ import GameSession from "models/game_session";
 import GuildPreference from "models/guild_preference";
 import { Pool } from "promise-mysql";
 import * as Discord from "discord.js";
-import ytdl = require("ytdl-core");
 import * as hangulRomanization from "hangul-romanization";
+import { QueriedSong } from "types";
 const GameOptions: { [option: string]: string } = { "GENDER": "Gender", "CUTOFF": "Cutoff", "LIMIT": "Limit", "VOLUME": "Volume" };
 
 const logger = _logger("game_utils");
+
 
 const guessSong = async ({ client, message, gameSessions, guildPreference, db }: CommandArgs) => {
     if (!client.voice.connections.get(message.guild.id).channel.members.has(message.author.id)) {
@@ -49,15 +50,42 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
     WHERE FIND_IN_SET(members, ?) AND dead = "n" AND publishedon >= "?-01-01" AND vtype = "main"
     ORDER BY kpop_videos.app_kpop.views DESC LIMIT ?;`;
     try {
-        let result = await db.query(query, [guildPreference.getSQLGender(), guildPreference.getBeginningCutoffYear(), guildPreference.getLimit()])
-        let random = result[Math.floor(Math.random() * result.length)];
-        gameSession.startRound(random.name, random.artist, random.youtubeLink);
+        let result = await db.query(query, [guildPreference.getSQLGender(), guildPreference.getBeginningCutoffYear(), guildPreference.getLimit()]);
+        let randomSong = selectRandomSong(result, guildPreference);
+        if (randomSong === null) {
+            sendErrorMessage(message, "Song Query Error", "Failed to find songs matching this criteria. Try to broaden your search");
+            return;
+        }
+        gameSession.startRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);
         playSong(gameSession, guildPreference, db, message, client);
         logger.info(`${getDebugContext(message)} | Playing song: ${gameSession.getDebugSongDetails()}`);
     }
     catch (err) {
         await sendErrorMessage(message, "KMQ database query error", err.toString());
-        logger.error(`${getDebugContext(message)} | Error querying song: ${err}`);
+        logger.error(`${getDebugContext(message)} | Error querying song: ${err}. guildPreference = ${JSON.stringify(guildPreference)}`);
+    }
+}
+
+const selectRandomSong = (queriedSongList: Array<QueriedSong>, guild_preference: GuildPreference): QueriedSong => {
+    let attempts = 0;    
+    if (queriedSongList.length == 0) {
+        return null;
+    }
+    while (true) {
+        // this case should rarely happen assuming our song cache is relatively up to date
+        if (attempts > 5) {
+            logger.error(`Failed to select a random song: guildPref = ${JSON.stringify(guild_preference)}`);
+            return null;
+        }
+        let random = queriedSongList[Math.floor(Math.random() * queriedSongList.length)];
+        const songLocation = `${SONG_CACHE_DIR}/${random.youtubeLink}.mp3`;
+        if (!fs.existsSync(songLocation)) {
+            logger.error(`Song not cached: ${songLocation}`);
+            attempts++;
+            continue;
+        }
+        logger.info(`Selected song: ${random.youtubeLink}`)
+        return random;
     }
 }
 
@@ -68,48 +96,14 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
         bitrate: voiceChannel.bitrate
     };
 
-    const cacheStreamOptions = {
-        volume: guildPreference.getCachedStreamVolume(),
-        bitrate: voiceChannel.bitrate
-    };
-
-    if (!fs.existsSync(SONG_CACHE_DIR)) {
-        fs.mkdirSync(SONG_CACHE_DIR)
-    }
-
-    const ytdlOptions = {
-        filter: "audioonly" as const,
-        quality: "highest"
-    };
-
-    const cachedSongLocation = `${SONG_CACHE_DIR}/${gameSession.getVideoID()}.mp3`;
-    gameSession.isSongCached = fs.existsSync(cachedSongLocation);
-    if (!gameSession.isSongCached) {
-        logger.debug(`${getDebugContext(message)} | Downloading uncached song: ${gameSession.getDebugSongDetails()}`);
-        const tempLocation = `${cachedSongLocation}.part`;
-        if (!fs.existsSync(tempLocation)) {
-            let cacheStream = fs.createWriteStream(tempLocation);
-            ytdl(gameSession.getVideoID(), ytdlOptions)
-                .pipe(cacheStream);
-            cacheStream.on("finish", () => {
-                fs.rename(tempLocation, cachedSongLocation, (error) => {
-                    if (error) {
-                        logger.error(`Error renaming temp song file from ${tempLocation} to ${cachedSongLocation}. err = ${error}`);
-                    }
-                    logger.info(`Successfully cached song ${gameSession.getDebugSongDetails()}`);
-                })
-            })
-        }
-    } else {
-        touch(cachedSongLocation);
-    }
+    const songLocation = `${SONG_CACHE_DIR}/${gameSession.getVideoID()}.mp3`;
     if (!gameSession.connection || client.voice.connections.get(message.guild.id) == null) {
         try {
             let connection = await voiceChannel.join();
             gameSession.connection = connection;
         }
         catch (err) {
-            logger.error(`${getDebugContext(message)} | Error joining voice connection. cached = ${gameSession.isSongCached}. song = ${gameSession.getDebugSongDetails()} err = ${err}`);
+            logger.error(`${getDebugContext(message)} | Error joining voice connection. song = ${gameSession.getDebugSongDetails()} err = ${err}`);
             await sendErrorMessage(message, "Missing voice permissions", "The bot is unable to join the voice channel you are in.");
             gameSession.endRound();
             return;
@@ -118,10 +112,8 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
     // We are unable to pipe the above ytdl stream into Discord.js's play
     // because it terminates the download when the dispatcher is destroyed
     // (i.e when a song is skipped)
-    gameSession.dispatcher = gameSession.connection.play(
-        gameSession.isSongCached ? cachedSongLocation : ytdl(gameSession.getVideoID(), ytdlOptions),
-        gameSession.isSongCached ? cacheStreamOptions : streamOptions);
-    logger.info(`${getDebugContext(message)} | Playing song in voice connection. cached = ${gameSession.isSongCached}. song = ${gameSession.getDebugSongDetails()}`);
+    gameSession.dispatcher = gameSession.connection.play(songLocation, streamOptions);
+    logger.info(`${getDebugContext(message)} | Playing song in voice connection. song = ${gameSession.getDebugSongDetails()}`);
 
     gameSession.dispatcher.on("finish", async () => {
         await sendSongMessage(message, gameSession, true);
@@ -133,7 +125,7 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
     gameSession.dispatcher.on("error", async () => {
         logger.error(`${getDebugContext(message)} | Unknown error with stream dispatcher. song = ${gameSession.getDebugSongDetails()}`);
         // Attempt to restart game with different song
-        await sendSongMessage(message, gameSession, true);
+        await sendErrorMessage(message, "Error playing song", "Starting new round in 2 seconds...");
         gameSession.endRound();
         setTimeout(() => {
             startGame(gameSession, guildPreference, db, message, client);

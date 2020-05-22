@@ -9,7 +9,6 @@ export default class GameSession {
     private inSession: boolean;
     private skippers: Set<string>;
     public scoreboard: Scoreboard;
-    public isSongCached: boolean;
     public dispatcher: StreamDispatcher;
     public connection: VoiceConnection;
     public finished: boolean;
@@ -21,7 +20,6 @@ export default class GameSession {
         this.inSession = false;
         this.skippers = new Set();
         this.scoreboard = new Scoreboard();
-        this.isSongCached = true;
 
         // dispatcher initalized in game_utils/playSong, used when changing volume
         this.dispatcher = null;
@@ -42,7 +40,6 @@ export default class GameSession {
         this.videoID = null;
         this.inSession = false;
         this.skippers.clear();
-        this.isSongCached = true;
     }
 
     getSong(): string {

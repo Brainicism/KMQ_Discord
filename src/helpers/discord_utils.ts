@@ -166,30 +166,8 @@ export function getNumParticipants(message: Discord.Message): number {
     return message.member.voice.channel.members.size - 1;
 }
 
-export function clearPartiallyCachedSongs() {
-    logger.debug("Clearing partially cached songs");
-    if (!fs.existsSync(SONG_CACHE_DIR)) {
-        return logger.error("Song cache directory doesn't exist.");
-    }
-    fs.readdir(SONG_CACHE_DIR, (error, files) => {
-        if (error) {
-            return logger.error(error);
-        }
 
-        const endingWithPartRegex = new RegExp("\\.part$");
-        const partFiles = files.filter((file) => file.match(endingWithPartRegex));
-        partFiles.forEach((partFile) => {
-            fs.unlink(`${SONG_CACHE_DIR}/${partFile}`, (err) => {
-                if (err) {
-                    logger.error(err);
-                }
-            })
-        })
-        if (partFiles.length) {
-            logger.debug(`${partFiles.length} stale cached songs deleted.`);
-        }
-    });
-}
+
 export {
     EMBED_INFO_COLOR,
     EMBED_ERROR_COLOR,
