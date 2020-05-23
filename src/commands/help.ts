@@ -33,17 +33,19 @@ const helpMessage = async (message: Discord.Message, action: string, botPrefix: 
     let embedFields = [];
     //TODO: potentially do some caching?
     let commandFiles = await getCommandFiles();
+    let commandFilesWithAliases = {};
+    Object.assign(commandFilesWithAliases, commandFiles);
     let commandNamesWithAliases = Object.keys(commandFiles).filter((commandName) => commandFiles[commandName].aliases);
     for (let commandName of commandNamesWithAliases) {
         let aliases = commandFiles[commandName].aliases;
         aliases.forEach(alias => {
-            commandFiles[alias] = commandFiles[commandName];
+            commandFilesWithAliases[alias] = commandFiles[commandName];
         });
     }
 
-    let commandNamesWithHelp = Object.keys(commandFiles).filter((commandName) => commandFiles[commandName].help);
     let embedFooter = null;
     if (action) {
+        let commandNamesWithHelp = Object.keys(commandFilesWithAliases).filter((commandName) => commandFilesWithAliases[commandName].help);
         if (!(commandNamesWithHelp.includes(action))) {
             logger.warn(`${getDebugContext(message)} | Missing documentation: ${action}`);
             await sendErrorMessage(message,
@@ -51,7 +53,7 @@ const helpMessage = async (message: Discord.Message, action: string, botPrefix: 
                 `Sorry, there is no documentation on ${action}`)
             return;
         }
-        let helpManual = commandFiles[action].help;
+        let helpManual = commandFilesWithAliases[action].help;
         embedTitle = `\`${helpManual.usage.replace(placeholder, botPrefix)}\``;
         embedDesc = helpManual.description;
         helpManual.arguments.forEach((argument) => {
@@ -60,14 +62,15 @@ const helpMessage = async (message: Discord.Message, action: string, botPrefix: 
                 value: argument.description
             })
         });
-        if (commandFiles[action].aliases) {
+        if (commandFilesWithAliases[action].aliases) {
             embedFooter = {
-                text: `Aliases: ${commandFiles[action].aliases.join(", ")}`
+                text: `Aliases: ${commandFilesWithAliases[action].aliases.join(", ")}`
             }
         }
 
     }
     else {
+        let commandNamesWithHelp = Object.keys(commandFiles).filter((commandName) => commandFiles[commandName].help);
         embedTitle = "K-pop Music Quiz Command Help";
         embedDesc = helpMessages.rules.replace(placeholder, botPrefix);
         commandNamesWithHelp.forEach((commandName) => {
