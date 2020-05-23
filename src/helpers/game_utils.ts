@@ -6,6 +6,7 @@ import { resolve } from "path"
 import * as fs from "fs";
 import GameSession from "models/game_session";
 import GuildPreference from "models/guild_preference";
+import { getAudioDurationInSeconds } from "get-audio-duration";
 import { Pool } from "promise-mysql";
 import * as Discord from "discord.js";
 import * as hangulRomanization from "hangul-romanization";
@@ -67,7 +68,7 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
 }
 
 const selectRandomSong = (queriedSongList: Array<QueriedSong>, guild_preference: GuildPreference): QueriedSong => {
-    let attempts = 0;    
+    let attempts = 0;
     if (queriedSongList.length == 0) {
         return null;
     }
@@ -91,12 +92,24 @@ const selectRandomSong = (queriedSongList: Array<QueriedSong>, guild_preference:
 
 const playSong = async (gameSession: GameSession, guildPreference: GuildPreference, db: Pool, message: Discord.Message, client: Discord.Client) => {
     let voiceChannel = message.member.voice.channel;
+    const songLocation = `${SONG_CACHE_DIR}/${gameSession.getVideoID()}.mp3`;
+
+    let seekLocation: number;
+    try {
+        const songDuration = await getAudioDurationInSeconds(songLocation);
+        seekLocation = songDuration * (0.6 * Math.random());
+    }
+    catch (e) {
+        logger.error(`Failed to get mp3 length: ${songLocation}`);
+        seekLocation = 0;
+    }
+
     const streamOptions = {
         volume: guildPreference.getStreamVolume(),
-        bitrate: voiceChannel.bitrate
+        bitrate: voiceChannel.bitrate,
+        seek: seekLocation
     };
 
-    const songLocation = `${SONG_CACHE_DIR}/${gameSession.getVideoID()}.mp3`;
     if (!gameSession.connection || client.voice.connections.get(message.guild.id) == null) {
         try {
             let connection = await voiceChannel.join();
