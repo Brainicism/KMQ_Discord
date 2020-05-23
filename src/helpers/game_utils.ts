@@ -56,7 +56,7 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
         let result = await db.query(query, [guildPreference.getSQLGender(), guildPreference.getBeginningCutoffYear(), guildPreference.getLimit()]);
         let randomSong = selectRandomSong(result, guildPreference);
         if (randomSong === null) {
-            sendErrorMessage(message, "Song Query Error", "Failed to find songs matching this criteria. Try to broaden your search");
+            sendErrorMessage(message, "Song Query Error", "Failed to find songs matching this criteria. Try to broaden your search.");
             return;
         }
         gameSession.startRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);

@@ -39,6 +39,7 @@ Gameplay is initiated via `,play`, which invites the bot to a voice channel. The
 - `,cutoff`: Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen.
 - `,limit`: Set a maximum number of results in the song query. This effectively sets the 'Top X number of songs' based on the selected filters.
 - `,gender`: Choose the gender of the artists you'd like to hear from.
+- `,seek`: Choose whether each songs starts from the beginning, or a random point.
 
 ![options](/images/game_options.png)
 
