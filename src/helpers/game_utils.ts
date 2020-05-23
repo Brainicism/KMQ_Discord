@@ -17,7 +17,8 @@ const logger = _logger("game_utils");
 
 
 const guessSong = async ({ client, message, gameSessions, guildPreference, db }: CommandArgs) => {
-    if (!client.voice.connections.get(message.guild.id).channel.members.has(message.author.id)) {
+    const voiceConnection = client.voice.connections.get(message.guild.id);
+    if (!voiceConnection || !voiceConnection.channel.members.has(message.author.id)) {
         return;
     }
     let guess = cleanSongName(message.content);
