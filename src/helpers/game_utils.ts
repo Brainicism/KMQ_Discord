@@ -11,7 +11,8 @@ import { Pool } from "promise-mysql";
 import * as Discord from "discord.js";
 import * as hangulRomanization from "hangul-romanization";
 import { QueriedSong } from "types";
-const GameOptions: { [option: string]: string } = { "GENDER": "Gender", "CUTOFF": "Cutoff", "LIMIT": "Limit", "VOLUME": "Volume" };
+import { SEEK_TYPES } from "../commands/seek";
+const GameOptions: { [option: string]: string } = { "GENDER": "Gender", "CUTOFF": "Cutoff", "LIMIT": "Limit", "VOLUME": "Volume", "SEEK_TYPE": "Seek Type"};
 
 const logger = _logger("game_utils");
 
@@ -96,12 +97,17 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
     const songLocation = `${SONG_CACHE_DIR}/${gameSession.getVideoID()}.mp3`;
 
     let seekLocation: number;
-    try {
-        const songDuration = await getAudioDurationInSeconds(songLocation);
-        seekLocation = songDuration * (0.6 * Math.random());
+    if (guildPreference.getSeekType() === SEEK_TYPES.RANDOM) {
+        try {
+            const songDuration = await getAudioDurationInSeconds(songLocation);
+            seekLocation = songDuration * (0.6 * Math.random());
+        }
+        catch (e) {
+            logger.error(`Failed to get mp3 length: ${songLocation}`);
+            seekLocation = 0;
+        }
     }
-    catch (e) {
-        logger.error(`Failed to get mp3 length: ${songLocation}`);
+    else {
         seekLocation = 0;
     }
 
@@ -127,7 +133,7 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
     // because it terminates the download when the dispatcher is destroyed
     // (i.e when a song is skipped)
     gameSession.dispatcher = gameSession.connection.play(songLocation, streamOptions);
-    logger.info(`${getDebugContext(message)} | Playing song in voice connection. song = ${gameSession.getDebugSongDetails()}`);
+    logger.info(`${getDebugContext(message)} | Playing song in voice connection. seek = ${guildPreference.getSeekType()}. song = ${gameSession.getDebugSongDetails()}`);
 
     gameSession.dispatcher.on("finish", async () => {
         await sendSongMessage(message, gameSession, true);

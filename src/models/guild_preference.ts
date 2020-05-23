@@ -4,13 +4,17 @@ import { DEFAULT_LIMIT } from "../commands/limit";
 import { DEFAULT_VOLUME } from "../commands/volume";
 import { GENDER } from "../commands/gender";
 import { Pool } from "promise-mysql";
+import { SEEK_TYPES } from "../commands/seek";
+import _logger from "../logger";
+const logger = _logger("guild_preference");
 
-const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.FEMALE], limit: DEFAULT_LIMIT, volume: DEFAULT_VOLUME };
+const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.FEMALE], limit: DEFAULT_LIMIT, volume: DEFAULT_VOLUME, seekType: SEEK_TYPES.BEGINNING };
 interface GameOption {
     beginningYear: number;
     gender: string[];
     limit: number;
     volume: number;
+    seekType: string;
 }
 
 class GuildPreference {
@@ -27,6 +31,15 @@ class GuildPreference {
         }
         this.gameOptions = json.gameOptions;
         this.botPrefix = json.botPrefix;
+        //apply default game option for empty
+        let defaultOptionAdded: boolean = false;
+        for (let defaultOption in DEFAULT_OPTIONS) {
+            if (!(defaultOption in this.gameOptions)) {
+                defaultOptionAdded = true;
+                this.gameOptions[defaultOption] = DEFAULT_OPTIONS[defaultOption];
+                logger.info(`Filling in missing game option: ${defaultOption} for guild: ${guildID}`);
+            }
+        }
     }
 
     setLimit(limit: number, db: Pool) {
@@ -86,6 +99,15 @@ class GuildPreference {
         return this.botPrefix;
     }
 
+    setSeekType(seekType: string, db: Pool) {
+        this.gameOptions.seekType = seekType;
+        this.updateGuildPreferences(db);
+    }
+
+    getSeekType(): string {
+        return this.gameOptions.seekType;
+    }
+
     setVolume(volume: number, db: Pool) {
         this.gameOptions.volume = volume;
         this.updateGuildPreferences(db);
@@ -99,7 +121,7 @@ class GuildPreference {
         return this.getVolume() / 150;
     }
 
-    updateGuildPreferences(db: Pool) {
+    async updateGuildPreferences(db: Pool) {
         let guildPreferencesUpdate = `UPDATE kmq.guild_preferences SET guild_preference = ? WHERE guild_id = ?;`;
         db.query(guildPreferencesUpdate, [JSON.stringify(this), this.guildID]);
     }
