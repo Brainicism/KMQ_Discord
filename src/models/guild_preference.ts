@@ -8,7 +8,7 @@ import { SEEK_TYPES } from "../commands/seek";
 import _logger from "../logger";
 const logger = _logger("guild_preference");
 
-const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.FEMALE], limit: DEFAULT_LIMIT, volume: DEFAULT_VOLUME, seekType: SEEK_TYPES.BEGINNING };
+const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.FEMALE], limit: DEFAULT_LIMIT, volume: DEFAULT_VOLUME, seekType: SEEK_TYPES.RANDOM };
 interface GameOption {
     beginningYear: number;
     gender: string[];
