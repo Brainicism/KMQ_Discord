@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-import { EMBED_INFO_COLOR, bold } from "../helpers/discord_utils";
+import { EMBED_INFO_COLOR, bold, sendMessage } from "../helpers/discord_utils";
 import * as Discord from "discord.js";
 import * as fs from "fs";
 import * as _config from "../../config/app_config.json";
@@ -17,7 +17,7 @@ class NewsCommand implements BaseCommand {
             description: news
         });
 
-        await message.channel.send(embed);
+        await sendMessage(message, embed);
     }
     help = {
         name: "news",

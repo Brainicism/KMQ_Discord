@@ -1,7 +1,7 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import * as Discord from "discord.js"
 import * as helpMessages from "../../data/help_strings.json";
-import { EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, getCommandFiles } from "../helpers/discord_utils";
+import { EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, getCommandFiles, sendMessage } from "../helpers/discord_utils";
 import _logger from "../logger";
 const logger = _logger("help");
 const placeholder = "!";
@@ -83,7 +83,7 @@ const helpMessage = async (message: Discord.Message, action: string, botPrefix: 
 
     }
 
-    message.channel.send({
+    sendMessage(message, {
         embed: {
             title: embedTitle,
             color: EMBED_INFO_COLOR,
