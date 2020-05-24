@@ -18,7 +18,7 @@ class PlayCommand implements BaseCommand {
                 gameSessions[message.guild.id] = new GameSession();
                 logger.info(`${getDebugContext(message)} | Game session created`);
             }
-            startGame(gameSessions[message.guild.id], guildPreference, db, message, client);
+            startGame(gameSessions[message.guild.id], guildPreference, db, message, client, message.member.voice.channel);
         }
     }
     aliases = ["random"]

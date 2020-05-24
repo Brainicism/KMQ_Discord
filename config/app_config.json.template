@@ -1,7 +1,8 @@
 {
-    "botToken": "YOUR BOT TOKEN HERE",
-    "dbUser": "root",
+    "botToken": "",
+    "dbUser": "",
     "dbPassword": "",
-    "songCacheDir": "./.cache",
-    "topGGToken": ""
+    "songCacheDir": "",
+    "topGGToken": "",
+    "newsFile": ""
 }

@@ -1,4 +1,3 @@
-import { songCacheDir as SONG_CACHE_DIR } from "../../config/app_config.json";
 import * as fs from "fs";
 import { Pool } from "promise-mysql"
 import * as path from "path";
@@ -13,7 +12,7 @@ const EMBED_INFO_COLOR = 0x000000; // BLACK
 const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 
 const sendSongMessage = async (message: Discord.Message, gameSession: GameSession, isForfeit: boolean) => {
-    await message.channel.send({
+    await sendMessage(message, {
         embed: {
             color: EMBED_INFO_COLOR,
             author: {
@@ -27,7 +26,7 @@ const sendSongMessage = async (message: Discord.Message, gameSession: GameSessio
             },
             fields: gameSession.scoreboard.getScoreboard()
         }
-    })
+    });
 }
 const sendInfoMessage = async (message: Discord.Message, title: string, description?: string, footerText?: string, footerImageWithPath?: string) => {
     let embed = new Discord.MessageEmbed({
@@ -45,11 +44,10 @@ const sendInfoMessage = async (message: Discord.Message, title: string, descript
         let footerImage = path.basename(footerImageWithPath);
         embed.setFooter(footerText, `attachment://${footerImage}`)
     }
-
-    await message.channel.send(embed);
+    await sendMessage(message, embed);
 }
 const sendErrorMessage = async (message: Discord.Message, title: string, description: string) => {
-    await message.channel.send({
+    await sendMessage(message, {
         embed: {
             color: EMBED_ERROR_COLOR,
             author: {
@@ -67,16 +65,18 @@ const sendOptionsMessage = async (message: Discord.Message, guildPreference: Gui
     let genderString = `${guildPreference.getSQLGender()}`;
     let limitString = `${guildPreference.getLimit()}`;
     let volumeString = `${guildPreference.getVolume()}`;
+    let seekTypeString = `${guildPreference.getSeekType()}`
 
     cutoffString = updatedOption == GameOptions.CUTOFF ? bold(cutoffString) : codeLine(cutoffString);
     genderString = updatedOption == GameOptions.GENDER ? bold(genderString) : codeLine(genderString);
     limitString = updatedOption == GameOptions.LIMIT ? bold(limitString) : codeLine(limitString);
     volumeString = updatedOption == GameOptions.VOLUME ? bold(volumeString) : codeLine(volumeString);
+    seekTypeString = updatedOption == GameOptions.SEEK_TYPE ? bold(seekTypeString) : codeLine(seekTypeString);
 
     let totalSongs = await getSongCount(guildPreference, db);
     await sendInfoMessage(message,
         updatedOption == null ? "Options" : `${updatedOption} updated`,
-        `Now playing the ${limitString} out of the __${totalSongs}__ most popular songs  by ${genderString} artists starting from the year ${cutoffString} at ${volumeString}% volume.`,
+        `Now playing the ${limitString} out of the __${totalSongs}__ most popular songs  by ${genderString} artists starting from the year ${cutoffString}. \nPlaying from the ${seekTypeString} point of each song and at ${volumeString}% volume.`,
         updatedOption == null ? `Psst. Your bot prefix is \`${guildPreference.getBotPrefix()}\`.` : null,
         updatedOption == null ? "assets/tsukasa.jpg" : null
     );
@@ -170,6 +170,20 @@ export function getNumParticipants(message: Discord.Message): number {
     return message.member.voice.channel.members.size - 1;
 }
 
+export async function sendMessage(context: Discord.Message, messageContent: any): Promise<Discord.Message> {
+    const channel: Discord.TextChannel = context.channel as Discord.TextChannel;
+    if (!channel.permissionsFor(context.guild.me.user).has("SEND_MESSAGES")) {
+        logger.warn(`${getDebugContext(context)} | Missing SEND_MESSAGES permissions`);
+        let embed = {
+            color: EMBED_INFO_COLOR,
+            title: `Missing Permissions`,
+            description: `Hi! I'm unable to message in ${context.guild.name}'s #${channel.name} channel. Please double check the text channel's permissions.`,
+        }
+        await context.author.send({ embed });
+        return;
+    }
+    return context.channel.send(messageContent);
+}
 
 
 export {
@@ -182,5 +196,8 @@ export {
     sendInfoMessage,
     sendErrorMessage,
     sendOptionsMessage,
-    arraysEqual
+    arraysEqual,
+    bold,
+    italicize,
+    codeLine
 }

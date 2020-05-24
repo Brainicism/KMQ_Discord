@@ -6,3 +6,4 @@ config/app_config.json
 logs/
 build/
 kpop_db/
+news.md

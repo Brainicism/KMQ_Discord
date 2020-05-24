@@ -31,14 +31,16 @@ Gameplay is initiated via `,play`, which invites the bot to a voice channel. The
 - `,end`: Stop the current game of KMQ. The bot will display the winner of the game.
 - `,skip`: Starts a vote to skip the current playing song. Based on majority rule.
 - `,options`: Shows the current game options, which filter the songs that will be played
-- `,volume`: Specifies the volume at which songs are played
 - `,help`: Shows a general overview of available commands, as well as specific instructions for each command
 - `,prefix`: Specifies the bot's prefix
+- `,news`: Show the latest features/changes to the bot
 
 ## Game Option Commands 
 - `,cutoff`: Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen.
 - `,limit`: Set a maximum number of results in the song query. This effectively sets the 'Top X number of songs' based on the selected filters.
 - `,gender`: Choose the gender of the artists you'd like to hear from.
+- `,seek`: Choose whether each songs starts from the beginning, or a random point.
+- `,volume`: Specifies the volume at which songs are played
 
 ![options](/images/game_options.png)
 

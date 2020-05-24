@@ -6,17 +6,20 @@ import { resolve } from "path"
 import * as fs from "fs";
 import GameSession from "models/game_session";
 import GuildPreference from "models/guild_preference";
+import { getAudioDurationInSeconds } from "get-audio-duration";
 import { Pool } from "promise-mysql";
 import * as Discord from "discord.js";
 import * as hangulRomanization from "hangul-romanization";
 import { QueriedSong } from "types";
-const GameOptions: { [option: string]: string } = { "GENDER": "Gender", "CUTOFF": "Cutoff", "LIMIT": "Limit", "VOLUME": "Volume" };
+import { SEEK_TYPES } from "../commands/seek";
+const GameOptions: { [option: string]: string } = { "GENDER": "Gender", "CUTOFF": "Cutoff", "LIMIT": "Limit", "VOLUME": "Volume", "SEEK_TYPE": "Seek Type" };
 
 const logger = _logger("game_utils");
 
 
 const guessSong = async ({ client, message, gameSessions, guildPreference, db }: CommandArgs) => {
-    if (!client.voice.connections.get(message.guild.id).channel.members.has(message.author.id)) {
+    const voiceConnection = client.voice.connections.get(message.guild.id);
+    if (!voiceConnection || !voiceConnection.channel.members.has(message.author.id)) {
         return;
     }
     let guess = cleanSongName(message.content);
@@ -32,13 +35,13 @@ const guessSong = async ({ client, message, gameSessions, guildPreference, db }:
             gameSession.connection.play(resolve("assets/ring.wav"));
         }
         setTimeout(() => {
-            startGame(gameSession, guildPreference, db, message, client);
+            startGame(gameSession, guildPreference, db, message, client, null);
         }, 2000);
     }
 }
 
 
-const startGame = async (gameSession: GameSession, guildPreference: GuildPreference, db: Pool, message: Discord.Message, client: Discord.Client) => {
+const startGame = async (gameSession: GameSession, guildPreference: GuildPreference, db: Pool, message: Discord.Message, client: Discord.Client, voiceChannel?: Discord.VoiceChannel) => {
     if (!gameSession || gameSession.finished) {
         return;
     }
@@ -53,10 +56,11 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
         let result = await db.query(query, [guildPreference.getSQLGender(), guildPreference.getBeginningCutoffYear(), guildPreference.getLimit()]);
         let randomSong = selectRandomSong(result, guildPreference);
         if (randomSong === null) {
-            sendErrorMessage(message, "Song Query Error", "Failed to find songs matching this criteria. Try to broaden your search");
+            sendErrorMessage(message, "Song Query Error", "Failed to find songs matching this criteria. Try to broaden your search.");
             return;
         }
         gameSession.startRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);
+        await ensureVoiceConnection(message, gameSession, client, voiceChannel);
         playSong(gameSession, guildPreference, db, message, client);
         logger.info(`${getDebugContext(message)} | Playing song: ${gameSession.getDebugSongDetails()}`);
     }
@@ -66,8 +70,22 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
     }
 }
 
+const ensureVoiceConnection = async (message: Discord.Message, gameSession: GameSession, client: Discord.Client, voiceChannel?: Discord.VoiceChannel) => {
+    if (voiceChannel) {
+        try {
+            let connection = await voiceChannel.join();
+            gameSession.connection = connection;
+        }
+        catch (err) {
+            logger.error(`${getDebugContext(message)} | Error joining voice connection. song = ${gameSession.getDebugSongDetails()} err = ${err}`);
+            await sendErrorMessage(message, "Missing voice permissions", "The bot is unable to join the voice channel you are in.");
+            gameSession.endRound();
+            return;
+        }
+    }
+}
 const selectRandomSong = (queriedSongList: Array<QueriedSong>, guild_preference: GuildPreference): QueriedSong => {
-    let attempts = 0;    
+    let attempts = 0;
     if (queriedSongList.length == 0) {
         return null;
     }
@@ -90,36 +108,36 @@ const selectRandomSong = (queriedSongList: Array<QueriedSong>, guild_preference:
 }
 
 const playSong = async (gameSession: GameSession, guildPreference: GuildPreference, db: Pool, message: Discord.Message, client: Discord.Client) => {
-    let voiceChannel = message.member.voice.channel;
-    const streamOptions = {
-        volume: guildPreference.getStreamVolume(),
-        bitrate: voiceChannel.bitrate
-    };
-
     const songLocation = `${SONG_CACHE_DIR}/${gameSession.getVideoID()}.mp3`;
-    if (!gameSession.connection || client.voice.connections.get(message.guild.id) == null) {
+
+    let seekLocation: number;
+    if (guildPreference.getSeekType() === SEEK_TYPES.RANDOM) {
         try {
-            let connection = await voiceChannel.join();
-            gameSession.connection = connection;
+            const songDuration = await getAudioDurationInSeconds(songLocation);
+            seekLocation = songDuration * (0.6 * Math.random());
         }
-        catch (err) {
-            logger.error(`${getDebugContext(message)} | Error joining voice connection. song = ${gameSession.getDebugSongDetails()} err = ${err}`);
-            await sendErrorMessage(message, "Missing voice permissions", "The bot is unable to join the voice channel you are in.");
-            gameSession.endRound();
-            return;
+        catch (e) {
+            logger.error(`Failed to get mp3 length: ${songLocation}`);
+            seekLocation = 0;
         }
     }
-    // We are unable to pipe the above ytdl stream into Discord.js's play
-    // because it terminates the download when the dispatcher is destroyed
-    // (i.e when a song is skipped)
+    else {
+        seekLocation = 0;
+    }
+    const streamOptions = {
+        volume: guildPreference.getStreamVolume(),
+        bitrate: gameSession.connection.channel.bitrate,
+        seek: seekLocation
+    };
+
     gameSession.dispatcher = gameSession.connection.play(songLocation, streamOptions);
-    logger.info(`${getDebugContext(message)} | Playing song in voice connection. song = ${gameSession.getDebugSongDetails()}`);
+    logger.info(`${getDebugContext(message)} | Playing song in voice connection. seek = ${guildPreference.getSeekType()}. song = ${gameSession.getDebugSongDetails()}`);
 
     gameSession.dispatcher.on("finish", async () => {
         await sendSongMessage(message, gameSession, true);
         gameSession.endRound();
         logger.info(`${getDebugContext(message)} | Song finished without being guessed. song = ${gameSession.getDebugSongDetails()}`);
-        startGame(gameSession, guildPreference, db, message, client);
+        startGame(gameSession, guildPreference, db, message, client, null);
     });
 
     gameSession.dispatcher.on("error", async () => {
@@ -128,7 +146,7 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
         await sendErrorMessage(message, "Error playing song", "Starting new round in 2 seconds...");
         gameSession.endRound();
         setTimeout(() => {
-            startGame(gameSession, guildPreference, db, message, client);
+            startGame(gameSession, guildPreference, db, message, client, null);
         }, 2000);
     })
 }

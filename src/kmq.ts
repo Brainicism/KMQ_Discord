@@ -92,6 +92,7 @@ client.on("voiceStateUpdate", (oldState, newState) => {
         // Bot was disconnected by another user
         if (!oldUserChannel.members.has(client.user.id)) {
             if (gameSession) {
+                logger.info(`gid: ${oldUserChannel.guild.id} | Bot disconnected by admin.`)
                 gameSession.endRound();
             }
         }
@@ -144,8 +145,9 @@ const parseMessage = (message: string, botPrefix: string): ParsedMessage => {
     await db.query(guildPreferencesTableCreation);
 
     let fields = await db.query(`SELECT * FROM kmq.guild_preferences`);
-    fields.forEach((field) => {
+    fields.forEach(async (field) => {
         guildPreferences[field.guild_id] = new GuildPreference(field.guild_id, JSON.parse(field.guild_preference));
+        await guildPreferences[field.guild_id].updateGuildPreferences(db);
     });
     let commandFiles = await getCommandFiles();
     for (const [commandName, command] of Object.entries(commandFiles)) {

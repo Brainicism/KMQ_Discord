@@ -20,7 +20,7 @@ class SkipCommand implements BaseCommand {
             return;
         }
         gameSession.userSkipped(message.author.id);
-        if (gameSession.userSkipped) {
+        if (gameSession.skipAchieved) {
             // song already being skipped
             return;
         }
