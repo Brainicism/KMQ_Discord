@@ -6,7 +6,8 @@ import {
     areUserAndBotInSameVoiceChannel,
     getNumParticipants,
     EMBED_INFO_COLOR,
-    getDebugContext
+    getDebugContext,
+    sendMessage
 } from "../helpers/discord_utils";
 import { startGame } from "../helpers/game_utils";
 import _logger from "../logger";
@@ -43,7 +44,7 @@ class SkipCommand implements BaseCommand {
 export default SkipCommand;
 
 async function sendSkipNotification(message: Discord.Message, gameSession: GameSession) {
-    await message.channel.send({
+    await sendMessage(message, {
         embed: {
             color: EMBED_INFO_COLOR,
             author: {
@@ -58,7 +59,7 @@ async function sendSkipNotification(message: Discord.Message, gameSession: GameS
 }
 
 async function sendSkipMessage(message: Discord.Message, gameSession: GameSession) {
-    await message.channel.send({
+    await sendMessage(message, {
         embed: {
             color: EMBED_INFO_COLOR,
             author: {

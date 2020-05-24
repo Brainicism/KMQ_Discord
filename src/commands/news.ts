@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-import { EMBED_INFO_COLOR, bold, getDebugContext } from "../helpers/discord_utils";
+import { EMBED_INFO_COLOR, bold, getDebugContext, sendMessage } from "../helpers/discord_utils";
 import * as Discord from "discord.js";
 import * as fs from "fs";
 import * as _config from "../../config/app_config.json";
@@ -10,15 +10,15 @@ let config: any = _config;
 class NewsCommand implements BaseCommand {
     async call({ message, guildPreference, db }: CommandArgs) {
         let latestSongDate: Date;
-        try{
+        try {
             const data = await db.query(`SELECT publishedon FROM kpop_videos.app_kpop ORDER BY publishedon DESC LIMIT 1;`);
             latestSongDate = new Date(data[0]["publishedon"]);
         }
-        catch(e){
+        catch (e) {
             logger.error(`${getDebugContext(message)} | Error retrieving latest song date`);
             latestSongDate = null;
         }
-        
+
         const news: string = (await fs.readFileSync(config.newsFile)).toString();
         const embed = new Discord.MessageEmbed({
             color: EMBED_INFO_COLOR,
@@ -33,7 +33,7 @@ class NewsCommand implements BaseCommand {
             }
         });
 
-        await message.channel.send(embed);
+        await sendMessage(message, embed);
     }
     help = {
         name: "news",
