@@ -37,12 +37,22 @@ export default class GameSession {
         this.skipAchieved = false;
     }
 
-    endRound() {
-        this.song = null;
-        this.artist = null;
-        this.videoID = null;
-        this.inSession = false;
-        this.skippers.clear();
+    endRound(): Promise<void> {
+        return new Promise((resolve) => {
+            this.song = null;
+            this.artist = null;
+            this.videoID = null;
+            this.inSession = false;
+            this.skippers.clear();
+            if (this.dispatcher) {
+                this.dispatcher.removeAllListeners();
+                this.dispatcher.end(() => {
+                    this.dispatcher = null;
+                    resolve();
+                });
+            }
+
+        })
     }
 
     getSong(): string {

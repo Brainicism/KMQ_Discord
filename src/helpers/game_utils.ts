@@ -30,7 +30,7 @@ const guessSong = async ({ client, message, gameSessions, guildPreference, db }:
         gameSession.scoreboard.updateScoreboard(userTag, message.author.id);
         await sendSongMessage(message, gameSession, false);
         logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${gameSession.getSong()}`)
-        gameSession.endRound();
+        await gameSession.endRound();
         if (gameSession.connection) {
             gameSession.connection.play(resolve("assets/ring.wav"));
         }
@@ -79,7 +79,7 @@ const ensureVoiceConnection = async (message: Discord.Message, gameSession: Game
         catch (err) {
             logger.error(`${getDebugContext(message)} | Error joining voice connection. song = ${gameSession.getDebugSongDetails()} err = ${err}`);
             await sendErrorMessage(message, "Missing voice permissions", "The bot is unable to join the voice channel you are in.");
-            gameSession.endRound();
+            await gameSession.endRound();
             return;
         }
     }
@@ -135,7 +135,7 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
 
     gameSession.dispatcher.on("finish", async () => {
         await sendSongMessage(message, gameSession, true);
-        gameSession.endRound();
+        await gameSession.endRound();
         logger.info(`${getDebugContext(message)} | Song finished without being guessed. song = ${gameSession.getDebugSongDetails()}`);
         startGame(gameSession, guildPreference, db, message, client, null);
     });
@@ -144,7 +144,7 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
         logger.error(`${getDebugContext(message)} | Unknown error with stream dispatcher. song = ${gameSession.getDebugSongDetails()}`);
         // Attempt to restart game with different song
         await sendErrorMessage(message, "Error playing song", "Starting new round in 2 seconds...");
-        gameSession.endRound();
+        await gameSession.endRound();
         setTimeout(() => {
             startGame(gameSession, guildPreference, db, message, client, null);
         }, 2000);

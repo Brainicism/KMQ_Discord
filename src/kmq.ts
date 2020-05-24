@@ -72,7 +72,7 @@ client.on("message", (message: Discord.Message) => {
     }
 });
 
-client.on("voiceStateUpdate", (oldState, newState) => {
+client.on("voiceStateUpdate", async (oldState, newState) => {
     let oldUserChannel = oldState.channel;
     let newUserChannel = newState.channel;
     if (!newUserChannel) {
@@ -84,7 +84,7 @@ client.on("voiceStateUpdate", (oldState, newState) => {
             if (voiceConnection) {
                 voiceConnection.disconnect();
                 if (gameSession) {
-                    gameSession.endRound();
+                    await gameSession.endRound();
                 }
                 return;
             }
@@ -93,7 +93,7 @@ client.on("voiceStateUpdate", (oldState, newState) => {
         if (!oldUserChannel.members.has(client.user.id)) {
             if (gameSession) {
                 logger.info(`gid: ${oldUserChannel.guild.id} | Bot disconnected by admin.`)
-                gameSession.endRound();
+                await gameSession.endRound();
             }
         }
     }
