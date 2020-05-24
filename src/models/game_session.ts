@@ -9,6 +9,7 @@ export default class GameSession {
     private inSession: boolean;
     private skippers: Set<string>;
     public scoreboard: Scoreboard;
+    public skipAchieved: boolean;
     public dispatcher: StreamDispatcher;
     public connection: VoiceConnection;
     public finished: boolean;
@@ -18,6 +19,7 @@ export default class GameSession {
         this.artist = null;
         this.videoID = null;
         this.inSession = false;
+        this.skipAchieved = false;
         this.skippers = new Set();
         this.scoreboard = new Scoreboard();
 
@@ -32,6 +34,7 @@ export default class GameSession {
         this.artist = artist;
         this.videoID = link;
         this.inSession = true;
+        this.skipAchieved = false;
     }
 
     endRound() {

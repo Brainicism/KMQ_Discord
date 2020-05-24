@@ -6,8 +6,7 @@ import {
     areUserAndBotInSameVoiceChannel,
     getNumParticipants,
     EMBED_INFO_COLOR,
-    getDebugContext,
-    sendMessage
+    getDebugContext
 } from "../helpers/discord_utils";
 import { startGame } from "../helpers/game_utils";
 import _logger from "../logger";
@@ -21,11 +20,16 @@ class SkipCommand implements BaseCommand {
             return;
         }
         gameSession.userSkipped(message.author.id);
+        if (gameSession.skipAchieved) {
+            // song already being skipped
+            return;
+        }
         if (isSkipMajority(message, gameSession)) {
+            gameSession.skipAchieved = true;
             await sendSkipMessage(message, gameSession);
             await sendSongMessage(message, gameSession, true);
             gameSession.endRound();
-            startGame(gameSession, guildPreference, db, message, client, null);
+            startGame(gameSession, guildPreference, db, message, client);
             logger.info(`${getDebugContext(message)} | Skip majority achieved.`);
         }
         else {
@@ -44,7 +48,7 @@ class SkipCommand implements BaseCommand {
 export default SkipCommand;
 
 async function sendSkipNotification(message: Discord.Message, gameSession: GameSession) {
-    await sendMessage(message, {
+    await message.channel.send({
         embed: {
             color: EMBED_INFO_COLOR,
             author: {
@@ -59,7 +63,7 @@ async function sendSkipNotification(message: Discord.Message, gameSession: GameS
 }
 
 async function sendSkipMessage(message: Discord.Message, gameSession: GameSession) {
-    await sendMessage(message, {
+    await message.channel.send({
         embed: {
             color: EMBED_INFO_COLOR,
             author: {
