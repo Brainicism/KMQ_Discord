@@ -8,7 +8,8 @@ const allowedOptions = {
     dbUser: { required: true },
     dbPassword: { required: true },
     songCacheDir: { required: true },
-    topGGToken: { required: false }
+    topGGToken: { required: false },
+    newsFile: { required: true }
 };
 
 export function validateConfig(config): boolean {

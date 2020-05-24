@@ -184,5 +184,8 @@ export {
     sendInfoMessage,
     sendErrorMessage,
     sendOptionsMessage,
-    arraysEqual
+    arraysEqual,
+    bold,
+    italicize,
+    codeLine
 }
