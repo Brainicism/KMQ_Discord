@@ -14,7 +14,16 @@ import GameSession from "models/game_session";
 import _logger from "./logger";
 const logger = _logger("kmq");
 
-const client = new Discord.Client();
+const client = new Discord.Client({
+    messageCacheMaxSize: 0,
+    ws: {
+        intents: [
+            'GUILDS',
+            'GUILD_VOICE_STATES',
+            'GUILD_MESSAGES'
+        ]
+    }
+});
 
 const config: any = _config;
 let db: Pool;
