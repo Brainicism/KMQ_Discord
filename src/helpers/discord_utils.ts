@@ -61,7 +61,7 @@ const sendErrorMessage = async (message: Discord.Message, title: string, descrip
 }
 
 const sendOptionsMessage = async (message: Discord.Message, guildPreference: GuildPreference, db: Pool, updatedOption: string) => {
-    let cutoffString = `${guildPreference.getBeginningCutoffYear()}`;
+    let cutoffString = `between the years ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
     let genderString = `${guildPreference.getSQLGender()}`;
     let limitString = `${guildPreference.getLimit()}`;
     let volumeString = `${guildPreference.getVolume()}`;
@@ -76,7 +76,7 @@ const sendOptionsMessage = async (message: Discord.Message, guildPreference: Gui
     let totalSongs = await getSongCount(guildPreference, db);
     await sendInfoMessage(message,
         updatedOption == null ? "Options" : `${updatedOption} updated`,
-        `Now playing the ${limitString} out of the __${totalSongs}__ most popular songs  by ${genderString} artists starting from the year ${cutoffString}. \nPlaying from the ${seekTypeString} point of each song and at ${volumeString}% volume.`,
+        `Now playing the ${limitString} out of the __${totalSongs}__ most popular songs  by ${genderString} artists ${cutoffString}. \nPlaying from the ${seekTypeString} point of each song and at ${volumeString}% volume.`,
         updatedOption == null ? `Psst. Your bot prefix is \`${guildPreference.getBotPrefix()}\`.` : null,
         updatedOption == null ? "assets/tsukasa.jpg" : null
     );

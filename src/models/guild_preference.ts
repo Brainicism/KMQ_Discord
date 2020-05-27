@@ -8,9 +8,10 @@ import { SEEK_TYPES } from "../commands/seek";
 import _logger from "../logger";
 const logger = _logger("guild_preference");
 
-const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, gender: [GENDER.FEMALE], limit: DEFAULT_LIMIT, volume: DEFAULT_VOLUME, seekType: SEEK_TYPES.RANDOM };
+const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, endYear: (new Date()).getFullYear(), gender: [GENDER.FEMALE], limit: DEFAULT_LIMIT, volume: DEFAULT_VOLUME, seekType: SEEK_TYPES.RANDOM };
 interface GameOption {
     beginningYear: number;
+    endYear: number;
     gender: string[];
     limit: number;
     volume: number;
@@ -72,6 +73,20 @@ class GuildPreference {
 
     getDefaultBeginningCutoffYear(): number {
         return BEGINNING_SEARCH_YEAR;
+    }
+
+    setEndCutoffYear(year: number, db: Pool) {
+        this.gameOptions.endYear = year;
+        this.updateGuildPreferences(db);
+    }
+
+    resetEndCutoffYear(year: number, db: Pool) {
+        this.gameOptions.endYear = (new Date()).getFullYear();
+        this.updateGuildPreferences(db);
+    }
+
+    getEndCutoffYear(): number {
+        return this.gameOptions.endYear;
     }
 
     resetGender(db: Pool) {
