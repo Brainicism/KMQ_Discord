@@ -50,10 +50,10 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
         return;
     }
     let query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
-    WHERE FIND_IN_SET(members, ?) AND dead = "n" AND publishedon >= "?-01-01" AND vtype = "main"
+    WHERE FIND_IN_SET(members, ?) AND dead = "n" AND publishedon >= "?-01-01" AND publishedon <= "?-12-31" AND vtype = "main"
     ORDER BY kpop_videos.app_kpop.views DESC LIMIT ?;`;
     try {
-        let result = await db.query(query, [guildPreference.getSQLGender(), guildPreference.getBeginningCutoffYear(), guildPreference.getLimit()]);
+        let result = await db.query(query, [guildPreference.getSQLGender(), guildPreference.getBeginningCutoffYear(), guildPreference.getEndCutoffYear(), guildPreference.getLimit()]);
         let randomSong = selectRandomSong(result, guildPreference);
         if (randomSong === null) {
             sendErrorMessage(message, "Song Query Error", "Failed to find songs matching this criteria. Try to broaden your search.");
@@ -168,11 +168,12 @@ const cleanSongName = (name: string): string => {
 }
 
 const getSongCount = async (guildPreference: GuildPreference, db: Pool): Promise<number> => {
+    //TODO: this query is almost identical to the one in startGame, refactor somehow
     let query = `SELECT count(*) as count FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
-    WHERE FIND_IN_SET(members, ?) AND dead = "n" AND publishedon >= "?-01-01" AND vtype = "main"
+    WHERE FIND_IN_SET(members, ?) AND dead = "n" AND publishedon >= "?-01-01" AND publishedon <= "?-12-31" AND vtype = "main"
     ORDER BY kpop_videos.app_kpop.views DESC LIMIT ?;`;
     try {
-        let result = await db.query(query, [guildPreference.getSQLGender(), guildPreference.getBeginningCutoffYear(), guildPreference.getLimit()])
+        let result = await db.query(query, [guildPreference.getSQLGender(), guildPreference.getBeginningCutoffYear(), guildPreference.getEndCutoffYear(), guildPreference.getLimit()])
         return result[0].count;
     }
     catch (e) {
