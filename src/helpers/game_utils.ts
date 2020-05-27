@@ -62,7 +62,6 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
         gameSession.startRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);
         await ensureVoiceConnection(message, gameSession, client, voiceChannel);
         playSong(gameSession, guildPreference, db, message, client);
-        logger.info(`${getDebugContext(message)} | Playing song: ${gameSession.getDebugSongDetails()}`);
     }
     catch (err) {
         await sendErrorMessage(message, "KMQ database query error", err.toString());
@@ -102,7 +101,6 @@ const selectRandomSong = (queriedSongList: Array<QueriedSong>, guild_preference:
             attempts++;
             continue;
         }
-        logger.info(`Selected song: ${random.youtubeLink}`)
         return random;
     }
 }
@@ -117,7 +115,7 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
             seekLocation = songDuration * (0.6 * Math.random());
         }
         catch (e) {
-            logger.error(`Failed to get mp3 length: ${songLocation}`);
+            logger.error(`Failed to get mp3 length: ${songLocation}. err = ${e}`);
             seekLocation = 0;
         }
     }
@@ -133,14 +131,14 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
     gameSession.dispatcher = gameSession.connection.play(songLocation, streamOptions);
     logger.info(`${getDebugContext(message)} | Playing song in voice connection. seek = ${guildPreference.getSeekType()}. song = ${gameSession.getDebugSongDetails()}`);
 
-    gameSession.dispatcher.on("finish", async () => {
+    gameSession.dispatcher.once("finish", async () => {
         await sendSongMessage(message, gameSession, true);
         await gameSession.endRound();
         logger.info(`${getDebugContext(message)} | Song finished without being guessed. song = ${gameSession.getDebugSongDetails()}`);
         startGame(gameSession, guildPreference, db, message, client, null);
     });
 
-    gameSession.dispatcher.on("error", async () => {
+    gameSession.dispatcher.once("error", async () => {
         logger.error(`${getDebugContext(message)} | Unknown error with stream dispatcher. song = ${gameSession.getDebugSongDetails()}`);
         // Attempt to restart game with different song
         await sendErrorMessage(message, "Error playing song", "Starting new round in 2 seconds...");
@@ -161,7 +159,7 @@ const cleanSongName = (name: string): string => {
     if (!cleanName) {
         // Odds are the song name is in hangul
         let hangulRomanized = hangulRomanization.convert(name);
-        logger.debug(`cleanSongName result is empty, assuming hangul. Before: ${name}. After: ${hangulRomanized}`)
+        // logger.debug(`cleanSongName result is empty, assuming hangul. Before: ${name}. After: ${hangulRomanized}`)
         return hangulRomanized;
     }
     return cleanName;

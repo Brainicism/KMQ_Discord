@@ -45,7 +45,6 @@ export default class GameSession {
             this.inSession = false;
             this.skippers.clear();
             if (this.dispatcher) {
-                this.dispatcher.removeAllListeners();
                 this.dispatcher.end(() => {
                     this.dispatcher = null;
                     resolve();
