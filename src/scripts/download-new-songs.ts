@@ -5,6 +5,7 @@ import * as mysql from "promise-mysql";
 import { QueriedSong } from "types";
 import * as path from "path";
 let config: any = _config;
+let deadLinksFilePath = path.join(config.songCacheDir, "deadlinks.txt");
 
 export async function clearPartiallyCachedSongs() {
     console.log("Clearing partially cached songs");
@@ -45,28 +46,35 @@ const downloadSong = (id: string) => {
     };
 
     return new Promise(async (resolve, reject) => {
-        console.log(`Downloading ${id}`)
         try {
             //check to see if the video is downloadable
-            await ytdl.getBasicInfo(`https://www.youtube.com/watch?v=${id}`);
+            let infoResponse = await ytdl.getBasicInfo(`https://www.youtube.com/watch?v=${id}`);
+            let playabilityStatus: any = infoResponse.player_response.playabilityStatus;
+            if (playabilityStatus.status !== "OK") {
+                fs.appendFileSync(deadLinksFilePath, `${id}: ${playabilityStatus.reason}\n`);
+                reject(`Failed to load video: error = ${playabilityStatus.reason}`);
+                return;
+            }
+            //download video
+            ytdl(`https://www.youtube.com/watch?v=${id}`, ytdlOptions)
+                .pipe(cacheStream);
         } catch (e) {
-            resolve(`Failed to retrieve video metadata. error = ${e}`);
+            fs.appendFileSync(deadLinksFilePath, `${id}: ${e}\n`);
+            reject(`Failed to retrieve video metadata. error = ${e}`);
             return;
         }
 
-        ytdl(`https://www.youtube.com/watch?v=${id}`, ytdlOptions)
-            .pipe(cacheStream);
-        cacheStream.on('finish', async () => {
+        cacheStream.once('finish', async () => {
             try {
                 await fs.promises.rename(tempLocation, cachedSongLocation);
-                console.log(`Downloaded ${id} successfully`);
+                console.log(`Downloaded song ${id} successfully`);
                 resolve();
             }
             catch (err) {
                 reject(`Error renaming temp song file from ${tempLocation} to ${cachedSongLocation}. err = ${err}`);
             }
         })
-        cacheStream.on("error", (e) => reject(e));
+        cacheStream.once("error", (e) => reject(e));
     })
 }
 
@@ -78,6 +86,8 @@ const downloadSong = (id: string) => {
         password: config.dbPassword
     });
     clearPartiallyCachedSongs();
+    let knownDeadAndReasons = fs.readFileSync(deadLinksFilePath).toString().split("\n");
+    let knownDeadIds = new Set(knownDeadAndReasons.map((x) => x.split(":")[0]));
     let query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
     WHERE dead = "n" AND vtype = "main";`;
     let songs: Array<QueriedSong> = await db.query(query);
@@ -85,13 +95,17 @@ const downloadSong = (id: string) => {
     console.log("total songs: " + songs.length);
     for (let song of songs) {
         if (!fs.existsSync(path.join(config.songCacheDir, `${song.youtubeLink}.mp3`))) {
+            if (knownDeadIds.has(song.youtubeLink)) {
+                console.log(`Known dead link (${song.youtubeLink}), skipping...`);
+                continue;
+            }
             console.log(`Downloading song: '${song.name}' by ${song.artist} | ${song.youtubeLink}`);
             try {
                 await downloadSong(song.youtubeLink);
                 downloadCount++;
             }
             catch (e) {
-                console.log("error downloading song: " + e);
+                console.log("Error downloading song: " + e);
             }
         }
     }
