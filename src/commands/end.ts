@@ -20,6 +20,7 @@ class EndCommand implements BaseCommand {
             logger.info(`${getDebugContext(message)} | Game session ended, empty`);
             await sendInfoMessage(message, "Nobody won :(")
         }
+        await gameSession.endRound();
         disconnectVoiceConnection(client, message);
         gameSession.finished = true;
         delete gameSessions[message.guild.id];

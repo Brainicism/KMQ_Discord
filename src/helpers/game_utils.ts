@@ -18,7 +18,7 @@ const logger = _logger("game_utils");
 
 
 const guessSong = async ({ client, message, gameSessions, guildPreference, db }: CommandArgs) => {
-    const voiceConnection = client.voice.connections.get(message.guild.id);
+    const voiceConnection = client.voiceConnections.get(message.guild.id);
     if (!voiceConnection || !voiceConnection.channel.members.has(message.author.id)) {
         return;
     }
@@ -32,7 +32,8 @@ const guessSong = async ({ client, message, gameSessions, guildPreference, db }:
         logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${gameSession.getSong()}`)
         await gameSession.endRound();
         if (gameSession.connection) {
-            gameSession.connection.play(resolve("assets/ring.wav"));
+            let stream: any = resolve("assets/ring.wav");
+            gameSession.connection.playFile(stream);
         }
         setTimeout(() => {
             startGame(gameSession, guildPreference, db, message, client, null);
@@ -127,11 +128,11 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
         bitrate: gameSession.connection.channel.bitrate,
         seek: seekLocation
     };
-
-    gameSession.dispatcher = gameSession.connection.play(songLocation, streamOptions);
+    let stream: any = songLocation;
+    gameSession.dispatcher = gameSession.connection.playStream(stream, streamOptions);
     logger.info(`${getDebugContext(message)} | Playing song in voice connection. seek = ${guildPreference.getSeekType()}. song = ${gameSession.getDebugSongDetails()}`);
 
-    gameSession.dispatcher.once("finish", async () => {
+    gameSession.dispatcher.once("end", async () => {
         await sendSongMessage(message, gameSession, true);
         await gameSession.endRound();
         logger.info(`${getDebugContext(message)} | Song finished without being guessed. song = ${gameSession.getDebugSongDetails()}`);

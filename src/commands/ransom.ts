@@ -8,12 +8,12 @@ class RansomCommand implements BaseCommand {
                 color: EMBED_INFO_COLOR,
                 author: {
                     name: message.author.username,
-                    icon_url: message.author.avatarURL()
+                    icon_url: message.author.avatarURL
                 },
                 title: "**GIVE ME YOUR MONEY**",
             }
         })
-            .then((message) => message.delete({ timeout: 100 }));
+            .then((message) => message.delete(100));
     }
     help = {
         name: "ransom",

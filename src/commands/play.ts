@@ -7,7 +7,7 @@ const logger = _logger("play");
 
 class PlayCommand implements BaseCommand {
     async call({ message, db, gameSessions, guildPreference, client }: CommandArgs) {
-        if (!message.member.voice.channel) {
+        if (!message.member.voiceChannel) {
             await sendErrorMessage(message,
                 "Join a voice channel",
                 `Send \`${guildPreference.getBotPrefix()}play\` again when you are in a voice channel.`);
@@ -18,7 +18,7 @@ class PlayCommand implements BaseCommand {
                 gameSessions[message.guild.id] = new GameSession();
                 logger.info(`${getDebugContext(message)} | Game session created`);
             }
-            startGame(gameSessions[message.guild.id], guildPreference, db, message, client, message.member.voice.channel);
+            startGame(gameSessions[message.guild.id], guildPreference, db, message, client, message.member.voiceChannel);
         }
     }
     aliases = ["random"]

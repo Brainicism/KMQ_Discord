@@ -14,16 +14,7 @@ import GameSession from "models/game_session";
 import _logger from "./logger";
 const logger = _logger("kmq");
 
-const client = new Discord.Client({
-    messageCacheMaxSize: 0,
-    ws: {
-        intents: [
-            'GUILDS',
-            'GUILD_VOICE_STATES',
-            'GUILD_MESSAGES'
-        ]
-    }
-});
+const client = new Discord.Client();
 
 const config: any = _config;
 let db: Pool;
@@ -56,7 +47,7 @@ client.on("message", (message: Discord.Message) => {
     let botPrefix = guildPreference.getBotPrefix();
     let parsedMessage = parseMessage(message.content, botPrefix) || null;
 
-    if (message.mentions.has(client.user) && message.content.split(" ").length == 1) {
+    if (message.isMemberMentioned(client.user) && message.content.split(" ").length == 1) {
         // Any message that mentions the bot sends the current options
         commands["options"].call({ message, guildPreference, db });
     }
@@ -82,14 +73,14 @@ client.on("message", (message: Discord.Message) => {
 });
 
 client.on("voiceStateUpdate", async (oldState, newState) => {
-    let oldUserChannel = oldState.channel;
-    let newUserChannel = newState.channel;
+    let oldUserChannel = oldState.voiceChannel;
+    let newUserChannel = newState.voiceChannel;
     if (!newUserChannel) {
         let guildID = oldUserChannel.guild.id;
         let gameSession = gameSessions[guildID];
         // User left voice channel, check if bot is only one left
         if (oldUserChannel.members.size === 1) {
-            let voiceConnection = client.voice.connections.get(guildID);
+            let voiceConnection = client.voiceConnections.get(guildID);
             if (voiceConnection) {
                 voiceConnection.disconnect();
                 if (gameSession) {
