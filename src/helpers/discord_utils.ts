@@ -159,7 +159,7 @@ export function getUserIdentifier(user: Discord.User): string {
 
 
 export function areUserAndBotInSameVoiceChannel(message: Discord.Message): boolean {
-    if (!message.member.voiceChannel || !message.guild.voiceConnection.channel) {
+    if (!message.member.voiceChannel || !message.guild.voiceConnection) {
         return false;
     }
     return message.member.voiceChannel === message.guild.voiceConnection.channel;

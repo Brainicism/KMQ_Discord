@@ -74,6 +74,9 @@ client.on("message", (message: Discord.Message) => {
 
 client.on("voiceStateUpdate", async (oldState, newState) => {
     let oldUserChannel = oldState.voiceChannel;
+    if (!oldUserChannel) {
+        return;
+    }
     let newUserChannel = newState.voiceChannel;
     if (!newUserChannel) {
         let guildID = oldUserChannel.guild.id;
