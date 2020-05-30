@@ -20,11 +20,11 @@ class NewsCommand implements BaseCommand {
         }
 
         const news: string = (await fs.readFileSync(config.newsFile)).toString();
-        const embed = new Discord.MessageEmbed({
+        const embed = new Discord.RichEmbed({
             color: EMBED_INFO_COLOR,
             author: {
                 name: message.author.username,
-                icon_url: message.author.avatarURL()
+                icon_url: message.author.avatarURL
             },
             title: bold("Updates"),
             description: news,

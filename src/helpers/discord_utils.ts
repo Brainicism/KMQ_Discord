@@ -17,7 +17,7 @@ const sendSongMessage = async (message: Discord.Message, gameSession: GameSessio
             color: EMBED_INFO_COLOR,
             author: {
                 name: isForfeit ? null : message.author.username,
-                icon_url: isForfeit ? null : message.author.avatarURL()
+                icon_url: isForfeit ? null : message.author.avatarURL
             },
             title: `"${gameSession.getSong()}" - ${gameSession.getArtist()}`,
             description: `https://youtube.com/watch?v=${gameSession.getVideoID()}\n\n**Scoreboard**`,
@@ -29,11 +29,11 @@ const sendSongMessage = async (message: Discord.Message, gameSession: GameSessio
     });
 }
 const sendInfoMessage = async (message: Discord.Message, title: string, description?: string, footerText?: string, footerImageWithPath?: string) => {
-    let embed = new Discord.MessageEmbed({
+    let embed = new Discord.RichEmbed({
         color: EMBED_INFO_COLOR,
         author: {
             name: message.author.username,
-            icon_url: message.author.avatarURL()
+            icon_url: message.author.avatarURL
         },
         title: bold(title),
         description: description
@@ -52,7 +52,7 @@ const sendErrorMessage = async (message: Discord.Message, title: string, descrip
             color: EMBED_ERROR_COLOR,
             author: {
                 name: message.author.username,
-                icon_url: message.author.avatarURL()
+                icon_url: message.author.avatarURL
             },
             title: bold(title),
             description: description
@@ -145,7 +145,7 @@ const arraysEqual = (arr1: Array<any>, arr2: Array<any>): boolean => {
 }
 
 export function disconnectVoiceConnection(client: Discord.Client, message: Discord.Message) {
-    let voiceConnection = client.voice.connections.get(message.guild.id);
+    let voiceConnection = client.voiceConnections.get(message.guild.id);
     if (voiceConnection) {
         logger.info(`${getDebugContext(message)} | Disconnected from voice channel`);
         voiceConnection.disconnect();
@@ -159,15 +159,15 @@ export function getUserIdentifier(user: Discord.User): string {
 
 
 export function areUserAndBotInSameVoiceChannel(message: Discord.Message): boolean {
-    if (!message.member.voice || !message.guild.voice) {
+    if (!message.member.voiceChannel || !message.guild.voiceConnection) {
         return false;
     }
-    return message.member.voice.channel === message.guild.voice.channel;
+    return message.member.voiceChannel === message.guild.voiceConnection.channel;
 }
 
 export function getNumParticipants(message: Discord.Message): number {
     // Don't include the bot as a participant
-    return message.member.voice.channel.members.size - 1;
+    return message.member.voiceChannel.members.size - 1;
 }
 
 export async function sendMessage(context: Discord.Message, messageContent: any): Promise<Discord.Message> {
