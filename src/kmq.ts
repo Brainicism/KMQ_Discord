@@ -93,7 +93,7 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
             }
         }
         // Bot was disconnected by another user
-        if (!oldUserChannel.members.has(client.user.id)) {
+        if (oldState.user === client.user && !oldUserChannel.members.has(client.user.id)) {
             if (gameSession) {
                 logger.info(`gid: ${oldUserChannel.guild.id} | Bot disconnected by admin.`)
                 await gameSession.endRound();
