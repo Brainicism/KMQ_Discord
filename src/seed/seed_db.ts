@@ -75,7 +75,7 @@ let main = async function () {
                 await db.query("CREATE DATABASE kpop_videos;");
                 logger.info("Seeding K-Pop video database");
                 setSqlMode(seedFile);
-                execSync(`mysql kpop_videos < ${seedFile}`)
+                execSync(`mysql -u ${config.dbUser} -p${config.dbPassword} kpop_videos < ${seedFile}`)
                 logger.info(`Imported database dump (${files[0]}) successfully`);
                 logger.info("Creating K-pop Music Quiz database");
                 await db.query("CREATE DATABASE IF NOT EXISTS kmq");

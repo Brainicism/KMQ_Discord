@@ -11,7 +11,10 @@ class NewsCommand implements BaseCommand {
     async call({ message, guildPreference, db }: CommandArgs) {
         let latestSongDate: Date;
         try {
-            const data = await db.query(`SELECT publishedon FROM kpop_videos.app_kpop ORDER BY publishedon DESC LIMIT 1;`);
+            const data = await db.kpopVideos("app_kpop")
+                .select("publishedon")
+                .orderBy("publishedon", "DESC")
+                .limit(1);
             latestSongDate = new Date(data[0]["publishedon"]);
         }
         catch (e) {

@@ -1,3 +1,5 @@
+import * as Knex from "knex";
+
 interface ParsedMessage {
     action: string;
     argument: string;
@@ -11,7 +13,12 @@ interface QueriedSong {
     youtubeLink: string;
 }
 
+interface Databases {
+    kmq: Knex,
+    kpopVideos: Knex
+}
 export {
     ParsedMessage,
-    QueriedSong
+    QueriedSong,
+    Databases
 }

@@ -1,5 +1,4 @@
 import * as fs from "fs";
-import { Pool } from "promise-mysql"
 import * as path from "path";
 import * as Discord from "discord.js";
 import GuildPreference from "models/guild_preference";
@@ -7,6 +6,7 @@ import GameSession from "../models/game_session";
 import BaseCommand from "commands/base_command";
 import _logger from "../logger";
 import { getSongCount, GameOptions } from "./game_utils";
+import { Databases } from "types";
 const logger = _logger("utils");
 const EMBED_INFO_COLOR = 0x000000; // BLACK
 const EMBED_ERROR_COLOR = 0xE74C3C; // RED
@@ -60,7 +60,7 @@ const sendErrorMessage = async (message: Discord.Message, title: string, descrip
     });
 }
 
-const sendOptionsMessage = async (message: Discord.Message, guildPreference: GuildPreference, db: Pool, updatedOption: string) => {
+const sendOptionsMessage = async (message: Discord.Message, guildPreference: GuildPreference, db: Databases, updatedOption: string) => {
     let cutoffString = `between the years ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
     let genderString = `${guildPreference.getSQLGender()}`;
     let limitString = `${guildPreference.getLimit()}`;
@@ -73,7 +73,7 @@ const sendOptionsMessage = async (message: Discord.Message, guildPreference: Gui
     volumeString = updatedOption == GameOptions.VOLUME ? bold(volumeString) : codeLine(volumeString);
     seekTypeString = updatedOption == GameOptions.SEEK_TYPE ? bold(seekTypeString) : codeLine(seekTypeString);
 
-    let totalSongs = await getSongCount(guildPreference, db);
+    let totalSongs = await getSongCount(guildPreference, db.kpopVideos);
     await sendInfoMessage(message,
         updatedOption == null ? "Options" : `${updatedOption} updated`,
         `Now playing the ${limitString} out of the __${totalSongs}__ most popular songs  by ${genderString} artists ${cutoffString}. \nPlaying from the ${seekTypeString} point of each song and at ${volumeString}% volume.`,

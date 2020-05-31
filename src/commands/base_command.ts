@@ -1,15 +1,14 @@
 import * as Discord from "discord.js";
 import GameSession from "../models/game_session";
 import GuildPreference from "../models/guild_preference";
-import { Pool } from "promise-mysql";
-import { ParsedMessage } from "types";
+import { ParsedMessage, Databases } from "types";
 
 interface CommandArgs {
     client?: Discord.Client;
     gameSessions?: { [guildID: string]: GameSession }
     guildPreference?: GuildPreference;
     message?: Discord.Message;
-    db?: Pool;
+    db?: Databases;
     parsedMessage?: ParsedMessage,
     botPrefix?: string;
 }

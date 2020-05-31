@@ -7,17 +7,7 @@ Join our [support server](https://discord.gg/RCuzwYV) for help and to play with 
 
 [![Discord Bots](https://top.gg/api/widget/508759831755096074.svg)](https://top.gg/bot/508759831755096074)
 
-# Instructions
-## Prerequisites
-- MySQL (tested on 5.7)
-- NodeJS (Requires at least v12)
 
-## Setup
-------------
-1. Create `app_config.json` based on the template provided
-2. `npm install` to install Node dependeices
-3. `npm run seed` to seed the database with latest kpop song data
-4. `npm run dev` to start the K-pop Music Quiz bot
 
 # Gameplay
 Gameplay is initiated via `,play`, which invites the bot to a voice channel. The bot will begin to play a random kpop song based on the game options. Users can guess the song by typing the name of the song. 
