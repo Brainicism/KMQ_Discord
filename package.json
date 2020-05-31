@@ -4,8 +4,8 @@
   "main": "src/kmq.js",
   "scripts": {
     "seed": "ts-node src/seed/seed_db",
-    "dev": "cd src && ts-node kmq",
-    "prod": "tsc && cp -r config build && cp -r src/assets build/src/assets && cd build/src && node kmq.js"
+    "dev": "npx knex migrate:latest --knexfile config/knexfile_kmq.js && cd src && ts-node kmq",
+    "prod": "npx knex migrate:latest --knexfile config/knexfile_kmq.js && tsc && cp -r config build && cp -r src/assets build/src/assets && cd build/src && node kmq.js"
   },
   "author": "",
   "license": "ISC",
@@ -13,13 +13,15 @@
     "@discordjs/opus": "^0.3.2",
     "bufferutil": "^4.0.1",
     "dblapi.js": "^2.4.0",
-    "erlpack": "github:discordapp/erlpack",
     "discord.js": "11.6.4",
+    "erlpack": "github:discordapp/erlpack",
     "get-audio-duration": "^1.0.0",
     "hangul-romanization": "1.0.0",
+    "knex": "^0.21.1",
     "log4js": "^6.2.1",
     "prepend-file": "^1.3.1",
     "promise-mysql": "^4.1.3",
+    "request": "^2.88.2",
     "request-promise": "^4.2.5",
     "sodium": "^3.0.2",
     "ts-node-dev": "^1.0.0-pre.44",

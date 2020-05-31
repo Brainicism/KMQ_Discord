@@ -3,9 +3,10 @@ import { DEFAULT_BOT_PREFIX } from "../commands/prefix";
 import { DEFAULT_LIMIT } from "../commands/limit";
 import { DEFAULT_VOLUME } from "../commands/volume";
 import { GENDER } from "../commands/gender";
-import { Pool } from "promise-mysql";
 import { SEEK_TYPES } from "../commands/seek";
 import _logger from "../logger";
+import * as Knex from "knex";
+import { Databases } from "types";
 const logger = _logger("guild_preference");
 
 const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, endYear: (new Date()).getFullYear(), gender: [GENDER.FEMALE], limit: DEFAULT_LIMIT, volume: DEFAULT_VOLUME, seekType: SEEK_TYPES.RANDOM };
@@ -43,28 +44,28 @@ class GuildPreference {
         }
     }
 
-    setLimit(limit: number, db: Pool) {
+    setLimit(limit: number, db: Databases) {
         this.gameOptions.limit = limit;
-        this.updateGuildPreferences(db);
+        this.updateGuildPreferences(db.kmq);
     }
 
-    resetLimit(db: Pool) {
+    resetLimit(db: Databases) {
         this.gameOptions.limit = DEFAULT_LIMIT;
-        this.updateGuildPreferences(db);
+        this.updateGuildPreferences(db.kmq);
     }
 
     getLimit(): number {
         return this.gameOptions.limit;
     }
 
-    setBeginningCutoffYear(year: number, db: Pool) {
+    setBeginningCutoffYear(year: number, db: Databases) {
         this.gameOptions.beginningYear = year;
-        this.updateGuildPreferences(db);
+        this.updateGuildPreferences(db.kmq);
     }
 
-    resetBeginningCutoffYear(db: Pool) {
+    resetBeginningCutoffYear(db: Databases) {
         this.gameOptions.beginningYear = BEGINNING_SEARCH_YEAR;
-        this.updateGuildPreferences(db);
+        this.updateGuildPreferences(db.kmq);
     }
 
     getBeginningCutoffYear(): number {
@@ -75,29 +76,29 @@ class GuildPreference {
         return BEGINNING_SEARCH_YEAR;
     }
 
-    setEndCutoffYear(year: number, db: Pool) {
+    setEndCutoffYear(year: number, db: Databases) {
         this.gameOptions.endYear = year;
-        this.updateGuildPreferences(db);
+        this.updateGuildPreferences(db.kmq);
     }
 
-    resetEndCutoffYear(year: number, db: Pool) {
+    resetEndCutoffYear(year: number, db: Databases) {
         this.gameOptions.endYear = (new Date()).getFullYear();
-        this.updateGuildPreferences(db);
+        this.updateGuildPreferences(db.kmq);
     }
 
     getEndCutoffYear(): number {
         return this.gameOptions.endYear;
     }
 
-    resetGender(db: Pool) {
+    resetGender(db: Databases) {
         this.gameOptions.gender = [GENDER.FEMALE];
-        this.updateGuildPreferences(db);
+        this.updateGuildPreferences(db.kmq);
     }
 
-    setGender(genderArr: string[], db: Pool): Array<string> {
+    setGender(genderArr: string[], db: Databases): Array<string> {
         let tempArr = genderArr.map(gender => gender.toLowerCase());
         this.gameOptions.gender = [...new Set(tempArr)];
-        this.updateGuildPreferences(db);
+        this.updateGuildPreferences(db.kmq);
         return this.gameOptions.gender;
     }
 
@@ -105,27 +106,27 @@ class GuildPreference {
         return this.gameOptions.gender.join(",");
     }
 
-    setBotPrefix(prefix: string, db: Pool) {
+    setBotPrefix(prefix: string, db: Databases) {
         this.botPrefix = prefix;
-        this.updateGuildPreferences(db);
+        this.updateGuildPreferences(db.kmq);
     }
 
     getBotPrefix(): string {
         return this.botPrefix;
     }
 
-    setSeekType(seekType: string, db: Pool) {
+    setSeekType(seekType: string, db: Databases) {
         this.gameOptions.seekType = seekType;
-        this.updateGuildPreferences(db);
+        this.updateGuildPreferences(db.kmq);
     }
 
     getSeekType(): string {
         return this.gameOptions.seekType;
     }
 
-    setVolume(volume: number, db: Pool) {
+    setVolume(volume: number, db: Databases) {
         this.gameOptions.volume = volume;
-        this.updateGuildPreferences(db);
+        this.updateGuildPreferences(db.kmq);
     }
 
     getVolume(): number {
@@ -136,9 +137,10 @@ class GuildPreference {
         return this.getVolume() / 150;
     }
 
-    async updateGuildPreferences(db: Pool) {
-        let guildPreferencesUpdate = `UPDATE kmq.guild_preferences SET guild_preference = ? WHERE guild_id = ?;`;
-        db.query(guildPreferencesUpdate, [JSON.stringify(this), this.guildID]);
+    async updateGuildPreferences(db: Knex) {
+        await db("guild_preferences")
+            .where({ guild_id: this.guildID })
+            .update({ guild_preference: JSON.stringify(this) });
     }
 };
 

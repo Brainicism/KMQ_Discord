@@ -2,6 +2,8 @@ node_modules/
 config.json
 main.db
 config/app_config.json
+config/knexfile_kmq.js
+config/knexfile_kpop_videos.js
 .cache/
 logs/
 build/

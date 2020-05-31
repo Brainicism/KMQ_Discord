@@ -1,5 +1,7 @@
 import * as Discord from "discord.js";
-import * as mysql from "promise-mysql";
+import * as Knex from "knex";
+import * as _kmqKnexConfig from "../config/knexfile_kmq";
+import * as _kpopVideosKnexConfig from "../config/knexfile_kpop_videos";
 import * as DBL from "dblapi.js";
 import { validateConfig } from "./config_validator";
 import GuildPreference from "./models/guild_preference";
@@ -8,7 +10,6 @@ import validate from "./helpers/validate";
 import { getCommandFiles } from "./helpers/discord_utils";
 import { ParsedMessage } from "types";
 import * as _config from "../config/app_config.json";
-import { Pool } from "promise-mysql";
 import BaseCommand from "commands/base_command";
 import GameSession from "models/game_session";
 import _logger from "./logger";
@@ -17,7 +18,10 @@ const logger = _logger("kmq");
 const client = new Discord.Client();
 
 const config: any = _config;
-let db: Pool;
+let db: {
+    kmq: Knex,
+    kpopVideos: Knex
+};
 let commands: { [commandName: string]: BaseCommand } = {};
 let gameSessions: { [guildID: string]: GameSession } = {};
 let guildPreferences: { [guildID: string]: GuildPreference } = {};
@@ -40,10 +44,10 @@ client.on("ready", () => {
     logger.info(`Logged in as ${client.user.tag}!`);
 });
 
-client.on("message", (message: Discord.Message) => {
+client.on("message", async (message: Discord.Message) => {
     if (message.author.equals(client.user) || message.author.bot) return;
     if (!message.guild) return;
-    let guildPreference = getGuildPreference(guildPreferences, message.guild.id);
+    let guildPreference = await getGuildPreference(guildPreferences, message.guild.id);
     let botPrefix = guildPreference.getBotPrefix();
     let parsedMessage = parseMessage(message.content, botPrefix) || null;
 
@@ -102,12 +106,12 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
     }
 });
 
-const getGuildPreference = (guildPreferences: { [guildId: string]: GuildPreference }, guildID: string): GuildPreference => {
+const getGuildPreference = async (guildPreferences: { [guildId: string]: GuildPreference }, guildID: string): Promise<GuildPreference> => {
     if (!guildPreferences[guildID]) {
         guildPreferences[guildID] = new GuildPreference(guildID);
         logger.info(`New server joined: ${guildID}`);
-        let guildPreferencesInsert = `INSERT INTO kmq.guild_preferences VALUES(?, ?)`;
-        db.query(guildPreferencesInsert, [guildID, JSON.stringify(guildPreferences[guildID])]);
+        await db.kmq("guild_preferences")
+            .insert({ guild_id: guildID, guild_preference: JSON.stringify(guildPreferences[guildID]) });
     }
     return guildPreferences[guildID];
 }
@@ -128,29 +132,21 @@ const parseMessage = (message: string, botPrefix: string): ParsedMessage => {
 }
 
 (async () => {
+    let kmqKnexConfig: any = _kmqKnexConfig;
+    let kpopVideosKnexConfig: any = _kpopVideosKnexConfig;
+    db = {
+        kmq: Knex(kmqKnexConfig),
+        kpopVideos: Knex(kpopVideosKnexConfig)
+    }
     if (!validateConfig(config)) {
         logger.error("Invalid config, aborting.");
         process.exit(1);
     }
 
-    db = await mysql.createPool({
-        connectionLimit: 10,
-        host: "localhost",
-        user: config.dbUser,
-        password: config.dbPassword
-    });
-
-    let guildPreferencesTableCreation = `CREATE TABLE IF NOT EXISTS kmq.guild_preferences(
-        guild_id TEXT NOT NULL,
-        guild_preference JSON NOT NULL
-    );`;
-
-    await db.query(guildPreferencesTableCreation);
-
-    let fields = await db.query(`SELECT * FROM kmq.guild_preferences`);
+    let fields = await db.kmq("guild_preferences").select("*");
     fields.forEach(async (field) => {
         guildPreferences[field.guild_id] = new GuildPreference(field.guild_id, JSON.parse(field.guild_preference));
-        await guildPreferences[field.guild_id].updateGuildPreferences(db);
+        await guildPreferences[field.guild_id].updateGuildPreferences(db.kmq);
     });
     let commandFiles = await getCommandFiles();
     for (const [commandName, command] of Object.entries(commandFiles)) {
