@@ -82,20 +82,21 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
         let guildID = oldUserChannel.guild.id;
         let gameSession = gameSessions[guildID];
         // User left voice channel, check if bot is only one left
-        if (oldUserChannel.members.size === 1) {
+        if (oldUserChannel.members.size === 1 && oldUserChannel.members.has(client.user.id)) {
             let voiceConnection = client.voiceConnections.get(guildID);
             if (voiceConnection) {
                 voiceConnection.disconnect();
                 if (gameSession) {
+                    logger.info(`gid: ${oldUserChannel.guild.id} | Bot is only user left, leaving voice...`)
                     await gameSession.endRound();
                 }
                 return;
             }
         }
-        // Bot was disconnected by another user
-        if (!oldUserChannel.members.has(client.user.id)) {
+        // Bot was disconnected voice channel (either via a kick by an admin or the situation handled above)
+        if (oldState.user === client.user && !oldUserChannel.members.has(client.user.id)) {
             if (gameSession) {
-                logger.info(`gid: ${oldUserChannel.guild.id} | Bot disconnected by admin.`)
+                logger.info(`gid: ${oldUserChannel.guild.id} | Bot disconnected.`)
                 await gameSession.endRound();
             }
         }
