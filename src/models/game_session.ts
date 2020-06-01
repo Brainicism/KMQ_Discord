@@ -1,9 +1,10 @@
 import Scoreboard from "./scoreboard";
-import { getUserIdentifier } from "../helpers/discord_utils";
-import * as Discord from "discord.js";
+import * as songAliasesList from "../../data/song_aliases.json";
 import { StreamDispatcher, VoiceConnection } from "discord.js"
+import { cleanSongName } from "../helpers/game_utils";
 export default class GameSession {
     private song: string;
+    private songAliases: Array<string>;
     private artist: string;
     private videoID: string;
     private inSession: boolean;
@@ -31,6 +32,7 @@ export default class GameSession {
 
     startRound(song: string, artist: string, link: string) {
         this.song = song;
+        this.songAliases = songAliasesList[link];
         this.artist = artist;
         this.videoID = link;
         this.inSession = true;
@@ -56,6 +58,10 @@ export default class GameSession {
 
     getSong(): string {
         return this.song;
+    }
+
+    getSongAliases(): Set<string> {
+        return new Set(this.songAliases.map((x) => cleanSongName(x)));
     }
 
     getArtist(): string {

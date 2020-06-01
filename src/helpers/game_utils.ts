@@ -8,7 +8,6 @@ import GameSession from "models/game_session";
 import GuildPreference from "models/guild_preference";
 import { getAudioDurationInSeconds } from "get-audio-duration";
 import * as Discord from "discord.js";
-import * as hangulRomanization from "hangul-romanization";
 import { QueriedSong, Databases } from "types";
 import { SEEK_TYPES } from "../commands/seek";
 import * as Knex from "knex";
@@ -22,9 +21,9 @@ const guessSong = async ({ client, message, gameSessions, guildPreference, db }:
     if (!voiceConnection || !voiceConnection.channel.members.has(message.author.id)) {
         return;
     }
-    let guess = cleanSongName(message.content);
     let gameSession = gameSessions[message.guild.id];
-    if (gameSession.getSong() && guess === cleanSongName(gameSession.getSong())) {
+    let guess = cleanSongName(message.content);
+    if (gameSession.getSong() || guess === cleanSongName(gameSession.getSong()) || gameSession.getSongAliases().has(guess)) {
         // this should be atomic
         let userTag = getUserIdentifier(message.author);
         gameSession.scoreboard.updateScoreboard(userTag, message.author.id);
@@ -64,7 +63,6 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
             .andWhere("vtype", "main")
             .orderBy("kpop_videos.app_kpop.views", "DESC")
             .limit(guildPreference.getLimit());
-
         let randomSong = selectRandomSong(result, guildPreference);
         if (randomSong === null) {
             sendErrorMessage(message, "Song Query Error", "Failed to find songs matching this criteria. Try to broaden your search.");
@@ -166,13 +164,8 @@ const cleanSongName = (name: string): string => {
         .normalize("NFD")
         .replace(/[^\x00-\x7F|]/g, "")
         .replace(/|/g, "")
+        .replace(/’/, "'")
         .replace(/ /g, "").trim();
-    if (!cleanName) {
-        // Odds are the song name is in hangul
-        let hangulRomanized = hangulRomanization.convert(name);
-        // logger.debug(`cleanSongName result is empty, assuming hangul. Before: ${name}. After: ${hangulRomanized}`)
-        return hangulRomanized;
-    }
     return cleanName;
 }
 
@@ -203,6 +196,7 @@ const getSongCount = async (guildPreference: GuildPreference, db: Knex): Promise
 export {
     guessSong,
     startGame,
+    cleanSongName,
     getSongCount,
     GameOptions
 }
