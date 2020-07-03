@@ -161,3 +161,12 @@ const parseMessage = (message: string, botPrefix: string): ParsedMessage => {
     }
     client.login(config.botToken);
 })();
+
+process.on("unhandledRejection", (reason: Error, p: Promise<any>) => {
+    logger.error(`Unhandled Rejection at: Promise ${p}. Reason: ${reason}. Trace: ${reason.stack}`);
+});
+
+
+process.on("uncaughtException", (err: Error) => {
+    logger.error(`Uncaught Exception. Reason: ${err}. Trace: ${err.stack}`);
+});
