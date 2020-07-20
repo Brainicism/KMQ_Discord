@@ -70,7 +70,6 @@ const getFilteredSongList = async (guildPreference: GuildPreference, db: Databas
             .andWhere("vtype", "main")
             .orderBy("kpop_videos.app_kpop.views", "DESC")
             .limit(guildPreference.getLimit());
-        console.log(`filter by group: ${guildPreference.getGroupNames()} \n ${result.map(x => x["name"])}`)
     }
     return result;
 
@@ -87,6 +86,10 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
 
     try {
         let filteredSongs = await getFilteredSongList(guildPreference, db);
+        if (filteredSongs.length === 0) {
+            sendErrorMessage(message, "Song Query Error", "There are no songs that match the current game options. Try to broaden your search");
+            return;
+        }
         let randomSong = selectRandomSong(filteredSongs, guildPreference);
         if (randomSong === null) {
             sendErrorMessage(message, "Song Query Error", "Failed to find songs matching this criteria. Try to broaden your search.");

@@ -28,7 +28,7 @@ class GroupsCommand implements BaseCommand {
         }
         guildPreference.setGroups(matchingGroups, db);
         await sendOptionsMessage(message, guildPreference, db, GameOptions.GROUPS);
-        logger.info(`${getDebugContext(message)} | Groups set to ${guildPreference.getGroupIds()}`);
+        logger.info(`${getDebugContext(message)} | Groups set to ${guildPreference.getGroupNames()}`);
     }
 
     help = {
