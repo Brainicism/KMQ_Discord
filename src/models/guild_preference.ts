@@ -9,7 +9,7 @@ import * as Knex from "knex";
 import { Databases } from "types";
 const logger = _logger("guild_preference");
 
-const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, endYear: (new Date()).getFullYear(), gender: [GENDER.FEMALE], limit: DEFAULT_LIMIT, volume: DEFAULT_VOLUME, seekType: SEEK_TYPES.RANDOM };
+const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, endYear: (new Date()).getFullYear(), gender: [GENDER.FEMALE], limit: DEFAULT_LIMIT, volume: DEFAULT_VOLUME, seekType: SEEK_TYPES.RANDOM, groups: null };
 interface GameOption {
     beginningYear: number;
     endYear: number;
@@ -17,6 +17,7 @@ interface GameOption {
     limit: number;
     volume: number;
     seekType: string;
+    groups: { id: number, name: string }[];
 }
 
 class GuildPreference {
@@ -88,6 +89,26 @@ class GuildPreference {
 
     getEndCutoffYear(): number {
         return this.gameOptions.endYear;
+    }
+
+    setGroups(groupIds: { id: number, name: string }[], db: Databases) {
+        this.gameOptions.groups = groupIds;
+        this.updateGuildPreferences(db.kmq);
+    }
+
+    resetGroups(db: Databases) {
+        this.gameOptions.groups = null;
+        this.updateGuildPreferences(db.kmq);
+    }
+
+    getGroupIds(): number[] {
+        if (this.gameOptions.groups === null) return null;
+        return this.gameOptions.groups.map((x) => x["id"]);
+    }
+
+    getGroupNames(): string[] {
+        if (this.gameOptions.groups === null) return null;
+        return this.gameOptions.groups.map((x) => x["name"]);
     }
 
     resetGender(db: Databases) {

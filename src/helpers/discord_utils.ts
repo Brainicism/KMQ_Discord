@@ -61,22 +61,27 @@ const sendErrorMessage = async (message: Discord.Message, title: string, descrip
 }
 
 const sendOptionsMessage = async (message: Discord.Message, guildPreference: GuildPreference, db: Databases, updatedOption: string) => {
+    let totalSongs = await getSongCount(guildPreference, db);
+    let groupsMode = guildPreference.getGroupIds() !== null;
     let cutoffString = `between the years ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
-    let genderString = `${guildPreference.getSQLGender()}`;
-    let limitString = `${guildPreference.getLimit()}`;
+
+
+    let genderString = `${guildPreference.getSQLGender()} artists`;
+    let groupsString = groupsMode ? `${guildPreference.getGroupNames().join(", ")}` : null;
+    let limitString = `${Math.min(totalSongs, guildPreference.getLimit())}`;
     let volumeString = `${guildPreference.getVolume()}`;
     let seekTypeString = `${guildPreference.getSeekType()}`
 
     cutoffString = updatedOption == GameOptions.CUTOFF ? bold(cutoffString) : codeLine(cutoffString);
     genderString = updatedOption == GameOptions.GENDER ? bold(genderString) : codeLine(genderString);
     limitString = updatedOption == GameOptions.LIMIT ? bold(limitString) : codeLine(limitString);
+    groupsString = updatedOption == GameOptions.GROUPS ? bold(groupsString) : codeLine(groupsString);
     volumeString = updatedOption == GameOptions.VOLUME ? bold(volumeString) : codeLine(volumeString);
     seekTypeString = updatedOption == GameOptions.SEEK_TYPE ? bold(seekTypeString) : codeLine(seekTypeString);
 
-    let totalSongs = await getSongCount(guildPreference, db.kpopVideos);
     await sendInfoMessage(message,
         updatedOption == null ? "Options" : `${updatedOption} updated`,
-        `Now playing the ${limitString} out of the __${totalSongs}__ most popular songs  by ${genderString} artists ${cutoffString}. \nPlaying from the ${seekTypeString} point of each song and at ${volumeString}% volume.`,
+        `Now playing the ${limitString} out of the __${totalSongs}__ most popular songs by ${groupsMode ? groupsString : genderString} ${cutoffString}. \nPlaying from the ${seekTypeString} point of each song and at ${volumeString}% volume.`,
         updatedOption == null ? `Psst. Your bot prefix is \`${guildPreference.getBotPrefix()}\`.` : null,
         updatedOption == null ? "assets/tsukasa.jpg" : null
     );
