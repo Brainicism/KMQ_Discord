@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-import { sendOptionsMessage, getDebugContext } from "../helpers/discord_utils";
+import { sendOptionsMessage, getDebugContext, sendErrorMessage } from "../helpers/discord_utils";
 import { GameOptions } from "../helpers/game_utils";
 import _logger from "../logger";
 const logger = _logger("groups");
@@ -18,7 +18,14 @@ class GroupsCommand implements BaseCommand {
             .map((x) => {
                 return { id: x["id"], name: x["name"] }
             })
-
+        if (matchingGroups.length !== groupNames.length) {
+            let matchingGroupNames = matchingGroups.map(x => x["name"].toUpperCase());
+            let unrecognizedGroups = groupNames.filter((x) => {
+                return !matchingGroupNames.includes(x.toUpperCase());
+            })
+            await sendErrorMessage(message, "Unknown Group Name", `One or more of the specified group names was not recognized. Please ensure that the group name matches exactly with the list provided by \`${guildPreference.getBotPrefix()}help groups\` \nThe following groups were **not** recognized:\n ${unrecognizedGroups.join(", ")} `);
+            return;
+        }
         guildPreference.setGroups(matchingGroups, db);
         await sendOptionsMessage(message, guildPreference, db, GameOptions.GROUPS);
         logger.info(`${getDebugContext(message)} | Groups set to ${guildPreference.getGroupIds()}`);
@@ -26,7 +33,7 @@ class GroupsCommand implements BaseCommand {
 
     help = {
         name: "groups",
-        description: "Select as many groups that you would like to hear from, separated by commas. Use without parameters to reset.",
+        description: "Select as many groups that you would like to hear from, separated by commas. Use without parameters to reset. List of group names can be found [here](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/data/group_list.txt)",
         usage: "!groups [group1],[group2]",
         arguments: [
             {
