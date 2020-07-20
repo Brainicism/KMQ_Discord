@@ -172,7 +172,7 @@ export function getNumParticipants(message: Discord.Message): number {
 
 export async function sendMessage(context: Discord.Message, messageContent: any): Promise<Discord.Message> {
     const channel: Discord.TextChannel = context.channel as Discord.TextChannel;
-    if (!channel.permissionsFor(context.guild.me.user).has("SEND_MESSAGES")) {
+    if (!context.guild.me.permissionsIn(context.channel).has("SEND_MESSAGES")) {
         logger.warn(`${getDebugContext(context)} | Missing SEND_MESSAGES permissions`);
         let embed = {
             color: EMBED_INFO_COLOR,
