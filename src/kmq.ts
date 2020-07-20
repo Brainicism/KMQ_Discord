@@ -167,7 +167,7 @@ const parseMessage = (message: string, botPrefix: string): ParsedMessage => {
     //populate group list
     let result = await db.kpopVideos("kpop_videos.app_kpop_group")
     .select(["name", "members as gender"])
-    .orderBy("name", "DESC")
+    .orderBy("name", "ASC")
     fs.writeFileSync(config.groupListFile, result.map((x) => x["name"]).join("\n"));
     client.login(config.botToken);
 })();

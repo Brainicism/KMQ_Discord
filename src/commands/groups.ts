@@ -33,12 +33,12 @@ class GroupsCommand implements BaseCommand {
 
     help = {
         name: "groups",
-        description: "Select as many groups that you would like to hear from, separated by commas. Use without parameters to reset. List of group names can be found [here](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/data/group_list.txt)",
+        description: "Select as many groups that you would like to hear from, separated by commas. Use without parameters to reset.",
         usage: "!groups [group1],[group2]",
         arguments: [
             {
                 name: "group",
-                description: "Select groups as specified here: [placeholder]"
+                description: "Select kpop groups as specified [here](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/data/group_list.txt)"
             }
         ]
     }
