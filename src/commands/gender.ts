@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-import { sendOptionsMessage, getDebugContext } from "../helpers/discord_utils";
+import { sendOptionsMessage, getDebugContext, sendErrorMessage } from "../helpers/discord_utils";
 import { GameOptions } from "../helpers/game_utils";
 import _logger from "../logger";
 const logger = _logger("gender");
@@ -7,6 +7,10 @@ const GENDER: { [gender: string]: string } = { MALE: "male", FEMALE: "female", C
 
 class GenderCommand implements BaseCommand {
     async call({ guildPreference, message, parsedMessage, db }: CommandArgs) {
+        if (guildPreference.getGroupIds() !== null) {
+            sendErrorMessage(message, "Game Option Conflict", `\`groups\` game option is currently set. \`gender\` and \`groups\` are incompatible. Remove the \`groups\` option to proceed`);
+            return;
+        }
         let selectedGenderArray = guildPreference.setGender(parsedMessage.components, db);
         let selectedGenderStr = "";
         for (let i = 0; i < selectedGenderArray.length; i++) {
