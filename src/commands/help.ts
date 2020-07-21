@@ -2,9 +2,12 @@ import BaseCommand, { CommandArgs } from "./base_command";
 import * as Discord from "discord.js"
 import * as helpMessages from "../../data/help_strings.json";
 import { EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, getCommandFiles, sendMessage } from "../helpers/discord_utils";
+import { Embeds as EmbedsMode } from 'discord-paginationembed';
 import _logger from "../logger";
+import { TextChannel, RichEmbed } from "discord.js";
 const logger = _logger("help");
-const placeholder = "!";
+const placeholder = /!/g;
+const FIELDS_PER_EMBED = 5;
 
 class HelpCommand implements BaseCommand {
     async call({ parsedMessage, message, botPrefix }: CommandArgs) {
@@ -54,7 +57,7 @@ const helpMessage = async (message: Discord.Message, action: string, botPrefix: 
             return;
         }
         let helpManual = commandFilesWithAliases[action].help;
-        embedTitle = `\`${helpManual.usage.replace(placeholder, botPrefix)}\``;
+        embedTitle = `\`${helpManual.usage.replaceAll(placeholder, botPrefix)}\``;
         embedDesc = helpManual.description;
         helpManual.arguments.forEach((argument) => {
             embedFields.push({
@@ -82,14 +85,39 @@ const helpMessage = async (message: Discord.Message, action: string, botPrefix: 
         });
 
     }
+    let embeds = []
+    for (let i = 0; i < embedFields.length; i += FIELDS_PER_EMBED) {
+        let embedFieldsSubset = embedFields.slice(i, Math.min(i + FIELDS_PER_EMBED, embedFields.length));
+        embeds.push(new RichEmbed(
+            {
+                title: embedTitle,
+                color: EMBED_INFO_COLOR,
+                description: embedDesc,
+                fields: embedFieldsSubset,
+                footer: embedFooter
+            }
+        ))
+    }
+    let channel = message.channel as TextChannel;
+    if (!message.guild.me.permissionsIn(message.channel).has("ADD_REACTIONS")) {
+        await sendMessage(message, {
+            embed: {
+                title: embedTitle,
+                color: EMBED_INFO_COLOR,
+                description: embedDesc,
+                fields: embedFields,
+                footer: embedFooter
+            }
+        })
+        await sendErrorMessage(message, "Missing Permissions", `Hi! I'm unable to add reactions in ${message.guild.name}'s #${channel.name} channel. Please double check the text channel's permissions.`)
+        return;
+    }
 
-    sendMessage(message, {
-        embed: {
-            title: embedTitle,
-            color: EMBED_INFO_COLOR,
-            description: embedDesc,
-            fields: embedFields,
-            footer: embedFooter
-        }
-    })
+    await new EmbedsMode()
+        .setArray(embeds)
+        .setAuthorizedUsers([message.author.id])
+        .setDisabledNavigationEmojis(["JUMP", "DELETE"])
+        .setChannel(message.channel as TextChannel)
+        .setPageIndicator(true)
+        .build();
 }
