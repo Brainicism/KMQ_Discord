@@ -11,7 +11,6 @@ class GroupsCommand implements BaseCommand {
             return;
         }
         let groupNames = parsedMessage.argument.split(",").map((groupName) => groupName.trim());
-        console.log(groupNames);
         let matchingGroups = (await db.kpopVideos("kpop_videos.app_kpop_group")
             .select(["id", "name"])
             .whereIn("name", groupNames))
