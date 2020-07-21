@@ -8,6 +8,7 @@ import { TextChannel, RichEmbed } from "discord.js";
 const logger = _logger("help");
 const placeholder = /!/g;
 const FIELDS_PER_EMBED = 5;
+const PAGINATION_EMBED_PERMISSIONS: Discord.PermissionResolvable = ["MANAGE_MESSAGES", "EMBED_LINKS", "VIEW_CHANNEL", "SEND_MESSAGES"];
 
 class HelpCommand implements BaseCommand {
     async call({ parsedMessage, message, botPrefix }: CommandArgs) {
@@ -99,7 +100,8 @@ const helpMessage = async (message: Discord.Message, action: string, botPrefix: 
         ))
     }
     let channel = message.channel as TextChannel;
-    if (!message.guild.me.permissionsIn(message.channel).has("ADD_REACTIONS")) {
+    let missingPermissions = channel.permissionsFor(message.guild.me).missing(PAGINATION_EMBED_PERMISSIONS);
+    if (missingPermissions.length > 0) {
         await sendMessage(message, {
             embed: {
                 title: embedTitle,
@@ -109,7 +111,7 @@ const helpMessage = async (message: Discord.Message, action: string, botPrefix: 
                 footer: embedFooter
             }
         })
-        await sendErrorMessage(message, "Missing Permissions", `Hi! I'm require the following permissions ["MANAGE_MESSAGES", "EMBED_LINKS", "VIEW_CHANNEL", "SEND_MESSAGES"] in ${message.guild.name}'s #${channel.name} channel. Please double check the text channel's permissions.`)
+        await sendErrorMessage(message, "Missing Permissions", `Hi! I require the following permissions [${missingPermissions.join(", ")}] in ${message.guild.name}'s #${channel.name} channel. Please double check the text channel's permissions.`)
         return;
     }
 
