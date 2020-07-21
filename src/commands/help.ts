@@ -109,7 +109,7 @@ const helpMessage = async (message: Discord.Message, action: string, botPrefix: 
                 footer: embedFooter
             }
         })
-        await sendErrorMessage(message, "Missing Permissions", `Hi! I'm unable to add reactions in ${message.guild.name}'s #${channel.name} channel. Please double check the text channel's permissions.`)
+        await sendErrorMessage(message, "Missing Permissions", `Hi! I'm require the following permissions ["MANAGE_MESSAGES", "EMBED_LINKS", "VIEW_CHANNEL", "SEND_MESSAGES"] in ${message.guild.name}'s #${channel.name} channel. Please double check the text channel's permissions.`)
         return;
     }
 
