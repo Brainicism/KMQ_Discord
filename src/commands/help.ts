@@ -58,7 +58,7 @@ const helpMessage = async (message: Discord.Message, action: string, botPrefix: 
             return;
         }
         let helpManual = commandFilesWithAliases[action].help;
-        embedTitle = `\`${helpManual.usage.replaceAll(placeholder, botPrefix)}\``;
+        embedTitle = `\`${helpManual.usage.replace(placeholder, botPrefix)}\``;
         embedDesc = helpManual.description;
         helpManual.arguments.forEach((argument) => {
             embedFields.push({
