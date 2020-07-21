@@ -42,7 +42,7 @@ class GroupsCommand implements BaseCommand {
             }
         ]
     }
-    aliases: ["group"]
+    aliases = ["group"]
 }
 
 export default GroupsCommand;
