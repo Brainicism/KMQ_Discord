@@ -68,15 +68,16 @@ let main = async function () {
         .then(async () => {
             return new Promise(async (resolve, reject) => {
                 let files = await fs.promises.readdir(`${databaseDownloadDir}/sql`);
-                let seedFile = `${databaseDownloadDir}/sql/${files[0]}`;
+                let seedFile = files[files.length - 1];
+                let seedFilePath = `${databaseDownloadDir}/sql/${seedFile}`;
                 logger.info("Dropping K-Pop video database");
                 await db.query("DROP DATABASE IF EXISTS kpop_videos;");
                 logger.info("Creating K-pop video database")
                 await db.query("CREATE DATABASE kpop_videos;");
                 logger.info("Seeding K-Pop video database");
-                setSqlMode(seedFile);
-                execSync(`mysql -u ${config.dbUser} -p${config.dbPassword} kpop_videos < ${seedFile}`)
-                logger.info(`Imported database dump (${files[0]}) successfully`);
+                setSqlMode(seedFilePath);
+                execSync(`mysql -u ${config.dbUser} -p${config.dbPassword} kpop_videos < ${seedFilePath}`)
+                logger.info(`Imported database dump (${seedFile}) successfully`);
                 logger.info("Creating K-pop Music Quiz database");
                 await db.query("CREATE DATABASE IF NOT EXISTS kmq");
                 //this is awful but idk why it won't end
