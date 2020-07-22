@@ -13,6 +13,7 @@ import * as _config from "../config/app_config.json";
 import BaseCommand from "commands/base_command";
 import GameSession from "models/game_session";
 import _logger from "./logger";
+import * as fs from "fs";
 const logger = _logger("kmq");
 
 const client = new Discord.Client();
@@ -144,11 +145,14 @@ const parseMessage = (message: string, botPrefix: string): ParsedMessage => {
         process.exit(1);
     }
 
+    // load guild preferences
     let fields = await db.kmq("guild_preferences").select("*");
     fields.forEach(async (field) => {
         guildPreferences[field.guild_id] = new GuildPreference(field.guild_id, JSON.parse(field.guild_preference));
         await guildPreferences[field.guild_id].updateGuildPreferences(db.kmq);
     });
+
+    //load commands
     let commandFiles = await getCommandFiles();
     for (const [commandName, command] of Object.entries(commandFiles)) {
         if (commandName === "base_command") continue;
@@ -159,5 +163,20 @@ const parseMessage = (message: string, botPrefix: string): ParsedMessage => {
             });
         }
     }
+    
+    //populate group list
+    let result = await db.kpopVideos("kpop_videos.app_kpop_group")
+    .select(["name", "members as gender"])
+    .orderBy("name", "ASC")
+    fs.writeFileSync(config.groupListFile, result.map((x) => x["name"]).join("\n"));
     client.login(config.botToken);
 })();
+
+process.on("unhandledRejection", (reason: Error, p: Promise<any>) => {
+    logger.error(`Unhandled Rejection at: Promise ${p}. Reason: ${reason}. Trace: ${reason.stack}`);
+});
+
+
+process.on("uncaughtException", (err: Error) => {
+    logger.error(`Uncaught Exception. Reason: ${err}. Trace: ${err.stack}`);
+});

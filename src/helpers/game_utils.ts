@@ -11,7 +11,7 @@ import * as Discord from "discord.js";
 import { QueriedSong, Databases } from "types";
 import { SEEK_TYPES } from "../commands/seek";
 import * as Knex from "knex";
-const GameOptions: { [option: string]: string } = { "GENDER": "Gender", "CUTOFF": "Cutoff", "LIMIT": "Limit", "VOLUME": "Volume", "SEEK_TYPE": "Seek Type" };
+const GameOptions: { [option: string]: string } = { "GENDER": "Gender", "CUTOFF": "Cutoff", "LIMIT": "Limit", "VOLUME": "Volume", "SEEK_TYPE": "Seek Type", "GROUPS": "Groups" };
 
 const logger = _logger("game_utils");
 
@@ -40,6 +40,41 @@ const guessSong = async ({ client, message, gameSessions, guildPreference, db }:
     }
 }
 
+const getFilteredSongList = async (guildPreference: GuildPreference, db: Databases): Promise<{songs: QueriedSong[], countBeforeLimit: number}> => {
+    let result;
+    if (guildPreference.getGroupIds() === null) {
+        result = await db.kpopVideos("kpop_videos.app_kpop")
+            .select(["nome as name", "name as artist", "vlink as youtubeLink"])
+            .join("kpop_videos.app_kpop_group", function () {
+                this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id")
+            })
+            .whereIn("members", guildPreference.getSQLGender().split(","))
+            .andWhere("dead", "n")
+            .andWhere("publishedon", ">=", `${guildPreference.getBeginningCutoffYear()}-01-01`)
+            .andWhere("publishedon", "<=", `${guildPreference.getEndCutoffYear()}-12-31`)
+            .andWhere("vtype", "main")
+            .orderBy("kpop_videos.app_kpop.views", "DESC")
+    }
+    else {
+        result = await db.kpopVideos("kpop_videos.app_kpop")
+            .select(["nome as name", "name as artist", "vlink as youtubeLink"])
+            .join("kpop_videos.app_kpop_group", function () {
+                this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id")
+            })
+            .whereIn("id_artist", guildPreference.getGroupIds())
+            .andWhere("dead", "n")
+            .andWhere("publishedon", ">=", `${guildPreference.getBeginningCutoffYear()}-01-01`)
+            .andWhere("publishedon", "<=", `${guildPreference.getEndCutoffYear()}-12-31`)
+            .andWhere("vtype", "main")
+            .orderBy("kpop_videos.app_kpop.views", "DESC")
+    }
+
+    return {
+        songs: result.slice(0, guildPreference.getLimit()),
+        countBeforeLimit: result.length
+    };
+
+}
 
 const startGame = async (gameSession: GameSession, guildPreference: GuildPreference, db: Databases, message: Discord.Message, client: Discord.Client, voiceChannel?: Discord.VoiceChannel) => {
     if (!gameSession || gameSession.finished) {
@@ -51,19 +86,12 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
     }
 
     try {
-        let result = await db.kpopVideos("kpop_videos.app_kpop")
-            .select(["nome as name", "name as artist", "vlink as youtubeLink"])
-            .join("kpop_videos.app_kpop_group", function () {
-                this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id")
-            })
-            .whereIn("members", guildPreference.getSQLGender().split(","))
-            .andWhere("dead", "n")
-            .andWhere("publishedon", ">=", `${guildPreference.getBeginningCutoffYear()}-01-01`)
-            .andWhere("publishedon", "<=", `${guildPreference.getEndCutoffYear()}-12-31`)
-            .andWhere("vtype", "main")
-            .orderBy("kpop_videos.app_kpop.views", "DESC")
-            .limit(guildPreference.getLimit());
-        let randomSong = selectRandomSong(result, guildPreference);
+        let {songs: filteredSongs} = await getFilteredSongList(guildPreference, db);
+        if (filteredSongs.length === 0) {
+            sendErrorMessage(message, "Song Query Error", "There are no songs that match the current game options. Try to broaden your search");
+            return;
+        }
+        let randomSong = selectRandomSong(filteredSongs, guildPreference);
         if (randomSong === null) {
             sendErrorMessage(message, "Song Query Error", "Failed to find songs matching this criteria. Try to broaden your search.");
             return;
@@ -169,26 +197,13 @@ const cleanSongName = (name: string): string => {
     return cleanName;
 }
 
-const getSongCount = async (guildPreference: GuildPreference, db: Knex): Promise<number> => {
-    //TODO: this query is almost identical to the one in startGame, refactor somehow
-    let query = `SELECT count(*) as count FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
-    WHERE FIND_IN_SET(members, ?) AND dead = "n" AND publishedon >= "?-01-01" AND publishedon <= "?-12-31" AND vtype = "main"
-    ORDER BY kpop_videos.app_kpop.views DESC LIMIT ?;`;
+const getSongCount = async (guildPreference: GuildPreference, db: Databases): Promise<number> => {
     try {
-        let result = await db("kpop_videos.app_kpop")
-            .join("kpop_videos.app_kpop_group", function () {
-                this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id")
-            })
-            .whereIn("members", guildPreference.getSQLGender().split(","))
-            .andWhere("dead", "n")
-            .andWhere("publishedon", ">=", `${guildPreference.getBeginningCutoffYear()}-01-01`)
-            .andWhere("publishedon", "<=", `${guildPreference.getEndCutoffYear()}-12-31`)
-            .andWhere("vtype", "main")
-            .orderBy("kpop_videos.app_kpop.views", "DESC")
-        return result.length;
+        let {countBeforeLimit: totalCount} = await getFilteredSongList(guildPreference, db);
+        return totalCount;
     }
     catch (e) {
-        logger.error(`Error retrieving song count. query = ${query} error = ${e}`);
+        logger.error(`Error retrieving song count ${e}`);
         return -1;
     }
 }
