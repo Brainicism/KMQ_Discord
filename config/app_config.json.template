@@ -4,6 +4,7 @@
     "dbPassword": "",
     "songCacheDir": "",
     "topGGToken": "",
+    "discordBotsGgToken": "",
     "newsFile": "",
     "groupListFile": ""
 }

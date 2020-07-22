@@ -2,7 +2,6 @@ import * as Discord from "discord.js";
 import * as Knex from "knex";
 import * as _kmqKnexConfig from "../config/knexfile_kmq";
 import * as _kpopVideosKnexConfig from "../config/knexfile_kpop_videos";
-import * as DBL from "dblapi.js";
 import { validateConfig } from "./config_validator";
 import GuildPreference from "./models/guild_preference";
 import { guessSong } from "./helpers/game_utils";
@@ -12,6 +11,7 @@ import { ParsedMessage } from "types";
 import * as _config from "../config/app_config.json";
 import BaseCommand from "commands/base_command";
 import GameSession from "models/game_session";
+import BotStatsPoster from "./helpers/bot_stats_poster";
 import _logger from "./logger";
 import * as fs from "fs";
 const logger = _logger("kmq");
@@ -26,26 +26,14 @@ let db: {
 let commands: { [commandName: string]: BaseCommand } = {};
 let gameSessions: { [guildID: string]: GameSession } = {};
 let guildPreferences: { [guildID: string]: GuildPreference } = {};
-
-const dbl = config.topGGToken ? new DBL(config.topGGToken, client) : null;
-
-if (dbl) {
-    dbl.on("posted", () => {
-        logger.info("Server count posted!");
-    });
-    dbl.on("error", (e) => {
-        logger.error(`Server count post failed! ${e}`);
-    });
-}
-else {
-    logger.info("No top.gg token passed (check your config.json)! Ignoring posting top.gg server count.");
-}
+let botStatsPoster: BotStatsPoster = null;
 
 client.on("ready", () => {
     logger.info(`Logged in as ${client.user.tag}!`);
 });
 
 client.on("message", async (message: Discord.Message) => {
+    
     if (message.author.equals(client.user) || message.author.bot) return;
     if (!message.guild) return;
     let guildPreference = await getGuildPreference(guildPreferences, message.guild.id);
@@ -169,6 +157,11 @@ const parseMessage = (message: string, botPrefix: string): ParsedMessage => {
     .select(["name", "members as gender"])
     .orderBy("name", "ASC")
     fs.writeFileSync(config.groupListFile, result.map((x) => x["name"]).join("\n"));
+
+    //set up bot stats poster
+    botStatsPoster = new BotStatsPoster(client);
+    botStatsPoster.start();
+
     client.login(config.botToken);
 })();
 
