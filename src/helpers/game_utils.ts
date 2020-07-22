@@ -41,7 +41,7 @@ const guessSong = async ({ client, message, gameSessions, guildPreference, db }:
     }
 }
 
-const getFilteredSongList = async (guildPreference: GuildPreference, db: Databases): Promise<QueriedSong[]> => {
+const getFilteredSongList = async (guildPreference: GuildPreference, db: Databases): Promise<{songs: QueriedSong[], countBeforeLimit: number}> => {
     let result;
     if (guildPreference.getGroupIds() === null) {
         result = await db.kpopVideos("kpop_videos.app_kpop")
@@ -55,7 +55,6 @@ const getFilteredSongList = async (guildPreference: GuildPreference, db: Databas
             .andWhere("publishedon", "<=", `${guildPreference.getEndCutoffYear()}-12-31`)
             .andWhere("vtype", "main")
             .orderBy("kpop_videos.app_kpop.views", "DESC")
-            .limit(guildPreference.getLimit());
     }
     else {
         result = await db.kpopVideos("kpop_videos.app_kpop")
@@ -69,9 +68,12 @@ const getFilteredSongList = async (guildPreference: GuildPreference, db: Databas
             .andWhere("publishedon", "<=", `${guildPreference.getEndCutoffYear()}-12-31`)
             .andWhere("vtype", "main")
             .orderBy("kpop_videos.app_kpop.views", "DESC")
-            .limit(guildPreference.getLimit());
     }
-    return result;
+
+    return {
+        songs: result.slice(0, guildPreference.getLimit()),
+        countBeforeLimit: result.length
+    };
 
 }
 
@@ -85,7 +87,7 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
     }
 
     try {
-        let filteredSongs = await getFilteredSongList(guildPreference, db);
+        let {songs: filteredSongs} = await getFilteredSongList(guildPreference, db);
         if (filteredSongs.length === 0) {
             sendErrorMessage(message, "Song Query Error", "There are no songs that match the current game options. Try to broaden your search");
             return;
@@ -203,8 +205,8 @@ const cleanSongName = (name: string): string => {
 
 const getSongCount = async (guildPreference: GuildPreference, db: Databases): Promise<number> => {
     try {
-        let result = await getFilteredSongList(guildPreference, db);
-        return result.length;
+        let {countBeforeLimit: totalCount} = await getFilteredSongList(guildPreference, db);
+        return totalCount;
     }
     catch (e) {
         logger.error(`Error retrieving song count ${e}`);
