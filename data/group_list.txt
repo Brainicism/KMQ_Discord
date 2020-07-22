@@ -47,6 +47,7 @@ Baek A Yeon
 Baek Ji-young
 Baek Yerin
 Baekhyun
+Baekhyun + Loco
 Bastarz
 Beast
 Ben
@@ -104,6 +105,7 @@ D.A.N.
 D.Holic
 D.O. 
 D.O. + Yoo Young Jin
+D1CE
 Daehyun
 Dal★Shabet
 Dalmatian (DMTN)
@@ -126,6 +128,7 @@ Elris
 ENOi
 Epik High
 Eric Nam
+Eric Nam + Cheeze
 Eric Nam + Somi
 Eru
 Eunji
@@ -185,6 +188,7 @@ Gugudan Semina
 Gummy
 GWSN
 Ha Hyun-woo
+Ha Hyunsang
 Ha Sung Woon
 HA:TFELT
 Haon
@@ -252,6 +256,7 @@ JBJ95
 JeA
 Jennie
 Jenyer
+Jeon Mido
 Jeon Sang Keun
 Jeong Se-woon
 Jessi
@@ -262,6 +267,7 @@ Jiselle
 Jiyeon
 JJ Project
 JJCC
+Jo Jung Suk + D.O.
 Jo Jung-suk
 John Legend + Wendy
 John Park
@@ -298,10 +304,11 @@ Kim HeeChul + WheeIn
 Kim Hyun-joong
 Kim Hyung-jun
 Kim Jaehwan
-kim Jaejoong
+Kim Jaejoong
 Kim Na Young
 Kim Na Young + Yang Da-Il
 Kim Sung Kyu
+Kim Wooseok
 Kisum
 Kisum + Homme
 Kisum + Hwasa
@@ -319,6 +326,8 @@ Laysha
 Lee Hae-ri
 Lee Hi
 Lee Hyori
+Lee Jinhyuk
+Lee Moonsae + Roy Kim
 Lee Seung Gi
 Lee SoRa
 Lee Sun Hee
@@ -332,8 +341,10 @@ Lim Jeong-hee
 Lim Jimin
 Lim Kim
 Loco
+Loco + Gray
 Loco + Hwasa
 Loco + Punch
+Loco + U Seungeun
 LOONA
 Loopy
 Lovelyz
@@ -358,11 +369,13 @@ MelodyDay
 MeloMance
 MFBTY
 Midnight
+Mido and Falasol
 Minah
 Minho
 Minhyuk
 Minhyun
 Mino
+Mino + Zico
 Minseo
 Minzy
 Miso
@@ -402,6 +415,7 @@ NU'EST
 NU'EST W
 Oh My Girl
 Oh My Girl Banhana
+Oh Seunghee
 Oneus
 Onew
 Onewe
@@ -410,6 +424,7 @@ Ong Seongwu
 OnlyOneOf
 Orange Caramel
 Ovan
+Park Bo Gum
 Park Bom
 Park BoRam
 Park Hyo-shin
@@ -421,6 +436,7 @@ Paul Kim
 Peniel Shin
 Penomeco
 Pentagon
+Phantom
 Pink Fantasy
 Pink Fantasy SHY
 Playback
@@ -444,6 +460,7 @@ Rainbow Pixie
 Rainz
 RaNia
 Red Velvet
+Red Velvet - I&S
 RM
 Rocket Punch
 Romeo
@@ -451,13 +468,17 @@ Rothy
 Roy Kim
 Royal Pirates
 Ryeowook
+Ryu Su-jeong
 S.E.S.
+Sam Kim
+Sam Kim + Loco
 Samuel
 San E
 Saturday
 Se7en
 Sechs kies
 Secret
+Secret Number
 Seenroot
 SeeYa
 Sejeong
@@ -505,7 +526,9 @@ Soyou + Sung Si Kyung
 SPEED
 SPICA
 SS501
+SSAK3
 Stella Jang
+Stella Jang + Lee Minhyuk
 Stellar
 Stray Kids
 Subin
@@ -530,10 +553,12 @@ T-ara + Davichi
 T-ara N4
 T.O.P
 Tablo
+Tablo + Taeyang
 Taemin
 TAEYANG
 Taeyeon
 Taeyeon + DEAN
+Taeyeon + Jonghyun
 Taeyeon + MeloMance
 Taeyong
 Tahiti
@@ -550,6 +575,7 @@ Treasure
 TREI
 Triple H
 Trouble Maker
+TST
 Turbo
 TVXQ!
 Twice
@@ -576,6 +602,7 @@ VIXX
 VIXX LR
 Voisper
 Wanna One
+Weeekly
 Weki Meki
 Wendy
 Wendy + Eric Nam
@@ -586,7 +613,9 @@ Winner
 WJSN
 Wonder Girls
 Woo Won-jae
+woo!ah!
 Woody
+Woodz
 Woosek X Kuanlin 
 Woosung
 X1
@@ -618,4 +647,5 @@ ZE:A
 Zhou Mi
 Zia
 Zico
+Zico + Kang Daniel
 Zion.T
