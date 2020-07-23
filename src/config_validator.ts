@@ -9,6 +9,7 @@ const allowedOptions = {
     dbPassword: { required: true },
     songCacheDir: { required: true },
     topGGToken: { required: false },
+    discordBotsGgToken: { required: false },
     newsFile: { required: true },
     groupListFile: { required: true }
 };
