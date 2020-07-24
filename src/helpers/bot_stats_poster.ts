@@ -15,7 +15,7 @@ class BotStatsPoster {
         this.client = client;
     }
     start() {
-        setInterval(() => { this.postStats(this.client) }, 180000);
+        setInterval(() => { this.postStats(this.client) }, 1800000);
     }
 
     private async postStats(client: Client) {
