@@ -32,7 +32,7 @@ export default class GameSession {
 
     startRound(song: string, artist: string, link: string) {
         this.song = song;
-        this.songAliases = songAliasesList[link];
+        this.songAliases = songAliasesList[link] || [];
         this.artist = artist;
         this.videoID = link;
         this.inSession = true;
@@ -52,6 +52,7 @@ export default class GameSession {
                 this.dispatcher = null;
                 resolve();
             }
+            resolve();
 
         })
     }
