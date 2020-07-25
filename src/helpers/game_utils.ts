@@ -23,7 +23,8 @@ const guessSong = async ({ client, message, gameSessions, guildPreference, db }:
     }
     let gameSession = gameSessions[message.guild.id];
     let guess = cleanSongName(message.content);
-    if (gameSession.getSong() && (guess === cleanSongName(gameSession.getSong()) || gameSession.getSongAliases().has(guess))) {
+    let cleanedSongAliases =  gameSession.getSongAliases().map((x) => cleanSongName(x));
+    if (gameSession.getSong() && (guess === cleanSongName(gameSession.getSong()) || cleanedSongAliases.includes(guess))) {
         // this should be atomic
         let userTag = getUserIdentifier(message.author);
         gameSession.scoreboard.updateScoreboard(userTag, message.author.id);
@@ -134,6 +135,10 @@ const selectRandomSong = async (guildPreference: GuildPreference, db: Databases)
             return null;
         }
         let random = queriedSongList[Math.floor(Math.random() * queriedSongList.length)];
+
+        if (isDebugMode() && skipSongPlay()) {
+            return random;
+        }
         const songLocation = `${SONG_CACHE_DIR}/${random.youtubeLink}.mp3`;
         if (!fs.existsSync(songLocation)) {
             logger.error(`Song not cached: ${songLocation}`);
@@ -195,8 +200,6 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
 const cleanSongName = (name: string): string => {
     let cleanName = name.toLowerCase()
         .split("(")[0]
-        .normalize("NFD")
-        .replace(/[^\x00-\x7F|]/g, "")
         .replace(/|/g, "")
         .replace(/’/, "'")
         .replace(/ /g, "").trim();

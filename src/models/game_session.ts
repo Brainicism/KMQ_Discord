@@ -61,8 +61,8 @@ export default class GameSession {
         return this.song;
     }
 
-    getSongAliases(): Set<string> {
-        return new Set(this.songAliases.map((x) => cleanSongName(x)));
+    getSongAliases(): string[] {
+        return this.songAliases;
     }
 
     getArtist(): string {
