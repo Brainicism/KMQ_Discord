@@ -4,7 +4,7 @@ import * as _kmqKnexConfig from "../config/knexfile_kmq";
 import * as _kpopVideosKnexConfig from "../config/knexfile_kpop_videos";
 import { validateConfig } from "./config_validator";
 import GuildPreference from "./models/guild_preference";
-import { guessSong } from "./helpers/game_utils";
+import { guessSong, endGame } from "./helpers/game_utils";
 import validate from "./helpers/validate";
 import { getCommandFiles } from "./helpers/discord_utils";
 import { ParsedMessage } from "types";
@@ -81,7 +81,7 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
                 voiceConnection.disconnect();
                 if (gameSession) {
                     logger.info(`gid: ${oldUserChannel.guild.id} | Bot is only user left, leaving voice...`)
-                    await gameSession.endRound();
+                    await endGame(gameSessions, newState.guild.id);
                 }
                 return;
             }
@@ -90,7 +90,7 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
         if (oldState.user === client.user && !oldUserChannel.members.has(client.user.id)) {
             if (gameSession) {
                 logger.info(`gid: ${oldUserChannel.guild.id} | Bot disconnected.`)
-                await gameSession.endRound();
+                await endGame(gameSessions, newState.guild.id);
             }
         }
     }

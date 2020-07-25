@@ -23,7 +23,7 @@ const guessSong = async ({ client, message, gameSessions, guildPreference, db }:
     }
     let gameSession = gameSessions[message.guild.id];
     let guess = cleanSongName(message.content);
-    let cleanedSongAliases =  gameSession.getSongAliases().map((x) => cleanSongName(x));
+    let cleanedSongAliases = gameSession.getSongAliases().map((x) => cleanSongName(x));
     if (gameSession.getSong() && (guess === cleanSongName(gameSession.getSong()) || cleanedSongAliases.includes(guess))) {
         // this should be atomic
         let userTag = getUserIdentifier(message.author);
@@ -217,10 +217,18 @@ const getSongCount = async (guildPreference: GuildPreference, db: Databases): Pr
     }
 }
 
+const endGame = async (gameSessions: { [guildId: string]: GameSession }, guildId: string): Promise<void> => {
+    let gameSession = gameSessions[guildId];
+    gameSession.finished = true;
+    await gameSession.endRound();
+    delete gameSessions[guildId];
+}
+
 export {
     guessSong,
     startGame,
     cleanSongName,
     getSongCount,
-    GameOptions
+    GameOptions,
+    endGame
 }
