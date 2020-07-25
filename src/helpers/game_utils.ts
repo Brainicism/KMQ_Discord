@@ -180,7 +180,7 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
     logger.info(`${getDebugContext(message)} | Playing song in voice connection. seek = ${guildPreference.getSeekType()}. song = ${gameSession.getDebugSongDetails()}`);
 
     gameSession.dispatcher.once("end", async () => {
-        logger.info(`${getDebugContext(message)} | Song finished without being guessed. song = ${gameSession.getDebugSongDetails()}`);
+        logger.info(`${getDebugContext(message)} | Song finished without being guessed.`);
         await sendSongMessage(message, gameSession, true);
         await gameSession.endRound();
         startGame(gameSession, guildPreference, db, message, client, null);

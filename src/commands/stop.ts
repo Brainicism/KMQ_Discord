@@ -7,10 +7,10 @@ class StopCommand implements BaseCommand {
     async call({ gameSessions, client, message }: CommandArgs) {
         let gameSession = gameSessions[message.guild.id];
         if (gameSession && gameSession.gameInSession()) {
+            logger.info(`${getDebugContext(message)} | Game round ended: ${gameSession.getDebugSongDetails()}`);
             await sendSongMessage(message, gameSession, true);
             disconnectVoiceConnection(client, message);
             await gameSession.endRound();
-            logger.info(`${getDebugContext(message)} | Game round ended: ${gameSession.getDebugSongDetails()}`);
         }
     }
     help = {
