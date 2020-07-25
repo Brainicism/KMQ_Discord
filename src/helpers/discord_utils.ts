@@ -12,6 +12,10 @@ const EMBED_INFO_COLOR = 0x000000; // BLACK
 const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 
 const sendSongMessage = async (message: Discord.Message, gameSession: GameSession, isForfeit: boolean) => {
+    let footer = gameSession.getSongAliases().length > 0 ? {
+        text: `Aliases: ${Array.from(gameSession.getSongAliases()).join(", ")}`
+    } : null;
+
     await sendMessage(message, {
         embed: {
             color: EMBED_INFO_COLOR,
@@ -24,7 +28,8 @@ const sendSongMessage = async (message: Discord.Message, gameSession: GameSessio
             image: {
                 url: `https://img.youtube.com/vi/${gameSession.getVideoID()}/hqdefault.jpg`
             },
-            fields: gameSession.scoreboard.getScoreboard()
+            fields: gameSession.scoreboard.getScoreboard(),
+            footer
         }
     });
 }

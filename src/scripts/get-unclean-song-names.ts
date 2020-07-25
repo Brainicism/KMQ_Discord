@@ -1,0 +1,22 @@
+import * as mysql from "promise-mysql";
+import * as _config from "../../config/app_config.json";
+import { QueriedSong } from "types";
+import * as fs from "fs";
+import * as existingSongAliases from "../../data/song_aliases.json";
+let config: any = _config;
+
+(async () => {
+    const db = await mysql.createPool({
+        connectionLimit: 10,
+        host: "localhost",
+        user: config.dbUser,
+        password: config.dbPassword
+    });
+    let query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
+    WHERE dead = "n" AND vtype = "main";`;
+    let songs: Array<QueriedSong> = await db.query(query);
+    let nonAsciiSongs = songs.filter(x => !/^[\x00-\x7F]*$/.test(x.name));
+    let nonCheckedSongs = nonAsciiSongs.filter(x => !(x.youtubeLink in existingSongAliases));
+    fs.writeFileSync("./tmp/song_dump.txt", nonCheckedSongs.map((x => `${x.youtubeLink}, ${x.name}`)).join("\n"));
+    console.log("Done");
+})();

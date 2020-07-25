@@ -29,7 +29,7 @@ let guildPreferences: { [guildID: string]: GuildPreference } = {};
 let botStatsPoster: BotStatsPoster = null;
 
 client.on("ready", () => {
-    logger.info(`Logged in as ${client.user.tag}!`);
+    logger.info(`Logged in as ${client.user.tag}! in '${process.env.NODE_ENV}' mode`);
 });
 
 client.on("message", async (message: Discord.Message) => {
