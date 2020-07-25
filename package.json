@@ -5,7 +5,8 @@
   "scripts": {
     "seed": "ts-node src/seed/seed_db",
     "dev": "npx knex migrate:latest --knexfile config/knexfile_kmq.js && cd src && ts-node kmq",
-    "prod": "npx knex migrate:latest --knexfile config/knexfile_kmq.js && tsc && cp -r config build && cp -r src/assets build/src/assets && cd build/src && node kmq.js"
+    "prod": "npx knex migrate:latest --knexfile config/knexfile_kmq.js && tsc && cp -r config build && cp -r src/assets build/src/assets && cd build/src && node kmq.js",
+    "download_songs": "ts-node src/scripts/download-new-songs.ts"
   },
   "author": "",
   "license": "ISC",
