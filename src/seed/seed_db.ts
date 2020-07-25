@@ -77,7 +77,7 @@ let main = async function () {
                 logger.info("Seeding K-Pop video database");
                 setSqlMode(seedFilePath);
                 execSync(`mysql -u ${config.dbUser} -p${config.dbPassword} kpop_videos < ${seedFilePath}`)
-                logger.info(`Imported database dump (${seedFile}) successfully. Make sure to run 'get-unclean-song-names' to check for new songss that may need aliasing`);
+                logger.info(`Imported database dump (${seedFile}) successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing`);
                 logger.info("Creating K-pop Music Quiz database");
                 await db.query("CREATE DATABASE IF NOT EXISTS kmq");
                 //this is awful but idk why it won't end
