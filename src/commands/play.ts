@@ -1,8 +1,9 @@
 import GameSession from "../models/game_session";
-import { sendErrorMessage, getDebugContext } from "../helpers/discord_utils";
+import { sendErrorMessage, getDebugContext, sendInfoMessage } from "../helpers/discord_utils";
 import { startGame } from "../helpers/game_utils";
 import BaseCommand, { CommandArgs } from "./base_command";
 import _logger from "../logger";
+import { TextChannel } from "discord.js";
 const logger = _logger("play");
 
 class PlayCommand implements BaseCommand {
@@ -14,10 +15,12 @@ class PlayCommand implements BaseCommand {
             logger.warn(`${getDebugContext(message)} | User not in voice channel`);
         }
         else {
+            let channel = message.channel as TextChannel;
             if (!gameSessions[message.guild.id]) {
-                gameSessions[message.guild.id] = new GameSession();
+                gameSessions[message.guild.id] = new GameSession(channel);
                 logger.info(`${getDebugContext(message)} | Game session created`);
             }
+            await sendInfoMessage(message, `Game started in #${channel.name}`, "Listen to the song and type your guess!");
             startGame(gameSessions[message.guild.id], guildPreference, db, message, client, message.member.voiceChannel);
         }
     }

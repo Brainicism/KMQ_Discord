@@ -1,6 +1,6 @@
 import { CommandArgs } from "commands/base_command";
 import { songCacheDir as SONG_CACHE_DIR } from "../../config/app_config.json";
-import { getUserIdentifier, sendSongMessage, getDebugContext, sendErrorMessage } from "./discord_utils";
+import { getUserIdentifier, sendSongMessage, getDebugContext, sendErrorMessage, sendInfoMessage } from "./discord_utils";
 import _logger from "../logger";
 import { resolve } from "path"
 import * as fs from "fs";
@@ -18,11 +18,19 @@ const logger = _logger("game_utils");
 
 
 const guessSong = async ({ client, message, gameSessions, guildPreference, db }: CommandArgs) => {
+    let gameSession = gameSessions[message.guild.id];
     const voiceConnection = client.voiceConnections.get(message.guild.id);
+    
+    //if user isn't in the same voice channel
     if (!voiceConnection || !voiceConnection.channel.members.has(message.author.id)) {
         return;
     }
-    let gameSession = gameSessions[message.guild.id];
+
+    //if message isn't in the active game session's text channel
+    if (message.channel.id !== gameSession.textChannel.id) {
+        return;
+    }
+
     let guess = cleanSongName(message.content);
     let cleanedSongAliases = gameSession.getSongAliases().map((x) => cleanSongName(x));
     if (gameSession.getSong() && (guess === cleanSongName(gameSession.getSong()) || cleanedSongAliases.includes(guess))) {
