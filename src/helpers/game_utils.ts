@@ -231,6 +231,7 @@ const endGame = async (gameSessions: { [guildId: string]: GameSession }, guildId
     gameSession.finished = true;
     await gameSession.endRound();
     gameSession.connection.disconnect();
+    logger.info(`gid: ${guildId} | Game session ended`);
     delete gameSessions[guildId];
 }
 

@@ -11,7 +11,8 @@ const allowedOptions = {
     topGGToken: { required: false },
     discordBotsGgToken: { required: false },
     newsFile: { required: true },
-    groupListFile: { required: true }
+    groupListFile: { required: true },
+    restartCron: { required: false }
 };
 
 export function validateConfig(config): boolean {
