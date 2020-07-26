@@ -11,6 +11,7 @@ import * as Discord from "discord.js";
 import { QueriedSong, Databases } from "types";
 import { SEEK_TYPES } from "../commands/seek";
 import { isDebugMode, getForcePlaySong, skipSongPlay, isForcedSongActive } from "./debug_utils";
+const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 const GameOptions: { [option: string]: string } = { "GENDER": "Gender", "CUTOFF": "Cutoff", "LIMIT": "Limit", "VOLUME": "Volume", "SEEK_TYPE": "Seek Type", "GROUPS": "Groups" };
 
 const logger = _logger("game_utils");
@@ -221,7 +222,26 @@ const endGame = async (gameSessions: { [guildId: string]: GameSession }, guildId
     let gameSession = gameSessions[guildId];
     gameSession.finished = true;
     await gameSession.endRound();
+    gameSession.connection.disconnect();
     delete gameSessions[guildId];
+}
+
+const cleanupInactiveGameSessions = async (gameSessions: { [guildId: string]: GameSession }): Promise<void> => {
+    let currentDate = Date.now();
+    let inactiveSessions = 0;
+    let totalSessions = Object.keys(gameSessions).length;
+    for (let guildId in gameSessions) {
+        let gameSession = gameSessions[guildId];
+        let timeDiffMs = currentDate - gameSession.lastActive;
+        let timeDiffMin = (timeDiffMs / (1000 * 60));
+        if (timeDiffMin > GAME_SESSION_INACTIVE_THRESHOLD) {
+            inactiveSessions++;
+            await endGame(gameSessions, guildId);
+        }
+    }
+    if (inactiveSessions > 0) {
+        logger.info(`Ended ${inactiveSessions} inactive game sessions out of ${totalSessions}`);
+    }
 }
 
 export {
@@ -230,5 +250,6 @@ export {
     cleanSongName,
     getSongCount,
     GameOptions,
-    endGame
+    endGame,
+    cleanupInactiveGameSessions
 }

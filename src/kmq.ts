@@ -4,7 +4,7 @@ import * as _kmqKnexConfig from "../config/knexfile_kmq";
 import * as _kpopVideosKnexConfig from "../config/knexfile_kpop_videos";
 import { validateConfig } from "./config_validator";
 import GuildPreference from "./models/guild_preference";
-import { guessSong, endGame } from "./helpers/game_utils";
+import { guessSong, endGame, cleanupInactiveGameSessions } from "./helpers/game_utils";
 import validate from "./helpers/validate";
 import { getCommandFiles } from "./helpers/discord_utils";
 import { ParsedMessage } from "types";
@@ -33,7 +33,6 @@ client.on("ready", () => {
 });
 
 client.on("message", async (message: Discord.Message) => {
-    
     if (message.author.equals(client.user) || message.author.bot) return;
     if (!message.guild) return;
     let guildPreference = await getGuildPreference(guildPreferences, message.guild.id);
@@ -151,16 +150,20 @@ const parseMessage = (message: string, botPrefix: string): ParsedMessage => {
             });
         }
     }
-    
     //populate group list
     let result = await db.kpopVideos("kpop_videos.app_kpop_group")
-    .select(["name", "members as gender"])
-    .orderBy("name", "ASC")
+        .select(["name", "members as gender"])
+        .orderBy("name", "ASC")
     fs.writeFileSync(config.groupListFile, result.map((x) => x["name"]).join("\n"));
 
     //set up bot stats poster
     botStatsPoster = new BotStatsPoster(client);
     botStatsPoster.start();
+
+    //set up cleanup for inactive game sessions
+    setInterval(() => {
+        cleanupInactiveGameSessions(gameSessions);
+    }, 10 * 60 * 1000)
 
     client.login(config.botToken);
 })();

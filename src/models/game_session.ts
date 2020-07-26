@@ -1,7 +1,6 @@
 import Scoreboard from "./scoreboard";
 import * as songAliasesList from "../../data/song_aliases.json";
 import { StreamDispatcher, VoiceConnection } from "discord.js"
-import { cleanSongName } from "../helpers/game_utils";
 export default class GameSession {
     private song: string;
     private songAliases: Array<string>;
@@ -14,6 +13,7 @@ export default class GameSession {
     public dispatcher: StreamDispatcher;
     public connection: VoiceConnection;
     public finished: boolean;
+    public lastActive: number;
 
     constructor() {
         this.song = null;
@@ -23,6 +23,7 @@ export default class GameSession {
         this.skipAchieved = false;
         this.skippers = new Set();
         this.scoreboard = new Scoreboard();
+        this.lastActive = Date.now();
 
         // dispatcher initalized in game_utils/playSong, used when changing volume
         this.dispatcher = null;
@@ -37,6 +38,7 @@ export default class GameSession {
         this.videoID = link;
         this.inSession = true;
         this.skipAchieved = false;
+        this.lastActive = Date.now();
     }
 
     endRound(): Promise<void> {
@@ -46,14 +48,13 @@ export default class GameSession {
             this.videoID = null;
             this.inSession = false;
             this.skippers.clear();
+            this.lastActive = Date.now();
             if (this.dispatcher) {
                 this.dispatcher.removeAllListeners();
                 this.dispatcher.end();
                 this.dispatcher = null;
-                resolve();
             }
             resolve();
-
         })
     }
 
