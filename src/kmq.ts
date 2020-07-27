@@ -123,6 +123,30 @@ const parseMessage = (message: string, botPrefix: string): ParsedMessage => {
     }
 }
 
+const checkRestartNotification = async (restartNotification: Date): Promise<void> => {
+    let timeDiffMin = Math.floor((restartNotification.getTime() - (new Date()).getTime()) / (1000 * 60));
+    let channelsWarned = 0;
+    if (RESTART_WARNING_INTERVALS.has(timeDiffMin)) {
+        for (let guildId in gameSessions) {
+            let gameSession = gameSessions[guildId];
+            if (gameSession.finished) continue;
+            await gameSession.textChannel.send({
+                embed: {
+                    color: EMBED_INFO_COLOR,
+                    author: {
+                        name: client.user.username,
+                        icon_url: client.user.avatarURL
+                    },
+                    title: `Upcoming bot restart in ${timeDiffMin} minutes.`,
+                    description: `Downtime will be approximately 2 minutes.`
+                }
+            })
+            channelsWarned++;
+        }
+        logger.info(`Impending bot restart in ${timeDiffMin} minutes. ${channelsWarned} servers warned.`);
+    }
+}
+
 (async () => {
     let kmqKnexConfig: any = _kmqKnexConfig;
     let kpopVideosKnexConfig: any = _kpopVideosKnexConfig;
@@ -168,34 +192,25 @@ const parseMessage = (message: string, botPrefix: string): ParsedMessage => {
         cleanupInactiveGameSessions(gameSessions);
     }, 10 * 60 * 1000)
 
-    //set up impending restart notifications
-    if (config.restartCron) {
-        setInterval(async () => {
+    //set up check for restart notifications
+    setInterval(async () => {
+        //unscheduled restarts
+        let restartNotification = (await db.kmq("restart_notifications").where("id", 1))[0]["restart_time"];
+        if (restartNotification) {
+            let restartNotificationTime = new Date(restartNotification);
+            if (restartNotificationTime.getTime() > Date.now()) {
+                await checkRestartNotification(restartNotificationTime);
+                return;
+            }
+        }
+
+        //cron based restart
+        if (config.restartCron) {
             let interval = cronParser.parseExpression(config.restartCron);
             let nextRestartTime = interval.next();
-            let timeDiffMin = Math.floor((nextRestartTime.getTime() - (new Date()).getTime()) / (1000 * 60));
-            let channelsWarned = 0;
-            if (RESTART_WARNING_INTERVALS.has(timeDiffMin)) {
-                for (let guildId in gameSessions) {
-                    let gameSession = gameSessions[guildId];
-                    if (gameSession.finished) continue;
-                    await gameSession.textChannel.send({
-                        embed: {
-                            color: EMBED_INFO_COLOR,
-                            author: {
-                                name: client.user.username,
-                                icon_url: client.user.avatarURL
-                            },
-                            title: `Upcoming server restart in ${timeDiffMin} minutes.`,
-                            description: `Downtime will be approximately 2 minutes.`
-                        }
-                    })
-                    channelsWarned++;
-                }
-                logger.info(`Impending server restart in ${timeDiffMin} minutes. ${channelsWarned} servers warned.`);
-            }
-        }, 60 * 1000);
-    }
+            await checkRestartNotification(nextRestartTime.toDate());
+        }
+    }, 60 * 1000);
     client.login(config.botToken);
 })();
 
