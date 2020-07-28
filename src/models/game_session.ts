@@ -1,6 +1,6 @@
 import Scoreboard from "./scoreboard";
 import * as songAliasesList from "../../data/song_aliases.json";
-import { StreamDispatcher, VoiceConnection } from "discord.js"
+import { StreamDispatcher, VoiceConnection, TextChannel } from "discord.js"
 export default class GameSession {
     private song: string;
     private songAliases: Array<string>;
@@ -14,8 +14,9 @@ export default class GameSession {
     public connection: VoiceConnection;
     public finished: boolean;
     public lastActive: number;
+    public textChannel: TextChannel;
 
-    constructor() {
+    constructor(textChannel: TextChannel) {
         this.song = null;
         this.artist = null;
         this.videoID = null;
@@ -29,6 +30,7 @@ export default class GameSession {
         this.dispatcher = null;
         this.connection = null;
         this.finished = false;
+        this.textChannel = textChannel;
     }
 
     startRound(song: string, artist: string, link: string) {

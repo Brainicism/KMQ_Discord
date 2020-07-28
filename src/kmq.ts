@@ -1,12 +1,13 @@
 import * as Discord from "discord.js";
 import * as Knex from "knex";
+import * as cronParser from "cron-parser";
 import * as _kmqKnexConfig from "../config/knexfile_kmq";
 import * as _kpopVideosKnexConfig from "../config/knexfile_kpop_videos";
 import { validateConfig } from "./config_validator";
 import GuildPreference from "./models/guild_preference";
 import { guessSong, endGame, cleanupInactiveGameSessions } from "./helpers/game_utils";
 import validate from "./helpers/validate";
-import { getCommandFiles } from "./helpers/discord_utils";
+import { getCommandFiles, EMBED_INFO_COLOR } from "./helpers/discord_utils";
 import { ParsedMessage } from "types";
 import * as _config from "../config/app_config.json";
 import BaseCommand from "commands/base_command";
@@ -19,6 +20,8 @@ const logger = _logger("kmq");
 const client = new Discord.Client();
 
 const config: any = _config;
+const RESTART_WARNING_INTERVALS = new Set([10, 5, 2, 1]);
+
 let db: {
     kmq: Knex,
     kpopVideos: Knex
@@ -120,6 +123,30 @@ const parseMessage = (message: string, botPrefix: string): ParsedMessage => {
     }
 }
 
+const checkRestartNotification = async (restartNotification: Date): Promise<void> => {
+    let timeDiffMin = Math.floor((restartNotification.getTime() - (new Date()).getTime()) / (1000 * 60));
+    let channelsWarned = 0;
+    if (RESTART_WARNING_INTERVALS.has(timeDiffMin)) {
+        for (let guildId in gameSessions) {
+            let gameSession = gameSessions[guildId];
+            if (gameSession.finished) continue;
+            await gameSession.textChannel.send({
+                embed: {
+                    color: EMBED_INFO_COLOR,
+                    author: {
+                        name: client.user.username,
+                        icon_url: client.user.avatarURL
+                    },
+                    title: `Upcoming bot restart in ${timeDiffMin} minutes.`,
+                    description: `Downtime will be approximately 2 minutes.`
+                }
+            })
+            channelsWarned++;
+        }
+        logger.info(`Impending bot restart in ${timeDiffMin} minutes. ${channelsWarned} servers warned.`);
+    }
+}
+
 (async () => {
     let kmqKnexConfig: any = _kmqKnexConfig;
     let kpopVideosKnexConfig: any = _kpopVideosKnexConfig;
@@ -165,6 +192,25 @@ const parseMessage = (message: string, botPrefix: string): ParsedMessage => {
         cleanupInactiveGameSessions(gameSessions);
     }, 10 * 60 * 1000)
 
+    //set up check for restart notifications
+    setInterval(async () => {
+        //unscheduled restarts
+        let restartNotification = (await db.kmq("restart_notifications").where("id", 1))[0]["restart_time"];
+        if (restartNotification) {
+            let restartNotificationTime = new Date(restartNotification);
+            if (restartNotificationTime.getTime() > Date.now()) {
+                await checkRestartNotification(restartNotificationTime);
+                return;
+            }
+        }
+
+        //cron based restart
+        if (config.restartCron) {
+            let interval = cronParser.parseExpression(config.restartCron);
+            let nextRestartTime = interval.next();
+            await checkRestartNotification(nextRestartTime.toDate());
+        }
+    }, 60 * 1000);
     client.login(config.botToken);
 })();
 
