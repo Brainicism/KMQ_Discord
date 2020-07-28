@@ -115,11 +115,23 @@ const helpMessage = async (message: Discord.Message, action: string, botPrefix: 
         return;
     }
 
-    await new EmbedsMode()
-        .setArray(embeds)
-        .setAuthorizedUsers([message.author.id])
-        .setDisabledNavigationEmojis(["JUMP", "DELETE"])
-        .setChannel(message.channel as TextChannel)
-        .setPageIndicator(true)
-        .build();
+    if (embedFields.length > 0) {
+        await new EmbedsMode()
+            .setArray(embeds)
+            .setAuthorizedUsers([message.author.id])
+            .setDisabledNavigationEmojis(["JUMP", "DELETE"])
+            .setChannel(message.channel as TextChannel)
+            .setPageIndicator(true)
+            .build();
+    }
+    else {
+        sendMessage(message, {
+            embed: {
+                title: embedTitle,
+                color: EMBED_INFO_COLOR,
+                description: embedDesc,
+                footer: embedFooter
+            }
+        })
+    }
 }
