@@ -20,7 +20,7 @@ const logger = _logger("game_utils");
 const guessSong = async ({ client, message, gameSessions, guildPreference, db }: CommandArgs) => {
     let gameSession = gameSessions[message.guild.id];
     const voiceConnection = client.voiceConnections.get(message.guild.id);
-    
+
     //if user isn't in the same voice channel
     if (!voiceConnection || !voiceConnection.channel.members.has(message.author.id)) {
         return;
@@ -230,7 +230,9 @@ const endGame = async (gameSessions: { [guildId: string]: GameSession }, guildId
     let gameSession = gameSessions[guildId];
     gameSession.finished = true;
     await gameSession.endRound();
-    gameSession.connection.disconnect();
+    if (gameSession.connection) {
+        gameSession.connection.disconnect();
+    }
     logger.info(`gid: ${guildId} | Game session ended`);
     delete gameSessions[guildId];
 }
