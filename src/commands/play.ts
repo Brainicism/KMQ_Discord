@@ -18,6 +18,7 @@ class PlayCommand implements BaseCommand {
             let channel = message.channel as TextChannel;
             if (!gameSessions[message.guild.id]) {
                 gameSessions[message.guild.id] = new GameSession(channel);
+                // GameSession constructor sets lastActive to current time during constructor
                 logger.info(`${getDebugContext(message)} | Game session created`);
             }
             await sendInfoMessage(message, `Game starting in #${channel.name}`, "Listen to the song and type your guess!");
