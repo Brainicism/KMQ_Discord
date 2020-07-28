@@ -11,8 +11,7 @@ let config: any = _config;
     let restartMinutes = parseInt(args[0]);
     let restartDate = new Date();
     restartDate.setMinutes(restartDate.getMinutes() + restartMinutes);
-    const db = await mysql.createPool({
-        connectionLimit: 10,
+    const db = await mysql.createConnection({
         host: "localhost",
         user: config.dbUser,
         password: config.dbPassword
@@ -24,5 +23,5 @@ let config: any = _config;
     query = `SELECT * FROM kmq.restart_notifications WHERE id = 1;`;
     let restartNotification = (await db.query(query))[0];
     console.log(`Next restart notification scheduled at ${restartNotification["restart_time"]}`);
-    process.exit(0);
+    db.destroy();
 })();

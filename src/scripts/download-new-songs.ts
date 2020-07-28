@@ -78,9 +78,9 @@ const downloadSong = (id: string) => {
     })
 }
 
-(async () => {
-    const db = await mysql.createPool({
-        connectionLimit: 10,
+
+const downloadNewSongs = async () => {
+    let db = await mysql.createConnection({
         host: "localhost",
         user: config.dbUser,
         password: config.dbPassword
@@ -109,5 +109,16 @@ const downloadSong = (id: string) => {
             }
         }
     }
+    db.destroy();
     console.log(`Total songs downloaded: ${downloadCount}`);
+}
+
+export {
+    downloadNewSongs
+}
+
+(async () => {
+    if (require.main === module) {
+        downloadNewSongs();
+    }
 })();
