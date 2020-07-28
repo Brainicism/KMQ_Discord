@@ -12,9 +12,20 @@ const EMBED_INFO_COLOR = 0x000000; // BLACK
 const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 
 const sendSongMessage = async (message: Discord.Message, gameSession: GameSession, isForfeit: boolean) => {
-    let footer = gameSession.getSongAliases().length > 0 ? {
-        text: `Aliases: ${Array.from(gameSession.getSongAliases()).join(", ")}`
-    } : null;
+    let footer = null;
+    if (gameSession.getSongAliases().length > 0) {
+        footer = {
+            text: `Aliases: ${Array.from(gameSession.getSongAliases()).join(", ")}`
+        };
+    }
+    else {
+        //occasionally show suggestions
+        if (Math.random() <= 0.3) {
+            footer = {
+                text: "Have a suggestion for an alternate song name? Tell us on the support server!"
+            }
+        }
+    }
 
     await sendMessage(message, {
         embed: {
