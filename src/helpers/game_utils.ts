@@ -44,9 +44,7 @@ const guessSong = async ({ client, message, gameSessions, guildPreference, db }:
             let stream: any = resolve("assets/ring.wav");
             gameSession.connection.playFile(stream);
         }
-        setTimeout(() => {
-            startGame(gameSession, guildPreference, db, message, client, null);
-        }, 2000);
+        startGame(gameSession, guildPreference, db, message, client, null);
     }
 }
 
@@ -95,6 +93,7 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
         return;
     }
 
+    await delay(2000);
     try {
         let randomSong = await selectRandomSong(guildPreference, db);
         if (randomSong === null) {
@@ -200,9 +199,7 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
         // Attempt to restart game with different song
         await sendErrorMessage(message, "Error playing song", "Starting new round in 2 seconds...");
         await gameSession.endRound();
-        setTimeout(() => {
-            startGame(gameSession, guildPreference, db, message, client, null);
-        }, 2000);
+        startGame(gameSession, guildPreference, db, message, client, null);
     })
 }
 
@@ -253,6 +250,10 @@ const cleanupInactiveGameSessions = async (gameSessions: { [guildId: string]: Ga
     if (inactiveSessions > 0) {
         logger.info(`Ended ${inactiveSessions} inactive game sessions out of ${totalSessions}`);
     }
+}
+
+const delay = (delayDuration: number): Promise<void> => {
+    return new Promise(resolve => setTimeout(resolve, delayDuration));
 }
 
 export {
