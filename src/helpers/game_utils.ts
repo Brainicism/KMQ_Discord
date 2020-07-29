@@ -12,6 +12,7 @@ import { QueriedSong, Databases } from "types";
 import { SEEK_TYPES } from "../commands/seek";
 import { isDebugMode, getForcePlaySong, skipSongPlay, isForcedSongActive } from "./debug_utils";
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
+const REMOVED_CHARACTERS_SONG_GUESS = /[\|’\ ']/g
 const GameOptions: { [option: string]: string } = { "GENDER": "Gender", "CUTOFF": "Cutoff", "LIMIT": "Limit", "VOLUME": "Volume", "SEEK_TYPE": "Seek Type", "GROUPS": "Groups" };
 
 const logger = _logger("game_utils");
@@ -206,9 +207,8 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
 const cleanSongName = (name: string): string => {
     let cleanName = name.toLowerCase()
         .split("(")[0]
-        .replace(/|/g, "")
-        .replace(/’/, "'")
-        .replace(/ /g, "").trim();
+        .replace(REMOVED_CHARACTERS_SONG_GUESS, "")
+        .trim();
     return cleanName;
 }
 
