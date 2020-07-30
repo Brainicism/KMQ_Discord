@@ -31,12 +31,12 @@ class SkipCommand implements BaseCommand {
             await gameSession.endRound();
             startGame(gameSession, guildPreference, db, message, client);
             logger.info(`${getDebugContext(message)} | Skip majority achieved.`);
-            gameSession.lastActive = Date.now();
         }
         else {
             await sendSkipNotification(message, gameSession);
             logger.info(`${getDebugContext(message)} | Skip vote received.`);
         }
+        gameSession.lastActiveNow();
     }
     help = {
         name: "skip",
