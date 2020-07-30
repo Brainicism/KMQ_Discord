@@ -18,9 +18,9 @@ class PlayCommand implements BaseCommand {
             let channel = message.channel as TextChannel;
             if (!gameSessions[message.guild.id]) {
                 gameSessions[message.guild.id] = new GameSession(channel);
+                await sendInfoMessage(message, `Game starting in #${channel.name}`, "Listen to the song and type your guess!");
                 logger.info(`${getDebugContext(message)} | Game session created`);
             }
-            await sendInfoMessage(message, `Game starting in #${channel.name}`, "Listen to the song and type your guess!");
             startGame(gameSessions[message.guild.id], guildPreference, db, message, client, message.member.voiceChannel);
         }
     }
