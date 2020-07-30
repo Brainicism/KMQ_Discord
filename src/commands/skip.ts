@@ -26,7 +26,7 @@ class SkipCommand implements BaseCommand {
         }
         if (isSkipMajority(message, gameSession)) {
             gameSession.skipAchieved = true;
-            await sendSkipMessage(message, gameSession);
+            sendSkipMessage(message, gameSession);
             await sendSongMessage(message, gameSession, true);
             await gameSession.endRound();
             startGame(gameSession, guildPreference, db, message, client);
@@ -63,7 +63,7 @@ async function sendSkipNotification(message: Discord.Message, gameSession: GameS
 }
 
 async function sendSkipMessage(message: Discord.Message, gameSession: GameSession) {
-    await message.channel.send({
+    message.channel.send({
         embed: {
             color: EMBED_INFO_COLOR,
             author: {
