@@ -40,7 +40,6 @@ export default class GameSession {
         this.videoID = link;
         this.inSession = true;
         this.skipAchieved = false;
-        this.lastActive = Date.now();
     }
 
     endRound(): Promise<void> {
@@ -50,7 +49,6 @@ export default class GameSession {
             this.videoID = null;
             this.inSession = false;
             this.skippers.clear();
-            this.lastActive = Date.now();
             if (this.dispatcher) {
                 this.dispatcher.removeAllListeners();
                 this.dispatcher.end();
@@ -90,5 +88,9 @@ export default class GameSession {
 
     getDebugSongDetails(): string {
         return `${this.song}:${this.artist}:${this.videoID}`;
+    }
+
+    lastActiveNow(): void {
+        this.lastActive = Date.now();
     }
 };
