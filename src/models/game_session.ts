@@ -89,4 +89,8 @@ export default class GameSession {
     getDebugSongDetails(): string {
         return `${this.song}:${this.artist}:${this.videoID}`;
     }
+
+    lastActiveNow(): void {
+        this.lastActive = Date.now();
+    }
 };
