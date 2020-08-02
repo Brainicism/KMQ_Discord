@@ -1,11 +1,13 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import { sendInfoMessage, getDebugContext } from "../helpers/discord_utils";
 import _logger from "../logger";
+import { getGuildPreference } from "../helpers/game_utils";
 const logger = _logger("prefix");
 const DEFAULT_BOT_PREFIX = ",";
 
 class PrefixCommand implements BaseCommand {
-    async call({ message, parsedMessage, guildPreference, db }: CommandArgs) {
+    async call({ message, parsedMessage, db }: CommandArgs) {
+        let guildPreference = await getGuildPreference(db, message.guild.id);
         guildPreference.setBotPrefix(parsedMessage.components[0], db);
         await sendInfoMessage(message,
             "Bot prefix",

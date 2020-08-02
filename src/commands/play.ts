@@ -1,13 +1,14 @@
 import GameSession from "../models/game_session";
 import { sendErrorMessage, getDebugContext, sendInfoMessage } from "../helpers/discord_utils";
-import { startGame } from "../helpers/game_utils";
+import { startGame, getGuildPreference } from "../helpers/game_utils";
 import BaseCommand, { CommandArgs } from "./base_command";
 import _logger from "../logger";
 import { TextChannel } from "discord.js";
 const logger = _logger("play");
 
 class PlayCommand implements BaseCommand {
-    async call({ message, db, gameSessions, guildPreference, client }: CommandArgs) {
+    async call({ message, db, gameSessions, client }: CommandArgs) {
+        let guildPreference = await getGuildPreference(db, message.guild.id);
         if (!message.member.voiceChannel) {
             await sendErrorMessage(message,
                 "Join a voice channel",

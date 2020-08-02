@@ -1,15 +1,16 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import { sendOptionsMessage, getDebugContext, sendErrorMessage } from "../helpers/discord_utils";
-import { GameOptions } from "../helpers/game_utils";
+import { GameOptions, getGuildPreference } from "../helpers/game_utils";
 import _logger from "../logger";
 const logger = _logger("cutoff");
 const BEGINNING_SEARCH_YEAR = 2008;
 
 class CutoffCommand implements BaseCommand {
-    async call({ message, parsedMessage, guildPreference, db }: CommandArgs) {
+    async call({ message, parsedMessage, db }: CommandArgs) {
+        let guildPreference = await getGuildPreference(db, message.guild.id);
         let yearRange = parsedMessage.components;
         let startYear = yearRange[0];
-        if (yearRange.length === 1){
+        if (yearRange.length === 1) {
             guildPreference.setBeginningCutoffYear(parseInt(startYear), db);
             guildPreference.setEndCutoffYear((new Date()).getFullYear(), db);
         }

@@ -1,10 +1,11 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import { sendOptionsMessage, getDebugContext, sendErrorMessage } from "../helpers/discord_utils";
-import { GameOptions } from "../helpers/game_utils";
+import { GameOptions, getGuildPreference } from "../helpers/game_utils";
 import _logger from "../logger";
 const logger = _logger("groups");
 class GroupsCommand implements BaseCommand {
-    async call({ guildPreference, message, parsedMessage, db }: CommandArgs) {
+    async call({ message, parsedMessage, db }: CommandArgs) {
+        let guildPreference = await getGuildPreference(db, message.guild.id);
         if (parsedMessage.components.length === 0) {
             guildPreference.resetGroups(db);
             await sendOptionsMessage(message, guildPreference, db, GameOptions.GROUPS);

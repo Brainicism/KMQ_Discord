@@ -4,8 +4,7 @@ import * as cronParser from "cron-parser";
 import * as _kmqKnexConfig from "../config/knexfile_kmq";
 import * as _kpopVideosKnexConfig from "../config/knexfile_kpop_videos";
 import { validateConfig } from "./config_validator";
-import GuildPreference from "./models/guild_preference";
-import { guessSong, endGame, cleanupInactiveGameSessions } from "./helpers/game_utils";
+import { guessSong, endGame, cleanupInactiveGameSessions, getGuildPreference } from "./helpers/game_utils";
 import validate from "./helpers/validate";
 import { getCommandFiles, EMBED_INFO_COLOR } from "./helpers/discord_utils";
 import { ParsedMessage } from "types";
@@ -28,7 +27,6 @@ let db: {
 };
 let commands: { [commandName: string]: BaseCommand } = {};
 let gameSessions: { [guildID: string]: GameSession } = {};
-let guildPreferences: { [guildID: string]: GuildPreference } = {};
 let botStatsPoster: BotStatsPoster = null;
 
 client.on("ready", () => {
@@ -38,13 +36,13 @@ client.on("ready", () => {
 client.on("message", async (message: Discord.Message) => {
     if (message.author.equals(client.user) || message.author.bot) return;
     if (!message.guild) return;
-    let guildPreference = await getGuildPreference(guildPreferences, message.guild.id);
+    let guildPreference = await getGuildPreference(db, message.guild.id);
     let botPrefix = guildPreference.getBotPrefix();
     let parsedMessage = parseMessage(message.content, botPrefix) || null;
 
     if (message.isMemberMentioned(client.user) && message.content.split(" ").length == 1) {
         // Any message that mentions the bot sends the current options
-        commands["options"].call({ message, guildPreference, db });
+        commands["options"].call({ message, db });
     }
     if (parsedMessage && commands[parsedMessage.action]) {
         let command = commands[parsedMessage.action];
@@ -52,7 +50,6 @@ client.on("message", async (message: Discord.Message) => {
             command.call({
                 client,
                 gameSessions,
-                guildPreference,
                 message,
                 db,
                 parsedMessage,
@@ -62,7 +59,7 @@ client.on("message", async (message: Discord.Message) => {
     }
     else {
         if (gameSessions[message.guild.id] && gameSessions[message.guild.id].gameInSession()) {
-            guessSong({ client, message, gameSessions, guildPreference, db });
+            guessSong({ client, message, gameSessions, db });
             gameSessions[message.guild.id].lastActiveNow();
         }
     }
@@ -99,15 +96,6 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
     }
 });
 
-const getGuildPreference = async (guildPreferences: { [guildId: string]: GuildPreference }, guildID: string): Promise<GuildPreference> => {
-    if (!guildPreferences[guildID]) {
-        guildPreferences[guildID] = new GuildPreference(guildID);
-        logger.info(`New server joined: ${guildID}`);
-        await db.kmq("guild_preferences")
-            .insert({ guild_id: guildID, guild_preference: JSON.stringify(guildPreferences[guildID]) });
-    }
-    return guildPreferences[guildID];
-}
 
 
 
@@ -159,13 +147,6 @@ const checkRestartNotification = async (restartNotification: Date): Promise<void
         logger.error("Invalid config, aborting.");
         process.exit(1);
     }
-
-    // load guild preferences
-    let fields = await db.kmq("guild_preferences").select("*");
-    fields.forEach(async (field) => {
-        guildPreferences[field.guild_id] = new GuildPreference(field.guild_id, JSON.parse(field.guild_preference));
-        await guildPreferences[field.guild_id].updateGuildPreferences(db.kmq);
-    });
 
     //load commands
     let commandFiles = await getCommandFiles();
