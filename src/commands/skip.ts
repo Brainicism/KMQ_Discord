@@ -37,7 +37,7 @@ class SkipCommand implements BaseCommand {
             await sendSkipNotification(message, gameSession);
             logger.info(`${getDebugContext(message)} | Skip vote received.`);
         }
-        gameSession.lastActiveNow();
+        gameSession.lastActiveNow(db);
     }
     help = {
         name: "skip",

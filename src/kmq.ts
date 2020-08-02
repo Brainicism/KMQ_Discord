@@ -60,7 +60,7 @@ client.on("message", async (message: Discord.Message) => {
     else {
         if (gameSessions[message.guild.id] && gameSessions[message.guild.id].gameInSession()) {
             guessSong({ client, message, gameSessions, db });
-            gameSessions[message.guild.id].lastActiveNow();
+            gameSessions[message.guild.id].lastActiveNow(db);
         }
     }
 });
