@@ -1,11 +1,11 @@
 import { CommandArgs } from "commands/base_command";
 import { songCacheDir as SONG_CACHE_DIR } from "../../config/app_config.json";
-import { getUserIdentifier, sendSongMessage, getDebugContext, sendErrorMessage, sendInfoMessage } from "./discord_utils";
+import { getUserIdentifier, sendSongMessage, getDebugContext, sendErrorMessage } from "./discord_utils";
 import _logger from "../logger";
 import { resolve } from "path"
 import * as fs from "fs";
-import GameSession from "models/game_session";
-import GuildPreference from "models/guild_preference";
+import GameSession from "../models/game_session";
+import GuildPreference from "../models/guild_preference";
 import { getAudioDurationInSeconds } from "get-audio-duration";
 import * as Discord from "discord.js";
 import { QueriedSong, Databases } from "types";
@@ -18,7 +18,8 @@ const GameOptions: { [option: string]: string } = { "GENDER": "Gender", "CUTOFF"
 const logger = _logger("game_utils");
 
 
-const guessSong = async ({ client, message, gameSessions, guildPreference, db }: CommandArgs) => {
+const guessSong = async ({ client, message, gameSessions, db }: CommandArgs) => {
+    let guildPreference = await getGuildPreference(db, message.guild.id);
     let gameSession = gameSessions[message.guild.id];
     const voiceConnection = client.voiceConnections.get(message.guild.id);
 
@@ -256,6 +257,19 @@ const delay = (delayDuration: number): Promise<void> => {
     return new Promise(resolve => setTimeout(resolve, delayDuration));
 }
 
+const getGuildPreference = async (db: Databases, guildID: string): Promise<GuildPreference> => {
+    let guildPreferences = await db.kmq("guild_preferences").select("*").where("guild_id", guildID);
+    if (guildPreferences.length === 0) {
+        let guildPreference = new GuildPreference(guildID);
+        logger.info(`New server joined: ${guildID}`);
+        await db.kmq("guild_preferences")
+            .insert({ guild_id: guildID, guild_preference: JSON.stringify(guildPreferences[guildID]) });
+        return guildPreference;
+    }
+    return new GuildPreference(guildPreferences[0].guild_id, JSON.parse(guildPreferences[0].guild_preference));
+}
+
+
 export {
     guessSong,
     startGame,
@@ -263,5 +277,6 @@ export {
     getSongCount,
     GameOptions,
     endGame,
-    cleanupInactiveGameSessions
+    cleanupInactiveGameSessions,
+    getGuildPreference
 }

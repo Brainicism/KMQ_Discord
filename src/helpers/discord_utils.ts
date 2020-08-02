@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as Discord from "discord.js";
-import GuildPreference from "models/guild_preference";
+import GuildPreference from "../models/guild_preference";
 import GameSession from "../models/game_session";
 import BaseCommand from "commands/base_command";
 import _logger from "../logger";

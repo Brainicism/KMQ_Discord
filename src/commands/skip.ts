@@ -8,12 +8,13 @@ import {
     EMBED_INFO_COLOR,
     getDebugContext
 } from "../helpers/discord_utils";
-import { startGame } from "../helpers/game_utils";
+import { startGame, getGuildPreference } from "../helpers/game_utils";
 import _logger from "../logger";
 const logger = _logger("skip");
 
 class SkipCommand implements BaseCommand {
-    async call({ gameSessions, guildPreference, client, message, db }: CommandArgs) {
+    async call({ gameSessions, client, message, db }: CommandArgs) {
+        let guildPreference = await getGuildPreference(db, message.guild.id);
         let gameSession = gameSessions[message.guild.id];
         if (!gameSession || !gameSession.gameInSession() || !areUserAndBotInSameVoiceChannel(message)) {
             logger.warn(`${getDebugContext(message)} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.gameInSession(): ${gameSession && !gameSession.gameInSession()}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
