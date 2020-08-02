@@ -263,7 +263,7 @@ const getGuildPreference = async (db: Databases, guildID: string): Promise<Guild
         let guildPreference = new GuildPreference(guildID);
         logger.info(`New server joined: ${guildID}`);
         await db.kmq("guild_preferences")
-            .insert({ guild_id: guildID, guild_preference: JSON.stringify(guildPreference) });
+            .insert({ guild_id: guildID, guild_preference: JSON.stringify(guildPreference), join_date: new Date()});
         return guildPreference;
     }
     return new GuildPreference(guildPreferences[0].guild_id, JSON.parse(guildPreferences[0].guild_preference));
