@@ -1,16 +1,17 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import { sendOptionsMessage, getDebugContext } from "../helpers/discord_utils";
-import { GameOptions } from "../helpers/game_utils";
+import { GameOptions, getGuildPreference } from "../helpers/game_utils";
 import _logger from "../logger";
 const logger = _logger("volume");
 const DEFAULT_VOLUME = 50;
 
 class VolumeCommand implements BaseCommand {
-    async call({ message, parsedMessage, gameSessions, guildPreference, db }: CommandArgs) {
+    async call({ message, parsedMessage, gameSessions, db }: CommandArgs) {
+        let guildPreference = await getGuildPreference(db, message.guild.id);
         guildPreference.setVolume(parseInt(parsedMessage.components[0]), db);
         let gameSession = gameSessions[message.guild.id];
         if (gameSession && gameSession.dispatcher) {
-            gameSession.dispatcher.setVolume( guildPreference.getStreamVolume());
+            gameSession.dispatcher.setVolume(guildPreference.getStreamVolume());
         }
         await sendOptionsMessage(message, guildPreference, db, GameOptions.VOLUME);
         logger.info(`${getDebugContext(message)} | Volume set to ${guildPreference.getVolume()}.`);

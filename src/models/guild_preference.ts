@@ -20,7 +20,7 @@ interface GameOption {
     groups: { id: number, name: string }[];
 }
 
-class GuildPreference {
+export default class GuildPreference {
     private guildID: string;
     private botPrefix: string;
     private gameOptions: GameOption;
@@ -165,4 +165,3 @@ class GuildPreference {
     }
 };
 
-export default GuildPreference;

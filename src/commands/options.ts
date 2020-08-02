@@ -1,8 +1,10 @@
 import { sendOptionsMessage } from "../helpers/discord_utils";
 import BaseCommand, { CommandArgs } from "./base_command";
+import { getGuildPreference } from "../helpers/game_utils";
 
 class OptionsCommand implements BaseCommand {
-    async call({ message, guildPreference, db }: CommandArgs) {
+    async call({ message, db }: CommandArgs) {
+        let guildPreference = await getGuildPreference(db, message.guild.id);
         await sendOptionsMessage(message, guildPreference, db, null);
     }
     help = {

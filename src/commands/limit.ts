@@ -1,12 +1,13 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import { getDebugContext, sendOptionsMessage } from "../helpers/discord_utils";
-import { GameOptions, getSongCount } from "../helpers/game_utils";
+import { GameOptions, getSongCount, getGuildPreference } from "../helpers/game_utils";
 import _logger from "../logger";
 const logger = _logger("limit");
 const DEFAULT_LIMIT = 500;
 
 class LimitCommand implements BaseCommand {
-    async call({ message, parsedMessage, guildPreference, db }: CommandArgs) {
+    async call({ message, parsedMessage, db }: CommandArgs) {
+        let guildPreference = await getGuildPreference(db, message.guild.id);
         guildPreference.setLimit(parseInt(parsedMessage.components[0]), db);
         let songCount = await getSongCount(guildPreference, db);
         if (guildPreference.getLimit() > songCount) {

@@ -1,12 +1,13 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import { sendOptionsMessage, getDebugContext } from "../helpers/discord_utils";
-import { GameOptions } from "../helpers/game_utils";
+import { GameOptions, getGuildPreference } from "../helpers/game_utils";
 import _logger from "../logger";
 const logger = _logger("seek");
 const SEEK_TYPES: { [seekType: string]: string } = { BEGINNING: "beginning", RANDOM: "random" }
 
 class SeekCommand implements BaseCommand {
-    async call({ guildPreference, message, parsedMessage, db }: CommandArgs) {
+    async call({ message, parsedMessage, db }: CommandArgs) {
+        let guildPreference = await getGuildPreference(db, message.guild.id);
         let seekType = parsedMessage.components[0];
         guildPreference.setSeekType(seekType, db);
         await sendOptionsMessage(message, guildPreference, db, GameOptions.SEEK_TYPE);

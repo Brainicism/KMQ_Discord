@@ -1,12 +1,13 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import { sendOptionsMessage, getDebugContext, sendErrorMessage } from "../helpers/discord_utils";
-import { GameOptions } from "../helpers/game_utils";
+import { GameOptions, getGuildPreference } from "../helpers/game_utils";
 import _logger from "../logger";
 const logger = _logger("gender");
 const GENDER: { [gender: string]: string } = { MALE: "male", FEMALE: "female", COED: "coed" }
 
 class GenderCommand implements BaseCommand {
-    async call({ guildPreference, message, parsedMessage, db }: CommandArgs) {
+    async call({ message, parsedMessage, db }: CommandArgs) {
+        let guildPreference = await getGuildPreference(db, message.guild.id);
         if (guildPreference.getGroupIds() !== null) {
             sendErrorMessage(message, "Game Option Conflict", `\`groups\` game option is currently set. \`gender\` and \`groups\` are incompatible. Remove the \`groups\` option to proceed`);
             return;

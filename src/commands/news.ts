@@ -8,7 +8,7 @@ const logger = _logger("news");
 
 let config: any = _config;
 class NewsCommand implements BaseCommand {
-    async call({ message, guildPreference, db }: CommandArgs) {
+    async call({ message, db }: CommandArgs) {
         let latestSongDate: Date;
         try {
             const data = await db.kpopVideos("app_kpop")
