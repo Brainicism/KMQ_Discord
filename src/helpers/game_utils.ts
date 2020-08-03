@@ -196,8 +196,8 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
         startGame(gameSession, guildPreference, db, message, client, null);
     });
 
-    gameSession.dispatcher.once("error", async () => {
-        logger.error(`${getDebugContext(message)} | Unknown error with stream dispatcher. song = ${gameSession.getDebugSongDetails()}`);
+    gameSession.dispatcher.once("error", async (err) => {
+        logger.error(`${getDebugContext(message)} | Unknown error with stream dispatcher. song = ${gameSession.getDebugSongDetails()}. err = ${err}`);
         // Attempt to restart game with different song
         await sendErrorMessage(message, "Error playing song", "Starting new round in 2 seconds...");
         await gameSession.endRound();
