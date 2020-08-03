@@ -96,34 +96,36 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
     }
 
     await delay(2000);
+    let randomSong: QueriedSong;
     try {
-        let randomSong = await selectRandomSong(guildPreference, db);
+        randomSong = await selectRandomSong(guildPreference, db);
         if (randomSong === null) {
             sendErrorMessage(message, "Song Query Error", "Failed to find songs matching this criteria. Try to broaden your search.");
             return;
         }
-        gameSession.startRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);
-        await ensureVoiceConnection(message, gameSession, client, voiceChannel);
-        playSong(gameSession, guildPreference, db, message, client);
     }
     catch (err) {
-        await sendErrorMessage(message, "KMQ database query error", err.toString());
+        await sendErrorMessage(message, "Error selecting song", err.toString());
         logger.error(`${getDebugContext(message)} | Error querying song: ${err}. guildPreference = ${JSON.stringify(guildPreference)}`);
+        return;
     }
+
+    try {
+        await ensureVoiceConnection(gameSession, client, voiceChannel);
+    }
+    catch (err) {
+        logger.error(`${getDebugContext(message)} | Error obtaining voice connection. err = ${err}`);
+        await sendErrorMessage(message, "Missing voice permissions", "The bot is unable to join the voice channel you are in.");
+        return;
+    }
+    gameSession.startRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);
+    playSong(gameSession, guildPreference, db, message, client);
 }
 
-const ensureVoiceConnection = async (message: Discord.Message, gameSession: GameSession, client: Discord.Client, voiceChannel?: Discord.VoiceChannel) => {
+const ensureVoiceConnection = async (gameSession: GameSession, client: Discord.Client, voiceChannel?: Discord.VoiceChannel) => {
     if (voiceChannel) {
-        try {
-            let connection = await voiceChannel.join();
-            gameSession.connection = connection;
-        }
-        catch (err) {
-            logger.error(`${getDebugContext(message)} | Error joining voice connection. song = ${gameSession.getDebugSongDetails()} err = ${err}`);
-            await sendErrorMessage(message, "Missing voice permissions", "The bot is unable to join the voice channel you are in.");
-            await gameSession.endRound();
-            return;
-        }
+        let connection = await voiceChannel.join();
+        gameSession.connection = connection;
     }
 }
 const selectRandomSong = async (guildPreference: GuildPreference, db: Databases): Promise<QueriedSong> => {
