@@ -42,6 +42,11 @@ const guessSong = async ({ client, message, gameSessions, db }: CommandArgs) => 
         await sendSongMessage(message, gameSession, false);
         logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${gameSession.getSong()}`)
         await gameSession.endRound();
+
+        await db.kmq("guild_preferences")
+            .where("guild_id", message.guild.id)
+            .increment("songs_guessed", 1);
+
         if (gameSession.connection) {
             let stream: any = resolve("assets/ring.wav");
             gameSession.connection.playFile(stream);
@@ -226,18 +231,22 @@ const getSongCount = async (guildPreference: GuildPreference, db: Databases): Pr
     }
 }
 
-const endGame = async (gameSessions: { [guildId: string]: GameSession }, guildId: string): Promise<void> => {
+const endGame = async (gameSessions: { [guildId: string]: GameSession }, guildId: string, db: Databases): Promise<void> => {
     let gameSession = gameSessions[guildId];
     gameSession.finished = true;
     await gameSession.endRound();
     if (gameSession.connection) {
         gameSession.connection.disconnect();
     }
+    await db.kmq("guild_preferences")
+        .where("guild_id", guildId)
+        .increment("games_played", 1);
+
     logger.info(`gid: ${guildId} | Game session ended`);
     delete gameSessions[guildId];
 }
 
-const cleanupInactiveGameSessions = async (gameSessions: { [guildId: string]: GameSession }): Promise<void> => {
+const cleanupInactiveGameSessions = async (gameSessions: { [guildId: string]: GameSession }, db): Promise<void> => {
     let currentDate = Date.now();
     let inactiveSessions = 0;
     let totalSessions = Object.keys(gameSessions).length;
@@ -247,7 +256,7 @@ const cleanupInactiveGameSessions = async (gameSessions: { [guildId: string]: Ga
         let timeDiffMin = (timeDiffMs / (1000 * 60));
         if (timeDiffMin > GAME_SESSION_INACTIVE_THRESHOLD) {
             inactiveSessions++;
-            await endGame(gameSessions, guildId);
+            await endGame(gameSessions, guildId, db);
         }
     }
     if (inactiveSessions > 0) {
@@ -265,7 +274,7 @@ const getGuildPreference = async (db: Databases, guildID: string): Promise<Guild
         let guildPreference = new GuildPreference(guildID);
         logger.info(`New server joined: ${guildID}`);
         await db.kmq("guild_preferences")
-            .insert({ guild_id: guildID, guild_preference: JSON.stringify(guildPreference) });
+            .insert({ guild_id: guildID, guild_preference: JSON.stringify(guildPreference), join_date: new Date() });
         return guildPreference;
     }
     return new GuildPreference(guildPreferences[0].guild_id, JSON.parse(guildPreferences[0].guild_preference));

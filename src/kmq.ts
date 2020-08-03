@@ -60,7 +60,7 @@ client.on("message", async (message: Discord.Message) => {
     else {
         if (gameSessions[message.guild.id] && gameSessions[message.guild.id].gameInSession()) {
             guessSong({ client, message, gameSessions, db });
-            gameSessions[message.guild.id].lastActiveNow();
+            gameSessions[message.guild.id].lastActiveNow(db);
         }
     }
 });
@@ -81,7 +81,7 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
                 voiceConnection.disconnect();
                 if (gameSession) {
                     logger.info(`gid: ${oldUserChannel.guild.id} | Bot is only user left, leaving voice...`)
-                    await endGame(gameSessions, newState.guild.id);
+                    await endGame(gameSessions, newState.guild.id, db);
                 }
                 return;
             }
@@ -90,7 +90,7 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
         if (oldState.user === client.user && !oldUserChannel.members.has(client.user.id)) {
             if (gameSession) {
                 logger.info(`gid: ${oldUserChannel.guild.id} | Bot disconnected.`)
-                await endGame(gameSessions, newState.guild.id);
+                await endGame(gameSessions, newState.guild.id, db);
             }
         }
     }
@@ -171,7 +171,7 @@ const checkRestartNotification = async (restartNotification: Date): Promise<void
 
     //set up cleanup for inactive game sessions
     setInterval(() => {
-        cleanupInactiveGameSessions(gameSessions);
+        cleanupInactiveGameSessions(gameSessions, db);
     }, 10 * 60 * 1000)
 
     //set up check for restart notifications

@@ -4,13 +4,13 @@ import _logger from "../logger";
 const logger = _logger("stop");
 
 class StopCommand implements BaseCommand {
-    async call({ gameSessions, message }: CommandArgs) {
+    async call({db, gameSessions, message }: CommandArgs) {
         let gameSession = gameSessions[message.guild.id];
         if (gameSession && gameSession.gameInSession()) {
             logger.info(`${getDebugContext(message)} | Game round ended: ${gameSession.getDebugSongDetails()}`);
             await sendSongMessage(message, gameSession, true);
             await gameSession.endRound();
-            gameSession.lastActiveNow();
+            gameSession.lastActiveNow(db);
         }
     }
     help = {

@@ -1,6 +1,7 @@
 import Scoreboard from "./scoreboard";
 import * as songAliasesList from "../../data/song_aliases.json";
 import { StreamDispatcher, VoiceConnection, TextChannel } from "discord.js"
+import { Databases } from "types";
 export default class GameSession {
     private song: string;
     private songAliases: Array<string>;
@@ -90,7 +91,11 @@ export default class GameSession {
         return `${this.song}:${this.artist}:${this.videoID}`;
     }
 
-    lastActiveNow(): void {
+    async lastActiveNow(db: Databases): Promise<void> {
         this.lastActive = Date.now();
+        await db.kmq("guild_preferences")
+            .where({ guild_id: this.textChannel.guild.id })
+            .update({ last_active: new Date() });
+
     }
 };
