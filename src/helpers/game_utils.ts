@@ -33,15 +33,13 @@ const guessSong = async ({ client, message, gameSessions, db }: CommandArgs) => 
         return;
     }
 
-    let guess = cleanSongName(message.content);
-    let cleanedSongAliases = gameSession.getSongAliases().map((x) => cleanSongName(x));
-    if (gameSession.getSong() && (guess === cleanSongName(gameSession.getSong()) || cleanedSongAliases.includes(guess))) {
+    if (gameSession.checkGuess(message)) {
         // this should be atomic
         let userTag = getUserIdentifier(message.author);
         gameSession.scoreboard.updateScoreboard(userTag, message.author.id);
         await sendSongMessage(message, gameSession, false);
         logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${gameSession.getSong()}`)
-        await gameSession.endRound();
+        await gameSession.endRound(true);
 
         await db.kmq("guild_preferences")
             .where("guild_id", message.guild.id)
@@ -199,7 +197,7 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
     gameSession.dispatcher.once("end", async () => {
         logger.info(`${getDebugContext(message)} | Song finished without being guessed.`);
         await sendSongMessage(message, gameSession, true);
-        await gameSession.endRound();
+        await gameSession.endRound(false);
         startGame(gameSession, guildPreference, db, message, client, null);
     });
 
@@ -207,7 +205,7 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
         logger.error(`${getDebugContext(message)} | Unknown error with stream dispatcher. song = ${gameSession.getDebugSongDetails()}. err = ${err}`);
         // Attempt to restart game with different song
         await sendErrorMessage(message, "Error playing song", "Starting new round in 2 seconds...");
-        await gameSession.endRound();
+        await gameSession.endRound(false);
         startGame(gameSession, guildPreference, db, message, client, null);
     })
 }
@@ -231,21 +229,6 @@ const getSongCount = async (guildPreference: GuildPreference, db: Databases): Pr
     }
 }
 
-const endGame = async (gameSessions: { [guildId: string]: GameSession }, guildId: string, db: Databases): Promise<void> => {
-    let gameSession = gameSessions[guildId];
-    gameSession.finished = true;
-    await gameSession.endRound();
-    if (gameSession.connection) {
-        gameSession.connection.disconnect();
-    }
-    await db.kmq("guild_preferences")
-        .where("guild_id", guildId)
-        .increment("games_played", 1);
-
-    logger.info(`gid: ${guildId} | Game session ended`);
-    delete gameSessions[guildId];
-}
-
 const cleanupInactiveGameSessions = async (gameSessions: { [guildId: string]: GameSession }, db): Promise<void> => {
     let currentDate = Date.now();
     let inactiveSessions = 0;
@@ -256,7 +239,7 @@ const cleanupInactiveGameSessions = async (gameSessions: { [guildId: string]: Ga
         let timeDiffMin = (timeDiffMs / (1000 * 60));
         if (timeDiffMin > GAME_SESSION_INACTIVE_THRESHOLD) {
             inactiveSessions++;
-            await endGame(gameSessions, guildId, db);
+            await gameSessions[guildId].endSession(gameSessions, db);
         }
     }
     if (inactiveSessions > 0) {
@@ -287,7 +270,6 @@ export {
     cleanSongName,
     getSongCount,
     GameOptions,
-    endGame,
     cleanupInactiveGameSessions,
     getGuildPreference
 }
