@@ -1,7 +1,6 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import { sendSongMessage, disconnectVoiceConnection, sendInfoMessage, getDebugContext } from "../helpers/discord_utils";
 import _logger from "../logger";
-import { endGame } from "../helpers/game_utils";
 const logger = _logger("end");
 
 class EndCommand implements BaseCommand {
@@ -21,7 +20,7 @@ class EndCommand implements BaseCommand {
             logger.info(`${getDebugContext(message)} | Game session ended, empty`);
             await sendInfoMessage(message, "Nobody won :(")
         }
-        await endGame(gameSessions, message.guild.id, db);
+        await gameSession.endSession(gameSessions, db);
         disconnectVoiceConnection(client, message);
     }
     help = {
