@@ -17,11 +17,11 @@ const logger: Logger = _logger("seed_db");
 
 const databaseDownloadDir = "./kpop_db";
 
-let setSqlMode = (sqlFile: string) => {
+const setSqlMode = (sqlFile: string) => {
     prependFile.sync(sqlFile, `SET @@sql_mode="";\n`);
 }
 
-let downloadDb = async () => {
+const downloadDb = async () => {
     const output = `${databaseDownloadDir}/bootstrap.zip`
     const options = {
         url: fileUrl,
@@ -35,7 +35,7 @@ let downloadDb = async () => {
     await fs.promises.writeFile(output, resp);
     logger.info("Downloaded database.zip");
 }
-let extractDb = async () => {
+const extractDb = async () => {
     return new Promise((resolve, reject) => {
         fs.createReadStream(`${databaseDownloadDir}/bootstrap.zip`)
             .pipe(unzipper.Extract({ path: `${databaseDownloadDir}/sql/` }))
@@ -51,7 +51,7 @@ let extractDb = async () => {
     })
 }
 
-let seedDb = async (db: mysql.Connection) => {
+const seedDb = async (db: mysql.Connection) => {
     return new Promise(async (resolve, reject) => {
         const files = await fs.promises.readdir(`${databaseDownloadDir}/sql`);
         const seedFile = files[files.length - 1];
@@ -73,7 +73,7 @@ let seedDb = async (db: mysql.Connection) => {
 (async () => {
     try {
         await fs.promises.mkdir(`${databaseDownloadDir}/sql`, { recursive: true })
-        let db = await mysql.createConnection({
+        const db = await mysql.createConnection({
             host: "localhost",
             user: config.dbUser,
             password: config.dbPassword

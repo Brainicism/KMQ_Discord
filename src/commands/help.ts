@@ -36,12 +36,12 @@ const helpMessage = async (message: Discord.Message, action: string, botPrefix: 
     let embedDesc = "";
     let embedFields = [];
     //TODO: potentially do some caching?
-    let commandFiles = await getCommandFiles();
+    const commandFiles = await getCommandFiles();
     let commandFilesWithAliases = {};
     Object.assign(commandFilesWithAliases, commandFiles);
-    let commandNamesWithAliases = Object.keys(commandFiles).filter((commandName) => commandFiles[commandName].aliases);
+    const commandNamesWithAliases = Object.keys(commandFiles).filter((commandName) => commandFiles[commandName].aliases);
     for (let commandName of commandNamesWithAliases) {
-        let aliases = commandFiles[commandName].aliases;
+        const aliases = commandFiles[commandName].aliases;
         aliases.forEach(alias => {
             commandFilesWithAliases[alias] = commandFiles[commandName];
         });
@@ -49,7 +49,7 @@ const helpMessage = async (message: Discord.Message, action: string, botPrefix: 
 
     let embedFooter = null;
     if (action) {
-        let commandNamesWithHelp = Object.keys(commandFilesWithAliases).filter((commandName) => commandFilesWithAliases[commandName].help);
+        const commandNamesWithHelp = Object.keys(commandFilesWithAliases).filter((commandName) => commandFilesWithAliases[commandName].help);
         if (!(commandNamesWithHelp.includes(action))) {
             logger.warn(`${getDebugContext(message)} | Missing documentation: ${action}`);
             await sendErrorMessage(message,
@@ -57,7 +57,7 @@ const helpMessage = async (message: Discord.Message, action: string, botPrefix: 
                 `Sorry, there is no documentation on ${action}`)
             return;
         }
-        let helpManual = commandFilesWithAliases[action].help;
+        const helpManual = commandFilesWithAliases[action].help;
         embedTitle = `\`${helpManual.usage.replace(placeholder, botPrefix)}\``;
         embedDesc = helpManual.description;
         helpManual.arguments.forEach((argument) => {
@@ -74,11 +74,11 @@ const helpMessage = async (message: Discord.Message, action: string, botPrefix: 
 
     }
     else {
-        let commandNamesWithHelp = Object.keys(commandFiles).filter((commandName) => commandFiles[commandName].help);
+        const commandNamesWithHelp = Object.keys(commandFiles).filter((commandName) => commandFiles[commandName].help);
         embedTitle = "K-pop Music Quiz Command Help";
         embedDesc = helpMessages.rules.replace(placeholder, botPrefix);
         commandNamesWithHelp.forEach((commandName) => {
-            let helpManual = commandFiles[commandName].help;
+            const helpManual = commandFiles[commandName].help;
             embedFields.push({
                 name: helpManual.name,
                 value: `${helpManual.description}\nUsage: \`${helpManual.usage.replace(placeholder, botPrefix)}\``
@@ -88,7 +88,7 @@ const helpMessage = async (message: Discord.Message, action: string, botPrefix: 
     }
     let embeds = []
     for (let i = 0; i < embedFields.length; i += FIELDS_PER_EMBED) {
-        let embedFieldsSubset = embedFields.slice(i, Math.min(i + FIELDS_PER_EMBED, embedFields.length));
+        const embedFieldsSubset = embedFields.slice(i, Math.min(i + FIELDS_PER_EMBED, embedFields.length));
         embeds.push(new RichEmbed(
             {
                 title: embedTitle,
@@ -99,8 +99,8 @@ const helpMessage = async (message: Discord.Message, action: string, botPrefix: 
             }
         ))
     }
-    let channel = message.channel as TextChannel;
-    let missingPermissions = channel.permissionsFor(message.guild.me).missing(PAGINATION_EMBED_PERMISSIONS);
+    const channel = message.channel as TextChannel;
+    const missingPermissions = channel.permissionsFor(message.guild.me).missing(PAGINATION_EMBED_PERMISSIONS);
     if (missingPermissions.length > 0) {
         await sendMessage(message, {
             embed: {

@@ -36,16 +36,16 @@ client.on("ready", () => {
 client.on("message", async (message: Discord.Message) => {
     if (message.author.equals(client.user) || message.author.bot) return;
     if (!message.guild) return;
-    let guildPreference = await getGuildPreference(db, message.guild.id);
-    let botPrefix = guildPreference.getBotPrefix();
-    let parsedMessage = parseMessage(message.content, botPrefix) || null;
+    const guildPreference = await getGuildPreference(db, message.guild.id);
+    const botPrefix = guildPreference.getBotPrefix();
+    const parsedMessage = parseMessage(message.content, botPrefix) || null;
 
     if (message.isMemberMentioned(client.user) && message.content.split(" ").length == 1) {
         // Any message that mentions the bot sends the current options
         commands["options"].call({ message, db });
     }
     if (parsedMessage && commands[parsedMessage.action]) {
-        let command = commands[parsedMessage.action];
+        const command = commands[parsedMessage.action];
         if (validate(message, parsedMessage, command.validations, botPrefix)) {
             command.call({
                 client,
@@ -66,17 +66,17 @@ client.on("message", async (message: Discord.Message) => {
 });
 
 client.on("voiceStateUpdate", async (oldState, newState) => {
-    let oldUserChannel = oldState.voiceChannel;
+    const oldUserChannel = oldState.voiceChannel;
     if (!oldUserChannel) {
         return;
     }
-    let newUserChannel = newState.voiceChannel;
+    const newUserChannel = newState.voiceChannel;
     if (!newUserChannel) {
-        let guildID = oldUserChannel.guild.id;
-        let gameSession = gameSessions[guildID];
+        const guildID = oldUserChannel.guild.id;
+        const gameSession = gameSessions[guildID];
         // User left voice channel, check if bot is only one left
         if (oldUserChannel.members.size === 1 && oldUserChannel.members.has(client.user.id)) {
-            let voiceConnection = client.voiceConnections.get(guildID);
+            const voiceConnection = client.voiceConnections.get(guildID);
             if (voiceConnection) {
                 voiceConnection.disconnect();
                 if (gameSession) {
@@ -101,9 +101,9 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
 
 const parseMessage = (message: string, botPrefix: string): ParsedMessage => {
     if (message.charAt(0) !== botPrefix) return null;
-    let components = message.split(" ");
-    let action = components.shift().substring(1);
-    let argument = components.join(" ");
+    const components = message.split(" ");
+    const action = components.shift().substring(1);
+    const argument = components.join(" ");
     return {
         action,
         argument,
@@ -113,11 +113,11 @@ const parseMessage = (message: string, botPrefix: string): ParsedMessage => {
 }
 
 const checkRestartNotification = async (restartNotification: Date): Promise<void> => {
-    let timeDiffMin = Math.floor((restartNotification.getTime() - (new Date()).getTime()) / (1000 * 60));
+    const timeDiffMin = Math.floor((restartNotification.getTime() - (new Date()).getTime()) / (1000 * 60));
     let channelsWarned = 0;
     if (RESTART_WARNING_INTERVALS.has(timeDiffMin)) {
         for (let guildId in gameSessions) {
-            let gameSession = gameSessions[guildId];
+            const gameSession = gameSessions[guildId];
             if (gameSession.finished) continue;
             await gameSession.textChannel.send({
                 embed: {
@@ -137,8 +137,8 @@ const checkRestartNotification = async (restartNotification: Date): Promise<void
 }
 
 (async () => {
-    let kmqKnexConfig: any = _kmqKnexConfig;
-    let kpopVideosKnexConfig: any = _kpopVideosKnexConfig;
+    const kmqKnexConfig: any = _kmqKnexConfig;
+    const kpopVideosKnexConfig: any = _kpopVideosKnexConfig;
     db = {
         kmq: Knex(kmqKnexConfig),
         kpopVideos: Knex(kpopVideosKnexConfig)
@@ -149,7 +149,7 @@ const checkRestartNotification = async (restartNotification: Date): Promise<void
     }
 
     //load commands
-    let commandFiles = await getCommandFiles();
+    const commandFiles = await getCommandFiles();
     for (const [commandName, command] of Object.entries(commandFiles)) {
         if (commandName === "base_command") continue;
         commands[commandName] = command;
@@ -160,7 +160,7 @@ const checkRestartNotification = async (restartNotification: Date): Promise<void
         }
     }
     //populate group list
-    let result = await db.kpopVideos("kpop_videos.app_kpop_group")
+    const result = await db.kpopVideos("kpop_videos.app_kpop_group")
         .select(["name", "members as gender"])
         .orderBy("name", "ASC")
     fs.writeFileSync(config.groupListFile, result.map((x) => x["name"]).join("\n"));
@@ -177,9 +177,9 @@ const checkRestartNotification = async (restartNotification: Date): Promise<void
     //set up check for restart notifications
     setInterval(async () => {
         //unscheduled restarts
-        let restartNotification = (await db.kmq("restart_notifications").where("id", 1))[0]["restart_time"];
+        const restartNotification = (await db.kmq("restart_notifications").where("id", 1))[0]["restart_time"];
         if (restartNotification) {
-            let restartNotificationTime = new Date(restartNotification);
+            const restartNotificationTime = new Date(restartNotification);
             if (restartNotificationTime.getTime() > Date.now()) {
                 await checkRestartNotification(restartNotificationTime);
                 return;
@@ -188,8 +188,8 @@ const checkRestartNotification = async (restartNotification: Date): Promise<void
 
         //cron based restart
         if (config.restartCron) {
-            let interval = cronParser.parseExpression(config.restartCron);
-            let nextRestartTime = interval.next();
+            const interval = cronParser.parseExpression(config.restartCron);
+            const nextRestartTime = interval.next();
             await checkRestartNotification(nextRestartTime.toDate());
         }
     }, 60 * 1000);

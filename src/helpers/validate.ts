@@ -7,7 +7,7 @@ const logger = _logger("validate");
 
 export default (message: Discord.Message, parsedMessage: ParsedMessage, validations: CommandValidations, botPrefix: string) => {
     if (!validations) return true;
-    let args = parsedMessage.components;
+    const args = parsedMessage.components;
     if (args.length > validations.maxArgCount || args.length < validations.minArgCount) {
         sendValidationErrorMessage(message,
             `Incorrect number of arguments. See \`${botPrefix}help ${parsedMessage.action}\` for usage.`,
@@ -15,7 +15,7 @@ export default (message: Discord.Message, parsedMessage: ParsedMessage, validati
         return false;
     }
     for (let i = 0; i < args.length; i++) {
-        let validation = validations.arguments[i];
+        const validation = validations.arguments[i];
         let arg = args[i];
         //check arg type
         switch (validation.type) {
@@ -27,7 +27,7 @@ export default (message: Discord.Message, parsedMessage: ParsedMessage, validati
                     return false;
                 }
                 //parse as integer for now, might cause problems later?
-                let intArg = parseInt(arg);
+                const intArg = parseInt(arg);
                 if ("minValue" in validation && intArg < validation.minValue) {
                     sendValidationErrorMessage(message,
                         `Expected value greater than \`${validation.minValue}\` for \`${validation.name}\`.`,
@@ -51,7 +51,7 @@ export default (message: Discord.Message, parsedMessage: ParsedMessage, validati
                 }
                 break;
             case "enum":
-                let enums = validation.enums;
+                const enums = validation.enums;
                 arg = arg.toLowerCase();
                 if (!enums.includes(arg)) {
                     sendValidationErrorMessage(message,
@@ -78,7 +78,7 @@ export default (message: Discord.Message, parsedMessage: ParsedMessage, validati
 const arrayToString = (elements: Array<string>): string => {
     elements = elements.map(element => `\`${element}\``);
     if (elements.length == 1) return elements[0];
-    let lastElement = elements.splice(-1);
+    const lastElement = elements.splice(-1);
     return `${elements.join(", ")} and ${lastElement}`
 }
 
