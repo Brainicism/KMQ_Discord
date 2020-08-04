@@ -35,10 +35,8 @@ export default class GuildPreference {
         this.gameOptions = json.gameOptions;
         this.botPrefix = json.botPrefix;
         //apply default game option for empty
-        let defaultOptionAdded: boolean = false;
         for (let defaultOption in DEFAULT_OPTIONS) {
             if (!(defaultOption in this.gameOptions)) {
-                defaultOptionAdded = true;
                 this.gameOptions[defaultOption] = DEFAULT_OPTIONS[defaultOption];
                 logger.info(`Filling in missing game option: ${defaultOption} for guild: ${guildID}`);
             }
@@ -117,7 +115,7 @@ export default class GuildPreference {
     }
 
     setGender(genderArr: string[], db: Databases): Array<string> {
-        let tempArr = genderArr.map(gender => gender.toLowerCase());
+        const tempArr = genderArr.map(gender => gender.toLowerCase());
         this.gameOptions.gender = [...new Set(tempArr)];
         this.updateGuildPreferences(db.kmq);
         return this.gameOptions.gender;

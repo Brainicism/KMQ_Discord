@@ -4,8 +4,8 @@ import * as _config from "../../config/app_config.json";
 import * as mysql from "promise-mysql";
 import { QueriedSong } from "types";
 import * as path from "path";
-let config: any = _config;
-let deadLinksFilePath = path.join(config.songCacheDir, "deadlinks.txt");
+const config: any = _config;
+const deadLinksFilePath = path.join(config.songCacheDir, "deadlinks.txt");
 
 export async function clearPartiallyCachedSongs() {
     console.log("Clearing partially cached songs");
@@ -37,9 +37,9 @@ export async function clearPartiallyCachedSongs() {
 }
 
 const downloadSong = (id: string) => {
-    let cachedSongLocation = path.join(config.songCacheDir, `${id}.mp3`);
+    const cachedSongLocation = path.join(config.songCacheDir, `${id}.mp3`);
     const tempLocation = `${cachedSongLocation}.part`;
-    let cacheStream = fs.createWriteStream(tempLocation);
+    const cacheStream = fs.createWriteStream(tempLocation);
     const ytdlOptions = {
         filter: "audioonly" as const,
         quality: "highest"
@@ -48,8 +48,8 @@ const downloadSong = (id: string) => {
     return new Promise(async (resolve, reject) => {
         try {
             //check to see if the video is downloadable
-            let infoResponse = await ytdl.getBasicInfo(`https://www.youtube.com/watch?v=${id}`);
-            let playabilityStatus: any = infoResponse.player_response.playabilityStatus;
+            const infoResponse = await ytdl.getBasicInfo(`https://www.youtube.com/watch?v=${id}`);
+            const playabilityStatus: any = infoResponse.player_response.playabilityStatus;
             if (playabilityStatus.status !== "OK") {
                 fs.appendFileSync(deadLinksFilePath, `${id}: ${playabilityStatus.reason}\n`);
                 reject(`Failed to load video: error = ${playabilityStatus.reason}`);
@@ -80,17 +80,17 @@ const downloadSong = (id: string) => {
 
 
 const downloadNewSongs = async () => {
-    let db = await mysql.createConnection({
+    const db = await mysql.createConnection({
         host: "localhost",
         user: config.dbUser,
         password: config.dbPassword
     });
     clearPartiallyCachedSongs();
-    let knownDeadAndReasons = fs.readFileSync(deadLinksFilePath).toString().split("\n");
-    let knownDeadIds = new Set(knownDeadAndReasons.map((x) => x.split(":")[0]));
-    let query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
+    const knownDeadAndReasons = fs.readFileSync(deadLinksFilePath).toString().split("\n");
+    const knownDeadIds = new Set(knownDeadAndReasons.map((x) => x.split(":")[0]));
+    const query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
     WHERE dead = "n" AND vtype = "main";`;
-    let songs: Array<QueriedSong> = await db.query(query);
+    const songs: Array<QueriedSong> = await db.query(query);
     let downloadCount = 0;
     console.log("total songs: " + songs.length);
     for (let song of songs) {

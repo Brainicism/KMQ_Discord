@@ -7,9 +7,9 @@ const DEFAULT_VOLUME = 50;
 
 class VolumeCommand implements BaseCommand {
     async call({ message, parsedMessage, gameSessions, db }: CommandArgs) {
-        let guildPreference = await getGuildPreference(db, message.guild.id);
+        const guildPreference = await getGuildPreference(db, message.guild.id);
         guildPreference.setVolume(parseInt(parsedMessage.components[0]), db);
-        let gameSession = gameSessions[message.guild.id];
+        const gameSession = gameSessions[message.guild.id];
         if (gameSession && gameSession.dispatcher) {
             gameSession.dispatcher.setVolume(guildPreference.getStreamVolume());
         }

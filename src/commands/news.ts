@@ -6,7 +6,7 @@ import * as _config from "../../config/app_config.json";
 import _logger from "../logger";
 const logger = _logger("news");
 
-let config: any = _config;
+const config: any = _config;
 class NewsCommand implements BaseCommand {
     async call({ message, db }: CommandArgs) {
         let latestSongDate: Date;

@@ -5,7 +5,7 @@ const logger = _logger("end");
 
 class EndCommand implements BaseCommand {
     async call({ client, gameSessions, message, db }: CommandArgs) {
-        let gameSession = gameSessions[message.guild.id];
+        const gameSession = gameSessions[message.guild.id];
         if (!gameSession) {
             return;
         }

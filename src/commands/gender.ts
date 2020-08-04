@@ -7,12 +7,12 @@ const GENDER: { [gender: string]: string } = { MALE: "male", FEMALE: "female", C
 
 class GenderCommand implements BaseCommand {
     async call({ message, parsedMessage, db }: CommandArgs) {
-        let guildPreference = await getGuildPreference(db, message.guild.id);
+        const guildPreference = await getGuildPreference(db, message.guild.id);
         if (guildPreference.getGroupIds() !== null) {
             sendErrorMessage(message, "Game Option Conflict", `\`groups\` game option is currently set. \`gender\` and \`groups\` are incompatible. Remove the \`groups\` option to proceed`);
             return;
         }
-        let selectedGenderArray = guildPreference.setGender(parsedMessage.components, db);
+        const selectedGenderArray = guildPreference.setGender(parsedMessage.components, db);
         let selectedGenderStr = "";
         for (let i = 0; i < selectedGenderArray.length; i++) {
             selectedGenderStr += `\`${selectedGenderArray[i]}\``;

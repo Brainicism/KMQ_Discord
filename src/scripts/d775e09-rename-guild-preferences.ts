@@ -6,7 +6,7 @@ This script removes the underscores from keys from kmq.guild_preferences.guild_p
 
 `
 import * as _config from "../../config/app_config.json";
-let config: any = _config;
+const config: any = _config;
 import * as mysql from "promise-mysql";
 
 (async () => {

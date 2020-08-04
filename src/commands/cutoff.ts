@@ -7,15 +7,15 @@ const BEGINNING_SEARCH_YEAR = 2008;
 
 class CutoffCommand implements BaseCommand {
     async call({ message, parsedMessage, db }: CommandArgs) {
-        let guildPreference = await getGuildPreference(db, message.guild.id);
-        let yearRange = parsedMessage.components;
-        let startYear = yearRange[0];
+        const guildPreference = await getGuildPreference(db, message.guild.id);
+        const yearRange = parsedMessage.components;
+        const startYear = yearRange[0];
         if (yearRange.length === 1) {
             guildPreference.setBeginningCutoffYear(parseInt(startYear), db);
             guildPreference.setEndCutoffYear((new Date()).getFullYear(), db);
         }
         else if (yearRange.length === 2) {
-            let endYear = yearRange[1];
+            const endYear = yearRange[1];
             if (endYear < startYear) {
                 await sendErrorMessage(message, "Invalid end year", "End year must be after or equal to start year");
                 return;
