@@ -45,7 +45,7 @@ const sendSongMessage = async (message: Discord.Message, gameSession: GameSessio
     });
 }
 const sendInfoMessage = async (message: Discord.Message, title: string, description?: string, footerText?: string, footerImageWithPath?: string) => {
-    let embed = new Discord.RichEmbed({
+    const embed = new Discord.RichEmbed({
         color: EMBED_INFO_COLOR,
         author: {
             name: message.author.username,
@@ -57,7 +57,7 @@ const sendInfoMessage = async (message: Discord.Message, title: string, descript
 
     if (footerImageWithPath) {
         embed.attachFiles([footerImageWithPath]);
-        let footerImage = path.basename(footerImageWithPath);
+        const footerImage = path.basename(footerImageWithPath);
         embed.setFooter(footerText, `attachment://${footerImage}`)
     }
     await sendMessage(message, embed);
@@ -119,8 +119,8 @@ const getCommandFiles = (): Promise<{ [commandName: string]: BaseCommand }> => {
         }
 
         for (const file of files) {
-            let command = await import(`../commands/${file}`);
-            let commandName = file.split(".")[0];
+            const command = await import(`../commands/${file}`);
+            const commandName = file.split(".")[0];
             commandMap[commandName] = new command.default()
         }
         resolve(commandMap);
@@ -142,7 +142,7 @@ const codeLine = (text: string): string => {
 
 const touch = (filePath: string) => {
     try {
-        let currentTime = new Date();
+        const currentTime = new Date();
         fs.utimesSync(filePath, currentTime, currentTime);
     } catch (err) {
         fs.closeSync(fs.openSync(filePath, "w"));
@@ -166,7 +166,7 @@ const arraysEqual = (arr1: Array<any>, arr2: Array<any>): boolean => {
 }
 
 export function disconnectVoiceConnection(client: Discord.Client, message: Discord.Message) {
-    let voiceConnection = client.voiceConnections.get(message.guild.id);
+    const voiceConnection = client.voiceConnections.get(message.guild.id);
     if (voiceConnection) {
         logger.info(`${getDebugContext(message)} | Disconnected from voice channel`);
         voiceConnection.disconnect();
@@ -195,7 +195,7 @@ export async function sendMessage(context: Discord.Message, messageContent: any)
     const channel: Discord.TextChannel = context.channel as Discord.TextChannel;
     if (!context.guild.me.permissionsIn(context.channel).has("SEND_MESSAGES")) {
         logger.warn(`${getDebugContext(context)} | Missing SEND_MESSAGES permissions`);
-        let embed = {
+        const embed = {
             color: EMBED_INFO_COLOR,
             title: `Missing Permissions`,
             description: `Hi! I'm unable to message in ${context.guild.name}'s #${channel.name} channel. Please double check the text channel's permissions.`,

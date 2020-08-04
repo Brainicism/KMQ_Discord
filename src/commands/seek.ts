@@ -7,8 +7,8 @@ const SEEK_TYPES: { [seekType: string]: string } = { BEGINNING: "beginning", RAN
 
 class SeekCommand implements BaseCommand {
     async call({ message, parsedMessage, db }: CommandArgs) {
-        let guildPreference = await getGuildPreference(db, message.guild.id);
-        let seekType = parsedMessage.components[0];
+        const guildPreference = await getGuildPreference(db, message.guild.id);
+        const seekType = parsedMessage.components[0];
         guildPreference.setSeekType(seekType, db);
         await sendOptionsMessage(message, guildPreference, db, GameOptions.SEEK_TYPE);
         logger.info(`${getDebugContext(message)} | Seek type set to ${seekType}`);

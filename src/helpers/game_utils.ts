@@ -19,8 +19,8 @@ const logger = _logger("game_utils");
 
 
 const guessSong = async ({ client, message, gameSessions, db }: CommandArgs) => {
-    let guildPreference = await getGuildPreference(db, message.guild.id);
-    let gameSession = gameSessions[message.guild.id];
+    const guildPreference = await getGuildPreference(db, message.guild.id);
+    const gameSession = gameSessions[message.guild.id];
     const voiceConnection = client.voiceConnections.get(message.guild.id);
 
     //if user isn't in the same voice channel
@@ -33,11 +33,11 @@ const guessSong = async ({ client, message, gameSessions, db }: CommandArgs) => 
         return;
     }
 
-    let guess = cleanSongName(message.content);
-    let cleanedSongAliases = gameSession.getSongAliases().map((x) => cleanSongName(x));
+    const guess = cleanSongName(message.content);
+    const cleanedSongAliases = gameSession.getSongAliases().map((x) => cleanSongName(x));
     if (gameSession.getSong() && (guess === cleanSongName(gameSession.getSong()) || cleanedSongAliases.includes(guess))) {
         // this should be atomic
-        let userTag = getUserIdentifier(message.author);
+        const userTag = getUserIdentifier(message.author);
         gameSession.scoreboard.updateScoreboard(userTag, message.author.id);
         await sendSongMessage(message, gameSession, false);
         logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${gameSession.getSong()}`)
@@ -48,7 +48,7 @@ const guessSong = async ({ client, message, gameSessions, db }: CommandArgs) => 
             .increment("songs_guessed", 1);
 
         if (gameSession.connection) {
-            let stream: any = resolve("assets/ring.wav");
+            const stream: string = resolve("assets/ring.wav");
             gameSession.connection.playFile(stream);
         }
         startGame(gameSession, guildPreference, db, message, client, null);
@@ -56,7 +56,7 @@ const guessSong = async ({ client, message, gameSessions, db }: CommandArgs) => 
 }
 
 const getFilteredSongList = async (guildPreference: GuildPreference, db: Databases): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> => {
-    let result;
+    let result: Array<QueriedSong>;
     if (guildPreference.getGroupIds() === null) {
         result = await db.kpopVideos("kpop_videos.app_kpop")
             .select(["nome as name", "name as artist", "vlink as youtubeLink"])
@@ -128,18 +128,20 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
 }
 
 const ensureVoiceConnection = async (gameSession: GameSession, client: Discord.Client, voiceChannel?: Discord.VoiceChannel) => {
+    // stay in current vc if voiceChannel is null
     if (voiceChannel) {
-        let connection = await voiceChannel.join();
+        const connection = await voiceChannel.join();
         gameSession.connection = connection;
     }
 }
+
 const selectRandomSong = async (guildPreference: GuildPreference, db: Databases): Promise<QueriedSong> => {
     if (isDebugMode() && isForcedSongActive()) {
-        let forcePlayedQueriedSong = await getForcePlaySong(db);
+        const forcePlayedQueriedSong = await getForcePlaySong(db);
         logger.debug(`Force playing ${forcePlayedQueriedSong.name} by ${forcePlayedQueriedSong.artist} | ${forcePlayedQueriedSong.youtubeLink}`);
         return forcePlayedQueriedSong;
     }
-    let { songs: queriedSongList } = await getFilteredSongList(guildPreference, db);
+    const { songs: queriedSongList } = await getFilteredSongList(guildPreference, db);
     if (queriedSongList.length === 0) {
         return null;
     }
@@ -151,7 +153,7 @@ const selectRandomSong = async (guildPreference: GuildPreference, db: Databases)
             logger.error(`Failed to select a random song: guildPref = ${JSON.stringify(guildPreference)}`);
             return null;
         }
-        let random = queriedSongList[Math.floor(Math.random() * queriedSongList.length)];
+        const random = queriedSongList[Math.floor(Math.random() * queriedSongList.length)];
 
         if (isDebugMode() && skipSongPlay()) {
             return random;
@@ -192,7 +194,7 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
         bitrate: gameSession.connection.channel.bitrate,
         seek: seekLocation
     };
-    let stream: any = songLocation;
+    const stream = fs.createReadStream(songLocation);;
     gameSession.dispatcher = gameSession.connection.playStream(stream, streamOptions);
     logger.info(`${getDebugContext(message)} | Playing song in voice connection. seek = ${guildPreference.getSeekType()}. song = ${gameSession.getDebugSongDetails()}`);
 
@@ -213,7 +215,7 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
 }
 
 const cleanSongName = (name: string): string => {
-    let cleanName = name.toLowerCase()
+    const cleanName = name.toLowerCase()
         .split("(")[0]
         .replace(REMOVED_CHARACTERS_SONG_GUESS, "")
         .trim();
@@ -222,7 +224,7 @@ const cleanSongName = (name: string): string => {
 
 const getSongCount = async (guildPreference: GuildPreference, db: Databases): Promise<number> => {
     try {
-        let { countBeforeLimit: totalCount } = await getFilteredSongList(guildPreference, db);
+        const { countBeforeLimit: totalCount } = await getFilteredSongList(guildPreference, db);
         return totalCount;
     }
     catch (e) {
@@ -232,7 +234,7 @@ const getSongCount = async (guildPreference: GuildPreference, db: Databases): Pr
 }
 
 const endGame = async (gameSessions: { [guildId: string]: GameSession }, guildId: string, db: Databases): Promise<void> => {
-    let gameSession = gameSessions[guildId];
+    const gameSession = gameSessions[guildId];
     gameSession.finished = true;
     await gameSession.endRound();
     if (gameSession.connection) {
@@ -247,13 +249,13 @@ const endGame = async (gameSessions: { [guildId: string]: GameSession }, guildId
 }
 
 const cleanupInactiveGameSessions = async (gameSessions: { [guildId: string]: GameSession }, db): Promise<void> => {
-    let currentDate = Date.now();
+    const currentDate = Date.now();
     let inactiveSessions = 0;
-    let totalSessions = Object.keys(gameSessions).length;
+    const totalSessions = Object.keys(gameSessions).length;
     for (let guildId in gameSessions) {
-        let gameSession = gameSessions[guildId];
-        let timeDiffMs = currentDate - gameSession.lastActive;
-        let timeDiffMin = (timeDiffMs / (1000 * 60));
+        const gameSession = gameSessions[guildId];
+        const timeDiffMs = currentDate - gameSession.lastActive;
+        const timeDiffMin = (timeDiffMs / (1000 * 60));
         if (timeDiffMin > GAME_SESSION_INACTIVE_THRESHOLD) {
             inactiveSessions++;
             await endGame(gameSessions, guildId, db);
@@ -269,9 +271,9 @@ const delay = (delayDuration: number): Promise<void> => {
 }
 
 const getGuildPreference = async (db: Databases, guildID: string): Promise<GuildPreference> => {
-    let guildPreferences = await db.kmq("guild_preferences").select("*").where("guild_id", guildID);
+    const guildPreferences = await db.kmq("guild_preferences").select("*").where("guild_id", guildID);
     if (guildPreferences.length === 0) {
-        let guildPreference = new GuildPreference(guildID);
+        const guildPreference = new GuildPreference(guildID);
         logger.info(`New server joined: ${guildID}`);
         await db.kmq("guild_preferences")
             .insert({ guild_id: guildID, guild_preference: JSON.stringify(guildPreference), join_date: new Date() });

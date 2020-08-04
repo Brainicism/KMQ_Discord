@@ -18,7 +18,7 @@ const allowedOptions = {
 export function validateConfig(config): boolean {
     let valid = true;
     //check for mismatch between template and this file
-    let templateOptions = JSON.parse(fs.readFileSync("../config/app_config.json.template").toString());
+    const templateOptions = JSON.parse(fs.readFileSync("../config/app_config.json.template").toString());
     if (!arraysEqual(Object.keys(allowedOptions), Object.keys(templateOptions))) {
         logger.error(`Configuration template and allowed options mismatch\n Allowed Options: ${Object.keys(allowedOptions)}\n Template Options: ${Object.keys(templateOptions)}`);
         valid = false;
@@ -32,7 +32,7 @@ export function validateConfig(config): boolean {
     }
     //check for required config options
     for (let option in allowedOptions) {
-        let optionRequired = allowedOptions[option].required;
+        const optionRequired = allowedOptions[option].required;
         if (optionRequired && !(option in config)) {
             logger.error(`Missing required configuration option: ${option}`);
             valid = false;
