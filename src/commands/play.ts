@@ -8,7 +8,7 @@ const logger = _logger("play");
 
 class PlayCommand implements BaseCommand {
     async call({ message, db, gameSessions, client }: CommandArgs) {
-        let guildPreference = await getGuildPreference(db, message.guild.id);
+        const guildPreference = await getGuildPreference(db, message.guild.id);
         if (!message.member.voiceChannel) {
             await sendErrorMessage(message,
                 "Join a voice channel",
@@ -16,7 +16,7 @@ class PlayCommand implements BaseCommand {
             logger.warn(`${getDebugContext(message)} | User not in voice channel`);
         }
         else {
-            let channel = message.channel as TextChannel;
+            const channel = message.channel as TextChannel;
             if (!gameSessions[message.guild.id]) {
                 gameSessions[message.guild.id] = new GameSession(channel);
                 await sendInfoMessage(message, `Game starting in #${channel.name}`, "Listen to the song and type your guess!");

@@ -5,22 +5,22 @@ import _logger from "../logger";
 const logger = _logger("groups");
 class GroupsCommand implements BaseCommand {
     async call({ message, parsedMessage, db }: CommandArgs) {
-        let guildPreference = await getGuildPreference(db, message.guild.id);
+        const guildPreference = await getGuildPreference(db, message.guild.id);
         if (parsedMessage.components.length === 0) {
             guildPreference.resetGroups(db);
             await sendOptionsMessage(message, guildPreference, db, GameOptions.GROUPS);
             return;
         }
-        let groupNames = parsedMessage.argument.split(",").map((groupName) => groupName.trim());
-        let matchingGroups = (await db.kpopVideos("kpop_videos.app_kpop_group")
+        const groupNames = parsedMessage.argument.split(",").map((groupName) => groupName.trim());
+        const matchingGroups = (await db.kpopVideos("kpop_videos.app_kpop_group")
             .select(["id", "name"])
             .whereIn("name", groupNames))
             .map((x) => {
                 return { id: x["id"], name: x["name"] }
             })
         if (matchingGroups.length !== groupNames.length) {
-            let matchingGroupNames = matchingGroups.map(x => x["name"].toUpperCase());
-            let unrecognizedGroups = groupNames.filter((x) => {
+            const matchingGroupNames = matchingGroups.map(x => x["name"].toUpperCase());
+            const unrecognizedGroups = groupNames.filter((x) => {
                 return !matchingGroupNames.includes(x.toUpperCase());
             })
             await sendErrorMessage(message, "Unknown Group Name", `One or more of the specified group names was not recognized. Please ensure that the group name matches exactly with the list provided by \`${guildPreference.getBotPrefix()}help groups\` \nThe following groups were **not** recognized:\n ${unrecognizedGroups.join(", ")} `);
