@@ -29,7 +29,7 @@ class SkipCommand implements BaseCommand {
             gameSession.skipAchieved = true;
             sendSkipMessage(message, gameSession);
             await sendSongMessage(message, gameSession, true);
-            await gameSession.endRound();
+            await gameSession.endRound(false);
             startGame(gameSession, guildPreference, db, message, client);
             logger.info(`${getDebugContext(message)} | Skip majority achieved.`);
         }

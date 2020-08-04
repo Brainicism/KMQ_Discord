@@ -4,7 +4,7 @@ import * as cronParser from "cron-parser";
 import * as _kmqKnexConfig from "../config/knexfile_kmq";
 import * as _kpopVideosKnexConfig from "../config/knexfile_kpop_videos";
 import { validateConfig } from "./config_validator";
-import { guessSong, endGame, cleanupInactiveGameSessions, getGuildPreference } from "./helpers/game_utils";
+import { guessSong, cleanupInactiveGameSessions, getGuildPreference } from "./helpers/game_utils";
 import validate from "./helpers/validate";
 import { getCommandFiles, EMBED_INFO_COLOR } from "./helpers/discord_utils";
 import { ParsedMessage } from "types";
@@ -81,7 +81,7 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
                 voiceConnection.disconnect();
                 if (gameSession) {
                     logger.info(`gid: ${oldUserChannel.guild.id} | Bot is only user left, leaving voice...`)
-                    await endGame(gameSessions, newState.guild.id, db);
+                    await gameSessions[newState.guild.id].endSession(gameSessions, db);
                 }
                 return;
             }
@@ -90,7 +90,7 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
         if (oldState.user === client.user && !oldUserChannel.members.has(client.user.id)) {
             if (gameSession) {
                 logger.info(`gid: ${oldUserChannel.guild.id} | Bot disconnected.`)
-                await endGame(gameSessions, newState.guild.id, db);
+                await gameSessions[newState.guild.id].endSession(gameSessions, db);
             }
         }
     }
