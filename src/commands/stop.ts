@@ -1,21 +1,13 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-import { sendSongMessage, getDebugContext } from "../helpers/discord_utils";
-import _logger from "../logger";
-const logger = _logger("stop");
+import { sendInfoMessage } from "../helpers/discord_utils";
 
 class StopCommand implements BaseCommand {
-    async call({db, gameSessions, message }: CommandArgs) {
-        const gameSession = gameSessions[message.guild.id];
-        if (gameSession && gameSession.roundIsActive()) {
-            logger.info(`${getDebugContext(message)} | Game round ended: ${gameSession.getDebugSongDetails()}`);
-            await sendSongMessage(message, gameSession, true);
-            gameSession.endRound(false);
-            gameSession.lastActiveNow(db);
-        }
+    async call({ message }: CommandArgs) {
+        await sendInfoMessage(message, "Command Deprecated", "This command is no longer supported. Please use `,end` when ending a game instead.");
     }
     help = {
         name: "stop",
-        description: "The game will be suspended and the bot will reveal the answer to any ongoing games in session.",
+        description: "[DEPRECATED] The game will be suspended and the bot will reveal the answer to any ongoing games in session.",
         usage: "!stop",
         arguments: []
     }
