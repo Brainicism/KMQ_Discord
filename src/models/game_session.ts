@@ -11,7 +11,7 @@ export default class GameSession {
     private songAliases: Array<string>;
     private artist: string;
     private videoID: string;
-    private inSession: boolean;
+    public roundActive: boolean;
     private skippers: Set<string>;
     public scoreboard: Scoreboard;
     public skipAchieved: boolean;
@@ -32,7 +32,7 @@ export default class GameSession {
         this.song = null;
         this.artist = null;
         this.videoID = null;
-        this.inSession = false;
+        this.roundActive = false;
         this.skipAchieved = false;
         this.skippers = new Set();
         this.scoreboard = new Scoreboard();
@@ -53,7 +53,7 @@ export default class GameSession {
         this.songAliases = songAliasesList[link] || [];
         this.artist = artist;
         this.videoID = link;
-        this.inSession = true;
+        this.roundActive = true;
         this.skipAchieved = false;
         this.roundStartedAt = Date.now();
     }
@@ -63,7 +63,7 @@ export default class GameSession {
             this.song = null;
             this.artist = null;
             this.videoID = null;
-            this.inSession = false;
+            this.roundActive = false;
             this.skippers.clear();
             if (guessed) {
                 this.guessTimes.push(Date.now() - this.roundStartedAt);
@@ -121,8 +121,12 @@ export default class GameSession {
         return this.videoID;
     }
 
-    gameInSession(): boolean {
-        return this.inSession;
+    roundIsActive(): boolean {
+        return this.roundActive;
+    }
+
+    setRoundActive(active: boolean): void {
+        this.roundActive = active;
     }
 
     userSkipped(userId: string) {
