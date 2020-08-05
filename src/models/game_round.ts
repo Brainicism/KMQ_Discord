@@ -9,7 +9,6 @@ export default class GameRound {
     public readonly videoID: string;
     public readonly startedAt: number;
 
-    public inSession: boolean;
     public skippers: Set<string>;
     public skipAchieved: boolean;
     public finished: boolean;
@@ -20,7 +19,6 @@ export default class GameRound {
         this.songAliases = songAliasesList[videoID] || [];;
         this.artist = artist;
         this.videoID = videoID;
-        this.inSession = true;
         this.skipAchieved = false;
         this.startedAt = Date.now();
         this.skippers = new Set();

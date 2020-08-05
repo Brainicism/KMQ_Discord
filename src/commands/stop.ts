@@ -6,7 +6,7 @@ const logger = _logger("stop");
 class StopCommand implements BaseCommand {
     async call({db, gameSessions, message }: CommandArgs) {
         const gameSession = gameSessions[message.guild.id];
-        if (gameSession && gameSession.gameInSession()) {
+        if (gameSession && gameSession.gameRound) {
             logger.info(`${getDebugContext(message)} | Game round ended: ${gameSession.getDebugSongDetails()}`);
             await sendSongMessage(message, gameSession, true);
             gameSession.endRound(false);

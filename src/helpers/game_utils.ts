@@ -22,6 +22,7 @@ const guessSong = async ({ client, message, gameSessions, db }: CommandArgs) => 
     const guildPreference = await getGuildPreference(db, message.guild.id);
     const gameSession = gameSessions[message.guild.id];
     const voiceConnection = client.voiceConnections.get(message.guild.id);
+    if (!gameSession.gameRound) return;
 
     //if user isn't in the same voice channel
     if (!voiceConnection || !voiceConnection.channel.members.has(message.author.id)) {
@@ -34,12 +35,11 @@ const guessSong = async ({ client, message, gameSessions, db }: CommandArgs) => 
     }
 
     if (gameSession.checkGuess(message)) {
-        // this should be atomic
+        logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${gameSession.gameRound.song}`)
         const userTag = getUserIdentifier(message.author);
         gameSession.scoreboard.updateScoreboard(userTag, message.author.id);
-        await sendSongMessage(message, gameSession, false);
-        logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${gameSession.gameRound.song}`)
         gameSession.endRound(true);
+        await sendSongMessage(message, gameSession, false);
 
         await db.kmq("guild_preferences")
             .where("guild_id", message.guild.id)
@@ -90,23 +90,26 @@ const getFilteredSongList = async (guildPreference: GuildPreference, db: Databas
 }
 
 const startGame = async (gameSession: GameSession, guildPreference: GuildPreference, db: Databases, message: Discord.Message, client: Discord.Client, voiceChannel?: Discord.VoiceChannel) => {
-    if (!gameSession || gameSession.finished) {
-        logger.debug(`${getDebugContext(message)} | startGame called with ${!gameSession}, ${gameSession.finished}`);
+    if (gameSession.finished) {
         return;
     }
-    if (gameSession.gameRound && !gameSession.gameRound.finished) {
+
+    if (gameSession.sessionIsInitialized()) {
         await sendErrorMessage(message, `Game already in session`, null);
         return;
     }
+    gameSession.setSessionInitialized(true);
     let randomSong: QueriedSong;
     try {
         randomSong = await selectRandomSong(guildPreference, db);
         if (randomSong === null) {
+            gameSession.setSessionInitialized(false);
             sendErrorMessage(message, "Song Query Error", "Failed to find songs matching this criteria. Try to broaden your search.");
             return;
         }
     }
     catch (err) {
+        gameSession.setSessionInitialized(false);
         await sendErrorMessage(message, "Error selecting song", err.toString());
         logger.error(`${getDebugContext(message)} | Error querying song: ${err}. guildPreference = ${JSON.stringify(guildPreference)}`);
         return;
@@ -116,6 +119,7 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
         await ensureVoiceConnection(gameSession, client, voiceChannel);
     }
     catch (err) {
+        gameSession.setSessionInitialized(false);
         logger.error(`${getDebugContext(message)} | Error obtaining voice connection. err = ${err}`);
         await sendErrorMessage(message, "Missing voice permissions", "The bot is unable to join the voice channel you are in.");
         return;
@@ -167,10 +171,7 @@ const selectRandomSong = async (guildPreference: GuildPreference, db: Databases)
 
 const playSong = async (gameSession: GameSession, guildPreference: GuildPreference, db: Databases, message: Discord.Message, client: Discord.Client) => {
     const gameRound = gameSession.gameRound;
-    if (gameRound.finished) {
-        logger.warn(`${getDebugContext(message)} | playSong attempted on finished GameRound`);
-        return;
-    }
+
     if (isDebugMode() && skipSongPlay()) {
         logger.debug(`${getDebugContext(message)} | Not playing song in voice connection. song = ${gameSession.getDebugSongDetails()}`);
         return;
@@ -199,8 +200,8 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
     const stream = fs.createReadStream(songLocation);
     await delay(2000);
     //check if ,end was called during the delay
-    if (!gameSession || gameSession.finished) {
-        logger.debug(`${getDebugContext(message)} | startGame called with ${!gameSession}, ${gameSession.finished}`);
+    if (gameSession.finished || gameSession.gameRound.finished) {
+        logger.debug(`${getDebugContext(message)} | startGame called with ${gameSession.finished}, ${gameRound.finished}`);
         return;
     }
     gameSession.dispatcher = gameSession.connection.playStream(stream, streamOptions);

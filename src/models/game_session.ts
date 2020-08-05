@@ -9,6 +9,7 @@ const logger = _logger("game_session");
 export default class GameSession {
     private readonly startedAt: number;
 
+    public sessionInitialized: boolean;
     public scoreboard: Scoreboard;
     public dispatcher: StreamDispatcher;
     public connection: VoiceConnection;
@@ -24,6 +25,7 @@ export default class GameSession {
     constructor(textChannel: TextChannel) {
         this.scoreboard = new Scoreboard();
         this.lastActive = Date.now();
+        this.sessionInitialized = false;
         this.startedAt = Date.now();
         this.participants = new Set();
         this.roundsPlayed = 0;
@@ -32,10 +34,12 @@ export default class GameSession {
         this.connection = null;
         this.finished = false;
         this.textChannel = textChannel;
+        this.gameRound = null;
     }
 
     startRound(song: string, artist: string, videoID: string) {
         this.gameRound = new GameRound(song, artist, videoID);
+        this.sessionInitialized = true;
         this.roundsPlayed++;
     }
 
@@ -48,11 +52,26 @@ export default class GameSession {
             this.dispatcher.end();
             this.dispatcher = null;
         }
-        this.gameRound.finished = true;
+        if (this.gameRound) {
+            this.gameRound.finished = true;
+        }
+        this.sessionInitialized = false;
+    }
+
+    setSessionInitialized(active: boolean) {
+        this.sessionInitialized = active;
+    }
+
+    sessionIsInitialized(): boolean {
+        return this.sessionInitialized;
     }
 
     endSession = async (gameSessions: { [guildId: string]: GameSession }, db: Databases): Promise<void> => {
         const guildId = this.textChannel.guild.id;
+        if (!(guildId in gameSessions)) {
+            logger.debug(`gid: ${guildId} | GameSession already ended`);
+            return;
+        }
         const gameSession = gameSessions[guildId];
         gameSession.finished = true;
         gameSession.endRound(false);
@@ -65,6 +84,10 @@ export default class GameSession {
 
         const sessionLength = (Date.now() - this.startedAt) / (1000 * 60);
         const averageGuessTime = this.guessTimes.length > 0 ? this.guessTimes.reduce((a, b) => a + b, 0) / (this.guessTimes.length * 1000) : -1;
+
+        logger.info(`gid: ${guildId} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}`);
+        delete gameSessions[guildId];
+
         await db.kmq("game_sessions")
             .insert({
                 start_date: new Date(this.startedAt).toISOString().slice(0, 19).replace('T', ' '),
@@ -75,19 +98,18 @@ export default class GameSession {
                 rounds_played: this.roundsPlayed
             })
 
-        logger.info(`gid: ${guildId} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}`);
-        delete gameSessions[guildId];
-    }
-
-    gameInSession(): boolean {
-        return (this.gameRound) && this.gameRound.inSession;
+        await db.kmq("guild_preferences")
+            .where("guild_id", guildId)
+            .increment("games_played", 1);
     }
 
     getDebugSongDetails(): string {
+        if (!this.gameRound) return;
         return `${this.gameRound.song}:${this.gameRound.artist}:${this.gameRound.videoID}`;
     }
 
     checkGuess(message: Message): boolean {
+        if (!this.gameRound) return;
         this.participants.add(message.author.id);
         return this.gameRound.checkGuess(message);
     }

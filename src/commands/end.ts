@@ -9,16 +9,16 @@ class EndCommand implements BaseCommand {
         if (!gameSession) {
             return;
         }
-        if (gameSession.gameInSession()) {
-            await sendSongMessage(message, gameSession, true);
+        if (gameSession.gameRound) {
+            sendSongMessage(message, gameSession, true);
         }
         if (!gameSession.scoreboard.isEmpty()) {
             logger.info(`${getDebugContext(message)} | Game session ended, non-empty`);
-            await sendInfoMessage(message, gameSession.scoreboard.getWinnerMessage())
+            sendInfoMessage(message, gameSession.scoreboard.getWinnerMessage())
         }
-        else if (gameSession.gameInSession()) {
+        else {
             logger.info(`${getDebugContext(message)} | Game session ended, empty`);
-            await sendInfoMessage(message, "Nobody won :(")
+            sendInfoMessage(message, "Nobody won :(")
         }
         await gameSession.endSession(gameSessions, db);
         disconnectVoiceConnection(client, message);

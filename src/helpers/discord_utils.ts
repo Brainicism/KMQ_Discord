@@ -14,6 +14,7 @@ const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 const sendSongMessage = async (message: Discord.Message, gameSession: GameSession, isForfeit: boolean) => {
     let footer = null;
     const gameRound = gameSession.gameRound;
+    if (!gameRound) return;
     if (gameRound.songAliases.length > 0) {
         footer = {
             text: `Aliases: ${Array.from(gameRound.songAliases).join(", ")}`
