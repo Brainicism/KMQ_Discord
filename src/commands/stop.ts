@@ -9,7 +9,7 @@ class StopCommand implements BaseCommand {
         if (gameSession && gameSession.roundIsActive()) {
             logger.info(`${getDebugContext(message)} | Game round ended: ${gameSession.getDebugSongDetails()}`);
             await sendSongMessage(message, gameSession, true);
-            await gameSession.endRound(false);
+            gameSession.endRound(false);
             gameSession.lastActiveNow(db);
         }
     }
