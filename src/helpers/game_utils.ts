@@ -93,14 +93,14 @@ const getFilteredSongList = async (guildPreference: GuildPreference, db: Databas
 
 const startGame = async (gameSession: GameSession, guildPreference: GuildPreference, db: Databases, message: Discord.Message, client: Discord.Client, voiceChannel?: Discord.VoiceChannel) => {
     if (!gameSession || gameSession.finished) {
+        logger.debug(`${getDebugContext(message)} | startGame called with ${!gameSession}, ${gameSession.finished}`);
         return;
     }
-    if (gameSession.gameInSession()) {
+    if (gameSession.roundIsActive()) {
         await sendErrorMessage(message, `Game already in session`, null);
         return;
     }
-
-    await delay(2000);
+    gameSession.setRoundActive(true);
     let randomSong: QueriedSong;
     try {
         randomSong = await selectRandomSong(guildPreference, db);
@@ -110,6 +110,7 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
         }
     }
     catch (err) {
+        gameSession.setRoundActive(false);
         await sendErrorMessage(message, "Error selecting song", err.toString());
         logger.error(`${getDebugContext(message)} | Error querying song: ${err}. guildPreference = ${JSON.stringify(guildPreference)}`);
         return;
@@ -119,6 +120,7 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
         await ensureVoiceConnection(gameSession, client, voiceChannel);
     }
     catch (err) {
+        gameSession.setRoundActive(false);
         logger.error(`${getDebugContext(message)} | Error obtaining voice connection. err = ${err}`);
         await sendErrorMessage(message, "Missing voice permissions", "The bot is unable to join the voice channel you are in.");
         return;
@@ -194,7 +196,14 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
         bitrate: gameSession.connection.channel.bitrate,
         seek: seekLocation
     };
-    const stream = fs.createReadStream(songLocation);;
+    const stream = fs.createReadStream(songLocation);
+    await delay(2000);
+    
+    //check if ,end was called during the delay
+    if (!gameSession || gameSession.finished) {
+        logger.debug(`${getDebugContext(message)} | startGame called with ${!gameSession}, ${gameSession.finished}`);
+        return;
+    }
     gameSession.dispatcher = gameSession.connection.playStream(stream, streamOptions);
     logger.info(`${getDebugContext(message)} | Playing song in voice connection. seek = ${guildPreference.getSeekType()}. song = ${gameSession.getDebugSongDetails()}`);
 

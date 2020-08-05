@@ -16,8 +16,8 @@ class SkipCommand implements BaseCommand {
     async call({ gameSessions, client, message, db }: CommandArgs) {
         const guildPreference = await getGuildPreference(db, message.guild.id);
         const gameSession = gameSessions[message.guild.id];
-        if (!gameSession || !gameSession.gameInSession() || !areUserAndBotInSameVoiceChannel(message)) {
-            logger.warn(`${getDebugContext(message)} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.gameInSession(): ${gameSession && !gameSession.gameInSession()}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
+        if (!gameSession || !gameSession.roundIsActive() || !areUserAndBotInSameVoiceChannel(message)) {
+            logger.warn(`${getDebugContext(message)} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.roundIsActive(): ${gameSession && !gameSession.roundIsActive()}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
             return;
         }
         gameSession.userSkipped(message.author.id);
