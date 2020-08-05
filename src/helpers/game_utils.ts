@@ -38,8 +38,8 @@ const guessSong = async ({ client, message, gameSessions, db }: CommandArgs) => 
         const userTag = getUserIdentifier(message.author);
         gameSession.scoreboard.updateScoreboard(userTag, message.author.id);
         await sendSongMessage(message, gameSession, false);
-        logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${gameSession.getSong()}`)
-        await gameSession.endRound(true);
+        logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${gameSession.gameRound.song}`)
+        gameSession.endRound(true);
 
         await db.kmq("guild_preferences")
             .where("guild_id", message.guild.id)
@@ -91,14 +91,13 @@ const getFilteredSongList = async (guildPreference: GuildPreference, db: Databas
 
 const startGame = async (gameSession: GameSession, guildPreference: GuildPreference, db: Databases, message: Discord.Message, client: Discord.Client, voiceChannel?: Discord.VoiceChannel) => {
     if (!gameSession || gameSession.finished) {
+        logger.debug(`${getDebugContext(message)} | startGame called with ${!gameSession}, ${gameSession.finished}`);
         return;
     }
-    if (gameSession.gameInSession()) {
+    if (gameSession.gameRound && !gameSession.gameRound.finished) {
         await sendErrorMessage(message, `Game already in session`, null);
         return;
     }
-
-    await delay(2000);
     let randomSong: QueriedSong;
     try {
         randomSong = await selectRandomSong(guildPreference, db);
@@ -167,11 +166,16 @@ const selectRandomSong = async (guildPreference: GuildPreference, db: Databases)
 }
 
 const playSong = async (gameSession: GameSession, guildPreference: GuildPreference, db: Databases, message: Discord.Message, client: Discord.Client) => {
+    const gameRound = gameSession.gameRound;
+    if (gameRound.finished) {
+        logger.warn(`${getDebugContext(message)} | playSong attempted on finished GameRound`);
+        return;
+    }
     if (isDebugMode() && skipSongPlay()) {
         logger.debug(`${getDebugContext(message)} | Not playing song in voice connection. song = ${gameSession.getDebugSongDetails()}`);
         return;
     }
-    const songLocation = `${SONG_CACHE_DIR}/${gameSession.getVideoID()}.mp3`;
+    const songLocation = `${SONG_CACHE_DIR}/${gameRound.videoID}.mp3`;
 
     let seekLocation: number;
     if (guildPreference.getSeekType() === SEEK_TYPES.RANDOM) {
@@ -192,14 +196,20 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
         bitrate: gameSession.connection.channel.bitrate,
         seek: seekLocation
     };
-    const stream = fs.createReadStream(songLocation);;
+    const stream = fs.createReadStream(songLocation);
+    await delay(2000);
+    //check if ,end was called during the delay
+    if (!gameSession || gameSession.finished) {
+        logger.debug(`${getDebugContext(message)} | startGame called with ${!gameSession}, ${gameSession.finished}`);
+        return;
+    }
     gameSession.dispatcher = gameSession.connection.playStream(stream, streamOptions);
     logger.info(`${getDebugContext(message)} | Playing song in voice connection. seek = ${guildPreference.getSeekType()}. song = ${gameSession.getDebugSongDetails()}`);
 
     gameSession.dispatcher.once("end", async () => {
         logger.info(`${getDebugContext(message)} | Song finished without being guessed.`);
         await sendSongMessage(message, gameSession, true);
-        await gameSession.endRound(false);
+        gameSession.endRound(false);
         startGame(gameSession, guildPreference, db, message, client, null);
     });
 
@@ -207,7 +217,7 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
         logger.error(`${getDebugContext(message)} | Unknown error with stream dispatcher. song = ${gameSession.getDebugSongDetails()}. err = ${err}`);
         // Attempt to restart game with different song
         await sendErrorMessage(message, "Error playing song", "Starting new round in 2 seconds...");
-        await gameSession.endRound(false);
+        gameSession.endRound(false);
         startGame(gameSession, guildPreference, db, message, client, null);
     })
 }
