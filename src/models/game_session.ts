@@ -91,12 +91,13 @@ export default class GameSession {
             .increment("games_played", 1);
 
         const sessionLength = (Date.now() - this.sessionStartedAt) / (1000 * 60);
+        const averageGuessTime = this.guessTimes.length > 0 ? this.guessTimes.reduce((a, b) => a + b, 0) / (this.guessTimes.length * 1000) : -1;
         await db.kmq("game_sessions")
             .insert({
-                start_date: new Date(this.sessionStartedAt),
+                start_date: new Date(this.sessionStartedAt).toISOString().slice(0, 19).replace('T', ' '),
                 guild_id: this.textChannel.guild.id,
                 num_participants: this.participants.size,
-                avg_guess_time: this.guessTimes.reduce((a, b) => a + b, 0) / (this.guessTimes.length * 1000),
+                avg_guess_time: averageGuessTime,
                 session_length: sessionLength,
                 rounds_played: this.roundsPlayed
             })
