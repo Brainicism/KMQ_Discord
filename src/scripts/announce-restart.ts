@@ -1,6 +1,35 @@
+import { spawn, exec } from "child_process";
+
 import * as mysql from "promise-mysql";
 import * as _config from "../../config/app_config.json";
 const config: any = _config;
+
+function serverShutdown(restartMinutes: number) {
+    return new Promise((resolve) => {
+        const logs = spawn("pm2", ["logs", "kmq", "--out"]);
+
+        logs.stdout.on("data", data => {
+            console.log(`${data}`);
+        });
+
+        logs.stderr.on("data", data => {
+            console.log(`${data}`);
+        });
+
+        logs.on('error', (error) => {
+            console.log(`${error.message}`);
+        });
+
+        setTimeout(() => {
+            logs.removeAllListeners();
+            logs.kill();
+            console.log("Restarting now...");
+            exec('pm2 stop kmq', (err) => {
+                resolve();
+              });
+        }, restartMinutes * 1000 * 60)
+    })
+}
 
 (async () => {
     const args = process.argv.slice(2);
@@ -24,4 +53,5 @@ const config: any = _config;
     const restartNotification = (await db.query(query))[0];
     console.log(`Next restart notification scheduled at ${restartNotification["restart_time"]}`);
     db.destroy();
+    await serverShutdown(restartMinutes);
 })();
