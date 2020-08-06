@@ -6,12 +6,10 @@ const logger = _logger("end");
 class EndCommand implements BaseCommand {
     async call({ client, gameSessions, message, db }: CommandArgs) {
         const gameSession = gameSessions[message.guild.id];
-        if (!gameSession) {
+        if (!gameSession || !gameSession.gameRound) {
             return;
         }
-        if (gameSession.gameRound) {
-            sendSongMessage(message, gameSession, true);
-        }
+        sendSongMessage(message, gameSession, true);
         if (!gameSession.scoreboard.isEmpty()) {
             logger.info(`${getDebugContext(message)} | Game session ended, non-empty`);
             sendInfoMessage(message, gameSession.scoreboard.getWinnerMessage())
