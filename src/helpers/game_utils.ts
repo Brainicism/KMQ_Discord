@@ -22,7 +22,7 @@ const guessSong = async ({ client, message, gameSessions, db }: CommandArgs) => 
     const guildPreference = await getGuildPreference(db, message.guild.id);
     const gameSession = gameSessions[message.guild.id];
     const voiceConnection = client.voiceConnections.get(message.guild.id);
-    if (!gameSession.gameRound) return;
+    if (!gameSession.gameRound || gameSession.gameRound.finished) return;
 
     //if user isn't in the same voice channel
     if (!voiceConnection || !voiceConnection.channel.members.has(message.author.id)) {
@@ -130,6 +130,10 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
 
 const ensureVoiceConnection = async (gameSession: GameSession, client: Discord.Client, voiceChannel?: Discord.VoiceChannel) => {
     // stay in current vc if voiceChannel is null
+    let existingVoiceConnection = client.voiceConnections.get(gameSession.textChannel.guild.id);
+    if (existingVoiceConnection) {
+        return;
+    } 
     if (voiceChannel) {
         const connection = await voiceChannel.join();
         gameSession.connection = connection;
