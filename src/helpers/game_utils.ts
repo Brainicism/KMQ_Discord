@@ -17,7 +17,8 @@ export enum GameOption {
     VOLUME = "Volume",
     SEEK_TYPE = "Seek Type",
     MODE_TYPE = "Guess Mode",
-    GROUPS = "Groups"
+    GROUPS = "Groups",
+    GOAL = "Goal"
 }
 const logger = _logger("game_utils");
 
@@ -35,7 +36,6 @@ export async function playCorrectGuessSong(gameSession: GameSession) {
         }
         resolve();
     })
-
 }
 
 async function getFilteredSongList(guildPreference: GuildPreference): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
