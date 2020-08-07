@@ -13,9 +13,11 @@ const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 
 const sendSongMessage = async (message: Discord.Message, gameSession: GameSession, isForfeit: boolean) => {
     let footer = null;
-    if (gameSession.getSongAliases().length > 0) {
+    const gameRound = gameSession.gameRound;
+    if (!gameRound) return;
+    if (gameRound.songAliases.length > 0) {
         footer = {
-            text: `Aliases: ${Array.from(gameSession.getSongAliases()).join(", ")}`
+            text: `Aliases: ${Array.from(gameRound.songAliases).join(", ")}`
         };
     }
     else {
@@ -26,7 +28,6 @@ const sendSongMessage = async (message: Discord.Message, gameSession: GameSessio
             }
         }
     }
-
     await sendMessage(message, {
         embed: {
             color: EMBED_INFO_COLOR,
@@ -34,10 +35,10 @@ const sendSongMessage = async (message: Discord.Message, gameSession: GameSessio
                 name: isForfeit ? null : message.author.username,
                 icon_url: isForfeit ? null : message.author.avatarURL
             },
-            title: `"${gameSession.getSong()}" - ${gameSession.getArtist()}`,
-            description: `https://youtube.com/watch?v=${gameSession.getVideoID()}\n\n**Scoreboard**`,
+            title: `"${gameRound.song}" - ${gameRound.artist}`,
+            description: `https://youtube.com/watch?v=${gameRound.videoID}\n\n**Scoreboard**`,
             image: {
-                url: `https://img.youtube.com/vi/${gameSession.getVideoID()}/hqdefault.jpg`
+                url: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`
             },
             fields: gameSession.scoreboard.getScoreboard(),
             footer
