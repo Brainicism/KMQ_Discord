@@ -16,20 +16,20 @@ class SkipCommand implements BaseCommand {
     async call({ gameSessions, client, message, db }: CommandArgs) {
         const guildPreference = await getGuildPreference(db, message.guild.id);
         const gameSession = gameSessions[message.guild.id];
-        if (!gameSession || !gameSession.roundIsActive() || !areUserAndBotInSameVoiceChannel(message)) {
-            logger.warn(`${getDebugContext(message)} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.roundIsActive(): ${gameSession && !gameSession.roundIsActive()}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
+        if (!gameSession || !gameSession.gameRound || !areUserAndBotInSameVoiceChannel(message)) {
+            logger.warn(`${getDebugContext(message)} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.gameRound: ${gameSession && !gameSession.gameRound}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
             return;
         }
-        gameSession.userSkipped(message.author.id);
-        if (gameSession.skipAchieved) {
+        gameSession.gameRound.userSkipped(message.author.id);
+        if (gameSession.gameRound.skipAchieved) {
             // song already being skipped
             return;
         }
         if (isSkipMajority(message, gameSession)) {
-            gameSession.skipAchieved = true;
+            gameSession.gameRound.skipAchieved = true;
             await sendSkipMessage(message, gameSession);
             await sendSongMessage(message, gameSession, true);
-            await gameSession.endRound(false);
+            gameSession.endRound(false);
             startGame(gameSession, guildPreference, db, message, client);
             logger.info(`${getDebugContext(message)} | Skip majority achieved.`);
         }
@@ -58,10 +58,9 @@ async function sendSkipNotification(message: Discord.Message, gameSession: GameS
                 icon_url: message.author.avatarURL
             },
             title: "**Skip**",
-            description: `${gameSession.getNumSkippers()}/${getSkipsRequired(message)} skips received.`
+            description: `${gameSession.gameRound.getNumSkippers()}/${getSkipsRequired(message)} skips received.`
         }
     })
-        .then((message) => message.delete(5000));
 }
 
 async function sendSkipMessage(message: Discord.Message, gameSession: GameSession) {
@@ -74,14 +73,13 @@ async function sendSkipMessage(message: Discord.Message, gameSession: GameSessio
 
             },
             title: "**Skip**",
-            description: `${gameSession.getNumSkippers()}/${getSkipsRequired(message)} skips achieved, skipping...`
+            description: `${gameSession.gameRound.getNumSkippers()}/${getSkipsRequired(message)} skips achieved, skipping...`
         }
     })
-        .then((message) => message.delete(5000));
 }
 
 function isSkipMajority(message: Discord.Message, gameSession: GameSession): boolean {
-    return gameSession.getNumSkippers() >= getSkipsRequired(message);
+    return gameSession.gameRound.getNumSkippers() >= getSkipsRequired(message);
 }
 
 function getSkipsRequired(message: Discord.Message): number {

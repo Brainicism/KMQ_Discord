@@ -58,7 +58,7 @@ client.on("message", async (message: Discord.Message) => {
         }
     }
     else {
-        if (gameSessions[message.guild.id] && gameSessions[message.guild.id].roundIsActive()) {
+        if (gameSessions[message.guild.id] && gameSessions[message.guild.id].gameRound) {
             guessSong({ client, message, gameSessions, db });
             gameSessions[message.guild.id].lastActiveNow(db);
         }

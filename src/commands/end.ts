@@ -6,19 +6,17 @@ const logger = _logger("end");
 class EndCommand implements BaseCommand {
     async call({ client, gameSessions, message, db }: CommandArgs) {
         const gameSession = gameSessions[message.guild.id];
-        if (!gameSession) {
+        if (!gameSession || !gameSession.gameRound) {
             return;
         }
-        if (gameSession.roundIsActive()) {
-            await sendSongMessage(message, gameSession, true);
-        }
+        sendSongMessage(message, gameSession, true);
         if (!gameSession.scoreboard.isEmpty()) {
             logger.info(`${getDebugContext(message)} | Game session ended, non-empty`);
-            await sendInfoMessage(message, gameSession.scoreboard.getWinnerMessage())
+            sendInfoMessage(message, gameSession.scoreboard.getWinnerMessage())
         }
         else {
             logger.info(`${getDebugContext(message)} | Game session ended, empty`);
-            await sendInfoMessage(message, "Nobody won :(")
+            sendInfoMessage(message, "Nobody won :(")
         }
         await gameSession.endSession(gameSessions, db);
         disconnectVoiceConnection(client, message);
