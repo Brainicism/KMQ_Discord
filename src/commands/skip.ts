@@ -61,7 +61,6 @@ async function sendSkipNotification(message: Discord.Message, gameSession: GameS
             description: `${gameSession.gameRound.getNumSkippers()}/${getSkipsRequired(message)} skips received.`
         }
     })
-        .then((message) => message.delete(5000));
 }
 
 async function sendSkipMessage(message: Discord.Message, gameSession: GameSession) {
