@@ -87,7 +87,8 @@ const sendOptionsMessage = async (message: Discord.Message, guildPreference: Gui
     let groupsString = groupsMode ? `${guildPreference.getGroupNames().join(", ")}` : null;
     let limitString = `${Math.min(totalSongs, guildPreference.getLimit())}`;
     let volumeString = `${guildPreference.getVolume()}`;
-    let seekTypeString = `${guildPreference.getSeekType()}`
+    let seekTypeString = `${guildPreference.getSeekType()}`;
+    let modeTypeString = `${guildPreference.getModeType()}`;
 
     cutoffString = updatedOption == GameOptions.CUTOFF ? bold(cutoffString) : codeLine(cutoffString);
     genderString = updatedOption == GameOptions.GENDER ? bold(genderString) : codeLine(genderString);
@@ -95,10 +96,11 @@ const sendOptionsMessage = async (message: Discord.Message, guildPreference: Gui
     groupsString = updatedOption == GameOptions.GROUPS ? bold(groupsString) : codeLine(groupsString);
     volumeString = updatedOption == GameOptions.VOLUME ? bold(volumeString) : codeLine(volumeString);
     seekTypeString = updatedOption == GameOptions.SEEK_TYPE ? bold(seekTypeString) : codeLine(seekTypeString);
+    modeTypeString = updatedOption == GameOptions.SEEK_TYPE ? bold(modeTypeString) : codeLine(modeTypeString);
 
     await sendInfoMessage(message,
         updatedOption == null ? "Options" : `${updatedOption} updated`,
-        `Now playing the ${limitString} out of the __${totalSongs}__ most popular songs by ${groupsMode ? groupsString : genderString} ${cutoffString}. \nPlaying from the ${seekTypeString} point of each song and at ${volumeString}% volume.`,
+        `Now playing the ${limitString} out of the __${totalSongs}__ most popular songs by ${groupsMode ? groupsString : genderString} ${cutoffString}. \nPlaying from the ${seekTypeString} point of each song and at ${volumeString}% volume. Guess the ${modeTypeString}'s name!`,
         updatedOption == null ? `Psst. Your bot prefix is \`${guildPreference.getBotPrefix()}\`.` : null,
         updatedOption == null ? "assets/tsukasa.jpg" : null
     );

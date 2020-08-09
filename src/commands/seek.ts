@@ -31,7 +31,7 @@ class SeekCommand implements BaseCommand {
         usage: "!seek [seekType]",
         arguments: [
             {
-                name: "seek",
+                name: "seekType",
                 description: "Valid values are \`beginning\` or \`random\`"
             }
         ]
