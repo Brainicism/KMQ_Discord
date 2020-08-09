@@ -17,7 +17,6 @@ Gameplay is initiated via `,play`, which invites the bot to a voice channel. The
 # Commands 
 ## General Commands 
 - `,play`: Begin a game of KMQ. The bot will play a random song based on the currently chosen filters. Users are able to guess the name of the song by typing it in the chat. You will receive a point if you are the first correct guesser
-- `,stop`: Stop the current round of KMQ. The bot will leave the call and cease to play any new songs.
 - `,end`: Stop the current game of KMQ. The bot will display the winner of the game.
 - `,skip`: Starts a vote to skip the current playing song. Based on majority rule.
 - `,options`: Shows the current game options, which filter the songs that will be played
