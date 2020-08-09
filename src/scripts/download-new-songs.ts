@@ -79,7 +79,7 @@ const downloadSong = (id: string) => {
 }
 
 
-const downloadNewSongs = async () => {
+const downloadNewSongs = async (limit?: number) => {
     const db = await mysql.createConnection({
         host: "localhost",
         user: config.dbUser,
@@ -88,8 +88,12 @@ const downloadNewSongs = async () => {
     clearPartiallyCachedSongs();
     const knownDeadAndReasons = fs.readFileSync(deadLinksFilePath).toString().split("\n");
     const knownDeadIds = new Set(knownDeadAndReasons.map((x) => x.split(":")[0]));
-    const query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
+    let query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
     WHERE dead = "n" AND vtype = "main";`;
+    if (limit) {
+        query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
+        WHERE dead = "n" AND vtype = "main" ORDER BY kpop_videos.app_kpop.views DESC LIMIT ${limit};`;
+    }
     const songs: Array<QueriedSong> = await db.query(query);
     let downloadCount = 0;
     console.log("total songs: " + songs.length);
@@ -119,6 +123,8 @@ export {
 
 (async () => {
     if (require.main === module) {
-        downloadNewSongs();
+        const args = process.argv.slice(2);
+        const limit = args.length > 0 ? parseInt(args[0]) : null;
+        downloadNewSongs(limit);
     }
 })();
