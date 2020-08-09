@@ -21,8 +21,11 @@ class NewsCommand implements BaseCommand {
             logger.error(`${getDebugContext(message)} | Error retrieving latest song date`);
             latestSongDate = null;
         }
-
-        const news: string = (await fs.readFileSync(config.newsFile)).toString();
+        if (!fs.existsSync(config.newsFile)){
+            logger.error("News file does not exist");
+            return;
+        }
+        const news = fs.readFileSync(config.newsFile).toString();
         const embed = new Discord.RichEmbed({
             color: EMBED_INFO_COLOR,
             author: {
