@@ -86,6 +86,11 @@ const downloadNewSongs = async (limit?: number) => {
         password: config.dbPassword
     });
     clearPartiallyCachedSongs();
+
+    if (!fs.existsSync(deadLinksFilePath)) {
+        fs.closeSync(fs.openSync(deadLinksFilePath, 'w'));
+    }
+    
     const knownDeadAndReasons = fs.readFileSync(deadLinksFilePath).toString().split("\n");
     const knownDeadIds = new Set(knownDeadAndReasons.map((x) => x.split(":")[0]));
     let query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
