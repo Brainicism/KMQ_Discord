@@ -221,7 +221,7 @@ const playSong = async (gameSessions:  { [guildID: string]: GameSession }, guild
         return;
     }
     gameSession.dispatcher = gameSession.connection.playStream(stream, streamOptions);
-    logger.info(`${getDebugContext(message)} | Playing song in voice connection. seek = ${guildPreference.getSeekType()}. song = ${gameSession.getDebugSongDetails()}`);
+    logger.info(`${getDebugContext(message)} | Playing song in voice connection. seek = ${guildPreference.getSeekType()}. song = ${gameSession.getDebugSongDetails()}. mode = ${guildPreference.getModeType()}`);
 
     gameSession.dispatcher.once("end", async () => {
         logger.info(`${getDebugContext(message)} | Song finished without being guessed.`);
