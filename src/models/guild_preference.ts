@@ -44,7 +44,6 @@ export default class GuildPreference {
         for (let defaultOption in DEFAULT_OPTIONS) {
             if (!(defaultOption in this.gameOptions)) {
                 this.gameOptions[defaultOption] = DEFAULT_OPTIONS[defaultOption];
-                logger.info(`Filling in missing game option: ${defaultOption} for guild: ${guildID}`);
                 missingOptionAdded = true;
             }
         }
