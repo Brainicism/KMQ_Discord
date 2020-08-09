@@ -16,13 +16,13 @@ class PlayCommand implements BaseCommand {
             logger.warn(`${getDebugContext(message)} | User not in voice channel`);
         }
         else {
-            const channel = message.channel as TextChannel;
             if (!gameSessions[message.guild.id]) {
-                gameSessions[message.guild.id] = new GameSession(channel);
-                await sendInfoMessage(message, `Game starting in #${channel.name}`, "Listen to the song and type your guess!");
-                logger.info(`${getDebugContext(message)} | Game session created`);
+                const textChannel = message.channel as TextChannel;
+                const voiceChannel = message.member.voiceChannel;
+                gameSessions[message.guild.id] = new GameSession(textChannel, voiceChannel);
+                await sendInfoMessage(message, `Game starting in #${textChannel.name} in 🔊 ${voiceChannel.name}`, "Listen to the song and type your guess!");
             }
-            startGame(gameSessions[message.guild.id], guildPreference, db, message, client, message.member.voiceChannel);
+            startGame(gameSessions, guildPreference, db, message, client);
         }
     }
     aliases = ["random"]

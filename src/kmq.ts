@@ -88,13 +88,6 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
                 return;
             }
         }
-        // Bot was disconnected voice channel (either via a kick by an admin or the situation handled above)
-        if (oldState.user === client.user && !oldUserChannel.members.has(client.user.id)) {
-            if (gameSession) {
-                logger.info(`gid: ${oldUserChannel.guild.id} | Bot disconnected.`)
-                await gameSessions[newState.guild.id].endSession(gameSessions, db);
-            }
-        }
     }
 });
 

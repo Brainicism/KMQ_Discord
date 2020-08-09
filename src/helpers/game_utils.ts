@@ -22,7 +22,7 @@ const guessSong = async ({ client, message, gameSessions, db }: CommandArgs) => 
     const guildPreference = await getGuildPreference(db, message.guild.id);
     const gameSession = gameSessions[message.guild.id];
     const voiceConnection = client.voiceConnections.get(message.guild.id);
-    if (!gameSession.gameRound || gameSession.gameRound.finished) return;
+    if (!gameSession || !gameSession.gameRound || gameSession.gameRound.finished) return;
 
     //if user isn't in the same voice channel
     if (!voiceConnection || !voiceConnection.channel.members.has(message.author.id)) {
@@ -49,7 +49,7 @@ const guessSong = async ({ client, message, gameSessions, db }: CommandArgs) => 
             const stream: string = resolve("assets/ring.wav");
             gameSession.connection.playFile(stream);
         }
-        startGame(gameSession, guildPreference, db, message, client, null);
+        startRound(gameSessions, guildPreference, db, message, client);
     }
 }
 
@@ -88,9 +88,14 @@ const getFilteredSongList = async (guildPreference: GuildPreference, db: Databas
     };
 
 }
+const startGame = async (gameSessions: { [guildID: string]: GameSession }, guildPreference: GuildPreference, db: Databases, message: Discord.Message, client: Discord.Client) => {
+    logger.info(`${getDebugContext(message)} | Game session starting`);
+    startRound(gameSessions, guildPreference, db, message, client);
+}
 
-const startGame = async (gameSession: GameSession, guildPreference: GuildPreference, db: Databases, message: Discord.Message, client: Discord.Client, voiceChannel?: Discord.VoiceChannel) => {
-    if (gameSession.finished) {
+const startRound = async (gameSessions: { [guildID: string]: GameSession }, guildPreference: GuildPreference, db: Databases, message: Discord.Message, client: Discord.Client) => {
+    const gameSession = gameSessions[message.guild.id];
+    if (!gameSession || gameSession.finished) {
         return;
     }
 
@@ -116,7 +121,7 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
     }
 
     try {
-        await ensureVoiceConnection(gameSession, client, voiceChannel);
+        await ensureVoiceConnection(gameSession, client);
     }
     catch (err) {
         gameSession.setSessionInitialized(false);
@@ -125,19 +130,23 @@ const startGame = async (gameSession: GameSession, guildPreference: GuildPrefere
         return;
     }
     gameSession.startRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);
-    playSong(gameSession, guildPreference, db, message, client);
+    playSong(gameSessions, guildPreference, db, message, client);
 }
 
-const ensureVoiceConnection = async (gameSession: GameSession, client: Discord.Client, voiceChannel?: Discord.VoiceChannel) => {
-    // stay in current vc if voiceChannel is null
+const ensureVoiceConnection = async (gameSession: GameSession, client: Discord.Client) => {
     let existingVoiceConnection = client.voiceConnections.get(gameSession.textChannel.guild.id);
     if (existingVoiceConnection) {
-        return;
-    } 
-    if (voiceChannel) {
-        const connection = await voiceChannel.join();
-        gameSession.connection = connection;
+        // temporary fix for monotonously increasing delay in vc.play() in discord.js v11
+        if (gameSession.roundsPlayed > 0 && gameSession.roundsPlayed % 15 == 0) {
+            gameSession.connection.disconnect();
+            await delay(500);
+        }
+        else {
+            return;
+        }
     }
+    const connection = await gameSession.voiceChannel.join();
+    gameSession.connection = connection;
 }
 
 const selectRandomSong = async (guildPreference: GuildPreference, db: Databases): Promise<QueriedSong> => {
@@ -173,7 +182,9 @@ const selectRandomSong = async (guildPreference: GuildPreference, db: Databases)
     }
 }
 
-const playSong = async (gameSession: GameSession, guildPreference: GuildPreference, db: Databases, message: Discord.Message, client: Discord.Client) => {
+const playSong = async (gameSessions:  { [guildID: string]: GameSession }, guildPreference: GuildPreference, db: Databases, message: Discord.Message, client: Discord.Client) => {
+    const gameSession = gameSessions[message.guild.id];
+    if (!gameSession) return;
     const gameRound = gameSession.gameRound;
 
     if (isDebugMode() && skipSongPlay()) {
@@ -215,15 +226,21 @@ const playSong = async (gameSession: GameSession, guildPreference: GuildPreferen
         logger.info(`${getDebugContext(message)} | Song finished without being guessed.`);
         await sendSongMessage(message, gameSession, true);
         gameSession.endRound(false);
-        startGame(gameSession, guildPreference, db, message, client, null);
+        startRound(gameSessions, guildPreference, db, message, client);
     });
 
     gameSession.dispatcher.once("error", async (err) => {
+        if (!client.voiceConnections.get(gameSession.textChannel.guild.id)) {
+            logger.info(`gid: ${gameSession.textChannel.guild.id} | Bot was kicked from voice channel`);
+            await gameSession.endSession(gameSessions, db);
+            return;
+        }
+
         logger.error(`${getDebugContext(message)} | Unknown error with stream dispatcher. song = ${gameSession.getDebugSongDetails()}. err = ${err}`);
         // Attempt to restart game with different song
         await sendErrorMessage(message, "Error playing song", "Starting new round in 2 seconds...");
         gameSession.endRound(false);
-        startGame(gameSession, guildPreference, db, message, client, null);
+        startRound(gameSessions, guildPreference, db, message, client);
     })
 }
 

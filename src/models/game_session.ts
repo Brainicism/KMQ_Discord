@@ -1,5 +1,5 @@
 import Scoreboard from "./scoreboard";
-import { StreamDispatcher, VoiceConnection, TextChannel, Message } from "discord.js"
+import { StreamDispatcher, VoiceConnection, TextChannel, Message, VoiceChannel } from "discord.js"
 import _logger from "../logger";
 import { Databases } from "types";
 import GameRound from "./game_round";
@@ -16,13 +16,15 @@ export default class GameSession {
     public finished: boolean;
     public lastActive: number;
     public textChannel: TextChannel;
+    public voiceChannel: VoiceChannel;
     public gameRound: GameRound;
-
+    public roundsPlayed: number;
+    
     private guessTimes: Array<number>;
     private participants: Set<string>;
-    private roundsPlayed: number;
 
-    constructor(textChannel: TextChannel) {
+
+    constructor(textChannel: TextChannel, voiceChannel: VoiceChannel) {
         this.scoreboard = new Scoreboard();
         this.lastActive = Date.now();
         this.sessionInitialized = false;
@@ -33,6 +35,7 @@ export default class GameSession {
         this.dispatcher = null;
         this.connection = null;
         this.finished = false;
+        this.voiceChannel = voiceChannel;
         this.textChannel = textChannel;
         this.gameRound = null;
     }
