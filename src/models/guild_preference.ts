@@ -7,9 +7,13 @@ import { SEEK_TYPES } from "../commands/seek";
 import _logger from "../logger";
 import * as Knex from "knex";
 import { Databases } from "types";
+import { MODE_TYPE } from "../commands/mode";
 const logger = _logger("guild_preference");
 
-const DEFAULT_OPTIONS = { beginningYear: BEGINNING_SEARCH_YEAR, endYear: (new Date()).getFullYear(), gender: [GENDER.FEMALE], limit: DEFAULT_LIMIT, volume: DEFAULT_VOLUME, seekType: SEEK_TYPES.RANDOM, groups: null };
+const DEFAULT_OPTIONS = {
+    beginningYear: BEGINNING_SEARCH_YEAR, endYear: (new Date()).getFullYear(), gender: [GENDER.FEMALE],
+    limit: DEFAULT_LIMIT, volume: DEFAULT_VOLUME, seekType: SEEK_TYPES.RANDOM, modeType: MODE_TYPE.SONG_NAME, groups: null
+};
 interface GameOption {
     beginningYear: number;
     endYear: number;
@@ -17,6 +21,7 @@ interface GameOption {
     limit: number;
     volume: number;
     seekType: string;
+    modeType: string;
     groups: { id: number, name: string }[];
 }
 
@@ -25,7 +30,7 @@ export default class GuildPreference {
     private botPrefix: string;
     private gameOptions: GameOption;
 
-    constructor(guildID: string, json?: GuildPreference) {
+    constructor(guildID: string, json?: GuildPreference, db?: Databases) {
         this.guildID = guildID;
         if (!json) {
             this.gameOptions = DEFAULT_OPTIONS;
@@ -35,11 +40,16 @@ export default class GuildPreference {
         this.gameOptions = json.gameOptions;
         this.botPrefix = json.botPrefix;
         //apply default game option for empty
+        let missingOptionAdded = false;
         for (let defaultOption in DEFAULT_OPTIONS) {
             if (!(defaultOption in this.gameOptions)) {
                 this.gameOptions[defaultOption] = DEFAULT_OPTIONS[defaultOption];
                 logger.info(`Filling in missing game option: ${defaultOption} for guild: ${guildID}`);
+                missingOptionAdded = true;
             }
+        }
+        if (missingOptionAdded) {
+            this.updateGuildPreferences(db.kmq);
         }
     }
 
@@ -141,6 +151,15 @@ export default class GuildPreference {
 
     getSeekType(): string {
         return this.gameOptions.seekType;
+    }
+
+    setModeType(modeType: string, db: Databases) {
+        this.gameOptions.modeType = modeType;
+        this.updateGuildPreferences(db.kmq);
+    }
+
+    getModeType(): string {
+        return this.gameOptions.modeType;
     }
 
     setVolume(volume: number, db: Databases) {

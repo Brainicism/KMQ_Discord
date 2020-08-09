@@ -111,10 +111,10 @@ export default class GameSession {
         return `${this.gameRound.song}:${this.gameRound.artist}:${this.gameRound.videoID}`;
     }
 
-    checkGuess(message: Message): boolean {
+    checkGuess(message: Message, modeType: string): boolean {
         if (!this.gameRound) return;
         this.participants.add(message.author.id);
-        return this.gameRound.checkGuess(message);
+        return this.gameRound.checkGuess(message, modeType);
     }
 
     async lastActiveNow(db: Databases): Promise<void> {

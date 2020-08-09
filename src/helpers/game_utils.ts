@@ -13,7 +13,8 @@ import { SEEK_TYPES } from "../commands/seek";
 import { isDebugMode, getForcePlaySong, skipSongPlay, isForcedSongActive } from "./debug_utils";
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 const REMOVED_CHARACTERS_SONG_GUESS = /[\|’\ ']/g
-const GameOptions: { [option: string]: string } = { "GENDER": "Gender", "CUTOFF": "Cutoff", "LIMIT": "Limit", "VOLUME": "Volume", "SEEK_TYPE": "Seek Type", "GROUPS": "Groups" };
+const REMOVED_CHARACTERS_ARTIST_GUESS = /[:'.\-★*]/g
+const GameOptions: { [option: string]: string } = { "GENDER": "Gender", "CUTOFF": "Cutoff", "LIMIT": "Limit", "VOLUME": "Volume", "SEEK_TYPE": "Seek Type", "GROUPS": "Groups", "MODE": "Guess Mode" };
 
 const logger = _logger("game_utils");
 
@@ -34,7 +35,7 @@ const guessSong = async ({ client, message, gameSessions, db }: CommandArgs) => 
         return;
     }
 
-    if (gameSession.checkGuess(message)) {
+    if (gameSession.checkGuess(message, guildPreference.getModeType())) {
         logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${gameSession.gameRound.song}`)
         const userTag = getUserIdentifier(message.author);
         gameSession.scoreboard.updateScoreboard(userTag, message.author.id);
@@ -252,6 +253,13 @@ const cleanSongName = (name: string): string => {
     return cleanName;
 }
 
+const cleanArtistName = (name: string): string => {
+    const cleanName = name.toLowerCase()
+        .replace(REMOVED_CHARACTERS_ARTIST_GUESS, "")
+        .trim();
+    return cleanName;
+}
+
 const getSongCount = async (guildPreference: GuildPreference, db: Databases): Promise<number> => {
     try {
         const { countBeforeLimit: totalCount } = await getFilteredSongList(guildPreference, db);
@@ -294,7 +302,7 @@ const getGuildPreference = async (db: Databases, guildID: string): Promise<Guild
             .insert({ guild_id: guildID, guild_preference: JSON.stringify(guildPreference), join_date: new Date() });
         return guildPreference;
     }
-    return new GuildPreference(guildPreferences[0].guild_id, JSON.parse(guildPreferences[0].guild_preference));
+    return new GuildPreference(guildPreferences[0].guild_id, JSON.parse(guildPreferences[0].guild_preference), db);
 }
 
 
@@ -302,6 +310,7 @@ export {
     guessSong,
     startGame,
     cleanSongName,
+    cleanArtistName,
     getSongCount,
     GameOptions,
     cleanupInactiveGameSessions,

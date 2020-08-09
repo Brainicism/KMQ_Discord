@@ -1,6 +1,9 @@
 import * as songAliasesList from "../../data/song_aliases.json";
-import { cleanSongName } from "../helpers/game_utils";
+import { cleanSongName, cleanArtistName } from "../helpers/game_utils";
 import { Message } from "discord.js";
+import { MODE_TYPE } from "../commands/mode";
+import _logger from "../logger";
+const logger = _logger("game_round");
 
 export default class GameRound {
     public readonly song: string;
@@ -32,11 +35,23 @@ export default class GameRound {
         return this.skippers.size;
     }
 
-    checkGuess(message: Message): boolean {
-        const guess = cleanSongName(message.content);
-        const cleanedSongAliases = this.songAliases.map((x) => cleanSongName(x));
-        const correctGuess = this.song && (guess === cleanSongName(this.song) || cleanedSongAliases.includes(guess));
-        return correctGuess;
+    checkGuess(message: Message, modeType: string): boolean {
+        if (modeType === MODE_TYPE.SONG_NAME) {
+            const guess = cleanSongName(message.content);
+            const cleanedSongAliases = this.songAliases.map((x) => cleanSongName(x));
+            const correctGuess = this.song && (guess === cleanSongName(this.song) || cleanedSongAliases.includes(guess));
+            return correctGuess;
+        }
+        else if (modeType === MODE_TYPE.ARTIST) {
+            const guess = cleanArtistName(message.content);
+            const artistNames = this.artist.split("+");
+            const cleanedArtistNames = artistNames.map(x => cleanArtistName(x));
+            let correctGuess = this.song && (guess === cleanArtistName(this.artist) || cleanedArtistNames.includes(guess));
+            return correctGuess;
+        }
+        else {
+            logger.error(`Illegal mode type: ${modeType}`);
+        }
     }
 
 }
