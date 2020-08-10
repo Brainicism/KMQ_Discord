@@ -5,7 +5,7 @@ import GuildPreference from "../models/guild_preference";
 import GameSession from "../models/game_session";
 import BaseCommand from "commands/base_command";
 import _logger from "../logger";
-import { getSongCount, GameOptions } from "./game_utils";
+import { getSongCount, GameOption } from "./game_utils";
 import { Databases } from "types";
 const logger = _logger("utils");
 const EMBED_INFO_COLOR = 0x000000; // BLACK
@@ -90,13 +90,13 @@ const sendOptionsMessage = async (message: Discord.Message, guildPreference: Gui
     let seekTypeString = `${guildPreference.getSeekType()}`;
     let modeTypeString = `${guildPreference.getModeType()}`;
 
-    cutoffString = updatedOption == GameOptions.CUTOFF ? bold(cutoffString) : codeLine(cutoffString);
-    genderString = updatedOption == GameOptions.GENDER ? bold(genderString) : codeLine(genderString);
-    limitString = updatedOption == GameOptions.LIMIT ? bold(limitString) : codeLine(limitString);
-    groupsString = updatedOption == GameOptions.GROUPS ? bold(groupsString) : codeLine(groupsString);
-    volumeString = updatedOption == GameOptions.VOLUME ? bold(volumeString) : codeLine(volumeString);
-    seekTypeString = updatedOption == GameOptions.SEEK_TYPE ? bold(seekTypeString) : codeLine(seekTypeString);
-    modeTypeString = updatedOption == GameOptions.SEEK_TYPE ? bold(modeTypeString) : codeLine(modeTypeString);
+    cutoffString = updatedOption == GameOption.CUTOFF ? bold(cutoffString) : codeLine(cutoffString);
+    genderString = updatedOption == GameOption.GENDER ? bold(genderString) : codeLine(genderString);
+    limitString = updatedOption == GameOption.LIMIT ? bold(limitString) : codeLine(limitString);
+    groupsString = updatedOption == GameOption.GROUPS ? bold(groupsString) : codeLine(groupsString);
+    volumeString = updatedOption == GameOption.VOLUME ? bold(volumeString) : codeLine(volumeString);
+    seekTypeString = updatedOption == GameOption.SEEK_TYPE ? bold(seekTypeString) : codeLine(seekTypeString);
+    modeTypeString = updatedOption == GameOption.MODE_TYPE ? bold(modeTypeString) : codeLine(modeTypeString);
 
     await sendInfoMessage(message,
         updatedOption == null ? "Options" : `${updatedOption} updated`,

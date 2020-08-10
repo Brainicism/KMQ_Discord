@@ -1,16 +1,18 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import { sendOptionsMessage, getDebugContext } from "../helpers/discord_utils";
-import { GameOptions, getGuildPreference } from "../helpers/game_utils";
+import { GameOption, getGuildPreference } from "../helpers/game_utils";
 import _logger from "../logger";
 const logger = _logger("seek");
-const SEEK_TYPES: { [seekType: string]: string } = { BEGINNING: "beginning", RANDOM: "random" }
-
+enum SEEK_TYPE {
+    BEGINNING = "beginning",
+    RANDOM = "random"
+}
 class SeekCommand implements BaseCommand {
     async call({ message, parsedMessage, db }: CommandArgs) {
         const guildPreference = await getGuildPreference(db, message.guild.id);
         const seekType = parsedMessage.components[0];
-        guildPreference.setSeekType(seekType, db);
-        await sendOptionsMessage(message, guildPreference, db, GameOptions.SEEK_TYPE);
+        guildPreference.setSeekType(seekType as SEEK_TYPE, db);
+        await sendOptionsMessage(message, guildPreference, db, GameOption.SEEK_TYPE);
         logger.info(`${getDebugContext(message)} | Seek type set to ${seekType}`);
     }
     validations = {
@@ -20,7 +22,7 @@ class SeekCommand implements BaseCommand {
             {
                 name: "seekType",
                 type: "enum" as const,
-                enums: Object.values(SEEK_TYPES)
+                enums: Object.values(SEEK_TYPE)
             }
         ]
     }
@@ -39,5 +41,5 @@ class SeekCommand implements BaseCommand {
 }
 export default SeekCommand;
 export {
-    SEEK_TYPES
+    SEEK_TYPE
 }

@@ -9,13 +9,20 @@ import GuildPreference from "../models/guild_preference";
 import { getAudioDurationInSeconds } from "get-audio-duration";
 import * as Discord from "discord.js";
 import { QueriedSong, Databases } from "types";
-import { SEEK_TYPES } from "../commands/seek";
+import { SEEK_TYPE } from "../commands/seek";
 import { isDebugMode, getForcePlaySong, skipSongPlay, isForcedSongActive } from "./debug_utils";
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 const REMOVED_CHARACTERS_SONG_GUESS = /[\|’\ ']/g
 const REMOVED_CHARACTERS_ARTIST_GUESS = /[:'.\-★*]/g
-const GameOptions: { [option: string]: string } = { "GENDER": "Gender", "CUTOFF": "Cutoff", "LIMIT": "Limit", "VOLUME": "Volume", "SEEK_TYPE": "Seek Type", "GROUPS": "Groups", "MODE": "Guess Mode" };
-
+enum GameOption {
+    GENDER = "Gender",
+    CUTOFF = "Cutoff",
+    LIMIT = "Limit",
+    VOLUME = "Volume",
+    SEEK_TYPE = "Seek Type",
+    MODE_TYPE = "Guess Mode",
+    GROUPS = "Groups"
+}
 const logger = _logger("game_utils");
 
 
@@ -195,7 +202,7 @@ const playSong = async (gameSessions:  { [guildID: string]: GameSession }, guild
     const songLocation = `${SONG_CACHE_DIR}/${gameRound.videoID}.mp3`;
 
     let seekLocation: number;
-    if (guildPreference.getSeekType() === SEEK_TYPES.RANDOM) {
+    if (guildPreference.getSeekType() === SEEK_TYPE.RANDOM) {
         try {
             const songDuration = await getAudioDurationInSeconds(songLocation);
             seekLocation = songDuration * (0.6 * Math.random());
@@ -312,7 +319,7 @@ export {
     cleanSongName,
     cleanArtistName,
     getSongCount,
-    GameOptions,
+    GameOption,
     cleanupInactiveGameSessions,
     getGuildPreference
 }

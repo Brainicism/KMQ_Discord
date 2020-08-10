@@ -1,10 +1,13 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import { sendOptionsMessage, getDebugContext, sendErrorMessage } from "../helpers/discord_utils";
-import { GameOptions, getGuildPreference } from "../helpers/game_utils";
+import { GameOption, getGuildPreference } from "../helpers/game_utils";
 import _logger from "../logger";
 const logger = _logger("gender");
-const GENDER: { [gender: string]: string } = { MALE: "male", FEMALE: "female", COED: "coed" }
-
+enum GENDER {
+    MALE = "male",
+    FEMALE = "female",
+    COED = "coed"
+}
 class GenderCommand implements BaseCommand {
     async call({ message, parsedMessage, db }: CommandArgs) {
         const guildPreference = await getGuildPreference(db, message.guild.id);
@@ -12,7 +15,7 @@ class GenderCommand implements BaseCommand {
             sendErrorMessage(message, "Game Option Conflict", `\`groups\` game option is currently set. \`gender\` and \`groups\` are incompatible. Remove the \`groups\` option to proceed`);
             return;
         }
-        const selectedGenderArray = guildPreference.setGender(parsedMessage.components, db);
+        const selectedGenderArray = guildPreference.setGender(parsedMessage.components as GENDER[], db);
         let selectedGenderStr = "";
         for (let i = 0; i < selectedGenderArray.length; i++) {
             selectedGenderStr += `\`${selectedGenderArray[i]}\``;
@@ -27,7 +30,7 @@ class GenderCommand implements BaseCommand {
             }
 
         }
-        await sendOptionsMessage(message, guildPreference, db, GameOptions.GENDER);
+        await sendOptionsMessage(message, guildPreference, db, GameOption.GENDER);
         logger.info(`${getDebugContext(message)} | Genders set to ${selectedGenderStr}`);
     }
     validations = {
