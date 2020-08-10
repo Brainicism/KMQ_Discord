@@ -6,7 +6,8 @@ import {
     areUserAndBotInSameVoiceChannel,
     getNumParticipants,
     EMBED_INFO_COLOR,
-    getDebugContext
+    getDebugContext,
+    EMBED_SUCCESS_COLOR
 } from "../helpers/discord_utils";
 import { startGame, getGuildPreference } from "../helpers/game_utils";
 import _logger from "../logger";
@@ -66,7 +67,7 @@ async function sendSkipNotification(message: Discord.Message, gameSession: GameS
 async function sendSkipMessage(message: Discord.Message, gameSession: GameSession) {
     await message.channel.send({
         embed: {
-            color: EMBED_INFO_COLOR,
+            color: EMBED_SUCCESS_COLOR,
             author: {
                 name: message.author.username,
                 icon_url: message.author.avatarURL

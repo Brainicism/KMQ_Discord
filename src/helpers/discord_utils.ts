@@ -5,12 +5,14 @@ import GuildPreference from "../models/guild_preference";
 import GameSession from "../models/game_session";
 import BaseCommand from "commands/base_command";
 import _logger from "../logger";
-import { getSongCount, GameOptions } from "./game_utils";
+import { getSongCount, GameOption } from "./game_utils";
 const logger = _logger("utils");
 const EMBED_INFO_COLOR = 0x000000; // BLACK
 const EMBED_ERROR_COLOR = 0xE74C3C; // RED
+const EMBED_SUCCESS_COLOR = 0x00FF00; // GREEN
+const MAX_EMBED_FIELDS = 25;
 
-const sendSongMessage = async (message: Discord.Message, gameSession: GameSession, isForfeit: boolean) => {
+const sendSongMessage = async (message: Discord.Message, gameSession: GameSession, isForfeit: boolean, guesser?: string) => {
     let footer = null;
     const gameRound = gameSession.gameRound;
     if (!gameRound) return;
@@ -27,19 +29,21 @@ const sendSongMessage = async (message: Discord.Message, gameSession: GameSessio
             }
         }
     }
+    let emptyScoreBoard = gameSession.scoreboard.isEmpty();
+    let description = `${isForfeit ? "Nobody got it." : (`**${guesser}** guessed correctly!`)}\nhttps://youtube.com/watch?v=${gameRound.videoID} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`
     await sendMessage(message, {
         embed: {
-            color: EMBED_INFO_COLOR,
+            color: isForfeit ? EMBED_ERROR_COLOR : EMBED_SUCCESS_COLOR,
             author: {
                 name: isForfeit ? null : message.author.username,
                 icon_url: isForfeit ? null : message.author.avatarURL
             },
             title: `"${gameRound.song}" - ${gameRound.artist}`,
-            description: `https://youtube.com/watch?v=${gameRound.videoID}\n\n**Scoreboard**`,
+            description,
             image: {
                 url: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`
             },
-            fields: gameSession.scoreboard.getScoreboard(),
+            fields: gameSession.scoreboard.getScoreboard().slice(0, MAX_EMBED_FIELDS),
             footer
         }
     });
@@ -89,13 +93,13 @@ const sendOptionsMessage = async (message: Discord.Message, guildPreference: Gui
     let seekTypeString = `${guildPreference.getSeekType()}`;
     let modeTypeString = `${guildPreference.getModeType()}`;
 
-    cutoffString = updatedOption == GameOptions.CUTOFF ? bold(cutoffString) : codeLine(cutoffString);
-    genderString = updatedOption == GameOptions.GENDER ? bold(genderString) : codeLine(genderString);
-    limitString = updatedOption == GameOptions.LIMIT ? bold(limitString) : codeLine(limitString);
-    groupsString = updatedOption == GameOptions.GROUPS ? bold(groupsString) : codeLine(groupsString);
-    volumeString = updatedOption == GameOptions.VOLUME ? bold(volumeString) : codeLine(volumeString);
-    seekTypeString = updatedOption == GameOptions.SEEK_TYPE ? bold(seekTypeString) : codeLine(seekTypeString);
-    modeTypeString = updatedOption == GameOptions.SEEK_TYPE ? bold(modeTypeString) : codeLine(modeTypeString);
+    cutoffString = updatedOption == GameOption.CUTOFF ? bold(cutoffString) : codeLine(cutoffString);
+    genderString = updatedOption == GameOption.GENDER ? bold(genderString) : codeLine(genderString);
+    limitString = updatedOption == GameOption.LIMIT ? bold(limitString) : codeLine(limitString);
+    groupsString = updatedOption == GameOption.GROUPS ? bold(groupsString) : codeLine(groupsString);
+    volumeString = updatedOption == GameOption.VOLUME ? bold(volumeString) : codeLine(volumeString);
+    seekTypeString = updatedOption == GameOption.SEEK_TYPE ? bold(seekTypeString) : codeLine(seekTypeString);
+    modeTypeString = updatedOption == GameOption.MODE_TYPE ? bold(modeTypeString) : codeLine(modeTypeString);
 
     await sendInfoMessage(message,
         updatedOption == null ? "Options" : `${updatedOption} updated`,
@@ -104,6 +108,36 @@ const sendOptionsMessage = async (message: Discord.Message, guildPreference: Gui
         updatedOption == null ? "assets/tsukasa.jpg" : null
     );
 }
+
+const sendEndGameMessage = async (message: Discord.Message, gameSession: GameSession) => {
+    if (gameSession.scoreboard.isEmpty()) {
+        await sendMessage(message, {
+            embed: {
+                color: EMBED_INFO_COLOR,
+                author: {
+                    name: message.author.username,
+                    icon_url: message.author.avatarURL
+                },
+                title: "Nobody won 😔"
+            }
+        });
+    }
+    else {
+        await sendMessage(message, {
+            embed: {
+                color: EMBED_SUCCESS_COLOR,
+                author: {
+                    name: message.author.username,
+                    icon_url: message.author.avatarURL
+                },
+                description: "**Scoreboard**",
+                title: gameSession.scoreboard.getWinnerMessage(),
+                fields: gameSession.scoreboard.getScoreboard().slice(0, MAX_EMBED_FIELDS)
+            }
+        });
+    }
+}
+
 const getDebugContext = (message: Discord.Message): string => {
     return `gid: ${message.guild.id}, uid: ${message.author.id}`
 }
@@ -212,6 +246,7 @@ export async function sendMessage(context: Discord.Message, messageContent: any)
 export {
     EMBED_INFO_COLOR,
     EMBED_ERROR_COLOR,
+    EMBED_SUCCESS_COLOR,
     touch,
     getCommandFiles,
     sendSongMessage,
@@ -219,6 +254,7 @@ export {
     sendInfoMessage,
     sendErrorMessage,
     sendOptionsMessage,
+    sendEndGameMessage,
     arraysEqual,
     bold,
     italicize,

@@ -1,6 +1,6 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import { getDebugContext, sendOptionsMessage } from "../helpers/discord_utils";
-import { GameOptions, getSongCount, getGuildPreference } from "../helpers/game_utils";
+import { GameOption, getSongCount, getGuildPreference } from "../helpers/game_utils";
 import _logger from "../logger";
 const logger = _logger("limit");
 const DEFAULT_LIMIT = 500;
@@ -13,7 +13,7 @@ class LimitCommand implements BaseCommand {
         if (guildPreference.getLimit() > songCount) {
             guildPreference.setLimit(songCount);
         }
-        await sendOptionsMessage(message, guildPreference, GameOptions.LIMIT);
+        await sendOptionsMessage(message, guildPreference, GameOption.LIMIT);
         logger.info(`${getDebugContext(message)} | Limit set to ${guildPreference.getLimit()}`);
     }
     validations = {

@@ -3,7 +3,7 @@ import { DEFAULT_BOT_PREFIX } from "../commands/prefix";
 import { DEFAULT_LIMIT } from "../commands/limit";
 import { DEFAULT_VOLUME } from "../commands/volume";
 import { GENDER } from "../commands/gender";
-import { SEEK_TYPES } from "../commands/seek";
+import { SEEK_TYPE } from "../commands/seek";
 import _logger from "../logger";
 import * as Knex from "knex";
 import { db } from "../databases";
@@ -12,23 +12,23 @@ const logger = _logger("guild_preference");
 
 const DEFAULT_OPTIONS = {
     beginningYear: BEGINNING_SEARCH_YEAR, endYear: (new Date()).getFullYear(), gender: [GENDER.FEMALE],
-    limit: DEFAULT_LIMIT, volume: DEFAULT_VOLUME, seekType: SEEK_TYPES.RANDOM, modeType: MODE_TYPE.SONG_NAME, groups: null
+    limit: DEFAULT_LIMIT, volume: DEFAULT_VOLUME, seekType: SEEK_TYPE.RANDOM, modeType: MODE_TYPE.SONG_NAME, groups: null
 };
-interface GameOption {
+interface GameOptions {
     beginningYear: number;
     endYear: number;
-    gender: string[];
+    gender: GENDER[];
     limit: number;
     volume: number;
-    seekType: string;
-    modeType: string;
+    seekType: SEEK_TYPE;
+    modeType: MODE_TYPE;
     groups: { id: number, name: string }[];
 }
 
 export default class GuildPreference {
     private guildID: string;
     private botPrefix: string;
-    private gameOptions: GameOption;
+    private gameOptions: GameOptions;
 
     constructor(guildID: string, json?: GuildPreference) {
         this.guildID = guildID;
@@ -123,7 +123,7 @@ export default class GuildPreference {
         this.updateGuildPreferences(db.kmq);
     }
 
-    setGender(genderArr: string[]): Array<string> {
+    setGender(genderArr: GENDER[]): Array<string> {
         this.gameOptions.gender = [...new Set(genderArr)];
         this.updateGuildPreferences(db.kmq);
         return this.gameOptions.gender;
@@ -142,21 +142,21 @@ export default class GuildPreference {
         return this.botPrefix;
     }
 
-    setSeekType(seekType: string) {
+    setSeekType(seekType: SEEK_TYPE) {
         this.gameOptions.seekType = seekType;
         this.updateGuildPreferences(db.kmq);
     }
 
-    getSeekType(): string {
+    getSeekType(): SEEK_TYPE {
         return this.gameOptions.seekType;
     }
 
-    setModeType(modeType: string) {
-        this.gameOptions.modeType = modeType;
+    setModeType(modeType: MODE_TYPE) {
+        this.gameOptions.modeType = modeType as MODE_TYPE;
         this.updateGuildPreferences(db.kmq);
     }
 
-    getModeType(): string {
+    getModeType(): MODE_TYPE {
         return this.gameOptions.modeType;
     }
 

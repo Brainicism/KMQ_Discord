@@ -1,6 +1,6 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import { sendOptionsMessage, getDebugContext, sendErrorMessage } from "../helpers/discord_utils";
-import { GameOptions, getGuildPreference } from "../helpers/game_utils";
+import { GameOption, getGuildPreference } from "../helpers/game_utils";
 import { db } from "../databases";
 import _logger from "../logger";
 const logger = _logger("groups");
@@ -9,7 +9,7 @@ class GroupsCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guild.id);
         if (parsedMessage.components.length === 0) {
             guildPreference.resetGroups();
-            await sendOptionsMessage(message, guildPreference, GameOptions.GROUPS);
+            await sendOptionsMessage(message, guildPreference, GameOption.GROUPS);
             return;
         }
         const groupNames = parsedMessage.argument.split(",").map((groupName) => groupName.trim());
@@ -28,7 +28,7 @@ class GroupsCommand implements BaseCommand {
             return;
         }
         guildPreference.setGroups(matchingGroups);
-        await sendOptionsMessage(message, guildPreference, GameOptions.GROUPS);
+        await sendOptionsMessage(message, guildPreference, GameOption.GROUPS);
         logger.info(`${getDebugContext(message)} | Groups set to ${guildPreference.getGroupNames()}`);
     }
 
