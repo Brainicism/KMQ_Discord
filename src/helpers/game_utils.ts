@@ -40,7 +40,7 @@ const guessSong = async ({ client, message, gameSessions, db }: CommandArgs) => 
         const userTag = getUserIdentifier(message.author);
         gameSession.scoreboard.updateScoreboard(userTag, message.author.id);
         gameSession.endRound(true);
-        await sendSongMessage(message, gameSession, false);
+        await sendSongMessage(message, gameSession, false, userTag);
 
         await db.kmq("guild_preferences")
             .where("guild_id", message.guild.id)

@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-import { sendSongMessage, disconnectVoiceConnection, sendInfoMessage, getDebugContext } from "../helpers/discord_utils";
+import { sendEndGameMessage, disconnectVoiceConnection, sendInfoMessage, getDebugContext } from "../helpers/discord_utils";
 import _logger from "../logger";
 const logger = _logger("end");
 
@@ -9,15 +9,8 @@ class EndCommand implements BaseCommand {
         if (!gameSession || !gameSession.gameRound) {
             return;
         }
-        sendSongMessage(message, gameSession, true);
-        if (!gameSession.scoreboard.isEmpty()) {
-            logger.info(`${getDebugContext(message)} | Game session ended, non-empty`);
-            sendInfoMessage(message, gameSession.scoreboard.getWinnerMessage())
-        }
-        else {
-            logger.info(`${getDebugContext(message)} | Game session ended, empty`);
-            sendInfoMessage(message, "Nobody won :(")
-        }
+        logger.info(`${getDebugContext(message)} | Game session ended`);
+        sendEndGameMessage(message, gameSession);
         await gameSession.endSession(gameSessions, db);
         disconnectVoiceConnection(client, message);
     }
