@@ -6,14 +6,14 @@ const logger = _logger("limit");
 const DEFAULT_LIMIT = 500;
 
 class LimitCommand implements BaseCommand {
-    async call({ message, parsedMessage, db }: CommandArgs) {
-        const guildPreference = await getGuildPreference(db, message.guild.id);
-        guildPreference.setLimit(parseInt(parsedMessage.components[0]), db);
-        const songCount = await getSongCount(guildPreference, db);
+    async call({ message, parsedMessage }: CommandArgs) {
+        const guildPreference = await getGuildPreference(message.guild.id);
+        guildPreference.setLimit(parseInt(parsedMessage.components[0]));
+        const songCount = await getSongCount(guildPreference);
         if (guildPreference.getLimit() > songCount) {
-            guildPreference.setLimit(songCount, db);
+            guildPreference.setLimit(songCount);
         }
-        await sendOptionsMessage(message, guildPreference, db, GameOption.LIMIT);
+        await sendOptionsMessage(message, guildPreference, GameOption.LIMIT);
         logger.info(`${getDebugContext(message)} | Limit set to ${guildPreference.getLimit()}`);
     }
     validations = {

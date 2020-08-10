@@ -14,8 +14,8 @@ import _logger from "../logger";
 const logger = _logger("skip");
 
 class SkipCommand implements BaseCommand {
-    async call({ gameSessions, client, message, db }: CommandArgs) {
-        const guildPreference = await getGuildPreference(db, message.guild.id);
+    async call({ gameSessions, client, message }: CommandArgs) {
+        const guildPreference = await getGuildPreference(message.guild.id);
         const gameSession = gameSessions[message.guild.id];
         if (!gameSession || !gameSession.gameRound || !areUserAndBotInSameVoiceChannel(message)) {
             logger.warn(`${getDebugContext(message)} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.gameRound: ${gameSession && !gameSession.gameRound}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
@@ -31,14 +31,14 @@ class SkipCommand implements BaseCommand {
             await sendSkipMessage(message, gameSession);
             await sendSongMessage(message, gameSession, true);
             gameSession.endRound(false);
-            startGame(gameSessions, guildPreference, db, message, client);
+            startGame(gameSessions, guildPreference, message, client);
             logger.info(`${getDebugContext(message)} | Skip majority achieved.`);
         }
         else {
             await sendSkipNotification(message, gameSession);
             logger.info(`${getDebugContext(message)} | Skip vote received.`);
         }
-        gameSession.lastActiveNow(db);
+        gameSession.lastActiveNow();
     }
     help = {
         name: "skip",

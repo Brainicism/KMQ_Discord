@@ -6,7 +6,7 @@ import { GENDER } from "../commands/gender";
 import { SEEK_TYPE } from "../commands/seek";
 import _logger from "../logger";
 import * as Knex from "knex";
-import { Databases } from "types";
+import { db } from "../databases";
 import { MODE_TYPE } from "../commands/mode";
 const logger = _logger("guild_preference");
 
@@ -30,7 +30,7 @@ export default class GuildPreference {
     private botPrefix: string;
     private gameOptions: GameOptions;
 
-    constructor(guildID: string, json?: GuildPreference, db?: Databases) {
+    constructor(guildID: string, json?: GuildPreference) {
         this.guildID = guildID;
         if (!json) {
             this.gameOptions = DEFAULT_OPTIONS;
@@ -52,12 +52,12 @@ export default class GuildPreference {
         }
     }
 
-    setLimit(limit: number, db: Databases) {
+    setLimit(limit: number) {
         this.gameOptions.limit = limit;
         this.updateGuildPreferences(db.kmq);
     }
 
-    resetLimit(db: Databases) {
+    resetLimit() {
         this.gameOptions.limit = DEFAULT_LIMIT;
         this.updateGuildPreferences(db.kmq);
     }
@@ -66,12 +66,12 @@ export default class GuildPreference {
         return this.gameOptions.limit;
     }
 
-    setBeginningCutoffYear(year: number, db: Databases) {
+    setBeginningCutoffYear(year: number) {
         this.gameOptions.beginningYear = year;
         this.updateGuildPreferences(db.kmq);
     }
 
-    resetBeginningCutoffYear(db: Databases) {
+    resetBeginningCutoffYear() {
         this.gameOptions.beginningYear = BEGINNING_SEARCH_YEAR;
         this.updateGuildPreferences(db.kmq);
     }
@@ -84,12 +84,12 @@ export default class GuildPreference {
         return BEGINNING_SEARCH_YEAR;
     }
 
-    setEndCutoffYear(year: number, db: Databases) {
+    setEndCutoffYear(year: number) {
         this.gameOptions.endYear = year;
         this.updateGuildPreferences(db.kmq);
     }
 
-    resetEndCutoffYear(year: number, db: Databases) {
+    resetEndCutoffYear(year: number) {
         this.gameOptions.endYear = (new Date()).getFullYear();
         this.updateGuildPreferences(db.kmq);
     }
@@ -98,12 +98,12 @@ export default class GuildPreference {
         return this.gameOptions.endYear;
     }
 
-    setGroups(groupIds: { id: number, name: string }[], db: Databases) {
+    setGroups(groupIds: { id: number, name: string }[]) {
         this.gameOptions.groups = groupIds;
         this.updateGuildPreferences(db.kmq);
     }
 
-    resetGroups(db: Databases) {
+    resetGroups() {
         this.gameOptions.groups = null;
         this.updateGuildPreferences(db.kmq);
     }
@@ -118,12 +118,12 @@ export default class GuildPreference {
         return this.gameOptions.groups.map((x) => x["name"]);
     }
 
-    resetGender(db: Databases) {
+    resetGender() {
         this.gameOptions.gender = [GENDER.FEMALE];
         this.updateGuildPreferences(db.kmq);
     }
 
-    setGender(genderArr: GENDER[], db: Databases): Array<string> {
+    setGender(genderArr: GENDER[]): Array<string> {
         this.gameOptions.gender = [...new Set(genderArr)];
         this.updateGuildPreferences(db.kmq);
         return this.gameOptions.gender;
@@ -133,7 +133,7 @@ export default class GuildPreference {
         return this.gameOptions.gender.join(",");
     }
 
-    setBotPrefix(prefix: string, db: Databases) {
+    setBotPrefix(prefix: string) {
         this.botPrefix = prefix;
         this.updateGuildPreferences(db.kmq);
     }
@@ -142,7 +142,7 @@ export default class GuildPreference {
         return this.botPrefix;
     }
 
-    setSeekType(seekType: SEEK_TYPE, db: Databases) {
+    setSeekType(seekType: SEEK_TYPE) {
         this.gameOptions.seekType = seekType;
         this.updateGuildPreferences(db.kmq);
     }
@@ -151,7 +151,7 @@ export default class GuildPreference {
         return this.gameOptions.seekType;
     }
 
-    setModeType(modeType: MODE_TYPE, db: Databases) {
+    setModeType(modeType: MODE_TYPE) {
         this.gameOptions.modeType = modeType as MODE_TYPE;
         this.updateGuildPreferences(db.kmq);
     }
@@ -160,7 +160,7 @@ export default class GuildPreference {
         return this.gameOptions.modeType;
     }
 
-    setVolume(volume: number, db: Databases) {
+    setVolume(volume: number) {
         this.gameOptions.volume = volume;
         this.updateGuildPreferences(db.kmq);
     }

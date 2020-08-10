@@ -1,14 +1,15 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import { sendOptionsMessage, getDebugContext, sendErrorMessage } from "../helpers/discord_utils";
 import { GameOption, getGuildPreference } from "../helpers/game_utils";
+import { db } from "../databases";
 import _logger from "../logger";
 const logger = _logger("groups");
 class GroupsCommand implements BaseCommand {
-    async call({ message, parsedMessage, db }: CommandArgs) {
-        const guildPreference = await getGuildPreference(db, message.guild.id);
+    async call({ message, parsedMessage }: CommandArgs) {
+        const guildPreference = await getGuildPreference(message.guild.id);
         if (parsedMessage.components.length === 0) {
-            guildPreference.resetGroups(db);
-            await sendOptionsMessage(message, guildPreference, db, GameOption.GROUPS);
+            guildPreference.resetGroups();
+            await sendOptionsMessage(message, guildPreference, GameOption.GROUPS);
             return;
         }
         const groupNames = parsedMessage.argument.split(",").map((groupName) => groupName.trim());
@@ -26,8 +27,8 @@ class GroupsCommand implements BaseCommand {
             await sendErrorMessage(message, "Unknown Group Name", `One or more of the specified group names was not recognized. Please ensure that the group name matches exactly with the list provided by \`${guildPreference.getBotPrefix()}help groups\` \nThe following groups were **not** recognized:\n ${unrecognizedGroups.join(", ")} `);
             return;
         }
-        guildPreference.setGroups(matchingGroups, db);
-        await sendOptionsMessage(message, guildPreference, db, GameOption.GROUPS);
+        guildPreference.setGroups(matchingGroups);
+        await sendOptionsMessage(message, guildPreference, GameOption.GROUPS);
         logger.info(`${getDebugContext(message)} | Groups set to ${guildPreference.getGroupNames()}`);
     }
 

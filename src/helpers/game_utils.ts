@@ -11,6 +11,7 @@ import * as Discord from "discord.js";
 import { QueriedSong, Databases } from "types";
 import { SEEK_TYPE } from "../commands/seek";
 import { isDebugMode, getForcePlaySong, skipSongPlay, isForcedSongActive } from "./debug_utils";
+import { db } from "../databases";
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 const REMOVED_CHARACTERS_SONG_GUESS = /[\|’\ ']/g
 const REMOVED_CHARACTERS_ARTIST_GUESS = /[:'.\-★*]/g
@@ -26,8 +27,8 @@ enum GameOption {
 const logger = _logger("game_utils");
 
 
-const guessSong = async ({ client, message, gameSessions, db }: CommandArgs) => {
-    const guildPreference = await getGuildPreference(db, message.guild.id);
+const guessSong = async ({ client, message, gameSessions }: CommandArgs) => {
+    const guildPreference = await getGuildPreference(message.guild.id);
     const gameSession = gameSessions[message.guild.id];
     const voiceConnection = client.voiceConnections.get(message.guild.id);
     if (!gameSession || !gameSession.gameRound || gameSession.gameRound.finished) return;
@@ -57,11 +58,11 @@ const guessSong = async ({ client, message, gameSessions, db }: CommandArgs) => 
             const stream: string = resolve("assets/ring.wav");
             gameSession.connection.playFile(stream);
         }
-        startRound(gameSessions, guildPreference, db, message, client);
+        startRound(gameSessions, guildPreference, message, client);
     }
 }
 
-const getFilteredSongList = async (guildPreference: GuildPreference, db: Databases): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> => {
+const getFilteredSongList = async (guildPreference: GuildPreference): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> => {
     let result: Array<QueriedSong>;
     if (guildPreference.getGroupIds() === null) {
         result = await db.kpopVideos("kpop_videos.app_kpop")
@@ -96,12 +97,12 @@ const getFilteredSongList = async (guildPreference: GuildPreference, db: Databas
     };
 
 }
-const startGame = async (gameSessions: { [guildID: string]: GameSession }, guildPreference: GuildPreference, db: Databases, message: Discord.Message, client: Discord.Client) => {
+const startGame = async (gameSessions: { [guildID: string]: GameSession }, guildPreference: GuildPreference, message: Discord.Message, client: Discord.Client) => {
     logger.info(`${getDebugContext(message)} | Game session starting`);
-    startRound(gameSessions, guildPreference, db, message, client);
+    startRound(gameSessions, guildPreference, message, client);
 }
 
-const startRound = async (gameSessions: { [guildID: string]: GameSession }, guildPreference: GuildPreference, db: Databases, message: Discord.Message, client: Discord.Client) => {
+const startRound = async (gameSessions: { [guildID: string]: GameSession }, guildPreference: GuildPreference, message: Discord.Message, client: Discord.Client) => {
     const gameSession = gameSessions[message.guild.id];
     if (!gameSession || gameSession.finished) {
         return;
@@ -114,7 +115,7 @@ const startRound = async (gameSessions: { [guildID: string]: GameSession }, guil
     gameSession.setSessionInitialized(true);
     let randomSong: QueriedSong;
     try {
-        randomSong = await selectRandomSong(guildPreference, db);
+        randomSong = await selectRandomSong(guildPreference);
         if (randomSong === null) {
             gameSession.setSessionInitialized(false);
             sendErrorMessage(message, "Song Query Error", "Failed to find songs matching this criteria. Try to broaden your search.");
@@ -138,7 +139,7 @@ const startRound = async (gameSessions: { [guildID: string]: GameSession }, guil
         return;
     }
     gameSession.startRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);
-    playSong(gameSessions, guildPreference, db, message, client);
+    playSong(gameSessions, guildPreference, message, client);
 }
 
 const ensureVoiceConnection = async (gameSession: GameSession, client: Discord.Client) => {
@@ -157,13 +158,13 @@ const ensureVoiceConnection = async (gameSession: GameSession, client: Discord.C
     gameSession.connection = connection;
 }
 
-const selectRandomSong = async (guildPreference: GuildPreference, db: Databases): Promise<QueriedSong> => {
+const selectRandomSong = async (guildPreference: GuildPreference): Promise<QueriedSong> => {
     if (isDebugMode() && isForcedSongActive()) {
-        const forcePlayedQueriedSong = await getForcePlaySong(db);
+        const forcePlayedQueriedSong = await getForcePlaySong();
         logger.debug(`Force playing ${forcePlayedQueriedSong.name} by ${forcePlayedQueriedSong.artist} | ${forcePlayedQueriedSong.youtubeLink}`);
         return forcePlayedQueriedSong;
     }
-    const { songs: queriedSongList } = await getFilteredSongList(guildPreference, db);
+    const { songs: queriedSongList } = await getFilteredSongList(guildPreference);
     if (queriedSongList.length === 0) {
         return null;
     }
@@ -190,7 +191,7 @@ const selectRandomSong = async (guildPreference: GuildPreference, db: Databases)
     }
 }
 
-const playSong = async (gameSessions:  { [guildID: string]: GameSession }, guildPreference: GuildPreference, db: Databases, message: Discord.Message, client: Discord.Client) => {
+const playSong = async (gameSessions:  { [guildID: string]: GameSession }, guildPreference: GuildPreference, message: Discord.Message, client: Discord.Client) => {
     const gameSession = gameSessions[message.guild.id];
     if (!gameSession) return;
     const gameRound = gameSession.gameRound;
@@ -234,13 +235,13 @@ const playSong = async (gameSessions:  { [guildID: string]: GameSession }, guild
         logger.info(`${getDebugContext(message)} | Song finished without being guessed.`);
         await sendSongMessage(message, gameSession, true);
         gameSession.endRound(false);
-        startRound(gameSessions, guildPreference, db, message, client);
+        startRound(gameSessions, guildPreference, message, client);
     });
 
     gameSession.dispatcher.once("error", async (err) => {
         if (!client.voiceConnections.get(gameSession.textChannel.guild.id)) {
             logger.info(`gid: ${gameSession.textChannel.guild.id} | Bot was kicked from voice channel`);
-            await gameSession.endSession(gameSessions, db);
+            await gameSession.endSession(gameSessions);
             return;
         }
 
@@ -248,7 +249,7 @@ const playSong = async (gameSessions:  { [guildID: string]: GameSession }, guild
         // Attempt to restart game with different song
         await sendErrorMessage(message, "Error playing song", "Starting new round in 2 seconds...");
         gameSession.endRound(false);
-        startRound(gameSessions, guildPreference, db, message, client);
+        startRound(gameSessions, guildPreference, message, client);
     })
 }
 
@@ -267,9 +268,9 @@ const cleanArtistName = (name: string): string => {
     return cleanName;
 }
 
-const getSongCount = async (guildPreference: GuildPreference, db: Databases): Promise<number> => {
+const getSongCount = async (guildPreference: GuildPreference): Promise<number> => {
     try {
-        const { countBeforeLimit: totalCount } = await getFilteredSongList(guildPreference, db);
+        const { countBeforeLimit: totalCount } = await getFilteredSongList(guildPreference);
         return totalCount;
     }
     catch (e) {
@@ -278,7 +279,7 @@ const getSongCount = async (guildPreference: GuildPreference, db: Databases): Pr
     }
 }
 
-const cleanupInactiveGameSessions = async (gameSessions: { [guildId: string]: GameSession }, db): Promise<void> => {
+const cleanupInactiveGameSessions = async (gameSessions: { [guildId: string]: GameSession }): Promise<void> => {
     const currentDate = Date.now();
     let inactiveSessions = 0;
     const totalSessions = Object.keys(gameSessions).length;
@@ -288,7 +289,7 @@ const cleanupInactiveGameSessions = async (gameSessions: { [guildId: string]: Ga
         const timeDiffMin = (timeDiffMs / (1000 * 60));
         if (timeDiffMin > GAME_SESSION_INACTIVE_THRESHOLD) {
             inactiveSessions++;
-            await gameSessions[guildId].endSession(gameSessions, db);
+            await gameSessions[guildId].endSession(gameSessions);
         }
     }
     if (inactiveSessions > 0) {
@@ -300,7 +301,7 @@ const delay = (delayDuration: number): Promise<void> => {
     return new Promise(resolve => setTimeout(resolve, delayDuration));
 }
 
-const getGuildPreference = async (db: Databases, guildID: string): Promise<GuildPreference> => {
+const getGuildPreference = async (guildID: string): Promise<GuildPreference> => {
     const guildPreferences = await db.kmq("guild_preferences").select("*").where("guild_id", guildID);
     if (guildPreferences.length === 0) {
         const guildPreference = new GuildPreference(guildID);
@@ -309,7 +310,7 @@ const getGuildPreference = async (db: Databases, guildID: string): Promise<Guild
             .insert({ guild_id: guildID, guild_preference: JSON.stringify(guildPreference), join_date: new Date() });
         return guildPreference;
     }
-    return new GuildPreference(guildPreferences[0].guild_id, JSON.parse(guildPreferences[0].guild_preference), db);
+    return new GuildPreference(guildPreferences[0].guild_id, JSON.parse(guildPreferences[0].guild_preference));
 }
 
 

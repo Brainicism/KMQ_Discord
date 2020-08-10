@@ -9,13 +9,13 @@ enum GENDER {
     COED = "coed"
 }
 class GenderCommand implements BaseCommand {
-    async call({ message, parsedMessage, db }: CommandArgs) {
-        const guildPreference = await getGuildPreference(db, message.guild.id);
+    async call({ message, parsedMessage }: CommandArgs) {
+        const guildPreference = await getGuildPreference(message.guild.id);
         if (guildPreference.getGroupIds() !== null) {
             sendErrorMessage(message, "Game Option Conflict", `\`groups\` game option is currently set. \`gender\` and \`groups\` are incompatible. Remove the \`groups\` option to proceed`);
             return;
         }
-        const selectedGenderArray = guildPreference.setGender(parsedMessage.components as GENDER[], db);
+        const selectedGenderArray = guildPreference.setGender(parsedMessage.components as GENDER[]);
         let selectedGenderStr = "";
         for (let i = 0; i < selectedGenderArray.length; i++) {
             selectedGenderStr += `\`${selectedGenderArray[i]}\``;
@@ -30,7 +30,7 @@ class GenderCommand implements BaseCommand {
             }
 
         }
-        await sendOptionsMessage(message, guildPreference, db, GameOption.GENDER);
+        await sendOptionsMessage(message, guildPreference, GameOption.GENDER);
         logger.info(`${getDebugContext(message)} | Genders set to ${selectedGenderStr}`);
     }
     validations = {

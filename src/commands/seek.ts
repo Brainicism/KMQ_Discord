@@ -8,11 +8,11 @@ enum SEEK_TYPE {
     RANDOM = "random"
 }
 class SeekCommand implements BaseCommand {
-    async call({ message, parsedMessage, db }: CommandArgs) {
-        const guildPreference = await getGuildPreference(db, message.guild.id);
+    async call({ message, parsedMessage }: CommandArgs) {
+        const guildPreference = await getGuildPreference(message.guild.id);
         const seekType = parsedMessage.components[0];
-        guildPreference.setSeekType(seekType as SEEK_TYPE, db);
-        await sendOptionsMessage(message, guildPreference, db, GameOption.SEEK_TYPE);
+        guildPreference.setSeekType(seekType as SEEK_TYPE);
+        await sendOptionsMessage(message, guildPreference, GameOption.SEEK_TYPE);
         logger.info(`${getDebugContext(message)} | Seek type set to ${seekType}`);
     }
     validations = {
