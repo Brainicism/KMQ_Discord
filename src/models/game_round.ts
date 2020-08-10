@@ -1,4 +1,3 @@
-import * as songAliasesList from "../../data/song_aliases.json";
 import { cleanSongName, cleanArtistName } from "../helpers/game_utils";
 import { Message } from "discord.js";
 import { MODE_TYPE } from "../commands/mode";
@@ -17,9 +16,9 @@ export default class GameRound {
     public finished: boolean;
     public lastActive: number;
 
-    constructor(song: string, artist: string, videoID: string) {
+    constructor(song: string, artist: string, videoID: string, songAliases: Array<string>) {
         this.song = song;
-        this.songAliases = songAliasesList[videoID] || [];;
+        this.songAliases = songAliases;
         this.artist = artist;
         this.videoID = videoID;
         this.skipAchieved = false;
