@@ -6,9 +6,9 @@ const logger = _logger("prefix");
 const DEFAULT_BOT_PREFIX = ",";
 
 class PrefixCommand implements BaseCommand {
-    async call({ message, parsedMessage, db }: CommandArgs) {
-        const guildPreference = await getGuildPreference(db, message.guild.id);
-        guildPreference.setBotPrefix(parsedMessage.components[0], db);
+    async call({ message, parsedMessage }: CommandArgs) {
+        const guildPreference = await getGuildPreference(message.guild.id);
+        guildPreference.setBotPrefix(parsedMessage.components[0]);
         await sendInfoMessage(message,
             "Bot prefix",
             `The prefix is \`${guildPreference.getBotPrefix()}\`.`

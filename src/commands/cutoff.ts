@@ -6,13 +6,13 @@ const logger = _logger("cutoff");
 const BEGINNING_SEARCH_YEAR = 2008;
 
 class CutoffCommand implements BaseCommand {
-    async call({ message, parsedMessage, db }: CommandArgs) {
-        const guildPreference = await getGuildPreference(db, message.guild.id);
+    async call({ message, parsedMessage }: CommandArgs) {
+        const guildPreference = await getGuildPreference(message.guild.id);
         const yearRange = parsedMessage.components;
         const startYear = yearRange[0];
         if (yearRange.length === 1) {
-            guildPreference.setBeginningCutoffYear(parseInt(startYear), db);
-            guildPreference.setEndCutoffYear((new Date()).getFullYear(), db);
+            guildPreference.setBeginningCutoffYear(parseInt(startYear));
+            guildPreference.setEndCutoffYear((new Date()).getFullYear());
         }
         else if (yearRange.length === 2) {
             const endYear = yearRange[1];
@@ -20,10 +20,10 @@ class CutoffCommand implements BaseCommand {
                 await sendErrorMessage(message, "Invalid end year", "End year must be after or equal to start year");
                 return;
             }
-            guildPreference.setBeginningCutoffYear(parseInt(startYear), db);
-            guildPreference.setEndCutoffYear(parseInt(endYear), db);
+            guildPreference.setBeginningCutoffYear(parseInt(startYear));
+            guildPreference.setEndCutoffYear(parseInt(endYear));
         }
-        await sendOptionsMessage(message, guildPreference, db, GameOptions.CUTOFF);
+        await sendOptionsMessage(message, guildPreference, GameOptions.CUTOFF);
         logger.info(`${getDebugContext(message)} | Cutoff set to ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`);
     }
     validations = {

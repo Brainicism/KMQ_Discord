@@ -14,6 +14,7 @@ import GameSession from "models/game_session";
 import BotStatsPoster from "./helpers/bot_stats_poster";
 import _logger from "./logger";
 import * as fs from "fs";
+import { db } from "./databases";
 const logger = _logger("kmq");
 
 const client = new Discord.Client();
@@ -21,10 +22,6 @@ const client = new Discord.Client();
 const config: any = _config;
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 2, 1]);
 
-let db: {
-    kmq: Knex,
-    kpopVideos: Knex
-};
 let commands: { [commandName: string]: BaseCommand } = {};
 let gameSessions: { [guildID: string]: GameSession } = {};
 let botStatsPoster: BotStatsPoster = null;
@@ -37,14 +34,14 @@ client.on("message", async (message: Discord.Message) => {
     if (!message.guild.available) return;
     if (message.author.equals(client.user) || message.author.bot) return;
     if (!message.guild) return;
-    
-    const guildPreference = await getGuildPreference(db, message.guild.id);
+
+    const guildPreference = await getGuildPreference(message.guild.id);
     const botPrefix = guildPreference.getBotPrefix();
     const parsedMessage = parseMessage(message.content, botPrefix) || null;
 
     if (message.isMemberMentioned(client.user) && message.content.split(" ").length == 1) {
         // Any message that mentions the bot sends the current options
-        commands["options"].call({ message, db });
+        commands["options"].call({ message });
     }
     if (parsedMessage && commands[parsedMessage.action]) {
         const command = commands[parsedMessage.action];
@@ -53,7 +50,6 @@ client.on("message", async (message: Discord.Message) => {
                 client,
                 gameSessions,
                 message,
-                db,
                 parsedMessage,
                 botPrefix
             });
@@ -61,8 +57,8 @@ client.on("message", async (message: Discord.Message) => {
     }
     else {
         if (gameSessions[message.guild.id] && gameSessions[message.guild.id].gameRound) {
-            guessSong({ client, message, gameSessions, db });
-            gameSessions[message.guild.id].lastActiveNow(db);
+            guessSong({ client, message, gameSessions });
+            gameSessions[message.guild.id].lastActiveNow();
         }
     }
 });
@@ -83,7 +79,7 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
                 voiceConnection.disconnect();
                 if (gameSession) {
                     logger.info(`gid: ${oldUserChannel.guild.id} | Bot is only user left, leaving voice...`)
-                    await gameSessions[newState.guild.id].endSession(gameSessions, db);
+                    await gameSessions[newState.guild.id].endSession(gameSessions);
                 }
                 return;
             }
@@ -132,12 +128,7 @@ const checkRestartNotification = async (restartNotification: Date): Promise<void
 }
 
 (async () => {
-    const kmqKnexConfig: any = _kmqKnexConfig;
-    const kpopVideosKnexConfig: any = _kpopVideosKnexConfig;
-    db = {
-        kmq: Knex(kmqKnexConfig),
-        kpopVideos: Knex(kpopVideosKnexConfig)
-    }
+
     if (!validateConfig(config)) {
         logger.error("Invalid config, aborting.");
         process.exit(1);
@@ -166,7 +157,7 @@ const checkRestartNotification = async (restartNotification: Date): Promise<void
 
     //set up cleanup for inactive game sessions
     setInterval(() => {
-        cleanupInactiveGameSessions(gameSessions, db);
+        cleanupInactiveGameSessions(gameSessions);
     }, 10 * 60 * 1000)
 
     //set up check for restart notifications

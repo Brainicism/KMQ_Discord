@@ -4,7 +4,7 @@ import _logger from "../logger";
 const logger = _logger("end");
 
 class EndCommand implements BaseCommand {
-    async call({ client, gameSessions, message, db }: CommandArgs) {
+    async call({ client, gameSessions, message }: CommandArgs) {
         const gameSession = gameSessions[message.guild.id];
         if (!gameSession || !gameSession.gameRound) {
             return;
@@ -18,7 +18,7 @@ class EndCommand implements BaseCommand {
             logger.info(`${getDebugContext(message)} | Game session ended, empty`);
             sendInfoMessage(message, "Nobody won :(")
         }
-        await gameSession.endSession(gameSessions, db);
+        await gameSession.endSession(gameSessions);
         disconnectVoiceConnection(client, message);
     }
     help = {

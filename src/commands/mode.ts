@@ -10,11 +10,11 @@ enum MODE_TYPE {
 }
 
 class ModeCommand implements BaseCommand {
-    async call({ message, parsedMessage, db }: CommandArgs) {
-        const guildPreference = await getGuildPreference(db, message.guild.id);
+    async call({ message, parsedMessage }: CommandArgs) {
+        const guildPreference = await getGuildPreference(message.guild.id);
         const modeType = parsedMessage.components[0].toLowerCase();
-        guildPreference.setModeType(modeType, db);
-        await sendOptionsMessage(message, guildPreference, db, GameOptions.MODE_TYPE);
+        guildPreference.setModeType(modeType);
+        await sendOptionsMessage(message, guildPreference, GameOptions.MODE_TYPE);
         logger.info(`${getDebugContext(message)} | Mode type set to ${modeType}`);
     }
 

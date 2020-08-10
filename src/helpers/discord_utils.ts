@@ -6,7 +6,6 @@ import GameSession from "../models/game_session";
 import BaseCommand from "commands/base_command";
 import _logger from "../logger";
 import { getSongCount, GameOptions } from "./game_utils";
-import { Databases } from "types";
 const logger = _logger("utils");
 const EMBED_INFO_COLOR = 0x000000; // BLACK
 const EMBED_ERROR_COLOR = 0xE74C3C; // RED
@@ -77,8 +76,8 @@ const sendErrorMessage = async (message: Discord.Message, title: string, descrip
     });
 }
 
-const sendOptionsMessage = async (message: Discord.Message, guildPreference: GuildPreference, db: Databases, updatedOption: string) => {
-    let totalSongs = await getSongCount(guildPreference, db);
+const sendOptionsMessage = async (message: Discord.Message, guildPreference: GuildPreference, updatedOption: string) => {
+    let totalSongs = await getSongCount(guildPreference);
     let groupsMode = guildPreference.getGroupIds() !== null;
     let cutoffString = `between the years ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
 

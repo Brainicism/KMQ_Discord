@@ -7,8 +7,8 @@ import { TextChannel } from "discord.js";
 const logger = _logger("play");
 
 class PlayCommand implements BaseCommand {
-    async call({ message, db, gameSessions, client }: CommandArgs) {
-        const guildPreference = await getGuildPreference(db, message.guild.id);
+    async call({ message, gameSessions, client }: CommandArgs) {
+        const guildPreference = await getGuildPreference(message.guild.id);
         if (!message.member.voiceChannel) {
             await sendErrorMessage(message,
                 "Join a voice channel",
@@ -22,7 +22,7 @@ class PlayCommand implements BaseCommand {
                 gameSessions[message.guild.id] = new GameSession(textChannel, voiceChannel);
                 await sendInfoMessage(message, `Game starting in #${textChannel.name} in 🔊 ${voiceChannel.name}`, "Listen to the song and type your guess!");
             }
-            startGame(gameSessions, guildPreference, db, message, client);
+            startGame(gameSessions, guildPreference, message, client);
         }
     }
     aliases = ["random"]

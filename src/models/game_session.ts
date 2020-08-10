@@ -1,7 +1,7 @@
 import Scoreboard from "./scoreboard";
 import { StreamDispatcher, VoiceConnection, TextChannel, Message, VoiceChannel } from "discord.js"
 import _logger from "../logger";
-import { Databases } from "types";
+import { db } from "../databases";
 import GameRound from "./game_round";
 
 const logger = _logger("game_session");
@@ -69,7 +69,7 @@ export default class GameSession {
         return this.sessionInitialized;
     }
 
-    endSession = async (gameSessions: { [guildId: string]: GameSession }, db: Databases): Promise<void> => {
+    endSession = async (gameSessions: { [guildId: string]: GameSession }): Promise<void> => {
         const guildId = this.textChannel.guild.id;
         if (!(guildId in gameSessions)) {
             logger.debug(`gid: ${guildId} | GameSession already ended`);
@@ -117,7 +117,7 @@ export default class GameSession {
         return this.gameRound.checkGuess(message, modeType);
     }
 
-    async lastActiveNow(db: Databases): Promise<void> {
+    async lastActiveNow(): Promise<void> {
         this.lastActive = Date.now();
         await db.kmq("guild_preferences")
             .where({ guild_id: this.textChannel.guild.id })

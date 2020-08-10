@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
-import { Databases, QueriedSong } from "types";
+import { QueriedSong } from "types";
+import { db } from "../databases";
 
 export function isDebugMode(): boolean {
     const developmentBuild = process.env.NODE_ENV === "development";
@@ -18,7 +19,7 @@ export function skipSongPlay(): boolean {
     return readDebugSettings("skipSongPlay");
 }
 
-export async function getForcePlaySong(db: Databases): Promise<QueriedSong> {
+export async function getForcePlaySong(): Promise<QueriedSong> {
     if (!isDebugMode()) return null;
     const forcePlaySongId = readDebugSettings("forcedSongId");
     const result = await db.kpopVideos("kpop_videos.app_kpop")

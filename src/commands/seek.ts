@@ -6,11 +6,11 @@ const logger = _logger("seek");
 const SEEK_TYPES: { [seekType: string]: string } = { BEGINNING: "beginning", RANDOM: "random" }
 
 class SeekCommand implements BaseCommand {
-    async call({ message, parsedMessage, db }: CommandArgs) {
-        const guildPreference = await getGuildPreference(db, message.guild.id);
+    async call({ message, parsedMessage }: CommandArgs) {
+        const guildPreference = await getGuildPreference(message.guild.id);
         const seekType = parsedMessage.components[0];
-        guildPreference.setSeekType(seekType, db);
-        await sendOptionsMessage(message, guildPreference, db, GameOptions.SEEK_TYPE);
+        guildPreference.setSeekType(seekType);
+        await sendOptionsMessage(message, guildPreference, GameOptions.SEEK_TYPE);
         logger.info(`${getDebugContext(message)} | Seek type set to ${seekType}`);
     }
     validations = {

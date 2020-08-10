@@ -1,12 +1,11 @@
 import * as Discord from "discord.js";
 import GameSession from "../models/game_session";
-import { ParsedMessage, Databases } from "types";
+import { ParsedMessage } from "types";
 
 interface CommandArgs {
     client?: Discord.Client;
     gameSessions?: { [guildID: string]: GameSession }
     message?: Discord.Message;
-    db?: Databases;
     parsedMessage?: ParsedMessage,
     botPrefix?: string;
 }
