@@ -59,6 +59,7 @@ export default (message: Discord.Message, parsedMessage: ParsedMessage, validati
                         arg);
                     return false;
                 }
+                args[i] = arg;
                 break;
             case "char":
                 if (arg.length !== 1) {
