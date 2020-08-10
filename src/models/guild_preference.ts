@@ -124,8 +124,7 @@ export default class GuildPreference {
     }
 
     setGender(genderArr: GENDER[], db: Databases): Array<string> {
-        const tempArr = genderArr.map(gender => gender.toLowerCase());
-        this.gameOptions.gender = [...new Set(tempArr as GENDER[])];
+        this.gameOptions.gender = [...new Set(genderArr)];
         this.updateGuildPreferences(db.kmq);
         return this.gameOptions.gender;
     }
