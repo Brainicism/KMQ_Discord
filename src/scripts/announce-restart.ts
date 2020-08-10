@@ -4,7 +4,7 @@ import * as mysql from "promise-mysql";
 import * as _config from "../../config/app_config.json";
 const config: any = _config;
 
-function serverShutdown(restartMinutes: number) {
+function serverShutdown(restartMinutes: number, restart: boolean) {
     return new Promise((resolve) => {
         const logs = spawn("pm2", ["logs", "kmq", "--out"]);
 
@@ -23,21 +23,22 @@ function serverShutdown(restartMinutes: number) {
         setTimeout(() => {
             logs.removeAllListeners();
             logs.kill();
-            console.log("Restarting now...");
-            exec('pm2 stop kmq', (err) => {
+            console.log(restart ? "Restarting now..." : "Stopping now");
+            exec(restart ? 'pm2 restart kmq' : 'pm2 stop kmq', (err) => {
                 resolve();
-              });
+            });
         }, restartMinutes * 1000 * 60)
     })
 }
 
 (async () => {
     const args = process.argv.slice(2);
-    if (args.length === 0) {
+    if (args.length !== 2) {
         console.error("Missing arguments");
         process.exit(-1);
     }
     const restartMinutes = parseInt(args[0]);
+    const restart = args[1] === "true";
     const restartDate = new Date();
     restartDate.setMinutes(restartDate.getMinutes() + restartMinutes);
     const db = await mysql.createConnection({
@@ -53,5 +54,5 @@ function serverShutdown(restartMinutes: number) {
     const restartNotification = (await db.query(query))[0];
     console.log(`Next restart notification scheduled at ${restartNotification["restart_time"]}`);
     db.destroy();
-    await serverShutdown(restartMinutes);
+    await serverShutdown(restartMinutes, restart);
 })();
