@@ -23,10 +23,17 @@ const sendSongMessage = async (message: Discord.Message, gameSession: GameSessio
         };
     }
     else {
-        //occasionally show suggestions
         if (Math.random() <= 0.3) {
+            let fact: string;
+            try {
+                fact = await getFact();
+            }
+            catch (e) {
+                logger.error(`${getDebugContext(message)} | Error retrieving fact. err = ${e}`);
+                fact = null;
+            }
             footer = {
-                text: await getFact()
+                text: fact
             }
         }
     }
