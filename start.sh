@@ -7,6 +7,8 @@ if [ $1 == "dev" ]; then
     echo "Starting bot..."
     NODE_ENV=development ts-node kmq
 elif [ $1 == "prod" ]; then
+    echo "Cleaning build..."
+    rm -rf build/
     echo "Compiling typescript..."
     tsc
     echo "Copying assets..."
