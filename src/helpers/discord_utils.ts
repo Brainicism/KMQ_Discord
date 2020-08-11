@@ -6,6 +6,7 @@ import GameSession from "../models/game_session";
 import BaseCommand from "commands/base_command";
 import _logger from "../logger";
 import { getSongCount, GameOption } from "./game_utils";
+import { getFact } from "../fact_generator";
 const logger = _logger("utils");
 const EMBED_INFO_COLOR = 0x000000; // BLACK
 const EMBED_ERROR_COLOR = 0xE74C3C; // RED
@@ -25,7 +26,7 @@ const sendSongMessage = async (message: Discord.Message, gameSession: GameSessio
         //occasionally show suggestions
         if (Math.random() <= 0.3) {
             footer = {
-                text: "Have a suggestion for an alternate song name? Tell us on the support server!"
+                text: await getFact()
             }
         }
     }
