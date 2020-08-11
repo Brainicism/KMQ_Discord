@@ -281,6 +281,69 @@ async function bigThreeDominance() {
     return `Fun Fact: BTS, Blackpink and Twice combined account for ${bigThreeViews.toLocaleString()} YouTube views, or ${proportion.toFixed(2)}%!`
 }
 
+async function longestGame() {
+    const result = await db.kmq("game_sessions")
+        .select(["rounds_played", "session_length", "num_participants", "avg_guess_time"])
+        .orderBy("session_length", "DESC");
+    const longestKmqGame = result[0];
+    return `KMQ Fact: The world's (current) longest game of KMQ lasted ${longestKmqGame.session_length} minutes, with over ${longestKmqGame.rounds_played} songs played, an average guess time of ${longestKmqGame.avg_guess_time} seconds, with ${longestKmqGame.num_participants} participants! Can you beat that?`
+}
+
+async function mostGames() {
+    const result = await db.kmq("guild_preferences")
+        .select("games_played", "songs_guessed")
+        .orderBy("games_played", "DESC")
+    const mostGamesPlayed = result[0];
+    return `KMQ Fact: The most active server has played ${mostGamesPlayed.games_played} games of KMQ, with a total of ${mostGamesPlayed.songs_guessed} songs guessed!`
+}
+
+async function mostCorrectGuessed() {
+    const result = await db.kmq("guild_preferences")
+        .select("games_played", "songs_guessed")
+        .orderBy("songs_guessed", "DESC")
+    const mostGamesPlayed = result[0];
+    return `KMQ Fact: The server with the most correct guesses has played ${mostGamesPlayed.games_played} games of KMQ, with a total of ${mostGamesPlayed.songs_guessed} songs guessed!`
+}
+
+
+async function globalTotalGames() {
+    const result = await db.kmq("game_sessions")
+        .count("* as count")
+    const totalGamesPlayed = result[0].count;
+    return `KMQ Fact: A grand total of ${totalGamesPlayed} games of KMQ have been played!`
+}
+
+async function recentGameSessions() {
+    const oneWeeksPriorDate = new Date();
+    oneWeeksPriorDate.setDate(oneWeeksPriorDate.getDate() - 7);
+    const result = await db.kmq("game_sessions")
+        .count("* as count")
+        .where("start_date", ">", oneWeeksPriorDate);
+    let recentGameSessions = result[0].count;
+    return `KMQ Fact: A total of ${recentGameSessions} games of KMQ have been played in the last week!`
+}
+
+async function genderGamePreferences() {
+    const oneWeekPriorDate = new Date();
+    oneWeekPriorDate.setDate(oneWeekPriorDate.getDate() - 7);
+    const result = await db.kmq("guild_preferences")
+        .select("guild_preference")
+        .where("last_active", ">", oneWeekPriorDate);
+    const preferenceCount = result.length;
+    let maleCount = 0;
+    let femaleCount = 0;
+    for (let guild of result) {
+        const guildPreference = JSON.parse(guild.guild_preference);
+        const genderPreference = guildPreference.gameOptions.gender;
+        if (genderPreference.length != 1) continue;
+        if (genderPreference[0] === "male") maleCount++;
+        if (genderPreference[0] === "female") femaleCount++;
+    }
+    const maleProportion = (100*(maleCount/preferenceCount)).toFixed(2);
+    const femaleProportion = (100*(femaleCount/preferenceCount)).toFixed(2);
+    return `KMQ Fact: ${femaleProportion}% of servers play with only girl group songs, while ${maleProportion}% play with boy groups only!`
+}
+
 (async () => {
     console.log(await recentMusicVideo());
     console.log(await recentMilestone());
@@ -298,6 +361,13 @@ async function bigThreeDominance() {
     console.log(await viewsBySolo());
     console.log(await yearWithMostReleases());
     console.log(await bigThreeDominance());
+    console.log(await longestGame());
+    console.log(await globalTotalGames());
+    console.log(await mostGames());
+    console.log(await mostCorrectGuessed());
+    console.log(await recentGameSessions())
+    console.log(await genderGamePreferences());
+    //gender query preference
     //do null checks
 })();
 
