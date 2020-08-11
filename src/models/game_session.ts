@@ -3,6 +3,9 @@ import { StreamDispatcher, VoiceConnection, TextChannel, Message, VoiceChannel }
 import _logger from "../logger";
 import { db } from "../databases";
 import GameRound from "./game_round";
+import * as fs from "fs";
+import * as _config from "../../config/app_config.json";
+const config: any = _config;
 
 const logger = _logger("game_session");
 
@@ -19,9 +22,10 @@ export default class GameSession {
     public voiceChannel: VoiceChannel;
     public gameRound: GameRound;
     public roundsPlayed: number;
-    
+
     private guessTimes: Array<number>;
     private participants: Set<string>;
+    private songAliasList: {[songId: string]: Array<string>};
 
 
     constructor(textChannel: TextChannel, voiceChannel: VoiceChannel) {
@@ -38,10 +42,11 @@ export default class GameSession {
         this.voiceChannel = voiceChannel;
         this.textChannel = textChannel;
         this.gameRound = null;
+        this.songAliasList = JSON.parse(fs.readFileSync(config.songAliasesFile).toString());
     }
 
     startRound(song: string, artist: string, videoID: string) {
-        this.gameRound = new GameRound(song, artist, videoID);
+        this.gameRound = new GameRound(song, artist, videoID, this.songAliasList[videoID] || []);
         this.sessionInitialized = true;
         this.roundsPlayed++;
     }

@@ -12,6 +12,7 @@ const allowedOptions = {
     discordBotsGgToken: { required: false },
     newsFile: { required: true },
     groupListFile: { required: true },
+    songAliasesFile: { required: true },
     restartCron: { required: false }
 };
 
