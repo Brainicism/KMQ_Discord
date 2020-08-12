@@ -82,7 +82,7 @@ const seedDb = async (db: mysql.Connection) => {
         await extractDb();
         await seedDb(db);
         db.destroy();
-        console.log("Downloading new songs")
+        logger.info("Downloading new songs")
         await downloadNewSongs();
     } catch (e) {
         logger.error("Error: " + e);

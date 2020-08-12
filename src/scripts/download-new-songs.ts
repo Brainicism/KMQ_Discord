@@ -6,18 +6,22 @@ import { QueriedSong } from "types";
 import * as path from "path";
 const config: any = _config;
 const deadLinksFilePath = path.join(config.songCacheDir, "deadlinks.txt");
+import _logger from "../logger";
+import { Logger } from "log4js";
+const logger: Logger = _logger("download-new-songs");
+
 
 export async function clearPartiallyCachedSongs() {
-    console.log("Clearing partially cached songs");
+    logger.info("Clearing partially cached songs");
     if (!fs.existsSync(config.songCacheDir)) {
-        return console.error("Song cache directory doesn't exist.");
+        return logger.error("Song cache directory doesn't exist.");
     }
     let files: Array<string>;
     try {
         files = await fs.promises.readdir(config.songCacheDir);
     }
     catch (err) {
-        return console.error(err);
+        return logger.error(err);
     }
 
     const endingWithPartRegex = new RegExp("\\.part$");
@@ -27,11 +31,11 @@ export async function clearPartiallyCachedSongs() {
             await fs.promises.unlink(`${config.songCacheDir}/${partFile}`);
         }
         catch (err) {
-            console.error(err);
+            logger.error(err);
         }
     })
     if (partFiles.length) {
-        console.log(`${partFiles.length} stale cached songs deleted.`);
+        logger.info(`${partFiles.length} stale cached songs deleted.`);
     }
 
 }
@@ -67,7 +71,7 @@ const downloadSong = (id: string) => {
         cacheStream.once('finish', async () => {
             try {
                 await fs.promises.rename(tempLocation, cachedSongLocation);
-                console.log(`Downloaded song ${id} successfully`);
+                logger.info(`Downloaded song ${id} successfully`);
                 resolve();
             }
             catch (err) {
@@ -90,7 +94,6 @@ const downloadNewSongs = async (limit?: number) => {
     if (!fs.existsSync(deadLinksFilePath)) {
         fs.closeSync(fs.openSync(deadLinksFilePath, 'w'));
     }
-    
     const knownDeadAndReasons = fs.readFileSync(deadLinksFilePath).toString().split("\n");
     const knownDeadIds = new Set(knownDeadAndReasons.map((x) => x.split(":")[0]));
     let query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
@@ -101,25 +104,27 @@ const downloadNewSongs = async (limit?: number) => {
     }
     const songs: Array<QueriedSong> = await db.query(query);
     let downloadCount = 0;
-    console.log("total songs: " + songs.length);
-    for (let song of songs) {
-        if (!fs.existsSync(path.join(config.songCacheDir, `${song.youtubeLink}.mp3`))) {
-            if (knownDeadIds.has(song.youtubeLink)) {
-                console.log(`Known dead link (${song.youtubeLink}), skipping...`);
-                continue;
-            }
-            console.log(`Downloading song: '${song.name}' by ${song.artist} | ${song.youtubeLink}`);
-            try {
-                await downloadSong(song.youtubeLink);
-                downloadCount++;
-            }
-            catch (e) {
-                console.log("Error downloading song: " + e);
-            }
+    logger.info("Total songs in database: " + songs.length);
+    const songsNotDownloaded = songs.filter(x => !fs.existsSync(path.join(config.songCacheDir, `${x.youtubeLink}.mp3`)));
+    logger.info("Total songs to be downloaded: " + songsNotDownloaded.length);
+
+    for (let song of songsNotDownloaded) {
+        if (knownDeadIds.has(song.youtubeLink)) {
+            logger.info(`Known dead link (${song.youtubeLink}), skipping...`);
+            continue;
         }
+        logger.info(`Downloading song: '${song.name}' by ${song.artist} | ${song.youtubeLink}`);
+        try {
+            await downloadSong(song.youtubeLink);
+            downloadCount++;
+        }
+        catch (e) {
+            logger.info("Error downloading song: " + e);
+        }
+
     }
     db.destroy();
-    console.log(`Total songs downloaded: ${downloadCount}`);
+    logger.info(`Total songs downloaded: ${downloadCount}`);
 }
 
 export {
