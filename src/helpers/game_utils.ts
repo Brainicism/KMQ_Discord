@@ -125,7 +125,7 @@ const startRound = async (gameSessions: { [guildID: string]: GameSession }, guil
     catch (err) {
         gameSession.setSessionInitialized(false);
         await sendErrorMessage(message, "Error selecting song", err.toString());
-        logger.error(`${getDebugContext(message)} | Error querying song: ${err}. guildPreference = ${JSON.stringify(guildPreference)}`);
+        logger.error(`${getDebugContext(message)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
         return;
     }
 
@@ -134,7 +134,7 @@ const startRound = async (gameSessions: { [guildID: string]: GameSession }, guil
     }
     catch (err) {
         gameSession.setSessionInitialized(false);
-        logger.error(`${getDebugContext(message)} | Error obtaining voice connection. err = ${err}`);
+        logger.error(`${getDebugContext(message)} | Error obtaining voice connection. err = ${err.toString()}`);
         await sendErrorMessage(message, "Missing voice permissions", "The bot is unable to join the voice channel you are in.");
         return;
     }
