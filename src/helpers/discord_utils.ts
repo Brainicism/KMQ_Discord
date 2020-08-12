@@ -149,6 +149,21 @@ const sendEndGameMessage = async (message: Discord.Message, gameSession: GameSes
     }
 }
 
+const sendScoreboardMessage = async (message: Discord.Message, gameSession: GameSession) => {
+    await sendMessage(message, {
+        embed: {
+            color: EMBED_SUCCESS_COLOR,
+            author: {
+                name: message.author.username,
+                icon_url: message.author.avatarURL
+            },
+            description: gameSession.scoreboard.isEmpty() ? "(╯°□°）╯︵ ┻━┻" : null,
+            title: "**Scoreboard**",
+            fields: gameSession.scoreboard.getScoreboard().slice(0, MAX_EMBED_FIELDS)
+        }
+    });
+}
+
 const getDebugContext = (message: Discord.Message): string => {
     return `gid: ${message.guild.id}, uid: ${message.author.id}`
 }
@@ -266,6 +281,7 @@ export {
     sendErrorMessage,
     sendOptionsMessage,
     sendEndGameMessage,
+    sendScoreboardMessage,
     arraysEqual,
     bold,
     italicize,
