@@ -104,6 +104,9 @@ const sendOptionsMessage = async (message: Discord.Message, guildPreference: Gui
     cutoffString = updatedOption == GameOption.CUTOFF ? bold(cutoffString) : codeLine(cutoffString);
     genderString = updatedOption == GameOption.GENDER ? bold(genderString) : codeLine(genderString);
     limitString = updatedOption == GameOption.LIMIT ? bold(limitString) : codeLine(limitString);
+    if (groupsString.length > 400) {
+        groupsString = `${groupsString.substr(0, 400)} and many others...`;
+    }
     groupsString = updatedOption == GameOption.GROUPS ? bold(groupsString) : codeLine(groupsString);
     volumeString = updatedOption == GameOption.VOLUME ? bold(volumeString) : codeLine(volumeString);
     seekTypeString = updatedOption == GameOption.SEEK_TYPE ? bold(seekTypeString) : codeLine(seekTypeString);
@@ -144,6 +147,21 @@ const sendEndGameMessage = async (message: Discord.Message, gameSession: GameSes
             }
         });
     }
+}
+
+const sendScoreboardMessage = async (message: Discord.Message, gameSession: GameSession) => {
+    await sendMessage(message, {
+        embed: {
+            color: EMBED_SUCCESS_COLOR,
+            author: {
+                name: message.author.username,
+                icon_url: message.author.avatarURL
+            },
+            description: gameSession.scoreboard.isEmpty() ? "(╯°□°）╯︵ ┻━┻" : null,
+            title: "**Scoreboard**",
+            fields: gameSession.scoreboard.getScoreboard().slice(0, MAX_EMBED_FIELDS)
+        }
+    });
 }
 
 const getDebugContext = (message: Discord.Message): string => {
@@ -263,6 +281,7 @@ export {
     sendErrorMessage,
     sendOptionsMessage,
     sendEndGameMessage,
+    sendScoreboardMessage,
     arraysEqual,
     bold,
     italicize,
