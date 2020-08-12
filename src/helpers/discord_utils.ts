@@ -104,6 +104,9 @@ const sendOptionsMessage = async (message: Discord.Message, guildPreference: Gui
     cutoffString = updatedOption == GameOption.CUTOFF ? bold(cutoffString) : codeLine(cutoffString);
     genderString = updatedOption == GameOption.GENDER ? bold(genderString) : codeLine(genderString);
     limitString = updatedOption == GameOption.LIMIT ? bold(limitString) : codeLine(limitString);
+    if (groupsString.length > 400) {
+        groupsString = `${groupsString.substr(0, 400)} and many others...`;
+    }
     groupsString = updatedOption == GameOption.GROUPS ? bold(groupsString) : codeLine(groupsString);
     volumeString = updatedOption == GameOption.VOLUME ? bold(volumeString) : codeLine(volumeString);
     seekTypeString = updatedOption == GameOption.SEEK_TYPE ? bold(seekTypeString) : codeLine(seekTypeString);
