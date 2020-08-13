@@ -10,7 +10,7 @@ const placeholder = /!/g;
 const FIELDS_PER_EMBED = 5;
 const PAGINATION_EMBED_PERMISSIONS: Discord.PermissionResolvable = ["MANAGE_MESSAGES", "EMBED_LINKS", "VIEW_CHANNEL", "SEND_MESSAGES"];
 
-class HelpCommand implements BaseCommand {
+export default class HelpCommand implements BaseCommand {
     async call({ parsedMessage, message, botPrefix }: CommandArgs) {
         await helpMessage(message, parsedMessage.argument, botPrefix);
     }
@@ -27,8 +27,6 @@ class HelpCommand implements BaseCommand {
             ]
         }
 }
-
-export default HelpCommand;
 
 // Usage: `!help [action]` or `!help`
 const helpMessage = async (message: Discord.Message, action: string, botPrefix: string) => {

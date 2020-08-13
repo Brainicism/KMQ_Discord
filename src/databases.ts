@@ -8,13 +8,8 @@ const kmqKnexConfig: any = _kmqKnexConfig;
 const kpopVideosKnexConfig: any = _kpopVideosKnexConfig;
 
 logger.info("Initializing database connections");
-const db = {
+export const db = {
     kmq: Knex(kmqKnexConfig),
     kpopVideos: Knex(kpopVideosKnexConfig)
 }
 logger.info("Initialized database connections");
-
-
-export {
-    db
-}

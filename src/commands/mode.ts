@@ -4,12 +4,12 @@ import { getGuildPreference, GameOption } from "../helpers/game_utils";
 import { sendOptionsMessage, getDebugContext } from "../helpers/discord_utils";
 const logger = _logger("mode");
 
-enum MODE_TYPE {
+export enum MODE_TYPE {
     SONG_NAME = "song",
     ARTIST = "artist"
 }
 
-class ModeCommand implements BaseCommand {
+export default class ModeCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guild.id);
         const modeType = parsedMessage.components[0].toLowerCase();
@@ -41,9 +41,4 @@ class ModeCommand implements BaseCommand {
             }
         ]
     }
-}
-
-export default ModeCommand;
-export {
-    MODE_TYPE
 }

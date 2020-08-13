@@ -8,12 +8,12 @@ import _logger from "../logger";
 import { getSongCount, GameOption } from "./game_utils";
 import { getFact } from "../fact_generator";
 const logger = _logger("utils");
-const EMBED_INFO_COLOR = 0x000000; // BLACK
-const EMBED_ERROR_COLOR = 0xE74C3C; // RED
-const EMBED_SUCCESS_COLOR = 0x00FF00; // GREEN
+export const EMBED_INFO_COLOR = 0x000000; // BLACK
+export const EMBED_ERROR_COLOR = 0xE74C3C; // RED
+export const EMBED_SUCCESS_COLOR = 0x00FF00; // GREEN
 const MAX_EMBED_FIELDS = 25;
 
-const sendSongMessage = async (message: Discord.Message, gameSession: GameSession, isForfeit: boolean, guesser?: string) => {
+export async function sendSongMessage(message: Discord.Message, gameSession: GameSession, isForfeit: boolean, guesser?: string) {
     let footer = null;
     const gameRound = gameSession.gameRound;
     if (!gameRound) return;
@@ -56,7 +56,7 @@ const sendSongMessage = async (message: Discord.Message, gameSession: GameSessio
         }
     });
 }
-const sendInfoMessage = async (message: Discord.Message, title: string, description?: string, footerText?: string, footerImageWithPath?: string) => {
+export async function sendInfoMessage(message: Discord.Message, title: string, description?: string, footerText?: string, footerImageWithPath?: string) {
     const embed = new Discord.RichEmbed({
         color: EMBED_INFO_COLOR,
         author: {
@@ -74,7 +74,7 @@ const sendInfoMessage = async (message: Discord.Message, title: string, descript
     }
     await sendMessage(message, embed);
 }
-const sendErrorMessage = async (message: Discord.Message, title: string, description: string) => {
+export async function sendErrorMessage(message: Discord.Message, title: string, description: string) {
     await sendMessage(message, {
         embed: {
             color: EMBED_ERROR_COLOR,
@@ -88,7 +88,7 @@ const sendErrorMessage = async (message: Discord.Message, title: string, descrip
     });
 }
 
-const sendOptionsMessage = async (message: Discord.Message, guildPreference: GuildPreference, updatedOption: string) => {
+export async function sendOptionsMessage(message: Discord.Message, guildPreference: GuildPreference, updatedOption: string) {
     let totalSongs = await getSongCount(guildPreference);
     let groupsMode = guildPreference.getGroupIds() !== null;
     let cutoffString = `between the years ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
@@ -120,7 +120,7 @@ const sendOptionsMessage = async (message: Discord.Message, guildPreference: Gui
     );
 }
 
-const sendEndGameMessage = async (message: Discord.Message, gameSession: GameSession) => {
+export async function sendEndGameMessage(message: Discord.Message, gameSession: GameSession) {
     if (gameSession.scoreboard.isEmpty()) {
         await sendMessage(message, {
             embed: {
@@ -149,7 +149,7 @@ const sendEndGameMessage = async (message: Discord.Message, gameSession: GameSes
     }
 }
 
-const sendScoreboardMessage = async (message: Discord.Message, gameSession: GameSession) => {
+export async function sendScoreboardMessage(message: Discord.Message, gameSession: GameSession) {
     await sendMessage(message, {
         embed: {
             color: EMBED_SUCCESS_COLOR,
@@ -164,11 +164,11 @@ const sendScoreboardMessage = async (message: Discord.Message, gameSession: Game
     });
 }
 
-const getDebugContext = (message: Discord.Message): string => {
+export function getDebugContext(message: Discord.Message): string {
     return `gid: ${message.guild.id}, uid: ${message.author.id}`
 }
 
-const getCommandFiles = (): Promise<{ [commandName: string]: BaseCommand }> => {
+export function getCommandFiles(): Promise<{ [commandName: string]: BaseCommand }> {
     return new Promise(async (resolve, reject) => {
         let commandMap = {};
         let files: Array<string>;
@@ -190,19 +190,19 @@ const getCommandFiles = (): Promise<{ [commandName: string]: BaseCommand }> => {
     })
 }
 
-const bold = (text: string): string => {
+export function bold(text: string): string {
     return `**${text}**`;
 }
 
-const italicize = (text: string): string => {
+export function italicize(text: string): string {
     return `*${text}*`;
 }
 
-const codeLine = (text: string): string => {
+export function codeLine(text: string): string {
     return `\`${text}\``
 }
 
-const touch = (filePath: string) => {
+export function touch(filePath: string) {
     try {
         const currentTime = new Date();
         fs.utimesSync(filePath, currentTime, currentTime);
@@ -211,7 +211,7 @@ const touch = (filePath: string) => {
     }
 }
 
-const arraysEqual = (arr1: Array<any>, arr2: Array<any>): boolean => {
+export function arraysEqual(arr1: Array<any>, arr2: Array<any>): boolean {
     if (arr1.length !== arr2.length) {
         return false;
     }
@@ -266,24 +266,4 @@ export async function sendMessage(context: Discord.Message, messageContent: any)
         return;
     }
     return context.channel.send(messageContent);
-}
-
-
-export {
-    EMBED_INFO_COLOR,
-    EMBED_ERROR_COLOR,
-    EMBED_SUCCESS_COLOR,
-    touch,
-    getCommandFiles,
-    sendSongMessage,
-    getDebugContext,
-    sendInfoMessage,
-    sendErrorMessage,
-    sendOptionsMessage,
-    sendEndGameMessage,
-    sendScoreboardMessage,
-    arraysEqual,
-    bold,
-    italicize,
-    codeLine
 }

@@ -3,9 +3,9 @@ import { sendOptionsMessage, getDebugContext } from "../helpers/discord_utils";
 import { GameOption, getGuildPreference } from "../helpers/game_utils";
 import _logger from "../logger";
 const logger = _logger("volume");
-const DEFAULT_VOLUME = 50;
+export const DEFAULT_VOLUME = 50;
 
-class VolumeCommand implements BaseCommand {
+export default class VolumeCommand implements BaseCommand {
     async call({ message, parsedMessage, gameSessions }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guild.id);
         guildPreference.setVolume(parseInt(parsedMessage.components[0]));
@@ -39,8 +39,4 @@ class VolumeCommand implements BaseCommand {
             }
         ]
     }
-}
-export default VolumeCommand;
-export {
-    DEFAULT_VOLUME
 }

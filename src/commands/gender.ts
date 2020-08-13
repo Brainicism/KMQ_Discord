@@ -3,12 +3,12 @@ import { sendOptionsMessage, getDebugContext, sendErrorMessage } from "../helper
 import { GameOption, getGuildPreference } from "../helpers/game_utils";
 import _logger from "../logger";
 const logger = _logger("gender");
-enum GENDER {
+export enum GENDER {
     MALE = "male",
     FEMALE = "female",
     COED = "coed"
 }
-class GenderCommand implements BaseCommand {
+export default class GenderCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guild.id);
         if (guildPreference.getGroupIds() !== null) {
@@ -66,8 +66,4 @@ class GenderCommand implements BaseCommand {
             }
         ]
     }
-}
-export default GenderCommand;
-export {
-    GENDER
 }

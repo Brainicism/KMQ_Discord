@@ -3,9 +3,9 @@ import { sendOptionsMessage, getDebugContext, sendErrorMessage } from "../helper
 import { GameOption, getGuildPreference } from "../helpers/game_utils";
 import _logger from "../logger";
 const logger = _logger("cutoff");
-const BEGINNING_SEARCH_YEAR = 2008;
+export const BEGINNING_SEARCH_YEAR = 2008;
 
-class CutoffCommand implements BaseCommand {
+export default class CutoffCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guild.id);
         const yearRange = parsedMessage.components;
@@ -60,9 +60,4 @@ class CutoffCommand implements BaseCommand {
             }
         ]
     }
-}
-
-export default CutoffCommand;
-export {
-    BEGINNING_SEARCH_YEAR
 }

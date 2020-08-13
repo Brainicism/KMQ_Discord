@@ -13,7 +13,7 @@ import { startGame, getGuildPreference } from "../helpers/game_utils";
 import _logger from "../logger";
 const logger = _logger("skip");
 
-class SkipCommand implements BaseCommand {
+export default class SkipCommand implements BaseCommand {
     async call({ gameSessions, client, message }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guild.id);
         const gameSession = gameSessions[message.guild.id];
@@ -47,8 +47,6 @@ class SkipCommand implements BaseCommand {
         arguments: []
     }
 }
-
-export default SkipCommand;
 
 async function sendSkipNotification(message: Discord.Message, gameSession: GameSession) {
     await message.channel.send({

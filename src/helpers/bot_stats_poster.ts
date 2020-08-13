@@ -8,7 +8,7 @@ const logger = _logger("bot_stats_poster");
 const TOP_GG_API = "https://top.gg/api/bots/%d/stats";
 const DISCORD_BOTS_API = "https://discord.bots.gg/api/v1/bots/%d/stats";
 
-class BotStatsPoster {
+export default class BotStatsPoster {
     private client: Client;
 
     constructor(client: Client) {
@@ -64,5 +64,3 @@ class BotStatsPoster {
         }
     }
 }
-
-export default BotStatsPoster;

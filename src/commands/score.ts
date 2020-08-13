@@ -2,7 +2,7 @@ import BaseCommand, { CommandArgs } from "./base_command";
 import { getGuildPreference } from "../helpers/game_utils";
 import { sendInfoMessage, sendScoreboardMessage } from "../helpers/discord_utils";
 
-class ScoreCommand implements BaseCommand {
+export default class ScoreCommand implements BaseCommand {
     async call({ message, gameSessions }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guild.id);
         const gameSession = gameSessions[message.guild.id];
@@ -20,4 +20,3 @@ class ScoreCommand implements BaseCommand {
     }
     aliases = ["scoreboard"]
 }
-export default ScoreCommand;
