@@ -76,14 +76,14 @@ export default (message: Discord.Message, parsedMessage: ParsedMessage, validati
     return true;
 }
 
-const arrayToString = (elements: Array<string>): string => {
+function arrayToString(elements: Array<string>): string {
     elements = elements.map(element => `\`${element}\``);
     if (elements.length == 1) return elements[0];
     const lastElement = elements.splice(-1);
     return `${elements.join(", ")} and ${lastElement}`
 }
 
-const sendValidationErrorMessage = async (message: Discord.Message, warning: string, arg: string | Array<string>) => {
+async function sendValidationErrorMessage(message: Discord.Message, warning: string, arg: string | Array<string>) {
     await sendErrorMessage(message, "Input validation error", warning);
     logger.warn(`${getDebugContext(message)} | ${warning}. val = ${arg}`);
 }
