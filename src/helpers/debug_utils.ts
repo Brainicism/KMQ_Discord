@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { QueriedSong } from "types";
+import { QueriedSong } from "../types";
 import { db } from "../databases";
 
 export function isDebugMode(): boolean {

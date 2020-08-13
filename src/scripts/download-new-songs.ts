@@ -1,8 +1,8 @@
 import * as ytdl from "ytdl-core";
 import * as fs from "fs";
-import * as _config from "../../config/app_config.json";
+import * as _config from "../config/app_config.json";
 import * as mysql from "promise-mysql";
-import { QueriedSong } from "types";
+import { QueriedSong } from "../types";
 import * as path from "path";
 const config: any = _config;
 const deadLinksFilePath = path.join(config.songCacheDir, "deadlinks.txt");

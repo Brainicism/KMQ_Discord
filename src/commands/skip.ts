@@ -1,6 +1,6 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import * as Discord from "discord.js"
-import GameSession from "models/game_session";
+import GameSession from "../models/game_session";
 import {
     sendSongMessage,
     areUserAndBotInSameVoiceChannel,

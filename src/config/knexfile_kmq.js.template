@@ -1,13 +1,13 @@
 module.exports = {
   client: 'mysql',
   connection: {
-    user: '', password: '', database: "kpop_videos"
+    user: '', password: '', database: "kmq"
   },
   pool: {
     min: 0,
     max: 10
   },
   migrations: {
-    directory: "../migrations"
+    directory: "../../migrations"
   }
 }

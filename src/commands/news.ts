@@ -1,10 +1,10 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-import { EMBED_INFO_COLOR, bold, getDebugContext, sendMessage } from "../helpers/discord_utils";
 import * as Discord from "discord.js";
 import * as fs from "fs";
-import * as _config from "../../config/app_config.json";
+import * as _config from "../config/app_config.json";
 import _logger from "../logger";
 import { db } from "../databases";
+import { EMBED_INFO_COLOR, bold, getDebugContext, sendMessage } from "../helpers/discord_utils";
 const logger = _logger("news");
 
 const config: any = _config;

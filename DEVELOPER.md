@@ -10,7 +10,7 @@
 ------------
 1. `npm install`
     - `libsodium` might require the following packages: `autoconf automake g++ libtool`
-2. Use `*.template` files to create own copy of configuration files
+2. Use `*.template` files to create own copy of configuration files in `src/config`
     - `app_config.json` contains application specific settings. See `src/config_validator.ts` to see required parameters. 
     - `knexfile_*.js` contains connection credentials for the each database connection. `kmq` is used for bot-specific database tables. `kpop_videos` is automatically created from the `aoimirai` backup
 3. Apply database migrations for `kmq`. Using `npx knex migrate:latest --knexfile config/knexfile_kmq.js`

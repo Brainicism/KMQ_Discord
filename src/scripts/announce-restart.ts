@@ -1,7 +1,7 @@
 import { spawn, exec } from "child_process";
 
 import * as mysql from "promise-mysql";
-import * as _config from "../../config/app_config.json";
+import * as _config from "../config/app_config.json";
 const config: any = _config;
 
 function serverShutdown(restartMinutes: number, restart: boolean) {

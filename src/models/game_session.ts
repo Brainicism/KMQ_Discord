@@ -4,7 +4,7 @@ import _logger from "../logger";
 import { db } from "../databases";
 import GameRound from "./game_round";
 import * as fs from "fs";
-import * as _config from "../../config/app_config.json";
+import * as _config from "../config/app_config.json";
 const config: any = _config;
 
 const logger = _logger("game_session");

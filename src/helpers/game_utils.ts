@@ -1,5 +1,5 @@
-import { CommandArgs } from "commands/base_command";
-import { songCacheDir as SONG_CACHE_DIR } from "../../config/app_config.json";
+import { CommandArgs } from "../commands/base_command";
+import { songCacheDir as SONG_CACHE_DIR } from "../config/app_config.json";
 import { getUserIdentifier, sendSongMessage, getDebugContext, sendErrorMessage } from "./discord_utils";
 import _logger from "../logger";
 import { resolve } from "path"
@@ -8,7 +8,7 @@ import GameSession from "../models/game_session";
 import GuildPreference from "../models/guild_preference";
 import { getAudioDurationInSeconds } from "get-audio-duration";
 import * as Discord from "discord.js";
-import { QueriedSong, Databases } from "types";
+import { QueriedSong, Databases } from "../types";
 import { SEEK_TYPE } from "../commands/seek";
 import { isDebugMode, getForcePlaySong, skipSongPlay, isForcedSongActive } from "./debug_utils";
 import { db } from "../databases";

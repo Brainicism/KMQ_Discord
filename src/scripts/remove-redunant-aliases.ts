@@ -1,5 +1,5 @@
 import { db } from "../databases";
-import * as _config from "../../config/app_config.json";
+import * as _config from "../config/app_config.json";
 import * as fs from "fs";
 import _logger from "../logger";
 import { Logger } from "log4js";
