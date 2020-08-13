@@ -3,7 +3,7 @@ import { sendEndGameMessage, disconnectVoiceConnection, sendInfoMessage, getDebu
 import _logger from "../logger";
 const logger = _logger("end");
 
-class EndCommand implements BaseCommand {
+export default class EndCommand implements BaseCommand {
     async call({ client, gameSessions, message }: CommandArgs) {
         const gameSession = gameSessions[message.guild.id];
         if (!gameSession || !gameSession.gameRound) {
@@ -21,5 +21,3 @@ class EndCommand implements BaseCommand {
         arguments: []
     }
 }
-
-export default EndCommand;

@@ -14,6 +14,7 @@ const DEFAULT_OPTIONS = {
     beginningYear: BEGINNING_SEARCH_YEAR, endYear: (new Date()).getFullYear(), gender: [GENDER.FEMALE],
     limit: DEFAULT_LIMIT, volume: DEFAULT_VOLUME, seekType: SEEK_TYPE.RANDOM, modeType: MODE_TYPE.SONG_NAME, groups: null
 };
+
 interface GameOptions {
     beginningYear: number;
     endYear: number;

@@ -4,7 +4,7 @@ import { GameOption, getGuildPreference } from "../helpers/game_utils";
 import { db } from "../databases";
 import _logger from "../logger";
 const logger = _logger("groups");
-class GroupsCommand implements BaseCommand {
+export default class GroupsCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guild.id);
         if (parsedMessage.components.length === 0) {
@@ -45,5 +45,3 @@ class GroupsCommand implements BaseCommand {
     }
     aliases = ["group"]
 }
-
-export default GroupsCommand;

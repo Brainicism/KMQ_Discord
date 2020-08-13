@@ -3,9 +3,9 @@ import { getDebugContext, sendOptionsMessage } from "../helpers/discord_utils";
 import { GameOption, getSongCount, getGuildPreference } from "../helpers/game_utils";
 import _logger from "../logger";
 const logger = _logger("limit");
-const DEFAULT_LIMIT = 500;
+export const DEFAULT_LIMIT = 500;
 
-class LimitCommand implements BaseCommand {
+export default class LimitCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guild.id);
         guildPreference.setLimit(parseInt(parsedMessage.components[0]));
@@ -40,9 +40,4 @@ class LimitCommand implements BaseCommand {
             }
         ]
     }
-}
-export default LimitCommand;
-
-export {
-    DEFAULT_LIMIT
 }

@@ -15,7 +15,7 @@ import { db } from "../databases";
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 const REMOVED_CHARACTERS_SONG_GUESS = /[\|’\ ']/g
 const REMOVED_CHARACTERS_ARTIST_GUESS = /[:'.\-★*]/g
-enum GameOption {
+export enum GameOption {
     GENDER = "Gender",
     CUTOFF = "Cutoff",
     LIMIT = "Limit",
@@ -27,7 +27,7 @@ enum GameOption {
 const logger = _logger("game_utils");
 
 
-const guessSong = async ({ client, message, gameSessions }: CommandArgs) => {
+export const guessSong = async ({ client, message, gameSessions }: CommandArgs) => {
     const guildPreference = await getGuildPreference(message.guild.id);
     const gameSession = gameSessions[message.guild.id];
     const voiceConnection = client.voiceConnections.get(message.guild.id);
@@ -97,7 +97,7 @@ const getFilteredSongList = async (guildPreference: GuildPreference): Promise<{ 
     };
 
 }
-const startGame = async (gameSessions: { [guildID: string]: GameSession }, guildPreference: GuildPreference, message: Discord.Message, client: Discord.Client) => {
+export const startGame = async (gameSessions: { [guildID: string]: GameSession }, guildPreference: GuildPreference, message: Discord.Message, client: Discord.Client) => {
     logger.info(`${getDebugContext(message)} | Game session starting`);
     startRound(gameSessions, guildPreference, message, client);
 }
@@ -253,7 +253,7 @@ const playSong = async (gameSessions:  { [guildID: string]: GameSession }, guild
     })
 }
 
-const cleanSongName = (name: string): string => {
+export const cleanSongName = (name: string): string => {
     const cleanName = name.toLowerCase()
         .split("(")[0]
         .replace(REMOVED_CHARACTERS_SONG_GUESS, "")
@@ -261,14 +261,14 @@ const cleanSongName = (name: string): string => {
     return cleanName;
 }
 
-const cleanArtistName = (name: string): string => {
+export const cleanArtistName = (name: string): string => {
     const cleanName = name.toLowerCase()
         .replace(REMOVED_CHARACTERS_ARTIST_GUESS, "")
         .trim();
     return cleanName;
 }
 
-const getSongCount = async (guildPreference: GuildPreference): Promise<number> => {
+export const getSongCount = async (guildPreference: GuildPreference): Promise<number> => {
     try {
         const { countBeforeLimit: totalCount } = await getFilteredSongList(guildPreference);
         return totalCount;
@@ -279,7 +279,7 @@ const getSongCount = async (guildPreference: GuildPreference): Promise<number> =
     }
 }
 
-const cleanupInactiveGameSessions = async (gameSessions: { [guildId: string]: GameSession }): Promise<void> => {
+export const cleanupInactiveGameSessions = async (gameSessions: { [guildId: string]: GameSession }): Promise<void> => {
     const currentDate = Date.now();
     let inactiveSessions = 0;
     const totalSessions = Object.keys(gameSessions).length;
@@ -301,7 +301,7 @@ const delay = (delayDuration: number): Promise<void> => {
     return new Promise(resolve => setTimeout(resolve, delayDuration));
 }
 
-const getGuildPreference = async (guildID: string): Promise<GuildPreference> => {
+export const getGuildPreference = async (guildID: string): Promise<GuildPreference> => {
     const guildPreferences = await db.kmq("guild_preferences").select("*").where("guild_id", guildID);
     if (guildPreferences.length === 0) {
         const guildPreference = new GuildPreference(guildID);
@@ -311,16 +311,4 @@ const getGuildPreference = async (guildID: string): Promise<GuildPreference> => 
         return guildPreference;
     }
     return new GuildPreference(guildPreferences[0].guild_id, JSON.parse(guildPreferences[0].guild_preference));
-}
-
-
-export {
-    guessSong,
-    startGame,
-    cleanSongName,
-    cleanArtistName,
-    getSongCount,
-    GameOption,
-    cleanupInactiveGameSessions,
-    getGuildPreference
 }

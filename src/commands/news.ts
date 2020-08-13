@@ -8,7 +8,7 @@ import { EMBED_INFO_COLOR, bold, getDebugContext, sendMessage } from "../helpers
 const logger = _logger("news");
 
 const config: any = _config;
-class NewsCommand implements BaseCommand {
+export default class NewsCommand implements BaseCommand {
     async call({ message }: CommandArgs) {
         let latestSongDate: Date;
         try {
@@ -51,4 +51,3 @@ class NewsCommand implements BaseCommand {
 
     aliases = ["updates"]
 }
-export default NewsCommand;

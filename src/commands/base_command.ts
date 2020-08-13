@@ -2,17 +2,15 @@ import * as Discord from "discord.js";
 import GameSession from "../models/game_session";
 import { ParsedMessage } from "../types";
 
-interface CommandArgs {
+export interface CommandArgs {
     client?: Discord.Client;
     gameSessions?: { [guildID: string]: GameSession }
     message?: Discord.Message;
     parsedMessage?: ParsedMessage,
     botPrefix?: string;
 }
-interface CallFunc {
-    (args: CommandArgs): Promise<void>
-}
-interface CommandValidations {
+
+export interface CommandValidations {
     minArgCount: number,
     maxArgCount: number,
     arguments: Array<{
@@ -23,7 +21,12 @@ interface CommandValidations {
         enums?: Array<string>
     }>
 }
-class BaseCommand {
+
+interface CallFunc {
+    (args: CommandArgs): Promise<void>
+}
+
+export default class BaseCommand {
     call: CallFunc;
     help: {
         name: string,
@@ -33,10 +36,4 @@ class BaseCommand {
     };
     aliases?: Array<string>;
     validations?: CommandValidations
-}
-
-export default BaseCommand;
-export {
-    CommandArgs,
-    CommandValidations
 }

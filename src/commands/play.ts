@@ -6,7 +6,7 @@ import _logger from "../logger";
 import { TextChannel } from "discord.js";
 const logger = _logger("play");
 
-class PlayCommand implements BaseCommand {
+export default class PlayCommand implements BaseCommand {
     async call({ message, gameSessions, client }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guild.id);
         if (!message.member.voiceChannel) {
@@ -33,5 +33,3 @@ class PlayCommand implements BaseCommand {
         arguments: []
     }
 }
-
-export default PlayCommand;
