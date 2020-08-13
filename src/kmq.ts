@@ -31,7 +31,7 @@ client.on("ready", () => {
 
 client.on("message", async (message: Discord.Message) => {
     if (message.author.equals(client.user) || message.author.bot) return;
-    if (!message.guild){
+    if (!message.guild) {
         logger.info(`Received message in DMs: message = ${message.content}`);
         return;
     }
@@ -193,4 +193,16 @@ process.on("unhandledRejection", (reason: Error, p: Promise<any>) => {
 
 process.on("uncaughtException", (err: Error) => {
     logger.error(`Uncaught Exception. Reason: ${err}. Trace: ${err.stack}`);
+});
+
+process.on("SIGINT", async () => {
+    logger.debug("SIGINT received, cleaning up...");
+    for (let guildId in gameSessions) {
+        const gameSession = gameSessions[guildId];
+        logger.debug(`gid: ${guildId} | Forcing game session end`);
+        await gameSession.endSession(gameSessions);
+    }
+    await db.kmq.destroy();
+    await db.kpopVideos.destroy();
+    process.exit(0);
 });
