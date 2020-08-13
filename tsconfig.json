@@ -5,7 +5,7 @@
         "target": "es6",
         "module": "commonjs",
         "moduleResolution": "node",
-        "baseUrl": "src",
+        "baseUrl": ".",
         "resolveJsonModule": true
     },
     "include": [

@@ -3,7 +3,7 @@ import * as path from "path";
 import * as Discord from "discord.js";
 import GuildPreference from "../models/guild_preference";
 import GameSession from "../models/game_session";
-import BaseCommand from "commands/base_command";
+import BaseCommand from "../commands/base_command";
 import _logger from "../logger";
 import { getSongCount, GameOption } from "./game_utils";
 import { getFact } from "../fact_generator";

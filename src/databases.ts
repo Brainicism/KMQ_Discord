@@ -1,5 +1,5 @@
-import * as _kmqKnexConfig from "../config/knexfile_kmq";
-import * as _kpopVideosKnexConfig from "../config/knexfile_kpop_videos";
+import * as _kmqKnexConfig from "./config/knexfile_kmq";
+import * as _kpopVideosKnexConfig from "./config/knexfile_kpop_videos";
 import * as Knex from "knex";
 import _logger from "./logger";
 

@@ -1,7 +1,7 @@
 import { Client } from "discord.js";
 import * as request from "request-promise";
 import _logger from "../logger";
-import * as _config from "../../config/app_config.json";
+import * as _config from "../config/app_config.json";
 const config: any = _config;
 
 const logger = _logger("bot_stats_poster");

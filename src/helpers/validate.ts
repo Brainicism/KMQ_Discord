@@ -1,7 +1,7 @@
 import { getDebugContext, sendErrorMessage } from "./discord_utils";
 import * as Discord from "discord.js";
-import { ParsedMessage } from "types";
-import { CommandValidations } from "commands/base_command";
+import { ParsedMessage } from "../types";
+import { CommandValidations } from "../commands/base_command";
 import _logger from "../logger";
 const logger = _logger("validate");
 

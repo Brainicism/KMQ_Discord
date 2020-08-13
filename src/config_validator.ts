@@ -1,5 +1,3 @@
-import { arraysEqual } from "./helpers/discord_utils";
-import * as fs from "fs";
 import _logger from "./logger";
 const logger = _logger("config_validator");
 
@@ -18,12 +16,6 @@ const allowedOptions = {
 
 export function validateConfig(config): boolean {
     let valid = true;
-    //check for mismatch between template and this file
-    const templateOptions = JSON.parse(fs.readFileSync("../config/app_config.json.template").toString());
-    if (!arraysEqual(Object.keys(allowedOptions), Object.keys(templateOptions))) {
-        logger.error(`Configuration template and allowed options mismatch\n Allowed Options: ${Object.keys(allowedOptions)}\n Template Options: ${Object.keys(templateOptions)}`);
-        valid = false;
-    }
     //check for extraneous config options
     for (let option in config) {
         if (!(option in allowedOptions)) {

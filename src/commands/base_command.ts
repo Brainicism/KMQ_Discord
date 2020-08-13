@@ -1,6 +1,6 @@
 import * as Discord from "discord.js";
 import GameSession from "../models/game_session";
-import { ParsedMessage } from "types";
+import { ParsedMessage } from "../types";
 
 interface CommandArgs {
     client?: Discord.Client;
