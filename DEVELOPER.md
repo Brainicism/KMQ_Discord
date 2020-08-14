@@ -13,7 +13,7 @@
 2. Use `*.template` files to create own copy of configuration files in `src/config`
     - `app_config.json` contains application specific settings. See `src/config_validator.ts` to see required parameters. 
     - `knexfile_*.js` contains connection credentials for the each database connection. `kmq` is used for bot-specific database tables. `kpop_videos` is automatically created from the `aoimirai` backup
-3. Apply database migrations for `kmq`. Using `npx knex migrate:latest --knexfile config/knexfile_kmq.js`
+3. Apply database migrations for `kmq`. Using `npx knex migrate:latest --knexfile src/config/knexfile_kmq.js`
 4. Get the latest `kpop_videos` data by running `npm run seed`. This will download the `aoimirai` kpop database dump, drop and recreate `kpop_videos`.  This script also attempt to download every song in the database that isn't downloaded locally. For development purposes, it isn't necessary to have every single song downloaded, so it is fine to kill the process after the database is downloaded.
 5. Download a subset of songs for local testing. Run `ts-node src/scripts/download-new-songs [n]` to download the top `n` most viewed kpop videos.
 6. `npm run dev` to start the bot
