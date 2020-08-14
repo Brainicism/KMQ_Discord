@@ -34,6 +34,6 @@ Gameplay is initiated via `,play`, which invites the bot to a voice channel. The
 - `,groups`: Specify what groups/artists you'd like to hear from
 - `,mode`: Choose whether to guess based on song name or artist name
 
-![options](/images/game_options.png)
+![options](/images/options.png)
 
 Full command list can always be found using `,help`
