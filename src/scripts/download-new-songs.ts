@@ -1,14 +1,12 @@
 import * as ytdl from "ytdl-core";
 import * as fs from "fs";
 import * as _config from "../config/app_config.json";
-import * as mysql from "promise-mysql";
 import { QueriedSong } from "../types";
 import * as path from "path";
+import { db } from "../databases";
 const config: any = _config;
-const deadLinksFilePath = path.join(config.songCacheDir, "deadlinks.txt");
 import _logger from "../logger";
 import { Logger } from "log4js";
-import { touch } from "../helpers/discord_utils";
 const logger: Logger = _logger("download-new-songs");
 
 
@@ -56,7 +54,8 @@ const downloadSong = (id: string) => {
             const infoResponse = await ytdl.getBasicInfo(`https://www.youtube.com/watch?v=${id}`);
             const playabilityStatus: any = infoResponse.player_response.playabilityStatus;
             if (playabilityStatus.status !== "OK") {
-                fs.appendFileSync(deadLinksFilePath, `${id}: ${playabilityStatus.reason}\n`);
+                await db.kmq("dead_links")
+                    .insert({ vlink: id, reason: `Failed to load video: error = ${playabilityStatus.reason}` });
                 reject(`Failed to load video: error = ${playabilityStatus.reason}`);
                 return;
             }
@@ -64,7 +63,8 @@ const downloadSong = (id: string) => {
             ytdl(`https://www.youtube.com/watch?v=${id}`, ytdlOptions)
                 .pipe(cacheStream);
         } catch (e) {
-            fs.appendFileSync(deadLinksFilePath, `${id}: ${e}\n`);
+            await db.kmq("dead_links")
+                .insert({ vlink: id, reason: `Failed to retrieve video metadata. error = ${e}` });
             reject(`Failed to retrieve video metadata. error = ${e}`);
             return;
         }
@@ -85,30 +85,29 @@ const downloadSong = (id: string) => {
 
 
 const downloadNewSongs = async (limit?: number) => {
-    const db = await mysql.createConnection({
-        host: "localhost",
-        user: config.dbUser,
-        password: config.dbPassword
-    });
     clearPartiallyCachedSongs();
 
-    touch(deadLinksFilePath);
+    const knownDeadIds = new Set((await db.kmq("dead_links")
+        .select("vlink"))
+        .map(x => x.vlink))
+    let songs: Array<QueriedSong> = await db.kpopVideos("kpop_videos.app_kpop")
+        .select(["nome as name", "name as artist", "vlink as youtubeLink"])
+        .join("kpop_videos.app_kpop_group", function () {
+            this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id")
+        })
+        .andWhere("dead", "n")
+        .andWhere("vtype", "main")
+        .orderBy("kpop_videos.app_kpop.views", "DESC")
 
-    const knownDeadAndReasons = fs.readFileSync(deadLinksFilePath).toString().split("\n");
-    const knownDeadIds = new Set(knownDeadAndReasons.map((x) => x.split(":")[0]));
-    let query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
-    WHERE dead = "n" AND vtype = "main";`;
     if (limit) {
-        query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
-        WHERE dead = "n" AND vtype = "main" ORDER BY kpop_videos.app_kpop.views DESC LIMIT ${limit};`;
+        songs = songs.slice(0, limit);
     }
-    const songs: Array<QueriedSong> = await db.query(query);
     let downloadCount = 0;
     logger.info("Total songs in database: " + songs.length);
-    const songsNotDownloaded = songs.filter(x => !fs.existsSync(path.join(config.songCacheDir, `${x.youtubeLink}.mp3`)));
-    logger.info("Total songs to be downloaded: " + songsNotDownloaded.length);
+    const songsToDownloaded = songs.filter(x => !fs.existsSync(path.join(config.songCacheDir, `${x.youtubeLink}.mp3`)));
+    logger.info("Total songs to be downloaded: " + songsToDownloaded.length);
 
-    for (let song of songsNotDownloaded) {
+    for (let song of songsToDownloaded) {
         if (knownDeadIds.has(song.youtubeLink)) {
             logger.info(`Known dead link (${song.youtubeLink}), skipping...`);
             continue;
@@ -121,9 +120,14 @@ const downloadNewSongs = async (limit?: number) => {
         catch (e) {
             logger.info("Error downloading song: " + e);
         }
-
     }
-    db.destroy();
+    const songIdsNotDownloaded = songs.filter(x => !fs.existsSync(path.join(config.songCacheDir, `${x.youtubeLink}.mp3`))).map(x => ({ vlink: x.youtubeLink }));
+    await db.kmq.transaction(async (trx) => {
+        await db.kmq("not_downloaded").del().transacting(trx);
+        await db.kmq("not_downloaded").insert(songIdsNotDownloaded).transacting(trx);
+    })
+    db.kmq.destroy();
+    db.kpopVideos.destroy();
     logger.info(`Total songs downloaded: ${downloadCount}`);
 }
 
