@@ -8,7 +8,6 @@ const config: any = _config;
 const deadLinksFilePath = path.join(config.songCacheDir, "deadlinks.txt");
 import _logger from "../logger";
 import { Logger } from "log4js";
-import { touch } from "../helpers/discord_utils";
 const logger: Logger = _logger("download-new-songs");
 
 
@@ -92,7 +91,12 @@ const downloadNewSongs = async (limit?: number) => {
     });
     clearPartiallyCachedSongs();
 
-    touch(deadLinksFilePath);
+    try {
+        const currentTime = new Date();
+        fs.utimesSync(deadLinksFilePath, currentTime, currentTime);
+    } catch (err) {
+        fs.closeSync(fs.openSync(deadLinksFilePath, "w"));
+    }
 
     const knownDeadAndReasons = fs.readFileSync(deadLinksFilePath).toString().split("\n");
     const knownDeadIds = new Set(knownDeadAndReasons.map((x) => x.split(":")[0]));
