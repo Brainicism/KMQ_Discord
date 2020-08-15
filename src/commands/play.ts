@@ -18,7 +18,7 @@ export default class PlayCommand implements BaseCommand {
         }
         else {
             if (!gameSessions[message.guildID]) {
-                const textChannel = message.channel as Eris.TextChannel;
+                const textChannel = message.channel;
                 gameSessions[message.guildID] = new GameSession(textChannel, voiceChannel);
                 await sendInfoMessage(message, `Game starting in #${textChannel.name} in 🔊 ${voiceChannel.name}`, "Listen to the song and type your guess!");
             }

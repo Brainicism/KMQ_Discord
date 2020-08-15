@@ -5,7 +5,7 @@ import _logger from "../logger";
 import * as Eris from "eris";
 const logger = _logger("validate");
 
-export default (message: Eris.Message, parsedMessage: ParsedMessage, validations: CommandValidations, botPrefix: string) => {
+export default (message: Eris.Message<Eris.GuildTextableChannel>, parsedMessage: ParsedMessage, validations: CommandValidations, botPrefix: string) => {
     if (!validations) return true;
     const args = parsedMessage.components;
     if (args.length > validations.maxArgCount || args.length < validations.minArgCount) {
@@ -83,7 +83,7 @@ function arrayToString(elements: Array<string>): string {
     return `${elements.join(", ")} and ${lastElement}`
 }
 
-async function sendValidationErrorMessage(message: Eris.Message, warning: string, arg: string | Array<string>) {
+async function sendValidationErrorMessage(message: Eris.Message<Eris.GuildTextableChannel>, warning: string, arg: string | Array<string>) {
     await sendErrorMessage(message, "Input validation error", warning);
     logger.warn(`${getDebugContext(message)} | ${warning}. val = ${arg}`);
 }

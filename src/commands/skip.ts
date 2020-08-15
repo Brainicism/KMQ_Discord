@@ -49,7 +49,7 @@ export default class SkipCommand implements BaseCommand {
     }
 }
 
-async function sendSkipNotification(message: Eris.Message, gameSession: GameSession) {
+async function sendSkipNotification(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
     await client.createMessage(message.channel.id, {
         embed: {
             color: EMBED_INFO_COLOR,
@@ -63,7 +63,7 @@ async function sendSkipNotification(message: Eris.Message, gameSession: GameSess
     })
 }
 
-async function sendSkipMessage(message: Eris.Message, gameSession: GameSession) {
+async function sendSkipMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
     await client.createMessage(message.channel.id, {
         embed: {
             color: EMBED_SUCCESS_COLOR,
@@ -78,10 +78,10 @@ async function sendSkipMessage(message: Eris.Message, gameSession: GameSession) 
     })
 }
 
-function isSkipMajority(message: Eris.Message, gameSession: GameSession): boolean {
+function isSkipMajority(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession): boolean {
     return gameSession.gameRound.getNumSkippers() >= getSkipsRequired(message);
 }
 
-function getSkipsRequired(message: Eris.Message): number {
+function getSkipsRequired(message: Eris.Message<Eris.GuildTextableChannel>): number {
     return Math.floor(getNumParticipants(message) * 0.5) + 1;
 }

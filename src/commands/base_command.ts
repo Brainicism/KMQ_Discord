@@ -4,7 +4,7 @@ import { ParsedMessage } from "../types";
 
 export interface CommandArgs {
     gameSessions?: { [guildID: string]: GameSession }
-    message?: Eris.Message;
+    message?: Eris.Message<Eris.GuildTextableChannel>;
     parsedMessage?: ParsedMessage,
     botPrefix?: string;
 }

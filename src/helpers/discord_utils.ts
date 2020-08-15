@@ -13,7 +13,7 @@ export const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 export const EMBED_SUCCESS_COLOR = 0x00FF00; // GREEN
 const MAX_EMBED_FIELDS = 25;
 
-export async function sendSongMessage(message: Eris.Message, gameSession: GameSession, isForfeit: boolean, guesser?: string) {
+export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession, isForfeit: boolean, guesser?: string) {
     let footer = null;
     const gameRound = gameSession.gameRound;
     if (!gameRound) return;
@@ -56,7 +56,7 @@ export async function sendSongMessage(message: Eris.Message, gameSession: GameSe
         }
     });
 }
-export async function sendInfoMessage(message: Eris.Message, title: string, description?: string, footerText?: string, footerImageUrl?: string) {
+export async function sendInfoMessage(message: Eris.Message<Eris.GuildTextableChannel>, title: string, description?: string, footerText?: string, footerImageUrl?: string) {
     let footer;
     if (footerImageUrl) {
         footer = {
@@ -76,7 +76,7 @@ export async function sendInfoMessage(message: Eris.Message, title: string, desc
     };
     await sendMessage(message, { embed });
 }
-export async function sendErrorMessage(message: Eris.Message, title: string, description: string) {
+export async function sendErrorMessage(message: Eris.Message<Eris.GuildTextableChannel>, title: string, description: string) {
     await sendMessage(message, {
         embed: {
             color: EMBED_ERROR_COLOR,
@@ -90,7 +90,7 @@ export async function sendErrorMessage(message: Eris.Message, title: string, des
     });
 }
 
-export async function sendOptionsMessage(message: Eris.Message, guildPreference: GuildPreference, updatedOption: string) {
+export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextableChannel>, guildPreference: GuildPreference, updatedOption: string) {
     let totalSongs = await getSongCount(guildPreference);
     let groupsMode = guildPreference.getGroupIds() !== null;
     let cutoffString = `between the years ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
@@ -122,7 +122,7 @@ export async function sendOptionsMessage(message: Eris.Message, guildPreference:
     );
 }
 
-export async function sendEndGameMessage(message: Eris.Message, gameSession: GameSession) {
+export async function sendEndGameMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
     if (gameSession.scoreboard.isEmpty()) {
         await sendMessage(message, {
             embed: {
@@ -151,7 +151,7 @@ export async function sendEndGameMessage(message: Eris.Message, gameSession: Gam
     }
 }
 
-export async function sendScoreboardMessage(message: Eris.Message, gameSession: GameSession) {
+export async function sendScoreboardMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
     await sendMessage(message, {
         embed: {
             color: EMBED_SUCCESS_COLOR,
@@ -229,7 +229,7 @@ export function arraysEqual(arr1: Array<any>, arr2: Array<any>): boolean {
     return true;
 }
 
-export function disconnectVoiceConnection(message: Eris.Message) {
+export function disconnectVoiceConnection(message: Eris.Message<Eris.GuildTextableChannel>) {
     const voiceChannel = getVoiceChannel(message);
     if (voiceChannel) {
         logger.info(`${getDebugContext(message)} | Disconnected from voice channel`);
@@ -250,13 +250,13 @@ export function areUserAndBotInSameVoiceChannel(message: Eris.Message): boolean 
     return message.member.voiceState.channelID === botVoiceConnection.channelID;
 }
 
-export function getNumParticipants(message: Eris.Message): number {
+export function getNumParticipants(message: Eris.Message<Eris.GuildTextableChannel>): number {
     // Don't include the bot as a participant
     return getVoiceChannel(message).voiceMembers.size - 1;
 }
 
-export function getVoiceChannel(message: Eris.Message): Eris.VoiceChannel {
-    const voiceChannel = (message.channel as Eris.TextChannel).guild.channels.get(message.member.voiceState.channelID) as Eris.VoiceChannel;
+export function getVoiceChannel(message: Eris.Message<Eris.GuildTextableChannel>): Eris.VoiceChannel {
+    const voiceChannel = message.channel.guild.channels.get(message.member.voiceState.channelID) as Eris.VoiceChannel;
     return voiceChannel;
 }
 
@@ -266,8 +266,8 @@ export function getVoiceConnection(message: Eris.Message): Eris.VoiceConnection 
 }
 
 
-export async function sendMessage(message: Eris.Message, messageContent: Eris.MessageContent): Promise<Eris.Message> {
-    const channel = message.channel as Eris.TextChannel;
+export async function sendMessage(message: Eris.Message<Eris.GuildTextableChannel>, messageContent: Eris.MessageContent): Promise<Eris.Message> {
+    const channel = message.channel;
     if (!channel.permissionsOf(client.user.id).has("sendMessages")) {
         logger.warn(`${getDebugContext(message)} | Missing SEND_MESSAGES permissions`);
         const embed = {

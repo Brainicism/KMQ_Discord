@@ -27,7 +27,7 @@ export default class HelpCommand implements BaseCommand {
 }
 
 // Usage: `!help [action]` or `!help`
-const helpMessage = async (message: Eris.Message, action: string, botPrefix: string) => {
+const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, action: string, botPrefix: string) => {
     let embedTitle = "";
     let embedDesc = "";
     let embedFields = [];

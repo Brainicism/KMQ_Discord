@@ -110,12 +110,12 @@ async function getFilteredSongList(guildPreference: GuildPreference): Promise<{ 
     };
 
 }
-export async function startGame(gameSessions: { [guildID: string]: GameSession }, guildPreference: GuildPreference, message: Eris.Message) {
+export async function startGame(gameSessions: { [guildID: string]: GameSession }, guildPreference: GuildPreference, message: Eris.Message<Eris.GuildTextableChannel>) {
     logger.info(`${getDebugContext(message)} | Game session starting`);
     startRound(gameSessions, guildPreference, message);
 }
 
-async function startRound(gameSessions: { [guildID: string]: GameSession }, guildPreference: GuildPreference, message: Eris.Message) {
+async function startRound(gameSessions: { [guildID: string]: GameSession }, guildPreference: GuildPreference, message: Eris.Message<Eris.GuildTextableChannel>) {
     const gameSession = gameSessions[message.guildID];
     if (!gameSession || gameSession.finished) {
         return;
@@ -207,7 +207,7 @@ async function selectRandomSong(guildPreference: GuildPreference): Promise<Queri
     }
 }
 
-async function playSong(gameSessions: { [guildID: string]: GameSession }, guildPreference: GuildPreference, message: Eris.Message, client: Eris.Client) {
+async function playSong(gameSessions: { [guildID: string]: GameSession }, guildPreference: GuildPreference, message: Eris.Message<Eris.GuildTextableChannel>, client: Eris.Client) {
     const gameSession = gameSessions[message.guildID];
     if (!gameSession) return;
     const gameRound = gameSession.gameRound;

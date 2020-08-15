@@ -37,6 +37,8 @@ client.on("messageCreate", async (message: Eris.Message) => {
         logger.info(`Received message in DMs: message = ${message.content}`);
         return;
     }
+    if (!isGuildMessage(message)) return;
+
     const guildPreference = await getGuildPreference(message.guildID);
     const botPrefix = guildPreference.getBotPrefix();
     const parsedMessage = parseMessage(message.content, botPrefix) || null;
@@ -63,6 +65,10 @@ client.on("messageCreate", async (message: Eris.Message) => {
         }
     }
 });
+
+function isGuildMessage(message: Eris.Message): message is Eris.Message<Eris.GuildTextableChannel> {
+    return (message.channel instanceof Eris.TextChannel)
+}
 
 client.on("voiceChannelLeave", async (member, oldUserChannel) => {
     const guildID = oldUserChannel.guild.id;
