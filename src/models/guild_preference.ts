@@ -177,7 +177,7 @@ export default class GuildPreference {
     async updateGuildPreferences(db: Knex) {
         await db("guild_preferences")
             .where({ guild_id: this.guildID })
-            .update({ guild_preference: JSON.stringify(this) });
+            .update({ guild_preference: JSON.stringify(this)});
     }
 };
 

@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-import * as Discord from "discord.js"
+import * as Eris from "eris";
 import GameSession from "../models/game_session";
 import {
     sendSongMessage,
@@ -11,12 +11,13 @@ import {
 } from "../helpers/discord_utils";
 import { startGame, getGuildPreference } from "../helpers/game_utils";
 import _logger from "../logger";
+import { client } from "../kmq";
 const logger = _logger("skip");
 
 export default class SkipCommand implements BaseCommand {
-    async call({ gameSessions, client, message }: CommandArgs) {
-        const guildPreference = await getGuildPreference(message.guild.id);
-        const gameSession = gameSessions[message.guild.id];
+    async call({ gameSessions, message }: CommandArgs) {
+        const guildPreference = await getGuildPreference(message.guildID);
+        const gameSession = gameSessions[message.guildID];
         if (!gameSession || !gameSession.gameRound || !areUserAndBotInSameVoiceChannel(message)) {
             logger.warn(`${getDebugContext(message)} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.gameRound: ${gameSession && !gameSession.gameRound}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
             return;
@@ -31,7 +32,7 @@ export default class SkipCommand implements BaseCommand {
             await sendSkipMessage(message, gameSession);
             await sendSongMessage(message, gameSession, true);
             gameSession.endRound(false);
-            startGame(gameSessions, guildPreference, message, client);
+            startGame(gameSessions, guildPreference, message);
             logger.info(`${getDebugContext(message)} | Skip majority achieved.`);
         }
         else {
@@ -48,8 +49,8 @@ export default class SkipCommand implements BaseCommand {
     }
 }
 
-async function sendSkipNotification(message: Discord.Message, gameSession: GameSession) {
-    await message.channel.send({
+async function sendSkipNotification(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
+    await client.createMessage(message.channel.id, {
         embed: {
             color: EMBED_INFO_COLOR,
             author: {
@@ -62,8 +63,8 @@ async function sendSkipNotification(message: Discord.Message, gameSession: GameS
     })
 }
 
-async function sendSkipMessage(message: Discord.Message, gameSession: GameSession) {
-    await message.channel.send({
+async function sendSkipMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
+    await client.createMessage(message.channel.id, {
         embed: {
             color: EMBED_SUCCESS_COLOR,
             author: {
@@ -77,10 +78,10 @@ async function sendSkipMessage(message: Discord.Message, gameSession: GameSessio
     })
 }
 
-function isSkipMajority(message: Discord.Message, gameSession: GameSession): boolean {
+function isSkipMajority(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession): boolean {
     return gameSession.gameRound.getNumSkippers() >= getSkipsRequired(message);
 }
 
-function getSkipsRequired(message: Discord.Message): number {
+function getSkipsRequired(message: Eris.Message<Eris.GuildTextableChannel>): number {
     return Math.floor(getNumParticipants(message) * 0.5) + 1;
 }

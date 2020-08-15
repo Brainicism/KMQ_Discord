@@ -6,7 +6,7 @@ import _logger from "../logger";
 const logger = _logger("groups");
 export default class GroupsCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
-        const guildPreference = await getGuildPreference(message.guild.id);
+        const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             guildPreference.resetGroups();
             await sendOptionsMessage(message, guildPreference, GameOption.GROUPS);

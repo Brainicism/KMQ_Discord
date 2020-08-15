@@ -1,10 +1,11 @@
 import Scoreboard from "./scoreboard";
-import { StreamDispatcher, VoiceConnection, TextChannel, Message, VoiceChannel } from "discord.js"
 import _logger from "../logger";
 import { db } from "../databases";
 import GameRound from "./game_round";
 import * as fs from "fs";
+import * as Eris from "eris";
 import * as _config from "../config/app_config.json";
+import { client } from "../kmq";
 const config: any = _config;
 
 const logger = _logger("game_session");
@@ -14,21 +15,20 @@ export default class GameSession {
 
     public sessionInitialized: boolean;
     public scoreboard: Scoreboard;
-    public dispatcher: StreamDispatcher;
-    public connection: VoiceConnection;
+    public connection: Eris.VoiceConnection;
     public finished: boolean;
     public lastActive: number;
-    public textChannel: TextChannel;
-    public voiceChannel: VoiceChannel;
+    public textChannel: Eris.TextChannel;
+    public voiceChannel: Eris.VoiceChannel;
     public gameRound: GameRound;
     public roundsPlayed: number;
 
     private guessTimes: Array<number>;
     private participants: Set<string>;
-    private songAliasList: {[songId: string]: Array<string>};
+    private songAliasList: { [songId: string]: Array<string> };
 
 
-    constructor(textChannel: TextChannel, voiceChannel: VoiceChannel) {
+    constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel) {
         this.scoreboard = new Scoreboard();
         this.lastActive = Date.now();
         this.sessionInitialized = false;
@@ -36,7 +36,6 @@ export default class GameSession {
         this.participants = new Set();
         this.roundsPlayed = 0;
         this.guessTimes = [];
-        this.dispatcher = null;
         this.connection = null;
         this.finished = false;
         this.voiceChannel = voiceChannel;
@@ -55,13 +54,13 @@ export default class GameSession {
         if (guessed) {
             this.guessTimes.push(Date.now() - this.gameRound.startedAt);
         }
-        if (this.dispatcher) {
-            this.dispatcher.removeAllListeners();
-            this.dispatcher.end();
-            this.dispatcher = null;
-        }
         if (this.gameRound) {
             this.gameRound.finished = true;
+        }
+        if (this.connection) {
+            this.connection.removeAllListeners();
+            this.connection.stopPlaying();
+
         }
         this.sessionInitialized = false;
     }
@@ -83,8 +82,13 @@ export default class GameSession {
         const gameSession = gameSessions[guildId];
         gameSession.finished = true;
         gameSession.endRound(false);
-        if (gameSession.connection) {
-            gameSession.connection.disconnect();
+        const voiceConnection = client.voiceConnections.get(guildId);
+        if (voiceConnection && voiceConnection.channelID) {
+            voiceConnection.stopPlaying();
+            const voiceChannel = client.getChannel(voiceConnection.channelID) as Eris.VoiceChannel;
+            if (voiceChannel) {
+                voiceChannel.leave();
+            }
         }
         await db.kmq("guild_preferences")
             .where("guild_id", guildId)
@@ -116,7 +120,7 @@ export default class GameSession {
         return `${this.gameRound.song}:${this.gameRound.artist}:${this.gameRound.videoID}`;
     }
 
-    checkGuess(message: Message, modeType: string): boolean {
+    checkGuess(message: Eris.Message, modeType: string): boolean {
         if (!this.gameRound) return;
         this.participants.add(message.author.id);
         return this.gameRound.checkGuess(message, modeType);

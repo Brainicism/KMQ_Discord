@@ -1,7 +1,8 @@
 import { cleanSongName, cleanArtistName } from "../helpers/game_utils";
-import { Message } from "discord.js";
 import { MODE_TYPE } from "../commands/mode";
 import _logger from "../logger";
+import * as Eris from "eris";
+
 const logger = _logger("game_round");
 
 export default class GameRound {
@@ -34,7 +35,7 @@ export default class GameRound {
         return this.skippers.size;
     }
 
-    checkGuess(message: Message, modeType: string): boolean {
+    checkGuess(message: Eris.Message, modeType: string): boolean {
         if (modeType === MODE_TYPE.SONG_NAME) {
             const guess = cleanSongName(message.content);
             const cleanedSongAliases = this.songAliases.map((x) => cleanSongName(x));

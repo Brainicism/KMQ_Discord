@@ -1,6 +1,6 @@
 import * as fs from "fs";
-import * as path from "path";
-import * as Discord from "discord.js";
+import * as Eris from "eris";
+import { client } from "../kmq";
 import GuildPreference from "../models/guild_preference";
 import GameSession from "../models/game_session";
 import BaseCommand from "../commands/base_command";
@@ -13,7 +13,7 @@ export const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 export const EMBED_SUCCESS_COLOR = 0x00FF00; // GREEN
 const MAX_EMBED_FIELDS = 25;
 
-export async function sendSongMessage(message: Discord.Message, gameSession: GameSession, isForfeit: boolean, guesser?: string) {
+export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession, isForfeit: boolean, guesser?: string) {
     let footer = null;
     const gameRound = gameSession.gameRound;
     if (!gameRound) return;
@@ -56,25 +56,27 @@ export async function sendSongMessage(message: Discord.Message, gameSession: Gam
         }
     });
 }
-export async function sendInfoMessage(message: Discord.Message, title: string, description?: string, footerText?: string, footerImageWithPath?: string) {
-    const embed = new Discord.RichEmbed({
+export async function sendInfoMessage(message: Eris.Message<Eris.GuildTextableChannel>, title: string, description?: string, footerText?: string, footerImageUrl?: string) {
+    let footer;
+    if (footerImageUrl) {
+        footer = {
+            text: footerText,
+            icon_url: footerImageUrl
+        }
+    }
+    let embed = {
         color: EMBED_INFO_COLOR,
         author: {
             name: message.author.username,
             icon_url: message.author.avatarURL
         },
         title: bold(title),
-        description: description
-    })
-
-    if (footerImageWithPath) {
-        embed.attachFiles([footerImageWithPath]);
-        const footerImage = path.basename(footerImageWithPath);
-        embed.setFooter(footerText, `attachment://${footerImage}`)
-    }
-    await sendMessage(message, embed);
+        description: description,
+        footer
+    };
+    await sendMessage(message, { embed });
 }
-export async function sendErrorMessage(message: Discord.Message, title: string, description: string) {
+export async function sendErrorMessage(message: Eris.Message<Eris.GuildTextableChannel>, title: string, description: string) {
     await sendMessage(message, {
         embed: {
             color: EMBED_ERROR_COLOR,
@@ -88,7 +90,7 @@ export async function sendErrorMessage(message: Discord.Message, title: string, 
     });
 }
 
-export async function sendOptionsMessage(message: Discord.Message, guildPreference: GuildPreference, updatedOption: string) {
+export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextableChannel>, guildPreference: GuildPreference, updatedOption: string) {
     let totalSongs = await getSongCount(guildPreference);
     let groupsMode = guildPreference.getGroupIds() !== null;
     let cutoffString = `between the years ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
@@ -116,11 +118,11 @@ export async function sendOptionsMessage(message: Discord.Message, guildPreferen
         updatedOption == null ? "Options" : `${updatedOption} updated`,
         `Now playing the ${limitString} out of the __${totalSongs}__ most popular songs by ${groupsMode ? groupsString : genderString} ${cutoffString}. \nPlaying from the ${seekTypeString} point of each song and at ${volumeString}% volume. Guess the ${modeTypeString}'s name!`,
         updatedOption == null ? `Psst. Your bot prefix is \`${guildPreference.getBotPrefix()}\`.` : null,
-        updatedOption == null ? "assets/tsukasa.jpg" : null
+        updatedOption == null ? "https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/src/assets/tsukasa.jpg" : null
     );
 }
 
-export async function sendEndGameMessage(message: Discord.Message, gameSession: GameSession) {
+export async function sendEndGameMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
     if (gameSession.scoreboard.isEmpty()) {
         await sendMessage(message, {
             embed: {
@@ -149,7 +151,7 @@ export async function sendEndGameMessage(message: Discord.Message, gameSession: 
     }
 }
 
-export async function sendScoreboardMessage(message: Discord.Message, gameSession: GameSession) {
+export async function sendScoreboardMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
     await sendMessage(message, {
         embed: {
             color: EMBED_SUCCESS_COLOR,
@@ -164,8 +166,8 @@ export async function sendScoreboardMessage(message: Discord.Message, gameSessio
     });
 }
 
-export function getDebugContext(message: Discord.Message): string {
-    return `gid: ${message.guild.id}, uid: ${message.author.id}`
+export function getDebugContext(message: Eris.Message): string {
+    return `gid: ${message.guildID}, uid: ${message.author.id}`
 }
 
 export function getCommandFiles(): Promise<{ [commandName: string]: BaseCommand }> {
@@ -227,43 +229,55 @@ export function arraysEqual(arr1: Array<any>, arr2: Array<any>): boolean {
     return true;
 }
 
-export function disconnectVoiceConnection(client: Discord.Client, message: Discord.Message) {
-    const voiceConnection = client.voiceConnections.get(message.guild.id);
-    if (voiceConnection) {
+export function disconnectVoiceConnection(message: Eris.Message<Eris.GuildTextableChannel>) {
+    const voiceChannel = getVoiceChannel(message);
+    if (voiceChannel) {
         logger.info(`${getDebugContext(message)} | Disconnected from voice channel`);
-        voiceConnection.disconnect();
-        return;
+        voiceChannel.leave();
     }
 }
 
-export function getUserIdentifier(user: Discord.User): string {
+export function getUserIdentifier(user: Eris.User): string {
     return `${user.username}#${user.discriminator}`
 }
 
 
-export function areUserAndBotInSameVoiceChannel(message: Discord.Message): boolean {
-    if (!message.member.voiceChannel || !message.guild.voiceConnection) {
+export function areUserAndBotInSameVoiceChannel(message: Eris.Message): boolean {
+    const botVoiceConnection = getVoiceConnection(message);
+    if (!message.member.voiceState || !botVoiceConnection) {
         return false;
     }
-    return message.member.voiceChannel === message.guild.voiceConnection.channel;
+    return message.member.voiceState.channelID === botVoiceConnection.channelID;
 }
 
-export function getNumParticipants(message: Discord.Message): number {
+export function getNumParticipants(message: Eris.Message<Eris.GuildTextableChannel>): number {
     // Don't include the bot as a participant
-    return message.member.voiceChannel.members.size - 1;
+    return getVoiceChannel(message).voiceMembers.size - 1;
 }
 
-export async function sendMessage(context: Discord.Message, messageContent: any): Promise<Discord.Message> {
-    const channel: Discord.TextChannel = context.channel as Discord.TextChannel;
-    if (!context.guild.me.permissionsIn(context.channel).has("SEND_MESSAGES")) {
-        logger.warn(`${getDebugContext(context)} | Missing SEND_MESSAGES permissions`);
+export function getVoiceChannel(message: Eris.Message<Eris.GuildTextableChannel>): Eris.VoiceChannel {
+    const voiceChannel = message.channel.guild.channels.get(message.member.voiceState.channelID) as Eris.VoiceChannel;
+    return voiceChannel;
+}
+
+export function getVoiceConnection(message: Eris.Message): Eris.VoiceConnection {
+    const voiceConnection = client.voiceConnections.get(message.guildID);
+    return voiceConnection;
+}
+
+
+export async function sendMessage(message: Eris.Message<Eris.GuildTextableChannel>, messageContent: Eris.MessageContent): Promise<Eris.Message> {
+    const channel = message.channel;
+    if (!channel.permissionsOf(client.user.id).has("sendMessages")) {
+        logger.warn(`${getDebugContext(message)} | Missing SEND_MESSAGES permissions`);
         const embed = {
             color: EMBED_INFO_COLOR,
             title: `Missing Permissions`,
-            description: `Hi! I'm unable to message in ${context.guild.name}'s #${channel.name} channel. Please double check the text channel's permissions.`,
+            description: `Hi! I'm unable to message in ${channel.guild.name}'s #${channel.name} channel. Please double check the text channel's permissions.`,
         }
-        await context.author.send({ embed });
+        const dmChannel = await client.getDMChannel(message.author.id);
+        await client.createMessage(dmChannel.id, { embed });
         return;
     }
-    return context.channel.send(messageContent);
+    return client.createMessage(channel.id, messageContent);
 }

@@ -1,7 +1,7 @@
-import * as Discord from "discord.js";
 import * as cronParser from "cron-parser";
 import * as _kmqKnexConfig from "./config/knexfile_kmq";
 import * as _kpopVideosKnexConfig from "./config/knexfile_kpop_videos";
+import * as Eris from "eris";
 import { validateConfig } from "./config_validator";
 import { guessSong, cleanupInactiveGameSessions, getGuildPreference } from "./helpers/game_utils";
 import validate from "./helpers/validate";
@@ -16,9 +16,10 @@ import * as fs from "fs";
 import { db } from "./databases";
 const logger = _logger("kmq");
 
-const client = new Discord.Client();
 
 const config: any = _config;
+export const client = new Eris.Client(config.botToken);
+
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 2, 1]);
 
 let commands: { [commandName: string]: BaseCommand } = {};
@@ -26,24 +27,23 @@ let gameSessions: { [guildID: string]: GameSession } = {};
 let botStatsPoster: BotStatsPoster = null;
 
 client.on("ready", () => {
-    logger.info(`Logged in as ${client.user.tag}! in '${process.env.NODE_ENV}' mode`);
+    logger.info(`Logged in as ${client.user.username}#${client.user.discriminator}! in '${process.env.NODE_ENV}' mode`);
 });
 
-client.on("message", async (message: Discord.Message) => {
-    if (message.author.equals(client.user) || message.author.bot) return;
-    if (!message.guild) {
+
+client.on("messageCreate", async (message: Eris.Message) => {
+    if (message.author.id === client.user.id || message.author.bot) return;
+    if (!message.guildID) {
         logger.info(`Received message in DMs: message = ${message.content}`);
         return;
     }
-    if (!message.guild.available) {
-        logger.error(`gid: ${message.guild.id} | Guild currently unavailable`);
-        return;
-    }
-    const guildPreference = await getGuildPreference(message.guild.id);
+    if (!isGuildMessage(message)) return;
+
+    const guildPreference = await getGuildPreference(message.guildID);
     const botPrefix = guildPreference.getBotPrefix();
     const parsedMessage = parseMessage(message.content, botPrefix) || null;
 
-    if (message.isMemberMentioned(client.user) && message.content.split(" ").length == 1) {
+    if (message.mentions.includes(client.user) && message.content.split(" ").length == 1) {
         // Any message that mentions the bot sends the current options
         commands["options"].call({ message });
     }
@@ -51,7 +51,6 @@ client.on("message", async (message: Discord.Message) => {
         const command = commands[parsedMessage.action];
         if (validate(message, parsedMessage, command.validations, botPrefix)) {
             command.call({
-                client,
                 gameSessions,
                 message,
                 parsedMessage,
@@ -60,34 +59,27 @@ client.on("message", async (message: Discord.Message) => {
         }
     }
     else {
-        if (gameSessions[message.guild.id] && gameSessions[message.guild.id].gameRound) {
-            guessSong({ client, message, gameSessions });
-            gameSessions[message.guild.id].lastActiveNow();
+        if (gameSessions[message.guildID] && gameSessions[message.guildID].gameRound) {
+            guessSong({ message, gameSessions });
+            gameSessions[message.guildID].lastActiveNow();
         }
     }
 });
 
-client.on("voiceStateUpdate", async (oldState, newState) => {
-    const oldUserChannel = oldState.voiceChannel;
-    if (!oldUserChannel) {
-        return;
-    }
-    const newUserChannel = newState.voiceChannel;
-    if (!newUserChannel) {
-        const guildID = oldUserChannel.guild.id;
-        const gameSession = gameSessions[guildID];
-        // User left voice channel, check if bot is only one left
-        if (oldUserChannel.members.size === 1 && oldUserChannel.members.has(client.user.id)) {
-            const voiceConnection = client.voiceConnections.get(guildID);
-            if (voiceConnection) {
-                voiceConnection.disconnect();
-                if (gameSession) {
-                    logger.info(`gid: ${oldUserChannel.guild.id} | Bot is only user left, leaving voice...`)
-                    await gameSessions[newState.guild.id].endSession(gameSessions);
-                }
-                return;
-            }
+function isGuildMessage(message: Eris.Message): message is Eris.Message<Eris.GuildTextableChannel> {
+    return (message.channel instanceof Eris.TextChannel)
+}
+
+client.on("voiceChannelLeave", async (member, oldUserChannel) => {
+    const guildID = oldUserChannel.guild.id;
+    const gameSession = gameSessions[guildID];
+    // User left voice channel, check if bot is only one left
+    if (oldUserChannel.voiceMembers.size === 1 && oldUserChannel.voiceMembers.has(client.user.id)) {
+        if (gameSession) {
+            logger.info(`gid: ${oldUserChannel.guild.id} | Bot is only user left, leaving voice...`)
+            await gameSessions[oldUserChannel.guild.id].endSession(gameSessions);
         }
+        return;
     }
 });
 
@@ -114,7 +106,7 @@ const checkRestartNotification = async (restartNotification: Date): Promise<void
         for (let guildId in gameSessions) {
             const gameSession = gameSessions[guildId];
             if (gameSession.finished) continue;
-            await gameSession.textChannel.send({
+            await client.createMessage(gameSession.textChannel.id, {
                 embed: {
                     color: EMBED_INFO_COLOR,
                     author: {
@@ -183,7 +175,7 @@ const checkRestartNotification = async (restartNotification: Date): Promise<void
             await checkRestartNotification(nextRestartTime.toDate());
         }
     }, 60 * 1000);
-    client.login(config.botToken);
+    client.connect();
 })();
 
 process.on("unhandledRejection", (reason: Error, p: Promise<any>) => {

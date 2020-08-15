@@ -36,11 +36,11 @@ export default class Scoreboard {
         return winnerStr;
     }
 
-    getScoreboard(): Array<{ name: string, value: number, inline: boolean }> {
+    getScoreboard(): Array<{ name: string, value: string, inline: boolean }> {
         return Object.values(this.players).map((x) => {
-            return { name: x.getName(), value: x.getScore(), inline: true }
+            return { name: x.getName(), value: x.getScore().toString(), inline: true }
         })
-            .sort((a, b) => { return b.value - a.value; })
+            .sort((a, b) => { return parseInt(b.value) - parseInt(a.value) })
     }
 
     updateScoreboard(winnerTag: string, winnerID: string) {

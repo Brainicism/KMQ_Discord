@@ -1,5 +1,4 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-import * as Discord from "discord.js";
 import * as fs from "fs";
 import * as _config from "../config/app_config.json";
 import _logger from "../logger";
@@ -27,7 +26,7 @@ export default class NewsCommand implements BaseCommand {
             return;
         }
         const news = fs.readFileSync(config.newsFile).toString();
-        const embed = new Discord.RichEmbed({
+        const embed = {
             color: EMBED_INFO_COLOR,
             author: {
                 name: message.author.username,
@@ -38,9 +37,9 @@ export default class NewsCommand implements BaseCommand {
             footer: {
                 text: `Latest Song Update: ${latestSongDate.toISOString().split('T')[0]}`
             }
-        });
+        };
 
-        await sendMessage(message, embed);
+        await sendMessage(message, { embed });
     }
     help = {
         name: "news",

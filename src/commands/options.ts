@@ -4,7 +4,7 @@ import { getGuildPreference } from "../helpers/game_utils";
 
 export default class OptionsCommand implements BaseCommand {
     async call({ message }: CommandArgs) {
-        const guildPreference = await getGuildPreference(message.guild.id);
+        const guildPreference = await getGuildPreference(message.guildID);
         await sendOptionsMessage(message, guildPreference, null);
     }
     help = {
