@@ -14,5 +14,7 @@ Gameplay is initiated via `,play`, which invites the bot to a voice channel. The
 
 ![scoreboard](/images/scoreboard.png)
 
+![options](/images/options.png)
+
 # Development
 If you are interested in contributing to KMQ, [instructions on setup and development can be found here.](DEVELOPER.md)
