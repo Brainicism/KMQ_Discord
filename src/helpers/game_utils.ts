@@ -249,9 +249,9 @@ async function playSong(gameSessions: { [guildID: string]: GameSession }, guildP
     gameSession.connection.stopPlaying();
     gameSession.connection.play(stream, {
         inputArgs: ["-ss", seekLocation.toString()],
-        encoderArgs: ["-filter:a", `volume=0.5`],
         inlineVolume: true
     });
+    gameSession.connection.setVolume(guildPreference.getStreamVolume());
     gameSession.connection.once("end", async () => {
         logger.info(`${getDebugContext(message)} | Song finished without being guessed.`);
         await sendSongMessage(message, gameSession, true);
