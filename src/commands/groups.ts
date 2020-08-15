@@ -43,5 +43,5 @@ export default class GroupsCommand implements BaseCommand {
             }
         ]
     }
-    aliases = ["group"]
+    aliases = ["group", "artist", "artists"]
 }
