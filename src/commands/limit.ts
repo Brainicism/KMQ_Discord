@@ -7,7 +7,7 @@ export const DEFAULT_LIMIT = 500;
 
 export default class LimitCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
-        const guildPreference = await getGuildPreference(message.guild.id);
+        const guildPreference = await getGuildPreference(message.guildID);
         guildPreference.setLimit(parseInt(parsedMessage.components[0]));
         const songCount = await getSongCount(guildPreference);
         if (guildPreference.getLimit() > songCount) {

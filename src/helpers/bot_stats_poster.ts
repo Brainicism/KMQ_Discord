@@ -1,4 +1,4 @@
-import { Client } from "discord.js";
+import * as Eris from "eris";
 import * as request from "request-promise";
 import _logger from "../logger";
 import * as _config from "../config/app_config.json";
@@ -9,16 +9,16 @@ const TOP_GG_API = "https://top.gg/api/bots/%d/stats";
 const DISCORD_BOTS_API = "https://discord.bots.gg/api/v1/bots/%d/stats";
 
 export default class BotStatsPoster {
-    private client: Client;
+    private client: Eris.Client;
 
-    constructor(client: Client) {
+    constructor(client: Eris.Client) {
         this.client = client;
     }
     start() {
         setInterval(() => { this.postStats(this.client) }, 1800000);
     }
 
-    private async postStats(client: Client) {
+    private async postStats(client: Eris.Client) {
         if ("topGGToken" in config){
             this.postTopGgStats(client);
         }
@@ -27,7 +27,7 @@ export default class BotStatsPoster {
         }
     }
 
-    private async postTopGgStats(client: Client) {
+    private async postTopGgStats(client: Eris.Client) {
         try {
             await request({
                 method: "POST",
@@ -46,7 +46,7 @@ export default class BotStatsPoster {
         }
     }
 
-    private async postDiscordGgBotsStats(client: Client) {
+    private async postDiscordGgBotsStats(client: Eris.Client) {
         try {
             await request({
                 method: "POST",

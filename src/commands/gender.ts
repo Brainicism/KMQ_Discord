@@ -10,7 +10,7 @@ export enum GENDER {
 }
 export default class GenderCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
-        const guildPreference = await getGuildPreference(message.guild.id);
+        const guildPreference = await getGuildPreference(message.guildID);
         if (guildPreference.getGroupIds() !== null) {
             sendErrorMessage(message, "Game Option Conflict", `\`groups\` game option is currently set. \`gender\` and \`groups\` are incompatible. Remove the \`groups\` option to proceed`);
             return;

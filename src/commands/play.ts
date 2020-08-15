@@ -1,28 +1,28 @@
 import GameSession from "../models/game_session";
-import { sendErrorMessage, getDebugContext, sendInfoMessage } from "../helpers/discord_utils";
+import { sendErrorMessage, getDebugContext, sendInfoMessage, getVoiceChannel } from "../helpers/discord_utils";
 import { startGame, getGuildPreference } from "../helpers/game_utils";
+import * as Eris from "eris";
 import BaseCommand, { CommandArgs } from "./base_command";
 import _logger from "../logger";
-import { TextChannel } from "discord.js";
 const logger = _logger("play");
 
 export default class PlayCommand implements BaseCommand {
-    async call({ message, gameSessions, client }: CommandArgs) {
-        const guildPreference = await getGuildPreference(message.guild.id);
-        if (!message.member.voiceChannel) {
+    async call({ message, gameSessions }: CommandArgs) {
+        const guildPreference = await getGuildPreference(message.guildID);
+        const voiceChannel = getVoiceChannel(message);
+        if (!voiceChannel) {
             await sendErrorMessage(message,
                 "Join a voice channel",
                 `Send \`${guildPreference.getBotPrefix()}play\` again when you are in a voice channel.`);
             logger.warn(`${getDebugContext(message)} | User not in voice channel`);
         }
         else {
-            if (!gameSessions[message.guild.id]) {
-                const textChannel = message.channel as TextChannel;
-                const voiceChannel = message.member.voiceChannel;
-                gameSessions[message.guild.id] = new GameSession(textChannel, voiceChannel);
+            if (!gameSessions[message.guildID]) {
+                const textChannel = message.channel as Eris.TextChannel;
+                gameSessions[message.guildID] = new GameSession(textChannel, voiceChannel);
                 await sendInfoMessage(message, `Game starting in #${textChannel.name} in 🔊 ${voiceChannel.name}`, "Listen to the song and type your guess!");
             }
-            startGame(gameSessions, guildPreference, message, client);
+            startGame(gameSessions, guildPreference, message);
         }
     }
     aliases = ["random"]

@@ -11,7 +11,7 @@ export enum MODE_TYPE {
 
 export default class ModeCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
-        const guildPreference = await getGuildPreference(message.guild.id);
+        const guildPreference = await getGuildPreference(message.guildID);
         const modeType = parsedMessage.components[0].toLowerCase();
         guildPreference.setModeType(modeType as MODE_TYPE);
         await sendOptionsMessage(message, guildPreference, GameOption.MODE_TYPE);

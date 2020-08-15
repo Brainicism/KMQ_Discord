@@ -4,8 +4,8 @@ import { sendInfoMessage, sendScoreboardMessage } from "../helpers/discord_utils
 
 export default class ScoreCommand implements BaseCommand {
     async call({ message, gameSessions }: CommandArgs) {
-        const guildPreference = await getGuildPreference(message.guild.id);
-        const gameSession = gameSessions[message.guild.id];
+        const guildPreference = await getGuildPreference(message.guildID);
+        const gameSession = gameSessions[message.guildID];
         if (!gameSession) {
             sendInfoMessage(message, "No Active Game", `There is no currently active game of KMQ. Start a new game with \`${guildPreference.getBotPrefix()}play\``);
             return;

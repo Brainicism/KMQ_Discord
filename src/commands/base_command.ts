@@ -1,11 +1,10 @@
-import * as Discord from "discord.js";
+import * as Eris from "eris";
 import GameSession from "../models/game_session";
 import { ParsedMessage } from "../types";
 
 export interface CommandArgs {
-    client?: Discord.Client;
     gameSessions?: { [guildID: string]: GameSession }
-    message?: Discord.Message;
+    message?: Eris.Message;
     parsedMessage?: ParsedMessage,
     botPrefix?: string;
 }

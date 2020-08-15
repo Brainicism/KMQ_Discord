@@ -9,7 +9,7 @@ export enum SEEK_TYPE {
 }
 export default class SeekCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
-        const guildPreference = await getGuildPreference(message.guild.id);
+        const guildPreference = await getGuildPreference(message.guildID);
         const seekType = parsedMessage.components[0];
         guildPreference.setSeekType(seekType as SEEK_TYPE);
         await sendOptionsMessage(message, guildPreference, GameOption.SEEK_TYPE);
