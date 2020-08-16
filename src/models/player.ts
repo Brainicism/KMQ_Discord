@@ -1,8 +1,10 @@
 export default class Player {
     private name: string;
+    private id: string;
     private score: number;
-    constructor(name: string) {
+    constructor(name: string, id: string) {
         this.name = name;
+        this.id = id;
         this.score = 1;
     }
 
@@ -12,6 +14,10 @@ export default class Player {
 
     getScore(): number {
         return this.score;
+    }
+
+    getId(): string {
+        return this.id;
     }
 
     incrementScore() {
