@@ -7,7 +7,8 @@ import {
     getNumParticipants,
     EMBED_INFO_COLOR,
     getDebugContext,
-    EMBED_SUCCESS_COLOR
+    EMBED_SUCCESS_COLOR,
+    sendMessage
 } from "../helpers/discord_utils";
 import { startGame, getGuildPreference } from "../helpers/game_utils";
 import _logger from "../logger";
@@ -50,7 +51,7 @@ export default class SkipCommand implements BaseCommand {
 }
 
 async function sendSkipNotification(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
-    await client.createMessage(message.channel.id, {
+    await sendMessage({ channel: message.channel, authorId: message.author.id }, {
         embed: {
             color: EMBED_INFO_COLOR,
             author: {
@@ -64,7 +65,7 @@ async function sendSkipNotification(message: Eris.Message<Eris.GuildTextableChan
 }
 
 async function sendSkipMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
-    await client.createMessage(message.channel.id, {
+    await sendMessage({ channel: message.channel, authorId: message.author.id }, {
         embed: {
             color: EMBED_SUCCESS_COLOR,
             author: {

@@ -39,7 +39,7 @@ export default class NewsCommand implements BaseCommand {
             }
         };
 
-        await sendMessage(message, { embed });
+        await sendMessage({ channel: message.channel, authorId: message.author.id }, { embed });
     }
     help = {
         name: "news",

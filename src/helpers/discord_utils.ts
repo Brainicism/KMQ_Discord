@@ -7,6 +7,7 @@ import BaseCommand from "../commands/base_command";
 import _logger from "../logger";
 import { getSongCount, GameOption } from "./game_utils";
 import { getFact } from "../fact_generator";
+import { SendMessagePayload } from "../types";
 const logger = _logger("utils");
 export const EMBED_INFO_COLOR = 0x000000; // BLACK
 export const EMBED_ERROR_COLOR = 0xE74C3C; // RED
@@ -14,7 +15,7 @@ export const EMBED_SUCCESS_COLOR = 0x00FF00; // GREEN
 const MAX_EMBED_FIELDS = 25;
 
 export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession, isForfeit: boolean, guesser?: string) {
-    let footer = null;
+    let footer: Eris.EmbedFooterOptions = null;
     const gameRound = gameSession.gameRound;
     if (!gameRound) return;
     if (gameRound.songAliases.length > 0) {
@@ -39,7 +40,7 @@ export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableCh
     }
     let emptyScoreBoard = gameSession.scoreboard.isEmpty();
     let description = `${isForfeit ? "Nobody got it." : (`**${guesser}** guessed correctly!`)}\nhttps://youtube.com/watch?v=${gameRound.videoID} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`
-    await sendMessage(message, {
+    await sendMessage({ channel: message.channel, authorId: message.author.id }, {
         embed: {
             color: isForfeit ? EMBED_ERROR_COLOR : EMBED_SUCCESS_COLOR,
             author: {
@@ -57,7 +58,7 @@ export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableCh
     });
 }
 export async function sendInfoMessage(message: Eris.Message<Eris.GuildTextableChannel>, title: string, description?: string, footerText?: string, footerImageUrl?: string) {
-    let footer;
+    let footer: Eris.EmbedFooterOptions;
     if (footerImageUrl) {
         footer = {
             text: footerText,
@@ -74,10 +75,10 @@ export async function sendInfoMessage(message: Eris.Message<Eris.GuildTextableCh
         description: description,
         footer
     };
-    await sendMessage(message, { embed });
+    await sendMessage({ channel: message.channel, authorId: message.author.id }, { embed });
 }
 export async function sendErrorMessage(message: Eris.Message<Eris.GuildTextableChannel>, title: string, description: string) {
-    await sendMessage(message, {
+    await sendMessage({ channel: message.channel, authorId: message.author.id }, {
         embed: {
             color: EMBED_ERROR_COLOR,
             author: {
@@ -124,7 +125,7 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
 
 export async function sendEndGameMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
     if (gameSession.scoreboard.isEmpty()) {
-        await sendMessage(message, {
+        await sendMessage({ channel: message.channel, authorId: message.author.id }, {
             embed: {
                 color: EMBED_INFO_COLOR,
                 author: {
@@ -137,10 +138,9 @@ export async function sendEndGameMessage(message: Eris.Message<Eris.GuildTextabl
     }
     else {
         const winners = gameSession.scoreboard.getWinners();
-        await sendMessage(message, {
+        await sendMessage({ channel: message.channel, authorId: message.author.id }, {
             embed: {
                 color: EMBED_SUCCESS_COLOR,
-             
                 description: "**Scoreboard**",
                 thumbnail: {
                     url: client.users.get(winners[0].getId()).avatarURL
@@ -153,7 +153,7 @@ export async function sendEndGameMessage(message: Eris.Message<Eris.GuildTextabl
 }
 
 export async function sendScoreboardMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
-    await sendMessage(message, {
+    await sendMessage({ channel: message.channel, authorId: message.author.id }, {
         embed: {
             color: EMBED_SUCCESS_COLOR,
             author: {
@@ -267,16 +267,16 @@ export function getVoiceConnection(message: Eris.Message): Eris.VoiceConnection 
 }
 
 
-export async function sendMessage(message: Eris.Message<Eris.GuildTextableChannel>, messageContent: Eris.MessageContent): Promise<Eris.Message> {
-    const channel = message.channel;
+export async function sendMessage(messagePayload: SendMessagePayload, messageContent: Eris.MessageContent): Promise<Eris.Message> {
+    const channel = messagePayload.channel;
     if (!channel.permissionsOf(client.user.id).has("sendMessages")) {
-        logger.warn(`${getDebugContext(message)} | Missing SEND_MESSAGES permissions`);
+        logger.warn(`gid: ${channel.guild.id}, uid: ${messagePayload.authorId} | Missing SEND_MESSAGES permissions`);
         const embed = {
             color: EMBED_INFO_COLOR,
             title: `Missing Permissions`,
             description: `Hi! I'm unable to message in ${channel.guild.name}'s #${channel.name} channel. Please double check the text channel's permissions.`,
         }
-        const dmChannel = await client.getDMChannel(message.author.id);
+        const dmChannel = await client.getDMChannel(messagePayload.authorId);
         await client.createMessage(dmChannel.id, { embed });
         return;
     }

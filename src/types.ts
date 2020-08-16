@@ -1,24 +1,25 @@
 import * as Knex from "knex";
+import * as Eris from "eris";
 
-interface ParsedMessage {
+export interface ParsedMessage {
     action: string;
     argument: string;
     message: string,
     components: Array<string>
 }
 
-interface QueriedSong {
+export interface QueriedSong {
     name: string;
     artist: string;
     youtubeLink: string;
 }
 
-interface Databases {
-    kmq: Knex,
-    kpopVideos: Knex
+export interface Databases {
+    kmq: Knex;
+    kpopVideos: Knex;
 }
-export {
-    ParsedMessage,
-    QueriedSong,
-    Databases
+
+export interface SendMessagePayload {
+    channel: Eris.GuildTextableChannel;
+    authorId?: string
 }

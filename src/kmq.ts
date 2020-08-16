@@ -5,7 +5,7 @@ import * as Eris from "eris";
 import { validateConfig } from "./config_validator";
 import { guessSong, cleanupInactiveGameSessions, getGuildPreference } from "./helpers/game_utils";
 import validate from "./helpers/validate";
-import { getCommandFiles, EMBED_INFO_COLOR } from "./helpers/discord_utils";
+import { getCommandFiles, EMBED_INFO_COLOR, sendMessage } from "./helpers/discord_utils";
 import { ParsedMessage } from "./types";
 import * as _config from "./config/app_config.json";
 import BaseCommand from "./commands/base_command";
@@ -106,7 +106,7 @@ const checkRestartNotification = async (restartNotification: Date): Promise<void
         for (let guildId in gameSessions) {
             const gameSession = gameSessions[guildId];
             if (gameSession.finished) continue;
-            await client.createMessage(gameSession.textChannel.id, {
+            await sendMessage({ channel: gameSession.textChannel }, {
                 embed: {
                     color: EMBED_INFO_COLOR,
                     author: {

@@ -96,10 +96,10 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
         )
     }
     if (embeds.length > 1) {
-        await EmbedPaginator.createPaginationEmbed(message, embeds, {timeout: 60000});
+        await EmbedPaginator.createPaginationEmbed(message, embeds, { timeout: 60000 });
     }
     else {
-        sendMessage(message, {
+        sendMessage({ channel: message.channel, authorId: message.author.id }, {
             embed: {
                 title: embedTitle,
                 color: EMBED_INFO_COLOR,
