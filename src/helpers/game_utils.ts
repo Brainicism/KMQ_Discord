@@ -1,6 +1,6 @@
 import { CommandArgs } from "../commands/base_command";
 import { songCacheDir as SONG_CACHE_DIR } from "../config/app_config.json";
-import { getUserIdentifier, sendSongMessage, getDebugContext, sendErrorMessage, getVoiceChannel } from "./discord_utils";
+import { getUserIdentifier, sendSongMessage, getDebugContext, sendErrorMessage, getVoiceChannel, sendEndGameMessage } from "./discord_utils";
 import * as Eris from "eris";
 import _logger from "../logger";
 import * as fs from "fs";
@@ -248,6 +248,7 @@ async function playSong(gameSessions: { [guildID: string]: GameSession }, guildP
     gameSession.connection.once("error", async (err) => {
         if (!gameSession.connection.channelID) {
             logger.info(`gid: ${gameSession.textChannel.guild.id} | Bot was kicked from voice channel`);
+            await sendEndGameMessage({ channel: message.channel }, gameSession);
             await gameSession.endSession(gameSessions);
             return;
         }
