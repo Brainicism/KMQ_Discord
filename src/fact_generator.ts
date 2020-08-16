@@ -12,7 +12,7 @@ const musicShows = {
 }
 const funFactFunctions = [recentMusicVideos, recentMilestone, recentMusicShowWin, musicShowWins, mostViewedGroups, mostLikedGroups, mostViewedVideo, mostLikedVideo,
     mostMusicVideos, yearWithMostDebuts, yearWithMostReleases, viewsByGender, mostViewedSoloArtist, viewsBySolo, mostViewsPerDay, bigThreeDominance]
-const kmqFactFunctions = [longestGame, mostGames, mostCorrectGuessed, globalTotalGames, recentGameSessions, genderGamePreferences]
+const kmqFactFunctions = [longestGame, mostGames, mostCorrectGuessed, globalTotalGames, recentGameSessions, genderGamePreferences, recentGames]
 
 function chooseRandom(list: Array<any>) {
     return list[Math.floor(Math.random() * list.length)];
@@ -387,4 +387,14 @@ async function genderGamePreferences(): Promise<string[]> {
     const maleProportion = (100 * (maleCount / preferenceCount)).toFixed(2);
     const femaleProportion = (100 * (femaleCount / preferenceCount)).toFixed(2);
     return [`KMQ Fact: ${femaleProportion}% of servers play with only girl group songs, while ${maleProportion}% play with boy groups only!`]
+}
+
+async function recentGames(): Promise<string[]> {
+    const oneWeekPriorDate = new Date();
+    oneWeekPriorDate.setDate(oneWeekPriorDate.getDate() - 7);
+    const result = await db.kmq("game_sessions")
+                    .count("* as count")
+                    .where("start_date", ">", oneWeekPriorDate);
+    const recentGameCount = result[0].count as number;
+    return [`KMQ Fact: There has been a total of ${recentGameCount} games of KMQ played in the last week, averaging ${Math.round(recentGameCount/7)} per day!`]
 }
