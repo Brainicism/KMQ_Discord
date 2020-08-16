@@ -1,5 +1,7 @@
 import { db } from "./databases";
 import _logger from "./logger";
+import * as factStrings from "../data/facts.json";
+
 const logger = _logger("fact_generator");
 
 const musicShows = {
@@ -51,7 +53,7 @@ export async function getFact(): Promise<string> {
     }
     const randomVal = Math.random();
     if (randomVal < 0.1) {
-        return generalFunction();
+        return chooseRandom(factStrings);
     }
     else if (randomVal < 0.85) {
         const funFacts = factCache["funFacts"];
@@ -65,9 +67,6 @@ export async function getFact(): Promise<string> {
     }
 }
 
-function generalFunction(): string {
-    return "Have a suggestion for an alternate song name? Tell us on the support server!";
-}
 async function recentMusicVideos(): Promise<string[]> {
     const oneMonthPriorDate = new Date();
     oneMonthPriorDate.setMonth(oneMonthPriorDate.getMonth() - 1);
