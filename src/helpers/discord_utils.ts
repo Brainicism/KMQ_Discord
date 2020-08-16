@@ -23,23 +23,26 @@ export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableCh
             text: `Aliases: ${Array.from(gameRound.songAliases).join(", ")}`
         };
     }
-    else {
-        if (Math.random() <= 0.3) {
-            let fact: string;
-            try {
-                fact = await getFact();
-            }
-            catch (e) {
-                logger.error(`${getDebugContext(message)} | Error retrieving fact. err = ${e}`);
-                fact = null;
-            }
-            footer = {
-                text: fact
-            }
+    let fact: string;
+    if (Math.random() <= 0.3) {
+        try {
+            fact = await getFact();
+        }
+        catch (e) {
+            logger.error(`${getDebugContext(message)} | Error retrieving fact. err = ${e}`);
+            fact = null;
         }
     }
+
     let emptyScoreBoard = gameSession.scoreboard.isEmpty();
     let description = `${isForfeit ? "Nobody got it." : (`**${guesser}** guessed correctly!`)}\nhttps://youtube.com/watch?v=${gameRound.videoID} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`
+    const fields = gameSession.scoreboard.getScoreboard().slice(0, MAX_EMBED_FIELDS - 1)
+    if (fact) {
+        fields.push({
+            name: "__Fun Fact__", value: fact, inline: false
+        })
+    }
+
     await sendMessage({ channel: message.channel, authorId: message.author.id }, {
         embed: {
             color: isForfeit ? EMBED_ERROR_COLOR : EMBED_SUCCESS_COLOR,
@@ -49,10 +52,10 @@ export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableCh
             },
             title: `"${gameRound.song}" - ${gameRound.artist}`,
             description,
-            image: {
+            thumbnail: {
                 url: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`
             },
-            fields: gameSession.scoreboard.getScoreboard().slice(0, MAX_EMBED_FIELDS),
+            fields,
             footer
         }
     });
