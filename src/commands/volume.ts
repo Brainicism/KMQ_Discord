@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-import { sendOptionsMessage, getDebugContext } from "../helpers/discord_utils";
+import { sendOptionsMessage, getDebugContext, sendInfoMessage } from "../helpers/discord_utils";
 import { GameOption, getGuildPreference } from "../helpers/game_utils";
 import _logger from "../logger";
 const logger = _logger("volume");
@@ -14,6 +14,7 @@ export default class VolumeCommand implements BaseCommand {
             gameSession.connection.setVolume(guildPreference.getStreamVolume());
         }
         await sendOptionsMessage(message, guildPreference, GameOption.VOLUME);
+        await sendInfoMessage(message, "Deprecation Warning", "This command is scheduled to be discontinued shortly. Please modify the bot's volume by right clicking it instead.");
         logger.info(`${getDebugContext(message)} | Volume set to ${guildPreference.getVolume()}.`);
     }
     validations = {
