@@ -83,6 +83,9 @@ async function getFilteredSongList(guildPreference: GuildPreference): Promise<{ 
             .join("kpop_videos.app_kpop_group", function () {
                 this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id")
             })
+            .whereNotIn("vlink", function () {
+                this.select("vlink").from("kmq.not_downloaded")
+            })
             .whereIn("members", guildPreference.getSQLGender().split(","))
             .andWhere("dead", "n")
             .andWhere("publishedon", ">=", `${guildPreference.getBeginningCutoffYear()}-01-01`)
@@ -96,6 +99,9 @@ async function getFilteredSongList(guildPreference: GuildPreference): Promise<{ 
             .join("kpop_videos.app_kpop_group", function () {
                 this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id")
             })
+            .whereNotIn("vlink", function () {
+                this.select("vlink").from("kmq.not_downloaded")
+            })
             .whereIn("id_artist", guildPreference.getGroupIds())
             .andWhere("dead", "n")
             .andWhere("publishedon", ">=", `${guildPreference.getBeginningCutoffYear()}-01-01`)
@@ -103,7 +109,6 @@ async function getFilteredSongList(guildPreference: GuildPreference): Promise<{ 
             .andWhere("vtype", "main")
             .orderBy("kpop_videos.app_kpop.views", "DESC")
     }
-
     return {
         songs: result.slice(0, guildPreference.getLimit()),
         countBeforeLimit: result.length
@@ -185,26 +190,7 @@ async function selectRandomSong(guildPreference: GuildPreference): Promise<Queri
         return null;
     }
 
-    let attempts = 0;
-    while (true) {
-        // this case should rarely happen assuming our song cache is relatively up to date
-        if (attempts > 5) {
-            logger.error(`Failed to select a random song: guildPref = ${JSON.stringify(guildPreference)}`);
-            return null;
-        }
-        const random = queriedSongList[Math.floor(Math.random() * queriedSongList.length)];
-
-        if (isDebugMode() && skipSongPlay()) {
-            return random;
-        }
-        const songLocation = `${SONG_CACHE_DIR}/${random.youtubeLink}.mp3`;
-        if (!fs.existsSync(songLocation)) {
-            logger.error(`Song not cached: ${songLocation}`);
-            attempts++;
-            continue;
-        }
-        return random;
-    }
+    return queriedSongList[Math.floor(Math.random() * queriedSongList.length)];
 }
 
 async function playSong(gameSessions: { [guildID: string]: GameSession }, guildPreference: GuildPreference, message: Eris.Message<Eris.GuildTextableChannel>, client: Eris.Client) {
