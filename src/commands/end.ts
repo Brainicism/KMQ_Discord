@@ -10,7 +10,7 @@ export default class EndCommand implements BaseCommand {
             return;
         }
         logger.info(`${getDebugContext(message)} | Game session ended`);
-        sendEndGameMessage(message, gameSession);
+        await sendEndGameMessage({ channel: message.channel, authorId: message.author.id }, gameSession);
         await gameSession.endSession(gameSessions);
         disconnectVoiceConnection(message);
     }

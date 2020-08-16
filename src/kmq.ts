@@ -5,7 +5,7 @@ import * as Eris from "eris";
 import { validateConfig } from "./config_validator";
 import { guessSong, cleanupInactiveGameSessions, getGuildPreference } from "./helpers/game_utils";
 import validate from "./helpers/validate";
-import { getCommandFiles, EMBED_INFO_COLOR, sendMessage } from "./helpers/discord_utils";
+import { getCommandFiles, EMBED_INFO_COLOR, sendMessage, sendEndGameMessage } from "./helpers/discord_utils";
 import { ParsedMessage } from "./types";
 import * as _config from "./config/app_config.json";
 import BaseCommand from "./commands/base_command";
@@ -77,6 +77,7 @@ client.on("voiceChannelLeave", async (member, oldUserChannel) => {
     if (oldUserChannel.voiceMembers.size === 1 && oldUserChannel.voiceMembers.has(client.user.id)) {
         if (gameSession) {
             logger.info(`gid: ${oldUserChannel.guild.id} | Bot is only user left, leaving voice...`)
+            sendEndGameMessage({ channel: gameSession.textChannel }, gameSession);
             await gameSessions[oldUserChannel.guild.id].endSession(gameSessions);
         }
         return;
@@ -191,6 +192,7 @@ process.on("SIGINT", async () => {
     logger.debug("SIGINT received, cleaning up...");
     for (let guildId in gameSessions) {
         const gameSession = gameSessions[guildId];
+        await sendEndGameMessage({ channel: gameSession.textChannel }, gameSession);
         logger.debug(`gid: ${guildId} | Forcing game session end`);
         await gameSession.endSession(gameSessions);
     }

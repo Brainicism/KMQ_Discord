@@ -123,14 +123,14 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
     );
 }
 
-export async function sendEndGameMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
+export async function sendEndGameMessage(messagePayload: SendMessagePayload, gameSession: GameSession) {
     if (gameSession.scoreboard.isEmpty()) {
-        await sendMessage({ channel: message.channel, authorId: message.author.id }, {
+        await sendMessage(messagePayload, {
             embed: {
                 color: EMBED_INFO_COLOR,
                 author: {
-                    name: message.author.username,
-                    icon_url: message.author.avatarURL
+                    name: client.user.username,
+                    icon_url: client.user.avatarURL
                 },
                 title: "Nobody won 😔"
             }
@@ -138,7 +138,7 @@ export async function sendEndGameMessage(message: Eris.Message<Eris.GuildTextabl
     }
     else {
         const winners = gameSession.scoreboard.getWinners();
-        await sendMessage({ channel: message.channel, authorId: message.author.id }, {
+        await sendMessage(messagePayload, {
             embed: {
                 color: EMBED_SUCCESS_COLOR,
                 description: "**Scoreboard**",
@@ -271,6 +271,7 @@ export async function sendMessage(messagePayload: SendMessagePayload, messageCon
     const channel = messagePayload.channel;
     if (!channel.permissionsOf(client.user.id).has("sendMessages")) {
         logger.warn(`gid: ${channel.guild.id}, uid: ${messagePayload.authorId} | Missing SEND_MESSAGES permissions`);
+        if (!messagePayload.authorId) return;
         const embed = {
             color: EMBED_INFO_COLOR,
             title: `Missing Permissions`,
