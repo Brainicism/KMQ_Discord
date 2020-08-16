@@ -45,7 +45,7 @@ export default class Scoreboard {
 
     updateScoreboard(winnerTag: string, winnerID: string) {
         if (!this.players[winnerID]) {
-            this.players[winnerID] = new Player(winnerTag);
+            this.players[winnerID] = new Player(winnerTag, winnerID);
         }
         else {
             this.players[winnerID].incrementScore();
@@ -64,5 +64,9 @@ export default class Scoreboard {
 
     isEmpty(): boolean {
         return !(Object.keys(this.players).length);
+    }
+
+    getWinners(): Array<Player> {
+         return this.firstPlace;
     }
 };

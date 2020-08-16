@@ -136,15 +136,16 @@ export async function sendEndGameMessage(message: Eris.Message<Eris.GuildTextabl
         });
     }
     else {
+        const winners = gameSession.scoreboard.getWinners();
         await sendMessage(message, {
             embed: {
                 color: EMBED_SUCCESS_COLOR,
-                author: {
-                    name: message.author.username,
-                    icon_url: message.author.avatarURL
-                },
+             
                 description: "**Scoreboard**",
-                title: gameSession.scoreboard.getWinnerMessage(),
+                thumbnail: {
+                    url: client.users.get(winners[0].getId()).avatarURL
+                },
+                title: `🎉 ${gameSession.scoreboard.getWinnerMessage()} 🎉`,
                 fields: gameSession.scoreboard.getScoreboard().slice(0, MAX_EMBED_FIELDS)
             }
         });
