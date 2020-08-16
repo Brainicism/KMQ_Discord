@@ -190,8 +190,7 @@ async function selectRandomSong(guildPreference: GuildPreference): Promise<Queri
         return null;
     }
 
-    const random = queriedSongList[Math.floor(Math.random() * queriedSongList.length)];
-    return random;
+    return queriedSongList[Math.floor(Math.random() * queriedSongList.length)];
 }
 
 async function playSong(gameSessions: { [guildID: string]: GameSession }, guildPreference: GuildPreference, message: Eris.Message<Eris.GuildTextableChannel>, client: Eris.Client) {

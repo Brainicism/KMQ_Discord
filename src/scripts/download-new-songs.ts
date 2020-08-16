@@ -104,16 +104,16 @@ const downloadNewSongs = async (limit?: number) => {
     }
     let downloadCount = 0;
     logger.info("Total songs in database: " + songs.length);
-    const songsToDownloaded = songs.filter(x => !fs.existsSync(path.join(config.songCacheDir, `${x.youtubeLink}.mp3`)));
-    logger.info("Total songs to be downloaded: " + songsToDownloaded.length);
+    const songsToDownload = songs.filter(x => !fs.existsSync(path.join(config.songCacheDir, `${x.youtubeLink}.mp3`)));
+    logger.info("Total songs to be downloaded: " + songsToDownload.length);
 
     //update current list of non-downloaded songs
     await db.kmq.transaction(async (trx) => {
         await db.kmq("not_downloaded").del().transacting(trx);
-        await db.kmq("not_downloaded").insert(songsToDownloaded.map(x=>({vlink: x.youtubeLink}))).transacting(trx);
+        await db.kmq("not_downloaded").insert(songsToDownload.map(x=>({vlink: x.youtubeLink}))).transacting(trx);
     });
 
-    for (let song of songsToDownloaded) {
+    for (let song of songsToDownload) {
         if (knownDeadIds.has(song.youtubeLink)) {
             logger.info(`Known dead link (${song.youtubeLink}), skipping...`);
             continue;
