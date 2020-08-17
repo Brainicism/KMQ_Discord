@@ -18,7 +18,26 @@ const logger = _logger("kmq");
 
 
 const config: any = _config;
-export const client = new Eris.Client(config.botToken);
+const ERIS_INTENTS = Eris.Constants.Intents;
+export const client = new Eris.Client(config.botToken, {
+    disableEvents: {
+        GUILD_DELETE: true,
+        GUILD_ROLE_CREATE: true,
+        GUILD_ROLE_UPDATE: true,
+        GUILD_ROLE_DELETE: true,
+        CHANNEL_CREATE: true,
+        CHANNEL_UPDATE: true,
+        CHANNEL_DELETE: true,
+        CHANNEL_PINS_UPDATE: true,
+        MESSAGE_UPDATE: true,
+        MESSAGE_DELETE: true,
+        MESSAGE_DELETE_BULK: true,
+        MESSAGE_REACTION_REMOVE: true,
+        MESSAGE_REACTION_REMOVE_ALL: true,
+        MESSAGE_REACTION_REMOVE_EMOJI: true
+    },
+    intents: ERIS_INTENTS.guilds ^ ERIS_INTENTS.guildVoiceStates ^ ERIS_INTENTS.guildMessages ^ ERIS_INTENTS.guildMessageReactions
+});
 
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 2, 1]);
 
