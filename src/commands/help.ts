@@ -104,6 +104,7 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
                 title: embedTitle,
                 color: EMBED_INFO_COLOR,
                 description: embedDesc,
+                fields: embedFields,
                 footer: embedFooter
             }
         })
