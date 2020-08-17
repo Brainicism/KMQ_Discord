@@ -85,6 +85,13 @@ client.on("voiceChannelLeave", async (member, oldUserChannel) => {
 });
 
 
+client.on("error", (err, shardId) => {
+    logger.error(`Client encountered error: ${err}`)
+})
+
+client.on("warn", (message, shardId) => {
+    logger.warn(`Client encountered warning: ${message}`);
+})
 
 
 const parseMessage = (message: string, botPrefix: string): ParsedMessage => {
