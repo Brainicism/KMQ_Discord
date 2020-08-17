@@ -1,5 +1,6 @@
 import * as ytdl from "ytdl-core";
 import * as fs from "fs";
+import * as ffmpeg from "fluent-ffmpeg";
 import * as _config from "../config/app_config.json";
 import { QueriedSong } from "../types";
 import * as path from "path";
@@ -10,18 +11,8 @@ import { Logger } from "log4js";
 const logger: Logger = _logger("download-new-songs");
 
 
-export async function clearPartiallyCachedSongs() {
+const clearPartiallyCachedSongs = async (files: Array<string>) => {
     logger.info("Clearing partially cached songs");
-    if (!fs.existsSync(config.songCacheDir)) {
-        return logger.error("Song cache directory doesn't exist.");
-    }
-    let files: Array<string>;
-    try {
-        files = await fs.promises.readdir(config.songCacheDir);
-    }
-    catch (err) {
-        return logger.error(err);
-    }
 
     const endingWithPartRegex = new RegExp("\\.part$");
     const partFiles = files.filter((file) => file.match(endingWithPartRegex));
@@ -85,8 +76,6 @@ const downloadSong = (id: string) => {
 
 
 const downloadNewSongs = async (limit?: number) => {
-    clearPartiallyCachedSongs();
-
     const knownDeadIds = new Set((await db.kmq("dead_links")
         .select("vlink"))
         .map(x => x.vlink))
@@ -138,14 +127,85 @@ const downloadNewSongs = async (limit?: number) => {
     logger.info(`Total songs downloaded: ${downloadCount}`);
 }
 
+
+const convertToOpus = async (files: Array<string>) => {
+    const endingWithMp3Regex = new RegExp("\\.mp3");
+    const mp3Files = files.filter((file) => file.match(endingWithMp3Regex));
+    logger.info(`Converting ${mp3Files.length} from mp3 to opus (in ogg container)`)
+    mp3Files.forEach(async (mp3File) => {
+        let mp3Bitrate: number;
+        let mp3FileWithPath = path.join(config.songCacheDir, mp3File);
+        try {
+            let oggFileWithPath: string = path.join(config.songCacheDir, `${path.basename(mp3File, ".mp3")}.ogg`);
+
+            if (fs.existsSync(oggFileWithPath)) {
+                return;
+            }
+
+            let oggPartWithPath = `${oggFileWithPath}.part`;
+            let oggFfmpegOutputStream: fs.WriteStream = fs.createWriteStream(oggPartWithPath);
+
+            let conversion = ffmpeg(`${config.songCacheDir}/${mp3File}`)
+                .format("opus")
+                .audioCodec("libopus")
+                .output(oggFfmpegOutputStream)
+                .on('end', () => {
+                    fs.renameSync(oggPartWithPath, oggFileWithPath);
+                })
+                .on('error', (transcodingErr) => {
+                    throw transcodingErr;
+                })
+
+            ffmpeg(mp3FileWithPath)
+                .ffprobe((ffprobeErr, data) => {
+                    if (ffprobeErr) {
+                        throw ffprobeErr;
+                    }
+
+                    // fluent-ffmpeg API takes kbps, we get bps from bit_rate
+                    // Most KMQ songs are ~130kbps
+                    mp3Bitrate = Math.floor(data.format.bit_rate / 1000);
+                    // Avoiding any promises waiting for mp3 bitrate by only converting
+                    // after ffprobe completes
+                    conversion.audioBitrate(mp3Bitrate);
+
+                    conversion.run();
+                }
+            );
+        }
+        catch (err) {
+            logger.error(err + ` | mp3 bitrate: ${mp3Bitrate}`);
+        }
+    })
+}
+
+const downloadAndConvertSongs = async (limit?: number) => {
+    if (!fs.existsSync(config.songCacheDir)) {
+        return logger.error("Song cache directory doesn't exist.");
+    }
+
+    let files: Array<string>;
+    try {
+        files = await fs.promises.readdir(config.songCacheDir);
+    }
+    catch (err) {
+        return logger.error(err);
+    }
+
+    clearPartiallyCachedSongs(files);
+    await downloadNewSongs(limit);
+    convertToOpus(files);
+}
+
+
 export {
-    downloadNewSongs
+    downloadAndConvertSongs
 }
 
 (async () => {
     if (require.main === module) {
         const args = process.argv.slice(2);
         const limit = args.length > 0 ? parseInt(args[0]) : null;
-        downloadNewSongs(limit);
+        downloadAndConvertSongs(limit);
     }
 })();

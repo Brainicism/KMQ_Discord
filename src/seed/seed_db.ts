@@ -8,7 +8,7 @@ import * as prependFile from 'prepend-file';
 import _logger from "../logger";
 import { Logger } from "log4js";
 import { removeRedunantAliases } from "../scripts/remove-redunant-aliases";
-import { downloadNewSongs } from "../scripts/download-new-songs";
+import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 const config: any = _config;
 const fileUrl = "http://kpop.aoimirai.net/download.php";
 const logger: Logger = _logger("seed_db");
@@ -83,8 +83,8 @@ const seedDb = async (db: mysql.Connection) => {
         await seedDb(db);
         await removeRedunantAliases();
         db.destroy();
-        logger.info("Downloading new songs")
-        await downloadNewSongs();
+        logger.info("Clearing .part files in your cache (if they exist), downloading new songs, and converting them to opus")
+        await downloadAndConvertSongs();
     } catch (e) {
         logger.error("Error: " + e);
     }

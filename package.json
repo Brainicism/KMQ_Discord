@@ -12,11 +12,13 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.19.2",
+    "@types/fluent-ffmpeg": "^2.1.14",
     "bufferutil": "^4.0.1",
     "cron-parser": "^2.16.3",
     "eris": "^0.13.3",
     "eris-pagination": "^0.5.1",
     "erlpack": "github:abalabahaha/erlpack",
+    "fluent-ffmpeg": "^2.1.2",
     "knex": "^0.21.4",
     "log4js": "^6.3.0",
     "node-opus": "^0.3.3",
