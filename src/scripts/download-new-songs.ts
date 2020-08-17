@@ -132,51 +132,75 @@ const convertToOpus = async (files: Array<string>) => {
     const endingWithMp3Regex = new RegExp("\\.mp3");
     const mp3Files = files.filter((file) => file.match(endingWithMp3Regex));
     logger.info(`Converting ${mp3Files.length} from mp3 to opus (in ogg container)`)
-    mp3Files.forEach(async (mp3File) => {
-        let mp3Bitrate: number;
-        let mp3FileWithPath = path.join(config.songCacheDir, mp3File);
-        try {
-            let oggFileWithPath: string = path.join(config.songCacheDir, `${path.basename(mp3File, ".mp3")}.ogg`);
 
-            if (fs.existsSync(oggFileWithPath)) {
-                return;
-            }
+    const threads = 16;
+    let currentSlice = 0;
 
-            let oggPartWithPath = `${oggFileWithPath}.part`;
-            let oggFfmpegOutputStream: fs.WriteStream = fs.createWriteStream(oggPartWithPath);
+    while (currentSlice * threads < mp3Files.length) {
+        logger.info(`Completing job ${currentSlice * threads} of ${mp3Files.length}`);
+        await ffmpegOpusJob(mp3Files.slice(currentSlice * threads, currentSlice * threads + threads));
+        currentSlice++;
+    }
+}
 
-            let conversion = ffmpeg(`${config.songCacheDir}/${mp3File}`)
-                .format("opus")
-                .audioCodec("libopus")
-                .output(oggFfmpegOutputStream)
-                .on('end', () => {
-                    fs.renameSync(oggPartWithPath, oggFileWithPath);
-                })
-                .on('error', (transcodingErr) => {
-                    throw transcodingErr;
-                })
 
-            ffmpeg(mp3FileWithPath)
-                .ffprobe((ffprobeErr, data) => {
-                    if (ffprobeErr) {
-                        throw ffprobeErr;
-                    }
-
-                    // fluent-ffmpeg API takes kbps, we get bps from bit_rate
-                    // Most KMQ songs are ~130kbps
-                    mp3Bitrate = Math.floor(data.format.bit_rate / 1000);
-                    // Avoiding any promises waiting for mp3 bitrate by only converting
-                    // after ffprobe completes
-                    conversion.audioBitrate(mp3Bitrate);
-
-                    conversion.run();
+const ffmpegOpusJob = async (files: Array<string>) => {
+    return new Promise((resolve, reject) => {
+        files.forEach(async (mp3File) => {
+            let mp3Bitrate: number;
+            let mp3FileWithPath = path.join(config.songCacheDir, mp3File);
+            try {
+                let oggFileWithPath: string = path.join(config.songCacheDir, `${path.basename(mp3File, ".mp3")}.ogg`);
+                if (fs.existsSync(oggFileWithPath)) {
+                    resolve();
                 }
-            );
-        }
-        catch (err) {
-            logger.error(err + ` | mp3 bitrate: ${mp3Bitrate}`);
-        }
-    })
+
+                let oggPartWithPath = `${oggFileWithPath}.part`;
+                let oggFfmpegOutputStream: fs.WriteStream = fs.createWriteStream(oggPartWithPath);
+
+                new Promise((resolve, reject) => {
+                    ffmpeg(mp3FileWithPath)
+                        .ffprobe((ffprobeErr, data) => {
+                            if (ffprobeErr) {
+                                reject(ffprobeErr);
+                            }
+                            // fluent-ffmpeg API takes kbps, we get bps from bit_rate
+                            mp3Bitrate = Math.floor(data.format.bit_rate / 1000);
+                            // Most KMQ songs are ~130kbps (and encoded in VBR)
+                            resolve();
+                        }
+                    )
+                });
+
+                ffmpeg(`${config.songCacheDir}/${mp3File}`)
+                    .format("opus")
+                    .audioCodec("libopus")
+                    .output(oggFfmpegOutputStream)
+                    .on('end', () => {
+                        try {
+                            fs.renameSync(oggPartWithPath, oggFileWithPath);
+                            resolve();
+                        }
+                        catch (err) {
+                            if (!fs.existsSync(oggFileWithPath)) {
+                                logger.error(`File ${oggFileWithPath} wasn't created. Ignoring...`);
+                                resolve();
+                            }
+                            logger.info(`File ${oggFileWithPath} might have duplicate entries in db.`)
+                            resolve();
+                        }
+                    })
+                    .on('error', (transcodingErr) => {
+                        reject(transcodingErr);
+                    })
+                    .run();
+            }
+            catch (err) {
+                logger.error(err + ` | mp3 bitrate: ${mp3Bitrate}`);
+                reject(err);
+            }
+        })
+    });
 }
 
 const downloadAndConvertSongs = async (limit?: number) => {
