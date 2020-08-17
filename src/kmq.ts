@@ -70,21 +70,29 @@ function isGuildMessage(message: Eris.Message): message is Eris.Message<Eris.Gui
     return (message.channel instanceof Eris.TextChannel)
 }
 
-client.on("voiceChannelLeave", async (member, oldUserChannel) => {
-    const guildID = oldUserChannel.guild.id;
+client.on("voiceChannelLeave", async (member, oldChannel) => {
+    const guildID = oldChannel.guild.id;
     const gameSession = gameSessions[guildID];
-    // User left voice channel, check if bot is only one left
-    if (oldUserChannel.voiceMembers.size === 1 && oldUserChannel.voiceMembers.has(client.user.id)) {
+    await checkBotIsAlone(gameSession, oldChannel);
+});
+
+client.on("voiceChannelSwitch", async (member, newChannel, oldChannel) => {
+    const guildID = oldChannel.guild.id;
+    const gameSession = gameSessions[guildID];
+    await checkBotIsAlone(gameSession, oldChannel);
+})
+
+
+async function checkBotIsAlone(gameSession: GameSession, channel: Eris.VoiceChannel) {
+    if (channel.voiceMembers.size === 1 && channel.voiceMembers.has(client.user.id)) {
         if (gameSession) {
-            logger.info(`gid: ${oldUserChannel.guild.id} | Bot is only user left, leaving voice...`)
+            logger.info(`gid: ${channel.guild.id} | Bot is only user left, leaving voice...`)
             sendEndGameMessage({ channel: gameSession.textChannel }, gameSession);
-            await gameSessions[oldUserChannel.guild.id].endSession(gameSessions);
+            await gameSessions[channel.guild.id].endSession(gameSessions);
         }
         return;
     }
-});
-
-
+}
 client.on("error", (err, shardId) => {
     logger.error(`Client encountered error: ${err}`)
 })
