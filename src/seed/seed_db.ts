@@ -23,7 +23,6 @@ const setSqlMode = (sqlFile: string) => {
 }
 
 const downloadDb = async () => {
-    downloadNewSongs();
     const output = `${databaseDownloadDir}/bootstrap.zip`
     const options = {
         url: fileUrl,
