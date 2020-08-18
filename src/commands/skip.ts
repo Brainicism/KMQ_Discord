@@ -24,7 +24,7 @@ export default class SkipCommand implements BaseCommand {
             return;
         }
         gameSession.gameRound.userSkipped(message.author.id);
-        if (gameSession.gameRound.skipAchieved) {
+        if (gameSession.gameRound.skipAchieved || gameSession.gameRound.finished) {
             // song already being skipped
             return;
         }
