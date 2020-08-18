@@ -13,7 +13,7 @@ export const EMBED_INFO_COLOR = 0x000000; // BLACK
 export const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 export const EMBED_SUCCESS_COLOR = 0x00FF00; // GREEN
 const MAX_EMBED_FIELDS = 25;
-
+const REQUIRED_PERMISSIONS = ["addReactions", "embedLinks"]
 export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession, isForfeit: boolean, guesser?: string) {
     let footer: Eris.EmbedFooterOptions = null;
     const gameRound = gameSession.gameRound;
@@ -272,17 +272,30 @@ export function getVoiceConnection(message: Eris.Message): Eris.VoiceConnection 
 
 export async function sendMessage(messagePayload: SendMessagePayload, messageContent: Eris.MessageContent): Promise<Eris.Message> {
     const channel = messagePayload.channel;
+    return client.createMessage(channel.id, messageContent);
+}
+
+export async function permissionsCheck(message: Eris.Message<Eris.GuildTextableChannel>): Promise<boolean> {
+    const channel = message.channel;
     if (!channel.permissionsOf(client.user.id).has("sendMessages")) {
-        logger.warn(`gid: ${channel.guild.id}, uid: ${messagePayload.authorId} | Missing SEND_MESSAGES permissions`);
-        if (!messagePayload.authorId) return;
+        logger.warn(`gid: ${channel.guild.id}, uid: ${message.author.id} | Missing SEND_MESSAGES permissions`);
         const embed = {
             color: EMBED_INFO_COLOR,
             title: `Missing Permissions`,
             description: `Hi! I'm unable to message in ${channel.guild.name}'s #${channel.name} channel. Please double check the text channel's permissions.`,
         }
-        const dmChannel = await client.getDMChannel(messagePayload.authorId);
+        const dmChannel = await client.getDMChannel(message.author.id);
         await client.createMessage(dmChannel.id, { embed });
         return;
     }
-    return client.createMessage(channel.id, messageContent);
+
+    const missingPermissions = REQUIRED_PERMISSIONS.filter((permission) => !channel.permissionsOf(client.user.id).has(permission));
+    if (missingPermissions.length > 0) {
+        logger.warn(`gid: ${channel.guild.id}, uid: ${message.author.id} | Missing [${missingPermissions.join(", ")}] permissions`);
+        client.createMessage(channel.id, {
+            content: `Missing Permissions:\nEnsure that the bot has the following permissions: \`${missingPermissions.join(", ")}\``
+        })
+        return false;
+    }
+    return true;
 }
