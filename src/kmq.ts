@@ -26,7 +26,6 @@ export const client = new Eris.Client(config.botToken, {
         GUILD_ROLE_UPDATE: true,
         GUILD_ROLE_DELETE: true,
         CHANNEL_CREATE: true,
-        CHANNEL_UPDATE: true,
         CHANNEL_DELETE: true,
         CHANNEL_PINS_UPDATE: true,
         MESSAGE_UPDATE: true,
