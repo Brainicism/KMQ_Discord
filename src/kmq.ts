@@ -5,7 +5,7 @@ import * as Eris from "eris";
 import { validateConfig } from "./config_validator";
 import { guessSong, cleanupInactiveGameSessions, getGuildPreference } from "./helpers/game_utils";
 import validate from "./helpers/validate";
-import { getCommandFiles, EMBED_INFO_COLOR, sendMessage, sendEndGameMessage, permissionsCheck } from "./helpers/discord_utils";
+import { getCommandFiles, EMBED_INFO_COLOR, sendMessage, sendEndGameMessage, textPermissionsCheck } from "./helpers/discord_utils";
 import { ParsedMessage } from "./types";
 import * as _config from "./config/app_config.json";
 import BaseCommand from "./commands/base_command";
@@ -60,10 +60,10 @@ client.on("messageCreate", async (message: Eris.Message) => {
     const guildPreference = await getGuildPreference(message.guildID);
     const botPrefix = guildPreference.getBotPrefix();
     const parsedMessage = parseMessage(message.content, botPrefix) || null;
-
+    const ableToText = await textPermissionsCheck(message);
     if (message.mentions.includes(client.user) && message.content.split(" ").length == 1) {
         // Any message that mentions the bot sends the current options
-        if (!(await permissionsCheck(message))) {
+        if (!ableToText) {
             return;
         }
         commands["options"].call({ message });
@@ -71,7 +71,7 @@ client.on("messageCreate", async (message: Eris.Message) => {
     if (parsedMessage && commands[parsedMessage.action]) {
         const command = commands[parsedMessage.action];
         if (validate(message, parsedMessage, command.validations, botPrefix)) {
-            if (!(await permissionsCheck(message))) {
+            if (!ableToText) {
                 return;
             }
             command.call({
