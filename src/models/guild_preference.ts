@@ -1,7 +1,6 @@
 import { BEGINNING_SEARCH_YEAR } from "../commands/cutoff";
 import { DEFAULT_BOT_PREFIX } from "../commands/prefix";
 import { DEFAULT_LIMIT } from "../commands/limit";
-import { DEFAULT_VOLUME } from "../commands/volume";
 import { GENDER } from "../commands/gender";
 import { SEEK_TYPE } from "../commands/seek";
 import _logger from "../logger";
@@ -12,7 +11,7 @@ const logger = _logger("guild_preference");
 
 const DEFAULT_OPTIONS = {
     beginningYear: BEGINNING_SEARCH_YEAR, endYear: (new Date()).getFullYear(), gender: [GENDER.FEMALE],
-    limit: DEFAULT_LIMIT, volume: DEFAULT_VOLUME, seekType: SEEK_TYPE.RANDOM, modeType: MODE_TYPE.SONG_NAME, groups: null
+    limit: DEFAULT_LIMIT, seekType: SEEK_TYPE.RANDOM, modeType: MODE_TYPE.SONG_NAME, groups: null
 };
 
 interface GameOptions {
@@ -20,7 +19,6 @@ interface GameOptions {
     endYear: number;
     gender: GENDER[];
     limit: number;
-    volume: number;
     seekType: SEEK_TYPE;
     modeType: MODE_TYPE;
     groups: { id: number, name: string }[];
@@ -41,14 +39,24 @@ export default class GuildPreference {
         this.gameOptions = json.gameOptions;
         this.botPrefix = json.botPrefix;
         //apply default game option for empty
-        let missingOptionAdded = false;
+        let gameOptionModified = false;
         for (let defaultOption in DEFAULT_OPTIONS) {
             if (!(defaultOption in this.gameOptions)) {
                 this.gameOptions[defaultOption] = DEFAULT_OPTIONS[defaultOption];
-                missingOptionAdded = true;
+                gameOptionModified = true;
             }
         }
-        if (missingOptionAdded) {
+
+        //extraneous keys
+        for (let option in this.gameOptions) {
+            console.log(option)
+            if (!(option in DEFAULT_OPTIONS)) {
+                console.log(`Extraneous key ${option}`)
+                delete this.gameOptions[option];
+                gameOptionModified = true;
+            }
+        }
+        if (gameOptionModified) {
             this.updateGuildPreferences(db.kmq);
         }
     }
@@ -161,23 +169,10 @@ export default class GuildPreference {
         return this.gameOptions.modeType;
     }
 
-    setVolume(volume: number) {
-        this.gameOptions.volume = volume;
-        this.updateGuildPreferences(db.kmq);
-    }
-
-    getVolume(): number {
-        return this.gameOptions.volume;
-    }
-
-    getStreamVolume(): number {
-        return this.getVolume() / 150;
-    }
-
     async updateGuildPreferences(db: Knex) {
         await db("guild_preferences")
             .where({ guild_id: this.guildID })
-            .update({ guild_preference: JSON.stringify(this)});
+            .update({ guild_preference: JSON.stringify(this) });
     }
 };
 
