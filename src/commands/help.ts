@@ -1,8 +1,9 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import * as Eris from "eris";
 import * as helpMessages from "../../data/help_strings.json";
-import { EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, getCommandFiles, sendMessage } from "../helpers/discord_utils";
+import { EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, getCommandFiles, sendPaginationedEmbed } from "../helpers/discord_utils";
 import _logger from "../logger";
+import { chunkArray } from "../helpers/utils";
 import * as EmbedPaginator from "eris-pagination"
 const logger = _logger("help");
 const placeholder = /!/g;
@@ -82,31 +83,14 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
         });
 
     }
-    let embeds = []
-    for (let i = 0; i < embedFields.length; i += FIELDS_PER_EMBED) {
-        const embedFieldsSubset = embedFields.slice(i, Math.min(i + FIELDS_PER_EMBED, embedFields.length));
-        embeds.push(
-            {
-                title: embedTitle,
-                color: EMBED_INFO_COLOR,
-                description: embedDesc,
-                fields: embedFieldsSubset,
-                footer: embedFooter
-            }
-        )
-    }
-    if (embeds.length > 1) {
-        await EmbedPaginator.createPaginationEmbed(message, embeds, { timeout: 60000 });
-    }
-    else {
-        sendMessage({ channel: message.channel, authorId: message.author.id }, {
-            embed: {
-                title: embedTitle,
-                color: EMBED_INFO_COLOR,
-                description: embedDesc,
-                fields: embedFields,
-                footer: embedFooter
-            }
-        })
-    }
+    const embedFieldSubsets = chunkArray(embedFields, FIELDS_PER_EMBED);
+    const embeds = embedFieldSubsets.map(embedFieldsSubset => ({
+        title: embedTitle,
+        color: EMBED_INFO_COLOR,
+        description: embedDesc,
+        fields: embedFieldsSubset,
+        footer: embedFooter
+    }));
+
+    await sendPaginationedEmbed(message, embeds);
 }
