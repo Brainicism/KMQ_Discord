@@ -151,7 +151,7 @@ export async function sendEndGameMessage(messagePayload: SendMessagePayload, gam
                     url: client.users.get(winners[0].getId()).avatarURL
                 },
                 title: `🎉 ${gameSession.scoreboard.getWinnerMessage()} 🎉`,
-                fields: gameSession.scoreboard.getScoreboard().slice(0, EMBED_FIELDS_PER_PAGE)
+                fields: gameSession.scoreboard.getScoreboard().slice(0, 10)
             }
         });
     }
@@ -172,15 +172,17 @@ export async function sendScoreboardMessage(message: Eris.Message<Eris.GuildText
         })
     }
     const winnersFieldSubsets = chunkArray(gameSession.scoreboard.getScoreboard(), EMBED_FIELDS_PER_PAGE);
-    const embeds = winnersFieldSubsets.map((winnersFieldSubset) => ({
+    const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map((winnersFieldSubset) => ({
         color: EMBED_SUCCESS_COLOR,
         author: {
             name: message.author.username,
             icon_url: message.author.avatarURL
         },
-        description: gameSession.scoreboard.isEmpty() ? "(╯°□°）╯︵ ┻━┻" : null,
         title: "**Scoreboard**",
-        fields: winnersFieldSubset
+        fields: winnersFieldSubset,
+        footer: {
+            text: `Your score is ${gameSession.scoreboard.getPlayerScore(message.author.id)}.`
+        }
     }));
 
     return sendPaginationedEmbed(message, embeds);
