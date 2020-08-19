@@ -1,6 +1,5 @@
 import { spawn, exec } from "child_process";
-
-import * as mysql from "promise-mysql";
+import { db } from "../databases";
 import * as _config from "../config/app_config.json";
 const config: any = _config;
 
@@ -41,18 +40,11 @@ function serverShutdown(restartMinutes: number, restart: boolean) {
     const restart = args[1] === "true";
     const restartDate = new Date();
     restartDate.setMinutes(restartDate.getMinutes() + restartMinutes);
-    const db = await mysql.createConnection({
-        host: "localhost",
-        user: config.dbUser,
-        password: config.dbPassword
-    });
 
-    let query = `UPDATE kmq.restart_notifications SET restart_time = ? WHERE id = 1;`;
-    await db.query(query, [restartDate]);
+    await db.kmq("restart_notifications").where("id", "=", "1")
+                .update({restart_time: restartDate})
 
-    query = `SELECT * FROM kmq.restart_notifications WHERE id = 1;`;
-    const restartNotification = (await db.query(query))[0];
-    console.log(`Next restart notification scheduled at ${restartNotification["restart_time"]}`);
+    console.log(`Next restart notification scheduled at ${restartDate}`);
     db.destroy();
     await serverShutdown(restartMinutes, restart);
 })();
