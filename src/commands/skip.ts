@@ -65,7 +65,7 @@ async function sendSkipNotification(message: Eris.Message<Eris.GuildTextableChan
 }
 
 async function sendSkipMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
-    await sendMessage({ channel: message.channel, authorId: message.author.id }, {
+    const skipMessage = await sendMessage({ channel: message.channel, authorId: message.author.id }, {
         embed: {
             color: EMBED_SUCCESS_COLOR,
             author: {
@@ -77,6 +77,9 @@ async function sendSkipMessage(message: Eris.Message<Eris.GuildTextableChannel>,
             description: `${gameSession.gameRound.getNumSkippers()}/${getSkipsRequired(message)} skips achieved, skipping...`
         }
     })
+    setTimeout(() => {
+        skipMessage.delete();
+    }, 2500);
 }
 
 function isSkipMajority(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession): boolean {
