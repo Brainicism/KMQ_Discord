@@ -241,7 +241,6 @@ process.on("SIGINT", async () => {
         logger.debug(`gid: ${guildId} | Forcing game session end`);
         await gameSession.endSession();
     }
-    await db.kmq.destroy();
-    await db.kpopVideos.destroy();
+    await db.destroy();
     process.exit(0);
 });
