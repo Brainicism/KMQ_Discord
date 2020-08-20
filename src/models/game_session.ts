@@ -231,9 +231,8 @@ export default class GameSession {
         this.connection.stopPlaying();
         this.connection.play(stream, {
             inputArgs: ["-ss", seekLocation.toString()],
-            inlineVolume: true
+            encoderArgs: ["-filter:a", `volume=0.1`]
         });
-        this.connection.setVolume(guildPreference.getStreamVolume());
         this.connection.once("end", async () => {
             logger.info(`${getDebugContext(message)} | Song finished without being guessed.`);
             await sendSongMessage(message, this, true);

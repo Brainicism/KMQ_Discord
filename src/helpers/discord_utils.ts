@@ -107,7 +107,6 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
     let genderString = `${guildPreference.getSQLGender()} artists`;
     let groupsString = groupsMode ? `${guildPreference.getGroupNames().join(", ")}` : null;
     let limitString = `${Math.min(totalSongs, guildPreference.getLimit())}`;
-    let volumeString = `${guildPreference.getVolume()}`;
     let seekTypeString = `${guildPreference.getSeekType()}`;
     let modeTypeString = `${guildPreference.getModeType()}`;
 
@@ -118,13 +117,12 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
         groupsString = `${groupsString.substr(0, 400)} and many others...`;
     }
     groupsString = updatedOption == GameOption.GROUPS ? bold(groupsString) : codeLine(groupsString);
-    volumeString = updatedOption == GameOption.VOLUME ? bold(volumeString) : codeLine(volumeString);
     seekTypeString = updatedOption == GameOption.SEEK_TYPE ? bold(seekTypeString) : codeLine(seekTypeString);
     modeTypeString = updatedOption == GameOption.MODE_TYPE ? bold(modeTypeString) : codeLine(modeTypeString);
 
     await sendInfoMessage(message,
         updatedOption == null ? "Options" : `${updatedOption} updated`,
-        `Now playing the ${limitString} out of the __${totalSongs}__ most popular songs by ${groupsMode ? groupsString : genderString} ${cutoffString}. \nPlaying from the ${seekTypeString} point of each song and at ${volumeString}% volume. Guess the ${modeTypeString}'s name!`,
+        `Now playing the ${limitString} out of the __${totalSongs}__ most popular songs by ${groupsMode ? groupsString : genderString} ${cutoffString}. \nPlaying from the ${seekTypeString} point of each song. Guess the ${modeTypeString}'s name!`,
         updatedOption == null ? `Psst. Your bot prefix is \`${guildPreference.getBotPrefix()}\`.` : null,
         updatedOption == null ? "https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/src/assets/tsukasa.jpg" : null
     );
