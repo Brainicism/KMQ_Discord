@@ -15,7 +15,9 @@ export const EMBED_INFO_COLOR = 0x000000; // BLACK
 export const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 export const EMBED_SUCCESS_COLOR = 0x00FF00; // GREEN
 const EMBED_FIELDS_PER_PAGE = 20;
-const REQUIRED_PERMISSIONS = ["addReactions", "embedLinks"]
+const REQUIRED_TEXT_PERMISSIONS = ["addReactions", "embedLinks"];
+const REQUIRED_VOICE_PERMISSIONS = ["voiceConnect", "voiceSpeak"];
+
 export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession, isForfeit: boolean, guesser?: string) {
     let footer: Eris.EmbedFooterOptions = null;
     const gameRound = gameSession.gameRound;
@@ -266,7 +268,24 @@ export async function sendMessage(messagePayload: SendMessagePayload, messageCon
     return client.createMessage(channel.id, messageContent);
 }
 
-export async function permissionsCheck(message: Eris.Message<Eris.GuildTextableChannel>): Promise<boolean> {
+export function voicePermissionsCheck(message: Eris.Message<Eris.GuildTextableChannel>): boolean {
+    const voiceChannel = getVoiceChannel(message);
+    const missingPermissions = REQUIRED_VOICE_PERMISSIONS.filter((permission) => !voiceChannel.permissionsOf(client.user.id).has(permission));
+    if (missingPermissions.length > 0) {
+        logger.warn(`gid: ${voiceChannel.guild.id}, uid: ${message.author.id} | Missing [${missingPermissions.join(", ")}] permissions`);
+        sendErrorMessage(message, "Missing Permissions", `Ensure that the bot has the following permissions: \`${missingPermissions.join(", ")}\``)
+        return false;
+    }
+    const channelFull = voiceChannel.userLimit && (voiceChannel.voiceMembers.size >= voiceChannel.userLimit);
+    if (channelFull) {
+        logger.warn(`gid: ${voiceChannel.guild.id}, uid: ${message.author.id} | Channel full`);
+        sendInfoMessage(message, "Voice Channel Full", "Ensure that there's enough space in the voice channel for me to join");
+        return false;
+    }
+    return true;
+}
+
+export async function textPermissionsCheck(message: Eris.Message<Eris.GuildTextableChannel>): Promise<boolean> {
     const channel = message.channel;
     if (!channel.permissionsOf(client.user.id).has("sendMessages")) {
         logger.warn(`gid: ${channel.guild.id}, uid: ${message.author.id} | Missing SEND_MESSAGES permissions`);
@@ -280,7 +299,7 @@ export async function permissionsCheck(message: Eris.Message<Eris.GuildTextableC
         return;
     }
 
-    const missingPermissions = REQUIRED_PERMISSIONS.filter((permission) => !channel.permissionsOf(client.user.id).has(permission));
+    const missingPermissions = REQUIRED_TEXT_PERMISSIONS.filter((permission) => !channel.permissionsOf(client.user.id).has(permission));
     if (missingPermissions.length > 0) {
         logger.warn(`gid: ${channel.guild.id}, uid: ${message.author.id} | Missing [${missingPermissions.join(", ")}] permissions`);
         client.createMessage(channel.id, {

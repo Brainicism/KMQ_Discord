@@ -1,7 +1,6 @@
 import GameSession from "../models/game_session";
-import { sendErrorMessage, getDebugContext, sendInfoMessage, getVoiceChannel } from "../helpers/discord_utils";
+import { sendErrorMessage, getDebugContext, sendInfoMessage, getVoiceChannel, voicePermissionsCheck } from "../helpers/discord_utils";
 import { startGame, getGuildPreference } from "../helpers/game_utils";
-import * as Eris from "eris";
 import BaseCommand, { CommandArgs } from "./base_command";
 import _logger from "../logger";
 const logger = _logger("play");
@@ -17,6 +16,9 @@ export default class PlayCommand implements BaseCommand {
             logger.warn(`${getDebugContext(message)} | User not in voice channel`);
         }
         else {
+            if (!voicePermissionsCheck(message)) {
+                return;
+            }
             if (!gameSessions[message.guildID]) {
                 const textChannel = message.channel;
                 gameSessions[message.guildID] = new GameSession(textChannel, voiceChannel);
