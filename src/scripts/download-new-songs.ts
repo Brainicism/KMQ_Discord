@@ -134,8 +134,7 @@ const downloadNewSongs = async (limit?: number) => {
         await db.kmq("not_downloaded").del().transacting(trx);
         await db.kmq("not_downloaded").insert(songIdsNotDownloaded).transacting(trx);
     })
-    db.kmq.destroy();
-    db.kpopVideos.destroy();
+    await db.destroy();
     logger.info(`Total songs downloaded: ${downloadCount}`);
 }
 

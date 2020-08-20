@@ -1,11 +1,21 @@
-import Scoreboard from "./scoreboard";
-import _logger from "../logger";
-import { db } from "../databases";
-import GameRound from "./game_round";
-import * as fs from "fs";
 import * as Eris from "eris";
+import * as fs from "fs";
+import { getAudioDurationInSeconds } from "get-audio-duration";
+import { CommandArgs } from "../commands/base_command";
+import { SEEK_TYPE } from "../commands/seek";
 import * as _config from "../config/app_config.json";
-import { client } from "../kmq";
+import { songCacheDir as SONG_CACHE_DIR } from "../config/app_config.json";
+import { db } from "../databases";
+import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
+import { getDebugContext, getUserIdentifier, getVoiceChannel, sendEndGameMessage, sendErrorMessage, sendSongMessage } from "../helpers/discord_utils";
+import { ensureVoiceConnection, getGuildPreference, playCorrectGuessSong, selectRandomSong } from "../helpers/game_utils";
+import { delay } from "../helpers/utils";
+import { client, deleteGameSession } from "../kmq";
+import _logger from "../logger";
+import { QueriedSong } from "../types";
+import GameRound from "./game_round";
+import GuildPreference from "./guild_preference";
+import Scoreboard from "./scoreboard";
 const config: any = _config;
 
 const logger = _logger("game_session");
@@ -44,7 +54,7 @@ export default class GameSession {
         this.songAliasList = JSON.parse(fs.readFileSync(config.songAliasesFile).toString());
     }
 
-    startRound(song: string, artist: string, videoID: string) {
+    createRound(song: string, artist: string, videoID: string) {
         this.gameRound = new GameRound(song, artist, videoID, this.songAliasList[videoID] || []);
         this.sessionInitialized = true;
         this.roundsPlayed++;
@@ -65,23 +75,10 @@ export default class GameSession {
         this.sessionInitialized = false;
     }
 
-    setSessionInitialized(active: boolean) {
-        this.sessionInitialized = active;
-    }
-
-    sessionIsInitialized(): boolean {
-        return this.sessionInitialized;
-    }
-
-    endSession = async (gameSessions: { [guildId: string]: GameSession }): Promise<void> => {
+    endSession = async (): Promise<void> => {
         const guildId = this.textChannel.guild.id;
-        if (!(guildId in gameSessions)) {
-            logger.debug(`gid: ${guildId} | GameSession already ended`);
-            return;
-        }
-        const gameSession = gameSessions[guildId];
-        gameSession.finished = true;
-        gameSession.endRound(false);
+        this.finished = true;
+        this.endRound(false);
         const voiceConnection = client.voiceConnections.get(guildId);
         if (voiceConnection && voiceConnection.channelID) {
             voiceConnection.stopPlaying();
@@ -98,7 +95,7 @@ export default class GameSession {
         const averageGuessTime = this.guessTimes.length > 0 ? this.guessTimes.reduce((a, b) => a + b, 0) / (this.guessTimes.length * 1000) : -1;
 
         logger.info(`gid: ${guildId} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}`);
-        delete gameSessions[guildId];
+        deleteGameSession(guildId);
 
         await db.kmq("game_sessions")
             .insert({
@@ -115,10 +112,6 @@ export default class GameSession {
             .increment("games_played", 1);
     }
 
-    getDebugSongDetails(): string {
-        if (!this.gameRound) return;
-        return `${this.gameRound.song}:${this.gameRound.artist}:${this.gameRound.videoID}`;
-    }
 
     checkGuess(message: Eris.Message, modeType: string): boolean {
         if (!this.gameRound) return;
@@ -131,5 +124,140 @@ export default class GameSession {
         await db.kmq("guild_preferences")
             .where({ guild_id: this.textChannel.guild.id })
             .update({ last_active: new Date() });
+    }
+
+
+    async guessSong({ message }: CommandArgs) {
+        const guildPreference = await getGuildPreference(message.guildID);
+        const voiceChannel = getVoiceChannel(message);
+        if (!this.gameRound || this.gameRound.finished) return;
+
+        //if user isn't in the same voice channel
+        if (!voiceChannel || !voiceChannel.voiceMembers.has(message.author.id)) {
+            return;
+        }
+
+        //if message isn't in the active game session's text channel
+        if (message.channel.id !== this.textChannel.id) {
+            return;
+        }
+
+        if (this.checkGuess(message, guildPreference.getModeType())) {
+            logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${this.gameRound.song}`)
+            const userTag = getUserIdentifier(message.author);
+            this.scoreboard.updateScoreboard(userTag, message.author.id);
+            this.endRound(true);
+            await sendSongMessage(message, this, false, userTag);
+            await playCorrectGuessSong(this);
+            await db.kmq("guild_preferences")
+                .where("guild_id", message.guildID)
+                .increment("songs_guessed", 1);
+            this.startRound(guildPreference, message);
+        }
+    }
+
+    async startRound(guildPreference: GuildPreference, message: Eris.Message<Eris.GuildTextableChannel>) {
+        if (this.finished) {
+            return;
+        }
+
+        if (this.sessionInitialized) {
+            await sendErrorMessage(message, `Game already in session`, null);
+            return;
+        }
+        this.sessionInitialized = true;
+        let randomSong: QueriedSong;
+        try {
+            randomSong = await selectRandomSong(guildPreference);
+            if (randomSong === null) {
+                this.sessionInitialized = false;
+                sendErrorMessage(message, "Song Query Error", "Failed to find songs matching this criteria. Try to broaden your search.");
+                return;
+            }
+        }
+        catch (err) {
+            this.sessionInitialized = false;
+            await sendErrorMessage(message, "Error selecting song", err.toString());
+            logger.error(`${getDebugContext(message)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
+            return;
+        }
+        this.createRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);
+
+        try {
+            await ensureVoiceConnection(this, client);
+        }
+        catch (err) {
+            await this.endSession();
+            this.sessionInitialized = false;
+            logger.error(`${getDebugContext(message)} | Error obtaining voice connection. err = ${err.toString()}`);
+            await sendErrorMessage(message, "Missing voice permissions", "The bot is unable to join the voice channel you are in.");
+            return;
+        }
+        this.playSong(guildPreference, message, client);
+    }
+
+    async playSong(guildPreference: GuildPreference, message: Eris.Message<Eris.GuildTextableChannel>, client: Eris.Client) {
+        const gameRound = this.gameRound;
+        if (isDebugMode() && skipSongPlay()) {
+            logger.debug(`${getDebugContext(message)} | Not playing song in voice connection. song = ${this.getDebugSongDetails()}`);
+            return;
+        }
+        const songLocation = `${SONG_CACHE_DIR}/${gameRound.videoID}.mp3`;
+
+        let seekLocation: number;
+        if (guildPreference.getSeekType() === SEEK_TYPE.RANDOM) {
+            try {
+                const songDuration = await getAudioDurationInSeconds(songLocation);
+                seekLocation = songDuration * (0.6 * Math.random());
+            }
+            catch (e) {
+                logger.error(`Failed to get mp3 length: ${songLocation}. err = ${e}`);
+                seekLocation = 0;
+            }
+        }
+        else {
+            seekLocation = 0;
+        }
+
+        const stream = fs.createReadStream(songLocation);
+        await delay(2000);
+        //check if ,end was called during the delay
+        if (this.finished || this.gameRound.finished) {
+            logger.debug(`${getDebugContext(message)} | startGame called with ${this.finished}, ${gameRound.finished}`);
+            return;
+        }
+
+        logger.info(`${getDebugContext(message)} | Playing song in voice connection. seek = ${guildPreference.getSeekType()}. song = ${this.getDebugSongDetails()}. mode = ${guildPreference.getModeType()}`);
+        this.connection.stopPlaying();
+        this.connection.play(stream, {
+            inputArgs: ["-ss", seekLocation.toString()],
+            encoderArgs: ["-filter:a", `volume=0.1`]
+        });
+        this.connection.once("end", async () => {
+            logger.info(`${getDebugContext(message)} | Song finished without being guessed.`);
+            await sendSongMessage(message, this, true);
+            this.endRound(false);
+            this.startRound(guildPreference, message);
+        })
+
+        this.connection.once("error", async (err) => {
+            if (!this.connection.channelID) {
+                logger.info(`gid: ${this.textChannel.guild.id} | Bot was kicked from voice channel`);
+                await sendEndGameMessage({ channel: message.channel }, this);
+                await this.endSession();
+                return;
+            }
+
+            logger.error(`${getDebugContext(message)} | Unknown error with stream dispatcher. song = ${this.getDebugSongDetails()}. err = ${err}`);
+            // Attempt to restart game with different song
+            await sendErrorMessage(message, "Error playing song", "Starting new round in 2 seconds...");
+            this.endRound(false);
+            this.startRound(guildPreference, message);
+        });
+    }
+
+    getDebugSongDetails(): string {
+        if (!this.gameRound) return;
+        return `${this.gameRound.song}:${this.gameRound.artist}:${this.gameRound.videoID}`;
     }
 };

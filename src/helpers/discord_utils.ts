@@ -4,15 +4,17 @@ import { client } from "../kmq";
 import GuildPreference from "../models/guild_preference";
 import GameSession from "../models/game_session";
 import BaseCommand from "../commands/base_command";
+import * as EmbedPaginator from "eris-pagination"
 import _logger from "../logger";
 import { getSongCount, GameOption } from "./game_utils";
 import { getFact } from "../fact_generator";
 import { SendMessagePayload } from "../types";
+import { chunkArray, codeLine, bold } from "./utils";
 const logger = _logger("utils");
 export const EMBED_INFO_COLOR = 0x000000; // BLACK
 export const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 export const EMBED_SUCCESS_COLOR = 0x00FF00; // GREEN
-const MAX_EMBED_FIELDS = 25;
+const EMBED_FIELDS_PER_PAGE = 20;
 const REQUIRED_PERMISSIONS = ["addReactions", "embedLinks"]
 export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession, isForfeit: boolean, guesser?: string) {
     let footer: Eris.EmbedFooterOptions = null;
@@ -36,7 +38,7 @@ export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableCh
 
     let emptyScoreBoard = gameSession.scoreboard.isEmpty();
     let description = `${isForfeit ? "Nobody got it." : (`**${guesser}** guessed correctly!`)}\nhttps://youtube.com/watch?v=${gameRound.videoID} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`
-    const fields = gameSession.scoreboard.getScoreboard().slice(0, MAX_EMBED_FIELDS - 1)
+    const fields = gameSession.scoreboard.getScoreboard().slice(0, 10)
     if (fact) {
         fields.push({
             name: "__Fun Fact__", value: fact, inline: false
@@ -147,25 +149,51 @@ export async function sendEndGameMessage(messagePayload: SendMessagePayload, gam
                     url: client.users.get(winners[0].getId()).avatarURL
                 },
                 title: `🎉 ${gameSession.scoreboard.getWinnerMessage()} 🎉`,
-                fields: gameSession.scoreboard.getScoreboard().slice(0, MAX_EMBED_FIELDS)
+                fields: gameSession.scoreboard.getScoreboard().slice(0, 10)
             }
         });
     }
 }
 
 export async function sendScoreboardMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
-    await sendMessage({ channel: message.channel, authorId: message.author.id }, {
-        embed: {
-            color: EMBED_SUCCESS_COLOR,
-            author: {
-                name: message.author.username,
-                icon_url: message.author.avatarURL
-            },
-            description: gameSession.scoreboard.isEmpty() ? "(╯°□°）╯︵ ┻━┻" : null,
-            title: "**Scoreboard**",
-            fields: gameSession.scoreboard.getScoreboard().slice(0, MAX_EMBED_FIELDS)
+    if (gameSession.scoreboard.isEmpty()) {
+        return sendMessage({ channel: message.channel, authorId: message.author.id }, {
+            embed: {
+                color: EMBED_SUCCESS_COLOR,
+                author: {
+                    name: message.author.username,
+                    icon_url: message.author.avatarURL
+                },
+                description: gameSession.scoreboard.isEmpty() ? "(╯°□°）╯︵ ┻━┻" : null,
+                title: "**Scoreboard**"
+            }
+        })
+    }
+    const winnersFieldSubsets = chunkArray(gameSession.scoreboard.getScoreboard(), EMBED_FIELDS_PER_PAGE);
+    const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map((winnersFieldSubset) => ({
+        color: EMBED_SUCCESS_COLOR,
+        author: {
+            name: message.author.username,
+            icon_url: message.author.avatarURL
+        },
+        title: "**Scoreboard**",
+        fields: winnersFieldSubset,
+        footer: {
+            text: `Your score is ${gameSession.scoreboard.getPlayerScore(message.author.id)}.`
         }
-    });
+    }));
+
+    return sendPaginationedEmbed(message, embeds);
+
+}
+
+export async function sendPaginationedEmbed(message: Eris.Message<Eris.GuildTextableChannel>, embeds: Array<Eris.EmbedOptions>) {
+    if (embeds.length > 1) {
+        await EmbedPaginator.createPaginationEmbed(message, embeds, { timeout: 60000 });
+    }
+    else {
+        return sendMessage({ channel: message.channel, authorId: message.author.id }, { embed: embeds[0] });
+    }
 }
 
 export function getDebugContext(message: Eris.Message): string {
@@ -192,43 +220,6 @@ export function getCommandFiles(): Promise<{ [commandName: string]: BaseCommand 
         resolve(commandMap);
 
     })
-}
-
-export function bold(text: string): string {
-    return `**${text}**`;
-}
-
-export function italicize(text: string): string {
-    return `*${text}*`;
-}
-
-export function codeLine(text: string): string {
-    return `\`${text}\``
-}
-
-export function touch(filePath: string) {
-    try {
-        const currentTime = new Date();
-        fs.utimesSync(filePath, currentTime, currentTime);
-    } catch (err) {
-        fs.closeSync(fs.openSync(filePath, "w"));
-    }
-}
-
-export function arraysEqual(arr1: Array<any>, arr2: Array<any>): boolean {
-    if (arr1.length !== arr2.length) {
-        return false;
-    }
-
-    arr1 = arr1.concat().sort();
-    arr2 = arr2.concat().sort();
-
-    for (var i = 0; i < arr1.length; i++) {
-        if (arr1[i] !== arr2[i]) {
-            return false;
-        }
-    }
-    return true;
 }
 
 export function disconnectVoiceConnection(message: Eris.Message<Eris.GuildTextableChannel>) {

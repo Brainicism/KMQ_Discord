@@ -67,6 +67,13 @@ export default class Scoreboard {
     }
 
     getWinners(): Array<Player> {
-         return this.firstPlace;
+        return this.firstPlace;
+    }
+
+    getPlayerScore(userId: string): number {
+        if (userId in this.players) {
+            return this.players[userId].getScore();
+        }
+        return 0;
     }
 };

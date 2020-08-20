@@ -49,9 +49,7 @@ export default class GuildPreference {
 
         //extraneous keys
         for (let option in this.gameOptions) {
-            console.log(option)
             if (!(option in DEFAULT_OPTIONS)) {
-                console.log(`Extraneous key ${option}`)
                 delete this.gameOptions[option];
                 gameOptionModified = true;
             }
