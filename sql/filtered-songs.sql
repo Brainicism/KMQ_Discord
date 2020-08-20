@@ -7,4 +7,4 @@ AND dead = 'n'
 AND publishedon >= TIMESTAMP('?-01-01')
 AND publishedon <= TIMESTAMP('?-12-31')
 AND vtype = 'main'
-ORDER BY kpop_videos.app_kpop.views DESC
+ORDER BY kpop_videos.app_kpop.views DESC;
