@@ -3,7 +3,8 @@ import * as fs from "fs";
 import * as _config from "../config/app_config.json";
 import _logger from "../logger";
 import { db } from "../databases";
-import { EMBED_INFO_COLOR, bold, getDebugContext, sendMessage } from "../helpers/discord_utils";
+import { EMBED_INFO_COLOR, getDebugContext, sendMessage } from "../helpers/discord_utils";
+import { bold } from "../helpers/utils";
 const logger = _logger("news");
 
 const config: any = _config;

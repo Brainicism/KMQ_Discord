@@ -7,9 +7,20 @@ const logger = _logger("databases");
 const kmqKnexConfig: any = _kmqKnexConfig;
 const kpopVideosKnexConfig: any = _kpopVideosKnexConfig;
 
-logger.info("Initializing database connections");
-export const db = {
-    kmq: Knex(kmqKnexConfig),
-    kpopVideos: Knex(kpopVideosKnexConfig)
+class DatabaseConnections {
+    public kmq: Knex;
+    public kpopVideos: Knex
+
+    constructor() {
+        logger.info("Initializing database connections");
+        this.kmq = Knex(kmqKnexConfig);
+        this.kpopVideos = Knex(kpopVideosKnexConfig);
+    }
+
+    async destroy() {
+        await this.kmq.destroy();
+        await this.kpopVideos.destroy();
+    }
 }
-logger.info("Initialized database connections");
+
+export const db = new DatabaseConnections();
