@@ -3,11 +3,30 @@ import * as request from "request-promise";
 import _logger from "../logger";
 import * as _config from "../config/app_config.json";
 const config: any = _config;
-
 const logger = _logger("bot_stats_poster");
-const TOP_GG_API = "https://top.gg/api/bots/%d/stats";
-const DISCORD_BOTS_API = "https://discord.bots.gg/api/v1/bots/%d/stats";
 
+interface BotListing {
+    endpoint: string;
+    payloadKeyName: string;
+    name: string;
+}
+const BOT_LISTING_SITES: { [siteName: string]: BotListing } = {
+    topGGToken: {
+        endpoint: "https://top.gg/api/bots/%d/stats",
+        payloadKeyName: "server_count",
+        name: "top.gg"
+    },
+    discordBotsGgToken: {
+        endpoint: "https://discord.bots.gg/api/v1/bots/%d/stats",
+        payloadKeyName: "guildCount",
+        name: "discord.bots.gg"
+    },
+    discordBotListToken: {
+        endpoint: "https://discordbotlist.com/api/v1/bots/%d/stats",
+        payloadKeyName: "guilds",
+        name: "discordbotlist.com"
+    }
+}
 export default class BotStatsPoster {
     private client: Eris.Client;
 
@@ -15,52 +34,33 @@ export default class BotStatsPoster {
         this.client = client;
     }
     start() {
+        this.postStats(this.client)
         setInterval(() => { this.postStats(this.client) }, 1800000);
     }
 
     private async postStats(client: Eris.Client) {
-        if ("topGGToken" in config){
-            this.postTopGgStats(client);
-        }
-        if ("discordBotsGgToken" in config){
-            this.postDiscordGgBotsStats(client);
-        }
+        ["topGGToken", "discordBotsGgToken", "discordBotListToken"].filter((siteConfigKeyName) => siteConfigKeyName in config).forEach((siteConfigKeyName) => {
+            this.postStat(client, siteConfigKeyName);
+        })
     }
 
-    private async postTopGgStats(client: Eris.Client) {
+    private async postStat(client: Eris.Client, siteConfigKeyName: string) {
+        const botListing = BOT_LISTING_SITES[siteConfigKeyName];
         try {
             await request({
                 method: "POST",
-                uri: TOP_GG_API.replace("%d", client.user.id),
+                uri: botListing.endpoint.replace("%d", client.user.id),
                 form: {
-                    server_count: client.guilds.size
+                    [botListing.payloadKeyName]: client.guilds.size
                 },
                 headers: {
-                    "Authorization": config.topGGToken
+                    "Authorization": config[siteConfigKeyName]
                 }
             })
-            logger.info("top.gg server count posted");
+            logger.info(`${botListing.name} server count posted`);
         }
         catch (e) {
-            logger.error("Error updating top.gg server count. error = " + e);
-        }
-    }
-
-    private async postDiscordGgBotsStats(client: Eris.Client) {
-        try {
-            await request({
-                method: "POST",
-                uri: DISCORD_BOTS_API.replace("%d", client.user.id),
-                form: {
-                    guildCount: client.guilds.size
-                },
-                headers: {
-                    "Authorization": config.discordBotsGgToken
-                }
-            })
-            logger.info("discord.bots.gg server count posted")
-        } catch (e) {
-            logger.error("Error updating discord.bots.gg server count. error = " + e);
+            logger.error(`Error updating ${botListing.name} server count. error = ${e}`);
         }
     }
 }

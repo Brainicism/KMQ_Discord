@@ -8,6 +8,7 @@ const allowedOptions = {
     songCacheDir: { required: true },
     topGGToken: { required: false },
     discordBotsGgToken: { required: false },
+    discordBotListToken: { required: false },
     newsFile: { required: true },
     groupListFile: { required: true },
     songAliasesFile: { required: true },

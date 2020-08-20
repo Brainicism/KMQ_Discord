@@ -5,6 +5,7 @@
     "songCacheDir": "",
     "topGGToken": "",
     "discordBotsGgToken": "",
+    "discordBotListToken": "",
     "newsFile": "",
     "groupListFile": "",
     "songAliasesFile": "",
