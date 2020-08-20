@@ -1,8 +1,8 @@
-import { cleanSongName, cleanArtistName } from "../helpers/game_utils";
 import { MODE_TYPE } from "../commands/mode";
 import _logger from "../logger";
 import * as Eris from "eris";
-
+const REMOVED_CHARACTERS_SONG_GUESS = /[\|’\ ']/g
+const REMOVED_CHARACTERS_ARTIST_GUESS = /[:'.\-★*]/g
 const logger = _logger("game_round");
 
 export default class GameRound {
@@ -54,4 +54,19 @@ export default class GameRound {
         }
     }
 
+}
+
+function cleanSongName(name: string): string {
+    const cleanName = name.toLowerCase()
+        .split("(")[0]
+        .replace(REMOVED_CHARACTERS_SONG_GUESS, "")
+        .trim();
+    return cleanName;
+}
+
+function cleanArtistName(name: string): string {
+    const cleanName = name.toLowerCase()
+        .replace(REMOVED_CHARACTERS_ARTIST_GUESS, "")
+        .trim();
+    return cleanName;
 }

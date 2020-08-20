@@ -1,5 +1,6 @@
-import * as fs from "fs";
-
+export function delay(delayDuration: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, delayDuration));
+}
 export function bold(text: string): string {
     return `**${text}**`;
 }

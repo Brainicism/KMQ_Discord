@@ -1,19 +1,17 @@
 import * as cronParser from "cron-parser";
-import * as _kmqKnexConfig from "./config/knexfile_kmq";
-import * as _kpopVideosKnexConfig from "./config/knexfile_kpop_videos";
 import * as Eris from "eris";
-import { validateConfig } from "./config_validator";
-import { guessSong, cleanupInactiveGameSessions, getGuildPreference } from "./helpers/game_utils";
-import validate from "./helpers/validate";
-import { getCommandFiles, EMBED_INFO_COLOR, sendMessage, sendEndGameMessage, textPermissionsCheck } from "./helpers/discord_utils";
-import { ParsedMessage } from "./types";
-import * as _config from "./config/app_config.json";
-import BaseCommand from "./commands/base_command";
-import GameSession from "./models/game_session";
-import BotStatsPoster from "./helpers/bot_stats_poster";
-import _logger from "./logger";
 import * as fs from "fs";
+import BaseCommand from "./commands/base_command";
+import * as _config from "./config/app_config.json";
+import { validateConfig } from "./config_validator";
 import { db } from "./databases";
+import BotStatsPoster from "./helpers/bot_stats_poster";
+import { EMBED_INFO_COLOR, getCommandFiles, sendEndGameMessage, sendMessage, textPermissionsCheck } from "./helpers/discord_utils";
+import { cleanupInactiveGameSessions, getGuildPreference } from "./helpers/game_utils";
+import validate from "./helpers/validate";
+import _logger from "./logger";
+import GameSession from "./models/game_session";
+import { ParsedMessage } from "./types";
 const logger = _logger("kmq");
 
 
@@ -84,8 +82,9 @@ client.on("messageCreate", async (message: Eris.Message) => {
     }
     else {
         if (gameSessions[message.guildID] && gameSessions[message.guildID].gameRound) {
-            guessSong({ message, gameSessions });
-            gameSessions[message.guildID].lastActiveNow();
+            const gameSession = gameSessions[message.guildID];
+            gameSession.guessSong({ message })
+            gameSession.lastActiveNow();
         }
     }
 });
@@ -112,7 +111,7 @@ async function checkBotIsAlone(gameSession: GameSession, channel: Eris.VoiceChan
         if (gameSession) {
             logger.info(`gid: ${channel.guild.id} | Bot is only user left, leaving voice...`)
             sendEndGameMessage({ channel: gameSession.textChannel }, gameSession);
-            await gameSessions[channel.guild.id].endSession(gameSessions);
+            await gameSession.endSession();
         }
         return;
     }
@@ -125,6 +124,13 @@ client.on("warn", (message, shardId) => {
     logger.warn(`Client encountered warning: ${message}`);
 })
 
+export function deleteGameSession(guildId: string) {
+    if (!(guildId in gameSessions)) {
+        logger.debug(`gid: ${guildId} | GameSession already ended`);
+        return;
+    }
+    delete gameSessions[guildId];
+}
 
 const parseMessage = (message: string, botPrefix: string): ParsedMessage => {
     if (message.charAt(0) !== botPrefix) return null;
@@ -233,7 +239,7 @@ process.on("SIGINT", async () => {
         const gameSession = gameSessions[guildId];
         await sendEndGameMessage({ channel: gameSession.textChannel }, gameSession);
         logger.debug(`gid: ${guildId} | Forcing game session end`);
-        await gameSession.endSession(gameSessions);
+        await gameSession.endSession();
     }
     await db.destroy();
     process.exit(0);
