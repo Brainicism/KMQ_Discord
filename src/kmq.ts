@@ -58,10 +58,9 @@ client.on("messageCreate", async (message: Eris.Message) => {
     const guildPreference = await getGuildPreference(message.guildID);
     const botPrefix = guildPreference.getBotPrefix();
     const parsedMessage = parseMessage(message.content, botPrefix) || null;
-    const ableToText = await textPermissionsCheck(message);
     if (message.mentions.includes(client.user) && message.content.split(" ").length == 1) {
         // Any message that mentions the bot sends the current options
-        if (!ableToText) {
+        if (!(await textPermissionsCheck(message))) {
             return;
         }
         commands["options"].call({ message });
@@ -69,7 +68,7 @@ client.on("messageCreate", async (message: Eris.Message) => {
     if (parsedMessage && commands[parsedMessage.action]) {
         const command = commands[parsedMessage.action];
         if (validate(message, parsedMessage, command.validations, botPrefix)) {
-            if (!ableToText) {
+            if (!(await textPermissionsCheck(message))) {
                 return;
             }
             command.call({
