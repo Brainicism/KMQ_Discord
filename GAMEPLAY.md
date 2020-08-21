@@ -37,11 +37,6 @@ Setting the seek type changes at which point in a song KMQ bot starts playing fr
 
 ![seek](/images/seek.png)
 
-## ,volume [volume_level]
-Setting the volume changes how loud the bot is. `,volume 65` would change the volume to 65%.
-
-![volume](/images/volume.png)
-
 ## ,mode [mode_type]
 Setting the mode type changes the objective of the game, between guessing the name of the artist (`,mode artist`) vs guessing the name of the song (`,mode song`). 
 
@@ -71,6 +66,5 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,limit`: Set a maximum number of results in the song query. This effectively sets the 'Top X number of songs' based on the selected filters.
 - `,gender`: Choose the gender of the artists you'd like to hear from.
 - `,seek`: Choose whether each songs starts from the beginning, or a random point.
-- `,volume`: Specifies the volume at which songs are played
 - `,groups`: Specify what groups/artists you'd like to hear from
 - `,mode`: Choose whether to guess based on song name or artist name
