@@ -1,4 +1,4 @@
-import * as request from "request-promise";
+import Axios from "axios";
 import * as fs from "fs";
 import { execSync } from "child_process";
 import * as unzipper from "unzipper";
@@ -24,16 +24,15 @@ const setSqlMode = (sqlFile: string) => {
 
 const downloadDb = async () => {
     const output = `${databaseDownloadDir}/bootstrap.zip`
-    const options = {
-        url: fileUrl,
-        encoding: null,
+    const resp = await Axios.get(fileUrl, {
+        responseType: "arraybuffer",
         headers: {
             "Host": "kpop.aoimirai.net",
             "User-Agent": "PostmanRuntime/7.22.0"
         }
-    }
-    const resp = await request(options);
-    await fs.promises.writeFile(output, resp);
+    });
+
+    await fs.promises.writeFile(output, resp.data, { encoding: null });
     logger.info("Downloaded database.zip");
 }
 const extractDb = async () => {

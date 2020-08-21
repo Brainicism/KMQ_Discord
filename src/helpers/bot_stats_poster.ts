@@ -1,5 +1,5 @@
 import * as Eris from "eris";
-import * as request from "request-promise";
+import Axios from "axios";
 import _logger from "../logger";
 import * as _config from "../config/app_config.json";
 const config: any = _config;
@@ -47,17 +47,13 @@ export default class BotStatsPoster {
     private async postStat(client: Eris.Client, siteConfigKeyName: string) {
         const botListing = BOT_LISTING_SITES[siteConfigKeyName];
         try {
-            await request({
-                method: "POST",
-                uri: botListing.endpoint.replace("%d", client.user.id),
-                form: {
-                    [botListing.payloadKeyName]: client.guilds.size
-                },
+            await Axios.post(botListing.endpoint.replace("%d", client.user.id), {
+                [botListing.payloadKeyName]: client.guilds.size
+            }, {
                 headers: {
                     "Authorization": config[siteConfigKeyName]
                 }
-            })
-            logger.info(`${botListing.name} server count posted`);
+            });
         }
         catch (e) {
             logger.error(`Error updating ${botListing.name} server count. error = ${e}`);
