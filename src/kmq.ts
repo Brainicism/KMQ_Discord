@@ -43,6 +43,10 @@ let gameSessions: { [guildID: string]: GameSession } = {};
 let botStatsPoster: BotStatsPoster = null;
 
 client.on("ready", () => {
+    //set up bot stats poster
+    botStatsPoster = new BotStatsPoster(client);
+    botStatsPoster.start();
+
     logger.info(`Logged in as ${client.user.username}#${client.user.discriminator}! in '${process.env.NODE_ENV}' mode`);
 });
 
@@ -191,10 +195,6 @@ const checkRestartNotification = async (restartNotification: Date): Promise<void
         .select(["name", "members as gender"])
         .orderBy("name", "ASC")
     fs.writeFileSync(config.groupListFile, result.map((x) => x["name"]).join("\n"));
-
-    //set up bot stats poster
-    botStatsPoster = new BotStatsPoster(client);
-    botStatsPoster.start();
 
     //set up cleanup for inactive game sessions
     setInterval(() => {
