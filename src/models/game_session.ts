@@ -69,8 +69,6 @@ export default class GameSession {
         }
         if (this.connection) {
             this.connection.removeAllListeners();
-            this.connection.stopPlaying();
-
         }
         this.sessionInitialized = false;
     }
@@ -148,7 +146,6 @@ export default class GameSession {
             this.scoreboard.updateScoreboard(userTag, message.author.id);
             this.endRound(true);
             await sendSongMessage(message, this, false, userTag);
-            await playCorrectGuessSong(this);
             await db.kmq("guild_preferences")
                 .where("guild_id", message.guildID)
                 .increment("songs_guessed", 1);
@@ -220,7 +217,7 @@ export default class GameSession {
         }
 
         const stream = fs.createReadStream(songLocation);
-        await delay(2000);
+        await delay(3000);
         //check if ,end was called during the delay
         if (this.finished || this.gameRound.finished) {
             logger.debug(`${getDebugContext(message)} | startGame called with ${this.finished}, ${gameRound.finished}`);
