@@ -260,6 +260,9 @@ export function getVoiceConnection(message: Eris.Message): Eris.VoiceConnection 
     return voiceConnection;
 }
 
+export async function sendEmbed(messagePayload: SendMessagePayload, embed: Eris.EmbedOptions) {
+    return sendMessage(messagePayload, { embed });
+}
 
 export async function sendMessage(messagePayload: SendMessagePayload, messageContent: Eris.MessageContent): Promise<Eris.Message> {
     const channel = messagePayload.channel;
