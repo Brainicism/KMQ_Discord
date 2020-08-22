@@ -50,6 +50,11 @@ export default class SkipCommand implements BaseCommand {
             name: "API Latency",
             value: `${message.channel.guild.shard.latency} ms`,
             inline: true
+        },
+        {
+            name: "Process Uptime",
+            value: `${(process.uptime() / (60 * 60)).toFixed(2)} hours`,
+            inline: true
         }
         ]
         sendEmbed({ channel: message.channel, authorId: message.author.id }, {
