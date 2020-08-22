@@ -12,7 +12,7 @@ export default class GenderCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
         if (guildPreference.getGroupIds() !== null) {
-            sendErrorMessage(message, "Game Option Conflict", `\`groups\` game option is currently set. \`gender\` and \`groups\` are incompatible. Remove the \`groups\` option to proceed`);
+            sendErrorMessage(message, "Game Option Conflict", `\`groups\` game option is currently set. \`gender\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`,groups\`to proceed`);
             return;
         }
         const selectedGenderArray = guildPreference.setGender(parsedMessage.components as GENDER[]);
