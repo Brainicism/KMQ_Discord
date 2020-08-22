@@ -1,7 +1,7 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import * as Eris from "eris";
 import * as helpMessages from "../../data/help_strings.json";
-import { EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, getCommandFiles, sendPaginationedEmbed } from "../helpers/discord_utils";
+import { EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, getCommandFiles, sendPaginationedEmbed, sendInfoMessage, sendEmbed } from "../helpers/discord_utils";
 import _logger from "../logger";
 import { chunkArray } from "../helpers/utils";
 import * as EmbedPaginator from "eris-pagination"
@@ -83,14 +83,25 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
         });
 
     }
-    const embedFieldSubsets = chunkArray(embedFields, FIELDS_PER_EMBED);
-    const embeds = embedFieldSubsets.map(embedFieldsSubset => ({
-        title: embedTitle,
-        color: EMBED_INFO_COLOR,
-        description: embedDesc,
-        fields: embedFieldsSubset,
-        footer: embedFooter
-    }));
 
-    await sendPaginationedEmbed(message, embeds);
+    if (embedFields.length > 0) {
+        const embedFieldSubsets = chunkArray(embedFields, FIELDS_PER_EMBED);
+        const embeds = embedFieldSubsets.map(embedFieldsSubset => ({
+            title: embedTitle,
+            color: EMBED_INFO_COLOR,
+            description: embedDesc,
+            fields: embedFieldsSubset,
+            footer: embedFooter
+        }));
+
+        await sendPaginationedEmbed(message, embeds);
+    }
+    else {
+        await sendEmbed(message, {
+            title: embedTitle,
+            color: EMBED_INFO_COLOR,
+            description: embedDesc,
+            footer: embedFooter
+        })
+    }
 }
