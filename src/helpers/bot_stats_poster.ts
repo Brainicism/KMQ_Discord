@@ -54,6 +54,7 @@ export default class BotStatsPoster {
                     "Authorization": config[siteConfigKeyName]
                 }
             });
+            logger.info(`${botListing.name} server count posted`);
         }
         catch (e) {
             logger.error(`Error updating ${botListing.name} server count. error = ${e}`);
