@@ -11,6 +11,7 @@ import * as os from "os";
 export default class SkipCommand implements BaseCommand {
     async call({ gameSessions, message }: CommandArgs) {
         const activeGameSessions = Object.keys(gameSessions).length;
+        const activeUsers = Object.values(gameSessions).reduce((total, curr) => total + curr.participants.size, 0);
         let dateThreshold = new Date();
         dateThreshold.setHours(dateThreshold.getHours() - 24);
         const recentGameSessions = (await db.kmq("game_sessions")
@@ -24,6 +25,11 @@ export default class SkipCommand implements BaseCommand {
         const fields: Array<Eris.EmbedField> = [{
             name: "Active Game Sessions",
             value: activeGameSessions.toString(),
+            inline: true
+        },
+        {
+            name: "Active Users",
+            value: activeUsers.toString(),
             inline: true
         },
         {

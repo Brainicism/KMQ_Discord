@@ -32,9 +32,9 @@ export default class GameSession {
     public voiceChannel: Eris.VoiceChannel;
     public gameRound: GameRound;
     public roundsPlayed: number;
+    public participants: Set<string>;
 
     private guessTimes: Array<number>;
-    private participants: Set<string>;
     private songAliasList: { [songId: string]: Array<string> };
 
 
