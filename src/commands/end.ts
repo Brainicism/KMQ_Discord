@@ -18,6 +18,6 @@ export default class EndCommand implements BaseCommand {
         name: "end",
         description: "Finishes the current game and decides on a winner.",
         usage: "!end",
-        arguments: []
+        examples: []
     }
 }

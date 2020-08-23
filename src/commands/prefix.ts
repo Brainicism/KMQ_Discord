@@ -27,12 +27,12 @@ export default class PrefixCommand implements BaseCommand {
     }
     help = {
         name: "prefix",
-        description: "Set the character used to summon the bot.",
+        description: `Set the character used to summon the bot. You can only use a single character as the bot prefix. The default prefix is \`${DEFAULT_BOT_PREFIX}\`.`,
         usage: "!prefix [character]",
-        arguments: [
+        examples: [
             {
-                name: "character",
-                description: `You can only use a single character as the bot prefix. The default prefix is \`${DEFAULT_BOT_PREFIX}\`.`
+                example: "`!prefix ;`",
+                explanation: "Changes the bot's prefix to `;`"
             }
         ]
     }

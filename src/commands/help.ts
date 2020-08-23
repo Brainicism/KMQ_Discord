@@ -4,7 +4,6 @@ import * as helpMessages from "../../data/help_strings.json";
 import { EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, getCommandFiles, sendPaginationedEmbed, sendInfoMessage, sendEmbed } from "../helpers/discord_utils";
 import _logger from "../logger";
 import { chunkArray } from "../helpers/utils";
-import * as EmbedPaginator from "eris-pagination"
 const logger = _logger("help");
 const placeholder = /!/g;
 const FIELDS_PER_EMBED = 5;
@@ -15,13 +14,17 @@ export default class HelpCommand implements BaseCommand {
     }
     help =
         {
-            "name": "help",
-            "description": "Get help about the game's commands. Add the action as an argument to get information about specific arguments.",
-            "usage": "!help [action]",
-            "arguments": [
+            name: "help",
+            description: "Get help about the game's commands. Add the command as an argument to get information about the specific command.",
+            usage: "!help [command]",
+            examples: [
                 {
-                    "name": "action",
-                    "description": "Any valid command for the K-pop Music Quiz bot"
+                    example: "`!help`",
+                    explanation: "Shows all available commands and a short description"
+                },
+                {
+                    example: "`!help cutoff`",
+                    explanation: "Shows a detailed description for the cutoff command"
                 }
             ]
         }
@@ -34,7 +37,7 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
     let embedFields = [];
     //TODO: potentially do some caching?
     const commandFiles = await getCommandFiles();
-    let commandFilesWithAliases = {};
+    let commandFilesWithAliases: { [commandName: string]: BaseCommand } = {};
     Object.assign(commandFilesWithAliases, commandFiles);
     const commandNamesWithAliases = Object.keys(commandFiles).filter((commandName) => commandFiles[commandName].aliases);
     for (let commandName of commandNamesWithAliases) {
@@ -57,10 +60,13 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
         const helpManual = commandFilesWithAliases[action].help;
         embedTitle = `\`${helpManual.usage.replace(placeholder, botPrefix)}\``;
         embedDesc = helpManual.description;
-        helpManual.arguments.forEach((argument) => {
+        if (helpManual.examples.length > 0) {
+            embedDesc += `\n\n**Examples**\n`;
+        }
+        helpManual.examples.forEach((example) => {
             embedFields.push({
-                name: argument.name,
-                value: argument.description
+                name: example.example.replace(placeholder, botPrefix),
+                value: example.explanation
             })
         });
         if (commandFilesWithAliases[action].aliases) {

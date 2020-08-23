@@ -31,7 +31,7 @@ export default class BaseCommand {
         name: string,
         description: string,
         usage: string,
-        arguments: Array<{ name: string, description: string }>
+        examples: Array<{ example: string, explanation: string }>
     };
     aliases?: Array<string>;
     validations?: CommandValidations

@@ -12,7 +12,6 @@ import {
 } from "../helpers/discord_utils";
 import { startGame, getGuildPreference } from "../helpers/game_utils";
 import _logger from "../logger";
-import { client } from "../kmq";
 const logger = _logger("skip");
 
 export default class SkipCommand implements BaseCommand {
@@ -46,7 +45,7 @@ export default class SkipCommand implements BaseCommand {
         name: "skip",
         description: "Vote to skip the current song. A song is skipped when majority of participants vote to skip it.",
         usage: "!skip",
-        arguments: []
+        examples: []
     }
 }
 

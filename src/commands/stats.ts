@@ -73,6 +73,6 @@ export default class SkipCommand implements BaseCommand {
         name: "stats",
         description: "Various usage/system statistics.",
         usage: "!stats",
-        arguments: []
+        examples: []
     }
 }

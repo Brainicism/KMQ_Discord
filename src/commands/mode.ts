@@ -32,12 +32,16 @@ export default class ModeCommand implements BaseCommand {
 
     help = {
         name: "mode",
-        description: "Choose whether to guess by song title or artist name.",
+        description: "Choose whether to guess by song title or artist name. Valid values are `artist` and `song`",
         usage: "!mode [guessType]",
-        arguments: [
+        examples: [
             {
-                name: "guessType",
-                description: "Valid values are \`artist\` and \`song\`"
+                example: "`!mode song`",
+                explanation: "Type the correct song name to win a game round"
+            },
+            {
+                example: "`!mode artist`",
+                explanation: "Type the correct name of the artist to win a game round"
             }
         ]
     }
