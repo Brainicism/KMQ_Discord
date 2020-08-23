@@ -11,6 +11,6 @@ export default class OptionsCommand implements BaseCommand {
         name: "options",
         description: "Displays the current game options.",
         usage: "!options",
-        arguments: []
+        examples: []
     }
 }

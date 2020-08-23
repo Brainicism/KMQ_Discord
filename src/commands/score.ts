@@ -16,7 +16,7 @@ export default class ScoreCommand implements BaseCommand {
         name: "score",
         description: "See the scoreboard for the current game",
         usage: "!score",
-        arguments: []
+        examples: []
     }
     aliases = ["scoreboard"]
 }

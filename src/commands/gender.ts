@@ -57,12 +57,20 @@ export default class GenderCommand implements BaseCommand {
 
     help = {
         name: "gender",
-        description: "Choose the gender of the artists you'd like to hear from.",
-        usage: "!gender [gender1] [gender2] [gender3]",
-        arguments: [
+        description: "Choose the gender of the artists you'd like to hear from. Options are the following, `male`, `female`, and `coed`",
+        usage: "!gender [gender1] {gender2} {gender3}",
+        examples: [
             {
-                name: "gender",
-                description: "To choose between multiple genders, enter each gender separated by a space. Valid values are \`female\`, \`male\`, and \`coed\`"
+                example: "`!gender female`",
+                explanation: "Play songs only from female artists"
+            },
+            {
+                example: "`!gender male female`",
+                explanation: "Play songs from both male and female artists"
+            },
+            {
+                example: "`!gender coed`",
+                explanation: "Play songs only from coed groups (groups with both male and female members)"
             }
         ]
     }
