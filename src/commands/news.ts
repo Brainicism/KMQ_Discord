@@ -46,7 +46,7 @@ export default class NewsCommand implements BaseCommand {
         name: "news",
         description: "Displays the latest updates to KMQ.",
         usage: "!news",
-        arguments: []
+        examples: []
     }
 
     aliases = ["updates"]
