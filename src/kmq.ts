@@ -43,9 +43,10 @@ let gameSessions: { [guildID: string]: GameSession } = {};
 let botStatsPoster: BotStatsPoster = null;
 
 client.on("ready", () => {
-    //set up bot stats poster
-    botStatsPoster = new BotStatsPoster(client);
-    botStatsPoster.start();
+    if (botStatsPoster === null) {
+        botStatsPoster = new BotStatsPoster(client);
+        botStatsPoster.start();
+    }
 
     logger.info(`Logged in as ${client.user.username}#${client.user.discriminator}! in '${process.env.NODE_ENV}' mode`);
 });
