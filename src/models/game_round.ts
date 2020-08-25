@@ -1,7 +1,11 @@
 import { MODE_TYPE } from "../commands/mode";
 import _logger from "../logger";
 import * as Eris from "eris";
-const REMOVED_CHARACTERS_SONG_GUESS = /[\|’\ ']/g
+const REMOVED_CHARACTERS_SONG_GUESS = /[\|’\ '?!.-]/g
+const CHARACTER_REPLACEMENTS = [
+    { pattern: REMOVED_CHARACTERS_SONG_GUESS, replacement: "" },
+    { pattern: /&/g, replacement: "and" }
+]
 const REMOVED_CHARACTERS_ARTIST_GUESS = /[:'.\-★*]/g
 const logger = _logger("game_round");
 
@@ -57,10 +61,12 @@ export default class GameRound {
 }
 
 function cleanSongName(name: string): string {
-    const cleanName = name.toLowerCase()
+    let cleanName = name.toLowerCase()
         .split("(")[0]
-        .replace(REMOVED_CHARACTERS_SONG_GUESS, "")
         .trim();
+    for (let characterReplacement of CHARACTER_REPLACEMENTS) {
+        cleanName = cleanName.replace(characterReplacement.pattern, characterReplacement.replacement);
+    }
     return cleanName;
 }
 
