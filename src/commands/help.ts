@@ -7,7 +7,6 @@ import { chunkArray } from "../helpers/utils";
 const logger = _logger("help");
 const placeholder = /!/g;
 const FIELDS_PER_EMBED = 5;
-
 export default class HelpCommand implements BaseCommand {
     async call({ parsedMessage, message, botPrefix }: CommandArgs) {
         await helpMessage(message, parsedMessage.argument, botPrefix);

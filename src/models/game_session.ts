@@ -16,6 +16,8 @@ import { QueriedSong } from "../types";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
 import Scoreboard from "./scoreboard";
+import * as path from "path";
+
 const config: any = _config;
 
 const logger = _logger("game_session");
@@ -51,7 +53,8 @@ export default class GameSession {
         this.voiceChannel = voiceChannel;
         this.textChannel = textChannel;
         this.gameRound = null;
-        this.songAliasList = JSON.parse(fs.readFileSync(config.songAliasesFile).toString());
+        const songAliasesFilePath = path.resolve(process.cwd(), "../data/song_aliases.json");
+        this.songAliasList = JSON.parse(fs.readFileSync(songAliasesFilePath).toString());
     }
 
     createRound(song: string, artist: string, videoID: string) {
