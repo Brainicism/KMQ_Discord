@@ -1,7 +1,7 @@
 module.exports = {
   client: 'mysql',
   connection: {
-    user: '', password: '', database: "kpop_videos"
+    user: '', password: '', database: "kpop_videos", host: "127.0.0.1"
   },
   pool: {
     min: 0,

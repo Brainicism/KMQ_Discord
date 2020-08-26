@@ -6,6 +6,13 @@
 - tsc + ts-node
 - ffmpeg
 
+## Docker
+Building Image: `docker build --tag kmq:1.0 .`  
+
+Running Image: `docker run --network="host"--mount type=bind,source=[host_song_cache_dir],target=[container_song_cache_dir] --mount type=bind,source=[host_log_dir],target=[container_log_dir] kmq:1.0`.
+
+The target directories should match the ones specified in `app_config.json` and `log_config.json`. 
+
 ## First Time Setup
 ------------
 1. `npm install`
