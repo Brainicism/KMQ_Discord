@@ -247,7 +247,7 @@ export function areUserAndBotInSameVoiceChannel(message: Eris.Message): boolean 
 
 export function getNumParticipants(message: Eris.Message<Eris.GuildTextableChannel>): number {
     // Don't include the bot as a participant
-    return getVoiceChannel(message).voiceMembers.size - 1;
+    return (getVoiceChannel(message).voiceMembers.filter(x => !x.bot)).length;
 }
 
 export function getVoiceChannel(message: Eris.Message<Eris.GuildTextableChannel>): Eris.VoiceChannel {
