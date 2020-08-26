@@ -1,6 +1,5 @@
 import * as Eris from "eris";
 import * as fs from "fs";
-import { getAudioDurationInSeconds } from "get-audio-duration";
 import { CommandArgs } from "../commands/base_command";
 import { SEEK_TYPE } from "../commands/seek";
 import * as _config from "../config/app_config.json";
@@ -9,7 +8,7 @@ import { db } from "../databases";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import { getDebugContext, getUserIdentifier, getVoiceChannel, sendEndGameMessage, sendErrorMessage, sendSongMessage } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, playCorrectGuessSong, selectRandomSong } from "../helpers/game_utils";
-import { delay } from "../helpers/utils";
+import { delay, getAudioDurationInSeconds } from "../helpers/utils";
 import { client, deleteGameSession } from "../kmq";
 import _logger from "../logger";
 import { QueriedSong } from "../types";
