@@ -4,10 +4,10 @@ src/config/app_config.json
 src/config/log_config.json
 src/config/knexfile_kmq.js
 src/config/knexfile_kpop_videos.js
+src/config/debug_settings.json
 .cache/
 logs/
 build/
 kpop_db/
 news.md
 tmp/
-debug_settings.json

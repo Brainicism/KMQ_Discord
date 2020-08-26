@@ -19,7 +19,7 @@
 6. `npm run dev` to start the bot
 
 ## Debug Mode
-Having every song downloaded may be infeasible for local development. A debug mode can be activated by modifying `debug_settings.json`, and running in development mode. `forcedSongId` will force the bot to play a specific song given its ID. If `null`, will ignore this setting. `skipSongPlay` will start a game session with a song even if it is not downloaded on the local machine. 
+Having every song downloaded may be infeasible for local development. A debug mode can be activated by modifying `src/config/debug_settings.json`, and running in development mode. `forcedSongId` will force the bot to play a specific song given its ID. If `null`, will ignore this setting. `skipSongPlay` will start a game session with a song even if it is not downloaded on the local machine. 
 
 ## Creating Migrations
 In order to modify the database schema, you need to create a migration file. This can be done using `npx knex migrate:make migration_name --knexfile src/config/knexfile_kmq.js`. Modify the created migration file to describe the change in schema. [Details here](http://knexjs.org/#Migrations).

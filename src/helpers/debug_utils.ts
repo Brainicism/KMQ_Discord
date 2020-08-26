@@ -32,6 +32,6 @@ export async function getForcePlaySong(): Promise<QueriedSong> {
 }
 
 function readDebugSettings(key: string): any {
-    const debugSettings = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../../debug_settings.json")).toString());
+    const debugSettings = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../config/debug_settings.json")).toString());
     return debugSettings[key];
 }
