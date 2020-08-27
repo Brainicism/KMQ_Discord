@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as _config from "../config/app_config.json";
 import _logger from "../logger";
 import { db } from "../databases";
+import * as path from "path";
 import { EMBED_INFO_COLOR, getDebugContext, sendMessage } from "../helpers/discord_utils";
 import { bold } from "../helpers/utils";
 const logger = _logger("news");
@@ -22,11 +23,12 @@ export default class NewsCommand implements BaseCommand {
             logger.error(`${getDebugContext(message)} | Error retrieving latest song date`);
             latestSongDate = null;
         }
-        if (!fs.existsSync(config.newsFile)) {
+        const newsFilePath = path.resolve(process.cwd(), "../data/news.md");
+        if (!fs.existsSync(newsFilePath)) {
             logger.error("News file does not exist");
             return;
         }
-        const news = fs.readFileSync(config.newsFile).toString();
+        const news = fs.readFileSync(newsFilePath).toString();
         const embed = {
             color: EMBED_INFO_COLOR,
             author: {

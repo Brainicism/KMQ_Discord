@@ -6,8 +6,5 @@
     "topGGToken": "",
     "discordBotsGgToken": "",
     "discordBotListToken": "",
-    "newsFile": "",
-    "groupListFile": "",
-    "songAliasesFile": "",
     "restartCron": ""
 }
