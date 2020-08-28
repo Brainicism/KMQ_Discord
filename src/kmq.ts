@@ -6,6 +6,7 @@ import * as _config from "./config/app_config.json";
 import { validateConfig } from "./config_validator";
 import { db } from "./databases";
 import BotStatsPoster from "./helpers/bot_stats_poster";
+import * as path from "path";
 import { EMBED_INFO_COLOR, getCommandFiles, sendEndGameMessage, sendMessage, textPermissionsCheck } from "./helpers/discord_utils";
 import { cleanupInactiveGameSessions, getGuildPreference } from "./helpers/game_utils";
 import validate from "./helpers/validate";
@@ -195,7 +196,7 @@ const checkRestartNotification = async (restartNotification: Date): Promise<void
     const result = await db.kpopVideos("kpop_videos.app_kpop_group")
         .select(["name", "members as gender"])
         .orderBy("name", "ASC")
-    fs.writeFileSync(config.groupListFile, result.map((x) => x["name"]).join("\n"));
+    fs.writeFileSync(path.resolve(process.cwd(), "../data/group_list.txt"), result.map((x) => x["name"]).join("\n"));
 
     //set up cleanup for inactive game sessions
     setInterval(() => {
