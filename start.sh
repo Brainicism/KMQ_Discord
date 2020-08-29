@@ -13,7 +13,8 @@ elif [ $1 == "prod" ]; then
     tsc
     echo "Copying assets..."
     cp -r src/assets build/src/assets
-    cp -r data/ build/
+    ln -s "$(pwd)"/data/news.md build/data/news.md
+    ln -s "$(pwd)"/data/group_list.txt build/data/group_list.txt
     cd build/src 
     echo "Starting bot..."
     NODE_ENV=production node kmq.js
