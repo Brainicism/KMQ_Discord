@@ -1,4 +1,4 @@
-import * as Eris from "eris";
+import Eris from "eris";
 import { state } from "../../kmq";
 import { checkBotIsAlone } from "../../helpers/discord_utils";
 

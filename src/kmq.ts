@@ -1,12 +1,11 @@
-import * as Eris from "eris";
-import * as _config from "./config/app_config.json";
+import Eris from "eris";
+import config from "./config/app_config.json";
 import { validateConfig } from "./config_validator";
 import _logger from "./logger";
 import { State } from "./types";
 import { registerClientEvents, registerProcessEvents, registerCommands, updateGroupList } from "./helpers/management_utils";
 const logger = _logger("kmq");
 
-const config: any = _config;
 const ERIS_INTENTS = Eris.Constants.Intents;
 const client = new Eris.Client(config.botToken, {
     disableEvents: {
@@ -37,7 +36,7 @@ export let state: State = {
 
 
 (async () => {
-    if (!validateConfig(config)) {
+    if (!validateConfig()) {
         logger.error("Invalid config, aborting.");
         process.exit(1);
     }

@@ -1,8 +1,7 @@
-import * as Eris from "eris";
+import Eris from "eris";
 import Axios from "axios";
 import _logger from "../logger";
-import * as _config from "../config/app_config.json";
-const config: any = _config;
+import config from "../config/app_config.json";
 const logger = _logger("bot_stats_poster");
 
 interface BotListing {
@@ -10,6 +9,7 @@ interface BotListing {
     payloadKeyName: string;
     name: string;
 }
+
 const BOT_LISTING_SITES: { [siteName: string]: BotListing } = {
     topGGToken: {
         endpoint: "https://top.gg/api/bots/%d/stats",

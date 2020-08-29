@@ -1,8 +1,7 @@
-import * as Eris from "eris";
-import * as fs from "fs";
+import Eris from "eris";
+import fs from "fs";
 import { CommandArgs } from "../commands/base_command";
 import { SEEK_TYPE } from "../commands/seek";
-import * as _config from "../config/app_config.json";
 import { songCacheDir as SONG_CACHE_DIR } from "../config/app_config.json";
 import { db } from "../databases";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
@@ -15,10 +14,8 @@ import { QueriedSong } from "../types";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
 import Scoreboard from "./scoreboard";
-import * as path from "path";
+import path from "path";
 import { deleteGameSession } from "../helpers/management_utils";
-
-const config: any = _config;
 
 const logger = _logger("game_session");
 

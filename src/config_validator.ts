@@ -1,4 +1,5 @@
 import _logger from "./logger";
+import config from "./config/app_config.json";
 const logger = _logger("config_validator");
 
 const allowedOptions = {
@@ -12,7 +13,7 @@ const allowedOptions = {
     restartCron: { required: false }
 };
 
-export function validateConfig(config): boolean {
+export function validateConfig(): boolean {
     let valid = true;
     //check for extraneous config options
     for (let option in config) {

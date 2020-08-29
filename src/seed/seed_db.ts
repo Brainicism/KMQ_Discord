@@ -1,15 +1,14 @@
 import Axios from "axios";
-import * as fs from "fs";
+import fs from "fs";
 import { execSync } from "child_process";
-import * as unzipper from "unzipper";
-import * as mysql from "promise-mysql";
-import * as _config from "../config/app_config.json";
-import * as prependFile from 'prepend-file';
+import unzipper from "unzipper";
+import mysql from "promise-mysql";
+import config from "../config/app_config.json";
+import prependFile from 'prepend-file';
 import _logger from "../logger";
 import { Logger } from "log4js";
 import { removeRedunantAliases } from "../scripts/remove-redunant-aliases";
 import { downloadNewSongs } from "../scripts/download-new-songs";
-const config: any = _config;
 const fileUrl = "http://kpop.aoimirai.net/download.php";
 const logger: Logger = _logger("seed_db");
 

@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-import * as Eris from "eris";
+import Eris from "eris";
 import GameSession from "../models/game_session";
 import {
     sendSongMessage,

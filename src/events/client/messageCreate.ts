@@ -1,4 +1,4 @@
-import * as Eris from "eris";
+import Eris from "eris";
 import _logger from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { textPermissionsCheck } from "../../helpers/discord_utils";

@@ -2,7 +2,7 @@ import { getDebugContext, sendErrorMessage } from "./discord_utils";
 import { ParsedMessage } from "../types";
 import { CommandValidations } from "../commands/base_command";
 import _logger from "../logger";
-import * as Eris from "eris";
+import Eris from "eris";
 const logger = _logger("validate");
 
 export default (message: Eris.Message<Eris.GuildTextableChannel>, parsedMessage: ParsedMessage, validations: CommandValidations, botPrefix: string) => {

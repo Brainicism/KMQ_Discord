@@ -1,6 +1,6 @@
 import { MODE_TYPE } from "../commands/mode";
 import _logger from "../logger";
-import * as Eris from "eris";
+import Eris from "eris";
 const REMOVED_CHARACTERS_SONG_GUESS = /[\|’\ '?!.-]/g
 const CHARACTER_REPLACEMENTS = [
     { pattern: REMOVED_CHARACTERS_SONG_GUESS, replacement: "" },
