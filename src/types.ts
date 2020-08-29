@@ -1,5 +1,8 @@
 import * as Knex from "knex";
 import * as Eris from "eris";
+import BaseCommand from "./commands/base_command";
+import GameSession from "./models/game_session";
+import BotStatsPoster from "./helpers/bot_stats_poster";
 
 export interface ParsedMessage {
     action: string;
@@ -22,4 +25,11 @@ export interface Databases {
 export interface SendMessagePayload {
     channel: Eris.GuildTextableChannel;
     authorId?: string
+}
+
+export interface State {
+    commands: { [commandName: string]: BaseCommand };
+    gameSessions: { [guildID: string]: GameSession };
+    botStatsPoster: BotStatsPoster;
+    client: Eris.Client
 }

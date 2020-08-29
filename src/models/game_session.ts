@@ -9,13 +9,14 @@ import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import { getDebugContext, getUserIdentifier, getVoiceChannel, sendEndGameMessage, sendErrorMessage, sendSongMessage } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, playCorrectGuessSong, selectRandomSong } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds } from "../helpers/utils";
-import { client, deleteGameSession } from "../kmq";
+import { state } from "../kmq";
 import _logger from "../logger";
 import { QueriedSong } from "../types";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
 import Scoreboard from "./scoreboard";
 import * as path from "path";
+import { deleteGameSession } from "../helpers/management_utils";
 
 const config: any = _config;
 
@@ -79,10 +80,10 @@ export default class GameSession {
         const guildId = this.textChannel.guild.id;
         this.finished = true;
         this.endRound(false);
-        const voiceConnection = client.voiceConnections.get(guildId);
+        const voiceConnection = state.client.voiceConnections.get(guildId);
         if (voiceConnection && voiceConnection.channelID) {
             voiceConnection.stopPlaying();
-            const voiceChannel = client.getChannel(voiceConnection.channelID) as Eris.VoiceChannel;
+            const voiceChannel = state.client.getChannel(voiceConnection.channelID) as Eris.VoiceChannel;
             if (voiceChannel) {
                 voiceChannel.leave();
             }
@@ -190,7 +191,7 @@ export default class GameSession {
         this.createRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);
 
         try {
-            await ensureVoiceConnection(this, client);
+            await ensureVoiceConnection(this, state.client);
         }
         catch (err) {
             await this.endSession();
@@ -199,10 +200,10 @@ export default class GameSession {
             await sendErrorMessage(message, "Missing voice permissions", "The bot is unable to join the voice channel you are in.");
             return;
         }
-        this.playSong(guildPreference, message, client);
+        this.playSong(guildPreference, message);
     }
 
-    async playSong(guildPreference: GuildPreference, message: Eris.Message<Eris.GuildTextableChannel>, client: Eris.Client) {
+    async playSong(guildPreference: GuildPreference, message: Eris.Message<Eris.GuildTextableChannel>) {
         const gameRound = this.gameRound;
         if (isDebugMode() && skipSongPlay()) {
             logger.debug(`${getDebugContext(message)} | Not playing song in voice connection. song = ${this.getDebugSongDetails()}`);
