@@ -49,6 +49,8 @@ Note that `,groups` and `,gender` are incompatible with each other. If you wish 
 
 ![groups](/images/groups.png)
 
+## ,goal [goal]
+Setting the goal ends the game when the given goal score is reached. For example, if a user were to call `,goal 5`, the first player to five points would win the game (`,end` is called automatically). To disable a goal, use `,goal`.
 
 # Full Command List
 Use `,help [command_name]` for more details for any of the following commands.
