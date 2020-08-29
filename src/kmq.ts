@@ -1,24 +1,33 @@
 import * as cronParser from "cron-parser";
 import * as Eris from "eris";
 import * as fs from "fs";
-import BaseCommand from "./commands/base_command";
 import * as _config from "./config/app_config.json";
 import { validateConfig } from "./config_validator";
 import { db } from "./databases";
-import BotStatsPoster from "./helpers/bot_stats_poster";
 import * as path from "path";
-import { EMBED_INFO_COLOR, getCommandFiles, sendEndGameMessage, sendMessage, textPermissionsCheck } from "./helpers/discord_utils";
-import { cleanupInactiveGameSessions, getGuildPreference } from "./helpers/game_utils";
-import validate from "./helpers/validate";
+import { EMBED_INFO_COLOR, getCommandFiles, sendEndGameMessage, sendMessage } from "./helpers/discord_utils";
+import { cleanupInactiveGameSessions } from "./helpers/game_utils";
 import _logger from "./logger";
-import GameSession from "./models/game_session";
-import { ParsedMessage } from "./types";
+import { State } from "./types";
+import ready from "./events/client/ready";
+import messageCreate from "./events/client/messageCreate";
+import voiceChannelLeave from "./events/client/voiceChannelLeave";
+import voiceChannelSwitch from "./events/client/voiceChannelSwitch";
+import warn from "./events/client/warn";
+import connect from "./events/client/connect";
+import error from "./events/client/error";
+import shardDisconnect from "./events/client/shardDisconnect";
+import shardReady from "./events/client/shardReady";
+import shardResume from "./events/client/shardResume";
+import unhandledRejection from "./events/process/unhandledRejection";
+import uncaughtException from "./events/process/uncaughtException";
+import SIGINT from "./events/process/SIGINT";
 const logger = _logger("kmq");
 
 
 const config: any = _config;
 const ERIS_INTENTS = Eris.Constants.Intents;
-export const client = new Eris.Client(config.botToken, {
+const client = new Eris.Client(config.botToken, {
     disableEvents: {
         GUILD_DELETE: true,
         GUILD_ROLE_CREATE: true,
@@ -39,123 +48,44 @@ export const client = new Eris.Client(config.botToken, {
 
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 2, 1]);
 
-let commands: { [commandName: string]: BaseCommand } = {};
-let gameSessions: { [guildID: string]: GameSession } = {};
-let botStatsPoster: BotStatsPoster = null;
-
-client.on("ready", () => {
-    if (botStatsPoster === null) {
-        botStatsPoster = new BotStatsPoster(client);
-        botStatsPoster.start();
-    }
-
-    logger.info(`Logged in as ${client.user.username}#${client.user.discriminator}! in '${process.env.NODE_ENV}' mode`);
-});
-
-
-client.on("messageCreate", async (message: Eris.Message) => {
-    if (message.author.id === client.user.id || message.author.bot) return;
-    if (!message.guildID) {
-        logger.info(`Received message in DMs: message = ${message.content}`);
-        return;
-    }
-    if (!isGuildMessage(message)) return;
-
-    const guildPreference = await getGuildPreference(message.guildID);
-    const botPrefix = guildPreference.getBotPrefix();
-    const parsedMessage = parseMessage(message.content, botPrefix) || null;
-    if (message.mentions.includes(client.user) && message.content.split(" ").length == 1) {
-        // Any message that mentions the bot sends the current options
-        if (!(await textPermissionsCheck(message))) {
-            return;
-        }
-        commands["options"].call({ message });
-    }
-    if (parsedMessage && commands[parsedMessage.action]) {
-        const command = commands[parsedMessage.action];
-        if (validate(message, parsedMessage, command.validations, botPrefix)) {
-            if (!(await textPermissionsCheck(message))) {
-                return;
-            }
-            command.call({
-                gameSessions,
-                message,
-                parsedMessage,
-                botPrefix
-            });
-        }
-    }
-    else {
-        if (gameSessions[message.guildID] && gameSessions[message.guildID].gameRound) {
-            const gameSession = gameSessions[message.guildID];
-            gameSession.guessSong({ message })
-            gameSession.lastActiveNow();
-        }
-    }
-});
-
-function isGuildMessage(message: Eris.Message): message is Eris.Message<Eris.GuildTextableChannel> {
-    return (message.channel instanceof Eris.TextChannel)
+export let state: State = {
+    commands: {},
+    gameSessions: {},
+    botStatsPoster: null,
+    client: client
 }
 
-client.on("voiceChannelLeave", async (member, oldChannel) => {
-    const guildID = oldChannel.guild.id;
-    const gameSession = gameSessions[guildID];
-    await checkBotIsAlone(gameSession, oldChannel);
-});
+client.on("ready", ready)
+    .on("messageCreate", messageCreate)
+    .on("voiceChannelLeave", voiceChannelLeave)
+    .on("voiceChannelSwitch", voiceChannelSwitch)
+    .on("connect", connect)
+    .on("error", error)
+    .on("warn", warn)
+    .on("shardDisconnect", shardDisconnect)
+    .on("shardReady", shardReady)
+    .on("shardResume", shardResume)
 
-client.on("voiceChannelSwitch", async (member, newChannel, oldChannel) => {
-    const guildID = oldChannel.guild.id;
-    const gameSession = gameSessions[guildID];
-    await checkBotIsAlone(gameSession, oldChannel);
-})
+process.on("unhandledRejection", unhandledRejection)
+    .on("uncaughtException", uncaughtException)
+    .on("SIGINT", SIGINT)
 
-
-async function checkBotIsAlone(gameSession: GameSession, channel: Eris.VoiceChannel) {
-    if (channel.voiceMembers.size === 1 && channel.voiceMembers.has(client.user.id)) {
-        if (gameSession) {
-            logger.info(`gid: ${channel.guild.id} | Bot is only user left, leaving voice...`)
-            sendEndGameMessage({ channel: gameSession.textChannel }, gameSession);
-            await gameSession.endSession();
-        }
-        return;
-    }
-}
-client.on("error", (err, shardId) => {
-    logger.error(`Client encountered error: ${err}`)
-})
-
-client.on("warn", (message, shardId) => {
-    logger.warn(`Client encountered warning: ${message}`);
-})
 
 export function deleteGameSession(guildId: string) {
-    if (!(guildId in gameSessions)) {
+    if (!(guildId in state.gameSessions)) {
         logger.debug(`gid: ${guildId} | GameSession already ended`);
         return;
     }
-    delete gameSessions[guildId];
+    delete state.gameSessions[guildId];
 }
 
-const parseMessage = (message: string, botPrefix: string): ParsedMessage => {
-    if (message.charAt(0) !== botPrefix) return null;
-    const components = message.split(" ");
-    const action = components.shift().substring(1);
-    const argument = components.join(" ");
-    return {
-        action,
-        argument,
-        message,
-        components
-    }
-}
 
 const checkRestartNotification = async (restartNotification: Date): Promise<void> => {
     const timeDiffMin = Math.floor((restartNotification.getTime() - (new Date()).getTime()) / (1000 * 60));
     let channelsWarned = 0;
     if (RESTART_WARNING_INTERVALS.has(timeDiffMin)) {
-        for (let guildId in gameSessions) {
-            const gameSession = gameSessions[guildId];
+        for (let guildId in state.gameSessions) {
+            const gameSession = state.gameSessions[guildId];
             if (gameSession.finished) continue;
             await sendMessage({ channel: gameSession.textChannel }, {
                 embed: {
@@ -175,7 +105,6 @@ const checkRestartNotification = async (restartNotification: Date): Promise<void
 }
 
 (async () => {
-
     if (!validateConfig(config)) {
         logger.error("Invalid config, aborting.");
         process.exit(1);
@@ -185,10 +114,10 @@ const checkRestartNotification = async (restartNotification: Date): Promise<void
     const commandFiles = await getCommandFiles();
     for (const [commandName, command] of Object.entries(commandFiles)) {
         if (commandName === "base_command") continue;
-        commands[commandName] = command;
+        state.commands[commandName] = command;
         if (command.aliases) {
             command.aliases.forEach((alias) => {
-                commands[alias] = command;
+                state.commands[alias] = command;
             });
         }
     }
@@ -200,7 +129,7 @@ const checkRestartNotification = async (restartNotification: Date): Promise<void
 
     //set up cleanup for inactive game sessions
     setInterval(() => {
-        cleanupInactiveGameSessions(gameSessions);
+        cleanupInactiveGameSessions(state.gameSessions);
     }, 10 * 60 * 1000)
 
     //set up check for restart notifications
@@ -224,24 +153,3 @@ const checkRestartNotification = async (restartNotification: Date): Promise<void
     }, 60 * 1000);
     client.connect();
 })();
-
-process.on("unhandledRejection", (reason: Error, p: Promise<any>) => {
-    logger.error(`Unhandled Rejection at: Promise ${p}. Reason: ${reason}. Trace: ${reason.stack}`);
-});
-
-
-process.on("uncaughtException", (err: Error) => {
-    logger.error(`Uncaught Exception. Reason: ${err}. Trace: ${err.stack}`);
-});
-
-process.on("SIGINT", async () => {
-    logger.debug("SIGINT received, cleaning up...");
-    for (let guildId in gameSessions) {
-        const gameSession = gameSessions[guildId];
-        await sendEndGameMessage({ channel: gameSession.textChannel }, gameSession);
-        logger.debug(`gid: ${guildId} | Forcing game session end`);
-        await gameSession.endSession();
-    }
-    await db.destroy();
-    process.exit(0);
-});

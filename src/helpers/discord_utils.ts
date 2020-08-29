@@ -1,6 +1,5 @@
 import * as fs from "fs";
 import * as Eris from "eris";
-import { client } from "../kmq";
 import GuildPreference from "../models/guild_preference";
 import GameSession from "../models/game_session";
 import BaseCommand from "../commands/base_command";
@@ -10,6 +9,7 @@ import { getSongCount, GameOption } from "./game_utils";
 import { getFact } from "../fact_generator";
 import { SendMessagePayload } from "../types";
 import { chunkArray, codeLine, bold } from "./utils";
+import { state } from "../kmq";
 const logger = _logger("utils");
 export const EMBED_INFO_COLOR = 0x000000; // BLACK
 export const EMBED_ERROR_COLOR = 0xE74C3C; // RED
@@ -129,6 +129,7 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
 }
 
 export async function sendEndGameMessage(messagePayload: SendMessagePayload, gameSession: GameSession) {
+    const client = state.client;
     if (gameSession.scoreboard.isEmpty()) {
         await sendMessage(messagePayload, {
             embed: {
@@ -256,7 +257,7 @@ export function getVoiceChannel(message: Eris.Message<Eris.GuildTextableChannel>
 }
 
 export function getVoiceConnection(message: Eris.Message): Eris.VoiceConnection {
-    const voiceConnection = client.voiceConnections.get(message.guildID);
+    const voiceConnection = state.client.voiceConnections.get(message.guildID);
     return voiceConnection;
 }
 
@@ -266,12 +267,12 @@ export async function sendEmbed(messagePayload: SendMessagePayload, embed: Eris.
 
 export async function sendMessage(messagePayload: SendMessagePayload, messageContent: Eris.MessageContent): Promise<Eris.Message> {
     const channel = messagePayload.channel;
-    return client.createMessage(channel.id, messageContent);
+    return state.client.createMessage(channel.id, messageContent);
 }
 
 export function voicePermissionsCheck(message: Eris.Message<Eris.GuildTextableChannel>): boolean {
     const voiceChannel = getVoiceChannel(message);
-    const missingPermissions = REQUIRED_VOICE_PERMISSIONS.filter((permission) => !voiceChannel.permissionsOf(client.user.id).has(permission));
+    const missingPermissions = REQUIRED_VOICE_PERMISSIONS.filter((permission) => !voiceChannel.permissionsOf(state.client.user.id).has(permission));
     if (missingPermissions.length > 0) {
         logger.warn(`gid: ${voiceChannel.guild.id}, uid: ${message.author.id} | Missing [${missingPermissions.join(", ")}] permissions`);
         sendErrorMessage(message, "Missing Permissions", `Ensure that the bot has the following permissions: \`${missingPermissions.join(", ")}\``)
@@ -288,6 +289,7 @@ export function voicePermissionsCheck(message: Eris.Message<Eris.GuildTextableCh
 
 export async function textPermissionsCheck(message: Eris.Message<Eris.GuildTextableChannel>): Promise<boolean> {
     const channel = message.channel;
+    const client = state.client;
     if (!channel.permissionsOf(client.user.id).has("sendMessages")) {
         logger.warn(`gid: ${channel.guild.id}, uid: ${message.author.id} | Missing SEND_MESSAGES permissions`);
         const embed = {
@@ -309,4 +311,15 @@ export async function textPermissionsCheck(message: Eris.Message<Eris.GuildTexta
         return false;
     }
     return true;
+}
+
+export async function checkBotIsAlone(gameSession: GameSession, channel: Eris.VoiceChannel) {
+    if (channel.voiceMembers.size === 1 && channel.voiceMembers.has(state.client.user.id)) {
+        if (gameSession) {
+            logger.info(`gid: ${channel.guild.id} | Bot is only user left, leaving voice...`)
+            sendEndGameMessage({ channel: gameSession.textChannel }, gameSession);
+            await gameSession.endSession();
+        }
+        return;
+    }
 }
