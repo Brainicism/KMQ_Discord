@@ -151,7 +151,14 @@ export default class GameSession {
             await db.kmq("guild_preferences")
                 .where("guild_id", message.guildID)
                 .increment("songs_guessed", 1);
-            this.startRound(guildPreference, message);
+            if (!guildPreference.isGoalSet() || this.scoreboard.getWinners()[0].getScore() < guildPreference.getGoal()) {
+                this.startRound(guildPreference, message);
+            }
+            else {
+                logger.info(`${getDebugContext(message)} | Game session ended (goal of ${guildPreference.getGoal()} reached)`);
+                await sendEndGameMessage({ channel: message.channel, authorId: message.author.id }, this);
+                await this.endSession();
+            }
         }
     }
 
