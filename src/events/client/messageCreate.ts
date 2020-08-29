@@ -7,7 +7,7 @@ import validate from "../../helpers/validate";
 import { ParsedMessage } from "../../types";
 const logger = _logger("messageCreate");
 
-export default async function messageCreate(message: Eris.Message) {
+export default async function messageCreateHandler(message: Eris.Message) {
     if (message.author.id === state.client.user.id || message.author.bot) return;
     if (!message.guildID) {
         logger.info(`Received message in DMs: message = ${message.content}`);

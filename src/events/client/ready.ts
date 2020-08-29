@@ -4,7 +4,7 @@ import _logger from "../../logger";
 const logger = _logger("ready");
 
 
-export default function ready() {
+export default function readyHandler() {
     const client = state.client;
     if (state.botStatsPoster === null) {
         state.botStatsPoster = new BotStatsPoster(client);

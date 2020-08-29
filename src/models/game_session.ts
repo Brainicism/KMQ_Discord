@@ -9,13 +9,14 @@ import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import { getDebugContext, getUserIdentifier, getVoiceChannel, sendEndGameMessage, sendErrorMessage, sendSongMessage } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, playCorrectGuessSong, selectRandomSong } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds } from "../helpers/utils";
-import { deleteGameSession, state } from "../kmq";
+import { state } from "../kmq";
 import _logger from "../logger";
 import { QueriedSong } from "../types";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
 import Scoreboard from "./scoreboard";
 import * as path from "path";
+import { deleteGameSession } from "../helpers/management_utils";
 
 const config: any = _config;
 

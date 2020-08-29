@@ -203,27 +203,7 @@ export function getDebugContext(message: Eris.Message): string {
     return `gid: ${message.guildID}, uid: ${message.author.id}`
 }
 
-export function getCommandFiles(): Promise<{ [commandName: string]: BaseCommand }> {
-    return new Promise(async (resolve, reject) => {
-        let commandMap = {};
-        let files: Array<string>;
-        try {
-            files = await fs.promises.readdir("./commands");
-        }
-        catch (err) {
-            reject();
-            return logger.error(`Unable to read commands error = ${err}`);
-        }
 
-        for (const file of files) {
-            const command = await import(`../commands/${file}`);
-            const commandName = file.split(".")[0];
-            commandMap[commandName] = new command.default()
-        }
-        resolve(commandMap);
-
-    })
-}
 
 export function disconnectVoiceConnection(message: Eris.Message<Eris.GuildTextableChannel>) {
     const voiceChannel = getVoiceChannel(message);

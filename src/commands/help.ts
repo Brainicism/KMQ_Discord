@@ -1,9 +1,10 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import * as Eris from "eris";
 import * as helpMessages from "../../data/help_strings.json";
-import { EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, getCommandFiles, sendPaginationedEmbed, sendInfoMessage, sendEmbed } from "../helpers/discord_utils";
+import { EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, sendPaginationedEmbed, sendEmbed } from "../helpers/discord_utils";
 import _logger from "../logger";
 import { chunkArray } from "../helpers/utils";
+import { getCommandFiles } from "../helpers/management_utils";
 const logger = _logger("help");
 const placeholder = /!/g;
 const FIELDS_PER_EMBED = 5;

@@ -4,7 +4,7 @@ import { sendEndGameMessage } from "../../helpers/discord_utils";
 import { db } from "../../databases";
 const logger = _logger("SIGINT");
 
-export default async function SIGINT() {
+export default async function SIGINTHandler() {
     logger.debug("SIGINT received, cleaning up...");
     for (let guildId in state.gameSessions) {
         const gameSession = state.gameSessions[guildId];
