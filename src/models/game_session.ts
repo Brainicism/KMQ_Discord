@@ -6,7 +6,7 @@ import * as _config from "../config/app_config.json";
 import { songCacheDir as SONG_CACHE_DIR } from "../config/app_config.json";
 import { db } from "../databases";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
-import { getDebugContext, getUserIdentifier, getVoiceChannel, sendEndGameMessage, sendErrorMessage, sendSongMessage, disconnectVoiceConnection } from "../helpers/discord_utils";
+import { getDebugContext, getUserIdentifier, getVoiceChannel, sendEndGameMessage, sendErrorMessage, sendSongMessage } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, playCorrectGuessSong, selectRandomSong } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds } from "../helpers/utils";
 import { client, deleteGameSession } from "../kmq";
@@ -151,14 +151,13 @@ export default class GameSession {
             await db.kmq("guild_preferences")
                 .where("guild_id", message.guildID)
                 .increment("songs_guessed", 1);
-            if (guildPreference.getGoal() == 0 || this.scoreboard.getWinners()[0].getScore() < guildPreference.getGoal()) {
+            if (!guildPreference.isGoalSet() || this.scoreboard.getWinners()[0].getScore() < guildPreference.getGoal()) {
                 this.startRound(guildPreference, message);
             }
             else {
-                logger.info(`${getDebugContext(message)} | Game session ended`);
+                logger.info(`${getDebugContext(message)} | Game session ended (goal of ${guildPreference.getGoal()} reached)`);
                 await sendEndGameMessage({ channel: message.channel, authorId: message.author.id }, this);
                 await this.endSession();
-                disconnectVoiceConnection(message);
             }
         }
     }

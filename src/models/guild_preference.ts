@@ -1,7 +1,6 @@
 import { BEGINNING_SEARCH_YEAR } from "../commands/cutoff";
 import { DEFAULT_BOT_PREFIX } from "../commands/prefix";
 import { DEFAULT_LIMIT } from "../commands/limit";
-import { DEFAULT_GOAL } from "../commands/goal";
 import { GENDER } from "../commands/gender";
 import { SEEK_TYPE } from "../commands/seek";
 import _logger from "../logger";
@@ -12,7 +11,7 @@ const logger = _logger("guild_preference");
 
 const DEFAULT_OPTIONS = {
     beginningYear: BEGINNING_SEARCH_YEAR, endYear: (new Date()).getFullYear(), gender: [GENDER.FEMALE],
-    limit: DEFAULT_LIMIT, seekType: SEEK_TYPE.RANDOM, modeType: MODE_TYPE.SONG_NAME, groups: null, goal: DEFAULT_GOAL
+    limit: DEFAULT_LIMIT, seekType: SEEK_TYPE.RANDOM, modeType: MODE_TYPE.SONG_NAME, groups: null, goal: null
 };
 
 interface GameOptions {
@@ -179,8 +178,12 @@ export default class GuildPreference {
     }
 
     resetGoal() {
-        this.gameOptions.goal = DEFAULT_GOAL;
+        this.gameOptions.goal = null;
+        this.updateGuildPreferences(db.kmq);
+    }
 
+    isGoalSet(): boolean {
+        return this.gameOptions.goal !== null;
     }
 
     async updateGuildPreferences(db: Knex) {
