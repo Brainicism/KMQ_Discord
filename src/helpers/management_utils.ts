@@ -12,6 +12,7 @@ import warnHandler from "../events/client/warn";
 import shardDisconnectHandler from "../events/client/shardDisconnect";
 import shardReadyHandler from "../events/client/shardReady";
 import shardResumeHandler from "../events/client/shardResume";
+import disconnectHandler from "../events/client/disconnect";
 import unhandledRejectionHandler from "../events/process/unhandledRejection";
 import uncaughtExceptionHandler from "../events/process/uncaughtException";
 import SIGINTHandler from "../events/process/SIGINT";
@@ -36,7 +37,8 @@ export function registerClientEvents(client: Eris.Client) {
         .on("warn", warnHandler)
         .on("shardDisconnect", shardDisconnectHandler)
         .on("shardReady", shardReadyHandler)
-        .on("shardResume", shardResumeHandler);
+        .on("shardResume", shardResumeHandler)
+        .on("disconnect", disconnectHandler);
 }
 
 export function registerProcessEvents(process: NodeJS.Process) {
