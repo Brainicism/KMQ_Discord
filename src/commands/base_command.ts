@@ -1,4 +1,4 @@
-import * as Eris from "eris";
+import Eris from "eris";
 import GameSession from "../models/game_session";
 import { ParsedMessage } from "../types";
 

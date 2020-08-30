@@ -4,7 +4,7 @@ import { DEFAULT_LIMIT } from "../commands/limit";
 import { GENDER } from "../commands/gender";
 import { SEEK_TYPE } from "../commands/seek";
 import _logger from "../logger";
-import * as Knex from "knex";
+import Knex from "knex";
 import { db } from "../databases";
 import { MODE_TYPE } from "../commands/mode";
 const logger = _logger("guild_preference");

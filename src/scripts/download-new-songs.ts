@@ -1,10 +1,9 @@
-import * as ytdl from "ytdl-core";
-import * as fs from "fs";
-import * as _config from "../config/app_config.json";
+import ytdl from "ytdl-core";
+import fs from "fs";
+import config from "../config/app_config.json";
 import { QueriedSong } from "../types";
-import * as path from "path";
+import path from "path";
 import { db } from "../databases";
-const config: any = _config;
 import _logger from "../logger";
 import { Logger } from "log4js";
 const logger: Logger = _logger("download-new-songs");

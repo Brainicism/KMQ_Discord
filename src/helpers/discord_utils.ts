@@ -1,9 +1,7 @@
-import * as fs from "fs";
-import * as Eris from "eris";
+import Eris from "eris";
 import GuildPreference from "../models/guild_preference";
 import GameSession from "../models/game_session";
-import BaseCommand from "../commands/base_command";
-import * as EmbedPaginator from "eris-pagination"
+import EmbedPaginator from "eris-pagination"
 import _logger from "../logger";
 import { getSongCount, GameOption } from "./game_utils";
 import { getFact } from "../fact_generator";

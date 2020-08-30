@@ -1,7 +1,5 @@
 import { spawn, exec } from "child_process";
 import { db } from "../databases";
-import * as _config from "../config/app_config.json";
-const config: any = _config;
 
 function serverShutdown(restartMinutes: number, restart: boolean) {
     return new Promise((resolve) => {

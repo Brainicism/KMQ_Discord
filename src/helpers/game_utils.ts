@@ -1,6 +1,6 @@
-import * as Eris from "eris";
-import * as fs from "fs";
-import * as path from "path";
+import Eris from "eris";
+import fs from "fs";
+import path from "path";
 import { db } from "../databases";
 import _logger from "../logger";
 import GameSession from "../models/game_session";

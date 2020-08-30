@@ -1,9 +1,8 @@
-import * as mysql from "promise-mysql";
-import * as _config from "../config/app_config.json";
+import mysql from "promise-mysql";
+import config from "../config/app_config.json";
 import { QueriedSong } from "../types";
-import * as fs from "fs";
-import * as existingSongAliases from "../../data/song_aliases.json";
-const config: any = _config;
+import fs from "fs";
+import existingSongAliases from "../../data/song_aliases.json";
 
 (async () => {
     const db = await mysql.createPool({

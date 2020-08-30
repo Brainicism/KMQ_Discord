@@ -1,14 +1,12 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-import * as fs from "fs";
-import * as _config from "../config/app_config.json";
+import fs from "fs";
 import _logger from "../logger";
 import { db } from "../databases";
-import * as path from "path";
+import path from "path";
 import { EMBED_INFO_COLOR, getDebugContext, sendMessage } from "../helpers/discord_utils";
 import { bold } from "../helpers/utils";
 const logger = _logger("news");
 
-const config: any = _config;
 export default class NewsCommand implements BaseCommand {
     async call({ message }: CommandArgs) {
         let latestSongDate: Date;

@@ -1,12 +1,12 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-import * as Eris from "eris";
+import Eris from "eris";
 import {
     sendEmbed
 } from "../helpers/discord_utils";
 import _logger from "../logger";
 import { db } from "../databases";
 import { bold } from "../helpers/utils";
-import * as os from "os";
+import os from "os";
 
 export default class SkipCommand implements BaseCommand {
     async call({ gameSessions, message }: CommandArgs) {

@@ -1,7 +1,7 @@
 import _logger from "../logger";
 import { state } from "../kmq";
 import { sendMessage, EMBED_INFO_COLOR } from "./discord_utils";
-import * as Eris from "eris";
+import Eris from "eris";
 import readyHandler from "../events/client/ready";
 import messageCreateHandler from "../events/client/messageCreate";
 import voiceChannelLeaveHandler from "../events/client/voiceChannelLeave";
@@ -16,14 +16,13 @@ import unhandledRejectionHandler from "../events/process/unhandledRejection";
 import uncaughtExceptionHandler from "../events/process/uncaughtException";
 import SIGINTHandler from "../events/process/SIGINT";
 import { cleanupInactiveGameSessions } from "./game_utils";
-import * as _config from "../config/app_config.json";
-import * as cronParser from "cron-parser";
-import * as path from "path";
-import * as fs from "fs";
+import config from "../config/app_config.json";
+import cronParser from "cron-parser";
+import path from "path";
+import fs from "fs";
 import { db } from "../databases";
 import BaseCommand from "../commands/base_command";
 const logger = _logger("management_utils");
-const config: any = _config;
 
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 2, 1]);
 

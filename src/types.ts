@@ -1,5 +1,5 @@
-import * as Knex from "knex";
-import * as Eris from "eris";
+import Knex from "knex";
+import Eris from "eris";
 import BaseCommand from "./commands/base_command";
 import GameSession from "./models/game_session";
 import BotStatsPoster from "./helpers/bot_stats_poster";
