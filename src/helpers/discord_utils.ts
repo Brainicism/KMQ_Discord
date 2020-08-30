@@ -209,11 +209,7 @@ export function getDebugContext(message: Eris.Message): string {
 
 
 export function disconnectVoiceConnection(message: Eris.Message<Eris.GuildTextableChannel>) {
-    const voiceChannel = getVoiceChannel(message);
-    if (voiceChannel) {
-        logger.info(`${getDebugContext(message)} | Disconnected from voice channel`);
-        voiceChannel.leave();
-    }
+    state.client.closeVoiceConnection(message.guildID);
 }
 
 export function getUserIdentifier(user: Eris.User): string {
