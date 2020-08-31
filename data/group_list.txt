@@ -56,7 +56,9 @@ BESTie
 Bibi
 BIGBANG
 BIGBANG + 2NE1
+Bigflo
 Bigstar
+BLACK6IX
 Blackpink
 Blady
 Block B
@@ -113,6 +115,7 @@ Davichi
 DAWN
 Day6
 Dean
+Demian
 Dia
 DKB
 Donghan
@@ -192,6 +195,7 @@ Ha Hyun-woo
 Ha Hyunsang
 Ha Sung Woon
 HA:TFELT
+HALO
 Han Seungwoo
 Haon
 HAON + VINXEN
@@ -312,6 +316,7 @@ Kim Na Young
 Kim Na Young + Yang Da-Il
 Kim Sung Kyu
 Kim Wooseok
+Kim Yo Han
 Kisum
 Kisum + Homme
 Kisum + Hwasa
@@ -489,6 +494,7 @@ Sejeong
 Seo Inguk
 Seo Inguk + Eunji
 Seohyun
+Seori
 Sera Ryu
 Seulgi + SinB + Chung Ha + Soyeon
 SEUNGRI

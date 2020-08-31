@@ -11,10 +11,7 @@ const client = new Eris.Client(config.botToken, {
     disableEvents: {
         GUILD_DELETE: true,
         GUILD_ROLE_CREATE: true,
-        GUILD_ROLE_UPDATE: true,
         GUILD_ROLE_DELETE: true,
-        CHANNEL_CREATE: true,
-        CHANNEL_DELETE: true,
         CHANNEL_PINS_UPDATE: true,
         MESSAGE_UPDATE: true,
         MESSAGE_DELETE: true,
