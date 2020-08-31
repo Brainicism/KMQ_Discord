@@ -6,7 +6,7 @@ import { songCacheDir as SONG_CACHE_DIR } from "../config/app_config.json";
 import { db } from "../databases";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import { getDebugContext, getUserIdentifier, getVoiceChannel, sendEndGameMessage, sendErrorMessage, sendSongMessage } from "../helpers/discord_utils";
-import { ensureVoiceConnection, getGuildPreference, playCorrectGuessSong, selectRandomSong } from "../helpers/game_utils";
+import { ensureVoiceConnection, getGuildPreference, selectRandomSong } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds } from "../helpers/utils";
 import { state } from "../kmq";
 import _logger from "../logger";

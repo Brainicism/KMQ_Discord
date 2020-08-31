@@ -23,6 +23,7 @@ import path from "path";
 import fs from "fs";
 import { db } from "../databases";
 import BaseCommand from "../commands/base_command";
+import debugHandler from "../events/client/debug";
 const logger = _logger("management_utils");
 
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 2, 1]);
@@ -38,7 +39,8 @@ export function registerClientEvents(client: Eris.Client) {
         .on("shardDisconnect", shardDisconnectHandler)
         .on("shardReady", shardReadyHandler)
         .on("shardResume", shardResumeHandler)
-        .on("disconnect", disconnectHandler);
+        .on("disconnect", disconnectHandler)
+        .on("debug", debugHandler);
 }
 
 export function registerProcessEvents(process: NodeJS.Process) {
