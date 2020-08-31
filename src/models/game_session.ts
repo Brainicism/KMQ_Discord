@@ -31,9 +31,11 @@ export default class GameSession {
     public gameRound: GameRound;
     public roundsPlayed: number;
     public participants: Set<string>;
+    public guessTimeoutVal: number;
 
     private guessTimes: Array<number>;
     private songAliasList: { [songId: string]: Array<string> };
+    private guessTimeoutFunc: NodeJS.Timer;
 
 
     constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel) {
@@ -49,6 +51,7 @@ export default class GameSession {
         this.voiceChannel = voiceChannel;
         this.textChannel = textChannel;
         this.gameRound = null;
+        this.guessTimeoutVal = null;
         const songAliasesFilePath = path.resolve(__dirname, "../data/song_aliases.json");
         this.songAliasList = JSON.parse(fs.readFileSync(songAliasesFilePath).toString());
     }
@@ -69,6 +72,7 @@ export default class GameSession {
         if (this.connection) {
             this.connection.removeAllListeners();
         }
+        this.stopGuessTimeout();
         this.sessionInitialized = false;
     }
 
@@ -145,6 +149,7 @@ export default class GameSession {
             gameSession.lastActiveNow();
             const userTag = getUserIdentifier(message.author);
             this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL);
+            this.stopGuessTimeout();
             this.endRound(true);
             await sendSongMessage(message, this, false, userTag);
             await db.kmq("guild_preferences")
@@ -224,6 +229,7 @@ export default class GameSession {
             seekLocation = 0;
         }
 
+
         const stream = fs.createReadStream(songLocation);
         await delay(3000);
         //check if ,end was called during the delay
@@ -238,8 +244,10 @@ export default class GameSession {
             inputArgs: ["-ss", seekLocation.toString()],
             encoderArgs: ["-filter:a", `volume=0.1`]
         });
+        this.startGuessTimeout(message);
         this.connection.once("end", async () => {
             logger.info(`${getDebugContext(message)} | Song finished without being guessed.`);
+            this.stopGuessTimeout();
             await sendSongMessage(message, this, true);
             this.endRound(false);
             this.startRound(guildPreference, message);
@@ -248,6 +256,7 @@ export default class GameSession {
         this.connection.once("error", async (err) => {
             if (!this.connection.channelID) {
                 logger.info(`gid: ${this.textChannel.guild.id} | Bot was kicked from voice channel`);
+                this.stopGuessTimeout();
                 await sendEndGameMessage({ channel: message.channel }, this);
                 await this.endSession();
                 return;
@@ -264,5 +273,22 @@ export default class GameSession {
     getDebugSongDetails(): string {
         if (!this.gameRound) return;
         return `${this.gameRound.song}:${this.gameRound.artist}:${this.gameRound.videoID}`;
+    }
+
+    async startGuessTimeout(message: Eris.Message<Eris.GuildTextableChannel>) {
+        let guildPreference = await getGuildPreference(message.guildID);
+        let time = guildPreference.getGuessTimeout();
+        if (!time) return;
+        this.guessTimeoutFunc = setTimeout(async () => {
+            if (this.finished) return;
+            logger.info(`${getDebugContext(message)} | Song finished without being guessed, timer of: ${time} seconds.`);
+            await sendSongMessage(message, this, true);
+            this.endRound(false);
+            this.startRound(guildPreference, message);
+        }, time * 1000)
+    }
+
+    stopGuessTimeout() {
+        clearTimeout(this.guessTimeoutFunc);
     }
 };

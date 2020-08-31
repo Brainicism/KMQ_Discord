@@ -11,7 +11,7 @@ const logger = _logger("guild_preference");
 
 const DEFAULT_OPTIONS = {
     beginningYear: BEGINNING_SEARCH_YEAR, endYear: (new Date()).getFullYear(), gender: [GENDER.FEMALE],
-    limit: DEFAULT_LIMIT, seekType: SEEK_TYPE.RANDOM, modeType: MODE_TYPE.SONG_NAME, groups: null, goal: null
+    limit: DEFAULT_LIMIT, seekType: SEEK_TYPE.RANDOM, modeType: MODE_TYPE.SONG_NAME, groups: null, goal: null, guessTimeout: null
 };
 
 interface GameOptions {
@@ -23,6 +23,7 @@ interface GameOptions {
     modeType: MODE_TYPE;
     groups: { id: number, name: string }[];
     goal: number;
+    guessTimeout: number;
 }
 
 export default class GuildPreference {
@@ -184,6 +185,24 @@ export default class GuildPreference {
 
     isGoalSet(): boolean {
         return this.gameOptions.goal !== null;
+    }
+
+    setGuessTimeout(guessTimeout: number) {
+        this.gameOptions.guessTimeout = guessTimeout;
+        this.updateGuildPreferences(db.kmq);
+    }
+
+    getGuessTimeout(): number {
+        return this.gameOptions.guessTimeout;
+    }
+
+    resetGuessTimeout() {
+        this.gameOptions.guessTimeout = null;
+        this.updateGuildPreferences(db.kmq);
+    }
+
+    isGuessTimeoutSet(): boolean {
+        return this.gameOptions.guessTimeout !== null;
     }
 
     async updateGuildPreferences(db: Knex) {
