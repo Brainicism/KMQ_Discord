@@ -50,23 +50,27 @@ Note that `,groups` and `,gender` are incompatible with each other. If you wish 
 ![groups](/images/groups.png)
 
 ## ,goal [goal]
-Setting the goal ends the game when the given goal score is reached. For example, if a user were to call `,goal 5`, the first player to five points would win the game (`,end` is called automatically). To disable a goal, use `,goal`.
+Setting the goal ends the game when the given goal score is reached. For example, if a user were to call `,goal 5`, the first player to five points would win the game (`,end` is called automatically). To disable a goal, use `,goal`.  
+
+![groups](/images/goal.png)
+
 
 # Full Command List
 Use `,help [command_name]` for more details for any of the following commands.
 ## General Commands 
-- `,play`: Begin a game of KMQ. The bot will play a random song based on the currently chosen filters.
-- `,end`: Stop the current game of KMQ. The bot will display the winner of the game.
-- `,skip`: Starts a vote to skip the current playing song. Based on majority rule.
+- `,play`: Begin a game of KMQ. The bot will play a random song based on the currently chosen filters
+- `,end`: Stop the current game of KMQ. The bot will display the winner of the game
+- `,skip`: Starts a vote to skip the current playing song. Based on majority rule
 - `,options`: Shows the current game options, which filters the songs that will be played
 - `,help`: Shows a general overview of available commands, as well as specific instructions for each command
 - `,prefix`: Specifies the bot's prefix
 - `,news`: Show the latest features/changes to the bot
 
 ## Game Option Commands 
-- `,cutoff`: Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen.
-- `,limit`: Set a maximum number of results in the song query. This effectively sets the 'Top X number of songs' based on the selected filters.
-- `,gender`: Choose the gender of the artists you'd like to hear from.
-- `,seek`: Choose whether each songs starts from the beginning, or a random point.
+- `,cutoff`: Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen
+- `,limit`: Set a maximum number of results in the song query. This effectively sets the 'Top X number of songs' based on the selected filters
+- `,gender`: Choose the gender of the artists you'd like to hear from
+- `,seek`: Choose whether each songs starts from the beginning, or a random point
 - `,groups`: Specify what groups/artists you'd like to hear from
 - `,mode`: Choose whether to guess based on song name or artist name
+- `,goal`: Specify a number of points to be reached before a winner is selected, and the game ends 
