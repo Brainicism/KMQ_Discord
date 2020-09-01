@@ -3,7 +3,7 @@ import config from "./config/app_config.json";
 import { validateConfig } from "./config_validator";
 import _logger from "./logger";
 import { State } from "./types";
-import { registerClientEvents, registerProcessEvents, registerCommands, updateGroupList } from "./helpers/management_utils";
+import { registerClientEvents, registerProcessEvents, registerCommands, updateGroupList, registerIntervals } from "./helpers/management_utils";
 const logger = _logger("kmq");
 
 const ERIS_INTENTS = Eris.Constants.Intents;
@@ -40,6 +40,7 @@ export let state: State = {
 
     await updateGroupList();
     await registerCommands();
+    registerIntervals();
     registerClientEvents(client);
     registerProcessEvents(process);
     client.connect();

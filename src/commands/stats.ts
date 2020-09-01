@@ -28,7 +28,7 @@ export default class SkipCommand implements BaseCommand {
             inline: true
         },
         {
-            name: "Active Users",
+            name: "Active Players",
             value: activeUsers.toString(),
             inline: true
         },
@@ -65,7 +65,11 @@ export default class SkipCommand implements BaseCommand {
         ]
         sendEmbed({ channel: message.channel, authorId: message.author.id }, {
             title: bold("Bot Stats"),
-            fields
+            fields,
+            footer: {
+                text: "'Recent' statistics represent data from last 24 hours."
+            },
+            timestamp: new Date()
         });
 
     }
