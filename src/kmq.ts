@@ -21,6 +21,7 @@ const client = new Eris.Client(config.botToken, {
         MESSAGE_REACTION_REMOVE_EMOJI: true
     },
     restMode: true,
+    maxShards: "auto",
     intents: ERIS_INTENTS.guilds ^ ERIS_INTENTS.guildVoiceStates ^ ERIS_INTENTS.guildMessages ^ ERIS_INTENTS.guildMessageReactions
 });
 
@@ -38,7 +39,6 @@ export let state: State = {
         logger.error("Invalid config, aborting.");
         process.exit(1);
     }
-
     await updateGroupList();
     await registerCommands();
     registerIntervals();

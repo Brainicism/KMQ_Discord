@@ -125,6 +125,7 @@ Double S 301
 Dreamcatcher
 DreamNote
 Drug Restaurant
+Dvwn
 Dynamic Duo
 Dynamic Duo + Chen
 Eddy Kim
@@ -139,6 +140,7 @@ Eunji
 Eunji + 10cm
 Eunjung
 Eunkwang
+Even of Day
 Everglow
 EvoL
 EXID
@@ -251,6 +253,7 @@ IZ*ONE
 J-Hope
 J-Min
 J.Fla
+Jamie
 Jang Beom June
 Jang Deok Cheol
 Jang Hye Jin + Yun Min Soo
@@ -331,6 +334,7 @@ Laboum
 Ladies' code
 Lay
 Laysha
+Lee Eun Sang
 Lee Hae-ri
 Lee Hi
 Lee Hyori
@@ -358,6 +362,7 @@ Loopy
 Lovelyz
 Lucy
 Luna
+Lunarsolar
 Luri
 Lyn
 Lyn + Leo
@@ -439,7 +444,6 @@ Park BoRam
 Park Hyo-shin
 Park Ji-yoon
 Park Jihoon
-Park Jimin
 Park Won
 Paul Kim
 Peniel Shin
@@ -483,6 +487,7 @@ Sam Kim
 Sam Kim + Loco
 Samuel
 San E
+Sandeul
 Saturday
 Se7en
 Sechs kies
