@@ -14,7 +14,11 @@ export default async function messageCreateHandler(message: Eris.Message) {
         return;
     }
     if (!isGuildMessage(message)) return;
-
+    if (state.client.unavailableGuilds.has(message.guildID)) {
+        logger.warn(`Server was unavailable. id = ${message.guildID}`);
+        return;
+    }
+    
     const guildPreference = await getGuildPreference(message.guildID);
     const botPrefix = guildPreference.getBotPrefix();
     const parsedMessage = parseMessage(message.content, botPrefix) || null;
