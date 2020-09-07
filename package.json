@@ -14,7 +14,7 @@
     "axios": "^0.19.2",
     "bufferutil": "^4.0.1",
     "cron-parser": "^2.16.3",
-    "eris": "^0.13.3",
+    "eris": "brainicism/eris",
     "eris-pagination": "^0.5.1",
     "erlpack": "github:abalabahaha/erlpack",
     "knex": "^0.21.4",

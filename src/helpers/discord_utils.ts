@@ -152,7 +152,7 @@ export async function sendEndGameMessage(messagePayload: SendMessagePayload, gam
                 color: EMBED_SUCCESS_COLOR,
                 description: "**Scoreboard**",
                 thumbnail: {
-                    url: client.users.get(winners[0].getId()).avatarURL
+                    url: winners[0].getAvatarURL()
                 },
                 title: `🎉 ${gameSession.scoreboard.getWinnerMessage()} 🎉`,
                 fields: gameSession.scoreboard.getScoreboard().slice(0, 10)
@@ -269,6 +269,20 @@ export function voicePermissionsCheck(message: Eris.Message<Eris.GuildTextableCh
 export async function textPermissionsCheck(message: Eris.Message<Eris.GuildTextableChannel>): Promise<boolean> {
     const channel = message.channel;
     const client = state.client;
+
+    // client isn't immune from cache pruning, re-add client back to cache if removed
+    if (!state.client.users.has(client.user.id)) {
+        const user = await state.client.getRESTUser(client.user.id);
+        logger.debug(`Manually adding client user to cache: ${client.user.id}`);
+        state.client.users.add(user);
+    }
+
+    if (!message.channel.guild.members.has(client.user.id)) {
+        const member = await state.client.getRESTGuildMember(message.guildID, client.user.id);
+        logger.debug(`Manually adding client member to cache: ${client.user.id}`);
+        message.channel.guild.members.add(member);
+    }
+
     if (!channel.permissionsOf(client.user.id).has("sendMessages")) {
         logger.warn(`gid: ${channel.guild.id}, uid: ${message.author.id} | Missing SEND_MESSAGES permissions`);
         const embed = {

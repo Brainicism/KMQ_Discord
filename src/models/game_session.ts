@@ -143,7 +143,7 @@ export default class GameSession {
         if (this.checkGuess(message, guildPreference.getModeType())) {
             logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${this.gameRound.song}`)
             const userTag = getUserIdentifier(message.author);
-            this.scoreboard.updateScoreboard(userTag, message.author.id);
+            this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL);
             this.endRound(true);
             await sendSongMessage(message, this, false, userTag);
             await db.kmq("guild_preferences")

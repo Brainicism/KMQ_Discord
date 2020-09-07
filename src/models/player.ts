@@ -2,10 +2,13 @@ export default class Player {
     private name: string;
     private id: string;
     private score: number;
-    constructor(name: string, id: string) {
+    private avatarURL: string;
+
+    constructor(name: string, id: string, avatarURL: string) {
         this.name = name;
         this.id = id;
         this.score = 1;
+        this.avatarURL = avatarURL;
     }
 
     getName(): string {
@@ -18,6 +21,10 @@ export default class Player {
 
     getId(): string {
         return this.id;
+    }
+
+    getAvatarURL(): string {
+        return this.avatarURL;
     }
 
     incrementScore() {
