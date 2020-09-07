@@ -39,7 +39,7 @@ export default class NewsCommand implements BaseCommand {
                 text: `Latest Song Update: ${latestSongDate.toISOString().split('T')[0]}`
             }
         };
-
+        logger.info(`${getDebugContext(message)} | News retrieved.`);
         await sendMessage({ channel: message.channel, authorId: message.author.id }, { embed });
     }
     help = {
