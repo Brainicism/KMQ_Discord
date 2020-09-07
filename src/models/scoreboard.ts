@@ -43,9 +43,9 @@ export default class Scoreboard {
             .sort((a, b) => { return parseInt(b.value) - parseInt(a.value) })
     }
 
-    updateScoreboard(winnerTag: string, winnerID: string) {
+    updateScoreboard(winnerTag: string, winnerID: string, avatarURL: string) {
         if (!this.players[winnerID]) {
-            this.players[winnerID] = new Player(winnerTag, winnerID);
+            this.players[winnerID] = new Player(winnerTag, winnerID, avatarURL);
         }
         else {
             this.players[winnerID].incrementScore();

@@ -20,6 +20,7 @@ const client = new Eris.Client(config.botToken, {
         MESSAGE_REACTION_REMOVE_ALL: true,
         MESSAGE_REACTION_REMOVE_EMOJI: true
     },
+    restMode: true,
     intents: ERIS_INTENTS.guilds ^ ERIS_INTENTS.guildVoiceStates ^ ERIS_INTENTS.guildMessages ^ ERIS_INTENTS.guildMessageReactions
 });
 
