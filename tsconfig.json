@@ -6,6 +6,7 @@
         "module": "commonjs",
         "moduleResolution": "node",
         "baseUrl": ".",
+        "rootDir": "src",
         "resolveJsonModule": true,
         "esModuleInterop": true
     },

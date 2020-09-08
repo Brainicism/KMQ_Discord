@@ -21,7 +21,7 @@ export default class NewsCommand implements BaseCommand {
             logger.error(`${getDebugContext(message)} | Error retrieving latest song date`);
             latestSongDate = null;
         }
-        const newsFilePath = path.resolve(process.cwd(), "../data/news.md");
+        const newsFilePath = path.resolve(__dirname, "../data/news.md");
         if (!fs.existsSync(newsFilePath)) {
             logger.error("News file does not exist");
             return;

@@ -1,5 +1,4 @@
 import { db } from "../databases";
-import config from "../config/app_config.json";
 import fs from "fs";
 import _logger from "../logger";
 import path from "path";
@@ -7,7 +6,7 @@ import { Logger } from "log4js";
 const logger: Logger = _logger("remove-redunant-aliases");
 
 export async function removeRedunantAliases() {
-    const songAliasPath = path.resolve(process.cwd(), "data/song_aliases.json")
+    const songAliasPath = path.resolve(__dirname, "../data/song_aliases.json")
     logger.info("Checking for redunant aliases...");
     const songAliases: { [songId: string]: Array<string> } = JSON.parse(fs.readFileSync(songAliasPath).toString());
     let changeCount = 0;
