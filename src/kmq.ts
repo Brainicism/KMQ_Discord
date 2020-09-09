@@ -1,13 +1,14 @@
 import Eris from "eris";
-import config from "./config/app_config.json";
-import { validateConfig } from "./config_validator";
 import _logger from "./logger";
 import { State } from "./types";
 import { registerClientEvents, registerProcessEvents, registerCommands, updateGroupList, registerIntervals } from "./helpers/management_utils";
+import { config } from "dotenv";
+import { resolve } from "path";
 const logger = _logger("kmq");
+config({ path: resolve(__dirname, "../.env") })
 
 const ERIS_INTENTS = Eris.Constants.Intents;
-const client = new Eris.Client(config.botToken, {
+const client = new Eris.Client(process.env.BOT_TOKEN, {
     disableEvents: {
         GUILD_DELETE: true,
         GUILD_ROLE_DELETE: true,
@@ -34,10 +35,6 @@ export let state: State = {
 
 
 (async () => {
-    if (!validateConfig()) {
-        logger.error("Invalid config, aborting.");
-        process.exit(1);
-    }
     await updateGroupList();
     await registerCommands();
     registerIntervals();

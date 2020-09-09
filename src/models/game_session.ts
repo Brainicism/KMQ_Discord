@@ -2,7 +2,6 @@ import Eris from "eris";
 import fs from "fs";
 import { CommandArgs } from "../commands/base_command";
 import { SEEK_TYPE } from "../commands/seek";
-import { songCacheDir as SONG_CACHE_DIR } from "../config/app_config.json";
 import { db } from "../databases";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import { getDebugContext, getUserIdentifier, getVoiceChannel, sendEndGameMessage, sendErrorMessage, sendSongMessage } from "../helpers/discord_utils";
@@ -50,7 +49,7 @@ export default class GameSession {
         this.voiceChannel = voiceChannel;
         this.textChannel = textChannel;
         this.gameRound = null;
-        const songAliasesFilePath = path.resolve(process.cwd(), "../data/song_aliases.json");
+        const songAliasesFilePath = path.resolve(__dirname, "../data/song_aliases.json");
         this.songAliasList = JSON.parse(fs.readFileSync(songAliasesFilePath).toString());
     }
 
@@ -206,7 +205,7 @@ export default class GameSession {
             logger.debug(`${getDebugContext(message)} | Not playing song in voice connection. song = ${this.getDebugSongDetails()}`);
             return;
         }
-        const songLocation = `${SONG_CACHE_DIR}/${gameRound.videoID}.mp3`;
+        const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${gameRound.videoID}.mp3`;
 
         let seekLocation: number;
         if (guildPreference.getSeekType() === SEEK_TYPE.RANDOM) {

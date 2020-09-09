@@ -1,6 +1,6 @@
 import { db } from "./databases";
 import _logger from "./logger";
-import factStrings from "../data/facts.json";
+import factStrings from "./data/facts.json";
 
 const logger = _logger("fact_generator");
 

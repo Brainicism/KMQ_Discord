@@ -1,7 +1,6 @@
 import Eris from "eris";
 import Axios from "axios";
 import _logger from "../logger";
-import config from "../config/app_config.json";
 const logger = _logger("bot_stats_poster");
 
 interface BotListing {
@@ -11,17 +10,17 @@ interface BotListing {
 }
 
 const BOT_LISTING_SITES: { [siteName: string]: BotListing } = {
-    topGGToken: {
+    TOP_GG_TOKEN: {
         endpoint: "https://top.gg/api/bots/%d/stats",
         payloadKeyName: "server_count",
         name: "top.gg"
     },
-    discordBotsGgToken: {
+    DISCORD_BOTS_GG_TOKEN: {
         endpoint: "https://discord.bots.gg/api/v1/bots/%d/stats",
         payloadKeyName: "guildCount",
         name: "discord.bots.gg"
     },
-    discordBotListToken: {
+    DISCORD_BOT_LIST_TOKEN: {
         endpoint: "https://discordbotlist.com/api/v1/bots/%d/stats",
         payloadKeyName: "guilds",
         name: "discordbotlist.com"
@@ -39,7 +38,7 @@ export default class BotStatsPoster {
     }
 
     private async postStats(client: Eris.Client) {
-        ["topGGToken", "discordBotsGgToken", "discordBotListToken"].filter((siteConfigKeyName) => siteConfigKeyName in config).forEach((siteConfigKeyName) => {
+        Object.keys(BOT_LISTING_SITES).filter((siteConfigKeyName) => siteConfigKeyName in process.env).forEach((siteConfigKeyName) => {
             this.postStat(client, siteConfigKeyName);
         })
     }
@@ -51,7 +50,7 @@ export default class BotStatsPoster {
                 [botListing.payloadKeyName]: client.guilds.size
             }, {
                 headers: {
-                    "Authorization": config[siteConfigKeyName]
+                    "Authorization": process.env[siteConfigKeyName]
                 }
             });
             logger.info(`${botListing.name} server count posted`);

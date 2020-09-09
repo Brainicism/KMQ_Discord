@@ -3,7 +3,6 @@ import fs from "fs";
 import { execSync } from "child_process";
 import unzipper from "unzipper";
 import mysql from "promise-mysql";
-import config from "../config/app_config.json";
 import prependFile from 'prepend-file';
 import _logger from "../logger";
 import { Logger } from "log4js";
@@ -11,9 +10,9 @@ import { removeRedunantAliases } from "../scripts/remove-redunant-aliases";
 import { downloadNewSongs } from "../scripts/download-new-songs";
 const fileUrl = "http://kpop.aoimirai.net/download.php";
 const logger: Logger = _logger("seed_db");
-
-
-
+import { config } from "dotenv";
+import { resolve } from "path";
+config({ path: resolve(__dirname, "../../.env") })
 
 const databaseDownloadDir = "./kpop_db";
 
@@ -56,15 +55,15 @@ const seedDb = async (db: mysql.Connection) => {
         const seedFile = files[files.length - 1];
         const seedFilePath = `${databaseDownloadDir}/sql/${seedFile}`;
         logger.info("Dropping K-Pop video database");
-        await db.query("DROP DATABASE IF EXISTS kpop_videos;");
+        await db.query(`DROP DATABASE IF EXISTS ${process.env.DB_KPOP_DATA_TABLE_NAME};`);
         logger.info("Creating K-pop video database")
-        await db.query("CREATE DATABASE kpop_videos;");
+        await db.query(`CREATE DATABASE ${process.env.DB_KPOP_DATA_TABLE_NAME};`);
         logger.info("Seeding K-Pop video database");
         setSqlMode(seedFilePath);
-        execSync(`mysql -u ${config.dbUser} -p${config.dbPassword} kpop_videos < ${seedFilePath}`)
+        execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} ${process.env.DB_KPOP_DATA_TABLE_NAME} < ${seedFilePath}`)
         logger.info(`Imported database dump (${seedFile}) successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing`);
         logger.info("Creating K-pop Music Quiz database");
-        await db.query("CREATE DATABASE IF NOT EXISTS kmq");
+        await db.query(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_KMQ_SETTINGS_TABLE_NAME}`);
         resolve();
     })
 
@@ -73,9 +72,9 @@ const seedDb = async (db: mysql.Connection) => {
     try {
         await fs.promises.mkdir(`${databaseDownloadDir}/sql`, { recursive: true })
         const db = await mysql.createConnection({
-            host: "localhost",
-            user: config.dbUser,
-            password: config.dbPassword
+            host: process.env.DB_HOST,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASS
         });
         await downloadDb();
         await extractDb();

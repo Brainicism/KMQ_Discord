@@ -17,7 +17,6 @@ import unhandledRejectionHandler from "../events/process/unhandledRejection";
 import uncaughtExceptionHandler from "../events/process/uncaughtException";
 import SIGINTHandler from "../events/process/SIGINT";
 import { cleanupInactiveGameSessions } from "./game_utils";
-import config from "../config/app_config.json";
 import cronParser from "cron-parser";
 import path from "path";
 import fs from "fs";
@@ -68,8 +67,8 @@ export function registerIntervals() {
         }
 
         //cron based restart
-        if (config.restartCron) {
-            const interval = cronParser.parseExpression(config.restartCron);
+        if (process.env.RESTART_CRON) {
+            const interval = cronParser.parseExpression(process.env.RESTART_CRON);
             const nextRestartTime = interval.next();
             await checkRestartNotification(nextRestartTime.toDate());
         }
@@ -95,7 +94,7 @@ export async function updateGroupList() {
     const result = await db.kpopVideos("kpop_videos.app_kpop_group")
         .select(["name", "members as gender"])
         .orderBy("name", "ASC")
-    fs.writeFileSync(path.resolve(process.cwd(), "../data/group_list.txt"), result.map((x) => x["name"]).join("\n"));
+    fs.writeFileSync(path.resolve(__dirname, "../data/group_list.txt"), result.map((x) => x["name"]).join("\n"));
 }
 
 export function deleteGameSession(guildId: string) {

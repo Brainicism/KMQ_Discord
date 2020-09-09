@@ -1,6 +1,5 @@
 import ytdl from "ytdl-core";
 import fs from "fs";
-import config from "../config/app_config.json";
 import { QueriedSong } from "../types";
 import path from "path";
 import { db } from "../databases";
@@ -11,12 +10,12 @@ const logger: Logger = _logger("download-new-songs");
 
 export async function clearPartiallyCachedSongs() {
     logger.info("Clearing partially cached songs");
-    if (!fs.existsSync(config.songCacheDir)) {
+    if (!fs.existsSync(process.env.SONG_DOWNLOAD_DIR)) {
         return logger.error("Song cache directory doesn't exist.");
     }
     let files: Array<string>;
     try {
-        files = await fs.promises.readdir(config.songCacheDir);
+        files = await fs.promises.readdir(process.env.SONG_DOWNLOAD_DIR);
     }
     catch (err) {
         return logger.error(err);
@@ -26,7 +25,7 @@ export async function clearPartiallyCachedSongs() {
     const partFiles = files.filter((file) => file.match(endingWithPartRegex));
     partFiles.forEach(async (partFile) => {
         try {
-            await fs.promises.unlink(`${config.songCacheDir}/${partFile}`);
+            await fs.promises.unlink(`${process.env.SONG_DOWNLOAD_DIR}/${partFile}`);
         }
         catch (err) {
             logger.error(err);
@@ -39,7 +38,7 @@ export async function clearPartiallyCachedSongs() {
 }
 
 const downloadSong = (id: string) => {
-    const cachedSongLocation = path.join(config.songCacheDir, `${id}.mp3`);
+    const cachedSongLocation = path.join(process.env.SONG_DOWNLOAD_DIR, `${id}.mp3`);
     const tempLocation = `${cachedSongLocation}.part`;
     const cacheStream = fs.createWriteStream(tempLocation);
     const ytdlOptions = {
@@ -103,7 +102,7 @@ const downloadNewSongs = async (limit?: number) => {
     }
     let downloadCount = 0;
     logger.info("Total songs in database: " + songs.length);
-    const songsToDownload = songs.filter(x => !fs.existsSync(path.join(config.songCacheDir, `${x.youtubeLink}.mp3`)));
+    const songsToDownload = songs.filter(x => !fs.existsSync(path.join(process.env.SONG_DOWNLOAD_DIR, `${x.youtubeLink}.mp3`)));
     logger.info("Total songs to be downloaded: " + songsToDownload.length);
 
     //update current list of non-downloaded songs
@@ -128,7 +127,7 @@ const downloadNewSongs = async (limit?: number) => {
     }
 
     //update list of non-downloaded songs
-    const songIdsNotDownloaded = songs.filter(x => !fs.existsSync(path.join(config.songCacheDir, `${x.youtubeLink}.mp3`))).map(x => ({ vlink: x.youtubeLink }));
+    const songIdsNotDownloaded = songs.filter(x => !fs.existsSync(path.join(process.env.SONG_DOWNLOAD_DIR, `${x.youtubeLink}.mp3`))).map(x => ({ vlink: x.youtubeLink }));
     await db.kmq.transaction(async (trx) => {
         await db.kmq("not_downloaded").del().transacting(trx);
         await db.kmq("not_downloaded").insert(songIdsNotDownloaded).transacting(trx);
