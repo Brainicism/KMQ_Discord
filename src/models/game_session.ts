@@ -141,6 +141,8 @@ export default class GameSession {
 
         if (this.checkGuess(message, guildPreference.getModeType())) {
             logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${this.gameRound.song}`)
+            const gameSession = state.gameSessions[message.guildID];
+            gameSession.lastActiveNow();
             const userTag = getUserIdentifier(message.author);
             this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL);
             this.endRound(true);
