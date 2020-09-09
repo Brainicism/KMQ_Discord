@@ -18,7 +18,7 @@ The target directories should match the ones specified in `.env` and `log_config
 1. `npm install`
     - `libsodium` might require the following packages: `autoconf automake g++ libtool`
 2. Use `*.template` files to create own copy of configuration files in `src/config`
-    - `.env` contains application specific settings. See `.env.template` to see parameters, and `environment.d.ts` to see which are required. 
+    - `.env` contains application specific settings. See `.env.example` to see parameters, and `environment.d.ts` to see which are required. 
     - `knexfile_*.js` contains connection credentials for the each database connection. `kmq` is used for bot-specific database tables. `kpop_videos` is automatically created from the `aoimirai` backup
 3. Apply database migrations for `kmq`. Using `npx knex migrate:latest --knexfile src/config/knexfile_kmq.js`
 4. Get the latest `kpop_videos` data by running `npm run seed`. This will download the `aoimirai` kpop database dump, drop and recreate `kpop_videos`.  This script also attempt to download every song in the database that isn't downloaded locally. For development purposes, it isn't necessary to have every single song downloaded, so it is fine to kill the process after the database is downloaded.

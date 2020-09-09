@@ -2,8 +2,6 @@ node_modules/
 main.db
 .env
 src/config/log_config.json
-src/config/knexfile_kmq.js
-src/config/knexfile_kpop_videos.js
 src/config/debug_settings.json
 .cache/
 logs/
