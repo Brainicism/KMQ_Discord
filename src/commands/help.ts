@@ -50,6 +50,7 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
     let embedFooter = null;
     if (action) {
         const commandNamesWithHelp = Object.keys(commandFilesWithAliases).filter((commandName) => commandFilesWithAliases[commandName].help);
+        logger.info(`${getDebugContext(message)} | Getting help documentation for: ${action}`);
         if (!(commandNamesWithHelp.includes(action))) {
             logger.warn(`${getDebugContext(message)} | Missing documentation: ${action}`);
             await sendErrorMessage(message,
@@ -77,6 +78,7 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
 
     }
     else {
+        logger.info(`${getDebugContext(message)} | Getting full help documentation`);
         const commandNamesWithHelp = Object.keys(commandFiles).filter((commandName) => commandFiles[commandName].help);
         embedTitle = "K-pop Music Quiz Command Help";
         embedDesc = helpMessages.rules.replace(placeholder, botPrefix);
