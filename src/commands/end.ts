@@ -7,6 +7,7 @@ export default class EndCommand implements BaseCommand {
     async call({ gameSessions, message }: CommandArgs) {
         const gameSession = gameSessions[message.guildID];
         if (!gameSession || !gameSession.gameRound) {
+            logger.warn(`${getDebugContext(message)} | No active game session`);
             return;
         }
         logger.info(`${getDebugContext(message)} | Game session ended`);

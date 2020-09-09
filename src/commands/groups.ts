@@ -9,6 +9,7 @@ export default class GroupsCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             guildPreference.resetGroups();
+            logger.info(`${getDebugContext(message)} | Groups reset.`)
             await sendOptionsMessage(message, guildPreference, GameOption.GROUPS);
             return;
         }
@@ -24,6 +25,7 @@ export default class GroupsCommand implements BaseCommand {
             const unrecognizedGroups = groupNames.filter((x) => {
                 return !matchingGroupNames.includes(x.toUpperCase());
             })
+            logger.info(`${getDebugContext(message)} | Attempted to set unknown groups. groups =  ${unrecognizedGroups.join(", ")}`);
             await sendErrorMessage(message, "Unknown Group Name", `One or more of the specified group names was not recognized. Please ensure that the group name matches exactly with the list provided by \`${guildPreference.getBotPrefix()}help groups\` \nThe following groups were **not** recognized:\n ${unrecognizedGroups.join(", ")} `);
             return;
         }

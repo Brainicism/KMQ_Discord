@@ -1,12 +1,13 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import Eris from "eris";
 import {
-    sendEmbed
+    sendEmbed, getDebugContext
 } from "../helpers/discord_utils";
-import _logger from "../logger";
 import { db } from "../databases";
 import { bold } from "../helpers/utils";
 import os from "os";
+import _logger from "../logger";
+const logger = _logger("stats");
 
 export default class SkipCommand implements BaseCommand {
     async call({ gameSessions, message }: CommandArgs) {
@@ -61,8 +62,9 @@ export default class SkipCommand implements BaseCommand {
             name: "Process Uptime",
             value: `${(process.uptime() / (60 * 60)).toFixed(2)} hours`,
             inline: true
-        }
-        ]
+        }];
+
+        logger.info(`${getDebugContext(message)} | Stats retrieved`);
         sendEmbed({ channel: message.channel, authorId: message.author.id }, {
             title: bold("Bot Stats"),
             fields,
