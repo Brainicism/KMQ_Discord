@@ -1,6 +1,7 @@
 import Eris from "eris";
 import Axios from "axios";
 import _logger from "../logger";
+import { state } from "../kmq";
 const logger = _logger("bot_stats_poster");
 
 interface BotListing {
@@ -27,24 +28,19 @@ const BOT_LISTING_SITES: { [siteName: string]: BotListing } = {
     }
 }
 export default class BotStatsPoster {
-    private client: Eris.Client;
-
-    constructor(client: Eris.Client) {
-        this.client = client;
-    }
     start() {
-        this.postStats(this.client)
-        setInterval(() => { this.postStats(this.client) }, 1800000);
+        setInterval(() => { this.postStats() }, 1800000);
     }
 
-    private async postStats(client: Eris.Client) {
+    private async postStats() {
         Object.keys(BOT_LISTING_SITES).filter((siteConfigKeyName) => siteConfigKeyName in process.env).forEach((siteConfigKeyName) => {
-            this.postStat(client, siteConfigKeyName);
+            this.postStat(siteConfigKeyName);
         })
     }
 
-    private async postStat(client: Eris.Client, siteConfigKeyName: string) {
+    private async postStat(siteConfigKeyName: string) {
         const botListing = BOT_LISTING_SITES[siteConfigKeyName];
+        const client = state.client;
         try {
             await Axios.post(botListing.endpoint.replace("%d", client.user.id), {
                 [botListing.payloadKeyName]: client.guilds.size

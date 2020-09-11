@@ -1,7 +1,7 @@
 import Eris from "eris";
 import _logger from "./logger";
 import { State } from "./types";
-import { registerClientEvents, registerProcessEvents, registerCommands, updateGroupList, registerIntervals } from "./helpers/management_utils";
+import { registerClientEvents, registerProcessEvents, registerCommands, updateGroupList, registerIntervals, initializeBotStatsPoster } from "./helpers/management_utils";
 import { config } from "dotenv";
 import { resolve } from "path";
 const logger = _logger("kmq");
@@ -40,5 +40,6 @@ export let state: State = {
     registerIntervals();
     registerClientEvents(client);
     registerProcessEvents(process);
+    initializeBotStatsPoster();
     client.connect();
 })();
