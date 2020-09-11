@@ -23,6 +23,7 @@ import fs from "fs";
 import { db } from "../databases";
 import BaseCommand from "../commands/base_command";
 import debugHandler from "../events/client/debug";
+import BotStatsPoster from "./bot_stats_poster";
 const logger = _logger("management_utils");
 
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 2, 1]);
@@ -52,6 +53,7 @@ export function registerIntervals() {
     //set up cleanup for inactive game sessions
     setInterval(() => {
         cleanupInactiveGameSessions(state.gameSessions);
+        updateBotStatus();
     }, 10 * 60 * 1000)
 
     //set up check for restart notifications
@@ -87,6 +89,11 @@ export async function registerCommands() {
             });
         }
     }
+}
+
+export function initializeBotStatsPoster() {
+    state.botStatsPoster = new BotStatsPoster();
+    state.botStatsPoster.start();
 }
 
 export async function updateGroupList() {
@@ -150,4 +157,12 @@ export function getCommandFiles(): Promise<{ [commandName: string]: BaseCommand 
         resolve(commandMap);
 
     })
+}
+
+export function updateBotStatus() {
+    const client = state.client;
+    client.editStatus("online", {
+        name: `over ${Math.floor(client.guilds.size / 100) * 100} servers`,
+        type: 3
+    });
 }
