@@ -270,19 +270,6 @@ export async function textPermissionsCheck(message: Eris.Message<Eris.GuildTexta
     const channel = message.channel;
     const client = state.client;
 
-    // client isn't immune from cache pruning, re-add client back to cache if removed
-    if (!state.client.users.has(client.user.id)) {
-        const user = await state.client.getRESTUser(client.user.id);
-        logger.debug(`Manually adding client user to cache: ${client.user.id}`);
-        state.client.users.add(user);
-    }
-
-    if (!message.channel.guild.members.has(client.user.id)) {
-        const member = await state.client.getRESTGuildMember(message.guildID, client.user.id);
-        logger.debug(`Manually adding client member to cache: ${client.user.id}`);
-        message.channel.guild.members.add(member);
-    }
-
     if (!channel.permissionsOf(client.user.id).has("sendMessages")) {
         logger.warn(`gid: ${channel.guild.id}, uid: ${message.author.id} | Missing SEND_MESSAGES permissions`);
         const embed = {
