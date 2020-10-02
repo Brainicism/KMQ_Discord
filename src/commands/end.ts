@@ -21,4 +21,5 @@ export default class EndCommand implements BaseCommand {
         usage: "!end",
         examples: []
     }
+    aliases = ["stop", "e"]
 }

@@ -27,7 +27,7 @@ export default class PlayCommand implements BaseCommand {
             startGame(gameSessions, guildPreference, message);
         }
     }
-    aliases = ["random"]
+    aliases = ["random", "start", "p"]
     help = {
         name: "play",
         description: "Bot plays a random song in VC; type in your guess first to get a point.",

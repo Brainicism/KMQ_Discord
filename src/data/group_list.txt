@@ -49,6 +49,7 @@ Baek Yerin
 Baekhyun
 Baekhyun + Loco
 Bastarz
+BDC
 Beast
 Ben
 Berry Good
@@ -83,6 +84,7 @@ C-Clown
 Changmo
 Changsub
 Chanyeol
+Checkmate
 Chen
 Chen + Heize
 Chen + Punch
@@ -175,6 +177,7 @@ GD + T.O.P.
 GD + TAEYANG
 Geeks + Soyou
 GFriend
+Ghost9
 Giant Pink
 Giriboy
 Girl Crush
@@ -194,6 +197,7 @@ Gugudan Oguogu
 Gugudan Semina
 Gummy
 GWSN
+H&D
 Ha Hyun-woo
 Ha Hyunsang
 Ha Sung Woon
@@ -406,6 +410,7 @@ Moon Byul + Seulgi
 Moon Hyuna
 Moon Hyuna + Pyo Hyemi
 Moon Moon
+Moonbin + Sanha
 MXM
 MYNAME
 N.Flying
@@ -639,6 +644,7 @@ Woosung
 X1
 XIA
 Xiumin
+XUM
 Yang Da-il
 Yang Yoseob
 Yangpa
