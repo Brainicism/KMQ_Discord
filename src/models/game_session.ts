@@ -37,7 +37,7 @@ export default class GameSession {
     private songAliasList: { [songId: string]: Array<string> };
 
 
-    constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel, author: Eris.User) {
+    constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel, gameSessionCreator: Eris.User) {
         this.scoreboard = new Scoreboard();
         this.lastActive = Date.now();
         this.sessionInitialized = false;
@@ -52,7 +52,7 @@ export default class GameSession {
         this.gameRound = null;
         const songAliasesFilePath = path.resolve(__dirname, "../data/song_aliases.json");
         this.songAliasList = JSON.parse(fs.readFileSync(songAliasesFilePath).toString());
-        this.owner = author;
+        this.owner = gameSessionCreator;
     }
 
     createRound(song: string, artist: string, videoID: string) {
