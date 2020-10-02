@@ -12,7 +12,6 @@ export default class GuessTimeoutCommand implements BaseCommand {
             guildPreference.resetGuessTimeout();
             if (gameSession) {
                 gameSession.stopGuessTimeout();
-                gameSession.guessTimeoutVal = null;
             }
             await sendOptionsMessage(message, guildPreference, GameOption.TIMER);
             logger.info(`${getDebugContext(message)} | Guess timeout disabled.`);
@@ -21,16 +20,16 @@ export default class GuessTimeoutCommand implements BaseCommand {
         const time = parseInt(parsedMessage.components[0]);
 
         guildPreference.setGuessTimeout(time);
-        if (gameSession) {
-            gameSession.guessTimeoutVal = time;
-            console.log("Updated timer to ", time, gameSession.guessTimeoutVal);
+        if (gameSession && gameSession.sessionInitialized && gameSession.connection.playing) {
+            // Timer can start mid-song, starting when the user enters the command
+            gameSession.stopGuessTimeout();
+            gameSession.startGuessTimeout(message);
         }
-
         await sendOptionsMessage(message, guildPreference, GameOption.TIMER);
         logger.info(`${getDebugContext(message)} | Guess timeout set to ${guildPreference.getGuessTimeout()}`);
     }
     validations = {
-        minArgCount: 1,
+        minArgCount: 0,
         maxArgCount: 1,
         arguments: [
             {
@@ -56,5 +55,5 @@ export default class GuessTimeoutCommand implements BaseCommand {
             }
         ]
     }
-    aliases = ["time", "t"]
+    aliases = ["time", "timeout", "t"]
 }

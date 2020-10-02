@@ -31,7 +31,6 @@ export default class GameSession {
     public gameRound: GameRound;
     public roundsPlayed: number;
     public participants: Set<string>;
-    public guessTimeoutVal: number;
 
     private guessTimes: Array<number>;
     private songAliasList: { [songId: string]: Array<string> };
@@ -51,7 +50,6 @@ export default class GameSession {
         this.voiceChannel = voiceChannel;
         this.textChannel = textChannel;
         this.gameRound = null;
-        this.guessTimeoutVal = null;
         const songAliasesFilePath = path.resolve(__dirname, "../data/song_aliases.json");
         this.songAliasList = JSON.parse(fs.readFileSync(songAliasesFilePath).toString());
     }
