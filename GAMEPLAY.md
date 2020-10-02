@@ -43,7 +43,7 @@ Setting the mode type changes the objective of the game, between guessing the na
 ![mode](/images/mode.png)
 
 ## ,groups [group_1],{group_2},{group_3} ...
-Setting the groups option limits the selection of songs to those belonging to the artist specified. For instance `,groups blackpink,itzy,bts` would exclusively play songs from those three artists. You can view the list of groups with `,help groups`. Make sure to separate the groups with commas. You must enter the names of all of the groups at one time. In order to reset this option, simply type `,groups`.
+Setting the groups option limits the selection of songs to those belonging to the artist specified. For instance `,groups blackpink,itzy,fromis 9,bts` would exclusively play songs from those four artists. You can view the list of groups with `,help groups`. Make sure to separate the groups with commas. You must enter the names of all of the groups at one time. In order to reset this option, simply type `,groups`.
 
 Note that `,groups` and `,gender` are incompatible with each other. If you wish to continue using `,gender`, reset `,groups` first. 
 
@@ -53,6 +53,9 @@ Note that `,groups` and `,gender` are incompatible with each other. If you wish 
 Setting the goal ends the game when the given goal score is reached. For example, if a user were to call `,goal 5`, the first player to five points would win the game (`,end` is called automatically). To disable a goal, use `,goal`.  
 
 ![groups](/images/goal.png)
+
+### ,forceskip
+To skip the voting process of `,skip` (no pun intended), the player that started the game by typing `,play` can go to the next song with `,forceskip`. This command is helpful when it's hard to get a skip majority (typically in larger games). We trust you, the game owner, to play the best songs possible. No pressure.
 
 
 # Full Command List
@@ -74,3 +77,4 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,groups`: Specify what groups/artists you'd like to hear from
 - `,mode`: Choose whether to guess based on song name or artist name
 - `,goal`: Specify a number of points to be reached before a winner is selected, and the game ends 
+- `,forceskip`: The person that started the game can force-skip the current song, no majority necessary
