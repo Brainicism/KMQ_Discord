@@ -17,11 +17,6 @@ export interface QueriedSong {
     youtubeLink: string;
 }
 
-export interface Databases {
-    kmq: Knex;
-    kpopVideos: Knex;
-}
-
 export interface SendMessagePayload {
     channel: Eris.GuildTextableChannel;
     authorId?: string

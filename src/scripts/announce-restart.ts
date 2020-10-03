@@ -1,5 +1,5 @@
 import { spawn, exec } from "child_process";
-import { db } from "../databases";
+import { db } from "../database_context";
 
 function serverShutdown(restartMinutes: number, restart: boolean) {
     return new Promise((resolve) => {

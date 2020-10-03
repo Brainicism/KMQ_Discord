@@ -2,7 +2,7 @@ import Eris from "eris";
 import fs from "fs";
 import { CommandArgs } from "../commands/base_command";
 import { SEEK_TYPE } from "../commands/seek";
-import { db } from "../databases";
+import { db } from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import { getDebugContext, getUserIdentifier, getVoiceChannel, sendEndGameMessage, sendErrorMessage, sendSongMessage } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong } from "../helpers/game_utils";

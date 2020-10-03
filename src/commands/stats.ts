@@ -3,7 +3,7 @@ import Eris from "eris";
 import {
     sendEmbed, getDebugContext
 } from "../helpers/discord_utils";
-import { db } from "../databases";
+import { db } from "../database_context";
 import { bold } from "../helpers/utils";
 import os from "os";
 import _logger from "../logger";

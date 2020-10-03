@@ -20,7 +20,7 @@ import { cleanupInactiveGameSessions } from "./game_utils";
 import cronParser from "cron-parser";
 import path from "path";
 import fs from "fs";
-import { db } from "../databases";
+import { db } from "../database_context";
 import BaseCommand from "../commands/base_command";
 import debugHandler from "../events/client/debug";
 import BotStatsPoster from "./bot_stats_poster";

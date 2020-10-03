@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { QueriedSong } from "../types";
-import { db } from "../databases";
+import { db } from "../database_context";
 
 export function isDebugMode(): boolean {
     const developmentBuild = process.env.NODE_ENV === "development";
