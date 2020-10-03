@@ -97,18 +97,19 @@ export async function sendErrorMessage(message: Eris.Message<Eris.GuildTextableC
 }
 
 export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextableChannel>, guildPreference: GuildPreference, updatedOption: string) {
-    let totalSongs = await getSongCount(guildPreference);
-    let groupsMode = guildPreference.getGroupIds() !== null;
-    let goalMode = guildPreference.isGoalSet();
+    const totalSongs = await getSongCount(guildPreference);
+    const groupsMode = guildPreference.getGroupIds() !== null;
+    const goalMode = guildPreference.isGoalSet();
+    const guessTimeoutMode = guildPreference.isGuessTimeoutSet();
+
     let cutoffString = `between the years ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
-
-
     let genderString = `${guildPreference.getSQLGender()} artists`;
     let groupsString = groupsMode ? `${guildPreference.getGroupNames().join(", ")}` : null;
     let limitString = `${Math.min(totalSongs, guildPreference.getLimit())}`;
     let seekTypeString = `${guildPreference.getSeekType()}`;
     let modeTypeString = `${guildPreference.getModeType()}`;
     let goalString = `${guildPreference.getGoal()}`;
+    let guessTimeoutString = `${guildPreference.getGuessTimeout()}`;
 
     cutoffString = updatedOption == GameOption.CUTOFF ? bold(cutoffString) : codeLine(cutoffString);
     genderString = updatedOption == GameOption.GENDER ? bold(genderString) : codeLine(genderString);
@@ -120,12 +121,14 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
     seekTypeString = updatedOption == GameOption.SEEK_TYPE ? bold(seekTypeString) : codeLine(seekTypeString);
     modeTypeString = updatedOption == GameOption.MODE_TYPE ? bold(modeTypeString) : codeLine(modeTypeString);
     goalString = updatedOption == GameOption.GOAL ? bold(goalString) : codeLine(goalString);
+    guessTimeoutString = updatedOption == GameOption.TIMER ? bold(guessTimeoutString) : codeLine(guessTimeoutString);
 
     let goalMessage = `First one to ${goalString} points wins.`;
+    let guessTimeoutMessage = ` in less than ${guessTimeoutString} seconds`;
 
     await sendInfoMessage(message,
         updatedOption == null ? "Options" : `${updatedOption} updated`,
-        `Now playing the ${limitString} out of the __${totalSongs}__ most popular songs by ${groupsMode ? groupsString : genderString} ${cutoffString}. \nPlaying from the ${seekTypeString} point of each song. Guess the ${modeTypeString}'s name! ${goalMode ? goalMessage : ""}`,
+        `Now playing the ${limitString} out of the __${totalSongs}__ most popular songs by ${groupsMode ? groupsString : genderString} ${cutoffString}. \nPlaying from the ${seekTypeString} point of each song. Guess the ${modeTypeString}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}`,
         updatedOption == null ? `Psst. Your bot prefix is \`${guildPreference.getBotPrefix()}\`.` : null,
         updatedOption == null ? "https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/src/assets/tsukasa.jpg" : null
     );

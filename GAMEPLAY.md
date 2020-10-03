@@ -52,8 +52,10 @@ Note that `,groups` and `,gender` are incompatible with each other. If you wish 
 ## ,goal [goal]
 Setting the goal ends the game when the given goal score is reached. For example, if a user were to call `,goal 5`, the first player to five points would win the game (`,end` is called automatically). To disable a goal, use `,goal`.  
 
-![groups](/images/goal.png)
+![goal](/images/goal.png)
 
+## ,timer [time (seconds)]
+Setting a timer limits players to guess in under `time` seconds before the round ends automatically. Once a user gives a valid timeout, such as `,timer 10`, the timer will automatically start at the beginning of every round. If no one guesses right in the time allotted (in this example, 10 seconds), the round is over. **Typing** `,timer` **disables the timer**. Set the timer under 10 (5? 3?) seconds and face off with your friends to see who the ultimate KMQ champ is! Alternatively, set it above 30 seconds, and enjoy a variety of your favorite artists while expanding your music library.
 
 # Full Command List
 Use `,help [command_name]` for more details for any of the following commands.
@@ -74,3 +76,4 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,groups`: Specify what groups/artists you'd like to hear from
 - `,mode`: Choose whether to guess based on song name or artist name
 - `,goal`: Specify a number of points to be reached before a winner is selected, and the game ends 
+- `,timer`: Try your best to guess correctly before the timer runs out! Enter a time in seconds, or give no arguments to disable

@@ -18,7 +18,8 @@ export enum GameOption {
     SEEK_TYPE = "Seek Type",
     MODE_TYPE = "Guess Mode",
     GROUPS = "Groups",
-    GOAL = "Goal"
+    GOAL = "Goal",
+    TIMER = "Timer"
 }
 const logger = _logger("game_utils");
 
