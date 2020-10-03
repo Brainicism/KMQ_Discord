@@ -2,7 +2,7 @@ import ytdl from "ytdl-core";
 import fs from "fs";
 import { QueriedSong } from "../types";
 import path from "path";
-import { db } from "../databases";
+import { db } from "../database_context";
 import _logger from "../logger";
 import { Logger } from "log4js";
 const logger: Logger = _logger("download-new-songs");

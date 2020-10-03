@@ -1,7 +1,7 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import fs from "fs";
 import _logger from "../logger";
-import { db } from "../databases";
+import { db } from "../database_context";
 import path from "path";
 import { EMBED_INFO_COLOR, getDebugContext, sendMessage } from "../helpers/discord_utils";
 import { bold } from "../helpers/utils";

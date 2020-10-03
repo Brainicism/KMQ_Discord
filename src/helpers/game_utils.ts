@@ -1,7 +1,7 @@
 import Eris from "eris";
 import fs from "fs";
 import path from "path";
-import { db } from "../databases";
+import { db } from "../database_context";
 import _logger from "../logger";
 import GameSession from "../models/game_session";
 import GuildPreference from "../models/guild_preference";

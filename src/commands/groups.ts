@@ -1,7 +1,7 @@
 import BaseCommand, { CommandArgs } from "./base_command";
 import { sendOptionsMessage, getDebugContext, sendErrorMessage } from "../helpers/discord_utils";
 import { GameOption, getGuildPreference } from "../helpers/game_utils";
-import { db } from "../databases";
+import { db } from "../database_context";
 import _logger from "../logger";
 const logger = _logger("groups");
 export default class GroupsCommand implements BaseCommand {

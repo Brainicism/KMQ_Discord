@@ -5,7 +5,7 @@ import { GENDER } from "../commands/gender";
 import { SEEK_TYPE } from "../commands/seek";
 import _logger from "../logger";
 import Knex from "knex";
-import { db } from "../databases";
+import { db } from "../database_context";
 import { MODE_TYPE } from "../commands/mode";
 const logger = _logger("guild_preference");
 

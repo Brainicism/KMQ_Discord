@@ -3,9 +3,9 @@ import kpopVideosKnexConfig from "./config/knexfile_kpop_videos";
 import Knex from "knex";
 import _logger from "./logger";
 
-const logger = _logger("databases");
+const logger = _logger("database_context");
 
-class DatabaseConnections {
+class DatabaseContext {
     public kmq: Knex;
     public kpopVideos: Knex
 
@@ -21,4 +21,4 @@ class DatabaseConnections {
     }
 }
 
-export const db = new DatabaseConnections();
+export const db = new DatabaseContext();

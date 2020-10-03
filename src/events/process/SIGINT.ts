@@ -1,7 +1,7 @@
 import _logger from "../../logger";
 import { state } from "../../kmq";
 import { sendEndGameMessage } from "../../helpers/discord_utils";
-import { db } from "../../databases";
+import { db } from "../../database_context";
 const logger = _logger("SIGINT");
 
 export default async function SIGINTHandler() {
