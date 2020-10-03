@@ -175,6 +175,7 @@ export default class GameSession {
             await sendErrorMessage(message, `Game already in session`, null);
             return;
         }
+        await delay(3000);
         this.sessionInitialized = true;
         let randomSong: QueriedSong;
         try {
@@ -231,7 +232,6 @@ export default class GameSession {
 
 
         const stream = fs.createReadStream(songLocation);
-        await delay(3000);
         //check if ,end was called during the delay
         if (this.finished || this.gameRound.finished) {
             logger.debug(`${getDebugContext(message)} | startGame called with ${this.finished}, ${gameRound.finished}`);

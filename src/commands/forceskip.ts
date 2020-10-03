@@ -19,13 +19,18 @@ export default class ForceSkipCommand implements BaseCommand {
             logger.warn(`${getDebugContext(message)} | Invalid force-skip. !gameSession: ${!gameSession}. !gameSession.gameRound: ${gameSession && !gameSession.gameRound}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
             return;
         }
+        if (gameSession.gameRound.skipAchieved || gameSession.gameRound.finished) {
+            // song already being skipped
+            return;
+        }
         if (message.author !== gameSession.owner) {
             await sendErrorMessage(message, "Force skip ignored", `Only the person who started the game (${bold(getUserIdentifier(gameSession.owner))}) can force-skip.`);
             return;
         }
         gameSession.gameRound.skipAchieved = true;
-        await sendSongMessage(message, gameSession, true);
         gameSession.endRound(false);
+        await sendSongMessage(message, gameSession, true);
+
         startGame(gameSessions, guildPreference, message);
         logger.info(`${getDebugContext(message)} | Owner force-skipped.`);
         gameSession.lastActiveNow();
