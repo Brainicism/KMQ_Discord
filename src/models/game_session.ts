@@ -31,13 +31,14 @@ export default class GameSession {
     public gameRound: GameRound;
     public roundsPlayed: number;
     public participants: Set<string>;
+    public owner: Eris.User;
 
     private guessTimes: Array<number>;
     private songAliasList: { [songId: string]: Array<string> };
     private guessTimeoutFunc: NodeJS.Timer;
 
 
-    constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel) {
+    constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel, gameSessionCreator: Eris.User) {
         this.scoreboard = new Scoreboard();
         this.lastActive = Date.now();
         this.sessionInitialized = false;
@@ -52,6 +53,7 @@ export default class GameSession {
         this.gameRound = null;
         const songAliasesFilePath = path.resolve(__dirname, "../data/song_aliases.json");
         this.songAliasList = JSON.parse(fs.readFileSync(songAliasesFilePath).toString());
+        this.owner = gameSessionCreator;
     }
 
     createRound(song: string, artist: string, videoID: string) {
