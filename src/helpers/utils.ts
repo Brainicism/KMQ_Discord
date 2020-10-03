@@ -28,7 +28,7 @@ export function chunkArray<T>(array: Array<T>, chunkSize: number): Array<Array<T
 
 export function getAudioDurationInSeconds(songPath: string): Promise<number> {
     return new Promise((resolve, reject) => {
-        exec(`ffprobe -i ${songPath} -show_entries format=duration -v quiet -of csv="p=0"`, (err, stdout, stderr) => {
+        exec(`ffprobe -i "${songPath}" -show_entries format=duration -v quiet -of csv="p=0"`, (err, stdout, stderr) => {
             if (!stdout || stderr) {
                 logger.error(`Error getting audio duration: path = ${songPath}, err = ${stderr}`);
                 return resolve(-1);
