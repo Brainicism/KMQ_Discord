@@ -275,8 +275,8 @@ export default class GameSession {
 
     async startGuessTimeout(message: Eris.Message<Eris.GuildTextableChannel>) {
         let guildPreference = await getGuildPreference(message.guildID);
+        if (!guildPreference.isGuessTimeoutSet()) return;
         let time = guildPreference.getGuessTimeout();
-        if (!time) return;
         this.guessTimeoutFunc = setTimeout(async () => {
             if (this.finished) return;
             logger.info(`${getDebugContext(message)} | Song finished without being guessed, timer of: ${time} seconds.`);
