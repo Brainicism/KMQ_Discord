@@ -47,6 +47,7 @@ export default class SkipCommand implements BaseCommand {
         usage: "!skip",
         examples: []
     }
+    aliases = ["s"]
 }
 
 async function sendSkipNotification(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
