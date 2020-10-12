@@ -152,7 +152,6 @@ export async function getGuildPreference(guildID: string): Promise<GuildPreferen
     const guildPreferences = await db.kmq("guild_preferences").select("*").where("guild_id", guildID);
     if (guildPreferences.length === 0) {
         const guildPreference = new GuildPreference(guildID);
-        logger.info(`New server joined: ${guildID}`);
         await db.kmq("guild_preferences")
             .insert({ guild_id: guildID, guild_preference: JSON.stringify(guildPreference), join_date: new Date() });
         return guildPreference;

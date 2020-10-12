@@ -10,6 +10,8 @@ declare namespace NodeJS {
         RESTART_CRON?: string,
         TOP_GG_TOKEN?: string,
         DISCORD_BOTS_GG_TOKEN?: string,
-        DISCORD_BOT_LIST_TOKEN?: string
+        DISCORD_BOT_LIST_TOKEN?: string,
+        DEBUG_SERVER_ID?: string,
+        DEBUG_TEXT_CHANNEL_ID?: string
     }
 }

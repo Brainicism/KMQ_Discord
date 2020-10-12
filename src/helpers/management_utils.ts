@@ -23,6 +23,7 @@ import fs from "fs";
 import { db } from "../database_context";
 import BaseCommand from "../commands/base_command";
 import debugHandler from "../events/client/debug";
+import guildCreateHandler from "../events/client/guildCreate";
 import BotStatsPoster from "./bot_stats_poster";
 const logger = _logger("management_utils");
 
@@ -40,7 +41,8 @@ export function registerClientEvents(client: Eris.Client) {
         .on("shardReady", shardReadyHandler)
         .on("shardResume", shardResumeHandler)
         .on("disconnect", disconnectHandler)
-        .on("debug", debugHandler);
+        .on("debug", debugHandler)
+        .on("guildCreate", guildCreateHandler);
 }
 
 export function registerProcessEvents(process: NodeJS.Process) {
