@@ -213,7 +213,7 @@ export default class GameSession {
             logger.debug(`${getDebugContext(message)} | Not playing song in voice connection. song = ${this.getDebugSongDetails()}`);
             return;
         }
-        const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${gameRound.videoID}.mp3`;
+        const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${gameRound.videoID}.ogg`;
 
         let seekLocation: number;
         if (guildPreference.getSeekType() === SEEK_TYPE.RANDOM) {
@@ -222,7 +222,7 @@ export default class GameSession {
                 seekLocation = songDuration * (0.6 * Math.random());
             }
             catch (e) {
-                logger.error(`Failed to get mp3 length: ${songLocation}. err = ${e}`);
+                logger.error(`Failed to get song length: ${songLocation}. err = ${e}`);
                 seekLocation = 0;
             }
         }
@@ -242,7 +242,7 @@ export default class GameSession {
         this.connection.stopPlaying();
         this.connection.play(stream, {
             inputArgs: ["-ss", seekLocation.toString()],
-            encoderArgs: ["-filter:a", `volume=0.1`]
+            encoderArgs: ["-c", "copy"]
         });
         this.startGuessTimeout(message);
         this.connection.once("end", async () => {
