@@ -1,5 +1,4 @@
 import { BEGINNING_SEARCH_YEAR } from "../commands/cutoff";
-import { DEFAULT_BOT_PREFIX } from "../commands/prefix";
 import { DEFAULT_LIMIT } from "../commands/limit";
 import { GENDER } from "../commands/gender";
 import { SEEK_TYPE } from "../commands/seek";
@@ -13,6 +12,8 @@ const DEFAULT_OPTIONS = {
     beginningYear: BEGINNING_SEARCH_YEAR, endYear: (new Date()).getFullYear(), gender: [GENDER.FEMALE],
     limit: DEFAULT_LIMIT, seekType: SEEK_TYPE.RANDOM, modeType: MODE_TYPE.SONG_NAME, groups: null, goal: null, guessTimeout: null
 };
+
+export const DEFAULT_BOT_PREFIX = ",";
 
 interface GameOptions {
     beginningYear: number;
@@ -28,18 +29,15 @@ interface GameOptions {
 
 export default class GuildPreference {
     private guildID: string;
-    private botPrefix: string;
     private gameOptions: GameOptions;
 
     constructor(guildID: string, json?: GuildPreference) {
         this.guildID = guildID;
         if (!json) {
             this.gameOptions = DEFAULT_OPTIONS;
-            this.botPrefix = DEFAULT_BOT_PREFIX;
             return;
         }
         this.gameOptions = json.gameOptions;
-        this.botPrefix = json.botPrefix;
         //apply default game option for empty
         let gameOptionModified = false;
         for (let defaultOption in DEFAULT_OPTIONS) {
@@ -50,8 +48,10 @@ export default class GuildPreference {
         }
 
         //extraneous keys
+        console.log(json);
         for (let option in this.gameOptions) {
             if (!(option in DEFAULT_OPTIONS)) {
+                console.log("Extra" + option);
                 delete this.gameOptions[option];
                 gameOptionModified = true;
             }
@@ -140,15 +140,6 @@ export default class GuildPreference {
 
     getSQLGender(): string {
         return this.gameOptions.gender.join(",");
-    }
-
-    setBotPrefix(prefix: string) {
-        this.botPrefix = prefix;
-        this.updateGuildPreferences(db.kmq);
-    }
-
-    getBotPrefix(): string {
-        return this.botPrefix;
     }
 
     setSeekType(seekType: SEEK_TYPE) {

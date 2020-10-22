@@ -5,12 +5,13 @@ import { EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, sendPaginationedEm
 import _logger from "../logger";
 import { chunkArray } from "../helpers/utils";
 import { getCommandFiles } from "../helpers/management_utils";
+import { DEFAULT_BOT_PREFIX } from "../models/guild_preference";
 const logger = _logger("help");
 const placeholder = /!/g;
 const FIELDS_PER_EMBED = 5;
 export default class HelpCommand implements BaseCommand {
-    async call({ parsedMessage, message, botPrefix }: CommandArgs) {
-        await helpMessage(message, parsedMessage.argument, botPrefix);
+    async call({ parsedMessage, message }: CommandArgs) {
+        await helpMessage(message, parsedMessage.argument);
     }
     help =
         {
@@ -31,7 +32,7 @@ export default class HelpCommand implements BaseCommand {
 }
 
 // Usage: `!help [action]` or `!help`
-const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, action: string, botPrefix: string) => {
+const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, action: string) => {
     let embedTitle = "";
     let embedDesc = "";
     let embedFields = [];
@@ -59,14 +60,14 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
             return;
         }
         const helpManual = commandFilesWithAliases[action].help;
-        embedTitle = `\`${helpManual.usage.replace(placeholder, botPrefix)}\``;
+        embedTitle = `\`${helpManual.usage.replace(placeholder, DEFAULT_BOT_PREFIX)}\``;
         embedDesc = helpManual.description;
         if (helpManual.examples.length > 0) {
             embedDesc += `\n\n**Examples**\n`;
         }
         helpManual.examples.forEach((example) => {
             embedFields.push({
-                name: example.example.replace(placeholder, botPrefix),
+                name: example.example.replace(placeholder, DEFAULT_BOT_PREFIX),
                 value: example.explanation
             })
         });
@@ -81,12 +82,12 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
         logger.info(`${getDebugContext(message)} | Getting full help documentation`);
         const commandNamesWithHelp = Object.keys(commandFiles).filter((commandName) => commandFiles[commandName].help);
         embedTitle = "K-pop Music Quiz Command Help";
-        embedDesc = helpMessages.rules.replace(placeholder, botPrefix);
+        embedDesc = helpMessages.rules.replace(placeholder, DEFAULT_BOT_PREFIX);
         commandNamesWithHelp.forEach((commandName) => {
             const helpManual = commandFiles[commandName].help;
             embedFields.push({
                 name: helpManual.name,
-                value: `${helpManual.description}\nUsage: \`${helpManual.usage.replace(placeholder, botPrefix)}\``
+                value: `${helpManual.description}\nUsage: \`${helpManual.usage.replace(placeholder, DEFAULT_BOT_PREFIX)}\``
             })
         });
 

@@ -69,7 +69,6 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,skip`: Starts a vote to skip the current playing song. Based on majority rule
 - `,options`: Shows the current game options, which filters the songs that will be played
 - `,help`: Shows a general overview of available commands, as well as specific instructions for each command
-- `,prefix`: Specifies the bot's prefix
 - `,news`: Show the latest features/changes to the bot
 
 ## Game Option Commands 

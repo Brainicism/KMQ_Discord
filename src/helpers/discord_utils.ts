@@ -1,5 +1,5 @@
 import Eris from "eris";
-import GuildPreference from "../models/guild_preference";
+import GuildPreference, { DEFAULT_BOT_PREFIX } from "../models/guild_preference";
 import GameSession from "../models/game_session";
 import EmbedPaginator from "eris-pagination"
 import _logger from "../logger";
@@ -129,7 +129,7 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
     await sendInfoMessage(message,
         updatedOption == null ? "Options" : `${updatedOption} updated`,
         `Now playing the ${limitString} out of the __${totalSongs}__ most popular songs by ${groupsMode ? groupsString : genderString} ${cutoffString}. \nPlaying from the ${seekTypeString} point of each song. Guess the ${modeTypeString}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}`,
-        updatedOption == null ? `Psst. Your bot prefix is \`${guildPreference.getBotPrefix()}\`.` : null,
+        updatedOption == null ? `Psst. Your bot prefix is \`${DEFAULT_BOT_PREFIX}\`.` : null,
         updatedOption == null ? "https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/src/assets/tsukasa.jpg" : null
     );
 }

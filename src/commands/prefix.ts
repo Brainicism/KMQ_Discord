@@ -1,33 +1,15 @@
 import BaseCommand, { CommandArgs } from "./base_command";
-import { sendInfoMessage, getDebugContext } from "../helpers/discord_utils";
+import { sendErrorMessage } from "../helpers/discord_utils";
 import _logger from "../logger";
-import { getGuildPreference } from "../helpers/game_utils";
-const logger = _logger("prefix");
-export const DEFAULT_BOT_PREFIX = ",";
+import { DEFAULT_BOT_PREFIX } from "../models/guild_preference";
 
 export default class PrefixCommand implements BaseCommand {
-    async call({ message, parsedMessage }: CommandArgs) {
-        const guildPreference = await getGuildPreference(message.guildID);
-        guildPreference.setBotPrefix(parsedMessage.components[0]);
-        await sendInfoMessage(message,
-            "Bot prefix",
-            `The prefix is \`${guildPreference.getBotPrefix()}\`.`
-        );
-        logger.info(`${getDebugContext(message)} | Prefix set to ${guildPreference.getBotPrefix()}`);
-    }
-    validations = {
-        minArgCount: 1,
-        maxArgCount: 1,
-        arguments: [
-            {
-                name: "prefix",
-                type: "char" as const
-            }
-        ]
+    async call({ message }: CommandArgs) {
+        await sendErrorMessage(message, "DEPRECATED", `This command has been discontinued, please use the default prefix \`${DEFAULT_BOT_PREFIX}\``);
     }
     help = {
         name: "prefix",
-        description: `Set the character used to summon the bot. You can only use a single character as the bot prefix. The default prefix is \`${DEFAULT_BOT_PREFIX}\`.`,
+        description: `[DEPRECATED] Set the character used to summon the bot. You can only use a single character as the bot prefix. The default prefix is \`${DEFAULT_BOT_PREFIX}\`.`,
         usage: "!prefix [character]",
         examples: [
             {
