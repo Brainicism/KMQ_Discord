@@ -62,7 +62,12 @@ export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableCh
         }
     });
 }
+
 export async function sendInfoMessage(message: Eris.Message<Eris.GuildTextableChannel>, title: string, description?: string, footerText?: string, footerImageUrl?: string) {
+    if (description.length > 2048) {
+        await sendErrorMessage(message, "Error", "Response message was too long, report this error to the KMQ help server");
+        return;
+    }
     let footer: Eris.EmbedFooterOptions;
     if (footerImageUrl) {
         footer = {
@@ -82,6 +87,7 @@ export async function sendInfoMessage(message: Eris.Message<Eris.GuildTextableCh
     };
     await sendMessage({ channel: message.channel, authorId: message.author.id }, { embed });
 }
+
 export async function sendErrorMessage(message: Eris.Message<Eris.GuildTextableChannel>, title: string, description: string) {
     await sendMessage({ channel: message.channel, authorId: message.author.id }, {
         embed: {
@@ -305,4 +311,10 @@ export async function checkBotIsAlone(gameSession: GameSession, channel: Eris.Vo
         }
         return;
     }
+}
+
+export function getDebugChannel(): Eris.TextChannel {
+    if (!process.env.DEBUG_SERVER_ID || !process.env.DEBUG_TEXT_CHANNEL_ID) return null;
+    return <Eris.TextChannel> state.client.guilds.get(process.env.DEBUG_SERVER_ID)
+        .channels.get(process.env.DEBUG_TEXT_CHANNEL_ID);
 }
