@@ -3,14 +3,15 @@ import { ParsedMessage } from "../types";
 import { CommandValidations } from "../commands/base_command";
 import _logger from "../logger";
 import Eris from "eris";
+import { DEFAULT_BOT_PREFIX } from "../models/guild_preference";
 const logger = _logger("validate");
 
-export default (message: Eris.Message<Eris.GuildTextableChannel>, parsedMessage: ParsedMessage, validations: CommandValidations, botPrefix: string) => {
+export default (message: Eris.Message<Eris.GuildTextableChannel>, parsedMessage: ParsedMessage, validations: CommandValidations) => {
     if (!validations) return true;
     const args = parsedMessage.components;
     if (args.length > validations.maxArgCount || args.length < validations.minArgCount) {
         sendValidationErrorMessage(message,
-            `Incorrect number of arguments. See \`${botPrefix}help ${parsedMessage.action}\` for usage.`,
+            `Incorrect number of arguments. See \`${DEFAULT_BOT_PREFIX}help ${parsedMessage.action}\` for usage.`,
             args);
         return false;
     }

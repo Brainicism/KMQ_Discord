@@ -5,6 +5,7 @@ import { textPermissionsCheck } from "../../helpers/discord_utils";
 import { state } from "../../kmq";
 import validate from "../../helpers/validate";
 import { ParsedMessage } from "../../types";
+import { DEFAULT_BOT_PREFIX } from "../../models/guild_preference";
 const logger = _logger("messageCreate");
 
 export default async function messageCreateHandler(message: Eris.Message) {
@@ -19,9 +20,7 @@ export default async function messageCreateHandler(message: Eris.Message) {
         return;
     }
     
-    const guildPreference = await getGuildPreference(message.guildID);
-    const botPrefix = guildPreference.getBotPrefix();
-    const parsedMessage = parseMessage(message.content, botPrefix) || null;
+    const parsedMessage = parseMessage(message.content) || null;
     if (message.mentions.includes(state.client.user) && message.content.split(" ").length == 1) {
         // Any message that mentions the bot sends the current options
         if (!(await textPermissionsCheck(message))) {
@@ -32,7 +31,7 @@ export default async function messageCreateHandler(message: Eris.Message) {
     
     if (parsedMessage && state.commands[parsedMessage.action]) {
         const command = state.commands[parsedMessage.action];
-        if (validate(message, parsedMessage, command.validations, botPrefix)) {
+        if (validate(message, parsedMessage, command.validations)) {
             if (!(await textPermissionsCheck(message))) {
                 return;
             }
@@ -40,8 +39,7 @@ export default async function messageCreateHandler(message: Eris.Message) {
             command.call({
                 gameSessions,
                 message,
-                parsedMessage,
-                botPrefix
+                parsedMessage
             });
         }
     }
@@ -53,8 +51,8 @@ export default async function messageCreateHandler(message: Eris.Message) {
     }
 }
 
-const parseMessage = (message: string, botPrefix: string): ParsedMessage => {
-    if (message.charAt(0) !== botPrefix) return null;
+const parseMessage = (message: string): ParsedMessage => {
+    if (message.charAt(0) !== DEFAULT_BOT_PREFIX) return null;
     const components = message.split(" ");
     const action = components.shift().substring(1);
     const argument = components.join(" ");

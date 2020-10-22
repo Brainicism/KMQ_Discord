@@ -3,6 +3,7 @@ import { sendErrorMessage, getDebugContext, sendInfoMessage, getVoiceChannel, vo
 import { startGame, getGuildPreference } from "../helpers/game_utils";
 import BaseCommand, { CommandArgs } from "./base_command";
 import _logger from "../logger";
+import { DEFAULT_BOT_PREFIX } from "../models/guild_preference";
 const logger = _logger("play");
 
 export default class PlayCommand implements BaseCommand {
@@ -12,7 +13,7 @@ export default class PlayCommand implements BaseCommand {
         if (!voiceChannel) {
             await sendErrorMessage(message,
                 "Join a voice channel",
-                `Send \`${guildPreference.getBotPrefix()}play\` again when you are in a voice channel.`);
+                `Send \`${DEFAULT_BOT_PREFIX}play\` again when you are in a voice channel.`);
             logger.warn(`${getDebugContext(message)} | User not in voice channel`);
         }
         else {

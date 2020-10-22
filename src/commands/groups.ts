@@ -3,6 +3,7 @@ import { sendOptionsMessage, getDebugContext, sendErrorMessage } from "../helper
 import { GameOption, getGuildPreference } from "../helpers/game_utils";
 import { db } from "../database_context";
 import _logger from "../logger";
+import { DEFAULT_BOT_PREFIX } from "../models/guild_preference";
 const logger = _logger("groups");
 export default class GroupsCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
@@ -26,7 +27,7 @@ export default class GroupsCommand implements BaseCommand {
                 return !matchingGroupNames.includes(x.toUpperCase());
             })
             logger.info(`${getDebugContext(message)} | Attempted to set unknown groups. groups =  ${unrecognizedGroups.join(", ")}`);
-            await sendErrorMessage(message, "Unknown Group Name", `One or more of the specified group names was not recognized. Please ensure that the group name matches exactly with the list provided by \`${guildPreference.getBotPrefix()}help groups\` \nThe following groups were **not** recognized:\n ${unrecognizedGroups.join(", ")} `);
+            await sendErrorMessage(message, "Unknown Group Name", `One or more of the specified group names was not recognized. Please ensure that the group name matches exactly with the list provided by \`${DEFAULT_BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unrecognizedGroups.join(", ")} `);
             return;
         }
         guildPreference.setGroups(matchingGroups);
