@@ -1,16 +1,13 @@
 import Eris from "eris";
 import _logger from "../../logger";
 import { state } from "../../kmq";
-import { sendMessage, EMBED_INFO_COLOR } from "../../helpers/discord_utils";
+import { sendMessage, EMBED_INFO_COLOR, getDebugChannel } from "../../helpers/discord_utils";
 const logger = _logger("guildCreate");
 
 export default async function guildCreateHandler(guild: Eris.Guild) {
-    const client = state.client;
     logger.info(`New server joined: ${guild.id} with ${guild.memberCount} users`);
-    if (!process.env.DEBUG_SERVER_ID || !process.env.DEBUG_TEXT_CHANNEL_ID) return;
-    const kmqDebugChannel: Eris.TextChannel =
-        <Eris.TextChannel>client.guilds.get(process.env.DEBUG_SERVER_ID)
-            .channels.get(process.env.DEBUG_TEXT_CHANNEL_ID);
+    const kmqDebugChannel = getDebugChannel();
+    if (!kmqDebugChannel) return;
     const joinDate: Date = new Date(guild.joinedAt);
     await sendMessage({ channel: kmqDebugChannel }, {
         embed: {

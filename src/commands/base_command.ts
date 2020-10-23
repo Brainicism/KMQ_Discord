@@ -26,7 +26,7 @@ interface CallFunc {
 
 export default class BaseCommand {
     call: CallFunc;
-    help: {
+    help?: {
         name: string;
         description: string;
         usage: string;
