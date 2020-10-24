@@ -241,8 +241,7 @@ export default class GameSession {
         logger.info(`${getDebugContext(message)} | Playing song in voice connection. seek = ${guildPreference.getSeekType()}. song = ${this.getDebugSongDetails()}. mode = ${guildPreference.getModeType()}`);
         this.connection.stopPlaying();
         this.connection.play(stream, {
-            inputArgs: ["-ss", seekLocation.toString()],
-            encoderArgs: ["-c", "copy"]
+            inputArgs: ["-ss", seekLocation.toString()]
         });
         this.startGuessTimeout(message);
         this.connection.once("end", async () => {
