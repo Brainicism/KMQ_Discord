@@ -48,7 +48,6 @@ export default class GuildPreference {
         }
 
         //extraneous keys
-        console.log(json);
         for (let option in this.gameOptions) {
             if (!(option in DEFAULT_OPTIONS)) {
                 console.log("Extra" + option);
