@@ -42,36 +42,20 @@ export async function playCorrectGuessSong(gameSession: GameSession) {
 async function getFilteredSongList(guildPreference: GuildPreference): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
     let result: Array<QueriedSong>;
     if (guildPreference.getGroupIds() === null) {
-        result = await db.kpopVideos("kpop_videos.app_kpop")
-            .select(["nome as name", "name as artist", "vlink as youtubeLink"])
-            .join("kpop_videos.app_kpop_group", function () {
-                this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id")
-            })
-            .whereNotIn("vlink", function () {
-                this.select("vlink").from("kmq.not_downloaded")
-            })
+        result = await db.kpopVideos("available_songs")
+            .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
             .whereIn("members", guildPreference.getSQLGender().split(","))
-            .andWhere("dead", "n")
             .andWhere("publishedon", ">=", `${guildPreference.getBeginningCutoffYear()}-01-01`)
             .andWhere("publishedon", "<=", `${guildPreference.getEndCutoffYear()}-12-31`)
-            .andWhere("vtype", "main")
-            .orderBy("kpop_videos.app_kpop.views", "DESC")
+            .orderBy("views", "DESC")
     }
     else {
-        result = await db.kpopVideos("kpop_videos.app_kpop")
-            .select(["nome as name", "name as artist", "vlink as youtubeLink"])
-            .join("kpop_videos.app_kpop_group", function () {
-                this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id")
-            })
-            .whereNotIn("vlink", function () {
-                this.select("vlink").from("kmq.not_downloaded")
-            })
-            .whereIn("id_artist", guildPreference.getGroupIds())
-            .andWhere("dead", "n")
+        result = await db.kpopVideos("available_songs")
+        .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
+        .whereIn("id_artist", guildPreference.getGroupIds())
             .andWhere("publishedon", ">=", `${guildPreference.getBeginningCutoffYear()}-01-01`)
             .andWhere("publishedon", "<=", `${guildPreference.getEndCutoffYear()}-12-31`)
-            .andWhere("vtype", "main")
-            .orderBy("kpop_videos.app_kpop.views", "DESC")
+            .orderBy("views", "DESC")
     }
     return {
         songs: result.slice(0, guildPreference.getLimit()),

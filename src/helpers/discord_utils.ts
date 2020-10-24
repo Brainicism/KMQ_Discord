@@ -41,7 +41,7 @@ export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableCh
     const fields = gameSession.scoreboard.getScoreboard().slice(0, 10)
     if (fact) {
         fields.push({
-            name: "__Fun Fact__", value: fact, inline: false
+            name: "__Did you know?__", value: fact, inline: false
         })
     }
 
