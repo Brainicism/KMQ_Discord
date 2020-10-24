@@ -15,7 +15,7 @@
     "bufferutil": "^4.0.1",
     "cron-parser": "^2.16.3",
     "dotenv": "^8.2.0",
-    "eris": "^0.13.3",
+    "eris": "github:brainicism/eris",
     "eris-pagination": "^0.5.1",
     "erlpack": "github:abalabahaha/erlpack",
     "knex": "^0.21.5",
