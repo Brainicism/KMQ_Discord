@@ -38,7 +38,7 @@ Setting the seek type changes at which point in a song KMQ bot starts playing fr
 ![seek](/images/seek.png)
 
 ## ,mode [mode_type]
-Setting the mode type changes the objective of the game, between guessing the name of the artist (`,mode artist`) vs guessing the name of the song (`,mode song`). 
+Setting the mode type changes the objective of the game, between guessing the name of the artist (`,mode artist`) vs guessing the name of the song (`,mode song`). `,mode both` can be used to allow for guessing either the song or artist, where a song guess will net you 1 point, and an artist guess will net you 0.2 points.
 
 ![mode](/images/mode.png)
 

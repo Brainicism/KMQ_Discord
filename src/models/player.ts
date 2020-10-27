@@ -4,10 +4,10 @@ export default class Player {
     private score: number;
     private avatarURL: string;
 
-    constructor(name: string, id: string, avatarURL: string) {
+    constructor(name: string, id: string, avatarURL: string, points: number) {
         this.name = name;
         this.id = id;
-        this.score = 1;
+        this.score = points;
         this.avatarURL = avatarURL;
     }
 
@@ -27,7 +27,7 @@ export default class Player {
         return this.avatarURL;
     }
 
-    incrementScore() {
-        this.score++;
+    incrementScore(pointsEarned: number) {
+        this.score += pointsEarned;
     }
 };

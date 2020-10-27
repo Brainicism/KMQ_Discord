@@ -43,12 +43,12 @@ export default class Scoreboard {
             .sort((a, b) => { return parseInt(b.value) - parseInt(a.value) })
     }
 
-    updateScoreboard(winnerTag: string, winnerID: string, avatarURL: string) {
+    updateScoreboard(winnerTag: string, winnerID: string, avatarURL: string, pointsEarned: number) {
         if (!this.players[winnerID]) {
-            this.players[winnerID] = new Player(winnerTag, winnerID, avatarURL);
+            this.players[winnerID] = new Player(winnerTag, winnerID, avatarURL, pointsEarned);
         }
         else {
-            this.players[winnerID].incrementScore();
+            this.players[winnerID].incrementScore(pointsEarned);
         }
 
         if (this.players[winnerID].getScore() == this.highestScore) {
