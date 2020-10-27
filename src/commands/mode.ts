@@ -6,7 +6,8 @@ const logger = _logger("mode");
 
 export enum MODE_TYPE {
     SONG_NAME = "song",
-    ARTIST = "artist"
+    ARTIST = "artist",
+    BOTH = "both"
 }
 
 export default class ModeCommand implements BaseCommand {
@@ -42,6 +43,10 @@ export default class ModeCommand implements BaseCommand {
             {
                 example: "`!mode artist`",
                 explanation: "Type the correct name of the artist to win a game round"
+            },
+            {
+                example: "`!mode both`",
+                explanation: "Type the correct name of the artist (0.2 points) or the name of the song (1 point) to win a game round"
             }
         ]
     }

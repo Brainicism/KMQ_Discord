@@ -6,7 +6,7 @@ const CHARACTER_REPLACEMENTS = [
     { pattern: REMOVED_CHARACTERS_SONG_GUESS, replacement: "" },
     { pattern: /&/g, replacement: "and" }
 ]
-const REMOVED_CHARACTERS_ARTIST_GUESS = /[:'.\-★*]/g
+const REMOVED_CHARACTERS_ARTIST_GUESS = /[:'.\-★*\ ]/g
 const logger = _logger("game_round");
 
 export default class GameRound {
@@ -39,23 +39,34 @@ export default class GameRound {
         return this.skippers.size;
     }
 
-    checkGuess(message: Eris.Message, modeType: string): boolean {
+    checkGuess(message: Eris.Message, modeType: string): number {
         if (modeType === MODE_TYPE.SONG_NAME) {
-            const guess = cleanSongName(message.content);
-            const cleanedSongAliases = this.songAliases.map((x) => cleanSongName(x));
-            const correctGuess = this.song && (guess === cleanSongName(this.song) || cleanedSongAliases.includes(guess));
-            return correctGuess;
+            return this.checkSongGuess(message.content) ? 1 : 0;
         }
         else if (modeType === MODE_TYPE.ARTIST) {
-            const guess = cleanArtistName(message.content);
-            const artistNames = this.artist.split("+");
-            const cleanedArtistNames = artistNames.map(x => cleanArtistName(x));
-            let correctGuess = this.song && (guess === cleanArtistName(this.artist) || cleanedArtistNames.includes(guess));
-            return correctGuess;
+            return this.checkArtistGuess(message.content) ? 1 : 0;
+        }
+        else if (modeType === MODE_TYPE.BOTH) {
+            if (this.checkSongGuess(message.content)) return 1;
+            if (this.checkArtistGuess(message.content)) return 0.2;
+            return 0;
         }
         else {
             logger.error(`Illegal mode type: ${modeType}`);
         }
+    }
+
+    private checkSongGuess(message: string): boolean {
+        const guess = cleanSongName(message);
+        const cleanedSongAliases = this.songAliases.map((x) => cleanSongName(x));
+        return this.song && (guess === cleanSongName(this.song) || cleanedSongAliases.includes(guess));
+    }
+
+    private checkArtistGuess(message: string): boolean {
+        const guess = cleanArtistName(message);
+        const artistNames = this.artist.split("+");
+        const cleanedArtistNames = artistNames.map(x => cleanArtistName(x));
+        return this.song && (guess === cleanArtistName(this.artist) || cleanedArtistNames.includes(guess));
     }
 
 }

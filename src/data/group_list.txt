@@ -61,6 +61,7 @@ Bigflo
 Bigstar
 BLACK6IX
 Blackpink
+Blackswan
 Blady
 Block B
 BoA
@@ -349,6 +350,7 @@ Lee Jinhyuk
 Lee Moonsae + Roy Kim
 Lee Seung Gi
 Lee SoRa
+Lee Suhyun
 Lee Sun Hee
 Leebada
 LeeSSang
@@ -359,6 +361,7 @@ Lim Jae Hyun
 Lim Jeong-hee
 Lim Jimin
 Lim Kim
+Lim Young Woong
 Loco
 Loco + Gray
 Loco + Hwasa
@@ -482,6 +485,7 @@ Rainz
 RaNia
 Red Velvet
 Red Velvet - I&S
+Refund Sisters
 RM
 Rocket Punch
 Romeo
@@ -550,6 +554,7 @@ SPEED
 SPICA
 SS501
 SSAK3
+Standing Egg
 Stella Jang
 Stella Jang + Lee Minhyuk
 Stellar

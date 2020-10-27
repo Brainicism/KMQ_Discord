@@ -8,6 +8,7 @@ import { getFact } from "../fact_generator";
 import { SendMessagePayload } from "../types";
 import { chunkArray, codeLine, bold } from "./utils";
 import { state } from "../kmq";
+import { MODE_TYPE } from "../commands/mode";
 const logger = _logger("utils");
 export const EMBED_INFO_COLOR = 0x000000; // BLACK
 export const EMBED_ERROR_COLOR = 0xE74C3C; // RED
@@ -113,7 +114,7 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
     let groupsString = groupsMode ? `${guildPreference.getGroupNames().join(", ")}` : null;
     let limitString = `${Math.min(totalSongs, guildPreference.getLimit())}`;
     let seekTypeString = `${guildPreference.getSeekType()}`;
-    let modeTypeString = `${guildPreference.getModeType()}`;
+    let modeTypeString = `${guildPreference.getModeType() === MODE_TYPE.BOTH ? "song or artist" : guildPreference.getModeType()}`;
     let goalString = `${guildPreference.getGoal()}`;
     let guessTimeoutString = `${guildPreference.getGuessTimeout()}`;
 

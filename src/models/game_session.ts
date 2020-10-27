@@ -114,7 +114,7 @@ export default class GameSession {
     }
 
 
-    checkGuess(message: Eris.Message, modeType: string): boolean {
+    checkGuess(message: Eris.Message, modeType: string): number {
         if (!this.gameRound) return;
         this.participants.add(message.author.id);
         return this.gameRound.checkGuess(message, modeType);
@@ -143,12 +143,13 @@ export default class GameSession {
             return;
         }
 
-        if (this.checkGuess(message, guildPreference.getModeType())) {
+        const pointsEarned = this.checkGuess(message, guildPreference.getModeType());
+        if (pointsEarned > 0) {
             logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${this.gameRound.song}`)
             const gameSession = state.gameSessions[message.guildID];
             gameSession.lastActiveNow();
             const userTag = getUserIdentifier(message.author);
-            this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL);
+            this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL, pointsEarned);
             this.stopGuessTimeout();
             this.endRound(true);
             await sendSongMessage(message, this, false, userTag);
