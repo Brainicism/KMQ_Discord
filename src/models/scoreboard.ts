@@ -37,10 +37,11 @@ export default class Scoreboard {
     }
 
     getScoreboard(): Array<{ name: string, value: string, inline: boolean }> {
-        return Object.values(this.players).map((x) => {
-            return { name: x.getName(), value: x.getScore().toFixed(1), inline: true }
+        return Object.values(this.players)
+        .sort((a, b) => { return b.getScore() - a.getScore() })
+        .map((x) => {
+            return { name: x.getName(), value: Number.isInteger(x.getScore()) ? x.getScore().toString() : x.getScore().toFixed(1), inline: true }
         })
-            .sort((a, b) => { return parseFloat(b.value) - parseFloat(a.value) })
     }
 
     updateScoreboard(winnerTag: string, winnerID: string, avatarURL: string, pointsEarned: number) {
