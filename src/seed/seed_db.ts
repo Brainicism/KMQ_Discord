@@ -7,7 +7,7 @@ import prependFile from 'prepend-file';
 import _logger from "../logger";
 import { Logger } from "log4js";
 import { removeRedunantAliases } from "../scripts/remove-redunant-aliases";
-import { downloadNewSongs } from "../scripts/download-new-songs";
+import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 const fileUrl = "http://kpop.aoimirai.net/download.php";
 const logger: Logger = _logger("seed_db");
 import { config } from "dotenv";
@@ -82,7 +82,7 @@ const seedDb = async (db: mysql.Connection) => {
         await removeRedunantAliases();
         db.destroy();
         logger.info("Downloading new songs")
-        await downloadNewSongs();
+        await downloadAndConvertSongs();
         logger.info("Re-creating available songs view");
         execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} ${process.env.DB_KPOP_DATA_TABLE_NAME} < ./src/seed/create_available_songs_table.sql`);
     } catch (e) {
