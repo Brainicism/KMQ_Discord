@@ -24,8 +24,11 @@ export default class PlayCommand implements BaseCommand {
                 const textChannel = message.channel;
                 gameSessions[message.guildID] = new GameSession(textChannel, voiceChannel, message.author);
                 await sendInfoMessage(message, `Game starting in #${textChannel.name} in 🔊 ${voiceChannel.name}`, "Listen to the song and type your guess!");
+                startGame(gameSessions, guildPreference, message);
             }
-            startGame(gameSessions, guildPreference, message);
+            else {
+                await sendErrorMessage(message, `Game already in session`, null);
+            }
         }
     }
     aliases = ["random", "start", "p"]

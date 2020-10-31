@@ -18,7 +18,6 @@ export default class GameRound {
 
     public skippers: Set<string>;
     public skipAchieved: boolean;
-    public finished: boolean;
     public lastActive: number;
 
     constructor(song: string, artist: string, videoID: string, songAliases: Array<string>) {

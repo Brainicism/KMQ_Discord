@@ -66,9 +66,8 @@ export default class GameSession {
         if (guessed) {
             this.guessTimes.push(Date.now() - this.gameRound.startedAt);
         }
-        if (this.gameRound) {
-            this.gameRound.finished = true;
-        }
+
+        this.gameRound = null;
         if (this.connection) {
             this.connection.removeAllListeners();
         }
@@ -131,7 +130,7 @@ export default class GameSession {
     async guessSong({ message }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
         const voiceChannel = getVoiceChannel(message);
-        if (!this.gameRound || this.gameRound.finished) return;
+        if (!this.gameRound) return;
 
         //if user isn't in the same voice channel
         if (!voiceChannel || !voiceChannel.voiceMembers.has(message.author.id)) {
@@ -151,8 +150,8 @@ export default class GameSession {
             const userTag = getUserIdentifier(message.author);
             this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL, pointsEarned);
             this.stopGuessTimeout();
-            this.endRound(true);
             await sendSongMessage(message, this, false, userTag);
+            this.endRound(true);
             await db.kmq("guild_preferences")
                 .where("guild_id", message.guildID)
                 .increment("songs_guessed", 1);
@@ -168,15 +167,11 @@ export default class GameSession {
     }
 
     async startRound(guildPreference: GuildPreference, message: Eris.Message<Eris.GuildTextableChannel>) {
-        if (this.finished) {
+        await delay(3000);
+        if (this.finished || this.gameRound) {
             return;
         }
 
-        if (this.sessionInitialized) {
-            await sendErrorMessage(message, `Game already in session`, null);
-            return;
-        }
-        await delay(3000);
         this.sessionInitialized = true;
         let randomSong: QueriedSong;
         try {
@@ -233,11 +228,6 @@ export default class GameSession {
 
 
         const stream = fs.createReadStream(songLocation);
-        //check if ,end was called during the delay
-        if (this.finished || this.gameRound.finished) {
-            logger.debug(`${getDebugContext(message)} | startGame called with ${this.finished}, ${gameRound.finished}`);
-            return;
-        }
 
         logger.info(`${getDebugContext(message)} | Playing song in voice connection. seek = ${guildPreference.getSeekType()}. song = ${this.getDebugSongDetails()}. mode = ${guildPreference.getModeType()}`);
         this.connection.stopPlaying();
