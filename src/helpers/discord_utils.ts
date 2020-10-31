@@ -20,7 +20,6 @@ const REQUIRED_VOICE_PERMISSIONS = ["voiceConnect", "voiceSpeak"];
 export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession, isForfeit: boolean, guesser?: string) {
     let footer: Eris.EmbedFooterOptions = null;
     const gameRound = gameSession.gameRound;
-    if (!gameRound) return;
     if (gameRound.songAliases.length > 0) {
         footer = {
             text: `Aliases: ${Array.from(gameRound.songAliases).join(", ")}`

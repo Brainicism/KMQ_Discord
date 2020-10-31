@@ -6,7 +6,7 @@ const logger = _logger("end");
 export default class EndCommand implements BaseCommand {
     async call({ gameSessions, message }: CommandArgs) {
         const gameSession = gameSessions[message.guildID];
-        if (!gameSession || !gameSession.gameRound) {
+        if (!gameSession) {
             logger.warn(`${getDebugContext(message)} | No active game session`);
             return;
         }

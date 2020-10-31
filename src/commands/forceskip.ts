@@ -19,7 +19,7 @@ export default class ForceSkipCommand implements BaseCommand {
             logger.warn(`${getDebugContext(message)} | Invalid force-skip. !gameSession: ${!gameSession}. !gameSession.gameRound: ${gameSession && !gameSession.gameRound}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
             return;
         }
-        if (gameSession.gameRound.skipAchieved || gameSession.gameRound.finished) {
+        if (gameSession.gameRound.skipAchieved || !gameSession.gameRound) {
             // song already being skipped
             return;
         }
@@ -28,9 +28,8 @@ export default class ForceSkipCommand implements BaseCommand {
             return;
         }
         gameSession.gameRound.skipAchieved = true;
-        gameSession.endRound(false);
         await sendSongMessage(message, gameSession, true);
-
+        gameSession.endRound(false);
         startGame(gameSessions, guildPreference, message);
         logger.info(`${getDebugContext(message)} | Owner force-skipped.`);
         gameSession.lastActiveNow();
