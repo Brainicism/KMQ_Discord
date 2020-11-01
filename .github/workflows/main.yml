@@ -21,6 +21,11 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2.1.2
+        with:
+          node-version: 14.2.0
+      - run: npm install
       - name: Typescript compiler
         uses: iCrawl/action-tsc@v1
 
