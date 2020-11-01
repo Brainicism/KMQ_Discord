@@ -84,9 +84,6 @@ const downloadSong = (id: string) => {
 
 
 const downloadNewSongs = async (limit?: number) => {
-    const knownDeadIds = new Set((await db.kmq("dead_links")
-        .select("vlink"))
-        .map(x => x.vlink))
     let songs: Array<QueriedSong> = await db.kpopVideos("kpop_videos.app_kpop")
         .select(["nome as name", "name as artist", "vlink as youtubeLink"])
         .join("kpop_videos.app_kpop_group", function () {
@@ -114,6 +111,10 @@ const downloadNewSongs = async (limit?: number) => {
         await db.kmq("not_downloaded").insert(songsToDownload.map(x=>({vlink: x.youtubeLink}))).transacting(trx);
     });
 
+    const knownDeadIds = new Set((await db.kmq("dead_links")
+        .select("vlink"))
+        .map(x => x.vlink))
+
     for (let song of songsToDownload) {
         if (knownDeadIds.has(song.youtubeLink)) {
             deadLinksSkipped++;
@@ -130,14 +131,6 @@ const downloadNewSongs = async (limit?: number) => {
             await fs.promises.unlink(`${process.env.SONG_DOWNLOAD_DIR}/${song.youtubeLink}.mp3.part`);
         }
     }
-
-    //update list of non-downloaded songs
-    const songIdsNotDownloaded = songs.filter(x => !fs.existsSync(path.join(process.env.SONG_DOWNLOAD_DIR, `${x.youtubeLink}.ogg`))).map(x => ({ vlink: x.youtubeLink }));
-    await db.kmq.transaction(async (trx) => {
-        await db.kmq("not_downloaded").del().transacting(trx);
-        await db.kmq("not_downloaded").insert(songIdsNotDownloaded).transacting(trx);
-    })
-    await db.destroy();
     logger.info(`Total songs downloaded: ${downloadCount}, (${deadLinksSkipped} dead links skipped)`);
 }
 
@@ -151,6 +144,24 @@ const convertToOpus = async () => {
     for (const mp3File of mp3Files) {
         await ffmpegOpusJob(mp3File);
     }
+
+    let songs: Array<QueriedSong> = await db.kpopVideos("kpop_videos.app_kpop")
+        .select(["nome as name", "name as artist", "vlink as youtubeLink"])
+        .join("kpop_videos.app_kpop_group", function () {
+            this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id")
+        })
+        .andWhere("dead", "n")
+        .andWhere("vtype", "main")
+        .orderBy("kpop_videos.app_kpop.views", "DESC")
+
+    //update list of non-downloaded songs
+    const songIdsNotDownloaded = songs.filter(x => !fs.existsSync(path.join(process.env.SONG_DOWNLOAD_DIR, `${x.youtubeLink}.ogg`))).map(x => ({ vlink: x.youtubeLink }));
+    await db.kmq.transaction(async (trx) => {
+        await db.kmq("not_downloaded").del().transacting(trx);
+        await db.kmq("not_downloaded").insert(songIdsNotDownloaded).transacting(trx);
+    })
+
+    await db.destroy();
 }
 
 const ffmpegOpusJob = async (mp3File: string) => {
@@ -162,6 +173,7 @@ const ffmpegOpusJob = async (mp3File: string) => {
     let oggPartWithPath = `${oggFileWithPath}.part`;
     let oggFfmpegOutputStream = fs.createWriteStream(oggPartWithPath);
 
+    logger.info(`Starting ffmpeg process for ${mp3File}`)
     return new Promise((resolve, reject) => {
         ffmpeg(`${process.env.SONG_DOWNLOAD_DIR}/${mp3File}`)
             .format("opus")
@@ -170,9 +182,8 @@ const ffmpegOpusJob = async (mp3File: string) => {
             .on("end", () => {
                 try {
                     fs.renameSync(oggPartWithPath, oggFileWithPath);
-                    logger.info("Renamed", oggPartWithPath, "to", oggFileWithPath)
                     fs.unlinkSync(path.join(process.env.SONG_DOWNLOAD_DIR, path.basename(mp3File)));
-                    logger.info("Deleted", mp3File)
+                    logger.info(`Completed ffmpeg process for ${mp3File}, ${path.basename(mp3File)} → ${path.basename(mp3File, ".mp3")}.ogg`);
                     resolve();
                 }
                 catch (err) {
