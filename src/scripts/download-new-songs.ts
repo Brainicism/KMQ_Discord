@@ -82,9 +82,8 @@ const downloadSong = (id: string) => {
     })
 }
 
-
-const downloadNewSongs = async (limit?: number) => {
-    let songs: Array<QueriedSong> = await db.kpopVideos("kpop_videos.app_kpop")
+const getSongsFromDb = async () => {
+    return db.kpopVideos("kpop_videos.app_kpop")
         .select(["nome as name", "name as artist", "vlink as youtubeLink"])
         .join("kpop_videos.app_kpop_group", function () {
             this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id")
@@ -92,6 +91,11 @@ const downloadNewSongs = async (limit?: number) => {
         .andWhere("dead", "n")
         .andWhere("vtype", "main")
         .orderBy("kpop_videos.app_kpop.views", "DESC")
+}
+
+
+const downloadNewSongs = async (limit?: number) => {
+    let songs: Array<QueriedSong> = await getSongsFromDb();
 
     if (limit) {
         songs = songs.slice(0, limit);
@@ -145,14 +149,7 @@ const convertToOpus = async () => {
         await ffmpegOpusJob(mp3File);
     }
 
-    let songs: Array<QueriedSong> = await db.kpopVideos("kpop_videos.app_kpop")
-        .select(["nome as name", "name as artist", "vlink as youtubeLink"])
-        .join("kpop_videos.app_kpop_group", function () {
-            this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id")
-        })
-        .andWhere("dead", "n")
-        .andWhere("vtype", "main")
-        .orderBy("kpop_videos.app_kpop.views", "DESC")
+    let songs: Array<QueriedSong> = await getSongsFromDb();
 
     //update list of non-downloaded songs
     const songIdsNotDownloaded = songs.filter(x => !fs.existsSync(path.join(process.env.SONG_DOWNLOAD_DIR, `${x.youtubeLink}.ogg`))).map(x => ({ vlink: x.youtubeLink }));
@@ -160,8 +157,6 @@ const convertToOpus = async () => {
         await db.kmq("not_downloaded").del().transacting(trx);
         await db.kmq("not_downloaded").insert(songIdsNotDownloaded).transacting(trx);
     })
-
-    await db.destroy();
 }
 
 const ffmpegOpusJob = async (mp3File: string) => {
@@ -173,7 +168,7 @@ const ffmpegOpusJob = async (mp3File: string) => {
     let oggPartWithPath = `${oggFileWithPath}.part`;
     let oggFfmpegOutputStream = fs.createWriteStream(oggPartWithPath);
 
-    logger.info(`Starting ffmpeg process for ${mp3File}`)
+    logger.info(`Encoding ${mp3File} to ${path.basename(mp3File, ".mp3")}.ogg via ffmpeg...`)
     return new Promise((resolve, reject) => {
         ffmpeg(`${process.env.SONG_DOWNLOAD_DIR}/${mp3File}`)
             .format("opus")
@@ -211,6 +206,7 @@ const downloadAndConvertSongs = async (limit?: number) => {
     await clearPartiallyCachedSongs();
     await downloadNewSongs(limit);
     convertToOpus();
+    await db.destroy();
 }
 
 export {
