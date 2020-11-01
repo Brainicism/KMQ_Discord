@@ -1,11 +1,11 @@
-import { BEGINNING_SEARCH_YEAR } from "../commands/cutoff";
-import { DEFAULT_LIMIT } from "../commands/limit";
-import { GENDER } from "../commands/gender";
-import { SEEK_TYPE } from "../commands/seek";
+import { BEGINNING_SEARCH_YEAR } from "../commands/game_options/cutoff";
+import { DEFAULT_LIMIT } from "../commands/game_options/limit";
+import { GENDER } from "../commands/game_options/gender";
+import { SEEK_TYPE } from "../commands/game_options/seek";
 import _logger from "../logger";
 import Knex from "knex";
 import { db } from "../database_context";
-import { MODE_TYPE } from "../commands/mode";
+import { MODE_TYPE } from "../commands/game_options/mode";
 const logger = _logger("guild_preference");
 
 const DEFAULT_OPTIONS = {
@@ -121,9 +121,13 @@ export default class GuildPreference {
         return this.gameOptions.groups.map((x) => x["id"]);
     }
 
-    getGroupNames(): string[] {
+    getDisplayedGroupNames(): string {
         if (this.gameOptions.groups === null) return null;
-        return this.gameOptions.groups.map((x) => x["name"]);
+        let displayedGroupNames = this.gameOptions.groups.map((x) => x["name"]).join(", ");
+        if (displayedGroupNames.length > 400) {
+            displayedGroupNames = `${displayedGroupNames.substr(0, 400)} and many others...`;
+        }
+        return displayedGroupNames;
     }
 
     resetGender() {

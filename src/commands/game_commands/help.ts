@@ -1,11 +1,11 @@
-import BaseCommand, { CommandArgs } from "./base_command";
+import BaseCommand, { CommandArgs } from "../base_command";
 import Eris from "eris";
-import helpMessages from "../data/help_strings.json";
-import { EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, sendPaginationedEmbed, sendEmbed } from "../helpers/discord_utils";
-import _logger from "../logger";
-import { chunkArray } from "../helpers/utils";
-import { getCommandFiles } from "../helpers/management_utils";
-import { DEFAULT_BOT_PREFIX } from "../models/guild_preference";
+import helpMessages from "../../data/help_strings.json";
+import { EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, sendPaginationedEmbed, sendEmbed } from "../../helpers/discord_utils";
+import _logger from "../../logger";
+import { chunkArray } from "../../helpers/utils";
+import { getCommandFiles } from "../../helpers/management_utils";
+import { DEFAULT_BOT_PREFIX } from "../../models/guild_preference";
 const logger = _logger("help");
 const placeholder = /!/g;
 const FIELDS_PER_EMBED = 5;

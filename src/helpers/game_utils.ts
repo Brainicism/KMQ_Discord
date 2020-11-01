@@ -10,17 +10,6 @@ import { getForcePlaySong, isDebugMode, isForcedSongActive } from "./debug_utils
 import { getDebugContext } from "./discord_utils";
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
-export enum GameOption {
-    GENDER = "Gender",
-    CUTOFF = "Cutoff",
-    LIMIT = "Limit",
-    VOLUME = "Volume",
-    SEEK_TYPE = "Seek Type",
-    MODE_TYPE = "Guess Mode",
-    GROUPS = "Groups",
-    GOAL = "Goal",
-    TIMER = "Timer"
-}
 const logger = _logger("game_utils");
 
 export async function playCorrectGuessSong(gameSession: GameSession) {

@@ -1,14 +1,14 @@
-import BaseCommand, { CommandArgs } from "./base_command";
+import BaseCommand, { CommandArgs } from "../base_command";
 import {
     sendSongMessage,
     sendErrorMessage,
     areUserAndBotInSameVoiceChannel,
     getDebugContext,
     getUserIdentifier
-} from "../helpers/discord_utils";
-import { bold } from "../helpers/utils";
-import { startGame, getGuildPreference } from "../helpers/game_utils";
-import _logger from "../logger";
+} from "../../helpers/discord_utils";
+import { bold } from "../../helpers/utils";
+import { startGame, getGuildPreference } from "../../helpers/game_utils";
+import _logger from "../../logger";
 const logger = _logger("forceskip");
 
 export default class ForceSkipCommand implements BaseCommand {
