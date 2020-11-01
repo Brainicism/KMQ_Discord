@@ -33,7 +33,7 @@ export default class GroupsCommand implements BaseCommand {
         }
         guildPreference.setGroups(matchingGroups);
         await sendOptionsMessage(message, guildPreference, GameOption.GROUPS);
-        logger.info(`${getDebugContext(message)} | Groups set to ${guildPreference.getGroupNames()}`);
+        logger.info(`${getDebugContext(message)} | Groups set to ${guildPreference.getDisplayedGroupNames()}`);
     }
 
     help = {

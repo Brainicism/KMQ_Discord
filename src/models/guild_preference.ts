@@ -121,9 +121,13 @@ export default class GuildPreference {
         return this.gameOptions.groups.map((x) => x["id"]);
     }
 
-    getGroupNames(): string[] {
+    getDisplayedGroupNames(): string {
         if (this.gameOptions.groups === null) return null;
-        return this.gameOptions.groups.map((x) => x["name"]);
+        let displayedGroupNames = this.gameOptions.groups.map((x) => x["name"]).join(", ");
+        if (displayedGroupNames.length > 400) {
+            displayedGroupNames = `${displayedGroupNames.substr(0, 400)} and many others...`;
+        }
+        return displayedGroupNames;
     }
 
     resetGender() {

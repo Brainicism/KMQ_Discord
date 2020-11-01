@@ -111,7 +111,7 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
     const optionStrings = {};
     optionStrings[GameOption.CUTOFF] = `between the years ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
     optionStrings[GameOption.GENDER] = `${guildPreference.getSQLGender()} artists`;
-    optionStrings[GameOption.GROUPS] = groupsMode ? `${guildPreference.getGroupNames().join(", ")}` : null;
+    optionStrings[GameOption.GROUPS] = groupsMode ? `${guildPreference.getDisplayedGroupNames()}` : null;
     optionStrings[GameOption.LIMIT] = `${Math.min(totalSongs, guildPreference.getLimit())}`;
     optionStrings[GameOption.SEEK_TYPE] = `${guildPreference.getSeekType()}`;
     optionStrings[GameOption.MODE_TYPE] = `${guildPreference.getModeType() === MODE_TYPE.BOTH ? "song or artist" : guildPreference.getModeType()}`;
