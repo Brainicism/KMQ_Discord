@@ -38,7 +38,7 @@ export async function clearPartiallyCachedSongs() {
 
 }
 
-const downloadSong = (id: string, retries: number) => {
+const downloadSong = (id: string) => {
     const cachedSongLocation = path.join(process.env.SONG_DOWNLOAD_DIR, `${id}.mp3`);
     const tempLocation = `${cachedSongLocation}.part`;
     const cacheStream = fs.createWriteStream(tempLocation);
@@ -62,18 +62,10 @@ const downloadSong = (id: string, retries: number) => {
             ytdl(`https://www.youtube.com/watch?v=${id}`, ytdlOptions)
                 .pipe(cacheStream);
         } catch (e) {
-            if (e !== "Video unavailable" && retries < 3) {
-                logger.error(`Retrying ${id} again...`)
-                downloadSong(id, ++retries);
-                resolve();
-                return;
-            }
-            else {
-                await db.kmq("dead_links")
-                    .insert({ vlink: id, reason: `Failed to retrieve video metadata. error = ${e}` });
-                reject(`Failed to retrieve video metadata. error = ${e}`);
-                return;
-            }
+            await db.kmq("dead_links")
+                .insert({ vlink: id, reason: `Failed to retrieve video metadata. error = ${e}` });
+            reject(`Failed to retrieve video metadata. error = ${e}`);
+            return;
         }
 
         cacheStream.once('finish', async () => {
@@ -129,7 +121,7 @@ const downloadNewSongs = async (limit?: number) => {
         }
         logger.info(`Downloading song: '${song.name}' by ${song.artist} | ${song.youtubeLink}`);
         try {
-            await downloadSong(song.youtubeLink, 0);
+            await downloadSong(song.youtubeLink);
             downloadCount++;
         }
         catch (e) {
@@ -150,28 +142,18 @@ const downloadNewSongs = async (limit?: number) => {
 }
 
 const convertToOpus = async () => {
-    let files: Array<string>;
-    try {
-        files = await fs.promises.readdir(process.env.SONG_DOWNLOAD_DIR);
-    }
-    catch (err) {
-        return logger.error(err);
-    }
+    let files = await fs.promises.readdir(process.env.SONG_DOWNLOAD_DIR);
 
     const endingWithMp3Regex = new RegExp("\\.mp3$");
     const mp3Files = files.filter((file) => file.match(endingWithMp3Regex));
     logger.info(`Converting ${mp3Files.length} from mp3 to opus (in ogg container)`)
 
-    let opusJobs = [];
-    mp3Files.forEach((mp3File) => {
-        opusJobs.push(ffmpegOpusJob(mp3File));
-    });
-    Promise.all(opusJobs).then(() => {
-        logger.info("Completed jobs of length", mp3Files.length);
-    });
+    for (const mp3File of mp3Files) {
+        await ffmpegOpusJob(mp3File);
+    }
 }
 
-const ffmpegOpusJob = (mp3File: string) => {
+const ffmpegOpusJob = async (mp3File: string) => {
     let oggFileWithPath = path.join(process.env.SONG_DOWNLOAD_DIR, `${path.basename(mp3File, ".mp3")}.ogg`);
     if (fs.existsSync(oggFileWithPath)) {
         return;
@@ -185,7 +167,7 @@ const ffmpegOpusJob = (mp3File: string) => {
             .format("opus")
             .audioCodec("libopus")
             .output(oggFfmpegOutputStream)
-            .on('end', () => {
+            .on("end", () => {
                 try {
                     fs.renameSync(oggPartWithPath, oggFileWithPath);
                     logger.info("Renamed", oggPartWithPath, "to", oggFileWithPath)
@@ -203,7 +185,7 @@ const ffmpegOpusJob = (mp3File: string) => {
                     reject();
                 }
             })
-            .on('error', (transcodingErr) => {
+            .on("error", (transcodingErr) => {
                 throw(transcodingErr);
             })
             .run();
