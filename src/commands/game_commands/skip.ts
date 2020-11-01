@@ -1,18 +1,59 @@
-import BaseCommand, { CommandArgs } from "./../base_command";
 import Eris from "eris";
+import BaseCommand, { CommandArgs } from "../base_command";
 import GameSession from "../../models/game_session";
 import {
     sendSongMessage,
     areUserAndBotInSameVoiceChannel,
-    getNumParticipants,
     EMBED_INFO_COLOR,
     getDebugContext,
     EMBED_SUCCESS_COLOR,
-    sendMessage
+    sendMessage,
+    getNumParticipants,
 } from "../../helpers/discord_utils";
 import { startGame, getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
+
 const logger = _logger("skip");
+
+function getSkipsRequired(message: Eris.Message<Eris.GuildTextableChannel>): number {
+    return Math.floor(getNumParticipants(message) * 0.5) + 1;
+}
+
+async function sendSkipNotification(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
+    await sendMessage({ channel: message.channel, authorId: message.author.id }, {
+        embed: {
+            color: EMBED_INFO_COLOR,
+            author: {
+                name: message.author.username,
+                icon_url: message.author.avatarURL,
+            },
+            title: "**Skip**",
+            description: `${gameSession.gameRound.getNumSkippers()}/${getSkipsRequired(message)} skips received.`,
+        },
+    });
+}
+
+async function sendSkipMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
+    const skipMessage = await sendMessage({ channel: message.channel, authorId: message.author.id }, {
+        embed: {
+            color: EMBED_SUCCESS_COLOR,
+            author: {
+                name: message.author.username,
+                icon_url: message.author.avatarURL,
+
+            },
+            title: "**Skip**",
+            description: `${gameSession.gameRound.getNumSkippers()}/${getSkipsRequired(message)} skips achieved, skipping...`,
+        },
+    });
+    setTimeout(() => {
+        skipMessage.delete();
+    }, 2500);
+}
+
+function isSkipMajority(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession): boolean {
+    return gameSession.gameRound.getNumSkippers() >= getSkipsRequired(message);
+}
 
 export default class SkipCommand implements BaseCommand {
     async call({ gameSessions, message }: CommandArgs) {
@@ -34,8 +75,7 @@ export default class SkipCommand implements BaseCommand {
             gameSession.endRound(false);
             startGame(gameSessions, guildPreference, message);
             logger.info(`${getDebugContext(message)} | Skip majority achieved.`);
-        }
-        else {
+        } else {
             await sendSkipNotification(message, gameSession);
             logger.info(`${getDebugContext(message)} | Skip vote received.`);
         }
@@ -45,47 +85,7 @@ export default class SkipCommand implements BaseCommand {
         name: "skip",
         description: "Vote to skip the current song. A song is skipped when majority of participants vote to skip it.",
         usage: "!skip",
-        examples: []
-    }
-    aliases = ["s"]
-}
-
-async function sendSkipNotification(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
-    await sendMessage({ channel: message.channel, authorId: message.author.id }, {
-        embed: {
-            color: EMBED_INFO_COLOR,
-            author: {
-                name: message.author.username,
-                icon_url: message.author.avatarURL
-            },
-            title: "**Skip**",
-            description: `${gameSession.gameRound.getNumSkippers()}/${getSkipsRequired(message)} skips received.`
-        }
-    })
-}
-
-async function sendSkipMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
-    const skipMessage = await sendMessage({ channel: message.channel, authorId: message.author.id }, {
-        embed: {
-            color: EMBED_SUCCESS_COLOR,
-            author: {
-                name: message.author.username,
-                icon_url: message.author.avatarURL
-
-            },
-            title: "**Skip**",
-            description: `${gameSession.gameRound.getNumSkippers()}/${getSkipsRequired(message)} skips achieved, skipping...`
-        }
-    })
-    setTimeout(() => {
-        skipMessage.delete();
-    }, 2500);
-}
-
-function isSkipMajority(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession): boolean {
-    return gameSession.gameRound.getNumSkippers() >= getSkipsRequired(message);
-}
-
-function getSkipsRequired(message: Eris.Message<Eris.GuildTextableChannel>): number {
-    return Math.floor(getNumParticipants(message) * 0.5) + 1;
+        examples: [],
+    };
+    aliases = ["s"];
 }

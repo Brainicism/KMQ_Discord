@@ -3,6 +3,7 @@ import { getDebugContext, sendOptionsMessage, sendErrorMessage } from "../../hel
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
+
 const logger = _logger("limit");
 
 export default class GoalCommand implements BaseCommand {
@@ -16,7 +17,7 @@ export default class GoalCommand implements BaseCommand {
         }
 
         const gameSession = gameSessions[message.guildID];
-        const userGoal = parseInt(parsedMessage.components[0]);
+        const userGoal = parseInt(parsedMessage.components[0], 10);
         if (gameSession && !gameSession.scoreboard.isEmpty() && userGoal <= gameSession.scoreboard.getWinners()[0].getScore()) {
             logger.info(`${getDebugContext(message)} | Goal update ignored.`);
             sendErrorMessage(message, "Error applying goal", "Given goal exceeds highest score. Please raise your goal, or start a new game.");
@@ -35,9 +36,9 @@ export default class GoalCommand implements BaseCommand {
                 name: "goal",
                 type: "number" as const,
                 minValue: 1,
-            }
-        ]
-    }
+            },
+        ],
+    };
     help = {
         name: "goal",
         description: "Once the player with the most points reaches the goal score, the game ends. Calling it with no arguments disables the goal. If a game is in progress, the goal must exceed the highest score",
@@ -45,12 +46,12 @@ export default class GoalCommand implements BaseCommand {
         examples: [
             {
                 example: "`!goal 30`",
-                explanation: "The first player to 30 wins the game"
+                explanation: "The first player to 30 wins the game",
             },
             {
                 example: "`!goal`",
-                explanation: "Disables the goal"
-            }
-        ]
-    }
+                explanation: "Disables the goal",
+            },
+        ],
+    };
 }

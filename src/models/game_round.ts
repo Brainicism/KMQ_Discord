@@ -1,13 +1,33 @@
-import { MODE_TYPE } from "../commands/game_options/mode";
-import _logger from "../logger";
 import Eris from "eris";
-const REMOVED_CHARACTERS_SONG_GUESS = /[\|’\ '?!.-]/g
+import { ModeType } from "../commands/game_options/mode";
+import _logger from "../logger";
+
+// eslint-disable-next-line no-useless-escape
+const REMOVED_CHARACTERS_SONG_GUESS = /[\|’\ '?!.-]/g;
 const CHARACTER_REPLACEMENTS = [
     { pattern: REMOVED_CHARACTERS_SONG_GUESS, replacement: "" },
-    { pattern: /&/g, replacement: "and" }
-]
-const REMOVED_CHARACTERS_ARTIST_GUESS = /[:'.\-★*\ \(\)]/g
+    { pattern: /&/g, replacement: "and" },
+];
+// eslint-disable-next-line no-useless-escape
+const REMOVED_CHARACTERS_ARTIST_GUESS = /[:'.\-★*\ \(\)]/g;
 const logger = _logger("game_round");
+
+function cleanSongName(name: string): string {
+    let cleanName = name.toLowerCase()
+        .split("(")[0]
+        .trim();
+    for (const characterReplacement of CHARACTER_REPLACEMENTS) {
+        cleanName = cleanName.replace(characterReplacement.pattern, characterReplacement.replacement);
+    }
+    return cleanName;
+}
+
+function cleanArtistName(name: string): string {
+    const cleanName = name.toLowerCase()
+        .replace(REMOVED_CHARACTERS_ARTIST_GUESS, "")
+        .trim();
+    return cleanName;
+}
 
 export default class GameRound {
     public readonly song: string;
@@ -39,20 +59,19 @@ export default class GameRound {
     }
 
     checkGuess(message: Eris.Message, modeType: string): number {
-        if (modeType === MODE_TYPE.SONG_NAME) {
+        if (modeType === ModeType.SONG_NAME) {
             return this.checkSongGuess(message.content) ? 1 : 0;
         }
-        else if (modeType === MODE_TYPE.ARTIST) {
+        if (modeType === ModeType.ARTIST) {
             return this.checkArtistGuess(message.content) ? 1 : 0;
         }
-        else if (modeType === MODE_TYPE.BOTH) {
+        if (modeType === ModeType.BOTH) {
             if (this.checkSongGuess(message.content)) return 1;
             if (this.checkArtistGuess(message.content)) return 0.2;
             return 0;
         }
-        else {
-            logger.error(`Illegal mode type: ${modeType}`);
-        }
+        logger.error(`Illegal mode type: ${modeType}`);
+        return 0;
     }
 
     private checkSongGuess(message: string): boolean {
@@ -64,25 +83,7 @@ export default class GameRound {
     private checkArtistGuess(message: string): boolean {
         const guess = cleanArtistName(message);
         const artistNames = this.artist.split("+");
-        const cleanedArtistNames = artistNames.map(x => cleanArtistName(x));
+        const cleanedArtistNames = artistNames.map((x) => cleanArtistName(x));
         return this.song && (guess === cleanArtistName(this.artist) || cleanedArtistNames.includes(guess));
     }
-
-}
-
-function cleanSongName(name: string): string {
-    let cleanName = name.toLowerCase()
-        .split("(")[0]
-        .trim();
-    for (let characterReplacement of CHARACTER_REPLACEMENTS) {
-        cleanName = cleanName.replace(characterReplacement.pattern, characterReplacement.replacement);
-    }
-    return cleanName;
-}
-
-function cleanArtistName(name: string): string {
-    const cleanName = name.toLowerCase()
-        .replace(REMOVED_CHARACTERS_ARTIST_GUESS, "")
-        .trim();
-    return cleanName;
 }

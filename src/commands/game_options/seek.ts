@@ -1,18 +1,19 @@
 import BaseCommand, { CommandArgs } from "../base_command";
 import { sendOptionsMessage, getDebugContext } from "../../helpers/discord_utils";
-import {  getGuildPreference } from "../../helpers/game_utils";
+import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
+
 const logger = _logger("seek");
-export enum SEEK_TYPE {
+export enum SeekType {
     BEGINNING = "beginning",
-    RANDOM = "random"
+    RANDOM = "random",
 }
 export default class SeekCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
         const seekType = parsedMessage.components[0];
-        guildPreference.setSeekType(seekType as SEEK_TYPE);
+        guildPreference.setSeekType(seekType as SeekType);
         await sendOptionsMessage(message, guildPreference, GameOption.SEEK_TYPE);
         logger.info(`${getDebugContext(message)} | Seek type set to ${seekType}`);
     }
@@ -23,10 +24,10 @@ export default class SeekCommand implements BaseCommand {
             {
                 name: "seekType",
                 type: "enum" as const,
-                enums: Object.values(SEEK_TYPE)
-            }
-        ]
-    }
+                enums: Object.values(SeekType),
+            },
+        ],
+    };
 
     help = {
         name: "seek",
@@ -35,12 +36,12 @@ export default class SeekCommand implements BaseCommand {
         examples: [
             {
                 example: "`!seek random`",
-                explanation: "Songs will be played starting from a random point in the middle"
+                explanation: "Songs will be played starting from a random point in the middle",
             },
             {
                 example: "`!seek beginning`",
-                explanation: "Song will be played starting from the very beginning"
-            }
-        ]
-    }
+                explanation: "Song will be played starting from the very beginning",
+            },
+        ],
+    };
 }

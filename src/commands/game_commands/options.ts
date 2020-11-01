@@ -1,7 +1,8 @@
 import { sendOptionsMessage, getDebugContext } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs } from "./../base_command";
+import BaseCommand, { CommandArgs } from "../base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
+
 const logger = _logger("options");
 
 export default class OptionsCommand implements BaseCommand {
@@ -14,6 +15,6 @@ export default class OptionsCommand implements BaseCommand {
         name: "options",
         description: "Displays the current game options.",
         usage: "!options",
-        examples: []
-    }
+        examples: [],
+    };
 }

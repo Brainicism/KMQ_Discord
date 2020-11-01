@@ -1,4 +1,3 @@
-import Knex from "knex";
 import Eris from "eris";
 import BaseCommand from "./commands/base_command";
 import GameSession from "./models/game_session";
@@ -38,5 +37,5 @@ export enum GameOption {
     MODE_TYPE = "Guess Mode",
     GROUPS = "Groups",
     GOAL = "Goal",
-    TIMER = "Timer"
+    TIMER = "Timer",
 }

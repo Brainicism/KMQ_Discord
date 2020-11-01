@@ -1,25 +1,27 @@
-import { db } from "../database_context";
 import fs from "fs";
-import _logger from "../logger";
 import path from "path";
 import { Logger } from "log4js";
+import _logger from "../logger";
+import dbContext from "../database_context";
+
 const logger: Logger = _logger("remove-redunant-aliases");
 
-export async function removeRedunantAliases() {
-    const songAliasPath = path.resolve(__dirname, "../data/song_aliases.json")
+export default async function removeRedunantAliases() {
+    const songAliasPath = path.resolve(__dirname, "../data/song_aliases.json");
     logger.info("Checking for redunant aliases...");
     const songAliases: { [songId: string]: Array<string> } = JSON.parse(fs.readFileSync(songAliasPath).toString());
     let changeCount = 0;
-    for (let videoId in songAliases) {
-        const result = await db.kpopVideos("app_kpop")
+    for (const videoId of Object.keys(songAliases)) {
+        const result = await dbContext.kpopVideos("app_kpop")
             .select("nome as name")
-            .where("vlink", "=", videoId)
+            .where("vlink", "=", videoId);
+
         if (result.length === 0) {
             logger.warn(`Song ID ${videoId} doesn't exist anymore?`);
             continue;
         }
         const songName = result[0].name;
-        let aliases = songAliases[videoId];
+        const aliases = songAliases[videoId];
         if (aliases.includes(songName)) {
             if (aliases.length === 1) {
                 logger.info(`vid ${videoId}, song_name '${songName}' no longer has any aliases`);
@@ -35,18 +37,18 @@ export async function removeRedunantAliases() {
         }
     }
     if (changeCount) {
-        fs.writeFileSync(songAliasPath, JSON.stringify(songAliases, function (k, v) {
-            if (v instanceof Array)
+        fs.writeFileSync(songAliasPath, JSON.stringify(songAliases, (k, v) => {
+            if (v instanceof Array) {
                 return JSON.stringify(v);
+            }
             return v;
         }, 4)
-            .replace(/"\[/g, '[')
-            .replace(/\]"/g, ']')
-            .replace(/\\"/g, '"')
-            .replace(/""/g, '"'));
+            .replace(/"\[/g, "[")
+            .replace(/\]"/g, "]")
+            .replace(/\\"/g, "\"")
+            .replace(/""/g, "\""));
         logger.info(`${changeCount} redunant aliases removed.`);
-    }
-    else {
+    } else {
         logger.info("No redunant aliases found.");
     }
 }

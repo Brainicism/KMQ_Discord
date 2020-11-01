@@ -1,9 +1,12 @@
 import Player from "./player";
 
 export default class Scoreboard {
-    private players: { [userID: number]: Player }
+    private players: { [userID: number]: Player };
+
     private firstPlace: Array<Player>;
+
     private highestScore: number;
+
     constructor() {
         this.players = {};
         this.firstPlace = [];
@@ -13,8 +16,8 @@ export default class Scoreboard {
     getWinnerMessage(): string {
         let winnerStr = "";
 
-        if (this.firstPlace.length == 1) {
-            return this.firstPlace[0].getName() + " wins!";
+        if (this.firstPlace.length === 1) {
+            return `${this.firstPlace[0].getName()} wins!`;
         }
 
         for (let i = 0; i < this.firstPlace.length; i++) {
@@ -22,12 +25,10 @@ export default class Scoreboard {
             if (i === this.firstPlace.length - 1) {
                 // Last entry -- append just the username
                 winnerStr += " ";
-            }
-            else if (i === this.firstPlace.length - 2) {
+            } else if (i === this.firstPlace.length - 2) {
                 // Second last entry -- use "and"
                 winnerStr += " and ";
-            }
-            else {
+            } else {
                 // At least two more entries -- separate by ","
                 winnerStr += ", ";
             }
@@ -38,25 +39,26 @@ export default class Scoreboard {
 
     getScoreboard(): Array<{ name: string, value: string, inline: boolean }> {
         return Object.values(this.players)
-        .sort((a, b) => { return b.getScore() - a.getScore() })
-        .map((x) => {
-            return { name: x.getName(), value: Number.isInteger(x.getScore()) ? x.getScore().toString() : x.getScore().toFixed(1), inline: true }
-        })
+            .sort((a, b) => b.getScore() - a.getScore())
+            .map((x) => (
+                {
+                    name: x.getName(),
+                    value: Number.isInteger(x.getScore()) ? x.getScore().toString() : x.getScore().toFixed(1),
+                    inline: true,
+                }));
     }
 
     updateScoreboard(winnerTag: string, winnerID: string, avatarURL: string, pointsEarned: number) {
         if (!this.players[winnerID]) {
             this.players[winnerID] = new Player(winnerTag, winnerID, avatarURL, pointsEarned);
-        }
-        else {
+        } else {
             this.players[winnerID].incrementScore(pointsEarned);
         }
 
-        if (this.players[winnerID].getScore() == this.highestScore) {
+        if (this.players[winnerID].getScore() === this.highestScore) {
             // If user is tied for first, add them to the first place array
             this.firstPlace.push(this.players[winnerID]);
-        }
-        else if (this.players[winnerID].getScore() > this.highestScore) {
+        } else if (this.players[winnerID].getScore() > this.highestScore) {
             // If user is first, reset first place array and add them
             this.highestScore = this.players[winnerID].getScore();
             this.firstPlace = [this.players[winnerID]];
@@ -77,4 +79,4 @@ export default class Scoreboard {
         }
         return 0;
     }
-};
+}

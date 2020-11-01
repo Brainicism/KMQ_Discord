@@ -3,13 +3,14 @@ import { getDebugContext, sendOptionsMessage } from "../../helpers/discord_utils
 import { getSongCount, getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
+
 const logger = _logger("limit");
 export const DEFAULT_LIMIT = 500;
 
 export default class LimitCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
-        guildPreference.setLimit(parseInt(parsedMessage.components[0]));
+        guildPreference.setLimit(parseInt(parsedMessage.components[0], 10));
         const songCount = await getSongCount(guildPreference);
         if (guildPreference.getLimit() > songCount) {
             guildPreference.setLimit(songCount);
@@ -25,10 +26,10 @@ export default class LimitCommand implements BaseCommand {
                 name: "limit",
                 type: "number" as const,
                 minValue: 1,
-                maxValue: 10000
-            }
-        ]
-    }
+                maxValue: 10000,
+            },
+        ],
+    };
 
     help = {
         name: "limit",
@@ -37,8 +38,8 @@ export default class LimitCommand implements BaseCommand {
         examples: [
             {
                 example: "`!limit 500`",
-                explanation: "Plays the top 500 most listened songs from the currently selected options."
-            }
-        ]
-    }
+                explanation: "Plays the top 500 most listened songs from the currently selected options.",
+            },
+        ],
+    };
 }

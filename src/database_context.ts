@@ -1,13 +1,13 @@
+import Knex from "knex";
 import kmqKnexConfig from "./config/knexfile_kmq";
 import kpopVideosKnexConfig from "./config/knexfile_kpop_videos";
-import Knex from "knex";
 import _logger from "./logger";
 
 const logger = _logger("database_context");
 
 class DatabaseContext {
     public kmq: Knex;
-    public kpopVideos: Knex
+    public kpopVideos: Knex;
 
     constructor() {
         logger.info("Initializing database connections");
@@ -21,4 +21,4 @@ class DatabaseContext {
     }
 }
 
-export const db = new DatabaseContext();
+export default new DatabaseContext();

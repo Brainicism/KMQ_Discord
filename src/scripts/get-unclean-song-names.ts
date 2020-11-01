@@ -1,9 +1,10 @@
 import mysql from "promise-mysql";
-import { QueriedSong } from "../types";
 import fs from "fs";
-import existingSongAliases from "../data/song_aliases.json";
 import { config } from "dotenv";
 import { resolve } from "path";
+import { QueriedSong } from "../types";
+import existingSongAliases from "../data/song_aliases.json";
+
 config({ path: resolve(__dirname, "../../.env") });
 
 (async () => {
@@ -11,14 +12,16 @@ config({ path: resolve(__dirname, "../../.env") });
         connectionLimit: 10,
         host: process.env.DB_HOST,
         user: process.env.DB_USER,
-        password: process.env.DB_PASS
+        password: process.env.DB_PASS,
     });
     const query = `SELECT nome as name, name as artist, vlink as youtubeLink FROM kpop_videos.app_kpop INNER JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
     WHERE dead = "n" AND vtype = "main";`;
     const songs: Array<QueriedSong> = await db.query(query);
-    const nonAsciiSongs = songs.filter(x => !/^[\x00-\x7F’]*$/.test(x.name));
-    const nonCheckedSongs = nonAsciiSongs.filter(x => !(x.youtubeLink in existingSongAliases));
-    fs.writeFileSync("./tmp/song_dump.txt", nonCheckedSongs.map((x => `${x.youtubeLink}, ${x.name}`)).join("\n"));
+    // eslint-disable-next-line no-control-regex
+    const nonAsciiSongs = songs.filter((x) => !/^[\x00-\x7F’]*$/.test(x.name));
+    const nonCheckedSongs = nonAsciiSongs.filter((x) => !(x.youtubeLink in existingSongAliases));
+    fs.writeFileSync("./tmp/song_dump.txt", nonCheckedSongs.map(((x) => `${x.youtubeLink}, ${x.name}`)).join("\n"));
+    // eslint-disable-next-line no-console
     console.log("Done");
     await db.end();
 })();

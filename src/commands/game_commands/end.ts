@@ -1,6 +1,7 @@
 import BaseCommand, { CommandArgs } from "../base_command";
 import { sendEndGameMessage, disconnectVoiceConnection, getDebugContext } from "../../helpers/discord_utils";
 import _logger from "../../logger";
+
 const logger = _logger("end");
 
 export default class EndCommand implements BaseCommand {
@@ -19,7 +20,7 @@ export default class EndCommand implements BaseCommand {
         name: "end",
         description: "Finishes the current game and decides on a winner.",
         usage: "!end",
-        examples: []
-    }
-    aliases = ["stop", "e"]
+        examples: [],
+    };
+    aliases = ["stop", "e"];
 }

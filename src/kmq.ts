@@ -1,11 +1,15 @@
 import Eris from "eris";
-import _logger from "./logger";
-import { State } from "./types";
-import { registerClientEvents, registerProcessEvents, registerCommands, updateGroupList, registerIntervals, initializeBotStatsPoster } from "./helpers/management_utils";
 import { config } from "dotenv";
 import { resolve } from "path";
+import _logger from "./logger";
+import { State } from "./types";
+import {
+    registerClientEvents, registerProcessEvents, registerCommands, updateGroupList, registerIntervals, initializeBotStatsPoster,
+} from "./helpers/management_utils";
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = _logger("kmq");
-config({ path: resolve(__dirname, "../.env") })
+config({ path: resolve(__dirname, "../.env") });
 
 const ERIS_INTENTS = Eris.Constants.Intents;
 const client = new Eris.Client(process.env.BOT_TOKEN, {
@@ -18,21 +22,22 @@ const client = new Eris.Client(process.env.BOT_TOKEN, {
         MESSAGE_DELETE_BULK: true,
         MESSAGE_REACTION_REMOVE: true,
         MESSAGE_REACTION_REMOVE_ALL: true,
-        MESSAGE_REACTION_REMOVE_EMOJI: true
+        MESSAGE_REACTION_REMOVE_EMOJI: true,
     },
     restMode: true,
     maxShards: "auto",
-    intents: ERIS_INTENTS.guilds ^ ERIS_INTENTS.guildVoiceStates ^ ERIS_INTENTS.guildMessages ^ ERIS_INTENTS.guildMessageReactions
+    // eslint-disable-next-line no-bitwise
+    intents: ERIS_INTENTS.guilds ^ ERIS_INTENTS.guildVoiceStates ^ ERIS_INTENTS.guildMessages ^ ERIS_INTENTS.guildMessageReactions,
 });
 
-
-export let state: State = {
+const state: State = {
     commands: {},
     gameSessions: {},
     botStatsPoster: null,
-    client: client
+    client,
 };
 
+export default state;
 
 (async () => {
     await updateGroupList();
