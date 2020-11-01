@@ -132,7 +132,7 @@ const downloadNewSongs = async (limit?: number) => {
     }
 
     //update list of non-downloaded songs
-    const songIdsNotDownloaded = songs.filter(x => !fs.existsSync(path.join(process.env.SONG_DOWNLOAD_DIR, `${x.youtubeLink}.mp3`))).map(x => ({ vlink: x.youtubeLink }));
+    const songIdsNotDownloaded = songs.filter(x => !fs.existsSync(path.join(process.env.SONG_DOWNLOAD_DIR, `${x.youtubeLink}.ogg`))).map(x => ({ vlink: x.youtubeLink }));
     await db.kmq.transaction(async (trx) => {
         await db.kmq("not_downloaded").del().transacting(trx);
         await db.kmq("not_downloaded").insert(songIdsNotDownloaded).transacting(trx);
