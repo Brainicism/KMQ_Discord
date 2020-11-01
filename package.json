@@ -4,9 +4,11 @@
   "main": "src/kmq.js",
   "scripts": {
     "seed": "ts-node src/seed/seed_db",
-    "dev": "./start.sh dev",
-    "prod": "./start.sh prod",
-    "download_songs": "ts-node src/scripts/download-new-songs.ts"
+    "dev": "npm run lint && ./start.sh dev",
+    "dev-no-lint": "./start.sh dev",
+    "prod": "npm run lint && ./start.sh prod",
+    "download_songs": "ts-node src/scripts/download-new-songs.ts",
+    "lint": "npx eslint . --ext .js,.ts"
   },
   "author": "",
   "license": "ISC",
