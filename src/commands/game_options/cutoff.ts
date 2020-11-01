@@ -1,7 +1,8 @@
-import BaseCommand, { CommandArgs } from "./base_command";
-import { sendOptionsMessage, getDebugContext, sendErrorMessage } from "../helpers/discord_utils";
-import { GameOption, getGuildPreference } from "../helpers/game_utils";
-import _logger from "../logger";
+import BaseCommand, { CommandArgs } from "../base_command";
+import { sendOptionsMessage, getDebugContext, sendErrorMessage } from "../../helpers/discord_utils";
+import { getGuildPreference } from "../../helpers/game_utils";
+import _logger from "../../logger";
+import { GameOption } from "../../types";
 const logger = _logger("cutoff");
 export const BEGINNING_SEARCH_YEAR = 2008;
 

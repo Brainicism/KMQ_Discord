@@ -1,11 +1,11 @@
-import { BEGINNING_SEARCH_YEAR } from "../commands/cutoff";
-import { DEFAULT_LIMIT } from "../commands/limit";
-import { GENDER } from "../commands/gender";
-import { SEEK_TYPE } from "../commands/seek";
+import { BEGINNING_SEARCH_YEAR } from "../commands/game_options/cutoff";
+import { DEFAULT_LIMIT } from "../commands/game_options/limit";
+import { GENDER } from "../commands/game_options/gender";
+import { SEEK_TYPE } from "../commands/game_options/seek";
 import _logger from "../logger";
 import Knex from "knex";
 import { db } from "../database_context";
-import { MODE_TYPE } from "../commands/mode";
+import { MODE_TYPE } from "../commands/game_options/mode";
 const logger = _logger("guild_preference");
 
 const DEFAULT_OPTIONS = {

@@ -18,6 +18,7 @@
     "eris": "github:brainicism/eris",
     "eris-pagination": "^0.5.1",
     "erlpack": "github:abalabahaha/erlpack",
+    "glob": "^7.1.6",
     "knex": "^0.21.5",
     "log4js": "^6.3.0",
     "node-opus": "^0.3.3",

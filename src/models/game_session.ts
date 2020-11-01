@@ -1,7 +1,7 @@
 import Eris from "eris";
 import fs from "fs";
 import { CommandArgs } from "../commands/base_command";
-import { SEEK_TYPE } from "../commands/seek";
+import { SEEK_TYPE } from "../commands/game_options/seek";
 import { db } from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import { getDebugContext, getUserIdentifier, getVoiceChannel, sendEndGameMessage, sendErrorMessage, sendSongMessage } from "../helpers/discord_utils";

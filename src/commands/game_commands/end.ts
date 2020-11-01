@@ -1,6 +1,6 @@
-import BaseCommand, { CommandArgs } from "./base_command";
-import { sendEndGameMessage, disconnectVoiceConnection, getDebugContext } from "../helpers/discord_utils";
-import _logger from "../logger";
+import BaseCommand, { CommandArgs } from "../base_command";
+import { sendEndGameMessage, disconnectVoiceConnection, getDebugContext } from "../../helpers/discord_utils";
+import _logger from "../../logger";
 const logger = _logger("end");
 
 export default class EndCommand implements BaseCommand {

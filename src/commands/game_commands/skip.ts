@@ -1,6 +1,6 @@
-import BaseCommand, { CommandArgs } from "./base_command";
+import BaseCommand, { CommandArgs } from "./../base_command";
 import Eris from "eris";
-import GameSession from "../models/game_session";
+import GameSession from "../../models/game_session";
 import {
     sendSongMessage,
     areUserAndBotInSameVoiceChannel,
@@ -9,9 +9,9 @@ import {
     getDebugContext,
     EMBED_SUCCESS_COLOR,
     sendMessage
-} from "../helpers/discord_utils";
-import { startGame, getGuildPreference } from "../helpers/game_utils";
-import _logger from "../logger";
+} from "../../helpers/discord_utils";
+import { startGame, getGuildPreference } from "../../helpers/game_utils";
+import _logger from "../../logger";
 const logger = _logger("skip");
 
 export default class SkipCommand implements BaseCommand {

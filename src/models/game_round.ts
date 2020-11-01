@@ -1,4 +1,4 @@
-import { MODE_TYPE } from "../commands/mode";
+import { MODE_TYPE } from "../commands/game_options/mode";
 import _logger from "../logger";
 import Eris from "eris";
 const REMOVED_CHARACTERS_SONG_GUESS = /[\|’\ '?!.-]/g

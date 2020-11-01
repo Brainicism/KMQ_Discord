@@ -1,9 +1,10 @@
-import BaseCommand, { CommandArgs } from "./base_command";
-import { sendOptionsMessage, getDebugContext, sendErrorMessage } from "../helpers/discord_utils";
-import { GameOption, getGuildPreference } from "../helpers/game_utils";
-import { db } from "../database_context";
-import _logger from "../logger";
-import { DEFAULT_BOT_PREFIX } from "../models/guild_preference";
+import BaseCommand, { CommandArgs } from "../base_command";
+import { sendOptionsMessage, getDebugContext, sendErrorMessage } from "../../helpers/discord_utils";
+import { getGuildPreference } from "../../helpers/game_utils";
+import { db } from "../../database_context";
+import _logger from "../../logger";
+import { DEFAULT_BOT_PREFIX } from "../../models/guild_preference";
+import { GameOption } from "../../types";
 const logger = _logger("groups");
 export default class GroupsCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {

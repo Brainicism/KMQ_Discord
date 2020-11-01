@@ -25,6 +25,10 @@ import BaseCommand from "../commands/base_command";
 import debugHandler from "../events/client/debug";
 import guildCreateHandler from "../events/client/guildCreate";
 import BotStatsPoster from "./bot_stats_poster";
+import _glob from "glob";
+import { promisify } from "util";
+const glob = promisify(_glob);
+
 const logger = _logger("management_utils");
 
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 2, 1]);
@@ -144,20 +148,18 @@ export function getCommandFiles(): Promise<{ [commandName: string]: BaseCommand 
         let commandMap = {};
         let files: Array<string>;
         try {
-            files = await fs.promises.readdir("./commands");
+            files = await glob("commands/**/*.*");
+            for (const file of files) {
+                const command = await import("../" + file);
+                const commandName = path.parse(file).name;
+                commandMap[commandName] = new command.default()
+            }
+            resolve(commandMap);
         }
         catch (err) {
             reject();
             return logger.error(`Unable to read commands error = ${err}`);
         }
-
-        for (const file of files) {
-            const command = await import(`../commands/${file}`);
-            const commandName = file.split(".")[0];
-            commandMap[commandName] = new command.default()
-        }
-        resolve(commandMap);
-
     })
 }
 
