@@ -29,4 +29,5 @@ jobs:
       - run: npm install
       - name: tsc
         uses: iCrawl/action-tsc@v1
-
+      - name: npm run lint
+        run: npm run lint
