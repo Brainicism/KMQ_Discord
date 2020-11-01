@@ -1,7 +1,6 @@
 node_modules/
 main.db
 .env
-src/config/log_config.json
 src/config/debug_settings.json
 .cache/
 logs/
