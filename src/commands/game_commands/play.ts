@@ -1,9 +1,9 @@
-import GameSession from "../models/game_session";
-import { sendErrorMessage, getDebugContext, sendInfoMessage, getVoiceChannel, voicePermissionsCheck } from "../helpers/discord_utils";
-import { startGame, getGuildPreference } from "../helpers/game_utils";
-import BaseCommand, { CommandArgs } from "./base_command";
-import _logger from "../logger";
-import { DEFAULT_BOT_PREFIX } from "../models/guild_preference";
+import GameSession from "../../models/game_session";
+import { sendErrorMessage, getDebugContext, sendInfoMessage, getVoiceChannel, voicePermissionsCheck } from "../../helpers/discord_utils";
+import { startGame, getGuildPreference } from "../../helpers/game_utils";
+import BaseCommand, { CommandArgs } from "../base_command";
+import _logger from "../../logger";
+import { DEFAULT_BOT_PREFIX } from "../../models/guild_preference";
 const logger = _logger("play");
 
 export default class PlayCommand implements BaseCommand {

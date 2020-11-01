@@ -1,7 +1,7 @@
-import BaseCommand, { CommandArgs } from "./base_command";
-import { getDebugChannel, getDebugContext, sendErrorMessage, sendInfoMessage } from "../helpers/discord_utils";
-import _logger from "../logger";
-import { state } from "../kmq";
+import BaseCommand, { CommandArgs } from "../base_command";
+import { getDebugChannel, getDebugContext, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
+import _logger from "../../logger";
+import { state } from "../../kmq";
 const logger = _logger("eval");
 
 export default class EvalCommand implements BaseCommand {

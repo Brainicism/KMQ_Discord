@@ -1,10 +1,10 @@
-import BaseCommand, { CommandArgs } from "./base_command";
+import BaseCommand, { CommandArgs } from "../base_command";
 import fs from "fs";
-import _logger from "../logger";
-import { db } from "../database_context";
+import _logger from "../../logger";
+import { db } from "../../database_context";
 import path from "path";
-import { EMBED_INFO_COLOR, getDebugContext, sendMessage } from "../helpers/discord_utils";
-import { bold } from "../helpers/utils";
+import { EMBED_INFO_COLOR, getDebugContext, sendMessage } from "../../helpers/discord_utils";
+import { bold } from "../../helpers/utils";
 const logger = _logger("news");
 
 export default class NewsCommand implements BaseCommand {

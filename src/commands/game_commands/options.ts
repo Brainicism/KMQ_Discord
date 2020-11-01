@@ -1,7 +1,7 @@
-import { sendOptionsMessage, getDebugContext } from "../helpers/discord_utils";
-import BaseCommand, { CommandArgs } from "./base_command";
-import { getGuildPreference } from "../helpers/game_utils";
-import _logger from "../logger";
+import { sendOptionsMessage, getDebugContext } from "../../helpers/discord_utils";
+import BaseCommand, { CommandArgs } from "./../base_command";
+import { getGuildPreference } from "../../helpers/game_utils";
+import _logger from "../../logger";
 const logger = _logger("options");
 
 export default class OptionsCommand implements BaseCommand {

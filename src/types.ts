@@ -28,3 +28,15 @@ export interface State {
     botStatsPoster: BotStatsPoster;
     client: Eris.Client
 }
+
+export enum GameOption {
+    GENDER = "Gender",
+    CUTOFF = "Cutoff",
+    LIMIT = "Limit",
+    VOLUME = "Volume",
+    SEEK_TYPE = "Seek Type",
+    MODE_TYPE = "Guess Mode",
+    GROUPS = "Groups",
+    GOAL = "Goal",
+    TIMER = "Timer"
+}

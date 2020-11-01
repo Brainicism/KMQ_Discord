@@ -1,12 +1,12 @@
-import BaseCommand, { CommandArgs } from "./base_command";
+import BaseCommand, { CommandArgs } from "../base_command";
 import Eris from "eris";
 import {
     sendEmbed, getDebugContext
-} from "../helpers/discord_utils";
-import { db } from "../database_context";
-import { bold } from "../helpers/utils";
+} from "../../helpers/discord_utils";
+import { db } from "../../database_context";
+import { bold } from "../../helpers/utils";
 import os from "os";
-import _logger from "../logger";
+import _logger from "../../logger";
 const logger = _logger("stats");
 
 export default class SkipCommand implements BaseCommand {

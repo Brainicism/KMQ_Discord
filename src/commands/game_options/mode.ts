@@ -1,7 +1,8 @@
-import BaseCommand, { CommandArgs } from "./base_command";
-import _logger from "../logger";
-import { getGuildPreference, GameOption } from "../helpers/game_utils";
-import { sendOptionsMessage, getDebugContext } from "../helpers/discord_utils";
+import BaseCommand, { CommandArgs } from "../base_command";
+import _logger from "../../logger";
+import { getGuildPreference } from "../../helpers/game_utils";
+import { sendOptionsMessage, getDebugContext } from "../../helpers/discord_utils";
+import { GameOption } from "../../types";
 const logger = _logger("mode");
 
 export enum MODE_TYPE {

@@ -3,12 +3,12 @@ import GuildPreference, { DEFAULT_BOT_PREFIX } from "../models/guild_preference"
 import GameSession from "../models/game_session";
 import EmbedPaginator from "eris-pagination"
 import _logger from "../logger";
-import { getSongCount, GameOption } from "./game_utils";
+import { getSongCount } from "./game_utils";
 import { getFact } from "../fact_generator";
-import { SendMessagePayload } from "../types";
+import { GameOption, SendMessagePayload } from "../types";
 import { chunkArray, codeLine, bold } from "./utils";
 import { state } from "../kmq";
-import { MODE_TYPE } from "../commands/mode";
+import { MODE_TYPE } from "../commands/game_options/mode";
 const logger = _logger("utils");
 export const EMBED_INFO_COLOR = 0x000000; // BLACK
 export const EMBED_ERROR_COLOR = 0xE74C3C; // RED
@@ -108,33 +108,27 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
     const goalMode = guildPreference.isGoalSet();
     const guessTimeoutMode = guildPreference.isGuessTimeoutSet();
 
-    let cutoffString = `between the years ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
-    let genderString = `${guildPreference.getSQLGender()} artists`;
-    let groupsString = groupsMode ? `${guildPreference.getGroupNames().join(", ")}` : null;
-    let limitString = `${Math.min(totalSongs, guildPreference.getLimit())}`;
-    let seekTypeString = `${guildPreference.getSeekType()}`;
-    let modeTypeString = `${guildPreference.getModeType() === MODE_TYPE.BOTH ? "song or artist" : guildPreference.getModeType()}`;
-    let goalString = `${guildPreference.getGoal()}`;
-    let guessTimeoutString = `${guildPreference.getGuessTimeout()}`;
+    const optionStrings = {};
+    optionStrings[GameOption.CUTOFF] = `between the years ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
+    optionStrings[GameOption.GENDER] = `${guildPreference.getSQLGender()} artists`;
+    optionStrings[GameOption.GROUPS] = groupsMode ? `${guildPreference.getDisplayedGroupNames()}` : null;
+    optionStrings[GameOption.LIMIT] = `${Math.min(totalSongs, guildPreference.getLimit())}`;
+    optionStrings[GameOption.SEEK_TYPE] = `${guildPreference.getSeekType()}`;
+    optionStrings[GameOption.MODE_TYPE] = `${guildPreference.getModeType() === MODE_TYPE.BOTH ? "song or artist" : guildPreference.getModeType()}`;
+    optionStrings[GameOption.GOAL] = `${guildPreference.getGoal()}`;
+    optionStrings[GameOption.TIMER] = `${guildPreference.getGuessTimeout()}`;
 
-    cutoffString = updatedOption == GameOption.CUTOFF ? bold(cutoffString) : codeLine(cutoffString);
-    genderString = updatedOption == GameOption.GENDER ? bold(genderString) : codeLine(genderString);
-    limitString = updatedOption == GameOption.LIMIT ? bold(limitString) : codeLine(limitString);
-    if (groupsString && groupsString.length > 400) {
-        groupsString = `${groupsString.substr(0, 400)} and many others...`;
+    for (let gameOption in optionStrings) {
+        const gameOptionString = optionStrings[gameOption];
+        optionStrings[gameOption] = updatedOption === gameOption ? bold(gameOptionString): codeLine(gameOptionString);
     }
-    groupsString = updatedOption == GameOption.GROUPS ? bold(groupsString) : codeLine(groupsString);
-    seekTypeString = updatedOption == GameOption.SEEK_TYPE ? bold(seekTypeString) : codeLine(seekTypeString);
-    modeTypeString = updatedOption == GameOption.MODE_TYPE ? bold(modeTypeString) : codeLine(modeTypeString);
-    goalString = updatedOption == GameOption.GOAL ? bold(goalString) : codeLine(goalString);
-    guessTimeoutString = updatedOption == GameOption.TIMER ? bold(guessTimeoutString) : codeLine(guessTimeoutString);
-
-    let goalMessage = `First one to ${goalString} points wins.`;
-    let guessTimeoutMessage = ` in less than ${guessTimeoutString} seconds`;
+  
+    let goalMessage = `First one to ${optionStrings[GameOption.GOAL]} points wins.`;
+    let guessTimeoutMessage = ` in less than ${optionStrings[GameOption.TIMER]} seconds`;
 
     await sendInfoMessage(message,
         updatedOption == null ? "Options" : `${updatedOption} updated`,
-        `Now playing the ${limitString} out of the __${totalSongs}__ most popular songs by ${groupsMode ? groupsString : genderString} ${cutoffString}. \nPlaying from the ${seekTypeString} point of each song. Guess the ${modeTypeString}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}`,
+        `Now playing the ${optionStrings[GameOption.LIMIT]} out of the __${totalSongs}__ most popular songs by ${groupsMode ? optionStrings[GameOption.GROUPS] : optionStrings[GameOption.GENDER]} ${optionStrings[GameOption.CUTOFF]}. \nPlaying from the ${optionStrings[GameOption.SEEK_TYPE]} point of each song. Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}`,
         updatedOption == null ? `Psst. Your bot prefix is \`${DEFAULT_BOT_PREFIX}\`.` : null,
         updatedOption == null ? "https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/src/assets/tsukasa.jpg" : null
     );
@@ -315,6 +309,6 @@ export async function checkBotIsAlone(gameSession: GameSession, channel: Eris.Vo
 
 export function getDebugChannel(): Eris.TextChannel {
     if (!process.env.DEBUG_SERVER_ID || !process.env.DEBUG_TEXT_CHANNEL_ID) return null;
-    return <Eris.TextChannel> state.client.guilds.get(process.env.DEBUG_SERVER_ID)
+    return <Eris.TextChannel>state.client.guilds.get(process.env.DEBUG_SERVER_ID)
         .channels.get(process.env.DEBUG_TEXT_CHANNEL_ID);
 }
