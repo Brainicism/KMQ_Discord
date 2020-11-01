@@ -1,10 +1,23 @@
+import Eris from "eris";
 import { getDebugContext, sendErrorMessage } from "./discord_utils";
 import { ParsedMessage } from "../types";
 import { CommandValidations } from "../commands/base_command";
 import _logger from "../logger";
-import Eris from "eris";
 import { DEFAULT_BOT_PREFIX } from "../models/guild_preference";
+
 const logger = _logger("validate");
+
+async function sendValidationErrorMessage(message: Eris.Message<Eris.GuildTextableChannel>, warning: string, arg: string | Array<string>) {
+    await sendErrorMessage(message, "Input validation error", warning);
+    logger.warn(`${getDebugContext(message)} | ${warning}. val = ${arg}`);
+}
+
+function arrayToString(arr: Array<string>): string {
+    const elements = arr.map((element) => `\`${element}\``);
+    if (elements.length === 1) return elements[0];
+    const lastElement = elements.splice(-1);
+    return `${elements.join(", ")} and ${lastElement}`;
+}
 
 export default (message: Eris.Message<Eris.GuildTextableChannel>, parsedMessage: ParsedMessage, validations: CommandValidations) => {
     if (!validations) return true;
@@ -18,17 +31,17 @@ export default (message: Eris.Message<Eris.GuildTextableChannel>, parsedMessage:
     for (let i = 0; i < args.length; i++) {
         const validation = validations.arguments[i];
         let arg = args[i];
-        //check arg type
+        // check arg type
         switch (validation.type) {
-            case "number":
-                if (isNaN(Number(arg))) {
+            case "number": {
+                if (Number.isNaN(Number(arg))) {
                     sendValidationErrorMessage(message,
                         `Expected numeric value for \`${validation.name}\`.`,
                         arg);
                     return false;
                 }
-                //parse as integer for now, might cause problems later?
-                const intArg = parseInt(arg);
+                // parse as integer for now, might cause problems later?
+                const intArg = parseInt(arg, 10);
                 if ("minValue" in validation && intArg < validation.minValue) {
                     sendValidationErrorMessage(message,
                         `Expected value greater than \`${validation.minValue}\` for \`${validation.name}\`.`,
@@ -42,17 +55,19 @@ export default (message: Eris.Message<Eris.GuildTextableChannel>, parsedMessage:
                     return false;
                 }
                 break;
-            case "boolean":
+            }
+            case "boolean": {
                 arg = arg.toLowerCase();
-                if (!(arg == "false" || arg == "true")) {
+                if (!(arg === "false" || arg === "true")) {
                     sendValidationErrorMessage(message,
                         `Expected true/false value for \`${validation.name}\`.`,
                         arg);
                     return false;
                 }
                 break;
-            case "enum":
-                const enums = validation.enums;
+            }
+            case "enum": {
+                const { enums } = validation;
                 arg = arg.toLowerCase();
                 if (!enums.includes(arg)) {
                     sendValidationErrorMessage(message,
@@ -62,7 +77,8 @@ export default (message: Eris.Message<Eris.GuildTextableChannel>, parsedMessage:
                 }
                 args[i] = arg;
                 break;
-            case "char":
+            }
+            case "char": {
                 if (arg.length !== 1) {
                     sendValidationErrorMessage(message,
                         `Expected a character for \`${validation.name}\`.`,
@@ -70,21 +86,11 @@ export default (message: Eris.Message<Eris.GuildTextableChannel>, parsedMessage:
                     return false;
                 }
                 break;
-            default:
+            }
+            default: {
                 logger.error(`Undefined argument type. ${validation}`);
+            }
         }
     }
     return true;
-}
-
-function arrayToString(elements: Array<string>): string {
-    elements = elements.map(element => `\`${element}\``);
-    if (elements.length == 1) return elements[0];
-    const lastElement = elements.splice(-1);
-    return `${elements.join(", ")} and ${lastElement}`
-}
-
-async function sendValidationErrorMessage(message: Eris.Message<Eris.GuildTextableChannel>, warning: string, arg: string | Array<string>) {
-    await sendErrorMessage(message, "Input validation error", warning);
-    logger.warn(`${getDebugContext(message)} | ${warning}. val = ${arg}`);
-}
+};

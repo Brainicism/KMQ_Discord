@@ -3,6 +3,7 @@ import { sendOptionsMessage, getDebugContext, sendErrorMessage } from "../../hel
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
+
 const logger = _logger("cutoff");
 export const BEGINNING_SEARCH_YEAR = 2008;
 
@@ -12,17 +13,16 @@ export default class CutoffCommand implements BaseCommand {
         const yearRange = parsedMessage.components;
         const startYear = yearRange[0];
         if (yearRange.length === 1) {
-            guildPreference.setBeginningCutoffYear(parseInt(startYear));
+            guildPreference.setBeginningCutoffYear(parseInt(startYear, 10));
             guildPreference.setEndCutoffYear((new Date()).getFullYear());
-        }
-        else if (yearRange.length === 2) {
+        } else if (yearRange.length === 2) {
             const endYear = yearRange[1];
             if (endYear < startYear) {
                 await sendErrorMessage(message, "Invalid end year", "End year must be after or equal to start year");
                 return;
             }
-            guildPreference.setBeginningCutoffYear(parseInt(startYear));
-            guildPreference.setEndCutoffYear(parseInt(endYear));
+            guildPreference.setBeginningCutoffYear(parseInt(startYear, 10));
+            guildPreference.setEndCutoffYear(parseInt(endYear, 10));
         }
         await sendOptionsMessage(message, guildPreference, GameOption.CUTOFF);
         logger.info(`${getDebugContext(message)} | Cutoff set to ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`);
@@ -35,16 +35,16 @@ export default class CutoffCommand implements BaseCommand {
                 name: "cutoff_start",
                 type: "number" as const,
                 minValue: BEGINNING_SEARCH_YEAR,
-                maxValue: (new Date()).getFullYear()
+                maxValue: (new Date()).getFullYear(),
             },
             {
                 name: "cutoff_end",
                 type: "number" as const,
                 minValue: BEGINNING_SEARCH_YEAR,
-                maxValue: (new Date()).getFullYear()
-            }
-        ]
-    }
+                maxValue: (new Date()).getFullYear(),
+            },
+        ],
+    };
 
     help = {
         name: "cutoff",
@@ -53,12 +53,12 @@ export default class CutoffCommand implements BaseCommand {
         examples: [
             {
                 example: "`!cutoff 2015`",
-                explanation: "Play songs released after the year 2015."
+                explanation: "Play songs released after the year 2015.",
             },
             {
                 example: "`!cutoff 2015 2018`",
-                explanation: "Play songs released between the years 2015-2018."
-            }
-        ]
-    }
+                explanation: "Play songs released between the years 2015-2018.",
+            },
+        ],
+    };
 }

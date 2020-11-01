@@ -30,4 +30,4 @@ export default class Player {
     incrementScore(pointsEarned: number) {
         this.score += pointsEarned;
     }
-};
+}

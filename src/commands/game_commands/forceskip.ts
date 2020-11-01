@@ -4,11 +4,12 @@ import {
     sendErrorMessage,
     areUserAndBotInSameVoiceChannel,
     getDebugContext,
-    getUserIdentifier
+    getUserIdentifier,
 } from "../../helpers/discord_utils";
 import { bold } from "../../helpers/utils";
 import { startGame, getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
+
 const logger = _logger("forceskip");
 
 export default class ForceSkipCommand implements BaseCommand {
@@ -38,7 +39,7 @@ export default class ForceSkipCommand implements BaseCommand {
         name: "forceskip",
         description: "The person that started the game can force-skip the current song, no majority necessary.",
         usage: "!forceskip",
-        examples: []
-    }
-    aliases = ["fskip", "fs"]
+        examples: [],
+    };
+    aliases = ["fskip", "fs"];
 }

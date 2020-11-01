@@ -19,4 +19,4 @@ export default (name: string): log4js.Logger => {
     }
     );
     return log4js.getLogger(name);
-}
+};

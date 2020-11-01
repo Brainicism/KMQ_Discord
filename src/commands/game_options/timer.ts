@@ -3,6 +3,7 @@ import { getDebugContext, sendOptionsMessage } from "../../helpers/discord_utils
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
+
 const logger = _logger("guessTimeout");
 
 export default class GuessTimeoutCommand implements BaseCommand {
@@ -18,7 +19,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
             logger.info(`${getDebugContext(message)} | Guess timeout disabled.`);
             return;
         }
-        const time = parseInt(parsedMessage.components[0]);
+        const time = parseInt(parsedMessage.components[0], 10);
 
         guildPreference.setGuessTimeout(time);
         if (gameSession && gameSession.sessionInitialized && gameSession.connection.playing) {
@@ -37,10 +38,10 @@ export default class GuessTimeoutCommand implements BaseCommand {
                 name: "timer",
                 type: "number" as const,
                 minValue: 2,
-                maxValue: 180
-            }
-        ]
-    }
+                maxValue: 180,
+            },
+        ],
+    };
     help = {
         name: "timer",
         description: "Try your best to guess correctly before the timer runs out! Enter a time in seconds, or give no arguments to disable.",
@@ -48,13 +49,13 @@ export default class GuessTimeoutCommand implements BaseCommand {
         examples: [
             {
                 example: "`!timer 15`",
-                explanation: "In 15 seconds, if no user has guessed correctly, the round ends and the next one begins automatically"
+                explanation: "In 15 seconds, if no user has guessed correctly, the round ends and the next one begins automatically",
             },
             {
                 example: "`!timer`",
-                explanation: "Disables the timer"
-            }
-        ]
-    }
-    aliases = ["time", "timeout", "t"]
+                explanation: "Disables the timer",
+            },
+        ],
+    };
+    aliases = ["time", "timeout", "t"];
 }

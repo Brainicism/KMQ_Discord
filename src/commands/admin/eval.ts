@@ -1,7 +1,10 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { getDebugChannel, getDebugContext, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
+import {
+    getDebugChannel, getDebugContext, sendErrorMessage, sendInfoMessage,
+} from "../../helpers/discord_utils";
 import _logger from "../../logger";
-import { state } from "../../kmq";
+import state from "../../kmq";
+
 const logger = _logger("eval");
 
 export default class EvalCommand implements BaseCommand {
@@ -13,14 +16,16 @@ export default class EvalCommand implements BaseCommand {
             return;
         }
 
-        let evalString = parsedMessage.argument;
-        logger.info(`Executing command: ${evalString}`)
-        let result = function (command: string) {
+        const evalString = parsedMessage.argument;
+        logger.info(`Executing command: ${evalString}`);
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const evalFunc = function executeEval(command: string) {
             try {
+                // eslint-disable-next-line no-eval
                 const result = eval(command);
                 sendInfoMessage(message, evalString, result === undefined ? "undefined" : JSON.stringify(result));
-            }
-            catch (e) {
+            } catch (e) {
                 sendErrorMessage(message, evalString, e.toString());
             }
         }.call(state, evalString);

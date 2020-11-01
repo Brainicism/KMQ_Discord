@@ -1,19 +1,20 @@
+/* eslint-disable no-console */
 import { spawn, exec } from "child_process";
-import { db } from "../database_context";
+import dbContext from "../database_context";
 
 function serverShutdown(restartMinutes: number, restart: boolean) {
     return new Promise((resolve) => {
         const logs = spawn("pm2", ["logs", "kmq", "--out"]);
 
-        logs.stdout.on("data", data => {
+        logs.stdout.on("data", (data) => {
             console.log(`${data}`);
         });
 
-        logs.stderr.on("data", data => {
+        logs.stderr.on("data", (data) => {
             console.log(`${data}`);
         });
 
-        logs.on('error', (error) => {
+        logs.on("error", (error) => {
             console.log(`${error.message}`);
         });
 
@@ -21,11 +22,11 @@ function serverShutdown(restartMinutes: number, restart: boolean) {
             logs.removeAllListeners();
             logs.kill();
             console.log(restart ? "Restarting now..." : "Stopping now");
-            exec(restart ? 'pm2 restart kmq' : 'pm2 stop kmq', (err) => {
+            exec(restart ? "pm2 restart kmq" : "pm2 stop kmq", () => {
                 resolve();
             });
-        }, restartMinutes * 1000 * 60)
-    })
+        }, restartMinutes * 1000 * 60);
+    });
 }
 
 (async () => {
@@ -34,15 +35,15 @@ function serverShutdown(restartMinutes: number, restart: boolean) {
         console.error("Missing arguments");
         process.exit(-1);
     }
-    const restartMinutes = parseInt(args[0]);
+    const restartMinutes = parseInt(args[0], 10);
     const restart = args[1] === "true";
     const restartDate = new Date();
     restartDate.setMinutes(restartDate.getMinutes() + restartMinutes);
 
-    await db.kmq("restart_notifications").where("id", "=", "1")
-                .update({restart_time: restartDate})
+    await dbContext.kmq("restart_notifications").where("id", "=", "1")
+        .update({ restart_time: restartDate });
 
     console.log(`Next restart notification scheduled at ${restartDate}`);
-    db.destroy();
+    dbContext.destroy();
     await serverShutdown(restartMinutes, restart);
 })();

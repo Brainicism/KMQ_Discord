@@ -1,0 +1,5 @@
+.eslintrc.js
+node_modules
+build
+migrations
+src/config

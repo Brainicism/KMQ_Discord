@@ -1,16 +1,25 @@
+import Knex from "knex";
 import { BEGINNING_SEARCH_YEAR } from "../commands/game_options/cutoff";
 import { DEFAULT_LIMIT } from "../commands/game_options/limit";
 import { GENDER } from "../commands/game_options/gender";
-import { SEEK_TYPE } from "../commands/game_options/seek";
+import { SeekType } from "../commands/game_options/seek";
 import _logger from "../logger";
-import Knex from "knex";
-import { db } from "../database_context";
-import { MODE_TYPE } from "../commands/game_options/mode";
+import dbContext from "../database_context";
+import { ModeType } from "../commands/game_options/mode";
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = _logger("guild_preference");
 
 const DEFAULT_OPTIONS = {
-    beginningYear: BEGINNING_SEARCH_YEAR, endYear: (new Date()).getFullYear(), gender: [GENDER.FEMALE],
-    limit: DEFAULT_LIMIT, seekType: SEEK_TYPE.RANDOM, modeType: MODE_TYPE.SONG_NAME, groups: null, goal: null, guessTimeout: null
+    beginningYear: BEGINNING_SEARCH_YEAR,
+    endYear: (new Date()).getFullYear(),
+    gender: [GENDER.FEMALE],
+    limit: DEFAULT_LIMIT,
+    seekType: SeekType.RANDOM,
+    modeType: ModeType.SONG_NAME,
+    groups: null,
+    goal: null,
+    guessTimeout: null,
 };
 
 export const DEFAULT_BOT_PREFIX = ",";
@@ -20,8 +29,8 @@ interface GameOptions {
     endYear: number;
     gender: GENDER[];
     limit: number;
-    seekType: SEEK_TYPE;
-    modeType: MODE_TYPE;
+    seekType: SeekType;
+    modeType: ModeType;
     groups: { id: number, name: string }[];
     goal: number;
     guessTimeout: number;
@@ -38,36 +47,35 @@ export default class GuildPreference {
             return;
         }
         this.gameOptions = json.gameOptions;
-        //apply default game option for empty
+        // apply default game option for empty
         let gameOptionModified = false;
-        for (let defaultOption in DEFAULT_OPTIONS) {
+        for (const defaultOption in DEFAULT_OPTIONS) {
             if (!(defaultOption in this.gameOptions)) {
                 this.gameOptions[defaultOption] = DEFAULT_OPTIONS[defaultOption];
                 gameOptionModified = true;
             }
         }
 
-        //extraneous keys
-        for (let option in this.gameOptions) {
+        // extraneous keys
+        for (const option in this.gameOptions) {
             if (!(option in DEFAULT_OPTIONS)) {
-                console.log("Extra" + option);
                 delete this.gameOptions[option];
                 gameOptionModified = true;
             }
         }
         if (gameOptionModified) {
-            this.updateGuildPreferences(db.kmq);
+            this.updateGuildPreferences(dbContext.kmq);
         }
     }
 
     setLimit(limit: number) {
         this.gameOptions.limit = limit;
-        this.updateGuildPreferences(db.kmq);
+        this.updateGuildPreferences(dbContext.kmq);
     }
 
     resetLimit() {
         this.gameOptions.limit = DEFAULT_LIMIT;
-        this.updateGuildPreferences(db.kmq);
+        this.updateGuildPreferences(dbContext.kmq);
     }
 
     getLimit(): number {
@@ -76,30 +84,26 @@ export default class GuildPreference {
 
     setBeginningCutoffYear(year: number) {
         this.gameOptions.beginningYear = year;
-        this.updateGuildPreferences(db.kmq);
+        this.updateGuildPreferences(dbContext.kmq);
     }
 
     resetBeginningCutoffYear() {
         this.gameOptions.beginningYear = BEGINNING_SEARCH_YEAR;
-        this.updateGuildPreferences(db.kmq);
+        this.updateGuildPreferences(dbContext.kmq);
     }
 
     getBeginningCutoffYear(): number {
         return this.gameOptions.beginningYear;
     }
 
-    getDefaultBeginningCutoffYear(): number {
-        return BEGINNING_SEARCH_YEAR;
-    }
-
     setEndCutoffYear(year: number) {
         this.gameOptions.endYear = year;
-        this.updateGuildPreferences(db.kmq);
+        this.updateGuildPreferences(dbContext.kmq);
     }
 
-    resetEndCutoffYear(year: number) {
+    resetEndCutoffYear() {
         this.gameOptions.endYear = (new Date()).getFullYear();
-        this.updateGuildPreferences(db.kmq);
+        this.updateGuildPreferences(dbContext.kmq);
     }
 
     getEndCutoffYear(): number {
@@ -108,22 +112,22 @@ export default class GuildPreference {
 
     setGroups(groupIds: { id: number, name: string }[]) {
         this.gameOptions.groups = groupIds;
-        this.updateGuildPreferences(db.kmq);
+        this.updateGuildPreferences(dbContext.kmq);
     }
 
     resetGroups() {
         this.gameOptions.groups = null;
-        this.updateGuildPreferences(db.kmq);
+        this.updateGuildPreferences(dbContext.kmq);
     }
 
     getGroupIds(): number[] {
         if (this.gameOptions.groups === null) return null;
-        return this.gameOptions.groups.map((x) => x["id"]);
+        return this.gameOptions.groups.map((x) => x.id);
     }
 
     getDisplayedGroupNames(): string {
         if (this.gameOptions.groups === null) return null;
-        let displayedGroupNames = this.gameOptions.groups.map((x) => x["name"]).join(", ");
+        let displayedGroupNames = this.gameOptions.groups.map((x) => x.name).join(", ");
         if (displayedGroupNames.length > 400) {
             displayedGroupNames = `${displayedGroupNames.substr(0, 400)} and many others...`;
         }
@@ -132,12 +136,12 @@ export default class GuildPreference {
 
     resetGender() {
         this.gameOptions.gender = [GENDER.FEMALE];
-        this.updateGuildPreferences(db.kmq);
+        this.updateGuildPreferences(dbContext.kmq);
     }
 
     setGender(genderArr: GENDER[]): Array<string> {
         this.gameOptions.gender = [...new Set(genderArr)];
-        this.updateGuildPreferences(db.kmq);
+        this.updateGuildPreferences(dbContext.kmq);
         return this.gameOptions.gender;
     }
 
@@ -145,27 +149,27 @@ export default class GuildPreference {
         return this.gameOptions.gender.join(",");
     }
 
-    setSeekType(seekType: SEEK_TYPE) {
+    setSeekType(seekType: SeekType) {
         this.gameOptions.seekType = seekType;
-        this.updateGuildPreferences(db.kmq);
+        this.updateGuildPreferences(dbContext.kmq);
     }
 
-    getSeekType(): SEEK_TYPE {
+    getSeekType(): SeekType {
         return this.gameOptions.seekType;
     }
 
-    setModeType(modeType: MODE_TYPE) {
-        this.gameOptions.modeType = modeType as MODE_TYPE;
-        this.updateGuildPreferences(db.kmq);
+    setModeType(modeType: ModeType) {
+        this.gameOptions.modeType = modeType as ModeType;
+        this.updateGuildPreferences(dbContext.kmq);
     }
 
-    getModeType(): MODE_TYPE {
+    getModeType(): ModeType {
         return this.gameOptions.modeType;
     }
 
     setGoal(goal: number) {
         this.gameOptions.goal = goal;
-        this.updateGuildPreferences(db.kmq);
+        this.updateGuildPreferences(dbContext.kmq);
     }
 
     getGoal(): number {
@@ -174,7 +178,7 @@ export default class GuildPreference {
 
     resetGoal() {
         this.gameOptions.goal = null;
-        this.updateGuildPreferences(db.kmq);
+        this.updateGuildPreferences(dbContext.kmq);
     }
 
     isGoalSet(): boolean {
@@ -183,7 +187,7 @@ export default class GuildPreference {
 
     setGuessTimeout(guessTimeout: number) {
         this.gameOptions.guessTimeout = guessTimeout;
-        this.updateGuildPreferences(db.kmq);
+        this.updateGuildPreferences(dbContext.kmq);
     }
 
     getGuessTimeout(): number {
@@ -192,17 +196,16 @@ export default class GuildPreference {
 
     resetGuessTimeout() {
         this.gameOptions.guessTimeout = null;
-        this.updateGuildPreferences(db.kmq);
+        this.updateGuildPreferences(dbContext.kmq);
     }
 
     isGuessTimeoutSet(): boolean {
         return this.gameOptions.guessTimeout !== null;
     }
 
-    async updateGuildPreferences(db: Knex) {
-        await db("guild_preferences")
+    async updateGuildPreferences(_db: Knex) {
+        await _db("guild_preferences")
             .where({ guild_id: this.guildID })
             .update({ guild_preference: JSON.stringify(this) });
     }
-};
-
+}

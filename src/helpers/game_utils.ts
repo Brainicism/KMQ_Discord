@@ -1,13 +1,14 @@
 import Eris from "eris";
 import fs from "fs";
 import path from "path";
-import { db } from "../database_context";
+import dbContext from "../database_context";
 import _logger from "../logger";
 import GameSession from "../models/game_session";
 import GuildPreference from "../models/guild_preference";
 import { QueriedSong } from "../types";
 import { getForcePlaySong, isDebugMode, isForcedSongActive } from "./debug_utils";
 import { getDebugContext } from "./discord_utils";
+
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
 const logger = _logger("game_utils");
@@ -25,39 +26,36 @@ export async function playCorrectGuessSong(gameSession: GameSession) {
             });
         }
         resolve();
-    })
+    });
 }
 
 async function getFilteredSongList(guildPreference: GuildPreference): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
     let result: Array<QueriedSong>;
     if (guildPreference.getGroupIds() === null) {
-        result = await db.kpopVideos("available_songs")
+        result = await dbContext.kpopVideos("available_songs")
             .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
             .whereIn("members", guildPreference.getSQLGender().split(","))
             .andWhere("publishedon", ">=", `${guildPreference.getBeginningCutoffYear()}-01-01`)
             .andWhere("publishedon", "<=", `${guildPreference.getEndCutoffYear()}-12-31`)
-            .orderBy("views", "DESC")
-    }
-    else {
-        result = await db.kpopVideos("available_songs")
-        .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
-        .whereIn("id_artist", guildPreference.getGroupIds())
+            .orderBy("views", "DESC");
+    } else {
+        result = await dbContext.kpopVideos("available_songs")
+            .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
+            .whereIn("id_artist", guildPreference.getGroupIds())
             .andWhere("publishedon", ">=", `${guildPreference.getBeginningCutoffYear()}-01-01`)
             .andWhere("publishedon", "<=", `${guildPreference.getEndCutoffYear()}-12-31`)
-            .orderBy("views", "DESC")
+            .orderBy("views", "DESC");
     }
     return {
         songs: result.slice(0, guildPreference.getLimit()),
-        countBeforeLimit: result.length
+        countBeforeLimit: result.length,
     };
-
 }
 export async function startGame(gameSessions: { [guildID: string]: GameSession }, guildPreference: GuildPreference, message: Eris.Message<Eris.GuildTextableChannel>) {
     logger.info(`${getDebugContext(message)} | Game session starting`);
     const gameSession = gameSessions[message.guildID];
     gameSession.startRound(guildPreference, message);
 }
-
 
 export async function ensureVoiceConnection(gameSession: GameSession, client: Eris.Client) {
     return new Promise(async (resolve, reject) => {
@@ -70,12 +68,10 @@ export async function ensureVoiceConnection(gameSession: GameSession, client: Er
             connection.once("ready", () => {
                 resolve();
             });
-        }
-        catch (e) {
+        } catch (e) {
             reject(e);
         }
-    })
-
+    });
 }
 
 export async function selectRandomSong(guildPreference: GuildPreference): Promise<QueriedSong> {
@@ -96,8 +92,7 @@ export async function getSongCount(guildPreference: GuildPreference): Promise<nu
     try {
         const { countBeforeLimit: totalCount } = await getFilteredSongList(guildPreference);
         return totalCount;
-    }
-    catch (e) {
+    } catch (e) {
         logger.error(`Error retrieving song count ${e}`);
         return -1;
     }
@@ -107,7 +102,7 @@ export async function cleanupInactiveGameSessions(gameSessions: { [guildId: stri
     const currentDate = Date.now();
     let inactiveSessions = 0;
     const totalSessions = Object.keys(gameSessions).length;
-    for (let guildId in gameSessions) {
+    for (const guildId of Object.keys(gameSessions)) {
         const gameSession = gameSessions[guildId];
         const timeDiffMs = currentDate - gameSession.lastActive;
         const timeDiffMin = (timeDiffMs / (1000 * 60));
@@ -122,10 +117,10 @@ export async function cleanupInactiveGameSessions(gameSessions: { [guildId: stri
 }
 
 export async function getGuildPreference(guildID: string): Promise<GuildPreference> {
-    const guildPreferences = await db.kmq("guild_preferences").select("*").where("guild_id", guildID);
+    const guildPreferences = await dbContext.kmq("guild_preferences").select("*").where("guild_id", guildID);
     if (guildPreferences.length === 0) {
         const guildPreference = new GuildPreference(guildID);
-        await db.kmq("guild_preferences")
+        await dbContext.kmq("guild_preferences")
             .insert({ guild_id: guildID, guild_preference: JSON.stringify(guildPreference), join_date: new Date() });
         return guildPreference;
     }
