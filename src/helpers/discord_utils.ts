@@ -9,6 +9,8 @@ import { GameOption, SendMessagePayload } from "../types";
 import { chunkArray, codeLine, bold } from "./utils";
 import state from "../kmq";
 import { ModeType } from "../commands/game_options/mode";
+import Scoreboard from "../models/scoreboard";
+import GameRound from "../models/game_round";
 
 const logger = _logger("utils");
 export const EMBED_INFO_COLOR = 0x000000; // BLACK
@@ -27,9 +29,8 @@ export async function sendMessage(messagePayload: SendMessagePayload, messageCon
     return state.client.createMessage(channel.id, messageContent);
 }
 
-export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession, isForfeit: boolean, guesser?: string) {
+export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableChannel>, scoreboard: Scoreboard, gameRound: GameRound, isForfeit: boolean, guesser?: string) {
     let footer: Eris.EmbedFooterOptions = null;
-    const { gameRound } = gameSession;
     if (gameRound.songAliases.length > 0) {
         footer = {
             text: `Aliases: ${Array.from(gameRound.songAliases).join(", ")}`,
@@ -45,9 +46,9 @@ export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableCh
         }
     }
 
-    const emptyScoreBoard = gameSession.scoreboard.isEmpty();
+    const emptyScoreBoard = scoreboard.isEmpty();
     const description = `${isForfeit ? "Nobody got it." : (`**${guesser}** guessed correctly!`)}\nhttps://youtube.com/watch?v=${gameRound.videoID} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
-    const fields = gameSession.scoreboard.getScoreboard().slice(0, 10);
+    const fields = scoreboard.getScoreboard().slice(0, 10);
     if (fact) {
         fields.push({
             name: "__Did you know?__", value: fact, inline: false,
