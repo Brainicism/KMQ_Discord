@@ -149,7 +149,7 @@ export default class GameSession {
             const userTag = getUserIdentifier(message.author);
             this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL, pointsEarned);
             this.stopGuessTimeout();
-            await sendSongMessage(message, this, false, userTag);
+            sendSongMessage(message, this.scoreboard, this.gameRound, false, userTag);
             this.endRound(true);
             await dbContext.kmq("guild_preferences")
                 .where("guild_id", message.guildID)
@@ -231,7 +231,7 @@ export default class GameSession {
         this.connection.once("end", async () => {
             logger.info(`${getDebugContext(message)} | Song finished without being guessed.`);
             this.stopGuessTimeout();
-            await sendSongMessage(message, this, true);
+            sendSongMessage(message, this.scoreboard, this.gameRound, true);
             this.endRound(false);
             this.startRound(guildPreference, message);
         });
@@ -265,7 +265,7 @@ export default class GameSession {
         this.guessTimeoutFunc = setTimeout(async () => {
             if (this.finished) return;
             logger.info(`${getDebugContext(message)} | Song finished without being guessed, timer of: ${time} seconds.`);
-            await sendSongMessage(message, this, true);
+            sendSongMessage(message, this.scoreboard, this.gameRound, true);
             this.endRound(false);
             this.startRound(guildPreference, message);
         }, time * 1000);

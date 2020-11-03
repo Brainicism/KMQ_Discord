@@ -29,7 +29,7 @@ export default class ForceSkipCommand implements BaseCommand {
             return;
         }
         gameSession.gameRound.skipAchieved = true;
-        await sendSongMessage(message, gameSession, true);
+        sendSongMessage(message, gameSession.scoreboard, gameSession.gameRound, true);
         gameSession.endRound(false);
         startGame(gameSessions, guildPreference, message);
         logger.info(`${getDebugContext(message)} | Owner force-skipped.`);

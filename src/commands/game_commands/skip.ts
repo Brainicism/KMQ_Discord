@@ -12,6 +12,7 @@ import {
 } from "../../helpers/discord_utils";
 import { startGame, getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
+import GameRound from "../../models/game_round";
 
 const logger = _logger("skip");
 
@@ -33,7 +34,7 @@ async function sendSkipNotification(message: Eris.Message<Eris.GuildTextableChan
     });
 }
 
-async function sendSkipMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
+async function sendSkipMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameRound: GameRound) {
     const skipMessage = await sendMessage({ channel: message.channel, authorId: message.author.id }, {
         embed: {
             color: EMBED_SUCCESS_COLOR,
@@ -43,7 +44,7 @@ async function sendSkipMessage(message: Eris.Message<Eris.GuildTextableChannel>,
 
             },
             title: "**Skip**",
-            description: `${gameSession.gameRound.getNumSkippers()}/${getSkipsRequired(message)} skips achieved, skipping...`,
+            description: `${gameRound.getNumSkippers()}/${getSkipsRequired(message)} skips achieved, skipping...`,
         },
     });
     setTimeout(() => {
@@ -70,8 +71,8 @@ export default class SkipCommand implements BaseCommand {
         }
         if (isSkipMajority(message, gameSession)) {
             gameSession.gameRound.skipAchieved = true;
-            await sendSkipMessage(message, gameSession);
-            await sendSongMessage(message, gameSession, true);
+            sendSkipMessage(message, gameSession.gameRound);
+            sendSongMessage(message, gameSession.scoreboard, gameSession.gameRound, true);
             gameSession.endRound(false);
             startGame(gameSessions, guildPreference, message);
             logger.info(`${getDebugContext(message)} | Skip majority achieved.`);
