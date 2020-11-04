@@ -177,12 +177,14 @@ export default class GameSession {
             if (randomSong === null) {
                 this.sessionInitialized = false;
                 sendErrorMessage(message, "Song Query Error", "Failed to find songs matching this criteria. Try to broaden your search.");
+                this.endSession();
                 return;
             }
         } catch (err) {
             this.sessionInitialized = false;
             await sendErrorMessage(message, "Error selecting song", err.toString());
             logger.error(`${getDebugContext(message)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
+            this.endSession();
             return;
         }
         this.createRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);
@@ -247,7 +249,7 @@ export default class GameSession {
 
             logger.error(`${getDebugContext(message)} | Unknown error with stream dispatcher. song = ${this.getDebugSongDetails()}. err = ${err}`);
             // Attempt to restart game with different song
-            await sendErrorMessage(message, "Error playing song", "Starting new round in 2 seconds...");
+            await sendErrorMessage(message, "Error playing song", "Starting new round in 3 seconds...");
             this.endRound(false);
             this.startRound(guildPreference, message);
         });
