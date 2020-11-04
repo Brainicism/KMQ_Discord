@@ -29,7 +29,7 @@ export async function playCorrectGuessSong(gameSession: GameSession) {
     });
 }
 
-async function getFilteredSongList(guildPreference: GuildPreference): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
+async function getFilteredSongList(guildPreference: GuildPreference, ignoredVideoIds?: Array<string>): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
     let result: Array<QueriedSong>;
     if (guildPreference.getGroupIds() === null) {
         result = await dbContext.kpopVideos("available_songs")
@@ -46,9 +46,13 @@ async function getFilteredSongList(guildPreference: GuildPreference): Promise<{ 
             .andWhere("publishedon", "<=", `${guildPreference.getEndCutoffYear()}-12-31`)
             .orderBy("views", "DESC");
     }
+    const count = result.length;
+    if (ignoredVideoIds && ignoredVideoIds.length > 0) {
+        result = result.filter((song) => !ignoredVideoIds.includes(song.youtubeLink));
+    }
     return {
         songs: result.slice(0, guildPreference.getLimit()),
-        countBeforeLimit: result.length,
+        countBeforeLimit: count,
     };
 }
 export async function startGame(gameSessions: { [guildID: string]: GameSession }, guildPreference: GuildPreference, message: Eris.Message<Eris.GuildTextableChannel>) {
@@ -74,13 +78,13 @@ export async function ensureVoiceConnection(gameSession: GameSession, client: Er
     });
 }
 
-export async function selectRandomSong(guildPreference: GuildPreference): Promise<QueriedSong> {
+export async function selectRandomSong(guildPreference: GuildPreference, lastPlayedSongs: Array<string>): Promise<QueriedSong> {
     if (isDebugMode() && isForcedSongActive()) {
         const forcePlayedQueriedSong = await getForcePlaySong();
         logger.debug(`Force playing ${forcePlayedQueriedSong.name} by ${forcePlayedQueriedSong.artist} | ${forcePlayedQueriedSong.youtubeLink}`);
         return forcePlayedQueriedSong;
     }
-    const { songs: queriedSongList } = await getFilteredSongList(guildPreference);
+    const { songs: queriedSongList } = await getFilteredSongList(guildPreference, lastPlayedSongs);
     if (queriedSongList.length === 0) {
         return null;
     }
