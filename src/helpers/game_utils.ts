@@ -74,13 +74,16 @@ export async function ensureVoiceConnection(gameSession: GameSession, client: Er
     });
 }
 
-export async function selectRandomSong(guildPreference: GuildPreference): Promise<QueriedSong> {
+export async function selectRandomSong(guildPreference: GuildPreference, lastPlayedSongs: Array<string>): Promise<QueriedSong> {
     if (isDebugMode() && isForcedSongActive()) {
         const forcePlayedQueriedSong = await getForcePlaySong();
         logger.debug(`Force playing ${forcePlayedQueriedSong.name} by ${forcePlayedQueriedSong.artist} | ${forcePlayedQueriedSong.youtubeLink}`);
         return forcePlayedQueriedSong;
     }
-    const { songs: queriedSongList } = await getFilteredSongList(guildPreference);
+    let { songs: queriedSongList } = await getFilteredSongList(guildPreference);
+    if (lastPlayedSongs.length > 0) {
+        queriedSongList = queriedSongList.filter((song: QueriedSong) => !lastPlayedSongs.includes(song.youtubeLink));
+    }
     if (queriedSongList.length === 0) {
         return null;
     }
