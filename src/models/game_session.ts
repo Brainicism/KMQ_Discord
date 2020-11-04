@@ -19,6 +19,7 @@ import Scoreboard from "./scoreboard";
 import { deleteGameSession } from "../helpers/management_utils";
 
 const logger = _logger("game_session");
+const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
 
 export default class GameSession {
     private readonly startedAt: number;
@@ -38,6 +39,7 @@ export default class GameSession {
     private guessTimes: Array<number>;
     private songAliasList: { [songId: string]: Array<string> };
     private guessTimeoutFunc: NodeJS.Timer;
+    private lastPlayedSongsQueue: Array<string>;
 
     constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel, gameSessionCreator: Eris.User) {
         this.scoreboard = new Scoreboard();
@@ -55,12 +57,14 @@ export default class GameSession {
         const songAliasesFilePath = path.resolve(__dirname, "../data/song_aliases.json");
         this.songAliasList = JSON.parse(fs.readFileSync(songAliasesFilePath).toString());
         this.owner = gameSessionCreator;
+        this.lastPlayedSongsQueue = [];
     }
 
     createRound(song: string, artist: string, videoID: string) {
         this.gameRound = new GameRound(song, artist, videoID, this.songAliasList[videoID] || []);
         this.sessionInitialized = true;
         this.roundsPlayed++;
+        this.lastPlayedSongsQueue.push(videoID);
     }
 
     endRound(guessed: boolean) {
@@ -74,12 +78,14 @@ export default class GameSession {
         }
         this.stopGuessTimeout();
         this.sessionInitialized = false;
+        if (this.lastPlayedSongsQueue.length >= LAST_PLAYED_SONG_QUEUE_SIZE) this.lastPlayedSongsQueue.shift();
     }
 
     endSession = async (): Promise<void> => {
         const guildId = this.textChannel.guild.id;
         this.finished = true;
         this.endRound(false);
+        this.lastPlayedSongsQueue = [];
         const voiceConnection = state.client.voiceConnections.get(guildId);
         if (voiceConnection && voiceConnection.channelID) {
             voiceConnection.stopPlaying();
@@ -173,7 +179,10 @@ export default class GameSession {
         this.sessionInitialized = true;
         let randomSong: QueriedSong;
         try {
-            randomSong = await selectRandomSong(guildPreference);
+            if (guildPreference.getLimit() <= LAST_PLAYED_SONG_QUEUE_SIZE) {
+                this.lastPlayedSongsQueue = [];
+            }
+            randomSong = await selectRandomSong(guildPreference, this.lastPlayedSongsQueue);
             if (randomSong === null) {
                 this.sessionInitialized = false;
                 sendErrorMessage(message, "Song Query Error", "Failed to find songs matching this criteria. Try to broaden your search.");
@@ -181,7 +190,7 @@ export default class GameSession {
             }
         } catch (err) {
             this.sessionInitialized = false;
-            await sendErrorMessage(message, "Error selecting song", err.toString());
+            await sendErrorMessage(message, "Error selecting song", "Please try starting the round again. If the issue persists, report it in our support server.");
             logger.error(`${getDebugContext(message)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
             return;
         }
