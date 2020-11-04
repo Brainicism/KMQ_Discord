@@ -22,6 +22,8 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout KMQ_Discord
         uses: actions/checkout@v2
+      - name: Check for undocumented game option commands
+        run: ./src/check_help.sh
       - name: Setup Node.js environment
         uses: actions/setup-node@v2.1.2
         with:
