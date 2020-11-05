@@ -33,3 +33,5 @@ jobs:
         uses: iCrawl/action-tsc@v1
       - name: npm run lint
         run: npm run lint
+      - name: Dry run
+        run: ./start.sh dry-run
