@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { getDebugContext, sendOptionsMessage } from "../../helpers/discord_utils";
+import { getDebugContext, sendErrorMessage, sendOptionsMessage } from "../../helpers/discord_utils";
 import { getSongCount, getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
@@ -12,6 +12,10 @@ export default class LimitCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         guildPreference.setLimit(parseInt(parsedMessage.components[0], 10));
         const songCount = await getSongCount(guildPreference);
+        if (songCount === 0) {
+            sendErrorMessage(message, "Game Option Error", "Cannot set a limit when there are 0 total songs. Please change your game options.");
+            return;
+        }
         if (guildPreference.getLimit() > songCount) {
             guildPreference.setLimit(songCount);
         }
