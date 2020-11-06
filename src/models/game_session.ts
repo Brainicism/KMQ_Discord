@@ -6,7 +6,7 @@ import { SeekType } from "../commands/game_options/seek";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
-    getDebugContext, getUserIdentifier, getVoiceChannel, sendEndGameMessage, sendErrorMessage, sendSongMessage,
+    getDebugContext, getSqlDateString, getUserIdentifier, getVoiceChannel, sendEndGameMessage, sendErrorMessage, sendSongMessage,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds } from "../helpers/utils";
@@ -94,6 +94,11 @@ export default class GameSession {
                 voiceChannel.leave();
             }
         }
+
+        for (const participant of this.participants) {
+            this.incrementPlayerGamesPlayed(participant);
+        }
+
         await dbContext.kmq("guild_preferences")
             .where("guild_id", guildId)
             .increment("games_played", 1);
@@ -106,7 +111,7 @@ export default class GameSession {
 
         await dbContext.kmq("game_sessions")
             .insert({
-                start_date: new Date(this.startedAt).toISOString().slice(0, 19).replace("T", " "),
+                start_date: getSqlDateString(this.startedAt),
                 guild_id: this.textChannel.guild.id,
                 num_participants: this.participants.size,
                 avg_guess_time: averageGuessTime,
@@ -157,6 +162,7 @@ export default class GameSession {
             this.stopGuessTimeout();
             sendSongMessage(message, this.scoreboard, this.gameRound, false, userTag);
             this.endRound(true);
+            this.incrementPlayerSongsGuessed(message.author.id);
             await dbContext.kmq("guild_preferences")
                 .where("guild_id", message.guildID)
                 .increment("songs_guessed", 1);
@@ -284,5 +290,41 @@ export default class GameSession {
 
     stopGuessTimeout() {
         clearTimeout(this.guessTimeoutFunc);
+    }
+
+    async ensurePlayerStat(userId: string) {
+        const results = await dbContext.kmq("player_stats")
+            .select("*")
+            .where("player_id", "=", userId)
+            .limit(1);
+
+        if (results.length === 0) {
+            const currentDateString = getSqlDateString();
+            await dbContext.kmq("player_stats")
+                .insert(
+                    {
+                        player_id: userId,
+                        first_play: currentDateString,
+                        last_active: currentDateString,
+                    },
+                );
+        }
+    }
+
+    async incrementPlayerSongsGuessed(userId: string) {
+        await this.ensurePlayerStat(userId);
+        await dbContext.kmq("player_stats")
+            .where("player_id", "=", userId)
+            .increment("songs_guessed", 1)
+            .update({
+                last_active: getSqlDateString(),
+            });
+    }
+
+    async incrementPlayerGamesPlayed(userId: string) {
+        await this.ensurePlayerStat(userId);
+        await dbContext.kmq("player_stats")
+            .where("player_id", "=", userId)
+            .increment("games_played", 1);
     }
 }
