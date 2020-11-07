@@ -14,7 +14,7 @@ import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 config({ path: path.resolve(__dirname, "../../.env") });
 const fileUrl = "http://kpop.aoimirai.net/download.php";
 const logger: Logger = _logger("seed_db");
-const databaseDownloadDir = "./kpop_db";
+const databaseDownloadDir = process.env.AOIMIRAI_DUMP_DIR;
 
 const setSqlMode = (sqlFile: string) => {
     prependFile.sync(sqlFile, "SET @@sql_mode=\"\";\n");
@@ -66,6 +66,16 @@ async function seedDb(db: mysql.Connection) {
     await db.query(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_KMQ_SETTINGS_TABLE_NAME}`);
 }
 
+async function hasRecentDump(): Promise<boolean> {
+    const dumpPath = `${databaseDownloadDir}/sql`;
+    const files = await fs.promises.readdir(dumpPath);
+    if (files.length === 0) return false;
+    const seedFileDateString = files[0].match(/backup_([0-9]{4}-[0-9]{2}-[0-9]{2}).sql/)[1];
+    logger.info(`Most recent seed file has date: ${seedFileDateString}`);
+    const daysDiff = ((new Date()).getTime() - Date.parse(seedFileDateString)) / 86400000;
+    return daysDiff < 6;
+}
+
 (async () => {
     try {
         await fs.promises.mkdir(`${databaseDownloadDir}/sql`, { recursive: true });
@@ -74,8 +84,14 @@ async function seedDb(db: mysql.Connection) {
             user: process.env.DB_USER,
             password: process.env.DB_PASS,
         });
-        await downloadDb();
-        await extractDb();
+
+        if (await hasRecentDump()) {
+            logger.info("Recent dump detected, skipping download...");
+        } else {
+            await downloadDb();
+            await extractDb();
+        }
+
         await seedDb(db);
         await removeRedunantAliases();
         db.destroy();
