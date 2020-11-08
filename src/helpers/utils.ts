@@ -18,6 +18,10 @@ export function codeLine(text: string): string {
     return `\`${text}\``;
 }
 
+export function roundDecimal(num: number, places: number) {
+    return Math.round(num * (10 ** places)) / (10 ** places);
+}
+
 export function chunkArray<T>(array: Array<T>, chunkSize: number): Array<Array<T>> {
     const chunkedArrays = [];
     for (let i = 0; i < array.length; i += chunkSize) {

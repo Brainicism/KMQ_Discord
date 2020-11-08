@@ -1,3 +1,4 @@
+import { roundDecimal } from "../helpers/utils";
 import Player from "./player";
 
 export default class Scoreboard {
@@ -43,7 +44,7 @@ export default class Scoreboard {
             .map((x) => (
                 {
                     name: x.getName(),
-                    value: Number.isInteger(x.getScore()) ? x.getScore().toString() : x.getScore().toFixed(1),
+                    value: Number.isInteger(roundDecimal(x.getScore(), 1)) ? roundDecimal(x.getScore(), 1).toString() : x.getScore().toFixed(1),
                     inline: true,
                 }));
     }
