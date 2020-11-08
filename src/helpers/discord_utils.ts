@@ -1,6 +1,6 @@
 import Eris from "eris";
 import EmbedPaginator from "eris-pagination";
-import GuildPreference, { DEFAULT_BOT_PREFIX } from "../models/guild_preference";
+import GuildPreference from "../models/guild_preference";
 import GameSession from "../models/game_session";
 import _logger from "../logger";
 import { getSongCount } from "./game_utils";
@@ -139,7 +139,7 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
     await sendInfoMessage(message,
         updatedOption == null ? "Options" : `${updatedOption} updated`,
         `Now playing the ${optionStrings[GameOption.LIMIT]} out of the __${totalSongs}__ most popular songs by ${groupsMode ? optionStrings[GameOption.GROUPS] : optionStrings[GameOption.GENDER]} ${optionStrings[GameOption.CUTOFF]}. \nPlaying from the ${optionStrings[GameOption.SEEK_TYPE]} point of each song. Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}`,
-        updatedOption == null ? `Psst. Your bot prefix is \`${DEFAULT_BOT_PREFIX}\`.` : null,
+        updatedOption == null ? `Psst. Your bot prefix is \`${process.env.PREFIX}\`.` : null,
         updatedOption == null ? "https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/src/assets/tsukasa.jpg" : null);
 }
 

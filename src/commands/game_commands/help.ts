@@ -7,7 +7,6 @@ import {
 import _logger from "../../logger";
 import { chunkArray } from "../../helpers/utils";
 import { getCommandFiles } from "../../helpers/management_utils";
-import { DEFAULT_BOT_PREFIX } from "../../models/guild_preference";
 
 const logger = _logger("help");
 const placeholder = /!/g;
@@ -42,14 +41,14 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
             return;
         }
         const helpManual = commandFilesWithAliases[action].help;
-        embedTitle = `\`${helpManual.usage.replace(placeholder, DEFAULT_BOT_PREFIX)}\``;
+        embedTitle = `\`${helpManual.usage.replace(placeholder, process.env.PREFIX)}\``;
         embedDesc = helpManual.description;
         if (helpManual.examples.length > 0) {
             embedDesc += "\n\n**Examples**\n";
         }
         helpManual.examples.forEach((example) => {
             embedFields.push({
-                name: example.example.replace(placeholder, DEFAULT_BOT_PREFIX),
+                name: example.example.replace(placeholder, process.env.PREFIX),
                 value: example.explanation,
             });
         });
@@ -62,12 +61,12 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
         logger.info(`${getDebugContext(message)} | Getting full help documentation`);
         const commandNamesWithHelp = Object.keys(commandFiles).filter((commandName) => commandFiles[commandName].help);
         embedTitle = "K-pop Music Quiz Command Help";
-        embedDesc = helpMessages.rules.replace(placeholder, DEFAULT_BOT_PREFIX);
+        embedDesc = helpMessages.rules.replace(placeholder, process.env.PREFIX);
         commandNamesWithHelp.forEach((commandName) => {
             const helpManual = commandFiles[commandName].help;
             embedFields.push({
                 name: helpManual.name,
-                value: `${helpManual.description}\nUsage: \`${helpManual.usage.replace(placeholder, DEFAULT_BOT_PREFIX)}\``,
+                value: `${helpManual.description}\nUsage: \`${helpManual.usage.replace(placeholder, process.env.PREFIX)}\``,
             });
         });
     }
