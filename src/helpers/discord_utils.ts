@@ -114,6 +114,11 @@ export async function sendInfoMessage(message: Eris.Message<Eris.GuildTextableCh
 
 export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextableChannel>, guildPreference: GuildPreference, updatedOption: string) {
     const totalSongs = await getSongCount(guildPreference);
+    if (totalSongs === -1) {
+        sendErrorMessage(message, "Error retrieving song data", `Try again in a bit, or report this error to the support server found in \`${process.env.PREFIX}help\`.`);
+        return;
+    }
+
     const groupsMode = guildPreference.getGroupIds() !== null;
     const goalMode = guildPreference.isGoalSet();
     const guessTimeoutMode = guildPreference.isGuessTimeoutSet();
