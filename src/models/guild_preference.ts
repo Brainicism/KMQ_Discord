@@ -22,8 +22,6 @@ const DEFAULT_OPTIONS = {
     guessTimeout: null,
 };
 
-export const DEFAULT_BOT_PREFIX = ",";
-
 interface GameOptions {
     beginningYear: number;
     endYear: number;

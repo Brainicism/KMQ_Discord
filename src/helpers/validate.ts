@@ -3,7 +3,6 @@ import { getDebugContext, sendErrorMessage } from "./discord_utils";
 import { ParsedMessage } from "../types";
 import { CommandValidations } from "../commands/base_command";
 import _logger from "../logger";
-import { DEFAULT_BOT_PREFIX } from "../models/guild_preference";
 
 const logger = _logger("validate");
 
@@ -24,7 +23,7 @@ export default (message: Eris.Message<Eris.GuildTextableChannel>, parsedMessage:
     const args = parsedMessage.components;
     if (args.length > validations.maxArgCount || args.length < validations.minArgCount) {
         sendValidationErrorMessage(message,
-            `Incorrect number of arguments. See \`${DEFAULT_BOT_PREFIX}help ${parsedMessage.action}\` for usage.`,
+            `Incorrect number of arguments. See \`${process.env.PREFIX}help ${parsedMessage.action}\` for usage.`,
             args);
         return false;
     }
