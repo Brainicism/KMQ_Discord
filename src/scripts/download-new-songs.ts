@@ -145,6 +145,7 @@ async function ffmpegOpusJob(mp3File: string): Promise<void> {
         ffmpeg(`${process.env.SONG_DOWNLOAD_DIR}/${mp3File}`)
             .format("opus")
             .audioCodec("libopus")
+            .audioFilters("volume=0.1")
             .output(oggFfmpegOutputStream)
             .on("end", () => {
                 try {
