@@ -304,3 +304,10 @@ export function getDebugChannel(): Eris.TextChannel {
     return <Eris.TextChannel>state.client.guilds.get(process.env.DEBUG_SERVER_ID)
         .channels.get(process.env.DEBUG_TEXT_CHANNEL_ID);
 }
+
+export function getSqlDateString(timeInMs?: number): string {
+    if (timeInMs) {
+        return new Date(timeInMs).toISOString().slice(0, 19).replace("T", " ");
+    }
+    return new Date().toISOString().slice(0, 19).replace("T", " ");
+}
