@@ -2,7 +2,7 @@ import Eris from "eris";
 import { config } from "dotenv";
 import { resolve } from "path";
 import _logger from "./logger";
-import { State } from "./types";
+import { EnvType, State } from "./types";
 import {
     registerClientEvents, registerProcessEvents, registerCommands, updateGroupList, registerIntervals, initializeBotStatsPoster,
 } from "./helpers/management_utils";
@@ -48,13 +48,17 @@ export default state;
     registerClientEvents(client);
     logger.info("Registering process event handlers...");
     registerProcessEvents(process);
-    if (process.env.NODE_ENV === "dry-run") {
+
+    if (process.env.NODE_ENV === EnvType.DRY_RUN) {
         logger.info("Dry run finished successfully.");
         process.exit(0);
     }
-    logger.info("Initializing bot stats poster...");
-    initializeBotStatsPoster();
-    logger.info("Updating group list...");
-    await updateGroupList();
+
+    if (process.env.NODE_ENV === EnvType.PROD) {
+        logger.info("Updating group list...");
+        await updateGroupList();
+        logger.info("Initializing bot stats poster...");
+        initializeBotStatsPoster();
+    }
     client.connect();
 })();
