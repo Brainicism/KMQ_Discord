@@ -39,3 +39,9 @@ export enum GameOption {
     GOAL = "Goal",
     TIMER = "Timer",
 }
+
+export enum EnvType {
+    PROD = "production",
+    DEV = "development",
+    DRY_RUN = "dry-run",
+}
