@@ -27,6 +27,7 @@ import BaseCommand from "../commands/base_command";
 import debugHandler from "../events/client/debug";
 import guildCreateHandler from "../events/client/guildCreate";
 import BotStatsPoster from "./bot_stats_poster";
+import { EnvType } from "../types";
 
 const glob = promisify(_glob);
 
@@ -121,10 +122,11 @@ export function getCommandFiles(): Promise<{ [commandName: string]: BaseCommand 
         const commandMap = {};
         let files: Array<string>;
         try {
-            files = await glob("commands/**/*.*");
+            files = await glob(process.env.NODE_ENV === EnvType.DEV ? "commands/**/*.ts" : "commands/**/*.js");
             for (const file of files) {
-                const command = await import(`../${file}`);
+                const command = await import(path.join("../", file));
                 const commandName = path.parse(file).name;
+                logger.info(`Registering command: ${commandName}`);
                 // eslint-disable-next-line new-cap
                 commandMap[commandName] = new command.default();
             }

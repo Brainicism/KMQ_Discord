@@ -12,21 +12,26 @@ const logger = _logger("help");
 const placeholder = /!/g;
 const FIELDS_PER_EMBED = 5;
 
+let commandFiles: { [commandName: string]: BaseCommand };
+
 // Usage: `!help [action]` or `!help`
 const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, action: string) => {
     let embedTitle = "";
     let embedDesc = "";
     const embedFields = [];
-    // TODO: potentially do some caching?
-    const commandFiles = await getCommandFiles();
+
+    if (!commandFiles) {
+        commandFiles = await getCommandFiles();
+    }
+
     const commandFilesWithAliases: { [commandName: string]: BaseCommand } = {};
     Object.assign(commandFilesWithAliases, commandFiles);
     const commandNamesWithAliases = Object.keys(commandFiles).filter((commandName) => commandFiles[commandName].aliases);
     for (const commandName of commandNamesWithAliases) {
         const { aliases } = commandFiles[commandName];
-        aliases.forEach((alias) => {
+        for (const alias of aliases) {
             commandFilesWithAliases[alias] = commandFiles[commandName];
-        });
+        }
     }
 
     let embedFooter = null;
@@ -96,8 +101,7 @@ export default class HelpCommand implements BaseCommand {
     async call({ parsedMessage, message }: CommandArgs) {
         await helpMessage(message, parsedMessage.argument);
     }
-    help =
-    {
+    help = {
         name: "help",
         description: "Get help about the game's commands. Add the command as an argument to get information about the specific command.",
         usage: "!help [command]",
