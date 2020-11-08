@@ -40,11 +40,21 @@ const state: State = {
 export default state;
 
 (async () => {
-    await updateGroupList();
+    logger.info("Registering commands...");
     await registerCommands();
+    logger.info("Registering event loops...");
     registerIntervals();
+    logger.info("Registering client event handlers...");
     registerClientEvents(client);
+    logger.info("Registering process event handlers...");
     registerProcessEvents(process);
+    if (process.env.NODE_ENV === "dry-run") {
+        logger.info("Dry run finished successfully.");
+        process.exit(0);
+    }
+    logger.info("Initializing bot stats poster...");
     initializeBotStatsPoster();
+    logger.info("Updating group list...");
+    await updateGroupList();
     client.connect();
 })();

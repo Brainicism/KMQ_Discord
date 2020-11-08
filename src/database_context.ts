@@ -10,6 +10,7 @@ class DatabaseContext {
     public kpopVideos: Knex;
 
     constructor() {
+        if (process.env.NODE_ENV === "dry-run") return;
         logger.info("Initializing database connections");
         this.kmq = Knex(kmqKnexConfig);
         this.kpopVideos = Knex(kpopVideosKnexConfig);
