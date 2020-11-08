@@ -37,7 +37,7 @@ export default class Scoreboard {
         return winnerStr;
     }
 
-    getScoreboard(): Array<{ name: string, value: string, inline: boolean }> {
+    getScoreboardEmbedFields(): Array<{ name: string, value: string, inline: boolean }> {
         return Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
             .map((x) => (
@@ -46,6 +46,14 @@ export default class Scoreboard {
                     value: Number.isInteger(x.getScore()) ? x.getScore().toString() : x.getScore().toFixed(1),
                     inline: true,
                 }));
+    }
+
+    getPlayerScores(): Array<{ id: string, score: number }> {
+        return Object.values(this.players)
+            .map((x) => ({
+                id: x.getId(),
+                score: x.getScore(),
+            }));
     }
 
     updateScoreboard(winnerTag: string, winnerID: string, avatarURL: string, pointsEarned: number) {

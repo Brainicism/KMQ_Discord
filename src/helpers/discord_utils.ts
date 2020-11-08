@@ -48,7 +48,7 @@ export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableCh
 
     const emptyScoreBoard = scoreboard.isEmpty();
     const description = `${isForfeit ? "Nobody got it." : (`**${guesser}** guessed correctly!`)}\nhttps://youtube.com/watch?v=${gameRound.videoID} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
-    const fields = scoreboard.getScoreboard().slice(0, 10);
+    const fields = scoreboard.getScoreboardEmbedFields().slice(0, 10);
     if (fact) {
         fields.push({
             name: "__Did you know?__", value: fact, inline: false,
@@ -166,7 +166,7 @@ export async function sendEndGameMessage(messagePayload: SendMessagePayload, gam
                     url: winners[0].getAvatarURL(),
                 },
                 title: `🎉 ${gameSession.scoreboard.getWinnerMessage()} 🎉`,
-                fields: gameSession.scoreboard.getScoreboard().slice(0, 10),
+                fields: gameSession.scoreboard.getScoreboardEmbedFields().slice(0, 10),
             },
         });
     }
@@ -193,7 +193,7 @@ export async function sendScoreboardMessage(message: Eris.Message<Eris.GuildText
             },
         });
     }
-    const winnersFieldSubsets = chunkArray(gameSession.scoreboard.getScoreboard(), EMBED_FIELDS_PER_PAGE);
+    const winnersFieldSubsets = chunkArray(gameSession.scoreboard.getScoreboardEmbedFields(), EMBED_FIELDS_PER_PAGE);
     const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map((winnersFieldSubset) => ({
         color: EMBED_SUCCESS_COLOR,
         author: {
