@@ -70,7 +70,7 @@ async function hasRecentDump(): Promise<boolean> {
     const dumpPath = `${databaseDownloadDir}/sql`;
     const files = await fs.promises.readdir(dumpPath);
     if (files.length === 0) return false;
-    const seedFileDateString = files[0].match(/backup_([0-9]{4}-[0-9]{2}-[0-9]{2}).sql/)[1];
+    const seedFileDateString = files[files.length - 1].match(/backup_([0-9]{4}-[0-9]{2}-[0-9]{2}).sql/)[1];
     logger.info(`Most recent seed file has date: ${seedFileDateString}`);
     const daysDiff = ((new Date()).getTime() - Date.parse(seedFileDateString)) / 86400000;
     return daysDiff < 6;
