@@ -24,6 +24,10 @@ export default class SkipCommand implements BaseCommand {
             .where("start_date", ">", dateThreshold)
             .sum("rounds_played as total"))[0].total;
 
+        const recentPlayers = (await dbContext.kmq("player_stats")
+            .where("last_active", ">", dateThreshold)
+            .count("* as count"))[0].count;
+
         const fields: Array<Eris.EmbedField> = [{
             name: "Active Game Sessions",
             value: activeGameSessions.toString(),
@@ -42,6 +46,11 @@ export default class SkipCommand implements BaseCommand {
         {
             name: "Recent Rounds Played",
             value: recentGameRounds.toString(),
+            inline: true,
+        },
+        {
+            name: "Recent Active Players",
+            value: recentPlayers,
             inline: true,
         },
         {
