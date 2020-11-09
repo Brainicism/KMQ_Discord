@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { CommandArgs } from "../commands/base_command";
 import { SeekType } from "../commands/game_options/seek";
+import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
@@ -78,7 +79,6 @@ export default class GameSession {
         }
         this.stopGuessTimeout();
         this.sessionInitialized = false;
-        if (this.lastPlayedSongsQueue.length >= LAST_PLAYED_SONG_QUEUE_SIZE) this.lastPlayedSongsQueue.shift();
     }
 
     endSession = async (): Promise<void> => {
@@ -185,10 +185,20 @@ export default class GameSession {
             return;
         }
 
+        if (guildPreference.getShuffleType() === ShuffleType.UNIQUE && guildPreference.getLimit() === this.lastPlayedSongsQueue.length) {
+            logger.info(`${getDebugContext(message)} | Game session ended (all ${guildPreference.getLimit()} unique songs played)`);
+            await sendEndGameMessage({ channel: message.channel, authorId: message.author.id }, this);
+            await this.endSession();
+            return;
+        }
+        if (guildPreference.getShuffleType() === ShuffleType.RANDOM && this.lastPlayedSongsQueue.length >= LAST_PLAYED_SONG_QUEUE_SIZE) {
+            this.lastPlayedSongsQueue.shift();
+        }
+
         this.sessionInitialized = true;
         let randomSong: QueriedSong;
         try {
-            if (guildPreference.getLimit() <= LAST_PLAYED_SONG_QUEUE_SIZE) {
+            if (guildPreference.getLimit() <= LAST_PLAYED_SONG_QUEUE_SIZE && guildPreference.getShuffleType() === ShuffleType.RANDOM) {
                 this.lastPlayedSongsQueue = [];
             }
             randomSong = await selectRandomSong(guildPreference, this.lastPlayedSongsQueue);
