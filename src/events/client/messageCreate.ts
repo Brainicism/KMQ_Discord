@@ -4,7 +4,6 @@ import { textPermissionsCheck } from "../../helpers/discord_utils";
 import state from "../../kmq";
 import validate from "../../helpers/validate";
 import { ParsedMessage } from "../../types";
-import { DEFAULT_BOT_PREFIX } from "../../models/guild_preference";
 
 const logger = _logger("messageCreate");
 
@@ -13,7 +12,7 @@ function isGuildMessage(message: Eris.Message): message is Eris.Message<Eris.Gui
 }
 
 const parseMessage = (message: string): ParsedMessage => {
-    if (message.charAt(0) !== DEFAULT_BOT_PREFIX) return null;
+    if (message.charAt(0) !== process.env.PREFIX) return null;
     const components = message.split(" ");
     const action = components.shift().substring(1);
     const argument = components.join(" ");

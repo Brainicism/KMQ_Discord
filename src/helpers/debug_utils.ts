@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { QueriedSong } from "../types";
+import { EnvType, QueriedSong } from "../types";
 import dbContext from "../database_context";
 
 function readDebugSettings(key: string): any {
@@ -9,7 +9,7 @@ function readDebugSettings(key: string): any {
 }
 
 export function isDebugMode(): boolean {
-    const developmentBuild = process.env.NODE_ENV === "development";
+    const developmentBuild = process.env.NODE_ENV === EnvType.DEV;
     if (!developmentBuild) return false;
     return readDebugSettings("active");
 }

@@ -1,6 +1,6 @@
 import Eris from "eris";
 import EmbedPaginator from "eris-pagination";
-import GuildPreference, { DEFAULT_BOT_PREFIX } from "../models/guild_preference";
+import GuildPreference from "../models/guild_preference";
 import GameSession from "../models/game_session";
 import _logger from "../logger";
 import { getSongCount } from "./game_utils";
@@ -48,7 +48,7 @@ export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableCh
 
     const emptyScoreBoard = scoreboard.isEmpty();
     const description = `${isForfeit ? "Nobody got it." : (`**${guesser}** guessed correctly!`)}\nhttps://youtube.com/watch?v=${gameRound.videoID} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
-    const fields = scoreboard.getScoreboard().slice(0, 10);
+    const fields = scoreboard.getScoreboardEmbedFields().slice(0, 10);
     if (fact) {
         fields.push({
             name: "__Did you know?__", value: fact, inline: false,
@@ -114,6 +114,11 @@ export async function sendInfoMessage(message: Eris.Message<Eris.GuildTextableCh
 
 export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextableChannel>, guildPreference: GuildPreference, updatedOption: string) {
     const totalSongs = await getSongCount(guildPreference);
+    if (totalSongs === -1) {
+        sendErrorMessage(message, "Error retrieving song data", `Try again in a bit, or report this error to the support server found in \`${process.env.PREFIX}help\`.`);
+        return;
+    }
+
     const groupsMode = guildPreference.getGroupIds() !== null;
     const goalMode = guildPreference.isGoalSet();
     const guessTimeoutMode = guildPreference.isGuessTimeoutSet();
@@ -139,7 +144,7 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
     await sendInfoMessage(message,
         updatedOption == null ? "Options" : `${updatedOption} updated`,
         `Now playing the ${optionStrings[GameOption.LIMIT]} out of the __${totalSongs}__ most popular songs by ${groupsMode ? optionStrings[GameOption.GROUPS] : optionStrings[GameOption.GENDER]} ${optionStrings[GameOption.CUTOFF]}. \nPlaying from the ${optionStrings[GameOption.SEEK_TYPE]} point of each song. Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}`,
-        updatedOption == null ? `Psst. Your bot prefix is \`${DEFAULT_BOT_PREFIX}\`.` : null,
+        updatedOption == null ? `Psst. Your bot prefix is \`${process.env.PREFIX}\`.` : null,
         updatedOption == null ? "https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/src/assets/tsukasa.jpg" : null);
 }
 
@@ -166,7 +171,7 @@ export async function sendEndGameMessage(messagePayload: SendMessagePayload, gam
                     url: winners[0].getAvatarURL(),
                 },
                 title: `🎉 ${gameSession.scoreboard.getWinnerMessage()} 🎉`,
-                fields: gameSession.scoreboard.getScoreboard().slice(0, 10),
+                fields: gameSession.scoreboard.getScoreboardEmbedFields().slice(0, 10),
             },
         });
     }
@@ -193,7 +198,7 @@ export async function sendScoreboardMessage(message: Eris.Message<Eris.GuildText
             },
         });
     }
-    const winnersFieldSubsets = chunkArray(gameSession.scoreboard.getScoreboard(), EMBED_FIELDS_PER_PAGE);
+    const winnersFieldSubsets = chunkArray(gameSession.scoreboard.getScoreboardEmbedFields(), EMBED_FIELDS_PER_PAGE);
     const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map((winnersFieldSubset) => ({
         color: EMBED_SUCCESS_COLOR,
         author: {

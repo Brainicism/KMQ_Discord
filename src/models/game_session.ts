@@ -99,6 +99,10 @@ export default class GameSession {
             this.incrementPlayerGamesPlayed(participant);
         }
 
+        for (const playerScore of this.scoreboard.getPlayerScores()) {
+            this.incrementPlayerSongsGuessed(playerScore.id, playerScore.score);
+        }
+
         await dbContext.kmq("guild_preferences")
             .where("guild_id", guildId)
             .increment("games_played", 1);
@@ -162,7 +166,6 @@ export default class GameSession {
             this.stopGuessTimeout();
             sendSongMessage(message, this.scoreboard, this.gameRound, false, userTag);
             this.endRound(true);
-            this.incrementPlayerSongsGuessed(message.author.id);
             await dbContext.kmq("guild_preferences")
                 .where("guild_id", message.guildID)
                 .increment("songs_guessed", 1);
@@ -311,11 +314,11 @@ export default class GameSession {
         }
     }
 
-    async incrementPlayerSongsGuessed(userId: string) {
+    async incrementPlayerSongsGuessed(userId: string, score: number) {
         await this.ensurePlayerStat(userId);
         await dbContext.kmq("player_stats")
             .where("player_id", "=", userId)
-            .increment("songs_guessed", 1)
+            .increment("songs_guessed", score)
             .update({
                 last_active: getSqlDateString(),
             });
