@@ -199,7 +199,7 @@ async function downloadAndConvertSongs(limit?: number) {
 
     await clearPartiallyCachedSongs();
     await downloadNewSongs(limit);
-    convertToOpus();
+    await convertToOpus();
     await dbContext.destroy();
 }
 
