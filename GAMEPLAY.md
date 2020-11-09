@@ -54,12 +54,15 @@ Setting the goal ends the game when the given goal score is reached. For example
 
 ![goal](/images/goal.png)
 
-### ,forceskip
-To skip the voting process of `,skip` (no pun intended), the player that started the game by typing `,play` can go to the next song with `,forceskip`. This command is helpful when it's hard to get a skip majority (typically in larger games). We trust you, the game owner, to play the best songs possible. No pressure.
-
 ## ,timer [time (seconds)]
 Setting a timer limits players to guess in under `time` seconds before the round ends automatically. Once a user gives a valid timeout, such as `,timer 10`, the timer will automatically start at the beginning of every round. If no one guesses right in the time allotted (in this example, 10 seconds), the round is over. **Typing** `,timer` **disables the timer**. Set the timer under 10 (5? 3?) seconds and face off with your friends to see who the ultimate KMQ champ is! Alternatively, set it above 30 seconds, and enjoy a variety of your favorite artists while expanding your music library.
 
+![timer](/images/timer.png)
+
+## ,shuffle [random|unique]
+Setting the shuffle mode to unique limits each random song chosen to appear at most once per game. Conversely, `,shuffle random` picks a song at random from the given options every round, so songs may play multiple times in a game. To limit instances where songs would randomly (with a low statistical probability) play multiple times back-to-back, no song will repeat in the span of 10 songs using `,shuffle random`.
+
+![shuffle](/images/shuffle.png)
 
 # Full Command List
 Use `,help [command_name]` for more details for any of the following commands.
@@ -70,6 +73,7 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,options`: Shows the current game options, which filters the songs that will be played
 - `,help`: Shows a general overview of available commands, as well as specific instructions for each command
 - `,news`: Show the latest features/changes to the bot
+- `,forceskip`: The person that started the game can force-skip the current song, no majority necessary
 
 ## Game Option Commands 
 - `,cutoff`: Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen
@@ -79,5 +83,5 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,groups`: Specify what groups/artists you'd like to hear from
 - `,mode`: Choose whether to guess based on song name or artist name
 - `,goal`: Specify a number of points to be reached before a winner is selected, and the game ends 
-- `,forceskip`: The person that started the game can force-skip the current song, no majority necessary
 - `,timer`: Try your best to guess correctly before the timer runs out! Enter a time in seconds, or give no arguments to disable
+- `,shuffle`: Choose whether songs should play in "true" random order or in uniquely random order.
