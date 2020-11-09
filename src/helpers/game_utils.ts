@@ -32,14 +32,14 @@ export async function playCorrectGuessSong(gameSession: GameSession) {
 async function getFilteredSongList(guildPreference: GuildPreference, ignoredVideoIds?: Array<string>): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
     let result: Array<QueriedSong>;
     if (guildPreference.getGroupIds() === null) {
-        result = await dbContext.kpopVideos("available_songs")
+        result = await dbContext.kmq("available_songs")
             .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
             .whereIn("members", guildPreference.getSQLGender().split(","))
             .andWhere("publishedon", ">=", `${guildPreference.getBeginningCutoffYear()}-01-01`)
             .andWhere("publishedon", "<=", `${guildPreference.getEndCutoffYear()}-12-31`)
             .orderBy("views", "DESC");
     } else {
-        result = await dbContext.kpopVideos("available_songs")
+        result = await dbContext.kmq("available_songs")
             .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
             .whereIn("id_artist", guildPreference.getGroupIds())
             .andWhere("publishedon", ">=", `${guildPreference.getBeginningCutoffYear()}-01-01`)

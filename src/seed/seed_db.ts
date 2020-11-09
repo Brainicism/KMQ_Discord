@@ -126,7 +126,7 @@ process.on("SIGINT", () => {
         logger.info("Downloading new songs");
         await downloadNewSongs();
         logger.info("Re-creating available songs view");
-        execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} ${process.env.DB_KPOP_DATA_TABLE_NAME} < ./src/seed/create_available_songs_table.sql`);
+        execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} ${process.env.DB_KMQ_SETTINGS_TABLE_NAME} < ./src/seed/create_available_songs_table.sql`);
     } catch (e) {
         logger.error(`Error: ${e}`);
     }
