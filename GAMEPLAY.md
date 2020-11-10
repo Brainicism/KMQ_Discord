@@ -60,7 +60,7 @@ Setting a timer limits players to guess in under `time` seconds before the round
 ![timer](/images/timer.png)
 
 ## ,shuffle [random|unique]
-Setting the shuffle mode to unique limits each random song chosen to appear at most once per game. Conversely, `,shuffle random` picks a song at random from the given options every round, so songs may play multiple times in a game. To limit instances where songs would randomly (with a low statistical probability) play multiple times back-to-back, no song will repeat in the span of 10 songs using `,shuffle random`.
+Setting the shuffle mode to unique plays through every song once before any are repeated. With `,shuffle random`, songs matching the user's criteria are randomly chosen from before every round, so there is a chance of repeated songs within a timespan, depending on the total amount of songs.
 
 ![shuffle](/images/shuffle.png)
 

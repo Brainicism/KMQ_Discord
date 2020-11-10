@@ -34,16 +34,16 @@ export default class ShuffleCommand implements BaseCommand {
 
     help = {
         name: "shuffle",
-        description: "Choose whether songs played appear at random (`random`) or once per game session (`unique`).",
+        description: "Choose whether songs are played in truly random order (`random`) or randomly but uniquely until all songs are played (`shuffle`).",
         usage: "!shuffle [random|unique]",
         examples: [
             {
                 example: "`!shuffle random`",
-                explanation: "Songs will play randomly, although they may repeat multiple times in the session.",
+                explanation: "Songs will play randomly.",
             },
             {
                 example: "`!shuffle unique`",
-                explanation: "Songs will appear once per session. To reset the tracklist, call `,stop` and then `,play`, or play through all the songs matching your options!",
+                explanation: "Every song will play once before any are repeated.",
             },
         ],
     };

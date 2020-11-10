@@ -213,6 +213,10 @@ export default class GuildPreference {
         return this.gameOptions.shuffleType;
     }
 
+    isShuffleUnique(): boolean {
+        return this.gameOptions.shuffleType === ShuffleType.UNIQUE;
+    }
+
     async updateGuildPreferences(_db: Knex) {
         await _db("guild_preferences")
             .where({ guild_id: this.guildID })
