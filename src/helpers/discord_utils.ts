@@ -37,7 +37,7 @@ export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableCh
         };
     }
     let fact: string;
-    if (Math.random() <= 0.3) {
+    if (Math.random() <= 0.1) {
         try {
             fact = await getFact();
         } catch (e) {
