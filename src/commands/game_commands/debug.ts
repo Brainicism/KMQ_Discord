@@ -2,7 +2,7 @@ import Eris from "eris";
 import * as uuid from "uuid";
 import BaseCommand, { CommandArgs } from "../base_command";
 import { getDebugChannel, getVoiceChannel, sendEmbed, sendInfoMessage } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
+import { getGuildPreference, getSongCount } from "../../helpers/game_utils";
 import { bold } from "../../helpers/utils";
 import state from "../../kmq";
 import _logger from "../../logger";
@@ -18,10 +18,17 @@ export default class DebugCommand implements BaseCommand {
         }
 
         const guildPreference = await getGuildPreference(message.guildID);
+        const songCount = await getSongCount(guildPreference);
         const fields: Array<Eris.EmbedField> = [];
         fields.push({
             name: "Guild Preference",
             value: JSON.stringify(guildPreference),
+            inline: false,
+        });
+
+        fields.push({
+            name: "Song Count",
+            value: songCount.toString(),
             inline: false,
         });
 
