@@ -188,16 +188,17 @@ export default class GameSession {
         if (guildPreference.getShuffleType() === ShuffleType.UNIQUE && guildPreference.getLimit() === this.lastPlayedSongsQueue.length) {
             logger.info(`${getDebugContext(message)} | Resetting lastPlayedSongsQueue (all ${guildPreference.getLimit()} unique songs played)`);
             this.lastPlayedSongsQueue = [];
-        } else if (guildPreference.getShuffleType() === ShuffleType.RANDOM && this.lastPlayedSongsQueue.length >= LAST_PLAYED_SONG_QUEUE_SIZE) {
-            this.lastPlayedSongsQueue.shift();
+        } else if (guildPreference.getShuffleType() === ShuffleType.RANDOM) {
+            if (this.lastPlayedSongsQueue.length >= LAST_PLAYED_SONG_QUEUE_SIZE) {
+                this.lastPlayedSongsQueue = this.lastPlayedSongsQueue.slice(this.lastPlayedSongsQueue.length - LAST_PLAYED_SONG_QUEUE_SIZE - 1);
+            } else if (guildPreference.getLimit() <= LAST_PLAYED_SONG_QUEUE_SIZE) {
+                this.lastPlayedSongsQueue = [];
+            }
         }
 
         this.sessionInitialized = true;
         let randomSong: QueriedSong;
         try {
-            if (guildPreference.getShuffleType() === ShuffleType.RANDOM && guildPreference.getLimit() <= LAST_PLAYED_SONG_QUEUE_SIZE) {
-                this.lastPlayedSongsQueue = [];
-            }
             randomSong = await selectRandomSong(guildPreference, this.lastPlayedSongsQueue);
             if (randomSong === null) {
                 this.sessionInitialized = false;

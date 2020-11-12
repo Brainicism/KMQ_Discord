@@ -14,8 +14,8 @@ export enum ShuffleType {
 export default class ShuffleCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
-        const shuffleType = parsedMessage.components[0].toLowerCase();
-        guildPreference.setShuffleType(shuffleType as ShuffleType);
+        const shuffleType = parsedMessage.components[0].toLowerCase() as ShuffleType;
+        guildPreference.setShuffleType(shuffleType);
         await sendOptionsMessage(message, guildPreference, GameOption.SHUFFLE_TYPE);
         logger.info(`${getDebugContext(message)} | Shuffle set to ${shuffleType}`);
     }
