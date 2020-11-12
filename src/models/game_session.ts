@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { CommandArgs } from "../commands/base_command";
 import { SeekType } from "../commands/game_options/seek";
+import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
@@ -64,7 +65,6 @@ export default class GameSession {
         this.gameRound = new GameRound(song, artist, videoID, this.songAliasList[videoID] || []);
         this.sessionInitialized = true;
         this.roundsPlayed++;
-        this.lastPlayedSongsQueue.push(videoID);
     }
 
     endRound(guessed: boolean) {
@@ -78,14 +78,12 @@ export default class GameSession {
         }
         this.stopGuessTimeout();
         this.sessionInitialized = false;
-        if (this.lastPlayedSongsQueue.length >= LAST_PLAYED_SONG_QUEUE_SIZE) this.lastPlayedSongsQueue.shift();
     }
 
     endSession = async (): Promise<void> => {
         const guildId = this.textChannel.guild.id;
         this.finished = true;
         this.endRound(false);
-        this.lastPlayedSongsQueue = [];
         const voiceConnection = state.client.voiceConnections.get(guildId);
         if (voiceConnection && voiceConnection.channelID) {
             voiceConnection.stopPlaying();
@@ -185,12 +183,16 @@ export default class GameSession {
             return;
         }
 
+        if (guildPreference.getShuffleType() === ShuffleType.UNIQUE && guildPreference.getLimit() === this.lastPlayedSongsQueue.length) {
+            logger.info(`${getDebugContext(message)} | Resetting lastPlayedSongsQueue (all ${guildPreference.getLimit()} unique songs played)`);
+            this.resetLastPlayedSongsQueue();
+        } else if (guildPreference.getShuffleType() === ShuffleType.RANDOM && this.lastPlayedSongsQueue.length === LAST_PLAYED_SONG_QUEUE_SIZE) {
+            this.lastPlayedSongsQueue.shift();
+        }
+
         this.sessionInitialized = true;
         let randomSong: QueriedSong;
         try {
-            if (guildPreference.getLimit() <= LAST_PLAYED_SONG_QUEUE_SIZE) {
-                this.lastPlayedSongsQueue = [];
-            }
             randomSong = await selectRandomSong(guildPreference, this.lastPlayedSongsQueue);
             if (randomSong === null) {
                 this.sessionInitialized = false;
@@ -206,6 +208,9 @@ export default class GameSession {
             return;
         }
         this.createRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);
+        if (guildPreference.getLimit() > LAST_PLAYED_SONG_QUEUE_SIZE || guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
+            this.lastPlayedSongsQueue.push(randomSong.youtubeLink);
+        }
 
         try {
             await ensureVoiceConnection(this, state.client);
@@ -329,5 +334,9 @@ export default class GameSession {
         await dbContext.kmq("player_stats")
             .where("player_id", "=", userId)
             .increment("games_played", 1);
+    }
+
+    resetLastPlayedSongsQueue() {
+        this.lastPlayedSongsQueue = [];
     }
 }

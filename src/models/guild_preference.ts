@@ -3,9 +3,11 @@ import { BEGINNING_SEARCH_YEAR } from "../commands/game_options/cutoff";
 import { DEFAULT_LIMIT } from "../commands/game_options/limit";
 import { GENDER } from "../commands/game_options/gender";
 import { SeekType } from "../commands/game_options/seek";
+import { ShuffleType } from "../commands/game_options/shuffle";
 import _logger from "../logger";
 import dbContext from "../database_context";
 import { ModeType } from "../commands/game_options/mode";
+import state from "../kmq";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = _logger("guild_preference");
@@ -17,6 +19,7 @@ const DEFAULT_OPTIONS = {
     limit: DEFAULT_LIMIT,
     seekType: SeekType.RANDOM,
     modeType: ModeType.SONG_NAME,
+    shuffleType: ShuffleType.RANDOM,
     groups: null,
     goal: null,
     guessTimeout: null,
@@ -29,6 +32,7 @@ interface GameOptions {
     limit: number;
     seekType: SeekType;
     modeType: ModeType;
+    shuffleType: ShuffleType;
     groups: { id: number, name: string }[];
     goal: number;
     guessTimeout: number;
@@ -201,9 +205,24 @@ export default class GuildPreference {
         return this.gameOptions.guessTimeout !== null;
     }
 
+    setShuffleType(shuffleType: ShuffleType) {
+        this.gameOptions.shuffleType = shuffleType;
+        this.updateGuildPreferences(dbContext.kmq);
+    }
+
+    getShuffleType(): ShuffleType {
+        return this.gameOptions.shuffleType;
+    }
+
+    isShuffleUnique(): boolean {
+        return this.gameOptions.shuffleType === ShuffleType.UNIQUE;
+    }
+
     async updateGuildPreferences(_db: Knex) {
         await _db("guild_preferences")
             .where({ guild_id: this.guildID })
             .update({ guild_preference: JSON.stringify(this) });
+        const gameSession = state.gameSessions[this.guildID];
+        if (gameSession) gameSession.resetLastPlayedSongsQueue();
     }
 }
