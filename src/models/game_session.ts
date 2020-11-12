@@ -85,7 +85,6 @@ export default class GameSession {
         const guildId = this.textChannel.guild.id;
         this.finished = true;
         this.endRound(false);
-        this.lastPlayedSongsQueue = [];
         const voiceConnection = state.client.voiceConnections.get(guildId);
         if (voiceConnection && voiceConnection.channelID) {
             voiceConnection.stopPlaying();
@@ -187,12 +186,12 @@ export default class GameSession {
 
         if (guildPreference.getShuffleType() === ShuffleType.UNIQUE && guildPreference.getLimit() === this.lastPlayedSongsQueue.length) {
             logger.info(`${getDebugContext(message)} | Resetting lastPlayedSongsQueue (all ${guildPreference.getLimit()} unique songs played)`);
-            this.lastPlayedSongsQueue = [];
+            this.resetLastPlayedSongsQueue();
         } else if (guildPreference.getShuffleType() === ShuffleType.RANDOM) {
             if (this.lastPlayedSongsQueue.length >= LAST_PLAYED_SONG_QUEUE_SIZE) {
                 this.lastPlayedSongsQueue = this.lastPlayedSongsQueue.slice(this.lastPlayedSongsQueue.length - LAST_PLAYED_SONG_QUEUE_SIZE - 1);
             } else if (guildPreference.getLimit() <= LAST_PLAYED_SONG_QUEUE_SIZE) {
-                this.lastPlayedSongsQueue = [];
+                this.resetLastPlayedSongsQueue();
             }
         }
 
@@ -337,5 +336,9 @@ export default class GameSession {
         await dbContext.kmq("player_stats")
             .where("player_id", "=", userId)
             .increment("games_played", 1);
+    }
+
+    resetLastPlayedSongsQueue() {
+        this.lastPlayedSongsQueue = [];
     }
 }

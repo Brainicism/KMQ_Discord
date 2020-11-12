@@ -7,6 +7,7 @@ import { ShuffleType } from "../commands/game_options/shuffle";
 import _logger from "../logger";
 import dbContext from "../database_context";
 import { ModeType } from "../commands/game_options/mode";
+import state from "../kmq";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = _logger("guild_preference");
@@ -221,5 +222,7 @@ export default class GuildPreference {
         await _db("guild_preferences")
             .where({ guild_id: this.guildID })
             .update({ guild_preference: JSON.stringify(this) });
+        const gameSession = state.gameSessions[this.guildID];
+        if (gameSession) gameSession.resetLastPlayedSongsQueue();
     }
 }
