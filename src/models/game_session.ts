@@ -65,7 +65,6 @@ export default class GameSession {
         this.gameRound = new GameRound(song, artist, videoID, this.songAliasList[videoID] || []);
         this.sessionInitialized = true;
         this.roundsPlayed++;
-        this.lastPlayedSongsQueue.push(videoID);
     }
 
     endRound(guessed: boolean) {
@@ -187,12 +186,8 @@ export default class GameSession {
         if (guildPreference.getShuffleType() === ShuffleType.UNIQUE && guildPreference.getLimit() === this.lastPlayedSongsQueue.length) {
             logger.info(`${getDebugContext(message)} | Resetting lastPlayedSongsQueue (all ${guildPreference.getLimit()} unique songs played)`);
             this.resetLastPlayedSongsQueue();
-        } else if (guildPreference.getShuffleType() === ShuffleType.RANDOM) {
-            if (this.lastPlayedSongsQueue.length >= LAST_PLAYED_SONG_QUEUE_SIZE) {
-                this.lastPlayedSongsQueue = this.lastPlayedSongsQueue.slice(this.lastPlayedSongsQueue.length - LAST_PLAYED_SONG_QUEUE_SIZE - 1);
-            } else if (guildPreference.getLimit() <= LAST_PLAYED_SONG_QUEUE_SIZE) {
-                this.resetLastPlayedSongsQueue();
-            }
+        } else if (guildPreference.getShuffleType() === ShuffleType.RANDOM && this.lastPlayedSongsQueue.length === LAST_PLAYED_SONG_QUEUE_SIZE) {
+            this.lastPlayedSongsQueue.shift();
         }
 
         this.sessionInitialized = true;
@@ -213,6 +208,9 @@ export default class GameSession {
             return;
         }
         this.createRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);
+        if (guildPreference.getLimit() > LAST_PLAYED_SONG_QUEUE_SIZE || guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
+            this.lastPlayedSongsQueue.push(randomSong.youtubeLink);
+        }
 
         try {
             await ensureVoiceConnection(this, state.client);
