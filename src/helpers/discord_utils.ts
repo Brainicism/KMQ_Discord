@@ -37,7 +37,7 @@ export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableCh
         };
     }
     let fact: string;
-    if (Math.random() <= 0.3) {
+    if (Math.random() <= 0.1) {
         try {
             fact = await getFact();
         } catch (e) {
@@ -122,6 +122,7 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
     const groupsMode = guildPreference.getGroupIds() !== null;
     const goalMode = guildPreference.isGoalSet();
     const guessTimeoutMode = guildPreference.isGuessTimeoutSet();
+    const shuffleUniqueMode = guildPreference.isShuffleUnique();
 
     const optionStrings = {};
     optionStrings[GameOption.CUTOFF] = `between the years ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
@@ -132,6 +133,7 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
     optionStrings[GameOption.MODE_TYPE] = `${guildPreference.getModeType() === ModeType.BOTH ? "song or artist" : guildPreference.getModeType()}`;
     optionStrings[GameOption.GOAL] = `${guildPreference.getGoal()}`;
     optionStrings[GameOption.TIMER] = `${guildPreference.getGuessTimeout()}`;
+    optionStrings[GameOption.SHUFFLE_TYPE] = `${guildPreference.getShuffleType()}`;
 
     for (const gameOption of Object.keys(optionStrings)) {
         const gameOptionString = optionStrings[gameOption];
@@ -140,10 +142,11 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
 
     const goalMessage = `First one to ${optionStrings[GameOption.GOAL]} points wins.`;
     const guessTimeoutMessage = ` in less than ${optionStrings[GameOption.TIMER]} seconds`;
+    const shuffleMessage = `Songs will be shuffled in ${optionStrings[GameOption.SHUFFLE_TYPE]} order. `;
 
     await sendInfoMessage(message,
         updatedOption == null ? "Options" : `${updatedOption} updated`,
-        `Now playing the ${optionStrings[GameOption.LIMIT]} out of the __${totalSongs}__ most popular songs by ${groupsMode ? optionStrings[GameOption.GROUPS] : optionStrings[GameOption.GENDER]} ${optionStrings[GameOption.CUTOFF]}. \nPlaying from the ${optionStrings[GameOption.SEEK_TYPE]} point of each song. Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}`,
+        `Now playing the ${optionStrings[GameOption.LIMIT]} out of the __${totalSongs}__ most popular songs by ${groupsMode ? optionStrings[GameOption.GROUPS] : optionStrings[GameOption.GENDER]} ${optionStrings[GameOption.CUTOFF]}. \nPlaying from the ${optionStrings[GameOption.SEEK_TYPE]} point of each song. ${shuffleUniqueMode ? shuffleMessage : ""}Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}`,
         updatedOption == null ? `Psst. Your bot prefix is \`${process.env.PREFIX}\`.` : null,
         updatedOption == null ? "https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/src/assets/tsukasa.jpg" : null);
 }

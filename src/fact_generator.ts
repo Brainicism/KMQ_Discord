@@ -391,3 +391,20 @@ async function recentGames(): Promise<string[]> {
     const recentGameCount = result[0].count as number;
     return [`KMQ Fact: There has been a total of ${recentGameCount} games of KMQ played in the last week, averaging ${Math.round(recentGameCount / 7)} per day!`];
 }
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function recentUniquePlayers(): Promise<string[]> {
+    const intervals = [1, 7, 30];
+    const output: Array<string> = [];
+    for (const interval of intervals) {
+        const priorDate = new Date();
+        priorDate.setDate(priorDate.getDate() - interval);
+        const result = await dbContext.kmq("player_stats")
+            .count("* as count")
+            .where("last_active", ">", priorDate);
+        const recentActivePlayers = result[0].count as number;
+        output.push(`KMQ Fact: ${recentActivePlayers} unique players have played KMQ in the past ${interval} day(s)!`);
+    }
+
+    return output;
+}

@@ -47,11 +47,12 @@ async function getFilteredSongList(guildPreference: GuildPreference, ignoredVide
             .orderBy("views", "DESC");
     }
     const count = result.length;
+    result = result.slice(0, guildPreference.getLimit());
     if (ignoredVideoIds && ignoredVideoIds.length > 0) {
         result = result.filter((song) => !ignoredVideoIds.includes(song.youtubeLink));
     }
     return {
-        songs: result.slice(0, guildPreference.getLimit()),
+        songs: result,
         countBeforeLimit: count,
     };
 }
