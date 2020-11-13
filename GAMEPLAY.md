@@ -85,3 +85,4 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,goal`: Specify a number of points to be reached before a winner is selected, and the game ends 
 - `,timer`: Try your best to guess correctly before the timer runs out! Enter a time in seconds, or give no arguments to disable
 - `,shuffle`: Choose whether songs should play in "true" random order or in uniquely random order.
+- `,reset`: Reset to the default settings

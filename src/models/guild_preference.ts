@@ -15,7 +15,7 @@ const logger = _logger("guild_preference");
 const DEFAULT_OPTIONS = {
     beginningYear: BEGINNING_SEARCH_YEAR,
     endYear: (new Date()).getFullYear(),
-    gender: [GENDER.FEMALE],
+    gender: [GENDER.FEMALE, GENDER.MALE, GENDER.COED],
     limit: DEFAULT_LIMIT,
     seekType: SeekType.RANDOM,
     modeType: ModeType.SONG_NAME,
@@ -203,6 +203,11 @@ export default class GuildPreference {
 
     isGuessTimeoutSet(): boolean {
         return this.gameOptions.guessTimeout !== null;
+    }
+
+    resetToDefault() {
+        this.gameOptions = DEFAULT_OPTIONS;
+        this.updateGuildPreferences(dbContext.kmq);
     }
 
     setShuffleType(shuffleType: ShuffleType) {
