@@ -141,11 +141,11 @@ export default class GameSession {
 
     async guessSong({ message }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
-        const voiceChannel = getVoiceChannel(message);
+        const userVoiceChannel = getVoiceChannel(message);
         if (!this.gameRound) return;
 
         // if user isn't in the same voice channel
-        if (!voiceChannel || !voiceChannel.voiceMembers.has(message.author.id)) {
+        if (!userVoiceChannel || (userVoiceChannel.id !== this.voiceChannel.id)) {
             return;
         }
 
