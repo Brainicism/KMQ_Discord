@@ -7,7 +7,7 @@ import {
     getUserIdentifier,
 } from "../../helpers/discord_utils";
 import { bold } from "../../helpers/utils";
-import { startGame, getGuildPreference } from "../../helpers/game_utils";
+import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 
 const logger = _logger("forceskip");
@@ -31,7 +31,7 @@ export default class ForceSkipCommand implements BaseCommand {
         gameSession.gameRound.skipAchieved = true;
         sendSongMessage(message, gameSession.scoreboard, gameSession.gameRound, true);
         gameSession.endRound(false);
-        startGame(gameSessions, guildPreference, message);
+        gameSession.startRound(guildPreference, message);
         logger.info(`${getDebugContext(message)} | Owner force-skipped.`);
         gameSession.lastActiveNow();
     }

@@ -10,7 +10,7 @@ import {
     sendMessage,
     getNumParticipants,
 } from "../../helpers/discord_utils";
-import { startGame, getGuildPreference } from "../../helpers/game_utils";
+import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import GameRound from "../../models/game_round";
 
@@ -74,7 +74,7 @@ export default class SkipCommand implements BaseCommand {
             sendSkipMessage(message, gameSession.gameRound);
             sendSongMessage(message, gameSession.scoreboard, gameSession.gameRound, true);
             gameSession.endRound(false);
-            startGame(gameSessions, guildPreference, message);
+            gameSession.startRound(guildPreference, message);
             logger.info(`${getDebugContext(message)} | Skip majority achieved.`);
         } else {
             await sendSkipNotification(message, gameSession);

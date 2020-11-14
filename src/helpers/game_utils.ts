@@ -7,7 +7,6 @@ import GameSession from "../models/game_session";
 import GuildPreference from "../models/guild_preference";
 import { QueriedSong } from "../types";
 import { getForcePlaySong, isDebugMode, isForcedSongActive } from "./debug_utils";
-import { getDebugContext } from "./discord_utils";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -55,11 +54,6 @@ async function getFilteredSongList(guildPreference: GuildPreference, ignoredVide
         songs: result,
         countBeforeLimit: count,
     };
-}
-export async function startGame(gameSessions: { [guildID: string]: GameSession }, guildPreference: GuildPreference, message: Eris.Message<Eris.GuildTextableChannel>) {
-    logger.info(`${getDebugContext(message)} | Game session starting`);
-    const gameSession = gameSessions[message.guildID];
-    gameSession.startRound(guildPreference, message);
 }
 
 export async function ensureVoiceConnection(gameSession: GameSession, client: Eris.Client) {
