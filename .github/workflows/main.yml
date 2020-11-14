@@ -23,7 +23,13 @@ jobs:
       - name: Checkout KMQ_Discord
         uses: actions/checkout@v2
       - name: Check for undocumented game option commands
-        run: ./src/check_help.sh
+        run: src/ci_checks/check_help.sh
+      - name: Setup Python 3.6
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.6'
+      - name: Check for newly introduced environment variables
+        run: python src/ci_checks/check_env_var.py
       - name: Setup Node.js environment
         uses: actions/setup-node@v2.1.2
         with:
