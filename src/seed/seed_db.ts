@@ -27,7 +27,7 @@ const downloadDb = async () => {
         headers: {
             // eslint-disable-next-line quote-props
             "Host": "kpop.aoimirai.net",
-            "User-Agent": "PostmanRuntime/7.22.0",
+            "User-Agent": "KMQ (K-pop Music Quiz)",
         },
     });
 
