@@ -37,7 +37,7 @@ async function needsBootstrap(db: mysql.Connection) {
 
 function generateAvailableSongsView() {
     logger.info("Re-creating available songs view...");
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} kmq -e "CALL CreateAvailableSongsTable;"`);
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq -e "CALL CreateAvailableSongsTable;"`);
 }
 
 function performMigrations() {
@@ -64,7 +64,7 @@ async function bootstrapDatabases() {
             logger.info("Performing migrations on KMQ database");
             await db.query("CREATE DATABASE IF NOT EXISTS kmq");
             logger.info("Creating CreateAvailableSongsTable procedure");
-            execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} kmq < ./src/seed/create_available_songs_table_procedure.sql`);
+            execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq < ./src/seed/create_available_songs_table_procedure.sql`);
             performMigrations();
         }
 

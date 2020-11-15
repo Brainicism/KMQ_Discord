@@ -60,14 +60,22 @@ async function seedDb(db: mysql.Connection) {
     await db.query("CREATE DATABASE kpop_videos;");
     logger.info("Seeding K-Pop video database");
     setSqlMode(seedFilePath);
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} kpop_videos < ${seedFilePath}`);
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kpop_videos < ${seedFilePath}`);
     logger.info(`Imported database dump (${seedFile}) successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing`);
     logger.info("Creating K-pop Music Quiz database");
 }
 
 async function hasRecentDump(): Promise<boolean> {
     const dumpPath = `${databaseDownloadDir}/sql`;
-    const files = await fs.promises.readdir(dumpPath);
+    let files : string[];
+    try {
+        files = await fs.promises.readdir(dumpPath);
+    } catch (err) {
+        // If the directory doesn't exist, we don't have a recent dump.
+        if (err.code === "ENOENT") return false;
+        // Otherwise just throw.
+        throw err;
+    }
     if (files.length === 0) return false;
     const seedFileDateString = files[files.length - 1].match(/backup_([0-9]{4}-[0-9]{2}-[0-9]{2}).sql/)[1];
     logger.info(`Most recent seed file has date: ${seedFileDateString}`);

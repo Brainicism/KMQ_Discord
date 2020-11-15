@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  kmq:
+    image: kmq-dev-bot
+    build:
+      context: ../
+      dockerfile: docker/kmq/Dockerfile
+    env_file: .env
+    environment:
+      SONG_DOWNLOAD_DIR: /songs
+      AOIMIRAI_DUMP_DIR: /dump
+    volumes:
+      - songs:/songs
+      - dump:/dump
+    depends_on:
+      - db
+
+  db:
+    image: mysql:5.7
+    restart: on-failure
+    env_file: .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+    volumes:
+      - mysql:/var/lib/mysql
+    ports:
+      - 3306:3306
+
+volumes:
+  songs:
+  dump:
+  mysql:
