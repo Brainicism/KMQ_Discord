@@ -38,6 +38,11 @@ interface GameOptions {
     guessTimeout: number;
 }
 
+const enum AvailableSongs {
+    Constant = 0,
+    Modifies = 1,
+}
+
 export default class GuildPreference {
     private guildID: string;
     private gameOptions: GameOptions;
@@ -66,18 +71,18 @@ export default class GuildPreference {
             }
         }
         if (gameOptionModified) {
-            this.updateGuildPreferences(dbContext.kmq);
+            this.updateGuildPreferences(dbContext.kmq, AvailableSongs.Constant);
         }
     }
 
     setLimit(limit: number) {
         this.gameOptions.limit = limit;
-        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGuildPreferences(dbContext.kmq, AvailableSongs.Modifies);
     }
 
     resetLimit() {
         this.gameOptions.limit = DEFAULT_LIMIT;
-        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGuildPreferences(dbContext.kmq, AvailableSongs.Modifies);
     }
 
     getLimit(): number {
@@ -86,12 +91,12 @@ export default class GuildPreference {
 
     setBeginningCutoffYear(year: number) {
         this.gameOptions.beginningYear = year;
-        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGuildPreferences(dbContext.kmq, AvailableSongs.Modifies);
     }
 
     resetBeginningCutoffYear() {
         this.gameOptions.beginningYear = BEGINNING_SEARCH_YEAR;
-        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGuildPreferences(dbContext.kmq, AvailableSongs.Modifies);
     }
 
     getBeginningCutoffYear(): number {
@@ -100,12 +105,12 @@ export default class GuildPreference {
 
     setEndCutoffYear(year: number) {
         this.gameOptions.endYear = year;
-        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGuildPreferences(dbContext.kmq, AvailableSongs.Modifies);
     }
 
     resetEndCutoffYear() {
         this.gameOptions.endYear = (new Date()).getFullYear();
-        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGuildPreferences(dbContext.kmq, AvailableSongs.Modifies);
     }
 
     getEndCutoffYear(): number {
@@ -114,12 +119,12 @@ export default class GuildPreference {
 
     setGroups(groupIds: { id: number, name: string }[]) {
         this.gameOptions.groups = groupIds;
-        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGuildPreferences(dbContext.kmq, AvailableSongs.Modifies);
     }
 
     resetGroups() {
         this.gameOptions.groups = null;
-        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGuildPreferences(dbContext.kmq, AvailableSongs.Modifies);
     }
 
     getGroupIds(): number[] {
@@ -138,12 +143,12 @@ export default class GuildPreference {
 
     resetGender() {
         this.gameOptions.gender = [GENDER.FEMALE];
-        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGuildPreferences(dbContext.kmq, AvailableSongs.Modifies);
     }
 
     setGender(genderArr: GENDER[]): Array<string> {
         this.gameOptions.gender = [...new Set(genderArr)];
-        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGuildPreferences(dbContext.kmq, AvailableSongs.Modifies);
         return this.gameOptions.gender;
     }
 
@@ -153,7 +158,7 @@ export default class GuildPreference {
 
     setSeekType(seekType: SeekType) {
         this.gameOptions.seekType = seekType;
-        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGuildPreferences(dbContext.kmq, AvailableSongs.Constant);
     }
 
     getSeekType(): SeekType {
@@ -162,7 +167,7 @@ export default class GuildPreference {
 
     setModeType(modeType: ModeType) {
         this.gameOptions.modeType = modeType as ModeType;
-        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGuildPreferences(dbContext.kmq, AvailableSongs.Constant);
     }
 
     getModeType(): ModeType {
@@ -171,7 +176,7 @@ export default class GuildPreference {
 
     setGoal(goal: number) {
         this.gameOptions.goal = goal;
-        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGuildPreferences(dbContext.kmq, AvailableSongs.Constant);
     }
 
     getGoal(): number {
@@ -180,7 +185,7 @@ export default class GuildPreference {
 
     resetGoal() {
         this.gameOptions.goal = null;
-        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGuildPreferences(dbContext.kmq, AvailableSongs.Constant);
     }
 
     isGoalSet(): boolean {
@@ -189,7 +194,7 @@ export default class GuildPreference {
 
     setGuessTimeout(guessTimeout: number) {
         this.gameOptions.guessTimeout = guessTimeout;
-        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGuildPreferences(dbContext.kmq, AvailableSongs.Constant);
     }
 
     getGuessTimeout(): number {
@@ -198,7 +203,7 @@ export default class GuildPreference {
 
     resetGuessTimeout() {
         this.gameOptions.guessTimeout = null;
-        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGuildPreferences(dbContext.kmq, AvailableSongs.Constant);
     }
 
     isGuessTimeoutSet(): boolean {
@@ -207,12 +212,15 @@ export default class GuildPreference {
 
     resetToDefault() {
         this.gameOptions = { ...DEFAULT_OPTIONS };
-        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGuildPreferences(dbContext.kmq, AvailableSongs.Modifies);
     }
 
     setShuffleType(shuffleType: ShuffleType) {
         this.gameOptions.shuffleType = shuffleType;
-        this.updateGuildPreferences(dbContext.kmq);
+
+        // Doesn't actually modify list of available_songs, but we need to
+        // reset lastPlayedSongsQueue when changing shuffling modes
+        this.updateGuildPreferences(dbContext.kmq, AvailableSongs.Modifies);
     }
 
     getShuffleType(): ShuffleType {
@@ -223,11 +231,13 @@ export default class GuildPreference {
         return this.gameOptions.shuffleType === ShuffleType.UNIQUE;
     }
 
-    async updateGuildPreferences(_db: Knex) {
+    async updateGuildPreferences(_db: Knex, songsState: AvailableSongs) {
         await _db("guild_preferences")
             .where({ guild_id: this.guildID })
             .update({ guild_preference: JSON.stringify(this) });
         const gameSession = state.gameSessions[this.guildID];
-        if (gameSession) gameSession.resetLastPlayedSongsQueue();
+        if (gameSession && songsState === AvailableSongs.Modifies) {
+            gameSession.resetLastPlayedSongsQueue();
+        }
     }
 }
