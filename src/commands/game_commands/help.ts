@@ -1,16 +1,17 @@
 import Eris from "eris";
+import path from "path";
 import BaseCommand, { CommandArgs } from "../base_command";
-import helpMessages from "../../data/help_strings.json";
 import {
     EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, sendPaginationedEmbed, sendEmbed,
 } from "../../helpers/discord_utils";
 import _logger from "../../logger";
-import { chunkArray } from "../../helpers/utils";
+import { chunkArray, parseJsonFile } from "../../helpers/utils";
 import { getCommandFiles } from "../../helpers/management_utils";
 
 const logger = _logger("help");
 const placeholder = /!/g;
 const FIELDS_PER_EMBED = 5;
+const helpMessages = parseJsonFile(path.resolve(__dirname, "../../../data/help_strings.json"));
 
 let commandFiles: { [commandName: string]: BaseCommand };
 
@@ -46,14 +47,14 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
             return;
         }
         const helpManual = commandFilesWithAliases[action].help;
-        embedTitle = `\`${helpManual.usage.replace(placeholder, process.env.PREFIX)}\``;
+        embedTitle = `\`${helpManual.usage.replace(placeholder, process.env.BOT_PREFIX)}\``;
         embedDesc = helpManual.description;
         if (helpManual.examples.length > 0) {
             embedDesc += "\n\n**Examples**\n";
         }
         helpManual.examples.forEach((example) => {
             embedFields.push({
-                name: example.example.replace(placeholder, process.env.PREFIX),
+                name: example.example.replace(placeholder, process.env.BOT_PREFIX),
                 value: example.explanation,
             });
         });
@@ -66,12 +67,12 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
         logger.info(`${getDebugContext(message)} | Getting full help documentation`);
         const commandNamesWithHelp = Object.keys(commandFiles).filter((commandName) => commandFiles[commandName].help);
         embedTitle = "K-pop Music Quiz Command Help";
-        embedDesc = helpMessages.rules.replace(placeholder, process.env.PREFIX);
+        embedDesc = helpMessages.rules.replace(placeholder, process.env.BOT_PREFIX);
         commandNamesWithHelp.forEach((commandName) => {
             const helpManual = commandFiles[commandName].help;
             embedFields.push({
                 name: helpManual.name,
-                value: `${helpManual.description}\nUsage: \`${helpManual.usage.replace(placeholder, process.env.PREFIX)}\``,
+                value: `${helpManual.description}\nUsage: \`${helpManual.usage.replace(placeholder, process.env.BOT_PREFIX)}\``,
             });
         });
     }

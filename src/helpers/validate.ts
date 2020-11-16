@@ -23,7 +23,7 @@ export default (message: Eris.Message<Eris.GuildTextableChannel>, parsedMessage:
     const args = parsedMessage.components;
     if (args.length > validations.maxArgCount || args.length < validations.minArgCount) {
         sendValidationErrorMessage(message,
-            `Incorrect number of arguments. See \`${process.env.PREFIX}help ${parsedMessage.action}\` for usage.`,
+            `Incorrect number of arguments. See \`${process.env.BOT_PREFIX}help ${parsedMessage.action}\` for usage.`,
             args);
         return false;
     }

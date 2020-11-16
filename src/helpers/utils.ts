@@ -1,3 +1,4 @@
+import fs from "fs";
 import { exec } from "child_process";
 import _logger from "../logger";
 
@@ -42,4 +43,8 @@ export function getAudioDurationInSeconds(songPath: string): Promise<number> {
             resolve(parseInt(stdout, 10));
         });
     });
+}
+
+export function parseJsonFile(filePath: string) {
+    return JSON.parse(fs.readFileSync(filePath).toString());
 }

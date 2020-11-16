@@ -24,7 +24,7 @@ export default class GroupsCommand implements BaseCommand {
             const matchingGroupNames = matchingGroups.map((x) => x.name.toUpperCase());
             const unrecognizedGroups = groupNames.filter((x) => !matchingGroupNames.includes(x.toUpperCase()));
             logger.info(`${getDebugContext(message)} | Attempted to set unknown groups. groups =  ${unrecognizedGroups.join(", ")}`);
-            await sendErrorMessage(message, "Unknown Group Name", `One or more of the specified group names was not recognized. Please ensure that the group name matches exactly with the list provided by \`${process.env.PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unrecognizedGroups.join(", ")} `);
+            await sendErrorMessage(message, "Unknown Group Name", `One or more of the specified group names was not recognized. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unrecognizedGroups.join(", ")} `);
             return;
         }
         guildPreference.setGroups(matchingGroups);
