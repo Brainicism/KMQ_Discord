@@ -10,7 +10,7 @@ import {
     getDebugContext, getSqlDateString, getUserIdentifier, getVoiceChannel, sendEndGameMessage, sendErrorMessage, sendSongMessage,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong } from "../helpers/game_utils";
-import { delay, getAudioDurationInSeconds } from "../helpers/utils";
+import { delay, getAudioDurationInSeconds, parseJsonFile } from "../helpers/utils";
 import state from "../kmq";
 import _logger from "../logger";
 import { QueriedSong } from "../types";
@@ -39,6 +39,7 @@ export default class GameSession {
 
     private guessTimes: Array<number>;
     private songAliasList: { [songId: string]: Array<string> };
+    private artistAliasList: { [artistName: string]: Array<string> };
     private guessTimeoutFunc: NodeJS.Timer;
     private lastPlayedSongsQueue: Array<string>;
 
@@ -55,14 +56,18 @@ export default class GameSession {
         this.voiceChannel = voiceChannel;
         this.textChannel = textChannel;
         this.gameRound = null;
-        const songAliasesFilePath = path.resolve(__dirname, "../data/song_aliases.json");
-        this.songAliasList = JSON.parse(fs.readFileSync(songAliasesFilePath).toString());
+        const songAliasesFilePath = path.resolve(__dirname, "../../data/song_aliases.json");
+        const artistAliasesFilePath = path.resolve(__dirname, "../../data/artist_aliases.json");
+        this.songAliasList = parseJsonFile(songAliasesFilePath);
+        this.artistAliasList = parseJsonFile(artistAliasesFilePath);
         this.owner = gameSessionCreator;
         this.lastPlayedSongsQueue = [];
     }
 
     createRound(song: string, artist: string, videoID: string) {
-        this.gameRound = new GameRound(song, artist, videoID, this.songAliasList[videoID] || []);
+        const artistNames = artist.split("+").map((x) => x.trim());
+        const artistAliases = artistNames.flatMap((x) => [x, ...(this.artistAliasList[x] || [])]);
+        this.gameRound = new GameRound(song, artist, videoID, this.songAliasList[videoID] || [], artistAliases);
         this.sessionInitialized = true;
         this.roundsPlayed++;
     }

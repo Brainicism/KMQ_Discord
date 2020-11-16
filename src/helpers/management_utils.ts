@@ -162,7 +162,7 @@ export async function updateGroupList() {
     const result = await dbContext.kpopVideos("kpop_videos.app_kpop_group")
         .select(["name", "members as gender"])
         .orderBy("name", "ASC");
-    fs.writeFileSync(path.resolve(__dirname, "../data/group_list.txt"), result.map((x) => x.name).join("\n"));
+    fs.writeFileSync(path.resolve(__dirname, "../../data/group_list.txt"), result.map((x) => x.name).join("\n"));
 }
 
 export function deleteGameSession(guildId: string) {

@@ -23,15 +23,19 @@ function cleanSongName(name: string): string {
 }
 
 function cleanArtistName(name: string): string {
-    const cleanName = name.toLowerCase()
+    let cleanName = name.toLowerCase()
         .replace(REMOVED_CHARACTERS_ARTIST_GUESS, "")
         .trim();
+    for (const characterReplacement of CHARACTER_REPLACEMENTS) {
+        cleanName = cleanName.replace(characterReplacement.pattern, characterReplacement.replacement);
+    }
     return cleanName;
 }
 
 export default class GameRound {
     public readonly song: string;
     public readonly songAliases: Array<string>;
+    public readonly artistAliases: Array<string>;
     public readonly artist: string;
     public readonly videoID: string;
     public readonly startedAt: number;
@@ -40,9 +44,10 @@ export default class GameRound {
     public skipAchieved: boolean;
     public lastActive: number;
 
-    constructor(song: string, artist: string, videoID: string, songAliases: Array<string>) {
+    constructor(song: string, artist: string, videoID: string, songAliases: Array<string>, artistAliases: Array<string>) {
         this.song = song;
         this.songAliases = songAliases;
+        this.artistAliases = artistAliases;
         this.artist = artist;
         this.videoID = videoID;
         this.skipAchieved = false;
@@ -82,8 +87,7 @@ export default class GameRound {
 
     private checkArtistGuess(message: string): boolean {
         const guess = cleanArtistName(message);
-        const artistNames = this.artist.split("+");
-        const cleanedArtistNames = artistNames.map((x) => cleanArtistName(x));
-        return this.song && (guess === cleanArtistName(this.artist) || cleanedArtistNames.includes(guess));
+        const cleanedArtistAliases = this.artistAliases.map((x) => cleanArtistName(x));
+        return this.song && (guess === cleanArtistName(this.artist) || cleanedArtistAliases.includes(guess));
     }
 }

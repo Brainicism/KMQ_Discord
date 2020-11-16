@@ -15,6 +15,6 @@ declare namespace NodeJS {
         DEBUG_TEXT_CHANNEL_ID?: string,
         LOG_DIR: string,
         AOIMIRAI_DUMP_DIR: string,
-        PREFIX: string
+        BOT_PREFIX: string
     }
 }

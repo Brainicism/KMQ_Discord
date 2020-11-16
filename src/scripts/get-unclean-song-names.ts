@@ -1,11 +1,12 @@
 import mysql from "promise-mysql";
 import fs from "fs";
+import path from "path";
 import { config } from "dotenv";
-import { resolve } from "path";
 import { QueriedSong } from "../types";
-import existingSongAliases from "../data/song_aliases.json";
+import { parseJsonFile } from "../helpers/utils";
 
-config({ path: resolve(__dirname, "../../.env") });
+const existingSongAliases = parseJsonFile(path.resolve(__dirname, "../../data/song_aliases.json"));
+config({ path: path.resolve(__dirname, "../../.env") });
 
 (async () => {
     const db = await mysql.createPool({

@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import dbContext from "./database_context";
+import { parseJsonFile } from "./helpers/utils";
 import _logger from "./logger";
-import factStrings from "./data/facts.json";
+
+const factStrings = parseJsonFile("../data/facts.json");
 
 const logger = _logger("fact_generator");
 

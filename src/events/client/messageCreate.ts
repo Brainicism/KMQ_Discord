@@ -12,7 +12,7 @@ function isGuildMessage(message: Eris.Message): message is Eris.Message<Eris.Gui
 }
 
 const parseMessage = (message: string): ParsedMessage => {
-    if (message.charAt(0) !== process.env.PREFIX) return null;
+    if (message.charAt(0) !== process.env.BOT_PREFIX) return null;
     const components = message.split(" ");
     const action = components.shift().substring(1);
     const argument = components.join(" ");

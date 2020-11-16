@@ -15,7 +15,7 @@ export default class PlayCommand implements BaseCommand {
         if (!voiceChannel) {
             await sendErrorMessage(message,
                 "Join a voice channel",
-                `Send \`${process.env.PREFIX}play\` again when you are in a voice channel.`);
+                `Send \`${process.env.BOT_PREFIX}play\` again when you are in a voice channel.`);
             logger.warn(`${getDebugContext(message)} | User not in voice channel`);
         } else {
             if (!voicePermissionsCheck(message)) {

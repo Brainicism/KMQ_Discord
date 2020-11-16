@@ -26,6 +26,7 @@ When specifying artists in `,groups`, they must be spelled **exactly** as shown 
 When specifying an artist as a guess, they must be shown exactly as in `,help groups`, with a few exceptions.
 1. If the song is a collaboration between artists such as `BIGBANG + 2NE1` (indicated by a + sign), you may enter *either* of the names
 2. Punctuation is not required. `Bae Jinyoung` will be accepted for a song by `Bae Jin-young`.
+3. Guessing the original group name will be accepted for subunits. `NCT` will be accepted for `NCT 127`.
 
 ## The bot is lagging
 If this lasts for more than 5 minutes, let us know in the support server found in `,help`
