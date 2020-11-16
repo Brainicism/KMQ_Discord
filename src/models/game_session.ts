@@ -99,11 +99,12 @@ export default class GameSession {
         }
 
         for (const participant of this.participants) {
-            this.incrementPlayerGamesPlayed(participant);
-        }
-
-        for (const playerScore of this.scoreboard.getPlayerScores()) {
-            this.incrementPlayerSongsGuessed(playerScore.id, playerScore.score);
+            await this.ensurePlayerStat(participant);
+            await this.incrementPlayerGamesPlayed(participant);
+            const playerScore = this.scoreboard.getPlayerScore(participant);
+            if (playerScore > 0) {
+                await this.incrementPlayerSongsGuessed(participant, playerScore);
+            }
         }
 
         await dbContext.kmq("guild_preferences")
@@ -325,7 +326,6 @@ export default class GameSession {
     }
 
     async incrementPlayerSongsGuessed(userId: string, score: number) {
-        await this.ensurePlayerStat(userId);
         await dbContext.kmq("player_stats")
             .where("player_id", "=", userId)
             .increment("songs_guessed", score)
@@ -335,7 +335,6 @@ export default class GameSession {
     }
 
     async incrementPlayerGamesPlayed(userId: string) {
-        await this.ensurePlayerStat(userId);
         await dbContext.kmq("player_stats")
             .where("player_id", "=", userId)
             .increment("games_played", 1);
