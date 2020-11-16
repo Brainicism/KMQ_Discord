@@ -81,6 +81,7 @@ Busker Busker
 Busters
 Buzz
 BVNDIT
+BXK
 C-Clown
 Changmo
 Changsub
@@ -128,6 +129,7 @@ Dongwoo
 Double S 301
 Dreamcatcher
 DreamNote
+Drippin
 Drug Restaurant
 Dvwn
 Dynamic Duo
@@ -197,6 +199,7 @@ Gugudan
 Gugudan Oguogu
 Gugudan Semina
 Gummy
+Gwangil Jo
 GWSN
 H&D
 Ha Hyun-woo
@@ -449,6 +452,7 @@ Ong Seongwu
 OnlyOneOf
 Orange Caramel
 Ovan
+P1Harmony
 Park Bo Gum
 Park Bom
 Park BoRam
@@ -464,6 +468,7 @@ Phantom
 Pink Fantasy
 Pink Fantasy SHY
 Playback
+Prisma
 Pristin
 Pristin V
 PRODUCE 101
@@ -569,6 +574,7 @@ Sunmi
 Sunny Hill
 Super Junior
 Super Junior D&E
+Super Junior-K.R.Y.
 Super Junior-M
 SuperM
 Supreme Team
@@ -580,6 +586,7 @@ T-Ara
 T-ara + Davichi
 T-ara N4
 T.O.P
+T1419
 Tablo
 Tablo + Taeyang
 Taemin
