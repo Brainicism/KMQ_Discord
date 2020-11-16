@@ -4,7 +4,7 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
 
-const logger = _logger("limit");
+const logger = _logger("goal");
 
 export default class GoalCommand implements BaseCommand {
     async call({ message, parsedMessage, gameSessions }: CommandArgs) {

@@ -1,25 +1,25 @@
 import Knex from "knex";
-import { BEGINNING_SEARCH_YEAR } from "../commands/game_options/cutoff";
+import { DEFAULT_BEGINNING_SEARCH_YEAR, DEFAULT_ENDING_SEARCH_YEAR } from "../commands/game_options/cutoff";
 import { DEFAULT_LIMIT } from "../commands/game_options/limit";
-import { GENDER } from "../commands/game_options/gender";
-import { SeekType } from "../commands/game_options/seek";
-import { ShuffleType } from "../commands/game_options/shuffle";
+import { GENDER, DEFAULT_GENDER } from "../commands/game_options/gender";
+import { SeekType, DEFAULT_SEEK } from "../commands/game_options/seek";
+import { ShuffleType, DEFAULT_SHUFFLE } from "../commands/game_options/shuffle";
+import { ModeType, DEFAULT_MODE } from "../commands/game_options/mode";
 import _logger from "../logger";
 import dbContext from "../database_context";
-import { ModeType } from "../commands/game_options/mode";
 import state from "../kmq";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = _logger("guild_preference");
 
 const DEFAULT_OPTIONS = {
-    beginningYear: BEGINNING_SEARCH_YEAR,
-    endYear: (new Date()).getFullYear(),
-    gender: [GENDER.FEMALE, GENDER.MALE, GENDER.COED],
+    beginningYear: DEFAULT_BEGINNING_SEARCH_YEAR,
+    endYear: DEFAULT_ENDING_SEARCH_YEAR,
+    gender: DEFAULT_GENDER,
     limit: DEFAULT_LIMIT,
-    seekType: SeekType.RANDOM,
-    modeType: ModeType.SONG_NAME,
-    shuffleType: ShuffleType.RANDOM,
+    seekType: DEFAULT_SEEK,
+    modeType: DEFAULT_MODE,
+    shuffleType: DEFAULT_SHUFFLE,
     groups: null,
     goal: null,
     guessTimeout: null,
@@ -93,7 +93,7 @@ export default class GuildPreference {
     }
 
     resetBeginningCutoffYear() {
-        this.gameOptions.beginningYear = BEGINNING_SEARCH_YEAR;
+        this.gameOptions.beginningYear = DEFAULT_BEGINNING_SEARCH_YEAR;
         this.updateGuildPreferences(dbContext.kmq);
         this.updateGameSession(true);
     }
@@ -109,7 +109,7 @@ export default class GuildPreference {
     }
 
     resetEndCutoffYear() {
-        this.gameOptions.endYear = (new Date()).getFullYear();
+        this.gameOptions.endYear = DEFAULT_ENDING_SEARCH_YEAR;
         this.updateGuildPreferences(dbContext.kmq);
         this.updateGameSession(true);
     }

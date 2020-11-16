@@ -9,16 +9,19 @@ export enum SeekType {
     BEGINNING = "beginning",
     RANDOM = "random",
 }
+
+export const DEFAULT_SEEK = SeekType.RANDOM;
+
 export default class SeekCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
-        const seekType = parsedMessage.components[0];
-        guildPreference.setSeekType(seekType as SeekType);
+        const seekType = parsedMessage.components.length > 0 ? parsedMessage.components[0] as SeekType : DEFAULT_SEEK;
+        guildPreference.setSeekType(seekType);
         await sendOptionsMessage(message, guildPreference, GameOption.SEEK_TYPE);
         logger.info(`${getDebugContext(message)} | Seek type set to ${seekType}`);
     }
     validations = {
-        minArgCount: 1,
+        minArgCount: 0,
         maxArgCount: 1,
         arguments: [
             {
