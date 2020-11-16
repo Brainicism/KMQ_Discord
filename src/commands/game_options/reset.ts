@@ -3,7 +3,7 @@ import _logger from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { getDebugContext, sendOptionsMessage } from "../../helpers/discord_utils";
 
-const logger = _logger("cutoff");
+const logger = _logger("reset");
 
 export default class ResetCommand implements BaseCommand {
     async call({ message }: CommandArgs) {
