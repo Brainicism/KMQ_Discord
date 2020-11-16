@@ -2,7 +2,7 @@ import GameSession from "../../models/game_session";
 import {
     sendErrorMessage, getDebugContext, sendInfoMessage, getVoiceChannel, voicePermissionsCheck,
 } from "../../helpers/discord_utils";
-import { startGame, getGuildPreference } from "../../helpers/game_utils";
+import { getGuildPreference } from "../../helpers/game_utils";
 import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
 
@@ -23,9 +23,11 @@ export default class PlayCommand implements BaseCommand {
             }
             if (!gameSessions[message.guildID]) {
                 const textChannel = message.channel;
-                gameSessions[message.guildID] = new GameSession(textChannel, voiceChannel, message.author);
+                const gameSession = new GameSession(textChannel, voiceChannel, message.author);
+                gameSessions[message.guildID] = gameSession;
                 await sendInfoMessage(message, `Game starting in #${textChannel.name} in 🔊 ${voiceChannel.name}`, "Listen to the song and type your guess!");
-                startGame(gameSessions, guildPreference, message);
+                logger.info(`${getDebugContext(message)} | Game session starting`);
+                gameSession.startRound(guildPreference, message);
             } else {
                 await sendErrorMessage(message, "Game already in session", null);
             }

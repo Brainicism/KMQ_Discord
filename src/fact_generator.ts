@@ -14,8 +14,11 @@ const musicShows = {
     showchampion: "Show Champion",
 };
 const funFactFunctions = [recentMusicVideos, recentMilestone, recentMusicShowWin, musicShowWins, mostViewedGroups, mostLikedGroups, mostViewedVideo, mostLikedVideo,
-    mostMusicVideos, yearWithMostDebuts, yearWithMostReleases, viewsByGender, mostViewedSoloArtist, viewsBySolo, mostViewsPerDay, bigThreeDominance];
-const kmqFactFunctions = [longestGame, mostGames, mostCorrectGuessed, globalTotalGames, recentGameSessions, genderGamePreferences, recentGames];
+    mostMusicVideos, yearWithMostDebuts, yearWithMostReleases, viewsByGender, mostViewedSoloArtist, viewsBySolo, mostViewsPerDay, bigThreeDominance, mostGaonFirsts,
+    mostGaonAppearances];
+
+const kmqFactFunctions = [longestGame, mostGames, mostCorrectGuessed, globalTotalGames, recentGameSessions, genderGamePreferences, recentGames, mostSongsGuessedPlayer,
+    mostGamesPlayedPlayer, recentUniquePlayers];
 
 function chooseRandom(list: Array<any>) {
     return list[Math.floor(Math.random() * list.length)];
@@ -392,7 +395,6 @@ async function recentGames(): Promise<string[]> {
     return [`KMQ Fact: There has been a total of ${recentGameCount} games of KMQ played in the last week, averaging ${Math.round(recentGameCount / 7)} per day!`];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function recentUniquePlayers(): Promise<string[]> {
     const intervals = [1, 7, 30];
     const output: Array<string> = [];
@@ -407,4 +409,36 @@ async function recentUniquePlayers(): Promise<string[]> {
     }
 
     return output;
+}
+
+async function mostSongsGuessedPlayer(): Promise<string[]> {
+    const result = await dbContext.kmq("player_stats")
+        .select(["songs_guessed"])
+        .orderBy("songs_guessed", "DESC")
+        .limit(1);
+    return [`KMQ Fact: The most active player has guessed ${result[0].songs_guessed} songs since Nov 8th, 2020!`];
+}
+
+async function mostGamesPlayedPlayer(): Promise<string[]> {
+    const result = await dbContext.kmq("player_stats")
+        .select(["games_played"])
+        .orderBy("games_played", "DESC")
+        .limit(1);
+    return [`KMQ Fact: The most active player has played ${result[0].games_played} games since Nov 8th, 2020!`];
+}
+
+async function mostGaonFirsts(): Promise<string[]> {
+    const result = await dbContext.kpopVideos("app_kpop_group")
+        .select(["name as artist_name", "gaondigital_firsts as firsts"])
+        .orderBy("firsts", "DESC")
+        .limit(25);
+    return result.map((x, idx) => `Fun Fact: '${x.artist_name}' has topped the GAON digital weekly charts the ${getOrdinalNum(idx + 1)} most times with ${x.firsts} first place appearances!`);
+}
+
+async function mostGaonAppearances(): Promise<string[]> {
+    const result = await dbContext.kpopVideos("app_kpop_group")
+        .select(["name as artist_name", "gaondigital_times as appearances"])
+        .orderBy("appearances", "DESC")
+        .limit(25);
+    return result.map((x, idx) => `Fun Fact: '${x.artist_name}' has placed on the GAON digital weekly charts the ${getOrdinalNum(idx + 1)} most times with ${x.appearances} appearances!`);
 }
