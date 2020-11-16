@@ -45,7 +45,7 @@ export default class GuildPreference {
     constructor(guildID: string, json?: GuildPreference) {
         this.guildID = guildID;
         if (!json) {
-            this.gameOptions = DEFAULT_OPTIONS;
+            this.gameOptions = { ...DEFAULT_OPTIONS };
             return;
         }
         this.gameOptions = json.gameOptions;
@@ -206,7 +206,7 @@ export default class GuildPreference {
     }
 
     resetToDefault() {
-        this.gameOptions = DEFAULT_OPTIONS;
+        this.gameOptions = { ...DEFAULT_OPTIONS };
         this.updateGuildPreferences(dbContext.kmq);
     }
 
