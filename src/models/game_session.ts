@@ -9,7 +9,7 @@ import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
     getDebugContext, getSqlDateString, getUserIdentifier, getVoiceChannel, sendEndGameMessage, sendErrorMessage, sendSongMessage,
 } from "../helpers/discord_utils";
-import { ensureVoiceConnection, getGuildPreference, selectRandomSong } from "../helpers/game_utils";
+import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getSongCount } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds, parseJsonFile } from "../helpers/utils";
 import state from "../kmq";
 import _logger from "../logger";
@@ -214,7 +214,9 @@ export default class GameSession {
             return;
         }
         this.createRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);
-        if (guildPreference.getLimit() > LAST_PLAYED_SONG_QUEUE_SIZE || guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
+        const totalSongs = await getSongCount(guildPreference);
+        if ((guildPreference.getLimit() > LAST_PLAYED_SONG_QUEUE_SIZE && totalSongs > LAST_PLAYED_SONG_QUEUE_SIZE)
+                || guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
             this.lastPlayedSongsQueue.push(randomSong.youtubeLink);
         }
 
