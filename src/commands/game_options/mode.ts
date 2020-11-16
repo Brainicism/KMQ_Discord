@@ -12,17 +12,19 @@ export enum ModeType {
     BOTH = "both",
 }
 
+export const DEFAULT_MODE = ModeType.SONG_NAME;
+
 export default class ModeCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
-        const modeType = parsedMessage.components[0].toLowerCase();
-        guildPreference.setModeType(modeType as ModeType);
+        const modeType = parsedMessage.components.length > 0 ? parsedMessage.components[0].toLowerCase() as ModeType : DEFAULT_MODE;
+        guildPreference.setModeType(modeType);
         await sendOptionsMessage(message, guildPreference, GameOption.MODE_TYPE);
         logger.info(`${getDebugContext(message)} | Mode type set to ${modeType}`);
     }
 
     validations = {
-        minArgCount: 1,
+        minArgCount: 0,
         maxArgCount: 1,
         arguments: [
             {
