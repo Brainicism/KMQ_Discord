@@ -55,12 +55,12 @@ async function seedDb(db: mysql.Connection) {
     const seedFile = files[files.length - 1];
     const seedFilePath = `${databaseDownloadDir}/sql/${seedFile}`;
     logger.info("Dropping K-Pop video database");
-    await db.query(`DROP DATABASE IF EXISTS ${process.env.DB_KPOP_DATA_TABLE_NAME};`);
+    await db.query("DROP DATABASE IF EXISTS kpop_videos;");
     logger.info("Creating K-pop video database");
-    await db.query(`CREATE DATABASE ${process.env.DB_KPOP_DATA_TABLE_NAME};`);
+    await db.query("CREATE DATABASE kpop_videos;");
     logger.info("Seeding K-Pop video database");
     setSqlMode(seedFilePath);
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} ${process.env.DB_KPOP_DATA_TABLE_NAME} < ${seedFilePath}`);
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} kpop_videos < ${seedFilePath}`);
     logger.info(`Imported database dump (${seedFile}) successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing`);
     logger.info("Creating K-pop Music Quiz database");
 }
