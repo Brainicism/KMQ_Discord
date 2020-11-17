@@ -16,12 +16,32 @@
         {
             "type": "node",
             "request": "launch",
-            "env": {"NODE_ENV": "production"},
+            "env": {
+                "NODE_ENV": "production"
+            },
             "name": "Debug KMQ",
             "program": "${workspaceFolder}/src/kmq.ts",
             "cwd": "${workspaceFolder}/build",
             "preLaunchTask": "tsc: build - tsconfig.json",
-            "outFiles": ["${workspaceFolder}/**/*.js"]
-          }
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ]
+        },
+        {
+            "name": "Current TS File",
+            "type": "node",
+            "request": "launch",
+            "args": [
+                "${relativeFile}"
+            ],
+            "runtimeArgs": [
+                "--nolazy",
+                "-r",
+                "ts-node/register"
+            ],
+            "sourceMaps": true,
+            "cwd": "${workspaceRoot}",
+            "protocol": "inspector",
+        }
     ]
 }
