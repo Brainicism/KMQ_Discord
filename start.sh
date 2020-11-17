@@ -14,8 +14,8 @@ if [ $1 == "dry-run" ]; then
     echo "Starting bot..."
     NODE_ENV=dry-run node kmq.js
 else
-    echo "Performing migrations..."
-    npx knex migrate:latest --knexfile src/config/knexfile_kmq.js
+    echo "Bootstrapping..."
+    npm run bootstrap
     if [ $1 == "dev" ]; then
         cd src 
         echo "Starting bot..."

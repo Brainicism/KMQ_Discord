@@ -1,6 +1,6 @@
 import Axios from "axios";
 import fs from "fs";
-import { execSync, spawn } from "child_process";
+import { execSync } from "child_process";
 import unzipper from "unzipper";
 import mysql from "promise-mysql";
 import prependFile from "prepend-file";
@@ -9,12 +9,12 @@ import { config } from "dotenv";
 import path from "path";
 import _logger from "../logger";
 import removeRedunantAliases from "../scripts/remove-redunant-aliases";
+import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 
 config({ path: path.resolve(__dirname, "../../.env") });
 const fileUrl = "http://kpop.aoimirai.net/download.php";
 const logger: Logger = _logger("seed_db");
 const databaseDownloadDir = process.env.AOIMIRAI_DUMP_DIR;
-let exit = false;
 
 const setSqlMode = (sqlFile: string) => {
     prependFile.sync(sqlFile, "SET @@sql_mode=\"\";\n");
@@ -55,15 +55,14 @@ async function seedDb(db: mysql.Connection) {
     const seedFile = files[files.length - 1];
     const seedFilePath = `${databaseDownloadDir}/sql/${seedFile}`;
     logger.info("Dropping K-Pop video database");
-    await db.query(`DROP DATABASE IF EXISTS ${process.env.DB_KPOP_DATA_TABLE_NAME};`);
+    await db.query("DROP DATABASE IF EXISTS kpop_videos;");
     logger.info("Creating K-pop video database");
-    await db.query(`CREATE DATABASE ${process.env.DB_KPOP_DATA_TABLE_NAME};`);
+    await db.query("CREATE DATABASE kpop_videos;");
     logger.info("Seeding K-Pop video database");
     setSqlMode(seedFilePath);
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} ${process.env.DB_KPOP_DATA_TABLE_NAME} < ${seedFilePath}`);
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} kpop_videos < ${seedFilePath}`);
     logger.info(`Imported database dump (${seedFile}) successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing`);
     logger.info("Creating K-pop Music Quiz database");
-    await db.query(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_KMQ_SETTINGS_TABLE_NAME}`);
 }
 
 async function hasRecentDump(): Promise<boolean> {
@@ -76,58 +75,36 @@ async function hasRecentDump(): Promise<boolean> {
     return daysDiff < 6;
 }
 
-async function downloadNewSongs() {
-    return new Promise((resolve) => {
-        const child = spawn("ts-node", ["src/scripts/download-new-songs"]);
-        child.stdout.setEncoding("utf8");
-        child.stderr.setEncoding("utf8");
-        child.stdout.on("data", (data) => {
-            logger.info(`stdout: ${data}`);
-            if (exit) {
-                logger.info("Song download ending prematurely...");
-                child.kill();
-            }
-        });
-
-        child.stderr.on("data", (data) => {
-            logger.error(`${data}`);
-        });
-
-        child.on("close", () => {
-            resolve();
-        });
+async function seedKpopDataDatabase() {
+    const db = await mysql.createConnection({
+        host: process.env.DB_HOST,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASS,
     });
+
+    if (await hasRecentDump()) {
+        logger.info("Recent dump detected, skipping download...");
+    } else {
+        await downloadDb();
+        await extractDb();
+    }
+
+    await seedDb(db);
+    db.destroy();
 }
 
-process.on("SIGINT", () => {
-    logger.info("SIGINT received");
-    exit = true;
-});
-
 (async () => {
-    try {
-        await fs.promises.mkdir(`${databaseDownloadDir}/sql`, { recursive: true });
-        const db = await mysql.createConnection({
-            host: process.env.DB_HOST,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASS,
-        });
-
-        if (await hasRecentDump()) {
-            logger.info("Recent dump detected, skipping download...");
-        } else {
-            await downloadDb();
-            await extractDb();
+    if (require.main === module) {
+        try {
+            await fs.promises.mkdir(`${databaseDownloadDir}/sql`, { recursive: true });
+            await seedKpopDataDatabase();
+            await removeRedunantAliases();
+            await downloadAndConvertSongs();
+        } catch (e) {
+            logger.error(`Error: ${e}`);
         }
-
-        await seedDb(db);
-        await removeRedunantAliases();
-        db.destroy();
-        logger.info("Downloading new songs");
-        await downloadNewSongs();
-        logger.info("Re-creating available songs view");
-        execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} ${process.env.DB_KMQ_SETTINGS_TABLE_NAME} < ./src/seed/create_available_songs_table.sql`);
-    } catch (e) {
-        logger.error(`Error: ${e}`);
     }
 })();
+
+// eslint-disable-next-line import/prefer-default-export
+export { seedKpopDataDatabase };
