@@ -7,7 +7,7 @@ import dbContext from "../database_context";
 const logger: Logger = _logger("remove-redunant-aliases");
 
 export default async function removeRedunantAliases() {
-    const songAliasPath = path.resolve(__dirname, "../data/song_aliases.json");
+    const songAliasPath = path.resolve(__dirname, "../../data/song_aliases.json");
     logger.info("Checking for redunant aliases...");
     const songAliases: { [songId: string]: Array<string> } = JSON.parse(fs.readFileSync(songAliasPath).toString());
     let changeCount = 0;

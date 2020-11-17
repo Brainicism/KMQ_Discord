@@ -9,7 +9,7 @@ import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
     getDebugContext, getSqlDateString, getUserIdentifier, getVoiceChannel, sendEndGameMessage, sendErrorMessage, sendSongMessage,
 } from "../helpers/discord_utils";
-import { ensureVoiceConnection, getGuildPreference, selectRandomSong } from "../helpers/game_utils";
+import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getSongCount } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds, parseJsonFile } from "../helpers/utils";
 import state from "../kmq";
 import _logger from "../logger";
@@ -99,11 +99,12 @@ export default class GameSession {
         }
 
         for (const participant of this.participants) {
-            this.incrementPlayerGamesPlayed(participant);
-        }
-
-        for (const playerScore of this.scoreboard.getPlayerScores()) {
-            this.incrementPlayerSongsGuessed(playerScore.id, playerScore.score);
+            await this.ensurePlayerStat(participant);
+            await this.incrementPlayerGamesPlayed(participant);
+            const playerScore = this.scoreboard.getPlayerScore(participant);
+            if (playerScore > 0) {
+                await this.incrementPlayerSongsGuessed(participant, playerScore);
+            }
         }
 
         await dbContext.kmq("guild_preferences")
@@ -213,7 +214,9 @@ export default class GameSession {
             return;
         }
         this.createRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);
-        if (guildPreference.getLimit() > LAST_PLAYED_SONG_QUEUE_SIZE || guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
+        const totalSongs = await getSongCount(guildPreference);
+        if ((guildPreference.getLimit() > LAST_PLAYED_SONG_QUEUE_SIZE && totalSongs > LAST_PLAYED_SONG_QUEUE_SIZE)
+                || guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
             this.lastPlayedSongsQueue.push(randomSong.youtubeLink);
         }
 
@@ -325,7 +328,6 @@ export default class GameSession {
     }
 
     async incrementPlayerSongsGuessed(userId: string, score: number) {
-        await this.ensurePlayerStat(userId);
         await dbContext.kmq("player_stats")
             .where("player_id", "=", userId)
             .increment("songs_guessed", score)
@@ -335,7 +337,6 @@ export default class GameSession {
     }
 
     async incrementPlayerGamesPlayed(userId: string) {
-        await this.ensurePlayerStat(userId);
         await dbContext.kmq("player_stats")
             .where("player_id", "=", userId)
             .increment("games_played", 1);

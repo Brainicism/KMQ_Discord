@@ -10,6 +10,9 @@ export enum GENDER {
     FEMALE = "female",
     COED = "coed",
 }
+
+export const DEFAULT_GENDER = [GENDER.FEMALE, GENDER.MALE, GENDER.COED];
+
 export default class GenderCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
@@ -18,7 +21,8 @@ export default class GenderCommand implements BaseCommand {
             sendErrorMessage(message, "Game Option Conflict", "`groups` game option is currently set. `gender` and `groups` are incompatible. Remove the `groups` option by typing `,groups`to proceed");
             return;
         }
-        const selectedGenderArray = guildPreference.setGender(parsedMessage.components as GENDER[]);
+        const selectedGenders = parsedMessage.components.length > 0 ? parsedMessage.components as GENDER[] : DEFAULT_GENDER;
+        const selectedGenderArray = guildPreference.setGender(selectedGenders);
         let selectedGenderStr = "";
         for (let i = 0; i < selectedGenderArray.length; i++) {
             selectedGenderStr += `\`${selectedGenderArray[i]}\``;
@@ -34,7 +38,7 @@ export default class GenderCommand implements BaseCommand {
         logger.info(`${getDebugContext(message)} | Genders set to ${selectedGenderStr}`);
     }
     validations = {
-        minArgCount: 1,
+        minArgCount: 0,
         maxArgCount: 3,
         arguments: [
             {

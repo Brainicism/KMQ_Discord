@@ -21,7 +21,7 @@ config({ path: path.resolve(__dirname, "../../.env") });
     // eslint-disable-next-line no-control-regex
     const nonAsciiSongs = songs.filter((x) => !/^[\x00-\x7F’]*$/.test(x.name));
     const nonCheckedSongs = nonAsciiSongs.filter((x) => !(x.youtubeLink in existingSongAliases));
-    fs.writeFileSync("./tmp/song_dump.txt", nonCheckedSongs.map(((x) => `${x.youtubeLink}, ${x.name}`)).join("\n"));
+    fs.writeFileSync("/tmp/song_dump.txt", nonCheckedSongs.map(((x) => `${x.youtubeLink}, ${x.name}`)).join("\n"));
     // eslint-disable-next-line no-console
     console.log("Done");
     await db.end();

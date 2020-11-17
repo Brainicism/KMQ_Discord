@@ -7,8 +7,6 @@ rebuild () {
     tsc
     echo "Copying assets..."
     cp -r src/assets build/assets
-    ln -s "$(pwd)"/data/news.md build/data/news.md
-    ln -s "$(pwd)"/data/group_list.txt build/data/group_list.txt
     cd build/ 
 }
 if [ $1 == "dry-run" ]; then
