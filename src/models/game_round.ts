@@ -3,7 +3,7 @@ import { ModeType } from "../commands/game_options/mode";
 import _logger from "../logger";
 
 // eslint-disable-next-line no-useless-escape
-const REMOVED_CHARACTERS_SONG_GUESS = /[\|’\ '?!.-]/g;
+const REMOVED_CHARACTERS_SONG_GUESS = /[\|’\ '?!.\-,]/g;
 const CHARACTER_REPLACEMENTS = [
     { pattern: REMOVED_CHARACTERS_SONG_GUESS, replacement: "" },
     { pattern: /&/g, replacement: "and" },
