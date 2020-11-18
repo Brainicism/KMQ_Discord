@@ -11,7 +11,8 @@ RUN apk add --no-cache git \
     automake \
     libtool \
     mysql-client \
-    nodejs
+    nodejs \
+    ffmpeg
 
 RUN npm install typescript -g
 
