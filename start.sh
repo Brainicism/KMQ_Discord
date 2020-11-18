@@ -14,6 +14,14 @@ if [ $1 == "dry-run" ]; then
     echo "Starting bot..."
     NODE_ENV=dry-run node kmq.js
 else
+    # Wait for DB if DB_HOST is defined and non-empty.
+    if [ ! -z "$DB_HOST" ]; then
+        while ! mysqladmin ping -h"$DB_HOST" --silent; do
+            echo "Waiting for mysql"
+            sleep 1
+        done
+    fi
+
     echo "Bootstrapping..."
     npm run bootstrap
     if [ $1 == "dev" ]; then

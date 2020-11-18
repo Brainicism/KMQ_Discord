@@ -7,13 +7,23 @@
 - ffmpeg
 
 ## Docker
-Building Image: `docker build --tag kmq:1.0 .`  
+------------
+1. Install docker and docker-compose
+2. `cd docker`
+3. `docker-compose up --build`
 
-Running Image: `docker run --network="host"--mount type=bind,source=[host_song_cache_dir],target=[container_song_cache_dir] --mount type=bind,source=[host_log_dir],target=[container_log_dir] kmq:1.0`.
+See `docker/.env.sample` for the bare minimum .env required. Note that this
+is different from the `.env` in the root directory.
 
-The target directories should match the ones specified in `.env` and `log_config.json`. 
+For day-to-day development, consider using `docker-compose up -d db` and
+keeping the database up while you restart and rebuild the kmq container using
+`docker-compose up --rebuild kmq`. The dockerfile is optimized for fast
+rebuilds if only the source files change.
 
-## First Time Setup
+The scripts referenced below can be used as long as the root .env file is set
+up (see below). The docker-compose file forwards ports for mysql.
+
+## Native
 ------------
 1. `npm install`
     - `libsodium` might require the following packages: `autoconf automake g++ libtool`
