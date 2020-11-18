@@ -1,13 +1,17 @@
-FROM node:15
+FROM node:15-alpine
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    mysql-client \
+RUN apk add --no-cache git \
     python \
+    make \
+    g++ \
     libsodium-dev \
-    nodejs \
-    ffmpeg
+    autoconf \
+    automake \
+    libtool \
+    mysql-client \
+    nodejs
 
 RUN npm install typescript -g
 
