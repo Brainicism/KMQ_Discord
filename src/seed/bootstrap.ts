@@ -76,7 +76,7 @@ async function bootstrapDatabases() {
         performMigrations();
     }
 
-    db.destroy();
+    await db.end();
 }
 
 (async () => {

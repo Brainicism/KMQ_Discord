@@ -98,7 +98,7 @@ async function seedKpopDataDatabase() {
     }
 
     await seedDb(db);
-    db.destroy();
+    await db.end();
 }
 
 (async () => {
