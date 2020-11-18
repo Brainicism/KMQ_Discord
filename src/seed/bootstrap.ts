@@ -28,7 +28,7 @@ async function songThresholdReached(db: mysql.Connection): Promise<boolean> {
     ) as count;`))[0].count === 1;
     if (!availableSongsTableExists) return false;
 
-    return (await db.query("SELECT count(*) as count FROM kmq.available_songs"))[0].count > SONG_DOWNLOAD_THRESHOLD;
+    return (await db.query("SELECT count(*) as count FROM kmq.available_songs"))[0].count >= SONG_DOWNLOAD_THRESHOLD;
 }
 
 async function needsBootstrap(db: mysql.Connection) {

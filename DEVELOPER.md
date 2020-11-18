@@ -17,7 +17,7 @@ is different from the `.env` in the root directory.
 
 For day-to-day development, consider using `docker-compose up -d db` and
 keeping the database up while you restart and rebuild the kmq container using
-`docker-compose up --rebuild kmq`. The dockerfile is optimized for fast
+`docker-compose up --build kmq`. The dockerfile is optimized for fast
 rebuilds if only the source files change.
 
 The scripts referenced below can be used as long as the root .env file is set
