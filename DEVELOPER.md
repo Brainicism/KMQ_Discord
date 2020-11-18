@@ -7,13 +7,23 @@
 - ffmpeg
 
 ## Docker
-Building Image: `docker build --tag kmq:1.0 .`  
+------------
+1. Install docker and docker-compose
+2. `cd docker`
+3. `docker-compose up --build`
 
-Running Image: `docker run --network="host"--mount type=bind,source=[host_song_cache_dir],target=[container_song_cache_dir] --mount type=bind,source=[host_log_dir],target=[container_log_dir] kmq:1.0`.
+See `docker/.env.sample` for the bare minimum .env required. Note that this
+is different from the `.env` in the root directory.
 
-The target directories should match the ones specified in `.env` and `log_config.json`. 
+For day-to-day development, consider using `docker-compose up -d db` and
+keeping the database up while you restart and rebuild the kmq container using
+`docker-compose up --rebuild kmq`. The dockerfile is optimized for fast
+rebuilds if only the source files change.
 
-## First Time Setup
+The scripts referenced below can be used as long as the root .env file is set
+up (see below). The docker-compose file forwards ports for mysql.
+
+## Native
 ------------
 1. `npm install`
     - `libsodium` might require the following packages: `autoconf automake g++ libtool`
@@ -40,3 +50,10 @@ Located under `src/scripts`
 - `announce-restart.ts [n]`: Set up a timer for `n` minutes before the bot is stopped. Each server currently playing a game will be notified at regular intervals until the shutdown  
 - `download-new-songs.ts {n}`: If a parameter isn't specified, will download every song not currently downloaded. If specified, will download the top `n` most viewed songs according to the database.  
 - `get-unclean-song-names.ts`: Returns a list of potentially unusual song names (hangul, hiragana, strange punctuation) to inspect. Used to check for songs that need aliasing.  
+
+## Old Docker Build
+Building Image: `docker build --tag kmq:1.0 .`  
+
+Running Image: `docker run --network="host"--mount type=bind,source=[host_song_cache_dir],target=[container_song_cache_dir] --mount type=bind,source=[host_log_dir],target=[container_log_dir] kmq:1.0`.
+
+The target directories should match the ones specified in `.env` and `log_config.json`. 
