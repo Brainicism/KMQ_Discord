@@ -6,9 +6,10 @@ import { Logger } from "log4js";
 import { QueriedSong } from "../types";
 import _logger from "../logger";
 import dbContext from "../database_context";
+import { generateAvailableSongsView } from "../seed/bootstrap";
 
 const logger: Logger = _logger("download-new-songs");
-
+let exit = false;
 export async function clearPartiallyCachedSongs(): Promise<void> {
     logger.info("Clearing partially cached songs");
     if (!fs.existsSync(process.env.SONG_DOWNLOAD_DIR)) {
@@ -115,6 +116,7 @@ const downloadNewSongs = async (limit?: number) => {
         .map((x) => x.vlink));
 
     for (const song of songsToDownload) {
+        if (exit) break;
         if (knownDeadIds.has(song.youtubeLink)) {
             deadLinksSkipped++;
             continue;
@@ -141,7 +143,7 @@ async function ffmpegOpusJob(mp3File: string): Promise<void> {
         const oggPartWithPath = `${oggFileWithPath}.part`;
         const oggFfmpegOutputStream = fs.createWriteStream(oggPartWithPath);
 
-        logger.info(`Encoding ${mp3File} to ${path.basename(mp3File, ".mp3")}.ogg via ffmpeg...`);
+        logger.info(`Encoding ${mp3File} to ${path.basename(mp3File, ".mp3")}.ogg...`);
         ffmpeg(`${process.env.SONG_DOWNLOAD_DIR}/${mp3File}`)
             .format("opus")
             .audioCodec("libopus")
@@ -151,7 +153,6 @@ async function ffmpegOpusJob(mp3File: string): Promise<void> {
                 try {
                     fs.renameSync(oggPartWithPath, oggFileWithPath);
                     fs.unlinkSync(path.join(process.env.SONG_DOWNLOAD_DIR, path.basename(mp3File)));
-                    logger.info(`Completed ffmpeg process for ${mp3File}, ${path.basename(mp3File)} → ${path.basename(mp3File, ".mp3")}.ogg`);
                     resolve();
                 } catch (err) {
                     if (!fs.existsSync(oggFileWithPath)) {
@@ -178,6 +179,7 @@ async function convertToOpus() {
     logger.info(`Converting ${mp3Files.length} from mp3 to opus (in ogg container)`);
 
     for (const mp3File of mp3Files) {
+        if (exit) break;
         await ffmpegOpusJob(mp3File);
     }
 
@@ -200,17 +202,24 @@ async function downloadAndConvertSongs(limit?: number) {
     await clearPartiallyCachedSongs();
     await downloadNewSongs(limit);
     await convertToOpus();
+    generateAvailableSongsView();
     await dbContext.destroy();
 }
+
+process.on("SIGINT", () => {
+    logger.info("SIGINT received");
+    if (exit) {
+        process.exit(0);
+    }
+    exit = true;
+});
 
 export {
     downloadAndConvertSongs,
 };
 
-(async () => {
-    if (require.main === module) {
-        const args = process.argv.slice(2);
-        const limit = args.length > 0 ? parseInt(args[0], 10) : null;
-        downloadAndConvertSongs(limit);
-    }
-})();
+if (require.main === module) {
+    const args = process.argv.slice(2);
+    const limit = args.length > 0 ? parseInt(args[0], 10) : null;
+    downloadAndConvertSongs(limit);
+}

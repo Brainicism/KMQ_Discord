@@ -7,13 +7,23 @@
 - ffmpeg
 
 ## Docker
-Building Image: `docker build --tag kmq:1.0 .`  
+------------
+1. Install docker and docker-compose
+2. `cd docker`
+3. `docker-compose up --build`
 
-Running Image: `docker run --network="host"--mount type=bind,source=[host_song_cache_dir],target=[container_song_cache_dir] --mount type=bind,source=[host_log_dir],target=[container_log_dir] kmq:1.0`.
+See `docker/.env.sample` for the bare minimum .env required. Note that this
+is different from the `.env` in the root directory.
 
-The target directories should match the ones specified in `.env` and `log_config.json`. 
+For day-to-day development, consider using `docker-compose up -d db` and
+keeping the database up while you restart and rebuild the kmq container using
+`docker-compose up --build kmq`. The dockerfile is optimized for fast
+rebuilds if only the source files change.
 
-## First Time Setup
+The scripts referenced below can be used as long as the root .env file is set
+up (see below). The docker-compose file forwards ports for mysql.
+
+## Native
 ------------
 1. `npm install`
     - `libsodium` might require the following packages: `autoconf automake g++ libtool`
@@ -21,9 +31,8 @@ The target directories should match the ones specified in `.env` and `log_config
     - `.env` contains application specific settings. See `.env.example` to see parameters, and `environment.d.ts` to see which are required. 
     - `knexfile_*.js` contains connection credentials for the each database connection. `kmq` is used for bot-specific database tables. `kpop_videos` is automatically created from the `aoimirai` backup
 3. Apply database migrations for `kmq`. Using `npx knex migrate:latest --knexfile src/config/knexfile_kmq.js`
-4. Get the latest `kpop_videos` data by running `npm run seed`. This will download the `aoimirai` kpop database dump, drop and recreate `kpop_videos`.  This script also attempt to download every song in the database that isn't downloaded locally. For development purposes, it isn't necessary to have every single song downloaded, so it is fine to kill the process after the database is downloaded.
-5. Download a subset of songs for local testing. Run `ts-node src/scripts/download-new-songs [n]` to download the top `n` most viewed kpop videos.
-6. `npm run dev` to start the bot
+4. `npm run dev` to start the bot. Upon first run, the bot will bootstrap the database, as well as download 5 songs to have a minimally working bot
+5. `ts-node src/scripts/download-new-songs` can be used to download the remaining songs in the database
 
 ## Debug Mode
 Having every song downloaded may be infeasible for local development. A debug mode can be activated by modifying `src/config/debug_settings.json`, and running in development mode. `forcedSongId` will force the bot to play a specific song given its ID. If `null`, will ignore this setting. `skipSongPlay` will start a game session with a song even if it is not downloaded on the local machine. 

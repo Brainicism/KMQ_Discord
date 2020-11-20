@@ -4,8 +4,6 @@ declare namespace NodeJS {
         DB_USER: string,
         DB_PASS: string,
         DB_HOST: string,
-        DB_KMQ_SETTINGS_TABLE_NAME: string,
-        DB_KPOP_DATA_TABLE_NAME: string,
         SONG_DOWNLOAD_DIR: string,
         RESTART_CRON?: string,
         TOP_GG_TOKEN?: string,
