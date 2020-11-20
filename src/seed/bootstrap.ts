@@ -46,12 +46,17 @@ function performMigrations() {
 }
 
 async function bootstrapDatabases() {
-    const db = await mysql.createConnection({
-        host: process.env.DB_HOST,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASS,
-    });
-
+    let db: mysql.Connection;
+    try {
+        db = await mysql.createConnection({
+            host: process.env.DB_HOST,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASS,
+        });
+    } catch (e) {
+        logger.error(`Failed to connect to database: ${e}`);
+        process.exit(1);
+    }
     if (await needsBootstrap(db)) {
         logger.info("Bootstrapping databases...");
 

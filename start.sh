@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 rebuild () {
     echo "Cleaning build..."
