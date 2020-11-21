@@ -3,13 +3,14 @@ import path from "path";
 import { EnvType, QueriedSong } from "../types";
 import dbContext from "../database_context";
 
+const DEBUG_SETTINGS_PATH = path.resolve(__dirname, "../config/debug_settings.json");
 function readDebugSettings(key: string): any {
-    const debugSettings = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../config/debug_settings.json")).toString());
+    const debugSettings = JSON.parse(fs.readFileSync(DEBUG_SETTINGS_PATH).toString());
     return debugSettings[key];
 }
 
 export function isDebugMode(): boolean {
-    const developmentBuild = process.env.NODE_ENV === EnvType.DEV;
+    const developmentBuild = process.env.NODE_ENV === EnvType.DEV && fs.existsSync(DEBUG_SETTINGS_PATH);
     if (!developmentBuild) return false;
     return readDebugSettings("active");
 }
