@@ -89,11 +89,20 @@ export function updateBotStatus() {
     });
 }
 
+function sweepCaches() {
+    logger.info("Sweeping cache..");
+    const sweepResults = state.client.sweepCaches(15);
+    if (sweepResults.users || sweepResults.members) {
+        logger.info(`Swept ${sweepResults.users} users and ${sweepResults.members} members from cache`);
+    }
+}
+
 export function registerIntervals() {
     // set up cleanup for inactive game sessions
     setInterval(() => {
         cleanupInactiveGameSessions(state.gameSessions);
         updateBotStatus();
+        sweepCaches();
     }, 10 * 60 * 1000);
 
     // set up check for restart notifications
