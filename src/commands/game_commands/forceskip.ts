@@ -24,7 +24,7 @@ export default class ForceSkipCommand implements BaseCommand {
             // song already being skipped
             return;
         }
-        if (message.author !== gameSession.owner) {
+        if (message.author.id !== gameSession.owner.id) {
             await sendErrorMessage(message, "Force skip ignored", `Only the person who started the game (${bold(getUserIdentifier(gameSession.owner))}) can force-skip.`);
             return;
         }
