@@ -1,38 +1,31 @@
-import Knex from "knex";
-import kmqKnexConfig from "../config/knexfile_kmq";
+import dbContext from "../database_context";
+import _logger from "../logger";
+
+const logger = _logger("daily_stats");
 
 const storeDailyStats = async () => {
-    const db = Knex(kmqKnexConfig);
-
-    if (!(await db.schema.hasTable("daily_stats"))) {
-        await db.schema.createTable("daily_stats", (table) => {
-            table.date("date").notNullable();
-            table.integer("gameSessions");
-            table.integer("roundsPlayed");
-            table.integer("players");
-            table.integer("newPlayers");
-        });
-    }
-
     const dateThreshold = new Date();
     dateThreshold.setHours(dateThreshold.getHours() - 24);
-    const recentGameSessions = (await db("game_sessions")
+
+    const recentGameSessions = (await dbContext.kmq("game_sessions")
         .where("start_date", ">", dateThreshold)
         .count("* as count"))[0].count;
 
-    const recentGameRounds = (await db("game_sessions")
+    const recentGameRounds = (await dbContext.kmq("game_sessions")
         .where("start_date", ">", dateThreshold)
         .sum("rounds_played as total"))[0].total;
 
-    const recentPlayers = (await db("player_stats")
+    const recentPlayers = (await dbContext.kmq("player_stats")
         .where("last_active", ">", dateThreshold)
         .count("* as count"))[0].count;
 
-    const newPlayers = (await db("player_stats")
+    const newPlayers = (await dbContext.kmq("player_stats")
         .where("first_play", "=", dateThreshold)
         .count("* as count"))[0].count;
 
-    await db("daily_stats")
+    logger.info("Inserting today's stats into db...");
+
+    await dbContext.kmq("daily_stats")
         .insert({
             date: dateThreshold,
             gameSessions: recentGameSessions,
