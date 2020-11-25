@@ -188,8 +188,9 @@ export default class GameSession {
         if (this.finished || this.gameRound) {
             return;
         }
+        const totalSongs = await getSongCount(guildPreference);
 
-        if (guildPreference.getShuffleType() === ShuffleType.UNIQUE && guildPreference.getLimit() === this.lastPlayedSongsQueue.length) {
+        if (guildPreference.getShuffleType() === ShuffleType.UNIQUE && Math.min(guildPreference.getLimit(), totalSongs) === this.lastPlayedSongsQueue.length) {
             logger.info(`${getDebugContext(message)} | Resetting lastPlayedSongsQueue (all ${guildPreference.getLimit()} unique songs played)`);
             this.resetLastPlayedSongsQueue();
         } else if (guildPreference.getShuffleType() === ShuffleType.RANDOM && this.lastPlayedSongsQueue.length === LAST_PLAYED_SONG_QUEUE_SIZE) {
@@ -214,7 +215,6 @@ export default class GameSession {
             return;
         }
         this.createRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);
-        const totalSongs = await getSongCount(guildPreference);
         if ((guildPreference.getLimit() > LAST_PLAYED_SONG_QUEUE_SIZE && totalSongs > LAST_PLAYED_SONG_QUEUE_SIZE)
                 || guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
             this.lastPlayedSongsQueue.push(randomSong.youtubeLink);
