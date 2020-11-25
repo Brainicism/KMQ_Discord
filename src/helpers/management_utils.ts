@@ -101,14 +101,16 @@ function sweepCaches() {
 
 export function registerIntervals() {
     // set up cleanup for inactive game sessions
-    setInterval(() => {
+    const everyTenMinutes = "*/10 * * * *";
+    schedule.scheduleJob(everyTenMinutes, () => {
         cleanupInactiveGameSessions(state.gameSessions);
         updateBotStatus();
         sweepCaches();
-    }, 10 * 60 * 1000);
+    });
 
+    const everyMinute = "* * * * *";
     // set up check for restart notifications
-    setInterval(async () => {
+    schedule.scheduleJob(everyMinute, async () => {
         // unscheduled restarts
         const restartNotification = (await dbContext.kmq("restart_notifications").where("id", 1))[0].restart_time;
         if (restartNotification) {
@@ -125,7 +127,7 @@ export function registerIntervals() {
             const nextRestartTime = interval.next();
             await checkRestartNotification(nextRestartTime.toDate());
         }
-    }, 60 * 1000);
+    });
 
     const dailyAtMidnight = "0 0 * * *";
     schedule.scheduleJob(dailyAtMidnight, async () => {
