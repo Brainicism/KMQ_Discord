@@ -3,7 +3,7 @@ import _logger from "../logger";
 
 const logger = _logger("daily_stats");
 
-const storeDailyStats = async () => {
+const storeDailyStats = async (serverCount: number) => {
     const dateThreshold = new Date();
     dateThreshold.setHours(dateThreshold.getHours() - 24);
 
@@ -32,9 +32,8 @@ const storeDailyStats = async () => {
             roundsPlayed: recentGameRounds,
             players: recentPlayers,
             newPlayers,
+            serverCount,
         });
 };
 
-(async () => {
-    await storeDailyStats();
-})();
+export { storeDailyStats as default };

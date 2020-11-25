@@ -5,6 +5,7 @@ exports.up = function(knex) {
         table.integer("roundsPlayed").defaultTo(0);
         table.integer("players").defaultTo(0);
         table.integer("newPlayers").defaultTo(0);
+        table.integer("serverCount").defaultTo(0);
         table.unique(["date"]);
     })
 };
