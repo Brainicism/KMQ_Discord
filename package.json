@@ -24,6 +24,7 @@
     "erlpack": "github:abalabahaha/erlpack#5d0064f",
     "fluent-ffmpeg": "^2.1.2",
     "glob": "^7.1.6",
+    "heapdump": "^0.3.15",
     "knex": "^0.21.12",
     "log4js": "^6.3.0",
     "node-opus": "^0.3.3",
