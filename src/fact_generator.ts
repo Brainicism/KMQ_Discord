@@ -336,6 +336,7 @@ async function mostGames(): Promise<string[]> {
     const result = await dbContext.kmq("guild_preferences")
         .select("games_played", "songs_guessed")
         .orderBy("games_played", "DESC");
+    if (result.length === 0) return [];
     const mostGamesPlayed = result[0];
     return [`KMQ Fact: The most active server has played ${mostGamesPlayed.games_played} games of KMQ, with a total of ${mostGamesPlayed.songs_guessed} songs guessed!`];
 }
@@ -344,6 +345,7 @@ async function mostCorrectGuessed(): Promise<string[]> {
     const result = await dbContext.kmq("guild_preferences")
         .select("games_played", "songs_guessed")
         .orderBy("songs_guessed", "DESC");
+    if (result.length === 0) return [];
     const mostGamesPlayed = result[0];
     return [`KMQ Fact: The server with the most correct guesses has played ${mostGamesPlayed.games_played} games of KMQ, with a total of ${mostGamesPlayed.songs_guessed} songs guessed!`];
 }
@@ -351,6 +353,7 @@ async function mostCorrectGuessed(): Promise<string[]> {
 async function globalTotalGames(): Promise<string[]> {
     const result = await dbContext.kmq("game_sessions")
         .count("* as count");
+    if (result.length === 0) return [];
     const totalGamesPlayed = result[0].count;
     return [`KMQ Fact: A grand total of ${totalGamesPlayed} games of KMQ have been played!`];
 }
@@ -361,6 +364,7 @@ async function recentGameSessions(): Promise<string[]> {
     const result = await dbContext.kmq("game_sessions")
         .count("* as count")
         .where("start_date", ">", oneWeeksPriorDate);
+    if (result.length === 0) return [];
     const recentSessions = result[0].count;
     return [`KMQ Fact: A total of ${recentSessions} games of KMQ have been played in the last week!`];
 }
@@ -393,6 +397,7 @@ async function recentGames(): Promise<string[]> {
     const result = await dbContext.kmq("game_sessions")
         .count("* as count")
         .where("start_date", ">", oneWeekPriorDate);
+    if (result.length === 0) return [];
     const recentGameCount = result[0].count as number;
     return [`KMQ Fact: There has been a total of ${recentGameCount} games of KMQ played in the last week, averaging ${Math.round(recentGameCount / 7)} per day!`];
 }
@@ -406,6 +411,7 @@ async function recentUniquePlayers(): Promise<string[]> {
         const result = await dbContext.kmq("player_stats")
             .count("* as count")
             .where("last_active", ">", priorDate);
+        if (result.length === 0) return [];
         const recentActivePlayers = result[0].count as number;
         output.push(`KMQ Fact: ${recentActivePlayers} unique players have played KMQ in the past ${interval} day(s)!`);
     }
@@ -418,6 +424,7 @@ async function mostSongsGuessedPlayer(): Promise<string[]> {
         .select(["songs_guessed"])
         .orderBy("songs_guessed", "DESC")
         .limit(1);
+    if (result.length === 0) return [];
     return [`KMQ Fact: The most active player has guessed ${result[0].songs_guessed} songs since Nov 8th, 2020!`];
 }
 
@@ -426,6 +433,7 @@ async function mostGamesPlayedPlayer(): Promise<string[]> {
         .select(["games_played"])
         .orderBy("games_played", "DESC")
         .limit(1);
+    if (result.length === 0) return [];
     return [`KMQ Fact: The most active player has played ${result[0].games_played} games since Nov 8th, 2020!`];
 }
 
