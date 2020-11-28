@@ -1,6 +1,4 @@
 import Eris from "eris";
-import fs from "fs";
-import path from "path";
 import dbContext from "../database_context";
 import _logger from "../logger";
 import GameSession from "../models/game_session";
@@ -11,22 +9,6 @@ import { getForcePlaySong, isDebugMode, isForcedSongActive } from "./debug_utils
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
 const logger = _logger("game_utils");
-
-export async function playCorrectGuessSong(gameSession: GameSession) {
-    return new Promise((resolve) => {
-        if (gameSession.connection) {
-            const stream = fs.createReadStream(path.resolve("assets/ring.wav"));
-            gameSession.connection.play(stream);
-            gameSession.connection.once("end", () => {
-                resolve();
-            });
-            gameSession.connection.once("error", () => {
-                resolve();
-            });
-        }
-        resolve();
-    });
-}
 
 async function getFilteredSongList(guildPreference: GuildPreference, ignoredVideoIds?: Array<string>): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
     let result: Array<QueriedSong>;
