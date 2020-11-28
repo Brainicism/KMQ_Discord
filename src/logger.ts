@@ -8,8 +8,8 @@ config({ path: resolve(__dirname, "../../.env") });
 export default (name: string): log4js.Logger => {
     log4js.configure({
         "appenders": {
-            "log": { "type": "dateFile", "filename": `${process.env.LOG_DIR}/log.log` },
-            "error": { "type": "dateFile", "filename": `${process.env.LOG_DIR}/error.log` },
+            "log": { "type": "dateFile", "filename": `${process.env.LOG_DIR}/log.log`, "daysToKeep": 30 },
+            "error": { "type": "dateFile", "filename": `${process.env.LOG_DIR}/error.log`, "daysToKeep": 30 },
             "error-filtered": { "type": "logLevelFilter", "appender": "error", "level": "error" },
             "info-filtered": { "type": "logLevelFilter", "appender": "log", "level": "info" },
             "console": { "type": "console" },
