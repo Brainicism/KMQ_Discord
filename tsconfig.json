@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "incremental": true,
         "outDir": "./build",
         "allowJs": true,
         "target": "es6",

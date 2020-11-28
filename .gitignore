@@ -8,3 +8,4 @@ build/
 kpop_db/
 news.md
 tmp/
+tsconfig.tsbuildinfo

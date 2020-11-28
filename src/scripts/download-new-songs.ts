@@ -145,6 +145,7 @@ async function ffmpegOpusJob(mp3File: string): Promise<void> {
 
         logger.info(`Encoding ${mp3File} to ${path.basename(mp3File, ".mp3")}.ogg...`);
         ffmpeg(`${process.env.SONG_DOWNLOAD_DIR}/${mp3File}`)
+            .renice(20)
             .format("opus")
             .audioCodec("libopus")
             .audioFilters("volume=0.1")

@@ -4,6 +4,7 @@ import path from "path";
 import fs from "fs";
 import _glob from "glob";
 import { promisify } from "util";
+import schedule from "node-schedule";
 import _logger from "../logger";
 import state from "../kmq";
 import { sendMessage, EMBED_INFO_COLOR } from "./discord_utils";
@@ -28,6 +29,7 @@ import debugHandler from "../events/client/debug";
 import guildCreateHandler from "../events/client/guildCreate";
 import BotStatsPoster from "./bot_stats_poster";
 import { EnvType } from "../types";
+import storeDailyStats from "../scripts/store-daily-stats";
 
 const glob = promisify(_glob);
 
@@ -99,14 +101,16 @@ function sweepCaches() {
 
 export function registerIntervals() {
     // set up cleanup for inactive game sessions
-    setInterval(() => {
+    const everyTenMinutes = "*/10 * * * *";
+    schedule.scheduleJob(everyTenMinutes, () => {
         cleanupInactiveGameSessions(state.gameSessions);
         updateBotStatus();
         sweepCaches();
-    }, 10 * 60 * 1000);
+    });
 
+    const everyMinute = "* * * * *";
     // set up check for restart notifications
-    setInterval(async () => {
+    schedule.scheduleJob(everyMinute, async () => {
         // unscheduled restarts
         const restartNotification = (await dbContext.kmq("restart_notifications").where("id", 1))[0].restart_time;
         if (restartNotification) {
@@ -123,7 +127,13 @@ export function registerIntervals() {
             const nextRestartTime = interval.next();
             await checkRestartNotification(nextRestartTime.toDate());
         }
-    }, 60 * 1000);
+    });
+
+    const dailyAtMidnight = "0 0 * * *";
+    schedule.scheduleJob(dailyAtMidnight, async () => {
+        const serverCount = state.client.guilds.size;
+        storeDailyStats(serverCount);
+    });
 }
 
 export function getCommandFiles(): Promise<{ [commandName: string]: BaseCommand }> {
