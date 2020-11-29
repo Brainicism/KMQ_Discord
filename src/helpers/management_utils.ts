@@ -63,8 +63,7 @@ export const checkRestartNotification = async (restartNotification: Date): Promi
     const timeDiffMin = Math.floor((restartNotification.getTime() - (new Date()).getTime()) / (1000 * 60));
     let channelsWarned = 0;
     if (RESTART_WARNING_INTERVALS.has(timeDiffMin)) {
-        for (const guildId of Object.keys(state.gameSessions)) {
-            const gameSession = state.gameSessions[guildId];
+        for (const gameSession of Object.values(state.gameSessions)) {
             if (gameSession.finished) continue;
             await sendMessage({ channel: gameSession.textChannel }, {
                 embed: {
