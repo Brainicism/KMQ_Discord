@@ -26,6 +26,7 @@ const client = new Eris.Client(process.env.BOT_TOKEN, {
     },
     restMode: true,
     maxShards: "auto",
+    messageLimit: 0,
     // eslint-disable-next-line no-bitwise
     intents: ERIS_INTENTS.guilds ^ ERIS_INTENTS.guildVoiceStates ^ ERIS_INTENTS.guildMessages ^ ERIS_INTENTS.guildMessageReactions,
 });
