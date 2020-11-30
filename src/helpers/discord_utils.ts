@@ -87,16 +87,15 @@ export async function sendErrorMessage(message: Eris.Message<Eris.GuildTextableC
     });
 }
 
-export async function sendInfoMessage(message: Eris.Message<Eris.GuildTextableChannel>, title: string, description?: string, footerText?: string, footerImageUrl?: string) {
+export async function sendInfoMessage(message: Eris.Message<Eris.GuildTextableChannel>, title: string, description?: string, footerText?: string) {
     if (description.length > 2048) {
         await sendErrorMessage(message, "Error", "Response message was too long, report this error to the KMQ help server");
         return;
     }
     let footer: Eris.EmbedFooterOptions;
-    if (footerImageUrl) {
+    if (footerText) {
         footer = {
             text: footerText,
-            icon_url: footerImageUrl,
         };
     }
     const embed = {
@@ -147,8 +146,7 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
     await sendInfoMessage(message,
         updatedOption == null ? "Options" : `${updatedOption} updated`,
         `Now playing the ${optionStrings[GameOption.LIMIT]} out of the __${totalSongs}__ most popular songs by ${groupsMode ? optionStrings[GameOption.GROUPS] : optionStrings[GameOption.GENDER]} ${optionStrings[GameOption.CUTOFF]}. \nPlaying from the ${optionStrings[GameOption.SEEK_TYPE]} point of each song. ${shuffleUniqueMode ? shuffleMessage : ""}Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}`,
-        updatedOption == null ? `Psst. Your bot prefix is \`${process.env.BOT_PREFIX}\`.` : null,
-        updatedOption == null ? "https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/src/assets/tsukasa.jpg" : null);
+        updatedOption == null ? `Psst. Your bot prefix is \`${process.env.BOT_PREFIX}\`.` : null);
 }
 
 export async function sendEndGameMessage(messagePayload: SendMessagePayload, gameSession: GameSession) {
