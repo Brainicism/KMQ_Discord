@@ -111,7 +111,7 @@ export async function sendInfoMessage(message: Eris.Message<Eris.GuildTextableCh
     await sendMessage({ channel: message.channel, authorId: message.author.id }, { embed });
 }
 
-export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextableChannel>, guildPreference: GuildPreference, updatedOption: string) {
+export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextableChannel>, guildPreference: GuildPreference, updatedOption: string, footerText?: string) {
     const totalSongs = await getSongCount(guildPreference);
     if (totalSongs === -1) {
         sendErrorMessage(message, "Error retrieving song data", `Try again in a bit, or report this error to the support server found in \`${process.env.BOT_PREFIX}help\`.`);
@@ -144,9 +144,9 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
     const shuffleMessage = `Songs will be shuffled in ${optionStrings[GameOption.SHUFFLE_TYPE]} order. `;
 
     await sendInfoMessage(message,
-        updatedOption == null ? "Options" : `${updatedOption} updated`,
+        updatedOption === null ? "Options" : `${updatedOption} updated`,
         `Now playing the ${optionStrings[GameOption.LIMIT]} out of the __${totalSongs}__ most popular songs by ${groupsMode ? optionStrings[GameOption.GROUPS] : optionStrings[GameOption.GENDER]} ${optionStrings[GameOption.CUTOFF]}. \nPlaying from the ${optionStrings[GameOption.SEEK_TYPE]} point of each song. ${shuffleUniqueMode ? shuffleMessage : ""}Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}`,
-        updatedOption == null ? `Psst. Your bot prefix is \`${process.env.BOT_PREFIX}\`.` : null);
+        footerText !== null ? footerText : null);
 }
 
 export async function sendEndGameMessage(messagePayload: SendMessagePayload, gameSession: GameSession) {

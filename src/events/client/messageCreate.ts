@@ -1,6 +1,7 @@
 import Eris from "eris";
 import _logger from "../../logger";
-import { textPermissionsCheck } from "../../helpers/discord_utils";
+import { textPermissionsCheck, sendOptionsMessage } from "../../helpers/discord_utils";
+import { getGuildPreference } from "../../helpers/game_utils";
 import state from "../../kmq";
 import validate from "../../helpers/validate";
 import { ParsedMessage } from "../../types";
@@ -42,7 +43,8 @@ export default async function messageCreateHandler(message: Eris.Message) {
         if (!(await textPermissionsCheck(message))) {
             return;
         }
-        state.commands.options.call({ message });
+        const guildPreference = await getGuildPreference(message.guildID);
+        sendOptionsMessage(message, guildPreference, null, `Psst. Your bot prefix is ${process.env.BOT_PREFIX}`);
     }
 
     if (parsedMessage && state.commands[parsedMessage.action]) {
