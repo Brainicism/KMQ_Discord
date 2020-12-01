@@ -273,6 +273,12 @@ export function voicePermissionsCheck(message: Eris.Message<Eris.GuildTextableCh
         sendInfoMessage(message, "Voice Channel Full", "Ensure that there's enough space in the voice channel for me to join");
         return false;
     }
+    const afkChannel = voiceChannel.id === voiceChannel.guild.afkChannelID;
+    if (afkChannel) {
+        logger.warn(`gid: ${voiceChannel.guild.id}, uid: ${message.author.id} | Attempted to start game in AFK voice channel`);
+        sendInfoMessage(message, "AFK Voice Channel", "Ensure you're not in the inactive voice channel so that you can hear me!");
+        return false;
+    }
     return true;
 }
 
