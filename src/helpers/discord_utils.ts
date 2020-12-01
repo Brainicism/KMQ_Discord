@@ -164,6 +164,14 @@ export async function sendEndGameMessage(messagePayload: SendMessagePayload, gam
         });
     } else {
         const winners = gameSession.scoreboard.getWinners();
+        const embedFields = gameSession.scoreboard.getScoreboardEmbedFields().slice(0, 10);
+        embedFields.push(
+            {
+                name: "Like KMQ?",
+                value: "Give us a vote and leave a review on [Top.GG!](https://top.gg/bot/508759831755096074)",
+                inline: false,
+            },
+        );
         await sendMessage(messagePayload, {
             embed: {
                 color: EMBED_SUCCESS_COLOR,
@@ -172,7 +180,7 @@ export async function sendEndGameMessage(messagePayload: SendMessagePayload, gam
                     url: winners[0].getAvatarURL(),
                 },
                 title: `🎉 ${gameSession.scoreboard.getWinnerMessage()} 🎉`,
-                fields: gameSession.scoreboard.getScoreboardEmbedFields().slice(0, 10),
+                fields: embedFields,
             },
         });
     }
