@@ -20,7 +20,7 @@ const storeDailyStats = async (serverCount: number) => {
         .count("* as count"))[0].count;
 
     const newPlayers = (await dbContext.kmq("player_stats")
-        .where("first_play", "=", dateThreshold)
+        .where("first_play", ">=", dateThreshold)
         .count("* as count"))[0].count;
 
     logger.info("Inserting today's stats into db...");
