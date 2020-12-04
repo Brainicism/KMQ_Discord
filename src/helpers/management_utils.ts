@@ -30,6 +30,7 @@ import guildCreateHandler from "../events/client/guildCreate";
 import BotStatsPoster from "./bot_stats_poster";
 import { EnvType } from "../types";
 import storeDailyStats from "../scripts/store-daily-stats";
+import { seedKpopDataDatabase } from "../seed/seed_db";
 
 const glob = promisify(_glob);
 
@@ -98,6 +99,14 @@ function sweepCaches() {
     }
 }
 
+export async function updateGroupList() {
+    // populate group list
+    const result = await dbContext.kpopVideos("kpop_videos.app_kpop_group")
+        .select(["name", "members as gender"])
+        .orderBy("name", "ASC");
+    fs.writeFileSync(path.resolve(__dirname, "../../data/group_list.txt"), result.map((x) => x.name).join("\n"));
+}
+
 export function registerIntervals() {
     // set up cleanup for inactive game sessions
     const everyTenMinutes = "*/10 * * * *";
@@ -132,6 +141,15 @@ export function registerIntervals() {
     schedule.scheduleJob(dailyAtMidnight, async () => {
         const serverCount = state.client.guilds.size;
         storeDailyStats(serverCount);
+    });
+
+    // every monday at 7am UTC => 2am EST
+    const aoiMiraiUpdate = "0 7 * * 1";
+    schedule.scheduleJob(aoiMiraiUpdate, async () => {
+        logger.info("Performing regularly scheduled AoiMirai database seed");
+        await seedKpopDataDatabase();
+        logger.info("Updating group lists");
+        await updateGroupList();
     });
 }
 
@@ -173,14 +191,6 @@ export async function registerCommands() {
 export function initializeBotStatsPoster() {
     state.botStatsPoster = new BotStatsPoster();
     state.botStatsPoster.start();
-}
-
-export async function updateGroupList() {
-    // populate group list
-    const result = await dbContext.kpopVideos("kpop_videos.app_kpop_group")
-        .select(["name", "members as gender"])
-        .orderBy("name", "ASC");
-    fs.writeFileSync(path.resolve(__dirname, "../../data/group_list.txt"), result.map((x) => x.name).join("\n"));
 }
 
 export function deleteGameSession(guildId: string) {
