@@ -2,7 +2,7 @@
 import { spawn, exec } from "child_process";
 import dbContext from "../database_context";
 
-function serverShutdown(restartMinutes: number, restart: boolean) {
+function serverShutdown(restartMinutes: number, restart: boolean): Promise<void> {
     return new Promise((resolve) => {
         const logs = spawn("pm2", ["logs", "kmq", "--out"]);
 

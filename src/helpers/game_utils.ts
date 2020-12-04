@@ -38,7 +38,7 @@ async function getFilteredSongList(guildPreference: GuildPreference, ignoredVide
     };
 }
 
-export async function ensureVoiceConnection(gameSession: GameSession, client: Eris.Client) {
+export async function ensureVoiceConnection(gameSession: GameSession, client: Eris.Client): Promise<void> {
     return new Promise(async (resolve, reject) => {
         try {
             const connection = await client.joinVoiceChannel(gameSession.voiceChannel.id);

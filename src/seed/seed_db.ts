@@ -34,7 +34,7 @@ const downloadDb = async () => {
     await fs.promises.writeFile(output, resp.data, { encoding: null });
     logger.info("Downloaded database.zip");
 };
-function extractDb() {
+async function extractDb(): Promise<void> {
     return new Promise((resolve, reject) => {
         fs.createReadStream(`${databaseDownloadDir}/bootstrap.zip`)
             .pipe(unzipper.Extract({ path: `${databaseDownloadDir}/sql/` }))
