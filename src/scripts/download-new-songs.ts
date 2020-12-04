@@ -38,7 +38,7 @@ export async function clearPartiallyCachedSongs(): Promise<void> {
     }
 }
 
-const downloadSong = (id: string) => {
+const downloadSong = (id: string): Promise<void> => {
     const cachedSongLocation = path.join(process.env.SONG_DOWNLOAD_DIR, `${id}.mp3`);
     const tempLocation = `${cachedSongLocation}.part`;
     const cacheStream = fs.createWriteStream(tempLocation);
