@@ -14,7 +14,6 @@ config({ path: resolve(__dirname, "../.env") });
 const ERIS_INTENTS = Eris.Constants.Intents;
 const client = new Eris.Client(process.env.BOT_TOKEN, {
     disableEvents: {
-        GUILD_DELETE: true,
         GUILD_ROLE_DELETE: true,
         CHANNEL_PINS_UPDATE: true,
         MESSAGE_UPDATE: true,
