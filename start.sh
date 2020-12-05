@@ -3,7 +3,7 @@ set -e
 
 rebuild () {
     echo "Cleaning build..."
-    rm -rf build/
+    npm run clean
     echo "Compiling typescript..."
     tsc
     cd build/

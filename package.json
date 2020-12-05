@@ -8,6 +8,7 @@
     "dev": "npm run lint && START_TYPE=dev npm run start",
     "dev-no-lint": "START_TYPE=dev npm run start",
     "prod": "npm run lint && START_TYPE=prod npm run start",
+    "clean": "rm -rf build/ && rm -f tsconfig.tsbuildinfo",
     "bootstrap": "ts-node src/seed/bootstrap.ts",
     "download_songs": "ts-node src/scripts/download-new-songs.ts",
     "lint": "npx eslint . --ext .js,.ts",
