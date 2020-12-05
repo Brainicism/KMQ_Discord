@@ -7,6 +7,7 @@
     "dev": "npm run lint && ./start.sh dev",
     "dev-no-lint": "./start.sh dev",
     "prod": "npm run lint && ./start.sh prod",
+    "clean": "rm -rf build/ && rm -f tsconfig.tsbuildinfo",
     "bootstrap": "ts-node src/seed/bootstrap.ts",
     "download_songs": "ts-node src/scripts/download-new-songs.ts",
     "lint": "npx eslint . --ext .js,.ts",
