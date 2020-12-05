@@ -38,4 +38,6 @@ jobs:
       - name: npm run lint
         run: npm run lint
       - name: Build and dry-run
-        run: ./start.sh dry-run
+        run: npm run start
+        env: 
+            START_TYPE: dry-run

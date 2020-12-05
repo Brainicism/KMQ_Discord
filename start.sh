@@ -8,7 +8,7 @@ rebuild () {
     tsc
     cd build/
 }
-if [ $1 == "dry-run" ]; then
+if [ "${START_TYPE}" == "dry-run" ]; then
     rebuild
     echo "Starting bot..."
     export NODE_ENV=dry-run 
@@ -25,11 +25,11 @@ else
     echo "Bootstrapping..."
     npm run bootstrap
     echo "Starting bot..."
-    if [ $1 == "dev" ]; then
+    if [ "${START_TYPE}" == "dev" ]; then
         cd src
         export NODE_ENV=development
         exec node -r ts-node/register --inspect=9229 kmq
-    elif [ $1 == "prod" ]; then
+    elif [ "${START_TYPE}" == "prod" ]; then
         rebuild
         export NODE_ENV=production
         exec node kmq.js
