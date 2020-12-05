@@ -11,7 +11,8 @@ rebuild () {
 if [ $1 == "dry-run" ]; then
     rebuild
     echo "Starting bot..."
-    NODE_ENV=dry-run node kmq.js
+    export NODE_ENV=dry-run 
+    exec node kmq.js
 else
     # Wait for DB if DB_HOST is defined and non-empty.
     if [ ! -z "$DB_HOST" ]; then
@@ -23,13 +24,14 @@ else
 
     echo "Bootstrapping..."
     npm run bootstrap
+    echo "Starting bot..."
     if [ $1 == "dev" ]; then
         cd src
-        echo "Starting bot..."
-        NODE_ENV=development node -r ts-node/register --inspect=9229 kmq
+        export NODE_ENV=development
+        exec node -r ts-node/register --inspect=9229 kmq
     elif [ $1 == "prod" ]; then
-        echo "Starting bot..."
         rebuild
-        NODE_ENV=production node kmq.js
+        export NODE_ENV=production
+        exec node kmq.js
     fi
 fi
