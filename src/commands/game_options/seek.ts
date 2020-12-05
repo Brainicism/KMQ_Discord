@@ -45,6 +45,10 @@ export default class SeekCommand implements BaseCommand {
                 example: "`!seek beginning`",
                 explanation: "Song will be played starting from the very beginning",
             },
+            {
+                example: "`!seek`",
+                explanation: `Reset to the default seek of \`${DEFAULT_SEEK}\``,
+            },
         ],
     };
 }

@@ -67,6 +67,10 @@ export default class CutoffCommand implements BaseCommand {
                 example: "`!cutoff 2015 2018`",
                 explanation: "Play songs released between the years 2015-2018.",
             },
+            {
+                example: "`!cutoff`",
+                explanation: `Reset to the default cutoff of \`${DEFAULT_BEGINNING_SEARCH_YEAR}\` to \`${DEFAULT_ENDING_SEARCH_YEAR}\``,
+            },
         ],
     };
 }

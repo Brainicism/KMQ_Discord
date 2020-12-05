@@ -52,6 +52,10 @@ export default class ModeCommand implements BaseCommand {
                 example: "`!mode both`",
                 explanation: "Type the correct name of the artist (0.2 points) or the name of the song (1 point) to win a game round",
             },
+            {
+                example: "`!mode`",
+                explanation: `Reset to the default mode of \`${DEFAULT_MODE}\``,
+            },
         ],
     };
 }

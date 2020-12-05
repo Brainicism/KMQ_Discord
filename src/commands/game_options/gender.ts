@@ -66,15 +66,19 @@ export default class GenderCommand implements BaseCommand {
         examples: [
             {
                 example: "`!gender female`",
-                explanation: "Play songs only from female artists",
+                explanation: "Play songs only from `female` artists",
             },
             {
                 example: "`!gender male female`",
-                explanation: "Play songs from both male and female artists",
+                explanation: "Play songs from both `male` and `female` artists",
             },
             {
                 example: "`!gender coed`",
-                explanation: "Play songs only from coed groups (groups with both male and female members)",
+                explanation: "Play songs only from `coed` groups (groups with both male and female members)",
+            },
+            {
+                example: "`!gender`",
+                explanation: "Reset to the default genders of `male`, `female`, and `coed`",
             },
         ],
     };
