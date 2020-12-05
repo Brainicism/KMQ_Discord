@@ -12,9 +12,9 @@
     "bootstrap": "ts-node src/seed/bootstrap.ts",
     "download_songs": "ts-node src/scripts/download-new-songs.ts",
     "lint": "npx eslint . --ext .js,.ts",
-    "docker-db": "docker-compose -f docker/docker-compose.yml up -d db",
-    "docker-dev": "START_TYPE=dev docker-compose -f docker/docker-compose.yml up --build kmq",
-    "docker-prod": "START_TYPE=prod docker-compose -f docker/docker-compose.yml up --build kmq"
+    "docker-db": "cd docker/ && docker-compose up -d db",
+    "docker-dev": "cd docker/ && START_TYPE=dev docker-compose up --build kmq",
+    "docker-prod": "cd docker/ && START_TYPE=prod docker-compose up --build kmq"
   },
   "author": "",
   "license": "ISC",
