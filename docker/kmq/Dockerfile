@@ -22,4 +22,6 @@ RUN npm install
 
 COPY . .
 
+STOPSIGNAL SIGINT
+
 ENTRYPOINT ["npm", "run", "dev"]
