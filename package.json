@@ -4,15 +4,17 @@
   "main": "src/kmq.js",
   "scripts": {
     "seed": "ts-node src/seed/seed_db",
-    "dev": "npm run lint && ./start.sh dev",
-    "dev-no-lint": "./start.sh dev",
-    "prod": "npm run lint && ./start.sh prod",
+    "start": "./start.sh",
+    "dev": "npm run lint && START_TYPE=dev npm run start",
+    "dev-no-lint": "START_TYPE=dev npm run start",
+    "prod": "npm run lint && START_TYPE=prod npm run start",
     "clean": "rm -rf build/ && rm -f tsconfig.tsbuildinfo",
     "bootstrap": "ts-node src/seed/bootstrap.ts",
     "download_songs": "ts-node src/scripts/download-new-songs.ts",
     "lint": "npx eslint . --ext .js,.ts",
     "docker-db": "docker-compose -f docker/docker-compose.yml up -d db",
-    "docker-dev": "docker-compose -f docker/docker-compose.yml up --build kmq"
+    "docker-dev": "START_TYPE=dev docker-compose -f docker/docker-compose.yml up --build kmq",
+    "docker-prod": "START_TYPE=prod docker-compose -f docker/docker-compose.yml up --build kmq"
   },
   "author": "",
   "license": "ISC",

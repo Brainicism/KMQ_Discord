@@ -23,5 +23,6 @@ RUN npm install
 COPY . .
 
 STOPSIGNAL SIGINT
-
-ENTRYPOINT ["npm", "run", "dev"]
+ARG START_TYPE
+ENV START_TYPE=$START_TYPE
+ENTRYPOINT ["npm", "run", "start"]

@@ -6,6 +6,8 @@ services:
     build:
       context: ../
       dockerfile: docker/kmq/Dockerfile
+      args: 
+        START_TYPE: ${START_TYPE}
     env_file: .env
     environment:
       SONG_DOWNLOAD_DIR: /songs
