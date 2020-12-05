@@ -9,7 +9,9 @@
     "prod": "npm run lint && ./start.sh prod",
     "bootstrap": "ts-node src/seed/bootstrap.ts",
     "download_songs": "ts-node src/scripts/download-new-songs.ts",
-    "lint": "npx eslint . --ext .js,.ts"
+    "lint": "npx eslint . --ext .js,.ts",
+    "docker-db": "docker-compose -f docker/docker-compose.yml up -d db",
+    "docker-dev": "docker-compose -f docker/docker-compose.yml up --build kmq"
   },
   "author": "",
   "license": "ISC",
