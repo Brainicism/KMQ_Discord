@@ -47,6 +47,10 @@ export default class ShuffleCommand implements BaseCommand {
                 example: "`!shuffle unique`",
                 explanation: "Every song will play once before any are repeated.",
             },
+            {
+                example: "`!shuffle`",
+                explanation: `Reset to the default shuffle mode of \`${DEFAULT_SHUFFLE}\``,
+            },
         ],
     };
 }

@@ -42,8 +42,12 @@ export default class LimitCommand implements BaseCommand {
         usage: "!limit [limit]",
         examples: [
             {
-                example: "`!limit 500`",
-                explanation: "Plays the top 500 most listened songs from the currently selected options.",
+                example: "`!limit 250`",
+                explanation: "Plays the top 250 most listened songs from the currently selected options.",
+            },
+            {
+                example: "`!limit`",
+                explanation: `Reset to the default limit of \`${DEFAULT_LIMIT}\``,
             },
         ],
     };
