@@ -1,4 +1,3 @@
-import Eris from "eris";
 import cronParser from "cron-parser";
 import path from "path";
 import fs from "fs";
@@ -38,7 +37,8 @@ const logger = _logger("management_utils");
 
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 2, 1]);
 
-export function registerClientEvents(client: Eris.Client) {
+export function registerClientEvents() {
+    const { client } = state;
     client.on("ready", readyHandler)
         .on("messageCreate", messageCreateHandler)
         .on("voiceChannelLeave", voiceChannelLeaveHandler)
@@ -54,7 +54,7 @@ export function registerClientEvents(client: Eris.Client) {
         .on("guildCreate", guildCreateHandler);
 }
 
-export function registerProcessEvents(process: NodeJS.Process) {
+export function registerProcessEvents() {
     process.on("unhandledRejection", unhandledRejectionHandler)
         .on("uncaughtException", uncaughtExceptionHandler)
         .on("SIGINT", SIGINTHandler);

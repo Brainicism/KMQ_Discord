@@ -45,9 +45,9 @@ export default state;
     logger.info("Registering event loops...");
     registerIntervals();
     logger.info("Registering client event handlers...");
-    registerClientEvents(client);
+    registerClientEvents();
     logger.info("Registering process event handlers...");
-    registerProcessEvents(process);
+    registerProcessEvents();
 
     if (process.env.NODE_ENV === EnvType.DRY_RUN) {
         logger.info("Dry run finished successfully.");
