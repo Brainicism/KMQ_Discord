@@ -10,12 +10,18 @@ const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
 const logger = _logger("game_utils");
 
+interface GroupMatchResults {
+    unmatchedGroups?: Array<string>;
+    matchedGroups?: { id: number, name: string }[];
+}
+
 async function getFilteredSongList(guildPreference: GuildPreference, ignoredVideoIds?: Array<string>): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
     let result: Array<QueriedSong>;
-    if (guildPreference.getGroupIds() === null) {
+    if (!guildPreference.isGroupsMode()) {
         result = await dbContext.kmq("available_songs")
             .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
             .whereIn("members", guildPreference.getSQLGender().split(","))
+            .whereNotIn("id_artist", guildPreference.getExcludesGroupIds())
             .andWhere("publishedon", ">=", `${guildPreference.getBeginningCutoffYear()}-01-01`)
             .andWhere("publishedon", "<=", `${guildPreference.getEndCutoffYear()}-12-31`)
             .orderBy("views", "DESC");
@@ -23,6 +29,7 @@ async function getFilteredSongList(guildPreference: GuildPreference, ignoredVide
         result = await dbContext.kmq("available_songs")
             .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
             .whereIn("id_artist", guildPreference.getGroupIds())
+            .whereNotIn("id_artist", guildPreference.getExcludesGroupIds())
             .andWhere("publishedon", ">=", `${guildPreference.getBeginningCutoffYear()}-01-01`)
             .andWhere("publishedon", "<=", `${guildPreference.getEndCutoffYear()}-12-31`)
             .orderBy("views", "DESC");
@@ -106,4 +113,23 @@ export async function getGuildPreference(guildID: string): Promise<GuildPreferen
         return guildPreference;
     }
     return new GuildPreference(guildPreferences[0].guild_id, JSON.parse(guildPreferences[0].guild_preference));
+}
+
+export async function getMatchingGroupNames(rawGroupNames: Array<string>): Promise<GroupMatchResults> {
+    const matchingGroups = (await dbContext.kpopVideos("kpop_videos.app_kpop_group")
+        .select(["id", "name"])
+        .whereIn("name", rawGroupNames))
+        .map((x) => ({ id: x.id, name: x.name }));
+
+    if (matchingGroups.length !== rawGroupNames.length) {
+        const matchingGroupNames = matchingGroups.map((x) => x.name.toUpperCase());
+        const unrecognizedGroups = rawGroupNames.filter((x) => !matchingGroupNames.includes(x.toUpperCase()));
+        return {
+            unmatchedGroups: unrecognizedGroups,
+            matchedGroups: matchingGroups,
+        };
+    }
+    return {
+        matchedGroups: matchingGroups,
+    };
 }

@@ -21,6 +21,7 @@ const DEFAULT_OPTIONS = {
     modeType: DEFAULT_MODE,
     shuffleType: DEFAULT_SHUFFLE,
     groups: null,
+    excludes: null,
     goal: null,
     guessTimeout: null,
 };
@@ -34,6 +35,7 @@ interface GameOptions {
     modeType: ModeType;
     shuffleType: ShuffleType;
     groups: { id: number, name: string }[];
+    excludes: { id: number, name: string }[];
     goal: number;
     guessTimeout: number;
 }
@@ -118,6 +120,10 @@ export default class GuildPreference {
         return this.gameOptions.endYear;
     }
 
+    isGroupsMode(): boolean {
+        return this.getGroupIds().length !== 0;
+    }
+
     setGroups(groupIds: { id: number, name: string }[]) {
         this.gameOptions.groups = groupIds;
         this.updateGuildPreferences(dbContext.kmq);
@@ -131,13 +137,43 @@ export default class GuildPreference {
     }
 
     getGroupIds(): number[] {
-        if (this.gameOptions.groups === null) return null;
+        if (this.gameOptions.groups === null) return [];
         return this.gameOptions.groups.map((x) => x.id);
     }
 
     getDisplayedGroupNames(): string {
         if (this.gameOptions.groups === null) return null;
         let displayedGroupNames = this.gameOptions.groups.map((x) => x.name).join(", ");
+        if (displayedGroupNames.length > 400) {
+            displayedGroupNames = `${displayedGroupNames.substr(0, 400)} and many others...`;
+        }
+        return displayedGroupNames;
+    }
+
+    isExcludesMode(): boolean {
+        return this.getExcludesGroupIds().length !== 0;
+    }
+
+    setExcludes(groupIds: { id: number, name: string }[]) {
+        this.gameOptions.excludes = groupIds;
+        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGameSession(true);
+    }
+
+    resetExcludes() {
+        this.gameOptions.excludes = null;
+        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGameSession(true);
+    }
+
+    getExcludesGroupIds(): number[] {
+        if (this.gameOptions.excludes === null) return [];
+        return this.gameOptions.excludes.map((x) => x.id);
+    }
+
+    getDisplayedExcludesGroupNames(): string {
+        if (this.gameOptions.excludes === null) return null;
+        let displayedGroupNames = this.gameOptions.excludes.map((x) => x.name).join(", ");
         if (displayedGroupNames.length > 400) {
             displayedGroupNames = `${displayedGroupNames.substr(0, 400)} and many others...`;
         }

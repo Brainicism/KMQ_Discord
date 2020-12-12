@@ -43,6 +43,7 @@ export enum GameOption {
     GROUPS = "Groups",
     GOAL = "Goal",
     TIMER = "Timer",
+    EXCLUDE = "Exclude",
 }
 
 export enum EnvType {

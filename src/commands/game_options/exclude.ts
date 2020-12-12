@@ -1,0 +1,52 @@
+import BaseCommand, { CommandArgs } from "../base_command";
+import { sendOptionsMessage, getDebugContext, sendErrorMessage } from "../../helpers/discord_utils";
+import { getGuildPreference, getMatchingGroupNames } from "../../helpers/game_utils";
+import _logger from "../../logger";
+import { GameOption } from "../../types";
+
+const logger = _logger("excludes");
+
+export default class ExcludeCommand implements BaseCommand {
+    async call({ message, parsedMessage }: CommandArgs) {
+        const guildPreference = await getGuildPreference(message.guildID);
+        if (parsedMessage.components.length === 0) {
+            guildPreference.resetExcludes();
+            logger.info(`${getDebugContext(message)} | Excludes reset.`);
+            await sendOptionsMessage(message, guildPreference, GameOption.EXCLUDE);
+            return;
+        }
+        const groupNames = parsedMessage.argument.split(",").map((groupName) => groupName.trim());
+        const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(groupNames);
+        if (unmatchedGroups) {
+            logger.info(`${getDebugContext(message)} | Attempted to set unknown excludes. excludes =  ${unmatchedGroups.join(", ")}`);
+            await sendErrorMessage(message, "Unknown Group Name", `One or more of the specified group names was not recognized. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} `);
+            return;
+        }
+
+        guildPreference.setExcludes(matchedGroups);
+        await sendOptionsMessage(message, guildPreference, GameOption.EXCLUDE);
+        logger.info(`${getDebugContext(message)} | Excludes set to ${guildPreference.getDisplayedExcludesGroupNames()}`);
+    }
+
+    help = {
+        name: "exclude",
+        description: "Select as many groups that you would like to ignore, separated by commas. A list of group names can be found [here](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/data/group_list.txt)",
+        usage: "!exclude [group1],{group2}",
+        examples: [
+            {
+                example: "`!exclude blackpink`",
+                explanation: "Ignore songs from Blackpink",
+            },
+            {
+                example: "`!exclude blackpink, bts, red velvet`",
+                explanation: "Ignore songs from Blackpink, BTS, and Red Velvet",
+            },
+            {
+                example: "`!exclude`",
+                explanation: "Resets the exclude option",
+            },
+        ],
+    };
+
+    aliases = ["excludes", "ignore", "ignores"];
+}
