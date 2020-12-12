@@ -4,7 +4,7 @@ import { resolve } from "path";
 import _logger from "./logger";
 import { EnvType, State } from "./types";
 import {
-    registerClientEvents, registerProcessEvents, registerCommands, updateGroupList, registerIntervals, initializeBotStatsPoster,
+    registerClientEvents, registerProcessEvents, registerCommands, updateGroupList, registerIntervals, initializeBotStatsPoster, reloadAliases,
 } from "./helpers/management_utils";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -35,6 +35,10 @@ const state: State = {
     gameSessions: {},
     botStatsPoster: null,
     client,
+    aliases: {
+        artist: {},
+        song: {},
+    },
 };
 
 export default state;
@@ -60,5 +64,6 @@ export default state;
         logger.info("Initializing bot stats poster...");
         initializeBotStatsPoster();
     }
+    reloadAliases();
     client.connect();
 })();
