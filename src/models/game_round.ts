@@ -1,5 +1,6 @@
 import Eris from "eris";
 import { ModeType } from "../commands/game_options/mode";
+import state from "../kmq";
 import _logger from "../logger";
 
 // eslint-disable-next-line no-useless-escape
@@ -44,9 +45,11 @@ export default class GameRound {
     public skipAchieved: boolean;
     public lastActive: number;
 
-    constructor(song: string, artist: string, videoID: string, songAliases: Array<string>, artistAliases: Array<string>) {
+    constructor(song: string, artist: string, videoID: string) {
         this.song = song;
-        this.songAliases = songAliases;
+        this.songAliases = state.aliases.song[videoID] || [];
+        const artistNames = artist.split("+").map((x) => x.trim());
+        const artistAliases = artistNames.flatMap((x) => [x, ...(state.aliases.artist[x] || [])]);
         this.artistAliases = artistAliases;
         this.artist = artist;
         this.videoID = videoID;

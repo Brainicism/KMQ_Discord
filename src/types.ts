@@ -25,7 +25,11 @@ export interface State {
     commands: { [commandName: string]: BaseCommand };
     gameSessions: { [guildID: string]: GameSession };
     botStatsPoster: BotStatsPoster;
-    client: Eris.Client
+    client: Eris.Client;
+    aliases: {
+        artist: { [artistName: string]: Array<string> },
+        song: { [songName: string]: Array<string> }
+    }
 }
 
 export enum GameOption {

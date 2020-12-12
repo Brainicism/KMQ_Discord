@@ -30,6 +30,7 @@ import BotStatsPoster from "./bot_stats_poster";
 import { EnvType } from "../types";
 import storeDailyStats from "../scripts/store-daily-stats";
 import { seedKpopDataDatabase } from "../seed/seed_db";
+import { parseJsonFile } from "./utils";
 
 const glob = promisify(_glob);
 
@@ -99,6 +100,19 @@ function sweepCaches() {
     }
 }
 
+export function reloadAliases() {
+    const songAliasesFilePath = path.resolve(__dirname, "../../data/song_aliases.json");
+    const artistAliasesFilePath = path.resolve(__dirname, "../../data/artist_aliases.json");
+    try {
+        state.aliases.song = parseJsonFile(songAliasesFilePath);
+        state.aliases.artist = parseJsonFile(artistAliasesFilePath);
+    } catch (err) {
+        logger.error("Error parsing alias files");
+        state.aliases.song = {};
+        state.aliases.artist = {};
+    }
+}
+
 export async function updateGroupList() {
     // populate group list
     const result = await dbContext.kpopVideos("kpop_videos.app_kpop_group")
@@ -109,16 +123,14 @@ export async function updateGroupList() {
 
 export function registerIntervals() {
     // set up cleanup for inactive game sessions
-    const everyTenMinutes = "*/10 * * * *";
-    schedule.scheduleJob(everyTenMinutes, () => {
+    schedule.scheduleJob("*/10 * * * *", () => {
         cleanupInactiveGameSessions(state.gameSessions);
         updateBotStatus();
         sweepCaches();
     });
 
-    const everyMinute = "* * * * *";
     // set up check for restart notifications
-    schedule.scheduleJob(everyMinute, async () => {
+    schedule.scheduleJob("* * * * *", async () => {
         // unscheduled restarts
         const restartNotification = (await dbContext.kmq("restart_notifications").where("id", 1))[0].restart_time;
         if (restartNotification) {
@@ -137,19 +149,21 @@ export function registerIntervals() {
         }
     });
 
-    const dailyAtMidnight = "0 0 * * *";
-    schedule.scheduleJob(dailyAtMidnight, async () => {
+    schedule.scheduleJob("0 0 * * *", async () => {
         const serverCount = state.client.guilds.size;
         storeDailyStats(serverCount);
     });
 
     // every monday at 7am UTC => 2am EST
-    const aoiMiraiUpdate = "0 7 * * 1";
-    schedule.scheduleJob(aoiMiraiUpdate, async () => {
+    schedule.scheduleJob("0 7 * * 1", async () => {
         logger.info("Performing regularly scheduled AoiMirai database seed");
         await seedKpopDataDatabase();
         logger.info("Updating group lists");
         await updateGroupList();
+    });
+
+    schedule.scheduleJob("*/5 * * * *", async () => {
+        reloadAliases();
     });
 }
 

@@ -1,6 +1,5 @@
 import Eris from "eris";
 import fs from "fs";
-import path from "path";
 import { CommandArgs } from "../commands/base_command";
 import { SeekType } from "../commands/game_options/seek";
 import { ShuffleType } from "../commands/game_options/shuffle";
@@ -10,7 +9,7 @@ import {
     getDebugContext, getSqlDateString, getUserIdentifier, getVoiceChannel, sendEndGameMessage, sendErrorMessage, sendSongMessage,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getSongCount } from "../helpers/game_utils";
-import { delay, getAudioDurationInSeconds, parseJsonFile } from "../helpers/utils";
+import { delay, getAudioDurationInSeconds } from "../helpers/utils";
 import state from "../kmq";
 import _logger from "../logger";
 import { QueriedSong } from "../types";
@@ -56,18 +55,12 @@ export default class GameSession {
         this.voiceChannel = voiceChannel;
         this.textChannel = textChannel;
         this.gameRound = null;
-        const songAliasesFilePath = path.resolve(__dirname, "../../data/song_aliases.json");
-        const artistAliasesFilePath = path.resolve(__dirname, "../../data/artist_aliases.json");
-        this.songAliasList = parseJsonFile(songAliasesFilePath);
-        this.artistAliasList = parseJsonFile(artistAliasesFilePath);
         this.owner = gameSessionCreator;
         this.lastPlayedSongsQueue = [];
     }
 
     createRound(song: string, artist: string, videoID: string) {
-        const artistNames = artist.split("+").map((x) => x.trim());
-        const artistAliases = artistNames.flatMap((x) => [x, ...(this.artistAliasList[x] || [])]);
-        this.gameRound = new GameRound(song, artist, videoID, this.songAliasList[videoID] || [], artistAliases);
+        this.gameRound = new GameRound(song, artist, videoID);
         this.sessionInitialized = true;
         this.roundsPlayed++;
     }
