@@ -72,5 +72,6 @@ export default class CutoffCommand implements BaseCommand {
                 explanation: `Reset to the default cutoff of \`${DEFAULT_BEGINNING_SEARCH_YEAR}\` to \`${DEFAULT_ENDING_SEARCH_YEAR}\``,
             },
         ],
+        priority: 140,
     };
 }

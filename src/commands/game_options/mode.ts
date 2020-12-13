@@ -57,5 +57,6 @@ export default class ModeCommand implements BaseCommand {
                 explanation: `Reset to the default mode of \`${DEFAULT_MODE}\``,
             },
         ],
+        priority: 130,
     };
 }

@@ -65,11 +65,12 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
         }
     } else {
         logger.info(`${getDebugContext(message)} | Getting full help documentation`);
-        const commandNamesWithHelp = Object.keys(commandFiles).filter((commandName) => commandFiles[commandName].help);
+        const commandsWithHelp = Object.values(commandFiles).filter((command) => command.help);
+        commandsWithHelp.sort((x, y) => y.help.priority - x.help.priority);
         embedTitle = "K-pop Music Quiz Command Help";
         embedDesc = helpMessages.rules.replace(placeholder, process.env.BOT_PREFIX);
-        commandNamesWithHelp.forEach((commandName) => {
-            const helpManual = commandFiles[commandName].help;
+        commandsWithHelp.forEach((command) => {
+            const helpManual = command.help;
             embedFields.push({
                 name: helpManual.name,
                 value: `${helpManual.description}\nUsage: \`${helpManual.usage.replace(placeholder, process.env.BOT_PREFIX)}\``,
@@ -104,7 +105,7 @@ export default class HelpCommand implements BaseCommand {
     }
     help = {
         name: "help",
-        description: "Get help about the game's commands. Add the command as an argument to get information about the specific command.",
+        description: "Get help about the game's commands. Add a command to get information about the specific command.",
         usage: "!help [command]",
         examples: [
             {
@@ -116,5 +117,6 @@ export default class HelpCommand implements BaseCommand {
                 explanation: "Shows a detailed description for the cutoff command",
             },
         ],
+        priority: 1000,
     };
 }

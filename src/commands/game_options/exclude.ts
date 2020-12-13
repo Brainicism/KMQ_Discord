@@ -46,6 +46,7 @@ export default class ExcludeCommand implements BaseCommand {
                 explanation: "Resets the exclude option",
             },
         ],
+        priority: 130,
     };
 
     aliases = ["excludes", "ignore", "ignores"];

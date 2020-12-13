@@ -81,5 +81,6 @@ export default class GenderCommand implements BaseCommand {
                 explanation: "Reset to the default genders of `male`, `female`, and `coed`",
             },
         ],
+        priority: 150,
     };
 }

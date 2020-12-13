@@ -50,5 +50,6 @@ export default class SeekCommand implements BaseCommand {
                 explanation: `Reset to the default seek of \`${DEFAULT_SEEK}\``,
             },
         ],
+        priority: 130,
     };
 }

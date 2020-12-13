@@ -56,6 +56,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                 explanation: "Disables the timer",
             },
         ],
+        priority: 110,
     };
     aliases = ["time", "timeout", "t"];
 }

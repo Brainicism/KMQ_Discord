@@ -40,6 +40,7 @@ export default class ForceSkipCommand implements BaseCommand {
         description: "The person that started the game can force-skip the current song, no majority necessary.",
         usage: "!forceskip",
         examples: [],
+        priority: 1009,
     };
     aliases = ["fskip", "fs"];
 }
