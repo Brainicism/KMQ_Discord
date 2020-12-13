@@ -29,7 +29,6 @@ up (see below). The docker-compose file forwards ports for mysql.
     - `libsodium` might require the following packages: `autoconf automake g++ libtool`
 2. Use `*.template` files to create own copy of configuration files in `src/config`
     - `.env` contains application specific settings. See `.env.example` to see parameters, and `environment.d.ts` to see which are required. 
-    - `knexfile_*.js` contains connection credentials for the each database connection. `kmq` is used for bot-specific database tables. `kpop_videos` is automatically created from the `aoimirai` backup
 3. Apply database migrations for `kmq`. Using `npx knex migrate:latest --knexfile src/config/knexfile_kmq.js`
 4. `npm run dev` to start the bot. Upon first run, the bot will bootstrap the database, as well as download 5 songs to have a minimally working bot
 5. `ts-node src/scripts/download-new-songs` can be used to download the remaining songs in the database
