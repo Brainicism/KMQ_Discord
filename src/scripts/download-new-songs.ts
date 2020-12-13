@@ -204,7 +204,6 @@ async function downloadAndConvertSongs(limit?: number) {
     await downloadNewSongs(limit);
     await convertToOpus();
     generateAvailableSongsView();
-    await dbContext.destroy();
 }
 
 process.on("SIGINT", () => {
@@ -219,8 +218,11 @@ export {
     downloadAndConvertSongs,
 };
 
-if (require.main === module) {
-    const args = process.argv.slice(2);
-    const limit = args.length > 0 ? parseInt(args[0], 10) : null;
-    downloadAndConvertSongs(limit);
-}
+(async () => {
+    if (require.main === module) {
+        const args = process.argv.slice(2);
+        const limit = args.length > 0 ? parseInt(args[0], 10) : null;
+        downloadAndConvertSongs(limit);
+        await dbContext.destroy();
+    }
+})();

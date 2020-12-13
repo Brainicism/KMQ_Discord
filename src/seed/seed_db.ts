@@ -10,6 +10,7 @@ import path from "path";
 import _logger from "../logger";
 import removeRedunantAliases from "../scripts/remove-redunant-aliases";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
+import dbContext from "../database_context";
 
 config({ path: path.resolve(__dirname, "../../.env") });
 const fileUrl = "http://kpop.aoimirai.net/download.php";
@@ -108,6 +109,7 @@ async function seedKpopDataDatabase() {
             await seedKpopDataDatabase();
             await removeRedunantAliases();
             await downloadAndConvertSongs();
+            await dbContext.destroy();
         } catch (e) {
             logger.error(`Error: ${e}`);
         }
