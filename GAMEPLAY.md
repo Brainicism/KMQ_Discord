@@ -49,6 +49,11 @@ Note that `,groups` and `,gender` are incompatible with each other. If you wish 
 
 ![groups](/images/groups.png)
 
+## ,exclude [group_1],{group_2},{group_3} ...
+Setting the exclude option ignores songs by the specified artists. For instance `,exclude Day6,Momoland` ignore songs by those two artists. You can view the list of groups with `,help exclude`. Make sure to separate the groups with commas. You must enter the names of all of the groups at one time. In order to reset this option, simply type `,exclude`.
+
+![groups](/images/exclude.png)
+
 ## ,goal [goal]
 Setting the goal ends the game when the given goal score is reached. For example, if a user were to call `,goal 5`, the first player to five points would win the game (`,end` is called automatically). To disable a goal, use `,goal`.  
 
@@ -81,6 +86,7 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,gender`: Choose the gender of the artists you'd like to hear from
 - `,seek`: Choose whether each songs starts from the beginning, or a random point
 - `,groups`: Specify what groups/artists you'd like to hear from
+- `,exclude`: Specify what groups/artists you'd like to exclude
 - `,mode`: Choose whether to guess based on song name or artist name
 - `,goal`: Specify a number of points to be reached before a winner is selected, and the game ends 
 - `,timer`: Try your best to guess correctly before the timer runs out! Enter a time in seconds, or give no arguments to disable

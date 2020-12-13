@@ -118,7 +118,6 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
         return;
     }
 
-    const groupsMode = guildPreference.getGroupIds() !== null;
     const goalMode = guildPreference.isGoalSet();
     const guessTimeoutMode = guildPreference.isGuessTimeoutSet();
     const shuffleUniqueMode = guildPreference.isShuffleUnique();
@@ -126,7 +125,8 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
     const optionStrings = {};
     optionStrings[GameOption.CUTOFF] = `between the years ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
     optionStrings[GameOption.GENDER] = `${guildPreference.getSQLGender()} artists`;
-    optionStrings[GameOption.GROUPS] = groupsMode ? `${guildPreference.getDisplayedGroupNames()}` : null;
+    optionStrings[GameOption.GROUPS] = guildPreference.isGroupsMode() ? `${guildPreference.getDisplayedGroupNames()}` : null;
+    optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode() ? `${guildPreference.getDisplayedExcludesGroupNames()}` : null;
     optionStrings[GameOption.LIMIT] = `${Math.min(totalSongs, guildPreference.getLimit())}`;
     optionStrings[GameOption.SEEK_TYPE] = `${guildPreference.getSeekType()}`;
     optionStrings[GameOption.MODE_TYPE] = `${guildPreference.getModeType() === ModeType.BOTH ? "song or artist" : guildPreference.getModeType()}`;
@@ -145,7 +145,9 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
 
     await sendInfoMessage(message,
         updatedOption === null ? "Options" : `${updatedOption} updated`,
-        `Now playing the ${optionStrings[GameOption.LIMIT]} out of the __${totalSongs}__ most popular songs by ${groupsMode ? optionStrings[GameOption.GROUPS] : optionStrings[GameOption.GENDER]} ${optionStrings[GameOption.CUTOFF]}. \nPlaying from the ${optionStrings[GameOption.SEEK_TYPE]} point of each song. ${shuffleUniqueMode ? shuffleMessage : ""}Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}`,
+        `Now playing the ${optionStrings[GameOption.LIMIT]} out of the __${totalSongs}__ most popular songs by ${guildPreference.isGroupsMode() ? optionStrings[GameOption.GROUPS] : optionStrings[GameOption.GENDER]} ${optionStrings[GameOption.CUTOFF]}\
+        ${guildPreference.isExcludesMode() ? ` excluding ${optionStrings[GameOption.EXCLUDE]}` : ""}. \nPlaying from the ${optionStrings[GameOption.SEEK_TYPE]} point of each song. ${shuffleUniqueMode ? shuffleMessage : ""}\
+        Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}`,
         footerText !== null ? footerText : null);
 }
 
