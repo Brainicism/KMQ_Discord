@@ -53,5 +53,6 @@ export default class GoalCommand implements BaseCommand {
                 explanation: "Disables the goal",
             },
         ],
+        priority: 120,
     };
 }

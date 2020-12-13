@@ -44,6 +44,7 @@ export default class GroupsCommand implements BaseCommand {
                 explanation: "Resets the groups option",
             },
         ],
+        priority: 135,
     };
     aliases = ["group", "artist", "artists"];
 }

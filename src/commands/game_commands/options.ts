@@ -16,5 +16,6 @@ export default class OptionsCommand implements BaseCommand {
         description: "Displays the current game options.",
         usage: "!options",
         examples: [],
+        priority: 50,
     };
 }

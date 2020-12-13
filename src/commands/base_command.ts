@@ -31,6 +31,7 @@ export default class BaseCommand {
         description: string;
         usage: string;
         examples: Array<{ example: string, explanation: string }>;
+        priority: number;
     };
     aliases?: Array<string>;
     validations?: CommandValidations;

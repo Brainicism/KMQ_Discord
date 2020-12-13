@@ -52,5 +52,6 @@ export default class ShuffleCommand implements BaseCommand {
                 explanation: `Reset to the default shuffle mode of \`${DEFAULT_SHUFFLE}\``,
             },
         ],
+        priority: 110,
     };
 }

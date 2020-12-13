@@ -20,6 +20,7 @@ export default class ScoreCommand implements BaseCommand {
         description: "See the scoreboard for the current game",
         usage: "!score",
         examples: [],
+        priority: 50,
     };
     aliases = ["scoreboard"];
 }
