@@ -29,5 +29,6 @@ export default class ResetCommand implements BaseCommand {
                 explanation: "Resets to the default game options",
             },
         ],
+        priority: 130,
     };
 }

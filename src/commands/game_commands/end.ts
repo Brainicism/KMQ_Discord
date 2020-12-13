@@ -21,6 +21,7 @@ export default class EndCommand implements BaseCommand {
         description: "Finishes the current game and decides on a winner.",
         usage: "!end",
         examples: [],
+        priority: 1020,
     };
     aliases = ["stop", "e"];
 }

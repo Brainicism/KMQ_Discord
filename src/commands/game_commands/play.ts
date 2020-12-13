@@ -39,5 +39,6 @@ export default class PlayCommand implements BaseCommand {
         description: "Bot plays a random song in VC; type in your guess first to get a point.",
         usage: "!play",
         examples: [],
+        priority: 1050,
     };
 }

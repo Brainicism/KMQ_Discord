@@ -50,5 +50,6 @@ export default class LimitCommand implements BaseCommand {
                 explanation: `Reset to the default limit of \`${DEFAULT_LIMIT}\``,
             },
         ],
+        priority: 140,
     };
 }

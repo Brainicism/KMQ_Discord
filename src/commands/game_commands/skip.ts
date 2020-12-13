@@ -87,6 +87,7 @@ export default class SkipCommand implements BaseCommand {
         description: "Vote to skip the current song. A song is skipped when majority of participants vote to skip it.",
         usage: "!skip",
         examples: [],
+        priority: 1010,
     };
     aliases = ["s"];
 }
