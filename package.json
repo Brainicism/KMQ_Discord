@@ -38,7 +38,7 @@
     "sodium-native": "^3.2.0",
     "unzipper": "^0.10.11",
     "uuid": "^8.3.1",
-    "ytdl-core": "^4.0.3",
+    "ytdl-core": "^4.1.5",
     "zlib-sync": "^0.1.7"
   },
   "devDependencies": {
