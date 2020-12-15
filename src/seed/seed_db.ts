@@ -68,7 +68,7 @@ async function seedDb(db: mysql.Connection) {
 
 async function hasRecentDump(): Promise<boolean> {
     const dumpPath = `${databaseDownloadDir}/sql`;
-    let files : string[];
+    let files: string[];
     try {
         files = await fs.promises.readdir(dumpPath);
     } catch (err) {
@@ -84,7 +84,7 @@ async function hasRecentDump(): Promise<boolean> {
     return daysDiff < 6;
 }
 
-async function seedKpopDataDatabase() {
+async function updateKpopDatabase() {
     const db = await mysql.createConnection({
         host: process.env.DB_HOST,
         user: process.env.DB_USER,
@@ -102,13 +102,17 @@ async function seedKpopDataDatabase() {
     await db.end();
 }
 
+async function seedAndDownloadNewSongs() {
+    await fs.promises.mkdir(`${databaseDownloadDir}/sql`, { recursive: true });
+    await updateKpopDatabase();
+    await removeRedunantAliases();
+    await downloadAndConvertSongs();
+    logger.info("Finishing seeding and downloading new songs");
+}
 (async () => {
     if (require.main === module) {
         try {
-            await fs.promises.mkdir(`${databaseDownloadDir}/sql`, { recursive: true });
-            await seedKpopDataDatabase();
-            await removeRedunantAliases();
-            await downloadAndConvertSongs();
+            await seedAndDownloadNewSongs();
             await dbContext.destroy();
         } catch (e) {
             logger.error(`Error: ${e}`);
@@ -117,4 +121,4 @@ async function seedKpopDataDatabase() {
 })();
 
 // eslint-disable-next-line import/prefer-default-export
-export { seedKpopDataDatabase };
+export { seedAndDownloadNewSongs, updateKpopDatabase };

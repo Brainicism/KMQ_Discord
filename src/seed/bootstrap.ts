@@ -2,7 +2,7 @@ import mysql from "promise-mysql";
 import path from "path";
 import { config } from "dotenv";
 import { execSync } from "child_process";
-import { seedKpopDataDatabase } from "./seed_db";
+import { updateKpopDatabase } from "./seed_db";
 import _logger from "../logger";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 
@@ -62,7 +62,7 @@ async function bootstrapDatabases() {
 
         if (!(await kpopDataDatabaseExists(db))) {
             logger.info("Seeding K-pop data database");
-            await seedKpopDataDatabase();
+            await updateKpopDatabase();
         }
 
         if (!(await kmqDatabaseExists(db))) {
@@ -86,7 +86,7 @@ async function bootstrapDatabases() {
 
 (async () => {
     if (require.main === module) {
-        bootstrapDatabases();
+        await bootstrapDatabases();
     }
 })();
 
