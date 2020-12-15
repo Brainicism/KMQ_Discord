@@ -206,20 +206,19 @@ async function downloadAndConvertSongs(limit?: number) {
     generateAvailableSongsView();
 }
 
-process.on("SIGINT", () => {
-    logger.info("SIGINT received");
-    if (exit) {
-        process.exit(0);
-    }
-    exit = true;
-});
-
 export {
     downloadAndConvertSongs,
 };
 
 (async () => {
     if (require.main === module) {
+        process.on("SIGINT", () => {
+            logger.info("SIGINT received");
+            if (exit) {
+                process.exit(0);
+            }
+            exit = true;
+        });
         const args = process.argv.slice(2);
         const limit = args.length > 0 ? parseInt(args[0], 10) : null;
         downloadAndConvertSongs(limit);

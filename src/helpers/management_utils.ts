@@ -29,7 +29,7 @@ import guildCreateHandler from "../events/client/guildCreate";
 import BotStatsPoster from "./bot_stats_poster";
 import { EnvType } from "../types";
 import storeDailyStats from "../scripts/store-daily-stats";
-import { seedKpopDataDatabase } from "../seed/seed_db";
+import { seedAndDownloadNewSongs } from "../seed/seed_db";
 import { parseJsonFile } from "./utils";
 
 const glob = promisify(_glob);
@@ -157,7 +157,7 @@ export function registerIntervals() {
     // every monday at 7am UTC => 2am EST
     schedule.scheduleJob("0 7 * * 1", async () => {
         logger.info("Performing regularly scheduled AoiMirai database seed");
-        await seedKpopDataDatabase();
+        await seedAndDownloadNewSongs();
         logger.info("Updating group lists");
         await updateGroupList();
     });
