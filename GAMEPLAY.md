@@ -8,6 +8,10 @@ You can see the current scoreboard by typing `,score`. It is also shown after th
 
 See the latest updates to KMQ with `,news`. 
 
+# Game Modes
+
+See who can survive the longest into a KMQ game with elimination mode. Using `,play elimination x`, everyone starts with `x` lives and the last one alive wins. The first one to guess right keeps a life. Use elimination mode in conjunction with `,timer` to raise the pressure!
+
 # Game Options
 KMQ offers different game options to narrow down the selection of random songs based on your preferences. The current game options can be viewed by using `,options` or simply tagging KMQ Bot.
 

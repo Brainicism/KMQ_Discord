@@ -16,6 +16,7 @@ import { QueriedSong } from "../types";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
 import Scoreboard from "./scoreboard";
+import EliminationScoreboard from "./elimination_scoreboard";
 import { deleteGameSession } from "../helpers/management_utils";
 
 const logger = _logger("game_session");
@@ -35,6 +36,7 @@ export default class GameSession {
     public roundsPlayed: number;
     public participants: Set<string>;
     public owner: Eris.User;
+    public eliminationMode: boolean;
 
     private guessTimes: Array<number>;
     private songAliasList: { [songId: string]: Array<string> };
@@ -42,8 +44,9 @@ export default class GameSession {
     private guessTimeoutFunc: NodeJS.Timer;
     private lastPlayedSongsQueue: Array<string>;
 
-    constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel, gameSessionCreator: Eris.User) {
-        this.scoreboard = new Scoreboard();
+    constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel, gameSessionCreator: Eris.User, isEliminationMode: boolean, eliminationLives: number) {
+        this.eliminationMode = isEliminationMode;
+        this.scoreboard = this.eliminationMode ? new EliminationScoreboard(eliminationLives) : new Scoreboard();
         this.lastActive = Date.now();
         this.sessionInitialized = false;
         this.startedAt = Date.now();
@@ -127,7 +130,9 @@ export default class GameSession {
 
     checkGuess(message: Eris.Message, modeType: string): number {
         if (!this.gameRound) return 0;
-        this.participants.add(message.author.id);
+        if (!this.eliminationMode) {
+            this.participants.add(message.author.id);
+        }
         return this.gameRound.checkGuess(message, modeType);
     }
 
@@ -158,6 +163,12 @@ export default class GameSession {
             logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${this.gameRound.song}`);
             const gameSession = state.gameSessions[message.guildID];
             gameSession.lastActiveNow();
+            if (this.eliminationMode) {
+                const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
+                if (!this.participants.has(message.author.id) || eliminationScoreboard.isPlayerEliminated(message.author.id)) {
+                    return;
+                }
+            }
             const userTag = getUserIdentifier(message.author);
             this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL, pointsEarned);
             this.stopGuessTimeout();
@@ -166,6 +177,14 @@ export default class GameSession {
             await dbContext.kmq("guild_preferences")
                 .where("guild_id", message.guildID)
                 .increment("songs_guessed", 1);
+            if (this.eliminationMode) {
+                const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
+                if (eliminationScoreboard.onePlayerLeft()) {
+                    logger.info(`${getDebugContext(message)} | Game session ended (one player alive in eliminationMode)`);
+                    await sendEndGameMessage({ channel: message.channel, authorId: message.author.id }, this);
+                    await this.endSession();
+                }
+            }
             if (!guildPreference.isGoalSet() || this.scoreboard.getWinners()[0].getScore() < guildPreference.getGoal()) {
                 this.startRound(guildPreference, message);
             } else {
@@ -291,8 +310,20 @@ export default class GameSession {
         this.guessTimeoutFunc = setTimeout(async () => {
             if (this.finished) return;
             logger.info(`${getDebugContext(message)} | Song finished without being guessed, timer of: ${time} seconds.`);
+            if (this.eliminationMode) {
+                const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
+                eliminationScoreboard.decrementAllLives();
+            }
             sendSongMessage(message, this.scoreboard, this.gameRound, true);
             this.endRound(false);
+            if (this.eliminationMode) {
+                const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
+                if (eliminationScoreboard.allPlayersEliminated() || eliminationScoreboard.onePlayerLeft()) {
+                    await sendEndGameMessage({ channel: message.channel, authorId: message.author.id }, this);
+                    this.endSession();
+                    return;
+                }
+            }
             this.startRound(guildPreference, message);
         }, time * 1000);
     }
@@ -337,5 +368,12 @@ export default class GameSession {
 
     resetLastPlayedSongsQueue() {
         this.lastPlayedSongsQueue = [];
+    }
+
+    setParticipants(participants: { [userID: number]: {tag: string, avatar: string} }) {
+        this.participants = new Set(Object.keys(participants));
+        if (this.eliminationMode) {
+            this.scoreboard.setPlayers(participants);
+        }
     }
 }
