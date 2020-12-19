@@ -5,16 +5,21 @@ import {
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { bold } from "../../helpers/utils";
+import { deleteGameSession } from "../../helpers/management_utils";
 import BaseCommand, { CommandArgs } from "../base_command";
+import EliminationScoreboard from "../../models/elimination_scoreboard";
 import _logger from "../../logger";
 
 const logger = _logger("play");
 
 export enum GameType {
+    CLASSIC = "classic",
     ELIMINATION = "elimination",
 }
 
 const DEFAULT_LIVES = 3;
+const JOIN_REACTION = "✋";
+const START_REACTION = "🎵";
 
 export default class PlayCommand implements BaseCommand {
     async call({ message, gameSessions, parsedMessage }: CommandArgs) {
@@ -29,55 +34,62 @@ export default class PlayCommand implements BaseCommand {
             if (!voicePermissionsCheck(message)) {
                 return;
             }
+            const eliminationMode = parsedMessage.components.length >= 1 && parsedMessage.components[0].toLowerCase() === "elimination";
+            if (gameSessions[message.guildID] && gameSessions[message.guildID].eliminationMode) {
+                const eliminationScoreboard = gameSessions[message.guildID].scoreboard as EliminationScoreboard;
+                if (eliminationScoreboard.numberOfPlayers() === 0) {
+                    // Game didn't really start (user trying to call ,play again), re-initialize GameSession
+                    if (eliminationMode) {
+                        gameSessions[message.guildID].deleteStartMessage();
+                    }
+                    deleteGameSession(message.guildID);
+                }
+            }
             if (!gameSessions[message.guildID]) {
                 const textChannel = message.channel;
-                const eliminationMode = parsedMessage.components.length >= 1 && parsedMessage.components[0].toLowerCase() === "elimination";
                 const gameOwner = message.author;
                 const lives = parsedMessage.components.length > 1 ? parseInt(parsedMessage.components[1], 10) : DEFAULT_LIVES;
-                const gameSession = new GameSession(textChannel, voiceChannel, gameOwner, eliminationMode, lives);
-                gameSessions[message.guildID] = gameSession;
-
-                const lifeOrLives = lives === 1 ? "life" : "lives";
-                const joinReaction = "✋";
-                const startReaction = "🎵";
-                const gameInstructions = eliminationMode ? `Click on ${joinReaction} to join the game. ${bold(getUserIdentifier(gameOwner))} needs to press ${startReaction} to start it! Everyone begins with ${lives} ${lifeOrLives}.` : "Listen to the song and type your guess!";
+                const gameInstructions = eliminationMode ? `Click on ${JOIN_REACTION} to join the game. ${bold(getUserIdentifier(gameOwner))} needs to press ${START_REACTION} to start it! Everyone begins with ${lives} lives.` : "Listen to the song and type your guess!";
                 const startTitle = `Game starting in #${textChannel.name} in 🔊 ${voiceChannel.name}`;
-                const startMessage = await sendInfoMessage(message, "Use the reactions to setup the game", gameInstructions);
+                const reactionsTitle = "Use the reactions to setup the game";
+                const startMessage = await sendInfoMessage(message, eliminationMode ? reactionsTitle : startTitle, gameInstructions);
+                if (!gameSessions[message.guildID]) {
+                    gameSessions[message.guildID] = new GameSession(textChannel, voiceChannel, gameOwner, eliminationMode, lives, startMessage);
+                }
+
                 if (eliminationMode) {
-                    startMessage.addReaction(joinReaction);
-                    startMessage.addReaction(startReaction);
-                    state.client.on("messageReactionAdd", (msg, emoji, reactor) => {
-                        if (msg.id !== startMessage.id || emoji.name !== startReaction || reactor !== gameOwner.id) {
+                    startMessage.addReaction(JOIN_REACTION);
+                    startMessage.addReaction(START_REACTION);
+                    state.client.on("messageReactionAdd", async function startOnReaction(msg, emoji, reactor) {
+                        if (msg.id !== startMessage.id || emoji.name !== START_REACTION || reactor !== gameOwner.id) {
                             return;
                         }
-                        const participants: { [userID: string]: {tag: string, avatar: string} } = {};
 
-                        // When startReaction pressed, get users who reacted to joinReaction and set as participants
-                        Promise.resolve(state.client.getMessageReaction(textChannel.id, msg.id, joinReaction))
-                            .then((reactors) => {
-                                reactors.forEach((player) => {
-                                    if (player.id === state.client.user.id) {
-                                        return;
-                                    }
-                                    participants[player.id] = { tag: getUserIdentifier(player), avatar: player.avatarURL };
-                                });
-                                if (Object.keys(participants).length === 0) return;
-                                startMessage.edit(
-                                    {
-                                        embed: {
-                                            title: startTitle,
-                                            description: gameInstructions,
-                                        },
-                                    },
-                                );
-                                gameSession.setParticipants(participants);
-                                gameSession.startRound(guildPreference, message);
-                                logger.info(`${getDebugContext(message)} | Game session starting (eliminationMode)`);
-                            });
+                        // When START_REACTION pressed, get users who reacted to JOIN_REACTION and set as participants
+                        const reactors = await state.client.getMessageReaction(textChannel.id, msg.id, JOIN_REACTION);
+                        const participants = reactors
+                            .filter((x) => x.id !== state.client.user.id)
+                            .reduce((acc, player) => {
+                                acc[player.id] = { tag: getUserIdentifier(player), avatar: player.avatarURL };
+                                return acc;
+                            }, {});
+                        if (Object.keys(participants).length === 0) return;
+                        state.client.removeListener("messageReactionAdd", startOnReaction);
+                        startMessage.edit(
+                            {
+                                embed: {
+                                    title: startTitle,
+                                    description: gameInstructions,
+                                },
+                            },
+                        );
+                        gameSessions[message.guildID].setParticipants(participants);
+                        gameSessions[message.guildID].startRound(guildPreference, message);
+                        logger.info(`${getDebugContext(message)} | Game session starting (eliminationMode)`);
                     });
                 } else {
                     logger.info(`${getDebugContext(message)} | Game session starting`);
-                    gameSession.startRound(guildPreference, message);
+                    gameSessions[message.guildID].startRound(guildPreference, message);
                 }
             } else {
                 await sendErrorMessage(message, "Game already in session", null);
@@ -118,7 +130,7 @@ export default class PlayCommand implements BaseCommand {
             },
             {
                 example: "`!play elimination`",
-                explanation: `Start an elimination game of KMQ where each player starts with ${DEFAULT_LIVES} lives.`,
+                explanation: `Start an elimination game of KMQ where each player starts with \`${DEFAULT_LIVES}\` lives.`,
             },
         ],
     };

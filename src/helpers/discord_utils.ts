@@ -11,6 +11,7 @@ import state from "../kmq";
 import { ModeType } from "../commands/game_options/mode";
 import Scoreboard from "../models/scoreboard";
 import GameRound from "../models/game_round";
+import EliminationScoreboard from "../models/elimination_scoreboard";
 
 const logger = _logger("utils");
 export const EMBED_INFO_COLOR = 0x000000; // BLACK
@@ -209,6 +210,11 @@ export async function sendScoreboardMessage(message: Eris.Message<Eris.GuildText
         });
     }
     const winnersFieldSubsets = chunkArray(gameSession.scoreboard.getScoreboardEmbedFields(), EMBED_FIELDS_PER_PAGE);
+    let footerText = `Your score is ${gameSession.scoreboard.getPlayerScore(message.author.id)}.`;
+    if (gameSession.eliminationMode) {
+        const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
+        footerText = `You have ${eliminationScoreboard.getPlayerLives(message.author.id)} lives.`;
+    }
     const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map((winnersFieldSubset) => ({
         color: EMBED_SUCCESS_COLOR,
         author: {
@@ -218,7 +224,7 @@ export async function sendScoreboardMessage(message: Eris.Message<Eris.GuildText
         title: "**Scoreboard**",
         fields: winnersFieldSubset,
         footer: {
-            text: gameSession.eliminationMode ? "" : `Your score is ${gameSession.scoreboard.getPlayerScore(message.author.id)}.`,
+            text: footerText,
         },
     }));
 

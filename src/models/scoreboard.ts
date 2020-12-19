@@ -93,8 +93,7 @@ export default class Scoreboard {
         }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    setPlayers(players: { [userID: number]: {tag: string, avatar: string} }) {
-        // Unused construction needed for derived class call (for game_session setPlayers)
+    gameFinished(goal: number): boolean {
+        return this.firstPlace[0].getScore() >= goal;
     }
 }

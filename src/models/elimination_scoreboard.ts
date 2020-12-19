@@ -18,24 +18,20 @@ export default class EliminationScoreboard extends Scoreboard {
         return Object.values(this.players)
             .sort((a, b) => b.getLives() - a.getLives())
             .map((x) => {
-                const heartEmoji = "❤️";
-                const lives = x.getLives() <= 5 ? heartEmoji.repeat(x.getLives()) : `${heartEmoji} x ${x.getLives()}`;
-                const value = !x.isEliminated() ? lives : "Eliminated";
+                const lives = !x.isEliminated() ? `Lives: ${x.getLives()}` : "Eliminated";
                 return {
                     name: x.getName(),
-                    value,
+                    value: lives,
                     inline: true,
                 };
             });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    awardPoint(winnerTag: string, winnerID: string, avatarURL: string, pointsEarned: number) {
+    awardPoint(_winnerTag: string, winnerID: string, _avatarURL: string, pointsEarned: number) {
         this.players[winnerID].incrementScore(pointsEarned);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    updateScoreboard(winnerTag: string, winnerID: string, avatarURL: string, pointsEarned: number) {
+    updateScoreboard(_winnerTag: string, winnerID: string, _avatarURL: string, _pointsEarned: number) {
         let maxLives = -1;
         Object.values(this.players).forEach((player) => {
             if (player.getId() !== winnerID) {
@@ -68,17 +64,26 @@ export default class EliminationScoreboard extends Scoreboard {
         });
     }
 
-    allPlayersEliminated() {
-        return Object.values(this.players).every((player) => player.isEliminated());
-    }
-
-    onePlayerLeft(): boolean {
-        // We only care for last alive when there are multiple players
-        return Object.values(this.players).length > 1
+    gameFinished(): boolean {
+        const allEliminated = Object.values(this.players).every((player) => player.isEliminated());
+        const oneLeft = Object.values(this.players).length > 1
             && Object.values(this.players).filter((player) => !player.isEliminated()).length === 1;
+        return allEliminated || oneLeft;
     }
 
     isEmpty(): boolean {
-        return this.allPlayersEliminated() || this.firstPlace.length === 0;
+        return this.firstPlace.length === 0;
+    }
+
+    getPlayerLives(userId: string): number {
+        return this.players[userId].getLives();
+    }
+
+    numberOfPlayers(): number {
+        return Object.keys(this.players).length;
+    }
+
+    getStartingLives(): number {
+        return this.startingLives;
     }
 }

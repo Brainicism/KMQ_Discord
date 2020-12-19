@@ -43,8 +43,9 @@ export default class GameSession {
     private artistAliasList: { [artistName: string]: Array<string> };
     private guessTimeoutFunc: NodeJS.Timer;
     private lastPlayedSongsQueue: Array<string>;
+    private startMessage: Eris.Message;
 
-    constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel, gameSessionCreator: Eris.User, isEliminationMode: boolean, eliminationLives: number) {
+    constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel, gameSessionCreator: Eris.User, isEliminationMode: boolean, eliminationLives: number, startMessage: Eris.Message) {
         this.eliminationMode = isEliminationMode;
         this.scoreboard = this.eliminationMode ? new EliminationScoreboard(eliminationLives) : new Scoreboard();
         this.lastActive = Date.now();
@@ -60,6 +61,7 @@ export default class GameSession {
         this.gameRound = null;
         this.owner = gameSessionCreator;
         this.lastPlayedSongsQueue = [];
+        this.startMessage = startMessage;
     }
 
     createRound(song: string, artist: string, videoID: string) {
@@ -179,18 +181,18 @@ export default class GameSession {
                 .increment("songs_guessed", 1);
             if (this.eliminationMode) {
                 const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
-                if (eliminationScoreboard.onePlayerLeft()) {
+                if (eliminationScoreboard.gameFinished()) {
                     logger.info(`${getDebugContext(message)} | Game session ended (one player alive in eliminationMode)`);
                     await sendEndGameMessage({ channel: message.channel, authorId: message.author.id }, this);
                     await this.endSession();
                 }
             }
-            if (!guildPreference.isGoalSet() || this.scoreboard.getWinners()[0].getScore() < guildPreference.getGoal()) {
-                this.startRound(guildPreference, message);
-            } else {
+            if (guildPreference.isGoalSet() && this.scoreboard.gameFinished(guildPreference.getGoal())) {
                 logger.info(`${getDebugContext(message)} | Game session ended (goal of ${guildPreference.getGoal()} reached)`);
                 await sendEndGameMessage({ channel: message.channel, authorId: message.author.id }, this);
                 await this.endSession();
+            } else {
+                this.startRound(guildPreference, message);
             }
         }
     }
@@ -313,17 +315,16 @@ export default class GameSession {
             if (this.eliminationMode) {
                 const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
                 eliminationScoreboard.decrementAllLives();
-            }
-            sendSongMessage(message, this.scoreboard, this.gameRound, true);
-            this.endRound(false);
-            if (this.eliminationMode) {
-                const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
-                if (eliminationScoreboard.allPlayersEliminated() || eliminationScoreboard.onePlayerLeft()) {
+                if (eliminationScoreboard.gameFinished()) {
+                    sendSongMessage(message, this.scoreboard, this.gameRound, true);
                     await sendEndGameMessage({ channel: message.channel, authorId: message.author.id }, this);
+                    this.endRound(false);
                     this.endSession();
                     return;
                 }
             }
+            sendSongMessage(message, this.scoreboard, this.gameRound, true);
+            this.endRound(false);
             this.startRound(guildPreference, message);
         }, time * 1000);
     }
@@ -373,7 +374,13 @@ export default class GameSession {
     setParticipants(participants: { [userID: number]: {tag: string, avatar: string} }) {
         this.participants = new Set(Object.keys(participants));
         if (this.eliminationMode) {
-            this.scoreboard.setPlayers(participants);
+            const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
+            eliminationScoreboard.setPlayers(participants);
+            this.scoreboard = eliminationScoreboard;
         }
+    }
+
+    deleteStartMessage() {
+        this.startMessage.delete();
     }
 }
