@@ -26,13 +26,13 @@ export async function clearPartiallyCachedSongs(): Promise<void> {
 
     const endingWithPartRegex = new RegExp("\\.part$");
     const partFiles = files.filter((file) => file.match(endingWithPartRegex));
-    partFiles.forEach(async (partFile) => {
+    for (const partFile of partFiles) {
         try {
             await fs.promises.unlink(`${process.env.SONG_DOWNLOAD_DIR}/${partFile}`);
         } catch (err) {
             logger.error(err);
         }
-    });
+    }
     if (partFiles.length) {
         logger.info(`${partFiles.length} stale cached songs deleted.`);
     }
