@@ -184,9 +184,9 @@ export async function registerCommands() {
         if (commandName === "base_command") continue;
         state.commands[commandName] = command;
         if (command.aliases) {
-            command.aliases.forEach((alias) => {
+            for (const alias of command.aliases) {
                 state.commands[alias] = command;
-            });
+            }
         }
     }
 }

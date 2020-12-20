@@ -19,7 +19,7 @@ let commandFiles: { [commandName: string]: BaseCommand };
 const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, action: string) => {
     let embedTitle = "";
     let embedDesc = "";
-    const embedFields = [];
+    let embedFields = [];
 
     if (!commandFiles) {
         commandFiles = await getCommandFiles();
@@ -52,12 +52,12 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
         if (helpManual.examples.length > 0) {
             embedDesc += "\n\n**Examples**\n";
         }
-        helpManual.examples.forEach((example) => {
-            embedFields.push({
-                name: example.example.replace(placeholder, process.env.BOT_PREFIX),
-                value: example.explanation,
-            });
-        });
+
+        embedFields = helpManual.examples.map((example) => ({
+            name: example.example.replace(placeholder, process.env.BOT_PREFIX),
+            value: example.explanation,
+        }));
+
         if (commandFilesWithAliases[action].aliases) {
             embedFooter = {
                 text: `Aliases: ${commandFilesWithAliases[action].aliases.join(", ")}`,
@@ -69,12 +69,12 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
         commandsWithHelp.sort((x, y) => y.help.priority - x.help.priority);
         embedTitle = "K-pop Music Quiz Command Help";
         embedDesc = helpMessages.rules.replace(placeholder, process.env.BOT_PREFIX);
-        commandsWithHelp.forEach((command) => {
+        embedFields = commandsWithHelp.map((command) => {
             const helpManual = command.help;
-            embedFields.push({
+            return {
                 name: helpManual.name,
                 value: `${helpManual.description}\nUsage: \`${helpManual.usage.replace(placeholder, process.env.BOT_PREFIX)}\``,
-            });
+            };
         });
     }
 

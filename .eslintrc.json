@@ -1,22 +1,63 @@
 {
-    "extends": ["airbnb-typescript/base"],
+    "extends": [
+        "airbnb-typescript/base"
+    ],
     "parserOptions": {
         "project": "./tsconfig.json"
     },
     "rules": {
-        "@typescript-eslint/indent": ["error", 4],
-        "@typescript-eslint/quotes": ["error", "double"],
-        "import/no-cycle": ["off"],
-        "lines-between-class-members": ["off"],
-        "max-len": ["warn", {"ignoreStrings": true, "ignoreTemplateLiterals": true, "code": 200}],
-        "no-restricted-syntax": ["off"],
-        "no-await-in-loop": ["off"],
-        "no-continue": ["off"],
-        "no-plusplus": ["off"],
-        "no-async-promise-executor": ["off"],
-        "@typescript-eslint/lines-between-class-members": ["off"],
-        "no-param-reassign": ["off"],
-        "class-methods-use-this": ["off"],
-        "object-curly-newline": ["off"]
+        "@typescript-eslint/indent": [
+            "error",
+            4
+        ],
+        "@typescript-eslint/quotes": [
+            "error",
+            "double"
+        ],
+        "import/no-cycle": [
+            "off"
+        ],
+        "lines-between-class-members": [
+            "off"
+        ],
+        "max-len": [
+            "warn",
+            {
+                "ignoreStrings": true,
+                "ignoreTemplateLiterals": true,
+                "code": 200
+            }
+        ],
+        "no-restricted-syntax": [
+            "error",
+            {
+                "selector": "CallExpression[callee.property.name='forEach']",
+                "message": "Do not use `forEach()`, use `for/of` instead"
+            }
+        ],
+        "no-await-in-loop": [
+            "off"
+        ],
+        "no-continue": [
+            "off"
+        ],
+        "no-plusplus": [
+            "off"
+        ],
+        "no-async-promise-executor": [
+            "off"
+        ],
+        "@typescript-eslint/lines-between-class-members": [
+            "off"
+        ],
+        "no-param-reassign": [
+            "off"
+        ],
+        "class-methods-use-this": [
+            "off"
+        ],
+        "object-curly-newline": [
+            "off"
+        ]
     }
 }

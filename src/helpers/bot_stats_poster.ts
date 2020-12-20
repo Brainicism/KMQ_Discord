@@ -33,9 +33,9 @@ export default class BotStatsPoster {
     }
 
     private async postStats() {
-        Object.keys(BOT_LISTING_SITES).filter((siteConfigKeyName) => siteConfigKeyName in process.env).forEach((siteConfigKeyName) => {
+        for (const siteConfigKeyName of Object.keys(BOT_LISTING_SITES).filter((x) => x in process.env)) {
             this.postStat(siteConfigKeyName);
-        });
+        }
     }
 
     // eslint-disable-next-line class-methods-use-this
