@@ -4,7 +4,7 @@ import { resolve } from "path";
 import _logger from "./logger";
 import { EnvType, State } from "./types";
 import {
-    registerClientEvents, registerProcessEvents, registerCommands, updateGroupList, registerIntervals, initializeBotStatsPoster, reloadAliases,
+    registerClientEvents, registerProcessEvents, registerCommands, registerIntervals, initializeBotStatsPoster, reloadAliases,
 } from "./helpers/management_utils";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -59,8 +59,6 @@ export default state;
     }
 
     if (process.env.NODE_ENV === EnvType.PROD) {
-        logger.info("Updating group list...");
-        await updateGroupList();
         logger.info("Initializing bot stats poster...");
         initializeBotStatsPoster();
     }
