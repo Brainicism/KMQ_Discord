@@ -261,18 +261,22 @@ export async function sendEmbed(messagePayload: SendMessagePayload, embed: Eris.
     return sendMessage(messagePayload, { embed });
 }
 
+function missingPermissionsText(missingPermissions: string[]): string {
+    return `Ensure that the bot has the following permissions: \`${missingPermissions.join(", ")}\`\n\nSee the following link for details: https://support.discord.com/hc/en-us/articles/206029707-How-do-I-set-up-Permissions-. If you are still having issues, join the support server found in \`${process.env.BOT_PREFIX}help\``;
+}
+
 export function voicePermissionsCheck(message: Eris.Message<Eris.GuildTextableChannel>): boolean {
     const voiceChannel = getVoiceChannel(message);
     const missingPermissions = REQUIRED_VOICE_PERMISSIONS.filter((permission) => !voiceChannel.permissionsOf(state.client.user.id).has(permission));
     if (missingPermissions.length > 0) {
         logger.warn(`gid: ${voiceChannel.guild.id}, uid: ${message.author.id} | Missing [${missingPermissions.join(", ")}] permissions`);
-        sendErrorMessage(message, "Missing Permissions", `Ensure that the bot has the following permissions: \`${missingPermissions.join(", ")}\``);
+        sendErrorMessage(message, "Missing Permissions", missingPermissionsText(missingPermissions));
         return false;
     }
     const channelFull = voiceChannel.userLimit && (voiceChannel.voiceMembers.size >= voiceChannel.userLimit);
     if (channelFull) {
         logger.warn(`gid: ${voiceChannel.guild.id}, uid: ${message.author.id} | Channel full`);
-        sendInfoMessage(message, "Voice Channel Full", "Ensure that there's enough space in the voice channel for me to join");
+        sendInfoMessage(message, "Voice Channel Full", "Ensure that there's enough room in the voice channel for me to join");
         return false;
     }
     const afkChannel = voiceChannel.id === voiceChannel.guild.afkChannelID;
@@ -293,7 +297,7 @@ export async function textPermissionsCheck(message: Eris.Message<Eris.GuildTexta
         const embed = {
             color: EMBED_INFO_COLOR,
             title: "Missing Permissions",
-            description: `Hi! I'm unable to message in ${channel.guild.name}'s #${channel.name} channel. Please double check the text channel's permissions.`,
+            description: `Hi! I'm unable to message in ${channel.guild.name}'s #${channel.name} channel. Please make sure the bot has permissions to message in this channel.`,
         };
         const dmChannel = await client.getDMChannel(message.author.id);
         await client.createMessage(dmChannel.id, { embed });
@@ -304,7 +308,7 @@ export async function textPermissionsCheck(message: Eris.Message<Eris.GuildTexta
     if (missingPermissions.length > 0) {
         logger.warn(`gid: ${channel.guild.id}, uid: ${message.author.id} | Missing [${missingPermissions.join(", ")}] permissions`);
         client.createMessage(channel.id, {
-            content: `Missing Permissions:\nEnsure that the bot has the following permissions: \`${missingPermissions.join(", ")}\``,
+            content: missingPermissionsText(missingPermissions),
         });
         return false;
     }
