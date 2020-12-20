@@ -1,6 +1,5 @@
 import cronParser from "cron-parser";
 import path from "path";
-import fs from "fs";
 import _glob from "glob";
 import { promisify } from "util";
 import schedule from "node-schedule";
@@ -113,14 +112,6 @@ export function reloadAliases() {
     }
 }
 
-export async function updateGroupList() {
-    // populate group list
-    const result = await dbContext.kpopVideos("kpop_videos.app_kpop_group")
-        .select(["name", "members as gender"])
-        .orderBy("name", "ASC");
-    fs.writeFileSync(path.resolve(__dirname, "../../data/group_list.txt"), result.map((x) => x.name).join("\n"));
-}
-
 export function registerIntervals() {
     // set up cleanup for inactive game sessions
     schedule.scheduleJob("*/10 * * * *", () => {
@@ -158,8 +149,6 @@ export function registerIntervals() {
     schedule.scheduleJob("0 7 * * 1", async () => {
         logger.info("Performing regularly scheduled AoiMirai database seed");
         await seedAndDownloadNewSongs();
-        logger.info("Updating group lists");
-        await updateGroupList();
     });
 
     schedule.scheduleJob("*/5 * * * *", async () => {
