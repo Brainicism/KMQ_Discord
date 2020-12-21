@@ -33,7 +33,7 @@ export default class EliminationScoreboard extends Scoreboard {
 
     updateScoreboard(_winnerTag: string, winnerID: string, _avatarURL: string, _pointsEarned: number) {
         let maxLives = -1;
-        Object.values(this.players).forEach((player) => {
+        for (const player of Object.values(this.players)) {
             if (player.getId() !== winnerID) {
                 player.decrementLives();
             }
@@ -43,7 +43,7 @@ export default class EliminationScoreboard extends Scoreboard {
                 this.firstPlace = [player];
                 maxLives = player.getLives();
             }
-        });
+        }
     }
 
     isPlayerEliminated(userID: string): boolean {
@@ -51,17 +51,17 @@ export default class EliminationScoreboard extends Scoreboard {
     }
 
     setPlayers(players: { [userID: number]: {tag: string, avatar: string} }) {
-        Object.entries(players).forEach((player) => {
+        for (const player of Object.entries(players)) {
             const userID = player[0];
             const { tag, avatar } = player[1];
             this.players[userID] = new EliminationPlayer(tag, userID, avatar, 0, this.startingLives);
-        });
+        }
     }
 
     decrementAllLives() {
-        Object.values(this.players).forEach((player) => {
+        for (const player of Object.values(this.players)) {
             player.decrementLives();
-        });
+        }
     }
 
     gameFinished(): boolean {
