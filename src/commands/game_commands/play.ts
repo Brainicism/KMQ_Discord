@@ -1,7 +1,7 @@
 import GameSession from "../../models/game_session";
 import state from "../../kmq";
 import {
-    sendErrorMessage, getDebugContext, sendInfoMessage, getVoiceChannel, voicePermissionsCheck, getUserIdentifier,
+    sendErrorMessage, getDebugContext, sendInfoMessage, getVoiceChannel, voicePermissionsCheck, getUserIdentifier, EMBED_INFO_COLOR,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { bold } from "../../helpers/utils";
@@ -78,14 +78,21 @@ export default class PlayCommand implements BaseCommand {
                         startMessage.edit(
                             {
                                 embed: {
+                                    color: EMBED_INFO_COLOR,
+                                    author: {
+                                        name: message.author.username,
+                                        icon_url: message.author.avatarURL,
+                                    },
                                     title: startTitle,
                                     description: gameInstructions,
                                 },
                             },
                         );
-                        gameSessions[message.guildID].setParticipants(participants);
-                        gameSessions[message.guildID].startRound(guildPreference, message);
-                        logger.info(`${getDebugContext(message)} | Game session starting (eliminationMode)`);
+                        if (gameSessions[message.guildID]) {
+                            gameSessions[message.guildID].setParticipants(participants);
+                            gameSessions[message.guildID].startRound(guildPreference, message);
+                            logger.info(`${getDebugContext(message)} | Game session starting (eliminationMode)`);
+                        }
                     });
                 } else {
                     logger.info(`${getDebugContext(message)} | Game session starting`);

@@ -25,6 +25,9 @@ const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
 export default class GameSession {
     private readonly startedAt: number;
 
+    public readonly eliminationMode: boolean;
+    public readonly owner: Eris.User;
+
     public sessionInitialized: boolean;
     public scoreboard: Scoreboard;
     public connection: Eris.VoiceConnection;
@@ -35,8 +38,6 @@ export default class GameSession {
     public gameRound: GameRound;
     public roundsPlayed: number;
     public participants: Set<string>;
-    public owner: Eris.User;
-    public eliminationMode: boolean;
 
     private guessTimes: Array<number>;
     private songAliasList: { [songId: string]: Array<string> };
