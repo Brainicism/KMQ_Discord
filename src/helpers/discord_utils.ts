@@ -74,8 +74,8 @@ export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableCh
     });
 }
 
-export async function sendErrorMessage(message: Eris.Message<Eris.GuildTextableChannel>, title: string, description: string): Promise<Eris.Message> {
-    return sendMessage({ channel: message.channel, authorId: message.author.id }, {
+export async function sendErrorMessage(message: Eris.Message<Eris.GuildTextableChannel>, title: string, description: string) {
+    await sendMessage({ channel: message.channel, authorId: message.author.id }, {
         embed: {
             color: EMBED_ERROR_COLOR,
             author: {
@@ -88,9 +88,10 @@ export async function sendErrorMessage(message: Eris.Message<Eris.GuildTextableC
     });
 }
 
-export async function sendInfoMessage(message: Eris.Message<Eris.GuildTextableChannel>, title: string, description?: string, footerText?: string): Promise<Eris.Message> {
+export async function sendInfoMessage(message: Eris.Message<Eris.GuildTextableChannel>, title: string, description?: string, footerText?: string) {
     if (description.length > 2048) {
-        return sendErrorMessage(message, "Error", "Response message was too long, report this error to the KMQ help server");
+        await sendErrorMessage(message, "Error", "Response message was too long, report this error to the KMQ help server");
+        return;
     }
     let footer: Eris.EmbedFooterOptions;
     if (footerText) {
@@ -108,7 +109,7 @@ export async function sendInfoMessage(message: Eris.Message<Eris.GuildTextableCh
         description,
         footer,
     };
-    return sendMessage({ channel: message.channel, authorId: message.author.id }, { embed });
+    await sendMessage({ channel: message.channel, authorId: message.author.id }, { embed });
 }
 
 export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextableChannel>, guildPreference: GuildPreference, updatedOption: string, footerText?: string) {

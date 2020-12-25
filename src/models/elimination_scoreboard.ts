@@ -14,6 +14,10 @@ export default class EliminationScoreboard extends Scoreboard {
         this.startingLives = lives;
     }
 
+    addPlayer(userID: string, tag: string, avatar: string) {
+        this.players[userID] = new EliminationPlayer(tag, userID, avatar, 0, this.startingLives);
+    }
+
     getScoreboardEmbedFields(): Array<{ name: string, value: string, inline: boolean }> {
         return Object.values(this.players)
             .sort((a, b) => b.getLives() - a.getLives())
@@ -48,14 +52,6 @@ export default class EliminationScoreboard extends Scoreboard {
 
     isPlayerEliminated(userID: string): boolean {
         return this.players[userID].isEliminated();
-    }
-
-    setPlayers(players: { [userID: number]: {tag: string, avatar: string} }) {
-        for (const player of Object.entries(players)) {
-            const userID = player[0];
-            const { tag, avatar } = player[1];
-            this.players[userID] = new EliminationPlayer(tag, userID, avatar, 0, this.startingLives);
-        }
     }
 
     decrementAllLives() {

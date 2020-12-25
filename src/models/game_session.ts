@@ -28,6 +28,7 @@ export default class GameSession {
     public readonly eliminationMode: boolean;
     public readonly owner: Eris.User;
 
+    public roundInitialized: boolean;
     public sessionInitialized: boolean;
     public scoreboard: Scoreboard;
     public connection: Eris.VoiceConnection;
@@ -44,12 +45,12 @@ export default class GameSession {
     private artistAliasList: { [artistName: string]: Array<string> };
     private guessTimeoutFunc: NodeJS.Timer;
     private lastPlayedSongsQueue: Array<string>;
-    private startMessage: Eris.Message;
 
-    constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel, gameSessionCreator: Eris.User, isEliminationMode: boolean, eliminationLives: number, startMessage: Eris.Message) {
+    constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel, gameSessionCreator: Eris.User, isEliminationMode: boolean, eliminationLives: number) {
         this.eliminationMode = isEliminationMode;
         this.scoreboard = this.eliminationMode ? new EliminationScoreboard(eliminationLives) : new Scoreboard();
         this.lastActive = Date.now();
+        this.roundInitialized = false;
         this.sessionInitialized = false;
         this.startedAt = Date.now();
         this.participants = new Set();
@@ -62,12 +63,11 @@ export default class GameSession {
         this.gameRound = null;
         this.owner = gameSessionCreator;
         this.lastPlayedSongsQueue = [];
-        this.startMessage = startMessage;
     }
 
     createRound(song: string, artist: string, videoID: string) {
         this.gameRound = new GameRound(song, artist, videoID);
-        this.sessionInitialized = true;
+        this.roundInitialized = true;
         this.roundsPlayed++;
     }
 
@@ -81,7 +81,7 @@ export default class GameSession {
             this.connection.removeAllListeners();
         }
         this.stopGuessTimeout();
-        this.sessionInitialized = false;
+        this.roundInitialized = false;
     }
 
     endSession = async (): Promise<void> => {
@@ -212,18 +212,18 @@ export default class GameSession {
             this.lastPlayedSongsQueue.shift();
         }
 
-        this.sessionInitialized = true;
+        this.roundInitialized = true;
         let randomSong: QueriedSong;
         try {
             randomSong = await selectRandomSong(guildPreference, this.lastPlayedSongsQueue);
             if (randomSong === null) {
-                this.sessionInitialized = false;
+                this.roundInitialized = false;
                 sendErrorMessage(message, "Song Query Error", "Failed to find songs matching this criteria. Try to broaden your search.");
                 this.endSession();
                 return;
             }
         } catch (err) {
-            this.sessionInitialized = false;
+            this.roundInitialized = false;
             await sendErrorMessage(message, "Error selecting song", "Please try starting the round again. If the issue persists, report it in our support server.");
             logger.error(`${getDebugContext(message)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
             this.endSession();
@@ -239,7 +239,7 @@ export default class GameSession {
             await ensureVoiceConnection(this, state.client);
         } catch (err) {
             await this.endSession();
-            this.sessionInitialized = false;
+            this.roundInitialized = false;
             logger.error(`${getDebugContext(message)} | Error obtaining voice connection. err = ${err.toString()}`);
             await sendErrorMessage(message, "Missing voice permissions", "The bot is unable to join the voice channel you are in.");
             return;
@@ -372,16 +372,12 @@ export default class GameSession {
         this.lastPlayedSongsQueue = [];
     }
 
-    setParticipants(participants: { [userID: number]: {tag: string, avatar: string} }) {
-        this.participants = new Set(Object.keys(participants));
+    addParticipant(user: Eris.User) {
+        this.participants.add(user.id);
         if (this.eliminationMode) {
             const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
-            eliminationScoreboard.setPlayers(participants);
+            eliminationScoreboard.addPlayer(user.id, getUserIdentifier(user), user.avatarURL);
             this.scoreboard = eliminationScoreboard;
         }
-    }
-
-    deleteStartMessage() {
-        this.startMessage.delete();
     }
 }
