@@ -12,6 +12,7 @@ import { ModeType } from "../commands/game_options/mode";
 import Scoreboard from "../models/scoreboard";
 import GameRound from "../models/game_round";
 import EliminationScoreboard from "../models/elimination_scoreboard";
+import { GameType } from "../commands/game_commands/play";
 
 const logger = _logger("utils");
 export const EMBED_INFO_COLOR = 0x000000; // BLACK
@@ -197,7 +198,7 @@ export async function sendPaginationedEmbed(message: Eris.Message<Eris.GuildText
 }
 
 export async function sendScoreboardMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
-    if (gameSession.scoreboard.isEmpty()) {
+    if (gameSession.scoreboard.isEmpty() && gameSession.eliminationMode === GameType.CLASSIC) {
         return sendMessage({ channel: message.channel, authorId: message.author.id }, {
             embed: {
                 color: EMBED_SUCCESS_COLOR,
@@ -205,7 +206,7 @@ export async function sendScoreboardMessage(message: Eris.Message<Eris.GuildText
                     name: message.author.username,
                     icon_url: message.author.avatarURL,
                 },
-                description: gameSession.scoreboard.isEmpty() ? "(╯°□°）╯︵ ┻━┻" : null,
+                description: "(╯°□°）╯︵ ┻━┻",
                 title: "**Scoreboard**",
             },
         });

@@ -2,6 +2,7 @@ import GameSession from "../../models/game_session";
 import {
     sendErrorMessage, getDebugContext, sendInfoMessage, getVoiceChannel, voicePermissionsCheck, getUserIdentifier,
 } from "../../helpers/discord_utils";
+import { deleteGameSession } from "../../helpers/management_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { bold } from "../../helpers/utils";
 import BaseCommand, { CommandArgs } from "../base_command";
@@ -28,24 +29,35 @@ export default class PlayCommand implements BaseCommand {
             if (!voicePermissionsCheck(message)) {
                 return;
             }
-            const msgHasElimination = parsedMessage.components.length >= 1 && parsedMessage.components[0].toLowerCase() === "elimination";
-            if (!gameSessions[message.guildID]) {
+            const isEliminationMode = parsedMessage.components.length >= 1 && parsedMessage.components[0].toLowerCase() === "elimination";
+            if (gameSessions[message.guildID] && !gameSessions[message.guildID].sessionInitialized && isEliminationMode) {
+                deleteGameSession(message.guildID);
+            }
+            if (!gameSessions[message.guildID] || (!isEliminationMode && !gameSessions[message.guildID].sessionInitialized)) {
                 const textChannel = message.channel;
                 const gameOwner = message.author;
-                const lives = parsedMessage.components.length > 1 ? parseInt(parsedMessage.components[1], 10) : DEFAULT_LIVES;
-                const gameInstructions = msgHasElimination ? `Type \`,join\` to play in the upcoming elimination game. Once all have joined, ${bold(getUserIdentifier(gameOwner))} must send \`,play\` to start the game. Everyone begins with \`${lives}\` lives.` : "Listen to the song and type your guess!";
-                await sendInfoMessage(message, `Game starting in #${textChannel.name} in 🔊 ${voiceChannel.name}`, gameInstructions);
-                const gameSession = new GameSession(textChannel, voiceChannel, gameOwner, msgHasElimination, lives);
-                gameSessions[message.guildID] = gameSession;
+                let startTitle: string;
+                let gameInstructions: string;
+                let gameSession: GameSession;
+                if (isEliminationMode) {
+                    const lives = parsedMessage.components.length > 1 ? parseInt(parsedMessage.components[1], 10) : DEFAULT_LIVES;
+                    startTitle = "`,join` the game and start it with `,begin`!";
+                    gameInstructions = `Type \`,join\` to play in the upcoming elimination game. Once all have joined, ${bold(getUserIdentifier(gameOwner))} must send \`,begin\` to start the game. Everyone begins with \`${lives}\` lives.`;
+                    gameSession = new GameSession(textChannel, voiceChannel, gameOwner, GameType.ELIMINATION, lives);
+                    gameSession.addParticipant(gameOwner);
+                } else {
+                    gameInstructions = "Listen to the song and type your guess!";
+                    startTitle = `Game starting in #${textChannel.name} in 🔊 ${voiceChannel.name}`;
+                    gameSession = new GameSession(textChannel, voiceChannel, gameOwner, GameType.CLASSIC);
+                }
 
-                if (!msgHasElimination) {
+                gameSessions[message.guildID] = gameSession;
+                await sendInfoMessage(message, startTitle, gameInstructions);
+
+                if (!isEliminationMode) {
                     gameSessions[message.guildID].startRound(guildPreference, message);
                     logger.info(`${getDebugContext(message)} | Game session starting`);
                 }
-            } else if (gameSessions[message.guildID].eliminationMode && !msgHasElimination && !gameSessions[message.guildID].sessionInitialized) {
-                gameSessions[message.guildID].addParticipant(message.author);
-                gameSessions[message.guildID].startRound(guildPreference, message);
-                logger.info(`${getDebugContext(message)} | Game session starting (eliminationMode)`);
             } else {
                 await sendErrorMessage(message, "Game already in session", null);
             }

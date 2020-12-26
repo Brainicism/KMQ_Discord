@@ -2,7 +2,7 @@
 
 filenames[0]='./src/commands/game_commands/*.ts'
 filenames[1]='./src/commands/game_options/*.ts'
-exceptions=("debug")
+exceptions=("debug", "join", "begin")
 
 for command_path in ${filenames[@]}
 do
@@ -12,7 +12,7 @@ do
     then
         continue
     fi
-    
+
     if grep -Fq ",$command" GAMEPLAY.md; then
         echo "Documentation for '$command' found in GAMEPLAY.md"
     else
