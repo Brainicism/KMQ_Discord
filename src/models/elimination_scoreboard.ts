@@ -31,10 +31,6 @@ export default class EliminationScoreboard extends Scoreboard {
             });
     }
 
-    awardPoint(_winnerTag: string, winnerID: string, _avatarURL: string, pointsEarned: number) {
-        this.players[winnerID].incrementScore(pointsEarned);
-    }
-
     updateScoreboard(_winnerTag: string, winnerID: string, _avatarURL: string, _pointsEarned: number) {
         let maxLives = -1;
         for (const player of Object.values(this.players)) {

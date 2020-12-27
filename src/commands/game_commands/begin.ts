@@ -15,15 +15,13 @@ export default class BeginCommand implements BaseCommand {
             return;
         }
         if (gameSession.owner.id !== author.id) {
-            sendErrorMessage(message, "Begin ignored", `Only the person who did \`${process.env.BOT_PREFIX}play elimination\` (${bold(getUserIdentifier(gameSession.owner))}) can start it.`);
+            sendErrorMessage(message, "Begin ignored", `Only the person who did \`${process.env.BOT_PREFIX}play elimination\` (${bold(getUserIdentifier(gameSession.owner))}) can start the game.`);
             return;
         }
         const guildPreference = await getGuildPreference(guildID);
         if (!gameSession.sessionInitialized) {
             const gameInstructions = "Listen to the song and type your guess!";
-            const textChannel = message.channel;
-            const voiceChannel = getVoiceChannel(message);
-            await sendInfoMessage(message, `Game starting in #${textChannel.name} in 🔊 ${voiceChannel.name}`, gameInstructions);
+            await sendInfoMessage(message, `Game starting in #${message.channel.name} in 🔊 ${getVoiceChannel(message).name}`, gameInstructions);
             gameSession.startRound(guildPreference, message);
             logger.info(`${getDebugContext(message)} | Game session starting (elimination gameType)`);
         }

@@ -58,7 +58,11 @@ export default class Scoreboard {
     }
 
     updateScoreboard(winnerTag: string, winnerID: string, avatarURL: string, pointsEarned: number) {
-        this.awardPoint(winnerTag, winnerID, avatarURL, pointsEarned);
+        if (!this.players[winnerID]) {
+            this.players[winnerID] = new Player(winnerTag, winnerID, avatarURL, pointsEarned);
+        } else {
+            this.players[winnerID].incrementScore(pointsEarned);
+        }
 
         if (this.players[winnerID].getScore() === this.highestScore) {
             // If user is tied for first, add them to the first place array
@@ -83,14 +87,6 @@ export default class Scoreboard {
             return this.players[userId].getScore();
         }
         return 0;
-    }
-
-    awardPoint(winnerTag: string, winnerID: string, avatarURL: string, pointsEarned: number) {
-        if (!this.players[winnerID]) {
-            this.players[winnerID] = new Player(winnerTag, winnerID, avatarURL, pointsEarned);
-        } else {
-            this.players[winnerID].incrementScore(pointsEarned);
-        }
     }
 
     gameFinished(goal: number): boolean {
