@@ -9,7 +9,7 @@ import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
 
 const logger = _logger("play");
-const DEFAULT_LIVES = 3;
+const DEFAULT_LIVES = 10;
 
 export enum GameType {
     CLASSIC = "classic",
@@ -31,21 +31,26 @@ export default class PlayCommand implements BaseCommand {
             }
             const isEliminationMode = parsedMessage.components.length >= 1 && parsedMessage.components[0].toLowerCase() === "elimination";
             if (gameSessions[message.guildID] && !gameSessions[message.guildID].sessionInitialized && isEliminationMode) {
+                // User sent ,play elimination twice, reset the GameSession
                 deleteGameSession(message.guildID);
             }
             if (!gameSessions[message.guildID] || (!isEliminationMode && !gameSessions[message.guildID].sessionInitialized)) {
+                // (1) No game session exists yet (create CLASSIC or ELIMINATION game), or
+                // (2) User attempting to ,play after a ,play elimination that didn't start, start CLASSIC game
                 const textChannel = message.channel;
                 const gameOwner = message.author;
                 let startTitle: string;
                 let gameInstructions: string;
                 let gameSession: GameSession;
                 if (isEliminationMode) {
+                    // (1) ELIMINATION game creation
                     const lives = parsedMessage.components.length > 1 ? parseInt(parsedMessage.components[1], 10) : DEFAULT_LIVES;
                     startTitle = "`,join` the game and start it with `,begin`!";
                     gameInstructions = `Type \`,join\` to play in the upcoming elimination game. Once all have joined, ${bold(getUserIdentifier(gameOwner))} must send \`,begin\` to start the game. Everyone begins with \`${lives}\` lives.`;
                     gameSession = new GameSession(textChannel, voiceChannel, gameOwner, GameType.ELIMINATION, lives);
                     gameSession.addParticipant(gameOwner);
                 } else {
+                    // (1 and 2) CLASSIC game creation
                     gameInstructions = "Listen to the song and type your guess!";
                     startTitle = `Game starting in #${textChannel.name} in 🔊 ${voiceChannel.name}`;
                     gameSession = new GameSession(textChannel, voiceChannel, gameOwner, GameType.CLASSIC);
@@ -55,6 +60,7 @@ export default class PlayCommand implements BaseCommand {
                 await sendInfoMessage(message, startTitle, gameInstructions);
 
                 if (!isEliminationMode) {
+                    // ELIMINATION startRound deferred to ,begin
                     gameSessions[message.guildID].startRound(guildPreference, message);
                     logger.info(`${getDebugContext(message)} | Game session starting`);
                 }
@@ -83,7 +89,7 @@ export default class PlayCommand implements BaseCommand {
     aliases = ["random", "start", "p"];
     help = {
         name: "play",
-        description: "Bot plays a random song in VC; decide whether to play a classic game or an elimination game",
+        description: "Starts a game of KMQ. Pick between classic (default) and elimination mode",
         usage: "!play",
         priority: 1050,
         examples: [

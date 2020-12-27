@@ -26,7 +26,7 @@ const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
 export default class GameSession {
     private readonly startedAt: number;
 
-    public readonly eliminationMode: GameType;
+    public readonly gameType: GameType;
     public readonly owner: Eris.User;
 
     public sessionInitialized: boolean;
@@ -46,9 +46,9 @@ export default class GameSession {
     private guessTimeoutFunc: NodeJS.Timer;
     private lastPlayedSongsQueue: Array<string>;
 
-    constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel, gameSessionCreator: Eris.User, eliminationMode: GameType, eliminationLives?: number) {
-        this.eliminationMode = eliminationMode;
-        this.scoreboard = this.eliminationMode === GameType.ELIMINATION ? new EliminationScoreboard(eliminationLives) : new Scoreboard();
+    constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel, gameSessionCreator: Eris.User, gameType: GameType, eliminationLives?: number) {
+        this.gameType = gameType;
+        this.scoreboard = this.gameType === GameType.ELIMINATION ? new EliminationScoreboard(eliminationLives) : new Scoreboard();
         this.lastActive = Date.now();
         this.sessionInitialized = false;
         this.startedAt = Date.now();
@@ -130,7 +130,7 @@ export default class GameSession {
 
     checkGuess(message: Eris.Message, modeType: string): number {
         if (!this.gameRound) return 0;
-        if (this.eliminationMode === GameType.ELIMINATION) {
+        if (this.gameType === GameType.CLASSIC) {
             this.participants.add(message.author.id);
         }
         return this.gameRound.checkGuess(message, modeType);
@@ -163,7 +163,7 @@ export default class GameSession {
             logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${this.gameRound.song}`);
             const gameSession = state.gameSessions[message.guildID];
             gameSession.lastActiveNow();
-            if (this.eliminationMode === GameType.ELIMINATION) {
+            if (this.gameType === GameType.ELIMINATION) {
                 const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
                 if (!this.participants.has(message.author.id) || eliminationScoreboard.isPlayerEliminated(message.author.id)) {
                     return;
@@ -177,12 +177,13 @@ export default class GameSession {
             await dbContext.kmq("guild_preferences")
                 .where("guild_id", message.guildID)
                 .increment("songs_guessed", 1);
-            if (this.eliminationMode === GameType.ELIMINATION) {
+            if (this.gameType === GameType.ELIMINATION) {
                 const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
                 if (eliminationScoreboard.gameFinished()) {
-                    logger.info(`${getDebugContext(message)} | Game session ended (one player alive in eliminationMode)`);
+                    logger.info(`${getDebugContext(message)} | Game session ended (one player alive in elimination gameType)`);
                     await sendEndGameMessage({ channel: message.channel, authorId: message.author.id }, this);
                     await this.endSession();
+                    return;
                 }
             }
             if (guildPreference.isGoalSet() && this.scoreboard.gameFinished(guildPreference.getGoal())) {
@@ -307,7 +308,7 @@ export default class GameSession {
         this.guessTimeoutFunc = setTimeout(async () => {
             if (this.finished) return;
             logger.info(`${getDebugContext(message)} | Song finished without being guessed, timer of: ${time} seconds.`);
-            if (this.eliminationMode === GameType.ELIMINATION) {
+            if (this.gameType === GameType.ELIMINATION) {
                 const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
                 eliminationScoreboard.decrementAllLives();
                 if (eliminationScoreboard.gameFinished()) {
@@ -367,10 +368,9 @@ export default class GameSession {
 
     addParticipant(user: Eris.User) {
         this.participants.add(user.id);
-        if (this.eliminationMode === GameType.ELIMINATION) {
+        if (this.gameType === GameType.ELIMINATION) {
             const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
             eliminationScoreboard.addPlayer(user.id, getUserIdentifier(user), user.avatarURL);
-            this.scoreboard = eliminationScoreboard;
         }
     }
 }

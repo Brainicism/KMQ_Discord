@@ -198,7 +198,7 @@ export async function sendPaginationedEmbed(message: Eris.Message<Eris.GuildText
 }
 
 export async function sendScoreboardMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
-    if (gameSession.scoreboard.isEmpty() && gameSession.eliminationMode === GameType.CLASSIC) {
+    if (gameSession.scoreboard.isEmpty() && gameSession.gameType === GameType.CLASSIC) {
         return sendMessage({ channel: message.channel, authorId: message.author.id }, {
             embed: {
                 color: EMBED_SUCCESS_COLOR,
@@ -213,7 +213,7 @@ export async function sendScoreboardMessage(message: Eris.Message<Eris.GuildText
     }
     const winnersFieldSubsets = chunkArray(gameSession.scoreboard.getScoreboardEmbedFields(), EMBED_FIELDS_PER_PAGE);
     let footerText = `Your score is ${gameSession.scoreboard.getPlayerScore(message.author.id)}.`;
-    if (gameSession.eliminationMode) {
+    if (gameSession.gameType === GameType.ELIMINATION) {
         const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
         footerText = `You have ${eliminationScoreboard.getPlayerLives(message.author.id)} lives.`;
     }
