@@ -96,4 +96,8 @@ export default class Scoreboard {
     gameFinished(goal: number): boolean {
         return this.firstPlace[0].getScore() >= goal;
     }
+
+    getPlayerNames(): Array<string> {
+        return Object.values(this.players).map((player) => player.getName());
+    }
 }
