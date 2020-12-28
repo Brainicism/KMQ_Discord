@@ -6,9 +6,9 @@ import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
-    getDebugContext, getSqlDateString, getUserIdentifier, getVoiceChannel, sendEndGameMessage, sendErrorMessage, sendSongMessage,
+    getDebugContext, getSqlDateString, getUserIdentifier, getVoiceChannel, sendErrorMessage, sendSongMessage,
 } from "../helpers/discord_utils";
-import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getSongCount } from "../helpers/game_utils";
+import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getSongCount, endSession } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds } from "../helpers/utils";
 import state from "../kmq";
 import _logger from "../logger";
@@ -41,8 +41,6 @@ export default class GameSession {
     public participants: Set<string>;
 
     private guessTimes: Array<number>;
-    private songAliasList: { [songId: string]: Array<string> };
-    private artistAliasList: { [artistName: string]: Array<string> };
     private guessTimeoutFunc: NodeJS.Timer;
     private lastPlayedSongsQueue: Array<string>;
 
@@ -181,15 +179,13 @@ export default class GameSession {
                 const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
                 if (eliminationScoreboard.gameFinished()) {
                     logger.info(`${getDebugContext(message)} | Game session ended (one player alive in elimination gameType)`);
-                    await sendEndGameMessage({ channel: message.channel, authorId: message.author.id }, this);
-                    await this.endSession();
+                    endSession({ channel: message.channel, authorId: message.author.id }, this);
                     return;
                 }
             }
             if (guildPreference.isGoalSet() && this.scoreboard.gameFinished(guildPreference.getGoal())) {
                 logger.info(`${getDebugContext(message)} | Game session ended (goal of ${guildPreference.getGoal()} reached)`);
-                await sendEndGameMessage({ channel: message.channel, authorId: message.author.id }, this);
-                await this.endSession();
+                endSession({ channel: message.channel, authorId: message.author.id }, this);
             } else {
                 this.startRound(guildPreference, message);
             }
@@ -227,7 +223,7 @@ export default class GameSession {
         }
         this.createRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);
         if ((guildPreference.getLimit() > LAST_PLAYED_SONG_QUEUE_SIZE && totalSongs > LAST_PLAYED_SONG_QUEUE_SIZE)
-                || guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
+            || guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
             this.lastPlayedSongsQueue.push(randomSong.youtubeLink);
         }
 
@@ -283,8 +279,7 @@ export default class GameSession {
             if (!this.connection.channelID) {
                 logger.info(`gid: ${this.textChannel.guild.id} | Bot was kicked from voice channel`);
                 this.stopGuessTimeout();
-                await sendEndGameMessage({ channel: message.channel }, this);
-                await this.endSession();
+                endSession(message, this);
                 return;
             }
 
@@ -313,8 +308,7 @@ export default class GameSession {
                 eliminationScoreboard.decrementAllLives();
                 if (eliminationScoreboard.gameFinished()) {
                     sendSongMessage(message, this.scoreboard, this.gameRound, true);
-                    await sendEndGameMessage({ channel: message.channel, authorId: message.author.id }, this);
-                    this.endSession();
+                    endSession(message, this);
                     return;
                 }
             }
