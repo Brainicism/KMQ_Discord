@@ -16,13 +16,18 @@ import { QueriedSong } from "../types";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
 import Scoreboard from "./scoreboard";
+import EliminationScoreboard from "./elimination_scoreboard";
 import { deleteGameSession } from "../helpers/management_utils";
+import { GameType } from "../commands/game_commands/play";
 
 const logger = _logger("game_session");
 const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
 
 export default class GameSession {
     private readonly startedAt: number;
+
+    public readonly gameType: GameType;
+    public readonly owner: Eris.User;
 
     public sessionInitialized: boolean;
     public scoreboard: Scoreboard;
@@ -34,7 +39,6 @@ export default class GameSession {
     public gameRound: GameRound;
     public roundsPlayed: number;
     public participants: Set<string>;
-    public owner: Eris.User;
 
     private guessTimes: Array<number>;
     private songAliasList: { [songId: string]: Array<string> };
@@ -42,8 +46,9 @@ export default class GameSession {
     private guessTimeoutFunc: NodeJS.Timer;
     private lastPlayedSongsQueue: Array<string>;
 
-    constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel, gameSessionCreator: Eris.User) {
-        this.scoreboard = new Scoreboard();
+    constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel, gameSessionCreator: Eris.User, gameType: GameType, eliminationLives?: number) {
+        this.gameType = gameType;
+        this.scoreboard = this.gameType === GameType.ELIMINATION ? new EliminationScoreboard(eliminationLives) : new Scoreboard();
         this.lastActive = Date.now();
         this.sessionInitialized = false;
         this.startedAt = Date.now();
@@ -61,7 +66,6 @@ export default class GameSession {
 
     createRound(song: string, artist: string, videoID: string) {
         this.gameRound = new GameRound(song, artist, videoID);
-        this.sessionInitialized = true;
         this.roundsPlayed++;
     }
 
@@ -75,7 +79,6 @@ export default class GameSession {
             this.connection.removeAllListeners();
         }
         this.stopGuessTimeout();
-        this.sessionInitialized = false;
     }
 
     endSession = async (): Promise<void> => {
@@ -127,7 +130,9 @@ export default class GameSession {
 
     checkGuess(message: Eris.Message, modeType: string): number {
         if (!this.gameRound) return 0;
-        this.participants.add(message.author.id);
+        if (this.gameType === GameType.CLASSIC) {
+            this.participants.add(message.author.id);
+        }
         return this.gameRound.checkGuess(message, modeType);
     }
 
@@ -158,6 +163,12 @@ export default class GameSession {
             logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${this.gameRound.song}`);
             const gameSession = state.gameSessions[message.guildID];
             gameSession.lastActiveNow();
+            if (this.gameType === GameType.ELIMINATION) {
+                const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
+                if (!this.participants.has(message.author.id) || eliminationScoreboard.isPlayerEliminated(message.author.id)) {
+                    return;
+                }
+            }
             const userTag = getUserIdentifier(message.author);
             this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL, pointsEarned);
             this.stopGuessTimeout();
@@ -166,17 +177,27 @@ export default class GameSession {
             await dbContext.kmq("guild_preferences")
                 .where("guild_id", message.guildID)
                 .increment("songs_guessed", 1);
-            if (!guildPreference.isGoalSet() || this.scoreboard.getWinners()[0].getScore() < guildPreference.getGoal()) {
-                this.startRound(guildPreference, message);
-            } else {
+            if (this.gameType === GameType.ELIMINATION) {
+                const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
+                if (eliminationScoreboard.gameFinished()) {
+                    logger.info(`${getDebugContext(message)} | Game session ended (one player alive in elimination gameType)`);
+                    await sendEndGameMessage({ channel: message.channel, authorId: message.author.id }, this);
+                    await this.endSession();
+                    return;
+                }
+            }
+            if (guildPreference.isGoalSet() && this.scoreboard.gameFinished(guildPreference.getGoal())) {
                 logger.info(`${getDebugContext(message)} | Game session ended (goal of ${guildPreference.getGoal()} reached)`);
                 await sendEndGameMessage({ channel: message.channel, authorId: message.author.id }, this);
                 await this.endSession();
+            } else {
+                this.startRound(guildPreference, message);
             }
         }
     }
 
     async startRound(guildPreference: GuildPreference, message: Eris.Message<Eris.GuildTextableChannel>) {
+        this.sessionInitialized = true;
         await delay(3000);
         if (this.finished || this.gameRound) {
             return;
@@ -190,18 +211,15 @@ export default class GameSession {
             this.lastPlayedSongsQueue.shift();
         }
 
-        this.sessionInitialized = true;
         let randomSong: QueriedSong;
         try {
             randomSong = await selectRandomSong(guildPreference, this.lastPlayedSongsQueue);
             if (randomSong === null) {
-                this.sessionInitialized = false;
                 sendErrorMessage(message, "Song Query Error", "Failed to find songs matching this criteria. Try to broaden your search.");
                 this.endSession();
                 return;
             }
         } catch (err) {
-            this.sessionInitialized = false;
             await sendErrorMessage(message, "Error selecting song", "Please try starting the round again. If the issue persists, report it in our support server.");
             logger.error(`${getDebugContext(message)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
             this.endSession();
@@ -217,7 +235,6 @@ export default class GameSession {
             await ensureVoiceConnection(this, state.client);
         } catch (err) {
             await this.endSession();
-            this.sessionInitialized = false;
             logger.error(`${getDebugContext(message)} | Error obtaining voice connection. err = ${err.toString()}`);
             await sendErrorMessage(message, "Missing voice permissions", "The bot is unable to join the voice channel you are in.");
             return;
@@ -291,6 +308,16 @@ export default class GameSession {
         this.guessTimeoutFunc = setTimeout(async () => {
             if (this.finished) return;
             logger.info(`${getDebugContext(message)} | Song finished without being guessed, timer of: ${time} seconds.`);
+            if (this.gameType === GameType.ELIMINATION) {
+                const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
+                eliminationScoreboard.decrementAllLives();
+                if (eliminationScoreboard.gameFinished()) {
+                    sendSongMessage(message, this.scoreboard, this.gameRound, true);
+                    await sendEndGameMessage({ channel: message.channel, authorId: message.author.id }, this);
+                    this.endSession();
+                    return;
+                }
+            }
             sendSongMessage(message, this.scoreboard, this.gameRound, true);
             this.endRound(false);
             this.startRound(guildPreference, message);
@@ -337,5 +364,13 @@ export default class GameSession {
 
     resetLastPlayedSongsQueue() {
         this.lastPlayedSongsQueue = [];
+    }
+
+    addParticipant(user: Eris.User) {
+        this.participants.add(user.id);
+        if (this.gameType === GameType.ELIMINATION) {
+            const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
+            eliminationScoreboard.addPlayer(user.id, getUserIdentifier(user), user.avatarURL);
+        }
     }
 }

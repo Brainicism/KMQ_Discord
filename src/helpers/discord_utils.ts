@@ -11,6 +11,8 @@ import state from "../kmq";
 import { ModeType } from "../commands/game_options/mode";
 import Scoreboard from "../models/scoreboard";
 import GameRound from "../models/game_round";
+import EliminationScoreboard from "../models/elimination_scoreboard";
+import { GameType } from "../commands/game_commands/play";
 
 const logger = _logger("utils");
 export const EMBED_INFO_COLOR = 0x000000; // BLACK
@@ -118,7 +120,10 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
         return;
     }
 
-    const goalMode = guildPreference.isGoalSet();
+    const { gameSessions } = state;
+    const isEliminationMode = gameSessions[message.guildID] && gameSessions[message.guildID].gameType === GameType.ELIMINATION;
+
+    const goalMode = guildPreference.isGoalSet() && !isEliminationMode;
     const guessTimeoutMode = guildPreference.isGuessTimeoutSet();
     const shuffleUniqueMode = guildPreference.isShuffleUnique();
 
@@ -196,7 +201,7 @@ export async function sendPaginationedEmbed(message: Eris.Message<Eris.GuildText
 }
 
 export async function sendScoreboardMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
-    if (gameSession.scoreboard.isEmpty()) {
+    if (gameSession.scoreboard.isEmpty() && gameSession.gameType === GameType.CLASSIC) {
         return sendMessage({ channel: message.channel, authorId: message.author.id }, {
             embed: {
                 color: EMBED_SUCCESS_COLOR,
@@ -204,12 +209,17 @@ export async function sendScoreboardMessage(message: Eris.Message<Eris.GuildText
                     name: message.author.username,
                     icon_url: message.author.avatarURL,
                 },
-                description: gameSession.scoreboard.isEmpty() ? "(╯°□°）╯︵ ┻━┻" : null,
+                description: "(╯°□°）╯︵ ┻━┻",
                 title: "**Scoreboard**",
             },
         });
     }
     const winnersFieldSubsets = chunkArray(gameSession.scoreboard.getScoreboardEmbedFields(), EMBED_FIELDS_PER_PAGE);
+    let footerText = `Your score is ${gameSession.scoreboard.getPlayerScore(message.author.id)}.`;
+    if (gameSession.gameType === GameType.ELIMINATION) {
+        const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
+        footerText = `You have ${eliminationScoreboard.getPlayerLives(message.author.id)} lives.`;
+    }
     const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map((winnersFieldSubset) => ({
         color: EMBED_SUCCESS_COLOR,
         author: {
@@ -219,7 +229,7 @@ export async function sendScoreboardMessage(message: Eris.Message<Eris.GuildText
         title: "**Scoreboard**",
         fields: winnersFieldSubset,
         footer: {
-            text: `Your score is ${gameSession.scoreboard.getPlayerScore(message.author.id)}.`,
+            text: footerText,
         },
     }));
 

@@ -22,7 +22,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
         const time = parseInt(parsedMessage.components[0], 10);
 
         guildPreference.setGuessTimeout(time);
-        if (gameSession && gameSession.sessionInitialized && gameSession.connection.playing) {
+        if (gameSession && gameSession.gameRound && gameSession.connection.playing) {
             // Timer can start mid-song, starting when the user enters the command
             gameSession.stopGuessTimeout();
             gameSession.startGuessTimeout(message);

@@ -2,9 +2,9 @@ import { roundDecimal } from "../helpers/utils";
 import Player from "./player";
 
 export default class Scoreboard {
-    private players: { [userID: number]: Player };
+    protected players: { [userID: number]: Player };
 
-    private firstPlace: Array<Player>;
+    protected firstPlace: Array<Player>;
 
     private highestScore: number;
 
@@ -87,5 +87,13 @@ export default class Scoreboard {
             return this.players[userId].getScore();
         }
         return 0;
+    }
+
+    gameFinished(goal: number): boolean {
+        return this.firstPlace[0].getScore() >= goal;
+    }
+
+    getPlayerNames(): Array<string> {
+        return Object.values(this.players).map((player) => player.getName());
     }
 }
