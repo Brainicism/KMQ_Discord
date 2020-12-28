@@ -16,7 +16,11 @@ export default class JoinCommand implements BaseCommand {
         if (gameSession.participants.has(message.author.id)) {
             sendErrorMessage(message, "Player already joined", `${bold(getUserIdentifier(message.author))} is already in the game.`);
         } else {
-            const previouslyJoinedPlayers = gameSession.scoreboard.getPlayerNames().reverse().slice(0, 10);
+            let previouslyJoinedPlayers = gameSession.scoreboard.getPlayerNames().reverse();
+            if (previouslyJoinedPlayers.length > 10) {
+                previouslyJoinedPlayers = previouslyJoinedPlayers.slice(0, 10);
+                previouslyJoinedPlayers.push("and many others...");
+            }
             const players = `${bold(getUserIdentifier(message.author))}, ${previouslyJoinedPlayers.join(", ")}`;
             sendInfoMessage(message, "Player joined", players);
             gameSession.addParticipant(message.author);
