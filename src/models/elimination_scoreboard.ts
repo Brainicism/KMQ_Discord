@@ -22,7 +22,7 @@ export default class EliminationScoreboard extends Scoreboard {
         return Object.values(this.players)
             .sort((a, b) => b.getLives() - a.getLives())
             .map((x) => {
-                const lives = !x.isEliminated() ? `❤️ x ${x.getLives()}` : "Eliminated";
+                const lives = !x.isEliminated() ? `❤️ x ${x.getLives()}` : "☠️";
                 return {
                     name: x.getName(),
                     value: lives,

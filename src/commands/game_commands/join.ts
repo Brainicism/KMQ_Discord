@@ -11,11 +11,13 @@ export default class JoinCommand implements BaseCommand {
         }
         if (gameSession.sessionInitialized) {
             await sendErrorMessage(message, "Game already in session", "You can only join as a participant before an elimination game has started. Please wait until the current game ends.");
-        } else if (gameSession.participants.has(message.author.id)) {
+            return;
+        }
+        if (gameSession.participants.has(message.author.id)) {
             sendErrorMessage(message, "Player already joined", `${bold(getUserIdentifier(message.author))} is already in the game.`);
         } else {
-            const previouslyJoinedPlayers = gameSession.scoreboard.getPlayerNames().reverse();
-            const players = `${bold(getUserIdentifier(message.author))}, ${previouslyJoinedPlayers.join(", ")}`.substring(0, 2048);
+            const previouslyJoinedPlayers = gameSession.scoreboard.getPlayerNames().reverse().slice(0, 10);
+            const players = `${bold(getUserIdentifier(message.author))}, ${previouslyJoinedPlayers.join(", ")}`;
             sendInfoMessage(message, "Player joined", players);
             gameSession.addParticipant(message.author);
         }

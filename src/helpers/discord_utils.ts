@@ -120,7 +120,10 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
         return;
     }
 
-    const goalMode = guildPreference.isGoalSet();
+    const { gameSessions } = state;
+    const isEliminationMode = gameSessions[message.guildID] && gameSessions[message.guildID].gameType === GameType.ELIMINATION;
+
+    const goalMode = guildPreference.isGoalSet() && !isEliminationMode;
     const guessTimeoutMode = guildPreference.isGuessTimeoutSet();
     const shuffleUniqueMode = guildPreference.isShuffleUnique();
 
