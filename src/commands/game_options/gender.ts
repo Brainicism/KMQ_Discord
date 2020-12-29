@@ -14,29 +14,6 @@ export enum GENDER {
 export const DEFAULT_GENDER = [GENDER.FEMALE, GENDER.MALE, GENDER.COED];
 
 export default class GenderCommand implements BaseCommand {
-    async call({ message, parsedMessage }: CommandArgs) {
-        const guildPreference = await getGuildPreference(message.guildID);
-        if (guildPreference.isGroupsMode()) {
-            logger.warn(`${getDebugContext(message)} | Game option conflict between gender and groups.`);
-            sendErrorMessage(message, "Game Option Conflict", "`groups` game option is currently set. `gender` and `groups` are incompatible. Remove the `groups` option by typing `,groups`to proceed");
-            return;
-        }
-        const selectedGenders = parsedMessage.components.length > 0 ? parsedMessage.components as GENDER[] : DEFAULT_GENDER;
-        const selectedGenderArray = guildPreference.setGender(selectedGenders);
-        let selectedGenderStr = "";
-        for (let i = 0; i < selectedGenderArray.length; i++) {
-            selectedGenderStr += `\`${selectedGenderArray[i]}\``;
-            if (i === selectedGenderArray.length - 1) {
-                break;
-            } else if (i === selectedGenderArray.length - 2) {
-                selectedGenderStr += " and ";
-            } else {
-                selectedGenderStr += ", ";
-            }
-        }
-        await sendOptionsMessage(message, guildPreference, GameOption.GENDER);
-        logger.info(`${getDebugContext(message)} | Genders set to ${selectedGenderStr}`);
-    }
     validations = {
         minArgCount: 0,
         maxArgCount: 3,
@@ -83,4 +60,28 @@ export default class GenderCommand implements BaseCommand {
         ],
         priority: 150,
     };
+
+    async call({ message, parsedMessage }: CommandArgs) {
+        const guildPreference = await getGuildPreference(message.guildID);
+        if (guildPreference.isGroupsMode()) {
+            logger.warn(`${getDebugContext(message)} | Game option conflict between gender and groups.`);
+            sendErrorMessage(message, "Game Option Conflict", "`groups` game option is currently set. `gender` and `groups` are incompatible. Remove the `groups` option by typing `,groups`to proceed");
+            return;
+        }
+        const selectedGenders = parsedMessage.components.length > 0 ? parsedMessage.components as GENDER[] : DEFAULT_GENDER;
+        const selectedGenderArray = guildPreference.setGender(selectedGenders);
+        let selectedGenderStr = "";
+        for (let i = 0; i < selectedGenderArray.length; i++) {
+            selectedGenderStr += `\`${selectedGenderArray[i]}\``;
+            if (i === selectedGenderArray.length - 1) {
+                break;
+            } else if (i === selectedGenderArray.length - 2) {
+                selectedGenderStr += " and ";
+            } else {
+                selectedGenderStr += ", ";
+            }
+        }
+        await sendOptionsMessage(message, guildPreference, GameOption.GENDER);
+        logger.info(`${getDebugContext(message)} | Genders set to ${selectedGenderStr}`);
+    }
 }

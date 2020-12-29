@@ -24,7 +24,7 @@ export default class EliminationScoreboard extends Scoreboard {
             .map((x) => {
                 const lives = !x.isEliminated() ? `❤️ x ${x.getLives()}` : "☠️";
                 return {
-                    name: x.getName(),
+                    name: x.getTag(),
                     value: lives,
                     inline: true,
                 };

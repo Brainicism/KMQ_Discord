@@ -1,9 +1,11 @@
 import BaseCommand, { CommandArgs } from "../base_command";
 import { GameType } from "./play";
-import { sendErrorMessage, sendInfoMessage, getUserIdentifier } from "../../helpers/discord_utils";
+import { sendErrorMessage, sendInfoMessage, getUserTag } from "../../helpers/discord_utils";
 import { bold } from "../../helpers/utils";
 
 export default class JoinCommand implements BaseCommand {
+    aliases = ["j"];
+
     async call({ message, gameSessions }: CommandArgs) {
         const gameSession = gameSessions[message.guildID];
         if (!gameSession || gameSession.gameType === GameType.CLASSIC) {
@@ -14,17 +16,16 @@ export default class JoinCommand implements BaseCommand {
             return;
         }
         if (gameSession.participants.has(message.author.id)) {
-            sendErrorMessage(message, "Player already joined", `${bold(getUserIdentifier(message.author))} is already in the game.`);
+            sendErrorMessage(message, "Player already joined", `${bold(getUserTag(message.author))} is already in the game.`);
         } else {
             let previouslyJoinedPlayers = gameSession.scoreboard.getPlayerNames().reverse();
             if (previouslyJoinedPlayers.length > 10) {
                 previouslyJoinedPlayers = previouslyJoinedPlayers.slice(0, 10);
                 previouslyJoinedPlayers.push("and many others...");
             }
-            const players = `${bold(getUserIdentifier(message.author))}, ${previouslyJoinedPlayers.join(", ")}`;
+            const players = `${bold(getUserTag(message.author))}, ${previouslyJoinedPlayers.join(", ")}`;
             sendInfoMessage(message, "Player joined", players);
             gameSession.addEliminationParticipant(message.author);
         }
     }
-    aliases = ["j"];
 }

@@ -240,7 +240,7 @@ export function disconnectVoiceConnection(message: Eris.Message<Eris.GuildTextab
     state.client.closeVoiceConnection(message.guildID);
 }
 
-export function getUserIdentifier(user: Eris.User): string {
+export function getUserTag(user: Eris.User): string {
     return `${user.username}#${user.discriminator}`;
 }
 

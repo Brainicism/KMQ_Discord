@@ -18,11 +18,11 @@ export default class Scoreboard {
         let winnerStr = "";
 
         if (this.firstPlace.length === 1) {
-            return `${this.firstPlace[0].getName()} wins!`;
+            return `${this.firstPlace[0].getTag()} wins!`;
         }
 
         for (let i = 0; i < this.firstPlace.length; i++) {
-            winnerStr += this.firstPlace[i].getName();
+            winnerStr += this.firstPlace[i].getTag();
             if (i === this.firstPlace.length - 1) {
                 // Last entry -- append just the username
                 winnerStr += " ";
@@ -43,7 +43,7 @@ export default class Scoreboard {
             .sort((a, b) => b.getScore() - a.getScore())
             .map((x) => (
                 {
-                    name: x.getName(),
+                    name: x.getTag(),
                     value: Number.isInteger(roundDecimal(x.getScore(), 1)) ? roundDecimal(x.getScore(), 1).toString() : x.getScore().toFixed(1),
                     inline: true,
                 }));
@@ -94,6 +94,6 @@ export default class Scoreboard {
     }
 
     getPlayerNames(): Array<string> {
-        return Object.values(this.players).map((player) => player.getName());
+        return Object.values(this.players).map((player) => player.getTag());
     }
 }

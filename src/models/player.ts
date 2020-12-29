@@ -1,18 +1,18 @@
 export default class Player {
-    private name: string;
+    private tag: string;
     private id: string;
     private score: number;
     private avatarURL: string;
 
-    constructor(name: string, id: string, avatarURL: string, points: number) {
-        this.name = name;
+    constructor(tag: string, id: string, avatarURL: string, points: number) {
+        this.tag = tag;
         this.id = id;
         this.score = points;
         this.avatarURL = avatarURL;
     }
 
-    getName(): string {
-        return this.name;
+    getTag(): string {
+        return this.tag;
     }
 
     getScore(): number {

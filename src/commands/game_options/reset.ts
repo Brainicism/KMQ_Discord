@@ -6,13 +6,6 @@ import { getDebugContext, sendOptionsMessage } from "../../helpers/discord_utils
 const logger = _logger("reset");
 
 export default class ResetCommand implements BaseCommand {
-    async call({ message }: CommandArgs) {
-        const guildPreference = await getGuildPreference(message.guildID);
-        guildPreference.resetToDefault();
-        logger.info(`${getDebugContext(message)} | Reset to default guild preferences`);
-        await sendOptionsMessage(message, guildPreference, null);
-    }
-
     validations = {
         minArgCount: 0,
         maxArgCount: 0,
@@ -31,4 +24,10 @@ export default class ResetCommand implements BaseCommand {
         ],
         priority: 130,
     };
+    async call({ message }: CommandArgs) {
+        const guildPreference = await getGuildPreference(message.guildID);
+        guildPreference.resetToDefault();
+        logger.info(`${getDebugContext(message)} | Reset to default guild preferences`);
+        await sendOptionsMessage(message, guildPreference, null);
+    }
 }

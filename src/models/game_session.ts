@@ -5,7 +5,7 @@ import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
-    getDebugContext, getSqlDateString, getUserIdentifier, getVoiceChannel, sendErrorMessage, sendSongMessage,
+    getDebugContext, getSqlDateString, getUserTag, getVoiceChannel, sendErrorMessage, sendSongMessage,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getSongCount, endSession } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds } from "../helpers/utils";
@@ -203,7 +203,7 @@ export default class GameSession {
             }
 
             // update scoreboard
-            const userTag = getUserIdentifier(message.author);
+            const userTag = getUserTag(message.author);
             this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL, pointsEarned);
 
             // misc. game round cleanup
@@ -342,7 +342,7 @@ export default class GameSession {
     addEliminationParticipant(user: Eris.User) {
         this.participants.add(user.id);
         const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
-        eliminationScoreboard.addPlayer(user.id, getUserIdentifier(user), user.avatarURL);
+        eliminationScoreboard.addPlayer(user.id, getUserTag(user), user.avatarURL);
     }
 
     /**

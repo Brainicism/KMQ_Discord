@@ -70,6 +70,19 @@
             {
                 "argsIgnorePattern": "^_"
             }
+        ],
+        "@typescript-eslint/member-ordering": [
+            "warn",
+            {
+                "default": [
+                    "public-field",
+                    "protected-field",
+                    "private-field",
+                    "public-method",
+                    "protected-method",
+                    "private-method"
+                ]
+            }
         ]
     }
 }

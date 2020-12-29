@@ -59,6 +59,16 @@ function isSkipMajority(message: Eris.Message<Eris.GuildTextableChannel>, gameSe
 }
 
 export default class SkipCommand implements BaseCommand {
+    help = {
+        name: "skip",
+        description: "Vote to skip the current song. A song is skipped when majority of participants vote to skip it.",
+        usage: "!skip",
+        examples: [],
+        priority: 1010,
+    };
+
+    aliases = ["s"];
+
     async call({ gameSessions, message }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
         const gameSession = gameSessions[message.guildID];
@@ -88,12 +98,4 @@ export default class SkipCommand implements BaseCommand {
         }
         gameSession.lastActiveNow();
     }
-    help = {
-        name: "skip",
-        description: "Vote to skip the current song. A song is skipped when majority of participants vote to skip it.",
-        usage: "!skip",
-        examples: [],
-        priority: 1010,
-    };
-    aliases = ["s"];
 }

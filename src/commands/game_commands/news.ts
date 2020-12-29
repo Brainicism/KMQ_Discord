@@ -9,6 +9,16 @@ import { bold } from "../../helpers/utils";
 const logger = _logger("news");
 
 export default class NewsCommand implements BaseCommand {
+    help = {
+        name: "news",
+        description: "Displays the latest updates to KMQ.",
+        usage: "!news",
+        examples: [],
+        priority: 10,
+    };
+
+    aliases = ["updates"];
+
     async call({ message }: CommandArgs) {
         let latestSongDate: Date;
         try {
@@ -42,13 +52,4 @@ export default class NewsCommand implements BaseCommand {
         logger.info(`${getDebugContext(message)} | News retrieved.`);
         await sendMessage({ channel: message.channel, authorId: message.author.id }, { embed });
     }
-    help = {
-        name: "news",
-        description: "Displays the latest updates to KMQ.",
-        usage: "!news",
-        examples: [],
-        priority: 10,
-    };
-
-    aliases = ["updates"];
 }
