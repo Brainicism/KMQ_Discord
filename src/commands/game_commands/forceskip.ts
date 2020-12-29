@@ -1,6 +1,6 @@
 import BaseCommand, { CommandArgs } from "../base_command";
 import {
-    sendSongMessage,
+    sendEndOfRoundMessage,
     sendErrorMessage,
     areUserAndBotInSameVoiceChannel,
     getDebugContext,
@@ -45,7 +45,7 @@ export default class ForceSkipCommand implements BaseCommand {
             const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
             eliminationScoreboard.decrementAllLives();
         }
-        sendSongMessage(message, gameSession.scoreboard, gameSession.gameRound, true);
+        sendEndOfRoundMessage(message, gameSession.scoreboard, gameSession.gameRound, true);
         gameSession.endRound(false);
         gameSession.startRound(guildPreference, message);
         logger.info(`${getDebugContext(message)} | Owner force-skipped.`);

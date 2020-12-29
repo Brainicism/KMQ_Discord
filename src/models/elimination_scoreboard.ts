@@ -6,7 +6,10 @@ import _logger from "../logger";
 const logger = _logger("elimination_scoreboard");
 
 export default class EliminationScoreboard extends Scoreboard {
+    /** Mapping of Discord user ID to EliminationPlayer */
     protected players: { [userID: number]: EliminationPlayer };
+
+    /** The amount of lives each player starts with */
     private startingLives: number;
 
     constructor(lives: number) {
@@ -14,10 +17,17 @@ export default class EliminationScoreboard extends Scoreboard {
         this.startingLives = lives;
     }
 
-    addPlayer(userID: string, tag: string, avatar: string) {
-        this.players[userID] = new EliminationPlayer(tag, userID, avatar, 0, this.startingLives);
+    /**
+     * Begins tracking a player on the game's scoreboard
+     * @param userID - The player's Discord user ID
+     * @param tag - The player's Discord tag
+     * @param avatarUrl - The player's Discord avatar URL
+     */
+    addPlayer(userID: string, tag: string, avatarUrl: string) {
+        this.players[userID] = new EliminationPlayer(tag, userID, avatarUrl, 0, this.startingLives);
     }
 
+    /** @returns An array of DiscordEmbed fields representing each participant's lives */
     getScoreboardEmbedFields(): Array<{ name: string, value: string, inline: boolean }> {
         return Object.values(this.players)
             .sort((a, b) => b.getLives() - a.getLives())
@@ -31,6 +41,12 @@ export default class EliminationScoreboard extends Scoreboard {
             });
     }
 
+    /**
+     * @param _winnerTag - Unused
+     * @param winnerID - The Discord ID of the person who guessed correctly
+     * @param _avatarURL - Unused
+     * @param _pointsEarned - Unused
+     */
     updateScoreboard(_winnerTag: string, winnerID: string, _avatarURL: string, _pointsEarned: number) {
         let maxLives = -1;
         for (const player of Object.values(this.players)) {
@@ -46,16 +62,25 @@ export default class EliminationScoreboard extends Scoreboard {
         }
     }
 
+    /**
+     * @param userID - The Discord user ID of the participant to check
+     * @returns whether or not the player has ran out of lives
+     */
     isPlayerEliminated(userID: string): boolean {
         return this.players[userID].isEliminated();
     }
 
+    /** Decrements the lives of all current players */
     decrementAllLives() {
         for (const player of Object.values(this.players)) {
             player.decrementLives();
         }
     }
 
+    /**
+     * Checks whether the game has finished depending on whether
+     * it is a solo or multiplayer game
+     */
     gameFinished(): boolean {
         // Game ends if
         // (1) all players are eliminated that round or
@@ -68,10 +93,15 @@ export default class EliminationScoreboard extends Scoreboard {
         return allEliminated || oneLeft;
     }
 
+    /** Whether there are any winners */
     isEmpty(): boolean {
         return this.firstPlace.length === 0;
     }
 
+    /**
+     * @param userId - The Discord user ID to check
+     * @returns the number of lives the player has remaining
+     */
     getPlayerLives(userId: string): number {
         return this.players[userId].getLives();
     }

@@ -37,6 +37,7 @@ const logger = _logger("management_utils");
 
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 2, 1]);
 
+/** Registers listeners on client events */
 export function registerClientEvents() {
     const { client } = state;
     client.on("ready", readyHandler)
@@ -54,12 +55,17 @@ export function registerClientEvents() {
         .on("guildCreate", guildCreateHandler);
 }
 
+/** Registers listeners on process events */
 export function registerProcessEvents() {
     process.on("unhandledRejection", unhandledRejectionHandler)
         .on("uncaughtException", uncaughtExceptionHandler)
         .on("SIGINT", SIGINTHandler);
 }
 
+/**
+ * Sends a warning message to all active GameSessions for impending restarts at predefined intervals
+ * @param restartNotification - The date of the impending restart
+ */
 export const checkRestartNotification = async (restartNotification: Date): Promise<void> => {
     const timeDiffMin = Math.floor((restartNotification.getTime() - (new Date()).getTime()) / (1000 * 60));
     let channelsWarned = 0;
@@ -83,6 +89,7 @@ export const checkRestartNotification = async (restartNotification: Date): Promi
     }
 };
 
+/** Updates the bot's server count status */
 export function updateBotStatus() {
     const { client } = state;
     client.editStatus("online", {
@@ -91,6 +98,7 @@ export function updateBotStatus() {
     });
 }
 
+/** Sweeps the member/user caches within Eris */
 function sweepCaches() {
     logger.info("Sweeping cache..");
     const sweepResults = state.client.sweepCaches(15);
@@ -99,6 +107,7 @@ function sweepCaches() {
     }
 }
 
+/** Reload song/artist aliases */
 export function reloadAliases() {
     const songAliasesFilePath = path.resolve(__dirname, "../../data/song_aliases.json");
     const artistAliasesFilePath = path.resolve(__dirname, "../../data/artist_aliases.json");
@@ -112,10 +121,11 @@ export function reloadAliases() {
     }
 }
 
+/** Sets up recurring cron-based tasks */
 export function registerIntervals() {
     // set up cleanup for inactive game sessions
     schedule.scheduleJob("*/10 * * * *", () => {
-        cleanupInactiveGameSessions(state.gameSessions);
+        cleanupInactiveGameSessions();
         updateBotStatus();
         sweepCaches();
     });
@@ -156,6 +166,7 @@ export function registerIntervals() {
     });
 }
 
+/** @returns a mapping of command name to command source file */
 export function getCommandFiles(): Promise<{ [commandName: string]: BaseCommand }> {
     return new Promise(async (resolve, reject) => {
         const commandMap = {};
@@ -177,6 +188,7 @@ export function getCommandFiles(): Promise<{ [commandName: string]: BaseCommand 
     });
 }
 
+/** Registers commands */
 export async function registerCommands() {
     // load commands
     const commandFiles = await getCommandFiles();
@@ -191,11 +203,16 @@ export async function registerCommands() {
     }
 }
 
+/** Initialize server count posting to bot listing sites */
 export function initializeBotStatsPoster() {
     state.botStatsPoster = new BotStatsPoster();
     state.botStatsPoster.start();
 }
 
+/**
+ * Deletes the GameSession corresponding to a given guild ID
+ * @param guildId - The guild ID
+ */
 export function deleteGameSession(guildId: string) {
     if (!(guildId in state.gameSessions)) {
         logger.debug(`gid: ${guildId} | GameSession already ended`);

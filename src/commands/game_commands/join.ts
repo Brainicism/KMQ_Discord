@@ -1,6 +1,6 @@
 import BaseCommand, { CommandArgs } from "../base_command";
 import { GameType } from "./play";
-import { sendErrorMessage, sendInfoMessage, getUserTag } from "../../helpers/discord_utils";
+import { getUserTag, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import { bold } from "../../helpers/utils";
 
 export default class JoinCommand implements BaseCommand {

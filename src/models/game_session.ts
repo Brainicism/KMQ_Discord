@@ -5,7 +5,7 @@ import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
-    getDebugContext, getSqlDateString, getUserTag, getVoiceChannel, sendErrorMessage, sendSongMessage,
+    getDebugContext, getSqlDateString, getUserTag, getVoiceChannel, sendErrorMessage, sendEndOfRoundMessage,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getSongCount, endSession } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds } from "../helpers/utils";
@@ -208,7 +208,7 @@ export default class GameSession {
 
             // misc. game round cleanup
             this.stopGuessTimeout();
-            sendSongMessage(message, this.scoreboard, this.gameRound, false, userTag);
+            sendEndOfRoundMessage(message, this.scoreboard, this.gameRound, false, userTag);
             this.endRound(true);
 
             // increment guild's song guess count
@@ -284,7 +284,7 @@ export default class GameSession {
 
         // join voice channel and start round
         try {
-            await ensureVoiceConnection(this, state.client);
+            await ensureVoiceConnection(this);
         } catch (err) {
             await this.endSession();
             logger.error(`${getDebugContext(message)} | Error obtaining voice connection. err = ${err.toString()}`);
@@ -310,12 +310,12 @@ export default class GameSession {
                 const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
                 eliminationScoreboard.decrementAllLives();
                 if (eliminationScoreboard.gameFinished()) {
-                    sendSongMessage(message, this.scoreboard, this.gameRound, true);
+                    sendEndOfRoundMessage(message, this.scoreboard, this.gameRound, true);
                     endSession(message, this);
                     return;
                 }
             }
-            sendSongMessage(message, this.scoreboard, this.gameRound, true);
+            sendEndOfRoundMessage(message, this.scoreboard, this.gameRound, true);
             this.endRound(false);
             this.startRound(guildPreference, message);
         }, time * 1000);
@@ -380,7 +380,7 @@ export default class GameSession {
         this.connection.once("end", async () => {
             logger.info(`${getDebugContext(message)} | Song finished without being guessed.`);
             this.stopGuessTimeout();
-            sendSongMessage(message, this.scoreboard, this.gameRound, true);
+            sendEndOfRoundMessage(message, this.scoreboard, this.gameRound, true);
             this.endRound(false);
             this.startRound(guildPreference, message);
         });
