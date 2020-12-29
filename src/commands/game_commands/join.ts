@@ -23,7 +23,7 @@ export default class JoinCommand implements BaseCommand {
             }
             const players = `${bold(getUserIdentifier(message.author))}, ${previouslyJoinedPlayers.join(", ")}`;
             sendInfoMessage(message, "Player joined", players);
-            gameSession.addParticipant(message.author);
+            gameSession.addEliminationParticipant(message.author);
         }
     }
     aliases = ["j"];
