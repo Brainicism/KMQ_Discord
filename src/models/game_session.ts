@@ -188,7 +188,7 @@ export default class GameSession {
 
         const pointsEarned = this.checkGuess(message, guildPreference.getModeType());
         if (pointsEarned > 0) {
-            logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${this.gameRound.song}`);
+            logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${this.gameRound.songName}`);
 
             // update game session's lastActive
             const gameSession = state.gameSessions[message.guildID];
@@ -479,6 +479,6 @@ export default class GameSession {
      */
     private getDebugSongDetails(): string {
         if (!this.gameRound) return "No active game round";
-        return `${this.gameRound.song}:${this.gameRound.artist}:${this.gameRound.videoID}`;
+        return `${this.gameRound.songName}:${this.gameRound.artist}:${this.gameRound.videoID}`;
     }
 }
