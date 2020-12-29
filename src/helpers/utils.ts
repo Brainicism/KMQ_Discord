@@ -37,7 +37,7 @@ export function getAudioDurationInSeconds(songPath: string): Promise<number> {
         exec(`ffprobe -i "${songPath}" -show_entries format=duration -v quiet -of csv="p=0"`, (err, stdout, stderr) => {
             if (!stdout || stderr) {
                 logger.error(`Error getting audio duration: path = ${songPath}, err = ${stderr}`);
-                resolve(-1);
+                resolve(0);
                 return;
             }
             resolve(parseInt(stdout, 10));
