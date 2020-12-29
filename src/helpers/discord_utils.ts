@@ -3,7 +3,7 @@ import EmbedPaginator from "eris-pagination";
 import GuildPreference from "../models/guild_preference";
 import GameSession from "../models/game_session";
 import _logger from "../logger";
-import { getSongCount } from "./game_utils";
+import { endSession, getSongCount } from "./game_utils";
 import getFact from "../fact_generator";
 import { GameOption, SendMessagePayload } from "../types";
 import { chunkArray, codeLine, bold } from "./utils";
@@ -329,8 +329,7 @@ export async function checkBotIsAlone(gameSession: GameSession, channel: Eris.Vo
     if (channel.voiceMembers.size === 1 && channel.voiceMembers.has(state.client.user.id)) {
         if (gameSession) {
             logger.info(`gid: ${channel.guild.id} | Bot is only user left, leaving voice...`);
-            sendEndGameMessage({ channel: gameSession.textChannel }, gameSession);
-            await gameSession.endSession();
+            endSession({ channel: gameSession.textChannel }, gameSession);
         }
     }
 }

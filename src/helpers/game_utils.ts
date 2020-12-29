@@ -3,8 +3,9 @@ import dbContext from "../database_context";
 import _logger from "../logger";
 import GameSession from "../models/game_session";
 import GuildPreference from "../models/guild_preference";
-import { QueriedSong } from "../types";
+import { QueriedSong, SendMessagePayload } from "../types";
 import { getForcePlaySong, isDebugMode, isForcedSongActive } from "./debug_utils";
+import { sendEndGameMessage } from "./discord_utils";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -113,6 +114,11 @@ export async function getGuildPreference(guildID: string): Promise<GuildPreferen
         return guildPreference;
     }
     return new GuildPreference(guildPreferences[0].guild_id, JSON.parse(guildPreferences[0].guild_preference));
+}
+
+export async function endSession(messagePayload: SendMessagePayload, gameSession: GameSession) {
+    await sendEndGameMessage({ channel: messagePayload.channel, authorId: messagePayload.authorId }, gameSession);
+    await gameSession.endSession();
 }
 
 export async function getMatchingGroupNames(rawGroupNames: Array<string>): Promise<GroupMatchResults> {
