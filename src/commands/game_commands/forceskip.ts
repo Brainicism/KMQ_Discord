@@ -1,10 +1,10 @@
 import BaseCommand, { CommandArgs } from "../base_command";
 import {
-    sendSongMessage,
+    sendEndOfRoundMessage,
     sendErrorMessage,
     areUserAndBotInSameVoiceChannel,
     getDebugContext,
-    getUserIdentifier,
+    getUserTag,
 } from "../../helpers/discord_utils";
 import { bold } from "../../helpers/utils";
 import { getGuildPreference } from "../../helpers/game_utils";
@@ -27,7 +27,7 @@ export default class ForceSkipCommand implements BaseCommand {
             return;
         }
         if (message.author.id !== gameSession.owner.id) {
-            await sendErrorMessage(message, "Force skip ignored", `Only the person who started the game (${bold(getUserIdentifier(gameSession.owner))}) can force-skip.`);
+            await sendErrorMessage(message, "Force skip ignored", `Only the person who started the game (${bold(getUserTag(gameSession.owner))}) can force-skip.`);
             return;
         }
         gameSession.gameRound.skipAchieved = true;
@@ -35,7 +35,7 @@ export default class ForceSkipCommand implements BaseCommand {
             const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
             eliminationScoreboard.decrementAllLives();
         }
-        sendSongMessage(message, gameSession.scoreboard, gameSession.gameRound, true);
+        sendEndOfRoundMessage(message, gameSession.scoreboard, gameSession.gameRound, true);
         gameSession.endRound(false);
         gameSession.startRound(guildPreference, message);
         logger.info(`${getDebugContext(message)} | Owner force-skipped.`);

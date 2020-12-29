@@ -1,6 +1,6 @@
 import GameSession from "../../models/game_session";
 import {
-    sendErrorMessage, getDebugContext, sendInfoMessage, getVoiceChannel, voicePermissionsCheck, getUserIdentifier,
+    sendErrorMessage, getDebugContext, sendInfoMessage, getVoiceChannel, voicePermissionsCheck, getUserTag,
 } from "../../helpers/discord_utils";
 import { deleteGameSession } from "../../helpers/management_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
@@ -46,7 +46,7 @@ export default class PlayCommand implements BaseCommand {
                     // (1) ELIMINATION game creation
                     const lives = parsedMessage.components.length > 1 ? parseInt(parsedMessage.components[1], 10) : DEFAULT_LIVES;
                     startTitle = `\`${process.env.BOT_PREFIX}join\` the game and start it with \`${process.env.BOT_PREFIX}begin\`!`;
-                    gameInstructions = `Type \`${process.env.BOT_PREFIX}join\` to play in the upcoming elimination game. Once all have joined, ${bold(getUserIdentifier(gameOwner))} must send \`${process.env.BOT_PREFIX}begin\` to start the game. Everyone begins with \`${lives}\` lives.`;
+                    gameInstructions = `Type \`${process.env.BOT_PREFIX}join\` to play in the upcoming elimination game. Once all have joined, ${bold(getUserTag(gameOwner))} must send \`${process.env.BOT_PREFIX}begin\` to start the game. Everyone begins with \`${lives}\` lives.`;
                     gameSession = new GameSession(textChannel, voiceChannel, gameOwner, GameType.ELIMINATION, lives);
                     gameSession.addEliminationParticipant(gameOwner);
                 } else {

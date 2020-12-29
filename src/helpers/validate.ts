@@ -3,19 +3,18 @@ import { getDebugContext, sendErrorMessage } from "./discord_utils";
 import { ParsedMessage } from "../types";
 import { CommandValidations } from "../commands/base_command";
 import _logger from "../logger";
+import { arrayToString } from "./utils";
 
 const logger = _logger("validate");
 
+/**
+ * @param message - the Message object
+ * @param warning - the warning text
+ * @param arg - The incorrect argument
+ */
 async function sendValidationErrorMessage(message: Eris.Message<Eris.GuildTextableChannel>, warning: string, arg: string | Array<string>) {
     await sendErrorMessage(message, "Input validation error", warning);
     logger.warn(`${getDebugContext(message)} | ${warning}. val = ${arg}`);
-}
-
-function arrayToString(arr: Array<string>): string {
-    const elements = arr.map((element) => `\`${element}\``);
-    if (elements.length === 1) return elements[0];
-    const lastElement = elements.splice(-1);
-    return `${elements.join(", ")} and ${lastElement}`;
 }
 
 export default (message: Eris.Message<Eris.GuildTextableChannel>, parsedMessage: ParsedMessage, validations: CommandValidations) => {

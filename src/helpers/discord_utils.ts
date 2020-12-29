@@ -22,16 +22,35 @@ const EMBED_FIELDS_PER_PAGE = 20;
 const REQUIRED_TEXT_PERMISSIONS = ["addReactions", "embedLinks"];
 const REQUIRED_VOICE_PERMISSIONS = ["voiceConnect", "voiceSpeak"];
 
+/**
+ * @param message - The Message that initiated the workflow
+ * @returns a string containing basic debug information
+ */
 export function getDebugContext(message: Eris.Message): string {
     return `gid: ${message.guildID}, uid: ${message.author.id}`;
 }
 
+/**
+ * A lower level message sending utility
+ * and when a Eris Message object isn't available in the context
+ * @param messagePayload - An object containing a text channel and author ID
+ * @param messageContent - The MessageContent to send
+ */
 export async function sendMessage(messagePayload: SendMessagePayload, messageContent: Eris.MessageContent): Promise<Eris.Message> {
     const { channel } = messagePayload;
     return state.client.createMessage(channel.id, messageContent);
 }
 
-export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableChannel>, scoreboard: Scoreboard, gameRound: GameRound, isForfeit: boolean, guesser?: string) {
+/**
+ * Sends an end of GameRound message displaying the correct answer as well as
+ * other game related information
+ * @param message - The Message object
+ * @param scoreboard - The GameSession's corresponding Scoreboard
+ * @param gameRound - The GameSession's corresponding GameRound
+ * @param songGuessed - Whether the song was guessed
+ * @param guesser - The Discord tag of the player who guessed correctly
+ */
+export async function sendEndOfRoundMessage(message: Eris.Message<Eris.GuildTextableChannel>, scoreboard: Scoreboard, gameRound: GameRound, songGuessed: boolean, guesser?: string) {
     let footer: Eris.EmbedFooterOptions = null;
     if (gameRound.songAliases.length > 0) {
         footer = {
@@ -49,7 +68,7 @@ export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableCh
     }
 
     const emptyScoreBoard = scoreboard.isEmpty();
-    const description = `${isForfeit ? "Nobody got it." : (`**${guesser}** guessed correctly!`)}\nhttps://youtube.com/watch?v=${gameRound.videoID} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
+    const description = `${songGuessed ? "Nobody got it." : (`**${guesser}** guessed correctly!`)}\nhttps://youtube.com/watch?v=${gameRound.videoID} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
     const fields = scoreboard.getScoreboardEmbedFields().slice(0, 10);
     if (fact) {
         fields.push({
@@ -59,10 +78,10 @@ export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableCh
 
     await sendMessage({ channel: message.channel, authorId: message.author.id }, {
         embed: {
-            color: isForfeit ? EMBED_ERROR_COLOR : EMBED_SUCCESS_COLOR,
+            color: songGuessed ? EMBED_ERROR_COLOR : EMBED_SUCCESS_COLOR,
             author: {
-                name: isForfeit ? null : message.author.username,
-                icon_url: isForfeit ? null : message.author.avatarURL,
+                name: songGuessed ? null : message.author.username,
+                icon_url: songGuessed ? null : message.author.avatarURL,
             },
             title: `"${gameRound.songName}" - ${gameRound.artist}`,
             description,
@@ -75,6 +94,12 @@ export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableCh
     });
 }
 
+/**
+ * Sends an error embed with the specified title/description
+ * @param message - The Message object
+ * @param title - The title of the embed
+ * @param description - The description of the embed
+ */
 export async function sendErrorMessage(message: Eris.Message<Eris.GuildTextableChannel>, title: string, description: string) {
     await sendMessage({ channel: message.channel, authorId: message.author.id }, {
         embed: {
@@ -89,6 +114,13 @@ export async function sendErrorMessage(message: Eris.Message<Eris.GuildTextableC
     });
 }
 
+/**
+ * Sends an info embed with the specified title/description/footer text
+ * @param message - The Message object
+ * @param title - The title of the embed
+ * @param description - The description of the embed
+ * @param footerText - The footer text of the embed
+ */
 export async function sendInfoMessage(message: Eris.Message<Eris.GuildTextableChannel>, title: string, description?: string, footerText?: string) {
     if (description.length > 2048) {
         await sendErrorMessage(message, "Error", "Response message was too long, report this error to the KMQ help server");
@@ -113,7 +145,14 @@ export async function sendInfoMessage(message: Eris.Message<Eris.GuildTextableCh
     await sendMessage({ channel: message.channel, authorId: message.author.id }, { embed });
 }
 
-export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextableChannel>, guildPreference: GuildPreference, updatedOption: string, footerText?: string) {
+/**
+ * Sends an embed displaying the currently selected GameOptions
+ * @param message - The Message object
+ * @param guildPreference - The corresponding GuildPreference
+ * @param updatedOption - Specifies which GameOption was modified
+ * @param footerText - The footer text
+ */
+export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextableChannel>, guildPreference: GuildPreference, updatedOption?: string, footerText?: string) {
     const totalSongs = await getSongCount(guildPreference);
     if (totalSongs === -1) {
         sendErrorMessage(message, "Error retrieving song data", `Try again in a bit, or report this error to the support server found in \`${process.env.BOT_PREFIX}help\`.`);
@@ -156,6 +195,11 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
         footerText !== null ? footerText : null);
 }
 
+/**
+ * Sends an embed displaying the winner of the session as well as the scoreboard
+ * @param messagePayload - An object containing a text channel and author ID
+ * @param gameSession - The GameSession that has ended
+ */
 export async function sendEndGameMessage(messagePayload: SendMessagePayload, gameSession: GameSession) {
     const { client } = state;
     if (gameSession.scoreboard.isEmpty()) {
@@ -193,6 +237,11 @@ export async function sendEndGameMessage(messagePayload: SendMessagePayload, gam
     }
 }
 
+/**
+ * Sends a paginated embed
+ * @param message - The Message object
+ * @param embeds - A list of embeds to paginate over
+ */
 export async function sendPaginationedEmbed(message: Eris.Message<Eris.GuildTextableChannel>, embeds: Array<Eris.EmbedOptions>) {
     if (embeds.length > 1) {
         return EmbedPaginator.createPaginationEmbed(message, embeds, { timeout: 60000 });
@@ -200,6 +249,11 @@ export async function sendPaginationedEmbed(message: Eris.Message<Eris.GuildText
     return sendMessage({ channel: message.channel, authorId: message.author.id }, { embed: embeds[0] });
 }
 
+/**
+ * Sends an embed displaying the scoreboard of the GameSession
+ * @param message - The Message object
+ * @param gameSession - The GameSession
+ */
 export async function sendScoreboardMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
     if (gameSession.scoreboard.isEmpty() && gameSession.gameType === GameType.CLASSIC) {
         return sendMessage({ channel: message.channel, authorId: message.author.id }, {
@@ -236,19 +290,35 @@ export async function sendScoreboardMessage(message: Eris.Message<Eris.GuildText
     return sendPaginationedEmbed(message, embeds);
 }
 
+/**
+ * Disconnects the bot from the voice channel of the  message's originating guild
+ * @param message - The Message object
+ */
 export function disconnectVoiceConnection(message: Eris.Message<Eris.GuildTextableChannel>) {
     state.client.closeVoiceConnection(message.guildID);
 }
 
-export function getUserIdentifier(user: Eris.User): string {
+/**
+ * @param user - The User object
+ * @returns the user's Discord tag
+ */
+export function getUserTag(user: Eris.User): string {
     return `${user.username}#${user.discriminator}`;
 }
 
+/**
+ * @param message - The Message object
+ * @returns the bot's voice connection in the message's originating guild
+ */
 export function getVoiceConnection(message: Eris.Message): Eris.VoiceConnection {
     const voiceConnection = state.client.voiceConnections.get(message.guildID);
     return voiceConnection;
 }
 
+/**
+ * @param message - The Message
+ * @returns whether the message's author and the bot are in the same voice channel
+ */
 export function areUserAndBotInSameVoiceChannel(message: Eris.Message): boolean {
     const botVoiceConnection = getVoiceConnection(message);
     if (!message.member.voiceState || !botVoiceConnection) {
@@ -257,24 +327,44 @@ export function areUserAndBotInSameVoiceChannel(message: Eris.Message): boolean 
     return message.member.voiceState.channelID === botVoiceConnection.channelID;
 }
 
+/**
+ * @param message - The Message object
+ * @returns the voice channel that the message's author is in
+ */
 export function getVoiceChannel(message: Eris.Message<Eris.GuildTextableChannel>): Eris.VoiceChannel {
     const voiceChannel = message.channel.guild.channels.get(message.member.voiceState.channelID) as Eris.VoiceChannel;
     return voiceChannel;
 }
 
+/**
+ * @param message - The Message object
+ * @returns the number of persons in the voice channel excluding bots
+ */
 export function getNumParticipants(message: Eris.Message<Eris.GuildTextableChannel>): number {
-    // Don't include the bot as a participant
     return (getVoiceChannel(message).voiceMembers.filter((x) => !x.bot)).length;
 }
 
+/**
+ * A lower level embed sending utility
+ * @param messagePayload - An object containing a text channel and author ID
+ * @param embed - The Embed to send
+ */
 export async function sendEmbed(messagePayload: SendMessagePayload, embed: Eris.EmbedOptions) {
     return sendMessage(messagePayload, { embed });
 }
 
+/**
+ * @param missingPermissions - List of missing text permissions
+ * @returns a friendly string describing the missing text permissions
+ */
 function missingPermissionsText(missingPermissions: string[]): string {
     return `Ensure that the bot has the following permissions: \`${missingPermissions.join(", ")}\`\n\nSee the following link for details: https://support.discord.com/hc/en-us/articles/206029707-How-do-I-set-up-Permissions-. If you are still having issues, join the support server found in \`${process.env.BOT_PREFIX}help\``;
 }
 
+/**
+ * @param message - The Message object
+ * @returns whether the bot has permissions to join the message author's currently active voice channel
+ */
 export function voicePermissionsCheck(message: Eris.Message<Eris.GuildTextableChannel>): boolean {
     const voiceChannel = getVoiceChannel(message);
     const missingPermissions = REQUIRED_VOICE_PERMISSIONS.filter((permission) => !voiceChannel.permissionsOf(state.client.user.id).has(permission));
@@ -298,6 +388,10 @@ export function voicePermissionsCheck(message: Eris.Message<Eris.GuildTextableCh
     return true;
 }
 
+/**
+ * @param message - The Message object
+ * @returns whether the bot has permissions to message's originating text channel
+ */
 export async function textPermissionsCheck(message: Eris.Message<Eris.GuildTextableChannel>): Promise<boolean> {
     const { channel } = message;
     const { client } = state;
@@ -325,6 +419,11 @@ export async function textPermissionsCheck(message: Eris.Message<Eris.GuildTexta
     return true;
 }
 
+/**
+ * @param gameSession - The currently active GameSession
+ * @param channel - The voice channel the bot is currently in
+ * @returns whether the bot is alone 😔
+ */
 export async function checkBotIsAlone(gameSession: GameSession, channel: Eris.VoiceChannel) {
     if (channel.voiceMembers.size === 1 && channel.voiceMembers.has(state.client.user.id)) {
         if (gameSession) {
@@ -334,12 +433,17 @@ export async function checkBotIsAlone(gameSession: GameSession, channel: Eris.Vo
     }
 }
 
+/** @returns the debug TextChannel */
 export function getDebugChannel(): Eris.TextChannel {
     if (!process.env.DEBUG_SERVER_ID || !process.env.DEBUG_TEXT_CHANNEL_ID) return null;
     return <Eris.TextChannel>state.client.guilds.get(process.env.DEBUG_SERVER_ID)
         .channels.get(process.env.DEBUG_TEXT_CHANNEL_ID);
 }
 
+/**
+ * @param timeInMs - A date in epoch milliseconds
+ * @returns a SQL ISO-friendly timestamp
+ */
 export function getSqlDateString(timeInMs?: number): string {
     if (timeInMs) {
         return new Date(timeInMs).toISOString().slice(0, 19).replace("T", " ");

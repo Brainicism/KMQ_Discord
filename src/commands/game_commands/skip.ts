@@ -2,7 +2,7 @@ import Eris from "eris";
 import BaseCommand, { CommandArgs } from "../base_command";
 import GameSession from "../../models/game_session";
 import {
-    sendSongMessage,
+    sendEndOfRoundMessage,
     areUserAndBotInSameVoiceChannel,
     EMBED_INFO_COLOR,
     getDebugContext,
@@ -78,7 +78,7 @@ export default class SkipCommand implements BaseCommand {
                 eliminationScoreboard.decrementAllLives();
             }
             sendSkipMessage(message, gameSession.gameRound);
-            sendSongMessage(message, gameSession.scoreboard, gameSession.gameRound, true);
+            sendEndOfRoundMessage(message, gameSession.scoreboard, gameSession.gameRound, true);
             gameSession.endRound(false);
             gameSession.startRound(guildPreference, message);
             logger.info(`${getDebugContext(message)} | Skip majority achieved.`);

@@ -93,7 +93,7 @@ export default class EliminationScoreboard extends Scoreboard {
         return allEliminated || oneLeft;
     }
 
-    /** Unused */
+    /** Whether there are any winners */
     isEmpty(): boolean {
         return this.firstPlace.length === 0;
     }

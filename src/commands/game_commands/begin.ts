@@ -1,7 +1,7 @@
 import BaseCommand, { CommandArgs } from "../base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { GameType } from "./play";
-import { getDebugContext, sendInfoMessage, sendErrorMessage, getUserIdentifier, getVoiceChannel } from "../../helpers/discord_utils";
+import { getDebugContext, sendInfoMessage, sendErrorMessage, getUserTag, getVoiceChannel } from "../../helpers/discord_utils";
 import { bold } from "../../helpers/utils";
 import _logger from "../../logger";
 
@@ -15,7 +15,7 @@ export default class BeginCommand implements BaseCommand {
             return;
         }
         if (gameSession.owner.id !== author.id) {
-            sendErrorMessage(message, "Begin ignored", `Only the person who did \`${process.env.BOT_PREFIX}play elimination\` (${bold(getUserIdentifier(gameSession.owner))}) can start the game.`);
+            sendErrorMessage(message, "Begin ignored", `Only the person who did \`${process.env.BOT_PREFIX}play elimination\` (${bold(getUserTag(gameSession.owner))}) can start the game.`);
             return;
         }
         const guildPreference = await getGuildPreference(guildID);
