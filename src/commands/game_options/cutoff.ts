@@ -9,32 +9,6 @@ export const DEFAULT_BEGINNING_SEARCH_YEAR = 2008;
 export const DEFAULT_ENDING_SEARCH_YEAR = (new Date()).getFullYear();
 
 export default class CutoffCommand implements BaseCommand {
-    async call({ message, parsedMessage }: CommandArgs) {
-        const guildPreference = await getGuildPreference(message.guildID);
-        if (parsedMessage.components.length === 0) {
-            guildPreference.setBeginningCutoffYear(DEFAULT_BEGINNING_SEARCH_YEAR);
-            guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
-            await sendOptionsMessage(message, guildPreference, GameOption.CUTOFF);
-            logger.info(`${getDebugContext(message)} | Cutoff set to ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`);
-            return;
-        }
-        const yearRange = parsedMessage.components;
-        const startYear = yearRange[0];
-        if (yearRange.length === 1) {
-            guildPreference.setBeginningCutoffYear(parseInt(startYear, 10));
-            guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
-        } else if (yearRange.length === 2) {
-            const endYear = yearRange[1];
-            if (endYear < startYear) {
-                await sendErrorMessage(message, "Invalid end year", "End year must be after or equal to start year");
-                return;
-            }
-            guildPreference.setBeginningCutoffYear(parseInt(startYear, 10));
-            guildPreference.setEndCutoffYear(parseInt(endYear, 10));
-        }
-        await sendOptionsMessage(message, guildPreference, GameOption.CUTOFF);
-        logger.info(`${getDebugContext(message)} | Cutoff set to ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`);
-    }
     validations = {
         minArgCount: 0,
         maxArgCount: 2,
@@ -74,4 +48,31 @@ export default class CutoffCommand implements BaseCommand {
         ],
         priority: 140,
     };
+
+    async call({ message, parsedMessage }: CommandArgs) {
+        const guildPreference = await getGuildPreference(message.guildID);
+        if (parsedMessage.components.length === 0) {
+            guildPreference.setBeginningCutoffYear(DEFAULT_BEGINNING_SEARCH_YEAR);
+            guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
+            await sendOptionsMessage(message, guildPreference, GameOption.CUTOFF);
+            logger.info(`${getDebugContext(message)} | Cutoff set to ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`);
+            return;
+        }
+        const yearRange = parsedMessage.components;
+        const startYear = yearRange[0];
+        if (yearRange.length === 1) {
+            guildPreference.setBeginningCutoffYear(parseInt(startYear, 10));
+            guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
+        } else if (yearRange.length === 2) {
+            const endYear = yearRange[1];
+            if (endYear < startYear) {
+                await sendErrorMessage(message, "Invalid end year", "End year must be after or equal to start year");
+                return;
+            }
+            guildPreference.setBeginningCutoffYear(parseInt(startYear, 10));
+            guildPreference.setEndCutoffYear(parseInt(endYear, 10));
+        }
+        await sendOptionsMessage(message, guildPreference, GameOption.CUTOFF);
+        logger.info(`${getDebugContext(message)} | Cutoff set to ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`);
+    }
 }

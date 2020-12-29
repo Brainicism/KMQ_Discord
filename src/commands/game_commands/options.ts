@@ -6,11 +6,6 @@ import _logger from "../../logger";
 const logger = _logger("options");
 
 export default class OptionsCommand implements BaseCommand {
-    async call({ message }: CommandArgs) {
-        const guildPreference = await getGuildPreference(message.guildID);
-        logger.info(`${getDebugContext(message)} | Options retrieved`);
-        await sendOptionsMessage(message, guildPreference, null);
-    }
     help = {
         name: "options",
         description: "Displays the current game options.",
@@ -18,4 +13,10 @@ export default class OptionsCommand implements BaseCommand {
         examples: [],
         priority: 50,
     };
+
+    async call({ message }: CommandArgs) {
+        const guildPreference = await getGuildPreference(message.guildID);
+        logger.info(`${getDebugContext(message)} | Options retrieved`);
+        await sendOptionsMessage(message, guildPreference, null);
+    }
 }

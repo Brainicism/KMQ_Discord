@@ -4,6 +4,8 @@ import { getUserTag, sendErrorMessage, sendInfoMessage } from "../../helpers/dis
 import { bold } from "../../helpers/utils";
 
 export default class JoinCommand implements BaseCommand {
+    aliases = ["j"];
+
     async call({ message, gameSessions }: CommandArgs) {
         const gameSession = gameSessions[message.guildID];
         if (!gameSession || gameSession.gameType === GameType.CLASSIC) {
@@ -26,5 +28,4 @@ export default class JoinCommand implements BaseCommand {
             gameSession.addEliminationParticipant(message.author);
         }
     }
-    aliases = ["j"];
 }

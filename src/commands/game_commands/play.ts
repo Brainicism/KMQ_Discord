@@ -17,6 +17,47 @@ export enum GameType {
 }
 
 export default class PlayCommand implements BaseCommand {
+    validations = {
+        minArgCount: 0,
+        maxArgCount: 2,
+        arguments: [
+            {
+                name: "gameType",
+                type: "enum" as const,
+                enums: Object.values(GameType),
+            },
+            {
+                name: "lives",
+                type: "number" as const,
+                minValue: 1,
+                maxValue: 500,
+            },
+        ],
+    };
+
+    aliases = ["random", "start", "p"];
+
+    help = {
+        name: "play",
+        description: "Starts a game of KMQ. Pick between classic (default) and elimination mode",
+        usage: "!play",
+        priority: 1050,
+        examples: [
+            {
+                example: "`!play`",
+                explanation: "Start a classic game of KMQ (type in your guess first to get a point)",
+            },
+            {
+                example: "`!play elimination 5`",
+                explanation: "Start an elimination game of KMQ where each player starts with `5` lives.",
+            },
+            {
+                example: "`!play elimination`",
+                explanation: `Start an elimination game of KMQ where each player starts with \`${DEFAULT_LIVES}\` lives.`,
+            },
+        ],
+    };
+
     async call({ message, gameSessions, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
         const voiceChannel = getVoiceChannel(message);
@@ -69,42 +110,4 @@ export default class PlayCommand implements BaseCommand {
             }
         }
     }
-    validations = {
-        minArgCount: 0,
-        maxArgCount: 2,
-        arguments: [
-            {
-                name: "gameType",
-                type: "enum" as const,
-                enums: Object.values(GameType),
-            },
-            {
-                name: "lives",
-                type: "number" as const,
-                minValue: 1,
-                maxValue: 500,
-            },
-        ],
-    };
-    aliases = ["random", "start", "p"];
-    help = {
-        name: "play",
-        description: "Starts a game of KMQ. Pick between classic (default) and elimination mode",
-        usage: "!play",
-        priority: 1050,
-        examples: [
-            {
-                example: "`!play`",
-                explanation: "Start a classic game of KMQ (type in your guess first to get a point)",
-            },
-            {
-                example: "`!play elimination 5`",
-                explanation: "Start an elimination game of KMQ where each player starts with `5` lives.",
-            },
-            {
-                example: "`!play elimination`",
-                explanation: `Start an elimination game of KMQ where each player starts with \`${DEFAULT_LIVES}\` lives.`,
-            },
-        ],
-    };
 }

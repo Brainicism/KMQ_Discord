@@ -11,6 +11,14 @@ import _logger from "../../logger";
 const logger = _logger("stats");
 
 export default class SkipCommand implements BaseCommand {
+    help = {
+        name: "stats",
+        description: "Various usage/system statistics.",
+        usage: "!stats",
+        examples: [],
+        priority: 1,
+    };
+
     async call({ gameSessions, message }: CommandArgs) {
         const activeGameSessions = Object.keys(gameSessions).length;
         const activeUsers = Object.values(gameSessions).reduce((total, curr) => total + curr.participants.size, 0);
@@ -84,11 +92,4 @@ export default class SkipCommand implements BaseCommand {
             timestamp: new Date(),
         });
     }
-    help = {
-        name: "stats",
-        description: "Various usage/system statistics.",
-        usage: "!stats",
-        examples: [],
-        priority: 1,
-    };
 }

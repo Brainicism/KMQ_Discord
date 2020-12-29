@@ -6,6 +6,16 @@ import { endSession } from "../../helpers/game_utils";
 const logger = _logger("end");
 
 export default class EndCommand implements BaseCommand {
+    help = {
+        name: "end",
+        description: "Finishes the current game and decides on a winner.",
+        usage: "!end",
+        examples: [],
+        priority: 1020,
+    };
+
+    aliases = ["stop", "e"];
+
     async call({ gameSessions, message }: CommandArgs) {
         const gameSession = gameSessions[message.guildID];
         if (!gameSession) {
@@ -16,12 +26,4 @@ export default class EndCommand implements BaseCommand {
         endSession(message, gameSession);
         disconnectVoiceConnection(message);
     }
-    help = {
-        name: "end",
-        description: "Finishes the current game and decides on a winner.",
-        usage: "!end",
-        examples: [],
-        priority: 1020,
-    };
-    aliases = ["stop", "e"];
 }
