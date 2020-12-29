@@ -62,6 +62,6 @@ export default async function messageCreateHandler(message: Eris.Message) {
         }
     } else if (state.gameSessions[message.guildID] && state.gameSessions[message.guildID].gameRound) {
         const gameSession = state.gameSessions[message.guildID];
-        gameSession.guessSong({ message });
+        gameSession.guessSong(message);
     }
 }
