@@ -2,10 +2,16 @@
     "extends": [
         "airbnb-typescript/base"
     ],
+    "plugins": [
+        "eslint-plugin-tsdoc"
+    ],
     "parserOptions": {
         "project": "./tsconfig.json"
     },
     "rules": {
+        "tsdoc/syntax": [
+            "warn"
+        ],
         "@typescript-eslint/indent": [
             "error",
             4

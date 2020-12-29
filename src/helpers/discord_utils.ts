@@ -64,7 +64,7 @@ export async function sendSongMessage(message: Eris.Message<Eris.GuildTextableCh
                 name: isForfeit ? null : message.author.username,
                 icon_url: isForfeit ? null : message.author.avatarURL,
             },
-            title: `"${gameRound.song}" - ${gameRound.artist}`,
+            title: `"${gameRound.songName}" - ${gameRound.artist}`,
             description,
             thumbnail: {
                 url: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,

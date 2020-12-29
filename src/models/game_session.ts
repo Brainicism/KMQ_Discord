@@ -19,6 +19,7 @@ import Scoreboard from "./scoreboard";
 import EliminationScoreboard from "./elimination_scoreboard";
 import { deleteGameSession } from "../helpers/management_utils";
 import { GameType } from "../commands/game_commands/play";
+import { ModeType } from "../commands/game_options/mode";
 
 const logger = _logger("game_session");
 const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
@@ -126,7 +127,7 @@ export default class GameSession {
             .increment("games_played", 1);
     };
 
-    checkGuess(message: Eris.Message, modeType: string): number {
+    checkGuess(message: Eris.Message, modeType: ModeType): number {
         if (!this.gameRound) return 0;
         if (this.gameType === GameType.CLASSIC) {
             this.participants.add(message.author.id);
@@ -158,7 +159,7 @@ export default class GameSession {
 
         const pointsEarned = this.checkGuess(message, guildPreference.getModeType());
         if (pointsEarned > 0) {
-            logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${this.gameRound.song}`);
+            logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${this.gameRound.songName}`);
             const gameSession = state.gameSessions[message.guildID];
             gameSession.lastActiveNow();
             if (this.gameType === GameType.ELIMINATION) {
@@ -293,7 +294,7 @@ export default class GameSession {
 
     getDebugSongDetails(): string {
         if (!this.gameRound) return "No active game round";
-        return `${this.gameRound.song}:${this.gameRound.artist}:${this.gameRound.videoID}`;
+        return `${this.gameRound.songName}:${this.gameRound.artist}:${this.gameRound.videoID}`;
     }
 
     async startGuessTimeout(message: Eris.Message<Eris.GuildTextableChannel>) {
