@@ -1,6 +1,7 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { sendEndGameMessage, disconnectVoiceConnection, getDebugContext } from "../../helpers/discord_utils";
+import { disconnectVoiceConnection, getDebugContext } from "../../helpers/discord_utils";
 import _logger from "../../logger";
+import { endSession } from "../../helpers/game_utils";
 
 const logger = _logger("end");
 
@@ -12,8 +13,7 @@ export default class EndCommand implements BaseCommand {
             return;
         }
         logger.info(`${getDebugContext(message)} | Game session ended`);
-        await sendEndGameMessage({ channel: message.channel, authorId: message.author.id }, gameSession);
-        await gameSession.endSession();
+        endSession(message, gameSession);
         disconnectVoiceConnection(message);
     }
     help = {
