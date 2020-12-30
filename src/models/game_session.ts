@@ -74,7 +74,7 @@ export default class GameSession {
 
     constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel, gameSessionCreator: Eris.User, gameType: GameType, eliminationLives?: number) {
         this.gameType = gameType;
-        this.scoreboard = this.gameType === GameType.ELIMINATION ? new EliminationScoreboard(eliminationLives) : new Scoreboard();
+        this.scoreboard = this.gameType === GameType.ELIMINATION ? new EliminationScoreboard(eliminationLives, textChannel.guild.id) : new Scoreboard(textChannel.guild.id);
         this.lastActive = Date.now();
         this.sessionInitialized = false;
         this.startedAt = Date.now();
@@ -106,18 +106,8 @@ export default class GameSession {
         this.stopGuessTimeout();
         if (this.finished) return;
 
-        // elimination mode, check GameSession finish condition,
-        if (this.gameType === GameType.ELIMINATION) {
-            const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
-            if (eliminationScoreboard.gameFinished()) {
-                endSession({ channel: this.textChannel, authorId: this.owner.id }, this);
-            }
-        } else {
-            // classic mode, check GameSession finish condition
-            const guildPreference = await getGuildPreference(this.textChannel.guild.id);
-            if (guildPreference.isGoalSet() && this.scoreboard.gameFinished(guildPreference.getGoal())) {
-                endSession({ channel: this.textChannel, authorId: this.owner.id }, this);
-            }
+        if (await this.scoreboard.gameFinished()) {
+            endSession({ channel: this.textChannel, authorId: this.owner.id }, this);
         }
     }
 
@@ -223,7 +213,7 @@ export default class GameSession {
 
             // misc. game round cleanup
             this.stopGuessTimeout();
-            sendEndOfRoundMessage(message, this.scoreboard, this.gameRound, false, userTag);
+            await sendEndOfRoundMessage(message, this.scoreboard, this.gameRound, false, userTag);
             await this.endRound(true);
 
             // increment guild's song guess count
@@ -308,7 +298,7 @@ export default class GameSession {
                 const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
                 eliminationScoreboard.decrementAllLives();
             }
-            sendEndOfRoundMessage(message, this.scoreboard, this.gameRound, true);
+            await sendEndOfRoundMessage(message, this.scoreboard, this.gameRound, true);
             await this.endRound(false);
             this.startRound(guildPreference, message);
         }, time * 1000);
@@ -373,7 +363,7 @@ export default class GameSession {
         this.connection.once("end", async () => {
             logger.info(`${getDebugContext(message)} | Song finished without being guessed.`);
             this.stopGuessTimeout();
-            sendEndOfRoundMessage(message, this.scoreboard, this.gameRound, true);
+            await sendEndOfRoundMessage(message, this.scoreboard, this.gameRound, true);
             await this.endRound(false);
             this.startRound(guildPreference, message);
         });

@@ -10,10 +10,10 @@ export default class EliminationScoreboard extends Scoreboard {
     protected players: { [userID: number]: EliminationPlayer };
 
     /** The amount of lives each player starts with */
-    private startingLives: number;
+    private readonly startingLives: number;
 
-    constructor(lives: number) {
-        super();
+    constructor(lives: number, guildID: string) {
+        super(guildID);
         this.startingLives = lives;
     }
 
@@ -81,7 +81,7 @@ export default class EliminationScoreboard extends Scoreboard {
      * Checks whether the game has finished depending on whether
      * it is a solo or multiplayer game
      */
-    gameFinished(): boolean {
+    async gameFinished(): Promise<boolean> {
         // Game ends if
         // (1) all players are eliminated that round or
         const allEliminated = Object.values(this.players).every((player) => player.isEliminated());

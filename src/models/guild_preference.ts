@@ -42,7 +42,7 @@ interface GameOptions {
 
 export default class GuildPreference {
     /** The Discord Guild ID */
-    private guildID: string;
+    private readonly guildID: string;
 
     /** The GuildPreference's respective GameOptions */
     private gameOptions: GameOptions;

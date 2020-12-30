@@ -1,5 +1,10 @@
-import { roundDecimal } from "../helpers/utils";
 import Player from "./player";
+import { roundDecimal } from "../helpers/utils";
+import { getGuildPreference } from "../helpers/game_utils";
+import _logger from "../logger";
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const logger = _logger("scoreboard");
 
 export default class Scoreboard {
     /** Mapping of Discord user ID to Player */
@@ -11,10 +16,14 @@ export default class Scoreboard {
     /** The current highest score */
     private highestScore: number;
 
-    constructor() {
+    /** The Discord Guild ID */
+    private readonly guildID: string;
+
+    constructor(guildID: string) {
         this.players = {};
         this.firstPlace = [];
         this.highestScore = 0;
+        this.guildID = guildID;
     }
 
     /** @returns a string congratulating the winner(s) */
@@ -108,8 +117,9 @@ export default class Scoreboard {
     }
 
     /** @returns whether the game has completed */
-    gameFinished(goal: number): boolean {
-        return this.firstPlace[0].getScore() >= goal;
+    async gameFinished(): Promise<boolean> {
+        const guildPreference = await getGuildPreference(this.guildID);
+        return guildPreference.isGoalSet() && !this.isEmpty() && this.firstPlace[0].getScore() >= guildPreference.getGoal();
     }
 
     /** @returns a list of tags of the player participating in the game */
