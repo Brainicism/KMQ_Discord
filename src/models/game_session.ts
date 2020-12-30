@@ -104,6 +104,13 @@ export default class GameSession {
             this.connection.removeAllListeners();
         }
         this.stopGuessTimeout();
+        if (this.gameType === GameType.ELIMINATION) {
+            const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
+            if (eliminationScoreboard.gameFinished()) {
+                if (this.finished) return;
+                endSession({ channel: this.textChannel, authorId: this.owner.id }, this);
+            }
+        }
     }
 
     /**
@@ -309,11 +316,6 @@ export default class GameSession {
             if (this.gameType === GameType.ELIMINATION) {
                 const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
                 eliminationScoreboard.decrementAllLives();
-                if (eliminationScoreboard.gameFinished()) {
-                    sendEndOfRoundMessage(message, this.scoreboard, this.gameRound, true);
-                    endSession(message, this);
-                    return;
-                }
             }
             sendEndOfRoundMessage(message, this.scoreboard, this.gameRound, true);
             this.endRound(false);
