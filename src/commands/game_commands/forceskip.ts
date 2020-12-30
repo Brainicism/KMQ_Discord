@@ -46,7 +46,7 @@ export default class ForceSkipCommand implements BaseCommand {
             eliminationScoreboard.decrementAllLives();
         }
         sendEndOfRoundMessage(message, gameSession.scoreboard, gameSession.gameRound, true);
-        gameSession.endRound(false);
+        await gameSession.endRound(false);
         gameSession.startRound(guildPreference, message);
         logger.info(`${getDebugContext(message)} | Owner force-skipped.`);
         gameSession.lastActiveNow();

@@ -89,7 +89,7 @@ export default class SkipCommand implements BaseCommand {
             }
             sendSkipMessage(message, gameSession.gameRound);
             sendEndOfRoundMessage(message, gameSession.scoreboard, gameSession.gameRound, true);
-            gameSession.endRound(false);
+            await gameSession.endRound(false);
             gameSession.startRound(guildPreference, message);
             logger.info(`${getDebugContext(message)} | Skip majority achieved.`);
         } else {
