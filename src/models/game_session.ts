@@ -74,7 +74,7 @@ export default class GameSession {
 
     constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel, gameSessionCreator: Eris.User, gameType: GameType, eliminationLives?: number) {
         this.gameType = gameType;
-        this.scoreboard = this.gameType === GameType.ELIMINATION ? new EliminationScoreboard(eliminationLives) : new Scoreboard();
+        this.scoreboard = this.gameType === GameType.ELIMINATION ? new EliminationScoreboard(eliminationLives, textChannel.guild.id) : new Scoreboard(textChannel.guild.id);
         this.lastActive = Date.now();
         this.sessionInitialized = false;
         this.startedAt = Date.now();
@@ -94,7 +94,7 @@ export default class GameSession {
      * Ends an active GameRound
      * @param guessed - Whether the round ended via a correct guess, or other (timeout, error, etc)
      */
-    endRound(guessed: boolean) {
+    async endRound(guessed: boolean) {
         if (guessed) {
             this.guessTimes.push(Date.now() - this.gameRound.startedAt);
         }
@@ -104,6 +104,11 @@ export default class GameSession {
             this.connection.removeAllListeners();
         }
         this.stopGuessTimeout();
+        if (this.finished) return;
+
+        if (await this.scoreboard.gameFinished()) {
+            endSession({ channel: this.textChannel, authorId: this.owner.id }, this);
+        }
     }
 
     /**
@@ -112,7 +117,7 @@ export default class GameSession {
     endSession = async (): Promise<void> => {
         const guildId = this.textChannel.guild.id;
         this.finished = true;
-        this.endRound(false);
+        await this.endRound(false);
         const voiceConnection = state.client.voiceConnections.get(guildId);
 
         // leave voice channel
@@ -153,7 +158,7 @@ export default class GameSession {
                 rounds_played: this.roundsPlayed,
             });
 
-        logger.info(`gid: ${guildId} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}`);
+        logger.info(`gid: ${guildId} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}. gameType = ${this.gameType}`);
         deleteGameSession(guildId);
     };
 
@@ -208,30 +213,13 @@ export default class GameSession {
 
             // misc. game round cleanup
             this.stopGuessTimeout();
-            sendEndOfRoundMessage(message, this.scoreboard, this.gameRound, false, userTag);
-            this.endRound(true);
+            await sendEndOfRoundMessage(message, this.scoreboard, this.gameRound, false, userTag);
+            await this.endRound(true);
 
             // increment guild's song guess count
             await dbContext.kmq("guild_preferences")
                 .where("guild_id", message.guildID)
                 .increment("songs_guessed", 1);
-
-            // elimination mode, check GameSession finish condition,
-            if (this.gameType === GameType.ELIMINATION) {
-                const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
-                if (eliminationScoreboard.gameFinished()) {
-                    logger.info(`${getDebugContext(message)} | Game session ended (one player alive in elimination gameType)`);
-                    endSession({ channel: message.channel, authorId: message.author.id }, this);
-                    return;
-                }
-            }
-
-            // classic mode, check GameSession finish condition
-            if (guildPreference.isGoalSet() && this.scoreboard.gameFinished(guildPreference.getGoal())) {
-                logger.info(`${getDebugContext(message)} | Game session ended (goal of ${guildPreference.getGoal()} reached)`);
-                endSession({ channel: message.channel, authorId: message.author.id }, this);
-                return;
-            }
 
             this.startRound(guildPreference, message);
         }
@@ -309,14 +297,9 @@ export default class GameSession {
             if (this.gameType === GameType.ELIMINATION) {
                 const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
                 eliminationScoreboard.decrementAllLives();
-                if (eliminationScoreboard.gameFinished()) {
-                    sendEndOfRoundMessage(message, this.scoreboard, this.gameRound, true);
-                    endSession(message, this);
-                    return;
-                }
             }
-            sendEndOfRoundMessage(message, this.scoreboard, this.gameRound, true);
-            this.endRound(false);
+            await sendEndOfRoundMessage(message, this.scoreboard, this.gameRound, true);
+            await this.endRound(false);
             this.startRound(guildPreference, message);
         }, time * 1000);
     }
@@ -380,8 +363,8 @@ export default class GameSession {
         this.connection.once("end", async () => {
             logger.info(`${getDebugContext(message)} | Song finished without being guessed.`);
             this.stopGuessTimeout();
-            sendEndOfRoundMessage(message, this.scoreboard, this.gameRound, true);
-            this.endRound(false);
+            await sendEndOfRoundMessage(message, this.scoreboard, this.gameRound, true);
+            await this.endRound(false);
             this.startRound(guildPreference, message);
         });
 
@@ -397,7 +380,7 @@ export default class GameSession {
             logger.error(`${getDebugContext(message)} | Unknown error with stream dispatcher. song = ${this.getDebugSongDetails()}. err = ${err}`);
             // Attempt to restart game with different song
             await sendErrorMessage(message, "Error playing song", "Starting new round in 3 seconds...");
-            this.endRound(false);
+            await this.endRound(false);
             this.startRound(guildPreference, message);
         });
     }
