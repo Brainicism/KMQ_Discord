@@ -60,7 +60,7 @@ export async function ensureVoiceConnection(gameSession: GameSession): Promise<v
     const { client } = state;
     return new Promise(async (resolve, reject) => {
         try {
-            const connection = await client.joinVoiceChannel(gameSession.voiceChannel.id);
+            const connection = await client.joinVoiceChannel(gameSession.voiceChannel.id, { opusOnly: true });
             gameSession.connection = connection;
             if (gameSession.connection.ready) {
                 resolve();
