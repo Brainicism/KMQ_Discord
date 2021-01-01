@@ -46,6 +46,11 @@ interface GaonWeeklyEntry {
     year: string;
 }
 
+export async function reloadFactCache() {
+    logger.info("Regenerating fact cache...");
+    await generateFacts();
+}
+
 async function generateFacts() {
     const funFactPromises = funFactFunctions.map((x) => x());
     const kmqFactPromises = kmqFactFunctions.map((x) => x());
@@ -76,14 +81,6 @@ function parseGaonWeeklyRankList(ranklist: string, year: string): Array<GaonWeek
 }
 
 export default async function getFact(): Promise<string> {
-    if (factCache === null) {
-        logger.info("Generating fact cache...");
-        await generateFacts();
-    }
-    if (Date.now() - factCache.lastUpdated > 1000 * 60 * 60 * 24) {
-        logger.info("Regenerating fact cache...");
-        await generateFacts();
-    }
     const randomVal = Math.random();
     if (randomVal < 0.1) {
         return chooseRandom(factStrings);
@@ -115,7 +112,7 @@ async function recentMusicVideos(): Promise<string[]> {
         logger.warn("recentMusicVideos generated no facts");
         return [];
     }
-    return result.map((x) => `New Song Alert: Check out this recently released music video, '${x.name}' by '${x.artist}'!\nhttps://youtu.be/${x.youtubeLink}`);
+    return result.map((x) => `New Song Alert: Check out this recently released music video, ['${x.name}' by '${x.artist}'](https://youtu.be/${x.youtubeLink})`);
 }
 
 async function recentMilestone(): Promise<string[]> {
@@ -491,21 +488,21 @@ async function historicalGaonWeekly(): Promise<Array<string>> {
     week = week === 53 ? 52 : week;
     const yearRange = Array.from({ length: endYear - startYear + 1 }, (value, key) => startYear + key);
     const result = await dbContext.kpopVideos("app_kpop_gaondigi")
-        .select(["rank_list", "year", "week"])
+        .select(["ranklist", "year", "week"])
         .where("week", "=", week)
         .whereIn("year", yearRange)
         .orderBy("year", "DESC");
-    const parsedResults = result.map((x) => parseGaonWeeklyRankList(x.rank_list, x.year));
+    const parsedResults = result.map((x) => parseGaonWeeklyRankList(x.ranklist, x.year));
     return parsedResults.map((x) => `Fun Fact: On this week in ${x[0].year}, ${generateSongArtistHyperlink(x[0].songName, x[0].artistName)} was the topping charting song on the Gaon Weekly charts!`);
 }
 
 async function recentGaonWeekly(): Promise<Array<string>> {
     const result = await dbContext.kpopVideos("app_kpop_gaondigi")
-        .select(["rank_list", "year", "week"])
+        .select(["ranklist", "year", "week"])
         .orderBy("year", "DESC")
         .orderBy("week", "DESC")
         .limit(1);
-    const parsedResult = parseGaonWeeklyRankList(result[0].rank_list, result[0].year);
+    const parsedResult = parseGaonWeeklyRankList(result[0].ranklist, result[0].year);
     return parsedResult.slice(0, 10).map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x.songName, x.artistName)} is the ${getOrdinalNum(idx + 1)} highest charting song on the Gaon Weekly charts last week!`);
 }
 
