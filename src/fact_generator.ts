@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
+import PHPUnserialize from "php-unserialize";
+import { URL } from "url";
 import dbContext from "./database_context";
-import { parseJsonFile } from "./helpers/utils";
+import { parseJsonFile, weekOfYear } from "./helpers/utils";
 import _logger from "./logger";
 
 const factStrings = parseJsonFile("../data/facts.json");
@@ -17,13 +19,13 @@ const musicShows = {
 };
 const funFactFunctions = [recentMusicVideos, recentMilestone, recentMusicShowWin, musicShowWins, mostViewedGroups, mostLikedGroups, mostViewedVideo, mostLikedVideo,
     mostMusicVideos, yearWithMostDebuts, yearWithMostReleases, viewsByGender, mostViewedSoloArtist, viewsBySolo, mostViewsPerDay, bigThreeDominance, mostGaonFirsts,
-    mostGaonAppearances];
+    mostGaonAppearances, historicalGaonWeekly, recentGaonWeekly];
 
 const kmqFactFunctions = [longestGame, mostGames, mostCorrectGuessed, globalTotalGames, recentGameSessions, genderGamePreferences, recentGames, mostSongsGuessedPlayer,
     mostGamesPlayedPlayer, recentUniquePlayers];
 
 function chooseRandom(list: Array<any>) {
-    return list[Math.floor(Math.random() * list.length)];
+    return list[Math.floor(Math.random() * list.length)] || [];
 }
 
 function getOrdinalNum(n: number): string {
@@ -35,6 +37,19 @@ let factCache: {
     kmqFacts: string[][],
     lastUpdated: number
 } = null;
+
+interface GaonWeeklyEntry {
+    songName: string;
+    artistName: string;
+    artistId?: string;
+    songId?: string;
+    year: string;
+}
+
+export async function reloadFactCache() {
+    logger.info("Regenerating fact cache...");
+    await generateFacts();
+}
 
 async function generateFacts() {
     const funFactPromises = funFactFunctions.map((x) => x());
@@ -48,15 +63,24 @@ async function generateFacts() {
     };
 }
 
+function parseGaonWeeklyRankList(ranklist: string, year: string): Array<GaonWeeklyEntry> {
+    const parsedWeeklyRankList = PHPUnserialize.unserialize(ranklist);
+    return Object.values(parsedWeeklyRankList).map((x) => {
+        const songName = x["0"];
+        const artistName = x["1"];
+        const artistId = x["2"] || null;
+        const songId = x["3"] || null;
+        return {
+            songName,
+            artistName,
+            artistId,
+            songId,
+            year,
+        };
+    });
+}
+
 export default async function getFact(): Promise<string> {
-    if (factCache === null) {
-        logger.info("Generating fact cache...");
-        await generateFacts();
-    }
-    if (Date.now() - factCache.lastUpdated > 1000 * 60 * 60 * 24) {
-        logger.info("Regenerating fact cache...");
-        await generateFacts();
-    }
     const randomVal = Math.random();
     if (randomVal < 0.1) {
         return chooseRandom(factStrings);
@@ -88,7 +112,7 @@ async function recentMusicVideos(): Promise<string[]> {
         logger.warn("recentMusicVideos generated no facts");
         return [];
     }
-    return result.map((x) => `New Song Alert: Check out this recently released music video, '${x.name}' by '${x.artist}'!\nhttps://youtu.be/${x.youtubeLink}`);
+    return result.map((x) => `New Song Alert: Check out this recently released music video, ['${x.name}' by '${x.artist}'](https://youtu.be/${x.youtubeLink})`);
 }
 
 async function recentMilestone(): Promise<string[]> {
@@ -107,7 +131,7 @@ async function recentMilestone(): Promise<string[]> {
         logger.warn("recentMilestone generated no facts");
         return [];
     }
-    return result.map((x) => `Fun Fact: '${x.song_name}' - '${x.artist_name}' recently reached ${x.milestone_views.toLocaleString()} views on YouTube!`);
+    return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x.song_name, x.artist_name)} recently reached ${x.milestone_views.toLocaleString()} views on YouTube!`);
 }
 
 async function recentMusicShowWin(): Promise<string[]> {
@@ -178,7 +202,7 @@ async function mostViewedVideo(): Promise<string[]> {
         .where("app_kpop.vtype", "main")
         .orderBy("views", "DESC")
         .limit(25);
-    return result.map((x, idx) => `Fun Fact: '${x.song_name}' - '${x.artist_name}' is the ${getOrdinalNum(idx + 1)} most viewed music video with ${x.views.toLocaleString()} YouTube views!`);
+    return result.map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x.song_name, x.artist_name)} is the ${getOrdinalNum(idx + 1)} most viewed music video with ${x.views.toLocaleString()} YouTube views!`);
 }
 
 async function mostLikedVideo(): Promise<string[]> {
@@ -189,7 +213,7 @@ async function mostLikedVideo(): Promise<string[]> {
         })
         .orderBy("likes", "DESC")
         .limit(25);
-    return result.map((x, idx) => `Fun Fact: '${x.song_name}' - ${x.artist_name} is the ${getOrdinalNum(idx + 1)} most liked music video with ${x.likes.toLocaleString()} YouTube likes!`);
+    return result.map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x.song_name, x.artist_name)} is the ${getOrdinalNum(idx + 1)} most liked music video with ${x.likes.toLocaleString()} YouTube likes!`);
 }
 
 async function mostMusicVideos(): Promise<string[]> {
@@ -303,7 +327,7 @@ async function mostViewsPerDay(): Promise<string[]> {
         })
         .orderBy("views_per_day", "DESC")
         .limit(25);
-    return result.map((x, idx) => `Fun Fact: '${x.song_name}' - '${x.artist_name}' is the music video with the ${getOrdinalNum(idx + 1)} most views per day, averaging ${x.views_per_day.toLocaleString()} over ${x.days_since} days!`);
+    return result.map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x.song_name, x.artist_name)} is the music video with the ${getOrdinalNum(idx + 1)} most views per day, averaging ${x.views_per_day.toLocaleString()} over ${x.days_since} days!`);
 }
 
 async function bigThreeDominance(): Promise<string[]> {
@@ -451,4 +475,39 @@ async function mostGaonAppearances(): Promise<string[]> {
         .orderBy("appearances", "DESC")
         .limit(25);
     return result.map((x, idx) => `Fun Fact: '${x.artist_name}' has placed on the GAON digital weekly charts the ${getOrdinalNum(idx + 1)} most times with ${x.appearances} appearances!`);
+}
+
+async function historicalGaonWeekly(): Promise<Array<string>> {
+    const startYear = 2010;
+    const endYear = new Date().getFullYear() - 1;
+    let week = weekOfYear();
+    /**
+     * Some weeks have 53 days depending on when you start counting a 'week'
+     * Better safe than sorry and just call it the 52nd week
+     */
+    week = week === 53 ? 52 : week;
+    const yearRange = Array.from({ length: endYear - startYear + 1 }, (value, key) => startYear + key);
+    const result = await dbContext.kpopVideos("app_kpop_gaondigi")
+        .select(["ranklist", "year", "week"])
+        .where("week", "=", week)
+        .whereIn("year", yearRange)
+        .orderBy("year", "DESC");
+    const parsedResults = result.map((x) => parseGaonWeeklyRankList(x.ranklist, x.year));
+    return parsedResults.map((x) => `Fun Fact: On this week in ${x[0].year}, ${generateSongArtistHyperlink(x[0].songName, x[0].artistName)} was the topping charting song on the Gaon Weekly charts!`);
+}
+
+async function recentGaonWeekly(): Promise<Array<string>> {
+    const result = await dbContext.kpopVideos("app_kpop_gaondigi")
+        .select(["ranklist", "year", "week"])
+        .orderBy("year", "DESC")
+        .orderBy("week", "DESC")
+        .limit(1);
+    const parsedResult = parseGaonWeeklyRankList(result[0].ranklist, result[0].year);
+    return parsedResult.slice(0, 10).map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x.songName, x.artistName)} is the ${getOrdinalNum(idx + 1)} highest charting song on the Gaon Weekly charts last week!`);
+}
+
+function generateSongArtistHyperlink(songName: string, artistName: string): string {
+    const searchUrl = new URL("https://youtube.com/results");
+    searchUrl.searchParams.append("search_query", `${songName} ${artistName}`);
+    return `['${songName}' by '${artistName}'](${searchUrl.toString()})`;
 }

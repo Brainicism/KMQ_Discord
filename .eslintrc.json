@@ -2,10 +2,16 @@
     "extends": [
         "airbnb-typescript/base"
     ],
+    "plugins": [
+        "eslint-plugin-tsdoc"
+    ],
     "parserOptions": {
         "project": "./tsconfig.json"
     },
     "rules": {
+        "tsdoc/syntax": [
+            "warn"
+        ],
         "@typescript-eslint/indent": [
             "error",
             4
@@ -63,6 +69,19 @@
             "error",
             {
                 "argsIgnorePattern": "^_"
+            }
+        ],
+        "@typescript-eslint/member-ordering": [
+            "warn",
+            {
+                "default": [
+                    "public-field",
+                    "protected-field",
+                    "private-field",
+                    "public-method",
+                    "protected-method",
+                    "private-method"
+                ]
             }
         ]
     }

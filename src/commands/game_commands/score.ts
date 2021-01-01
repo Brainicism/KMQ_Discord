@@ -5,6 +5,16 @@ import _logger from "../../logger";
 const logger = _logger("score");
 
 export default class ScoreCommand implements BaseCommand {
+    help = {
+        name: "score",
+        description: "See the scoreboard for the current game",
+        usage: "!score",
+        examples: [],
+        priority: 50,
+    };
+
+    aliases = ["scoreboard"];
+
     async call({ message, gameSessions }: CommandArgs) {
         const gameSession = gameSessions[message.guildID];
         if (!gameSession) {
@@ -15,12 +25,4 @@ export default class ScoreCommand implements BaseCommand {
         logger.info(`${getDebugContext(message)} | Score retrieved`);
         await sendScoreboardMessage(message, gameSession);
     }
-    help = {
-        name: "score",
-        description: "See the scoreboard for the current game",
-        usage: "!score",
-        examples: [],
-        priority: 50,
-    };
-    aliases = ["scoreboard"];
 }

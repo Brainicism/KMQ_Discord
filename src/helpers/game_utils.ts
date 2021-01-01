@@ -1,10 +1,11 @@
-import Eris from "eris";
 import dbContext from "../database_context";
+import state from "../kmq";
 import _logger from "../logger";
 import GameSession from "../models/game_session";
 import GuildPreference from "../models/guild_preference";
-import { QueriedSong } from "../types";
+import { QueriedSong, SendMessagePayload } from "../types";
 import { getForcePlaySong, isDebugMode, isForcedSongActive } from "./debug_utils";
+import { sendEndGameMessage } from "./discord_utils";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -15,6 +16,12 @@ interface GroupMatchResults {
     matchedGroups?: { id: number, name: string }[];
 }
 
+/**
+ * Returns a list of songs from the data store, narrowed down by the specified game options
+ * @param guildPreference - The GuildPreference
+ * @param ignoredVideoIds - List of Youtube video IDs of songs to ignore
+ * @returns a list of songs, as well as the number of songs before the filter option was applied
+ */
 async function getFilteredSongList(guildPreference: GuildPreference, ignoredVideoIds?: Array<string>): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
     let result: Array<QueriedSong>;
     if (!guildPreference.isGroupsMode()) {
@@ -45,10 +52,15 @@ async function getFilteredSongList(guildPreference: GuildPreference, ignoredVide
     };
 }
 
-export async function ensureVoiceConnection(gameSession: GameSession, client: Eris.Client): Promise<void> {
+/**
+ * Joins the VoiceChannel specified by GameSession, and stores the VoiceConnection
+ * @param gameSession - The active GameSession
+ */
+export async function ensureVoiceConnection(gameSession: GameSession): Promise<void> {
+    const { client } = state;
     return new Promise(async (resolve, reject) => {
         try {
-            const connection = await client.joinVoiceChannel(gameSession.voiceChannel.id);
+            const connection = await client.joinVoiceChannel(gameSession.voiceChannel.id, { opusOnly: true });
             gameSession.connection = connection;
             if (gameSession.connection.ready) {
                 resolve();
@@ -62,6 +74,11 @@ export async function ensureVoiceConnection(gameSession: GameSession, client: Er
     });
 }
 
+/**
+ * Selects a random song based on the GameOptions, avoiding recently played songs
+ * @param guildPreference - The GuildPreference
+ * @param lastPlayedSongs - The list of recently played songs
+ */
 export async function selectRandomSong(guildPreference: GuildPreference, lastPlayedSongs: Array<string>): Promise<QueriedSong> {
     if (isDebugMode() && isForcedSongActive()) {
         const forcePlayedQueriedSong = await getForcePlaySong();
@@ -76,6 +93,10 @@ export async function selectRandomSong(guildPreference: GuildPreference, lastPla
     return queriedSongList[Math.floor(Math.random() * queriedSongList.length)];
 }
 
+/**
+ * @param guildPreference - The GuildPreference
+ * @returns the total number of available songs based on the GameOptions
+ */
 export async function getSongCount(guildPreference: GuildPreference): Promise<number> {
     try {
         const { countBeforeLimit: totalCount } = await getFilteredSongList(guildPreference);
@@ -86,7 +107,9 @@ export async function getSongCount(guildPreference: GuildPreference): Promise<nu
     }
 }
 
-export async function cleanupInactiveGameSessions(gameSessions: { [guildId: string]: GameSession }): Promise<void> {
+/** Cleans up inactive GameSessions */
+export async function cleanupInactiveGameSessions(): Promise<void> {
+    const { gameSessions } = state;
     const currentDate = Date.now();
     let inactiveSessions = 0;
     const totalSessions = Object.keys(gameSessions).length;
@@ -104,6 +127,11 @@ export async function cleanupInactiveGameSessions(gameSessions: { [guildId: stri
     }
 }
 
+/**
+ * Gets or creates a GuildPreference
+ * @param guildID - The Guild ID
+ * @returns the correspond guild's GuildPreference
+ */
 export async function getGuildPreference(guildID: string): Promise<GuildPreference> {
     const guildPreferences = await dbContext.kmq("guild_preferences").select("*").where("guild_id", guildID);
     if (guildPreferences.length === 0) {
@@ -115,6 +143,20 @@ export async function getGuildPreference(guildID: string): Promise<GuildPreferen
     return new GuildPreference(guildPreferences[0].guild_id, JSON.parse(guildPreferences[0].guild_preference));
 }
 
+/**
+ * Perform end of GameSession cleanup activities
+ * @param messagePayload - An object containing a text channel and author ID
+ * @param gameSession - The GameSession to end
+ */
+export async function endSession(messagePayload: SendMessagePayload, gameSession: GameSession) {
+    await sendEndGameMessage({ channel: messagePayload.channel, authorId: messagePayload.authorId }, gameSession);
+    await gameSession.endSession();
+}
+
+/**
+ * @param rawGroupNames - List of user-inputted group names
+ * @returns a list of recognized/unrecognized groups
+ */
 export async function getMatchingGroupNames(rawGroupNames: Array<string>): Promise<GroupMatchResults> {
     const matchingGroups = (await dbContext.kpopVideos("kpop_videos.app_kpop_group")
         .select(["id", "name"])

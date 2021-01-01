@@ -100,9 +100,6 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
 };
 
 export default class HelpCommand implements BaseCommand {
-    async call({ parsedMessage, message }: CommandArgs) {
-        await helpMessage(message, parsedMessage.argument);
-    }
     help = {
         name: "help",
         description: "Get help about the game's commands. Add a command to get information about the specific command.",
@@ -119,4 +116,8 @@ export default class HelpCommand implements BaseCommand {
         ],
         priority: 1000,
     };
+
+    async call({ parsedMessage, message }: CommandArgs) {
+        await helpMessage(message, parsedMessage.argument);
+    }
 }

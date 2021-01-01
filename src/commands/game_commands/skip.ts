@@ -2,7 +2,7 @@ import Eris from "eris";
 import BaseCommand, { CommandArgs } from "../base_command";
 import GameSession from "../../models/game_session";
 import {
-    sendSongMessage,
+    sendEndOfRoundMessage,
     areUserAndBotInSameVoiceChannel,
     EMBED_INFO_COLOR,
     getDebugContext,
@@ -59,6 +59,16 @@ function isSkipMajority(message: Eris.Message<Eris.GuildTextableChannel>, gameSe
 }
 
 export default class SkipCommand implements BaseCommand {
+    help = {
+        name: "skip",
+        description: "Vote to skip the current song. A song is skipped when majority of participants vote to skip it.",
+        usage: "!skip",
+        examples: [],
+        priority: 1010,
+    };
+
+    aliases = ["s"];
+
     async call({ gameSessions, message }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
         const gameSession = gameSessions[message.guildID];
@@ -78,8 +88,8 @@ export default class SkipCommand implements BaseCommand {
                 eliminationScoreboard.decrementAllLives();
             }
             sendSkipMessage(message, gameSession.gameRound);
-            sendSongMessage(message, gameSession.scoreboard, gameSession.gameRound, true);
-            gameSession.endRound(false);
+            await sendEndOfRoundMessage(message, gameSession.scoreboard, gameSession.gameRound, true);
+            await gameSession.endRound(false);
             gameSession.startRound(guildPreference, message);
             logger.info(`${getDebugContext(message)} | Skip majority achieved.`);
         } else {
@@ -88,12 +98,4 @@ export default class SkipCommand implements BaseCommand {
         }
         gameSession.lastActiveNow();
     }
-    help = {
-        name: "skip",
-        description: "Vote to skip the current song. A song is skipped when majority of participants vote to skip it.",
-        usage: "!skip",
-        examples: [],
-        priority: 1010,
-    };
-    aliases = ["s"];
 }

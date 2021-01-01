@@ -1,21 +1,11 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { sendEndGameMessage, disconnectVoiceConnection, getDebugContext } from "../../helpers/discord_utils";
+import { disconnectVoiceConnection, getDebugContext } from "../../helpers/discord_utils";
 import _logger from "../../logger";
+import { endSession } from "../../helpers/game_utils";
 
 const logger = _logger("end");
 
 export default class EndCommand implements BaseCommand {
-    async call({ gameSessions, message }: CommandArgs) {
-        const gameSession = gameSessions[message.guildID];
-        if (!gameSession) {
-            logger.warn(`${getDebugContext(message)} | No active game session`);
-            return;
-        }
-        logger.info(`${getDebugContext(message)} | Game session ended`);
-        await sendEndGameMessage({ channel: message.channel, authorId: message.author.id }, gameSession);
-        await gameSession.endSession();
-        disconnectVoiceConnection(message);
-    }
     help = {
         name: "end",
         description: "Finishes the current game and decides on a winner.",
@@ -23,5 +13,17 @@ export default class EndCommand implements BaseCommand {
         examples: [],
         priority: 1020,
     };
+
     aliases = ["stop", "e"];
+
+    async call({ gameSessions, message }: CommandArgs) {
+        const gameSession = gameSessions[message.guildID];
+        if (!gameSession) {
+            logger.warn(`${getDebugContext(message)} | No active game session`);
+            return;
+        }
+        logger.info(`${getDebugContext(message)} | Game session ended`);
+        endSession(message, gameSession);
+        disconnectVoiceConnection(message);
+    }
 }
