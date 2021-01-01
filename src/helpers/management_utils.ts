@@ -30,6 +30,7 @@ import { EnvType } from "../types";
 import storeDailyStats from "../scripts/store-daily-stats";
 import { seedAndDownloadNewSongs } from "../seed/seed_db";
 import { parseJsonFile } from "./utils";
+import { reloadFactCache } from "../fact_generator";
 
 const glob = promisify(_glob);
 
@@ -114,6 +115,7 @@ export function reloadAliases() {
     try {
         state.aliases.song = parseJsonFile(songAliasesFilePath);
         state.aliases.artist = parseJsonFile(artistAliasesFilePath);
+        logger.info("Reloaded song and artist alias data");
     } catch (err) {
         logger.error("Error parsing alias files");
         state.aliases.song = {};
@@ -153,6 +155,7 @@ export function registerIntervals() {
     schedule.scheduleJob("0 0 * * *", async () => {
         const serverCount = state.client.guilds.size;
         storeDailyStats(serverCount);
+        reloadFactCache();
     });
 
     // every monday at 7am UTC => 2am EST
@@ -164,6 +167,12 @@ export function registerIntervals() {
     schedule.scheduleJob("*/5 * * * *", async () => {
         reloadAliases();
     });
+}
+
+/** Reloads caches */
+export async function reloadCaches() {
+    reloadAliases();
+    await reloadFactCache();
 }
 
 /** @returns a mapping of command name to command source file */
