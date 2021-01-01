@@ -3,17 +3,13 @@ import { ModeType } from "../commands/game_options/mode";
 import state from "../kmq";
 import _logger from "../logger";
 
-/** List of characters to remove from song names/guesses */
+/** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
-const REMOVED_CHARACTERS_SONG_GUESS = /[\|’\ '?!.\-,]/g;
-
-/** List of characters to remove from artist names/guesses */
-// eslint-disable-next-line no-useless-escape
-const REMOVED_CHARACTERS_ARTIST_GUESS = /[:'.\-★*\ \(\)]/g;
+const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:★\ \(\)]/g;
 
 /** Set of characters to replace in song names/guesses */
 const CHARACTER_REPLACEMENTS = [
-    { pattern: REMOVED_CHARACTERS_SONG_GUESS, replacement: "" },
+    { pattern: REMOVED_CHARACTERS, replacement: "" },
     { pattern: /&/g, replacement: "and" },
 ];
 
@@ -41,7 +37,6 @@ function cleanSongName(name: string): string {
  */
 function cleanArtistName(name: string): string {
     let cleanName = name.toLowerCase()
-        .replace(REMOVED_CHARACTERS_ARTIST_GUESS, "")
         .trim();
     for (const characterReplacement of CHARACTER_REPLACEMENTS) {
         cleanName = cleanName.replace(characterReplacement.pattern, characterReplacement.replacement);
