@@ -9,7 +9,7 @@ export default async function guildCreateHandler(guild: Eris.Guild) {
     const kmqDebugChannel = getDebugChannel();
     if (!kmqDebugChannel) return;
     const joinDate: Date = new Date(guild.joinedAt);
-    await sendMessage({ channel: kmqDebugChannel }, {
+    await sendMessage(kmqDebugChannel, {
         embed: {
             color: EMBED_INFO_COLOR,
             author: {

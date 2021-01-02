@@ -3,7 +3,7 @@ import state from "../kmq";
 import _logger from "../logger";
 import GameSession from "../models/game_session";
 import GuildPreference from "../models/guild_preference";
-import { QueriedSong, SendMessagePayload } from "../types";
+import { QueriedSong } from "../types";
 import { getForcePlaySong, isDebugMode, isForcedSongActive } from "./debug_utils";
 import { sendEndGameMessage } from "./discord_utils";
 
@@ -145,11 +145,11 @@ export async function getGuildPreference(guildID: string): Promise<GuildPreferen
 
 /**
  * Perform end of GameSession cleanup activities
- * @param messagePayload - An object containing a text channel and author ID
+ * @param messageContext - An object containing a text channel and author ID
  * @param gameSession - The GameSession to end
  */
-export async function endSession(messagePayload: SendMessagePayload, gameSession: GameSession) {
-    await sendEndGameMessage({ channel: messagePayload.channel, authorId: messagePayload.authorId }, gameSession);
+export async function endSession(gameSession: GameSession) {
+    await sendEndGameMessage(gameSession.textChannel, gameSession);
     await gameSession.endSession();
 }
 

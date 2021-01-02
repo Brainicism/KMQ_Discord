@@ -1,6 +1,6 @@
 import BaseCommand, { CommandArgs } from "../base_command";
 import { GameType } from "./play";
-import { getUserTag, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
+import { getUserTag, sendErrorMessage, sendInfoMessage, getMessageContext } from "../../helpers/discord_utils";
 import { bold } from "../../helpers/utils";
 
 export default class JoinCommand implements BaseCommand {
@@ -12,11 +12,11 @@ export default class JoinCommand implements BaseCommand {
             return;
         }
         if (gameSession.sessionInitialized) {
-            await sendErrorMessage(message, "Game already in session", "You can only join as a participant before an elimination game has started. Please wait until the current game ends.");
+            await sendErrorMessage(getMessageContext(message), "Game already in session", "You can only join as a participant before an elimination game has started. Please wait until the current game ends.");
             return;
         }
         if (gameSession.participants.has(message.author.id)) {
-            sendErrorMessage(message, "Player already joined", `${bold(getUserTag(message.author))} is already in the game.`);
+            sendErrorMessage(getMessageContext(message), "Player already joined", `${bold(getUserTag(message.author))} is already in the game.`);
         } else {
             let previouslyJoinedPlayers = gameSession.scoreboard.getPlayerNames().reverse();
             if (previouslyJoinedPlayers.length > 10) {
@@ -24,7 +24,7 @@ export default class JoinCommand implements BaseCommand {
                 previouslyJoinedPlayers.push("and many others...");
             }
             const players = `${bold(getUserTag(message.author))}, ${previouslyJoinedPlayers.join(", ")}`;
-            sendInfoMessage(message, "Player joined", players);
+            sendInfoMessage(getMessageContext(message), "Player joined", players);
             gameSession.addEliminationParticipant(message.author);
         }
     }

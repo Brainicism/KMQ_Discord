@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { getDebugContext, sendOptionsMessage } from "../../helpers/discord_utils";
+import { getDebugLogHeader, sendOptionsMessage, getMessageContext } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
@@ -47,7 +47,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                 gameSession.stopGuessTimeout();
             }
             await sendOptionsMessage(message, guildPreference, GameOption.TIMER);
-            logger.info(`${getDebugContext(message)} | Guess timeout disabled.`);
+            logger.info(`${getDebugLogHeader(message)} | Guess timeout disabled.`);
             return;
         }
         const time = parseInt(parsedMessage.components[0], 10);
@@ -56,9 +56,9 @@ export default class GuessTimeoutCommand implements BaseCommand {
         if (gameSession && gameSession.gameRound && gameSession.connection.playing) {
             // Timer can start mid-song, starting when the user enters the command
             gameSession.stopGuessTimeout();
-            gameSession.startGuessTimeout(message);
+            gameSession.startGuessTimeout(getMessageContext(message));
         }
         await sendOptionsMessage(message, guildPreference, GameOption.TIMER);
-        logger.info(`${getDebugContext(message)} | Guess timeout set to ${guildPreference.getGuessTimeout()}`);
+        logger.info(`${getDebugLogHeader(message)} | Guess timeout set to ${guildPreference.getGuessTimeout()}`);
     }
 }

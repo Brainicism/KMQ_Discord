@@ -1,7 +1,7 @@
 import BaseCommand, { CommandArgs } from "../base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { GameType } from "./play";
-import { getDebugContext, sendInfoMessage, sendErrorMessage, getUserTag, getVoiceChannel } from "../../helpers/discord_utils";
+import { getDebugLogHeader, sendInfoMessage, sendErrorMessage, getUserTag, getVoiceChannel, getMessageContext } from "../../helpers/discord_utils";
 import { bold } from "../../helpers/utils";
 import _logger from "../../logger";
 
@@ -15,15 +15,15 @@ export default class BeginCommand implements BaseCommand {
             return;
         }
         if (gameSession.owner.id !== author.id) {
-            sendErrorMessage(message, "Begin ignored", `Only the person who did \`${process.env.BOT_PREFIX}play elimination\` (${bold(getUserTag(gameSession.owner))}) can start the game.`);
+            sendErrorMessage(getMessageContext(message), "Begin ignored", `Only the person who did \`${process.env.BOT_PREFIX}play elimination\` (${bold(getUserTag(gameSession.owner))}) can start the game.`);
             return;
         }
         const guildPreference = await getGuildPreference(guildID);
         if (!gameSession.sessionInitialized) {
             const gameInstructions = "Listen to the song and type your guess!";
-            await sendInfoMessage(message, `Game starting in #${message.channel.name} in 🔊 ${getVoiceChannel(message).name}`, gameInstructions);
-            gameSession.startRound(guildPreference, message);
-            logger.info(`${getDebugContext(message)} | Game session starting (elimination gameType)`);
+            await sendInfoMessage(getMessageContext(message), `Game starting in #${message.channel.name} in 🔊 ${getVoiceChannel(message).name}`, gameInstructions);
+            gameSession.startRound(guildPreference, getMessageContext(message));
+            logger.info(`${getDebugLogHeader(message)} | Game session starting (elimination gameType)`);
         }
     }
 }

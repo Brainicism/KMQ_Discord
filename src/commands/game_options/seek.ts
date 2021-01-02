@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { sendOptionsMessage, getDebugContext } from "../../helpers/discord_utils";
+import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
@@ -51,6 +51,6 @@ export default class SeekCommand implements BaseCommand {
         const seekType = parsedMessage.components.length > 0 ? parsedMessage.components[0] as SeekType : DEFAULT_SEEK;
         guildPreference.setSeekType(seekType);
         await sendOptionsMessage(message, guildPreference, GameOption.SEEK_TYPE);
-        logger.info(`${getDebugContext(message)} | Seek type set to ${seekType}`);
+        logger.info(`${getDebugLogHeader(message)} | Seek type set to ${seekType}`);
     }
 }

@@ -1,6 +1,6 @@
 import GameSession from "../../models/game_session";
 import {
-    sendErrorMessage, getDebugContext, sendInfoMessage, getVoiceChannel, voicePermissionsCheck, getUserTag,
+    sendErrorMessage, getDebugLogHeader, sendInfoMessage, getVoiceChannel, voicePermissionsCheck, getUserTag, getMessageContext,
 } from "../../helpers/discord_utils";
 import { deleteGameSession } from "../../helpers/management_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
@@ -62,10 +62,10 @@ export default class PlayCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         const voiceChannel = getVoiceChannel(message);
         if (!voiceChannel) {
-            await sendErrorMessage(message,
+            await sendErrorMessage(getMessageContext(message),
                 "Join a voice channel",
                 `Send \`${process.env.BOT_PREFIX}play\` again when you are in a voice channel.`);
-            logger.warn(`${getDebugContext(message)} | User not in voice channel`);
+            logger.warn(`${getDebugLogHeader(message)} | User not in voice channel`);
         } else {
             if (!voicePermissionsCheck(message)) {
                 return;
@@ -98,15 +98,15 @@ export default class PlayCommand implements BaseCommand {
                 }
 
                 gameSessions[message.guildID] = gameSession;
-                await sendInfoMessage(message, startTitle, gameInstructions);
+                await sendInfoMessage(getMessageContext(message), startTitle, gameInstructions);
 
                 if (!isEliminationMode) {
                     // ELIMINATION startRound deferred to ,begin
-                    gameSessions[message.guildID].startRound(guildPreference, message);
-                    logger.info(`${getDebugContext(message)} | Game session starting`);
+                    gameSessions[message.guildID].startRound(guildPreference, getMessageContext(message));
+                    logger.info(`${getDebugLogHeader(message)} | Game session starting`);
                 }
             } else {
-                await sendErrorMessage(message, "Game already in session", null);
+                await sendErrorMessage(getMessageContext(message), "Game already in session", null);
             }
         }
     }

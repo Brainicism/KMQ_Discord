@@ -2,7 +2,7 @@ import Eris from "eris";
 import path from "path";
 import BaseCommand, { CommandArgs } from "../base_command";
 import {
-    EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, sendPaginationedEmbed, sendEmbed,
+    EMBED_INFO_COLOR, sendErrorMessage, getDebugLogHeader, sendPaginationedEmbed, sendEmbed, getMessageContext,
 } from "../../helpers/discord_utils";
 import _logger from "../../logger";
 import { chunkArray, parseJsonFile } from "../../helpers/utils";
@@ -38,10 +38,10 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
     let embedFooter = null;
     if (action) {
         const commandNamesWithHelp = Object.keys(commandFilesWithAliases).filter((commandName) => commandFilesWithAliases[commandName].help);
-        logger.info(`${getDebugContext(message)} | Getting help documentation for: ${action}`);
+        logger.info(`${getDebugLogHeader(message)} | Getting help documentation for: ${action}`);
         if (!(commandNamesWithHelp.includes(action))) {
-            logger.warn(`${getDebugContext(message)} | Missing documentation: ${action}`);
-            await sendErrorMessage(message,
+            logger.warn(`${getDebugLogHeader(message)} | Missing documentation: ${action}`);
+            await sendErrorMessage(getMessageContext(message),
                 "K-pop Music Quiz Command Help",
                 `Sorry, there is no documentation on ${action}`);
             return;
@@ -64,7 +64,7 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
             };
         }
     } else {
-        logger.info(`${getDebugContext(message)} | Getting full help documentation`);
+        logger.info(`${getDebugLogHeader(message)} | Getting full help documentation`);
         const commandsWithHelp = Object.values(commandFiles).filter((command) => command.help);
         commandsWithHelp.sort((x, y) => y.help.priority - x.help.priority);
         embedTitle = "K-pop Music Quiz Command Help";
@@ -90,7 +90,7 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
 
         await sendPaginationedEmbed(message, embeds);
     } else {
-        await sendEmbed(message, {
+        await sendEmbed(message.channel, {
             title: embedTitle,
             color: EMBED_INFO_COLOR,
             description: embedDesc,

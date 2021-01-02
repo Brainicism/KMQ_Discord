@@ -2,7 +2,7 @@ import Eris from "eris";
 import os from "os";
 import BaseCommand, { CommandArgs } from "../base_command";
 import {
-    sendEmbed, getDebugContext,
+    sendEmbed, getDebugLogHeader,
 } from "../../helpers/discord_utils";
 import dbContext from "../../database_context";
 import { bold } from "../../helpers/utils";
@@ -82,8 +82,8 @@ export default class SkipCommand implements BaseCommand {
             inline: true,
         }];
 
-        logger.info(`${getDebugContext(message)} | Stats retrieved`);
-        sendEmbed({ channel: message.channel, authorId: message.author.id }, {
+        logger.info(`${getDebugLogHeader(message)} | Stats retrieved`);
+        sendEmbed(message.channel, {
             title: bold("Bot Stats"),
             fields,
             footer: {

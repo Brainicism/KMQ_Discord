@@ -1,7 +1,7 @@
 import Eris from "eris";
 import * as uuid from "uuid";
 import BaseCommand, { CommandArgs } from "../base_command";
-import { getDebugChannel, getVoiceChannel, sendEmbed, sendInfoMessage } from "../../helpers/discord_utils";
+import { getDebugChannel, getVoiceChannel, sendEmbed, sendInfoMessage, getMessageContext } from "../../helpers/discord_utils";
 import { getGuildPreference, getSongCount } from "../../helpers/game_utils";
 import { bold } from "../../helpers/utils";
 import state from "../../kmq";
@@ -48,8 +48,8 @@ export default class DebugCommand implements BaseCommand {
         }
 
         const debugId = uuid.v4();
-        sendInfoMessage(message, "Debug Details Sent!", `If you were asked by a bot developer to do this, give them this:\n\`${debugId}\``);
-        sendEmbed({ channel: debugChannel, authorId: message.author.id }, {
+        sendInfoMessage(getMessageContext(message), "Debug Details Sent!", `If you were asked by a bot developer to do this, give them this:\n\`${debugId}\``);
+        sendEmbed(debugChannel, {
             title: bold(`Debug Details for User: ${message.author.id}, Guild: ${message.guildID}`),
             footer: {
                 text: debugId,

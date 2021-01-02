@@ -1,6 +1,6 @@
 import BaseCommand, { CommandArgs } from "../base_command";
 import {
-    getDebugChannel, getDebugContext, sendErrorMessage, sendInfoMessage,
+    getDebugChannel, getDebugLogHeader, sendErrorMessage, sendInfoMessage, getMessageContext,
 } from "../../helpers/discord_utils";
 import _logger from "../../logger";
 import state from "../../kmq";
@@ -11,8 +11,8 @@ export default class EvalCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
         const kmqDebugChannel = getDebugChannel();
         if (!kmqDebugChannel || message.channel.id !== kmqDebugChannel.id) {
-            sendErrorMessage(message, "Error", "You are not allowed to eval in this channel");
-            logger.warn(`${getDebugContext(message)} | Attempted to eval in non-debug channel`);
+            sendErrorMessage(getMessageContext(message), "Error", "You are not allowed to eval in this channel");
+            logger.warn(`${getDebugLogHeader(message)} | Attempted to eval in non-debug channel`);
             return;
         }
 
@@ -24,9 +24,9 @@ export default class EvalCommand implements BaseCommand {
             try {
                 // eslint-disable-next-line no-eval
                 const result = eval(command);
-                sendInfoMessage(message, evalString, result === undefined ? "undefined" : JSON.stringify(result));
+                sendInfoMessage(getMessageContext(message), evalString, result === undefined ? "undefined" : JSON.stringify(result));
             } catch (e) {
-                sendErrorMessage(message, evalString, e.toString());
+                sendErrorMessage(getMessageContext(message), evalString, e.toString());
             }
         }.call(state, evalString);
     }

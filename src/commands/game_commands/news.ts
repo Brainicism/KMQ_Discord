@@ -3,7 +3,7 @@ import path from "path";
 import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
 import dbContext from "../../database_context";
-import { EMBED_INFO_COLOR, getDebugContext, sendMessage } from "../../helpers/discord_utils";
+import { EMBED_INFO_COLOR, getDebugLogHeader, sendMessage } from "../../helpers/discord_utils";
 import { bold } from "../../helpers/utils";
 
 const logger = _logger("news");
@@ -28,7 +28,7 @@ export default class NewsCommand implements BaseCommand {
                 .limit(1);
             latestSongDate = new Date(data[0].publishedon);
         } catch (e) {
-            logger.error(`${getDebugContext(message)} | Error retrieving latest song date`);
+            logger.error(`${getDebugLogHeader(message)} | Error retrieving latest song date`);
             latestSongDate = null;
         }
         const newsFilePath = path.resolve(__dirname, "../../../data/news.md");
@@ -49,7 +49,7 @@ export default class NewsCommand implements BaseCommand {
                 text: `Latest Song Update: ${latestSongDate.toISOString().split("T")[0]}`,
             },
         };
-        logger.info(`${getDebugContext(message)} | News retrieved.`);
-        await sendMessage({ channel: message.channel, authorId: message.author.id }, { embed });
+        logger.info(`${getDebugLogHeader(message)} | News retrieved.`);
+        await sendMessage(message.channel, { embed });
     }
 }
