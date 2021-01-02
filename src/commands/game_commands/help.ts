@@ -2,7 +2,7 @@ import Eris from "eris";
 import path from "path";
 import BaseCommand, { CommandArgs } from "../base_command";
 import {
-    EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, sendPaginationedEmbed, sendEmbed,
+    EMBED_INFO_COLOR, sendErrorMessage, getDebugContext, sendPaginationedEmbed, sendEmbed, getMessageContext,
 } from "../../helpers/discord_utils";
 import _logger from "../../logger";
 import { chunkArray, parseJsonFile } from "../../helpers/utils";
@@ -41,7 +41,7 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
         logger.info(`${getDebugContext(message)} | Getting help documentation for: ${action}`);
         if (!(commandNamesWithHelp.includes(action))) {
             logger.warn(`${getDebugContext(message)} | Missing documentation: ${action}`);
-            await sendErrorMessage(message,
+            await sendErrorMessage(getMessageContext(message),
                 "K-pop Music Quiz Command Help",
                 `Sorry, there is no documentation on ${action}`);
             return;
@@ -90,7 +90,7 @@ const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, act
 
         await sendPaginationedEmbed(message, embeds);
     } else {
-        await sendEmbed(message, {
+        await sendEmbed(message.channel, {
             title: embedTitle,
             color: EMBED_INFO_COLOR,
             description: embedDesc,

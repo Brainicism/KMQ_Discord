@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { sendOptionsMessage, getDebugContext, sendErrorMessage } from "../../helpers/discord_utils";
+import { sendOptionsMessage, getDebugContext, sendErrorMessage, getMessageContext } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
@@ -66,7 +66,7 @@ export default class CutoffCommand implements BaseCommand {
         } else if (yearRange.length === 2) {
             const endYear = yearRange[1];
             if (endYear < startYear) {
-                await sendErrorMessage(message, "Invalid end year", "End year must be after or equal to start year");
+                await sendErrorMessage(getMessageContext(message), "Invalid end year", "End year must be after or equal to start year");
                 return;
             }
             guildPreference.setBeginningCutoffYear(parseInt(startYear, 10));

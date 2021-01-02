@@ -10,7 +10,7 @@ export default async function SIGINTHandler() {
     for (const guildId of Object.keys(state.gameSessions)) {
         const gameSession = state.gameSessions[guildId];
         logger.debug(`gid: ${guildId} | Forcing game session end`);
-        await endSession({ channel: gameSession.textChannel }, gameSession);
+        await endSession(gameSession);
     }
     await dbContext.destroy();
     process.exit(0);

@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { sendOptionsMessage, getDebugContext, sendErrorMessage } from "../../helpers/discord_utils";
+import { sendOptionsMessage, getDebugContext, sendErrorMessage, getMessageContext } from "../../helpers/discord_utils";
 import { getGuildPreference, getMatchingGroupNames } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
@@ -42,7 +42,7 @@ export default class ExcludeCommand implements BaseCommand {
         const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(groupNames);
         if (unmatchedGroups) {
             logger.info(`${getDebugContext(message)} | Attempted to set unknown excludes. excludes =  ${unmatchedGroups.join(", ")}`);
-            await sendErrorMessage(message, "Unknown Group Name", `One or more of the specified group names was not recognized. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} `);
+            await sendErrorMessage(getMessageContext(message), "Unknown Group Name", `One or more of the specified group names was not recognized. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} `);
             return;
         }
 

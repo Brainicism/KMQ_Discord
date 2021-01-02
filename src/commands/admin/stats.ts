@@ -83,7 +83,7 @@ export default class SkipCommand implements BaseCommand {
         }];
 
         logger.info(`${getDebugContext(message)} | Stats retrieved`);
-        sendEmbed({ channel: message.channel, authorId: message.author.id }, {
+        sendEmbed(message.channel, {
             title: bold("Bot Stats"),
             fields,
             footer: {

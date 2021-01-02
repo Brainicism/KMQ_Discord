@@ -23,7 +23,7 @@ export default class EndCommand implements BaseCommand {
             return;
         }
         logger.info(`${getDebugContext(message)} | Game session ended`);
-        endSession(message, gameSession);
+        endSession(gameSession);
         disconnectVoiceConnection(message);
     }
 }

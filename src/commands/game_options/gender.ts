@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { sendOptionsMessage, getDebugContext, sendErrorMessage } from "../../helpers/discord_utils";
+import { sendOptionsMessage, getDebugContext, sendErrorMessage, getMessageContext } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
@@ -65,7 +65,7 @@ export default class GenderCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         if (guildPreference.isGroupsMode()) {
             logger.warn(`${getDebugContext(message)} | Game option conflict between gender and groups.`);
-            sendErrorMessage(message, "Game Option Conflict", "`groups` game option is currently set. `gender` and `groups` are incompatible. Remove the `groups` option by typing `,groups`to proceed");
+            sendErrorMessage(getMessageContext(message), "Game Option Conflict", "`groups` game option is currently set. `gender` and `groups` are incompatible. Remove the `groups` option by typing `,groups`to proceed");
             return;
         }
         const selectedGenders = parsedMessage.components.length > 0 ? parsedMessage.components as GENDER[] : DEFAULT_GENDER;

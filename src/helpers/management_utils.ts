@@ -73,7 +73,7 @@ export const checkRestartNotification = async (restartNotification: Date): Promi
     if (RESTART_WARNING_INTERVALS.has(timeDiffMin)) {
         for (const gameSession of Object.values(state.gameSessions)) {
             if (gameSession.finished) continue;
-            await sendMessage({ channel: gameSession.textChannel }, {
+            await sendMessage(gameSession.textChannel, {
                 embed: {
                     color: EMBED_INFO_COLOR,
                     author: {

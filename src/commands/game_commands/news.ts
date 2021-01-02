@@ -50,6 +50,6 @@ export default class NewsCommand implements BaseCommand {
             },
         };
         logger.info(`${getDebugContext(message)} | News retrieved.`);
-        await sendMessage({ channel: message.channel, authorId: message.author.id }, { embed });
+        await sendMessage(message.channel, { embed });
     }
 }

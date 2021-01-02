@@ -2,13 +2,13 @@ import Eris from "eris";
 import BaseCommand, { CommandArgs } from "../base_command";
 import GameSession from "../../models/game_session";
 import {
-    sendEndOfRoundMessage,
     areUserAndBotInSameVoiceChannel,
     EMBED_INFO_COLOR,
     getDebugContext,
     EMBED_SUCCESS_COLOR,
     sendMessage,
     getNumParticipants,
+    getMessageContext,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { GameType } from "./play";
@@ -23,7 +23,7 @@ function getSkipsRequired(message: Eris.Message<Eris.GuildTextableChannel>): num
 }
 
 async function sendSkipNotification(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
-    await sendMessage({ channel: message.channel, authorId: message.author.id }, {
+    await sendMessage(message.channel, {
         embed: {
             color: EMBED_INFO_COLOR,
             author: {
@@ -37,7 +37,7 @@ async function sendSkipNotification(message: Eris.Message<Eris.GuildTextableChan
 }
 
 async function sendSkipMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameRound: GameRound) {
-    const skipMessage = await sendMessage({ channel: message.channel, authorId: message.author.id }, {
+    const skipMessage = await sendMessage(message.channel, {
         embed: {
             color: EMBED_SUCCESS_COLOR,
             author: {
@@ -88,9 +88,8 @@ export default class SkipCommand implements BaseCommand {
                 eliminationScoreboard.decrementAllLives();
             }
             sendSkipMessage(message, gameSession.gameRound);
-            await sendEndOfRoundMessage(message, gameSession.scoreboard, gameSession.gameRound, true);
-            await gameSession.endRound(false);
-            gameSession.startRound(guildPreference, message);
+            await gameSession.endRound(false, getMessageContext(message));
+            gameSession.startRound(guildPreference, getMessageContext(message));
             logger.info(`${getDebugContext(message)} | Skip majority achieved.`);
         } else {
             await sendSkipNotification(message, gameSession);

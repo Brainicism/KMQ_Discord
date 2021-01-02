@@ -6,8 +6,8 @@ import BotStatsPoster from "./helpers/bot_stats_poster";
 export interface ParsedMessage {
     action: string;
     argument: string;
-    message: string,
-    components: Array<string>
+    message: string;
+    components: Array<string>;
 }
 
 export interface QueriedSong {
@@ -16,9 +16,13 @@ export interface QueriedSong {
     youtubeLink: string;
 }
 
-export interface SendMessagePayload {
+export interface MessageContext {
     channel: Eris.GuildTextableChannel;
-    authorId?: string
+    user?: {
+        username: string;
+        id: string;
+        avatarURL: string;
+    };
 }
 
 export interface State {
@@ -29,7 +33,7 @@ export interface State {
     aliases: {
         artist: { [artistName: string]: Array<string> },
         song: { [songName: string]: Array<string> }
-    }
+    };
 }
 
 export enum GameOption {
