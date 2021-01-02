@@ -1,30 +1,16 @@
 /* eslint-disable no-console */
-import { spawn, exec } from "child_process";
+import { execSync } from "child_process";
 import dbContext from "../database_context";
 
-function serverShutdown(restartMinutes: number, restart: boolean): Promise<void> {
+function serverShutdown(restartMinutes: number, restartDate: Date, restart: boolean): Promise<void> {
     return new Promise((resolve) => {
-        const logs = spawn("pm2", ["logs", "kmq", "--out"]);
-
-        logs.stdout.on("data", (data) => {
-            console.log(`${data}`);
-        });
-
-        logs.stderr.on("data", (data) => {
-            console.log(`${data}`);
-        });
-
-        logs.on("error", (error) => {
-            console.log(`${error.message}`);
-        });
-
+        setInterval(() => {
+            console.log(`Restarting in ${Math.floor((restartDate.getTime() - Date.now()) / 1000)} seconds`);
+        }, 1000 * 10);
         setTimeout(() => {
-            logs.removeAllListeners();
-            logs.kill();
             console.log(restart ? "Restarting now..." : "Stopping now");
-            exec(restart ? "pm2 restart kmq" : "pm2 stop kmq", () => {
-                resolve();
-            });
+            execSync(restart ? "pm2 restart kmq" : "pm2 stop kmq");
+            resolve();
         }, restartMinutes * 1000 * 60);
     });
 }
@@ -43,7 +29,7 @@ function serverShutdown(restartMinutes: number, restart: boolean): Promise<void>
     await dbContext.kmq("restart_notifications").where("id", "=", "1")
         .update({ restart_time: restartDate });
 
-    console.log(`Next restart notification scheduled at ${restartDate}`);
+    console.log(`Next restart scheduled at ${restartDate}`);
     dbContext.destroy();
-    await serverShutdown(restartMinutes, restart);
+    await serverShutdown(restartMinutes, restartDate, restart);
 })();
