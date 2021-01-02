@@ -82,7 +82,7 @@ export async function ensureVoiceConnection(gameSession: GameSession): Promise<v
 export async function selectRandomSong(guildPreference: GuildPreference, lastPlayedSongs: Array<string>): Promise<QueriedSong> {
     if (isDebugMode() && isForcedSongActive()) {
         const forcePlayedQueriedSong = await getForcePlaySong();
-        logger.debug(`Force playing ${forcePlayedQueriedSong.name} by ${forcePlayedQueriedSong.artist} | ${forcePlayedQueriedSong.youtubeLink}`);
+        logger.info(`Force playing ${forcePlayedQueriedSong.name} by ${forcePlayedQueriedSong.artist} | ${forcePlayedQueriedSong.youtubeLink}`);
         return forcePlayedQueriedSong;
     }
     const { songs: queriedSongList } = await getFilteredSongList(guildPreference, lastPlayedSongs);
