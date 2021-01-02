@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { disconnectVoiceConnection, getDebugContext } from "../../helpers/discord_utils";
+import { disconnectVoiceConnection, getDebugLogHeader } from "../../helpers/discord_utils";
 import _logger from "../../logger";
 import { endSession } from "../../helpers/game_utils";
 
@@ -19,10 +19,10 @@ export default class EndCommand implements BaseCommand {
     async call({ gameSessions, message }: CommandArgs) {
         const gameSession = gameSessions[message.guildID];
         if (!gameSession) {
-            logger.warn(`${getDebugContext(message)} | No active game session`);
+            logger.warn(`${getDebugLogHeader(message)} | No active game session`);
             return;
         }
-        logger.info(`${getDebugContext(message)} | Game session ended`);
+        logger.info(`${getDebugLogHeader(message)} | Game session ended`);
         endSession(gameSession);
         disconnectVoiceConnection(message);
     }

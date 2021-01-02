@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { sendOptionsMessage, getDebugContext, sendErrorMessage, getMessageContext } from "../../helpers/discord_utils";
+import { sendOptionsMessage, getDebugLogHeader, sendErrorMessage, getMessageContext } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
@@ -55,7 +55,7 @@ export default class CutoffCommand implements BaseCommand {
             guildPreference.setBeginningCutoffYear(DEFAULT_BEGINNING_SEARCH_YEAR);
             guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
             await sendOptionsMessage(message, guildPreference, GameOption.CUTOFF);
-            logger.info(`${getDebugContext(message)} | Cutoff set to ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`);
+            logger.info(`${getDebugLogHeader(message)} | Cutoff set to ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`);
             return;
         }
         const yearRange = parsedMessage.components;
@@ -73,6 +73,6 @@ export default class CutoffCommand implements BaseCommand {
             guildPreference.setEndCutoffYear(parseInt(endYear, 10));
         }
         await sendOptionsMessage(message, guildPreference, GameOption.CUTOFF);
-        logger.info(`${getDebugContext(message)} | Cutoff set to ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`);
+        logger.info(`${getDebugLogHeader(message)} | Cutoff set to ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`);
     }
 }

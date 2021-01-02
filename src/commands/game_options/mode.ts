@@ -1,7 +1,7 @@
 import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { sendOptionsMessage, getDebugContext } from "../../helpers/discord_utils";
+import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
 import { GameOption } from "../../types";
 
 const logger = _logger("mode");
@@ -57,6 +57,6 @@ export default class ModeCommand implements BaseCommand {
         const modeType = parsedMessage.components.length > 0 ? parsedMessage.components[0].toLowerCase() as ModeType : DEFAULT_MODE;
         guildPreference.setModeType(modeType);
         await sendOptionsMessage(message, guildPreference, GameOption.MODE_TYPE);
-        logger.info(`${getDebugContext(message)} | Mode type set to ${modeType}`);
+        logger.info(`${getDebugLogHeader(message)} | Mode type set to ${modeType}`);
     }
 }

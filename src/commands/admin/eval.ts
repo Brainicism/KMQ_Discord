@@ -1,6 +1,6 @@
 import BaseCommand, { CommandArgs } from "../base_command";
 import {
-    getDebugChannel, getDebugContext, sendErrorMessage, sendInfoMessage, getMessageContext,
+    getDebugChannel, getDebugLogHeader, sendErrorMessage, sendInfoMessage, getMessageContext,
 } from "../../helpers/discord_utils";
 import _logger from "../../logger";
 import state from "../../kmq";
@@ -12,7 +12,7 @@ export default class EvalCommand implements BaseCommand {
         const kmqDebugChannel = getDebugChannel();
         if (!kmqDebugChannel || message.channel.id !== kmqDebugChannel.id) {
             sendErrorMessage(getMessageContext(message), "Error", "You are not allowed to eval in this channel");
-            logger.warn(`${getDebugContext(message)} | Attempted to eval in non-debug channel`);
+            logger.warn(`${getDebugLogHeader(message)} | Attempted to eval in non-debug channel`);
             return;
         }
 

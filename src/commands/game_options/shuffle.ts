@@ -1,7 +1,7 @@
 import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { sendOptionsMessage, getDebugContext } from "../../helpers/discord_utils";
+import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
 import { GameOption } from "../../types";
 
 const logger = _logger("shuffle");
@@ -52,6 +52,6 @@ export default class ShuffleCommand implements BaseCommand {
         const shuffleType = parsedMessage.components.length > 0 ? parsedMessage.components[0].toLowerCase() as ShuffleType : DEFAULT_SHUFFLE;
         guildPreference.setShuffleType(shuffleType);
         await sendOptionsMessage(message, guildPreference, GameOption.SHUFFLE_TYPE);
-        logger.info(`${getDebugContext(message)} | Shuffle set to ${shuffleType}`);
+        logger.info(`${getDebugLogHeader(message)} | Shuffle set to ${shuffleType}`);
     }
 }

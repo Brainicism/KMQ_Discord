@@ -5,7 +5,7 @@ import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
-    getDebugContext, getSqlDateString, getUserTag, getVoiceChannel, sendErrorMessage, sendEndOfRoundMessage, getMessageContext,
+    getDebugLogHeader, getSqlDateString, getUserTag, getVoiceChannel, sendErrorMessage, sendEndOfRoundMessage, getMessageContext,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getSongCount, endSession } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds } from "../helpers/utils";
@@ -97,6 +97,7 @@ export default class GameSession {
     /**
      * Ends an active GameRound
      * @param guessed - Whether the round ended via a correct guess, or other (timeout, error, etc)
+     * @param messageContext - An object containing relevant parts of Eris.Message
      */
     async endRound(guessed: boolean, messageContext?: MessageContext) {
         if (guessed) {
@@ -122,10 +123,9 @@ export default class GameSession {
      * Ends the current GameSession
      */
     endSession = async (): Promise<void> => {
-        const guildId = this.textChannel.guild.id;
         this.finished = true;
         await this.endRound(false);
-        const voiceConnection = state.client.voiceConnections.get(guildId);
+        const voiceConnection = state.client.voiceConnections.get(this.guildID);
 
         // leave voice channel
         if (voiceConnection && voiceConnection.channelID) {
@@ -148,7 +148,7 @@ export default class GameSession {
 
         // commit guild stats
         await dbContext.kmq("guild_preferences")
-            .where("guild_id", guildId)
+            .where("guild_id", this.guildID)
             .increment("games_played", 1);
 
         // commit guild's game session
@@ -158,15 +158,15 @@ export default class GameSession {
         await dbContext.kmq("game_sessions")
             .insert({
                 start_date: getSqlDateString(this.startedAt),
-                guild_id: this.textChannel.guild.id,
+                guild_id: this.guildID,
                 num_participants: this.participants.size,
                 avg_guess_time: averageGuessTime,
                 session_length: sessionLength,
                 rounds_played: this.roundsPlayed,
             });
 
-        logger.info(`gid: ${guildId} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}. gameType = ${this.gameType}`);
-        deleteGameSession(guildId);
+        logger.info(`gid: ${this.guildID} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}. gameType = ${this.gameType}`);
+        deleteGameSession(this.guildID);
     };
 
     /**
@@ -175,7 +175,7 @@ export default class GameSession {
     async lastActiveNow(): Promise<void> {
         this.lastActive = Date.now();
         await dbContext.kmq("guild_preferences")
-            .where({ guild_id: this.textChannel.guild.id })
+            .where({ guild_id: this.guildID })
             .update({ last_active: new Date() });
     }
 
@@ -184,7 +184,7 @@ export default class GameSession {
      * @param message - The message to check
      */
     async guessSong(message: Eris.Message<Eris.GuildTextableChannel>) {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await getGuildPreference(this.guildID);
         const userVoiceChannel = getVoiceChannel(message);
         if (!this.gameRound) return;
 
@@ -200,10 +200,10 @@ export default class GameSession {
 
         const pointsEarned = this.checkGuess(message, guildPreference.getModeType());
         if (pointsEarned > 0) {
-            logger.info(`${getDebugContext(message)} | Song correctly guessed. song = ${this.gameRound.songName}`);
+            logger.info(`${getDebugLogHeader(message)} | Song correctly guessed. song = ${this.gameRound.songName}`);
 
             // update game session's lastActive
-            const gameSession = state.gameSessions[message.guildID];
+            const gameSession = state.gameSessions[this.guildID];
             gameSession.lastActiveNow();
 
             // elimination mode, check if current user is allowed to guess
@@ -224,7 +224,7 @@ export default class GameSession {
 
             // increment guild's song guess count
             await dbContext.kmq("guild_preferences")
-                .where("guild_id", message.guildID)
+                .where("guild_id", this.guildID)
                 .increment("songs_guessed", 1);
 
             this.startRound(guildPreference, getMessageContext(message));
@@ -246,7 +246,7 @@ export default class GameSession {
 
         // manage recently played song queue
         if (guildPreference.getShuffleType() === ShuffleType.UNIQUE && Math.min(guildPreference.getLimit(), totalSongs) === this.lastPlayedSongsQueue.length) {
-            logger.info(`gid: ${this.guildID} | Resetting lastPlayedSongsQueue (all ${guildPreference.getLimit()} unique songs played)`);
+            logger.info(`${getDebugLogHeader(messageContext)} | Resetting lastPlayedSongsQueue (all ${guildPreference.getLimit()} unique songs played)`);
             this.resetLastPlayedSongsQueue();
         } else if (guildPreference.getShuffleType() === ShuffleType.RANDOM && this.lastPlayedSongsQueue.length === LAST_PLAYED_SONG_QUEUE_SIZE) {
             this.lastPlayedSongsQueue.shift();
@@ -263,7 +263,7 @@ export default class GameSession {
             }
         } catch (err) {
             await sendErrorMessage(messageContext, "Error selecting song", "Please try starting the round again. If the issue persists, report it in our support server.");
-            logger.error(`gid: ${this.guildID} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
+            logger.error(`${getDebugLogHeader(messageContext)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
             this.endSession();
             return;
         }
@@ -281,7 +281,7 @@ export default class GameSession {
             await ensureVoiceConnection(this);
         } catch (err) {
             await this.endSession();
-            logger.error(`gid: ${this.guildID} | Error obtaining voice connection. err = ${err.toString()}`);
+            logger.error(`${getDebugLogHeader(messageContext)} | Error obtaining voice connection. err = ${err.toString()}`);
             await sendErrorMessage(messageContext, "Missing voice permissions", "The bot is unable to join the voice channel you are in.");
             return;
         }
@@ -299,7 +299,7 @@ export default class GameSession {
         const time = guildPreference.getGuessTimeout();
         this.guessTimeoutFunc = setTimeout(async () => {
             if (this.finished) return;
-            logger.info(`gid: ${this.guildID} | Song finished without being guessed, timer of: ${time} seconds.`);
+            logger.info(`${getDebugLogHeader(messageContext)} | Song finished without being guessed, timer of: ${time} seconds.`);
             if (this.gameType === GameType.ELIMINATION) {
                 const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
                 eliminationScoreboard.decrementAllLives();
@@ -341,7 +341,7 @@ export default class GameSession {
     private async playSong(guildPreference: GuildPreference, messageContext: MessageContext) {
         const { gameRound } = this;
         if (isDebugMode() && skipSongPlay()) {
-            logger.debug(`gid: ${this.guildID} | Not playing song in voice connection. song = ${this.getDebugSongDetails()}`);
+            logger.debug(`${getDebugLogHeader(messageContext)} | Not playing song in voice connection. song = ${this.getDebugSongDetails()}`);
             return;
         }
         const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${gameRound.videoID}.ogg`;
@@ -356,7 +356,7 @@ export default class GameSession {
 
         const stream = fs.createReadStream(songLocation);
 
-        logger.info(`gid: ${this.guildID} | Playing song in voice connection. seek = ${guildPreference.getSeekType()}. song = ${this.getDebugSongDetails()}. mode = ${guildPreference.getModeType()}`);
+        logger.info(`${getDebugLogHeader(messageContext)} | Playing song in voice connection. seek = ${guildPreference.getSeekType()}. song = ${this.getDebugSongDetails()}. mode = ${guildPreference.getModeType()}`);
         this.connection.stopPlaying();
         this.connection.play(stream, {
             inputArgs: ["-ss", seekLocation.toString()],
@@ -366,7 +366,7 @@ export default class GameSession {
 
         // song finished without being guessed
         this.connection.once("end", async () => {
-            logger.info(`gid: ${this.guildID} | Song finished without being guessed.`);
+            logger.info(`${getDebugLogHeader(messageContext)} | Song finished without being guessed.`);
             this.stopGuessTimeout();
             await this.endRound(false, messageContext);
             this.startRound(guildPreference, messageContext);
@@ -375,13 +375,13 @@ export default class GameSession {
         // admin manually 'disconnected' bot from voice channel or misc error
         this.connection.once("error", async (err) => {
             if (!this.connection.channelID) {
-                logger.info(`gid: ${this.textChannel.guild.id} | Bot was kicked from voice channel`);
+                logger.info(`${getDebugLogHeader(messageContext)} | Bot was kicked from voice channel`);
                 this.stopGuessTimeout();
                 endSession(this);
                 return;
             }
 
-            logger.error(`gid: ${this.guildID} | Unknown error with stream dispatcher. song = ${this.getDebugSongDetails()}. err = ${err}`);
+            logger.error(`${getDebugLogHeader(messageContext)} | Unknown error with stream dispatcher. song = ${this.getDebugSongDetails()}. err = ${err}`);
             // Attempt to restart game with different song
             await sendErrorMessage(messageContext, "Error playing song", "Starting new round in 3 seconds...");
             await this.endRound(false, messageContext);

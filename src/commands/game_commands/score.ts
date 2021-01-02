@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { sendInfoMessage, sendScoreboardMessage, getDebugContext, getMessageContext } from "../../helpers/discord_utils";
+import { sendInfoMessage, sendScoreboardMessage, getDebugLogHeader, getMessageContext } from "../../helpers/discord_utils";
 import _logger from "../../logger";
 
 const logger = _logger("score");
@@ -19,10 +19,10 @@ export default class ScoreCommand implements BaseCommand {
         const gameSession = gameSessions[message.guildID];
         if (!gameSession) {
             sendInfoMessage(getMessageContext(message), "No Active Game", `There is no currently active game of KMQ. Start a new game with \`${process.env.BOT_PREFIX}play\``);
-            logger.warn(`${getDebugContext(message)} | No active game session.`);
+            logger.warn(`${getDebugLogHeader(message)} | No active game session.`);
             return;
         }
-        logger.info(`${getDebugContext(message)} | Score retrieved`);
+        logger.info(`${getDebugLogHeader(message)} | Score retrieved`);
         await sendScoreboardMessage(message, gameSession);
     }
 }

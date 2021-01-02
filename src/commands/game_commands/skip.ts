@@ -4,7 +4,7 @@ import GameSession from "../../models/game_session";
 import {
     areUserAndBotInSameVoiceChannel,
     EMBED_INFO_COLOR,
-    getDebugContext,
+    getDebugLogHeader,
     EMBED_SUCCESS_COLOR,
     sendMessage,
     getNumParticipants,
@@ -73,7 +73,7 @@ export default class SkipCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         const gameSession = gameSessions[message.guildID];
         if (!gameSession || !gameSession.gameRound || !areUserAndBotInSameVoiceChannel(message)) {
-            logger.warn(`${getDebugContext(message)} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.gameRound: ${gameSession && !gameSession.gameRound}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
+            logger.warn(`${getDebugLogHeader(message)} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.gameRound: ${gameSession && !gameSession.gameRound}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
             return;
         }
         gameSession.gameRound.userSkipped(message.author.id);
@@ -90,10 +90,10 @@ export default class SkipCommand implements BaseCommand {
             sendSkipMessage(message, gameSession.gameRound);
             await gameSession.endRound(false, getMessageContext(message));
             gameSession.startRound(guildPreference, getMessageContext(message));
-            logger.info(`${getDebugContext(message)} | Skip majority achieved.`);
+            logger.info(`${getDebugLogHeader(message)} | Skip majority achieved.`);
         } else {
             await sendSkipNotification(message, gameSession);
-            logger.info(`${getDebugContext(message)} | Skip vote received.`);
+            logger.info(`${getDebugLogHeader(message)} | Skip vote received.`);
         }
         gameSession.lastActiveNow();
     }

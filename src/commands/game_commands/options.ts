@@ -1,4 +1,4 @@
-import { sendOptionsMessage, getDebugContext } from "../../helpers/discord_utils";
+import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
 import BaseCommand, { CommandArgs } from "../base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
@@ -16,7 +16,7 @@ export default class OptionsCommand implements BaseCommand {
 
     async call({ message }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
-        logger.info(`${getDebugContext(message)} | Options retrieved`);
+        logger.info(`${getDebugLogHeader(message)} | Options retrieved`);
         await sendOptionsMessage(message, guildPreference, null);
     }
 }

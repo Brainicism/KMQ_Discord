@@ -23,11 +23,14 @@ const REQUIRED_TEXT_PERMISSIONS = ["addReactions", "embedLinks"];
 const REQUIRED_VOICE_PERMISSIONS = ["voiceConnect", "voiceSpeak"];
 
 /**
- * @param message - The Message that initiated the workflow
+ * @param message - The Message or context of the Message that initiated the workflow
  * @returns a string containing basic debug information
  */
-export function getDebugContext(message: Eris.Message): string {
-    return `gid: ${message.guildID}, uid: ${message.author.id}`;
+export function getDebugLogHeader(message: Eris.Message | MessageContext): string {
+    if (message instanceof Eris.Message) {
+        return `gid: ${message.guildID}, uid: ${message.author.id}`;
+    }
+    return `gid: ${message.channel.guild.id}`;
 }
 
 /**
@@ -376,19 +379,19 @@ export function voicePermissionsCheck(message: Eris.Message<Eris.GuildTextableCh
     const voiceChannel = getVoiceChannel(message);
     const missingPermissions = REQUIRED_VOICE_PERMISSIONS.filter((permission) => !voiceChannel.permissionsOf(state.client.user.id).has(permission));
     if (missingPermissions.length > 0) {
-        logger.warn(`gid: ${voiceChannel.guild.id}, uid: ${message.author.id} | Missing [${missingPermissions.join(", ")}] permissions`);
+        logger.warn(`${getDebugLogHeader(message)} | Missing [${missingPermissions.join(", ")}] permissions`);
         sendErrorMessage(getMessageContext(message), "Missing Permissions", missingPermissionsText(missingPermissions));
         return false;
     }
     const channelFull = voiceChannel.userLimit && (voiceChannel.voiceMembers.size >= voiceChannel.userLimit);
     if (channelFull) {
-        logger.warn(`gid: ${voiceChannel.guild.id}, uid: ${message.author.id} | Channel full`);
+        logger.warn(`${getDebugLogHeader(message)} | Channel full`);
         sendInfoMessage(getMessageContext(message), "Voice Channel Full", "Ensure that there's enough room in the voice channel for me to join");
         return false;
     }
     const afkChannel = voiceChannel.id === voiceChannel.guild.afkChannelID;
     if (afkChannel) {
-        logger.warn(`gid: ${voiceChannel.guild.id}, uid: ${message.author.id} | Attempted to start game in AFK voice channel`);
+        logger.warn(`${getDebugLogHeader(message)} | Attempted to start game in AFK voice channel`);
         sendInfoMessage(getMessageContext(message), "AFK Voice Channel", "Ensure you're not in the inactive voice channel so that you can hear me!");
         return false;
     }
@@ -404,7 +407,7 @@ export async function textPermissionsCheck(message: Eris.Message<Eris.GuildTexta
     const { client } = state;
 
     if (!channel.permissionsOf(client.user.id).has("sendMessages")) {
-        logger.warn(`gid: ${channel.guild.id}, uid: ${message.author.id} | Missing SEND_MESSAGES permissions`);
+        logger.warn(`${getDebugLogHeader(message)} | Missing SEND_MESSAGES permissions`);
         const embed = {
             color: EMBED_INFO_COLOR,
             title: "Missing Permissions",
@@ -417,7 +420,7 @@ export async function textPermissionsCheck(message: Eris.Message<Eris.GuildTexta
 
     const missingPermissions = REQUIRED_TEXT_PERMISSIONS.filter((permission) => !channel.permissionsOf(client.user.id).has(permission));
     if (missingPermissions.length > 0) {
-        logger.warn(`gid: ${channel.guild.id}, uid: ${message.author.id} | Missing [${missingPermissions.join(", ")}] permissions`);
+        logger.warn(`${getDebugLogHeader(message)} | Missing [${missingPermissions.join(", ")}] permissions`);
         client.createMessage(channel.id, {
             content: missingPermissionsText(missingPermissions),
         });

@@ -2,7 +2,7 @@ import BaseCommand, { CommandArgs } from "../base_command";
 import {
     sendErrorMessage,
     areUserAndBotInSameVoiceChannel,
-    getDebugContext,
+    getDebugLogHeader,
     getUserTag,
     getMessageContext,
 } from "../../helpers/discord_utils";
@@ -29,7 +29,7 @@ export default class ForceSkipCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         const gameSession = gameSessions[message.guildID];
         if (!gameSession || !gameSession.gameRound || !areUserAndBotInSameVoiceChannel(message)) {
-            logger.warn(`${getDebugContext(message)} | Invalid force-skip. !gameSession: ${!gameSession}. !gameSession.gameRound: ${gameSession && !gameSession.gameRound}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
+            logger.warn(`${getDebugLogHeader(message)} | Invalid force-skip. !gameSession: ${!gameSession}. !gameSession.gameRound: ${gameSession && !gameSession.gameRound}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
             return;
         }
         if (gameSession.gameRound.skipAchieved || !gameSession.gameRound) {
@@ -47,7 +47,7 @@ export default class ForceSkipCommand implements BaseCommand {
         }
         await gameSession.endRound(false, getMessageContext(message));
         gameSession.startRound(guildPreference, getMessageContext(message));
-        logger.info(`${getDebugContext(message)} | Owner force-skipped.`);
+        logger.info(`${getDebugLogHeader(message)} | Owner force-skipped.`);
         gameSession.lastActiveNow();
     }
 }

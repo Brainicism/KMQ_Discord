@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { getDebugContext, sendOptionsMessage, sendErrorMessage, getMessageContext } from "../../helpers/discord_utils";
+import { getDebugLogHeader, sendOptionsMessage, sendErrorMessage, getMessageContext } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
@@ -41,20 +41,20 @@ export default class GoalCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             guildPreference.resetGoal();
             await sendOptionsMessage(message, guildPreference, GameOption.GOAL);
-            logger.info(`${getDebugContext(message)} | Goal disabled.`);
+            logger.info(`${getDebugLogHeader(message)} | Goal disabled.`);
             return;
         }
 
         const gameSession = gameSessions[message.guildID];
         const userGoal = parseInt(parsedMessage.components[0], 10);
         if (gameSession && !gameSession.scoreboard.isEmpty() && userGoal <= gameSession.scoreboard.getWinners()[0].getScore()) {
-            logger.info(`${getDebugContext(message)} | Goal update ignored.`);
+            logger.info(`${getDebugLogHeader(message)} | Goal update ignored.`);
             sendErrorMessage(getMessageContext(message), "Error applying goal", "Given goal exceeds highest score. Please raise your goal, or start a new game.");
             return;
         }
 
         guildPreference.setGoal(userGoal);
         await sendOptionsMessage(message, guildPreference, GameOption.GOAL);
-        logger.info(`${getDebugContext(message)} | Goal set to ${guildPreference.getGoal()}`);
+        logger.info(`${getDebugLogHeader(message)} | Goal set to ${guildPreference.getGoal()}`);
     }
 }

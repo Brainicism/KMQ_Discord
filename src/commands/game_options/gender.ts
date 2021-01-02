@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { sendOptionsMessage, getDebugContext, sendErrorMessage, getMessageContext } from "../../helpers/discord_utils";
+import { sendOptionsMessage, getDebugLogHeader, sendErrorMessage, getMessageContext } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
@@ -64,7 +64,7 @@ export default class GenderCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
         if (guildPreference.isGroupsMode()) {
-            logger.warn(`${getDebugContext(message)} | Game option conflict between gender and groups.`);
+            logger.warn(`${getDebugLogHeader(message)} | Game option conflict between gender and groups.`);
             sendErrorMessage(getMessageContext(message), "Game Option Conflict", "`groups` game option is currently set. `gender` and `groups` are incompatible. Remove the `groups` option by typing `,groups`to proceed");
             return;
         }
@@ -82,6 +82,6 @@ export default class GenderCommand implements BaseCommand {
             }
         }
         await sendOptionsMessage(message, guildPreference, GameOption.GENDER);
-        logger.info(`${getDebugContext(message)} | Genders set to ${selectedGenderStr}`);
+        logger.info(`${getDebugLogHeader(message)} | Genders set to ${selectedGenderStr}`);
     }
 }
