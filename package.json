@@ -24,7 +24,7 @@
     "bufferutil": "^4.0.2",
     "cron-parser": "^2.17.0",
     "dotenv": "^8.2.0",
-    "eris": "github:brainicism/eris#763141e",
+    "eris": "github:brainicism/eris#0bf8784",
     "eris-pagination": "^0.5.1",
     "erlpack": "github:abalabahaha/erlpack#5d0064f",
     "fluent-ffmpeg": "^2.1.2",
