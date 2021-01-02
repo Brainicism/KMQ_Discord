@@ -1,7 +1,7 @@
 import Eris from "eris";
 import EmbedPaginator from "eris-pagination";
-import GuildPreference from "../models/guild_preference";
-import GameSession from "../models/game_session";
+import GuildPreference from "../structures/guild_preference";
+import GameSession from "../structures/game_session";
 import _logger from "../logger";
 import { endSession, getSongCount } from "./game_utils";
 import getFact from "../fact_generator";
@@ -9,9 +9,9 @@ import { GameOption, MessageContext } from "../types";
 import { chunkArray, codeLine, bold } from "./utils";
 import state from "../kmq";
 import { ModeType } from "../commands/game_options/mode";
-import Scoreboard from "../models/scoreboard";
-import GameRound from "../models/game_round";
-import EliminationScoreboard from "../models/elimination_scoreboard";
+import Scoreboard from "../structures/scoreboard";
+import GameRound from "../structures/game_round";
+import EliminationScoreboard from "../structures/elimination_scoreboard";
 import { GameType } from "../commands/game_commands/play";
 
 const logger = _logger("utils");

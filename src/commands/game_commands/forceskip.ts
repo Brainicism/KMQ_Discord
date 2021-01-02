@@ -9,7 +9,7 @@ import {
 import { bold } from "../../helpers/utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { GameType } from "./play";
-import EliminationScoreboard from "../../models/elimination_scoreboard";
+import EliminationScoreboard from "../../structures/elimination_scoreboard";
 import _logger from "../../logger";
 
 const logger = _logger("forceskip");

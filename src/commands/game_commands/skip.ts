@@ -1,6 +1,6 @@
 import Eris from "eris";
 import BaseCommand, { CommandArgs } from "../base_command";
-import GameSession from "../../models/game_session";
+import GameSession from "../../structures/game_session";
 import {
     areUserAndBotInSameVoiceChannel,
     EMBED_INFO_COLOR,
@@ -12,9 +12,9 @@ import {
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { GameType } from "./play";
-import EliminationScoreboard from "../../models/elimination_scoreboard";
+import EliminationScoreboard from "../../structures/elimination_scoreboard";
 import _logger from "../../logger";
-import GameRound from "../../models/game_round";
+import GameRound from "../../structures/game_round";
 
 const logger = _logger("skip");
 

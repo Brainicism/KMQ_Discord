@@ -1,8 +1,8 @@
 import dbContext from "../database_context";
 import state from "../kmq";
 import _logger from "../logger";
-import GameSession from "../models/game_session";
-import GuildPreference from "../models/guild_preference";
+import GameSession from "../structures/game_session";
+import GuildPreference from "../structures/guild_preference";
 import { QueriedSong } from "../types";
 import { getForcePlaySong, isDebugMode, isForcedSongActive } from "./debug_utils";
 import { sendEndGameMessage } from "./discord_utils";

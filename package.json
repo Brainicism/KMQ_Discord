@@ -5,6 +5,7 @@
   "scripts": {
     "seed": "ts-node src/seed/seed_db",
     "start": "./start.sh",
+    "dry-run": "npm run lint && START_TYPE=dry-run npm run start",
     "dev": "npm run lint && START_TYPE=dev npm run start",
     "dev-no-lint": "START_TYPE=dev npm run start",
     "prod": "npm run lint && START_TYPE=prod npm run start",

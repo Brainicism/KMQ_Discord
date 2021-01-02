@@ -1,5 +1,5 @@
 import Eris from "eris";
-import GameSession from "../models/game_session";
+import GameSession from "../structures/game_session";
 import { ParsedMessage } from "../types";
 
 export interface CommandArgs {

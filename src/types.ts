@@ -1,6 +1,6 @@
 import Eris from "eris";
 import BaseCommand from "./commands/base_command";
-import GameSession from "./models/game_session";
+import GameSession from "./structures/game_session";
 import BotStatsPoster from "./helpers/bot_stats_poster";
 
 export interface ParsedMessage {

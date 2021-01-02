@@ -1,4 +1,4 @@
-import GameSession from "../../models/game_session";
+import GameSession from "../../structures/game_session";
 import {
     sendErrorMessage, getDebugLogHeader, sendInfoMessage, getVoiceChannel, voicePermissionsCheck, getUserTag, getMessageContext,
 } from "../../helpers/discord_utils";
