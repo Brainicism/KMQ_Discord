@@ -184,19 +184,10 @@ export default class GameSession {
      * @param message - The message to check
      */
     async guessSong(message: Eris.Message<Eris.GuildTextableChannel>) {
-        const guildPreference = await getGuildPreference(this.guildID);
-        const userVoiceChannel = getVoiceChannel(message);
+        const guildPreference = await getGuildPreference(message.guildID);
         if (!this.gameRound) return;
 
-        // if user isn't in the same voice channel
-        if (!userVoiceChannel || (userVoiceChannel.id !== this.voiceChannel.id)) {
-            return;
-        }
-
-        // if message isn't in the active game session's text channel
-        if (message.channel.id !== this.textChannel.id) {
-            return;
-        }
+        if (!this.guessEligible(message)) return;
 
         const pointsEarned = this.checkGuess(message, guildPreference.getModeType());
         if (pointsEarned > 0) {
@@ -205,14 +196,6 @@ export default class GameSession {
             // update game session's lastActive
             const gameSession = state.gameSessions[this.guildID];
             gameSession.lastActiveNow();
-
-            // elimination mode, check if current user is allowed to guess
-            if (this.gameType === GameType.ELIMINATION) {
-                const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
-                if (!this.participants.has(message.author.id) || eliminationScoreboard.isPlayerEliminated(message.author.id)) {
-                    return;
-                }
-            }
 
             // update scoreboard
             const userTag = getUserTag(message.author);
@@ -412,6 +395,34 @@ export default class GameSession {
             this.participants.add(message.author.id);
         }
         return this.gameRound.checkGuess(message, modeType);
+    }
+
+    /**
+     * Checks whether the author of the message is eligible to guess in the
+     * current game session
+     * @param message - The message to check for guess eligibility
+     */
+    private guessEligible(message: Eris.Message<Eris.GuildTextableChannel>): boolean {
+        const userVoiceChannel = getVoiceChannel(message);
+        // if user isn't in the same voice channel
+        if (!userVoiceChannel || (userVoiceChannel.id !== this.voiceChannel.id)) {
+            return false;
+        }
+
+        // if message isn't in the active game session's text channel
+        if (message.channel.id !== this.textChannel.id) {
+            return false;
+        }
+
+        // check elimination mode constraints
+        if (this.gameType === GameType.ELIMINATION) {
+            const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
+            if (!this.participants.has(message.author.id) || eliminationScoreboard.isPlayerEliminated(message.author.id)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
