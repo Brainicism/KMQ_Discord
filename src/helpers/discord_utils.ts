@@ -1,18 +1,21 @@
 import Eris from "eris";
 import EmbedPaginator from "eris-pagination";
+import path from "path";
 import GuildPreference from "../structures/guild_preference";
 import GameSession from "../structures/game_session";
 import _logger from "../logger";
 import { endSession, getSongCount } from "./game_utils";
 import getFact from "../fact_generator";
 import { GameOption, MessageContext } from "../types";
-import { chunkArray, codeLine, bold } from "./utils";
+import { chunkArray, codeLine, bold, parseJsonFile, chooseRandom } from "./utils";
 import state from "../kmq";
 import { ModeType } from "../commands/game_options/mode";
 import Scoreboard from "../structures/scoreboard";
 import GameRound from "../structures/game_round";
 import EliminationScoreboard from "../structures/elimination_scoreboard";
 import { GameType } from "../commands/game_commands/play";
+
+const endGameMessages = parseJsonFile(path.resolve(__dirname, "../../data/end_game_messages.json"));
 
 const logger = _logger("utils");
 export const EMBED_INFO_COLOR = 0x000000; // BLACK
@@ -226,10 +229,11 @@ export async function sendEndGameMessage(textChannel: Eris.TextChannel, gameSess
     } else {
         const winners = gameSession.scoreboard.getWinners();
         const embedFields = gameSession.scoreboard.getScoreboardEmbedFields().slice(0, 10);
+        const endGameMessage = Math.random() < 0.75 ? chooseRandom(endGameMessages.kmq) : chooseRandom(endGameMessages.game);
         embedFields.push(
             {
-                name: "Like KMQ?",
-                value: "Give us a vote and leave a review on [Top.GG!](https://top.gg/bot/508759831755096074)",
+                name: endGameMessage.title,
+                value: endGameMessage.message,
                 inline: false,
             },
         );

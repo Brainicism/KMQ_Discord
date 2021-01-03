@@ -2,10 +2,8 @@
 import PHPUnserialize from "php-unserialize";
 import { URL } from "url";
 import dbContext from "./database_context";
-import { parseJsonFile, weekOfYear } from "./helpers/utils";
+import { chooseRandom, weekOfYear } from "./helpers/utils";
 import _logger from "./logger";
-
-const factStrings = parseJsonFile("../data/facts.json");
 
 const logger = _logger("fact_generator");
 
@@ -23,10 +21,6 @@ const funFactFunctions = [recentMusicVideos, recentMilestone, recentMusicShowWin
 
 const kmqFactFunctions = [longestGame, mostGames, mostCorrectGuessed, globalTotalGames, recentGameSessions, genderGamePreferences, recentGames, mostSongsGuessedPlayer,
     mostGamesPlayedPlayer, recentUniquePlayers];
-
-function chooseRandom(list: Array<any>) {
-    return list[Math.floor(Math.random() * list.length)] || [];
-}
 
 function getOrdinalNum(n: number): string {
     return n + (n > 0 ? ["th", "st", "nd", "rd"][(n > 3 && n < 21) || n % 10 > 3 ? 0 : n % 10] : "");
@@ -82,9 +76,6 @@ function parseGaonWeeklyRankList(ranklist: string, year: string): Array<GaonWeek
 
 export default async function getFact(): Promise<string> {
     const randomVal = Math.random();
-    if (randomVal < 0.1) {
-        return chooseRandom(factStrings);
-    }
     if (randomVal < 0.85) {
         const { funFacts } = factCache;
         const funFactGroup = chooseRandom(funFacts);

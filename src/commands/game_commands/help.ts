@@ -9,7 +9,7 @@ import { chunkArray, parseJsonFile } from "../../helpers/utils";
 import { getCommandFiles } from "../../helpers/management_utils";
 
 const logger = _logger("help");
-const placeholder = /!/g;
+export const placeholder = /!/g;
 const FIELDS_PER_EMBED = 5;
 const helpMessages = parseJsonFile(path.resolve(__dirname, "../../../data/help_strings.json"));
 
