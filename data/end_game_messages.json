@@ -1,0 +1,62 @@
+{
+    "kmq": [
+        {
+            "title": "Wrong Song Name?",
+            "message": "Have a suggestion for an alternate song name? Tell us on the support server!"
+        },
+        {
+            "title": "Beep Boop",
+            "message": "Did you know KMQ is open source? [Check us out on Github and give us a star!](https://github.com/Brainicism/KMQ_Discord/)"
+        },
+        {
+            "title": "Like KMQ?",
+            "message": "Give us a vote and leave a review on [Top.GG!](https://top.gg/bot/508759831755096074)"
+        }
+    ],
+    "game": [
+        {
+            "title": "Did you know?",
+            "message": "Raise the stakes and try `elimination` mode where you lose a life for not guessing correctly ☠. See `,help play` for more details."
+        },
+        {
+            "title": "Did you know?",
+            "message": "You can set which years you want to hear songs from using the `cutoff` game option. See `,help cutoff` for more details."
+        },
+        {
+            "title": "Did you know?",
+            "message": "You can set which groups you *don't* want to hear songs from using the `exclude` game option. See `,help exclude` for more details."
+        },
+        {
+            "title": "Did you know?",
+            "message": "You can set what gender groups you want to hear songs from using the `gender` game option. See `,help gender` for more details."
+        },
+        {
+            "title": "Did you know?",
+            "message": "You can set which groups you want to exclusively hear songs from using the `groups` game option. See `,help groups` for more details."
+        },
+        {
+            "title": "Did you know?",
+            "message": "You can limit the number of songs you hear from by popularity. See `,help limit` for more details."
+        },
+        {
+            "title": "Did you know?",
+            "message": "Tired of guessing song names? Switch it up by changing the guess mode to `artist` or `both`. See `,help mode` for more details."
+        },
+        {
+            "title": "Did you know?",
+            "message": "You can reset the game options by using `,reset`."
+        },
+        {
+            "title": "Did you know?",
+            "message": "You can pick whether each song starts from the `beginning` or `random` position. See `,help seek` for more details."
+        },
+        {
+            "title": "Did you know?",
+            "message": "You can avoid songs repeating too frequently by changing the `shuffle` game option. See `,help shuffle` for more details."
+        },
+        {
+            "title": "Did you know?",
+            "message": "You can set a time limit for guessing each song by using the `timer` game option. See `,help timer` for more details."
+        }
+    ]
+}
