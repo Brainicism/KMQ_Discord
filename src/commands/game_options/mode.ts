@@ -54,9 +54,17 @@ export default class ModeCommand implements BaseCommand {
 
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
-        const modeType = parsedMessage.components.length > 0 ? parsedMessage.components[0].toLowerCase() as ModeType : DEFAULT_MODE;
+
+        if (parsedMessage.components.length === 0) {
+            guildPreference.resetModeType();
+            logger.info(`${getDebugLogHeader(message)} | Mode type reset.`);
+            await sendOptionsMessage(message, guildPreference, { option: GameOption.MODE_TYPE, reset: true });
+            return;
+        }
+
+        const modeType = parsedMessage.components[0].toLowerCase() as ModeType;
         guildPreference.setModeType(modeType);
-        await sendOptionsMessage(message, guildPreference, GameOption.MODE_TYPE);
+        await sendOptionsMessage(message, guildPreference, { option: GameOption.MODE_TYPE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Mode type set to ${modeType}`);
     }
 }

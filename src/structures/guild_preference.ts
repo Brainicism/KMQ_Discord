@@ -219,7 +219,7 @@ export default class GuildPreference {
 
     /** Resets the gender option to the default value */
     resetGender() {
-        this.gameOptions.gender = [GENDER.FEMALE];
+        this.gameOptions.gender = DEFAULT_GENDER;
         this.updateGuildPreferences(dbContext.kmq);
         this.updateGameSession(true);
     }
@@ -255,6 +255,12 @@ export default class GuildPreference {
         return this.gameOptions.seekType;
     }
 
+    /** Resets the seek type option to the default value */
+    resetSeekType() {
+        this.gameOptions.seekType = DEFAULT_SEEK;
+        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGameSession(false);
+    }
     /**
      * Sets the mode type option value
      * @param modeType - The ModeType
@@ -268,6 +274,13 @@ export default class GuildPreference {
     /** @returns the current mode type option value */
     getModeType(): ModeType {
         return this.gameOptions.modeType;
+    }
+
+    /** Resets the mode type option to the default value */
+    resetModeType() {
+        this.gameOptions.modeType = DEFAULT_MODE;
+        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGameSession(false);
     }
 
     /**
@@ -340,6 +353,13 @@ export default class GuildPreference {
     /** Returns the current shuffle type option value */
     getShuffleType(): ShuffleType {
         return this.gameOptions.shuffleType;
+    }
+
+    /** Resets the shuffle type to the default value */
+    resetShuffleType() {
+        this.gameOptions.shuffleType = DEFAULT_SHUFFLE;
+        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGameSession(false);
     }
 
     /** @returns whether the current shuffle type is UNIQUE */

@@ -165,7 +165,8 @@ export async function sendInfoMessage(messageContext: MessageContext, title: str
  * @param updatedOption - Specifies which GameOption was modified
  * @param footerText - The footer text
  */
-export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextableChannel>, guildPreference: GuildPreference, updatedOption?: string, footerText?: string) {
+export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextableChannel>, guildPreference: GuildPreference,
+    updatedOption?: { option: GameOption, reset: boolean }, footerText?: string) {
     const totalSongs = await getSongCount(guildPreference);
     if (totalSongs === -1) {
         sendErrorMessage(getMessageContext(message), "Error retrieving song data", `Try again in a bit, or report this error to the support server found in \`${process.env.BOT_PREFIX}help\`.`);
@@ -193,15 +194,19 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
 
     for (const gameOption of Object.keys(optionStrings)) {
         const gameOptionString = optionStrings[gameOption];
-        optionStrings[gameOption] = updatedOption === gameOption ? bold(gameOptionString) : codeLine(gameOptionString);
+        optionStrings[gameOption] = (updatedOption && updatedOption.option) === gameOption ? bold(gameOptionString) : codeLine(gameOptionString);
     }
 
     const goalMessage = `First one to ${optionStrings[GameOption.GOAL]} points wins.`;
     const guessTimeoutMessage = ` in less than ${optionStrings[GameOption.TIMER]} seconds`;
     const shuffleMessage = `Songs will be shuffled in ${optionStrings[GameOption.SHUFFLE_TYPE]} order. `;
 
+    if (updatedOption && updatedOption.reset) {
+        footerText = `Looking for information on how to use this command? Check out '${process.env.BOT_PREFIX}help [command]' to learn more`;
+    }
+
     await sendInfoMessage(getMessageContext(message),
-        updatedOption === null ? "Options" : `${updatedOption} updated`,
+        updatedOption === null ? "Options" : `${updatedOption.option} ${updatedOption.reset ? "reset" : "updated"}`,
         `Now playing the ${optionStrings[GameOption.LIMIT]} out of the __${totalSongs}__ most popular songs by ${guildPreference.isGroupsMode() ? optionStrings[GameOption.GROUPS] : optionStrings[GameOption.GENDER]} ${optionStrings[GameOption.CUTOFF]}\
         ${guildPreference.isExcludesMode() ? ` excluding ${optionStrings[GameOption.EXCLUDE]}` : ""}. \nPlaying from the ${optionStrings[GameOption.SEEK_TYPE]} point of each song. ${shuffleUniqueMode ? shuffleMessage : ""}\
         Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}`,
