@@ -40,7 +40,14 @@ export default class LimitCommand implements BaseCommand {
 
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
-        const newLimit = parsedMessage.components.length > 0 ? parseInt(parsedMessage.components[0], 10) : DEFAULT_LIMIT;
+        if (parsedMessage.components.length === 0) {
+            guildPreference.resetLimit();
+            logger.info(`${getDebugLogHeader(message)} | Limit reset.`);
+            await sendOptionsMessage(message, guildPreference, { option: GameOption.LIMIT, reset: true });
+            return;
+        }
+
+        const newLimit = parseInt(parsedMessage.components[0], 10);
         guildPreference.setLimit(newLimit);
         const songCount = await getSongCount(guildPreference);
         if (songCount === 0) {
@@ -50,7 +57,7 @@ export default class LimitCommand implements BaseCommand {
         if (guildPreference.getLimit() > songCount) {
             guildPreference.setLimit(songCount);
         }
-        await sendOptionsMessage(message, guildPreference, GameOption.LIMIT);
+        await sendOptionsMessage(message, guildPreference, { option: GameOption.LIMIT, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Limit set to ${guildPreference.getLimit()}`);
     }
 }
