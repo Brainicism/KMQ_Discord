@@ -57,6 +57,10 @@
         {
             "title": "Did you know?",
             "message": "You can set a time limit for guessing each song by using the `timer` game option. See `,help timer` for more details."
+        },
+        {
+            "title": "Did you know?",
+            "message": "You can see how many games you've played and how many songs you've guessed in total using `,profile`."
         }
     ]
 }
