@@ -9,6 +9,14 @@ import { bold, friendlyFormattedDate } from "../../helpers/utils";
 const logger = _logger("profile");
 
 export default class ProfileCommand implements BaseCommand {
+    help = {
+        name: "profile",
+        description: "Shows your game stats.",
+        usage: "!profile",
+        examples: [],
+        priority: 50,
+    };
+
     async call({ message }: CommandArgs) {
         const authorId = message.author.id;
         const playerStats = await dbContext.kmq("player_stats")
