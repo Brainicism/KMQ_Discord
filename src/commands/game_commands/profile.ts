@@ -18,7 +18,7 @@ export default class ProfileCommand implements BaseCommand {
             explanation: "View your own player profile.",
         },
         {
-            example: "`!shuffle @FortnitePlayer`",
+            example: "`!profile @FortnitePlayer`",
             explanation: "Views FortnitePlayer's player profile.",
         }],
         priority: 50,
