@@ -60,7 +60,7 @@
         },
         {
             "title": "Did you know?",
-            "message": "You can see how many games you've played, and how many song's you've guessed in total using `,profile`."
+            "message": "You can see how many games you've played and how many songs you've guessed in total using `,profile`."
         }
     ]
 }

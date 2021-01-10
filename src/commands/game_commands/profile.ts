@@ -12,8 +12,15 @@ export default class ProfileCommand implements BaseCommand {
     help = {
         name: "profile",
         description: "Shows your game stats.",
-        usage: "!profile",
-        examples: [],
+        usage: "!profile { @mention }",
+        examples: [{
+            example: "`!profile`",
+            explanation: "View your own player profile.",
+        },
+        {
+            example: "`!shuffle @FortnitePlayer`",
+            explanation: "Views FortnitePlayer's player profile.",
+        }],
         priority: 50,
     };
 
