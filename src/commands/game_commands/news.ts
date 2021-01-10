@@ -4,7 +4,7 @@ import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
 import dbContext from "../../database_context";
 import { EMBED_INFO_COLOR, getDebugLogHeader, sendMessage } from "../../helpers/discord_utils";
-import { bold } from "../../helpers/utils";
+import { bold, friendlyFormattedDate } from "../../helpers/utils";
 
 const logger = _logger("news");
 
@@ -46,7 +46,7 @@ export default class NewsCommand implements BaseCommand {
             title: bold("Updates"),
             description: news,
             footer: {
-                text: `Latest Song Update: ${latestSongDate.toISOString().split("T")[0]}`,
+                text: `Latest Song Update: ${friendlyFormattedDate(latestSongDate)}`,
             },
         };
         logger.info(`${getDebugLogHeader(message)} | News retrieved.`);

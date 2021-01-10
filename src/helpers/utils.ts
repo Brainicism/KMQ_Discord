@@ -112,8 +112,17 @@ export function weekOfYear(dateObj?: Date): number {
 
 /**
  * Chooses random element from a list
- * @param list List of arbitrary elements
+ * @param list - List of arbitrary elements
+ * @returns the randomly selected element
  */
 export function chooseRandom(list: Array<any>) {
     return list[Math.floor(Math.random() * list.length)] || [];
+}
+
+/**
+ * @param date - the date Object
+ * @returns the date in yyyy-mm-dd format
+ */
+export function friendlyFormattedDate(date: Date): string {
+    return date.toISOString().split("T")[0];
 }
