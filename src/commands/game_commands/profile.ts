@@ -50,15 +50,15 @@ export default class ProfileCommand implements BaseCommand {
         const lastActiveDateString = friendlyFormattedDate(new Date(playerStats["last_active"]));
 
         const totalPlayers = (await dbContext.kmq("player_stats").count("* as count").first())["count"];
-        const relativeSongRank = (await dbContext.kmq("player_stats")
+        const relativeSongRank = ((await dbContext.kmq("player_stats")
             .count("* as count")
             .where("songs_guessed", ">", songsGuessed)
-            .first())["count"];
+            .first())["count"] as number) + 1;
 
-        const relativeGamesPlayedRank = (await dbContext.kmq("player_stats")
+        const relativeGamesPlayedRank = ((await dbContext.kmq("player_stats")
             .count("* as count")
             .where("games_played", ">", gamesPlayed)
-            .first())["count"];
+            .first())["count"] as number) + 1;
 
         const fields: Array<Eris.EmbedField> = [{
             name: "Songs Guessed",
