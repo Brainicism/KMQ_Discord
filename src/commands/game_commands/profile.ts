@@ -36,6 +36,7 @@ export default class ProfileCommand implements BaseCommand {
             .select("songs_guessed", "games_played", "first_play", "last_active")
             .where("player_id", "=", requestedPlayer.id)
             .first();
+
         logger.info(`${getDebugLogHeader(message)} | Profile retrieved`);
 
         if (!playerStats) {
@@ -43,21 +44,37 @@ export default class ProfileCommand implements BaseCommand {
             return;
         }
 
+        const songsGuessed = playerStats["songs_guessed"];
+        const gamesPlayed = playerStats["games_played"];
+        const firstPlayDateString = friendlyFormattedDate(new Date(playerStats["first_play"]));
+        const lastActiveDateString = friendlyFormattedDate(new Date(playerStats["last_active"]));
+
+        const totalPlayers = (await dbContext.kmq("player_stats").count("* as count").first())["count"];
+        const relativeSongRank = (await dbContext.kmq("player_stats")
+            .count("* as count")
+            .where("songs_guessed", ">", songsGuessed)
+            .first())["count"];
+
+        const relativeGamesPlayedRank = (await dbContext.kmq("player_stats")
+            .count("* as count")
+            .where("games_played", ">", gamesPlayed)
+            .first())["count"];
+
         const fields: Array<Eris.EmbedField> = [{
             name: "Songs Guessed",
-            value: playerStats["songs_guessed"],
+            value: `${songsGuessed} | #${relativeSongRank}/${totalPlayers} `,
         },
         {
             name: "Games Played",
-            value: playerStats["games_played"],
+            value: `${gamesPlayed} | #${relativeGamesPlayedRank}/${totalPlayers} `,
         },
         {
             name: "First Played",
-            value: friendlyFormattedDate(new Date(playerStats["first_play"])),
+            value: firstPlayDateString,
         },
         {
             name: "Last Active",
-            value: friendlyFormattedDate(new Date(playerStats["last_active"])),
+            value: lastActiveDateString,
         }];
 
         sendEmbed(message.channel, {
