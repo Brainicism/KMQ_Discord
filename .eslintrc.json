@@ -83,6 +83,13 @@
                     "private-method"
                 ]
             }
+        ],
+        "prefer-destructuring": [
+            "error",
+            {
+                "object": true,
+                "array": false
+            }
         ]
     }
 }

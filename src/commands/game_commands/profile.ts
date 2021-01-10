@@ -18,10 +18,16 @@ export default class ProfileCommand implements BaseCommand {
     };
 
     async call({ message }: CommandArgs) {
-        const authorId = message.author.id;
+        let requestedPlayer: Eris.User;
+        if (message.mentions.length === 1) {
+            requestedPlayer = message.mentions[0];
+        } else {
+            requestedPlayer = message.author;
+        }
+
         const playerStats = await dbContext.kmq("player_stats")
             .select("songs_guessed", "games_played", "first_play", "last_active")
-            .where("player_id", "=", authorId)
+            .where("player_id", "=", requestedPlayer.id)
             .first();
         logger.info(`${getDebugLogHeader(message)} | Profile retrieved`);
 
@@ -48,7 +54,7 @@ export default class ProfileCommand implements BaseCommand {
         }];
 
         sendEmbed(message.channel, {
-            title: bold(`${getUserTag(message.author)}`),
+            title: bold(`${getUserTag(requestedPlayer)}`),
             fields,
             timestamp: new Date(),
         });
