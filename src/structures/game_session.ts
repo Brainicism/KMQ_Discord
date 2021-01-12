@@ -23,6 +23,9 @@ import { ModeType } from "../commands/game_options/mode";
 const logger = _logger("game_session");
 const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const EXP_TABLE = [...Array(100).keys()].map((level) => 10 * (level ** 2) + 200 * level - 200);
+
 export default class GameSession {
     /** The GameType that the GameSession started in */
     public readonly gameType: GameType;
@@ -489,7 +492,7 @@ export default class GameSession {
     private async calculateExpGain(guildPreference: GuildPreference): Promise<number> {
         const songCount = Math.min(await getSongCount(guildPreference), guildPreference.getLimit());
         if (songCount < 10) return 0;
-        const expBase = 1000 / (1 + (Math.exp(2 - (0.00125 * songCount))));
+        const expBase = 1000 / (1 + (Math.exp(1 - (0.00125 * songCount))));
         let expJitter = expBase * (0.05 * Math.random());
         expJitter *= Math.round(Math.random()) ? 1 : -1;
         return Math.floor(expBase + expJitter);
