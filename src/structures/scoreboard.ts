@@ -77,13 +77,15 @@ export default class Scoreboard {
      * @param winnerID  - The Discord ID of the correct guesser
      * @param avatarURL - The avatar URL of the correct guesser
      * @param pointsEarned - The amount of points awarded
+     * @param expGain - The amount of EXP gained
      */
-    updateScoreboard(winnerTag: string, winnerID: string, avatarURL: string, pointsEarned: number) {
+    updateScoreboard(winnerTag: string, winnerID: string, avatarURL: string, pointsEarned: number, expGain: number) {
         if (!this.players[winnerID]) {
             this.players[winnerID] = new Player(winnerTag, winnerID, avatarURL, pointsEarned);
         } else {
             this.players[winnerID].incrementScore(pointsEarned);
         }
+        this.players[winnerID].incrementExp(expGain);
 
         if (this.players[winnerID].getScore() === this.highestScore) {
             // If user is tied for first, add them to the first place array

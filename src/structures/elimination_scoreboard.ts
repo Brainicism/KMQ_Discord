@@ -47,11 +47,13 @@ export default class EliminationScoreboard extends Scoreboard {
      * @param _avatarURL - Unused
      * @param _pointsEarned - Unused
      */
-    updateScoreboard(_winnerTag: string, winnerID: string, _avatarURL: string, _pointsEarned: number) {
+    updateScoreboard(_winnerTag: string, winnerID: string, _avatarURL: string, _pointsEarned: number, expGain: number) {
         let maxLives = -1;
         for (const player of Object.values(this.players)) {
             if (player.getId() !== winnerID) {
                 player.decrementLives();
+            } else {
+                player.incrementExp(expGain);
             }
             if (player.getLives() === maxLives) {
                 this.firstPlace.push(player);

@@ -199,7 +199,8 @@ export default class GameSession {
 
             // update scoreboard
             const userTag = getUserTag(message.author);
-            this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL, pointsEarned);
+            const expGain = await this.calculateExpGain(guildPreference);
+            this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL, pointsEarned, expGain);
 
             // misc. game round cleanup
             this.stopGuessTimeout();
@@ -478,5 +479,18 @@ export default class GameSession {
     private getDebugSongDetails(): string {
         if (!this.gameRound) return "No active game round";
         return `${this.gameRound.songName}:${this.gameRound.artist}:${this.gameRound.videoID}`;
+    }
+
+    /**
+     * https://www.desmos.com/calculator/y8kweubkqs
+     * @param guildPreference - The guild preference
+     * @returns The amount of EXP gained based on the current game options
+     */
+    private async calculateExpGain(guildPreference: GuildPreference): Promise<number> {
+        const songCount = Math.min(await getSongCount(guildPreference), guildPreference.getLimit());
+        const expBase = 1000 / (1 + (Math.exp(2 - (0.00125 * songCount))));
+        let expJitter = expBase * (0.05 * Math.random());
+        expJitter *= Math.round(Math.random()) ? 1 : -1;
+        return Math.floor(expBase + expJitter);
     }
 }

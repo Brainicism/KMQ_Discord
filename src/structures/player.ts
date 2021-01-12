@@ -11,11 +11,15 @@ export default class Player {
     /** The player's avatar URL */
     private avatarURL: string;
 
+    /** The player's EXP gain */
+    private expGain: number;
+
     constructor(tag: string, id: string, avatarURL: string, points: number) {
         this.tag = tag;
         this.id = id;
         this.score = points;
         this.avatarURL = avatarURL;
+        this.expGain = 0;
     }
 
     /** @returns the player's Discord tag  */
@@ -26,6 +30,11 @@ export default class Player {
     /** @returns the player's current score */
     getScore(): number {
         return this.score;
+    }
+
+    /** @returns the player's EXP gain */
+    getExpGain(): number {
+        return this.expGain;
     }
 
     /** @returns the player's Discord ID */
@@ -44,5 +53,14 @@ export default class Player {
      */
     incrementScore(pointsEarned: number) {
         this.score += pointsEarned;
+    }
+
+    /**
+     * Increment the player's EXP gain by the specified amount
+     * @param expGain - The amount of EXP that was gained
+     */
+
+    incrementExp(expGain: number) {
+        this.expGain += expGain;
     }
 }
