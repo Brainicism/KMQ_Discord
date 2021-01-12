@@ -114,13 +114,15 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
  * @param description - The description of the embed
  */
 export async function sendErrorMessage(messageContext: MessageContext, title: string, description: string) {
+    const author = messageContext.user ? {
+        name: messageContext.user.username,
+        icon_url: messageContext.user.avatarURL,
+    } : null;
+
     await sendMessage(messageContext.channel, {
         embed: {
             color: EMBED_ERROR_COLOR,
-            author: {
-                name: messageContext.user.username,
-                icon_url: messageContext.user.avatarURL,
-            },
+            author,
             title: bold(title),
             description,
         },
@@ -145,12 +147,15 @@ export async function sendInfoMessage(messageContext: MessageContext, title: str
             text: footerText,
         };
     }
+
+    const author = messageContext.user ? {
+        name: messageContext.user.username,
+        icon_url: messageContext.user.avatarURL,
+    } : null;
+
     const embed = {
         color: EMBED_INFO_COLOR,
-        author: {
-            name: messageContext.user.username,
-            icon_url: messageContext.user.avatarURL,
-        },
+        author,
         title: bold(title),
         description,
         footer,

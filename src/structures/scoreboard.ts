@@ -118,6 +118,17 @@ export default class Scoreboard {
         return 0;
     }
 
+    /**
+     * @param userId - The Discord user ID of the player to check
+     * @returns the exp gained by the player
+     */
+    getPlayerExpGain(userId: string): number {
+        if (userId in this.players) {
+            return this.players[userId].getExpGain();
+        }
+        return 0;
+    }
+
     /** @returns whether the game has completed */
     async gameFinished(): Promise<boolean> {
         const guildPreference = await getGuildPreference(this.guildID);
@@ -127,5 +138,13 @@ export default class Scoreboard {
     /** @returns a list of tags of the player participating in the game */
     getPlayerNames(): Array<string> {
         return Object.values(this.players).map((player) => player.getTag());
+    }
+
+    /**
+     *  @param userId - The Discord user ID of the Player
+     *  @returns a Player object for the corresponding user ID
+     * */
+    getPlayerName(userId: string): string {
+        return this.players[userId].getTag();
     }
 }
