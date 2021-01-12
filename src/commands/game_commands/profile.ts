@@ -5,6 +5,7 @@ import { getDebugLogHeader, getMessageContext, getUserTag, sendEmbed, sendInfoMe
 import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
 import { bold, friendlyFormattedDate } from "../../helpers/utils";
+import { CUM_EXP_TABLE } from "../../structures/game_session";
 
 const logger = _logger("profile");
 
@@ -60,22 +61,38 @@ export default class ProfileCommand implements BaseCommand {
             .where("games_played", ">", gamesPlayed)
             .first())["count"] as number) + 1;
 
-        const fields: Array<Eris.EmbedField> = [{
-            name: "Songs Guessed",
-            value: `${songsGuessed} | #${relativeSongRank}/${totalPlayers} `,
-        },
-        {
-            name: "Games Played",
-            value: `${gamesPlayed} | #${relativeGamesPlayedRank}/${totalPlayers} `,
-        },
-        {
-            name: "First Played",
-            value: firstPlayDateString,
-        },
-        {
-            name: "Last Active",
-            value: lastActiveDateString,
-        }];
+        const { exp, level } = (await dbContext.kmq("player_stats")
+            .select(["exp", "level"])
+            .where("player_id", "=", requestedPlayer.id)
+            .first());
+
+        const fields: Array<Eris.EmbedField> = [
+            {
+                name: "Level",
+                value: `${level}`,
+                inline: true,
+            },
+            {
+                name: "Experience",
+                value: `${exp}/${CUM_EXP_TABLE[level + 1]}`,
+                inline: true,
+            },
+            {
+                name: "Songs Guessed",
+                value: `${songsGuessed} | #${relativeSongRank}/${totalPlayers} `,
+            },
+            {
+                name: "Games Played",
+                value: `${gamesPlayed} | #${relativeGamesPlayedRank}/${totalPlayers} `,
+            },
+            {
+                name: "First Played",
+                value: firstPlayDateString,
+            },
+            {
+                name: "Last Active",
+                value: lastActiveDateString,
+            }];
 
         sendEmbed(message.channel, {
             title: bold(`${getUserTag(requestedPlayer)}`),

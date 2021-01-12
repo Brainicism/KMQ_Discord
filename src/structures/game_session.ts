@@ -29,7 +29,7 @@ const EXP_TABLE = [...Array(100).keys()].map((level) => {
 });
 
 // eslint-disable-next-line no-return-assign
-const CUM_EXP_TABLE = EXP_TABLE.map(((sum) => (value) => sum += value)(0));
+export const CUM_EXP_TABLE = EXP_TABLE.map(((sum) => (value) => sum += value)(0));
 
 interface LevelUpResult {
     userId: string;
