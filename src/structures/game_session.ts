@@ -19,11 +19,12 @@ import EliminationScoreboard from "./elimination_scoreboard";
 import { deleteGameSession } from "../helpers/management_utils";
 import { GameType } from "../commands/game_commands/play";
 import { ModeType } from "../commands/game_options/mode";
+import { getRankNameByLevel } from "../commands/game_commands/profile";
 
 const logger = _logger("game_session");
 const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
 
-const EXP_TABLE = [...Array(100).keys()].map((level) => {
+const EXP_TABLE = [...Array(200).keys()].map((level) => {
     if (level === 0 || level === 1) return 0;
     return 10 * (level ** 2) + 200 * level - 200;
 });
@@ -170,7 +171,7 @@ export default class GameSession {
 
         // send level up message
         if (leveledUpPlayers.length > 0) {
-            const message = leveledUpPlayers.map((leveledUpPlayer) => `${this.scoreboard.getPlayerName(leveledUpPlayer.userId)} has leveled from \`${leveledUpPlayer.startLevel}\` to \`${leveledUpPlayer.endLevel}\``)
+            const message = leveledUpPlayers.map((leveledUpPlayer) => `${this.scoreboard.getPlayerName(leveledUpPlayer.userId)} has leveled from \`${leveledUpPlayer.startLevel}\` to \`${leveledUpPlayer.endLevel} (${getRankNameByLevel(leveledUpPlayer.endLevel)})\``)
                 .join("\n");
             sendInfoMessage({ channel: this.textChannel }, "Power up!", message);
         }

@@ -9,6 +9,28 @@ import { CUM_EXP_TABLE } from "../../structures/game_session";
 
 const logger = _logger("profile");
 
+const RANK_TITLES = [
+    { title: "Novice", req: 0 },
+    { title: "Trainee", req: 10 },
+    { title: "Pre-debut", req: 20 },
+    { title: "Nugu", req: 30 },
+    { title: "New Artist Of The Year", req: 40 },
+    { title: "Artist Of The Year", req: 50 },
+    { title: "Bonsang Award Winner", req: 60 },
+    { title: "Daesang Award Winner", req: 70 },
+    { title: "CEO of KMQ Entertainment", req: 80 },
+    { title: "President of South Korea", req: 90 },
+    { title: "Reuniter of the Two Koreas", req: 100 },
+];
+
+export function getRankNameByLevel(level: number): string {
+    for (let i = RANK_TITLES.length - 1; i >= 0; i--) {
+        const rankTitle = RANK_TITLES[i];
+        if (level >= rankTitle.req) return rankTitle.title;
+    }
+    return RANK_TITLES[0].title;
+}
+
 export default class ProfileCommand implements BaseCommand {
     help = {
         name: "profile",
@@ -65,11 +87,10 @@ export default class ProfileCommand implements BaseCommand {
             .select(["exp", "level"])
             .where("player_id", "=", requestedPlayer.id)
             .first());
-
         const fields: Array<Eris.EmbedField> = [
             {
                 name: "Level",
-                value: `${level}`,
+                value: `${level} (${getRankNameByLevel(level)})`,
                 inline: true,
             },
             {
