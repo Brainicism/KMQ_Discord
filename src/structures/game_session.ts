@@ -488,6 +488,7 @@ export default class GameSession {
      */
     private async calculateExpGain(guildPreference: GuildPreference): Promise<number> {
         const songCount = Math.min(await getSongCount(guildPreference), guildPreference.getLimit());
+        if (songCount < 10) return 0;
         const expBase = 1000 / (1 + (Math.exp(2 - (0.00125 * songCount))));
         let expJitter = expBase * (0.05 * Math.random());
         expJitter *= Math.round(Math.random()) ? 1 : -1;
