@@ -171,9 +171,12 @@ export default class GameSession {
 
         // send level up message
         if (leveledUpPlayers.length > 0) {
-            const message = leveledUpPlayers.map((leveledUpPlayer) => `${this.scoreboard.getPlayerName(leveledUpPlayer.userId)} has leveled from \`${leveledUpPlayer.startLevel}\` to \`${leveledUpPlayer.endLevel} (${getRankNameByLevel(leveledUpPlayer.endLevel)})\``)
-                .join("\n");
-            sendInfoMessage({ channel: this.textChannel }, "Power up!", message);
+            let levelUpMessages = leveledUpPlayers.map((leveledUpPlayer) => `\`${this.scoreboard.getPlayerName(leveledUpPlayer.userId)}\` has leveled from \`${leveledUpPlayer.startLevel}\` to \`${leveledUpPlayer.endLevel} (${getRankNameByLevel(leveledUpPlayer.endLevel)})\``);
+            if (levelUpMessages.length > 10) {
+                levelUpMessages = levelUpMessages.slice(0, 10);
+                levelUpMessages.push("and many others...");
+            }
+            sendInfoMessage({ channel: this.textChannel }, "🚀 Power up!", levelUpMessages.join("\n"));
         }
 
         // commit guild stats
@@ -545,7 +548,7 @@ export default class GameSession {
     }
 
     /**
-     * https://www.desmos.com/calculator/y8kweubkqs
+     * https://www.desmos.com/calculator/zxvbuq0bch
      * @param guildPreference - The guild preference
      * @returns The amount of EXP gained based on the current game options
      */
