@@ -5,8 +5,31 @@ import { getDebugLogHeader, getMessageContext, getUserTag, sendEmbed, sendInfoMe
 import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
 import { bold, friendlyFormattedDate } from "../../helpers/utils";
+import { CUM_EXP_TABLE } from "../../structures/game_session";
 
 const logger = _logger("profile");
+
+const RANK_TITLES = [
+    { title: "Novice", req: 0 },
+    { title: "Trainee", req: 10 },
+    { title: "Pre-debut", req: 20 },
+    { title: "Nugu", req: 30 },
+    { title: "New Artist Of The Year", req: 40 },
+    { title: "Artist Of The Year", req: 50 },
+    { title: "Bonsang Award Winner", req: 60 },
+    { title: "Daesang Award Winner", req: 70 },
+    { title: "CEO of KMQ Entertainment", req: 80 },
+    { title: "President of South Korea", req: 90 },
+    { title: "Reuniter of the Two Koreas", req: 100 },
+];
+
+export function getRankNameByLevel(level: number): string {
+    for (let i = RANK_TITLES.length - 1; i >= 0; i--) {
+        const rankTitle = RANK_TITLES[i];
+        if (level >= rankTitle.req) return rankTitle.title;
+    }
+    return RANK_TITLES[0].title;
+}
 
 export default class ProfileCommand implements BaseCommand {
     help = {
@@ -60,22 +83,37 @@ export default class ProfileCommand implements BaseCommand {
             .where("games_played", ">", gamesPlayed)
             .first())["count"] as number) + 1;
 
-        const fields: Array<Eris.EmbedField> = [{
-            name: "Songs Guessed",
-            value: `${songsGuessed} | #${relativeSongRank}/${totalPlayers} `,
-        },
-        {
-            name: "Games Played",
-            value: `${gamesPlayed} | #${relativeGamesPlayedRank}/${totalPlayers} `,
-        },
-        {
-            name: "First Played",
-            value: firstPlayDateString,
-        },
-        {
-            name: "Last Active",
-            value: lastActiveDateString,
-        }];
+        const { exp, level } = (await dbContext.kmq("player_stats")
+            .select(["exp", "level"])
+            .where("player_id", "=", requestedPlayer.id)
+            .first());
+        const fields: Array<Eris.EmbedField> = [
+            {
+                name: "Level",
+                value: `${level} (${getRankNameByLevel(level)})`,
+                inline: true,
+            },
+            {
+                name: "Experience",
+                value: `${exp}/${CUM_EXP_TABLE[level + 1]}`,
+                inline: true,
+            },
+            {
+                name: "Songs Guessed",
+                value: `${songsGuessed} | #${relativeSongRank}/${totalPlayers} `,
+            },
+            {
+                name: "Games Played",
+                value: `${gamesPlayed} | #${relativeGamesPlayedRank}/${totalPlayers} `,
+            },
+            {
+                name: "First Played",
+                value: firstPlayDateString,
+            },
+            {
+                name: "Last Active",
+                value: lastActiveDateString,
+            }];
 
         sendEmbed(message.channel, {
             title: bold(`${getUserTag(requestedPlayer)}`),

@@ -5,7 +5,7 @@ import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
-    getDebugLogHeader, getSqlDateString, getUserTag, getVoiceChannel, sendErrorMessage, sendEndOfRoundMessage, getMessageContext,
+    getDebugLogHeader, getSqlDateString, getUserTag, getVoiceChannel, sendErrorMessage, sendEndOfRoundMessage, getMessageContext, sendInfoMessage,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getSongCount, endSession } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds } from "../helpers/utils";
@@ -19,9 +19,24 @@ import EliminationScoreboard from "./elimination_scoreboard";
 import { deleteGameSession } from "../helpers/management_utils";
 import { GameType } from "../commands/game_commands/play";
 import { ModeType } from "../commands/game_options/mode";
+import { getRankNameByLevel } from "../commands/game_commands/profile";
 
 const logger = _logger("game_session");
 const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
+
+const EXP_TABLE = [...Array(200).keys()].map((level) => {
+    if (level === 0 || level === 1) return 0;
+    return 10 * (level ** 2) + 200 * level - 200;
+});
+
+// eslint-disable-next-line no-return-assign
+export const CUM_EXP_TABLE = EXP_TABLE.map(((sum) => (value) => sum += value)(0));
+
+interface LevelUpResult {
+    userId: string;
+    startLevel: number;
+    endLevel: number;
+}
 
 export default class GameSession {
     /** The GameType that the GameSession started in */
@@ -136,6 +151,7 @@ export default class GameSession {
             }
         }
 
+        const leveledUpPlayers: Array<LevelUpResult> = [];
         // commit player stats
         for (const participant of this.participants) {
             await this.ensurePlayerStat(participant);
@@ -144,6 +160,23 @@ export default class GameSession {
             if (playerScore > 0) {
                 await this.incrementPlayerSongsGuessed(participant, playerScore);
             }
+            const playerExpGain = this.scoreboard.getPlayerExpGain(participant);
+            if (playerExpGain > 0) {
+                const levelUpResult = await this.incrementPlayerExp(participant, playerExpGain);
+                if (levelUpResult) {
+                    leveledUpPlayers.push(levelUpResult);
+                }
+            }
+        }
+
+        // send level up message
+        if (leveledUpPlayers.length > 0) {
+            let levelUpMessages = leveledUpPlayers.map((leveledUpPlayer) => `\`${this.scoreboard.getPlayerName(leveledUpPlayer.userId)}\` has leveled from \`${leveledUpPlayer.startLevel}\` to \`${leveledUpPlayer.endLevel} (${getRankNameByLevel(leveledUpPlayer.endLevel)})\``);
+            if (levelUpMessages.length > 10) {
+                levelUpMessages = levelUpMessages.slice(0, 10);
+                levelUpMessages.push("and many others...");
+            }
+            sendInfoMessage({ channel: this.textChannel }, "🚀 Power up!", levelUpMessages.join("\n"));
         }
 
         // commit guild stats
@@ -191,15 +224,15 @@ export default class GameSession {
 
         const pointsEarned = this.checkGuess(message, guildPreference.getModeType());
         if (pointsEarned > 0) {
-            logger.info(`${getDebugLogHeader(message)} | Song correctly guessed. song = ${this.gameRound.songName}`);
-
             // update game session's lastActive
             const gameSession = state.gameSessions[this.guildID];
             gameSession.lastActiveNow();
 
             // update scoreboard
             const userTag = getUserTag(message.author);
-            this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL, pointsEarned);
+            const expGain = await this.calculateExpGain(guildPreference);
+            logger.info(`${getDebugLogHeader(message)} | Song correctly guessed. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
+            this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL, pointsEarned, expGain);
 
             // misc. game round cleanup
             this.stopGuessTimeout();
@@ -473,10 +506,68 @@ export default class GameSession {
     }
 
     /**
+     * @param userId - The Discord ID of the user to exp gain
+     * @param expGain - The amount of EXP gained
+     */
+    private async incrementPlayerExp(userId: string, expGain: number): Promise<LevelUpResult> {
+        const { exp: currentExp, level } = (await dbContext.kmq("player_stats")
+            .select(["exp", "level"])
+            .where("player_id", "=", userId)
+            .first());
+        const newExp = currentExp + expGain;
+        let newLevel = level;
+
+        // check for level up
+        while (newExp > CUM_EXP_TABLE[newLevel + 1]) {
+            newLevel++;
+        }
+
+        // persist exp and level to data store
+        await dbContext.kmq("player_stats")
+            .update({ exp: newExp, level: newLevel })
+            .where("player_id", "=", userId);
+
+        if (level !== newLevel) {
+            logger.info(`${userId} has leveled from ${level} to ${newLevel}`);
+            return {
+                userId,
+                startLevel: level,
+                endLevel: newLevel,
+            };
+        }
+
+        return null;
+    }
+
+    /**
      * @returns Debug string containing basic information about the GameRound
      */
     private getDebugSongDetails(): string {
         if (!this.gameRound) return "No active game round";
         return `${this.gameRound.songName}:${this.gameRound.artist}:${this.gameRound.videoID}`;
+    }
+
+    /**
+     * https://www.desmos.com/calculator/zxvbuq0bch
+     * @param guildPreference - The guild preference
+     * @returns The amount of EXP gained based on the current game options
+     */
+    private async calculateExpGain(guildPreference: GuildPreference): Promise<number> {
+        let expModifier = 1;
+        const songCount = Math.min(await getSongCount(guildPreference), guildPreference.getLimit());
+
+        // minimum amount of songs for exp gain
+        if (songCount < 10) return 0;
+
+        // penalize for using artist guess modes
+        if (guildPreference.getModeType() === ModeType.ARTIST || guildPreference.getModeType() === ModeType.BOTH) {
+            if (guildPreference.isGroupsMode()) return 0;
+            expModifier = 0.3;
+        }
+
+        const expBase = 1000 / (1 + (Math.exp(1 - (0.00125 * songCount))));
+        let expJitter = expBase * (0.05 * Math.random());
+        expJitter *= Math.round(Math.random()) ? 1 : -1;
+        return Math.floor(expModifier * (expBase + expJitter));
     }
 }

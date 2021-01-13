@@ -77,13 +77,15 @@ export default class Scoreboard {
      * @param winnerID  - The Discord ID of the correct guesser
      * @param avatarURL - The avatar URL of the correct guesser
      * @param pointsEarned - The amount of points awarded
+     * @param expGain - The amount of EXP gained
      */
-    updateScoreboard(winnerTag: string, winnerID: string, avatarURL: string, pointsEarned: number) {
+    updateScoreboard(winnerTag: string, winnerID: string, avatarURL: string, pointsEarned: number, expGain: number) {
         if (!this.players[winnerID]) {
             this.players[winnerID] = new Player(winnerTag, winnerID, avatarURL, pointsEarned);
         } else {
             this.players[winnerID].incrementScore(pointsEarned);
         }
+        this.players[winnerID].incrementExp(expGain);
 
         if (this.players[winnerID].getScore() === this.highestScore) {
             // If user is tied for first, add them to the first place array
@@ -116,6 +118,17 @@ export default class Scoreboard {
         return 0;
     }
 
+    /**
+     * @param userId - The Discord user ID of the player to check
+     * @returns the exp gained by the player
+     */
+    getPlayerExpGain(userId: string): number {
+        if (userId in this.players) {
+            return this.players[userId].getExpGain();
+        }
+        return 0;
+    }
+
     /** @returns whether the game has completed */
     async gameFinished(): Promise<boolean> {
         const guildPreference = await getGuildPreference(this.guildID);
@@ -125,5 +138,13 @@ export default class Scoreboard {
     /** @returns a list of tags of the player participating in the game */
     getPlayerNames(): Array<string> {
         return Object.values(this.players).map((player) => player.getTag());
+    }
+
+    /**
+     *  @param userId - The Discord user ID of the Player
+     *  @returns a Player object for the corresponding user ID
+     * */
+    getPlayerName(userId: string): string {
+        return this.players[userId].getTag();
     }
 }
