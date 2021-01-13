@@ -8,8 +8,20 @@ You can see the current scoreboard by typing `,score`. It is also shown after th
 
 See the latest updates to KMQ with `,news`. 
 
-## Game Modes
+# Game Modes
 See who can survive the longest into a KMQ game with elimination mode. Using `,play elimination x`, everyone starts with `x` lives and the last one alive wins. Guessing correctly will save your life, while everyone else loses one. Use elimination mode in conjunction with `,timer` to raise the pressure! `,goal` cannot be used in elimination mode.
+
+# EXP System
+Think you have what it takes to be a KMQ master? Rise through the ranks, gaining EXP and leveling up by playing KMQ. Every correct guess will net you some EXP, increasing based on your game options. The higher the number of songs selected by your game options, the more EXP you will get! 
+
+You start off as a `Novice`, and work your way up through the works of `Trainee` (Level 10), `Pre-debut` (Level 20), `Nugu` (Level 30), and many more to discover. Check out `,profile` to see where you stand.
+
+You will only gain EXP if:
+- There is a minimum of 10 songs selected
+- You are using `,mode song` (full EXP)
+- You are using `,mode artist` or `,mode both` and you are not using `,groups` (30% EXP)
+
+
 
 # Game Options
 KMQ offers different game options to narrow down the selection of random songs based on your preferences. The current game options can be viewed by using `,options` or simply tagging KMQ Bot.
