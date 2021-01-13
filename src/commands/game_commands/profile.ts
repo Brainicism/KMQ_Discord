@@ -87,6 +87,12 @@ export default class ProfileCommand implements BaseCommand {
             .select(["exp", "level"])
             .where("player_id", "=", requestedPlayer.id)
             .first());
+
+        const relativeLevelRank = ((await dbContext.kmq("player_stats")
+            .count("* as count")
+            .where("exp", ">", exp)
+            .first())["count"] as number) + 1;
+
         const fields: Array<Eris.EmbedField> = [
             {
                 name: "Level",
@@ -97,6 +103,10 @@ export default class ProfileCommand implements BaseCommand {
                 name: "Experience",
                 value: `${exp}/${CUM_EXP_TABLE[level + 1]}`,
                 inline: true,
+            },
+            {
+                name: "Overall Rank",
+                value: `#${relativeLevelRank}/${totalPlayers}`,
             },
             {
                 name: "Songs Guessed",
