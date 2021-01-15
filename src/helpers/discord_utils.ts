@@ -5,7 +5,7 @@ import GuildPreference from "../structures/guild_preference";
 import GameSession from "../structures/game_session";
 import _logger from "../logger";
 import { endSession, getSongCount } from "./game_utils";
-import getFact from "../fact_generator";
+import { getFact } from "../fact_generator";
 import { GameOption, MessageContext } from "../types";
 import { chunkArray, codeLine, bold, parseJsonFile, chooseRandom } from "./utils";
 import state from "../kmq";
@@ -72,12 +72,7 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
     }
     let fact: string;
     if (Math.random() <= 0.05) {
-        try {
-            fact = await getFact();
-        } catch (e) {
-            logger.error(`Error retrieving fact. err = ${e}`);
-            fact = null;
-        }
+        fact = await getFact();
     }
 
     const emptyScoreBoard = scoreboard.isEmpty();

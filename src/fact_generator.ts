@@ -74,7 +74,7 @@ function parseGaonWeeklyRankList(ranklist: string, year: string): Array<GaonWeek
     });
 }
 
-export default async function getFact(): Promise<string> {
+export function getFact(): string {
     const randomVal = Math.random();
     if (randomVal < 0.85) {
         const { funFacts } = factCache;
