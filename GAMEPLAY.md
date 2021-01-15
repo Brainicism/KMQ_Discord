@@ -16,11 +16,12 @@ Think you have what it takes to be a KMQ master? Rise through the ranks, gaining
 
 You start off as a `Novice`, and work your way up through the works of `Trainee` (Level 10), `Pre-debut` (Level 20), `Nugu` (Level 30), and many more to discover. Check out `,profile` to see where you stand.
 
+Playing with more people will increase how much XP you gain, maxing out at 6 players. 
+
 You will only gain EXP if:
 - There is a minimum of 10 songs selected
 - You are using `,mode song` (full EXP)
 - You are using `,mode artist` or `,mode both` and you are not using `,groups` (30% EXP)
-
 
 
 # Game Options

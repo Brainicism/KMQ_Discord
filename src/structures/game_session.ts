@@ -5,7 +5,7 @@ import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
-    getDebugLogHeader, getSqlDateString, getUserTag, getVoiceChannel, sendErrorMessage, sendEndOfRoundMessage, getMessageContext, sendInfoMessage,
+    getDebugLogHeader, getSqlDateString, getUserTag, getVoiceChannel, sendErrorMessage, sendEndOfRoundMessage, getMessageContext, sendInfoMessage, getNumParticipants,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getSongCount, endSession } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds } from "../helpers/utils";
@@ -230,7 +230,7 @@ export default class GameSession {
 
             // update scoreboard
             const userTag = getUserTag(message.author);
-            const expGain = await this.calculateExpGain(guildPreference);
+            const expGain = await this.calculateExpGain(guildPreference, getNumParticipants(message));
             logger.info(`${getDebugLogHeader(message)} | Song correctly guessed. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
             this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL, pointsEarned, expGain);
 
@@ -552,8 +552,10 @@ export default class GameSession {
      * @param guildPreference - The guild preference
      * @returns The amount of EXP gained based on the current game options
      */
-    private async calculateExpGain(guildPreference: GuildPreference): Promise<number> {
+    private async calculateExpGain(guildPreference: GuildPreference, numParticipants: number): Promise<number> {
         let expModifier = 1;
+        // penalize/incentivize for number of participants from 0.75x to 1.25x
+        expModifier *= numParticipants === 1 ? 0.75 : (0.0625 * (Math.min(numParticipants, 6)) + 0.875);
         const songCount = Math.min(await getSongCount(guildPreference), guildPreference.getLimit());
 
         // minimum amount of songs for exp gain
@@ -562,7 +564,7 @@ export default class GameSession {
         // penalize for using artist guess modes
         if (guildPreference.getModeType() === ModeType.ARTIST || guildPreference.getModeType() === ModeType.BOTH) {
             if (guildPreference.isGroupsMode()) return 0;
-            expModifier = 0.3;
+            expModifier *= 0.3;
         }
 
         const expBase = 1000 / (1 + (Math.exp(1 - (0.00125 * songCount))));
