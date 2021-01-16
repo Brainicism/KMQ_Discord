@@ -68,11 +68,9 @@ async function bootstrapDatabases() {
         if (!(await kmqDatabaseExists(db))) {
             logger.info("Performing migrations on KMQ database");
             await db.query("CREATE DATABASE IF NOT EXISTS kmq");
-            logger.info("Creating CreateAvailableSongsTable procedure");
-            execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq < ./src/seed/create_available_songs_table_procedure.sql`);
             performMigrations();
         }
-
+        execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq < ./src/seed/create_available_songs_table_procedure.sql`);
         if (!(await songThresholdReached(db))) {
             logger.info(`Downloading minimum threshold (${SONG_DOWNLOAD_THRESHOLD}) songs`);
             await downloadAndConvertSongs(SONG_DOWNLOAD_THRESHOLD);
