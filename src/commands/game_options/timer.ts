@@ -56,7 +56,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
         if (gameSession && gameSession.gameRound && gameSession.connection.playing) {
             // Timer can start mid-song, starting when the user enters the command
             gameSession.stopGuessTimeout();
-            gameSession.startGuessTimeout(getMessageContext(message));
+            gameSession.startGuessTimeout(getMessageContext(message), guildPreference);
         }
         await sendOptionsMessage(message, guildPreference, { option: GameOption.TIMER, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Guess timeout set to ${guildPreference.getGuessTimeout()}`);

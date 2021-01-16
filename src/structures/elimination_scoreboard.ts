@@ -83,7 +83,7 @@ export default class EliminationScoreboard extends Scoreboard {
      * Checks whether the game has finished depending on whether
      * it is a solo or multiplayer game
      */
-    async gameFinished(): Promise<boolean> {
+    gameFinished(): boolean {
         // Game ends if
         // (1) all players are eliminated that round or
         const allEliminated = Object.values(this.players).every((player) => player.isEliminated());

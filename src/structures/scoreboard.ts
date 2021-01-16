@@ -1,7 +1,7 @@
 import Player from "./player";
 import { roundDecimal } from "../helpers/utils";
-import { getGuildPreference } from "../helpers/game_utils";
 import _logger from "../logger";
+import GuildPreference from "./guild_preference";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = _logger("scoreboard");
@@ -129,9 +129,11 @@ export default class Scoreboard {
         return 0;
     }
 
-    /** @returns whether the game has completed */
-    async gameFinished(): Promise<boolean> {
-        const guildPreference = await getGuildPreference(this.guildID);
+    /**
+     * @param guildPreference - The GuildPreference
+     * @returns whether the game has completed
+     * */
+    gameFinished(guildPreference: GuildPreference): boolean {
         return guildPreference.isGoalSet() && !this.isEmpty() && this.firstPlace[0].getScore() >= guildPreference.getGoal();
     }
 

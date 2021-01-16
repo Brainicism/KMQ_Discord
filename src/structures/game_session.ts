@@ -114,12 +114,12 @@ export default class GameSession {
      * @param guessed - Whether the round ended via a correct guess, or other (timeout, error, etc)
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
-    async endRound(guessed: boolean, messageContext?: MessageContext) {
+    endRound(guessed: boolean, guildPreference: GuildPreference, messageContext?: MessageContext) {
         if (guessed) {
             this.guessTimes.push(Date.now() - this.gameRound.startedAt);
         }
         if (messageContext) {
-            await sendEndOfRoundMessage(messageContext, this.scoreboard, this.gameRound, guessed);
+            sendEndOfRoundMessage(messageContext, this.scoreboard, this.gameRound, guessed);
         }
 
         this.gameRound = null;
@@ -129,7 +129,7 @@ export default class GameSession {
         this.stopGuessTimeout();
         if (this.finished) return;
 
-        if (await this.scoreboard.gameFinished()) {
+        if (this.scoreboard.gameFinished(guildPreference)) {
             endSession(this);
         }
     }
@@ -139,7 +139,7 @@ export default class GameSession {
      */
     endSession = async (): Promise<void> => {
         this.finished = true;
-        await this.endRound(false);
+        this.endRound(false, await getGuildPreference(this.guildID));
         const voiceConnection = state.client.voiceConnections.get(this.guildID);
 
         // leave voice channel
@@ -224,6 +224,10 @@ export default class GameSession {
 
         const pointsEarned = this.checkGuess(message, guildPreference.getModeType());
         if (pointsEarned > 0) {
+            // mark round as complete, so no more guesses can go through
+            const { songName } = this.gameRound;
+            this.endRound(true, guildPreference, getMessageContext(message));
+
             // update game session's lastActive
             const gameSession = state.gameSessions[this.guildID];
             gameSession.lastActiveNow();
@@ -231,12 +235,11 @@ export default class GameSession {
             // update scoreboard
             const userTag = getUserTag(message.author);
             const expGain = await this.calculateExpGain(guildPreference, getNumParticipants(message));
-            logger.info(`${getDebugLogHeader(message)} | Song correctly guessed. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
+            logger.info(`${getDebugLogHeader(message)} | Song correctly guessed. song = ${songName}. Gained ${expGain} EXP`);
             this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL, pointsEarned, expGain);
 
             // misc. game round cleanup
             this.stopGuessTimeout();
-            await this.endRound(true, getMessageContext(message));
 
             // increment guild's song guess count
             await dbContext.kmq("guild_preferences")
@@ -307,9 +310,9 @@ export default class GameSession {
     /**
      * Sets a timeout for guessing in timer mode
      * @param messageContext - An object containing relevant parts of Eris.Message
+     * @param guildPreference - The GuildPreference
      */
-    async startGuessTimeout(messageContext: MessageContext) {
-        const guildPreference = await getGuildPreference(this.guildID);
+    startGuessTimeout(messageContext: MessageContext, guildPreference: GuildPreference) {
         if (!guildPreference.isGuessTimeoutSet()) return;
 
         const time = guildPreference.getGuessTimeout();
@@ -320,7 +323,7 @@ export default class GameSession {
                 const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
                 eliminationScoreboard.decrementAllLives();
             }
-            await this.endRound(false, messageContext);
+            this.endRound(false, guildPreference, messageContext);
             this.startRound(guildPreference, messageContext);
         }, time * 1000);
     }
@@ -378,13 +381,13 @@ export default class GameSession {
             inputArgs: ["-ss", seekLocation.toString()],
         });
 
-        this.startGuessTimeout(messageContext);
+        this.startGuessTimeout(messageContext, guildPreference);
 
         // song finished without being guessed
         this.connection.once("end", async () => {
             logger.info(`${getDebugLogHeader(messageContext)} | Song finished without being guessed.`);
             this.stopGuessTimeout();
-            await this.endRound(false, messageContext);
+            this.endRound(false, guildPreference, messageContext);
             this.startRound(guildPreference, messageContext);
         });
 
@@ -400,7 +403,7 @@ export default class GameSession {
             logger.error(`${getDebugLogHeader(messageContext)} | Unknown error with stream dispatcher. song = ${this.getDebugSongDetails()}. err = ${err}`);
             // Attempt to restart game with different song
             await sendErrorMessage(messageContext, "Error playing song", "Starting new round in 3 seconds...");
-            await this.endRound(false, messageContext);
+            this.endRound(false, guildPreference, messageContext);
             this.startRound(guildPreference, messageContext);
         });
     }
