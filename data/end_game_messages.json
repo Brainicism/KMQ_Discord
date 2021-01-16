@@ -5,6 +5,10 @@
             "message": "Have a suggestion for an alternate song name? Tell us on the support server!"
         },
         {
+            "title": "Song has an incorrect date?",
+            "message": "Is a song from the early 2000s showing up in your 2017-2020 game? Tell us on the support server!"
+        },
+        {
             "title": "Beep Boop",
             "message": "Did you know KMQ is open source? [Check us out on Github and give us a star!](https://github.com/Brainicism/KMQ_Discord/)"
         },

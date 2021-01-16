@@ -4,7 +4,7 @@ import { resolve } from "path";
 import _logger from "./logger";
 import { EnvType, State } from "./types";
 import {
-    registerClientEvents, registerProcessEvents, registerCommands, registerIntervals, initializeBotStatsPoster, reloadCaches,
+    registerClientEvents, registerProcessEvents, registerCommands, registerIntervals, initializeBotStatsPoster, reloadCaches, updatePublishDateOverrides,
 } from "./helpers/management_utils";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -60,6 +60,7 @@ export default state;
 
     logger.info("Reloading cached application data...");
     await reloadCaches();
+    await updatePublishDateOverrides();
 
     if (process.env.NODE_ENV === EnvType.PROD) {
         logger.info("Initializing bot stats poster...");

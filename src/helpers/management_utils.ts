@@ -38,6 +38,10 @@ const logger = _logger("management_utils");
 
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 2, 1]);
 
+const publishOverridesFilePath = path.resolve(__dirname, "../../data/publish_date_overrides.json");
+const songAliasesFilePath = path.resolve(__dirname, "../../data/song_aliases.json");
+const artistAliasesFilePath = path.resolve(__dirname, "../../data/artist_aliases.json");
+
 /** Registers listeners on client events */
 export function registerClientEvents() {
     const { client } = state;
@@ -108,10 +112,21 @@ function sweepCaches() {
     }
 }
 
+/** Applies publish date overrides to available_songs table */
+export async function updatePublishDateOverrides() {
+    try {
+        const publishDateOverrides = parseJsonFile(publishOverridesFilePath);
+        for (const [videoId, dateOverride] of Object.entries(publishDateOverrides)) {
+            await dbContext.kmq("available_songs")
+                .update({ publishedon: dateOverride })
+                .where("link", "=", videoId);
+        }
+    } catch (err) {
+        logger.error("Error parsing publish overrides file");
+    }
+}
 /** Reload song/artist aliases */
 export function reloadAliases() {
-    const songAliasesFilePath = path.resolve(__dirname, "../../data/song_aliases.json");
-    const artistAliasesFilePath = path.resolve(__dirname, "../../data/artist_aliases.json");
     try {
         state.aliases.song = parseJsonFile(songAliasesFilePath);
         state.aliases.artist = parseJsonFile(artistAliasesFilePath);
@@ -166,6 +181,7 @@ export function registerIntervals() {
 
     schedule.scheduleJob("*/5 * * * *", async () => {
         reloadAliases();
+        updatePublishDateOverrides();
     });
 }
 
