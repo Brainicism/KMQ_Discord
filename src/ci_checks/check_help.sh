@@ -13,7 +13,7 @@ do
         continue
     fi
 
-    if grep -Fq ",$command" GAMEPLAY.md; then
+    if grep -Fq ",$command" docs/GAMEPLAY.md; then
         echo "Documentation for '$command' found in GAMEPLAY.md"
     else
         echo "Documentation for '$command' not found in GAMEPLAY.md"
