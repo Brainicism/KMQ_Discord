@@ -65,6 +65,10 @@
         {
             "title": "Did you know?",
             "message": "You can see how many games you've played and how many songs you've guessed in total using `,profile`."
+        },
+        {
+            "title": "Did you know?",
+            "message": "Think you got what it takes to be a top KMQ player? See `,leaderboard` and `,help leaderboard` to see where you stand."
         }
     ]
 }
