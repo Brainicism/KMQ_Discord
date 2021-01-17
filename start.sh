@@ -32,6 +32,7 @@ else
     elif [ "${START_TYPE}" == "prod" ]; then
         rebuild
         export NODE_ENV=production
+        git log -n 1 --pretty=format:"%H" > ../version
         exec node kmq.js
     fi
 fi
