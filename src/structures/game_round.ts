@@ -72,6 +72,9 @@ export default class GameRound {
     /** Timestamp of the last time the GameRound was interacted with in epoch milliseconds */
     public lastActive: number;
 
+    /** The base EXP for this GameRound */
+    public baseExp: number;
+
     constructor(song: string, artist: string, videoID: string) {
         this.songName = song;
         this.songAliases = state.aliases.song[videoID] || [];
@@ -121,6 +124,14 @@ export default class GameRound {
         }
         logger.error(`Illegal mode type: ${modeType}`);
         return 0;
+    }
+
+    /**
+     * Sets the base exp
+     * @param baseExp - The base exp
+     */
+    setBaseExpReward(baseExp: number) {
+        this.baseExp = baseExp;
     }
 
     /**
