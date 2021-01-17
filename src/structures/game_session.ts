@@ -226,7 +226,7 @@ export default class GameSession {
         if (pointsEarned > 0) {
             // update scoreboard
             const userTag = getUserTag(message.author);
-            const expGain = await this.calculateExpGain(guildPreference, getNumParticipants(message));
+            const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(message));
             logger.info(`${getDebugLogHeader(message)} | Song correctly guessed. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
             this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL, pointsEarned, expGain);
 
@@ -302,6 +302,7 @@ export default class GameSession {
             await sendErrorMessage(messageContext, "Missing voice permissions", "The bot is unable to join the voice channel you are in.");
             return;
         }
+        this.gameRound.setBaseExpReward(await this.calculateBaseExp(guildPreference));
         this.playSong(guildPreference, messageContext);
     }
 
@@ -549,18 +550,13 @@ export default class GameSession {
     }
 
     /**
-     * https://www.desmos.com/calculator/zxvbuq0bch
      * @param guildPreference - The guild preference
      * @returns The amount of EXP gained based on the current game options
      */
-    private async calculateExpGain(guildPreference: GuildPreference, numParticipants: number): Promise<number> {
+    private calculateExpGain(guildPreference: GuildPreference, baseExp: number, numParticipants: number): number {
         let expModifier = 1;
         // penalize/incentivize for number of participants from 0.75x to 1.25x
         expModifier *= numParticipants === 1 ? 0.75 : (0.0625 * (Math.min(numParticipants, 6)) + 0.875);
-        const songCount = Math.min(await getSongCount(guildPreference), guildPreference.getLimit());
-
-        // minimum amount of songs for exp gain
-        if (songCount < 10) return 0;
 
         // penalize for using artist guess modes
         if (guildPreference.getModeType() === ModeType.ARTIST || guildPreference.getModeType() === ModeType.BOTH) {
@@ -568,9 +564,21 @@ export default class GameSession {
             expModifier *= 0.3;
         }
 
+        return Math.floor(expModifier * baseExp);
+    }
+
+    /**
+     * https://www.desmos.com/calculator/zxvbuq0bch
+     * @param guildPreference - The GuildPreference
+     * @returns the base EXP reward for the gameround
+     */
+    private async calculateBaseExp(guildPreference: GuildPreference): Promise<number> {
+        const songCount = Math.min(await getSongCount(guildPreference), guildPreference.getLimit());
+        // minimum amount of songs for exp gain
+        if (songCount < 10) return 0;
         const expBase = 1000 / (1 + (Math.exp(1 - (0.00125 * songCount))));
         let expJitter = expBase * (0.05 * Math.random());
         expJitter *= Math.round(Math.random()) ? 1 : -1;
-        return Math.floor(expModifier * (expBase + expJitter));
+        return expBase + expJitter;
     }
 }
