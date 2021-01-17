@@ -224,21 +224,19 @@ export default class GameSession {
 
         const pointsEarned = this.checkGuess(message, guildPreference.getModeType());
         if (pointsEarned > 0) {
+            // update scoreboard
+            const userTag = getUserTag(message.author);
+            const expGain = await this.calculateExpGain(guildPreference, getNumParticipants(message));
+            logger.info(`${getDebugLogHeader(message)} | Song correctly guessed. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
+            this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL, pointsEarned, expGain);
+
             // mark round as complete, so no more guesses can go through
-            const { songName } = this.gameRound;
             this.endRound(true, guildPreference, getMessageContext(message));
 
             // update game session's lastActive
             const gameSession = state.gameSessions[this.guildID];
             gameSession.lastActiveNow();
 
-            // update scoreboard
-            const userTag = getUserTag(message.author);
-            const expGain = await this.calculateExpGain(guildPreference, getNumParticipants(message));
-            logger.info(`${getDebugLogHeader(message)} | Song correctly guessed. song = ${songName}. Gained ${expGain} EXP`);
-            this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL, pointsEarned, expGain);
-
-            // misc. game round cleanup
             this.stopGuessTimeout();
 
             // increment guild's song guess count
