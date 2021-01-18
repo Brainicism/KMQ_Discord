@@ -29,7 +29,7 @@ const DEFAULT_OPTIONS = {
 interface GameOptions {
     beginningYear: number;
     endYear: number;
-    gender: GENDER[];
+    gender: Array<GENDER>;
     limit: number;
     seekType: SeekType;
     modeType: ModeType;
@@ -228,21 +228,20 @@ export default class GuildPreference {
      * Sets the gender option value
      * @param genderArr - A list of GENDER enums
      */
-    setGender(genderArr: GENDER[]): Array<string> {
+    setGender(genderArr: Array<GENDER>) {
         this.gameOptions.gender = [...new Set(genderArr)];
         this.updateGuildPreferences(dbContext.kmq);
         this.updateGameSession(true);
-        return this.gameOptions.gender;
     }
 
     /** @returns an array containing the currently selected gender option */
-    getGender(): GENDER[] {
+    getGender(): Array<GENDER> {
         return this.gameOptions.gender;
     }
 
-    /** @returns a SQL friendly string containing the currently selected gender option */
-    getSQLGender(): string {
-        return this.gameOptions.gender.join(",");
+    /** @returns whether gender is set to alternating */
+    isGenderAlternating(): boolean {
+        return this.getGender()[0] === GENDER.ALTERNATING;
     }
 
     /**

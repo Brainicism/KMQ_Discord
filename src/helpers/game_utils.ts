@@ -26,7 +26,7 @@ interface GroupMatchResults {
 async function getFilteredSongList(guildPreference: GuildPreference, ignoredVideoIds?: Array<string>, alternatingGender?: GENDER): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
     let result: Array<QueriedSong>;
     if (!guildPreference.isGroupsMode()) {
-        const gender = guildPreference.getGender()[0] === GENDER.ALTERNATING ? [GENDER.MALE, GENDER.FEMALE] : guildPreference.getSQLGender().split(",");
+        const gender = guildPreference.isGenderAlternating() ? [GENDER.MALE, GENDER.FEMALE] : guildPreference.getGender();
         result = await dbContext.kmq("available_songs")
             .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
             .whereIn("members", gender)
@@ -48,7 +48,7 @@ async function getFilteredSongList(guildPreference: GuildPreference, ignoredVide
     if (ignoredVideoIds && ignoredVideoIds.length > 0) {
         result = result.filter((song) => !ignoredVideoIds.includes(song.youtubeLink));
     }
-    if (guildPreference.getGender()[0] === GENDER.ALTERNATING && alternatingGender !== undefined) {
+    if (guildPreference.isGenderAlternating() && alternatingGender) {
         const alternatingResult = await dbContext.kmq("available_songs")
             .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
             .whereIn("link", result.map((song) => song.youtubeLink))
@@ -90,13 +90,18 @@ export async function ensureVoiceConnection(gameSession: GameSession): Promise<v
  * @param guildPreference - The GuildPreference
  * @param lastPlayedSongs - The list of recently played songs
  */
-export async function selectRandomSong(guildPreference: GuildPreference, lastPlayedSongs: Array<string>, alternatingGender: GENDER): Promise<QueriedSong> {
+export async function selectRandomSong(guildPreference: GuildPreference, lastPlayedSongs: Array<string>, alternatingGender?: GENDER): Promise<QueriedSong> {
     if (isDebugMode() && isForcedSongActive()) {
         const forcePlayedQueriedSong = await getForcePlaySong();
         logger.info(`Force playing ${forcePlayedQueriedSong.name} by ${forcePlayedQueriedSong.artist} | ${forcePlayedQueriedSong.youtubeLink}`);
         return forcePlayedQueriedSong;
     }
-    const { songs: queriedSongList } = await getFilteredSongList(guildPreference, lastPlayedSongs, alternatingGender);
+    let queriedSongList: Array<QueriedSong>;
+    if (alternatingGender) {
+        queriedSongList = (await getFilteredSongList(guildPreference, lastPlayedSongs, alternatingGender)).songs;
+    } else {
+        queriedSongList = (await getFilteredSongList(guildPreference, lastPlayedSongs)).songs;
+    }
     if (queriedSongList.length === 0) {
         return null;
     }

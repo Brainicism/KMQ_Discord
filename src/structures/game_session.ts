@@ -275,7 +275,7 @@ export default class GameSession {
         }
 
         // manage alternating gender
-        if (guildPreference.getGender()[0] === GENDER.ALTERNATING) {
+        if (guildPreference.isGenderAlternating()) {
             if (this.lastAlternatingGender === null) {
                 this.lastAlternatingGender = Math.random() < 0.5 ? GENDER.MALE : GENDER.FEMALE;
             } else {
@@ -288,7 +288,11 @@ export default class GameSession {
         // query for random song
         let randomSong: QueriedSong;
         try {
-            randomSong = await selectRandomSong(guildPreference, this.lastPlayedSongsQueue, this.lastAlternatingGender);
+            if (this.lastAlternatingGender) {
+                randomSong = await selectRandomSong(guildPreference, this.lastPlayedSongsQueue, this.lastAlternatingGender);
+            } else {
+                randomSong = await selectRandomSong(guildPreference, this.lastPlayedSongsQueue);
+            }
             if (randomSong === null) {
                 sendErrorMessage(messageContext, "Song Query Error", "Failed to find songs matching this criteria. Try to broaden your search.");
                 this.endSession();
