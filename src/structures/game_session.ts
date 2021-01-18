@@ -20,6 +20,7 @@ import { deleteGameSession } from "../helpers/management_utils";
 import { GameType } from "../commands/game_commands/play";
 import { ModeType } from "../commands/game_options/mode";
 import { getRankNameByLevel } from "../commands/game_commands/profile";
+import { GENDER } from "../commands/game_options/gender";
 
 const logger = _logger("game_session");
 const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
@@ -90,6 +91,9 @@ export default class GameSession {
     /** List of recently played songs used to prevent frequent repeats */
     private lastPlayedSongsQueue: Array<string>;
 
+    /** The last gender played when gender is set to alternating, can be null (in not alternating mode), GENDER.MALE, or GENDER.FEMALE */
+    private lastAlternatingGender: GENDER;
+
     constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel, gameSessionCreator: Eris.User, gameType: GameType, eliminationLives?: number) {
         this.gameType = gameType;
         this.guildID = textChannel.guild.id;
@@ -107,6 +111,7 @@ export default class GameSession {
         this.gameRound = null;
         this.owner = gameSessionCreator;
         this.lastPlayedSongsQueue = [];
+        this.lastAlternatingGender = null;
     }
 
     /**
@@ -269,10 +274,25 @@ export default class GameSession {
             this.lastPlayedSongsQueue.shift();
         }
 
+        // manage alternating gender
+        if (guildPreference.isGenderAlternating()) {
+            if (this.lastAlternatingGender === null) {
+                this.lastAlternatingGender = Math.random() < 0.5 ? GENDER.MALE : GENDER.FEMALE;
+            } else {
+                this.lastAlternatingGender = this.lastAlternatingGender === GENDER.MALE ? GENDER.FEMALE : GENDER.MALE;
+            }
+        } else {
+            this.lastAlternatingGender = null;
+        }
+
         // query for random song
         let randomSong: QueriedSong;
         try {
-            randomSong = await selectRandomSong(guildPreference, this.lastPlayedSongsQueue);
+            if (this.lastAlternatingGender) {
+                randomSong = await selectRandomSong(guildPreference, this.lastPlayedSongsQueue, this.lastAlternatingGender);
+            } else {
+                randomSong = await selectRandomSong(guildPreference, this.lastPlayedSongsQueue);
+            }
             if (randomSong === null) {
                 sendErrorMessage(messageContext, "Song Query Error", "Failed to find songs matching this criteria. Try to broaden your search.");
                 this.endSession();
