@@ -39,7 +39,7 @@ Setting a limit 'limits' KMQ bot to the top most viewed `x` music videos out of 
 ![limit](/images/limit.png)
 
 ## ,gender [gender_1] {gender_2} {gender_3}
-Setting a gender specifies the gender of the groups you'd like to hear from. For instance, `,gender male` would only play songs by boy groups. `,gender male female` would play song by both boy and girl groups. `,gender coed` refers to groups that contain a mix of male and female members. 
+Setting a gender specifies the gender of the groups you'd like to hear from. For instance, `,gender male` would only play songs by boy groups. `,gender male female` would play song by both boy and girl groups. `,gender coed` refers to groups that contain a mix of male and female members. To alternate between `male` and `female` artists each round, use `,gender alternating`.
 
 ![gender](/images/gender.png)
 
