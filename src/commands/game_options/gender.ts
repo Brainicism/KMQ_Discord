@@ -77,8 +77,8 @@ export default class GenderCommand implements BaseCommand {
             return;
         }
 
-        // Incompatibility between groups and gender doesn't exist in GENDER.ALTERNATING
         if (guildPreference.isGroupsMode() && selectedGenders.length >= 1) {
+            // Incompatibility between groups and gender doesn't exist in GENDER.ALTERNATING
             if (selectedGenders[0] !== GENDER.ALTERNATING) {
                 logger.warn(`${getDebugLogHeader(message)} | Game option conflict between gender and groups.`);
                 sendErrorMessage(getMessageContext(message), "Game Option Conflict", `\`groups\` game option is currently set. \`gender\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed`);
