@@ -275,7 +275,7 @@ export default class GameSession {
         }
 
         // manage alternating gender
-        if (guildPreference.getSQLGender() === GENDER.ALTERNATING) {
+        if (guildPreference.getGender()[0] === GENDER.ALTERNATING) {
             if (this.lastAlternatingGender === null) {
                 this.lastAlternatingGender = Math.random() < 0.5 ? GENDER.MALE : GENDER.FEMALE;
             } else {

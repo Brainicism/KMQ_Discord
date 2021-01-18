@@ -39,7 +39,7 @@ export default class GenderCommand implements BaseCommand {
 
     help = {
         name: "gender",
-        description: `Choose the gender of the artists you'd like to hear from. Options are the following, \`male\`, \`female\`, and \`coed\`. Alternatively, use \`${process.env.BOT_PREFIX}gender alternating\` to rotate between \`male\` and \`female\` artists each song.`,
+        description: `Choose the gender of the artists you'd like to hear from. Options are the following, \`male\`, \`female\`, and \`coed\`. Alternatively, use \`${process.env.BOT_PREFIX}gender alternating\` to rotate between \`male\` and \`female\` artists every round.`,
         usage: "!gender [gender1] {gender2} {gender3}",
         examples: [
             {
@@ -60,7 +60,7 @@ export default class GenderCommand implements BaseCommand {
             },
             {
                 example: "`!gender alternating`",
-                explanation: "Play songs by `male` and `female` artists, switching between the two genders every round",
+                explanation: "Alternate between `male` and `female` artists every round",
             },
         ],
         priority: 150,
@@ -70,27 +70,26 @@ export default class GenderCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         const selectedGenders = parsedMessage.components as GENDER[];
 
-        // Groups can only be chosen with alternating genders
-        if (guildPreference.isGroupsMode() && !selectedGenders.includes(GENDER.ALTERNATING)) {
+        // Incompatibility between groups and gender doesn't exist in GENDER.ALTERNATING
+        if (guildPreference.isGroupsMode() && selectedGenders.length >= 1 && selectedGenders[0] !== GENDER.ALTERNATING) {
             logger.warn(`${getDebugLogHeader(message)} | Game option conflict between gender and groups.`);
             sendErrorMessage(getMessageContext(message), "Game Option Conflict", `\`groups\` game option is currently set. \`gender\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed`);
             return;
         }
 
-        if (parsedMessage.components.length === 0) {
+        if (selectedGenders.length > 1 && selectedGenders[0] === GENDER.ALTERNATING) {
+            sendErrorMessage(getMessageContext(message), "Game Option Conflict", `\`${process.env.BOT_PREFIX}gender alternating\` already switches between male and female artists; you cannot include more genders. Instead, type \`${process.env.BOT_PREFIX}gender alternating\``);
+            return;
+        }
+
+        if (selectedGenders.length === 0) {
             guildPreference.resetGender();
             logger.info(`${getDebugLogHeader(message)} | Gender reset.`);
             await sendOptionsMessage(message, guildPreference, { option: GameOption.GENDER, reset: true });
             return;
         }
 
-        if (parsedMessage.components.length > 1 && selectedGenders.includes(GENDER.ALTERNATING)) {
-            logger.warn(`${getDebugLogHeader(message)} | Game option conflict between alternating genders and genders.`);
-            sendErrorMessage(getMessageContext(message), "Game Option Conflict", `\`${process.env.BOT_PREFIX}gender alternating\` already switches between male and female artists; you cannot include more genders. Instead, type \`${process.env.BOT_PREFIX}gender alternating\``);
-            return;
-        }
-
-        if (selectedGenders.includes(GENDER.ALTERNATING) && guildPreference.isGroupsMode() && guildPreference.getGroupIds().length === 1) {
+        if (selectedGenders[0] === GENDER.ALTERNATING && guildPreference.isGroupsMode() && guildPreference.getGroupIds().length === 1) {
             sendErrorMessage(getMessageContext(message), "Game Option Warning", `With only one group chosen, \`${process.env.BOT_PREFIX}gender alternating\` may not behave as expected. Consider including more groups to correctly alternate genders.`);
         }
 

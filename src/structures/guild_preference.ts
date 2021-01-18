@@ -235,6 +235,11 @@ export default class GuildPreference {
         return this.gameOptions.gender;
     }
 
+    /** @returns an array containing the currently selected gender option */
+    getGender(): GENDER[] {
+        return this.gameOptions.gender;
+    }
+
     /** @returns a SQL friendly string containing the currently selected gender option */
     getSQLGender(): string {
         return this.gameOptions.gender.join(",");

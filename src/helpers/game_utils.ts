@@ -26,7 +26,7 @@ interface GroupMatchResults {
 async function getFilteredSongList(guildPreference: GuildPreference, ignoredVideoIds?: Array<string>, alternatingGender?: GENDER): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
     let result: Array<QueriedSong>;
     if (!guildPreference.isGroupsMode()) {
-        const gender = guildPreference.getSQLGender() === GENDER.ALTERNATING ? [GENDER.MALE, GENDER.FEMALE] : guildPreference.getSQLGender().split(",");
+        const gender = guildPreference.getGender()[0] === GENDER.ALTERNATING ? [GENDER.MALE, GENDER.FEMALE] : guildPreference.getSQLGender().split(",");
         result = await dbContext.kmq("available_songs")
             .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
             .whereIn("members", gender)
@@ -48,7 +48,7 @@ async function getFilteredSongList(guildPreference: GuildPreference, ignoredVide
     if (ignoredVideoIds && ignoredVideoIds.length > 0) {
         result = result.filter((song) => !ignoredVideoIds.includes(song.youtubeLink));
     }
-    if (guildPreference.getSQLGender() === GENDER.ALTERNATING && alternatingGender !== undefined) {
+    if (guildPreference.getGender()[0] === GENDER.ALTERNATING && alternatingGender !== undefined) {
         const alternatingResult = await dbContext.kmq("available_songs")
             .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
             .whereIn("link", result.map((song) => song.youtubeLink))
