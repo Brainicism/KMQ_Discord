@@ -6,6 +6,7 @@ import GuildPreference from "../structures/guild_preference";
 import { QueriedSong } from "../types";
 import { getForcePlaySong, isDebugMode, isForcedSongActive } from "./debug_utils";
 import { sendEndGameMessage } from "./discord_utils";
+import { GENDER } from "../commands/game_options/gender";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -22,12 +23,13 @@ interface GroupMatchResults {
  * @param ignoredVideoIds - List of Youtube video IDs of songs to ignore
  * @returns a list of songs, as well as the number of songs before the filter option was applied
  */
-async function getFilteredSongList(guildPreference: GuildPreference, ignoredVideoIds?: Array<string>): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
+async function getFilteredSongList(guildPreference: GuildPreference, ignoredVideoIds?: Array<string>, alternatingGender?: GENDER): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
     let result: Array<QueriedSong>;
     if (!guildPreference.isGroupsMode()) {
+        const gender = guildPreference.getSQLGender() === GENDER.ALTERNATING ? [GENDER.MALE, GENDER.FEMALE] : guildPreference.getSQLGender().split(",");
         result = await dbContext.kmq("available_songs")
             .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
-            .whereIn("members", guildPreference.getSQLGender().split(","))
+            .whereIn("members", gender)
             .whereNotIn("id_artist", guildPreference.getExcludesGroupIds())
             .andWhere("publishedon", ">=", `${guildPreference.getBeginningCutoffYear()}-01-01`)
             .andWhere("publishedon", "<=", `${guildPreference.getEndCutoffYear()}-12-31`)
@@ -45,6 +47,15 @@ async function getFilteredSongList(guildPreference: GuildPreference, ignoredVide
     result = result.slice(0, guildPreference.getLimit());
     if (ignoredVideoIds && ignoredVideoIds.length > 0) {
         result = result.filter((song) => !ignoredVideoIds.includes(song.youtubeLink));
+    }
+    if (guildPreference.getSQLGender() === GENDER.ALTERNATING && alternatingGender !== undefined) {
+        const alternatingResult = await dbContext.kmq("available_songs")
+            .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
+            .whereIn("link", result.map((song) => song.youtubeLink))
+            .andWhere("members", "=", [alternatingGender]);
+        if (alternatingResult.length > 0) {
+            result = alternatingResult;
+        }
     }
     return {
         songs: result,
@@ -79,13 +90,13 @@ export async function ensureVoiceConnection(gameSession: GameSession): Promise<v
  * @param guildPreference - The GuildPreference
  * @param lastPlayedSongs - The list of recently played songs
  */
-export async function selectRandomSong(guildPreference: GuildPreference, lastPlayedSongs: Array<string>): Promise<QueriedSong> {
+export async function selectRandomSong(guildPreference: GuildPreference, lastPlayedSongs: Array<string>, alternatingGender: GENDER): Promise<QueriedSong> {
     if (isDebugMode() && isForcedSongActive()) {
         const forcePlayedQueriedSong = await getForcePlaySong();
         logger.info(`Force playing ${forcePlayedQueriedSong.name} by ${forcePlayedQueriedSong.artist} | ${forcePlayedQueriedSong.youtubeLink}`);
         return forcePlayedQueriedSong;
     }
-    const { songs: queriedSongList } = await getFilteredSongList(guildPreference, lastPlayedSongs);
+    const { songs: queriedSongList } = await getFilteredSongList(guildPreference, lastPlayedSongs, alternatingGender);
     if (queriedSongList.length === 0) {
         return null;
     }
