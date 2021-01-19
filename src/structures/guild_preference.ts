@@ -8,6 +8,7 @@ import { ModeType, DEFAULT_MODE } from "../commands/game_options/mode";
 import _logger from "../logger";
 import dbContext from "../database_context";
 import state from "../kmq";
+import { ArtistType, DEFAULT_ARTIST_TYPE } from "../commands/game_options/artisttype";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = _logger("guild_preference");
@@ -24,6 +25,7 @@ const DEFAULT_OPTIONS = {
     excludes: null,
     goal: null,
     guessTimeout: null,
+    artistType: DEFAULT_ARTIST_TYPE,
 };
 
 interface GameOptions {
@@ -33,6 +35,7 @@ interface GameOptions {
     limit: number;
     seekType: SeekType;
     modeType: ModeType;
+    artistType: ArtistType;
     shuffleType: ShuffleType;
     groups: { id: number, name: string }[];
     excludes: { id: number, name: string }[];
@@ -265,6 +268,7 @@ export default class GuildPreference {
         this.updateGuildPreferences(dbContext.kmq);
         this.updateGameSession(false);
     }
+
     /**
      * Sets the mode type option value
      * @param modeType - The ModeType
@@ -273,6 +277,28 @@ export default class GuildPreference {
         this.gameOptions.modeType = modeType as ModeType;
         this.updateGuildPreferences(dbContext.kmq);
         this.updateGameSession(false);
+    }
+
+    /** @returns the current artist type option value */
+    getArtistType(): ArtistType {
+        return this.gameOptions.artistType;
+    }
+
+    /** Resets the artist type option to the default value */
+    resetArtistType() {
+        this.gameOptions.artistType = DEFAULT_ARTIST_TYPE;
+        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGameSession(true);
+    }
+
+    /**
+     * Sets the artist type option value
+     * @param artistType - The ArtistType
+     */
+    setArtistType(artistType: ArtistType) {
+        this.gameOptions.artistType = artistType as ArtistType;
+        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGameSession(true);
     }
 
     /** @returns the current mode type option value */
