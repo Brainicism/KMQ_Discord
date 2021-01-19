@@ -7,6 +7,7 @@ import { QueriedSong } from "../types";
 import { getForcePlaySong, isDebugMode, isForcedSongActive } from "./debug_utils";
 import { sendEndGameMessage } from "./discord_utils";
 import { GENDER } from "../commands/game_options/gender";
+import { ArtistType } from "../commands/game_options/artisttype";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -24,25 +25,25 @@ interface GroupMatchResults {
  * @returns a list of songs, as well as the number of songs before the filter option was applied
  */
 async function getFilteredSongList(guildPreference: GuildPreference, ignoredVideoIds?: Array<string>, alternatingGender?: GENDER): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
-    let result: Array<QueriedSong>;
+    let queryBuilder = dbContext.kmq("available_songs")
+        .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
+        .whereNotIn("id_artist", guildPreference.getExcludesGroupIds())
+        .andWhere("publishedon", ">=", `${guildPreference.getBeginningCutoffYear()}-01-01`)
+        .andWhere("publishedon", "<=", `${guildPreference.getEndCutoffYear()}-12-31`);
+
     if (!guildPreference.isGroupsMode()) {
         const gender = guildPreference.isGenderAlternating() ? [GENDER.MALE, GENDER.FEMALE] : guildPreference.getGender();
-        result = await dbContext.kmq("available_songs")
-            .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
-            .whereIn("members", gender)
-            .whereNotIn("id_artist", guildPreference.getExcludesGroupIds())
-            .andWhere("publishedon", ">=", `${guildPreference.getBeginningCutoffYear()}-01-01`)
-            .andWhere("publishedon", "<=", `${guildPreference.getEndCutoffYear()}-12-31`)
-            .orderBy("views", "DESC");
+        queryBuilder = queryBuilder.whereIn("members", gender);
     } else {
-        result = await dbContext.kmq("available_songs")
-            .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
-            .whereIn("id_artist", guildPreference.getGroupIds())
-            .whereNotIn("id_artist", guildPreference.getExcludesGroupIds())
-            .andWhere("publishedon", ">=", `${guildPreference.getBeginningCutoffYear()}-01-01`)
-            .andWhere("publishedon", "<=", `${guildPreference.getEndCutoffYear()}-12-31`)
-            .orderBy("views", "DESC");
+        queryBuilder = queryBuilder.whereIn("id_artist", guildPreference.getGroupIds());
     }
+
+    if (guildPreference.getArtistType() !== ArtistType.BOTH) {
+        queryBuilder.andWhere("issolo", "=", guildPreference.getArtistType() === ArtistType.SOLOIST ? "y" : "n");
+    }
+
+    let result: Array<QueriedSong> = await queryBuilder.orderBy("views", "DESC");
+
     const count = result.length;
     result = result.slice(0, guildPreference.getLimit());
     if (ignoredVideoIds && ignoredVideoIds.length > 0) {

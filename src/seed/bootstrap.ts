@@ -70,7 +70,6 @@ async function bootstrapDatabases() {
             await db.query("CREATE DATABASE IF NOT EXISTS kmq");
             performMigrations();
         }
-        execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq < ./src/seed/create_available_songs_table_procedure.sql`);
         if (!(await songThresholdReached(db))) {
             logger.info(`Downloading minimum threshold (${SONG_DOWNLOAD_THRESHOLD}) songs`);
             await downloadAndConvertSongs(SONG_DOWNLOAD_THRESHOLD);
@@ -78,7 +77,7 @@ async function bootstrapDatabases() {
     } else {
         performMigrations();
     }
-
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq < ./src/seed/create_available_songs_table_procedure.sql`);
     await db.end();
 }
 

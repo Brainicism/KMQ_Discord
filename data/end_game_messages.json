@@ -69,6 +69,10 @@
         {
             "title": "Did you know?",
             "message": "Think you got what it takes to be a top KMQ player? See `,leaderboard` and `,help leaderboard` to see where you stand."
+        },
+        {
+            "title": "Did you know?",
+            "message": "You can pick whether you want to hear from soloists or groups using `,artisttype`? See `,help artisttype` to learn more."
         }
     ]
 }
