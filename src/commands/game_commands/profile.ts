@@ -72,7 +72,11 @@ export default class ProfileCommand implements BaseCommand {
         const firstPlayDateString = friendlyFormattedDate(new Date(playerStats["first_play"]));
         const lastActiveDateString = friendlyFormattedDate(new Date(playerStats["last_active"]));
 
-        const totalPlayers = (await dbContext.kmq("player_stats").count("* as count").first())["count"];
+        const totalPlayers = (await dbContext.kmq("player_stats")
+            .count("* as count")
+            .where("exp", ">", "0")
+            .first())["count"];
+
         const relativeSongRank = ((await dbContext.kmq("player_stats")
             .count("* as count")
             .where("songs_guessed", ">", songsGuessed)
