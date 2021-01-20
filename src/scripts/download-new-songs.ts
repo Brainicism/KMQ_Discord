@@ -38,7 +38,44 @@ export async function clearPartiallyCachedSongs(): Promise<void> {
     }
 }
 
-const downloadSong = (id: string): Promise<void> => {
+async function ffmpegOpusJob(mp3File: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const oggFileWithPath = mp3File.replace(".mp3", ".ogg");
+        if (fs.existsSync(oggFileWithPath)) {
+            resolve();
+        }
+        const oggPartWithPath = `${oggFileWithPath}.part`;
+        const oggFfmpegOutputStream = fs.createWriteStream(oggPartWithPath);
+
+        logger.info(`Encoding ${mp3File} to ${path.basename(mp3File, ".mp3")}.ogg...`);
+        ffmpeg(mp3File)
+            .renice(20)
+            .format("opus")
+            .audioCodec("libopus")
+            .audioFilters("volume=0.1")
+            .output(oggFfmpegOutputStream)
+            .on("end", () => {
+                try {
+                    fs.renameSync(oggPartWithPath, oggFileWithPath);
+                    fs.unlinkSync(path.join(process.env.SONG_DOWNLOAD_DIR, path.basename(mp3File)));
+                    resolve();
+                } catch (err) {
+                    if (!fs.existsSync(oggFileWithPath)) {
+                        logger.error(`File ${oggFileWithPath} wasn't created. Ignoring...`);
+                        reject();
+                        return;
+                    }
+                    logger.info(`File ${oggFileWithPath} might have duplicate entries in db.`);
+                    reject();
+                }
+            })
+            .on("error", (transcodingErr) => {
+                throw (transcodingErr);
+            })
+            .run();
+    });
+}
+const downloadSong = (id: string): Promise<string> => {
     const cachedSongLocation = path.join(process.env.SONG_DOWNLOAD_DIR, `${id}.mp3`);
     const tempLocation = `${cachedSongLocation}.part`;
     const cacheStream = fs.createWriteStream(tempLocation);
@@ -72,7 +109,7 @@ const downloadSong = (id: string): Promise<void> => {
             try {
                 await fs.promises.rename(tempLocation, cachedSongLocation);
                 logger.info(`Downloaded song ${id} successfully`);
-                resolve();
+                resolve(cachedSongLocation);
             } catch (err) {
                 reject(new Error(`Error renaming temp song file from ${tempLocation} to ${cachedSongLocation}. err = ${err}`));
             }
@@ -81,7 +118,11 @@ const downloadSong = (id: string): Promise<void> => {
     });
 };
 
-function getSongsFromDb() {
+async function getSongsFromDb() {
+    const deadLinks = (await dbContext.kmq("dead_links")
+        .select("vlink"))
+        .map((x) => x.vlink);
+
     return dbContext.kpopVideos("kpop_videos.app_kpop")
         .select(["nome as name", "name as artist", "vlink as youtubeLink"])
         .join("kpop_videos.app_kpop_group", function join() {
@@ -89,6 +130,7 @@ function getSongsFromDb() {
         })
         .andWhere("dead", "n")
         .andWhere("vtype", "main")
+        .whereNotIn("vlink", deadLinks)
         .orderBy("kpop_videos.app_kpop.views", "DESC");
 }
 
@@ -121,9 +163,11 @@ const downloadNewSongs = async (limit?: number) => {
             deadLinksSkipped++;
             continue;
         }
-        logger.info(`Downloading song: '${song.name}' by ${song.artist} | ${song.youtubeLink}`);
         try {
-            await downloadSong(song.youtubeLink);
+            logger.info(`Downloading song: '${song.name}' by ${song.artist} | ${song.youtubeLink} (${downloadCount + 1}/${songsToDownload.length})`);
+            const mp3Path = await downloadSong(song.youtubeLink);
+            logger.info(`Encoding song: '${song.name}' by ${song.artist} | ${song.youtubeLink}`);
+            await ffmpegOpusJob(mp3Path);
             downloadCount++;
         } catch (e) {
             logger.info("Error downloading song:", song.youtubeLink, e);
@@ -134,66 +178,6 @@ const downloadNewSongs = async (limit?: number) => {
     logger.info(`Total songs downloaded: ${downloadCount}, (${deadLinksSkipped} dead links skipped)`);
 };
 
-async function ffmpegOpusJob(mp3File: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-        const oggFileWithPath = path.join(process.env.SONG_DOWNLOAD_DIR, `${path.basename(mp3File, ".mp3")}.ogg`);
-        if (fs.existsSync(oggFileWithPath)) {
-            resolve();
-        }
-        const oggPartWithPath = `${oggFileWithPath}.part`;
-        const oggFfmpegOutputStream = fs.createWriteStream(oggPartWithPath);
-
-        logger.info(`Encoding ${mp3File} to ${path.basename(mp3File, ".mp3")}.ogg...`);
-        ffmpeg(`${process.env.SONG_DOWNLOAD_DIR}/${mp3File}`)
-            .renice(20)
-            .format("opus")
-            .audioCodec("libopus")
-            .audioFilters("volume=0.1")
-            .output(oggFfmpegOutputStream)
-            .on("end", () => {
-                try {
-                    fs.renameSync(oggPartWithPath, oggFileWithPath);
-                    fs.unlinkSync(path.join(process.env.SONG_DOWNLOAD_DIR, path.basename(mp3File)));
-                    resolve();
-                } catch (err) {
-                    if (!fs.existsSync(oggFileWithPath)) {
-                        logger.error(`File ${oggFileWithPath} wasn't created. Ignoring...`);
-                        reject();
-                        return;
-                    }
-                    logger.info(`File ${oggFileWithPath} might have duplicate entries in db.`);
-                    reject();
-                }
-            })
-            .on("error", (transcodingErr) => {
-                throw (transcodingErr);
-            })
-            .run();
-    });
-}
-
-async function convertToOpus() {
-    const files = await fs.promises.readdir(process.env.SONG_DOWNLOAD_DIR);
-
-    const endingWithMp3Regex = new RegExp("\\.mp3$");
-    const mp3Files = files.filter((file) => file.match(endingWithMp3Regex));
-    logger.info(`Converting ${mp3Files.length} from mp3 to opus (in ogg container)`);
-
-    for (const mp3File of mp3Files) {
-        if (exit) break;
-        await ffmpegOpusJob(mp3File);
-    }
-
-    const songs: Array<QueriedSong> = await getSongsFromDb();
-
-    // update list of non-downloaded songs
-    const songIdsNotDownloaded = songs.filter((x) => !fs.existsSync(path.join(process.env.SONG_DOWNLOAD_DIR, `${x.youtubeLink}.ogg`))).map((x) => ({ vlink: x.youtubeLink }));
-    await dbContext.kmq.transaction(async (trx) => {
-        await dbContext.kmq("not_downloaded").del().transacting(trx);
-        await dbContext.kmq("not_downloaded").insert(songIdsNotDownloaded).transacting(trx);
-    });
-}
-
 async function downloadAndConvertSongs(limit?: number) {
     if (!fs.existsSync(process.env.SONG_DOWNLOAD_DIR)) {
         logger.error("Song cache directory doesn't exist.");
@@ -202,7 +186,6 @@ async function downloadAndConvertSongs(limit?: number) {
 
     await clearPartiallyCachedSongs();
     await downloadNewSongs(limit);
-    await convertToOpus();
     generateAvailableSongsView();
 }
 
