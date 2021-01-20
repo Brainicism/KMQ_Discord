@@ -11,21 +11,24 @@ export default class JoinCommand implements BaseCommand {
         if (!gameSession || gameSession.gameType === GameType.CLASSIC) {
             return;
         }
-        if (gameSession.sessionInitialized) {
-            await sendErrorMessage(getMessageContext(message), "Game already in session", "You can only join as a participant before an elimination game has started. Please wait until the current game ends.");
-            return;
-        }
         if (gameSession.participants.has(message.author.id)) {
             sendErrorMessage(getMessageContext(message), "Player already joined", `${bold(getUserTag(message.author))} is already in the game.`);
-        } else {
-            let previouslyJoinedPlayers = gameSession.scoreboard.getPlayerNames().reverse();
-            if (previouslyJoinedPlayers.length > 10) {
-                previouslyJoinedPlayers = previouslyJoinedPlayers.slice(0, 10);
-                previouslyJoinedPlayers.push("and many others...");
-            }
-            const players = `${bold(getUserTag(message.author))}, ${previouslyJoinedPlayers.join(", ")}`;
-            sendInfoMessage(getMessageContext(message), "Player joined", players);
-            gameSession.addEliminationParticipant(message.author);
+            return;
         }
+
+        if (gameSession.sessionInitialized) {
+            const newPlayer = gameSession.addEliminationParticipant(message.author, true);
+            sendInfoMessage(message, "Joined Elimination Midgame", `\`${getUserTag(message.author)}\` has spawned with \`${newPlayer.getLives()}\` lives`);
+            return;
+        }
+
+        let previouslyJoinedPlayers = gameSession.scoreboard.getPlayerNames().reverse();
+        if (previouslyJoinedPlayers.length > 10) {
+            previouslyJoinedPlayers = previouslyJoinedPlayers.slice(0, 10);
+            previouslyJoinedPlayers.push("and many others...");
+        }
+        const players = `${bold(getUserTag(message.author))}, ${previouslyJoinedPlayers.join(", ")}`;
+        sendInfoMessage(getMessageContext(message), "Player joined", players);
+        gameSession.addEliminationParticipant(message.author);
     }
 }

@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
+import { sendOptionsMessage, getDebugLogHeader, getMessageContext, sendErrorMessage } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
@@ -57,6 +57,12 @@ export default class ArtistTypeCommand implements BaseCommand {
             guildPreference.resetArtistType();
             logger.info(`${getDebugLogHeader(message)} | Artist type reset.`);
             await sendOptionsMessage(message, guildPreference, { option: GameOption.ARTIST_TYPE, reset: true });
+            return;
+        }
+
+        if (guildPreference.isGroupsMode()) {
+            logger.warn(`${getDebugLogHeader(message)} | Game option conflict between artist type and groups.`);
+            sendErrorMessage(getMessageContext(message), "Game Option Conflict", `\`groups\` game option is currently set. \`artisttype\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed`);
             return;
         }
 
