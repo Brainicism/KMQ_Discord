@@ -23,8 +23,9 @@ export default class EliminationScoreboard extends Scoreboard {
      * @param tag - The player's Discord tag
      * @param avatarUrl - The player's Discord avatar URL
      */
-    addPlayer(userID: string, tag: string, avatarUrl: string) {
-        this.players[userID] = new EliminationPlayer(tag, userID, avatarUrl, 0, this.startingLives);
+    addPlayer(userID: string, tag: string, avatarUrl: string, lives?: number): EliminationPlayer {
+        this.players[userID] = new EliminationPlayer(tag, userID, avatarUrl, 0, lives || this.startingLives);
+        return this.players[userID];
     }
 
     /** @returns An array of DiscordEmbed fields representing each participant's lives */
@@ -106,5 +107,15 @@ export default class EliminationScoreboard extends Scoreboard {
      */
     getPlayerLives(userId: string): number {
         return this.players[userId].getLives();
+    }
+
+    /** @returns the number of lives of the player with the least amount of lives (who isn't dead) */
+    getLivesOfWeakestPlayer(): number {
+        const minimumLives = Object.values(this.players)
+            .filter((x) => x.getLives() > 0)
+            .reduce((prev, curr) => (prev.getLives() < curr.getLives() ? prev : curr))
+            .getLives();
+
+        return minimumLives;
     }
 }

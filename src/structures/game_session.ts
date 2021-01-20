@@ -21,6 +21,7 @@ import { GameType } from "../commands/game_commands/play";
 import { ModeType } from "../commands/game_options/mode";
 import { getRankNameByLevel } from "../commands/game_commands/profile";
 import { GENDER } from "../commands/game_options/gender";
+import EliminationPlayer from "./elimination_player";
 
 const logger = _logger("game_session");
 const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
@@ -365,10 +366,10 @@ export default class GameSession {
      * Adds a participant for elimination mode
      * @param user - The user to add
      */
-    addEliminationParticipant(user: Eris.User) {
+    addEliminationParticipant(user: Eris.User, midgame = false): EliminationPlayer {
         this.participants.add(user.id);
         const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
-        eliminationScoreboard.addPlayer(user.id, getUserTag(user), user.avatarURL);
+        return eliminationScoreboard.addPlayer(user.id, getUserTag(user), user.avatarURL, midgame ? eliminationScoreboard.getLivesOfWeakestPlayer() : null);
     }
 
     /**
