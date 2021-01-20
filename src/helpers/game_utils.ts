@@ -34,12 +34,13 @@ async function getFilteredSongList(guildPreference: GuildPreference, ignoredVide
     if (!guildPreference.isGroupsMode()) {
         const gender = guildPreference.isGenderAlternating() ? [GENDER.MALE, GENDER.FEMALE] : guildPreference.getGender();
         queryBuilder = queryBuilder.whereIn("members", gender);
+
+        // filter by artist type only in non-groups
+        if (guildPreference.getArtistType() !== ArtistType.BOTH) {
+            queryBuilder.andWhere("issolo", "=", guildPreference.getArtistType() === ArtistType.SOLOIST ? "y" : "n");
+        }
     } else {
         queryBuilder = queryBuilder.whereIn("id_artist", guildPreference.getGroupIds());
-    }
-
-    if (guildPreference.getArtistType() !== ArtistType.BOTH) {
-        queryBuilder.andWhere("issolo", "=", guildPreference.getArtistType() === ArtistType.SOLOIST ? "y" : "n");
     }
 
     let result: Array<QueriedSong> = await queryBuilder.orderBy("views", "DESC");
