@@ -126,6 +126,7 @@ D.O.
 D.O. + Yoo Young Jin
 D1CE
 Daehyun
+Dahye
 Dal★Shabet
 Dalmatian (DMTN)
 Davichi
@@ -245,8 +246,10 @@ Honey Popcorn
 Hong Jin Young
 Hong Joochan
 Hong-bin + Hyung Won
+Hoppipolla
 Hotshot
 Huh Gak
+Huta
 Hwang Chi-yeul
 Hwang In Wook
 Hwasa
@@ -283,6 +286,7 @@ IZ*ONE
 J-Hope
 J-Min
 J.Fla
+Jaehyun
 Jamie
 Jang Beom June
 Jang Deok Cheol
@@ -318,6 +322,7 @@ Jung Ilhoon
 Jung Jinhyeong
 Jung Key
 Jung Seung-hwan
+Jung Wooseok
 Junggigo
 Junhyung
 JUNIEL
@@ -326,6 +331,7 @@ Jus2
 Jvcki Wai
 JYJ
 JYPark
+JYPark + Rain
 K.will
 K.will + Baekhyun
 K.will + Davichi
@@ -453,6 +459,7 @@ MyB
 MYNAME
 N.Flying
 Nam Woohyun
+Nano
 Nasty Nasty
 Natty
 Nature
@@ -594,8 +601,10 @@ Soyou + JunggiGo
 Soyou + Kwon Jeongyeol
 Soyou + Ovan
 Soyou + Sung Si Kyung
+Spectrum
 SPEED
 SPICA
+SPICA.S
 SS501
 SSAK3
 Standing Egg
@@ -612,8 +621,10 @@ Sung Si-kyung
 Sungyeol
 Sunmi
 Sunny Hill
+Super Five
 Super Junior
 Super Junior D&E
+Super Junior-Happy
 Super Junior-K.R.Y.
 Super Junior-M
 SuperM
@@ -622,8 +633,10 @@ Suran
 Suzy
 Suzy + Baekhyun
 Suzy + Park Won
-T-Ara
+T-ara
 T-ara + Davichi
+T-ara + Davichi + SeeYa
+T-ara + Supernova
 T-ara N4
 T.O.P
 T1419
@@ -683,6 +696,7 @@ VIXX LR
 Voisper
 WA$$UP
 Wanna One
+WANNA.B
 Weeekly
 Wei
 Weki Meki
@@ -700,7 +714,7 @@ Woo Won-jae
 woo!ah!
 Woody
 Woodz
-Woosek X Kuanlin 
+Wooseok + Kuanlin 
 Woosung
 X1
 XIA
@@ -730,6 +744,7 @@ Yuju
 Yukika
 Yuri
 Yuri + Seohyun
+Yuto
 ZE:A
 Zhou Mi
 Zia
