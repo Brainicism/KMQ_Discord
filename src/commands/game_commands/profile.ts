@@ -80,11 +80,13 @@ export default class ProfileCommand implements BaseCommand {
         const relativeSongRank = ((await dbContext.kmq("player_stats")
             .count("* as count")
             .where("songs_guessed", ">", songsGuessed)
+            .where("exp", ">", "0")
             .first())["count"] as number) + 1;
 
         const relativeGamesPlayedRank = ((await dbContext.kmq("player_stats")
             .count("* as count")
             .where("games_played", ">", gamesPlayed)
+            .where("exp", ">", "0")
             .first())["count"] as number) + 1;
 
         const { exp, level } = (await dbContext.kmq("player_stats")
