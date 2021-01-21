@@ -134,6 +134,15 @@ async function getSongsFromDb() {
         .orderBy("kpop_videos.app_kpop.views", "DESC");
 }
 
+async function updateNotDownloaded(songs: Array<QueriedSong>) {
+    // update list of non-downloaded songs
+    const songIdsNotDownloaded = songs.filter((x) => !fs.existsSync(path.join(process.env.SONG_DOWNLOAD_DIR, `${x.youtubeLink}.ogg`))).map((x) => ({ vlink: x.youtubeLink }));
+    await dbContext.kmq.transaction(async (trx) => {
+        await dbContext.kmq("not_downloaded").del().transacting(trx);
+        await dbContext.kmq("not_downloaded").insert(songIdsNotDownloaded).transacting(trx);
+    });
+}
+
 const downloadNewSongs = async (limit?: number) => {
     let songs: Array<QueriedSong> = await getSongsFromDb();
 
@@ -148,10 +157,7 @@ const downloadNewSongs = async (limit?: number) => {
     logger.info("Total songs to be downloaded:", songsToDownload.length);
 
     // update current list of non-downloaded songs
-    await dbContext.kmq.transaction(async (trx) => {
-        await dbContext.kmq("not_downloaded").del().transacting(trx);
-        await dbContext.kmq("not_downloaded").insert(songsToDownload.map((x) => ({ vlink: x.youtubeLink }))).transacting(trx);
-    });
+    await updateNotDownloaded(songs);
 
     const knownDeadIds = new Set((await dbContext.kmq("dead_links")
         .select("vlink"))
@@ -175,6 +181,9 @@ const downloadNewSongs = async (limit?: number) => {
             await fs.promises.unlink(`${process.env.SONG_DOWNLOAD_DIR}/${song.youtubeLink}.mp3.part`);
         }
     }
+
+    // update final list of non-downloaded songs
+    await updateNotDownloaded(songs);
     logger.info(`Total songs downloaded: ${downloadCount}, (${deadLinksSkipped} dead links skipped)`);
 };
 
