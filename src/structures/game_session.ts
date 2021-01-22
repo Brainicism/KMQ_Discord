@@ -83,6 +83,9 @@ export default class GameSession {
     /** The number of GameRounds played */
     private roundsPlayed: number;
 
+    /** The number of songs correctly guessed */
+    private correctGuesses: number;
+
     /** List of guess times per GameRound */
     private guessTimes: Array<number>;
 
@@ -104,6 +107,7 @@ export default class GameSession {
         this.startedAt = Date.now();
         this.participants = new Set();
         this.roundsPlayed = 0;
+        this.correctGuesses = 0;
         this.guessTimes = [];
         this.connection = null;
         this.finished = false;
@@ -244,6 +248,7 @@ export default class GameSession {
             gameSession.lastActiveNow();
 
             this.stopGuessTimeout();
+            this.correctGuesses++;
 
             // increment guild's song guess count
             await dbContext.kmq("guild_preferences")
@@ -370,6 +375,14 @@ export default class GameSession {
         this.participants.add(user.id);
         const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
         return eliminationScoreboard.addPlayer(user.id, getUserTag(user), user.avatarURL, midgame ? eliminationScoreboard.getLivesOfWeakestPlayer() : null);
+    }
+
+    getRoundsPlayed() {
+        return this.roundsPlayed;
+    }
+
+    getCorrectGuesses() {
+        return this.correctGuesses;
     }
 
     /**

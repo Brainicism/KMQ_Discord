@@ -163,7 +163,6 @@ export async function getGuildPreference(guildID: string): Promise<GuildPreferen
 
 /**
  * Perform end of GameSession cleanup activities
- * @param messageContext - An object containing a text channel and author ID
  * @param gameSession - The GameSession to end
  */
 export async function endSession(gameSession: GameSession) {
