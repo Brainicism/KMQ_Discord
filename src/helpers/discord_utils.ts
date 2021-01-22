@@ -223,6 +223,7 @@ export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextabl
  */
 export async function sendEndGameMessage(textChannel: Eris.TextChannel, gameSession: GameSession) {
     const { client } = state;
+    const roundsPlayedFooter = { text: `${gameSession.getCorrectGuesses()}/${gameSession.getRoundsPlayed()} songs correctly guessed!` };
     if (gameSession.scoreboard.isEmpty()) {
         await sendMessage(textChannel, {
             embed: {
@@ -232,6 +233,7 @@ export async function sendEndGameMessage(textChannel: Eris.TextChannel, gameSess
                     icon_url: client.user.avatarURL,
                 },
                 title: "Nobody won 😔",
+                footer: roundsPlayedFooter,
             },
         });
     } else {
@@ -254,6 +256,7 @@ export async function sendEndGameMessage(textChannel: Eris.TextChannel, gameSess
                 },
                 title: `🎉 ${gameSession.scoreboard.getWinnerMessage()} 🎉`,
                 fields: embedFields,
+                footer: roundsPlayedFooter,
             },
         });
     }
