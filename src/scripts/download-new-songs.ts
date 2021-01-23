@@ -3,12 +3,14 @@ import fs from "fs";
 import ffmpeg from "fluent-ffmpeg";
 import path from "path";
 import { Logger } from "log4js";
+import { exec } from "child_process";
 import { QueriedSong } from "../types";
 import _logger from "../logger";
 import dbContext from "../database_context";
 import { generateAvailableSongsView } from "../seed/bootstrap";
 
 const logger: Logger = _logger("download-new-songs");
+const TARGET_AVERAGE_VOLUME = -30;
 let exit = false;
 export async function clearPartiallyCachedSongs(): Promise<void> {
     logger.info("Clearing partially cached songs");
@@ -38,8 +40,21 @@ export async function clearPartiallyCachedSongs(): Promise<void> {
     }
 }
 
-async function ffmpegOpusJob(mp3File: string): Promise<void> {
+function getAverageVolume(mp3File: string): Promise<number> {
     return new Promise((resolve, reject) => {
+        exec(`ffmpeg -i ${mp3File} -af 'volumedetect' -f null /dev/null 2>&1 | grep mean_volume | awk -F': ' '{print $2}' | cut -d' ' -f1;`, (err, stdout, stderr) => {
+            if (!stdout || stderr) {
+                logger.error(`Error getting average volume: path = ${mp3File}, err = ${stderr}`);
+                reject();
+                return;
+            }
+            resolve(parseFloat(stdout));
+        });
+    });
+}
+
+async function ffmpegOpusJob(mp3File: string): Promise<void> {
+    return new Promise(async (resolve, reject) => {
         const oggFileWithPath = mp3File.replace(".mp3", ".ogg");
         if (fs.existsSync(oggFileWithPath)) {
             resolve();
@@ -48,11 +63,13 @@ async function ffmpegOpusJob(mp3File: string): Promise<void> {
         const oggFfmpegOutputStream = fs.createWriteStream(oggPartWithPath);
 
         logger.info(`Encoding ${mp3File} to ${path.basename(mp3File, ".mp3")}.ogg...`);
+        const currentAverageVolume = await getAverageVolume(mp3File);
+        const volumeDifferential = TARGET_AVERAGE_VOLUME - currentAverageVolume;
         ffmpeg(mp3File)
             .renice(20)
             .format("opus")
             .audioCodec("libopus")
-            .audioFilters("volume=0.1")
+            .audioFilters(`volume=${volumeDifferential}dB`)
             .output(oggFfmpegOutputStream)
             .on("end", () => {
                 try {
