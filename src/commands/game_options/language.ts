@@ -8,7 +8,6 @@ const logger = _logger("language");
 export enum LanguageType {
     KOREAN = "korean",
     ALL = "all",
-    BOTH = "both",
 }
 
 export const DEFAULT_LANGUAGE = LanguageType.ALL;

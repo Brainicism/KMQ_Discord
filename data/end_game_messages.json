@@ -76,7 +76,7 @@
         },
         {
             "title": "Did you know?",
-            "message": "Don't like hearing japanese/english/chinese songs? Check out `,language`? See `,help language` to learn more."
+            "message": "Don't like hearing Japanese/English/Chinese songs? Check out `,language`? See `,help language` to learn more."
         }
     ]
 }
