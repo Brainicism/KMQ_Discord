@@ -499,22 +499,25 @@ export default class GameSession {
      * @param userId - The player's Discord user ID
      */
     private async ensurePlayerStat(userId: string) {
-        const results = await dbContext.kmq("player_stats")
-            .select("*")
-            .where("player_id", "=", userId)
-            .limit(1);
+        const currentDateString = getSqlDateString();
+        await dbContext.kmq("player_stats")
+            .insert(
+                {
+                    player_id: userId,
+                    first_play: currentDateString,
+                    last_active: currentDateString,
+                },
+            )
+            .onConflict("player_id")
+            .ignore();
 
-        if (results.length === 0) {
-            const currentDateString = getSqlDateString();
-            await dbContext.kmq("player_stats")
-                .insert(
-                    {
-                        player_id: userId,
-                        first_play: currentDateString,
-                        last_active: currentDateString,
-                    },
-                );
-        }
+        await dbContext.kmq("player_servers")
+            .insert({
+                player_id: userId,
+                server_id: this.guildID,
+            })
+            .onConflict(["player_id", "server_id"])
+            .ignore();
     }
 
     /**
