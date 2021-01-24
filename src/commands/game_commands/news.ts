@@ -22,7 +22,7 @@ export default class NewsCommand implements BaseCommand {
     async call({ message }: CommandArgs) {
         let latestSongDate: Date;
         try {
-            const data = await dbContext.kpopVideos("app_kpop")
+            const data = await dbContext.kmq("available_songs")
                 .select("publishedon")
                 .orderBy("publishedon", "DESC")
                 .limit(1);

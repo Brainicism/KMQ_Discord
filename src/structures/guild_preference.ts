@@ -9,6 +9,7 @@ import _logger from "../logger";
 import dbContext from "../database_context";
 import state from "../kmq";
 import { ArtistType, DEFAULT_ARTIST_TYPE } from "../commands/game_options/artisttype";
+import { DEFAULT_LANGUAGE, LanguageType } from "../commands/game_options/language";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = _logger("guild_preference");
@@ -26,6 +27,7 @@ const DEFAULT_OPTIONS = {
     goal: null,
     guessTimeout: null,
     artistType: DEFAULT_ARTIST_TYPE,
+    languageType: DEFAULT_LANGUAGE,
 };
 
 interface GameOptions {
@@ -41,6 +43,7 @@ interface GameOptions {
     excludes: { id: number, name: string }[];
     goal: number;
     guessTimeout: number;
+    languageType: LanguageType;
 }
 
 export default class GuildPreference {
@@ -395,6 +398,28 @@ export default class GuildPreference {
     /** @returns whether the current shuffle type is UNIQUE */
     isShuffleUnique(): boolean {
         return this.gameOptions.shuffleType === ShuffleType.UNIQUE;
+    }
+
+    /**
+     * Sets the language type option value
+     * @param languageType - The language type
+     */
+    setLanguageType(languageType: LanguageType) {
+        this.gameOptions.languageType = languageType;
+        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGameSession(true);
+    }
+
+    /** @returns the langauge type option value */
+    getLanguageType(): LanguageType {
+        return this.gameOptions.languageType;
+    }
+
+    /** Resets the language type option the the default value */
+    resetLanguageType() {
+        this.gameOptions.languageType = DEFAULT_LANGUAGE;
+        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGameSession(true);
     }
 
     /**

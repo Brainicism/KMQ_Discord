@@ -110,4 +110,5 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,timer`: Try your best to guess correctly before the timer runs out! Enter a time in seconds, or give no arguments to disable
 - `,shuffle`: Choose whether songs should play in "true" random order or in uniquely random order.
 - `,artisttype`: Choose whether to hear from soloists, groups, or both. 
+- `,language`: Choose whether to include Japanese/English/Chinese songs, or only Korean songs
 - `,reset`: Reset to the default settings

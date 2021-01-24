@@ -49,6 +49,7 @@ export enum GameOption {
     TIMER = "Timer",
     EXCLUDE = "Exclude",
     ARTIST_TYPE = "Artist Type",
+    LANGUAGE_TYPE = "Language Type",
 }
 
 export enum EnvType {

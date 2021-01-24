@@ -73,6 +73,10 @@
         {
             "title": "Did you know?",
             "message": "You can pick whether you want to hear from soloists or groups using `,artisttype`? See `,help artisttype` to learn more."
+        },
+        {
+            "title": "Did you know?",
+            "message": "Don't like hearing japanese/english/chinese songs? Check out `,language`? See `,help language` to learn more."
         }
     ]
 }

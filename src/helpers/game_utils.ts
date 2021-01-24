@@ -8,6 +8,7 @@ import { getForcePlaySong, isDebugMode, isForcedSongActive } from "./debug_utils
 import { sendEndGameMessage } from "./discord_utils";
 import { GENDER } from "../commands/game_options/gender";
 import { ArtistType } from "../commands/game_options/artisttype";
+import { LanguageType } from "../commands/game_options/language";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -41,6 +42,13 @@ async function getFilteredSongList(guildPreference: GuildPreference, ignoredVide
         }
     } else {
         queryBuilder = queryBuilder.whereIn("id_artist", guildPreference.getGroupIds());
+    }
+
+    if (guildPreference.getLanguageType() === LanguageType.KOREAN) {
+        queryBuilder = queryBuilder
+            .where("song_name", "NOT LIKE", "%(cn)%")
+            .where("song_name", "NOT LIKE", "%(en)%")
+            .where("song_name", "NOT LIKE", "%(jp)%");
     }
 
     let result: Array<QueriedSong> = await queryBuilder.orderBy("views", "DESC");
