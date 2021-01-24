@@ -8,6 +8,7 @@ import { QueriedSong } from "../types";
 import _logger from "../logger";
 import dbContext from "../database_context";
 import { generateAvailableSongsView } from "../seed/bootstrap";
+import { delay } from "../helpers/utils";
 
 const logger: Logger = _logger("download-new-songs");
 const TARGET_AVERAGE_VOLUME = -30;
@@ -190,7 +191,13 @@ const downloadNewSongs = async (limit?: number) => {
             logger.info(`Downloading song: '${song.name}' by ${song.artist} | ${song.youtubeLink} (${downloadCount + 1}/${songsToDownload.length})`);
             const mp3Path = await downloadSong(song.youtubeLink);
             logger.info(`Encoding song: '${song.name}' by ${song.artist} | ${song.youtubeLink}`);
-            await ffmpegOpusJob(mp3Path);
+            try {
+                await ffmpegOpusJob(mp3Path);
+            } catch (e) {
+                logger.info("Encode failed, retrying...");
+                await delay(5000);
+                await ffmpegOpusJob(mp3Path);
+            }
             downloadCount++;
         } catch (e) {
             logger.info("Error downloading song:", song.youtubeLink, e);
