@@ -5,6 +5,7 @@ import _logger from "../../logger";
 import { getDebugLogHeader, getUserTag, sendEmbed, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import { getRankNameByLevel } from "./profile";
 import { bold, chooseRandom } from "../../helpers/utils";
+import state from "../../kmq";
 
 const logger = _logger("leaderboard");
 
@@ -12,6 +13,7 @@ enum LeaderboardAction {
     ENROLL = "enroll",
     UNEROLL = "unenroll",
     PAGE = "page",
+    SERVER = "server",
 }
 
 const leaderboardQuotes = [
@@ -22,12 +24,24 @@ const leaderboardQuotes = [
 export default class LeaderboardCommand implements BaseCommand {
     help = {
         name: "leaderboard",
-        description: "View the global KMQ leaderboard.",
+        description: "View the KMQ leaderboard.",
         usage: "!leaderboard",
         examples: [
             {
                 example: "`!leaderboard`",
-                explanation: "Show the KMQ leaderboard",
+                explanation: "Show the global leaderboard",
+            },
+            {
+                example: "`!leaderboard page 3`",
+                explanation: "Shows the 3rd page of the global leaderboard",
+            },
+            {
+                example: "`!leaderboard server`",
+                explanation: "Show the server-wide leaderboard",
+            },
+            {
+                example: "`!leaderboard server 3`",
+                explanation: "Show the 3rd page of the server-wide leaderboard",
             },
             {
                 example: "`!leaderboard enroll`",
@@ -36,10 +50,6 @@ export default class LeaderboardCommand implements BaseCommand {
             {
                 example: "`!leaderboard unenroll`",
                 explanation: "Hides your name from the leaderboard",
-            },
-            {
-                example: "`!leaderboard page 3`",
-                explanation: "Shows the 3rd page of the leaderboard",
             },
         ],
         priority: 50,
@@ -66,7 +76,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
     async call({ message, parsedMessage }: CommandArgs) {
         if (parsedMessage.components.length === 0) {
-            this.showLeaderboard(message, 0);
+            this.showLeaderboard(message, 0, false);
             return;
         }
         const action = parsedMessage.components[0] as LeaderboardAction;
@@ -76,14 +86,19 @@ export default class LeaderboardCommand implements BaseCommand {
             } else if (action === LeaderboardAction.UNEROLL) {
                 this.unenrollLeaderboard(message);
             } else if (action === LeaderboardAction.PAGE) {
-                this.showLeaderboard(message, 0);
+                this.showLeaderboard(message, 0, false);
+            } else if (action === LeaderboardAction.SERVER) {
+                this.showLeaderboard(message, 0, true);
             }
             return;
         }
 
         if (parsedMessage.components.length === 2) {
+            const pageOffset = parseInt(parsedMessage.components[1], 10) - 1;
             if (action === LeaderboardAction.PAGE) {
-                this.showLeaderboard(message, 10 * (parseInt(parsedMessage.components[1], 10) - 1));
+                this.showLeaderboard(message, pageOffset, false);
+            } else if (action === LeaderboardAction.SERVER) {
+                this.showLeaderboard(message, pageOffset, true);
             } else {
                 sendErrorMessage(message, "Incorrect Leaderboard Usage", `See \`${process.env.BOT_PREFIX}help leaderboard\` for more details`);
             }
@@ -114,11 +129,22 @@ export default class LeaderboardCommand implements BaseCommand {
             .del();
         sendInfoMessage(message, "Leaderboard Unenrollment Complete", "You are no longer visible on the leaderboard");
     }
-    private async showLeaderboard(message: Eris.Message<GuildTextableChannel>, offset: number) {
-        const topPlayers = await dbContext.kmq("player_stats")
+    private async showLeaderboard(message: Eris.Message<GuildTextableChannel>, pageOffset: number, serverSpecific: boolean) {
+        const offset = 10 * pageOffset;
+        let topPlayersQuery = dbContext.kmq("player_stats")
             .select(["exp", "level", "player_id"])
+            .where("exp", ">", 0);
+
+        if (serverSpecific) {
+            const serverPlayers = (await dbContext.kmq("player_servers")
+                .select("player_id")
+                .where("server_id", "=", message.guildID)).map((x) => x.player_id);
+
+            topPlayersQuery = topPlayersQuery.whereIn("player_id", serverPlayers);
+        }
+
+        const topPlayers = await topPlayersQuery
             .orderBy("exp", "DESC")
-            .where("exp", ">", 0)
             .offset(offset)
             .limit(10);
 
@@ -126,6 +152,7 @@ export default class LeaderboardCommand implements BaseCommand {
             sendErrorMessage(message, "😐", "The leaderboard doesn't go this far");
             return;
         }
+
         logger.info(`${getDebugLogHeader(message)} | Leaderboard retrieved`);
         const fields: Array<Eris.EmbedField> = await Promise.all(topPlayers.map(async (player, rank) => {
             const enrolledPlayer = await dbContext.kmq("leaderboard_enrollment")
@@ -137,8 +164,10 @@ export default class LeaderboardCommand implements BaseCommand {
             };
         }));
 
+        const leaderboardType = serverSpecific ? `${state.client.guilds.get(message.guildID).name}'s` : "Global";
+        const leaderboardTitle = `${leaderboardType} Leaderboard (Page ${pageOffset + 1})`;
         sendEmbed(message.channel, {
-            title: bold("Leaderboard"),
+            title: bold(leaderboardTitle),
             fields,
             timestamp: new Date(),
             footer: {
