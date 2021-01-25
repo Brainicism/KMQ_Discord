@@ -125,6 +125,9 @@ export default class GameSession {
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
     endRound(guessed: boolean, guildPreference: GuildPreference, messageContext?: MessageContext) {
+        if (this.gameRound === null) {
+            return;
+        }
         if (guessed) {
             this.guessTimes.push(Date.now() - this.gameRound.startedAt);
         }
