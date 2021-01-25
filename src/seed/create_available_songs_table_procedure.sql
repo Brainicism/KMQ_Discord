@@ -26,7 +26,7 @@ BEGIN
 	);
 
 	INSERT INTO available_songs_temp 
-	SELECT nome AS song_name, vlink AS link, kpop_videos.app_kpop_group.name AS artist_name, kpop_videos.app_kpop_group.members as members, kpop_videos.app_kpop.views AS views, publishedon, kpop_videos.app_kpop_group.id as id_artist, issolo
+	SELECT TRIM(nome) AS song_name, vlink AS link, TRIM(kpop_videos.app_kpop_group.name) AS artist_name, kpop_videos.app_kpop_group.members as members, kpop_videos.app_kpop.views AS views, publishedon, kpop_videos.app_kpop_group.id as id_artist, issolo
 	FROM kpop_videos.app_kpop 
 	JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
 	WHERE vlink NOT IN (SELECT vlink FROM kmq.not_downloaded)
