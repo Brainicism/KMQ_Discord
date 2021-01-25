@@ -42,7 +42,7 @@ export async function clearPartiallyCachedSongs(): Promise<void> {
 
 function getAverageVolume(mp3File: string): Promise<number> {
     return new Promise((resolve, reject) => {
-        exec(`ffmpeg -i ${mp3File} -af 'volumedetect' -f null /dev/null 2>&1 | grep mean_volume | awk -F': ' '{print $2}' | cut -d' ' -f1;`, (err, stdout, stderr) => {
+        exec(`ffmpeg -i "${mp3File}" -af 'volumedetect' -f null /dev/null 2>&1 | grep mean_volume | awk -F': ' '{print $2}' | cut -d' ' -f1;`, (err, stdout, stderr) => {
             if (!stdout || stderr) {
                 logger.error(`Error getting average volume: path = ${mp3File}, err = ${stderr}`);
                 reject();
@@ -182,20 +182,38 @@ const downloadNewSongs = async (limit?: number) => {
         }
         try {
             logger.info(`Downloading song: '${song.name}' by ${song.artist} | ${song.youtubeLink} (${downloadCount + 1}/${songsToDownload.length})`);
-            const mp3Path = await downloadSong(song.youtubeLink);
+            let mp3Path: string;
+            try {
+                mp3Path = await downloadSong(song.youtubeLink);
+            } catch (err) {
+                logger.error(`Download failed, err = ${err}, retrying...`);
+                await delay(5000);
+                logger.info(`Downloading song: '${song.name}' by ${song.artist} | ${song.youtubeLink} (${downloadCount + 1}/${songsToDownload.length})`);
+                mp3Path = await downloadSong(song.youtubeLink);
+            }
             logger.info(`Encoding song: '${song.name}' by ${song.artist} | ${song.youtubeLink}`);
             try {
                 await ffmpegOpusJob(mp3Path);
             } catch (e) {
-                logger.info("Encode failed, retrying...");
+                logger.error(`Encode failed, err = ${e}, retrying...`);
                 await delay(5000);
-                await ffmpegOpusJob(mp3Path);
+                logger.info(`Encoding song: '${song.name}' by ${song.artist} | ${song.youtubeLink}`);
+                try {
+                    await ffmpegOpusJob(mp3Path);
+                } catch (err) {
+                    logger.error(`Encode failed twice, err = ${err}, exiting...`);
+                    break;
+                }
             }
             downloadCount++;
         } catch (e) {
-            logger.info("Error downloading song:", song.youtubeLink, e);
+            logger.error(`Download failed twice, err = ${e}, skipping...`);
             deadLinksSkipped++;
-            await fs.promises.unlink(`${process.env.SONG_DOWNLOAD_DIR}/${song.youtubeLink}.mp3.part`);
+            try {
+                await fs.promises.unlink(`${process.env.SONG_DOWNLOAD_DIR}/${song.youtubeLink}.mp3.part`);
+            } catch (err) {
+                logger.error(err);
+            }
         }
     }
 
