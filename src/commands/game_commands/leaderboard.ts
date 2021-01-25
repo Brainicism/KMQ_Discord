@@ -114,6 +114,7 @@ export default class LeaderboardCommand implements BaseCommand {
             .del();
         sendInfoMessage(message, "Leaderboard Unenrollment Complete", "You are no longer visible on the leaderboard");
     }
+
     private async showLeaderboard(message: Eris.Message<GuildTextableChannel>, offset: number) {
         const topPlayers = await dbContext.kmq("player_stats")
             .select(["exp", "level", "player_id"])
@@ -131,8 +132,10 @@ export default class LeaderboardCommand implements BaseCommand {
             const enrolledPlayer = await dbContext.kmq("leaderboard_enrollment")
                 .where("player_id", "=", player.player_id)
                 .first();
+            const medalIcon = ["🥇", "🥈", "🥉"][rank] || "";
+            const displayName = enrolledPlayer ? enrolledPlayer.display_name : `Rank #${(rank + offset) + 1}`;
             return {
-                name: enrolledPlayer ? enrolledPlayer.display_name : `Rank #${(rank + offset) + 1}`,
+                name: `${medalIcon} ${displayName}`,
                 value: `${player.exp} xp | Level ${player.level} (${getRankNameByLevel(player.level)})`,
             };
         }));
