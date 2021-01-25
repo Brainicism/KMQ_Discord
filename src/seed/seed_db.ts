@@ -96,9 +96,8 @@ async function updateKpopDatabase() {
     } else {
         await downloadDb();
         await extractDb();
+        await seedDb(db);
     }
-
-    await seedDb(db);
     await db.end();
 }
 
