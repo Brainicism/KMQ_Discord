@@ -183,14 +183,22 @@ export async function endSession(gameSession: GameSession) {
  * @returns a list of recognized/unrecognized groups
  */
 export async function getMatchingGroupNames(rawGroupNames: Array<string>): Promise<GroupMatchResults> {
-    const matchingGroups = (await dbContext.kpopVideos("kpop_videos.app_kpop_group")
+    const artistIdQuery = dbContext.kpopVideos("app_kpop_group")
+        .select(["id"])
+        .whereIn("name", rawGroupNames);
+
+    const matchingGroups = (await dbContext.kpopVideos("app_kpop_group")
         .select(["id", "name"])
-        .whereIn("name", rawGroupNames))
+        .whereIn("app_kpop_group.id", [artistIdQuery])
+        .orWhereIn("app_kpop_group.id_artist1", [artistIdQuery])
+        .orWhereIn("app_kpop_group.id_artist2", [artistIdQuery])
+        .orWhereIn("app_kpop_group.id_artist3", [artistIdQuery])
+        .orWhereIn("app_kpop_group.id_artist4", [artistIdQuery]))
         .map((x) => ({ id: x.id, name: x.name }));
 
-    if (matchingGroups.length !== rawGroupNames.length) {
-        const matchingGroupNames = matchingGroups.map((x) => x.name.toUpperCase());
-        const unrecognizedGroups = rawGroupNames.filter((x) => !matchingGroupNames.includes(x.toUpperCase()));
+    const matchingGroupNames = matchingGroups.map((x) => x.name.toUpperCase());
+    const unrecognizedGroups = rawGroupNames.filter((x) => !matchingGroupNames.includes(x.toUpperCase()));
+    if (unrecognizedGroups.length) {
         return {
             unmatchedGroups: unrecognizedGroups,
             matchedGroups: matchingGroups,
