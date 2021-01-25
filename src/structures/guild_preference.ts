@@ -178,7 +178,9 @@ export default class GuildPreference {
     /** @returns a friendly, potentially truncuated, string displaying the currently selected groups option */
     getDisplayedGroupNames(): string {
         if (this.gameOptions.groups === null) return null;
-        let displayedGroupNames = this.gameOptions.groups.map((x) => x.name).join(", ");
+        let displayedGroupNames = this.gameOptions.groups
+            .filter((x) => !x.name.includes("+"))
+            .map((x) => x.name).join(", ");
         if (displayedGroupNames.length > 400) {
             displayedGroupNames = `${displayedGroupNames.substr(0, 400)} and many others...`;
         }
