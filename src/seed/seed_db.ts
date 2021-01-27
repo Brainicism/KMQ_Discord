@@ -11,11 +11,13 @@ import _logger from "../logger";
 import removeRedunantAliases from "../scripts/remove-redunant-aliases";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import dbContext from "../database_context";
+import { generateAvailableSongsView } from "./bootstrap";
 
 config({ path: path.resolve(__dirname, "../../.env") });
 const fileUrl = "http://kpop.aoimirai.net/download.php";
 const logger: Logger = _logger("seed_db");
 const databaseDownloadDir = process.env.AOIMIRAI_DUMP_DIR;
+const overridesFilePath = path.join(__dirname, "./kpop_videos_overrides.sql");
 
 const setSqlMode = (sqlFile: string) => {
     prependFile.sync(sqlFile, "SET @@sql_mode=\"\";\n");
@@ -57,13 +59,14 @@ async function seedDb(db: mysql.Connection) {
     const seedFilePath = `${databaseDownloadDir}/sql/${seedFile}`;
     logger.info("Dropping K-Pop video database");
     await db.query("DROP DATABASE IF EXISTS kpop_videos;");
-    logger.info("Creating K-pop video database");
+    logger.info("Creating K-Pop video database");
     await db.query("CREATE DATABASE kpop_videos;");
     logger.info("Seeding K-Pop video database");
     setSqlMode(seedFilePath);
     execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kpop_videos < ${seedFilePath}`);
+    logger.info("Performing data overrides");
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kpop_videos < ${overridesFilePath}`);
     logger.info(`Imported database dump (${seedFile}) successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing`);
-    logger.info("Creating K-pop Music Quiz database");
 }
 
 async function hasRecentDump(): Promise<boolean> {
@@ -98,6 +101,7 @@ async function updateKpopDatabase() {
         await extractDb();
         await seedDb(db);
     }
+    generateAvailableSongsView();
     await db.end();
 }
 
