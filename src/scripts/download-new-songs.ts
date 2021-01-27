@@ -12,7 +12,6 @@ import { delay } from "../helpers/utils";
 
 const logger: Logger = _logger("download-new-songs");
 const TARGET_AVERAGE_VOLUME = -30;
-let exit = false;
 export async function clearPartiallyCachedSongs(): Promise<void> {
     logger.info("Clearing partially cached songs");
     if (!fs.existsSync(process.env.SONG_DOWNLOAD_DIR)) {
@@ -177,7 +176,6 @@ const downloadNewSongs = async (limit?: number) => {
         .map((x) => x.vlink));
 
     for (const song of songsToDownload) {
-        if (exit) break;
         if (knownDeadIds.has(song.youtubeLink)) {
             deadLinksSkipped++;
             continue;
@@ -220,19 +218,3 @@ async function downloadAndConvertSongs(limit?: number) {
 export {
     downloadAndConvertSongs,
 };
-
-(async () => {
-    if (require.main === module) {
-        process.on("SIGINT", () => {
-            logger.info("SIGINT received");
-            if (exit) {
-                process.exit(0);
-            }
-            exit = true;
-        });
-        const args = process.argv.slice(2);
-        const limit = args.length > 0 ? parseInt(args[0], 10) : null;
-        downloadAndConvertSongs(limit);
-        await dbContext.destroy();
-    }
-})();
