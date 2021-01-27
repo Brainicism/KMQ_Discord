@@ -21,9 +21,9 @@ const databaseDownloadDir = process.env.AOIMIRAI_DUMP_DIR;
 const overridesFilePath = path.join(__dirname, "./kpop_videos_overrides.sql");
 
 program
-    .option("-fd, --force-download", "Force re-download of AoiMirai backup", false)
-    .option("-fr, --force-reseed", "Force drop/create of kpop_videos database", false)
-    .option("-sd, --skip-download", "Skip download/encode of videos in database", false);
+    .option("-p, --force-pull", "Force re-pull of AoiMirai database dump", false)
+    .option("-r, --force-reseed", "Force drop/create of kpop_videos database", false)
+    .option("-d, --skip-download", "Skip download/encode of videos in database", false);
 
 program.parse();
 const options = program.opts();
