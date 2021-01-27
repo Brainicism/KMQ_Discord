@@ -137,10 +137,6 @@ const downloadSong = (id: string): Promise<string> => {
 };
 
 async function getSongsFromDb() {
-    const deadLinks = (await dbContext.kmq("dead_links")
-        .select("vlink"))
-        .map((x) => x.vlink);
-
     return dbContext.kpopVideos("kpop_videos.app_kpop")
         .select(["nome as name", "name as artist", "vlink as youtubeLink"])
         .join("kpop_videos.app_kpop_group", function join() {
@@ -148,7 +144,6 @@ async function getSongsFromDb() {
         })
         .andWhere("dead", "n")
         .andWhere("vtype", "main")
-        .whereNotIn("vlink", deadLinks)
         .orderBy("kpop_videos.app_kpop.views", "DESC");
 }
 
