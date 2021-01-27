@@ -1,6 +1,12 @@
 /* eslint-disable no-console */
 import { execSync } from "child_process";
+import { program } from "commander";
 import dbContext from "../database_context";
+
+program
+    .option("--no-restart", "Automatically restart pm2 process when countdown is over")
+    .option("--timer <minutes>", "Countdown duration", (x) => parseInt(x, 10), 5);
+program.parse();
 
 function serverShutdown(restartMinutes: number, restartDate: Date, restart: boolean): Promise<void> {
     return new Promise((resolve) => {
@@ -16,20 +22,15 @@ function serverShutdown(restartMinutes: number, restartDate: Date, restart: bool
 }
 
 (async () => {
-    const args = process.argv.slice(2);
-    if (args.length !== 2) {
-        console.error("Missing arguments");
-        process.exit(-1);
-    }
-    const restartMinutes = parseInt(args[0], 10);
-    const restart = args[1] === "true";
+    const options = program.opts();
+    const restartMinutes = options.timer;
     const restartDate = new Date();
     restartDate.setMinutes(restartDate.getMinutes() + restartMinutes);
 
     await dbContext.kmq("restart_notifications").where("id", "=", "1")
         .update({ restart_time: restartDate });
 
-    console.log(`Next restart scheduled at ${restartDate}`);
+    console.log(`Next ${options.restart ? "restart" : "shutdown"} scheduled at ${restartDate}`);
     dbContext.destroy();
-    await serverShutdown(restartMinutes, restartDate, restart);
+    await serverShutdown(restartMinutes, restartDate, options.restart);
 })();
