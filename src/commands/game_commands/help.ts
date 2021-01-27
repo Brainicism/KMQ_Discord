@@ -10,7 +10,7 @@ import { getCommandFiles } from "../../helpers/management_utils";
 
 const logger = _logger("help");
 export const placeholder = /!/g;
-const FIELDS_PER_EMBED = 5;
+const FIELDS_PER_EMBED = 6;
 const helpMessages = parseJsonFile(path.resolve(__dirname, "../../../data/help_strings.json"));
 
 let commandFiles: { [commandName: string]: BaseCommand };
