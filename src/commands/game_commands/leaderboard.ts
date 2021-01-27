@@ -154,12 +154,13 @@ export default class LeaderboardCommand implements BaseCommand {
         }
 
         logger.info(`${getDebugLogHeader(message)} | Leaderboard retrieved`);
-        const fields: Array<Eris.EmbedField> = await Promise.all(topPlayers.map(async (player, rank) => {
+        const fields: Array<Eris.EmbedField> = await Promise.all(topPlayers.map(async (player, relativeRank) => {
+            const rank = relativeRank + offset;
             const enrolledPlayer = await dbContext.kmq("leaderboard_enrollment")
                 .where("player_id", "=", player.player_id)
                 .first();
             const medalIcon = ["🥇", "🥈", "🥉"][rank] || "";
-            const displayName = enrolledPlayer ? enrolledPlayer.display_name : `Rank #${(rank + offset) + 1}`;
+            const displayName = enrolledPlayer ? enrolledPlayer.display_name : `Rank #${(rank) + 1}`;
             return {
                 name: `${medalIcon} ${displayName}`,
                 value: `${player.exp} xp | Level ${player.level} (${getRankNameByLevel(player.level)})`,
