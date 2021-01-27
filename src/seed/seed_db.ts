@@ -5,6 +5,7 @@ import unzipper from "unzipper";
 import mysql from "promise-mysql";
 import prependFile from "prepend-file";
 import { Logger } from "log4js";
+import { program } from "commander";
 import { config } from "dotenv";
 import path from "path";
 import _logger from "../logger";
@@ -18,6 +19,14 @@ const fileUrl = "http://kpop.aoimirai.net/download.php";
 const logger: Logger = _logger("seed_db");
 const databaseDownloadDir = process.env.AOIMIRAI_DUMP_DIR;
 const overridesFilePath = path.join(__dirname, "./kpop_videos_overrides.sql");
+
+program
+    .option("-fd, --force-download", "Force re-download of AoiMirai backup", false)
+    .option("-fr, --force-reseed", "Force drop/create of kpop_videos database", false)
+    .option("-sd, --skip-download", "Skip download/encode of videos in database", false);
+
+program.parse();
+const options = program.opts();
 
 const setSqlMode = (sqlFile: string) => {
     prependFile.sync(sqlFile, "SET @@sql_mode=\"\";\n");
@@ -94,11 +103,14 @@ async function updateKpopDatabase() {
         password: process.env.DB_PASS,
     });
 
-    if (await hasRecentDump()) {
-        logger.info("Recent dump detected, skipping download...");
-    } else {
+    if (options.forceDownload || !(await hasRecentDump())) {
         await downloadDb();
         await extractDb();
+        await seedDb(db);
+    } else {
+        logger.info("Recent dump detected, skipping download...");
+    }
+    if (options.forceReseed) {
         await seedDb(db);
     }
     generateAvailableSongsView();
@@ -118,7 +130,9 @@ async function seedAndDownloadNewSongs() {
     await updateKpopDatabase();
     await updateGroupList();
     await removeRedunantAliases();
-    await downloadAndConvertSongs();
+    if (!options.skipDownload) {
+        await downloadAndConvertSongs();
+    }
     logger.info("Finishing seeding and downloading new songs");
 }
 (async () => {
