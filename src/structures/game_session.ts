@@ -242,6 +242,7 @@ export default class GameSession {
             const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(message));
             logger.info(`${getDebugLogHeader(message)} | Song correctly guessed. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
             this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL, pointsEarned, expGain);
+            this.correctGuesses++;
 
             // mark round as complete, so no more guesses can go through
             this.endRound(true, guildPreference, getMessageContext(message));
@@ -251,7 +252,6 @@ export default class GameSession {
             gameSession.lastActiveNow();
 
             this.stopGuessTimeout();
-            this.correctGuesses++;
 
             // increment guild's song guess count
             await dbContext.kmq("guild_preferences")
