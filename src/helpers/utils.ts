@@ -2,7 +2,7 @@ import fs from "fs";
 import { exec } from "child_process";
 import _logger from "../logger";
 
-const logger = _logger("game_session");
+const logger = _logger("utils");
 
 /**
  * Promise-based delay function
@@ -125,4 +125,24 @@ export function chooseRandom(list: Array<any>) {
  */
 export function friendlyFormattedDate(date: Date): string {
     return date.toISOString().split("T")[0];
+}
+
+/**
+ * @param job - the function to retry
+ * @param jobArgs - arguments to pass to job
+ * @param maxRetries - retries of job before throwing
+ * @param delayDuration - time (in ms) before attempting job retry
+ * @returns the result of job
+ */
+export async function retryJob(job: (...args: any) => Promise<void>, jobArgs: Array<any>, maxRetries: number, firstTry: boolean, delayDuration?: number): Promise<void> {
+    if (!firstTry && delayDuration) {
+        await delay(delayDuration);
+    }
+    return job(...jobArgs).catch((err) => {
+        logger.error(`err = ${err}`);
+        if (maxRetries <= 0) {
+            throw err;
+        }
+        return retryJob(job, jobArgs, maxRetries - 1, false, delayDuration);
+    });
 }

@@ -8,7 +8,7 @@ import { QueriedSong } from "../types";
 import _logger from "../logger";
 import dbContext from "../database_context";
 import { generateAvailableSongsView } from "../seed/bootstrap";
-import { delay } from "../helpers/utils";
+import { retryJob } from "../helpers/utils";
 
 const logger: Logger = _logger("download-new-songs");
 const TARGET_AVERAGE_VOLUME = -30;
@@ -42,7 +42,7 @@ export async function clearPartiallyCachedSongs(): Promise<void> {
 
 function getAverageVolume(mp3File: string): Promise<number> {
     return new Promise((resolve, reject) => {
-        exec(`ffmpeg -i ${mp3File} -af 'volumedetect' -f null /dev/null 2>&1 | grep mean_volume | awk -F': ' '{print $2}' | cut -d' ' -f1;`, (err, stdout, stderr) => {
+        exec(`ffmpeg -i "${mp3File}" -af 'volumedetect' -f null /dev/null 2>&1 | grep mean_volume | awk -F': ' '{print $2}' | cut -d' ' -f1;`, (err, stdout, stderr) => {
             if (!stdout || stderr) {
                 logger.error(`Error getting average volume: path = ${mp3File}, err = ${stderr}`);
                 reject();
@@ -53,7 +53,8 @@ function getAverageVolume(mp3File: string): Promise<number> {
     });
 }
 
-async function ffmpegOpusJob(mp3File: string): Promise<void> {
+async function ffmpegOpusJob(id: string): Promise<void> {
+    const mp3File = path.join(process.env.SONG_DOWNLOAD_DIR, `${id}.mp3`);
     return new Promise(async (resolve, reject) => {
         const oggFileWithPath = mp3File.replace(".mp3", ".ogg");
         if (fs.existsSync(oggFileWithPath)) {
@@ -78,21 +79,18 @@ async function ffmpegOpusJob(mp3File: string): Promise<void> {
                     resolve();
                 } catch (err) {
                     if (!fs.existsSync(oggFileWithPath)) {
-                        logger.error(`File ${oggFileWithPath} wasn't created. Ignoring...`);
-                        reject();
-                        return;
+                        reject(new Error(`File ${oggFileWithPath} wasn't created. err = ${err}`));
                     }
-                    logger.info(`File ${oggFileWithPath} might have duplicate entries in db.`);
-                    reject();
+                    reject(new Error(`File ${oggFileWithPath} might have duplicate entries in db. err = ${err}`));
                 }
             })
             .on("error", (transcodingErr) => {
-                throw (transcodingErr);
+                reject(transcodingErr);
             })
             .run();
     });
 }
-const downloadSong = (id: string): Promise<string> => {
+const downloadSong = (id: string): Promise<void> => {
     const cachedSongLocation = path.join(process.env.SONG_DOWNLOAD_DIR, `${id}.mp3`);
     const tempLocation = `${cachedSongLocation}.part`;
     const cacheStream = fs.createWriteStream(tempLocation);
@@ -126,7 +124,7 @@ const downloadSong = (id: string): Promise<string> => {
             try {
                 await fs.promises.rename(tempLocation, cachedSongLocation);
                 logger.info(`Downloaded song ${id} successfully`);
-                resolve(cachedSongLocation);
+                resolve();
             } catch (err) {
                 reject(new Error(`Error renaming temp song file from ${tempLocation} to ${cachedSongLocation}. err = ${err}`));
             }
@@ -164,8 +162,7 @@ const downloadNewSongs = async (limit?: number) => {
     let downloadCount = 0;
     let deadLinksSkipped = 0;
     logger.info("Total songs in database:", songs.length);
-    const songsToDownload = songs.filter((x) => !fs.existsSync(path.join(process.env.SONG_DOWNLOAD_DIR, `${x.youtubeLink}.ogg`))
-        && !fs.existsSync(path.join(process.env.SONG_DOWNLOAD_DIR, `${x.youtubeLink}.mp3`)));
+    const songsToDownload = songs.filter((x) => !fs.existsSync(path.join(process.env.SONG_DOWNLOAD_DIR, `${x.youtubeLink}.ogg`)));
     logger.info("Total songs to be downloaded:", songsToDownload.length);
 
     // update current list of non-downloaded songs
@@ -180,23 +177,29 @@ const downloadNewSongs = async (limit?: number) => {
             deadLinksSkipped++;
             continue;
         }
+
+        logger.info(`Downloading song: '${song.name}' by ${song.artist} | ${song.youtubeLink} (${downloadCount + 1}/${songsToDownload.length})`);
         try {
-            logger.info(`Downloading song: '${song.name}' by ${song.artist} | ${song.youtubeLink} (${downloadCount + 1}/${songsToDownload.length})`);
-            const mp3Path = await downloadSong(song.youtubeLink);
-            logger.info(`Encoding song: '${song.name}' by ${song.artist} | ${song.youtubeLink}`);
-            try {
-                await ffmpegOpusJob(mp3Path);
-            } catch (e) {
-                logger.info("Encode failed, retrying...");
-                await delay(5000);
-                await ffmpegOpusJob(mp3Path);
-            }
-            downloadCount++;
-        } catch (e) {
-            logger.info("Error downloading song:", song.youtubeLink, e);
+            await retryJob(downloadSong, [song.youtubeLink], 1, true, 5000);
+        } catch (err) {
+            logger.error(`Error downloading song ${song.youtubeLink}, skipping... err = ${err}`);
             deadLinksSkipped++;
-            await fs.promises.unlink(`${process.env.SONG_DOWNLOAD_DIR}/${song.youtubeLink}.mp3.part`);
+            try {
+                await fs.promises.unlink(`${process.env.SONG_DOWNLOAD_DIR}/${song.youtubeLink}.mp3.part`);
+            } catch (tempErr) {
+                logger.error(`Error deleting temp file ${song.youtubeLink}.mp3.part, err = ${tempErr}`);
+            }
+            continue;
         }
+
+        logger.info(`Encoding song: '${song.name}' by ${song.artist} | ${song.youtubeLink}`);
+        try {
+            await retryJob(ffmpegOpusJob, [song.youtubeLink], 1, true, 5000);
+        } catch (err) {
+            logger.error(`Error encoding song ${song.youtubeLink}, exiting... err = ${err}`);
+            break;
+        }
+        downloadCount++;
     }
 
     // update final list of non-downloaded songs
