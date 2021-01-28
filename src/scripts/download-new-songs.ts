@@ -8,7 +8,7 @@ import { QueriedSong } from "../types";
 import _logger from "../logger";
 import dbContext from "../database_context";
 import { generateAvailableSongsView } from "../seed/bootstrap";
-import { delay } from "../helpers/utils";
+import { retryJob } from "../helpers/utils";
 
 const logger: Logger = _logger("download-new-songs");
 const TARGET_AVERAGE_VOLUME = -30;
@@ -178,46 +178,26 @@ const downloadNewSongs = async (limit?: number) => {
             continue;
         }
 
-        const retryJob = async (job: (songID: string) => Promise<void>): Promise<void> => new Promise(async (resolve, reject) => {
-            await delay(5000);
-            try {
-                await job(song.youtubeLink);
-                resolve();
-            } catch (e) {
-                reject(new Error(e));
-            }
-        });
-
         logger.info(`Downloading song: '${song.name}' by ${song.artist} | ${song.youtubeLink} (${downloadCount + 1}/${songsToDownload.length})`);
         try {
-            await downloadSong(song.youtubeLink);
+            await retryJob(downloadSong, [song.youtubeLink], 1, true, 5000);
         } catch (err) {
+            logger.error(`Error downloading song ${song.youtubeLink}, skipping... err = ${err}`);
+            deadLinksSkipped++;
             try {
-                logger.error(`Error downloading song ${song.youtubeLink}, retrying... err = ${err}`);
-                await retryJob(downloadSong);
-            } catch (secondErr) {
-                logger.error(`Error downloading song ${song.youtubeLink}, skipping... err = ${secondErr}`);
-                deadLinksSkipped++;
-                try {
-                    await fs.promises.unlink(`${process.env.SONG_DOWNLOAD_DIR}/${song.youtubeLink}.mp3.part`);
-                } catch (tempErr) {
-                    logger.error(`Error deleting temp file ${song.youtubeLink}.mp3.part, err = ${tempErr}`);
-                }
-                continue;
+                await fs.promises.unlink(`${process.env.SONG_DOWNLOAD_DIR}/${song.youtubeLink}.mp3.part`);
+            } catch (tempErr) {
+                logger.error(`Error deleting temp file ${song.youtubeLink}.mp3.part, err = ${tempErr}`);
             }
+            continue;
         }
 
         logger.info(`Encoding song: '${song.name}' by ${song.artist} | ${song.youtubeLink}`);
         try {
-            await ffmpegOpusJob(song.youtubeLink);
+            await retryJob(ffmpegOpusJob, [song.youtubeLink], 1, true, 5000);
         } catch (err) {
-            try {
-                logger.error(`Error encoding song ${song.youtubeLink}, retrying... err = ${err}`);
-                await retryJob(ffmpegOpusJob);
-            } catch (secondErr) {
-                logger.error(`Error encoding song ${song.youtubeLink}, exiting... err = ${secondErr}`);
-                break;
-            }
+            logger.error(`Error encoding song ${song.youtubeLink}, exiting... err = ${err}`);
+            break;
         }
         downloadCount++;
     }
