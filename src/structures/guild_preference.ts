@@ -10,6 +10,7 @@ import dbContext from "../database_context";
 import state from "../kmq";
 import { ArtistType, DEFAULT_ARTIST_TYPE } from "../commands/game_options/artisttype";
 import { DEFAULT_LANGUAGE, LanguageType } from "../commands/game_options/language";
+import { DEFAULT_SUBUNIT_PREFERENCE, SubunitsPreference } from "../commands/game_options/subunits";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = _logger("guild_preference");
@@ -28,6 +29,7 @@ const DEFAULT_OPTIONS = {
     guessTimeout: null,
     artistType: DEFAULT_ARTIST_TYPE,
     languageType: DEFAULT_LANGUAGE,
+    subunitPreference: DEFAULT_SUBUNIT_PREFERENCE,
 };
 
 interface GameOptions {
@@ -44,6 +46,7 @@ interface GameOptions {
     goal: number;
     guessTimeout: number;
     languageType: LanguageType;
+    subunitPreference: SubunitsPreference;
 }
 
 export default class GuildPreference {
@@ -274,16 +277,6 @@ export default class GuildPreference {
         this.updateGameSession(false);
     }
 
-    /**
-     * Sets the mode type option value
-     * @param modeType - The ModeType
-     */
-    setModeType(modeType: ModeType) {
-        this.gameOptions.modeType = modeType as ModeType;
-        this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
-    }
-
     /** @returns the current artist type option value */
     getArtistType(): ArtistType {
         return this.gameOptions.artistType;
@@ -304,6 +297,38 @@ export default class GuildPreference {
         this.gameOptions.artistType = artistType as ArtistType;
         this.updateGuildPreferences(dbContext.kmq);
         this.updateGameSession(true);
+    }
+
+    /** @returns the current subunit preference option value */
+    getSubunitPreference(): SubunitsPreference {
+        return this.gameOptions.subunitPreference;
+    }
+
+    /** Resets the subunit preference option to the default value */
+    resetSubunitPreference() {
+        this.gameOptions.subunitPreference = DEFAULT_SUBUNIT_PREFERENCE;
+        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGameSession(true);
+    }
+
+    /**
+     * Sets the subunit preference option value
+     * @param subunitPreference - The SubunitsPreference
+     */
+    setSubunitPreference(subunitPreference: SubunitsPreference) {
+        this.gameOptions.subunitPreference = subunitPreference as SubunitsPreference;
+        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGameSession(true);
+    }
+
+    /**
+     * Sets the mode type option value
+     * @param modeType - The ModeType
+     */
+    setModeType(modeType: ModeType) {
+        this.gameOptions.modeType = modeType as ModeType;
+        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGameSession(false);
     }
 
     /** @returns the current mode type option value */

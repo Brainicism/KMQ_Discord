@@ -90,6 +90,9 @@
                 "object": true,
                 "array": false
             }
+        ],
+        "func-names": [
+            "off"
         ]
     }
 }
