@@ -9,6 +9,7 @@ import { sendEndGameMessage } from "./discord_utils";
 import { GENDER } from "../commands/game_options/gender";
 import { ArtistType } from "../commands/game_options/artisttype";
 import { LanguageType } from "../commands/game_options/language";
+import { SubunitsPreference } from "../commands/game_options/subunits";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -41,7 +42,15 @@ async function getFilteredSongList(guildPreference: GuildPreference, ignoredVide
             queryBuilder.andWhere("issolo", "=", guildPreference.getArtistType() === ArtistType.SOLOIST ? "y" : "n");
         }
     } else {
-        queryBuilder = queryBuilder.whereIn("id_artist", guildPreference.getGroupIds());
+        // eslint-disable-next-line no-lonely-if
+        if (guildPreference.getSubunitPreference() === SubunitsPreference.EXCLUDE) {
+            queryBuilder = queryBuilder.whereIn("id_artist", guildPreference.getGroupIds());
+        } else {
+            queryBuilder = queryBuilder.andWhere(function () {
+                this.whereIn("id_artist", guildPreference.getGroupIds())
+                    .orWhereIn("id_parent_artist", guildPreference.getGroupIds());
+            });
+        }
     }
 
     if (guildPreference.getLanguageType() === LanguageType.KOREAN) {
