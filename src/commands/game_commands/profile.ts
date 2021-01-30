@@ -21,6 +21,14 @@ const RANK_TITLES = [
     { title: "CEO of KMQ Entertainment", req: 80 },
     { title: "President of South Korea", req: 90 },
     { title: "Reuniter of the Two Koreas", req: 100 },
+    { title: "Ruler of the Two Koreas", req: 110 },
+    { title: "Supreme Ruler of Asia", req: 120 },
+    { title: "Benevolent Ruler of Earth", req: 130 },
+    { title: "Divine Ruler of the Stars", req: 130 },
+    { title: "Almighty Ruler of the Solar System", req: 140 },
+    { title: "Enlightened Ruler of the Galaxy", req: 150 },
+    { title: "Immortal Ruler of the Universe", req: 160 },
+    { title: "Omnicient Ruler of the Multiverse", req: 170 },
 ];
 
 export function getRankNameByLevel(level: number): string {
