@@ -1,7 +1,7 @@
 import BaseCommand, { CommandArgs } from "../base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { GameType } from "./play";
-import { getDebugLogHeader, sendInfoMessage, sendErrorMessage, getUserTag, getVoiceChannel, getMessageContext } from "../../helpers/discord_utils";
+import { GameType, sendBeginGameMessage } from "./play";
+import { getDebugLogHeader, sendErrorMessage, getUserTag, getVoiceChannel, getMessageContext } from "../../helpers/discord_utils";
 import { bold } from "../../helpers/utils";
 import _logger from "../../logger";
 
@@ -20,8 +20,7 @@ export default class BeginCommand implements BaseCommand {
         }
         const guildPreference = await getGuildPreference(guildID);
         if (!gameSession.sessionInitialized) {
-            const gameInstructions = "Listen to the song and type your guess!";
-            await sendInfoMessage(getMessageContext(message), `Game starting in #${message.channel.name} in 🔊 ${getVoiceChannel(message).name}`, gameInstructions);
+            sendBeginGameMessage(message.channel.name, getVoiceChannel(message).name, message);
             gameSession.startRound(guildPreference, getMessageContext(message));
             logger.info(`${getDebugLogHeader(message)} | Game session starting (elimination gameType)`);
         }

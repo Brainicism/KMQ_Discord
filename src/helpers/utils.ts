@@ -1,5 +1,6 @@
 import fs from "fs";
 import { exec } from "child_process";
+import moment from "moment-timezone";
 import _logger from "../logger";
 
 const logger = _logger("utils");
@@ -145,4 +146,10 @@ export async function retryJob(job: (...args: any) => Promise<void>, jobArgs: Ar
         }
         return retryJob(job, jobArgs, maxRetries - 1, false, delayDuration);
     });
+}
+
+/** @returns whether it's a weekend or not */
+export function isWeekend(): boolean {
+    const normalizedDate = moment().tz("America/New_York");
+    return normalizedDate.weekday() === 0 || normalizedDate.weekday() === 6;
 }
