@@ -1,5 +1,4 @@
 import path from "path";
-import { config } from "dotenv";
 import { QueriedSong } from "../types";
 import { parseJsonFile } from "../helpers/utils";
 import dbContext from "../database_context";
@@ -7,7 +6,6 @@ import _logger from "../logger";
 
 const logger = _logger("get-unclean-song-names");
 const existingSongAliases = parseJsonFile(path.resolve(__dirname, "../../data/song_aliases.json"));
-config({ path: path.resolve(__dirname, "../../.env") });
 
 (async () => {
     const songs: Array<QueriedSong> = await dbContext.kmq("available_songs")

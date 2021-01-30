@@ -2,7 +2,6 @@ import Axios from "axios";
 import fs from "fs";
 import { execSync } from "child_process";
 import unzipper from "unzipper";
-import mysql from "promise-mysql";
 import prependFile from "prepend-file";
 import { Logger } from "log4js";
 import { program } from "commander";
@@ -11,7 +10,7 @@ import path from "path";
 import _logger from "../logger";
 import removeRedunantAliases from "../scripts/remove-redunant-aliases";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
-import dbContext from "../database_context";
+import dbContext, { DatabaseContext, getDatabaseAgnosticContext } from "../database_context";
 import { generateAvailableSongsView } from "./bootstrap";
 
 config({ path: path.resolve(__dirname, "../../.env") });
@@ -62,14 +61,14 @@ async function extractDb(): Promise<void> {
     });
 }
 
-async function seedDb(db: mysql.Connection) {
+async function seedDb(db: DatabaseContext) {
     const files = await fs.promises.readdir(`${databaseDownloadDir}/sql`);
     const seedFile = files[files.length - 1];
     const seedFilePath = `${databaseDownloadDir}/sql/${seedFile}`;
     logger.info("Dropping K-Pop video database");
-    await db.query("DROP DATABASE IF EXISTS kpop_videos;");
+    await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos;");
     logger.info("Creating K-Pop video database");
-    await db.query("CREATE DATABASE kpop_videos;");
+    await db.agnostic.raw("CREATE DATABASE kpop_videos;");
     logger.info("Seeding K-Pop video database");
     setSqlMode(seedFilePath);
     execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kpop_videos < ${seedFilePath}`);
@@ -97,11 +96,7 @@ async function hasRecentDump(): Promise<boolean> {
 }
 
 async function updateKpopDatabase() {
-    const db = await mysql.createConnection({
-        host: process.env.DB_HOST,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASS,
-    });
+    const db = getDatabaseAgnosticContext();
 
     if (options.forceDownload || !(await hasRecentDump())) {
         await downloadDb();
@@ -114,7 +109,7 @@ async function updateKpopDatabase() {
         await seedDb(db);
     }
     generateAvailableSongsView();
-    await db.end();
+    await db.destroy();
 }
 
 export async function updateGroupList() {
