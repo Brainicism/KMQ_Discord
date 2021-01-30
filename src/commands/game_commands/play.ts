@@ -1,10 +1,11 @@
+import Eris, { GuildTextableChannel } from "eris";
 import GameSession from "../../structures/game_session";
 import {
     sendErrorMessage, getDebugLogHeader, sendInfoMessage, getVoiceChannel, voicePermissionsCheck, getUserTag, getMessageContext,
 } from "../../helpers/discord_utils";
 import { deleteGameSession } from "../../helpers/management_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { bold } from "../../helpers/utils";
+import { bold, isWeekend } from "../../helpers/utils";
 import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
 
@@ -14,6 +15,15 @@ const DEFAULT_LIVES = 10;
 export enum GameType {
     CLASSIC = "classic",
     ELIMINATION = "elimination",
+}
+
+export async function sendBeginGameMessage(textChannelName: string, voiceChannelName: string, message: Eris.Message<GuildTextableChannel>) {
+    let gameInstructions = "Listen to the song and type your guess!";
+    if (isWeekend()) {
+        gameInstructions += "\n\n**⬆️ DOUBLE XP WEEKEND ACTIVE ⬆️**";
+    }
+    const startTitle = `Game starting in #${textChannelName} in 🔊 ${voiceChannelName}`;
+    await sendInfoMessage(getMessageContext(message), startTitle, gameInstructions);
 }
 
 export default class PlayCommand implements BaseCommand {
@@ -90,21 +100,15 @@ export default class PlayCommand implements BaseCommand {
                     gameInstructions = `Type \`${process.env.BOT_PREFIX}join\` to play in the upcoming elimination game. Once all have joined, ${bold(getUserTag(gameOwner))} must send \`${process.env.BOT_PREFIX}begin\` to start the game. Everyone begins with \`${lives}\` lives.`;
                     gameSession = new GameSession(textChannel, voiceChannel, gameOwner, GameType.ELIMINATION, lives);
                     gameSession.addEliminationParticipant(gameOwner);
+                    await sendInfoMessage(getMessageContext(message), startTitle, gameInstructions);
                 } else {
                     // (1 and 2) CLASSIC game creation
-                    gameInstructions = "Listen to the song and type your guess!";
-                    startTitle = `Game starting in #${textChannel.name} in 🔊 ${voiceChannel.name}`;
                     gameSession = new GameSession(textChannel, voiceChannel, gameOwner, GameType.CLASSIC);
-                }
-
-                gameSessions[message.guildID] = gameSession;
-                await sendInfoMessage(getMessageContext(message), startTitle, gameInstructions);
-
-                if (!isEliminationMode) {
-                    // ELIMINATION startRound deferred to ,begin
-                    gameSessions[message.guildID].startRound(guildPreference, getMessageContext(message));
+                    await sendBeginGameMessage(textChannel.name, voiceChannel.name, message);
+                    gameSession.startRound(guildPreference, getMessageContext(message));
                     logger.info(`${getDebugLogHeader(message)} | Game session starting`);
                 }
+                gameSessions[message.guildID] = gameSession;
             } else {
                 await sendErrorMessage(getMessageContext(message), "Game already in session", null);
             }
