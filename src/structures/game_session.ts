@@ -321,6 +321,7 @@ export default class GameSession {
 
         // create a new round with randomly chosen song
         this.prepareRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);
+        this.gameRound.setBaseExpReward(await this.calculateBaseExp(guildPreference));
 
         // join voice channel and start round
         try {
@@ -331,7 +332,6 @@ export default class GameSession {
             await sendErrorMessage(messageContext, "Missing voice permissions", "The bot is unable to join the voice channel you are in.");
             return;
         }
-        this.gameRound.setBaseExpReward(await this.calculateBaseExp(guildPreference));
         this.playSong(guildPreference, messageContext);
     }
 

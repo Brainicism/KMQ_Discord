@@ -3,8 +3,7 @@ import log4js from "log4js";
 import { config } from "dotenv";
 import { resolve } from "path";
 
-config({ path: resolve(__dirname, "../../.env") });
-
+config({ path: resolve(__dirname, "../.env") });
 export default (name: string): log4js.Logger => {
     log4js.configure({
         "appenders": {
