@@ -78,6 +78,7 @@ async function bootstrapDatabases() {
         performMigrations();
     }
     execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq < ./src/seed/create_available_songs_table_procedure.sql`);
+    generateAvailableSongsView();
     await db.end();
 }
 
