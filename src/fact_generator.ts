@@ -343,6 +343,7 @@ async function longestGame(): Promise<string[]> {
     const result = await dbContext.kmq("game_sessions")
         .select(["rounds_played", "session_length", "num_participants", "avg_guess_time"])
         .orderBy("session_length", "DESC");
+    if (result.length === 0) return [];
     const longestKmqGame = result[0];
     return [`KMQ Fact: The world's (current) longest game of KMQ lasted ${longestKmqGame.session_length} minutes, with over ${longestKmqGame.rounds_played} songs played, an average guess time of ${longestKmqGame.avg_guess_time} seconds, with ${longestKmqGame.num_participants} participants! Can you beat that?`];
 }
