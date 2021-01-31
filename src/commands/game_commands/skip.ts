@@ -88,7 +88,7 @@ export default class SkipCommand implements BaseCommand {
                 eliminationScoreboard.decrementAllLives();
             }
             sendSkipMessage(message, gameSession.gameRound);
-            gameSession.endRound(false, guildPreference, getMessageContext(message));
+            gameSession.endRound({ correct: false }, guildPreference, getMessageContext(message));
             gameSession.startRound(guildPreference, getMessageContext(message));
             logger.info(`${getDebugLogHeader(message)} | Skip majority achieved.`);
         } else {

@@ -45,7 +45,7 @@ export default class ForceSkipCommand implements BaseCommand {
             const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
             eliminationScoreboard.decrementAllLives();
         }
-        gameSession.endRound(false, guildPreference, getMessageContext(message));
+        gameSession.endRound({ correct: false }, guildPreference, getMessageContext(message));
         gameSession.startRound(guildPreference, getMessageContext(message));
         logger.info(`${getDebugLogHeader(message)} | Owner force-skipped.`);
         gameSession.lastActiveNow();
