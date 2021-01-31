@@ -63,7 +63,6 @@ async function ffmpegOpusJob(id: string): Promise<void> {
         const oggPartWithPath = `${oggFileWithPath}.part`;
         const oggFfmpegOutputStream = fs.createWriteStream(oggPartWithPath);
 
-        logger.info(`Encoding ${mp3File} to ${path.basename(mp3File, ".mp3")}.ogg...`);
         const currentAverageVolume = await getAverageVolume(mp3File);
         const volumeDifferential = TARGET_AVERAGE_VOLUME - currentAverageVolume;
         ffmpeg(mp3File)
@@ -123,7 +122,6 @@ const downloadSong = (id: string): Promise<void> => {
         cacheStream.once("finish", async () => {
             try {
                 await fs.promises.rename(tempLocation, cachedSongLocation);
-                logger.info(`Downloaded song ${id} successfully`);
                 resolve();
             } catch (err) {
                 reject(new Error(`Error renaming temp song file from ${tempLocation} to ${cachedSongLocation}. err = ${err}`));
@@ -154,19 +152,16 @@ async function updateNotDownloaded(songs: Array<QueriedSong>) {
 }
 
 const downloadNewSongs = async (limit?: number) => {
-    let songs: Array<QueriedSong> = await getSongsFromDb();
-
-    if (limit) {
-        songs = songs.slice(0, limit);
-    }
+    const allSongs: Array<QueriedSong> = await getSongsFromDb();
+    let songsToDownload = limit ? allSongs.slice(0, limit) : allSongs.slice();
     let downloadCount = 0;
     let deadLinksSkipped = 0;
-    logger.info("Total songs in database:", songs.length);
-    const songsToDownload = songs.filter((x) => !fs.existsSync(path.join(process.env.SONG_DOWNLOAD_DIR, `${x.youtubeLink}.ogg`)));
+    logger.info("Total songs in database:", allSongs.length);
+    songsToDownload = songsToDownload.filter((x) => !fs.existsSync(path.join(process.env.SONG_DOWNLOAD_DIR, `${x.youtubeLink}.ogg`)));
     logger.info("Total songs to be downloaded:", songsToDownload.length);
 
     // update current list of non-downloaded songs
-    await updateNotDownloaded(songs);
+    await updateNotDownloaded(allSongs);
 
     const knownDeadIds = new Set((await dbContext.kmq("dead_links")
         .select("vlink"))
@@ -203,7 +198,7 @@ const downloadNewSongs = async (limit?: number) => {
     }
 
     // update final list of non-downloaded songs
-    await updateNotDownloaded(songs);
+    await updateNotDownloaded(allSongs);
     logger.info(`Total songs downloaded: ${downloadCount}, (${deadLinksSkipped} dead links skipped)`);
 };
 
