@@ -2,7 +2,7 @@ import Eris from "eris";
 import EmbedPaginator from "eris-pagination";
 import path from "path";
 import GuildPreference from "../structures/guild_preference";
-import GameSession from "../structures/game_session";
+import GameSession, { GuessResult } from "../structures/game_session";
 import _logger from "../logger";
 import { endSession, getSongCount } from "./game_utils";
 import { getFact } from "../fact_generator";
@@ -65,20 +65,17 @@ export async function sendMessage(textChannel: Eris.TextChannel, messageContent:
  * @param gameRound - The GameSession's corresponding GameRound
  * @param songGuessed - Whether the song was guessed
  */
-export async function sendEndOfRoundMessage(messageContext: MessageContext, scoreboard: Scoreboard, gameRound: GameRound, correctlyGuessed: boolean) {
+export async function sendEndOfRoundMessage(messageContext: MessageContext, scoreboard: Scoreboard, gameRound: GameRound, guessResult: GuessResult) {
     let footer: Eris.EmbedFooterOptions = null;
     if (gameRound.songAliases.length > 0) {
         footer = {
             text: `Aliases: ${Array.from(gameRound.songAliases).join(", ")}`,
         };
     }
-    let fact: string;
-    if (Math.random() <= 0.05) {
-        fact = await getFact();
-    }
+    const fact = Math.random() <= 0.05 ? getFact() : null;
 
     const emptyScoreBoard = scoreboard.isEmpty();
-    const description = `${correctlyGuessed ? (`**${messageContext.user.username}** guessed correctly!`) : "Nobody got it."}\nhttps://youtube.com/watch?v=${gameRound.videoID} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
+    const description = `${guessResult.correct ? (`**${messageContext.user.username}** guessed correctly  (+${guessResult.expGain} xp)`) : "Nobody got it."}\nhttps://youtube.com/watch?v=${gameRound.videoID} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
     const fields = scoreboard.getScoreboardEmbedFields().slice(0, 10);
     if (fact) {
         fields.push({
@@ -88,10 +85,10 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
 
     await sendMessage(messageContext.channel, {
         embed: {
-            color: correctlyGuessed ? EMBED_SUCCESS_COLOR : EMBED_ERROR_COLOR,
+            color: guessResult.correct ? EMBED_SUCCESS_COLOR : EMBED_ERROR_COLOR,
             author: {
-                name: correctlyGuessed ? messageContext.user.username : null,
-                icon_url: correctlyGuessed ? messageContext.user.avatarURL : null,
+                name: guessResult.correct ? messageContext.user.username : null,
+                icon_url: guessResult.correct ? messageContext.user.avatarURL : null,
             },
             title: `"${gameRound.songName}" - ${gameRound.artist}`,
             description,
