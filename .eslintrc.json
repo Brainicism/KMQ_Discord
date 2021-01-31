@@ -93,6 +93,9 @@
         ],
         "func-names": [
             "off"
+        ],
+        "no-bitwise": [
+            "off"
         ]
     }
 }

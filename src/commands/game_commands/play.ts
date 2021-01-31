@@ -4,7 +4,7 @@ import {
 } from "../../helpers/discord_utils";
 import { deleteGameSession } from "../../helpers/management_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { bold, isWeekend } from "../../helpers/utils";
+import { bold, isPowerHour, isWeekend } from "../../helpers/utils";
 import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
 import { GuildTextableMessage } from "../../types";
@@ -21,6 +21,8 @@ export async function sendBeginGameMessage(textChannelName: string, voiceChannel
     let gameInstructions = "Listen to the song and type your guess!";
     if (isWeekend()) {
         gameInstructions += "\n\n**⬆️ DOUBLE XP WEEKEND ACTIVE ⬆️**";
+    } else if (isPowerHour()) {
+        gameInstructions += "\n\n**⬆️ KMQ POWER HOUR ACTIVE ⬆️**";
     }
     const startTitle = `Game starting in #${textChannelName} in 🔊 ${voiceChannelName}`;
     await sendInfoMessage(getMessageContext(message), startTitle, gameInstructions);
