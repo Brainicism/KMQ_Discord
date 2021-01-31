@@ -1,4 +1,3 @@
-import Eris, { GuildTextableChannel } from "eris";
 import GameSession from "../../structures/game_session";
 import {
     sendErrorMessage, getDebugLogHeader, sendInfoMessage, getVoiceChannel, voicePermissionsCheck, getUserTag, getMessageContext,
@@ -8,6 +7,7 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import { bold, isWeekend } from "../../helpers/utils";
 import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
+import { GuildTextableMessage } from "../../types";
 
 const logger = _logger("play");
 const DEFAULT_LIVES = 10;
@@ -17,7 +17,7 @@ export enum GameType {
     ELIMINATION = "elimination",
 }
 
-export async function sendBeginGameMessage(textChannelName: string, voiceChannelName: string, message: Eris.Message<GuildTextableChannel>) {
+export async function sendBeginGameMessage(textChannelName: string, voiceChannelName: string, message: GuildTextableMessage) {
     let gameInstructions = "Listen to the song and type your guess!";
     if (isWeekend()) {
         gameInstructions += "\n\n**⬆️ DOUBLE XP WEEKEND ACTIVE ⬆️**";
