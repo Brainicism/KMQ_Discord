@@ -11,7 +11,6 @@ import _logger from "../logger";
 import removeRedunantAliases from "../scripts/remove-redunant-aliases";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import dbContext, { DatabaseContext, getDatabaseAgnosticContext } from "../database_context";
-import { generateAvailableSongsView } from "./bootstrap";
 
 config({ path: path.resolve(__dirname, "../../.env") });
 const fileUrl = "http://kpop.aoimirai.net/download.php";
@@ -22,7 +21,8 @@ const overridesFilePath = path.join(__dirname, "./kpop_videos_overrides.sql");
 program
     .option("-p, --force-pull", "Force re-pull of AoiMirai database dump", false)
     .option("-r, --force-reseed", "Force drop/create of kpop_videos database", false)
-    .option("-d, --skip-download", "Skip download/encode of videos in database", false);
+    .option("-d, --skip-download", "Skip download/encode of videos in database", false)
+    .option("--limit <limit>", "Limit the number of songs to download", (x) => parseInt(x, 10));
 
 program.parse();
 const options = program.opts();
@@ -108,7 +108,6 @@ async function updateKpopDatabase() {
     if (options.forceReseed) {
         await seedDb(db);
     }
-    generateAvailableSongsView();
     await db.destroy();
 }
 
@@ -126,7 +125,7 @@ async function seedAndDownloadNewSongs() {
     await updateGroupList();
     await removeRedunantAliases();
     if (!options.skipDownload) {
-        await downloadAndConvertSongs();
+        await downloadAndConvertSongs(options.limit);
     }
     logger.info("Finishing seeding and downloading new songs");
 }
