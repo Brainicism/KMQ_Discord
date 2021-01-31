@@ -16,14 +16,16 @@ Think you have what it takes to be a KMQ master? Rise through the ranks, gaining
 
 You start off as a `Novice`, and work your way up through the works of `Trainee` (Level 10), `Pre-debut` (Level 20), `Nugu` (Level 30), and many more to discover. Check out `,profile` to see where you stand.
 
-Playing with more people will increase how much XP you gain, maxing out at 6 players for 1.25x XP. You also gain 2x XP on weekends.
+## XP Modifiers
+Playing with more people will increase how much XP you gain, ranging between 0.75x (single player) to 1.25x XP (6+ players).
 
+Every weekend is a 2x XP weekend, all days on Saturdays and Sundays EST time. On weekdays, there are 3 daily `KMQ Power Hours` lasting two hours each for 2x XP, at random points in the day.
+
+## Requirements
 You will only gain EXP if:
 - There is a minimum of 10 songs selected
-- You are using `,mode song` (full EXP)
-- You are using `,mode artist` or `,mode both` and you are not using `,groups` (30% EXP)
-
-
+- You are using `,mode song` (full XP)
+- You are using `,mode artist` or `,mode both` and you are not using `,groups` (30% XP)
 
 # Game Options
 KMQ offers different game options to narrow down the selection of random songs based on your preferences. The current game options can be viewed by using `,options` or simply tagging KMQ Bot.

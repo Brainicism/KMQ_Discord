@@ -1,6 +1,7 @@
 import fs from "fs";
 import { exec } from "child_process";
 import moment from "moment-timezone";
+import crypto from "crypto";
 import _logger from "../logger";
 
 const logger = _logger("utils");
@@ -152,4 +153,27 @@ export async function retryJob(job: (...args: any) => Promise<void>, jobArgs: Ar
 export function isWeekend(): boolean {
     const normalizedDate = moment().tz("America/New_York");
     return normalizedDate.weekday() === 0 || normalizedDate.weekday() === 6;
+}
+
+/**
+ * @param input - The hash input
+ * @param bits - The number of bits wanted in the output
+ * @returns the output hash as a number
+ */
+export function md5Hash(input: string | number, bits: number) {
+    if (bits > 128) {
+        logger.warn("Maximum bit length is 128");
+    }
+    const hash = crypto.createHash("md5").update(input.toString()).digest("hex");
+    return parseInt(hash.slice(0, bits / 4), 16);
+}
+
+/** @returns whether its a KMQ power hour */
+export function isPowerHour(): boolean {
+    const date = new Date();
+    const dateSeed = (date.getDate() * 31 + date.getMonth()) * 31 + date.getFullYear();
+    // distribute between each third of the day to accomodate timezone differences
+    const powerHours = [md5Hash(dateSeed, 8) % 7, (md5Hash(dateSeed + 1, 8) % 7) + 8, (md5Hash(dateSeed + 2, 8) % 7) + 16];
+    const currentHour = date.getHours();
+    return powerHours.some((powerHour) => currentHour >= powerHour && currentHour <= (powerHour + 1));
 }

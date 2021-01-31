@@ -8,7 +8,7 @@ import {
     getDebugLogHeader, getSqlDateString, getUserTag, getVoiceChannel, sendErrorMessage, sendEndOfRoundMessage, getMessageContext, sendInfoMessage, getNumParticipants,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getSongCount, endSession } from "../helpers/game_utils";
-import { delay, getAudioDurationInSeconds, isWeekend } from "../helpers/utils";
+import { delay, getAudioDurationInSeconds, isPowerHour, isWeekend } from "../helpers/utils";
 import state from "../kmq";
 import _logger from "../logger";
 import { QueriedSong, MessageContext, GuildTextableMessage } from "../types";
@@ -627,7 +627,7 @@ export default class GameSession {
         expJitter *= Math.round(Math.random()) ? 1 : -1;
 
         // double xp weekend multiplier
-        const multiplier = isWeekend() ? 2 : 1;
+        const multiplier = (isWeekend() || isPowerHour()) ? 2 : 1;
         return (expBase + expJitter) * multiplier;
     }
 }
