@@ -1,4 +1,3 @@
-import Eris from "eris";
 import path from "path";
 import BaseCommand, { CommandArgs } from "../base_command";
 import {
@@ -7,6 +6,7 @@ import {
 import _logger from "../../logger";
 import { chunkArray, parseJsonFile } from "../../helpers/utils";
 import { getCommandFiles } from "../../helpers/management_utils";
+import { GuildTextableMessage } from "../../types";
 
 const logger = _logger("help");
 export const placeholder = /!/g;
@@ -16,7 +16,7 @@ const helpMessages = parseJsonFile(path.resolve(__dirname, "../../../data/help_s
 let commandFiles: { [commandName: string]: BaseCommand };
 
 // Usage: `!help [action]` or `!help`
-const helpMessage = async (message: Eris.Message<Eris.GuildTextableChannel>, action: string) => {
+const helpMessage = async (message: GuildTextableMessage, action: string) => {
     let embedTitle = "";
     let embedDesc = "";
     let embedFields = [];

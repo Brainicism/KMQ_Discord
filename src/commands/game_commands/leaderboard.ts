@@ -1,4 +1,4 @@
-import Eris, { GuildTextableChannel } from "eris";
+import Eris from "eris";
 import dbContext from "../../database_context";
 import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
@@ -6,6 +6,7 @@ import { getDebugLogHeader, getUserTag, sendEmbed, sendErrorMessage, sendInfoMes
 import { getRankNameByLevel } from "./profile";
 import { bold, chooseRandom } from "../../helpers/utils";
 import state from "../../kmq";
+import { GuildTextableMessage } from "../../types";
 
 const logger = _logger("leaderboard");
 
@@ -105,7 +106,7 @@ export default class LeaderboardCommand implements BaseCommand {
         }
     }
 
-    private async enrollLeaderboard(message: Eris.Message<GuildTextableChannel>) {
+    private async enrollLeaderboard(message: GuildTextableMessage) {
         const alreadyEnrolled = !!(await dbContext.kmq("leaderboard_enrollment")
             .where("player_id", "=", message.author.id)
             .first());
@@ -123,13 +124,13 @@ export default class LeaderboardCommand implements BaseCommand {
         sendInfoMessage(message, "Leaderboard Enrollment Complete", "Your name is now visible on the leaderboard");
     }
 
-    private async unenrollLeaderboard(message: Eris.Message<GuildTextableChannel>) {
+    private async unenrollLeaderboard(message: GuildTextableMessage) {
         await dbContext.kmq("leaderboard_enrollment")
             .where("player_id", "=", message.author.id)
             .del();
         sendInfoMessage(message, "Leaderboard Unenrollment Complete", "You are no longer visible on the leaderboard");
     }
-    private async showLeaderboard(message: Eris.Message<GuildTextableChannel>, pageOffset: number, serverSpecific: boolean) {
+    private async showLeaderboard(message: GuildTextableMessage, pageOffset: number, serverSpecific: boolean) {
         const offset = 10 * pageOffset;
         let topPlayersQuery = dbContext.kmq("player_stats")
             .select(["exp", "level", "player_id"])

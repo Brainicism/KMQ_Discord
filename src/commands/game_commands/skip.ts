@@ -1,4 +1,3 @@
-import Eris from "eris";
 import BaseCommand, { CommandArgs } from "../base_command";
 import GameSession from "../../structures/game_session";
 import {
@@ -15,14 +14,15 @@ import { GameType } from "./play";
 import EliminationScoreboard from "../../structures/elimination_scoreboard";
 import _logger from "../../logger";
 import GameRound from "../../structures/game_round";
+import { GuildTextableMessage } from "../../types";
 
 const logger = _logger("skip");
 
-function getSkipsRequired(message: Eris.Message<Eris.GuildTextableChannel>): number {
+function getSkipsRequired(message: GuildTextableMessage): number {
     return Math.floor(getNumParticipants(message) * 0.5) + 1;
 }
 
-async function sendSkipNotification(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
+async function sendSkipNotification(message: GuildTextableMessage, gameSession: GameSession) {
     await sendMessage(message.channel, {
         embed: {
             color: EMBED_INFO_COLOR,
@@ -36,7 +36,7 @@ async function sendSkipNotification(message: Eris.Message<Eris.GuildTextableChan
     });
 }
 
-async function sendSkipMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameRound: GameRound) {
+async function sendSkipMessage(message: GuildTextableMessage, gameRound: GameRound) {
     const skipMessage = await sendMessage(message.channel, {
         embed: {
             color: EMBED_SUCCESS_COLOR,
@@ -54,7 +54,7 @@ async function sendSkipMessage(message: Eris.Message<Eris.GuildTextableChannel>,
     }, 2500);
 }
 
-function isSkipMajority(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession): boolean {
+function isSkipMajority(message: GuildTextableMessage, gameSession: GameSession): boolean {
     return gameSession.gameRound.getNumSkippers() >= getSkipsRequired(message);
 }
 

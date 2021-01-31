@@ -4,11 +4,11 @@ import { textPermissionsCheck, sendOptionsMessage } from "../../helpers/discord_
 import { getGuildPreference } from "../../helpers/game_utils";
 import state from "../../kmq";
 import validate from "../../helpers/validate";
-import { ParsedMessage } from "../../types";
+import { GuildTextableMessage, ParsedMessage } from "../../types";
 
 const logger = _logger("messageCreate");
 
-function isGuildMessage(message: Eris.Message): message is Eris.Message<Eris.GuildTextableChannel> {
+function isGuildMessage(message: Eris.Message): message is GuildTextableMessage {
     return (message.channel instanceof Eris.TextChannel);
 }
 
