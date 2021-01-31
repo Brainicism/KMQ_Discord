@@ -11,7 +11,7 @@ import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getSongCou
 import { delay, getAudioDurationInSeconds, isWeekend } from "../helpers/utils";
 import state from "../kmq";
 import _logger from "../logger";
-import { QueriedSong, MessageContext } from "../types";
+import { QueriedSong, MessageContext, GuildTextableMessage } from "../types";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
 import Scoreboard from "./scoreboard";
@@ -235,7 +235,7 @@ export default class GameSession {
      * Process a message to see if it is a valid and correct guess
      * @param message - The message to check
      */
-    async guessSong(message: Eris.Message<Eris.GuildTextableChannel>) {
+    async guessSong(message: GuildTextableMessage) {
         const guildPreference = await getGuildPreference(message.guildID);
         if (!this.gameRound) return;
 
@@ -480,7 +480,7 @@ export default class GameSession {
      * current game session
      * @param message - The message to check for guess eligibility
      */
-    private guessEligible(message: Eris.Message<Eris.GuildTextableChannel>): boolean {
+    private guessEligible(message: GuildTextableMessage): boolean {
         const userVoiceChannel = getVoiceChannel(message);
         // if user isn't in the same voice channel
         if (!userVoiceChannel || (userVoiceChannel.id !== this.voiceChannel.id)) {

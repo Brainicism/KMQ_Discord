@@ -38,11 +38,8 @@ async function needsBootstrap(db: DatabaseContext) {
     return (await Promise.all([kmqDatabaseExists(db), kpopDataDatabaseExists(db), songThresholdReached(db)])).some((x) => x === false);
 }
 
-function updateAvailableSongProcedure() {
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq < ./src/seed/create_available_songs_table_procedure.sql`);
-}
-
 function generateAvailableSongsView() {
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq < ./src/seed/create_available_songs_table_procedure.sql`);
     logger.info("Re-creating available songs view...");
     execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq -e "CALL CreateAvailableSongsTable;"`);
 }
@@ -68,16 +65,14 @@ async function bootstrapDatabases() {
             await db.agnostic.raw("CREATE DATABASE IF NOT EXISTS kmq");
             performMigrations();
         }
-        updateAvailableSongProcedure();
         if (!(await songThresholdReached(db))) {
             logger.info(`Downloading minimum threshold (${SONG_DOWNLOAD_THRESHOLD}) songs`);
             await downloadAndConvertSongs(SONG_DOWNLOAD_THRESHOLD);
         }
     } else {
-        updateAvailableSongProcedure();
         performMigrations();
+        generateAvailableSongsView();
     }
-    generateAvailableSongsView();
     await db.destroy();
 }
 

@@ -6,7 +6,7 @@ import GameSession, { GuessResult } from "../structures/game_session";
 import _logger from "../logger";
 import { endSession, getSongCount } from "./game_utils";
 import { getFact } from "../fact_generator";
-import { GameOption, MessageContext } from "../types";
+import { GameOption, GuildTextableMessage, MessageContext } from "../types";
 import { chunkArray, codeLine, bold, parseJsonFile, chooseRandom } from "./utils";
 import state from "../kmq";
 import { ModeType } from "../commands/game_options/mode";
@@ -43,7 +43,7 @@ export function getDebugLogHeader(message: Eris.Message | MessageContext): strin
  * @param message - The Message object
  * @returns a MessageContext object from the message
  */
-export function getMessageContext(message: Eris.Message<Eris.GuildTextableChannel>): MessageContext {
+export function getMessageContext(message: GuildTextableMessage): MessageContext {
     return { channel: message.channel, user: message.author };
 }
 
@@ -164,7 +164,7 @@ export async function sendInfoMessage(messageContext: MessageContext, title: str
  * @param updatedOption - Specifies which GameOption was modified
  * @param footerText - The footer text
  */
-export async function sendOptionsMessage(message: Eris.Message<Eris.GuildTextableChannel>, guildPreference: GuildPreference,
+export async function sendOptionsMessage(message: GuildTextableMessage, guildPreference: GuildPreference,
     updatedOption?: { option: GameOption, reset: boolean }, footerText?: string) {
     const totalSongs = await getSongCount(guildPreference);
     if (totalSongs === -1) {
@@ -267,7 +267,7 @@ export async function sendEndGameMessage(textChannel: Eris.TextChannel, gameSess
  * @param message - The Message object
  * @param embeds - A list of embeds to paginate over
  */
-export async function sendPaginationedEmbed(message: Eris.Message<Eris.GuildTextableChannel>, embeds: Array<Eris.EmbedOptions>) {
+export async function sendPaginationedEmbed(message: GuildTextableMessage, embeds: Array<Eris.EmbedOptions>) {
     if (embeds.length > 1) {
         return EmbedPaginator.createPaginationEmbed(message, embeds, { timeout: 60000 });
     }
@@ -279,7 +279,7 @@ export async function sendPaginationedEmbed(message: Eris.Message<Eris.GuildText
  * @param message - The Message object
  * @param gameSession - The GameSession
  */
-export async function sendScoreboardMessage(message: Eris.Message<Eris.GuildTextableChannel>, gameSession: GameSession) {
+export async function sendScoreboardMessage(message: GuildTextableMessage, gameSession: GameSession) {
     if (gameSession.scoreboard.isEmpty() && gameSession.gameType === GameType.CLASSIC) {
         return sendMessage(message.channel, {
             embed: {
@@ -319,7 +319,7 @@ export async function sendScoreboardMessage(message: Eris.Message<Eris.GuildText
  * Disconnects the bot from the voice channel of the  message's originating guild
  * @param message - The Message object
  */
-export function disconnectVoiceConnection(message: Eris.Message<Eris.GuildTextableChannel>) {
+export function disconnectVoiceConnection(message: GuildTextableMessage) {
     state.client.closeVoiceConnection(message.guildID);
 }
 
@@ -356,7 +356,7 @@ export function areUserAndBotInSameVoiceChannel(message: Eris.Message): boolean 
  * @param message - The Message object
  * @returns the voice channel that the message's author is in
  */
-export function getVoiceChannel(message: Eris.Message<Eris.GuildTextableChannel>): Eris.VoiceChannel {
+export function getVoiceChannel(message: GuildTextableMessage): Eris.VoiceChannel {
     const voiceChannel = message.channel.guild.channels.get(message.member.voiceState.channelID) as Eris.VoiceChannel;
     return voiceChannel;
 }
@@ -365,7 +365,7 @@ export function getVoiceChannel(message: Eris.Message<Eris.GuildTextableChannel>
  * @param message - The Message object
  * @returns the number of persons in the voice channel excluding bots
  */
-export function getNumParticipants(message: Eris.Message<Eris.GuildTextableChannel>): number {
+export function getNumParticipants(message: GuildTextableMessage): number {
     return (getVoiceChannel(message).voiceMembers.filter((x) => !x.bot)).length;
 }
 
@@ -390,7 +390,7 @@ function missingPermissionsText(missingPermissions: string[]): string {
  * @param message - The Message object
  * @returns whether the bot has permissions to join the message author's currently active voice channel
  */
-export function voicePermissionsCheck(message: Eris.Message<Eris.GuildTextableChannel>): boolean {
+export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
     const voiceChannel = getVoiceChannel(message);
     const missingPermissions = REQUIRED_VOICE_PERMISSIONS.filter((permission) => !voiceChannel.permissionsOf(state.client.user.id).has(permission));
     if (missingPermissions.length > 0) {
@@ -417,7 +417,7 @@ export function voicePermissionsCheck(message: Eris.Message<Eris.GuildTextableCh
  * @param message - The Message object
  * @returns whether the bot has permissions to message's originating text channel
  */
-export async function textPermissionsCheck(message: Eris.Message<Eris.GuildTextableChannel>): Promise<boolean> {
+export async function textPermissionsCheck(message: GuildTextableMessage): Promise<boolean> {
     const { channel } = message;
     const { client } = state;
 
