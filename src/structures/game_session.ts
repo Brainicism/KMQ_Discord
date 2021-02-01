@@ -135,9 +135,7 @@ export default class GameSession {
         if (this.gameRound === null) {
             return;
         }
-        if (guessResult.correct) {
-            this.guessTimes.push(Date.now() - this.gameRound.startedAt);
-        }
+
         if (messageContext) {
             sendEndOfRoundMessage(messageContext, this.scoreboard, this.gameRound, guessResult);
         }
@@ -244,10 +242,14 @@ export default class GameSession {
 
         const pointsEarned = this.checkGuess(message, guildPreference.getModeType());
         if (pointsEarned > 0) {
+            // calculate xp gain
+            const guessSpeed = Date.now() - this.gameRound.startedAt;
+            this.guessTimes.push(guessSpeed);
+            const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(message), guessSpeed);
+            logger.info(`${getDebugLogHeader(message)} | Song correctly guessed. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
+
             // update scoreboard
             const userTag = getUserTag(message.author);
-            const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(message));
-            logger.info(`${getDebugLogHeader(message)} | Song correctly guessed. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
             this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL, pointsEarned, expGain);
             this.correctGuesses++;
 
@@ -600,7 +602,7 @@ export default class GameSession {
      * @param guildPreference - The guild preference
      * @returns The amount of EXP gained based on the current game options
      */
-    private calculateExpGain(guildPreference: GuildPreference, baseExp: number, numParticipants: number): number {
+    private calculateExpGain(guildPreference: GuildPreference, baseExp: number, numParticipants: number, guessSpeed: number): number {
         let expModifier = 1;
         // penalize/incentivize for number of participants from 0.75x to 1.25x
         expModifier *= numParticipants === 1 ? 0.75 : (0.0625 * (Math.min(numParticipants, 6)) + 0.875);
@@ -609,6 +611,11 @@ export default class GameSession {
         if (guildPreference.getModeType() === ModeType.ARTIST || guildPreference.getModeType() === ModeType.BOTH) {
             if (guildPreference.isGroupsMode()) return 0;
             expModifier *= 0.3;
+        }
+
+        // bonus for quick guess
+        if (guessSpeed < 3500) {
+            expModifier *= 1.1;
         }
 
         return Math.floor(expModifier * baseExp);
