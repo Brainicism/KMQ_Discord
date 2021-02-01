@@ -44,7 +44,7 @@ export function getDebugLogHeader(message: Eris.Message | MessageContext): strin
  * @returns a MessageContext object from the message
  */
 export function getMessageContext(message: GuildTextableMessage): MessageContext {
-    return { channel: message.channel, user: message.author };
+    return { channel: message.channel, author: message.author };
 }
 
 /**
@@ -75,7 +75,7 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
     const fact = Math.random() <= 0.05 ? getFact() : null;
 
     const emptyScoreBoard = scoreboard.isEmpty();
-    const description = `${guessResult.correct ? (`**${messageContext.user.username}** guessed correctly  (+${guessResult.expGain} xp)`) : "Nobody got it."}\nhttps://youtube.com/watch?v=${gameRound.videoID} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
+    const description = `${guessResult.correct ? (`**${messageContext.author.username}** ${guessResult.streak >= 5 ? `(🔥 ${guessResult.streak})` : ""} guessed correctly  (+${guessResult.expGain} xp)`) : "Nobody got it."}\nhttps://youtube.com/watch?v=${gameRound.videoID} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
     const fields = scoreboard.getScoreboardEmbedFields().slice(0, 10);
     if (fact) {
         fields.push({
@@ -87,8 +87,8 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
         embed: {
             color: guessResult.correct ? EMBED_SUCCESS_COLOR : EMBED_ERROR_COLOR,
             author: {
-                name: guessResult.correct ? messageContext.user.username : null,
-                icon_url: guessResult.correct ? messageContext.user.avatarURL : null,
+                name: guessResult.correct ? messageContext.author.username : null,
+                icon_url: guessResult.correct ? messageContext.author.avatarURL : null,
             },
             title: `"${gameRound.songName}" - ${gameRound.artist}`,
             description,
@@ -108,9 +108,9 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
  * @param description - The description of the embed
  */
 export async function sendErrorMessage(messageContext: MessageContext, title: string, description: string) {
-    const author = messageContext.user ? {
-        name: messageContext.user.username,
-        icon_url: messageContext.user.avatarURL,
+    const author = messageContext.author ? {
+        name: messageContext.author.username,
+        icon_url: messageContext.author.avatarURL,
     } : null;
 
     await sendMessage(messageContext.channel, {
@@ -142,9 +142,9 @@ export async function sendInfoMessage(messageContext: MessageContext, title: str
         };
     }
 
-    const author = messageContext.user ? {
-        name: messageContext.user.username,
-        icon_url: messageContext.user.avatarURL,
+    const author = messageContext.author ? {
+        name: messageContext.author.username,
+        icon_url: messageContext.author.avatarURL,
     } : null;
 
     const embed = {

@@ -40,9 +40,17 @@ interface LevelUpResult {
     endLevel: number;
 }
 
+interface LastGuesser {
+    userId: string;
+    streak: number;
+}
+
 export interface GuessResult {
     correct: boolean;
     expGain?: number;
+    guesserUserId?: string;
+    pointsEarned?: number;
+    streak?: number;
 }
 
 export default class GameSession {
@@ -103,6 +111,9 @@ export default class GameSession {
     /** The last gender played when gender is set to alternating, can be null (in not alternating mode), GENDER.MALE, or GENDER.FEMALE */
     private lastAlternatingGender: GENDER;
 
+    /** The most recent Guesser, including their current streak */
+    private lastGuesser: LastGuesser;
+
     constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel, gameSessionCreator: Eris.User, gameType: GameType, eliminationLives?: number) {
         this.gameType = gameType;
         this.guildID = textChannel.guild.id;
@@ -122,6 +133,7 @@ export default class GameSession {
         this.owner = gameSessionCreator;
         this.lastPlayedSongsQueue = [];
         this.lastAlternatingGender = null;
+        this.lastGuesser = null;
     }
 
     /**
@@ -134,6 +146,29 @@ export default class GameSession {
         this.roundsPlayed++;
         if (this.gameRound === null) {
             return;
+        }
+
+        if (guessResult.correct) {
+            // update guessing streaks
+            if (this.lastGuesser === null || this.lastGuesser.userId !== guessResult.guesserUserId) {
+                this.lastGuesser = { userId: guessResult.guesserUserId, streak: 1 };
+            } else {
+                this.lastGuesser.streak++;
+            }
+            const message = messageContext as GuildTextableMessage;
+            // calculate xp gain
+            const guessSpeed = Date.now() - this.gameRound.startedAt;
+            this.guessTimes.push(guessSpeed);
+            const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(message), guessSpeed);
+            guessResult.expGain = expGain;
+            guessResult.streak = this.lastGuesser.streak;
+            logger.info(`${getDebugLogHeader(message)} | Song correctly guessed. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
+
+            // update scoreboard
+            const userTag = getUserTag(message.author);
+            this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL, guessResult.pointsEarned, expGain);
+        } else {
+            this.lastGuesser = null;
         }
 
         if (messageContext) {
@@ -242,19 +277,10 @@ export default class GameSession {
 
         const pointsEarned = this.checkGuess(message, guildPreference.getModeType());
         if (pointsEarned > 0) {
-            // calculate xp gain
-            const guessSpeed = Date.now() - this.gameRound.startedAt;
-            this.guessTimes.push(guessSpeed);
-            const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(message), guessSpeed);
-            logger.info(`${getDebugLogHeader(message)} | Song correctly guessed. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
-
-            // update scoreboard
-            const userTag = getUserTag(message.author);
-            this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL, pointsEarned, expGain);
             this.correctGuesses++;
 
             // mark round as complete, so no more guesses can go through
-            this.endRound({ correct: true, expGain }, guildPreference, getMessageContext(message));
+            this.endRound({ correct: true, guesserUserId: message.author.id, pointsEarned }, guildPreference, message);
 
             // update game session's lastActive
             const gameSession = state.gameSessions[this.guildID];
@@ -600,6 +626,9 @@ export default class GameSession {
 
     /**
      * @param guildPreference - The guild preference
+     * @param baseExp - The base amount of XP the GameRound provides
+     * @param numParticipants - The number of participants in the voice channel at the time of guesse
+     * @param guessSpeed - The time taken to guess correctly
      * @returns The amount of EXP gained based on the current game options
      */
     private calculateExpGain(guildPreference: GuildPreference, baseExp: number, numParticipants: number, guessSpeed: number): number {
@@ -616,6 +645,11 @@ export default class GameSession {
         // bonus for quick guess
         if (guessSpeed < 3500) {
             expModifier *= 1.1;
+        }
+
+        // bonus for guess streaks
+        if (this.lastGuesser.streak >= 5) {
+            expModifier *= 1.2;
         }
 
         return Math.floor(expModifier * baseExp);

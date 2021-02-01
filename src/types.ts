@@ -20,7 +20,7 @@ export interface QueriedSong {
 
 export interface MessageContext {
     channel: Eris.GuildTextableChannel;
-    user?: {
+    author?: {
         username: string;
         id: string;
         avatarURL: string;
