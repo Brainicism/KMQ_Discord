@@ -118,7 +118,7 @@ export function weekOfYear(dateObj?: Date): number {
  * @returns the randomly selected element
  */
 export function chooseRandom(list: Array<any>) {
-    return list[Math.floor(Math.random() * list.length)] || [];
+    return list[Math.floor(Math.random() * list.length)] || null;
 }
 
 /**

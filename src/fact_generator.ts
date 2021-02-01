@@ -51,8 +51,8 @@ async function generateFacts() {
     const funFacts = await Promise.all(funFactPromises);
     const kmqFacts = await Promise.all(kmqFactPromises);
     factCache = {
-        funFacts,
-        kmqFacts,
+        funFacts: funFacts.filter((facts) => facts.length > 0),
+        kmqFacts: kmqFacts.filter((facts) => facts.length > 0),
         lastUpdated: Date.now(),
     };
 }
