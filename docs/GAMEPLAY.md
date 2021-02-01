@@ -19,6 +19,7 @@ You start off as a `Novice`, and work your way up through the works of `Trainee`
 ## XP Modifiers
 - Playing with more people will increase how much XP you gain, ranging between 0.75x (single player) to 1.25x XP (6+ players).  
 - Guessing quickly will earn you 1.1x XP.
+- Guess streaks greater than 5 will earn you 1.2x XP.
 - Every weekend is a 2x XP weekend, all days on Saturdays and Sundays EST time. 
 - On weekdays, there are 3 daily `KMQ Power Hours` lasting two hours each for 2x XP, at random points in the day.
 
