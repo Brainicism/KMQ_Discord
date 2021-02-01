@@ -17,9 +17,10 @@ Think you have what it takes to be a KMQ master? Rise through the ranks, gaining
 You start off as a `Novice`, and work your way up through the works of `Trainee` (Level 10), `Pre-debut` (Level 20), `Nugu` (Level 30), and many more to discover. Check out `,profile` to see where you stand.
 
 ## XP Modifiers
-Playing with more people will increase how much XP you gain, ranging between 0.75x (single player) to 1.25x XP (6+ players).
-
-Every weekend is a 2x XP weekend, all days on Saturdays and Sundays EST time. On weekdays, there are 3 daily `KMQ Power Hours` lasting two hours each for 2x XP, at random points in the day.
+- Playing with more people will increase how much XP you gain, ranging between 0.75x (single player) to 1.25x XP (6+ players).  
+- Guessing quickly will earn you 1.1x XP.
+- Every weekend is a 2x XP weekend, all days on Saturdays and Sundays EST time. 
+- On weekdays, there are 3 daily `KMQ Power Hours` lasting two hours each for 2x XP, at random points in the day.
 
 ## Requirements
 You will only gain EXP if:
