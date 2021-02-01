@@ -131,6 +131,7 @@ export default class GameSession {
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
     endRound(guessResult: GuessResult, guildPreference: GuildPreference, messageContext?: MessageContext) {
+        this.roundsPlayed++;
         if (this.gameRound === null) {
             return;
         }
@@ -445,6 +446,7 @@ export default class GameSession {
             logger.error(`${getDebugLogHeader(messageContext)} | Unknown error with stream dispatcher. song = ${this.getDebugSongDetails()}. err = ${err}`);
             // Attempt to restart game with different song
             await sendErrorMessage(messageContext, "Error playing song", "Starting new round in 3 seconds...");
+            this.roundsPlayed--;
             this.endRound({ correct: false }, guildPreference, messageContext);
             this.startRound(guildPreference, messageContext);
         });
@@ -458,7 +460,6 @@ export default class GameSession {
      */
     private prepareRound(song: string, artist: string, videoID: string) {
         this.gameRound = new GameRound(song, artist, videoID);
-        this.roundsPlayed++;
     }
 
     /**
