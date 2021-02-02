@@ -430,6 +430,10 @@ export default class GameSession {
      */
     private async playSong(guildPreference: GuildPreference, messageContext: MessageContext) {
         const { gameRound } = this;
+        if (gameRound === null) {
+            return;
+        }
+
         if (isDebugMode() && skipSongPlay()) {
             logger.debug(`${getDebugLogHeader(messageContext)} | Not playing song in voice connection. song = ${this.getDebugSongDetails()}`);
             return;
