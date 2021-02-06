@@ -1,6 +1,6 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { getDebugLogHeader, sendErrorMessage, sendOptionsMessage, getMessageContext } from "../../helpers/discord_utils";
-import { getSongCount, getGuildPreference } from "../../helpers/game_utils";
+import { getDebugLogHeader, sendErrorMessage, sendOptionsMessage } from "../../helpers/discord_utils";
+import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
 
