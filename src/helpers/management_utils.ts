@@ -105,6 +105,7 @@ export function updateBotStatus() {
 }
 
 /** Sweeps the member/user caches within Eris */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function sweepCaches() {
     logger.info("Sweeping cache..");
     const sweepResults = state.client.sweepCaches(15);
@@ -145,7 +146,7 @@ export function registerIntervals() {
     schedule.scheduleJob("*/10 * * * *", () => {
         cleanupInactiveGameSessions();
         updateBotStatus();
-        sweepCaches();
+        // sweepCaches();
     });
 
     // set up check for restart notifications

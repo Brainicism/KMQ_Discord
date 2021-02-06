@@ -42,6 +42,7 @@ export enum GameOption {
     GENDER = "Gender",
     CUTOFF = "Cutoff",
     LIMIT = "Limit",
+    LIMIT_ORDERING = "Limit Ordering",
     VOLUME = "Volume",
     SEEK_TYPE = "Seek Type",
     MODE_TYPE = "Guess Mode",

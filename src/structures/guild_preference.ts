@@ -1,6 +1,6 @@
 import Knex from "knex";
 import { DEFAULT_BEGINNING_SEARCH_YEAR, DEFAULT_ENDING_SEARCH_YEAR } from "../commands/game_options/cutoff";
-import { DEFAULT_LIMIT } from "../commands/game_options/limit";
+import { DEFAULT_LIMIT, DEFAULT_LIMIT_ORDER, LimitOrdering } from "../commands/game_options/limit";
 import { GENDER, DEFAULT_GENDER } from "../commands/game_options/gender";
 import { SeekType, DEFAULT_SEEK } from "../commands/game_options/seek";
 import { ShuffleType, DEFAULT_SHUFFLE } from "../commands/game_options/shuffle";
@@ -20,6 +20,7 @@ const DEFAULT_OPTIONS = {
     endYear: DEFAULT_ENDING_SEARCH_YEAR,
     gender: DEFAULT_GENDER,
     limit: DEFAULT_LIMIT,
+    limitOrdering: DEFAULT_LIMIT_ORDER,
     seekType: DEFAULT_SEEK,
     modeType: DEFAULT_MODE,
     shuffleType: DEFAULT_SHUFFLE,
@@ -37,6 +38,7 @@ interface GameOptions {
     endYear: number;
     gender: Array<GENDER>;
     limit: number;
+    limitOrdering: LimitOrdering;
     seekType: SeekType;
     modeType: ModeType;
     artistType: ArtistType;
@@ -88,8 +90,9 @@ export default class GuildPreference {
      * Sets the limit option value
      * @param limit - The limit value
      */
-    setLimit(limit: number) {
+    setLimit(limit: number, limitOrder: LimitOrdering) {
         this.gameOptions.limit = limit;
+        this.gameOptions.limitOrdering = limitOrder;
         this.updateGuildPreferences(dbContext.kmq);
         this.updateGameSession(true);
     }
@@ -97,6 +100,7 @@ export default class GuildPreference {
     /** Resets the limit option to the default value */
     resetLimit() {
         this.gameOptions.limit = DEFAULT_LIMIT;
+        this.gameOptions.limitOrdering = DEFAULT_LIMIT_ORDER;
         this.updateGuildPreferences(dbContext.kmq);
         this.updateGameSession(true);
     }
@@ -104,6 +108,11 @@ export default class GuildPreference {
     /** @returns the current limit option value */
     getLimit(): number {
         return this.gameOptions.limit;
+    }
+
+    /** @returns the current limit order option value */
+    getLimitOrder(): LimitOrdering {
+        return this.gameOptions.limitOrdering;
     }
 
     /**

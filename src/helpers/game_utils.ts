@@ -10,6 +10,7 @@ import { GENDER } from "../commands/game_options/gender";
 import { ArtistType } from "../commands/game_options/artisttype";
 import { LanguageType } from "../commands/game_options/language";
 import { SubunitsPreference } from "../commands/game_options/subunits";
+import { LimitOrdering } from "../commands/game_options/limit";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -60,7 +61,7 @@ async function getFilteredSongList(guildPreference: GuildPreference, ignoredVide
             .where("song_name", "NOT LIKE", "%(jp)%");
     }
 
-    let result: Array<QueriedSong> = await queryBuilder.orderBy("views", "DESC");
+    let result: Array<QueriedSong> = await queryBuilder.orderBy("views", guildPreference.getLimitOrder() === LimitOrdering.MOST ? "DESC" : "ASC");
 
     const count = result.length;
     result = result.slice(0, guildPreference.getLimit());

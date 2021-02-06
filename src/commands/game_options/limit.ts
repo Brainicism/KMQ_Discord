@@ -6,11 +6,15 @@ import { GameOption } from "../../types";
 
 const logger = _logger("limit");
 export const DEFAULT_LIMIT = 500;
-
+export enum LimitOrdering {
+    MOST = "most",
+    LEAST = "least",
+}
+export const DEFAULT_LIMIT_ORDER = LimitOrdering.MOST;
 export default class LimitCommand implements BaseCommand {
     validations = {
         minArgCount: 0,
-        maxArgCount: 1,
+        maxArgCount: 2,
         arguments: [
             {
                 name: "limit",
@@ -18,17 +22,26 @@ export default class LimitCommand implements BaseCommand {
                 minValue: 1,
                 maxValue: 10000,
             },
+            {
+                name: "order",
+                type: "enum" as const,
+                enums: Object.values(LimitOrdering),
+            },
         ],
     };
 
     help = {
         name: "limit",
         description: "Set a maximum number of results in the song query. This effectively sets the 'Top X number of songs' based on the selected filters.",
-        usage: "!limit [limit]",
+        usage: "!limit [limit] {most|least}",
         examples: [
             {
                 example: "`!limit 250`",
-                explanation: "Plays the top 250 most listened songs from the currently selected options.",
+                explanation: "Plays the top 250 **most** listened songs from the currently selected options.",
+            },
+            {
+                example: "`!limit 50 bottom`",
+                explanation: "Plays the top 50 **least** listened songs from the currently selected options.",
             },
             {
                 example: "`!limit`",
@@ -48,15 +61,14 @@ export default class LimitCommand implements BaseCommand {
         }
 
         const newLimit = parseInt(parsedMessage.components[0], 10);
-        guildPreference.setLimit(newLimit);
+        const order = parsedMessage.components.length === 2 ? parsedMessage.components[1] as LimitOrdering : LimitOrdering.MOST;
         const songCount = await getSongCount(guildPreference);
         if (songCount === 0) {
             sendErrorMessage(getMessageContext(message), "Game Option Error", "Cannot set a limit when there are 0 total songs. Please change your game options.");
             return;
         }
-        if (guildPreference.getLimit() > songCount) {
-            guildPreference.setLimit(songCount);
-        }
+        const limit = Math.min(newLimit, songCount);
+        guildPreference.setLimit(limit, order);
         await sendOptionsMessage(message, guildPreference, { option: GameOption.LIMIT, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Limit set to ${guildPreference.getLimit()}`);
     }

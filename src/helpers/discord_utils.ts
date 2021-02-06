@@ -16,6 +16,7 @@ import EliminationScoreboard from "../structures/elimination_scoreboard";
 import { GameType } from "../commands/game_commands/play";
 import { ArtistType } from "../commands/game_options/artisttype";
 import { SubunitsPreference } from "../commands/game_options/subunits";
+import { LimitOrdering } from "../commands/game_options/limit";
 
 const endGameMessages = parseJsonFile(path.resolve(__dirname, "../../data/end_game_messages.json"));
 
@@ -186,6 +187,7 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
     optionStrings[GameOption.GROUPS] = guildPreference.isGroupsMode() ? `${guildPreference.getDisplayedGroupNames()}` : null;
     optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode() ? `${guildPreference.getDisplayedExcludesGroupNames()}` : null;
     optionStrings[GameOption.LIMIT] = `${Math.min(totalSongs, guildPreference.getLimit())}`;
+    optionStrings[GameOption.LIMIT_ORDERING] = guildPreference.getLimitOrder() === LimitOrdering.MOST ? "most" : "least";
     optionStrings[GameOption.SEEK_TYPE] = `${guildPreference.getSeekType()}`;
     optionStrings[GameOption.MODE_TYPE] = `${guildPreference.getModeType() === ModeType.BOTH ? "song or artist" : guildPreference.getModeType()}`;
     optionStrings[GameOption.GOAL] = `${guildPreference.getGoal()}`;
@@ -193,9 +195,18 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
     optionStrings[GameOption.SHUFFLE_TYPE] = `${guildPreference.getShuffleType()}`;
     optionStrings[GameOption.SUBUNIT_PREFERENCE] = `${guildPreference.getSubunitPreference() === SubunitsPreference.INCLUDE ? "including" : "excluding"} subunits`;
 
+    // mapping of game options linked to the same command
+    const linkedOptions = {
+        [GameOption.LIMIT_ORDERING]: GameOption.LIMIT,
+    };
+
     for (const gameOption of Object.keys(optionStrings)) {
         const gameOptionString = optionStrings[gameOption];
-        optionStrings[gameOption] = (updatedOption && updatedOption.option) === gameOption ? bold(gameOptionString) : codeLine(gameOptionString);
+        if (gameOption in linkedOptions) {
+            optionStrings[gameOption] = linkedOptions[gameOption] === (updatedOption && updatedOption.option) ? bold(gameOptionString) : codeLine(gameOptionString);
+        } else {
+            optionStrings[gameOption] = (updatedOption && updatedOption.option) === gameOption ? bold(gameOptionString) : codeLine(gameOptionString);
+        }
     }
 
     const goalMessage = `First one to ${optionStrings[GameOption.GOAL]} points wins.`;
@@ -208,7 +219,7 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
 
     await sendInfoMessage(getMessageContext(message),
         updatedOption === null ? "Options" : `${updatedOption.option} ${updatedOption.reset ? "reset" : "updated"}`,
-        `Now playing the ${optionStrings[GameOption.LIMIT]} out of the __${totalSongs}__ most popular songs by ${guildPreference.isGroupsMode() ? `${optionStrings[GameOption.GROUPS]} (${optionStrings[GameOption.SUBUNIT_PREFERENCE]})` : `${optionStrings[GameOption.GENDER]} ${optionStrings[GameOption.ARTIST_TYPE]}`}\
+        `Now playing the ${optionStrings[GameOption.LIMIT]} out of the __${totalSongs}__ ${optionStrings[GameOption.LIMIT_ORDERING]} popular songs by ${guildPreference.isGroupsMode() ? `${optionStrings[GameOption.GROUPS]} (${optionStrings[GameOption.SUBUNIT_PREFERENCE]})` : `${optionStrings[GameOption.GENDER]} ${optionStrings[GameOption.ARTIST_TYPE]}`}\
         ${guildPreference.isGroupsMode() && guildPreference.isGenderAlternating() && guildPreference.getGroupIds().length > 1 ? ` with ${optionStrings[GameOption.GENDER]}` : ""} ${optionStrings[GameOption.CUTOFF]}\
         ${guildPreference.isExcludesMode() ? ` excluding ${optionStrings[GameOption.EXCLUDE]}` : ""}. \nPlaying from the ${optionStrings[GameOption.SEEK_TYPE]} point of each song. ${shuffleUniqueMode ? shuffleMessage : ""}\
         Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}\
