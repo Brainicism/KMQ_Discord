@@ -26,15 +26,31 @@ export default class SkipCommand implements BaseCommand {
         dateThreshold.setHours(dateThreshold.getHours() - 24);
         const recentGameSessions = (await dbContext.kmq("game_sessions")
             .where("start_date", ">", dateThreshold)
-            .count("* as count"))[0].count;
+            .count("* as count")
+            .first()).count;
+
+        const totalGameSessions = (await dbContext.kmq("game_sessions")
+            .count("* as count")
+            .first()).count;
 
         const recentGameRounds = (await dbContext.kmq("game_sessions")
             .where("start_date", ">", dateThreshold)
-            .sum("rounds_played as total"))[0].total;
+            .sum("rounds_played as total")
+            .first()).total;
+
+        const totalGameRounds = (await dbContext.kmq("game_sessions")
+            .sum("rounds_played as total")
+            .first()).total;
 
         const recentPlayers = (await dbContext.kmq("player_stats")
             .where("last_active", ">", dateThreshold)
-            .count("* as count"))[0].count;
+            .count("* as count")
+            .first()).count;
+
+        const totalPlayers = (await dbContext.kmq("player_stats")
+            .count("* as count")
+            .where("exp", ">", "0")
+            .first()).count;
 
         const fields: Array<Eris.EmbedField> = [{
             name: "Active Game Sessions",
@@ -47,18 +63,18 @@ export default class SkipCommand implements BaseCommand {
             inline: true,
         },
         {
-            name: "Recent Game Sessions",
-            value: recentGameSessions.toString(),
+            name: "(Recent) Game Sessions",
+            value: `${recentGameSessions} | ${totalGameSessions}`,
             inline: true,
         },
         {
-            name: "Recent Rounds Played",
-            value: recentGameRounds.toString(),
+            name: "(Recent) Rounds Played",
+            value: `${recentGameRounds} | ${totalGameRounds}`,
             inline: true,
         },
         {
-            name: "Recent Active Players",
-            value: recentPlayers,
+            name: "(Recent) Players",
+            value: `${recentPlayers} | ${totalPlayers}`,
             inline: true,
         },
         {
@@ -77,7 +93,7 @@ export default class SkipCommand implements BaseCommand {
             inline: true,
         },
         {
-            name: "Process Uptime",
+            name: "Uptime",
             value: `${(process.uptime() / (60 * 60)).toFixed(2)} hours`,
             inline: true,
         }];

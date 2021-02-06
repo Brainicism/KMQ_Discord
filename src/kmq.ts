@@ -38,13 +38,14 @@ const state: State = {
         artist: {},
         song: {},
     },
+    processStartTime: Date.now(),
 };
 
 export default state;
 
 (async () => {
     logger.info("Registering commands...");
-    await registerCommands();
+    registerCommands();
     logger.info("Registering event loops...");
     registerIntervals();
     logger.info("Registering client event handlers...");
@@ -58,13 +59,12 @@ export default state;
     }
 
     logger.info("Reloading cached application data...");
-    await reloadCaches();
-    await updatePublishDateOverrides();
+    reloadCaches();
+    updatePublishDateOverrides();
 
     if (process.env.NODE_ENV === EnvType.PROD) {
         logger.info("Initializing bot stats poster...");
         initializeBotStatsPoster();
     }
-
     client.connect();
 })();

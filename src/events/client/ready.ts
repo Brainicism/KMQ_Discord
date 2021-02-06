@@ -7,5 +7,5 @@ const logger = _logger("ready");
 export default function readyHandler() {
     const { client } = state;
     updateBotStatus();
-    logger.info(`Logged in as ${client.user.username}#${client.user.discriminator}! in '${process.env.NODE_ENV}' mode`);
+    logger.info(`Logged in as ${client.user.username}#${client.user.discriminator}! in '${process.env.NODE_ENV}' mode (${(Date.now() - state.processStartTime) / 1000}s)`);
 }
