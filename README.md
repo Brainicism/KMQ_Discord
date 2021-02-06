@@ -15,7 +15,7 @@ Join our [support server](https://discord.gg/RCuzwYV) for help and to play with 
 
 
 # Gameplay
-Gameplay is initiated via `,play`, which invites the bot to a voice channel. The bot will begin to play a random kpop song based on the game options. Users can guess the song by simply typing their guess. [A more detailed gameplay guide as well as the full list of commands can be found here](docs/GAMEPLAY.md).
+Gameplay is initiated via `,play`, which invites the bot to a voice channel. The bot will begin to play a random kpop song based on the game options. Users can guess the song by simply typing their guess. [A more detailed gameplay guide as well as the full list of commands can be found here](https://brainicism.github.io/KMQ_Discord/GAMEPLAY).
 
 ![scoreboard](/images/scoreboard.png)
 
