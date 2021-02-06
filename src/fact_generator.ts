@@ -2,7 +2,7 @@
 import PHPUnserialize from "php-unserialize";
 import { URL } from "url";
 import dbContext from "./database_context";
-import { chooseRandom, weekOfYear } from "./helpers/utils";
+import { chooseRandom, getOrdinalNum, weekOfYear } from "./helpers/utils";
 import _logger from "./logger";
 
 const logger = _logger("fact_generator");
@@ -21,10 +21,6 @@ const funFactFunctions = [recentMusicVideos, recentMilestone, recentMusicShowWin
 
 const kmqFactFunctions = [longestGame, mostGames, mostCorrectGuessed, globalTotalGames, recentGameSessions, recentGames, mostSongsGuessedPlayer,
     mostGamesPlayedPlayer, recentUniquePlayers, topLeveledPlayers];
-
-function getOrdinalNum(n: number): string {
-    return n + (n > 0 ? ["th", "st", "nd", "rd"][(n > 3 && n < 21) || n % 10 > 3 ? 0 : n % 10] : "");
-}
 
 let factCache: {
     funFacts: string[][],

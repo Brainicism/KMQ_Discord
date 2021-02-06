@@ -177,3 +177,11 @@ export function isPowerHour(): boolean {
     const currentHour = date.getHours();
     return powerHours.some((powerHour) => currentHour >= powerHour && currentHour <= (powerHour + 1));
 }
+
+/**
+ * @param n - The number
+ * @returns the number with its proper ordinal suffix
+ */
+export function getOrdinalNum(n: number): string {
+    return n + (n > 0 ? ["th", "st", "nd", "rd"][(n > 3 && n < 21) || n % 10 > 3 ? 0 : n % 10] : "");
+}
