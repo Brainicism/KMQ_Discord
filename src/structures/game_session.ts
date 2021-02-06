@@ -311,8 +311,8 @@ export default class GameSession {
         const totalSongs = await getSongCount(guildPreference);
 
         // manage recently played song queue
-        if (guildPreference.getShuffleType() === ShuffleType.UNIQUE && Math.min(guildPreference.getLimit(), totalSongs) === this.lastPlayedSongsQueue.length) {
-            logger.info(`${getDebugLogHeader(messageContext)} | Resetting lastPlayedSongsQueue (all ${guildPreference.getLimit()} unique songs played)`);
+        if (guildPreference.getShuffleType() === ShuffleType.UNIQUE && totalSongs.count === this.lastPlayedSongsQueue.length) {
+            logger.info(`${getDebugLogHeader(messageContext)} | Resetting lastPlayedSongsQueue (all ${totalSongs.count} unique songs played)`);
             this.resetLastPlayedSongsQueue();
         } else if (guildPreference.getShuffleType() === ShuffleType.RANDOM && this.lastPlayedSongsQueue.length === LAST_PLAYED_SONG_QUEUE_SIZE) {
             this.lastPlayedSongsQueue.shift();
@@ -349,8 +349,7 @@ export default class GameSession {
             return;
         }
 
-        if ((guildPreference.getLimit() > LAST_PLAYED_SONG_QUEUE_SIZE && totalSongs > LAST_PLAYED_SONG_QUEUE_SIZE)
-            || guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
+        if ((totalSongs.count > LAST_PLAYED_SONG_QUEUE_SIZE) || guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
             this.lastPlayedSongsQueue.push(randomSong.youtubeLink);
         }
 
@@ -665,10 +664,10 @@ export default class GameSession {
      * @returns the base EXP reward for the gameround
      */
     private async calculateBaseExp(guildPreference: GuildPreference): Promise<number> {
-        const songCount = Math.min(await getSongCount(guildPreference), guildPreference.getLimit());
+        const songCount = await getSongCount(guildPreference);
         // minimum amount of songs for exp gain
-        if (songCount < 10) return 0;
-        const expBase = 1000 / (1 + (Math.exp(1 - (0.00125 * songCount))));
+        if (songCount.count < 10) return 0;
+        const expBase = 1000 / (1 + (Math.exp(1 - (0.00125 * songCount.count))));
         let expJitter = expBase * (0.05 * Math.random());
         expJitter *= Math.round(Math.random()) ? 1 : -1;
 

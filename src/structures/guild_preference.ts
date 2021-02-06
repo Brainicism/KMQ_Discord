@@ -19,7 +19,8 @@ const DEFAULT_OPTIONS = {
     beginningYear: DEFAULT_BEGINNING_SEARCH_YEAR,
     endYear: DEFAULT_ENDING_SEARCH_YEAR,
     gender: DEFAULT_GENDER,
-    limit: DEFAULT_LIMIT,
+    limitEnd: DEFAULT_LIMIT,
+    limitStart: 0,
     seekType: DEFAULT_SEEK,
     modeType: DEFAULT_MODE,
     shuffleType: DEFAULT_SHUFFLE,
@@ -36,7 +37,8 @@ interface GameOptions {
     beginningYear: number;
     endYear: number;
     gender: Array<GENDER>;
-    limit: number;
+    limitStart: number;
+    limitEnd: number;
     seekType: SeekType;
     modeType: ModeType;
     artistType: ArtistType;
@@ -86,24 +88,31 @@ export default class GuildPreference {
 
     /**
      * Sets the limit option value
-     * @param limit - The limit value
+     * @param limit - The limit range value
      */
-    setLimit(limit: number) {
-        this.gameOptions.limit = limit;
+    setLimit(limitStart: number, limitEnd: number) {
+        this.gameOptions.limitEnd = limitEnd;
+        this.gameOptions.limitStart = limitStart;
         this.updateGuildPreferences(dbContext.kmq);
         this.updateGameSession(true);
     }
 
     /** Resets the limit option to the default value */
     resetLimit() {
-        this.gameOptions.limit = DEFAULT_LIMIT;
+        this.gameOptions.limitEnd = DEFAULT_LIMIT;
+        this.gameOptions.limitStart = 0;
         this.updateGuildPreferences(dbContext.kmq);
         this.updateGameSession(true);
     }
 
-    /** @returns the current limit option value */
-    getLimit(): number {
-        return this.gameOptions.limit;
+    /** @returns the current limit start option value */
+    getLimitStart(): number {
+        return this.gameOptions.limitStart;
+    }
+
+    /** @returns the current limit end option value */
+    getLimitEnd(): number {
+        return this.gameOptions.limitEnd;
     }
 
     /**

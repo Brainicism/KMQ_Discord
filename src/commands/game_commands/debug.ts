@@ -28,7 +28,7 @@ export default class DebugCommand implements BaseCommand {
 
         fields.push({
             name: "Song Count",
-            value: songCount.toString(),
+            value: `${songCount.count.toString()}/${songCount.countBeforeLimit.toString()}`,
             inline: false,
         });
 

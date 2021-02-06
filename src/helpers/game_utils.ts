@@ -63,7 +63,7 @@ async function getFilteredSongList(guildPreference: GuildPreference, ignoredVide
     let result: Array<QueriedSong> = await queryBuilder.orderBy("views", "DESC");
 
     const count = result.length;
-    result = result.slice(0, guildPreference.getLimit());
+    result = result.slice(guildPreference.getLimitStart(), guildPreference.getLimitEnd());
     if (ignoredVideoIds && ignoredVideoIds.length > 0) {
         result = result.filter((song) => !ignoredVideoIds.includes(song.youtubeLink));
     }
@@ -130,15 +130,18 @@ export async function selectRandomSong(guildPreference: GuildPreference, lastPla
 
 /**
  * @param guildPreference - The GuildPreference
- * @returns the total number of available songs based on the GameOptions
+ * @returns an object containing the total number of available songs before and after limit based on the GameOptions
  */
-export async function getSongCount(guildPreference: GuildPreference): Promise<number> {
+export async function getSongCount(guildPreference: GuildPreference): Promise<{ count: number; countBeforeLimit: number }> {
     try {
-        const { countBeforeLimit: totalCount } = await getFilteredSongList(guildPreference);
-        return totalCount;
+        const { songs, countBeforeLimit } = await getFilteredSongList(guildPreference);
+        return {
+            count: songs.length,
+            countBeforeLimit,
+        };
     } catch (e) {
         logger.error(`Error retrieving song count ${e}`);
-        return -1;
+        return null;
     }
 }
 
