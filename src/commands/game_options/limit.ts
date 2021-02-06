@@ -10,10 +10,16 @@ export const DEFAULT_LIMIT = 500;
 export default class LimitCommand implements BaseCommand {
     validations = {
         minArgCount: 0,
-        maxArgCount: 1,
+        maxArgCount: 2,
         arguments: [
             {
-                name: "limit",
+                name: "limit_start",
+                type: "number" as const,
+                minValue: 1,
+                maxValue: 10000,
+            },
+            {
+                name: "limit_end",
                 type: "number" as const,
                 minValue: 1,
                 maxValue: 10000,
@@ -31,6 +37,10 @@ export default class LimitCommand implements BaseCommand {
                 explanation: "Plays the top 250 most listened songs from the currently selected options.",
             },
             {
+                example: "`!limit 250 500`",
+                explanation: "Plays the 250th to 500th most listened songs from the currently selected options.",
+            },
+            {
                 example: "`!limit`",
                 explanation: `Reset to the default limit of \`${DEFAULT_LIMIT}\``,
             },
@@ -46,18 +56,21 @@ export default class LimitCommand implements BaseCommand {
             await sendOptionsMessage(message, guildPreference, { option: GameOption.LIMIT, reset: true });
             return;
         }
-
-        const newLimit = parseInt(parsedMessage.components[0], 10);
-        guildPreference.setLimit(newLimit);
-        const songCount = await getSongCount(guildPreference);
-        if (songCount === 0) {
-            sendErrorMessage(getMessageContext(message), "Game Option Error", "Cannot set a limit when there are 0 total songs. Please change your game options.");
-            return;
+        let limitStart: number;
+        let limitEnd: number;
+        if (parsedMessage.components.length === 1) {
+            limitStart = 0;
+            limitEnd = parseInt(parsedMessage.components[0], 10);
+        } else {
+            limitStart = parseInt(parsedMessage.components[0], 10);
+            limitEnd = parseInt(parsedMessage.components[1], 10);
+            if (limitEnd <= limitStart) {
+                sendErrorMessage(message, "Game Option Error", "End limit must be greater than start limit");
+                return;
+            }
         }
-        if (guildPreference.getLimit() > songCount) {
-            guildPreference.setLimit(songCount);
-        }
+        guildPreference.setLimit(limitStart, limitEnd);
         await sendOptionsMessage(message, guildPreference, { option: GameOption.LIMIT, reset: false });
-        logger.info(`${getDebugLogHeader(message)} | Limit set to ${guildPreference.getLimit()}`);
+        logger.info(`${getDebugLogHeader(message)} | Limit set to ${guildPreference.getLimitStart()} - ${guildPreference.getLimitEnd()}`);
     }
 }

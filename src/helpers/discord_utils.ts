@@ -167,7 +167,7 @@ export async function sendInfoMessage(messageContext: MessageContext, title: str
 export async function sendOptionsMessage(message: GuildTextableMessage, guildPreference: GuildPreference,
     updatedOption?: { option: GameOption, reset: boolean }, footerText?: string) {
     const totalSongs = await getSongCount(guildPreference);
-    if (totalSongs === -1) {
+    if (totalSongs === null) {
         sendErrorMessage(getMessageContext(message), "Error retrieving song data", `Try again in a bit, or report this error to the support server found in \`${process.env.BOT_PREFIX}help\`.`);
         return;
     }
@@ -178,14 +178,15 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
     const goalMode = guildPreference.isGoalSet() && !isEliminationMode;
     const guessTimeoutMode = guildPreference.isGuessTimeoutSet();
     const shuffleUniqueMode = guildPreference.isShuffleUnique();
-
+    const visibleLimitEnd = Math.min(totalSongs.countBeforeLimit, guildPreference.getLimitEnd());
+    const visibleLimitStart = Math.min(totalSongs.countBeforeLimit, guildPreference.getLimitStart());
     const optionStrings = {};
     optionStrings[GameOption.CUTOFF] = `between the years ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
     optionStrings[GameOption.GENDER] = guildPreference.isGenderAlternating() ? "alternating gender" : `${guildPreference.getGender().join(", ")}`;
     optionStrings[GameOption.ARTIST_TYPE] = `${guildPreference.getArtistType() === ArtistType.BOTH ? "artists" : guildPreference.getArtistType()}`;
     optionStrings[GameOption.GROUPS] = guildPreference.isGroupsMode() ? `${guildPreference.getDisplayedGroupNames()}` : null;
     optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode() ? `${guildPreference.getDisplayedExcludesGroupNames()}` : null;
-    optionStrings[GameOption.LIMIT] = `${Math.min(totalSongs, guildPreference.getLimit())}`;
+    optionStrings[GameOption.LIMIT] = guildPreference.getLimitStart() === 0 ? `${visibleLimitEnd}` : `${visibleLimitStart} to ${visibleLimitEnd} (${totalSongs.count} songs)`;
     optionStrings[GameOption.SEEK_TYPE] = `${guildPreference.getSeekType()}`;
     optionStrings[GameOption.MODE_TYPE] = `${guildPreference.getModeType() === ModeType.BOTH ? "song or artist" : guildPreference.getModeType()}`;
     optionStrings[GameOption.GOAL] = `${guildPreference.getGoal()}`;
@@ -208,7 +209,7 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
 
     await sendInfoMessage(getMessageContext(message),
         updatedOption === null ? "Options" : `${updatedOption.option} ${updatedOption.reset ? "reset" : "updated"}`,
-        `Now playing the ${optionStrings[GameOption.LIMIT]} out of the __${totalSongs}__ most popular songs by ${guildPreference.isGroupsMode() ? `${optionStrings[GameOption.GROUPS]} (${optionStrings[GameOption.SUBUNIT_PREFERENCE]})` : `${optionStrings[GameOption.GENDER]} ${optionStrings[GameOption.ARTIST_TYPE]}`}\
+        `Now playing the ${optionStrings[GameOption.LIMIT]} most popular songs out of the __${totalSongs.countBeforeLimit}__ by ${guildPreference.isGroupsMode() ? `${optionStrings[GameOption.GROUPS]} (${optionStrings[GameOption.SUBUNIT_PREFERENCE]})` : `${optionStrings[GameOption.GENDER]} ${optionStrings[GameOption.ARTIST_TYPE]}`}\
         ${guildPreference.isGroupsMode() && guildPreference.isGenderAlternating() && guildPreference.getGroupIds().length > 1 ? ` with ${optionStrings[GameOption.GENDER]}` : ""} ${optionStrings[GameOption.CUTOFF]}\
         ${guildPreference.isExcludesMode() ? ` excluding ${optionStrings[GameOption.EXCLUDE]}` : ""}. \nPlaying from the ${optionStrings[GameOption.SEEK_TYPE]} point of each song. ${shuffleUniqueMode ? shuffleMessage : ""}\
         Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}\
