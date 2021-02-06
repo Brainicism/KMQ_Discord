@@ -30,7 +30,11 @@ let factCache: {
     funFacts: string[][],
     kmqFacts: string[][],
     lastUpdated: number
-} = null;
+} = {
+    funFacts: [],
+    kmqFacts: [],
+    lastUpdated: null,
+};
 
 interface GaonWeeklyEntry {
     songName: string;
@@ -76,15 +80,9 @@ function parseGaonWeeklyRankList(ranklist: string, year: string): Array<GaonWeek
 
 export function getFact(): string {
     const randomVal = Math.random();
-    if (randomVal < 0.85) {
-        const { funFacts } = factCache;
-        const funFactGroup = chooseRandom(funFacts);
-        return chooseRandom(funFactGroup);
-    }
-
-    const { kmqFacts } = factCache;
-    const kmqFactGroup = chooseRandom(kmqFacts);
-    return chooseRandom(kmqFactGroup);
+    const factGroup = randomVal < 0.85 ? factCache.funFacts : factCache.kmqFacts;
+    if (factGroup.length === 0) return null;
+    return chooseRandom(chooseRandom(factGroup));
 }
 
 async function recentMusicVideos(): Promise<string[]> {

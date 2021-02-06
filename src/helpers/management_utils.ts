@@ -105,6 +105,7 @@ export function updateBotStatus() {
 }
 
 /** Sweeps the member/user caches within Eris */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function sweepCaches() {
     logger.info("Sweeping cache..");
     const sweepResults = state.client.sweepCaches(15);
@@ -145,7 +146,7 @@ export function registerIntervals() {
     schedule.scheduleJob("*/10 * * * *", () => {
         cleanupInactiveGameSessions();
         updateBotStatus();
-        sweepCaches();
+        // sweepCaches();
     });
 
     // set up check for restart notifications
@@ -189,7 +190,7 @@ export function registerIntervals() {
 /** Reloads caches */
 export async function reloadCaches() {
     reloadAliases();
-    await reloadFactCache();
+    reloadFactCache();
 }
 
 /** @returns a mapping of command name to command source file */
@@ -199,13 +200,13 @@ export function getCommandFiles(): Promise<{ [commandName: string]: BaseCommand 
         let files: Array<string>;
         try {
             files = await glob(process.env.NODE_ENV === EnvType.DEV ? "commands/**/*.ts" : "commands/**/*.js");
-            for (const file of files) {
+            await Promise.all(files.map(async (file) => {
                 const command = await import(path.join("../", file));
                 const commandName = path.parse(file).name;
                 logger.info(`Registering command: ${commandName}`);
                 // eslint-disable-next-line new-cap
                 commandMap[commandName] = new command.default();
-            }
+            }));
             resolve(commandMap);
         } catch (err) {
             reject();
