@@ -7,7 +7,7 @@ import _logger from "../logger";
 import { endSession, getSongCount } from "./game_utils";
 import { getFact } from "../fact_generator";
 import { GameOption, GuildTextableMessage, MessageContext } from "../types";
-import { chunkArray, codeLine, bold, parseJsonFile, chooseRandom } from "./utils";
+import { chunkArray, codeLine, bold, parseJsonFile, chooseRandom, getOrdinalNum } from "./utils";
 import state from "../kmq";
 import { ModeType } from "../commands/game_options/mode";
 import Scoreboard from "../structures/scoreboard";
@@ -186,7 +186,7 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
     optionStrings[GameOption.ARTIST_TYPE] = `${guildPreference.getArtistType() === ArtistType.BOTH ? "artists" : guildPreference.getArtistType()}`;
     optionStrings[GameOption.GROUPS] = guildPreference.isGroupsMode() ? `${guildPreference.getDisplayedGroupNames()}` : null;
     optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode() ? `${guildPreference.getDisplayedExcludesGroupNames()}` : null;
-    optionStrings[GameOption.LIMIT] = guildPreference.getLimitStart() === 0 ? `${visibleLimitEnd}` : `${visibleLimitStart} to ${visibleLimitEnd} (${totalSongs.count} songs)`;
+    optionStrings[GameOption.LIMIT] = guildPreference.getLimitStart() === 0 ? `${visibleLimitEnd}` : `${getOrdinalNum(visibleLimitStart)} to ${getOrdinalNum(visibleLimitEnd)} (${totalSongs.count} songs)`;
     optionStrings[GameOption.SEEK_TYPE] = `${guildPreference.getSeekType()}`;
     optionStrings[GameOption.MODE_TYPE] = `${guildPreference.getModeType() === ModeType.BOTH ? "song or artist" : guildPreference.getModeType()}`;
     optionStrings[GameOption.GOAL] = `${guildPreference.getGoal()}`;

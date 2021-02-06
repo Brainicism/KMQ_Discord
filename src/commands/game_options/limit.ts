@@ -13,13 +13,13 @@ export default class LimitCommand implements BaseCommand {
         maxArgCount: 2,
         arguments: [
             {
-                name: "limit_start",
+                name: "limit_1",
                 type: "number" as const,
-                minValue: 1,
+                minValue: 0,
                 maxValue: 10000,
             },
             {
-                name: "limit_end",
+                name: "limit_2",
                 type: "number" as const,
                 minValue: 1,
                 maxValue: 10000,
@@ -38,7 +38,7 @@ export default class LimitCommand implements BaseCommand {
             },
             {
                 example: "`!limit 250 500`",
-                explanation: "Plays the 250th to 500th most listened songs from the currently selected options.",
+                explanation: "Plays between the 250th to 500th most listened songs from the currently selected options.",
             },
             {
                 example: "`!limit`",
@@ -61,6 +61,10 @@ export default class LimitCommand implements BaseCommand {
         if (parsedMessage.components.length === 1) {
             limitStart = 0;
             limitEnd = parseInt(parsedMessage.components[0], 10);
+            if (limitEnd === 0) {
+                sendErrorMessage(message, "Game Option Error", "End limit must be greater than 0");
+                return;
+            }
         } else {
             limitStart = parseInt(parsedMessage.components[0], 10);
             limitEnd = parseInt(parsedMessage.components[1], 10);
