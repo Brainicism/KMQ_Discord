@@ -100,7 +100,7 @@ export default class GuildPreference {
     /** Resets the limit option to the default value */
     resetLimit() {
         this.gameOptions.limitEnd = DEFAULT_LIMIT;
-        this.gameOptions.limitStart = null;
+        this.gameOptions.limitStart = 0;
         this.updateGuildPreferences(dbContext.kmq);
         this.updateGameSession(true);
     }

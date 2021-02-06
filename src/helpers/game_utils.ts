@@ -130,7 +130,7 @@ export async function selectRandomSong(guildPreference: GuildPreference, lastPla
 
 /**
  * @param guildPreference - The GuildPreference
- * @returns the total number of available songs based on the GameOptions
+ * @returns an object containing the total number of available songs before and after limit based on the GameOptions
  */
 export async function getSongCount(guildPreference: GuildPreference): Promise<{ count: number; countBeforeLimit: number }> {
     try {
