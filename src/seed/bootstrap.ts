@@ -50,6 +50,7 @@ function performMigrations() {
 }
 
 async function bootstrapDatabases() {
+    const startTime = Date.now();
     const db = getDatabaseAgnosticContext();
 
     if (await needsBootstrap(db)) {
@@ -73,6 +74,7 @@ async function bootstrapDatabases() {
         performMigrations();
         generateAvailableSongsView();
     }
+    logger.info(`Bootstrapped in ${(Date.now() - startTime) / 1000}s`);
     await db.destroy();
 }
 
