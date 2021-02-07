@@ -28,7 +28,7 @@ interface GroupMatchResults {
  */
 async function getFilteredSongList(guildPreference: GuildPreference, ignoredVideoIds?: Array<string>, alternatingGender?: GENDER): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
     let queryBuilder = dbContext.kmq("available_songs")
-        .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
+        .select(["song_name as name", "artist_name as artist", "link as youtubeLink", "publishedon as publishDate"])
         .where(function artistFilter() {
             this.where(function includesInnerArtistFilter() {
                 if (!guildPreference.isGroupsMode()) {
