@@ -26,6 +26,7 @@ const DEFAULT_OPTIONS = {
     shuffleType: DEFAULT_SHUFFLE,
     groups: null,
     excludes: null,
+    includes: null,
     goal: null,
     guessTimeout: null,
     artistType: DEFAULT_ARTIST_TYPE,
@@ -45,10 +46,24 @@ interface GameOptions {
     shuffleType: ShuffleType;
     groups: { id: number, name: string }[];
     excludes: { id: number, name: string }[];
+    includes: { id: number, name: string }[];
     goal: number;
     guessTimeout: number;
     languageType: LanguageType;
     subunitPreference: SubunitsPreference;
+}
+
+/**
+ * @param text - The text to truncate
+ * @param length - The number of characters to truncate to
+ * @returns the truncuated string
+ */
+function getTruncuatedGroupNames(groups: { id: number, name: string }[]): string {
+    const displayedGroupNames = groups
+        .map((x) => x.name)
+        .filter((name) => !name.includes("+"))
+        .join(", ");
+    return `${displayedGroupNames.substr(0, 200)} and many others...`;
 }
 
 export default class GuildPreference {
@@ -190,12 +205,7 @@ export default class GuildPreference {
     /** @returns a friendly, potentially truncuated, string displaying the currently selected groups option */
     getDisplayedGroupNames(): string {
         if (this.gameOptions.groups === null) return null;
-        let displayedGroupNames = this.gameOptions.groups
-            .filter((x) => !x.name.includes("+"))
-            .map((x) => x.name).join(", ");
-        if (displayedGroupNames.length > 400) {
-            displayedGroupNames = `${displayedGroupNames.substr(0, 400)} and many others...`;
-        }
+        const displayedGroupNames = getTruncuatedGroupNames(this.gameOptions.groups);
         return displayedGroupNames;
     }
 
@@ -230,10 +240,42 @@ export default class GuildPreference {
     /** @returns a friendly, potentially truncuated, string displaying the currently selected exclude option */
     getDisplayedExcludesGroupNames(): string {
         if (this.gameOptions.excludes === null) return null;
-        let displayedGroupNames = this.gameOptions.excludes.map((x) => x.name).join(", ");
-        if (displayedGroupNames.length > 400) {
-            displayedGroupNames = `${displayedGroupNames.substr(0, 400)} and many others...`;
-        }
+        const displayedGroupNames = getTruncuatedGroupNames(this.gameOptions.excludes);
+        return displayedGroupNames;
+    }
+
+    /** @returns whether the exclude option is active */
+    isIncludesMode(): boolean {
+        return this.getIncludesGroupIds().length !== 0;
+    }
+
+    /**
+     * Sets the include option value
+     * @param groupIds - A list of kpop groups, ID and name
+     */
+    setIncludes(groupIds: { id: number, name: string }[]) {
+        this.gameOptions.includes = groupIds;
+        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGameSession(true);
+    }
+
+    /** Resets the include option to the default value */
+    resetIncludes() {
+        this.gameOptions.includes = null;
+        this.updateGuildPreferences(dbContext.kmq);
+        this.updateGameSession(true);
+    }
+
+    /** @returns a list containing the excluded group IDs */
+    getIncludesGroupIds(): number[] {
+        if (this.gameOptions.includes === null) return [];
+        return this.gameOptions.includes.map((x) => x.id);
+    }
+
+    /** @returns a friendly, potentially truncuated, string displaying the currently selected include option */
+    getDisplayedIncludesGroupNames(): string {
+        if (this.gameOptions.includes === null) return null;
+        const displayedGroupNames = getTruncuatedGroupNames(this.gameOptions.includes);
         return displayedGroupNames;
     }
 

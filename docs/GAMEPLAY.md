@@ -110,6 +110,7 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,seek`: Choose whether each songs starts from the beginning, or a random point
 - `,groups`: Specify what groups/artists you'd like to hear from
 - `,exclude`: Specify what groups/artists you'd like to exclude
+- `,include`: Specify what groups/artists you'd like to forcefully include, regardless of other game options
 - `,mode`: Choose whether to guess based on song name or artist name
 - `,goal`: Specify a number of points to be reached before a winner is selected, and the game ends 
 - `,timer`: Try your best to guess correctly before the timer runs out! Enter a time in seconds, or give no arguments to disable
