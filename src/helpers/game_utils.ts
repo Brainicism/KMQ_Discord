@@ -31,13 +31,15 @@ async function getFilteredSongList(guildPreference: GuildPreference, ignoredVide
         .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
         .where(function artistFilter() {
             this.where(function includesInnerArtistFilter() {
-                if (guildPreference.getSubunitPreference() === SubunitsPreference.EXCLUDE) {
-                    this.whereIn("id_artist", guildPreference.getIncludesGroupIds());
-                } else {
-                    this.andWhere(function () {
-                        this.whereIn("id_artist", guildPreference.getIncludesGroupIds())
-                            .orWhereIn("id_parent_artist", guildPreference.getIncludesGroupIds());
-                    });
+                if (!guildPreference.isGroupsMode()) {
+                    if (guildPreference.getSubunitPreference() === SubunitsPreference.EXCLUDE) {
+                        this.whereIn("id_artist", guildPreference.getIncludesGroupIds());
+                    } else {
+                        this.andWhere(function () {
+                            this.whereIn("id_artist", guildPreference.getIncludesGroupIds())
+                                .orWhereIn("id_parent_artist", guildPreference.getIncludesGroupIds());
+                        });
+                    }
                 }
             }).orWhere(function mainInnerArtistFilter() {
                 this.whereNotIn("id_artist", guildPreference.getExcludesGroupIds());

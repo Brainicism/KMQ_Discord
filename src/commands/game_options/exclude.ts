@@ -38,6 +38,12 @@ export default class ExcludeCommand implements BaseCommand {
             await sendOptionsMessage(message, guildPreference, { option: GameOption.EXCLUDE, reset: true });
             return;
         }
+        if (guildPreference.isGroupsMode()) {
+            logger.warn(`${getDebugLogHeader(message)} | Game option conflict between include and groups.`);
+            sendErrorMessage(getMessageContext(message), "Game Option Conflict", `\`groups\` game option is currently set. \`include\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed`);
+            return;
+        }
+
         const groupNames = parsedMessage.argument.split(",").map((groupName) => groupName.trim());
         const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(groupNames);
         if (unmatchedGroups) {
