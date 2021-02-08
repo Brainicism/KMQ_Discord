@@ -53,6 +53,19 @@ interface GameOptions {
     subunitPreference: SubunitsPreference;
 }
 
+/**
+ * @param text - The text to truncate
+ * @param length - The number of characters to truncate to
+ * @returns the truncuated string
+ */
+function getTruncuatedGroupNames(groups: { id: number, name: string }[]): string {
+    const displayedGroupNames = groups
+        .map((x) => x.name)
+        .filter((name) => !name.includes("+"))
+        .join(", ");
+    return `${displayedGroupNames.substr(0, 200)} and many others...`;
+}
+
 export default class GuildPreference {
     /** The Discord Guild ID */
     private readonly guildID: string;
@@ -192,13 +205,7 @@ export default class GuildPreference {
     /** @returns a friendly, potentially truncuated, string displaying the currently selected groups option */
     getDisplayedGroupNames(): string {
         if (this.gameOptions.groups === null) return null;
-        let displayedGroupNames = this.gameOptions.groups
-            .map((x) => x.name)
-            .filter((name) => !name.includes("+"))
-            .join(", ");
-        if (displayedGroupNames.length > 400) {
-            displayedGroupNames = `${displayedGroupNames.substr(0, 400)} and many others...`;
-        }
+        const displayedGroupNames = getTruncuatedGroupNames(this.gameOptions.groups);
         return displayedGroupNames;
     }
 
@@ -233,12 +240,7 @@ export default class GuildPreference {
     /** @returns a friendly, potentially truncuated, string displaying the currently selected exclude option */
     getDisplayedExcludesGroupNames(): string {
         if (this.gameOptions.excludes === null) return null;
-        let displayedGroupNames = this.gameOptions.excludes.map((x) => x.name)
-            .filter((name) => !name.includes("+"))
-            .join(", ");
-        if (displayedGroupNames.length > 400) {
-            displayedGroupNames = `${displayedGroupNames.substr(0, 400)} and many others...`;
-        }
+        const displayedGroupNames = getTruncuatedGroupNames(this.gameOptions.excludes);
         return displayedGroupNames;
     }
 
@@ -273,12 +275,7 @@ export default class GuildPreference {
     /** @returns a friendly, potentially truncuated, string displaying the currently selected include option */
     getDisplayedIncludesGroupNames(): string {
         if (this.gameOptions.includes === null) return null;
-        let displayedGroupNames = this.gameOptions.includes.map((x) => x.name)
-            .filter((name) => !name.includes("+"))
-            .join(", ");
-        if (displayedGroupNames.length > 400) {
-            displayedGroupNames = `${displayedGroupNames.substr(0, 400)} and many others...`;
-        }
+        const displayedGroupNames = getTruncuatedGroupNames(this.gameOptions.includes);
         return displayedGroupNames;
     }
 
