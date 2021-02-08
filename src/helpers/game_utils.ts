@@ -111,10 +111,6 @@ export async function ensureVoiceConnection(gameSession: GameSession): Promise<v
             connection.updateVoiceState(false, true);
             gameSession.connection = connection;
             resolve();
-            connection.once("error", (e) => {
-                gameSession.connection = null;
-                logger.error(`gid: ${gameSession.guildID} | Voice connection errored. err = ${e}`);
-            });
 
             connection.once("disconnect", (e) => {
                 gameSession.connection = null;
