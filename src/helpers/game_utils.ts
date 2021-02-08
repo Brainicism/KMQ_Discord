@@ -104,22 +104,10 @@ async function getFilteredSongList(guildPreference: GuildPreference, ignoredVide
  */
 export async function ensureVoiceConnection(gameSession: GameSession): Promise<void> {
     const { client } = state;
-    return new Promise(async (resolve, reject) => {
-        try {
-            const connection = await client.joinVoiceChannel(gameSession.voiceChannel.id, { opusOnly: true });
-            // deafen self
-            connection.updateVoiceState(false, true);
-            gameSession.connection = connection;
-            resolve();
-
-            connection.once("disconnect", (e) => {
-                gameSession.connection = null;
-                logger.error(`gid: ${gameSession.guildID} | Voice connection disconnected. err = ${e}`);
-            });
-        } catch (e) {
-            reject(e);
-        }
-    });
+    const connection = await client.joinVoiceChannel(gameSession.voiceChannel.id, { opusOnly: true });
+    // deafen self
+    connection.updateVoiceState(false, true);
+    gameSession.connection = connection;
 }
 
 /**
