@@ -59,11 +59,14 @@ interface GameOptions {
  * @returns the truncuated string
  */
 function getTruncuatedGroupNames(groups: { id: number, name: string }[]): string {
-    const displayedGroupNames = groups
+    let displayedGroupNames = groups
         .map((x) => x.name)
         .filter((name) => !name.includes("+"))
         .join(", ");
-    return `${displayedGroupNames.substr(0, 200)} and many others...`;
+    if (displayedGroupNames.length > 200) {
+        displayedGroupNames = displayedGroupNames.substr(0, 200);
+    }
+    return displayedGroupNames;
 }
 
 export default class GuildPreference {
