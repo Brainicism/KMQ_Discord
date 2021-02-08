@@ -105,10 +105,6 @@ async function getFilteredSongList(guildPreference: GuildPreference, ignoredVide
 export async function ensureVoiceConnection(gameSession: GameSession): Promise<void> {
     const { client } = state;
     return new Promise(async (resolve, reject) => {
-        if (gameSession.connection) {
-            resolve();
-            return;
-        }
         try {
             const connection = await client.joinVoiceChannel(gameSession.voiceChannel.id, { opusOnly: true });
             // deafen self

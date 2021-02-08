@@ -54,7 +54,12 @@ export function getMessageContext(message: GuildTextableMessage): MessageContext
  * @param messageContent - The MessageContent to send
  */
 export async function sendMessage(textChannel: Eris.TextChannel, messageContent: Eris.MessageContent): Promise<Eris.Message> {
-    return state.client.createMessage(textChannel.id, messageContent);
+    try {
+        return await state.client.createMessage(textChannel.id, messageContent);
+    } catch (e) {
+        logger.error(`Error sending message. err = ${e}. body = ${JSON.stringify(messageContent)}`);
+        return null;
+    }
 }
 
 /**
