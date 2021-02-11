@@ -96,6 +96,7 @@ BVNDIT
 BXK
 C-Clown
 Car, the garden
+Cha Eunwoo
 Changmo
 Changsub
 Chanyeol
@@ -128,9 +129,11 @@ Daehyun
 Dahye
 Dal★Shabet
 Dalmatian (DMTN)
+Dalsooobin
 Davichi
 DAWN
 Day6
+Daybreak
 Dean
 Demian
 Dia
@@ -225,6 +228,7 @@ HALO
 Han Seungwoo
 Hani
 Haon
+Hashtag
 Hayeon
 Heize
 Hellovenus
@@ -253,6 +257,7 @@ Hyolyn
 Hyomin
 Hyoseong
 Hyoyeon
+Hyuk
 Hyukoh
 Hyuna
 Hyunsik
@@ -307,6 +312,7 @@ Jung Ilhoon
 Jung Jinhyeong
 Jung Key
 Jung Seung-hwan
+Jung Yong Hwa
 Jung-in
 Junggigo
 Junhyung
@@ -326,6 +332,7 @@ Kara
 KARD
 Kassy
 KEEMBO
+Ken
 Key
 KHAN
 Kiara
@@ -364,6 +371,7 @@ Lee Hyori
 Lee Jinhyuk
 Lee Moonsae
 Lee Sang Soon
+Lee Seung Chul
 Lee Seung Gi
 Lee SoRa
 Lee Suhyun
@@ -491,6 +499,7 @@ PRODUCE 101
 PSY
 Punch
 Purfles
+Purple
 Purple Kiss
 Purplebeck
 R.Tee
@@ -571,7 +580,6 @@ StayC
 Stella Jang
 Stellar
 Stray Kids
-Subin
 Sugarbowl
 Suho
 Sulli ☮
@@ -579,6 +587,7 @@ Sung Si-kyung
 Sungyeol
 Sunmi
 Sunny Hill
+Sunwoojunga
 Super Five
 Super Junior
 Super Junior D&E
@@ -604,9 +613,11 @@ Teen Top
 Thama
 The Ark
 The Boyz
+The East Light
 The Rose
 Tiffany
 TOO
+Topp Dogg
 Toy
 TraxX
 TRCNG
@@ -667,6 +678,7 @@ Woodz
 Wooseok X Kuanlin
 Woosung
 X1
+Xeno-T
 XIA
 Xiumin
 XRO
