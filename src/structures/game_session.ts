@@ -451,9 +451,15 @@ export default class GameSession {
 
         logger.info(`${getDebugLogHeader(messageContext)} | Playing song in voice connection. seek = ${guildPreference.getSeekType()}. song = ${this.getDebugSongDetails()}. mode = ${guildPreference.getModeType()}`);
         this.connection.stopPlaying();
-        this.connection.play(stream, {
-            inputArgs: ["-ss", seekLocation.toString()],
-        });
+        try {
+            this.connection.play(stream, {
+                inputArgs: ["-ss", seekLocation.toString()],
+            });
+        } catch (e) {
+            logger.error(`Erroring playing on voice connection. err = ${e}`);
+            await this.errorRestartRound(messageContext, guildPreference);
+            return;
+        }
 
         this.startGuessTimeout(messageContext, guildPreference);
 
@@ -475,14 +481,21 @@ export default class GameSession {
             }
 
             logger.error(`${getDebugLogHeader(messageContext)} | Unknown error with stream dispatcher. song = ${this.getDebugSongDetails()}. err = ${err}`);
-            // Attempt to restart game with different song
-            await sendErrorMessage(messageContext, "Error playing song", "Starting new round in 3 seconds...");
-            this.roundsPlayed--;
-            this.endRound({ correct: false }, guildPreference, messageContext);
-            this.startRound(guildPreference, messageContext);
+            this.errorRestartRound(messageContext, guildPreference);
         });
     }
 
+    /**
+     * Attempt to restart game with different song
+     * @param messageContext - The MessageContext
+     * @param guildPreference - The GuildPreference
+     */
+    private async errorRestartRound(messageContext: MessageContext, guildPreference: GuildPreference) {
+        await sendErrorMessage(messageContext, "Error playing song", "Starting new round in 3 seconds...");
+        this.roundsPlayed--;
+        this.endRound({ correct: false }, guildPreference, messageContext);
+        this.startRound(guildPreference, messageContext);
+    }
     /**
      * Prepares a new GameRound
      * @param song - The name of the song

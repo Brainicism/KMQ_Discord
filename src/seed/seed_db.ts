@@ -2,7 +2,6 @@ import Axios from "axios";
 import fs from "fs";
 import { execSync } from "child_process";
 import unzipper from "unzipper";
-import prependFile from "prepend-file";
 import { Logger } from "log4js";
 import { program } from "commander";
 import { config } from "dotenv";
@@ -26,10 +25,6 @@ program
 
 program.parse();
 const options = program.opts();
-
-const setSqlMode = (sqlFile: string) => {
-    prependFile.sync(sqlFile, "SET @@sql_mode=\"\";\n");
-};
 
 const downloadDb = async () => {
     const output = `${databaseDownloadDir}/bootstrap.zip`;
@@ -70,7 +65,6 @@ async function seedDb(db: DatabaseContext) {
     logger.info("Creating K-Pop video database");
     await db.agnostic.raw("CREATE DATABASE kpop_videos;");
     logger.info("Seeding K-Pop video database");
-    setSqlMode(seedFilePath);
     execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kpop_videos < ${seedFilePath}`);
     logger.info("Performing data overrides");
     execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kpop_videos < ${overridesFilePath}`);
@@ -98,16 +92,18 @@ async function hasRecentDump(): Promise<boolean> {
 async function updateKpopDatabase() {
     const db = getDatabaseAgnosticContext();
 
-    if (options.forceDownload || !(await hasRecentDump())) {
+    if (options.forcePull || !(await hasRecentDump())) {
         await downloadDb();
         await extractDb();
         await seedDb(db);
     } else {
         logger.info("Recent dump detected, skipping download...");
+        if (options.forceReseed) {
+            logger.info("Forcing reseed");
+            await seedDb(db);
+        }
     }
-    if (options.forceReseed) {
-        await seedDb(db);
-    }
+
     await db.destroy();
 }
 
