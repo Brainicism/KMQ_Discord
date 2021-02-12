@@ -5,7 +5,7 @@ import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
-    getDebugLogHeader, getSqlDateString, getUserTag, getVoiceChannel, sendErrorMessage, sendEndOfRoundMessage, getMessageContext, sendInfoMessage, getNumParticipants,
+    getDebugLogHeader, getSqlDateString, getUserTag, getVoiceChannel, sendErrorMessage, sendEndOfRoundMessage, getMessageContext, sendInfoMessage, getNumParticipants, checkBotIsAlone,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getSongCount, endSession } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds, isPowerHour, isWeekend } from "../helpers/utils";
@@ -305,7 +305,7 @@ export default class GameSession {
     async startRound(guildPreference: GuildPreference, messageContext: MessageContext) {
         this.sessionInitialized = true;
         await delay(3000);
-        if (this.finished || this.gameRound) {
+        if (this.finished || this.gameRound || checkBotIsAlone(this, this.voiceChannel)) {
             return;
         }
         const totalSongs = await getSongCount(guildPreference);
