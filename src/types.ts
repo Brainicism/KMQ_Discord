@@ -51,6 +51,7 @@ export enum GameOption {
     GOAL = "Goal",
     TIMER = "Timer",
     EXCLUDE = "Exclude",
+    INCLUDE = "Include",
     ARTIST_TYPE = "Artist Type",
     LANGUAGE_TYPE = "Language Type",
     SUBUNIT_PREFERENCE = "Subunit Preference",
