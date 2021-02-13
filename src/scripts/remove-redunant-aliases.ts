@@ -14,13 +14,16 @@ export default async function removeRedunantAliases() {
     for (const videoId of Object.keys(songAliases)) {
         const result = await dbContext.kpopVideos("app_kpop")
             .select("nome as name")
-            .where("vlink", "=", videoId);
+            .where("vlink", "=", videoId)
+            .first();
 
-        if (result.length === 0) {
-            logger.warn(`Song ID ${videoId} doesn't exist anymore?`);
+        if (!result) {
+            logger.warn(`vid ${videoId}, doesn't exist anymore, deleting...`);
+            delete songAliases[videoId];
+            changeCount++;
             continue;
         }
-        const songName = result[0].name;
+        const songName = result.name;
         const aliases = songAliases[videoId];
         if (aliases.includes(songName)) {
             if (aliases.length === 1) {
@@ -51,4 +54,11 @@ export default async function removeRedunantAliases() {
     } else {
         logger.info("No redunant aliases found.");
     }
+    await dbContext.destroy();
 }
+
+(async () => {
+    if (require.main === module) {
+        await removeRedunantAliases();
+    }
+})();
