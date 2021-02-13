@@ -363,7 +363,7 @@ export default class GameSession {
         } catch (err) {
             await this.endSession();
             logger.error(`${getDebugLogHeader(messageContext)} | Error obtaining voice connection. err = ${err.toString()}`);
-            await sendErrorMessage(messageContext, "Missing voice permissions", "The bot is unable to join the voice channel you are in.");
+            await sendErrorMessage(messageContext, "Error joining voice channel", "Something went wrong, try starting the game again in a bit.");
             return;
         }
         this.playSong(guildPreference, messageContext);
