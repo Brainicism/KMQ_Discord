@@ -38,7 +38,7 @@ export default class ListCommand implements BaseCommand {
                 explanation: "Lists the current `,excludes` options",
             },
             {
-                example: "`!includes`",
+                example: "`!list includes`",
                 explanation: "Lists the current `,includes` options",
             },
         ],
