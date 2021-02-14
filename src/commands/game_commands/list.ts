@@ -1,4 +1,4 @@
-import { getDebugLogHeader, sendInfoMessage } from "../../helpers/discord_utils";
+import { getDebugLogHeader, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import BaseCommand, { CommandArgs } from "../base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
@@ -64,13 +64,19 @@ export default class ListCommand implements BaseCommand {
         }
         optionValue = optionValue || "Nothing currently selected";
 
-        if (optionValue.length > 2000) {
-            message.channel.createMessage({
-                content: "Too many groups to list in a Discord message, see the attached file",
-            }, {
-                name: "groups.txt",
-                file: Buffer.from(`${optionValue}\n`),
-            });
+        if (optionValue.length > 1500) {
+            try {
+                await message.channel.createMessage({
+                    content: "Too many groups to list in a Discord message, see the attached file",
+                }, {
+                    name: "groups.txt",
+                    file: Buffer.from(`${optionValue}\n`),
+                });
+            } catch (e) {
+                logger.warn(`${getDebugLogHeader(message)} | Missing ATTACH_FILE permissions`);
+                await sendErrorMessage(message, "Error Sending File", "Too many groups to list in a Discord message, see the attached file. Make sure that the bot has ATTACH_FILE permissions");
+                return;
+            }
         } else {
             await sendInfoMessage(message, `Current \`${optionListed}\` value`, optionValue);
         }
