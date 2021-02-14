@@ -354,7 +354,7 @@ export default class GameSession {
         }
 
         // create a new round with randomly chosen song
-        this.prepareRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);
+        this.prepareRound(randomSong.name, randomSong.artist, randomSong.youtubeLink, randomSong.publishDate.getFullYear());
         this.gameRound.setBaseExpReward(await this.calculateBaseExp(guildPreference));
 
         if (checkBotIsAlone(this, this.voiceChannel)) {
@@ -509,9 +509,10 @@ export default class GameSession {
      * @param song - The name of the song
      * @param artist - The name of the artist
      * @param videoID - The song's corresponding YouTube ID
+     * @param year - The song's release year
      */
-    private prepareRound(song: string, artist: string, videoID: string) {
-        this.gameRound = new GameRound(song, artist, videoID);
+    private prepareRound(song: string, artist: string, videoID: string, year: number) {
+        this.gameRound = new GameRound(song, artist, videoID, year);
     }
 
     /**

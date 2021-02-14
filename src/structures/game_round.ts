@@ -63,6 +63,9 @@ export default class GameRound {
     /** Timestamp of the creation of the GameRound in epoch milliseconds */
     public readonly startedAt: number;
 
+    /** The song release year */
+    public readonly songYear: number;
+
     /** List of players who have opted to skip the current GameRound */
     public skippers: Set<string>;
 
@@ -75,7 +78,7 @@ export default class GameRound {
     /** The base EXP for this GameRound */
     public baseExp: number;
 
-    constructor(song: string, artist: string, videoID: string) {
+    constructor(song: string, artist: string, videoID: string, year: number) {
         this.songName = song;
         this.songAliases = state.aliases.song[videoID] || [];
         const artistNames = artist.split("+").map((x) => x.trim());
@@ -85,6 +88,7 @@ export default class GameRound {
         this.videoID = videoID;
         this.skipAchieved = false;
         this.startedAt = Date.now();
+        this.songYear = year;
         this.skippers = new Set();
     }
 

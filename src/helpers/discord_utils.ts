@@ -95,7 +95,7 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
                 name: guessResult.correct ? messageContext.author.username : null,
                 icon_url: guessResult.correct ? messageContext.author.avatarURL : null,
             },
-            title: `"${gameRound.songName}" - ${gameRound.artist}`,
+            title: `"${gameRound.songName}" (${gameRound.songYear}) - ${gameRound.artist}`,
             description,
             thumbnail: {
                 url: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,
