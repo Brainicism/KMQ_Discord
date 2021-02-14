@@ -120,3 +120,4 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,language`: Choose whether to include Japanese/English/Chinese songs, or only Korean songs
 - `,reset`: Reset to the default settings
 - `,subunits`: Choose whether to automatically include a group's subunits when using `,groups`
+- `,add`: Add a single or multiple groups to the `,groups`, `,excludes`, or `,includes` option
