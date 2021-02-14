@@ -9,7 +9,7 @@ export interface CommandArgs {
 
 export interface CommandValidations {
     minArgCount: number;
-    maxArgCount: number;
+    maxArgCount?: number;
     arguments: Array<{
         type: "number" | "boolean" | "enum" | "char";
         name: string;

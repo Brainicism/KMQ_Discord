@@ -28,7 +28,7 @@ export default class IncludeCommand implements BaseCommand {
         priority: 130,
     };
 
-    aliases = ["include", "includes", "add"];
+    aliases = ["include", "includes"];
 
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
