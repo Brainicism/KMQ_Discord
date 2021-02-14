@@ -357,7 +357,7 @@ export default class GameSession {
         this.prepareRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);
         this.gameRound.setBaseExpReward(await this.calculateBaseExp(guildPreference));
 
-        if ((await checkBotIsAlone(this, this.voiceChannel))) {
+        if (checkBotIsAlone(this, this.voiceChannel)) {
             return;
         }
         if (this.voiceChannel.voiceMembers.size === 0) {
