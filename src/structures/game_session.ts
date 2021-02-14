@@ -305,7 +305,7 @@ export default class GameSession {
     async startRound(guildPreference: GuildPreference, messageContext: MessageContext) {
         this.sessionInitialized = true;
         await delay(3000);
-        if (this.finished || this.gameRound || checkBotIsAlone(this, this.voiceChannel)) {
+        if (this.finished || this.gameRound) {
             return;
         }
         const totalSongs = await getSongCount(guildPreference);
@@ -356,6 +356,14 @@ export default class GameSession {
         // create a new round with randomly chosen song
         this.prepareRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);
         this.gameRound.setBaseExpReward(await this.calculateBaseExp(guildPreference));
+
+        if ((await checkBotIsAlone(this, this.voiceChannel))) {
+            return;
+        }
+        if (this.voiceChannel.voiceMembers.size === 0) {
+            await this.endSession();
+            return;
+        }
 
         // join voice channel and start round
         try {
