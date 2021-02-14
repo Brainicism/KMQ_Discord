@@ -212,7 +212,8 @@ export async function getMatchingGroupNames(rawGroupNames: Array<string>): Promi
         .orWhereIn("app_kpop_group.id_artist1", [artistIdQuery])
         .orWhereIn("app_kpop_group.id_artist2", [artistIdQuery])
         .orWhereIn("app_kpop_group.id_artist3", [artistIdQuery])
-        .orWhereIn("app_kpop_group.id_artist4", [artistIdQuery]))
+        .orWhereIn("app_kpop_group.id_artist4", [artistIdQuery])
+        .orderBy("name", "ASC"))
         .map((x) => ({ id: x.id, name: x.name }));
 
     const matchingGroupNames = matchingGroups.map((x) => x.name.toUpperCase());

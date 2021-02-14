@@ -62,7 +62,19 @@ export default class ListCommand implements BaseCommand {
             default:
                 optionValue = null;
         }
-        await sendInfoMessage(message, `Current \`${optionListed}\` value`, optionValue || "Nothing currently selected.");
+        optionValue = optionValue || "Nothing currently selected";
+
+        if (optionValue.length > 2000) {
+            message.channel.createMessage({
+                content: "Too many groups to list in a Discord message, see the attached file",
+            }, {
+                name: "groups.txt",
+                file: Buffer.from(`${optionValue}\n`),
+            });
+        } else {
+            await sendInfoMessage(message, `Current \`${optionListed}\` value`, optionValue);
+        }
+
         logger.info(`${getDebugLogHeader(message)} | List '${optionListed}' retrieved`);
     }
 }
