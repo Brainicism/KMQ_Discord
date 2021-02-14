@@ -58,11 +58,11 @@ interface GameOptions {
  * @param length - The number of characters to truncate to
  * @returns the truncated string
  */
-function getGroupNamesString(groups: { id: number, name: string }[], truncate = true): string {
+function getGroupNamesString(groups: { id: number, name: string }[], truncate = true, spaceDelimiter = true): string {
     let displayedGroupNames = groups
         .map((x) => x.name)
         .filter((name) => !name.includes("+"))
-        .join(", ");
+        .join(spaceDelimiter ? ", " : ",");
     if (truncate && displayedGroupNames.length > 200) {
         displayedGroupNames = `${displayedGroupNames.substr(0, 200)} and many others...`;
     }
@@ -209,7 +209,7 @@ export default class GuildPreference {
     getDisplayedGroupNames(original = false): string {
         if (this.gameOptions.groups === null) return null;
         if (original) {
-            return getGroupNamesString(this.gameOptions.groups.filter((group) => !group.name.includes("+")), false);
+            return getGroupNamesString(this.gameOptions.groups.filter((group) => !group.name.includes("+")), false, false);
         }
         const displayedGroupNames = getGroupNamesString(this.gameOptions.groups);
         return displayedGroupNames;
@@ -247,7 +247,7 @@ export default class GuildPreference {
     getDisplayedExcludesGroupNames(original = false): string {
         if (this.gameOptions.excludes === null) return null;
         if (original) {
-            return getGroupNamesString(this.gameOptions.excludes.filter((group) => !group.name.includes("+")), false);
+            return getGroupNamesString(this.gameOptions.excludes.filter((group) => !group.name.includes("+")), false, false);
         }
         const displayedGroupNames = getGroupNamesString(this.gameOptions.excludes);
         return displayedGroupNames;
@@ -285,7 +285,7 @@ export default class GuildPreference {
     getDisplayedIncludesGroupNames(original = false): string {
         if (this.gameOptions.includes === null) return null;
         if (original) {
-            return getGroupNamesString(this.gameOptions.includes.filter((group) => !group.name.includes("+")), false);
+            return getGroupNamesString(this.gameOptions.includes.filter((group) => !group.name.includes("+")), false, false);
         }
         const displayedGroupNames = getGroupNamesString(this.gameOptions.includes);
         return displayedGroupNames;
