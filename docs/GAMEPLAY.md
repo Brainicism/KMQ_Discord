@@ -102,6 +102,7 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,forceskip`: The person that started the game can force-skip the current song, no majority necessary
 - `,profile`: Shows many games you've played + songs you've guessed
 - `,leaderboard`: Shows the global KMQ leaderboard
+- `,list`: Shows the currently selected groups for `,groups`,`,includes`, or `,excludes`
 
 ## Game Option Commands 
 - `,cutoff`: Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen
