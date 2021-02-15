@@ -178,13 +178,13 @@ export function registerIntervals() {
     });
 
     // every monday at 7am UTC => 2am EST
-    schedule.scheduleJob("0 7 * * MON", async () => {
+    schedule.scheduleJob("0 7 * * 1", async () => {
         logger.info("Performing regularly scheduled AoiMirai database seed");
         await seedAndDownloadNewSongs();
     });
 
-    // every sunday at 12am UTC => 7pm EST
-    schedule.scheduleJob("0 7 * * SUN", () => {
+    // every sunday at 1am UTC => 8pm saturday EST
+    schedule.scheduleJob("0 1 * * 0", async () => {
         logger.info("Backing up kmq database");
         backupKmqDatabase();
     });

@@ -15,7 +15,8 @@
     "lint": "npx eslint . --ext .js,.ts",
     "docker-db": "cd docker/ && docker-compose up -d db",
     "docker-dev": "cd docker/ && START_TYPE=dev docker-compose up --build kmq",
-    "docker-prod": "cd docker/ && START_TYPE=prod docker-compose up --build kmq"
+    "docker-prod": "cd docker/ && START_TYPE=prod docker-compose up --build kmq",
+    "backup": "ts-node src/scripts/backup-kmq-database"
   },
   "author": "",
   "license": "ISC",
