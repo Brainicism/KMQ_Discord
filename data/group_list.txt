@@ -69,6 +69,7 @@ BLACK6IX
 Blackpink
 Blackswan
 Blady
+Blah Blah
 Bling Bling
 Block B
 Bloo
@@ -119,7 +120,7 @@ CRAVITY
 Crayon Pop
 Cross Gene
 Crush
-CVSC
+CSVC
 D-Crunch
 D.A.N.
 D.Holic
@@ -698,10 +699,12 @@ Yoon Hyun-sang
 Yoon Jisung
 Yoon Jong-shin
 Yoon Min soo
+Yoon Mirae
 Yoona
 Yoonhan
 Youha
 Youngjae
+Youngjoo Song
 Younha
 Yubin
 Yuju
