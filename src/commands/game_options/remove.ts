@@ -4,42 +4,42 @@ import { getGuildPreference, getMatchingGroupNames } from "../../helpers/game_ut
 import _logger from "../../logger";
 import { GameOption } from "../../types";
 
-const logger = _logger("add");
+const logger = _logger("remove");
 
-enum AddType {
+enum RemoveType {
     GROUPS = "groups",
     EXCLUDES = "excludes",
     INCLUDES = "includes",
 }
 
-export default class AddCommand implements BaseCommand {
+export default class RemoveCommand implements BaseCommand {
     validations = {
         minArgCount: 2,
         arguments: [
             {
                 name: "option",
                 type: "enum" as const,
-                enums: Object.values(AddType),
+                enums: Object.values(RemoveType),
             },
         ],
     };
 
     help = {
-        name: "add",
-        description: "Adds one or more groups to the current `,groups`, `,excludes`, or `,includes` options",
-        usage: "!add [groups | excludes | includes] [list of groups]",
+        name: "remove",
+        description: "Removes one or more groups from the current `,groups`, `,excludes`, or `,includes` options",
+        usage: "!remove [groups | excludes | includes] [list of groups]",
         examples: [
             {
-                example: "`!add groups twice, red velvet`",
-                explanation: "Adds Twice and Red Velvet to the current `,groups` option",
+                example: "`!remove groups twice, red velvet`",
+                explanation: "Removes Twice and Red Velvet from the current `,groups` option",
             },
             {
-                example: "`!add excludes BESTie, Dia, iKON`",
-                explanation: "Adds BESTie, Dia, and IKON to the current `,excludes` option",
+                example: "`!remove excludes BESTie, Dia, iKON`",
+                explanation: "Removes BESTie, Dia, and IKON from the current `,excludes` option",
             },
             {
-                example: "`!add includes exo`",
-                explanation: "Adds EXO to the current `,includes` option",
+                example: "`!remove includes exo`",
+                explanation: "Removes EXO from the current `,includes` option",
             },
         ],
         priority: 200,
@@ -47,27 +47,35 @@ export default class AddCommand implements BaseCommand {
 
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
-        const optionListed = parsedMessage.components[0] as AddType;
+        const optionListed = parsedMessage.components[0] as RemoveType;
         let groupNamesString: string;
         switch (optionListed) {
-            case AddType.GROUPS:
+            case RemoveType.GROUPS:
                 groupNamesString = guildPreference.getDisplayedGroupNames(true);
                 break;
-            case AddType.INCLUDES:
+            case RemoveType.INCLUDES:
                 groupNamesString = guildPreference.getDisplayedIncludesGroupNames(true);
                 break;
-            case AddType.EXCLUDES:
+            case RemoveType.EXCLUDES:
                 groupNamesString = guildPreference.getDisplayedExcludesGroupNames(true);
                 break;
             default:
         }
 
         const currentGroupNames = !groupNamesString ? [] : groupNamesString.split(",");
+
+        if (currentGroupNames.length === 0) {
+            sendErrorMessage(message, "Remove failed", "There are no groups currently selected");
+            return;
+        }
+
         const newGroupNames = parsedMessage.argument.split(" ").slice(1).join(" ")
             .split(",")
-            .map((groupName) => groupName.trim());
+            .map((groupName) => groupName.trim().toLowerCase());
 
-        const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(currentGroupNames.concat(newGroupNames));
+        const remainingGroups = currentGroupNames.filter((group) => !newGroupNames.includes(group.toLowerCase()));
+
+        const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(remainingGroups);
         if (unmatchedGroups) {
             logger.info(`${getDebugLogHeader(message)} | Attempted to set unknown groups. groups =  ${unmatchedGroups.join(", ")}`);
             await sendErrorMessage(getMessageContext(message), "Unknown Group Name", `One or more of the specified group names was not recognized. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} `);
@@ -75,20 +83,20 @@ export default class AddCommand implements BaseCommand {
         }
 
         switch (optionListed) {
-            case AddType.GROUPS:
+            case RemoveType.GROUPS:
                 guildPreference.setGroups(matchedGroups);
                 await sendOptionsMessage(message, guildPreference, { option: GameOption.GROUPS, reset: false });
-                logger.info(`${getDebugLogHeader(message)} | Group added: ${guildPreference.getDisplayedGroupNames()}`);
+                logger.info(`${getDebugLogHeader(message)} | Group removed: ${guildPreference.getDisplayedGroupNames()}`);
                 break;
-            case AddType.INCLUDES:
+            case RemoveType.INCLUDES:
                 guildPreference.setIncludes(matchedGroups);
                 await sendOptionsMessage(message, guildPreference, { option: GameOption.INCLUDE, reset: false });
-                logger.info(`${getDebugLogHeader(message)} | Include added: ${guildPreference.getDisplayedIncludesGroupNames()}`);
+                logger.info(`${getDebugLogHeader(message)} | Include removed: ${guildPreference.getDisplayedIncludesGroupNames()}`);
                 break;
-            case AddType.EXCLUDES:
+            case RemoveType.EXCLUDES:
                 guildPreference.setExcludes(matchedGroups);
                 await sendOptionsMessage(message, guildPreference, { option: GameOption.EXCLUDE, reset: false });
-                logger.info(`${getDebugLogHeader(message)} | Exclude added: ${guildPreference.getDisplayedExcludesGroupNames()}`);
+                logger.info(`${getDebugLogHeader(message)} | Exclude removed: ${guildPreference.getDisplayedExcludesGroupNames()}`);
                 break;
             default:
         }
