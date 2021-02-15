@@ -26,20 +26,20 @@ export default class RemoveCommand implements BaseCommand {
 
     help = {
         name: "remove",
-        description: "Removes one or more groups to the current `,groups`, `,excludes`, or `,includes` options",
+        description: "Removes one or more groups from the current `,groups`, `,excludes`, or `,includes` options",
         usage: "!remove [groups | excludes | includes] [list of groups]",
         examples: [
             {
                 example: "`!remove groups twice, red velvet`",
-                explanation: "Removes Twice and Red Velvet to the current `,groups` option",
+                explanation: "Removes Twice and Red Velvet from the current `,groups` option",
             },
             {
                 example: "`!remove excludes BESTie, Dia, iKON`",
-                explanation: "Removes BESTie, Dia, and IKON to the current `,excludes option`",
+                explanation: "Removes BESTie, Dia, and IKON from the current `,excludes` option",
             },
             {
                 example: "`!remove includes exo`",
-                explanation: "Removes EXO to the current `,includes` option",
+                explanation: "Removes EXO from the current `,includes` option",
             },
         ],
         priority: 200,
@@ -65,7 +65,7 @@ export default class RemoveCommand implements BaseCommand {
         const currentGroupNames = !groupNamesString ? [] : groupNamesString.split(",");
 
         if (currentGroupNames.length === 0) {
-            sendErrorMessage(message, "Remove failed", "There's no groups currently selected");
+            sendErrorMessage(message, "Remove failed", "There are no groups currently selected");
             return;
         }
 

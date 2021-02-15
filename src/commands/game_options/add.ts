@@ -35,7 +35,7 @@ export default class AddCommand implements BaseCommand {
             },
             {
                 example: "`!add excludes BESTie, Dia, iKON`",
-                explanation: "Adds BESTie, Dia, and IKON to the current `,excludes option`",
+                explanation: "Adds BESTie, Dia, and IKON to the current `,excludes` option",
             },
             {
                 example: "`!add includes exo`",
