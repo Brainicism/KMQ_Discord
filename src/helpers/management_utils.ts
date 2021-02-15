@@ -30,6 +30,7 @@ import BotStatsPoster from "./bot_stats_poster";
 import { EnvType } from "../types";
 import storeDailyStats from "../scripts/store-daily-stats";
 import { seedAndDownloadNewSongs } from "../seed/seed_db";
+import backupKmqDatabase from "../scripts/backup-kmq-database";
 import { parseJsonFile } from "./utils";
 import { reloadFactCache } from "../fact_generator";
 
@@ -169,6 +170,7 @@ export function registerIntervals() {
         }
     });
 
+    // everyday at 12am UTC => 7pm EST
     schedule.scheduleJob("0 0 * * *", async () => {
         const serverCount = state.client.guilds.size;
         storeDailyStats(serverCount);
@@ -176,11 +178,18 @@ export function registerIntervals() {
     });
 
     // every monday at 7am UTC => 2am EST
-    schedule.scheduleJob("0 7 * * 1", async () => {
+    schedule.scheduleJob("0 7 * * MON", async () => {
         logger.info("Performing regularly scheduled AoiMirai database seed");
         await seedAndDownloadNewSongs();
     });
 
+    // every sunday at 12am UTC => 7pm EST
+    schedule.scheduleJob("0 7 * * SUN", () => {
+        logger.info("Backing up kmq database");
+        backupKmqDatabase();
+    });
+
+    // every 5 minutes
     schedule.scheduleJob("*/5 * * * *", async () => {
         reloadAliases();
         updatePublishDateOverrides();
