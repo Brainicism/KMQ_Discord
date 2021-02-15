@@ -53,6 +53,7 @@ export default async function removeRedunantAliases() {
         logger.info("No redunant aliases found.");
     }
 }
+
 (async () => {
     if (require.main === module) {
         await removeRedunantAliases();

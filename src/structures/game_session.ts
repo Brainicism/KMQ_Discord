@@ -5,7 +5,7 @@ import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
-    getDebugLogHeader, getSqlDateString, getUserTag, getVoiceChannel, sendErrorMessage, sendEndOfRoundMessage, getMessageContext, sendInfoMessage, getNumParticipants,
+    getDebugLogHeader, getSqlDateString, getUserTag, getVoiceChannel, sendErrorMessage, sendEndOfRoundMessage, getMessageContext, sendInfoMessage, getNumParticipants, checkBotIsAlone,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getSongCount, endSession } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds, isPowerHour, isWeekend } from "../helpers/utils";
@@ -354,8 +354,16 @@ export default class GameSession {
         }
 
         // create a new round with randomly chosen song
-        this.prepareRound(randomSong.name, randomSong.artist, randomSong.youtubeLink);
+        this.prepareRound(randomSong.name, randomSong.artist, randomSong.youtubeLink, randomSong.publishDate.getFullYear());
         this.gameRound.setBaseExpReward(await this.calculateBaseExp(guildPreference));
+
+        if (checkBotIsAlone(this, this.voiceChannel)) {
+            return;
+        }
+        if (this.voiceChannel.voiceMembers.size === 0) {
+            await this.endSession();
+            return;
+        }
 
         // join voice channel and start round
         try {
@@ -363,7 +371,7 @@ export default class GameSession {
         } catch (err) {
             await this.endSession();
             logger.error(`${getDebugLogHeader(messageContext)} | Error obtaining voice connection. err = ${err.toString()}`);
-            await sendErrorMessage(messageContext, "Missing voice permissions", "The bot is unable to join the voice channel you are in.");
+            await sendErrorMessage(messageContext, "Error joining voice channel", "Something went wrong, try starting the game again in a bit.");
             return;
         }
         this.playSong(guildPreference, messageContext);
@@ -501,9 +509,10 @@ export default class GameSession {
      * @param song - The name of the song
      * @param artist - The name of the artist
      * @param videoID - The song's corresponding YouTube ID
+     * @param year - The song's release year
      */
-    private prepareRound(song: string, artist: string, videoID: string) {
-        this.gameRound = new GameRound(song, artist, videoID);
+    private prepareRound(song: string, artist: string, videoID: string, year: number) {
+        this.gameRound = new GameRound(song, artist, videoID, year);
     }
 
     /**

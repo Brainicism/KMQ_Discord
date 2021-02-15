@@ -30,6 +30,7 @@ import BotStatsPoster from "./bot_stats_poster";
 import { EnvType } from "../types";
 import storeDailyStats from "../scripts/store-daily-stats";
 import { seedAndDownloadNewSongs } from "../seed/seed_db";
+import backupKmqDatabase from "../scripts/backup-kmq-database";
 import { parseJsonFile } from "./utils";
 import { reloadFactCache } from "../fact_generator";
 
@@ -169,6 +170,7 @@ export function registerIntervals() {
         }
     });
 
+    // everyday at 12am UTC => 7pm EST
     schedule.scheduleJob("0 0 * * *", async () => {
         const serverCount = state.client.guilds.size;
         storeDailyStats(serverCount);
@@ -181,6 +183,13 @@ export function registerIntervals() {
         await seedAndDownloadNewSongs();
     });
 
+    // every sunday at 1am UTC => 8pm saturday EST
+    schedule.scheduleJob("0 1 * * 0", async () => {
+        logger.info("Backing up kmq database");
+        await backupKmqDatabase();
+    });
+
+    // every 5 minutes
     schedule.scheduleJob("*/5 * * * *", async () => {
         reloadAliases();
         updatePublishDateOverrides();
@@ -215,16 +224,29 @@ export function getCommandFiles(): Promise<{ [commandName: string]: BaseCommand 
     });
 }
 
+/**
+ * Registers a command
+ * @param command - The Command class
+ * @param commandName - The name/alias of the command
+ */
+function registerCommand(command: BaseCommand, commandName: string) {
+    if (commandName in state.commands) {
+        logger.error(`Command \`${commandName}\` already exists. Possible conflict?`);
+        process.exit(1);
+    }
+    state.commands[commandName] = command;
+}
+
 /** Registers commands */
 export async function registerCommands() {
     // load commands
     const commandFiles = await getCommandFiles();
     for (const [commandName, command] of Object.entries(commandFiles)) {
         if (commandName === "base_command") continue;
-        state.commands[commandName] = command;
+        registerCommand(command, commandName);
         if (command.aliases) {
             for (const alias of command.aliases) {
-                state.commands[alias] = command;
+                registerCommand(command, alias);
             }
         }
     }

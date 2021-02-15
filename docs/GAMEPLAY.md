@@ -102,6 +102,7 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,forceskip`: The person that started the game can force-skip the current song, no majority necessary
 - `,profile`: Shows many games you've played + songs you've guessed
 - `,leaderboard`: Shows the global KMQ leaderboard
+- `,list`: Shows the currently selected groups for `,groups`,`,includes`, or `,excludes`
 
 ## Game Option Commands 
 - `,cutoff`: Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen
@@ -119,3 +120,5 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,language`: Choose whether to include Japanese/English/Chinese songs, or only Korean songs
 - `,reset`: Reset to the default settings
 - `,subunits`: Choose whether to automatically include a group's subunits when using `,groups`
+- `,add`: Add a single or multiple groups to the `,groups`, `,excludes`, or `,includes` option
+- `,remove`: Remove a single or multiple groups to the `,groups`, `,excludes`, or `,includes` option

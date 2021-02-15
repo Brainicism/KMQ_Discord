@@ -28,7 +28,7 @@ interface GroupMatchResults {
  */
 async function getFilteredSongList(guildPreference: GuildPreference, ignoredVideoIds?: Array<string>, alternatingGender?: GENDER): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
     let queryBuilder = dbContext.kmq("available_songs")
-        .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
+        .select(["song_name as name", "artist_name as artist", "link as youtubeLink", "publishedon as publishDate"])
         .where(function artistFilter() {
             this.where(function includesInnerArtistFilter() {
                 if (!guildPreference.isGroupsMode()) {
@@ -212,7 +212,8 @@ export async function getMatchingGroupNames(rawGroupNames: Array<string>): Promi
         .orWhereIn("app_kpop_group.id_artist1", [artistIdQuery])
         .orWhereIn("app_kpop_group.id_artist2", [artistIdQuery])
         .orWhereIn("app_kpop_group.id_artist3", [artistIdQuery])
-        .orWhereIn("app_kpop_group.id_artist4", [artistIdQuery]))
+        .orWhereIn("app_kpop_group.id_artist4", [artistIdQuery])
+        .orderBy("name", "ASC"))
         .map((x) => ({ id: x.id, name: x.name }));
 
     const matchingGroupNames = matchingGroups.map((x) => x.name.toUpperCase());

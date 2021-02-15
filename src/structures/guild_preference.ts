@@ -56,15 +56,15 @@ interface GameOptions {
 /**
  * @param text - The text to truncate
  * @param length - The number of characters to truncate to
- * @returns the truncuated string
+ * @returns the truncated string
  */
-function getTruncuatedGroupNames(groups: { id: number, name: string }[]): string {
+function getGroupNamesString(groups: { id: number, name: string }[], truncate = true, spaceDelimiter = true): string {
     let displayedGroupNames = groups
         .map((x) => x.name)
         .filter((name) => !name.includes("+"))
-        .join(", ");
-    if (displayedGroupNames.length > 200) {
-        displayedGroupNames = displayedGroupNames.substr(0, 200);
+        .join(spaceDelimiter ? ", " : ",");
+    if (truncate && displayedGroupNames.length > 200) {
+        displayedGroupNames = `${displayedGroupNames.substr(0, 200)} and many others...`;
     }
     return displayedGroupNames;
 }
@@ -205,10 +205,13 @@ export default class GuildPreference {
         return this.gameOptions.groups.map((x) => x.id);
     }
 
-    /** @returns a friendly, potentially truncuated, string displaying the currently selected groups option */
-    getDisplayedGroupNames(): string {
+    /** @returns a friendly, potentially truncated, string displaying the currently selected groups option */
+    getDisplayedGroupNames(original = false): string {
         if (this.gameOptions.groups === null) return null;
-        const displayedGroupNames = getTruncuatedGroupNames(this.gameOptions.groups);
+        if (original) {
+            return getGroupNamesString(this.gameOptions.groups.filter((group) => !group.name.includes("+")), false, false);
+        }
+        const displayedGroupNames = getGroupNamesString(this.gameOptions.groups);
         return displayedGroupNames;
     }
 
@@ -240,10 +243,13 @@ export default class GuildPreference {
         return this.gameOptions.excludes.map((x) => x.id);
     }
 
-    /** @returns a friendly, potentially truncuated, string displaying the currently selected exclude option */
-    getDisplayedExcludesGroupNames(): string {
+    /** @returns a friendly, potentially truncated, string displaying the currently selected exclude option */
+    getDisplayedExcludesGroupNames(original = false): string {
         if (this.gameOptions.excludes === null) return null;
-        const displayedGroupNames = getTruncuatedGroupNames(this.gameOptions.excludes);
+        if (original) {
+            return getGroupNamesString(this.gameOptions.excludes.filter((group) => !group.name.includes("+")), false, false);
+        }
+        const displayedGroupNames = getGroupNamesString(this.gameOptions.excludes);
         return displayedGroupNames;
     }
 
@@ -275,10 +281,13 @@ export default class GuildPreference {
         return this.gameOptions.includes.map((x) => x.id);
     }
 
-    /** @returns a friendly, potentially truncuated, string displaying the currently selected include option */
-    getDisplayedIncludesGroupNames(): string {
+    /** @returns a friendly, potentially truncated, string displaying the currently selected include option */
+    getDisplayedIncludesGroupNames(original = false): string {
         if (this.gameOptions.includes === null) return null;
-        const displayedGroupNames = getTruncuatedGroupNames(this.gameOptions.includes);
+        if (original) {
+            return getGroupNamesString(this.gameOptions.includes.filter((group) => !group.name.includes("+")), false, false);
+        }
+        const displayedGroupNames = getGroupNamesString(this.gameOptions.includes);
         return displayedGroupNames;
     }
 

@@ -95,7 +95,7 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
                 name: guessResult.correct ? messageContext.author.username : null,
                 icon_url: guessResult.correct ? messageContext.author.avatarURL : null,
             },
-            title: `"${gameRound.songName}" - ${gameRound.artist}`,
+            title: `"${gameRound.songName}" (${gameRound.songYear}) - ${gameRound.artist}`,
             description,
             thumbnail: {
                 url: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,
@@ -453,16 +453,18 @@ export async function textPermissionsCheck(message: GuildTextableMessage): Promi
 
 /**
  * @param gameSession - The currently active GameSession
- * @param channel - The voice channel the bot is currently in
- * @returns whether the bot is alone 😔
+ * @param channel - The voice channel the bot could be in
+ * @returns whether the bot is alone 😔 ends the gameSession if it does
  */
-export async function checkBotIsAlone(gameSession: GameSession, channel: Eris.VoiceChannel) {
+export function checkBotIsAlone(gameSession: GameSession, channel: Eris.VoiceChannel): boolean {
     if (channel.voiceMembers.size === 1 && channel.voiceMembers.has(state.client.user.id)) {
         if (gameSession) {
             logger.info(`gid: ${channel.guild.id} | Bot is only user left, leaving voice...`);
             endSession(gameSession);
         }
+        return true;
     }
+    return false;
 }
 
 /** @returns the debug TextChannel */

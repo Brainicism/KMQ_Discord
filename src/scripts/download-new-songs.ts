@@ -202,7 +202,7 @@ const downloadNewSongs = async (limit?: number) => {
     logger.info(`Total songs downloaded: ${downloadCount}, (${deadLinksSkipped} dead links skipped)`);
 };
 
-async function downloadAndConvertSongs(limit?: number) {
+export async function downloadAndConvertSongs(limit?: number) {
     if (!fs.existsSync(process.env.SONG_DOWNLOAD_DIR)) {
         logger.error("Song cache directory doesn't exist.");
         return;
@@ -212,7 +212,3 @@ async function downloadAndConvertSongs(limit?: number) {
     await downloadNewSongs(limit);
     generateAvailableSongsView();
 }
-
-export {
-    downloadAndConvertSongs,
-};
