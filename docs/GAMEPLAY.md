@@ -121,3 +121,4 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,reset`: Reset to the default settings
 - `,subunits`: Choose whether to automatically include a group's subunits when using `,groups`
 - `,add`: Add a single or multiple groups to the `,groups`, `,excludes`, or `,includes` option
+- `,remove`: Remove a single or multiple groups to the `,groups`, `,excludes`, or `,includes` option
