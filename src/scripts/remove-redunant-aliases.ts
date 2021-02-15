@@ -54,11 +54,11 @@ export default async function removeRedunantAliases() {
     } else {
         logger.info("No redunant aliases found.");
     }
-    await dbContext.destroy();
 }
 
 (async () => {
     if (require.main === module) {
         await removeRedunantAliases();
+        await dbContext.destroy();
     }
 })();

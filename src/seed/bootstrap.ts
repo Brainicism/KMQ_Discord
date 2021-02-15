@@ -38,7 +38,8 @@ async function needsBootstrap(db: DatabaseContext) {
     return (await Promise.all([kmqDatabaseExists(db), kpopDataDatabaseExists(db), songThresholdReached(db)])).some((x) => x === false);
 }
 
-function generateAvailableSongsView() {
+// eslint-disable-next-line import/prefer-default-export
+export function generateAvailableSongsView() {
     execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq < ./src/seed/create_available_songs_table_procedure.sql`);
     logger.info("Re-creating available songs view...");
     execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq -e "CALL CreateAvailableSongsTable;"`);
@@ -83,5 +84,3 @@ async function bootstrapDatabases() {
         await bootstrapDatabases();
     }
 })();
-
-export { bootstrapDatabases, generateAvailableSongsView };
