@@ -215,16 +215,29 @@ export function getCommandFiles(): Promise<{ [commandName: string]: BaseCommand 
     });
 }
 
+/**
+ * Registers a command
+ * @param command - The Command class
+ * @param commandName - The name/alias of the command
+ */
+function registerCommand(command: BaseCommand, commandName: string) {
+    if (commandName in state.commands) {
+        logger.error(`Command \`${commandName}\` already exists. Possible conflict?`);
+        process.exit(1);
+    }
+    state.commands[commandName] = command;
+}
+
 /** Registers commands */
 export async function registerCommands() {
     // load commands
     const commandFiles = await getCommandFiles();
     for (const [commandName, command] of Object.entries(commandFiles)) {
         if (commandName === "base_command") continue;
-        state.commands[commandName] = command;
+        registerCommand(command, commandName);
         if (command.aliases) {
             for (const alias of command.aliases) {
-                state.commands[alias] = command;
+                registerCommand(command, alias);
             }
         }
     }
