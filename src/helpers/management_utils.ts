@@ -186,7 +186,7 @@ export function registerIntervals() {
     // every sunday at 1am UTC => 8pm saturday EST
     schedule.scheduleJob("0 1 * * 0", async () => {
         logger.info("Backing up kmq database");
-        backupKmqDatabase();
+        await backupKmqDatabase();
     });
 
     // every 5 minutes
