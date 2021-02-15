@@ -35,7 +35,7 @@ function importKmqDatabase(fileWithPath: string) {
         logger.error(`Dump file ${fileWithPath} doesn't exist.`);
         return;
     }
-    execSync(`mysqldump -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq < ${fileWithPath}`);
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq < ${fileWithPath}`);
 }
 
 (async () => {
