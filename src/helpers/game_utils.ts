@@ -85,7 +85,7 @@ async function getFilteredSongList(guildPreference: GuildPreference, ignoredVide
     }
     if (guildPreference.isGenderAlternating() && alternatingGender) {
         const alternatingResult = await dbContext.kmq("available_songs")
-            .select(["song_name as name", "artist_name as artist", "link as youtubeLink"])
+            .select(["song_name as name", "artist_name as artist", "link as youtubeLink", "publishedon as publishDate"])
             .whereIn("link", result.map((song) => song.youtubeLink))
             .andWhere("members", "=", [alternatingGender]);
         if (alternatingResult.length > 0) {
