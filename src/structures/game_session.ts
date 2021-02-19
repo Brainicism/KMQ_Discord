@@ -7,7 +7,7 @@ import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
     getDebugLogHeader, getSqlDateString, getUserTag, getVoiceChannel, sendErrorMessage, sendEndOfRoundMessage, getMessageContext, sendInfoMessage, getNumParticipants, checkBotIsAlone,
 } from "../helpers/discord_utils";
-import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getSongCount, endSession } from "../helpers/game_utils";
+import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, getSongCount, endSession } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds, isPowerHour, isWeekend } from "../helpers/utils";
 import state from "../kmq";
 import _logger from "../logger";
@@ -308,11 +308,14 @@ export default class GameSession {
         if (this.finished || this.gameRound) {
             return;
         }
-        const totalSongs = await getSongCount(guildPreference);
+
+        const totalSongs = await getFilteredSongList(guildPreference);
+        const totalSongsCount = totalSongs.songs.length;
+        const songsNotPlayed = totalSongs.songs.filter((song) => !this.lastPlayedSongsQueue.includes(song.youtubeLink));
 
         // manage recently played song queue
-        if (guildPreference.getShuffleType() === ShuffleType.UNIQUE && totalSongs.count === this.lastPlayedSongsQueue.length) {
-            logger.info(`${getDebugLogHeader(messageContext)} | Resetting lastPlayedSongsQueue (all ${totalSongs.count} unique songs played)`);
+        if (guildPreference.getShuffleType() === ShuffleType.UNIQUE && songsNotPlayed.length === 0) {
+            logger.info(`${getDebugLogHeader(messageContext)} | Resetting lastPlayedSongsQueue (all ${totalSongsCount} unique songs played)`);
             this.resetLastPlayedSongsQueue();
         } else if (guildPreference.getShuffleType() === ShuffleType.RANDOM && this.lastPlayedSongsQueue.length === LAST_PLAYED_SONG_QUEUE_SIZE) {
             this.lastPlayedSongsQueue.shift();
@@ -349,7 +352,7 @@ export default class GameSession {
             return;
         }
 
-        if ((totalSongs.count > LAST_PLAYED_SONG_QUEUE_SIZE) || guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
+        if ((totalSongsCount > LAST_PLAYED_SONG_QUEUE_SIZE) || guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
             this.lastPlayedSongsQueue.push(randomSong.youtubeLink);
         }
 

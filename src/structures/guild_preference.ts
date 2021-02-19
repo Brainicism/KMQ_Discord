@@ -189,14 +189,14 @@ export default class GuildPreference {
     setGroups(groupIds: { id: number, name: string }[]) {
         this.gameOptions.groups = groupIds;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(true);
+        this.updateGameSession(false);
     }
 
     /** Resets the groups option to the default value */
     resetGroups() {
         this.gameOptions.groups = null;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(true);
+        this.updateGameSession(false);
     }
 
     /** @returns the current selected groups, if the groups option is active */
@@ -227,14 +227,14 @@ export default class GuildPreference {
     setExcludes(groupIds: { id: number, name: string }[]) {
         this.gameOptions.excludes = groupIds;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(true);
+        this.updateGameSession(false);
     }
 
     /** Resets the exclude option to the default value */
     resetExcludes() {
         this.gameOptions.excludes = null;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(true);
+        this.updateGameSession(false);
     }
 
     /** @returns a list containing the excluded group IDs */
@@ -265,14 +265,14 @@ export default class GuildPreference {
     setIncludes(groupIds: { id: number, name: string }[]) {
         this.gameOptions.includes = groupIds;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(true);
+        this.updateGameSession(false);
     }
 
     /** Resets the include option to the default value */
     resetIncludes() {
         this.gameOptions.includes = null;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(true);
+        this.updateGameSession(false);
     }
 
     /** @returns a list containing the excluded group IDs */
@@ -526,9 +526,9 @@ export default class GuildPreference {
      * Performs any actions on GameSession required upon game option change
      * @param songListModified - Whether the updated game option modified the list of available songs
      */
-    updateGameSession(songListModified: boolean) {
+    updateGameSession(resetSongsQueue: boolean) {
         const gameSession = state.gameSessions[this.guildID];
-        if (gameSession && songListModified) {
+        if (gameSession && resetSongsQueue) {
             gameSession.resetLastPlayedSongsQueue();
         }
     }
