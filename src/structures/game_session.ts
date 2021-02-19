@@ -311,13 +311,15 @@ export default class GameSession {
 
         const totalSongs = await getFilteredSongList(guildPreference);
         const totalSongsCount = totalSongs.songs.length;
-        const songsNotPlayed = totalSongs.songs.filter((song) => !this.lastPlayedSongsQueue.includes(song.youtubeLink));
 
         // manage recently played song queue
-        if (guildPreference.getShuffleType() === ShuffleType.UNIQUE && songsNotPlayed.length === 0) {
-            logger.info(`${getDebugLogHeader(messageContext)} | Resetting lastPlayedSongsQueue (all ${totalSongsCount} unique songs played)`);
-            this.resetLastPlayedSongsQueue();
-        } else if (guildPreference.getShuffleType() === ShuffleType.RANDOM && this.lastPlayedSongsQueue.length === LAST_PLAYED_SONG_QUEUE_SIZE) {
+        if (guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
+            const songsNotPlayed = totalSongs.songs.filter((song) => !this.lastPlayedSongsQueue.includes(song.youtubeLink));
+            if (songsNotPlayed.length === 0) {
+                logger.info(`${getDebugLogHeader(messageContext)} | Resetting lastPlayedSongsQueue (all ${totalSongsCount} unique songs played)`);
+                this.resetLastPlayedSongsQueue();
+            }
+        } else if (this.lastPlayedSongsQueue.length === LAST_PLAYED_SONG_QUEUE_SIZE) {
             this.lastPlayedSongsQueue.shift();
         }
 
