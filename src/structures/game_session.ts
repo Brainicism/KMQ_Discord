@@ -394,7 +394,7 @@ export default class GameSession {
                 eliminationScoreboard.decrementAllLives();
             }
             this.endRound({ correct: false }, guildPreference, messageContext);
-            this.startRound(guildPreference, messageContext);
+            this.startRound(await getGuildPreference(this.guildID), messageContext);
         }, time * 1000);
     }
 
@@ -476,7 +476,7 @@ export default class GameSession {
             logger.info(`${getDebugLogHeader(messageContext)} | Song finished without being guessed.`);
             this.stopGuessTimeout();
             this.endRound({ correct: false }, guildPreference, messageContext);
-            this.startRound(guildPreference, messageContext);
+            this.startRound(await getGuildPreference(this.guildID), messageContext);
         });
 
         // admin manually 'disconnected' bot from voice channel or misc error
