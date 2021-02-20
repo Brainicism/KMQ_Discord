@@ -26,7 +26,7 @@ interface GroupMatchResults {
  * @param ignoredVideoIds - List of Youtube video IDs of songs to ignore
  * @returns a list of songs, as well as the number of songs before the filter option was applied
  */
-async function getFilteredSongList(guildPreference: GuildPreference, ignoredVideoIds?: Array<string>, alternatingGender?: GENDER): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
+export async function getFilteredSongList(guildPreference: GuildPreference, ignoredVideoIds?: Array<string>, alternatingGender?: GENDER): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
     let queryBuilder = dbContext.kmq("available_songs")
         .select(["song_name as name", "artist_name as artist", "link as youtubeLink", "publishedon as publishDate"])
         .where(function artistFilter() {
