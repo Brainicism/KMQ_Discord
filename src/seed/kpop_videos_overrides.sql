@@ -24,5 +24,8 @@ UPDATE kpop_videos.app_kpop SET vtype = 'duplicate' WHERE vlink = 'IOk087zgj84';
 UPDATE kpop_videos.app_kpop SET vtype = 'main' WHERE vlink = 'cNCmElEQ0F4';
 
 /* Remove ☮ symbols from artist names */
-UPDATE kpop_videos.app_kpop_group SET name = REPLACE(name, ' ☮', '')
+UPDATE kpop_videos.app_kpop_group SET name = REPLACE(name, ' ☮', '');
+
+/* Set group names collation to utfmb4 */
+ALTER TABLE kpop_videos.app_kpop_group MODIFY name VARCHAR(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
