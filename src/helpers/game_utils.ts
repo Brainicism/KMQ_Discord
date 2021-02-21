@@ -23,10 +23,10 @@ interface GroupMatchResults {
 /**
  * Returns a list of songs from the data store, narrowed down by the specified game options
  * @param guildPreference - The GuildPreference
- * @param ignoredVideoIds - List of Youtube video IDs of songs to ignore
+ * @param ignoredSongs - List of YouTube video IDs of songs to ignore
  * @returns a list of songs, as well as the number of songs before the filter option was applied
  */
-export async function getFilteredSongList(guildPreference: GuildPreference, ignoredVideoIds?: Array<string>, alternatingGender?: GENDER): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
+export async function getFilteredSongList(guildPreference: GuildPreference, ignoredSongs?: Set<string>, alternatingGender?: GENDER): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
     let queryBuilder = dbContext.kmq("available_songs")
         .select(["song_name as name", "artist_name as artist", "link as youtubeLink", "publishedon as publishDate"])
         .where(function artistFilter() {
@@ -80,8 +80,8 @@ export async function getFilteredSongList(guildPreference: GuildPreference, igno
 
     const count = result.length;
     result = result.slice(guildPreference.getLimitStart(), guildPreference.getLimitEnd());
-    if (ignoredVideoIds && ignoredVideoIds.length > 0) {
-        result = result.filter((song) => !ignoredVideoIds.includes(song.youtubeLink));
+    if (ignoredSongs && ignoredSongs.size > 0) {
+        result = result.filter((song) => !ignoredSongs.has(song.youtubeLink));
     }
     if (guildPreference.isGenderAlternating() && alternatingGender) {
         const alternatingResult = await dbContext.kmq("available_songs")
@@ -114,9 +114,10 @@ export async function ensureVoiceConnection(gameSession: GameSession): Promise<v
 /**
  * Selects a random song based on the GameOptions, avoiding recently played songs
  * @param guildPreference - The GuildPreference
- * @param lastPlayedSongs - The list of recently played songs
+ * @param ignoredSongs - The union of last played songs and unique songs to not select from
+ * @param alternatingGender - The gender to limit selecting from if ,gender alternating
  */
-export async function selectRandomSong(guildPreference: GuildPreference, lastPlayedSongs: Array<string>, alternatingGender?: GENDER): Promise<QueriedSong> {
+export async function selectRandomSong(guildPreference: GuildPreference, ignoredSongs: Set<string>, alternatingGender?: GENDER): Promise<QueriedSong> {
     if (isDebugMode() && isForcedSongActive()) {
         const forcePlayedQueriedSong = await getForcePlaySong();
         logger.info(`Force playing ${forcePlayedQueriedSong.name} by ${forcePlayedQueriedSong.artist} | ${forcePlayedQueriedSong.youtubeLink}`);
@@ -124,9 +125,9 @@ export async function selectRandomSong(guildPreference: GuildPreference, lastPla
     }
     let queriedSongList: Array<QueriedSong>;
     if (alternatingGender) {
-        queriedSongList = (await getFilteredSongList(guildPreference, lastPlayedSongs, alternatingGender)).songs;
+        queriedSongList = (await getFilteredSongList(guildPreference, ignoredSongs, alternatingGender)).songs;
     } else {
-        queriedSongList = (await getFilteredSongList(guildPreference, lastPlayedSongs)).songs;
+        queriedSongList = (await getFilteredSongList(guildPreference, ignoredSongs)).songs;
     }
     if (queriedSongList.length === 0) {
         return null;

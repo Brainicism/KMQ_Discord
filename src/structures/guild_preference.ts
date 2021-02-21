@@ -7,7 +7,6 @@ import { ShuffleType, DEFAULT_SHUFFLE } from "../commands/game_options/shuffle";
 import { ModeType, DEFAULT_MODE } from "../commands/game_options/mode";
 import _logger from "../logger";
 import dbContext from "../database_context";
-import state from "../kmq";
 import { ArtistType, DEFAULT_ARTIST_TYPE } from "../commands/game_options/artisttype";
 import { DEFAULT_LANGUAGE, LanguageType } from "../commands/game_options/language";
 import { DEFAULT_SUBUNIT_PREFERENCE, SubunitsPreference } from "../commands/game_options/subunits";
@@ -112,7 +111,6 @@ export default class GuildPreference {
         this.gameOptions.limitEnd = limitEnd;
         this.gameOptions.limitStart = limitStart;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** Resets the limit option to the default value */
@@ -120,7 +118,6 @@ export default class GuildPreference {
         this.gameOptions.limitEnd = DEFAULT_LIMIT;
         this.gameOptions.limitStart = 0;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** @returns the current limit start option value */
@@ -140,14 +137,12 @@ export default class GuildPreference {
     setBeginningCutoffYear(year: number) {
         this.gameOptions.beginningYear = year;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** Resets the beginning cutoff year option to the default value */
     resetBeginningCutoffYear() {
         this.gameOptions.beginningYear = DEFAULT_BEGINNING_SEARCH_YEAR;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** @returns the current beginning cutoff year option value */
@@ -162,14 +157,12 @@ export default class GuildPreference {
     setEndCutoffYear(year: number) {
         this.gameOptions.endYear = year;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** Resets the end cutoff year option to the default value */
     resetEndCutoffYear() {
         this.gameOptions.endYear = DEFAULT_ENDING_SEARCH_YEAR;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** @returns the current end cutoff year option value */
@@ -189,14 +182,12 @@ export default class GuildPreference {
     setGroups(groupIds: { id: number, name: string }[]) {
         this.gameOptions.groups = groupIds;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** Resets the groups option to the default value */
     resetGroups() {
         this.gameOptions.groups = null;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** @returns the current selected groups, if the groups option is active */
@@ -227,14 +218,12 @@ export default class GuildPreference {
     setExcludes(groupIds: { id: number, name: string }[]) {
         this.gameOptions.excludes = groupIds;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** Resets the exclude option to the default value */
     resetExcludes() {
         this.gameOptions.excludes = null;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** @returns a list containing the excluded group IDs */
@@ -265,14 +254,12 @@ export default class GuildPreference {
     setIncludes(groupIds: { id: number, name: string }[]) {
         this.gameOptions.includes = groupIds;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** Resets the include option to the default value */
     resetIncludes() {
         this.gameOptions.includes = null;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** @returns a list containing the excluded group IDs */
@@ -295,7 +282,6 @@ export default class GuildPreference {
     resetGender() {
         this.gameOptions.gender = DEFAULT_GENDER;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /**
@@ -305,7 +291,6 @@ export default class GuildPreference {
     setGender(genderArr: Array<GENDER>) {
         this.gameOptions.gender = [...new Set(genderArr)];
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** @returns an array containing the currently selected gender option */
@@ -325,7 +310,6 @@ export default class GuildPreference {
     setSeekType(seekType: SeekType) {
         this.gameOptions.seekType = seekType;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** Gets the current seek type option value */
@@ -337,7 +321,6 @@ export default class GuildPreference {
     resetSeekType() {
         this.gameOptions.seekType = DEFAULT_SEEK;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** @returns the current artist type option value */
@@ -349,7 +332,6 @@ export default class GuildPreference {
     resetArtistType() {
         this.gameOptions.artistType = DEFAULT_ARTIST_TYPE;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /**
@@ -359,7 +341,6 @@ export default class GuildPreference {
     setArtistType(artistType: ArtistType) {
         this.gameOptions.artistType = artistType as ArtistType;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** @returns the current subunit preference option value */
@@ -371,7 +352,6 @@ export default class GuildPreference {
     resetSubunitPreference() {
         this.gameOptions.subunitPreference = DEFAULT_SUBUNIT_PREFERENCE;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /**
@@ -381,7 +361,6 @@ export default class GuildPreference {
     setSubunitPreference(subunitPreference: SubunitsPreference) {
         this.gameOptions.subunitPreference = subunitPreference as SubunitsPreference;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /**
@@ -391,7 +370,6 @@ export default class GuildPreference {
     setModeType(modeType: ModeType) {
         this.gameOptions.modeType = modeType as ModeType;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** @returns the current mode type option value */
@@ -403,7 +381,6 @@ export default class GuildPreference {
     resetModeType() {
         this.gameOptions.modeType = DEFAULT_MODE;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /**
@@ -413,7 +390,6 @@ export default class GuildPreference {
     setGoal(goal: number) {
         this.gameOptions.goal = goal;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** @returns the current goal option value */
@@ -425,7 +401,6 @@ export default class GuildPreference {
     resetGoal() {
         this.gameOptions.goal = null;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** @returns whether the goal option is set */
@@ -440,7 +415,6 @@ export default class GuildPreference {
     setGuessTimeout(guessTimeout: number) {
         this.gameOptions.guessTimeout = guessTimeout;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** @returns the current timer option value */
@@ -452,7 +426,6 @@ export default class GuildPreference {
     resetGuessTimeout() {
         this.gameOptions.guessTimeout = null;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** @returns whether the timer option is active */
@@ -470,7 +443,6 @@ export default class GuildPreference {
         // Doesn't actually modify list of available_songs, but we need to
         // reset lastPlayedSongsQueue when changing shuffling modes
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(true);
     }
 
     /** Returns the current shuffle type option value */
@@ -482,7 +454,6 @@ export default class GuildPreference {
     resetShuffleType() {
         this.gameOptions.shuffleType = DEFAULT_SHUFFLE;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(true);
     }
 
     /** @returns whether the current shuffle type is UNIQUE */
@@ -497,7 +468,6 @@ export default class GuildPreference {
     setLanguageType(languageType: LanguageType) {
         this.gameOptions.languageType = languageType;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /** @returns the langauge type option value */
@@ -509,7 +479,6 @@ export default class GuildPreference {
     resetLanguageType() {
         this.gameOptions.languageType = DEFAULT_LANGUAGE;
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(false);
     }
 
     /**
@@ -522,21 +491,9 @@ export default class GuildPreference {
             .update({ guild_preference: JSON.stringify(this) });
     }
 
-    /**
-     * Performs any actions on GameSession required upon game option change
-     * @param resetSongsQueue - Whether the updated game option warrants resetting lastPlayedSongsQueue
-     */
-    updateGameSession(resetSongsQueue: boolean) {
-        const gameSession = state.gameSessions[this.guildID];
-        if (gameSession && resetSongsQueue) {
-            gameSession.resetLastPlayedSongsQueue();
-        }
-    }
-
     /** Resets all options to the default value */
     resetToDefault() {
         this.gameOptions = { ...DEFAULT_OPTIONS };
         this.updateGuildPreferences(dbContext.kmq);
-        this.updateGameSession(true);
     }
 }
