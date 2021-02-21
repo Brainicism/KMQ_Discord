@@ -102,11 +102,14 @@ export default class GameSession {
     /** List of guess times per GameRound */
     private guessTimes: Array<number>;
 
-    /** Timer function used to for !timer command */
+    /** Timer function used to for ,timer command */
     private guessTimeoutFunc: NodeJS.Timer;
 
     /** List of recently played songs used to prevent frequent repeats */
-    private lastPlayedSongsQueue: Array<string>;
+    private lastPlayedSongs: Array<string>;
+
+    /** List of songs played with ,shuffle unique enabled */
+    private uniqueSongs: Set<string>;
 
     /** The last gender played when gender is set to alternating, can be null (in not alternating mode), GENDER.MALE, or GENDER.FEMALE */
     private lastAlternatingGender: GENDER;
@@ -131,7 +134,8 @@ export default class GameSession {
         this.textChannel = textChannel;
         this.gameRound = null;
         this.owner = gameSessionCreator;
-        this.lastPlayedSongsQueue = [];
+        this.lastPlayedSongs = [];
+        this.uniqueSongs = new Set();
         this.lastAlternatingGender = null;
         this.lastGuesser = null;
     }
@@ -312,15 +316,28 @@ export default class GameSession {
         const totalSongs = await getFilteredSongList(guildPreference);
         const totalSongsCount = totalSongs.songs.length;
 
-        // manage recently played song queue
+        // manage unique songs
         if (guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
-            const songsNotPlayed = totalSongs.songs.filter((song) => !this.lastPlayedSongsQueue.includes(song.youtubeLink));
+            const songsNotPlayed = totalSongs.songs.filter((song) => !this.uniqueSongs.has(song.youtubeLink));
             if (songsNotPlayed.length === 0) {
-                logger.info(`${getDebugLogHeader(messageContext)} | Resetting lastPlayedSongsQueue (all ${totalSongsCount} unique songs played)`);
-                this.resetLastPlayedSongsQueue();
+                logger.info(`${getDebugLogHeader(messageContext)} | Resetting uniqueSongs (all ${totalSongsCount} unique songs played)`);
+                this.resetUniqueSongs();
             }
-        } else if (this.lastPlayedSongsQueue.length === LAST_PLAYED_SONG_QUEUE_SIZE) {
-            this.lastPlayedSongsQueue.shift();
+        } else {
+            this.resetUniqueSongs();
+        }
+
+        // manage last played songs
+        if (totalSongsCount <= LAST_PLAYED_SONG_QUEUE_SIZE) {
+            this.lastPlayedSongs = [];
+        } else if (this.lastPlayedSongs.length === LAST_PLAYED_SONG_QUEUE_SIZE) {
+            this.lastPlayedSongs.shift();
+
+            // Randomize songs from oldest LAST_PLAYED_SONG_QUEUE_SIZE / 2 songs
+            // when lastPlayedSongsQueue is in use but totalSongsCount small
+            if (totalSongsCount <= LAST_PLAYED_SONG_QUEUE_SIZE * 2) {
+                this.lastPlayedSongs.splice(0, LAST_PLAYED_SONG_QUEUE_SIZE / 2);
+            }
         }
 
         // manage alternating gender
@@ -337,10 +354,11 @@ export default class GameSession {
         // query for random song
         let randomSong: QueriedSong;
         try {
+            const ignoredSongs = new Set([...this.lastPlayedSongs, ...this.uniqueSongs]);
             if (this.lastAlternatingGender) {
-                randomSong = await selectRandomSong(guildPreference, this.lastPlayedSongsQueue, this.lastAlternatingGender);
+                randomSong = await selectRandomSong(guildPreference, ignoredSongs, this.lastAlternatingGender);
             } else {
-                randomSong = await selectRandomSong(guildPreference, this.lastPlayedSongsQueue);
+                randomSong = await selectRandomSong(guildPreference, ignoredSongs);
             }
             if (randomSong === null) {
                 sendErrorMessage(messageContext, "Song Query Error", "Failed to find songs matching this criteria. Try to broaden your search.");
@@ -354,8 +372,11 @@ export default class GameSession {
             return;
         }
 
-        if ((totalSongsCount > LAST_PLAYED_SONG_QUEUE_SIZE) || guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
-            this.lastPlayedSongsQueue.push(randomSong.youtubeLink);
+        if (totalSongsCount > LAST_PLAYED_SONG_QUEUE_SIZE) {
+            this.lastPlayedSongs.push(randomSong.youtubeLink);
+        }
+        if (guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
+            this.uniqueSongs.add(randomSong.youtubeLink);
         }
 
         // create a new round with randomly chosen song
@@ -411,10 +432,10 @@ export default class GameSession {
     }
 
     /**
-     * Resets the recently played song queue
+     * Resets the unique songs set
      */
-    resetLastPlayedSongsQueue() {
-        this.lastPlayedSongsQueue = [];
+    resetUniqueSongs() {
+        this.uniqueSongs = new Set();
     }
 
     /**
