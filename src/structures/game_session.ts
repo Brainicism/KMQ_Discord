@@ -435,7 +435,7 @@ export default class GameSession {
      * Resets the unique songs set
      */
     resetUniqueSongs() {
-        this.uniqueSongs = new Set();
+        this.uniqueSongs.clear();
     }
 
     /**
