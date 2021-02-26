@@ -1,7 +1,7 @@
 import Axios from "axios";
 import fs from "fs";
 import { execSync } from "child_process";
-import unzipper from "unzipper";
+import StreamZip from "node-stream-zip";
 import { Logger } from "log4js";
 import { program } from "commander";
 import { config } from "dotenv";
@@ -12,7 +12,7 @@ import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import dbContext, { DatabaseContext, getDatabaseAgnosticContext } from "../database_context";
 
 config({ path: path.resolve(__dirname, "../../.env") });
-const fileUrl = "http://kpop.aoimirai.net/download.php";
+const fileUrl = "http://kpop.daisuki.com.br/download.php";
 const logger: Logger = _logger("seed_db");
 const databaseDownloadDir = process.env.AOIMIRAI_DUMP_DIR;
 const overridesFilePath = path.join(__dirname, "./kpop_videos_overrides.sql");
@@ -31,29 +31,18 @@ const downloadDb = async () => {
     const resp = await Axios.get(fileUrl, {
         responseType: "arraybuffer",
         headers: {
-            // eslint-disable-next-line quote-props
-            "Host": "kpop.aoimirai.net",
             "User-Agent": "KMQ (K-pop Music Quiz)",
         },
     });
 
     await fs.promises.writeFile(output, resp.data, { encoding: null });
-    logger.info("Downloaded database.zip");
+    logger.info("Downloaded AoiMirai database archive");
 };
 async function extractDb(): Promise<void> {
-    return new Promise((resolve, reject) => {
-        fs.createReadStream(`${databaseDownloadDir}/bootstrap.zip`)
-            .pipe(unzipper.Extract({ path: `${databaseDownloadDir}/sql/` }))
-            .on("error", (err) => {
-                // this throws an error even though it finished successfully
-                if (!err.toString().includes("invalid signature")) {
-                    reject(err);
-                }
-                logger.info("Extracted database.zip");
-                resolve();
-            })
-            .on("finish", () => resolve());
-    });
+    // eslint-disable-next-line new-cap
+    const zip = new StreamZip.async({ file: `${databaseDownloadDir}/bootstrap.zip` });
+    await zip.extract(null, `${databaseDownloadDir}/sql/`);
+    logger.info("Extracted AoiMirai database");
 }
 
 async function seedDb(db: DatabaseContext) {
