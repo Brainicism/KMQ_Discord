@@ -18,7 +18,7 @@ const databaseDownloadDir = process.env.AOIMIRAI_DUMP_DIR;
 const overridesFilePath = path.join(__dirname, "./kpop_videos_overrides.sql");
 
 program
-    .option("-p, --force-pull", "Force re-pull of AoiMirai database dump", false)
+    .option("-p, --skip-pull", "Skip re-pull of AoiMirai database dump", false)
     .option("-r, --force-reseed", "Force drop/create of kpop_videos database", false)
     .option("-d, --skip-download", "Skip download/encode of videos in database", false)
     .option("--limit <limit>", "Limit the number of songs to download", (x) => parseInt(x, 10));
@@ -60,6 +60,7 @@ async function seedDb(db: DatabaseContext) {
     logger.info(`Imported database dump (${seedFile}) successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing`);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function hasRecentDump(): Promise<boolean> {
     const dumpPath = `${databaseDownloadDir}/sql`;
     let files: string[];
@@ -80,8 +81,7 @@ async function hasRecentDump(): Promise<boolean> {
 
 async function updateKpopDatabase() {
     const db = getDatabaseAgnosticContext();
-
-    if (options.forcePull || !(await hasRecentDump())) {
+    if (!options.skipPull) {
         await downloadDb();
         await extractDb();
         await seedDb(db);

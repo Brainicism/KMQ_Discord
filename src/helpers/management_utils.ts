@@ -177,8 +177,8 @@ export function registerIntervals() {
         reloadFactCache();
     });
 
-    // every monday at 7am UTC => 2am EST
-    schedule.scheduleJob("0 7 * * 1", async () => {
+    // everyday at 7am UTC => 2am EST
+    schedule.scheduleJob("0 7 * * *", async () => {
         logger.info("Performing regularly scheduled AoiMirai database seed");
         await seedAndDownloadNewSongs();
     });
