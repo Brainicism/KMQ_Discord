@@ -24,11 +24,11 @@ const RANK_TITLES = [
     { title: "Ruler of the Two Koreas", req: 110 },
     { title: "Supreme Ruler of Asia", req: 120 },
     { title: "Benevolent Ruler of Earth", req: 130 },
-    { title: "Divine Ruler of the Stars", req: 130 },
-    { title: "Almighty Ruler of the Solar System", req: 140 },
-    { title: "Enlightened Ruler of the Galaxy", req: 150 },
-    { title: "Immortal Ruler of the Universe", req: 160 },
-    { title: "Omnicient Ruler of the Multiverse", req: 170 },
+    { title: "Divine Ruler of the Stars", req: 140 },
+    { title: "Almighty Ruler of the Solar System", req: 150 },
+    { title: "Enlightened Ruler of the Galaxy", req: 160 },
+    { title: "Immortal Ruler of the Universe", req: 170 },
+    { title: "Omnicient Ruler of the Multiverse", req: 180 },
 ];
 
 export function getRankNameByLevel(level: number): string {
