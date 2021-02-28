@@ -19,10 +19,10 @@ async function backupKmqDatabase(): Promise<void> {
         fs.mkdirSync(databaseBackupDir);
     }
     return new Promise((resolve, reject) => {
-        exec(`mysqldump -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --routines kmq > ${databaseBackupDir}/kmq_backup_${friendlyFormattedDate(new Date())}.sql`, (err, stdout, stderr) => {
-            if (stderr) {
-                logger.error(`Error backing up kmq database, err = ${stderr}`);
-                reject(stderr);
+        exec(`mysqldump -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --routines kmq > ${databaseBackupDir}/kmq_backup_${friendlyFormattedDate(new Date())}.sql`, (err) => {
+            if (err) {
+                logger.error(`Error backing up kmq database, err = ${err}`);
+                reject(err);
                 return;
             }
             resolve();
