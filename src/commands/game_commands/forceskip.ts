@@ -37,7 +37,7 @@ export default class ForceSkipCommand implements BaseCommand {
             return;
         }
         if (message.author.id !== gameSession.owner.id) {
-            await sendErrorMessage(getMessageContext(message), "Force skip ignored", `Only the person who started the game (${bold(getUserTag(gameSession.owner))}) can force-skip.`);
+            await sendErrorMessage(getMessageContext(message), { title: "Force skip ignored", description: `Only the person who started the game (${bold(getUserTag(gameSession.owner))}) can force-skip.` });
             return;
         }
         gameSession.gameRound.skipAchieved = true;

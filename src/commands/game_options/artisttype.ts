@@ -62,7 +62,7 @@ export default class ArtistTypeCommand implements BaseCommand {
 
         if (guildPreference.isGroupsMode()) {
             logger.warn(`${getDebugLogHeader(message)} | Game option conflict between artist type and groups.`);
-            sendErrorMessage(getMessageContext(message), "Game Option Conflict", `\`groups\` game option is currently set. \`artisttype\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed`);
+            sendErrorMessage(getMessageContext(message), { title: "Game Option Conflict", description: `\`groups\` game option is currently set. \`artisttype\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed` });
             return;
         }
 

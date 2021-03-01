@@ -71,7 +71,7 @@ export default class ProfileCommand implements BaseCommand {
         logger.info(`${getDebugLogHeader(message)} | Profile retrieved`);
 
         if (!playerStats) {
-            sendInfoMessage(getMessageContext(message), "No profile found", "Play your first game to begin tracking your stats!");
+            sendInfoMessage(getMessageContext(message), { title: "No profile found", description: "Play your first game to begin tracking your stats!" });
             return;
         }
 

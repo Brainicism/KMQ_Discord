@@ -81,14 +81,14 @@ export default class GenderCommand implements BaseCommand {
             // Incompatibility between groups and gender doesn't exist in GENDER.ALTERNATING
             if (selectedGenders[0] !== GENDER.ALTERNATING) {
                 logger.warn(`${getDebugLogHeader(message)} | Game option conflict between gender and groups.`);
-                sendErrorMessage(getMessageContext(message), "Game Option Conflict", `\`groups\` game option is currently set. \`gender\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed`);
+                sendErrorMessage(getMessageContext(message), { title: "Game Option Conflict", description: `\`groups\` game option is currently set. \`gender\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed` });
                 return;
             }
         }
 
         if (selectedGenders[0] === GENDER.ALTERNATING) {
             if (guildPreference.isGroupsMode() && guildPreference.getGroupIds().length === 1) {
-                sendErrorMessage(getMessageContext(message), "Game Option Warning", `With only one group chosen, \`${process.env.BOT_PREFIX}gender alternating\` may not behave as expected. Consider including more groups to correctly alternate genders.`);
+                sendErrorMessage(getMessageContext(message), { title: "Game Option Warning", description: `With only one group chosen, \`${process.env.BOT_PREFIX}gender alternating\` may not behave as expected. Consider including more groups to correctly alternate genders.` });
             }
             guildPreference.setGender([selectedGenders[0]]);
         } else {

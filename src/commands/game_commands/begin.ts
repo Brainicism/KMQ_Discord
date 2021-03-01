@@ -15,7 +15,7 @@ export default class BeginCommand implements BaseCommand {
             return;
         }
         if (gameSession.owner.id !== author.id) {
-            sendErrorMessage(getMessageContext(message), "Begin ignored", `Only the person who did \`${process.env.BOT_PREFIX}play elimination\` (${bold(getUserTag(gameSession.owner))}) can start the game.`);
+            sendErrorMessage(getMessageContext(message), { title: "Begin ignored", description: `Only the person who did \`${process.env.BOT_PREFIX}play elimination\` (${bold(getUserTag(gameSession.owner))}) can start the game.` });
             return;
         }
         const guildPreference = await getGuildPreference(guildID);

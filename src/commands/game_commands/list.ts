@@ -74,11 +74,11 @@ export default class ListCommand implements BaseCommand {
                 });
             } catch (e) {
                 logger.warn(`${getDebugLogHeader(message)} | Missing ATTACH_FILE permissions`);
-                await sendErrorMessage(message, "Error Sending File", "Too many groups to list in a Discord message, see the attached file. Make sure that the bot has ATTACH_FILE permissions");
+                await sendErrorMessage(message, { title: "Error Sending File", description: "Too many groups to list in a Discord message, see the attached file. Make sure that the bot has ATTACH_FILE permissions" });
                 return;
             }
         } else {
-            await sendInfoMessage(message, `Current \`${optionListed}\` value`, optionValue);
+            await sendInfoMessage(message, { title: `Current \`${optionListed}\` value`, description: optionValue });
         }
 
         logger.info(`${getDebugLogHeader(message)} | List '${optionListed}' retrieved`);

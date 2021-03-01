@@ -41,9 +41,10 @@ const helpMessage = async (message: GuildTextableMessage, action: string) => {
         logger.info(`${getDebugLogHeader(message)} | Getting help documentation for: ${action}`);
         if (!(commandNamesWithHelp.includes(action))) {
             logger.warn(`${getDebugLogHeader(message)} | Missing documentation: ${action}`);
-            await sendErrorMessage(getMessageContext(message),
-                "K-pop Music Quiz Command Help",
-                `Sorry, there is no documentation on ${action}`);
+            await sendErrorMessage(getMessageContext(message), {
+                title: "K-pop Music Quiz Command Help",
+                description: `Sorry, there is no documentation on ${action}`,
+            });
             return;
         }
         const helpManual = commandFilesWithAliases[action].help;

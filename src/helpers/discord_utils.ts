@@ -1,4 +1,4 @@
-import Eris from "eris";
+import Eris, { EmbedOptions } from "eris";
 import EmbedPaginator from "eris-pagination";
 import path from "path";
 import GuildPreference from "../structures/guild_preference";
@@ -6,7 +6,7 @@ import GameSession, { GuessResult } from "../structures/game_session";
 import _logger from "../logger";
 import { endSession, getSongCount } from "./game_utils";
 import { getFact } from "../fact_generator";
-import { GameOption, GuildTextableMessage, MessageContext } from "../types";
+import { EmbedPayload, GameOption, GuildTextableMessage, MessageContext } from "../types";
 import { chunkArray, codeLine, bold, parseJsonFile, chooseRandom, getOrdinalNum } from "./utils";
 import state from "../kmq";
 import { ModeType } from "../commands/game_options/mode";
@@ -112,18 +112,20 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
  * @param title - The title of the embed
  * @param description - The description of the embed
  */
-export async function sendErrorMessage(messageContext: MessageContext, title: string, description: string) {
-    const author = messageContext.author ? {
-        name: messageContext.author.username,
-        icon_url: messageContext.author.avatarURL,
-    } : null;
-
+export async function sendErrorMessage(messageContext: MessageContext, embedPayload: EmbedPayload) {
     await sendMessage(messageContext.channel, {
         embed: {
             color: EMBED_ERROR_COLOR,
-            author,
-            title: bold(title),
-            description,
+            author: messageContext.author ? {
+                name: messageContext.author.username,
+                icon_url: messageContext.author.avatarURL,
+            } : null,
+            title: bold(embedPayload.title),
+            description: embedPayload.description,
+            footer: embedPayload.footerText ? {
+                text: embedPayload.footerText,
+            } : null,
+            thumbnail: embedPayload.thumbnailUrl ? { url: embedPayload.thumbnailUrl } : null,
         },
     });
 }
@@ -135,29 +137,24 @@ export async function sendErrorMessage(messageContext: MessageContext, title: st
  * @param description - The description of the embed
  * @param footerText - The footer text of the embed
  */
-export async function sendInfoMessage(messageContext: MessageContext, title: string, description?: string, footerText?: string) {
-    if (description.length > 2048) {
-        await sendErrorMessage(messageContext, "Error", "Response message was too long, report this error to the KMQ help server");
+export async function sendInfoMessage(messageContext: MessageContext, embedPayload: EmbedPayload) {
+    if (embedPayload.description.length > 2048) {
+        await sendErrorMessage(messageContext, { title: "Error", description: "Response message was too long, report this error to the KMQ help server" });
         return;
     }
-    let footer: Eris.EmbedFooterOptions;
-    if (footerText) {
-        footer = {
-            text: footerText,
-        };
-    }
 
-    const author = messageContext.author ? {
-        name: messageContext.author.username,
-        icon_url: messageContext.author.avatarURL,
-    } : null;
-
-    const embed = {
+    const embed: EmbedOptions = {
         color: EMBED_INFO_COLOR,
-        author,
-        title: bold(title),
-        description,
-        footer,
+        author: messageContext.author ? {
+            name: messageContext.author.username,
+            icon_url: messageContext.author.avatarURL,
+        } : null,
+        title: bold(embedPayload.title),
+        description: embedPayload.description,
+        footer: embedPayload.footerText ? {
+            text: embedPayload.footerText,
+        } : null,
+        thumbnail: embedPayload.thumbnailUrl ? { url: embedPayload.thumbnailUrl } : null,
     };
     await sendMessage(messageContext.channel, { embed });
 }
@@ -173,7 +170,7 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
     updatedOption?: { option: GameOption, reset: boolean }, footerText?: string) {
     const totalSongs = await getSongCount(guildPreference);
     if (totalSongs === null) {
-        sendErrorMessage(getMessageContext(message), "Error retrieving song data", `Try again in a bit, or report this error to the support server found in \`${process.env.BOT_PREFIX}help\`.`);
+        sendErrorMessage(getMessageContext(message), { title: "Error retrieving song data", description: `Try again in a bit, or report this error to the support server found in \`${process.env.BOT_PREFIX}help\`.` });
         return;
     }
 
@@ -214,13 +211,16 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
     }
 
     await sendInfoMessage(getMessageContext(message),
-        updatedOption === null ? "Options" : `${updatedOption.option} ${updatedOption.reset ? "reset" : "updated"}`,
-        `Now playing the ${optionStrings[GameOption.LIMIT]} most popular songs out of the __${totalSongs.countBeforeLimit}__ by ${guildPreference.isGroupsMode() ? `${optionStrings[GameOption.GROUPS]} (${optionStrings[GameOption.SUBUNIT_PREFERENCE]})` : `${optionStrings[GameOption.GENDER]} ${optionStrings[GameOption.ARTIST_TYPE]}`}\
-        ${guildPreference.isGroupsMode() && guildPreference.isGenderAlternating() && guildPreference.getGroupIds().length > 1 ? ` with ${optionStrings[GameOption.GENDER]}` : ""} ${optionStrings[GameOption.CUTOFF]}\
-        ${guildPreference.isExcludesMode() && !guildPreference.isGroupsMode() ? `, excluding ${optionStrings[GameOption.EXCLUDE]}` : ""}${guildPreference.isIncludesMode() && !guildPreference.isGroupsMode() ? `, including ${optionStrings[GameOption.INCLUDE]}` : ""}. \nPlaying from the ${optionStrings[GameOption.SEEK_TYPE]} point of each song. ${shuffleUniqueMode ? shuffleMessage : ""}\
-        Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}\
-        \nPlaying \`${guildPreference.getLanguageType()}\` language songs.`,
-        footerText !== null ? footerText : null);
+        {
+            title: updatedOption === null ? "Options" : `${updatedOption.option} ${updatedOption.reset ? "reset" : "updated"}`,
+            description:
+                `Now playing the ${optionStrings[GameOption.LIMIT]} most popular songs out of the __${totalSongs.countBeforeLimit}__ by ${guildPreference.isGroupsMode() ? `${optionStrings[GameOption.GROUPS]} (${optionStrings[GameOption.SUBUNIT_PREFERENCE]})` : `${optionStrings[GameOption.GENDER]} ${optionStrings[GameOption.ARTIST_TYPE]}`}\
+                ${guildPreference.isGroupsMode() && guildPreference.isGenderAlternating() && guildPreference.getGroupIds().length > 1 ? ` with ${optionStrings[GameOption.GENDER]}` : ""} ${optionStrings[GameOption.CUTOFF]}\
+                ${guildPreference.isExcludesMode() && !guildPreference.isGroupsMode() ? `, excluding ${optionStrings[GameOption.EXCLUDE]}` : ""}${guildPreference.isIncludesMode() && !guildPreference.isGroupsMode() ? `, including ${optionStrings[GameOption.INCLUDE]}` : ""}. \nPlaying from the ${optionStrings[GameOption.SEEK_TYPE]} point of each song. ${shuffleUniqueMode ? shuffleMessage : ""}\
+                Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}\
+                \nPlaying \`${guildPreference.getLanguageType()}\` language songs.`,
+            footerText: footerText !== null ? footerText : null,
+        });
 }
 
 /**
@@ -402,19 +402,19 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
     const missingPermissions = REQUIRED_VOICE_PERMISSIONS.filter((permission) => !voiceChannel.permissionsOf(state.client.user.id).has(permission));
     if (missingPermissions.length > 0) {
         logger.warn(`${getDebugLogHeader(message)} | Missing [${missingPermissions.join(", ")}] permissions`);
-        sendErrorMessage(getMessageContext(message), "Missing Permissions", missingPermissionsText(missingPermissions));
+        sendErrorMessage(getMessageContext(message), { title: "Missing Permissions", description: missingPermissionsText(missingPermissions) });
         return false;
     }
     const channelFull = voiceChannel.userLimit && (voiceChannel.voiceMembers.size >= voiceChannel.userLimit);
     if (channelFull) {
         logger.warn(`${getDebugLogHeader(message)} | Channel full`);
-        sendInfoMessage(getMessageContext(message), "Voice Channel Full", "Ensure that there's enough room in the voice channel for me to join");
+        sendInfoMessage(getMessageContext(message), { title: "Voice Channel Full", description: "Ensure that there's enough room in the voice channel for me to join" });
         return false;
     }
     const afkChannel = voiceChannel.id === voiceChannel.guild.afkChannelID;
     if (afkChannel) {
         logger.warn(`${getDebugLogHeader(message)} | Attempted to start game in AFK voice channel`);
-        sendInfoMessage(getMessageContext(message), "AFK Voice Channel", "Ensure you're not in the inactive voice channel so that you can hear me!");
+        sendInfoMessage(getMessageContext(message), { title: "AFK Voice Channel", description: "Ensure you're not in the inactive voice channel so that you can hear me!" });
         return false;
     }
     return true;

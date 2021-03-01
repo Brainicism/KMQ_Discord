@@ -12,7 +12,7 @@ const logger = _logger("validate");
  * @param arg - The incorrect argument
  */
 async function sendValidationErrorMessage(message: GuildTextableMessage, warning: string, arg: string | Array<string>) {
-    await sendErrorMessage(getMessageContext(message), "Input validation error", warning);
+    await sendErrorMessage(getMessageContext(message), { title: "Input validation error", description: warning });
     logger.warn(`${getDebugLogHeader(message)} | ${warning}. val = ${arg}`);
 }
 

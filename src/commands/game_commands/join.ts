@@ -12,13 +12,13 @@ export default class JoinCommand implements BaseCommand {
             return;
         }
         if (gameSession.participants.has(message.author.id)) {
-            sendErrorMessage(getMessageContext(message), "Player already joined", `${bold(getUserTag(message.author))} is already in the game.`);
+            sendErrorMessage(getMessageContext(message), { title: "Player already joined", description: `${bold(getUserTag(message.author))} is already in the game.` });
             return;
         }
 
         if (gameSession.sessionInitialized) {
             const newPlayer = gameSession.addEliminationParticipant(message.author, true);
-            sendInfoMessage(message, "Joined Elimination Midgame", `\`${getUserTag(message.author)}\` has spawned with \`${newPlayer.getLives()}\` lives`);
+            sendInfoMessage(message, { title: "Joined Elimination Midgame", description: `\`${getUserTag(message.author)}\` has spawned with \`${newPlayer.getLives()}\` lives` });
             return;
         }
 
@@ -28,7 +28,7 @@ export default class JoinCommand implements BaseCommand {
             previouslyJoinedPlayers.push("and many others...");
         }
         const players = `${bold(getUserTag(message.author))}, ${previouslyJoinedPlayers.join(", ")}`;
-        sendInfoMessage(getMessageContext(message), "Player joined", players);
+        sendInfoMessage(getMessageContext(message), { title: "Player joined", description: players });
         gameSession.addEliminationParticipant(message.author);
     }
 }

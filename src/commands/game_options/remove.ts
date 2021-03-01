@@ -65,7 +65,7 @@ export default class RemoveCommand implements BaseCommand {
         const currentGroupNames = !groupNamesString ? [] : groupNamesString.split(",");
 
         if (currentGroupNames.length === 0) {
-            sendErrorMessage(message, "Remove failed", "There are no groups currently selected");
+            sendErrorMessage(message, { title: "Remove failed", description: "There are no groups currently selected" });
             return;
         }
 
@@ -78,7 +78,7 @@ export default class RemoveCommand implements BaseCommand {
         const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(remainingGroups);
         if (unmatchedGroups) {
             logger.info(`${getDebugLogHeader(message)} | Attempted to set unknown groups. groups =  ${unmatchedGroups.join(", ")}`);
-            await sendErrorMessage(getMessageContext(message), "Unknown Group Name", `One or more of the specified group names was not recognized. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} `);
+            await sendErrorMessage(getMessageContext(message), { title: "Unknown Group Name", description: `One or more of the specified group names was not recognized. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} ` });
             return;
         }
 

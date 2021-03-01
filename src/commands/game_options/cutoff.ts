@@ -66,7 +66,7 @@ export default class CutoffCommand implements BaseCommand {
         } else if (yearRange.length === 2) {
             const endYear = yearRange[1];
             if (endYear < startYear) {
-                await sendErrorMessage(getMessageContext(message), "Invalid end year", "End year must be after or equal to start year");
+                await sendErrorMessage(getMessageContext(message), { title: "Invalid end year", description: "End year must be after or equal to start year" });
                 return;
             }
             guildPreference.setBeginningCutoffYear(parseInt(startYear, 10));
