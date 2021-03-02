@@ -48,7 +48,7 @@ export default class DebugCommand implements BaseCommand {
         }
 
         const debugId = uuid.v4();
-        sendInfoMessage(getMessageContext(message), "Debug Details Sent!", `If you were asked by a bot developer to do this, give them this:\n\`${debugId}\``);
+        sendInfoMessage(getMessageContext(message), { title: "Debug Details Sent!", description: `If you were asked by a bot developer to do this, give them this:\n\`${debugId}\`` });
         sendEmbed(debugChannel, {
             title: bold(`Debug Details for User: ${message.author.id}, Guild: ${message.guildID}`),
             footer: {

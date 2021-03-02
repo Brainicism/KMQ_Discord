@@ -28,6 +28,13 @@ export interface MessageContext {
     };
 }
 
+export interface EmbedPayload {
+    title: string;
+    description?: string;
+    footerText?: string;
+    thumbnailUrl?: string;
+}
+
 export interface State {
     commands: { [commandName: string]: BaseCommand };
     gameSessions: { [guildID: string]: GameSession };

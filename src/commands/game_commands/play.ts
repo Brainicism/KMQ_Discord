@@ -25,7 +25,7 @@ export async function sendBeginGameMessage(textChannelName: string, voiceChannel
         gameInstructions += "\n\n**⬆️ KMQ POWER HOUR ACTIVE ⬆️**";
     }
     const startTitle = `Game starting in #${textChannelName} in 🔊 ${voiceChannelName}`;
-    await sendInfoMessage(getMessageContext(message), startTitle, gameInstructions);
+    await sendInfoMessage(getMessageContext(message), { title: startTitle, description: gameInstructions });
 }
 
 export default class PlayCommand implements BaseCommand {
@@ -75,8 +75,10 @@ export default class PlayCommand implements BaseCommand {
         const voiceChannel = getVoiceChannel(message);
         if (!voiceChannel) {
             await sendErrorMessage(getMessageContext(message),
-                "Join a voice channel",
-                `Send \`${process.env.BOT_PREFIX}play\` again when you are in a voice channel.`);
+                {
+                    title: "Join a voice channel",
+                    description: `Send \`${process.env.BOT_PREFIX}play\` again when you are in a voice channel.`,
+                });
             logger.warn(`${getDebugLogHeader(message)} | User not in voice channel`);
         } else {
             if (!voicePermissionsCheck(message)) {
@@ -102,7 +104,7 @@ export default class PlayCommand implements BaseCommand {
                     gameInstructions = `Type \`${process.env.BOT_PREFIX}join\` to play in the upcoming elimination game. Once all have joined, ${bold(getUserTag(gameOwner))} must send \`${process.env.BOT_PREFIX}begin\` to start the game. Everyone begins with \`${lives}\` lives.`;
                     gameSession = new GameSession(textChannel, voiceChannel, gameOwner, GameType.ELIMINATION, lives);
                     gameSession.addEliminationParticipant(gameOwner);
-                    await sendInfoMessage(getMessageContext(message), startTitle, gameInstructions);
+                    await sendInfoMessage(getMessageContext(message), { title: startTitle, description: gameInstructions });
                 } else {
                     // (1 and 2) CLASSIC game creation
                     gameSession = new GameSession(textChannel, voiceChannel, gameOwner, GameType.CLASSIC);
@@ -112,7 +114,7 @@ export default class PlayCommand implements BaseCommand {
                 }
                 gameSessions[message.guildID] = gameSession;
             } else {
-                await sendErrorMessage(getMessageContext(message), "Game already in session", null);
+                await sendErrorMessage(getMessageContext(message), { title: "Game already in session" });
             }
         }
     }

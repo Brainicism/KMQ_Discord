@@ -233,7 +233,7 @@ export default class GameSession {
                 levelUpMessages = levelUpMessages.slice(0, 10);
                 levelUpMessages.push("and many others...");
             }
-            sendInfoMessage({ channel: this.textChannel }, "🚀 Power up!", levelUpMessages.join("\n"));
+            sendInfoMessage({ channel: this.textChannel }, { title: "🚀 Power up!", description: levelUpMessages.join("\n") });
         }
 
         // commit guild stats
@@ -361,12 +361,12 @@ export default class GameSession {
                 randomSong = await selectRandomSong(guildPreference, ignoredSongs);
             }
             if (randomSong === null) {
-                sendErrorMessage(messageContext, "Song Query Error", "Failed to find songs matching this criteria. Try to broaden your search.");
+                sendErrorMessage(messageContext, { title: "Song Query Error", description: "Failed to find songs matching this criteria. Try to broaden your search." });
                 this.endSession();
                 return;
             }
         } catch (err) {
-            await sendErrorMessage(messageContext, "Error selecting song", "Please try starting the round again. If the issue persists, report it in our support server.");
+            await sendErrorMessage(messageContext, { title: "Error selecting song", description: "Please try starting the round again. If the issue persists, report it in our support server." });
             logger.error(`${getDebugLogHeader(messageContext)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
             this.endSession();
             return;
@@ -397,7 +397,7 @@ export default class GameSession {
         } catch (err) {
             await this.endSession();
             logger.error(`${getDebugLogHeader(messageContext)} | Error obtaining voice connection. err = ${err.toString()}`);
-            await sendErrorMessage(messageContext, "Error joining voice channel", "Something went wrong, try starting the game again in a bit.");
+            await sendErrorMessage(messageContext, { title: "Error joining voice channel", description: "Something went wrong, try starting the game again in a bit." });
             return;
         }
         this.playSong(guildPreference, messageContext);
@@ -525,7 +525,7 @@ export default class GameSession {
      * @param guildPreference - The GuildPreference
      */
     private async errorRestartRound(messageContext: MessageContext, guildPreference: GuildPreference) {
-        await sendErrorMessage(messageContext, "Error playing song", "Starting new round in 3 seconds...");
+        await sendErrorMessage(messageContext, { title: "Error playing song", description: "Starting new round in 3 seconds..." });
         this.roundsPlayed--;
         this.endRound({ correct: false }, guildPreference, messageContext);
         this.startRound(guildPreference, messageContext);

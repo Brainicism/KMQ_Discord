@@ -101,7 +101,7 @@ export default class LeaderboardCommand implements BaseCommand {
             } else if (action === LeaderboardAction.SERVER) {
                 this.showLeaderboard(message, pageOffset, true);
             } else {
-                sendErrorMessage(message, "Incorrect Leaderboard Usage", `See \`${process.env.BOT_PREFIX}help leaderboard\` for more details`);
+                sendErrorMessage(message, { title: "Incorrect Leaderboard Usage", description: `See \`${process.env.BOT_PREFIX}help leaderboard\` for more details` });
             }
         }
     }
@@ -112,7 +112,7 @@ export default class LeaderboardCommand implements BaseCommand {
             .first());
 
         if (alreadyEnrolled) {
-            sendErrorMessage(message, "Player Already Enrolled", "You are already visible on the leaderboard. If you'd like to update your display name, unenroll and enroll again.");
+            sendErrorMessage(message, { title: "Player Already Enrolled", description: "You are already visible on the leaderboard. If you'd like to update your display name, unenroll and enroll again." });
             return;
         }
 
@@ -121,14 +121,14 @@ export default class LeaderboardCommand implements BaseCommand {
                 player_id: message.author.id,
                 display_name: getUserTag(message.author),
             });
-        sendInfoMessage(message, "Leaderboard Enrollment Complete", "Your name is now visible on the leaderboard");
+        sendInfoMessage(message, { title: "Leaderboard Enrollment Complete", description: "Your name is now visible on the leaderboard" });
     }
 
     private async unenrollLeaderboard(message: GuildTextableMessage) {
         await dbContext.kmq("leaderboard_enrollment")
             .where("player_id", "=", message.author.id)
             .del();
-        sendInfoMessage(message, "Leaderboard Unenrollment Complete", "You are no longer visible on the leaderboard");
+        sendInfoMessage(message, { title: "Leaderboard Unenrollment Complete", description: "You are no longer visible on the leaderboard" });
     }
     private async showLeaderboard(message: GuildTextableMessage, pageOffset: number, serverSpecific: boolean) {
         const offset = 10 * pageOffset;
@@ -150,7 +150,7 @@ export default class LeaderboardCommand implements BaseCommand {
             .limit(10);
 
         if (topPlayers.length === 0) {
-            sendErrorMessage(message, "😐", "The leaderboard doesn't go this far");
+            sendErrorMessage(message, { title: "😐", description: "The leaderboard doesn't go this far" });
             return;
         }
 

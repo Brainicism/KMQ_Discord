@@ -11,7 +11,7 @@ export default class EvalCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
         const kmqDebugChannel = getDebugChannel();
         if (!kmqDebugChannel || message.channel.id !== kmqDebugChannel.id) {
-            sendErrorMessage(getMessageContext(message), "Error", "You are not allowed to eval in this channel");
+            sendErrorMessage(getMessageContext(message), { title: "Error", description: "You are not allowed to eval in this channel" });
             logger.warn(`${getDebugLogHeader(message)} | Attempted to eval in non-debug channel`);
             return;
         }
@@ -24,9 +24,9 @@ export default class EvalCommand implements BaseCommand {
             try {
                 // eslint-disable-next-line no-eval
                 const result = eval(command);
-                sendInfoMessage(getMessageContext(message), evalString, result === undefined ? "undefined" : JSON.stringify(result));
+                sendInfoMessage(getMessageContext(message), { title: evalString, description: result === undefined ? "undefined" : JSON.stringify(result) });
             } catch (e) {
-                sendErrorMessage(getMessageContext(message), evalString, e.toString());
+                sendErrorMessage(getMessageContext(message), { title: evalString, description: e.toString() });
             }
         }.call(state, evalString);
     }
