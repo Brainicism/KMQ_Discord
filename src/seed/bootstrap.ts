@@ -40,7 +40,8 @@ async function needsBootstrap(db: DatabaseContext) {
 
 // eslint-disable-next-line import/prefer-default-export
 export function generateAvailableSongsView() {
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq < ./src/seed/create_available_songs_table_procedure.sql`);
+    const createAvailableSongsTableProcedureSqlPath = path.join(__dirname, "../../sql/create_available_songs_table_procedure.sql");
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq < ${createAvailableSongsTableProcedureSqlPath}`);
     logger.info("Re-creating available songs view...");
     execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq -e "CALL CreateAvailableSongsTable;"`);
 }
