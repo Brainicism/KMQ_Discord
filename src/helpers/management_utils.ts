@@ -206,8 +206,8 @@ export async function reloadCaches() {
 }
 
 /** @returns a mapping of command name to command source file */
-export function getCommandFiles(reload = false): Promise<{ [commandName: string]: BaseCommand }> {
-    if (cachedCommandFiles && !reload) {
+export function getCommandFiles(shouldReload: boolean): Promise<{ [commandName: string]: BaseCommand }> {
+    if (cachedCommandFiles && !shouldReload) {
         return Promise.resolve(cachedCommandFiles);
     }
 
@@ -218,7 +218,7 @@ export function getCommandFiles(reload = false): Promise<{ [commandName: string]
             files = await glob(process.env.NODE_ENV === EnvType.DEV ? "commands/**/*.ts" : "commands/**/*.js");
             await Promise.all(files.map(async (file) => {
                 const commandFilePath = path.join("../", file);
-                if (reload) {
+                if (shouldReload) {
                     // invalidate require cache
                     delete require.cache[require.resolve(commandFilePath)];
                 }
@@ -246,24 +246,24 @@ export function getCommandFiles(reload = false): Promise<{ [commandName: string]
  * @param command - The Command class
  * @param commandName - The name/alias of the command
  */
-function registerCommand(command: BaseCommand, commandName: string, reload = false) {
-    if (commandName in state.commands && !reload) {
+function registerCommand(command: BaseCommand, commandName: string) {
+    if (commandName in state.commands) {
         logger.error(`Command \`${commandName}\` already exists. Possible conflict?`);
-        process.exit(1);
     }
     state.commands[commandName] = command;
 }
 
 /** Registers commands */
-export async function registerCommands(reload = false) {
+export async function registerCommands(initialLoad: boolean) {
     // load commands
-    const commandFiles = await getCommandFiles(reload);
+    state.commands = {};
+    const commandFiles = await getCommandFiles(!initialLoad);
     for (const [commandName, command] of Object.entries(commandFiles)) {
         if (commandName === "base_command") continue;
-        registerCommand(command, commandName, reload);
+        registerCommand(command, commandName);
         if (command.aliases) {
             for (const alias of command.aliases) {
-                registerCommand(command, alias, reload);
+                registerCommand(command, alias);
             }
         }
     }

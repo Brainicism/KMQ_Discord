@@ -16,7 +16,7 @@ export default class EvalCommand implements BaseCommand {
 
         logger.info("Reloading KMQ commands");
         try {
-            await registerCommands(true);
+            await registerCommands(false);
             logger.info("Reload KMQ commands complete");
             sendInfoMessage(getMessageContext(message), { title: "Reload Complete", description: "All changes should now be applied" });
         } catch (e) {

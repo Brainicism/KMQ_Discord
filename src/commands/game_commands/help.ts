@@ -19,7 +19,7 @@ const helpMessage = async (message: GuildTextableMessage, action: string) => {
     let embedDesc = "";
     let embedFields = [];
 
-    const commandFiles = await getCommandFiles();
+    const commandFiles = await getCommandFiles(false);
 
     const commandFilesWithAliases: { [commandName: string]: BaseCommand } = {};
     Object.assign(commandFilesWithAliases, commandFiles);
