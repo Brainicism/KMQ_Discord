@@ -203,17 +203,17 @@ export async function endSession(gameSession: GameSession) {
  * @returns a list of recognized/unrecognized groups
  */
 export async function getMatchingGroupNames(rawGroupNames: Array<string>): Promise<GroupMatchResults> {
-    const artistIdQuery = dbContext.kpopVideos("app_kpop_group")
+    const artistIdQuery = dbContext.kmq("kpop_groups")
         .select(["id"])
         .whereIn("name", rawGroupNames);
 
-    const matchingGroups = (await dbContext.kpopVideos("app_kpop_group")
+    const matchingGroups = (await dbContext.kmq("kpop_groups")
         .select(["id", "name"])
-        .whereIn("app_kpop_group.id", [artistIdQuery])
-        .orWhereIn("app_kpop_group.id_artist1", [artistIdQuery])
-        .orWhereIn("app_kpop_group.id_artist2", [artistIdQuery])
-        .orWhereIn("app_kpop_group.id_artist3", [artistIdQuery])
-        .orWhereIn("app_kpop_group.id_artist4", [artistIdQuery])
+        .whereIn("id", [artistIdQuery])
+        .orWhereIn("id_artist1", [artistIdQuery])
+        .orWhereIn("id_artist2", [artistIdQuery])
+        .orWhereIn("id_artist3", [artistIdQuery])
+        .orWhereIn("id_artist4", [artistIdQuery])
         .orderBy("name", "ASC"))
         .map((x) => ({ id: x.id, name: x.name }));
 
