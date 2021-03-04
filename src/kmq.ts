@@ -45,7 +45,7 @@ export default state;
 
 (async () => {
     logger.info("Registering commands...");
-    registerCommands();
+    registerCommands(true);
     logger.info("Registering event loops...");
     registerIntervals();
     logger.info("Registering client event handlers...");
