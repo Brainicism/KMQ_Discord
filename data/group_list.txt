@@ -3,6 +3,7 @@
 10cm
 14U
 15&
+1iL
 1NB
 1Team
 1THE9
@@ -20,6 +21,7 @@
 8Eight
 9Muses
 9Muses A
+A-REAL
 A.C.E
 AB6IX
 Aespa
@@ -44,6 +46,7 @@ As One
 Astin
 ASTRO
 ATEEZ
+Ato6
 B.A.P
 B.I.G
 B.O.Y
@@ -96,7 +99,7 @@ Buzz
 BVNDIT
 BXK
 C-Clown
-Car, the garden
+Car the garden
 Cha Eunwoo
 Changmo
 Changsub
@@ -152,6 +155,7 @@ Drug Restaurant
 Dvwn
 Dynamic Duo
 E'LAST
+eaJ
 Eddy Kim
 Elris
 Enhypen
@@ -209,10 +213,11 @@ Girls' Generation
 Girls' Generation Oh!GG
 Girls' Generation TTS
 Golden Child
-Goo Hara ☮
+Goo Hara
 GOOD DAY
 GOT7
 Gray
+GSoul
 Gu Yoon Hoe
 Gugudan
 Gugudan Oguogu
@@ -262,6 +267,7 @@ Hyuk
 Hyukoh
 Hyuna
 Hyunsik
+I.M
 I.O.I
 iKON
 Imfact
@@ -269,6 +275,7 @@ IN2IT
 Infinite
 Infinite F
 Infinite H
+Irene
 Isu
 ITZY
 IU
@@ -276,6 +283,7 @@ IZ
 IZ*ONE
 J-Hope
 J-Min
+J.Don
 J.Fla
 Jaehyun
 Jamie
@@ -304,7 +312,8 @@ JJ Project
 JJCC
 Jo Jung-suk
 John Park
-Jonghyun ☮
+Jonghyun
+Joohoney
 Jooyoung
 Joy
 JQT
@@ -334,11 +343,13 @@ KARD
 Kassy
 KEEMBO
 Ken
+Kevin Oh
 Key
 KHAN
 Kiara
 Kihyun
 Kim Bo Kyung
+Kim Bohyung
 Kim Bum-soo
 Kim Dong-Ryul
 Kim Feel
@@ -352,6 +363,7 @@ Kim Nam Joo
 Kim Sung Kyu
 Kim Wooseok
 Kim Yo Han
+Kingdom
 Kiss&Cry
 Kisum
 KNK
@@ -490,6 +502,7 @@ Phantom
 Pink Fantasy
 Pink Fantasy MDD
 Pink Fantasy SHY
+Pixy
 Playback
 Precious
 Primary
@@ -507,10 +520,11 @@ R.Tee
 Raiden
 Rain
 Rainbow
-rainbow blaxx
+Rainbow blaxx
 Rainbow Pixie
 Rainz
 RaNia
+Ravi
 Red Velvet
 Red Velvet - I&S
 REDSQUARE
@@ -560,6 +574,7 @@ Sleepy
 Snuper
 Sohee
 Sohlhee
+Sohyang
 Solar
 Solji
 Somi
@@ -583,7 +598,7 @@ Stellar
 Stray Kids
 Sugarbowl
 Suho
-Sulli ☮
+Sulli
 Sung Si-kyung
 Sungyeol
 Sunmi
@@ -624,6 +639,7 @@ TraxX
 TRCNG
 Treasure
 TREI
+Tri.be
 Triple H
 Trouble Maker
 TST

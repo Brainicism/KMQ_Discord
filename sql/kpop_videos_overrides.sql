@@ -29,3 +29,5 @@ UPDATE kpop_videos.app_kpop_group SET name = REPLACE(name, ' ☮', '');
 /* Set group names collation to utfmb4 */
 ALTER TABLE kpop_videos.app_kpop_group MODIFY name VARCHAR(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+/* Remove comma from "Car, the garden" */
+UPDATE kpop_videos.app_kpop_group SET name = 'Car the garden' WHERE id = 700;
