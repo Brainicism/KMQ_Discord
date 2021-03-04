@@ -97,7 +97,7 @@ async function updateKpopDatabase() {
 }
 
 export async function updateGroupList() {
-    const result = await dbContext.kpopVideos("kpop_videos.app_kpop_group")
+    const result = await dbContext.kmq("kpop_groups")
         .select(["name", "members as gender"])
         .where("name", "NOT LIKE", "%+%")
         .orderBy("name", "ASC");
