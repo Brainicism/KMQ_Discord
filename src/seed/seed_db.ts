@@ -15,7 +15,7 @@ config({ path: path.resolve(__dirname, "../../.env") });
 const fileUrl = "http://kpop.daisuki.com.br/download.php";
 const logger: Logger = _logger("seed_db");
 const databaseDownloadDir = process.env.AOIMIRAI_DUMP_DIR;
-const overridesFilePath = path.join(__dirname, "./kpop_videos_overrides.sql");
+const overridesFilePath = path.join(__dirname, "../../sql/kpop_videos_overrides.sql");
 
 program
     .option("-p, --skip-pull", "Skip re-pull of AoiMirai database dump", false)
