@@ -13,17 +13,13 @@ export const placeholder = /!/g;
 const FIELDS_PER_EMBED = 6;
 const helpMessages = parseJsonFile(path.resolve(__dirname, "../../../data/help_strings.json"));
 
-let commandFiles: { [commandName: string]: BaseCommand };
-
 // Usage: `!help [action]` or `!help`
 const helpMessage = async (message: GuildTextableMessage, action: string) => {
     let embedTitle = "";
     let embedDesc = "";
     let embedFields = [];
 
-    if (!commandFiles) {
-        commandFiles = await getCommandFiles();
-    }
+    const commandFiles = await getCommandFiles();
 
     const commandFilesWithAliases: { [commandName: string]: BaseCommand } = {};
     Object.assign(commandFilesWithAliases, commandFiles);
