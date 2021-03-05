@@ -28,6 +28,7 @@ const DEFAULT_OPTIONS = {
     includes: null,
     goal: null,
     guessTimeout: null,
+    duration: null,
     artistType: DEFAULT_ARTIST_TYPE,
     languageType: DEFAULT_LANGUAGE,
     subunitPreference: DEFAULT_SUBUNIT_PREFERENCE,
@@ -48,6 +49,7 @@ interface GameOptions {
     includes: { id: number, name: string }[];
     goal: number;
     guessTimeout: number;
+    duration: number;
     languageType: LanguageType;
     subunitPreference: SubunitsPreference;
 }
@@ -406,6 +408,31 @@ export default class GuildPreference {
     /** @returns whether the goal option is set */
     isGoalSet(): boolean {
         return this.gameOptions.goal !== null;
+    }
+
+    /**
+     * Sets the duration option value
+     * @param duration - The game session duration in minutes
+     */
+    setDuration(duration: number) {
+        this.gameOptions.duration = duration;
+        this.updateGuildPreferences(dbContext.kmq);
+    }
+
+    /** @returns the current duration option value */
+    getDuration(): number {
+        return this.gameOptions.duration;
+    }
+
+    /** Resets the duration option to the default value */
+    resetDuration() {
+        this.gameOptions.duration = null;
+        this.updateGuildPreferences(dbContext.kmq);
+    }
+
+    /** @returns whether the duratiopn option is active */
+    isDurationSet(): boolean {
+        return this.gameOptions.duration !== null;
     }
 
     /**
