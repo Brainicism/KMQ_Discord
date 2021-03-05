@@ -51,6 +51,7 @@ export interface GuessResult {
     guesserUserId?: string;
     pointsEarned?: number;
     streak?: number;
+    remainingDuration?: number;
 }
 
 export default class GameSession {
@@ -169,24 +170,33 @@ export default class GameSession {
             logger.info(`${getDebugLogHeader(message)} | Song correctly guessed. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
 
             // update scoreboard
-            const userTag = getUserTag(message.author);
-            this.scoreboard.updateScoreboard(userTag, message.author.id, message.author.avatarURL, guessResult.pointsEarned, expGain);
+            this.scoreboard.updateScoreboard(getUserTag(message.author), message.author.id, message.author.avatarURL, guessResult.pointsEarned, expGain);
         } else {
             this.lastGuesser = null;
         }
+
+        // calculate remaining game duration if applicable
+        const currGameLength = (Date.now() - this.startedAt) / 60000;
+        const remainingDuration = guildPreference.isDurationSet() ? (guildPreference.getDuration() - currGameLength) : null;
+        guessResult.remainingDuration = remainingDuration;
 
         if (messageContext) {
             sendEndOfRoundMessage(messageContext, this.scoreboard, this.gameRound, guessResult);
         }
 
+        // cleanup
+        this.stopGuessTimeout();
         this.gameRound = null;
         if (this.connection) {
             this.connection.removeAllListeners();
         }
-        this.stopGuessTimeout();
-        if (this.finished) return;
 
-        if (this.scoreboard.gameFinished(guildPreference)) {
+        if (this.finished) return;
+        // check if duration has been reached
+        if (remainingDuration && remainingDuration < 0) {
+            logger.info(`gid: ${this.guildID} | Game session duration reached`);
+            endSession(this);
+        } else if (this.scoreboard.gameFinished(guildPreference)) {
             endSession(this);
         }
     }
