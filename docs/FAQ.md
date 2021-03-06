@@ -10,7 +10,7 @@ If you think an official music video is missing, consider contributing to the Ao
 3. You have changed the *guess mode* game option. See `,help mode` for more details
 4. You must be in the same voice channel as the bot, *and* typing your answer in the text channel the game started in
 
-If none of these apply, the song's name in the database *may* be incorrect. You may report these in #song-aliases in the official support server found in `,help`. 
+If none of these apply, the song's name in the database *may* be incorrect. You may report these in #song-aliases in the official KMQ server found in `,help`. 
 
 ## The bot keeps repeating the same songs
 Your current set of game options is limiting the choice of songs available. You can check your game options by using `,options`. 
@@ -29,7 +29,7 @@ When specifying an artist as a guess, they must be shown exactly as in `,help gr
 3. Guessing the original group name will be accepted for subunits. `NCT` will be accepted for `NCT 127`.
 
 ## The bot is lagging
-If this lasts for more than 5 minutes, let us know in the support server found in `,help`
+If this lasts for more than 5 minutes, let us know in the official KMQ server found in `,help`
 
 ## I have an amazing feature request
-Recommend it in the #suggestions channel in the support server found in `,help`
+Recommend it in the #suggestions channel in the official KMQ server found in `,help`

@@ -176,7 +176,7 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
     updatedOption?: { option: GameOption, reset: boolean }, footerText?: string) {
     const totalSongs = await getSongCount(guildPreference);
     if (totalSongs === null) {
-        sendErrorMessage(getMessageContext(message), { title: "Error retrieving song data", description: `Try again in a bit, or report this error to the support server found in \`${process.env.BOT_PREFIX}help\`.` });
+        sendErrorMessage(getMessageContext(message), { title: "Error retrieving song data", description: `Try again in a bit, or report this error to the official KMQ server found in \`${process.env.BOT_PREFIX}help\`.` });
         return;
     }
 
@@ -382,7 +382,7 @@ export function getNumParticipants(message: GuildTextableMessage): number {
  * @returns a friendly string describing the missing text permissions
  */
 function missingPermissionsText(missingPermissions: string[]): string {
-    return `Ensure that the bot has the following permissions: \`${missingPermissions.join(", ")}\`\n\nSee the following link for details: https://support.discord.com/hc/en-us/articles/206029707-How-do-I-set-up-Permissions-. If you are still having issues, join the support server found in \`${process.env.BOT_PREFIX}help\``;
+    return `Ensure that the bot has the following permissions: \`${missingPermissions.join(", ")}\`\n\nSee the following link for details: https://support.discord.com/hc/en-us/articles/206029707-How-do-I-set-up-Permissions-. If you are still having issues, join the official KMQ server found in \`${process.env.BOT_PREFIX}help\``;
 }
 
 /**

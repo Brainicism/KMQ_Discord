@@ -8,7 +8,7 @@
 
 A K-Pop guessing game over Discord, using [Aoimirai's database](http://kpop.daisuki.com.br/index.html) of K-Pop music videos. Test your reflexes and K-Pop knowledge by guessing the right song name before your friends!
 
-Join our [support server](https://discord.gg/RCuzwYV) for help and to play with us! We're open to feature requests/bug reports too!
+Join our [official KMQ server](https://discord.gg/RCuzwYV) for help and to play with us! We're open to feature requests/bug reports too!
 
 [![Discord Bots](https://top.gg/api/widget/508759831755096074.svg)](https://top.gg/bot/508759831755096074)
 
