@@ -246,7 +246,7 @@ export async function sendEndGameMessage(textChannel: Eris.TextChannel, gameSess
                 username: client.user.username,
                 avatarURL: client.user.avatarURL,
             },
-            title: "Nobody won 😔",
+            title: "Nobody won",
             footerText,
             thumbnailUrl: KmqImages.NOT_IMPRESSED,
         });
