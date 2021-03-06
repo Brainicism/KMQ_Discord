@@ -127,12 +127,19 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
  * @param songGuessed - Whether the song was guessed
  */
 export async function sendEndOfRoundMessage(messageContext: MessageContext, scoreboard: Scoreboard, gameRound: GameRound, guessResult: GuessResult) {
-    let footer: Eris.EmbedFooterOptions = null;
+    const footer: Eris.EmbedFooterOptions = {
+        text: "",
+    };
+
     if (gameRound.songAliases.length > 0) {
-        footer = {
-            text: `Aliases: ${Array.from(gameRound.songAliases).join(", ")}`,
-        };
+        footer.text += `Aliases: ${Array.from(gameRound.songAliases).join(", ")}\n`;
     }
+
+    const { remainingDuration } = guessResult;
+    if (remainingDuration) {
+        footer.text += `${remainingDuration > 0 ? Math.ceil(guessResult.remainingDuration) : 0} minutes remaining`;
+    }
+
     const fact = Math.random() <= 0.05 ? getFact() : null;
 
     const emptyScoreBoard = scoreboard.isEmpty();
@@ -217,7 +224,8 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
                 ${guildPreference.isGroupsMode() && guildPreference.isGenderAlternating() && guildPreference.getGroupIds().length > 1 ? ` with ${optionStrings[GameOption.GENDER]}` : ""} ${optionStrings[GameOption.CUTOFF]}\
                 ${guildPreference.isExcludesMode() && !guildPreference.isGroupsMode() ? `, excluding ${optionStrings[GameOption.EXCLUDE]}` : ""}${guildPreference.isIncludesMode() && !guildPreference.isGroupsMode() ? `, including ${optionStrings[GameOption.INCLUDE]}` : ""}. \nPlaying from the ${optionStrings[GameOption.SEEK_TYPE]} point of each song. ${shuffleUniqueMode ? shuffleMessage : ""}\
                 Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}\
-                \nPlaying \`${guildPreference.getLanguageType()}\` language songs.`,
+                \nPlaying \`${guildPreference.getLanguageType()}\` language songs.\
+                \n${guildPreference.isDurationSet() ? `The game will automatically end after \`${guildPreference.getDuration()}\` minutes have passed.` : ""}`,
             footerText: footerText !== null ? footerText : null,
             thumbnailUrl: KmqImages.LISTENING,
         });

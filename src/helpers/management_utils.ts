@@ -1,3 +1,5 @@
+/* eslint-disable global-require */
+/* eslint-disable import/no-dynamic-require */
 import cronParser from "cron-parser";
 import path from "path";
 import _glob from "glob";
@@ -43,6 +45,7 @@ const RESTART_WARNING_INTERVALS = new Set([10, 5, 2, 1]);
 const publishOverridesFilePath = path.resolve(__dirname, "../../data/publish_date_overrides.json");
 const songAliasesFilePath = path.resolve(__dirname, "../../data/song_aliases.json");
 const artistAliasesFilePath = path.resolve(__dirname, "../../data/artist_aliases.json");
+let cachedCommandFiles: { [commandName: string]: BaseCommand } = null;
 
 /** Registers listeners on client events */
 export function registerClientEvents() {
@@ -201,22 +204,36 @@ export async function reloadCaches() {
 }
 
 /** @returns a mapping of command name to command source file */
-export function getCommandFiles(): Promise<{ [commandName: string]: BaseCommand }> {
+export function getCommandFiles(shouldReload: boolean): Promise<{ [commandName: string]: BaseCommand }> {
+    if (cachedCommandFiles && !shouldReload) {
+        return Promise.resolve(cachedCommandFiles);
+    }
+
     return new Promise(async (resolve, reject) => {
         const commandMap = {};
         let files: Array<string>;
         try {
             files = await glob(process.env.NODE_ENV === EnvType.DEV ? "commands/**/*.ts" : "commands/**/*.js");
             await Promise.all(files.map(async (file) => {
-                const command = await import(path.join("../", file));
-                const commandName = path.parse(file).name;
-                logger.info(`Registering command: ${commandName}`);
-                // eslint-disable-next-line new-cap
-                commandMap[commandName] = new command.default();
+                const commandFilePath = path.join("../", file);
+                if (shouldReload) {
+                    // invalidate require cache
+                    delete require.cache[require.resolve(commandFilePath)];
+                }
+                try {
+                    const command = require(commandFilePath);
+                    const commandName = path.parse(file).name;
+                    logger.info(`Registering command: ${commandName}`);
+                    // eslint-disable-next-line new-cap
+                    commandMap[commandName] = new command.default();
+                } catch (e) {
+                    throw new Error(`Failed to load file: ${commandFilePath}`);
+                }
             }));
+            cachedCommandFiles = commandMap;
             resolve(commandMap);
         } catch (err) {
-            reject();
+            reject(err);
             logger.error(`Unable to read commands error = ${err}`);
         }
     });
@@ -230,15 +247,15 @@ export function getCommandFiles(): Promise<{ [commandName: string]: BaseCommand 
 function registerCommand(command: BaseCommand, commandName: string) {
     if (commandName in state.commands) {
         logger.error(`Command \`${commandName}\` already exists. Possible conflict?`);
-        process.exit(1);
     }
     state.commands[commandName] = command;
 }
 
 /** Registers commands */
-export async function registerCommands() {
+export async function registerCommands(initialLoad: boolean) {
     // load commands
-    const commandFiles = await getCommandFiles();
+    state.commands = {};
+    const commandFiles = await getCommandFiles(!initialLoad);
     for (const [commandName, command] of Object.entries(commandFiles)) {
         if (commandName === "base_command") continue;
         registerCommand(command, commandName);

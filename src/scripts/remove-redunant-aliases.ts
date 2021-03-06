@@ -12,9 +12,9 @@ export default async function removeRedunantAliases() {
     const songAliases: { [songId: string]: Array<string> } = JSON.parse(fs.readFileSync(songAliasPath).toString());
     let changeCount = 0;
     for (const videoId of Object.keys(songAliases)) {
-        const result = await dbContext.kpopVideos("app_kpop")
-            .select("nome as name")
-            .where("vlink", "=", videoId)
+        const result = await dbContext.kmq("available_songs")
+            .select("song_name as name")
+            .where("link", "=", videoId)
             .first();
 
         if (!result) {

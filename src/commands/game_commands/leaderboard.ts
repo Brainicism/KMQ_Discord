@@ -7,6 +7,7 @@ import { getRankNameByLevel } from "./profile";
 import { bold, chooseRandom } from "../../helpers/utils";
 import state from "../../kmq";
 import { GuildTextableMessage } from "../../types";
+import { KmqImages } from "../../constants";
 
 const logger = _logger("leaderboard");
 
@@ -174,6 +175,7 @@ export default class LeaderboardCommand implements BaseCommand {
             title: bold(leaderboardTitle),
             fields,
             timestamp: new Date(),
+            thumbnailUrl: KmqImages.THUMBS_UP,
             footerText: chooseRandom(leaderboardQuotes),
         });
     }

@@ -7,7 +7,7 @@ import { exec } from "child_process";
 import { QueriedSong } from "../types";
 import _logger from "../logger";
 import dbContext from "../database_context";
-import { generateAvailableSongsView } from "../seed/bootstrap";
+import { generateKmqDataTables } from "../seed/bootstrap";
 import { retryJob } from "../helpers/utils";
 
 const logger: Logger = _logger("download-new-songs");
@@ -210,5 +210,5 @@ export async function downloadAndConvertSongs(limit?: number) {
 
     await clearPartiallyCachedSongs();
     await downloadNewSongs(limit);
-    generateAvailableSongsView();
+    generateKmqDataTables();
 }

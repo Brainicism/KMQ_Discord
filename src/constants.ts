@@ -5,4 +5,5 @@ export class KmqImages {
     public static HAPPY = "https://lovearrowshoot.me/kmq/images/happy_bg.png";
     public static DEAD = "https://lovearrowshoot.me/kmq/images/dead_bg.png";
     public static LISTENING = "https://lovearrowshoot.me/kmq/images/listening_bg.png";
+    public static THUMBS_UP = "https://lovearrowshoot.me/kmq/images/thumbs_up_bg.png";
 }

@@ -39,10 +39,11 @@ async function needsBootstrap(db: DatabaseContext) {
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export function generateAvailableSongsView() {
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq < ./src/seed/create_available_songs_table_procedure.sql`);
-    logger.info("Re-creating available songs view...");
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq -e "CALL CreateAvailableSongsTable;"`);
+export function generateKmqDataTables() {
+    const createKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/create_kmq_data_tables_procedure.sql");
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq < ${createKmqTablesProcedureSqlPath}`);
+    logger.info("Re-creating KMQ data tables view...");
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq -e "CALL CreateKmqDataTables;"`);
 }
 
 function performMigrations() {
@@ -73,7 +74,7 @@ async function bootstrapDatabases() {
         }
     } else {
         performMigrations();
-        generateAvailableSongsView();
+        generateKmqDataTables();
     }
     logger.info(`Bootstrapped in ${(Date.now() - startTime) / 1000}s`);
     await db.destroy();

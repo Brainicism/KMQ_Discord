@@ -65,6 +65,7 @@ export enum GameOption {
     GROUPS = "Groups",
     GOAL = "Goal",
     TIMER = "Timer",
+    DURATION = "Duration",
     EXCLUDE = "Exclude",
     INCLUDE = "Include",
     ARTIST_TYPE = "Artist Type",
