@@ -31,3 +31,7 @@ ALTER TABLE kpop_videos.app_kpop_group MODIFY name VARCHAR(250) CHARACTER SET ut
 
 /* Remove comma from "Car, the garden" */
 UPDATE kpop_videos.app_kpop_group SET name = 'Car the garden' WHERE id = 700;
+
+/* T-ara Day by Day, swap main and dance versions. Main version is 15 minutes long */
+UPDATE kpop_videos.app_kpop SET vtype = 'duplicate' WHERE vlink = 'brnCe8lL7l4';
+UPDATE kpop_videos.app_kpop SET vtype = 'main' WHERE vlink = 'kb6mCsvLqP0';
