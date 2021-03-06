@@ -2,12 +2,11 @@ import BaseCommand, { CommandArgs } from "../base_command";
 import GameSession from "../../structures/game_session";
 import {
     areUserAndBotInSameVoiceChannel,
-    EMBED_INFO_COLOR,
     getDebugLogHeader,
     EMBED_SUCCESS_COLOR,
-    sendMessage,
     getNumParticipants,
     getMessageContext,
+    sendInfoMessage,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { GameType } from "./play";
@@ -15,6 +14,7 @@ import EliminationScoreboard from "../../structures/elimination_scoreboard";
 import _logger from "../../logger";
 import GameRound from "../../structures/game_round";
 import { GuildTextableMessage } from "../../types";
+import { KmqImages } from "../../constants";
 
 const logger = _logger("skip");
 
@@ -23,31 +23,26 @@ function getSkipsRequired(message: GuildTextableMessage): number {
 }
 
 async function sendSkipNotification(message: GuildTextableMessage, gameSession: GameSession) {
-    await sendMessage(message.channel, {
-        embed: {
-            color: EMBED_INFO_COLOR,
-            author: {
-                name: message.author.username,
-                icon_url: message.author.avatarURL,
-            },
-            title: "**Skip**",
-            description: `${gameSession.gameRound.getNumSkippers()}/${getSkipsRequired(message)} skips received.`,
+    await sendInfoMessage(getMessageContext(message), {
+        title: "**Skip**",
+        description: `${gameSession.gameRound.getNumSkippers()}/${getSkipsRequired(message)} skips received.`,
+        author: {
+            username: message.author.username,
+            avatarURL: message.author.avatarURL,
         },
     });
 }
 
 async function sendSkipMessage(message: GuildTextableMessage, gameRound: GameRound) {
-    const skipMessage = await sendMessage(message.channel, {
-        embed: {
-            color: EMBED_SUCCESS_COLOR,
-            author: {
-                name: message.author.username,
-                icon_url: message.author.avatarURL,
-
-            },
-            title: "**Skip**",
-            description: `${gameRound.getNumSkippers()}/${getSkipsRequired(message)} skips achieved, skipping...`,
+    const skipMessage = await sendInfoMessage(getMessageContext(message), {
+        color: EMBED_SUCCESS_COLOR,
+        author: {
+            username: message.author.username,
+            avatarURL: message.author.avatarURL,
         },
+        title: "**Skip**",
+        description: `${gameRound.getNumSkippers()}/${getSkipsRequired(message)} skips achieved, skipping...`,
+        thumbnailUrl: KmqImages.NOT_IMPRESSED,
     });
     setTimeout(() => {
         skipMessage.delete();

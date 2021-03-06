@@ -22,6 +22,7 @@ import { ModeType } from "../commands/game_options/mode";
 import { getRankNameByLevel } from "../commands/game_commands/profile";
 import { GENDER } from "../commands/game_options/gender";
 import EliminationPlayer from "./elimination_player";
+import { KmqImages } from "../constants";
 
 const logger = _logger("game_session");
 const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
@@ -243,7 +244,7 @@ export default class GameSession {
                 levelUpMessages = levelUpMessages.slice(0, 10);
                 levelUpMessages.push("and many others...");
             }
-            sendInfoMessage({ channel: this.textChannel }, { title: "🚀 Power up!", description: levelUpMessages.join("\n") });
+            sendInfoMessage({ channel: this.textChannel }, { title: "🚀 Power up!", description: levelUpMessages.join("\n"), thumbnailUrl: KmqImages.THUMBS_UP });
         }
 
         // commit guild stats
@@ -376,7 +377,7 @@ export default class GameSession {
                 return;
             }
         } catch (err) {
-            await sendErrorMessage(messageContext, { title: "Error selecting song", description: "Please try starting the round again. If the issue persists, report it in our support server." });
+            await sendErrorMessage(messageContext, { title: "Error selecting song", description: "Please try starting the round again. If the issue persists, report it in our official KMQ server." });
             logger.error(`${getDebugLogHeader(messageContext)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
             this.endSession();
             return;

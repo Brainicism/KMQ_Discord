@@ -3,8 +3,9 @@ import path from "path";
 import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
 import dbContext from "../../database_context";
-import { EMBED_INFO_COLOR, getDebugLogHeader, sendMessage } from "../../helpers/discord_utils";
+import { EMBED_INFO_COLOR, getDebugLogHeader, getMessageContext, sendInfoMessage } from "../../helpers/discord_utils";
 import { bold, friendlyFormattedDate } from "../../helpers/utils";
+import { KmqImages } from "../../constants";
 
 const logger = _logger("news");
 
@@ -37,19 +38,18 @@ export default class NewsCommand implements BaseCommand {
             return;
         }
         const news = fs.readFileSync(newsFilePath).toString();
-        const embed = {
+
+        logger.info(`${getDebugLogHeader(message)} | News retrieved.`);
+        await sendInfoMessage(getMessageContext(message), {
             color: EMBED_INFO_COLOR,
             author: {
-                name: message.author.username,
-                icon_url: message.author.avatarURL,
+                username: message.author.username,
+                avatarURL: message.author.avatarURL,
             },
             title: bold("Updates"),
             description: news,
-            footer: {
-                text: `Latest Song Update: ${friendlyFormattedDate(latestSongDate)}`,
-            },
-        };
-        logger.info(`${getDebugLogHeader(message)} | News retrieved.`);
-        await sendMessage(message.channel, { embed });
+            thumbnailUrl: KmqImages.READING_BOOK,
+            footerText: `Latest Song Update: ${friendlyFormattedDate(latestSongDate)}`,
+        });
     }
 }

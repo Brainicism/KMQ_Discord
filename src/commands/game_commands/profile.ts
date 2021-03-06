@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import Eris from "eris";
 import dbContext from "../../database_context";
-import { getDebugLogHeader, getMessageContext, getUserTag, sendEmbed, sendInfoMessage } from "../../helpers/discord_utils";
+import { getDebugLogHeader, getMessageContext, getUserTag, sendInfoMessage } from "../../helpers/discord_utils";
 import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
 import { bold, friendlyFormattedDate } from "../../helpers/utils";
@@ -139,7 +139,7 @@ export default class ProfileCommand implements BaseCommand {
                 value: lastActiveDateString,
             }];
 
-        sendEmbed(message.channel, {
+        sendInfoMessage(getMessageContext(message), {
             title: bold(`${getUserTag(requestedPlayer)}`),
             fields,
             timestamp: new Date(),

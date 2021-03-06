@@ -7,7 +7,7 @@ import { promisify } from "util";
 import schedule from "node-schedule";
 import _logger from "../logger";
 import state from "../kmq";
-import { sendMessage, EMBED_INFO_COLOR } from "./discord_utils";
+import { EMBED_INFO_COLOR, sendInfoMessage } from "./discord_utils";
 import readyHandler from "../events/client/ready";
 import messageCreateHandler from "../events/client/messageCreate";
 import voiceChannelLeaveHandler from "../events/client/voiceChannelLeave";
@@ -82,16 +82,14 @@ export const checkRestartNotification = async (restartNotification: Date): Promi
     if (RESTART_WARNING_INTERVALS.has(timeDiffMin)) {
         for (const gameSession of Object.values(state.gameSessions)) {
             if (gameSession.finished) continue;
-            await sendMessage(gameSession.textChannel, {
-                embed: {
-                    color: EMBED_INFO_COLOR,
-                    author: {
-                        name: state.client.user.username,
-                        icon_url: state.client.user.avatarURL,
-                    },
-                    title: `Upcoming bot restart in ${timeDiffMin} minutes.`,
-                    description: "Downtime will be approximately 2 minutes.",
+            await sendInfoMessage({ channel: gameSession.textChannel }, {
+                color: EMBED_INFO_COLOR,
+                author: {
+                    username: state.client.user.username,
+                    avatarURL: state.client.user.avatarURL,
                 },
+                title: `Upcoming bot restart in ${timeDiffMin} minutes.`,
+                description: "Downtime will be approximately 2 minutes.",
             });
             channelsWarned++;
         }

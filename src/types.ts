@@ -33,6 +33,13 @@ export interface EmbedPayload {
     description?: string;
     footerText?: string;
     thumbnailUrl?: string;
+    timestamp?: Date;
+    fields?: Eris.EmbedField[];
+    author?: {
+        username: string;
+        avatarURL: string;
+    };
+    color?: number;
 }
 
 export interface State {

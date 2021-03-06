@@ -2,11 +2,12 @@ import Eris from "eris";
 import dbContext from "../../database_context";
 import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
-import { getDebugLogHeader, getUserTag, sendEmbed, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
+import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import { getRankNameByLevel } from "./profile";
 import { bold, chooseRandom } from "../../helpers/utils";
 import state from "../../kmq";
 import { GuildTextableMessage } from "../../types";
+import { KmqImages } from "../../constants";
 
 const logger = _logger("leaderboard");
 
@@ -170,13 +171,12 @@ export default class LeaderboardCommand implements BaseCommand {
 
         const leaderboardType = serverSpecific ? `${state.client.guilds.get(message.guildID).name}'s` : "Global";
         const leaderboardTitle = `${leaderboardType} Leaderboard (Page ${pageOffset + 1})`;
-        sendEmbed(message.channel, {
+        sendInfoMessage({ channel: message.channel }, {
             title: bold(leaderboardTitle),
             fields,
             timestamp: new Date(),
-            footer: {
-                text: chooseRandom(leaderboardQuotes),
-            },
+            thumbnailUrl: KmqImages.THUMBS_UP,
+            footerText: chooseRandom(leaderboardQuotes),
         });
     }
 }
