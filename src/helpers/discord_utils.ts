@@ -1,4 +1,4 @@
-import Eris, { EmbedOptions } from "eris";
+import Eris, { EmbedOptions, TextableChannel } from "eris";
 import EmbedPaginator from "eris-pagination";
 import path from "path";
 import GuildPreference from "../structures/guild_preference";
@@ -16,6 +16,7 @@ import EliminationScoreboard from "../structures/elimination_scoreboard";
 import { GameType } from "../commands/game_commands/play";
 import { ArtistType } from "../commands/game_options/artisttype";
 import { SubunitsPreference } from "../commands/game_options/subunits";
+import { KmqImages } from "../constants";
 
 const endGameMessages = parseJsonFile(path.resolve(__dirname, "../../data/end_game_messages.json"));
 
@@ -53,13 +54,68 @@ export function getMessageContext(message: GuildTextableMessage): MessageContext
  * @param textChannel - The channel where the message should be delivered
  * @param messageContent - The MessageContent to send
  */
-export async function sendMessage(textChannel: Eris.TextChannel, messageContent: Eris.MessageContent): Promise<Eris.Message> {
+async function sendMessage(textChannel: Eris.TextChannel, messageContent: Eris.MessageContent): Promise<Eris.Message> {
     try {
         return await state.client.createMessage(textChannel.id, messageContent);
     } catch (e) {
         logger.error(`Error sending message. err = ${e}. body = ${JSON.stringify(messageContent)}`);
         return null;
     }
+}
+
+/**
+ * Sends an error embed with the specified title/description
+ * @param messageContext - An object containing relevant parts of Eris.Message
+ * @param title - The title of the embed
+ * @param description - The description of the embed
+ */
+export async function sendErrorMessage(messageContext: MessageContext, embedPayload: EmbedPayload): Promise<Eris.Message<TextableChannel>> {
+    return sendMessage(messageContext.channel, {
+        embed: {
+            color: embedPayload.color || EMBED_ERROR_COLOR,
+            author: messageContext.author ? {
+                name: messageContext.author.username,
+                icon_url: messageContext.author.avatarURL,
+            } : null,
+            title: bold(embedPayload.title),
+            description: embedPayload.description,
+            footer: embedPayload.footerText ? {
+                text: embedPayload.footerText,
+            } : null,
+            thumbnail: embedPayload.thumbnailUrl ? { url: embedPayload.thumbnailUrl } : { url: KmqImages.DEAD },
+        },
+    });
+}
+
+/**
+ * Sends an info embed with the specified title/description/footer text
+ * @param messageContext - An object containing relevant parts of Eris.Message
+ * @param title - The title of the embed
+ * @param description - The description of the embed
+ * @param footerText - The footer text of the embed
+ */
+export async function sendInfoMessage(messageContext: MessageContext, embedPayload: EmbedPayload): Promise<Eris.Message<TextableChannel>> {
+    if (embedPayload.description && embedPayload.description.length > 2048) {
+        return sendErrorMessage(messageContext, { title: "Error", description: "Response message was too long, report this error to the KMQ help server" });
+    }
+
+    const author = messageContext.author || embedPayload.author;
+    const embed: EmbedOptions = {
+        color: embedPayload.color || EMBED_INFO_COLOR,
+        author: author ? {
+            name: author.username,
+            icon_url: author.avatarURL,
+        } : null,
+        title: bold(embedPayload.title),
+        description: embedPayload.description,
+        fields: embedPayload.fields,
+        footer: embedPayload.footerText ? {
+            text: embedPayload.footerText,
+        } : null,
+        thumbnail: embedPayload.thumbnailUrl ? { url: embedPayload.thumbnailUrl } : null,
+        timestamp: embedPayload.timestamp,
+    };
+    return sendMessage(messageContext.channel, { embed });
 }
 
 /**
@@ -88,75 +144,18 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
         });
     }
 
-    await sendMessage(messageContext.channel, {
-        embed: {
-            color: guessResult.correct ? EMBED_SUCCESS_COLOR : EMBED_ERROR_COLOR,
-            author: {
-                name: guessResult.correct ? messageContext.author.username : null,
-                icon_url: guessResult.correct ? messageContext.author.avatarURL : null,
-            },
-            title: `"${gameRound.songName}" (${gameRound.songYear}) - ${gameRound.artist}`,
-            description,
-            thumbnail: {
-                url: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,
-            },
-            fields,
-            footer,
+    await sendInfoMessage({ channel: messageContext.channel }, {
+        color: guessResult.correct ? EMBED_SUCCESS_COLOR : EMBED_ERROR_COLOR,
+        author: {
+            username: guessResult.correct ? messageContext.author.username : null,
+            avatarURL: guessResult.correct ? messageContext.author.avatarURL : null,
         },
+        title: `"${gameRound.songName}" (${gameRound.songYear}) - ${gameRound.artist}`,
+        description,
+        thumbnailUrl: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,
+        fields,
+        footerText: footer ? footer.text : "",
     });
-}
-
-/**
- * Sends an error embed with the specified title/description
- * @param messageContext - An object containing relevant parts of Eris.Message
- * @param title - The title of the embed
- * @param description - The description of the embed
- */
-export async function sendErrorMessage(messageContext: MessageContext, embedPayload: EmbedPayload) {
-    await sendMessage(messageContext.channel, {
-        embed: {
-            color: EMBED_ERROR_COLOR,
-            author: messageContext.author ? {
-                name: messageContext.author.username,
-                icon_url: messageContext.author.avatarURL,
-            } : null,
-            title: bold(embedPayload.title),
-            description: embedPayload.description,
-            footer: embedPayload.footerText ? {
-                text: embedPayload.footerText,
-            } : null,
-            thumbnail: embedPayload.thumbnailUrl ? { url: embedPayload.thumbnailUrl } : null,
-        },
-    });
-}
-
-/**
- * Sends an info embed with the specified title/description/footer text
- * @param messageContext - An object containing relevant parts of Eris.Message
- * @param title - The title of the embed
- * @param description - The description of the embed
- * @param footerText - The footer text of the embed
- */
-export async function sendInfoMessage(messageContext: MessageContext, embedPayload: EmbedPayload) {
-    if (embedPayload.description.length > 2048) {
-        await sendErrorMessage(messageContext, { title: "Error", description: "Response message was too long, report this error to the KMQ help server" });
-        return;
-    }
-
-    const embed: EmbedOptions = {
-        color: EMBED_INFO_COLOR,
-        author: messageContext.author ? {
-            name: messageContext.author.username,
-            icon_url: messageContext.author.avatarURL,
-        } : null,
-        title: bold(embedPayload.title),
-        description: embedPayload.description,
-        footer: embedPayload.footerText ? {
-            text: embedPayload.footerText,
-        } : null,
-        thumbnail: embedPayload.thumbnailUrl ? { url: embedPayload.thumbnailUrl } : null,
-    };
-    await sendMessage(messageContext.channel, { embed });
 }
 
 /**
@@ -220,6 +219,7 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
                 Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}\
                 \nPlaying \`${guildPreference.getLanguageType()}\` language songs.`,
             footerText: footerText !== null ? footerText : null,
+            thumbnailUrl: KmqImages.LISTENING,
         });
 }
 
@@ -230,18 +230,17 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
  */
 export async function sendEndGameMessage(textChannel: Eris.TextChannel, gameSession: GameSession) {
     const { client } = state;
-    const roundsPlayedFooter = { text: `${gameSession.getCorrectGuesses()}/${gameSession.getRoundsPlayed()} songs correctly guessed!` };
+    const footerText = `${gameSession.getCorrectGuesses()}/${gameSession.getRoundsPlayed()} songs correctly guessed!`;
     if (gameSession.scoreboard.isEmpty()) {
-        await sendMessage(textChannel, {
-            embed: {
-                color: EMBED_INFO_COLOR,
-                author: {
-                    name: client.user.username,
-                    icon_url: client.user.avatarURL,
-                },
-                title: "Nobody won 😔",
-                footer: roundsPlayedFooter,
+        await sendInfoMessage({ channel: textChannel }, {
+            color: EMBED_INFO_COLOR,
+            author: {
+                username: client.user.username,
+                avatarURL: client.user.avatarURL,
             },
+            title: "Nobody won 😔",
+            footerText,
+            thumbnailUrl: KmqImages.NOT_IMPRESSED,
         });
     } else {
         const winners = gameSession.scoreboard.getWinners();
@@ -254,17 +253,13 @@ export async function sendEndGameMessage(textChannel: Eris.TextChannel, gameSess
                 inline: false,
             },
         );
-        await sendMessage(textChannel, {
-            embed: {
-                color: EMBED_SUCCESS_COLOR,
-                description: "**Scoreboard**",
-                thumbnail: {
-                    url: winners[0].getAvatarURL(),
-                },
-                title: `🎉 ${gameSession.scoreboard.getWinnerMessage()} 🎉`,
-                fields: embedFields,
-                footer: roundsPlayedFooter,
-            },
+        await sendInfoMessage({ channel: textChannel }, {
+            color: EMBED_SUCCESS_COLOR,
+            description: "**Scoreboard**",
+            thumbnailUrl: winners[0].getAvatarURL(),
+            title: `🎉 ${gameSession.scoreboard.getWinnerMessage()} 🎉`,
+            fields: embedFields,
+            footerText,
         });
     }
 }
@@ -288,16 +283,14 @@ export async function sendPaginationedEmbed(message: GuildTextableMessage, embed
  */
 export async function sendScoreboardMessage(message: GuildTextableMessage, gameSession: GameSession) {
     if (gameSession.scoreboard.isEmpty() && gameSession.gameType === GameType.CLASSIC) {
-        return sendMessage(message.channel, {
-            embed: {
-                color: EMBED_SUCCESS_COLOR,
-                author: {
-                    name: message.author.username,
-                    icon_url: message.author.avatarURL,
-                },
-                description: "(╯°□°）╯︵ ┻━┻",
-                title: "**Scoreboard**",
+        return sendInfoMessage({ channel: message.channel }, {
+            color: EMBED_SUCCESS_COLOR,
+            author: {
+                username: message.author.username,
+                avatarURL: message.author.avatarURL,
             },
+            description: "(╯°□°）╯︵ ┻━┻",
+            title: "**Scoreboard**",
         });
     }
     const winnersFieldSubsets = chunkArray(gameSession.scoreboard.getScoreboardEmbedFields(), EMBED_FIELDS_PER_PAGE);
@@ -374,15 +367,6 @@ export function getVoiceChannel(message: GuildTextableMessage): Eris.VoiceChanne
  */
 export function getNumParticipants(message: GuildTextableMessage): number {
     return (getVoiceChannel(message).voiceMembers.filter((x) => !x.bot)).length;
-}
-
-/**
- * A lower level embed sending utility
- * @param textChannel - The channel where the embed will be sent
- * @param embed - The Embed to send
- */
-export async function sendEmbed(textChannel: Eris.TextChannel, embed: Eris.EmbedOptions) {
-    return sendMessage(textChannel, { embed });
 }
 
 /**

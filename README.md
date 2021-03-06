@@ -1,4 +1,5 @@
-K-pop Music Quiz
+![scoreboard](/images/banner.png)
+
 =======
 [![Top.GG Bot Status](https://top.gg/api/widget/status/508759831755096074.svg)](https://top.gg/bot/508759831755096074)
 [![Discord](https://img.shields.io/discord/679165980995223582)](https://discord.gg/RCuzwYV)

@@ -2,11 +2,12 @@ import Eris from "eris";
 import os from "os";
 import BaseCommand, { CommandArgs } from "../base_command";
 import {
-    sendEmbed, getDebugLogHeader,
+    getDebugLogHeader, sendInfoMessage, getMessageContext,
 } from "../../helpers/discord_utils";
 import dbContext from "../../database_context";
 import { bold } from "../../helpers/utils";
 import _logger from "../../logger";
+import { KmqImages } from "../../constants";
 
 const logger = _logger("stats");
 
@@ -99,13 +100,12 @@ export default class SkipCommand implements BaseCommand {
         }];
 
         logger.info(`${getDebugLogHeader(message)} | Stats retrieved`);
-        sendEmbed(message.channel, {
+        sendInfoMessage(getMessageContext(message), {
             title: bold("Bot Stats"),
             fields,
-            footer: {
-                text: "'Recent' statistics represent data from last 24 hours.",
-            },
+            footerText: "'Recent' statistics represent data from last 24 hours.",
             timestamp: new Date(),
+            thumbnailUrl: KmqImages.READING_BOOK,
         });
     }
 }

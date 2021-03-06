@@ -1,12 +1,14 @@
 import path from "path";
+import { EmbedOptions } from "eris";
 import BaseCommand, { CommandArgs } from "../base_command";
 import {
-    EMBED_INFO_COLOR, sendErrorMessage, getDebugLogHeader, sendPaginationedEmbed, sendEmbed, getMessageContext,
+    EMBED_INFO_COLOR, sendErrorMessage, getDebugLogHeader, sendPaginationedEmbed, getMessageContext, sendInfoMessage,
 } from "../../helpers/discord_utils";
 import _logger from "../../logger";
 import { chunkArray, parseJsonFile } from "../../helpers/utils";
 import { getCommandFiles } from "../../helpers/management_utils";
 import { GuildTextableMessage } from "../../types";
+import { KmqImages } from "../../constants";
 
 const logger = _logger("help");
 export const placeholder = /!/g;
@@ -81,21 +83,24 @@ const helpMessage = async (message: GuildTextableMessage, action: string) => {
 
     if (embedFields.length > 0) {
         const embedFieldSubsets = chunkArray(embedFields, FIELDS_PER_EMBED);
-        const embeds = embedFieldSubsets.map((embedFieldsSubset) => ({
+        const embeds: Array<EmbedOptions> = embedFieldSubsets.map((embedFieldsSubset) => ({
             title: embedTitle,
             color: EMBED_INFO_COLOR,
             description: embedDesc,
             fields: embedFieldsSubset,
             footer: embedFooter,
+            thumbnail: {
+                url: KmqImages.READING_BOOK,
+            },
         }));
 
         await sendPaginationedEmbed(message, embeds);
     } else {
-        await sendEmbed(message.channel, {
+        await sendInfoMessage(getMessageContext(message), {
             title: embedTitle,
-            color: EMBED_INFO_COLOR,
             description: embedDesc,
-            footer: embedFooter,
+            footerText: embedFooter.text,
+            thumbnailUrl: KmqImages.READING_BOOK,
         });
     }
 };

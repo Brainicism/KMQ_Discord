@@ -8,6 +8,7 @@ import { bold, isPowerHour, isWeekend } from "../../helpers/utils";
 import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
 import { GuildTextableMessage } from "../../types";
+import { KmqImages } from "../../constants";
 
 const logger = _logger("play");
 const DEFAULT_LIVES = 10;
@@ -25,7 +26,7 @@ export async function sendBeginGameMessage(textChannelName: string, voiceChannel
         gameInstructions += "\n\n**⬆️ KMQ POWER HOUR ACTIVE ⬆️**";
     }
     const startTitle = `Game starting in #${textChannelName} in 🔊 ${voiceChannelName}`;
-    await sendInfoMessage(getMessageContext(message), { title: startTitle, description: gameInstructions });
+    await sendInfoMessage(getMessageContext(message), { title: startTitle, description: gameInstructions, thumbnailUrl: KmqImages.HAPPY });
 }
 
 export default class PlayCommand implements BaseCommand {
@@ -104,7 +105,7 @@ export default class PlayCommand implements BaseCommand {
                     gameInstructions = `Type \`${process.env.BOT_PREFIX}join\` to play in the upcoming elimination game. Once all have joined, ${bold(getUserTag(gameOwner))} must send \`${process.env.BOT_PREFIX}begin\` to start the game. Everyone begins with \`${lives}\` lives.`;
                     gameSession = new GameSession(textChannel, voiceChannel, gameOwner, GameType.ELIMINATION, lives);
                     gameSession.addEliminationParticipant(gameOwner);
-                    await sendInfoMessage(getMessageContext(message), { title: startTitle, description: gameInstructions });
+                    await sendInfoMessage(getMessageContext(message), { title: startTitle, description: gameInstructions, thumbnailUrl: KmqImages.HAPPY });
                 } else {
                     // (1 and 2) CLASSIC game creation
                     gameSession = new GameSession(textChannel, voiceChannel, gameOwner, GameType.CLASSIC);
