@@ -28,7 +28,7 @@ const RANK_TITLES = [
     { title: "Almighty Ruler of the Solar System", req: 150 },
     { title: "Enlightened Ruler of the Galaxy", req: 160 },
     { title: "Immortal Ruler of the Universe", req: 170 },
-    { title: "Omnicient Ruler of the Multiverse", req: 180 },
+    { title: "Omniscient Ruler of the Multiverse", req: 180 },
 ];
 
 export function getRankNameByLevel(level: number): string {
