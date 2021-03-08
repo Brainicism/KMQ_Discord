@@ -290,7 +290,7 @@ export async function sendPaginationedEmbed(message: GuildTextableMessage, embed
  * @param gameSession - The GameSession
  */
 export async function sendScoreboardMessage(message: GuildTextableMessage, gameSession: GameSession) {
-    if (gameSession.scoreboard.isEmpty() && gameSession.gameType === GameType.CLASSIC) {
+    if (gameSession.scoreboard.isEmpty() && (gameSession.gameType === GameType.CLASSIC || gameSession.gameType === GameType.TEAMS)) {
         return sendInfoMessage({ channel: message.channel }, {
             color: EMBED_SUCCESS_COLOR,
             author: {

@@ -81,6 +81,10 @@
         {
             "title": "Did you know?",
             "message": "KMQ distracting you from studying? Check out `,duration` to limit the length of each game? See `,help duration` to learn more."
+        },
+        {
+            "title": "Did you know?",
+            "message": "Ever wanted to team up to defeat that insanely good KMQ player? Start playing with custom teams using `,play teams`! See `,help play` for more details."
         }
     ]
 }

@@ -16,6 +16,7 @@ const DEFAULT_LIVES = 10;
 export enum GameType {
     CLASSIC = "classic",
     ELIMINATION = "elimination",
+    TEAMS = "teams",
 }
 
 export async function sendBeginGameMessage(textChannelName: string, voiceChannelName: string, message: GuildTextableMessage) {
@@ -68,6 +69,10 @@ export default class PlayCommand implements BaseCommand {
                 example: "`!play elimination`",
                 explanation: `Start an elimination game of KMQ where each player starts with \`${DEFAULT_LIVES}\` lives.`,
             },
+            {
+                example: "`!play teams`",
+                explanation: "Split up into as many teams as you want and see who you can depend on to help you win!",
+            },
         ],
     };
 
@@ -86,13 +91,14 @@ export default class PlayCommand implements BaseCommand {
                 return;
             }
             const isEliminationMode = parsedMessage.components.length >= 1 && parsedMessage.components[0].toLowerCase() === "elimination";
-            if (gameSessions[message.guildID] && !gameSessions[message.guildID].sessionInitialized && isEliminationMode) {
-                // User sent ,play elimination twice, reset the GameSession
+            const isTeamsMode = parsedMessage.components.length >= 1 && parsedMessage.components[0].toLowerCase() === "teams";
+            if (gameSessions[message.guildID] && !gameSessions[message.guildID].sessionInitialized && (isEliminationMode || isTeamsMode)) {
+                // User sent ,play elimination or ,play teams twice, reset the GameSession
                 deleteGameSession(message.guildID);
             }
             if (!gameSessions[message.guildID] || (!isEliminationMode && !gameSessions[message.guildID].sessionInitialized)) {
-                // (1) No game session exists yet (create CLASSIC or ELIMINATION game), or
-                // (2) User attempting to ,play after a ,play elimination that didn't start, start CLASSIC game
+                // (1) No game session exists yet (create CLASSIC, ELIMINATION, or TEAMS game), or
+                // (2) User attempting to ,play after a ,play elimination/teams that didn't start, start CLASSIC game
                 const textChannel = message.channel;
                 const gameOwner = message.author;
                 let startTitle: string;
@@ -106,6 +112,12 @@ export default class PlayCommand implements BaseCommand {
                     gameSession = new GameSession(textChannel, voiceChannel, gameOwner, GameType.ELIMINATION, lives);
                     gameSession.addEliminationParticipant(gameOwner);
                     await sendInfoMessage(getMessageContext(message), { title: startTitle, description: gameInstructions, thumbnailUrl: KmqImages.HAPPY });
+                } else if (isTeamsMode) {
+                    // (1) TEAMS game creation
+                    startTitle = `\`${process.env.BOT_PREFIX}join\` a team!`;
+                    gameInstructions = `Type \`${process.env.BOT_PREFIX}join [team name]\` to form a new team.`;
+                    await sendInfoMessage(getMessageContext(message), { title: startTitle, description: gameInstructions, thumbnailUrl: KmqImages.HAPPY });
+                    gameSession = new GameSession(textChannel, voiceChannel, gameOwner, GameType.TEAMS);
                 } else {
                     // (1 and 2) CLASSIC game creation
                     gameSession = new GameSession(textChannel, voiceChannel, gameOwner, GameType.CLASSIC);

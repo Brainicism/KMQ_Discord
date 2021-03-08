@@ -8,22 +8,18 @@ const logger = _logger("scoreboard");
 
 export default class Scoreboard {
     /** Mapping of Discord user ID to Player */
-    protected players: { [userID: number]: Player };
+    protected players: { [userID: string]: Player };
 
     /** The current players in first place */
     protected firstPlace: Array<Player>;
 
     /** The current highest score */
-    private highestScore: number;
+    protected highestScore: number;
 
-    /** The Discord Guild ID */
-    private readonly guildID: string;
-
-    constructor(guildID: string) {
+    constructor() {
         this.players = {};
         this.firstPlace = [];
         this.highestScore = 0;
-        this.guildID = guildID;
     }
 
     /** @returns a string congratulating the winner(s) */
@@ -31,11 +27,11 @@ export default class Scoreboard {
         let winnerStr = "";
 
         if (this.firstPlace.length === 1) {
-            return `${this.firstPlace[0].getTag()} wins!`;
+            return `${this.firstPlace[0].getName()} wins!`;
         }
 
         for (let i = 0; i < this.firstPlace.length; i++) {
-            winnerStr += this.firstPlace[i].getTag();
+            winnerStr += this.firstPlace[i].getName();
             if (i === this.firstPlace.length - 1) {
                 // Last entry -- append just the username
                 winnerStr += " ";
@@ -51,13 +47,13 @@ export default class Scoreboard {
         return winnerStr;
     }
 
-    /** @returns An array of DiscordEmbed fields representing each participant's lives */
+    /** @returns An array of DiscordEmbed fields representing each participant's score */
     getScoreboardEmbedFields(): Array<{ name: string, value: string, inline: boolean }> {
         return Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
             .map((x) => (
                 {
-                    name: x.getTag(),
+                    name: x.getName(),
                     value: Number.isInteger(roundDecimal(x.getScore(), 1)) ? roundDecimal(x.getScore(), 1).toString() : x.getScore().toFixed(1),
                     inline: true,
                 }));
@@ -77,20 +73,24 @@ export default class Scoreboard {
             this.players[winnerID].incrementScore(pointsEarned);
         }
         this.players[winnerID].incrementExp(expGain);
+        const winnerScore = this.players[winnerID].getScore();
 
-        if (this.players[winnerID].getScore() === this.highestScore) {
+        if (winnerScore === this.highestScore) {
             // If user is tied for first, add them to the first place array
             this.firstPlace.push(this.players[winnerID]);
-        } else if (this.players[winnerID].getScore() > this.highestScore) {
+        } else if (winnerScore > this.highestScore) {
             // If user is first, reset first place array and add them
-            this.highestScore = this.players[winnerID].getScore();
+            this.highestScore = winnerScore;
             this.firstPlace = [this.players[winnerID]];
         }
     }
 
-    /** @returns whether the scoreboard has any players on it */
+    /**
+     * @returns whether the scoreboard has any players on it
+     * (if there are none in first place, then the scoreboard must be empty)
+     */
     isEmpty(): boolean {
-        return !(Object.keys(this.players).length);
+        return this.firstPlace.length === 0;
     }
 
     /** @returns a list of the player currently in first place */
@@ -130,7 +130,7 @@ export default class Scoreboard {
 
     /** @returns a list of tags of the player participating in the game */
     getPlayerNames(): Array<string> {
-        return Object.values(this.players).map((player) => player.getTag());
+        return Object.values(this.players).map((player) => player.getName());
     }
 
     /**
@@ -138,6 +138,6 @@ export default class Scoreboard {
      *  @returns a Player object for the corresponding user ID
      * */
     getPlayerName(userId: string): string {
-        return this.players[userId].getTag();
+        return this.players[userId].getName();
     }
 }

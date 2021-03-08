@@ -1,21 +1,21 @@
 export default class Player {
     /** The Discord tag of the player */
-    private tag: string;
+    public readonly name: string;
 
     /** The Discord user ID of the player */
-    private id: string;
+    public readonly id: string;
+
+    /** The player's avatar URL */
+    private readonly avatarURL: string;
 
     /** The player's current score */
     private score: number;
-
-    /** The player's avatar URL */
-    private avatarURL: string;
 
     /** The player's EXP gain */
     private expGain: number;
 
     constructor(tag: string, id: string, avatarURL: string, points: number) {
-        this.tag = tag;
+        this.name = tag;
         this.id = id;
         this.score = points;
         this.avatarURL = avatarURL;
@@ -23,8 +23,8 @@ export default class Player {
     }
 
     /** @returns the player's Discord tag  */
-    getTag(): string {
-        return this.tag;
+    getName(): string {
+        return this.name;
     }
 
     /** @returns the player's current score */
