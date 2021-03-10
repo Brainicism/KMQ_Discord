@@ -82,13 +82,11 @@ export default class GuildPreference {
     }
 
     static fromGuild(guildID: string, json?: GuildPreference): GuildPreference {
-        let gameOptions: GameOptions;
         if (!json) {
-            gameOptions = { ...DEFAULT_OPTIONS };
-            return new GuildPreference(guildID, gameOptions);
+            return new GuildPreference(guildID, { ...DEFAULT_OPTIONS });
         }
         // eslint-disable-next-line prefer-destructuring
-        gameOptions = json.gameOptions;
+        const gameOptions = json.gameOptions;
         // apply default game option for empty
         let gameOptionModified = false;
         for (const defaultOption in DEFAULT_OPTIONS) {
@@ -105,11 +103,11 @@ export default class GuildPreference {
                 gameOptionModified = true;
             }
         }
-        const guildPrefrence = new GuildPreference(guildID, gameOptions);
+        const guildPreference = new GuildPreference(guildID, gameOptions);
         if (gameOptionModified) {
-            guildPrefrence.updateGuildPreferences();
+            guildPreference.updateGuildPreferences();
         }
-        return guildPrefrence;
+        return guildPreference;
     }
 
     /**

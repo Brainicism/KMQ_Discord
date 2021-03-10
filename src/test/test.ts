@@ -203,7 +203,7 @@ describe("song query", function () {
         const excludeArtists = mockArtists.filter((artist) => artist.gender === Gender.FEMALE).slice(0, 2);
         const expectedExcludeCount = mockSongs.filter((song) => excludeArtists.map((artist) => artist.id).includes(song.id_artist)).length;
 
-        describe("female gender, exclude 2 male groups", function () {
+        describe("female gender, exclude 2 female groups", function () {
             it("should match the expected song count", async function () {
                 await this.guildPreference.setGender([Gender.FEMALE]);
                 await this.guildPreference.setExcludes(excludeArtists.map((artist) => ({ id: artist.id, name: artist.name })));
@@ -235,18 +235,18 @@ describe("song query", function () {
     });
 
     describe("cutoff", function () {
-        describe("songs after 2016", function () {
+        describe("songs in or after 2016", function () {
             it("should match the expected song count", async function () {
-                const expectedSongCount = mockSongs.filter((song) => song.publishedon > new Date("2016-01-01")).length;
+                const expectedSongCount = mockSongs.filter((song) => song.publishedon >= new Date("2016-01-01")).length;
                 await this.guildPreference.setBeginningCutoffYear(2016);
                 const { songs } = await getFilteredSongList(this.guildPreference);
                 assert.strictEqual(songs.length, expectedSongCount);
             });
         });
 
-        describe("songs before 2015", function () {
+        describe("songs in or before 2015", function () {
             it("should match the expected song count", async function () {
-                const expectedSongCount = mockSongs.filter((song) => song.publishedon < new Date("2015-12-31")).length;
+                const expectedSongCount = mockSongs.filter((song) => song.publishedon <= new Date("2015-12-31")).length;
                 await this.guildPreference.setEndCutoffYear(2015);
                 const { songs } = await getFilteredSongList(this.guildPreference);
                 assert.strictEqual(songs.length, expectedSongCount);
@@ -255,7 +255,7 @@ describe("song query", function () {
 
         describe("songs between 2008 and 2018", function () {
             it("should match the expected song count", async function () {
-                const expectedSongCount = mockSongs.filter((song) => song.publishedon > new Date("2008-01-01") && song.publishedon < new Date("2018-12-31")).length;
+                const expectedSongCount = mockSongs.filter((song) => song.publishedon >= new Date("2008-01-01") && song.publishedon <= new Date("2018-12-31")).length;
                 await this.guildPreference.setBeginningCutoffYear(2008);
                 await this.guildPreference.setEndCutoffYear(2018);
                 const { songs } = await getFilteredSongList(this.guildPreference);
@@ -265,7 +265,7 @@ describe("song query", function () {
 
         describe("songs in 2017", function () {
             it("should match the expected song count", async function () {
-                const expectedSongCount = mockSongs.filter((song) => song.publishedon > new Date("2017-01-01") && song.publishedon < new Date("2017-12-31")).length;
+                const expectedSongCount = mockSongs.filter((song) => song.publishedon >= new Date("2017-01-01") && song.publishedon <= new Date("2017-12-31")).length;
                 await this.guildPreference.setBeginningCutoffYear(2017);
                 await this.guildPreference.setEndCutoffYear(2017);
                 const { songs } = await getFilteredSongList(this.guildPreference);
