@@ -44,27 +44,29 @@ const state: State = {
 export default state;
 
 (async () => {
-    logger.info("Registering commands...");
-    registerCommands(true);
-    logger.info("Registering event loops...");
-    registerIntervals();
-    logger.info("Registering client event handlers...");
-    registerClientEvents();
-    logger.info("Registering process event handlers...");
-    registerProcessEvents();
+    if (require.main === module) {
+        logger.info("Registering commands...");
+        registerCommands(true);
+        logger.info("Registering event loops...");
+        registerIntervals();
+        logger.info("Registering client event handlers...");
+        registerClientEvents();
+        logger.info("Registering process event handlers...");
+        registerProcessEvents();
 
-    if (process.env.NODE_ENV === EnvType.DRY_RUN) {
-        logger.info("Dry run finished successfully.");
-        process.exit(0);
+        if (process.env.NODE_ENV === EnvType.DRY_RUN) {
+            logger.info("Dry run finished successfully.");
+            process.exit(0);
+        }
+
+        logger.info("Reloading cached application data...");
+        reloadCaches();
+        updatePublishDateOverrides();
+
+        if (process.env.NODE_ENV === EnvType.PROD) {
+            logger.info("Initializing bot stats poster...");
+            initializeBotStatsPoster();
+        }
+        client.connect();
     }
-
-    logger.info("Reloading cached application data...");
-    reloadCaches();
-    updatePublishDateOverrides();
-
-    if (process.env.NODE_ENV === EnvType.PROD) {
-        logger.info("Initializing bot stats poster...");
-        initializeBotStatsPoster();
-    }
-    client.connect();
 })();

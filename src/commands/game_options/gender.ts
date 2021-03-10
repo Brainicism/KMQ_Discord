@@ -5,14 +5,14 @@ import _logger from "../../logger";
 import { GameOption } from "../../types";
 
 const logger = _logger("gender");
-export enum GENDER {
+export enum Gender {
     MALE = "male",
     FEMALE = "female",
     COED = "coed",
     ALTERNATING = "alternating",
 }
 
-export const DEFAULT_GENDER = [GENDER.FEMALE, GENDER.MALE, GENDER.COED];
+export const DEFAULT_GENDER = [Gender.FEMALE, Gender.MALE, Gender.COED];
 
 export default class GenderCommand implements BaseCommand {
     validations = {
@@ -22,17 +22,17 @@ export default class GenderCommand implements BaseCommand {
             {
                 name: "gender_1",
                 type: "enum" as const,
-                enums: Object.values(GENDER),
+                enums: Object.values(Gender),
             },
             {
                 name: "gender_2",
                 type: "enum" as const,
-                enums: Object.values(GENDER).slice(0, 3),
+                enums: Object.values(Gender).slice(0, 3),
             },
             {
                 name: "gender_3",
                 type: "enum" as const,
-                enums: Object.values(GENDER).slice(0, 3),
+                enums: Object.values(Gender).slice(0, 3),
             },
         ],
     };
@@ -68,7 +68,7 @@ export default class GenderCommand implements BaseCommand {
 
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
-        const selectedGenders = parsedMessage.components as Array<GENDER>;
+        const selectedGenders = parsedMessage.components as Array<Gender>;
 
         if (selectedGenders.length === 0) {
             guildPreference.resetGender();
@@ -79,14 +79,14 @@ export default class GenderCommand implements BaseCommand {
 
         if (guildPreference.isGroupsMode() && selectedGenders.length >= 1) {
             // Incompatibility between groups and gender doesn't exist in GENDER.ALTERNATING
-            if (selectedGenders[0] !== GENDER.ALTERNATING) {
+            if (selectedGenders[0] !== Gender.ALTERNATING) {
                 logger.warn(`${getDebugLogHeader(message)} | Game option conflict between gender and groups.`);
                 sendErrorMessage(getMessageContext(message), { title: "Game Option Conflict", description: `\`groups\` game option is currently set. \`gender\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed` });
                 return;
             }
         }
 
-        if (selectedGenders[0] === GENDER.ALTERNATING) {
+        if (selectedGenders[0] === Gender.ALTERNATING) {
             if (guildPreference.isGroupsMode() && guildPreference.getGroupIds().length === 1) {
                 sendErrorMessage(getMessageContext(message), { title: "Game Option Warning", description: `With only one group chosen, \`${process.env.BOT_PREFIX}gender alternating\` may not behave as expected. Consider including more groups to correctly alternate genders.` });
             }

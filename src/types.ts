@@ -2,6 +2,7 @@ import Eris, { GuildTextableChannel } from "eris";
 import BaseCommand from "./commands/base_command";
 import GameSession from "./structures/game_session";
 import BotStatsPoster from "./helpers/bot_stats_poster";
+import { Gender } from "./commands/game_options/gender";
 
 export type GuildTextableMessage = Eris.Message<GuildTextableChannel>;
 
@@ -17,6 +18,9 @@ export interface QueriedSong {
     artist: string;
     youtubeLink: string;
     publishDate?: Date;
+    members?: Gender;
+    artistId?: number;
+    isSolo?: string;
 }
 
 export interface MessageContext {
@@ -77,4 +81,5 @@ export enum EnvType {
     PROD = "production",
     DEV = "development",
     DRY_RUN = "dry-run",
+    TEST = "test",
 }

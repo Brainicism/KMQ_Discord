@@ -13,7 +13,9 @@ const SONG_DOWNLOAD_THRESHOLD = 5;
 config({ path: path.resolve(__dirname, "../../.env") });
 
 async function kmqDatabaseExists(db: DatabaseContext): Promise<boolean> {
-    return (await db.agnostic("information_schema.schemata").where("schema_name", "=", "kmq")).length === 1;
+    const kmqExists = (await db.agnostic("information_schema.schemata").where("schema_name", "=", "kmq")).length === 1;
+    const kmqTestExists = (await db.agnostic("information_schema.schemata").where("schema_name", "=", "kmq_test")).length === 1;
+    return kmqExists && kmqTestExists;
 }
 
 async function kpopDataDatabaseExists(db: DatabaseContext): Promise<boolean> {
@@ -66,6 +68,7 @@ async function bootstrapDatabases() {
         if (!(await kmqDatabaseExists(db))) {
             logger.info("Performing migrations on KMQ database");
             await db.agnostic.raw("CREATE DATABASE IF NOT EXISTS kmq");
+            await db.agnostic.raw("CREATE DATABASE IF NOT EXISTS kmq_test");
             performMigrations();
         }
         if (!(await songThresholdReached(db))) {
