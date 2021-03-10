@@ -1,6 +1,6 @@
 import { DEFAULT_BEGINNING_SEARCH_YEAR, DEFAULT_ENDING_SEARCH_YEAR } from "../commands/game_options/cutoff";
 import { DEFAULT_LIMIT } from "../commands/game_options/limit";
-import { GENDER, DEFAULT_GENDER } from "../commands/game_options/gender";
+import { Gender, DEFAULT_GENDER } from "../commands/game_options/gender";
 import { SeekType, DEFAULT_SEEK } from "../commands/game_options/seek";
 import { ShuffleType, DEFAULT_SHUFFLE } from "../commands/game_options/shuffle";
 import { ModeType, DEFAULT_MODE } from "../commands/game_options/mode";
@@ -36,7 +36,7 @@ const DEFAULT_OPTIONS = {
 interface GameOptions {
     beginningYear: number;
     endYear: number;
-    gender: Array<GENDER>;
+    gender: Array<Gender>;
     limitStart: number;
     limitEnd: number;
     seekType: SeekType;
@@ -297,19 +297,19 @@ export default class GuildPreference {
      * Sets the gender option value
      * @param genderArr - A list of GENDER enums
      */
-    async setGender(genderArr: Array<GENDER>) {
+    async setGender(genderArr: Array<Gender>) {
         this.gameOptions.gender = [...new Set(genderArr)];
         await this.updateGuildPreferences();
     }
 
     /** @returns an array containing the currently selected gender option */
-    getGender(): Array<GENDER> {
+    getGender(): Array<Gender> {
         return this.gameOptions.gender;
     }
 
     /** @returns whether gender is set to alternating */
     isGenderAlternating(): boolean {
-        return this.getGender()[0] === GENDER.ALTERNATING;
+        return this.getGender()[0] === Gender.ALTERNATING;
     }
 
     /**

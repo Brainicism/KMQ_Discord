@@ -6,7 +6,7 @@ import { describe } from "mocha";
 import dbContext from "../database_context";
 import { md5Hash } from "../helpers/utils";
 import GuildPreference from "../structures/guild_preference";
-import { GENDER } from "../commands/game_options/gender";
+import { Gender } from "../commands/game_options/gender";
 import { getFilteredSongList } from "../helpers/game_utils";
 import { EnvType } from "../types";
 import _logger from "../logger";
@@ -98,14 +98,14 @@ describe("song query", function () {
 
     describe("gender game option", function () {
         const expectedSongCounts = {
-            [GENDER.MALE]: mockSongs.filter((song) => song.members === "male").length,
-            [GENDER.FEMALE]: mockSongs.filter((song) => song.members === "female").length,
-            [GENDER.COED]: mockSongs.filter((song) => song.members === "coed").length,
+            [Gender.MALE]: mockSongs.filter((song) => song.members === "male").length,
+            [Gender.FEMALE]: mockSongs.filter((song) => song.members === "female").length,
+            [Gender.COED]: mockSongs.filter((song) => song.members === "coed").length,
         };
 
         describe("single-select gender", function () {
             it("should match the expected song count", async function () {
-                for (const gender of [GENDER.MALE, GENDER.FEMALE, GENDER.COED]) {
+                for (const gender of [Gender.MALE, Gender.FEMALE, Gender.COED]) {
                     await this.guildPreference.setGender([gender]);
                     const { songs } = await getFilteredSongList(this.guildPreference);
                     assert.strictEqual(songs.length, expectedSongCounts[gender], `Gender query (${gender}) does not match with actual gender count`);
@@ -115,28 +115,28 @@ describe("song query", function () {
 
         describe("multi-select gender", function () {
             it("should match the expected song count", async function () {
-                await this.guildPreference.setGender([GENDER.MALE, GENDER.FEMALE]);
+                await this.guildPreference.setGender([Gender.MALE, Gender.FEMALE]);
                 const { songs } = await getFilteredSongList(this.guildPreference);
-                assert.strictEqual(songs.length, expectedSongCounts[GENDER.MALE] + expectedSongCounts[GENDER.FEMALE]);
+                assert.strictEqual(songs.length, expectedSongCounts[Gender.MALE] + expectedSongCounts[Gender.FEMALE]);
             });
         });
     });
 
     describe("gender override", function () {
         beforeEach(async function () {
-            await this.guildPreference.setGender([GENDER.ALTERNATING]);
+            await this.guildPreference.setGender([Gender.ALTERNATING]);
         });
 
         describe("override to female", function () {
             it("should match the expected song count", async function () {
-                const { songs: femaleSongs } = await getFilteredSongList(this.guildPreference, null, GENDER.FEMALE);
-                assert.ok(femaleSongs.every((song) => song.members === GENDER.FEMALE));
+                const { songs: femaleSongs } = await getFilteredSongList(this.guildPreference, null, Gender.FEMALE);
+                assert.ok(femaleSongs.every((song) => song.members === Gender.FEMALE));
             });
         });
         describe("override to male", function () {
             it("should match the expected song count", async function () {
-                const { songs: maleSongs } = await getFilteredSongList(this.guildPreference, null, GENDER.MALE);
-                assert.ok(maleSongs.every((song) => song.members === GENDER.MALE));
+                const { songs: maleSongs } = await getFilteredSongList(this.guildPreference, null, Gender.MALE);
+                assert.ok(maleSongs.every((song) => song.members === Gender.MALE));
             });
         });
     });
@@ -160,7 +160,7 @@ describe("song query", function () {
         }, {});
 
         beforeEach(async function () {
-            await this.guildPreference.setGender([GENDER.ALTERNATING]);
+            await this.guildPreference.setGender([Gender.ALTERNATING]);
         });
 
         describe("single-selected group", function () {
@@ -184,13 +184,13 @@ describe("song query", function () {
     });
 
     describe("includes", function () {
-        const expectedFemaleCount = mockSongs.filter((song) => song.members === GENDER.FEMALE).length;
-        const includedArtists = mockArtists.filter((artist) => artist.gender === GENDER.MALE).slice(0, 2);
+        const expectedFemaleCount = mockSongs.filter((song) => song.members === Gender.FEMALE).length;
+        const includedArtists = mockArtists.filter((artist) => artist.gender === Gender.MALE).slice(0, 2);
         const expectedIncludeCount = mockSongs.filter((song) => includedArtists.map((artist) => artist.id).includes(song.id_artist)).length;
 
         describe("female gender, include 2 male groups", function () {
             it("should match the expected song count", async function () {
-                await this.guildPreference.setGender([GENDER.FEMALE]);
+                await this.guildPreference.setGender([Gender.FEMALE]);
                 await this.guildPreference.setIncludes(includedArtists.map((artist) => ({ id: artist.id, name: artist.name })));
                 const { songs } = await getFilteredSongList(this.guildPreference);
                 assert.strictEqual(songs.length, expectedFemaleCount + expectedIncludeCount);
@@ -199,13 +199,13 @@ describe("song query", function () {
     });
 
     describe("excludes", function () {
-        const expectedFemaleCount = mockSongs.filter((song) => song.members === GENDER.FEMALE).length;
-        const excludeArtists = mockArtists.filter((artist) => artist.gender === GENDER.FEMALE).slice(0, 2);
+        const expectedFemaleCount = mockSongs.filter((song) => song.members === Gender.FEMALE).length;
+        const excludeArtists = mockArtists.filter((artist) => artist.gender === Gender.FEMALE).slice(0, 2);
         const expectedExcludeCount = mockSongs.filter((song) => excludeArtists.map((artist) => artist.id).includes(song.id_artist)).length;
 
         describe("female gender, exclude 2 male groups", function () {
             it("should match the expected song count", async function () {
-                await this.guildPreference.setGender([GENDER.FEMALE]);
+                await this.guildPreference.setGender([Gender.FEMALE]);
                 await this.guildPreference.setExcludes(excludeArtists.map((artist) => ({ id: artist.id, name: artist.name })));
                 const { songs } = await getFilteredSongList(this.guildPreference);
                 assert.strictEqual(songs.length, expectedFemaleCount - expectedExcludeCount);
@@ -303,7 +303,7 @@ describe("song query", function () {
     describe("limit", function () {
         const limit = 17;
         beforeEach(async function () {
-            await this.guildPreference.setGender([GENDER.COED]);
+            await this.guildPreference.setGender([Gender.COED]);
         });
 
         describe("with limit", function () {
@@ -317,7 +317,7 @@ describe("song query", function () {
 
         describe("without limit", function () {
             it("should match the expected song count", async function () {
-                const expectedSongCount = mockSongs.filter((song) => song.members === GENDER.COED).length;
+                const expectedSongCount = mockSongs.filter((song) => song.members === Gender.COED).length;
                 const { songs } = await getFilteredSongList(this.guildPreference);
                 assert.strictEqual(songs.length, expectedSongCount);
             });

@@ -6,7 +6,7 @@ import GuildPreference from "../structures/guild_preference";
 import { QueriedSong } from "../types";
 import { getForcePlaySong, isDebugMode, isForcedSongActive } from "./debug_utils";
 import { sendEndGameMessage } from "./discord_utils";
-import { GENDER } from "../commands/game_options/gender";
+import { Gender } from "../commands/game_options/gender";
 import { ArtistType } from "../commands/game_options/artisttype";
 import { LanguageType } from "../commands/game_options/language";
 import { SubunitsPreference } from "../commands/game_options/subunits";
@@ -26,7 +26,7 @@ interface GroupMatchResults {
  * @param ignoredSongs - List of YouTube video IDs of songs to ignore
  * @returns a list of songs, as well as the number of songs before the filter option was applied
  */
-export async function getFilteredSongList(guildPreference: GuildPreference, ignoredSongs?: Set<string>, genderOverride?: GENDER): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
+export async function getFilteredSongList(guildPreference: GuildPreference, ignoredSongs?: Set<string>, genderOverride?: Gender): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
     const fields = ["song_name as name", "artist_name as artist", "link as youtubeLink", "publishedon as publishDate", "members", "id_artist as artistId", "issolo as isSolo", "members"];
     let queryBuilder = dbContext.kmq("available_songs")
         .select(fields)
@@ -45,7 +45,7 @@ export async function getFilteredSongList(guildPreference: GuildPreference, igno
             }).orWhere(function mainInnerArtistFilter() {
                 this.whereNotIn("id_artist", guildPreference.getExcludesGroupIds());
                 if (!guildPreference.isGroupsMode()) {
-                    const gender = guildPreference.isGenderAlternating() ? [GENDER.MALE, GENDER.FEMALE] : guildPreference.getGender();
+                    const gender = guildPreference.isGenderAlternating() ? [Gender.MALE, Gender.FEMALE] : guildPreference.getGender();
                     this.whereIn("members", gender);
 
                     // filter by artist type only in non-groups
@@ -118,7 +118,7 @@ export async function ensureVoiceConnection(gameSession: GameSession): Promise<v
  * @param ignoredSongs - The union of last played songs and unique songs to not select from
  * @param alternatingGender - The gender to limit selecting from if ,gender alternating
  */
-export async function selectRandomSong(guildPreference: GuildPreference, ignoredSongs: Set<string>, alternatingGender?: GENDER): Promise<QueriedSong> {
+export async function selectRandomSong(guildPreference: GuildPreference, ignoredSongs: Set<string>, alternatingGender?: Gender): Promise<QueriedSong> {
     if (isDebugMode() && isForcedSongActive()) {
         const forcePlayedQueriedSong = await getForcePlaySong();
         logger.info(`Force playing ${forcePlayedQueriedSong.name} by ${forcePlayedQueriedSong.artist} | ${forcePlayedQueriedSong.youtubeLink}`);

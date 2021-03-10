@@ -20,7 +20,7 @@ import { deleteGameSession } from "../helpers/management_utils";
 import { GameType } from "../commands/game_commands/play";
 import { ModeType } from "../commands/game_options/mode";
 import { getRankNameByLevel } from "../commands/game_commands/profile";
-import { GENDER } from "../commands/game_options/gender";
+import { Gender } from "../commands/game_options/gender";
 import EliminationPlayer from "./elimination_player";
 import { KmqImages } from "../constants";
 
@@ -114,7 +114,7 @@ export default class GameSession {
     private uniqueSongs: Set<string>;
 
     /** The last gender played when gender is set to alternating, can be null (in not alternating mode), GENDER.MALE, or GENDER.FEMALE */
-    private lastAlternatingGender: GENDER;
+    private lastAlternatingGender: Gender;
 
     /** The most recent Guesser, including their current streak */
     private lastGuesser: LastGuesser;
@@ -354,9 +354,9 @@ export default class GameSession {
         // manage alternating gender
         if (guildPreference.isGenderAlternating()) {
             if (this.lastAlternatingGender === null) {
-                this.lastAlternatingGender = Math.random() < 0.5 ? GENDER.MALE : GENDER.FEMALE;
+                this.lastAlternatingGender = Math.random() < 0.5 ? Gender.MALE : Gender.FEMALE;
             } else {
-                this.lastAlternatingGender = this.lastAlternatingGender === GENDER.MALE ? GENDER.FEMALE : GENDER.MALE;
+                this.lastAlternatingGender = this.lastAlternatingGender === Gender.MALE ? Gender.FEMALE : Gender.MALE;
             }
         } else {
             this.lastAlternatingGender = null;
