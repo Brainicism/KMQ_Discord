@@ -17,7 +17,8 @@
     "docker-dev": "cd docker/ && START_TYPE=dev docker-compose up --build kmq",
     "docker-prod": "cd docker/ && START_TYPE=prod docker-compose up --build kmq",
     "backup": "ts-node src/scripts/backup-kmq-database",
-    "import": "ts-node src/scripts/backup-kmq-database --import"
+    "import": "ts-node src/scripts/backup-kmq-database --import",
+    "test": "NODE_ENV=test mocha -r ts-node/register 'src/test/**/*.ts'"
   },
   "author": "",
   "license": "ISC",
@@ -47,6 +48,7 @@
     "zlib-sync": "^0.1.7"
   },
   "devDependencies": {
+    "@types/mocha": "^8.2.1",
     "@types/uuid": "^8.3.0",
     "@typescript-eslint/eslint-plugin": "^4.14.1",
     "@typescript-eslint/parser": "^4.14.1",
@@ -54,6 +56,7 @@
     "eslint-config-airbnb-typescript": "^12.0.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-tsdoc": "^0.2.11",
+    "mocha": "^8.3.1",
     "ts-node-dev": "^1.1.1",
     "typescript": "~4.0.5"
   },

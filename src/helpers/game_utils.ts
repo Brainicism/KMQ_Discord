@@ -26,9 +26,10 @@ interface GroupMatchResults {
  * @param ignoredSongs - List of YouTube video IDs of songs to ignore
  * @returns a list of songs, as well as the number of songs before the filter option was applied
  */
-export async function getFilteredSongList(guildPreference: GuildPreference, ignoredSongs?: Set<string>, alternatingGender?: GENDER): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
+export async function getFilteredSongList(guildPreference: GuildPreference, ignoredSongs?: Set<string>, genderOverride?: GENDER): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
+    const fields = ["song_name as name", "artist_name as artist", "link as youtubeLink", "publishedon as publishDate", "members", "id_artist as artistId", "issolo as isSolo", "members"];
     let queryBuilder = dbContext.kmq("available_songs")
-        .select(["song_name as name", "artist_name as artist", "link as youtubeLink", "publishedon as publishDate"])
+        .select(fields)
         .where(function artistFilter() {
             this.where(function includesInnerArtistFilter() {
                 if (!guildPreference.isGroupsMode()) {
@@ -83,11 +84,11 @@ export async function getFilteredSongList(guildPreference: GuildPreference, igno
     if (ignoredSongs && ignoredSongs.size > 0) {
         result = result.filter((song) => !ignoredSongs.has(song.youtubeLink));
     }
-    if (guildPreference.isGenderAlternating() && alternatingGender) {
+    if (guildPreference.isGenderAlternating() && genderOverride) {
         const alternatingResult = await dbContext.kmq("available_songs")
-            .select(["song_name as name", "artist_name as artist", "link as youtubeLink", "publishedon as publishDate"])
+            .select(fields)
             .whereIn("link", result.map((song) => song.youtubeLink))
-            .andWhere("members", "=", [alternatingGender]);
+            .andWhere("members", "=", [genderOverride]);
         if (alternatingResult.length > 0) {
             result = alternatingResult;
         }
@@ -181,12 +182,12 @@ export async function cleanupInactiveGameSessions(): Promise<void> {
 export async function getGuildPreference(guildID: string): Promise<GuildPreference> {
     const guildPreferences = await dbContext.kmq("guild_preferences").select("*").where("guild_id", guildID);
     if (guildPreferences.length === 0) {
-        const guildPreference = new GuildPreference(guildID);
+        const guildPreference = GuildPreference.fromGuild(guildID);
         await dbContext.kmq("guild_preferences")
             .insert({ guild_id: guildID, guild_preference: JSON.stringify(guildPreference), join_date: new Date() });
         return guildPreference;
     }
-    return new GuildPreference(guildPreferences[0].guild_id, JSON.parse(guildPreferences[0].guild_preference));
+    return GuildPreference.fromGuild(guildPreferences[0].guild_id, JSON.parse(guildPreferences[0].guild_preference));
 }
 
 /**
