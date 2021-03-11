@@ -563,7 +563,7 @@ export default class GameSession {
         if (this.gameType === GameType.CLASSIC) {
             this.participants.add(message.author.id);
         }
-        return this.gameRound.checkGuess(message, modeType);
+        return this.gameRound.checkGuess(message.content, modeType);
     }
 
     /**

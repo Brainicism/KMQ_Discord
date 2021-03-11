@@ -63,15 +63,6 @@ export default class Scoreboard {
                 }));
     }
 
-    /** @returns a list containing each player ID and their corresponding score */
-    getPlayerScores(): Array<{ id: string, score: number }> {
-        return Object.values(this.players)
-            .map((x) => ({
-                id: x.getId(),
-                score: x.getScore(),
-            }));
-    }
-
     /**
      * @param winnerTag - The Discord tag of the correct guesser
      * @param winnerID  - The Discord ID of the correct guesser

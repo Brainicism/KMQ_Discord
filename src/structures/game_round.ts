@@ -1,4 +1,3 @@
-import Eris from "eris";
 import { ModeType } from "../commands/game_options/mode";
 import state from "../kmq";
 import _logger from "../logger";
@@ -20,7 +19,7 @@ const logger = _logger("game_round");
  * @param name - the song name
  * @returns The cleaned song name
  */
-function cleanSongName(name: string): string {
+export function cleanSongName(name: string): string {
     let cleanName = name.toLowerCase()
         .split("(")[0]
         .trim();
@@ -35,7 +34,7 @@ function cleanSongName(name: string): string {
  * @param name - the artist name
  * @returns The cleaned artist name
  */
-function cleanArtistName(name: string): string {
+export function cleanArtistName(name: string): string {
     let cleanName = name.toLowerCase()
         .trim();
     for (const characterReplacement of CHARACTER_REPLACEMENTS) {
@@ -48,14 +47,14 @@ export default class GameRound {
     /** The song name */
     public readonly songName: string;
 
-    /** The list of aliases for the given song name */
-    public readonly songAliases: Array<string>;
+    /** The accepted answers for the song name */
+    public readonly acceptedSongAnswers: Array<string>;
 
     /** The artist name */
     public readonly artist: string;
 
-    /** The list of aliases for the given artist name */
-    public readonly artistAliases: Array<string>;
+    /** The accepted answers for the artist name */
+    public readonly acceptedArtistAnswers: Array<string>;
 
     /** The youtube video ID of the current song */
     public readonly videoID: string;
@@ -80,10 +79,10 @@ export default class GameRound {
 
     constructor(song: string, artist: string, videoID: string, year: number) {
         this.songName = song;
-        this.songAliases = state.aliases.song[videoID] || [];
+        this.acceptedSongAnswers = [song, ...(state.aliases.song[videoID] || [])];
         const artistNames = artist.split("+").map((x) => x.trim());
         const artistAliases = artistNames.flatMap((x) => [x, ...(state.aliases.artist[x] || [])]);
-        this.artistAliases = artistAliases;
+        this.acceptedArtistAnswers = artistAliases;
         this.artist = artist;
         this.videoID = videoID;
         this.skipAchieved = false;
@@ -114,16 +113,16 @@ export default class GameRound {
      * @param modeType - The guessing mode
      * @returns the number of points as defined by the mode type and correctness of the guess
      */
-    checkGuess(message: Eris.Message, modeType: ModeType): number {
+    checkGuess(guess: string, modeType: ModeType): number {
         if (modeType === ModeType.SONG_NAME) {
-            return this.checkSongGuess(message.content) ? 1 : 0;
+            return this.checkSongGuess(guess) ? 1 : 0;
         }
         if (modeType === ModeType.ARTIST) {
-            return this.checkArtistGuess(message.content) ? 1 : 0;
+            return this.checkArtistGuess(guess) ? 1 : 0;
         }
         if (modeType === ModeType.BOTH) {
-            if (this.checkSongGuess(message.content)) return 1;
-            if (this.checkArtistGuess(message.content)) return 0.2;
+            if (this.checkSongGuess(guess)) return 1;
+            if (this.checkArtistGuess(guess)) return 0.2;
             return 0;
         }
         logger.error(`Illegal mode type: ${modeType}`);
@@ -145,8 +144,8 @@ export default class GameRound {
      */
     private checkSongGuess(message: string): boolean {
         const guess = cleanSongName(message);
-        const cleanedSongAliases = this.songAliases.map((x) => cleanSongName(x));
-        return this.songName && (guess === cleanSongName(this.songName) || cleanedSongAliases.includes(guess));
+        const cleanedSongAliases = this.acceptedSongAnswers.map((x) => cleanSongName(x));
+        return this.songName && cleanedSongAliases.includes(guess);
     }
 
     /**
@@ -156,7 +155,7 @@ export default class GameRound {
      */
     private checkArtistGuess(message: string): boolean {
         const guess = cleanArtistName(message);
-        const cleanedArtistAliases = this.artistAliases.map((x) => cleanArtistName(x));
-        return this.songName && (guess === cleanArtistName(this.artist) || cleanedArtistAliases.includes(guess));
+        const cleanedArtistAliases = this.acceptedArtistAnswers.map((x) => cleanArtistName(x));
+        return this.songName && cleanedArtistAliases.includes(guess);
     }
 }
