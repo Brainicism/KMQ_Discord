@@ -131,8 +131,8 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
         text: "",
     };
 
-    if (gameRound.songAliases.length > 0) {
-        footer.text += `Aliases: ${Array.from(gameRound.songAliases).join(", ")}\n`;
+    if (gameRound.acceptedSongAnswers.length > 1) {
+        footer.text += `Aliases: ${Array.from(gameRound.acceptedSongAnswers).join(", ")}\n`;
     }
 
     const { remainingDuration } = guessResult;
