@@ -3,8 +3,9 @@ import EliminationScoreboard from "../structures/elimination_scoreboard";
 
 /* eslint-disable prefer-arrow-callback */
 const userIds = ["12345", "23456", "34567"];
+const DEFAULT_LIVES = 10;
 beforeEach(function () {
-    this.eliminationScoreboard = new EliminationScoreboard(10, "123");
+    this.eliminationScoreboard = new EliminationScoreboard(DEFAULT_LIVES, "123");
 });
 
 describe("score/xp updating", function () {
@@ -31,9 +32,9 @@ describe("score/xp updating", function () {
                 for (let i = 0; i < 5; i++) {
                     this.eliminationScoreboard.updateScoreboard("irene#1234", userIds[0], "someurl", 1, 50);
                 }
-                assert.strictEqual(this.eliminationScoreboard.getPlayerLives(userIds[0]), 10);
-                assert.strictEqual(this.eliminationScoreboard.getPlayerLives(userIds[1]), 5);
-                assert.strictEqual(this.eliminationScoreboard.getPlayerLives(userIds[2]), 5);
+                assert.strictEqual(this.eliminationScoreboard.getPlayerLives(userIds[0]), DEFAULT_LIVES);
+                assert.strictEqual(this.eliminationScoreboard.getPlayerLives(userIds[1]), DEFAULT_LIVES - 5);
+                assert.strictEqual(this.eliminationScoreboard.getPlayerLives(userIds[2]), DEFAULT_LIVES - 5);
             });
         });
 
@@ -45,9 +46,9 @@ describe("score/xp updating", function () {
                 this.eliminationScoreboard.updateScoreboard("seulgi#7854", userIds[1], "someurl", 1, 50);
                 this.eliminationScoreboard.updateScoreboard("seulgi#7854", userIds[1], "someurl", 1, 50);
                 this.eliminationScoreboard.updateScoreboard("joy#4144", userIds[2], "someurl", 1, 50);
-                assert.strictEqual(this.eliminationScoreboard.getPlayerLives(userIds[0]), 6);
-                assert.strictEqual(this.eliminationScoreboard.getPlayerLives(userIds[1]), 7);
-                assert.strictEqual(this.eliminationScoreboard.getPlayerLives(userIds[2]), 5);
+                assert.strictEqual(this.eliminationScoreboard.getPlayerLives(userIds[0]), DEFAULT_LIVES - 4);
+                assert.strictEqual(this.eliminationScoreboard.getPlayerLives(userIds[1]), DEFAULT_LIVES - 3);
+                assert.strictEqual(this.eliminationScoreboard.getPlayerLives(userIds[2]), DEFAULT_LIVES - 5);
             });
         });
     });
@@ -65,7 +66,7 @@ describe("winner detection", function () {
         });
     });
 
-    describe("single player, has guessed atleast once", function () {
+    describe("single player, has guessed at least once", function () {
         const userId = "12345";
         it("should return the single player", function () {
             this.eliminationScoreboard.updateScoreboard("minju#7489", userId, "someurl", 10, 0);
@@ -144,7 +145,7 @@ describe("getLivesOfWeakestPlayer", function () {
     });
     describe("tie for the weakest", function () {
         it("should return the number of lives", function () {
-            this.eliminationScoreboard.addPlayer(userIds[0], "irene#1234", "someurl", 2);
+            this.eliminationScoreboard.addPlayer(userIds[0], "irene#1234", "someurl", 3);
             this.eliminationScoreboard.addPlayer(userIds[1], "seulgi#7854", "someurl", 2);
             this.eliminationScoreboard.addPlayer(userIds[2], "joy#4144", "someurl", 2);
             assert.strictEqual(this.eliminationScoreboard.getLivesOfWeakestPlayer(), 2);
@@ -156,7 +157,7 @@ describe("starting lives", function () {
     describe("no explicit number of lives set for player", function () {
         it("should default to the scoreboard's default", function () {
             this.eliminationScoreboard.addPlayer(userIds[0], "irene#1234", "someurl");
-            assert.strictEqual(this.eliminationScoreboard.getPlayerLives(userIds[0]), 10);
+            assert.strictEqual(this.eliminationScoreboard.getPlayerLives(userIds[0]), DEFAULT_LIVES);
         });
     });
     describe("explicit number of lives set for player", function () {
