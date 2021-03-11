@@ -50,7 +50,7 @@ const mockArtists = [
     { id: 11, name: "K", gender: "coed", solo: "n" },
 ];
 
-const mockSongs = [...Array(1000).keys()].map((i) => {
+const mockSongs = [...Array(100).keys()].map((i) => {
     const artist = mockArtists[md5Hash(i, 8) % mockArtists.length];
     return {
         song_name: crypto.randomBytes(8).toString("hex"),

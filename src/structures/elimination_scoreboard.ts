@@ -24,7 +24,7 @@ export default class EliminationScoreboard extends Scoreboard {
      * @param avatarUrl - The player's Discord avatar URL
      */
     addPlayer(userID: string, tag: string, avatarUrl: string, lives?: number): EliminationPlayer {
-        this.players[userID] = new EliminationPlayer(tag, userID, avatarUrl, 0, lives || this.startingLives);
+        this.players[userID] = new EliminationPlayer(tag, userID, avatarUrl, 0, lives === undefined ? this.startingLives : lives);
         return this.players[userID];
     }
 
@@ -88,7 +88,6 @@ export default class EliminationScoreboard extends Scoreboard {
         // Game ends if
         // (1) all players are eliminated that round or
         const allEliminated = Object.values(this.players).every((player) => player.isEliminated());
-
         // (2) there is one player left in a game that started with multiple players
         const oneLeft = Object.values(this.players).length > 1
             && Object.values(this.players).filter((player) => !player.isEliminated()).length === 1;
