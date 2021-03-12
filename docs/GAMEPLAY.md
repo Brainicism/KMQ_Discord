@@ -9,6 +9,8 @@ You can see the current scoreboard by typing `,score`. It is also shown after th
 See the latest updates to KMQ with `,news`. 
 
 # Game Modes
+Team up with your friends and crush the competition in `,play teams`! Split up into as many teams as you'd like and see who will emerge triumphant in the battle for 10% more XP! Once your team is confident of its abilities, join the official KMQ server](https://discord.gg/RCuzwYV) to face-off with the best of the best. More to come soon...
+
 See who can survive the longest into a KMQ game with elimination mode. Using `,play elimination x`, everyone starts with `x` lives and the last one alive wins. Guessing correctly will save your life, while everyone else loses one. Use elimination mode in conjunction with `,timer` to raise the pressure! `,goal` cannot be used in elimination mode.
 
 # EXP System
@@ -22,6 +24,7 @@ You start off as a `Novice`, and work your way up through the works of `Trainee`
 - Guess streaks greater than 5 will earn you 1.2x XP.
 - Every weekend is a 2x XP weekend, all days on Saturdays and Sundays EST time. 
 - On weekdays, there are 3 daily `KMQ Power Hours` lasting two hours each for 2x XP, at random points in the day.
+- Winning a game in teams mode earns your team 1.1x XP.
 
 ## Requirements
 You will only gain EXP if:
