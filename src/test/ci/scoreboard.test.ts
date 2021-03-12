@@ -5,7 +5,7 @@ import Scoreboard from "../../structures/scoreboard";
 /* eslint-disable prefer-arrow-callback */
 let scoreboard: Scoreboard;
 beforeEach(function () {
-    scoreboard = new Scoreboard("123");
+    scoreboard = new Scoreboard();
 });
 describe("score/xp updating", function () {
     describe("single player scoreboard", function () {
