@@ -1,7 +1,6 @@
 import Scoreboard from "./scoreboard";
 import Player from "./player";
 import Team from "./team";
-import { roundDecimal } from "../helpers/utils";
 import _logger from "../logger";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
