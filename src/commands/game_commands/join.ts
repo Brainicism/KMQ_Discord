@@ -2,6 +2,7 @@ import BaseCommand, { CommandArgs } from "../base_command";
 import { GameType } from "./play";
 import GameSession from "../../structures/game_session";
 import TeamScoreboard from "../../structures/team_scoreboard";
+import Player from "../../structures/player";
 import { GuildTextableMessage, ParsedMessage } from "../../types";
 import { getUserTag, sendErrorMessage, sendInfoMessage, getMessageContext } from "../../helpers/discord_utils";
 import { KmqImages } from "../../constants";
@@ -57,7 +58,7 @@ export default class JoinCommand implements BaseCommand {
         const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
         if (!teamScoreboard.hasTeam(teamName)) {
             // Create a new team if teamName contains any non-digit characters, or the given team index doesn't exist
-            teamScoreboard.addTeam(teamName, getUserTag(message.author), message.author.id, message.author.avatarURL);
+            teamScoreboard.addTeam(teamName, new Player(getUserTag(message.author), message.author.id, message.author.avatarURL, 0));
             sendInfoMessage(getMessageContext(message), {
                 title: "New team created",
                 description: `To join ${bold(teamName)} alongside ${bold(getUserTag(message.author))}, enter \`,join ${teamName}\`. Start the game with \`,begin\`.`,
@@ -69,7 +70,7 @@ export default class JoinCommand implements BaseCommand {
                 sendErrorMessage(getMessageContext(message), { title: "Join error", description: "You're already a member of this team." });
                 return;
             }
-            teamScoreboard.addPlayer(team.id, getUserTag(message.author), String(message.author.id), message.author.avatarURL);
+            teamScoreboard.addPlayer(team.id, new Player(getUserTag(message.author), message.author.id, message.author.avatarURL, 0));
             sendInfoMessage(getMessageContext(message), {
                 title: `${getUserTag(message.author)} joined ${team.name}`,
                 description: !gameSession.sessionInitialized ? "When everyone has joined a team, `,begin` the game!"

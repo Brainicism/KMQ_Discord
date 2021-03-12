@@ -3,8 +3,8 @@ import Player from "./player";
 export default class Team extends Player {
     private players: { [userID: string]: Player };
 
-    constructor(name: string, id: string, player: Player) {
-        super(name, id, null, 0);
+    constructor(name: string, player: Player) {
+        super(name, name, null, 0);
         this.players = {};
         this.players[player.getId()] = player;
     }

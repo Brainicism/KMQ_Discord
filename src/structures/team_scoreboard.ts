@@ -48,17 +48,14 @@ export default class TeamScoreboard extends Scoreboard {
     /**
     * Create a new team with name teamName containing the player who created it
     * @param name - The name of the team
-    * @param userTag - The Discord tag of the player
-    * @param userID - The Discord ID of the player
-    * @param avatarURL - The avatar URL of the player
+    * @param player - The player that created the team
     */
-    addTeam(name: string, userTag: string, userID: string, avatarURL: string) {
+    addTeam(name: string, player: Player) {
         // If the user is switching teams, remove them from their existing team first
-        if (this.getPlayer(userID)) {
-            this.removePlayer(userID);
+        if (this.getPlayer(player.id)) {
+            this.removePlayer(player.id);
         }
-        const teamsSize = Object.keys(this.players).length;
-        this.players[name] = new Team(name, String(teamsSize), new Player(userTag, userID, avatarURL, 0));
+        this.players[name] = new Team(name, player);
     }
 
     /**
@@ -108,14 +105,12 @@ export default class TeamScoreboard extends Scoreboard {
     /**
     * Adds a player to an existing team
     * @param teamName - The name of the team to add the player to
-    * @param userTag - The Discord tag of the player
-    * @param userID - The Discord ID of the player
-    * @param avatarURL - The avatar URL of the player
+    * @param player - The player to add to the team
     */
-    addPlayer(teamName: string, userTag: string, userID: string, avatarURL: string) {
+    addPlayer(teamName: string, player: Player) {
         // If the user is switching teams, remove them from their existing team first
-        this.removePlayer(userID);
-        this.players[teamName].addPlayer(new Player(userTag, userID, avatarURL, 0));
+        this.removePlayer(player.id);
+        this.players[teamName].addPlayer(player);
     }
 
     /**
@@ -143,10 +138,10 @@ export default class TeamScoreboard extends Scoreboard {
 
     /**
      * @param userID - The Discord user ID of the player whose exp we want
-     * @returns the exp gained by the player (with a 10% bonus to the winning team)
+     * @returns the exp gained by the player (with a 10% bonus to the winning team if there are multiple teams)
      */
     getPlayerExpGain(userID: string): number {
-        if (this.isTeamFirstPlace(this.getTeamOfPlayer(userID).name)) {
+        if (this.isTeamFirstPlace(this.getTeamOfPlayer(userID).name) && Object.keys(this.getTeams()).length > 1) {
             return this.getPlayer(userID).getExpGain() * 1.1;
         }
         return this.getPlayer(userID).getExpGain();
