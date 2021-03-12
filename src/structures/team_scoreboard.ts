@@ -141,7 +141,7 @@ export default class TeamScoreboard extends Scoreboard {
      * @returns the exp gained by the player (with a 10% bonus to the winning team if there are multiple teams)
      */
     getPlayerExpGain(userID: string): number {
-        if (this.isTeamFirstPlace(this.getTeamOfPlayer(userID).name) && Object.keys(this.getTeams()).length > 1) {
+        if (this.isTeamFirstPlace(this.getTeamOfPlayer(userID).name) && Object.keys(this.getTeams()).length > 1 && this.firstPlace.length === 1) {
             return this.getPlayer(userID).getExpGain() * 1.1;
         }
         return this.getPlayer(userID).getExpGain();
