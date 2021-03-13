@@ -567,7 +567,7 @@ export default class GameSession {
      */
     private checkGuess(message: Eris.Message, modeType: ModeType): number {
         if (!this.gameRound) return 0;
-        if (this.gameType === GameType.CLASSIC || this.gameType === GameType.TEAMS) {
+        if (this.gameType !== GameType.ELIMINATION) {
             this.participants.add(message.author.id);
         }
         return this.gameRound.checkGuess(message.content, modeType);

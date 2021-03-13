@@ -17,12 +17,6 @@ export default class TeamScoreboard extends Scoreboard {
     */
     protected players: TeamMap;
 
-    constructor() {
-        super();
-        this.players = {};
-        this.firstPlace = [];
-    }
-
     /**
      * Reward points to the player that guessed correctly. Update the team in first place based on the new score
      * @param winnerTag - Unused
@@ -66,7 +60,7 @@ export default class TeamScoreboard extends Scoreboard {
     }
 
     /**
-     * @param name - The name of the team we're accessing
+     * @param name - The name of the team being accessed
      * @returns the Team corresponding to the given name, or null if it doesn't exist
      */
     getTeam(name: string): Team {
@@ -90,16 +84,11 @@ export default class TeamScoreboard extends Scoreboard {
     }
 
     /**
-     * @param userID - The unique identifier of the player we're searching for
+     * @param userID - The unique identifier of the player being searching for
      * @returns the team containing the given player
      */
     getTeamOfPlayer(userID: string): Team {
-        return Object.values(this.players).find((t: Team) => {
-            if (t.hasPlayer(userID)) {
-                return t;
-            }
-            return null;
-        });
+        return Object.values(this.players).find((t: Team) => t.hasPlayer(userID));
     }
 
     /**
@@ -116,7 +105,7 @@ export default class TeamScoreboard extends Scoreboard {
     /**
      * Removes the given player from the team they are in (if they are in one)
      * If removing this player causes the team to have 0 members, destroy the team
-     * @param userID - The unique identifier of the player we're going to delete
+     * @param userID - The unique identifier of the player to be deleted
      */
     removePlayer(userID: string) {
         const team = this.getTeamOfPlayer(userID);
@@ -128,7 +117,7 @@ export default class TeamScoreboard extends Scoreboard {
     }
 
     /**
-     * @param userID - The unique identifier of the player we're going to find
+     * @param userID - The unique identifier of the player to find
      * @returns the player associated with the given userID, or null if it isn't in any of the teams
      */
     getPlayer(userID: string): Player {

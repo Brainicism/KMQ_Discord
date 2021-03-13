@@ -44,6 +44,7 @@ describe("single player score", function () {
             for (let i = 0; i < numIncrements; i++) {
                 team.getPlayer(goodPlayer.id).incrementScore(1);
             }
+            assert.strictEqual(team.getScore(), numIncrements);
             assert.strictEqual(team.getScore(), team.getPlayer(goodPlayer.id).getScore());
         });
     });
@@ -74,11 +75,16 @@ describe("score after removal", function () {
             for (let i = 0; i < numIncrements; i++) {
                 team.getPlayers().map((p: Player) => p.incrementScore(1));
             }
-            assert.strictEqual(team.getScore(), numIncrements * team.getNumPlayers());
-            team.removePlayer(subparPlayer.name);
-            assert.strictEqual(team.getScore(), numIncrements * team.getNumPlayers());
-            team.removePlayer(firstOnLeaderboardPlayer.name);
-            assert.strictEqual(team.getScore(), numIncrements * team.getNumPlayers());
+            assert.deepStrictEqual(team.getPlayers(), [subparPlayer, goodPlayer, firstOnLeaderboardPlayer]);
+            assert.strictEqual(team.getScore(), 75);
+
+            team.removePlayer(subparPlayer.getId());
+            assert.deepStrictEqual(team.getPlayers(), [goodPlayer, firstOnLeaderboardPlayer]);
+            assert.strictEqual(team.getScore(), 50);
+
+            team.removePlayer(firstOnLeaderboardPlayer.getId());
+            assert.deepStrictEqual(team.getPlayers(), [goodPlayer]);
+            assert.strictEqual(team.getScore(), 25);
         });
     });
 });

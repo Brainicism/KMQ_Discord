@@ -15,11 +15,12 @@ export default class BeginCommand implements BaseCommand {
         if (!gameSession || gameSession.gameType === GameType.CLASSIC) {
             return;
         }
-        if (gameSession.gameType === GameType.ELIMINATION && gameSession.owner.id !== author.id) {
-            sendErrorMessage(getMessageContext(message), { title: "Begin ignored", description: `Only the person who did \`${process.env.BOT_PREFIX}play elimination\` (${bold(getUserTag(gameSession.owner))}) can start the game.` });
-            return;
-        }
-        if (gameSession.gameType === GameType.TEAMS) {
+        if (gameSession.gameType === GameType.ELIMINATION) {
+            if (gameSession.owner.id !== author.id) {
+                sendErrorMessage(getMessageContext(message), { title: "Begin ignored", description: `Only the person who did \`${process.env.BOT_PREFIX}play elimination\` (${bold(getUserTag(gameSession.owner))}) can start the game.` });
+                return;
+            }
+        } else if (gameSession.gameType === GameType.TEAMS) {
             const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
             if (Object.keys(teamScoreboard.getTeams()).length === 0) {
                 sendErrorMessage(getMessageContext(message), { title: "Begin ignored", description: "Create a team using `,join [team name]` before you can start the game." });

@@ -13,7 +13,7 @@ export default class JoinCommand implements BaseCommand {
 
     async call({ message, gameSessions, parsedMessage }: CommandArgs) {
         const gameSession = gameSessions[message.guildID];
-        if (!gameSession) {
+        if (!gameSession || gameSession.gameType === GameType.CLASSIC) {
             return;
         }
         if (gameSession.gameType === GameType.ELIMINATION) {
@@ -57,7 +57,6 @@ export default class JoinCommand implements BaseCommand {
         const teamName = parsedMessage.argument.replace(/\\|_|\*|~|\||`/gm, "").substr(0, 128);
         const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
         if (!teamScoreboard.hasTeam(teamName)) {
-            // Create a new team if teamName contains any non-digit characters, or the given team index doesn't exist
             teamScoreboard.addTeam(teamName, new Player(getUserTag(message.author), message.author.id, message.author.avatarURL, 0));
             sendInfoMessage(getMessageContext(message), {
                 title: "New team created",

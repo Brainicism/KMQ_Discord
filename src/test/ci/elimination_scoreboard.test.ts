@@ -10,7 +10,7 @@ beforeEach(function () {
     scoreboard = new EliminationScoreboard(DEFAULT_LIVES);
 });
 
-describe("elimination score/xp updating", function () {
+describe("score/xp updating", function () {
     beforeEach(function () {
         scoreboard.addPlayer(userIds[0], "irene#1234", "someurl");
         scoreboard.addPlayer(userIds[1], "seulgi#7854", "someurl");
@@ -56,7 +56,7 @@ describe("elimination score/xp updating", function () {
     });
 });
 
-describe("elimination winner detection", function () {
+describe("winner detection", function () {
     beforeEach(function () {
         scoreboard.addPlayer(userIds[0], "irene#1234", "someurl");
         scoreboard.addPlayer(userIds[1], "seulgi#7854", "someurl");
@@ -100,7 +100,7 @@ describe("elimination winner detection", function () {
     });
 });
 
-describe("elimination game finished", function () {
+describe("game finished", function () {
     describe("every player is dead", function () {
         it("should return true", function () {
             scoreboard.addPlayer(userIds[0], "irene#1234", "someurl", 0);
@@ -136,7 +136,7 @@ describe("elimination game finished", function () {
     });
 });
 
-describe("elimination getLivesOfWeakestPlayer", function () {
+describe("getLivesOfWeakestPlayer", function () {
     describe("one person is the weakest", function () {
         it("should return the weakest person's number of lives", function () {
             scoreboard.addPlayer(userIds[0], "irene#1234", "someurl", 5);
@@ -155,7 +155,7 @@ describe("elimination getLivesOfWeakestPlayer", function () {
     });
 });
 
-describe("elimination starting lives", function () {
+describe("starting lives", function () {
     describe("no explicit number of lives set for player", function () {
         it("should default to the scoreboard's default", function () {
             scoreboard.addPlayer(userIds[0], "irene#1234", "someurl");
