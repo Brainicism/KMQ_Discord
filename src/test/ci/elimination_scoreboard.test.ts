@@ -1,5 +1,5 @@
 import assert from "assert";
-import EliminationScoreboard from "../structures/elimination_scoreboard";
+import EliminationScoreboard from "../../structures/elimination_scoreboard";
 
 /* eslint-disable prefer-arrow-callback */
 const userIds = ["12345", "23456", "34567"];

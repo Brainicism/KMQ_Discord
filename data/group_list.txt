@@ -14,6 +14,7 @@
 2NE1
 2PM
 2YOON
+2Z
 3YE
 4Men
 4Minute
@@ -119,7 +120,9 @@ CLC
 CNBlue
 Coco
 CocoSori
+Coed School
 CRAVITY
+Craxy
 Crayon Pop
 Cross Gene
 Crush
@@ -146,6 +149,7 @@ Donghan
 Dongkiz
 Dongwoo
 Double S 301
+Doyoung
 DPR Ian
 DPR Live
 Dreamcatcher
@@ -190,6 +194,7 @@ Fly to the Sky
 Fromis 9
 FTISLAND
 G-DRAGON
+G-reyish
 G.na
 G.O.D
 Gaeko
@@ -291,6 +296,7 @@ Jang Beom June
 Jang Deok Cheol
 Jang Hye Jin
 Jang Hyejin
+Jang Woo Young
 Jannabi
 Jay Park
 JBJ
@@ -304,6 +310,7 @@ Jeong Se-woon
 Jessi
 Jessica
 Jimin
+Jinho
 JINU
 Jinwoon
 Jiselle
@@ -414,6 +421,7 @@ M.O.N.T
 Mad Clown
 Maddox
 Madtown
+Majors
 Maktub
 Mamamoo
 Marmello
@@ -447,6 +455,7 @@ Moon Moon
 MXM
 MyB
 MYNAME
+N.CUS
 N.Flying
 Nam Woohyun
 Nano
@@ -462,6 +471,7 @@ NCT DREAM
 NCT U
 Nell
 NeonPunch
+Newkidd
 Nichkhun
 Nick & Sammy
 Nilo
@@ -496,7 +506,7 @@ Park Won
 Paul Kim
 Peniel Shin
 Penomeco
-Pentagon
+PENTAGON
 pH-1
 Phantom
 Pink Fantasy
@@ -625,6 +635,7 @@ Taeyeon
 Taeyong
 Tahiti
 Target
+Teen Teen
 Teen Top
 Thama
 The Ark
@@ -651,6 +662,7 @@ TXT
 U Sungeun
 U-Kiss
 U-Know (Yunho)
+Uhm Junghwa
 Uk
 Ulala Session
 UNB

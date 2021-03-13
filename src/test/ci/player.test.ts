@@ -1,6 +1,6 @@
 /* eslint-disable prefer-arrow-callback */
 import assert from "assert";
-import Player from "../structures/player";
+import Player from "../../structures/player";
 
 let player: Player;
 beforeEach(function () {

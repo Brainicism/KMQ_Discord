@@ -1,6 +1,6 @@
 import assert from "assert";
-import GuildPreference from "../structures/guild_preference";
-import Scoreboard from "../structures/scoreboard";
+import GuildPreference from "../../structures/guild_preference";
+import Scoreboard from "../../structures/scoreboard";
 
 /* eslint-disable prefer-arrow-callback */
 let scoreboard: Scoreboard;

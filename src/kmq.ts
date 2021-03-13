@@ -46,7 +46,11 @@ export default state;
 (async () => {
     if (require.main === module) {
         logger.info("Registering commands...");
-        registerCommands(true);
+        if (process.env.NODE_ENV === EnvType.DRY_RUN) {
+            await registerCommands(true);
+        } else {
+            registerCommands(true);
+        }
         logger.info("Registering event loops...");
         registerIntervals();
         logger.info("Registering client event handlers...");
