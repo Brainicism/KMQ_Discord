@@ -79,19 +79,19 @@ async function insertMockSongs(): Promise<Array<MockSong>> {
     return mockSongs;
 }
 
-before(async function () {
-    if (process.env.NODE_ENV !== EnvType.TEST) {
-        logger.error("Must be running with NODE_ENV=EnvType.TEST");
-        process.exit(1);
-    }
-    this.timeout(10000);
-    logger.info("Setting up test database...");
-    await setup();
-    logger.info("Inserting mock songs...");
-    await insertMockSongs();
-});
-
 describe("song query", function () {
+    before(async function () {
+        if (process.env.NODE_ENV !== EnvType.TEST) {
+            logger.error("Must be running with NODE_ENV=EnvType.TEST");
+            process.exit(1);
+        }
+        this.timeout(10000);
+        logger.info("Setting up test database...");
+        await setup();
+        logger.info("Inserting mock songs...");
+        await insertMockSongs();
+    });
+
     let guildPreference: GuildPreference;
     beforeEach(async function () {
         guildPreference = await getMockGuildPreference();
