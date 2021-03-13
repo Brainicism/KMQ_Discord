@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 /* eslint-disable prefer-arrow-callback */
 import assert from "assert";
-import { ModeType } from "../commands/game_options/mode";
-import state from "../kmq";
-import GameRound, { cleanArtistName, cleanSongName } from "../structures/game_round";
+import { ModeType } from "../../commands/game_options/mode";
+import state from "../../kmq";
+import GameRound, { cleanArtistName, cleanSongName } from "../../structures/game_round";
 
 let gameRound: GameRound;
 describe("constructor defaults", function () {
