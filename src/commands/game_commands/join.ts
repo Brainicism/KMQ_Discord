@@ -55,12 +55,16 @@ export default class JoinCommand implements BaseCommand {
         }
         // Limit length to 128 chars, filter out Discord markdown modifiers
         const teamName = parsedMessage.argument.replace(/\\|_|\*|~|\||`/gm, "").substr(0, 128);
+        if (teamName.length === 0) {
+            sendErrorMessage(getMessageContext(message), { title: "Join error", description: "Your team name consists of only invalid characters." });
+            return;
+        }
         const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
         if (!teamScoreboard.hasTeam(teamName)) {
             teamScoreboard.addTeam(teamName, new Player(getUserTag(message.author), message.author.id, message.author.avatarURL, 0));
             sendInfoMessage(getMessageContext(message), {
                 title: "New team created",
-                description: `To join ${bold(teamName)} alongside ${bold(getUserTag(message.author))}, enter \`,join ${teamName}\`. Start the game with \`,begin\`.`,
+                description: `To join ${bold(teamName)} alongside ${bold(getUserTag(message.author))}, enter \`,join ${teamName}\`.${!gameSession.sessionInitialized ? " Start the game with `,begin`." : ""}`,
                 thumbnailUrl: KmqImages.READING_BOOK,
             });
         } else {

@@ -24,7 +24,7 @@ export default class EliminationScoreboard extends Scoreboard {
      * @param avatarUrl - The player's Discord avatar URL
      */
     addPlayer(userID: string, tag: string, avatarUrl: string, lives?: number): EliminationPlayer {
-        this.players[userID] = new EliminationPlayer(tag, userID, avatarUrl, 0, lives === undefined ? this.startingLives : lives);
+        this.players[userID] = new EliminationPlayer(tag, userID, avatarUrl, 0, lives === undefined || lives === null ? this.startingLives : lives);
         return this.players[userID];
     }
 

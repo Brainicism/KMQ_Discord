@@ -17,6 +17,12 @@ export default class TeamScoreboard extends Scoreboard {
     */
     protected players: TeamMap;
 
+    /** @returns An array of DiscordEmbed fields representing each participant's score */
+    getScoreboardEmbedFields(): Array<{ name: string, value: string, inline: boolean }> {
+        if (this.isEmpty()) return [];
+        return super.getScoreboardEmbedFields();
+    }
+
     /**
      * Reward points to the player that guessed correctly. Update the team in first place based on the new score
      * @param winnerTag - Unused
@@ -40,7 +46,7 @@ export default class TeamScoreboard extends Scoreboard {
     }
 
     /**
-    * Create a new team with name teamName containing the player who created it
+    * Create a new team with containing the player who created it
     * @param name - The name of the team
     * @param player - The player that created the team
     */
@@ -112,6 +118,7 @@ export default class TeamScoreboard extends Scoreboard {
         if (!team) return;
         team.removePlayer(userID);
         if (team.getNumPlayers() === 0) {
+            this.firstPlace = this.firstPlace.filter((t: Team) => t !== team);
             delete this.players[team.name];
         }
     }
@@ -126,7 +133,7 @@ export default class TeamScoreboard extends Scoreboard {
     }
 
     /**
-     * @param userID - The Discord user ID of the player whose exp we want
+     * @param userID - The Discord user ID of the player whose exp is being accessed
      * @returns the exp gained by the player (with a 10% bonus to the winning team if there are multiple teams)
      */
     getPlayerExpGain(userID: string): number {
