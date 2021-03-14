@@ -77,6 +77,9 @@ export default class GameRound {
     /** The base EXP for this GameRound */
     public baseExp: number;
 
+    /** Whether the round has been started (the music has started playing) */
+    public started: boolean;
+
     constructor(song: string, artist: string, videoID: string, year: number) {
         this.songName = song;
         this.acceptedSongAnswers = [song, ...(state.aliases.song[videoID] || [])];

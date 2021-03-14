@@ -287,6 +287,9 @@ export default class GameSession {
     async guessSong(message: GuildTextableMessage) {
         const guildPreference = await getGuildPreference(message.guildID);
         if (!this.gameRound) return;
+        if (!this.gameRound.started) {
+            return;
+        }
 
         if (!this.guessEligible(message)) return;
 
@@ -497,6 +500,7 @@ export default class GameSession {
         logger.info(`${getDebugLogHeader(messageContext)} | Playing song in voice connection. seek = ${guildPreference.getSeekType()}. song = ${this.getDebugSongDetails()}. mode = ${guildPreference.getModeType()}`);
         this.connection.stopPlaying();
         try {
+            this.gameRound.started = true;
             this.connection.play(stream, {
                 inputArgs: ["-ss", seekLocation.toString()],
             });
