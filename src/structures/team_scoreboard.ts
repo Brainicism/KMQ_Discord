@@ -94,7 +94,7 @@ export default class TeamScoreboard extends Scoreboard {
      * @returns the team containing the given player
      */
     getTeamOfPlayer(userID: string): Team {
-        return Object.values(this.players).find((t: Team) => t.hasPlayer(userID));
+        return Object.values(this.players).find((t: Team) => t.hasPlayer(userID)) || null;
     }
 
     /**

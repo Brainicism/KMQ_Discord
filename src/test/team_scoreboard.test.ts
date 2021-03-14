@@ -1,5 +1,6 @@
 import assert from "assert";
 import GuildPreference from "../structures/guild_preference";
+import Team from "../structures/team";
 import TeamScoreboard from "../structures/team_scoreboard";
 import Player from "../structures/player";
 
@@ -21,7 +22,43 @@ beforeEach(function () {
     scoreboard.addTeam(FIRST_TEAM_NAME, new Player("user#0101", FIRST_USERID, AVATAR_URL, 0));
 });
 
-describe("team score/xp updating", function () {
+describe("add a team", function () {
+    it("should add the team to the scoreboard", function () {
+        const player = new Player("second_user#1010", TWO_USER_IDS[1], AVATAR_URL, 0);
+        const team = new Team(SECOND_TEAM_NAME, player);
+
+        assert.strictEqual(scoreboard.hasTeam(team.getName()), false);
+        scoreboard.addTeam(SECOND_TEAM_NAME, player);
+        assert.deepStrictEqual(scoreboard.getTeam(team.getName()), team);
+        assert.strictEqual(scoreboard.hasTeam(team.getName()), true);
+        assert.deepStrictEqual(Object.values(scoreboard.getTeams()), [new Team(FIRST_TEAM_NAME, new Player("user#0101", FIRST_USERID, AVATAR_URL, 0)), team]);
+    });
+});
+
+describe("get team of player", function () {
+    it("should get the team that corresponds to the player", function () {
+        assert.deepStrictEqual(scoreboard.getTeamOfPlayer(FOUR_USER_IDS[0]), scoreboard.getTeam(FIRST_TEAM_NAME));
+        assert.strictEqual(scoreboard.getTeamOfPlayer(FOUR_USER_IDS[1]), null);
+
+        const player = new Player("second_user#1010", FOUR_USER_IDS[1], AVATAR_URL, 0);
+        scoreboard.addTeam(SECOND_TEAM_NAME, player);
+        assert.deepStrictEqual(scoreboard.getTeamOfPlayer(player.getId()), scoreboard.getTeam(SECOND_TEAM_NAME));
+
+        const anotherPlayer = new Player(USER_TAG, FOUR_USER_IDS[2], AVATAR_URL, 0);
+        scoreboard.addPlayer(SECOND_TEAM_NAME, anotherPlayer);
+        assert.deepStrictEqual(scoreboard.getTeamOfPlayer(anotherPlayer.getId()), scoreboard.getTeam(SECOND_TEAM_NAME));
+
+        const bestPlayer = new Player(USER_TAG, FOUR_USER_IDS[3], AVATAR_URL, 0);
+        scoreboard.addPlayer(FIRST_TEAM_NAME, bestPlayer);
+        scoreboard.removePlayer(bestPlayer.getId());
+        scoreboard.removePlayer(player.getId());
+        scoreboard.removePlayer(FIRST_USERID);
+        assert.strictEqual(scoreboard.getTeam(FIRST_TEAM_NAME), null);
+        assert.deepStrictEqual(Object.values(scoreboard.getTeams()), [new Team(SECOND_TEAM_NAME, anotherPlayer)]);
+    });
+});
+
+describe("score/xp updating", function () {
     describe("single player, single team scoreboard", function () {
         describe("user guesses correctly multiple times", function () {
             it("should increment the user's score/xp, team score should be player's score, no bonus xp since 1 team", function () {
@@ -79,7 +116,7 @@ describe("team score/xp updating", function () {
         beforeEach(function () {
             scoreboard.addPlayer(FIRST_TEAM_NAME, new Player("second_user#1010", FOUR_USER_IDS[1], AVATAR_URL, 0));
             scoreboard.addTeam(SECOND_TEAM_NAME, new Player("IU#2325", FOUR_USER_IDS[2], AVATAR_URL, 0));
-            scoreboard.addPlayer(SECOND_TEAM_NAME, new Player("g-dragon#9999", FOUR_USER_IDS[3], "dragon", 0));
+            scoreboard.addPlayer(SECOND_TEAM_NAME, new Player("g-dragon#9999", FOUR_USER_IDS[3], AVATAR_URL, 0));
         });
 
         describe("all users guess correctly multiple times", function () {
@@ -162,11 +199,11 @@ describe("team score/xp updating", function () {
     });
 });
 
-describe("team winner detection", function () {
+describe("winner detection", function () {
     beforeEach(function () {
         scoreboard.addPlayer(FIRST_TEAM_NAME, new Player("sakura#5478", FOUR_USER_IDS[1], AVATAR_URL, 0));
         scoreboard.addTeam(SECOND_TEAM_NAME, new Player("IU#2325", FOUR_USER_IDS[2], AVATAR_URL, 0));
-        scoreboard.addPlayer(SECOND_TEAM_NAME, new Player("g-dragon#9999", FOUR_USER_IDS[3], "dragon", 0));
+        scoreboard.addPlayer(SECOND_TEAM_NAME, new Player("g-dragon#9999", FOUR_USER_IDS[3], AVATAR_URL, 0));
     });
 
     describe("nobody has a score yet", function () {
@@ -218,7 +255,7 @@ describe("team winner detection", function () {
 });
 
 let guildPreference: GuildPreference;
-describe("team game finished", function () {
+describe("game finished", function () {
     beforeEach(function () {
         guildPreference = new GuildPreference("1234");
         guildPreference.setGoal(5);

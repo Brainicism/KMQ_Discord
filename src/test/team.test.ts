@@ -18,9 +18,13 @@ beforeEach(function () {
 describe("add a teammate", function () {
     describe("add a player to a team", function () {
         it("should increase the size of the team and the team should include the new player", function () {
+            assert.strictEqual(team.hasPlayer(subparPlayer.getId()), false);
             team.addPlayer(subparPlayer);
             assert.strictEqual(team.getNumPlayers(), 2);
             assert.deepStrictEqual(team.getPlayers(), [subparPlayer, goodPlayer]);
+            assert.strictEqual(team.hasPlayer(goodPlayer.getId()), true);
+            assert.strictEqual(team.hasPlayer(subparPlayer.getId()), true);
+            assert.strictEqual(team.hasPlayer(firstOnLeaderboardPlayer.getId()), false);
         });
     });
 });
@@ -29,8 +33,10 @@ describe("remove a teammate", function () {
     describe("remove a player from a team", function () {
         it("should decrease the size of the team and the team should now exclude that player", function () {
             team.addPlayer(subparPlayer);
+            assert.strictEqual(team.hasPlayer(subparPlayer.getId()), true);
             assert.strictEqual(team.getNumPlayers(), 2);
             team.removePlayer(subparPlayer.getId());
+            assert.strictEqual(team.hasPlayer(subparPlayer.getId()), false);
             assert.strictEqual(team.getNumPlayers(), 1);
             assert.deepStrictEqual(team.getPlayers(), [goodPlayer]);
         });
