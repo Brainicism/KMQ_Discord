@@ -1,8 +1,8 @@
 import assert from "assert";
-import GuildPreference from "../structures/guild_preference";
-import Team from "../structures/team";
-import TeamScoreboard from "../structures/team_scoreboard";
-import Player from "../structures/player";
+import GuildPreference from "../../structures/guild_preference";
+import Team from "../../structures/team";
+import TeamScoreboard from "../../structures/team_scoreboard";
+import Player from "../../structures/player";
 
 const FIRST_TEAM_NAME = "kmq team";
 const SECOND_TEAM_NAME = "not kmqer";
@@ -15,46 +15,54 @@ const USER_TAG = "unused";
 const AVATAR_URL = "avatarurl";
 
 let scoreboard: TeamScoreboard;
+let firstTeam: Team;
 
 /* eslint-disable prefer-arrow-callback */
 beforeEach(function () {
     scoreboard = new TeamScoreboard();
-    scoreboard.addTeam(FIRST_TEAM_NAME, new Player("user#0101", FIRST_USERID, AVATAR_URL, 0));
+    firstTeam = scoreboard.addTeam(FIRST_TEAM_NAME, new Player("user#0101", FIRST_USERID, AVATAR_URL, 0));
 });
 
 describe("add a team", function () {
     it("should add the team to the scoreboard", function () {
         const player = new Player("second_user#1010", TWO_USER_IDS[1], AVATAR_URL, 0);
-        const team = new Team(SECOND_TEAM_NAME, player);
 
-        assert.strictEqual(scoreboard.hasTeam(team.getName()), false);
-        scoreboard.addTeam(SECOND_TEAM_NAME, player);
-        assert.deepStrictEqual(scoreboard.getTeam(team.getName()), team);
-        assert.strictEqual(scoreboard.hasTeam(team.getName()), true);
-        assert.deepStrictEqual(Object.values(scoreboard.getTeams()), [new Team(FIRST_TEAM_NAME, new Player("user#0101", FIRST_USERID, AVATAR_URL, 0)), team]);
+        assert.strictEqual(scoreboard.hasTeam(SECOND_TEAM_NAME), false);
+        const secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, player);
+        assert.deepStrictEqual(scoreboard.getTeam(secondTeam.getName()), secondTeam);
+        assert.strictEqual(scoreboard.hasTeam(secondTeam.getName()), true);
+        assert.deepStrictEqual(Object.values(scoreboard.getTeams()), [firstTeam, secondTeam]);
     });
 });
 
 describe("get team of player", function () {
     it("should get the team that corresponds to the player", function () {
-        assert.deepStrictEqual(scoreboard.getTeamOfPlayer(FOUR_USER_IDS[0]), scoreboard.getTeam(FIRST_TEAM_NAME));
+        assert.deepStrictEqual(scoreboard.getTeamOfPlayer(FOUR_USER_IDS[0]), firstTeam);
         assert.strictEqual(scoreboard.getTeamOfPlayer(FOUR_USER_IDS[1]), null);
 
         const player = new Player("second_user#1010", FOUR_USER_IDS[1], AVATAR_URL, 0);
-        scoreboard.addTeam(SECOND_TEAM_NAME, player);
-        assert.deepStrictEqual(scoreboard.getTeamOfPlayer(player.getId()), scoreboard.getTeam(SECOND_TEAM_NAME));
+        const secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, player);
+        assert.deepStrictEqual(scoreboard.getTeamOfPlayer(player.getId()), secondTeam);
 
         const anotherPlayer = new Player(USER_TAG, FOUR_USER_IDS[2], AVATAR_URL, 0);
         scoreboard.addPlayer(SECOND_TEAM_NAME, anotherPlayer);
-        assert.deepStrictEqual(scoreboard.getTeamOfPlayer(anotherPlayer.getId()), scoreboard.getTeam(SECOND_TEAM_NAME));
+        assert.deepStrictEqual(scoreboard.getTeamOfPlayer(anotherPlayer.getId()), secondTeam);
+    });
+});
 
+describe("team deletion", function () {
+    it("should delete a team when it has no players in it", function () {
+        const player = new Player("second_user#1010", FOUR_USER_IDS[1], AVATAR_URL, 0);
+        const secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, player);
+        const anotherPlayer = new Player(USER_TAG, FOUR_USER_IDS[2], AVATAR_URL, 0);
+        scoreboard.addPlayer(SECOND_TEAM_NAME, anotherPlayer);
         const bestPlayer = new Player(USER_TAG, FOUR_USER_IDS[3], AVATAR_URL, 0);
         scoreboard.addPlayer(FIRST_TEAM_NAME, bestPlayer);
         scoreboard.removePlayer(bestPlayer.getId());
         scoreboard.removePlayer(player.getId());
         scoreboard.removePlayer(FIRST_USERID);
-        assert.strictEqual(scoreboard.getTeam(FIRST_TEAM_NAME), null);
-        assert.deepStrictEqual(Object.values(scoreboard.getTeams()), [new Team(SECOND_TEAM_NAME, anotherPlayer)]);
+        assert.strictEqual(scoreboard.getTeam(FIRST_USERID), null);
+        assert.deepStrictEqual(Object.values(scoreboard.getTeams()), [secondTeam]);
     });
 });
 
@@ -66,7 +74,7 @@ describe("score/xp updating", function () {
                     scoreboard.updateScoreboard(USER_TAG, FIRST_USERID, AVATAR_URL, 1, 50);
                     assert.strictEqual(scoreboard.getPlayerScore(FIRST_USERID), i + 1);
                     assert.strictEqual(scoreboard.getPlayerExpGain(FIRST_USERID), 50 * (i + 1));
-                    assert.strictEqual(scoreboard.getTeam(FIRST_TEAM_NAME).getScore(), i + 1);
+                    assert.strictEqual(firstTeam.getScore(), i + 1);
                 }
             });
         });
@@ -75,7 +83,7 @@ describe("score/xp updating", function () {
             it("should not increment the user's score/xp", function () {
                 assert.strictEqual(scoreboard.getPlayerScore(FIRST_USERID), 0);
                 assert.strictEqual(scoreboard.getPlayerExpGain(FIRST_USERID), 0);
-                assert.strictEqual(scoreboard.getTeam(FIRST_TEAM_NAME).getScore(), 0);
+                assert.strictEqual(firstTeam.getScore(), 0);
             });
         });
     });
@@ -97,7 +105,7 @@ describe("score/xp updating", function () {
                 assert.strictEqual(scoreboard.getPlayerExpGain(TWO_USER_IDS[0]), 1000);
                 assert.strictEqual(scoreboard.getPlayerScore(TWO_USER_IDS[1]), 10);
                 assert.strictEqual(scoreboard.getPlayerExpGain(TWO_USER_IDS[1]), 500);
-                assert.strictEqual(scoreboard.getTeam(FIRST_TEAM_NAME).getScore(), 30);
+                assert.strictEqual(firstTeam.getScore(), 30);
             });
         });
 
@@ -107,15 +115,16 @@ describe("score/xp updating", function () {
                 assert.strictEqual(scoreboard.getPlayerExpGain(TWO_USER_IDS[0]), 0);
                 assert.strictEqual(scoreboard.getPlayerScore(TWO_USER_IDS[1]), 0);
                 assert.strictEqual(scoreboard.getPlayerExpGain(TWO_USER_IDS[1]), 0);
-                assert.strictEqual(scoreboard.getTeam(FIRST_TEAM_NAME).getScore(), 0);
+                assert.strictEqual(firstTeam.getScore(), 0);
             });
         });
     });
 
     describe("multi player, multi team scoreboard", function () {
+        let secondTeam: Team;
         beforeEach(function () {
             scoreboard.addPlayer(FIRST_TEAM_NAME, new Player("second_user#1010", FOUR_USER_IDS[1], AVATAR_URL, 0));
-            scoreboard.addTeam(SECOND_TEAM_NAME, new Player("IU#2325", FOUR_USER_IDS[2], AVATAR_URL, 0));
+            secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, new Player("IU#2325", FOUR_USER_IDS[2], AVATAR_URL, 0));
             scoreboard.addPlayer(SECOND_TEAM_NAME, new Player("g-dragon#9999", FOUR_USER_IDS[3], AVATAR_URL, 0));
         });
 
@@ -145,8 +154,8 @@ describe("score/xp updating", function () {
                 assert.strictEqual(scoreboard.getPlayerScore(FOUR_USER_IDS[3]), 1);
                 assert.strictEqual(scoreboard.getPlayerExpGain(FOUR_USER_IDS[3]), 50);
 
-                assert.strictEqual(scoreboard.getTeam(FIRST_TEAM_NAME).getScore(), 30);
-                assert.strictEqual(scoreboard.getTeam(SECOND_TEAM_NAME).getScore(), 3);
+                assert.strictEqual(firstTeam.getScore(), 30);
+                assert.strictEqual(secondTeam.getScore(), 3);
             });
         });
 
@@ -173,8 +182,8 @@ describe("score/xp updating", function () {
                 assert.strictEqual(scoreboard.getPlayerScore(FOUR_USER_IDS[3]), 0);
                 assert.strictEqual(scoreboard.getPlayerExpGain(FOUR_USER_IDS[3]), 0);
 
-                assert.strictEqual(scoreboard.getTeam(FIRST_TEAM_NAME).getScore(), 21);
-                assert.strictEqual(scoreboard.getTeam(SECOND_TEAM_NAME).getScore(), 2);
+                assert.strictEqual(firstTeam.getScore(), 21);
+                assert.strictEqual(secondTeam.getScore(), 2);
             });
         });
 
@@ -192,17 +201,18 @@ describe("score/xp updating", function () {
                 assert.strictEqual(scoreboard.getPlayerScore(FOUR_USER_IDS[3]), 0);
                 assert.strictEqual(scoreboard.getPlayerExpGain(FOUR_USER_IDS[3]), 0);
 
-                assert.strictEqual(scoreboard.getTeam(FIRST_TEAM_NAME).getScore(), 0);
-                assert.strictEqual(scoreboard.getTeam(SECOND_TEAM_NAME).getScore(), 0);
+                assert.strictEqual(firstTeam.getScore(), 0);
+                assert.strictEqual(secondTeam.getScore(), 0);
             });
         });
     });
 });
 
 describe("winner detection", function () {
+    let secondTeam: Team;
     beforeEach(function () {
         scoreboard.addPlayer(FIRST_TEAM_NAME, new Player("sakura#5478", FOUR_USER_IDS[1], AVATAR_URL, 0));
-        scoreboard.addTeam(SECOND_TEAM_NAME, new Player("IU#2325", FOUR_USER_IDS[2], AVATAR_URL, 0));
+        secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, new Player("IU#2325", FOUR_USER_IDS[2], AVATAR_URL, 0));
         scoreboard.addPlayer(SECOND_TEAM_NAME, new Player("g-dragon#9999", FOUR_USER_IDS[3], AVATAR_URL, 0));
     });
 
@@ -248,7 +258,7 @@ describe("winner detection", function () {
             scoreboard.updateScoreboard(USER_TAG, FOUR_USER_IDS[1], AVATAR_URL, 7, 0);
             scoreboard.updateScoreboard(USER_TAG, FOUR_USER_IDS[2], AVATAR_URL, 7, 0);
             scoreboard.updateScoreboard(USER_TAG, FOUR_USER_IDS[3], AVATAR_URL, 5, 0);
-            assert.deepStrictEqual(scoreboard.getWinners(), [scoreboard.getTeam(FIRST_TEAM_NAME), scoreboard.getTeam(SECOND_TEAM_NAME)]);
+            assert.deepStrictEqual(scoreboard.getWinners(), [firstTeam, secondTeam]);
             assert.strictEqual(scoreboard.isTeamFirstPlace(FIRST_TEAM_NAME) && scoreboard.isTeamFirstPlace(SECOND_TEAM_NAME), true);
         });
     });

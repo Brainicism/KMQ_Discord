@@ -49,13 +49,15 @@ export default class TeamScoreboard extends Scoreboard {
     * Create a new team with containing the player who created it
     * @param name - The name of the team
     * @param player - The player that created the team
+    * @returns the newly created team
     */
-    addTeam(name: string, player: Player) {
+    addTeam(name: string, player: Player): Team {
         // If the user is switching teams, remove them from their existing team first
         if (this.getPlayer(player.id)) {
             this.removePlayer(player.id);
         }
         this.players[name] = new Team(name, player);
+        return this.players[name];
     }
 
     /**

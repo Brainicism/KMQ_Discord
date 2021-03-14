@@ -1,7 +1,7 @@
 /* eslint-disable prefer-arrow-callback */
 import assert from "assert";
-import Player from "../structures/player";
-import Team from "../structures/team";
+import Player from "../../structures/player";
+import Team from "../../structures/team";
 
 let team: Team;
 let goodPlayer: Player;
