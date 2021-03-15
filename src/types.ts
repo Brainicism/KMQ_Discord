@@ -19,7 +19,7 @@ export interface QueriedSong {
     youtubeLink: string;
     publishDate?: Date;
     members?: Gender;
-    artistId?: number;
+    artistID?: number;
     isSolo?: string;
 }
 

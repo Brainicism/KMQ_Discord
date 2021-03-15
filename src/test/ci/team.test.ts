@@ -17,13 +17,13 @@ beforeEach(() => {
 describe("add a teammate", () => {
     describe("add a player to a team", () => {
         it("should increase the size of the team and the team should include the new player", () => {
-            assert.strictEqual(team.hasPlayer(subparPlayer.getId()), false);
+            assert.strictEqual(team.hasPlayer(subparPlayer.getID()), false);
             team.addPlayer(subparPlayer);
             assert.strictEqual(team.getNumPlayers(), 2);
             assert.deepStrictEqual(team.getPlayers(), [subparPlayer, goodPlayer]);
-            assert.strictEqual(team.hasPlayer(goodPlayer.getId()), true);
-            assert.strictEqual(team.hasPlayer(subparPlayer.getId()), true);
-            assert.strictEqual(team.hasPlayer(firstOnLeaderboardPlayer.getId()), false);
+            assert.strictEqual(team.hasPlayer(goodPlayer.getID()), true);
+            assert.strictEqual(team.hasPlayer(subparPlayer.getID()), true);
+            assert.strictEqual(team.hasPlayer(firstOnLeaderboardPlayer.getID()), false);
         });
     });
 });
@@ -32,10 +32,10 @@ describe("remove a teammate", () => {
     describe("remove a player from a team", () => {
         it("should decrease the size of the team and the team should now exclude that player", () => {
             team.addPlayer(subparPlayer);
-            assert.strictEqual(team.hasPlayer(subparPlayer.getId()), true);
+            assert.strictEqual(team.hasPlayer(subparPlayer.getID()), true);
             assert.strictEqual(team.getNumPlayers(), 2);
-            team.removePlayer(subparPlayer.getId());
-            assert.strictEqual(team.hasPlayer(subparPlayer.getId()), false);
+            team.removePlayer(subparPlayer.getID());
+            assert.strictEqual(team.hasPlayer(subparPlayer.getID()), false);
             assert.strictEqual(team.getNumPlayers(), 1);
             assert.deepStrictEqual(team.getPlayers(), [goodPlayer]);
         });
@@ -83,11 +83,11 @@ describe("score after removal", () => {
             assert.deepStrictEqual(team.getPlayers(), [subparPlayer, goodPlayer, firstOnLeaderboardPlayer]);
             assert.strictEqual(team.getScore(), 75);
 
-            team.removePlayer(subparPlayer.getId());
+            team.removePlayer(subparPlayer.getID());
             assert.deepStrictEqual(team.getPlayers(), [goodPlayer, firstOnLeaderboardPlayer]);
             assert.strictEqual(team.getScore(), 50);
 
-            team.removePlayer(firstOnLeaderboardPlayer.getId());
+            team.removePlayer(firstOnLeaderboardPlayer.getID());
             assert.deepStrictEqual(team.getPlayers(), [goodPlayer]);
             assert.strictEqual(team.getScore(), 25);
         });

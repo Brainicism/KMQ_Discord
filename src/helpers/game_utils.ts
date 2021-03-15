@@ -27,23 +27,23 @@ interface GroupMatchResults {
  * @returns a list of songs, as well as the number of songs before the filter option was applied
  */
 export async function getFilteredSongList(guildPreference: GuildPreference, ignoredSongs?: Set<string>, genderOverride?: Gender): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
-    const fields = ["song_name as name", "artist_name as artist", "link as youtubeLink", "publishedon as publishDate", "members", "id_artist as artistId", "issolo as isSolo", "members"];
+    const fields = ["song_name as name", "artist_name as artist", "link as youtubeLink", "publishedon as publishDate", "members", "id_artist as artistID", "issolo as isSolo", "members"];
     let queryBuilder = dbContext.kmq("available_songs")
         .select(fields)
         .where(function artistFilter() {
             this.where(function includesInnerArtistFilter() {
                 if (!guildPreference.isGroupsMode()) {
                     if (guildPreference.getSubunitPreference() === SubunitsPreference.EXCLUDE) {
-                        this.whereIn("id_artist", guildPreference.getIncludesGroupIds());
+                        this.whereIn("id_artist", guildPreference.getIncludesGroupIDs());
                     } else {
                         this.andWhere(function () {
-                            this.whereIn("id_artist", guildPreference.getIncludesGroupIds())
-                                .orWhereIn("id_parent_artist", guildPreference.getIncludesGroupIds());
+                            this.whereIn("id_artist", guildPreference.getIncludesGroupIDs())
+                                .orWhereIn("id_parent_artist", guildPreference.getIncludesGroupIDs());
                         });
                     }
                 }
             }).orWhere(function mainInnerArtistFilter() {
-                this.whereNotIn("id_artist", guildPreference.getExcludesGroupIds());
+                this.whereNotIn("id_artist", guildPreference.getExcludesGroupIDs());
                 if (!guildPreference.isGroupsMode()) {
                     const gender = guildPreference.isGenderAlternating() ? [Gender.MALE, Gender.FEMALE] : guildPreference.getGender();
                     this.whereIn("members", gender);
@@ -55,11 +55,11 @@ export async function getFilteredSongList(guildPreference: GuildPreference, igno
                 } else {
                     // eslint-disable-next-line no-lonely-if
                     if (guildPreference.getSubunitPreference() === SubunitsPreference.EXCLUDE) {
-                        this.whereIn("id_artist", guildPreference.getGroupIds());
+                        this.whereIn("id_artist", guildPreference.getGroupIDs());
                     } else {
                         this.andWhere(function () {
-                            this.whereIn("id_artist", guildPreference.getGroupIds())
-                                .orWhereIn("id_parent_artist", guildPreference.getGroupIds());
+                            this.whereIn("id_artist", guildPreference.getGroupIDs())
+                                .orWhereIn("id_parent_artist", guildPreference.getGroupIDs());
                         });
                     }
                 }
@@ -160,13 +160,13 @@ export async function cleanupInactiveGameSessions(): Promise<void> {
     const currentDate = Date.now();
     let inactiveSessions = 0;
     const totalSessions = Object.keys(gameSessions).length;
-    for (const guildId of Object.keys(gameSessions)) {
-        const gameSession = gameSessions[guildId];
+    for (const guildID of Object.keys(gameSessions)) {
+        const gameSession = gameSessions[guildID];
         const timeDiffMs = currentDate - gameSession.lastActive;
         const timeDiffMin = (timeDiffMs / (1000 * 60));
         if (timeDiffMin > GAME_SESSION_INACTIVE_THRESHOLD) {
             inactiveSessions++;
-            await gameSessions[guildId].endSession();
+            await gameSessions[guildID].endSession();
         }
     }
     if (inactiveSessions > 0) {
@@ -204,17 +204,17 @@ export async function endSession(gameSession: GameSession) {
  * @returns a list of recognized/unrecognized groups
  */
 export async function getMatchingGroupNames(rawGroupNames: Array<string>): Promise<GroupMatchResults> {
-    const artistIdQuery = dbContext.kmq("kpop_groups")
+    const artistIDQuery = dbContext.kmq("kpop_groups")
         .select(["id"])
         .whereIn("name", rawGroupNames);
 
     const matchingGroups = (await dbContext.kmq("kpop_groups")
         .select(["id", "name"])
-        .whereIn("id", [artistIdQuery])
-        .orWhereIn("id_artist1", [artistIdQuery])
-        .orWhereIn("id_artist2", [artistIdQuery])
-        .orWhereIn("id_artist3", [artistIdQuery])
-        .orWhereIn("id_artist4", [artistIdQuery])
+        .whereIn("id", [artistIDQuery])
+        .orWhereIn("id_artist1", [artistIDQuery])
+        .orWhereIn("id_artist2", [artistIDQuery])
+        .orWhereIn("id_artist3", [artistIDQuery])
+        .orWhereIn("id_artist4", [artistIDQuery])
         .orderBy("name", "ASC"))
         .map((x) => ({ id: x.id, name: x.name }));
 

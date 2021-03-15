@@ -13,14 +13,14 @@ export default class MessageContext {
     /** The guild ID to send the message to */
     public guildID: string;
 
-    constructor(textChannelId: string, author?: KmqMember, guildId?: string) {
-        this.textChannelID = textChannelId;
+    constructor(textChannelID: string, author?: KmqMember, guildID?: string) {
+        this.textChannelID = textChannelID;
         if (author === null) {
             const clientUser = state.client.user;
             this.author = new KmqMember(clientUser.username, getUserTag(clientUser), clientUser.avatarURL, clientUser.id);
         }
         this.author = author;
-        this.guildID = guildId;
+        this.guildID = guildID;
     }
 
     /**

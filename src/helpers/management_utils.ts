@@ -121,10 +121,10 @@ function sweepCaches() {
 export async function updatePublishDateOverrides() {
     try {
         const publishDateOverrides = parseJsonFile(publishOverridesFilePath);
-        for (const [videoId, dateOverride] of Object.entries(publishDateOverrides)) {
+        for (const [videoID, dateOverride] of Object.entries(publishDateOverrides)) {
             await dbContext.kmq("available_songs")
                 .update({ publishedon: dateOverride })
-                .where("link", "=", videoId);
+                .where("link", "=", videoID);
         }
     } catch (err) {
         logger.error("Error parsing publish overrides file");
@@ -276,12 +276,12 @@ export function initializeBotStatsPoster() {
 
 /**
  * Deletes the GameSession corresponding to a given guild ID
- * @param guildId - The guild ID
+ * @param guildID - The guild ID
  */
-export function deleteGameSession(guildId: string) {
-    if (!(guildId in state.gameSessions)) {
-        logger.debug(`gid: ${guildId} | GameSession already ended`);
+export function deleteGameSession(guildID: string) {
+    if (!(guildID in state.gameSessions)) {
+        logger.debug(`gid: ${guildID} | GameSession already ended`);
         return;
     }
-    delete state.gameSessions[guildId];
+    delete state.gameSessions[guildID];
 }

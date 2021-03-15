@@ -39,20 +39,20 @@ const EXP_TABLE = [...Array(200).keys()].map((level) => {
 export const CUM_EXP_TABLE = EXP_TABLE.map(((sum) => (value) => sum += value)(0));
 
 interface LevelUpResult {
-    userId: string;
+    userID: string;
     startLevel: number;
     endLevel: number;
 }
 
 interface LastGuesser {
-    userId: string;
+    userID: string;
     streak: number;
 }
 
 export interface GuessResult {
     correct: boolean;
     expGain?: number;
-    guesserUserId?: string;
+    guesserUserID?: string;
     pointsEarned?: number;
     streak?: number;
     remainingDuration?: number;
@@ -165,8 +165,8 @@ export default class GameSession {
 
         if (guessResult.correct) {
             // update guessing streaks
-            if (this.lastGuesser === null || this.lastGuesser.userId !== guessResult.guesserUserId) {
-                this.lastGuesser = { userId: guessResult.guesserUserId, streak: 1 };
+            if (this.lastGuesser === null || this.lastGuesser.userID !== guessResult.guesserUserID) {
+                this.lastGuesser = { userID: guessResult.guesserUserID, streak: 1 };
             } else {
                 this.lastGuesser.streak++;
             }
@@ -248,7 +248,7 @@ export default class GameSession {
 
         // send level up message
         if (leveledUpPlayers.length > 0) {
-            let levelUpMessages = leveledUpPlayers.map((leveledUpPlayer) => `\`${this.scoreboard.getPlayerName(leveledUpPlayer.userId)}\` has leveled from \`${leveledUpPlayer.startLevel}\` to \`${leveledUpPlayer.endLevel} (${getRankNameByLevel(leveledUpPlayer.endLevel)})\``);
+            let levelUpMessages = leveledUpPlayers.map((leveledUpPlayer) => `\`${this.scoreboard.getPlayerName(leveledUpPlayer.userID)}\` has leveled from \`${leveledUpPlayer.startLevel}\` to \`${leveledUpPlayer.endLevel} (${getRankNameByLevel(leveledUpPlayer.endLevel)})\``);
             if (levelUpMessages.length > 10) {
                 levelUpMessages = levelUpMessages.slice(0, 10);
                 levelUpMessages.push("and many others...");
@@ -305,7 +305,7 @@ export default class GameSession {
             this.correctGuesses++;
 
             // mark round as complete, so no more guesses can go through
-            this.endRound({ correct: true, guesserUserId: message.author.id, pointsEarned }, guildPreference, MessageContext.fromMessage(message));
+            this.endRound({ correct: true, guesserUserID: message.author.id, pointsEarned }, guildPreference, MessageContext.fromMessage(message));
 
             // update game session's lastActive
             const gameSession = state.gameSessions[this.guildID];
@@ -612,14 +612,14 @@ export default class GameSession {
 
     /**
      * Creates/updates a user's activity in the data store
-     * @param userId - The player's Discord user ID
+     * @param userID - The player's Discord user ID
      */
-    private async ensurePlayerStat(userId: string) {
+    private async ensurePlayerStat(userID: string) {
         const currentDateString = getSqlDateString();
         await dbContext.kmq("player_stats")
             .insert(
                 {
-                    player_id: userId,
+                    player_id: userID,
                     first_play: currentDateString,
                     last_active: currentDateString,
                 },
@@ -629,7 +629,7 @@ export default class GameSession {
 
         await dbContext.kmq("player_servers")
             .insert({
-                player_id: userId,
+                player_id: userID,
                 server_id: this.guildID,
             })
             .onConflict(["player_id", "server_id"])
@@ -638,12 +638,12 @@ export default class GameSession {
 
     /**
      * Updates a user's songs guessed in the data store
-     * @param userId - The player's Discord user ID
+     * @param userID - The player's Discord user ID
      * @param score - The player's score in the current GameSession
      */
-    private async incrementPlayerSongsGuessed(userId: string, score: number) {
+    private async incrementPlayerSongsGuessed(userID: string, score: number) {
         await dbContext.kmq("player_stats")
-            .where("player_id", "=", userId)
+            .where("player_id", "=", userID)
             .increment("songs_guessed", score)
             .update({
                 last_active: getSqlDateString(),
@@ -652,22 +652,22 @@ export default class GameSession {
 
     /**
      * Updates a user's games played in the data store
-     * @param userId - The player's Discord user ID
+     * @param userID - The player's Discord user ID
      */
-    private async incrementPlayerGamesPlayed(userId: string) {
+    private async incrementPlayerGamesPlayed(userID: string) {
         await dbContext.kmq("player_stats")
-            .where("player_id", "=", userId)
+            .where("player_id", "=", userID)
             .increment("games_played", 1);
     }
 
     /**
-     * @param userId - The Discord ID of the user to exp gain
+     * @param userID - The Discord ID of the user to exp gain
      * @param expGain - The amount of EXP gained
      */
-    private async incrementPlayerExp(userId: string, expGain: number): Promise<LevelUpResult> {
+    private async incrementPlayerExp(userID: string, expGain: number): Promise<LevelUpResult> {
         const { exp: currentExp, level } = (await dbContext.kmq("player_stats")
             .select(["exp", "level"])
-            .where("player_id", "=", userId)
+            .where("player_id", "=", userID)
             .first());
         const newExp = currentExp + expGain;
         let newLevel = level;
@@ -680,12 +680,12 @@ export default class GameSession {
         // persist exp and level to data store
         await dbContext.kmq("player_stats")
             .update({ exp: newExp, level: newLevel })
-            .where("player_id", "=", userId);
+            .where("player_id", "=", userID);
 
         if (level !== newLevel) {
-            logger.info(`${userId} has leveled from ${level} to ${newLevel}`);
+            logger.info(`${userID} has leveled from ${level} to ${newLevel}`);
             return {
-                userId,
+                userID,
                 startLevel: level,
                 endLevel: newLevel,
             };

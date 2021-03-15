@@ -49,15 +49,15 @@ export default class DebugCommand implements BaseCommand {
             });
         }
 
-        const debugId = uuid.v4();
+        const debugID = uuid.v4();
         sendInfoMessage(MessageContext.fromMessage(message), {
             title: "Debug Details Sent!",
-            description: `If you were asked by a bot developer to do this, give them this:\n\`${debugId}\``,
+            description: `If you were asked by a bot developer to do this, give them this:\n\`${debugID}\``,
             thumbnailUrl: KmqImages.READING_BOOK,
         });
         sendInfoMessage(new MessageContext(debugChannel.id), {
             title: bold(`Debug Details for User: ${message.author.id}, Guild: ${message.guildID}`),
-            footerText: debugId,
+            footerText: debugID,
             fields,
             timestamp: new Date(),
         });
