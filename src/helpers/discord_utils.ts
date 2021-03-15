@@ -137,7 +137,7 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
 
     const { remainingDuration } = guessResult;
     if (remainingDuration) {
-        footer.text += `${remainingDuration > 0 ? Math.ceil(guessResult.remainingDuration) : 0} minutes remaining`;
+        footer.text += remainingDuration > 0 ? `⏰ ${Math.ceil(guessResult.remainingDuration)} minute(s) remaining` : "⏰ Time's up!";
     }
 
     const fact = Math.random() <= 0.05 ? getFact() : null;
@@ -225,7 +225,7 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
                 ${guildPreference.isExcludesMode() && !guildPreference.isGroupsMode() ? `, excluding ${optionStrings[GameOption.EXCLUDE]}` : ""}${guildPreference.isIncludesMode() && !guildPreference.isGroupsMode() ? `, including ${optionStrings[GameOption.INCLUDE]}` : ""}. \nPlaying from the ${optionStrings[GameOption.SEEK_TYPE]} point of each song. ${shuffleUniqueMode ? shuffleMessage : ""}\
                 Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}\
                 \nPlaying \`${guildPreference.getLanguageType()}\` language songs.\
-                \n${guildPreference.isDurationSet() ? `The game will automatically end after \`${guildPreference.getDuration()}\` minutes have passed.` : ""}`,
+                \n${guildPreference.isDurationSet() ? `The game will automatically end after \`${guildPreference.getDuration()}\` minutes from the time the game starts.` : ""}`,
             footerText: footerText !== null ? footerText : null,
             thumbnailUrl: KmqImages.LISTENING,
         });
