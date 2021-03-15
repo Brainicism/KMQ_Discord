@@ -1,21 +1,31 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { getDebugLogHeader, sendOptionsMessage } from "../../helpers/discord_utils";
+import { getDebugLogHeader, sendErrorMessage, sendOptionsMessage } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
 
 const logger = _logger("duration");
 
+enum DurationAction {
+    ADD = "add",
+    REMOVE = "remove",
+}
+
 export default class DurationCommand implements BaseCommand {
     validations = {
         minArgCount: 0,
-        maxArgCount: 1,
+        maxArgCount: 2,
         arguments: [
             {
                 name: "duration",
                 type: "number" as const,
                 minValue: 2,
                 maxValue: 600,
+            },
+            {
+                name: "action",
+                type: "enum" as const,
+                enums: Object.values(DurationAction),
             },
         ],
     };
@@ -28,6 +38,14 @@ export default class DurationCommand implements BaseCommand {
             {
                 example: "`!duration 15`",
                 explanation: "The game will automatically end after 15 minutes.",
+            },
+            {
+                example: "`!duration 5 add`",
+                explanation: "Remove 5 minutes from the current game's duration",
+            },
+            {
+                example: "`!duration 5 remove`",
+                explanation: "Add 5 minutes to the current game's duration.",
             },
             {
                 example: "`!duration`",
@@ -45,7 +63,32 @@ export default class DurationCommand implements BaseCommand {
             logger.info(`${getDebugLogHeader(message)} | Duration disabled.`);
             return;
         }
-        const duration = parseInt(parsedMessage.components[0], 10);
+        let duration: number;
+        const durationDelta = parseInt(parsedMessage.components[0], 10);
+        if (parsedMessage.components[1]) {
+            const action = parsedMessage.components[1] as DurationAction;
+            const currentDuration = guildPreference.getDuration();
+            if (action === DurationAction.ADD) {
+                if (!guildPreference.isDurationSet()) {
+                    duration = durationDelta;
+                } else {
+                    duration = currentDuration + durationDelta;
+                }
+            } else if (action === DurationAction.REMOVE) {
+                if (!guildPreference.isDurationSet()) {
+                    sendErrorMessage(message, { title: "Error adding/remove duration", description: "The duration is not currently set." });
+                    return;
+                }
+
+                duration = currentDuration - durationDelta;
+                if (duration < 2) {
+                    sendErrorMessage(message, { title: "Error removing duration", description: "Duration cannot be less than 2 minutes." });
+                    return;
+                }
+            }
+        } else {
+            duration = parseInt(parsedMessage.components[0], 10);
+        }
 
         guildPreference.setDuration(duration);
         await sendOptionsMessage(message, guildPreference, { option: GameOption.DURATION, reset: false });

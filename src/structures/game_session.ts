@@ -292,6 +292,7 @@ export default class GameSession {
      * @param message - The message to check
      */
     async guessSong(message: GuildTextableMessage) {
+        if (this.connection.listenerCount("end") === 0) return;
         const guildPreference = await getGuildPreference(message.guildID);
         if (!this.gameRound) return;
 
