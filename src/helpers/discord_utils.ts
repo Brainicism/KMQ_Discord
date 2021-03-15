@@ -13,6 +13,7 @@ import { ModeType } from "../commands/game_options/mode";
 import Scoreboard from "../structures/scoreboard";
 import GameRound from "../structures/game_round";
 import EliminationScoreboard from "../structures/elimination_scoreboard";
+import TeamScoreboard from "../structures/team_scoreboard";
 import { GameType } from "../commands/game_commands/play";
 import { ArtistType } from "../commands/game_options/artisttype";
 import { SubunitsPreference } from "../commands/game_options/subunits";
@@ -306,6 +307,9 @@ export async function sendScoreboardMessage(message: GuildTextableMessage, gameS
     if (gameSession.gameType === GameType.ELIMINATION) {
         const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
         footerText = `You have ${eliminationScoreboard.getPlayerLives(message.author.id)} lives.`;
+    } else if (gameSession.gameType === GameType.TEAMS) {
+        const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
+        footerText = `Your team's score: ${teamScoreboard.getTeamOfPlayer(message.author.id).getScore()}\nYour score: ${teamScoreboard.getPlayerScore(message.author.id)}`;
     }
     const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map((winnersFieldSubset) => ({
         color: EMBED_SUCCESS_COLOR,

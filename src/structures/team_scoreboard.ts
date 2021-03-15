@@ -122,6 +122,12 @@ export default class TeamScoreboard extends Scoreboard {
         if (team.getNumPlayers() === 0) {
             this.firstPlace = this.firstPlace.filter((t: Team) => t !== team);
             delete this.players[team.name];
+            // If the removed team was the only team in first, first place is now second place
+            if (this.firstPlace.length === 0) {
+                const highestScore = Math.max(...Object.values(this.players).map((x: Team) => x.getScore(), 0));
+                if (highestScore === 0) return;
+                this.firstPlace = Object.values(this.players).filter((t: Team) => t.getScore() === highestScore);
+            }
         }
     }
 

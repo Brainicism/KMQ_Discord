@@ -9,8 +9,11 @@ You can see the current scoreboard by typing `,score`. It is also shown after th
 See the latest updates to KMQ with `,news`. 
 
 # Game Modes
-Team up with your friends and crush the competition in `,play teams`! Split up into as many teams as you'd like and see who will emerge triumphant in the battle for 10% more XP! Once your team is confident of its abilities, join the official KMQ server](https://discord.gg/RCuzwYV) to face-off with the best of the best. More to come soon...
 
+## Teams mode
+Team up with your friends and crush the competition in `,play teams`! Split up into as many teams as you'd like and see who will emerge triumphant in the battle for 10% more EXP! Once your team is confident of its abilities, join the official KMQ server](https://discord.gg/RCuzwYV) to face-off with the best of the best. To keep things fair, switching teams mid-game forfeits your current points and EXP. More to come soon...
+
+## Elimination mode
 See who can survive the longest into a KMQ game with elimination mode. Using `,play elimination x`, everyone starts with `x` lives and the last one alive wins. Guessing correctly will save your life, while everyone else loses one. Use elimination mode in conjunction with `,timer` to raise the pressure! `,goal` cannot be used in elimination mode.
 
 # EXP System
@@ -18,19 +21,19 @@ Think you have what it takes to be a KMQ master? Rise through the ranks, gaining
 
 You start off as a `Novice`, and work your way up through the works of `Trainee` (Level 10), `Pre-debut` (Level 20), `Nugu` (Level 30), and many more to discover. Check out `,profile` to see where you stand.
 
-## XP Modifiers
-- Playing with more people will increase how much XP you gain, ranging between 0.75x (single player) to 1.25x XP (6+ players).  
-- Guessing quickly will earn you 1.1x XP.
-- Guess streaks greater than 5 will earn you 1.2x XP.
-- Every weekend is a 2x XP weekend, all days on Saturdays and Sundays EST time. 
-- On weekdays, there are 3 daily `KMQ Power Hours` lasting two hours each for 2x XP, at random points in the day.
-- Winning a game in teams mode earns your team 1.1x XP.
+## EXP Modifiers
+- Playing with more people will increase how much EXP you gain, ranging between 0.75x (single player) to 1.25x EXP (6+ players).
+- Guessing quickly will earn you 1.1x EXP.
+- Guess streaks greater than 5 will earn you 1.2x EXP.
+- Every weekend is a 2x EXP weekend, all days on Saturdays and Sundays EST time.
+- On weekdays, there are 3 daily `KMQ Power Hours` lasting two hours each for 2x EXP, at random points in the day.
+- Winning a game in teams mode earns your team 1.1x EXP.
 
 ## Requirements
 You will only gain EXP if:
 - There is a minimum of 10 songs selected
-- You are using `,mode song` (full XP)
-- You are using `,mode artist` or `,mode both` and you are not using `,groups` (30% XP)
+- You are using `,mode song` (full EXP)
+- You are using `,mode artist` or `,mode both` and you are not using `,groups` (30% EXP)
 
 # Game Options
 KMQ offers different game options to narrow down the selection of random songs based on your preferences. The current game options can be viewed by using `,options` or simply tagging KMQ Bot.

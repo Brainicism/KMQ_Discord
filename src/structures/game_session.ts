@@ -597,6 +597,11 @@ export default class GameSession {
             if (!this.participants.has(message.author.id) || eliminationScoreboard.isPlayerEliminated(message.author.id)) {
                 return false;
             }
+        } else if (this.gameType === GameType.TEAMS) {
+            const teamScoreboard = this.scoreboard as TeamScoreboard;
+            if (!teamScoreboard.getPlayer(message.author.id)) {
+                return false;
+            }
         }
 
         return true;
@@ -696,8 +701,8 @@ export default class GameSession {
 
     /**
      * @param guildPreference - The guild preference
-     * @param baseExp - The base amount of XP the GameRound provides
-     * @param numParticipants - The number of participants in the voice channel at the time of guesse
+     * @param baseExp - The base amount of EXP the GameRound provides
+     * @param numParticipants - The number of participants in the voice channel at the time of guess
      * @param guessSpeed - The time taken to guess correctly
      * @returns The amount of EXP gained based on the current game options
      */

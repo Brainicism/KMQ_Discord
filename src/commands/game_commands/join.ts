@@ -7,6 +7,7 @@ import { GuildTextableMessage, ParsedMessage } from "../../types";
 import { getUserTag, sendErrorMessage, sendInfoMessage, getMessageContext } from "../../helpers/discord_utils";
 import { KmqImages } from "../../constants";
 import { bold } from "../../helpers/utils";
+import state from "../../kmq";
 
 export default class JoinCommand implements BaseCommand {
     aliases = ["j"];
@@ -54,7 +55,21 @@ export default class JoinCommand implements BaseCommand {
             return;
         }
         // Limit length to 128 chars, filter out Discord markdown modifiers
+        // Ignore: \ _ * ~ | `
         const teamName = parsedMessage.argument.replace(/\\|_|\*|~|\||`/gm, "").substr(0, 128);
+        // Don't allow emojis that aren't in this server
+        // Emojis are of the format: <(a if animated):(alphanumeric):(number)>
+        const emojis = teamName.match(/<a?:[a-zA-Z0-9]+:[0-9]+>/gm) || [];
+        for (const emoji of emojis) {
+            const emojiId = emoji.match(/(?<=<a?:[a-zA-Z0-9]+:)[0-9]+(?=>)/gm).join("");
+            if (!state.client.guilds.get(message.guildID).emojis.map((e) => e.id).includes(emojiId)) {
+                sendErrorMessage(getMessageContext(message), {
+                    title: "Invalid team name",
+                    description: "You can only include emojis that are in this server.",
+                });
+                return;
+            }
+        }
         if (teamName.length === 0) {
             sendErrorMessage(getMessageContext(message), { title: "Join error", description: "Your team name consists of only invalid characters." });
             return;
@@ -62,9 +77,10 @@ export default class JoinCommand implements BaseCommand {
         const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
         if (!teamScoreboard.hasTeam(teamName)) {
             teamScoreboard.addTeam(teamName, new Player(getUserTag(message.author), message.author.id, message.author.avatarURL, 0));
+            const teamNameWithCleanEmojis = teamName.replace(/(<a?)(:[a-zA-Z0-9]+:)([0-9]+>)/gm, (p1, p2, p3) => p3);
             sendInfoMessage(getMessageContext(message), {
                 title: "New team created",
-                description: `To join ${bold(teamName)} alongside ${bold(getUserTag(message.author))}, enter \`,join ${teamName}\`.${!gameSession.sessionInitialized ? " Start the game with `,begin`." : ""}`,
+                description: `To join ${bold(teamName)} alongside ${bold(getUserTag(message.author))}, enter \`,join ${teamNameWithCleanEmojis}\`.${!gameSession.sessionInitialized ? " Start the game with `,begin`." : ""}`,
                 thumbnailUrl: KmqImages.READING_BOOK,
             });
         } else {
