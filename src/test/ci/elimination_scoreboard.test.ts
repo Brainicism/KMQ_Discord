@@ -7,7 +7,7 @@ const DEFAULT_LIVES = 10;
 
 let scoreboard: EliminationScoreboard;
 beforeEach(function () {
-    scoreboard = new EliminationScoreboard(DEFAULT_LIVES, "123");
+    scoreboard = new EliminationScoreboard(DEFAULT_LIVES);
 });
 
 describe("score/xp updating", function () {

@@ -7,13 +7,13 @@ const logger = _logger("elimination_scoreboard");
 
 export default class EliminationScoreboard extends Scoreboard {
     /** Mapping of Discord user ID to EliminationPlayer */
-    protected players: { [userID: number]: EliminationPlayer };
+    protected players: { [userID: string]: EliminationPlayer };
 
     /** The amount of lives each player starts with */
     private readonly startingLives: number;
 
-    constructor(lives: number, guildID: string) {
-        super(guildID);
+    constructor(lives: number) {
+        super();
         this.startingLives = lives;
     }
 
@@ -24,7 +24,7 @@ export default class EliminationScoreboard extends Scoreboard {
      * @param avatarUrl - The player's Discord avatar URL
      */
     addPlayer(userID: string, tag: string, avatarUrl: string, lives?: number): EliminationPlayer {
-        this.players[userID] = new EliminationPlayer(tag, userID, avatarUrl, 0, lives === undefined ? this.startingLives : lives);
+        this.players[userID] = new EliminationPlayer(tag, userID, avatarUrl, 0, lives === undefined || lives === null ? this.startingLives : lives);
         return this.players[userID];
     }
 
@@ -35,7 +35,7 @@ export default class EliminationScoreboard extends Scoreboard {
             .map((x) => {
                 const lives = !x.isEliminated() ? `❤️ x ${x.getLives()}` : "☠️";
                 return {
-                    name: x.getTag(),
+                    name: x.getName(),
                     value: lives,
                     inline: true,
                 };
@@ -93,11 +93,6 @@ export default class EliminationScoreboard extends Scoreboard {
             && Object.values(this.players).filter((player) => !player.isEliminated()).length === 1;
 
         return allEliminated || oneLeft;
-    }
-
-    /** Whether there are any winners */
-    isEmpty(): boolean {
-        return this.firstPlace.length === 0;
     }
 
     /**

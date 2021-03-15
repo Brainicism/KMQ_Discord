@@ -16,6 +16,7 @@ import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
 import Scoreboard from "./scoreboard";
 import EliminationScoreboard from "./elimination_scoreboard";
+import TeamScoreboard from "./team_scoreboard";
 import { deleteGameSession } from "../helpers/management_utils";
 import { GameType } from "../commands/game_commands/play";
 import { ModeType } from "../commands/game_options/mode";
@@ -122,7 +123,13 @@ export default class GameSession {
     constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel, gameSessionCreator: Eris.User, gameType: GameType, eliminationLives?: number) {
         this.gameType = gameType;
         this.guildID = textChannel.guild.id;
-        this.scoreboard = this.gameType === GameType.ELIMINATION ? new EliminationScoreboard(eliminationLives, this.guildID) : new Scoreboard(textChannel.guild.id);
+        if (this.gameType === GameType.ELIMINATION) {
+            this.scoreboard = new EliminationScoreboard(eliminationLives);
+        } else if (this.gameType === GameType.TEAMS) {
+            this.scoreboard = new TeamScoreboard();
+        } else {
+            this.scoreboard = new Scoreboard();
+        }
         this.lastActive = Date.now();
         this.sessionInitialized = false;
         this.startedAt = Date.now();
@@ -561,7 +568,7 @@ export default class GameSession {
      */
     private checkGuess(message: Eris.Message, modeType: ModeType): number {
         if (!this.gameRound) return 0;
-        if (this.gameType === GameType.CLASSIC) {
+        if (this.gameType !== GameType.ELIMINATION) {
             this.participants.add(message.author.id);
         }
         return this.gameRound.checkGuess(message.content, modeType);
@@ -588,6 +595,11 @@ export default class GameSession {
         if (this.gameType === GameType.ELIMINATION) {
             const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
             if (!this.participants.has(message.author.id) || eliminationScoreboard.isPlayerEliminated(message.author.id)) {
+                return false;
+            }
+        } else if (this.gameType === GameType.TEAMS) {
+            const teamScoreboard = this.scoreboard as TeamScoreboard;
+            if (!teamScoreboard.getPlayer(message.author.id)) {
                 return false;
             }
         }
@@ -689,8 +701,8 @@ export default class GameSession {
 
     /**
      * @param guildPreference - The guild preference
-     * @param baseExp - The base amount of XP the GameRound provides
-     * @param numParticipants - The number of participants in the voice channel at the time of guesse
+     * @param baseExp - The base amount of EXP the GameRound provides
+     * @param numParticipants - The number of participants in the voice channel at the time of guess
      * @param guessSpeed - The time taken to guess correctly
      * @returns The amount of EXP gained based on the current game options
      */
