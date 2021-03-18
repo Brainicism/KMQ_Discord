@@ -9,6 +9,7 @@ import { KmqImages } from "../../constants";
 import { bold } from "../../helpers/utils";
 import state from "../../kmq";
 import MessageContext from "../../structures/message_context";
+import KmqMember from "../../structures/kmq_member";
 
 export default class JoinCommand implements BaseCommand {
     aliases = ["j"];
@@ -26,13 +27,14 @@ export default class JoinCommand implements BaseCommand {
     }
 
     joinEliminationGame(message: GuildTextableMessage, gameSession: GameSession) {
+        const kmqMember = KmqMember.fromUser(message.author);
         if (gameSession.participants.has(message.author.id)) {
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Player already joined", description: `${bold(getUserTag(message.author))} is already in the game.` });
             return;
         }
 
         if (gameSession.sessionInitialized) {
-            const newPlayer = gameSession.addEliminationParticipant(message.author, true);
+            const newPlayer = gameSession.addEliminationParticipant(kmqMember, true);
             sendInfoMessage(MessageContext.fromMessage(message), { title: "Joined Elimination Midgame", description: `\`${getUserTag(message.author)}\` has spawned with \`${newPlayer.getLives()}\` lives` });
             return;
         }
@@ -42,9 +44,9 @@ export default class JoinCommand implements BaseCommand {
             previouslyJoinedPlayers = previouslyJoinedPlayers.slice(0, 10);
             previouslyJoinedPlayers.push("and many others...");
         }
-        const players = `${bold(getUserTag(message.author))}, ${previouslyJoinedPlayers.join(", ")}`;
+        const players = `${bold(kmqMember.tag)}, ${previouslyJoinedPlayers.join(", ")}`;
         sendInfoMessage(MessageContext.fromMessage(message), { title: "Player joined", description: players });
-        gameSession.addEliminationParticipant(message.author);
+        gameSession.addEliminationParticipant(kmqMember);
     }
 
     joinTeamsGame(message: GuildTextableMessage, parsedMessage: ParsedMessage, gameSession: GameSession) {

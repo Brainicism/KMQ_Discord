@@ -1,3 +1,6 @@
+import Eris from "eris";
+import { getUserTag } from "../helpers/discord_utils";
+
 export default class KmqMember {
     /** The username */
     public username: string;
@@ -16,5 +19,9 @@ export default class KmqMember {
         this.tag = tag;
         this.avatarUrl = avatarUrl;
         this.id = id;
+    }
+
+    static fromUser(user: Eris.User) {
+        return new KmqMember(user.username, getUserTag(user), user.avatarURL, user.id);
     }
 }

@@ -237,11 +237,11 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
  * @param textChannel - The channel where the message should be delivered
  * @param gameSession - The GameSession that has ended
  */
-export async function sendEndGameMessage(textChannel: Eris.TextChannel, gameSession: GameSession) {
+export async function sendEndGameMessage(textChannelId: string, gameSession: GameSession) {
     const { client } = state;
     const footerText = `${gameSession.getCorrectGuesses()}/${gameSession.getRoundsPlayed()} songs correctly guessed!`;
     if (gameSession.scoreboard.isEmpty()) {
-        await sendInfoMessage(new MessageContext(textChannel.id), {
+        await sendInfoMessage(new MessageContext(textChannelId), {
             color: EMBED_INFO_COLOR,
             author: {
                 username: client.user.username,
@@ -262,7 +262,7 @@ export async function sendEndGameMessage(textChannel: Eris.TextChannel, gameSess
                 inline: false,
             },
         );
-        await sendInfoMessage(new MessageContext(textChannel.id), {
+        await sendInfoMessage(new MessageContext(textChannelId), {
             color: EMBED_SUCCESS_COLOR,
             description: "**Scoreboard**",
             thumbnailUrl: winners[0].getAvatarURL(),

@@ -3,7 +3,6 @@ import {
     sendErrorMessage,
     areUserAndBotInSameVoiceChannel,
     getDebugLogHeader,
-    getUserTag,
 } from "../../helpers/discord_utils";
 import { bold } from "../../helpers/utils";
 import { getGuildPreference } from "../../helpers/game_utils";
@@ -37,7 +36,7 @@ export default class ForceSkipCommand implements BaseCommand {
             return;
         }
         if (message.author.id !== gameSession.owner.id) {
-            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Force skip ignored", description: `Only the person who started the game (${bold(getUserTag(gameSession.owner))}) can force-skip.` });
+            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Force skip ignored", description: `Only the person who started the game (${bold(gameSession.owner.tag)}) can force-skip.` });
             return;
         }
         gameSession.gameRound.skipAchieved = true;

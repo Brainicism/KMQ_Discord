@@ -5,7 +5,7 @@ import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
-    getDebugLogHeader, getSqlDateString, getUserTag, sendErrorMessage, sendEndOfRoundMessage, sendInfoMessage, getNumParticipants, checkBotIsAlone, getVoiceChannelFromMessage,
+    getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndOfRoundMessage, sendInfoMessage, getNumParticipants, checkBotIsAlone, getVoiceChannelFromMessage,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, getSongCount, endSession } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds, isPowerHour, isWeekend } from "../helpers/utils";
@@ -25,6 +25,7 @@ import { Gender } from "../commands/game_options/gender";
 import EliminationPlayer from "./elimination_player";
 import { KmqImages } from "../constants";
 import MessageContext from "./message_context";
+import KmqMember from "./kmq_member";
 
 const logger = _logger("game_session");
 const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
@@ -62,16 +63,16 @@ export default class GameSession {
     public readonly gameType: GameType;
 
     /** The user who initiated the GameSession */
-    public readonly owner: Eris.User;
+    public readonly owner: KmqMember;
 
     /** The Scoreboard object keeping track of players and scoring */
     public readonly scoreboard: Scoreboard;
 
-    /** The Eris.TextChannel in which the GameSession was started in, and will be active in */
-    public readonly textChannel: Eris.TextChannel;
+    /** The ID of text channel in which the GameSession was started in, and will be active in */
+    public readonly textChannelId: string;
 
-    /** The Eris.VoiceChannel in which the GameSession was started in, and will be active in */
-    public readonly voiceChannel: Eris.VoiceChannel;
+    /** The ID of the voice channel in which the GameSession was started in, and will be active in */
+    public readonly voiceChannelId: string;
 
     /** The Discord Guild ID */
     public readonly guildID: string;
@@ -121,9 +122,9 @@ export default class GameSession {
     /** The most recent Guesser, including their current streak */
     private lastGuesser: LastGuesser;
 
-    constructor(textChannel: Eris.TextChannel, voiceChannel: Eris.VoiceChannel, gameSessionCreator: Eris.User, gameType: GameType, eliminationLives?: number) {
+    constructor(textChannelId: string, voiceChannelId: string, guildId: string, gameSessionCreator: KmqMember, gameType: GameType, eliminationLives?: number) {
         this.gameType = gameType;
-        this.guildID = textChannel.guild.id;
+        this.guildID = guildId;
         if (this.gameType === GameType.ELIMINATION) {
             this.scoreboard = new EliminationScoreboard(eliminationLives);
         } else if (this.gameType === GameType.TEAMS) {
@@ -140,8 +141,8 @@ export default class GameSession {
         this.guessTimes = [];
         this.connection = null;
         this.finished = false;
-        this.voiceChannel = voiceChannel;
-        this.textChannel = textChannel;
+        this.voiceChannelId = voiceChannelId;
+        this.textChannelId = textChannelId;
         this.gameRound = null;
         this.owner = gameSessionCreator;
         this.lastPlayedSongs = [];
@@ -172,7 +173,7 @@ export default class GameSession {
             // calculate xp gain
             const guessSpeed = Date.now() - this.gameRound.startedAt;
             this.guessTimes.push(guessSpeed);
-            const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(this.voiceChannel.id), guessSpeed);
+            const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(this.voiceChannelId), guessSpeed);
             guessResult.expGain = expGain;
             guessResult.streak = this.lastGuesser.streak;
             logger.info(`${getDebugLogHeader(messageContext)} | Song correctly guessed. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
@@ -252,7 +253,7 @@ export default class GameSession {
                 levelUpMessages = levelUpMessages.slice(0, 10);
                 levelUpMessages.push("and many others...");
             }
-            sendInfoMessage(new MessageContext(this.textChannel.id), { title: "🚀 Power up!", description: levelUpMessages.join("\n"), thumbnailUrl: KmqImages.THUMBS_UP });
+            sendInfoMessage(new MessageContext(this.textChannelId), { title: "🚀 Power up!", description: levelUpMessages.join("\n"), thumbnailUrl: KmqImages.THUMBS_UP });
         }
 
         // commit guild stats
@@ -403,10 +404,11 @@ export default class GameSession {
         this.prepareRound(randomSong.name, randomSong.artist, randomSong.youtubeLink, randomSong.publishDate.getFullYear());
         this.gameRound.setBaseExpReward(await this.calculateBaseExp(guildPreference));
 
-        if (checkBotIsAlone(this, this.voiceChannel)) {
+        const voiceChannel = state.client.getChannel(this.voiceChannelId) as Eris.VoiceChannel;
+        if (checkBotIsAlone(this, voiceChannel)) {
             return;
         }
-        if (this.voiceChannel.voiceMembers.size === 0) {
+        if (voiceChannel.voiceMembers.size === 0) {
             await this.endSession();
             return;
         }
@@ -462,10 +464,10 @@ export default class GameSession {
      * Adds a participant for elimination mode
      * @param user - The user to add
      */
-    addEliminationParticipant(user: Eris.User, midgame = false): EliminationPlayer {
+    addEliminationParticipant(user: KmqMember, midgame = false): EliminationPlayer {
         this.participants.add(user.id);
         const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
-        return eliminationScoreboard.addPlayer(user.id, getUserTag(user), user.avatarURL, midgame ? eliminationScoreboard.getLivesOfWeakestPlayer() : null);
+        return eliminationScoreboard.addPlayer(user.id, user.tag, user.avatarUrl, midgame ? eliminationScoreboard.getLivesOfWeakestPlayer() : null);
     }
 
     getRoundsPlayed() {
@@ -583,12 +585,12 @@ export default class GameSession {
     private guessEligible(message: GuildTextableMessage): boolean {
         const userVoiceChannel = getVoiceChannelFromMessage(message);
         // if user isn't in the same voice channel
-        if (!userVoiceChannel || (userVoiceChannel.id !== this.voiceChannel.id)) {
+        if (!userVoiceChannel || (userVoiceChannel.id !== this.voiceChannelId)) {
             return false;
         }
 
         // if message isn't in the active game session's text channel
-        if (message.channel.id !== this.textChannel.id) {
+        if (message.channel.id !== this.textChannelId) {
             return false;
         }
 
