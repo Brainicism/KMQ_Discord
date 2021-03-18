@@ -3,6 +3,7 @@ import { getDebugLogHeader, sendErrorMessage, sendOptionsMessage } from "../../h
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
+import MessageContext from "../../structures/message_context";
 
 const logger = _logger("limit");
 export const DEFAULT_LIMIT = 500;
@@ -62,14 +63,14 @@ export default class LimitCommand implements BaseCommand {
             limitStart = 0;
             limitEnd = parseInt(parsedMessage.components[0], 10);
             if (limitEnd === 0) {
-                sendErrorMessage(message, { title: "Game Option Error", description: "End limit must be greater than 0" });
+                sendErrorMessage(MessageContext.fromMessage(message), { title: "Game Option Error", description: "End limit must be greater than 0" });
                 return;
             }
         } else {
             limitStart = parseInt(parsedMessage.components[0], 10);
             limitEnd = parseInt(parsedMessage.components[1], 10);
             if (limitEnd <= limitStart) {
-                sendErrorMessage(message, { title: "Game Option Error", description: "End limit must be greater than start limit" });
+                sendErrorMessage(MessageContext.fromMessage(message), { title: "Game Option Error", description: "End limit must be greater than start limit" });
                 return;
             }
         }

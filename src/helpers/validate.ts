@@ -1,8 +1,9 @@
-import { getDebugLogHeader, sendErrorMessage, getMessageContext } from "./discord_utils";
+import { getDebugLogHeader, sendErrorMessage } from "./discord_utils";
 import { GuildTextableMessage, ParsedMessage } from "../types";
 import { CommandValidations } from "../commands/base_command";
 import _logger from "../logger";
 import { arrayToString } from "./utils";
+import MessageContext from "../structures/message_context";
 
 const logger = _logger("validate");
 
@@ -12,7 +13,7 @@ const logger = _logger("validate");
  * @param arg - The incorrect argument
  */
 async function sendValidationErrorMessage(message: GuildTextableMessage, warning: string, arg: string | Array<string>) {
-    await sendErrorMessage(getMessageContext(message), { title: "Input validation error", description: warning });
+    await sendErrorMessage(MessageContext.fromMessage(message), { title: "Input validation error", description: warning });
     logger.warn(`${getDebugLogHeader(message)} | ${warning}. val = ${arg}`);
 }
 

@@ -3,9 +3,10 @@ import path from "path";
 import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
 import dbContext from "../../database_context";
-import { EMBED_INFO_COLOR, getDebugLogHeader, getMessageContext, sendInfoMessage } from "../../helpers/discord_utils";
+import { EMBED_INFO_COLOR, getDebugLogHeader, sendInfoMessage } from "../../helpers/discord_utils";
 import { bold, friendlyFormattedDate } from "../../helpers/utils";
 import { KmqImages } from "../../constants";
+import MessageContext from "../../structures/message_context";
 
 const logger = _logger("news");
 
@@ -40,11 +41,11 @@ export default class NewsCommand implements BaseCommand {
         const news = fs.readFileSync(newsFilePath).toString();
 
         logger.info(`${getDebugLogHeader(message)} | News retrieved.`);
-        await sendInfoMessage(getMessageContext(message), {
+        await sendInfoMessage(MessageContext.fromMessage(message), {
             color: EMBED_INFO_COLOR,
             author: {
                 username: message.author.username,
-                avatarURL: message.author.avatarURL,
+                avatarUrl: message.author.avatarURL,
             },
             title: bold("Updates"),
             description: news,

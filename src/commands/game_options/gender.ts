@@ -1,8 +1,9 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { sendOptionsMessage, getDebugLogHeader, sendErrorMessage, getMessageContext } from "../../helpers/discord_utils";
+import { sendOptionsMessage, getDebugLogHeader, sendErrorMessage } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
+import MessageContext from "../../structures/message_context";
 
 const logger = _logger("gender");
 export enum Gender {
@@ -81,14 +82,14 @@ export default class GenderCommand implements BaseCommand {
             // Incompatibility between groups and gender doesn't exist in GENDER.ALTERNATING
             if (selectedGenders[0] !== Gender.ALTERNATING) {
                 logger.warn(`${getDebugLogHeader(message)} | Game option conflict between gender and groups.`);
-                sendErrorMessage(getMessageContext(message), { title: "Game Option Conflict", description: `\`groups\` game option is currently set. \`gender\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed` });
+                sendErrorMessage(MessageContext.fromMessage(message), { title: "Game Option Conflict", description: `\`groups\` game option is currently set. \`gender\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed` });
                 return;
             }
         }
 
         if (selectedGenders[0] === Gender.ALTERNATING) {
             if (guildPreference.isGroupsMode() && guildPreference.getGroupIds().length === 1) {
-                sendErrorMessage(getMessageContext(message), { title: "Game Option Warning", description: `With only one group chosen, \`${process.env.BOT_PREFIX}gender alternating\` may not behave as expected. Consider including more groups to correctly alternate genders.` });
+                sendErrorMessage(MessageContext.fromMessage(message), { title: "Game Option Warning", description: `With only one group chosen, \`${process.env.BOT_PREFIX}gender alternating\` may not behave as expected. Consider including more groups to correctly alternate genders.` });
             }
             guildPreference.setGender([selectedGenders[0]]);
         } else {

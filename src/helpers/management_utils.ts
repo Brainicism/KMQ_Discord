@@ -35,6 +35,7 @@ import { seedAndDownloadNewSongs } from "../seed/seed_db";
 import backupKmqDatabase from "../scripts/backup-kmq-database";
 import { parseJsonFile } from "./utils";
 import { reloadFactCache } from "../fact_generator";
+import MessageContext from "../structures/message_context";
 
 const glob = promisify(_glob);
 
@@ -82,11 +83,11 @@ export const checkRestartNotification = async (restartNotification: Date): Promi
     if (RESTART_WARNING_INTERVALS.has(timeDiffMin)) {
         for (const gameSession of Object.values(state.gameSessions)) {
             if (gameSession.finished) continue;
-            await sendInfoMessage({ channel: gameSession.textChannel }, {
+            await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
                 color: EMBED_INFO_COLOR,
                 author: {
                     username: state.client.user.username,
-                    avatarURL: state.client.user.avatarURL,
+                    avatarUrl: state.client.user.avatarURL,
                 },
                 title: `Upcoming bot restart in ${timeDiffMin} minutes.`,
                 description: "Downtime will be approximately 2 minutes.",

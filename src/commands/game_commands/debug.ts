@@ -1,12 +1,13 @@
 import Eris from "eris";
 import * as uuid from "uuid";
 import BaseCommand, { CommandArgs } from "../base_command";
-import { getDebugChannel, getVoiceChannel, sendInfoMessage, getMessageContext } from "../../helpers/discord_utils";
+import { getDebugChannel, sendInfoMessage, getVoiceChannelFromMessage } from "../../helpers/discord_utils";
 import { getGuildPreference, getSongCount } from "../../helpers/game_utils";
 import { bold } from "../../helpers/utils";
 import state from "../../kmq";
 import _logger from "../../logger";
 import { KmqImages } from "../../constants";
+import MessageContext from "../../structures/message_context";
 
 const logger = _logger("debug");
 
@@ -39,7 +40,7 @@ export default class DebugCommand implements BaseCommand {
             inline: false,
         });
 
-        const voiceChannel = getVoiceChannel(message);
+        const voiceChannel = getVoiceChannelFromMessage(message);
         if (voiceChannel) {
             fields.push({
                 name: "Voice Permissions",
@@ -49,12 +50,12 @@ export default class DebugCommand implements BaseCommand {
         }
 
         const debugId = uuid.v4();
-        sendInfoMessage(getMessageContext(message), {
+        sendInfoMessage(MessageContext.fromMessage(message), {
             title: "Debug Details Sent!",
             description: `If you were asked by a bot developer to do this, give them this:\n\`${debugId}\``,
             thumbnailUrl: KmqImages.READING_BOOK,
         });
-        sendInfoMessage({ channel: debugChannel }, {
+        sendInfoMessage(new MessageContext(debugChannel.id), {
             title: bold(`Debug Details for User: ${message.author.id}, Guild: ${message.guildID}`),
             footerText: debugId,
             fields,

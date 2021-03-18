@@ -1,8 +1,9 @@
-import { getDebugLogHeader, getMessageContext, sendErrorMessage, sendOptionsMessage } from "../../helpers/discord_utils";
+import { getDebugLogHeader, sendErrorMessage, sendOptionsMessage } from "../../helpers/discord_utils";
 import BaseCommand, { CommandArgs } from "../base_command";
 import { getGuildPreference, getMatchingGroupNames } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
+import MessageContext from "../../structures/message_context";
 
 const logger = _logger("add");
 
@@ -70,7 +71,7 @@ export default class AddCommand implements BaseCommand {
         const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(currentGroupNames.concat(newGroupNames));
         if (unmatchedGroups) {
             logger.info(`${getDebugLogHeader(message)} | Attempted to set unknown groups. groups =  ${unmatchedGroups.join(", ")}`);
-            await sendErrorMessage(getMessageContext(message), { title: "Unknown Group Name", description: `One or more of the specified group names was not recognized. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} ` });
+            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Unknown Group Name", description: `One or more of the specified group names was not recognized. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} ` });
             return;
         }
 
