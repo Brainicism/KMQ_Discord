@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import Eris from "eris";
 import dbContext from "../../database_context";
-import { getDebugLogHeader, getMessageContext, getUserTag, sendInfoMessage } from "../../helpers/discord_utils";
+import { getDebugLogHeader, getUserTag, sendInfoMessage } from "../../helpers/discord_utils";
 import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
 import { bold, friendlyFormattedDate } from "../../helpers/utils";
 import { CUM_EXP_TABLE } from "../../structures/game_session";
+import MessageContext from "../../structures/message_context";
 
 const logger = _logger("profile");
 
@@ -71,7 +72,7 @@ export default class ProfileCommand implements BaseCommand {
         logger.info(`${getDebugLogHeader(message)} | Profile retrieved`);
 
         if (!playerStats) {
-            sendInfoMessage(getMessageContext(message), { title: "No profile found", description: "Play your first game to begin tracking your stats!" });
+            sendInfoMessage(MessageContext.fromMessage(message), { title: "No profile found", description: "Play your first game to begin tracking your stats!" });
             return;
         }
 
@@ -139,7 +140,7 @@ export default class ProfileCommand implements BaseCommand {
                 value: lastActiveDateString,
             }];
 
-        sendInfoMessage(getMessageContext(message), {
+        sendInfoMessage(MessageContext.fromMessage(message), {
             title: bold(`${getUserTag(requestedPlayer)}`),
             fields,
             timestamp: new Date(),

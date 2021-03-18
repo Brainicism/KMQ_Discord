@@ -6,7 +6,7 @@ import GameSession, { GuessResult } from "../structures/game_session";
 import _logger from "../logger";
 import { endSession, getSongCount } from "./game_utils";
 import { getFact } from "../fact_generator";
-import { EmbedPayload, GameOption, GuildTextableMessage, MessageContext } from "../types";
+import { EmbedPayload, GameOption, GuildTextableMessage } from "../types";
 import { chunkArray, codeLine, bold, parseJsonFile, chooseRandom, getOrdinalNum } from "./utils";
 import state from "../kmq";
 import { ModeType } from "../commands/game_options/mode";
@@ -18,6 +18,7 @@ import { GameType } from "../commands/game_commands/play";
 import { ArtistType } from "../commands/game_options/artisttype";
 import { SubunitsPreference } from "../commands/game_options/subunits";
 import { KmqImages } from "../constants";
+import MessageContext from "../structures/message_context";
 
 const endGameMessages = parseJsonFile(path.resolve(__dirname, "../../data/end_game_messages.json"));
 
@@ -30,23 +31,22 @@ const REQUIRED_TEXT_PERMISSIONS = ["addReactions", "embedLinks"];
 const REQUIRED_VOICE_PERMISSIONS = ["voiceConnect", "voiceSpeak"];
 
 /**
- * @param message - The Message or context of the Message that initiated the workflow
- * @returns a string containing basic debug information
+ * @param user - The User object
+ * @returns the user's Discord tag
  */
-export function getDebugLogHeader(message: Eris.Message | MessageContext): string {
-    if (message instanceof Eris.Message) {
-        return `gid: ${message.guildID}, uid: ${message.author.id}`;
-    }
-    return `gid: ${message.channel.guild.id}`;
+export function getUserTag(user: Eris.User): string {
+    return `${user.username}#${user.discriminator}`;
 }
 
 /**
- * Generates a MessageContext object from the given Eris.Message
- * @param message - The Message object
- * @returns a MessageContext object from the message
+ * @param messageContext - The Message or context of the Message that initiated the workflow
+ * @returns a string containing basic debug information
  */
-export function getMessageContext(message: GuildTextableMessage): MessageContext {
-    return { channel: message.channel, author: message.author };
+export function getDebugLogHeader(messageContext: MessageContext | Eris.Message): string {
+    if (messageContext instanceof Eris.Message) {
+        return `gid: ${messageContext.guildID}, uid: ${messageContext.author.id}`;
+    }
+    return `gid: ${messageContext.guildID}`;
 }
 
 /**
@@ -55,9 +55,9 @@ export function getMessageContext(message: GuildTextableMessage): MessageContext
  * @param textChannel - The channel where the message should be delivered
  * @param messageContent - The MessageContent to send
  */
-async function sendMessage(textChannel: Eris.TextChannel, messageContent: Eris.MessageContent): Promise<Eris.Message> {
+async function sendMessage(textChannelId: string, messageContent: Eris.MessageContent): Promise<Eris.Message> {
     try {
-        return await state.client.createMessage(textChannel.id, messageContent);
+        return await state.client.createMessage(textChannelId, messageContent);
     } catch (e) {
         logger.error(`Error sending message. err = ${e}. body = ${JSON.stringify(messageContent)}`);
         return null;
@@ -71,12 +71,12 @@ async function sendMessage(textChannel: Eris.TextChannel, messageContent: Eris.M
  * @param description - The description of the embed
  */
 export async function sendErrorMessage(messageContext: MessageContext, embedPayload: EmbedPayload): Promise<Eris.Message<TextableChannel>> {
-    return sendMessage(messageContext.channel, {
+    return sendMessage(messageContext.textChannelID, {
         embed: {
             color: embedPayload.color || EMBED_ERROR_COLOR,
             author: messageContext.author ? {
                 name: messageContext.author.username,
-                icon_url: messageContext.author.avatarURL,
+                icon_url: messageContext.author.avatarUrl,
             } : null,
             title: bold(embedPayload.title),
             description: embedPayload.description,
@@ -105,7 +105,7 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
         color: embedPayload.color || EMBED_INFO_COLOR,
         author: author ? {
             name: author.username,
-            icon_url: author.avatarURL,
+            icon_url: author.avatarUrl,
         } : null,
         title: bold(embedPayload.title),
         description: embedPayload.description,
@@ -116,7 +116,7 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
         thumbnail: embedPayload.thumbnailUrl ? { url: embedPayload.thumbnailUrl } : null,
         timestamp: embedPayload.timestamp,
     };
-    return sendMessage(messageContext.channel, { embed });
+    return sendMessage(messageContext.textChannelID, { embed });
 }
 
 /**
@@ -152,11 +152,11 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
         });
     }
 
-    await sendInfoMessage({ channel: messageContext.channel }, {
+    await sendInfoMessage(messageContext, {
         color: guessResult.correct ? EMBED_SUCCESS_COLOR : EMBED_ERROR_COLOR,
         author: {
-            username: guessResult.correct ? messageContext.author.username : null,
-            avatarURL: guessResult.correct ? messageContext.author.avatarURL : null,
+            avatarUrl: messageContext.author.avatarUrl,
+            username: messageContext.author.username,
         },
         title: `"${gameRound.songName}" (${gameRound.songYear}) - ${gameRound.artist}`,
         description,
@@ -177,7 +177,7 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
     updatedOption?: { option: GameOption, reset: boolean }, footerText?: string) {
     const totalSongs = await getSongCount(guildPreference);
     if (totalSongs === null) {
-        sendErrorMessage(getMessageContext(message), { title: "Error retrieving song data", description: `Try again in a bit, or report this error to the official KMQ server found in \`${process.env.BOT_PREFIX}help\`.` });
+        sendErrorMessage(MessageContext.fromMessage(message), { title: "Error retrieving song data", description: `Try again in a bit, or report this error to the official KMQ server found in \`${process.env.BOT_PREFIX}help\`.` });
         return;
     }
 
@@ -217,7 +217,7 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
         footerText = `Looking for information on how to use this command? Check out '${process.env.BOT_PREFIX}help [command]' to learn more`;
     }
 
-    await sendInfoMessage(getMessageContext(message),
+    await sendInfoMessage(MessageContext.fromMessage(message),
         {
             title: updatedOption === null ? "Options" : `${updatedOption.option} ${updatedOption.reset ? "reset" : "updated"}`,
             description:
@@ -237,15 +237,15 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
  * @param textChannel - The channel where the message should be delivered
  * @param gameSession - The GameSession that has ended
  */
-export async function sendEndGameMessage(textChannel: Eris.TextChannel, gameSession: GameSession) {
+export async function sendEndGameMessage(textChannelId: string, gameSession: GameSession) {
     const { client } = state;
     const footerText = `${gameSession.getCorrectGuesses()}/${gameSession.getRoundsPlayed()} songs correctly guessed!`;
     if (gameSession.scoreboard.isEmpty()) {
-        await sendInfoMessage({ channel: textChannel }, {
+        await sendInfoMessage(new MessageContext(textChannelId), {
             color: EMBED_INFO_COLOR,
             author: {
                 username: client.user.username,
-                avatarURL: client.user.avatarURL,
+                avatarUrl: client.user.avatarURL,
             },
             title: "Nobody won",
             footerText,
@@ -262,7 +262,7 @@ export async function sendEndGameMessage(textChannel: Eris.TextChannel, gameSess
                 inline: false,
             },
         );
-        await sendInfoMessage({ channel: textChannel }, {
+        await sendInfoMessage(new MessageContext(textChannelId), {
             color: EMBED_SUCCESS_COLOR,
             description: "**Scoreboard**",
             thumbnailUrl: winners[0].getAvatarURL(),
@@ -282,7 +282,7 @@ export async function sendPaginationedEmbed(message: GuildTextableMessage, embed
     if (embeds.length > 1) {
         return EmbedPaginator.createPaginationEmbed(message, embeds, { timeout: 60000 });
     }
-    return sendMessage(message.channel, { embed: embeds[0] });
+    return sendMessage(message.channel.id, { embed: embeds[0] });
 }
 
 /**
@@ -292,11 +292,11 @@ export async function sendPaginationedEmbed(message: GuildTextableMessage, embed
  */
 export async function sendScoreboardMessage(message: GuildTextableMessage, gameSession: GameSession) {
     if (gameSession.scoreboard.isEmpty() && gameSession.gameType !== GameType.ELIMINATION) {
-        return sendInfoMessage({ channel: message.channel }, {
+        return sendInfoMessage(MessageContext.fromMessage(message), {
             color: EMBED_SUCCESS_COLOR,
             author: {
                 username: message.author.username,
-                avatarURL: message.author.avatarURL,
+                avatarUrl: message.author.avatarURL,
             },
             description: "(╯°□°）╯︵ ┻━┻",
             title: "**Scoreboard**",
@@ -336,14 +336,6 @@ export function disconnectVoiceConnection(message: GuildTextableMessage) {
 }
 
 /**
- * @param user - The User object
- * @returns the user's Discord tag
- */
-export function getUserTag(user: Eris.User): string {
-    return `${user.username}#${user.discriminator}`;
-}
-
-/**
  * @param message - The Message object
  * @returns the bot's voice connection in the message's originating guild
  */
@@ -368,8 +360,17 @@ export function areUserAndBotInSameVoiceChannel(message: Eris.Message): boolean 
  * @param message - The Message object
  * @returns the voice channel that the message's author is in
  */
-export function getVoiceChannel(message: GuildTextableMessage): Eris.VoiceChannel {
+export function getVoiceChannelFromMessage(message: GuildTextableMessage): Eris.VoiceChannel {
     const voiceChannel = message.channel.guild.channels.get(message.member.voiceState.channelID) as Eris.VoiceChannel;
+    return voiceChannel;
+}
+
+/**
+ * @param message - The Message object
+ * @returns the voice channel that the message's author is in
+ */
+export function getVoiceChannel(voiceChannelId: string): Eris.VoiceChannel {
+    const voiceChannel = state.client.getChannel(voiceChannelId) as Eris.VoiceChannel;
     return voiceChannel;
 }
 
@@ -377,8 +378,8 @@ export function getVoiceChannel(message: GuildTextableMessage): Eris.VoiceChanne
  * @param message - The Message object
  * @returns the number of persons in the voice channel excluding bots
  */
-export function getNumParticipants(message: GuildTextableMessage): number {
-    return (getVoiceChannel(message).voiceMembers.filter((x) => !x.bot)).length;
+export function getNumParticipants(voiceChannelId: string): number {
+    return (getVoiceChannel(voiceChannelId).voiceMembers.filter((x) => !x.bot)).length;
 }
 
 /**
@@ -394,23 +395,24 @@ function missingPermissionsText(missingPermissions: string[]): string {
  * @returns whether the bot has permissions to join the message author's currently active voice channel
  */
 export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
-    const voiceChannel = getVoiceChannel(message);
+    const voiceChannel = getVoiceChannelFromMessage(message);
+    const messageContext = MessageContext.fromMessage(message);
     const missingPermissions = REQUIRED_VOICE_PERMISSIONS.filter((permission) => !voiceChannel.permissionsOf(state.client.user.id).has(permission));
     if (missingPermissions.length > 0) {
-        logger.warn(`${getDebugLogHeader(message)} | Missing [${missingPermissions.join(", ")}] permissions`);
-        sendErrorMessage(getMessageContext(message), { title: "Missing Permissions", description: missingPermissionsText(missingPermissions) });
+        logger.warn(`${getDebugLogHeader(messageContext)} | Missing [${missingPermissions.join(", ")}] permissions`);
+        sendErrorMessage(MessageContext.fromMessage(message), { title: "Missing Permissions", description: missingPermissionsText(missingPermissions) });
         return false;
     }
     const channelFull = voiceChannel.userLimit && (voiceChannel.voiceMembers.size >= voiceChannel.userLimit);
     if (channelFull) {
-        logger.warn(`${getDebugLogHeader(message)} | Channel full`);
-        sendInfoMessage(getMessageContext(message), { title: "Voice Channel Full", description: "Ensure that there's enough room in the voice channel for me to join" });
+        logger.warn(`${getDebugLogHeader(messageContext)} | Channel full`);
+        sendInfoMessage(MessageContext.fromMessage(message), { title: "Voice Channel Full", description: "Ensure that there's enough room in the voice channel for me to join" });
         return false;
     }
     const afkChannel = voiceChannel.id === voiceChannel.guild.afkChannelID;
     if (afkChannel) {
-        logger.warn(`${getDebugLogHeader(message)} | Attempted to start game in AFK voice channel`);
-        sendInfoMessage(getMessageContext(message), { title: "AFK Voice Channel", description: "Ensure you're not in the inactive voice channel so that you can hear me!" });
+        logger.warn(`${getDebugLogHeader(messageContext)} | Attempted to start game in AFK voice channel`);
+        sendInfoMessage(MessageContext.fromMessage(message), { title: "AFK Voice Channel", description: "Ensure you're not in the inactive voice channel so that you can hear me!" });
         return false;
     }
     return true;
@@ -423,9 +425,9 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
 export async function textPermissionsCheck(message: GuildTextableMessage): Promise<boolean> {
     const { channel } = message;
     const { client } = state;
-
+    const messageContext = MessageContext.fromMessage(message);
     if (!channel.permissionsOf(client.user.id).has("sendMessages")) {
-        logger.warn(`${getDebugLogHeader(message)} | Missing SEND_MESSAGES permissions`);
+        logger.warn(`${getDebugLogHeader(messageContext)} | Missing SEND_MESSAGES permissions`);
         const embed = {
             color: EMBED_INFO_COLOR,
             title: "Missing Permissions",
@@ -438,7 +440,7 @@ export async function textPermissionsCheck(message: GuildTextableMessage): Promi
 
     const missingPermissions = REQUIRED_TEXT_PERMISSIONS.filter((permission) => !channel.permissionsOf(client.user.id).has(permission));
     if (missingPermissions.length > 0) {
-        logger.warn(`${getDebugLogHeader(message)} | Missing [${missingPermissions.join(", ")}] permissions`);
+        logger.warn(`${getDebugLogHeader(messageContext)} | Missing [${missingPermissions.join(", ")}] permissions`);
         client.createMessage(channel.id, {
             content: missingPermissionsText(missingPermissions),
         });
