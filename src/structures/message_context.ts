@@ -5,22 +5,22 @@ import KmqMember from "./kmq_member";
 
 export default class MessageContext {
     /** The text channel to send the message to */
-    public textChannelId: string;
+    public textChannelID: string;
 
     /** The author to represent the message as */
     public author: KmqMember;
 
     /** The guild ID to send the message to */
-    public guildId: string;
+    public guildID: string;
 
     constructor(textChannelId: string, author?: KmqMember, guildId?: string) {
-        this.textChannelId = textChannelId;
+        this.textChannelID = textChannelId;
         if (author === null) {
             const clientUser = state.client.user;
             this.author = new KmqMember(clientUser.username, getUserTag(clientUser), clientUser.avatarURL, clientUser.id);
         }
         this.author = author;
-        this.guildId = guildId;
+        this.guildID = guildId;
     }
 
     /**

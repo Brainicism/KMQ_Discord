@@ -46,7 +46,7 @@ export function getDebugLogHeader(messageContext: MessageContext | Eris.Message)
     if (messageContext instanceof Eris.Message) {
         return `gid: ${messageContext.guildID}, uid: ${messageContext.author.id}`;
     }
-    return `gid: ${messageContext.guildId}`;
+    return `gid: ${messageContext.guildID}`;
 }
 
 /**
@@ -71,7 +71,7 @@ async function sendMessage(textChannelId: string, messageContent: Eris.MessageCo
  * @param description - The description of the embed
  */
 export async function sendErrorMessage(messageContext: MessageContext, embedPayload: EmbedPayload): Promise<Eris.Message<TextableChannel>> {
-    return sendMessage(messageContext.textChannelId, {
+    return sendMessage(messageContext.textChannelID, {
         embed: {
             color: embedPayload.color || EMBED_ERROR_COLOR,
             author: messageContext.author ? {
@@ -116,7 +116,7 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
         thumbnail: embedPayload.thumbnailUrl ? { url: embedPayload.thumbnailUrl } : null,
         timestamp: embedPayload.timestamp,
     };
-    return sendMessage(messageContext.textChannelId, { embed });
+    return sendMessage(messageContext.textChannelID, { embed });
 }
 
 /**

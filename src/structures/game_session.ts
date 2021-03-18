@@ -69,10 +69,10 @@ export default class GameSession {
     public readonly scoreboard: Scoreboard;
 
     /** The ID of text channel in which the GameSession was started in, and will be active in */
-    public readonly textChannelId: string;
+    public readonly textChannelID: string;
 
     /** The ID of the voice channel in which the GameSession was started in, and will be active in */
-    public readonly voiceChannelId: string;
+    public readonly voiceChannelID: string;
 
     /** The Discord Guild ID */
     public readonly guildID: string;
@@ -122,9 +122,9 @@ export default class GameSession {
     /** The most recent Guesser, including their current streak */
     private lastGuesser: LastGuesser;
 
-    constructor(textChannelId: string, voiceChannelId: string, guildId: string, gameSessionCreator: KmqMember, gameType: GameType, eliminationLives?: number) {
+    constructor(textChannelID: string, voiceChannelID: string, guildID: string, gameSessionCreator: KmqMember, gameType: GameType, eliminationLives?: number) {
         this.gameType = gameType;
-        this.guildID = guildId;
+        this.guildID = guildID;
         if (this.gameType === GameType.ELIMINATION) {
             this.scoreboard = new EliminationScoreboard(eliminationLives);
         } else if (this.gameType === GameType.TEAMS) {
@@ -141,8 +141,8 @@ export default class GameSession {
         this.guessTimes = [];
         this.connection = null;
         this.finished = false;
-        this.voiceChannelId = voiceChannelId;
-        this.textChannelId = textChannelId;
+        this.voiceChannelID = voiceChannelID;
+        this.textChannelID = textChannelID;
         this.gameRound = null;
         this.owner = gameSessionCreator;
         this.lastPlayedSongs = [];
@@ -173,7 +173,7 @@ export default class GameSession {
             // calculate xp gain
             const guessSpeed = Date.now() - this.gameRound.startedAt;
             this.guessTimes.push(guessSpeed);
-            const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(this.voiceChannelId), guessSpeed);
+            const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(this.voiceChannelID), guessSpeed);
             guessResult.expGain = expGain;
             guessResult.streak = this.lastGuesser.streak;
             logger.info(`${getDebugLogHeader(messageContext)} | Song correctly guessed. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
@@ -253,7 +253,7 @@ export default class GameSession {
                 levelUpMessages = levelUpMessages.slice(0, 10);
                 levelUpMessages.push("and many others...");
             }
-            sendInfoMessage(new MessageContext(this.textChannelId), { title: "🚀 Power up!", description: levelUpMessages.join("\n"), thumbnailUrl: KmqImages.THUMBS_UP });
+            sendInfoMessage(new MessageContext(this.textChannelID), { title: "🚀 Power up!", description: levelUpMessages.join("\n"), thumbnailUrl: KmqImages.THUMBS_UP });
         }
 
         // commit guild stats
@@ -404,7 +404,7 @@ export default class GameSession {
         this.prepareRound(randomSong.name, randomSong.artist, randomSong.youtubeLink, randomSong.publishDate.getFullYear());
         this.gameRound.setBaseExpReward(await this.calculateBaseExp(guildPreference));
 
-        const voiceChannel = state.client.getChannel(this.voiceChannelId) as Eris.VoiceChannel;
+        const voiceChannel = state.client.getChannel(this.voiceChannelID) as Eris.VoiceChannel;
         if (checkBotIsAlone(this, voiceChannel)) {
             return;
         }
@@ -585,12 +585,12 @@ export default class GameSession {
     private guessEligible(message: GuildTextableMessage): boolean {
         const userVoiceChannel = getVoiceChannelFromMessage(message);
         // if user isn't in the same voice channel
-        if (!userVoiceChannel || (userVoiceChannel.id !== this.voiceChannelId)) {
+        if (!userVoiceChannel || (userVoiceChannel.id !== this.voiceChannelID)) {
             return false;
         }
 
         // if message isn't in the active game session's text channel
-        if (message.channel.id !== this.textChannelId) {
+        if (message.channel.id !== this.textChannelID) {
             return false;
         }
 

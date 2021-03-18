@@ -106,7 +106,7 @@ export async function getFilteredSongList(guildPreference: GuildPreference, igno
 export async function ensureVoiceConnection(gameSession: GameSession): Promise<void> {
     const { client } = state;
     if (gameSession.connection && gameSession.connection.ready) return;
-    const connection = await client.joinVoiceChannel(gameSession.voiceChannelId, { opusOnly: true });
+    const connection = await client.joinVoiceChannel(gameSession.voiceChannelID, { opusOnly: true });
     // deafen self
     connection.updateVoiceState(false, true);
     gameSession.connection = connection;
@@ -195,7 +195,7 @@ export async function getGuildPreference(guildID: string): Promise<GuildPreferen
  * @param gameSession - The GameSession to end
  */
 export async function endSession(gameSession: GameSession) {
-    await sendEndGameMessage(gameSession.textChannelId, gameSession);
+    await sendEndGameMessage(gameSession.textChannelID, gameSession);
     await gameSession.endSession();
 }
 

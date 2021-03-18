@@ -11,12 +11,12 @@ import GameSession from "../../structures/game_session";
 const logger = _logger("begin");
 
 export default class BeginCommand implements BaseCommand {
-    canStart(gameSession: GameSession, authorId: string, messageContext: MessageContext): boolean {
+    canStart(gameSession: GameSession, authorID: string, messageContext: MessageContext): boolean {
         if (!gameSession || gameSession.gameType === GameType.CLASSIC) {
             return false;
         }
         if (gameSession.gameType === GameType.ELIMINATION) {
-            if (gameSession.owner.id !== authorId) {
+            if (gameSession.owner.id !== authorID) {
                 sendErrorMessage(messageContext, { title: "Begin ignored", description: `Only the person who did \`${process.env.BOT_PREFIX}play elimination\` (${bold(gameSession.owner.tag)}) can start the game.` });
                 return false;
             }
