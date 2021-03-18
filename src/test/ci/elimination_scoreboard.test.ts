@@ -1,24 +1,23 @@
 import assert from "assert";
 import EliminationScoreboard from "../../structures/elimination_scoreboard";
 
-/* eslint-disable prefer-arrow-callback */
 const userIds = ["12345", "23456", "34567"];
 const DEFAULT_LIVES = 10;
 
 let scoreboard: EliminationScoreboard;
-beforeEach(function () {
+beforeEach(() => {
     scoreboard = new EliminationScoreboard(DEFAULT_LIVES);
 });
 
-describe("score/xp updating", function () {
-    beforeEach(function () {
+describe("score/xp updating", () => {
+    beforeEach(() => {
         scoreboard.addPlayer(userIds[0], "irene#1234", "someurl");
         scoreboard.addPlayer(userIds[1], "seulgi#7854", "someurl");
         scoreboard.addPlayer(userIds[2], "joy#4144", "someurl");
     });
-    describe("single player scoreboard", function () {
-        describe("user guesses correctly multiple times", function () {
-            it("should not affect their lives", function () {
+    describe("single player scoreboard", () => {
+        describe("user guesses correctly multiple times", () => {
+            it("should not affect their lives", () => {
                 scoreboard.addPlayer(userIds[0], "yeonwoo#4747", "someurl");
                 for (let i = 0; i < 20; i++) {
                     scoreboard.updateScoreboard("yeonwoo#4785", userIds[0], "someurl", 1, 0);
@@ -28,9 +27,9 @@ describe("score/xp updating", function () {
         });
     });
 
-    describe("multi player scoreboard", function () {
-        describe("one person guesses correctly multiple times", function () {
-            it("should decrement every other user's scores", function () {
+    describe("multi player scoreboard", () => {
+        describe("one person guesses correctly multiple times", () => {
+            it("should decrement every other user's scores", () => {
                 for (let i = 0; i < 5; i++) {
                     scoreboard.updateScoreboard("irene#1234", userIds[0], "someurl", 1, 50);
                 }
@@ -40,8 +39,8 @@ describe("score/xp updating", function () {
             });
         });
 
-        describe("each player guesses correctly a different amount of times", function () {
-            it("should decrease each player's score by the amount of guesses of every other player", function () {
+        describe("each player guesses correctly a different amount of times", () => {
+            it("should decrease each player's score by the amount of guesses of every other player", () => {
                 scoreboard.updateScoreboard("irene#1234", userIds[0], "someurl", 1, 50);
                 scoreboard.updateScoreboard("irene#1234", userIds[0], "someurl", 1, 50);
                 scoreboard.updateScoreboard("seulgi#7854", userIds[1], "someurl", 1, 50);
@@ -56,29 +55,29 @@ describe("score/xp updating", function () {
     });
 });
 
-describe("winner detection", function () {
-    beforeEach(function () {
+describe("winner detection", () => {
+    beforeEach(() => {
         scoreboard.addPlayer(userIds[0], "irene#1234", "someurl");
         scoreboard.addPlayer(userIds[1], "seulgi#7854", "someurl");
         scoreboard.addPlayer(userIds[2], "joy#4144", "someurl");
     });
-    describe("nobody has a score yet", function () {
-        it("should return an empty array", function () {
+    describe("nobody has a score yet", () => {
+        it("should return an empty array", () => {
             assert.deepStrictEqual(scoreboard.getWinners(), []);
         });
     });
 
-    describe("single player, has guessed at least once", function () {
+    describe("single player, has guessed at least once", () => {
         const userId = "12345";
-        it("should return the single player", function () {
+        it("should return the single player", () => {
             scoreboard.updateScoreboard("minju#7489", userId, "someurl", 10, 0);
             assert.strictEqual(scoreboard.getWinners().length, 1);
             assert.strictEqual(scoreboard.getWinners()[0].getId(), userId);
         });
     });
 
-    describe("multiple players, has different number of lives", function () {
-        it("should return the player with most number of lives", function () {
+    describe("multiple players, has different number of lives", () => {
+        it("should return the player with most number of lives", () => {
             scoreboard.updateScoreboard("minju#7489", userIds[0], "someurl", 1, 0);
             scoreboard.updateScoreboard("minju#7489", userIds[0], "someurl", 1, 0);
             scoreboard.updateScoreboard("sakura#5478", userIds[1], "someurl", 1, 0);
@@ -87,8 +86,8 @@ describe("winner detection", function () {
         });
     });
 
-    describe("multiple players, tied score", function () {
-        it("should return the two tied players", function () {
+    describe("multiple players, tied score", () => {
+        it("should return the two tied players", () => {
             scoreboard.updateScoreboard("minju#7489", userIds[0], "someurl", 1, 0);
             scoreboard.updateScoreboard("sakura#5478", userIds[1], "someurl", 1, 0);
             scoreboard.updateScoreboard("sakura#5478", userIds[1], "someurl", 1, 0);
@@ -100,9 +99,9 @@ describe("winner detection", function () {
     });
 });
 
-describe("game finished", function () {
-    describe("every player is dead", function () {
-        it("should return true", function () {
+describe("game finished", () => {
+    describe("every player is dead", () => {
+        it("should return true", () => {
             scoreboard.addPlayer(userIds[0], "irene#1234", "someurl", 0);
             scoreboard.addPlayer(userIds[1], "seulgi#7854", "someurl", 0);
             scoreboard.addPlayer(userIds[2], "joy#4144", "someurl", 0);
@@ -110,8 +109,8 @@ describe("game finished", function () {
         });
     });
 
-    describe("one player is left in a multiplayer game", function () {
-        it("should return true", function () {
+    describe("one player is left in a multiplayer game", () => {
+        it("should return true", () => {
             scoreboard.addPlayer(userIds[0], "irene#1234", "someurl", 0);
             scoreboard.addPlayer(userIds[1], "seulgi#7854", "someurl", 0);
             scoreboard.addPlayer(userIds[2], "joy#4144", "someurl", 5);
@@ -119,15 +118,15 @@ describe("game finished", function () {
         });
     });
 
-    describe("one player is left in a single player game", function () {
-        it("should return false", function () {
+    describe("one player is left in a single player game", () => {
+        it("should return false", () => {
             scoreboard.addPlayer(userIds[0], "irene#1234", "someurl", 5);
             assert.strictEqual(scoreboard.gameFinished(), false);
         });
     });
 
-    describe("multiple players are still alive", function () {
-        it("should return false", function () {
+    describe("multiple players are still alive", () => {
+        it("should return false", () => {
             scoreboard.addPlayer(userIds[0], "irene#1234", "someurl", 5);
             scoreboard.addPlayer(userIds[1], "seulgi#7854", "someurl", 8);
             scoreboard.addPlayer(userIds[2], "joy#4144", "someurl", 2);
@@ -136,17 +135,17 @@ describe("game finished", function () {
     });
 });
 
-describe("getLivesOfWeakestPlayer", function () {
-    describe("one person is the weakest", function () {
-        it("should return the weakest person's number of lives", function () {
+describe("getLivesOfWeakestPlayer", () => {
+    describe("one person is the weakest", () => {
+        it("should return the weakest person's number of lives", () => {
             scoreboard.addPlayer(userIds[0], "irene#1234", "someurl", 5);
             scoreboard.addPlayer(userIds[1], "seulgi#7854", "someurl", 8);
             scoreboard.addPlayer(userIds[2], "joy#4144", "someurl", 2);
             assert.strictEqual(scoreboard.getLivesOfWeakestPlayer(), 2);
         });
     });
-    describe("tie for the weakest", function () {
-        it("should return the number of lives", function () {
+    describe("tie for the weakest", () => {
+        it("should return the number of lives", () => {
             scoreboard.addPlayer(userIds[0], "irene#1234", "someurl", 3);
             scoreboard.addPlayer(userIds[1], "seulgi#7854", "someurl", 2);
             scoreboard.addPlayer(userIds[2], "joy#4144", "someurl", 2);
@@ -155,15 +154,15 @@ describe("getLivesOfWeakestPlayer", function () {
     });
 });
 
-describe("starting lives", function () {
-    describe("no explicit number of lives set for player", function () {
-        it("should default to the scoreboard's default", function () {
+describe("starting lives", () => {
+    describe("no explicit number of lives set for player", () => {
+        it("should default to the scoreboard's default", () => {
             scoreboard.addPlayer(userIds[0], "irene#1234", "someurl");
             assert.strictEqual(scoreboard.getPlayerLives(userIds[0]), DEFAULT_LIVES);
         });
     });
-    describe("explicit number of lives set for player", function () {
-        it("should use the explicitly set number of lives", function () {
+    describe("explicit number of lives set for player", () => {
+        it("should use the explicitly set number of lives", () => {
             scoreboard.addPlayer(userIds[0], "irene#1234", "someurl", 17);
             assert.strictEqual(scoreboard.getPlayerLives(userIds[0]), 17);
         });

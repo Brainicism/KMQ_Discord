@@ -15,14 +15,13 @@ const AVATAR_URL = null;
 let scoreboard: TeamScoreboard;
 let firstTeam: Team;
 
-/* eslint-disable prefer-arrow-callback */
-beforeEach(function () {
+beforeEach(() => {
     scoreboard = new TeamScoreboard();
     firstTeam = scoreboard.addTeam(FIRST_TEAM_NAME, new Player("user#0101", USER_IDS[0], AVATAR_URL, 0));
 });
 
-describe("add a team", function () {
-    it("should add the team to the scoreboard", function () {
+describe("add a team", () => {
+    it("should add the team to the scoreboard", () => {
         const player = new Player("second_user#1010", USER_IDS[1], AVATAR_URL, 0);
 
         assert.strictEqual(scoreboard.hasTeam(SECOND_TEAM_NAME), false);
@@ -33,8 +32,8 @@ describe("add a team", function () {
     });
 });
 
-describe("get team of player", function () {
-    it("should get the team that corresponds to the player", function () {
+describe("get team of player", () => {
+    it("should get the team that corresponds to the player", () => {
         assert.deepStrictEqual(scoreboard.getTeamOfPlayer(USER_IDS[0]), firstTeam);
         assert.strictEqual(scoreboard.getTeamOfPlayer(USER_IDS[1]), null);
 
@@ -44,8 +43,8 @@ describe("get team of player", function () {
     });
 });
 
-describe("team deletion", function () {
-    it("should delete a team when it has no players in it", function () {
+describe("team deletion", () => {
+    it("should delete a team when it has no players in it", () => {
         const player = new Player("second_user#1010", USER_IDS[1], AVATAR_URL, 0);
         const secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, player);
         const anotherPlayer = new Player(USER_TAG, USER_IDS[2], AVATAR_URL, 0);
@@ -59,10 +58,10 @@ describe("team deletion", function () {
     });
 });
 
-describe("score/xp updating", function () {
-    describe("single player, single team scoreboard", function () {
-        describe("user guesses correctly multiple times", function () {
-            it("should increment the user's score/xp, team score should be player's score, no bonus xp since 1 team", function () {
+describe("score/xp updating", () => {
+    describe("single player, single team scoreboard", () => {
+        describe("user guesses correctly multiple times", () => {
+            it("should increment the user's score/xp, team score should be player's score, no bonus xp since 1 team", () => {
                 for (let i = 0; i < 20; i++) {
                     scoreboard.updateScoreboard(USER_TAG, USER_IDS[0], AVATAR_URL, 1, 50);
                     assert.strictEqual(scoreboard.getPlayerScore(USER_IDS[0]), i + 1);
@@ -72,8 +71,8 @@ describe("score/xp updating", function () {
             });
         });
 
-        describe("user has not guessed yet", function () {
-            it("should not increment the user's score/xp", function () {
+        describe("user has not guessed yet", () => {
+            it("should not increment the user's score/xp", () => {
                 assert.strictEqual(scoreboard.getPlayerScore(USER_IDS[0]), 0);
                 assert.strictEqual(scoreboard.getPlayerExpGain(USER_IDS[0]), 0);
                 assert.strictEqual(firstTeam.getScore(), 0);
@@ -81,13 +80,13 @@ describe("score/xp updating", function () {
         });
     });
 
-    describe("multi player, single team scoreboard", function () {
-        beforeEach(function () {
+    describe("multi player, single team scoreboard", () => {
+        beforeEach(() => {
             scoreboard.addPlayer(FIRST_TEAM_NAME, new Player("second_user#1010", USER_IDS[1], AVATAR_URL, 0));
         });
 
-        describe("both users guess correctly multiple times", function () {
-            it("should increment each user's score, team score should be sum of its players' scores", function () {
+        describe("both users guess correctly multiple times", () => {
+            it("should increment each user's score, team score should be sum of its players' scores", () => {
                 for (let i = 0; i < 20; i++) {
                     scoreboard.updateScoreboard(USER_TAG, USER_IDS[0], AVATAR_URL, 1, 50);
                     if (i % 2 === 0) {
@@ -102,8 +101,8 @@ describe("score/xp updating", function () {
             });
         });
 
-        describe("both users have not guessed yet", function () {
-            it("should not increment each user's score", function () {
+        describe("both users have not guessed yet", () => {
+            it("should not increment each user's score", () => {
                 assert.strictEqual(scoreboard.getPlayerScore(USER_IDS[0]), 0);
                 assert.strictEqual(scoreboard.getPlayerExpGain(USER_IDS[0]), 0);
                 assert.strictEqual(scoreboard.getPlayerScore(USER_IDS[1]), 0);
@@ -113,16 +112,16 @@ describe("score/xp updating", function () {
         });
     });
 
-    describe("multi player, multi team scoreboard", function () {
+    describe("multi player, multi team scoreboard", () => {
         let secondTeam: Team;
-        beforeEach(function () {
+        beforeEach(() => {
             scoreboard.addPlayer(FIRST_TEAM_NAME, new Player("second_user#1010", USER_IDS[1], AVATAR_URL, 0));
             secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, new Player("IU#2325", USER_IDS[2], AVATAR_URL, 0));
             scoreboard.addPlayer(SECOND_TEAM_NAME, new Player("g-dragon#9999", USER_IDS[3], AVATAR_URL, 0));
         });
 
-        describe("some users guess correctly multiple times", function () {
-            it("should increment each user's score", function () {
+        describe("some users guess correctly multiple times", () => {
+            it("should increment each user's score", () => {
                 for (let i = 0; i < 20; i++) {
                     scoreboard.updateScoreboard(USER_TAG, USER_IDS[0], AVATAR_URL, 1, 50);
                     if (i === 0) {
@@ -149,8 +148,8 @@ describe("score/xp updating", function () {
             });
         });
 
-        describe("all users have not guessed yet", function () {
-            it("should not increment each user's score", function () {
+        describe("all users have not guessed yet", () => {
+            it("should not increment each user's score", () => {
                 assert.strictEqual(scoreboard.getPlayerScore(USER_IDS[0]), 0);
                 assert.strictEqual(scoreboard.getPlayerExpGain(USER_IDS[0]), 0);
 
@@ -161,22 +160,22 @@ describe("score/xp updating", function () {
     });
 });
 
-describe("winner detection", function () {
+describe("winner detection", () => {
     let secondTeam: Team;
-    beforeEach(function () {
+    beforeEach(() => {
         scoreboard.addPlayer(FIRST_TEAM_NAME, new Player("sakura#5478", USER_IDS[1], AVATAR_URL, 0));
         secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, new Player("IU#2325", USER_IDS[2], AVATAR_URL, 0));
         scoreboard.addPlayer(SECOND_TEAM_NAME, new Player("g-dragon#9999", USER_IDS[3], AVATAR_URL, 0));
     });
 
-    describe("nobody has a score yet", function () {
-        it("should return an empty array", function () {
+    describe("nobody has a score yet", () => {
+        it("should return an empty array", () => {
             assert.deepStrictEqual(scoreboard.getWinners(), []);
         });
     });
 
-    describe("single player, single team, has score", function () {
-        it("should return the team", function () {
+    describe("single player, single team, has score", () => {
+        it("should return the team", () => {
             scoreboard.updateScoreboard(USER_TAG, USER_IDS[0], AVATAR_URL, 10, 0);
             assert.strictEqual(scoreboard.getWinners().length, 1);
             assert.strictEqual(scoreboard.getWinners()[0].name, FIRST_TEAM_NAME);
@@ -184,8 +183,8 @@ describe("winner detection", function () {
         });
     });
 
-    describe("multiple players, single team, has different scores", function () {
-        it("should return the team", function () {
+    describe("multiple players, single team, has different scores", () => {
+        it("should return the team", () => {
             scoreboard.updateScoreboard(USER_TAG, USER_IDS[0], AVATAR_URL, 10, 0);
             scoreboard.updateScoreboard(USER_TAG, USER_IDS[1], AVATAR_URL, 15, 0);
             assert.strictEqual(scoreboard.getWinners().length, 1);
@@ -194,8 +193,8 @@ describe("winner detection", function () {
         });
     });
 
-    describe("multiple players, multiple teams, has different scores", function () {
-        it("should return the team with most points", function () {
+    describe("multiple players, multiple teams, has different scores", () => {
+        it("should return the team with most points", () => {
             scoreboard.updateScoreboard(USER_TAG, USER_IDS[0], AVATAR_URL, 10, 0);
             scoreboard.updateScoreboard(USER_TAG, USER_IDS[1], AVATAR_URL, 15, 0);
             scoreboard.updateScoreboard(USER_TAG, USER_IDS[2], AVATAR_URL, 15, 0);
@@ -205,8 +204,8 @@ describe("winner detection", function () {
         });
     });
 
-    describe("multiple players, multiple teams, tied score", function () {
-        it("should return the two tied teams", function () {
+    describe("multiple players, multiple teams, tied score", () => {
+        it("should return the two tied teams", () => {
             scoreboard.updateScoreboard(USER_TAG, USER_IDS[0], AVATAR_URL, 5, 0);
             scoreboard.updateScoreboard(USER_TAG, USER_IDS[1], AVATAR_URL, 7, 0);
             scoreboard.updateScoreboard(USER_TAG, USER_IDS[2], AVATAR_URL, 7, 0);
@@ -218,38 +217,38 @@ describe("winner detection", function () {
 });
 
 let guildPreference: GuildPreference;
-describe("game finished", function () {
-    beforeEach(function () {
+describe("game finished", () => {
+    beforeEach(() => {
         guildPreference = new GuildPreference("1234");
         guildPreference.setGoal(5);
         scoreboard.addTeam(FIRST_TEAM_NAME, new Player("user#0101", USER_IDS[0], AVATAR_URL, 0));
         scoreboard.addTeam(SECOND_TEAM_NAME, new Player("second_user#1010", USER_IDS[1], AVATAR_URL, 0));
     });
 
-    describe("goal is not set", function () {
-        it("should return false", function () {
+    describe("goal is not set", () => {
+        it("should return false", () => {
             guildPreference.resetGoal();
             assert.strictEqual(scoreboard.gameFinished(guildPreference), false);
         });
     });
 
-    describe("goal is set", function () {
-        describe("no one has a score yet", function () {
-            it("should return false", function () {
+    describe("goal is set", () => {
+        describe("no one has a score yet", () => {
+            it("should return false", () => {
                 assert.strictEqual(scoreboard.gameFinished(guildPreference), false);
             });
         });
 
-        describe("first place is not equal/above the goal", function () {
-            it("should return false", function () {
+        describe("first place is not equal/above the goal", () => {
+            it("should return false", () => {
                 scoreboard.updateScoreboard(USER_TAG, USER_IDS[0], AVATAR_URL, 2, 0);
                 scoreboard.updateScoreboard(USER_TAG, USER_IDS[1], AVATAR_URL, 4, 0);
                 assert.strictEqual(scoreboard.gameFinished(guildPreference), false);
             });
         });
 
-        describe("first place is equal/above the goal", function () {
-            it("should return true", function () {
+        describe("first place is equal/above the goal", () => {
+            it("should return true", () => {
                 scoreboard.updateScoreboard(USER_TAG, USER_IDS[0], AVATAR_URL, 5, 0);
                 scoreboard.updateScoreboard(USER_TAG, USER_IDS[1], AVATAR_URL, 4, 0);
                 assert.strictEqual(scoreboard.gameFinished(guildPreference), true);
