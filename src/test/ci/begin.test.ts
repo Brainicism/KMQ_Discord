@@ -59,7 +59,7 @@ describe("begin command", () => {
                 });
             });
 
-            describe("atleast 1 team has been added yet", () => {
+            describe("atleast 1 team has been added", () => {
                 it("should return false", () => {
                     const scoreboard = gameSession.scoreboard as TeamScoreboard;
                     scoreboard.addTeam("Loona", new Player(null, null, null, 0));

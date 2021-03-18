@@ -20,7 +20,7 @@ export default class TeamScoreboard extends Scoreboard {
     /** @returns An array of DiscordEmbed fields representing each participant's score */
     getScoreboardEmbedFields(): Array<{ name: string, value: string, inline: boolean }> {
         if (this.isEmpty()) return [];
-        return super.getScoreboardEmbedFields();
+        return super.getScoreboardEmbedFields().map((x) => ({ name: `Team ${x.name}`, value: x.value, inline: x.inline }));
     }
 
     /**
