@@ -3,6 +3,7 @@ import { getDebugLogHeader, sendErrorMessage, sendOptionsMessage } from "../../h
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
+import MessageContext from "../../structures/message_context";
 
 const logger = _logger("duration");
 
@@ -76,13 +77,13 @@ export default class DurationCommand implements BaseCommand {
                 }
             } else if (action === DurationAction.REMOVE) {
                 if (!guildPreference.isDurationSet()) {
-                    sendErrorMessage(message, { title: "Error adding/remove duration", description: "The duration is not currently set." });
+                    sendErrorMessage(MessageContext.fromMessage(message), { title: "Error adding/remove duration", description: "The duration is not currently set." });
                     return;
                 }
 
                 duration = currentDuration - durationDelta;
                 if (duration < 2) {
-                    sendErrorMessage(message, { title: "Error removing duration", description: "Duration cannot be less than 2 minutes." });
+                    sendErrorMessage(MessageContext.fromMessage(message), { title: "Error removing duration", description: "Duration cannot be less than 2 minutes." });
                     return;
                 }
             }

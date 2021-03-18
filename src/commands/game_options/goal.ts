@@ -1,8 +1,9 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { getDebugLogHeader, sendOptionsMessage, sendErrorMessage, getMessageContext } from "../../helpers/discord_utils";
+import { getDebugLogHeader, sendOptionsMessage, sendErrorMessage } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
+import MessageContext from "../../structures/message_context";
 
 const logger = _logger("goal");
 
@@ -49,7 +50,7 @@ export default class GoalCommand implements BaseCommand {
         const userGoal = parseInt(parsedMessage.components[0], 10);
         if (gameSession && !gameSession.scoreboard.isEmpty() && userGoal <= gameSession.scoreboard.getWinners()[0].getScore()) {
             logger.info(`${getDebugLogHeader(message)} | Goal update ignored.`);
-            sendErrorMessage(getMessageContext(message), { title: "Error applying goal", description: "Given goal exceeds highest score. Please raise your goal, or start a new game." });
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "Error applying goal", description: "Given goal exceeds highest score. Please raise your goal, or start a new game." });
             return;
         }
 

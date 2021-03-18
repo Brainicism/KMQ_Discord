@@ -5,13 +5,13 @@ import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
-    getDebugLogHeader, getSqlDateString, getUserTag, getVoiceChannel, sendErrorMessage, sendEndOfRoundMessage, getMessageContext, sendInfoMessage, getNumParticipants, checkBotIsAlone,
+    getDebugLogHeader, getSqlDateString, getUserTag, sendErrorMessage, sendEndOfRoundMessage, sendInfoMessage, getNumParticipants, checkBotIsAlone, getVoiceChannelFromMessage,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, getSongCount, endSession } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds, isPowerHour, isWeekend } from "../helpers/utils";
 import state from "../kmq";
 import _logger from "../logger";
-import { QueriedSong, MessageContext, GuildTextableMessage } from "../types";
+import { QueriedSong, GuildTextableMessage } from "../types";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
 import Scoreboard from "./scoreboard";
@@ -24,6 +24,7 @@ import { getRankNameByLevel } from "../commands/game_commands/profile";
 import { Gender } from "../commands/game_options/gender";
 import EliminationPlayer from "./elimination_player";
 import { KmqImages } from "../constants";
+import MessageContext from "./message_context";
 
 const logger = _logger("game_session");
 const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
@@ -168,17 +169,17 @@ export default class GameSession {
             } else {
                 this.lastGuesser.streak++;
             }
-            const message = messageContext as GuildTextableMessage;
             // calculate xp gain
             const guessSpeed = Date.now() - this.gameRound.startedAt;
             this.guessTimes.push(guessSpeed);
-            const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(message), guessSpeed);
+            const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(this.voiceChannel.id), guessSpeed);
             guessResult.expGain = expGain;
             guessResult.streak = this.lastGuesser.streak;
-            logger.info(`${getDebugLogHeader(message)} | Song correctly guessed. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
+            logger.info(`${getDebugLogHeader(messageContext)} | Song correctly guessed. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
 
             // update scoreboard
-            this.scoreboard.updateScoreboard(getUserTag(message.author), message.author.id, message.author.avatarURL, guessResult.pointsEarned, expGain);
+            const { author } = messageContext;
+            this.scoreboard.updateScoreboard(author.tag, author.id, author.avatarUrl, guessResult.pointsEarned, expGain);
         } else {
             this.lastGuesser = null;
         }
@@ -251,7 +252,7 @@ export default class GameSession {
                 levelUpMessages = levelUpMessages.slice(0, 10);
                 levelUpMessages.push("and many others...");
             }
-            sendInfoMessage({ channel: this.textChannel }, { title: "🚀 Power up!", description: levelUpMessages.join("\n"), thumbnailUrl: KmqImages.THUMBS_UP });
+            sendInfoMessage(new MessageContext(this.textChannel.id), { title: "🚀 Power up!", description: levelUpMessages.join("\n"), thumbnailUrl: KmqImages.THUMBS_UP });
         }
 
         // commit guild stats
@@ -303,7 +304,7 @@ export default class GameSession {
             this.correctGuesses++;
 
             // mark round as complete, so no more guesses can go through
-            this.endRound({ correct: true, guesserUserId: message.author.id, pointsEarned }, guildPreference, message);
+            this.endRound({ correct: true, guesserUserId: message.author.id, pointsEarned }, guildPreference, MessageContext.fromMessage(message));
 
             // update game session's lastActive
             const gameSession = state.gameSessions[this.guildID];
@@ -316,7 +317,7 @@ export default class GameSession {
                 .where("guild_id", this.guildID)
                 .increment("songs_guessed", 1);
 
-            this.startRound(guildPreference, getMessageContext(message));
+            this.startRound(guildPreference, MessageContext.fromMessage(message));
         }
     }
 
@@ -580,7 +581,7 @@ export default class GameSession {
      * @param message - The message to check for guess eligibility
      */
     private guessEligible(message: GuildTextableMessage): boolean {
-        const userVoiceChannel = getVoiceChannel(message);
+        const userVoiceChannel = getVoiceChannelFromMessage(message);
         // if user isn't in the same voice channel
         if (!userVoiceChannel || (userVoiceChannel.id !== this.voiceChannel.id)) {
             return false;
