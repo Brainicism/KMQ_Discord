@@ -64,8 +64,8 @@ export default class JoinCommand implements BaseCommand {
         // Emojis are of the format: <(a if animated):(alphanumeric):(number)>
         const emojis = teamName.match(/<a?:[a-zA-Z0-9]+:[0-9]+>/gm) || [];
         for (const emoji of emojis) {
-            const emojiId = emoji.match(/(?<=<a?:[a-zA-Z0-9]+:)[0-9]+(?=>)/gm).join("");
-            if (!state.client.guilds.get(message.guildID).emojis.map((e) => e.id).includes(emojiId)) {
+            const emojiID = emoji.match(/(?<=<a?:[a-zA-Z0-9]+:)[0-9]+(?=>)/gm).join("");
+            if (!state.client.guilds.get(message.guildID).emojis.map((e) => e.id).includes(emojiID)) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
                     title: "Invalid team name",
                     description: "You can only include emojis that are in this server.",

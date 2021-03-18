@@ -55,9 +55,9 @@ export function getDebugLogHeader(messageContext: MessageContext | Eris.Message)
  * @param textChannel - The channel where the message should be delivered
  * @param messageContent - The MessageContent to send
  */
-async function sendMessage(textChannelId: string, messageContent: Eris.MessageContent): Promise<Eris.Message> {
+async function sendMessage(textChannelID: string, messageContent: Eris.MessageContent): Promise<Eris.Message> {
     try {
-        return await state.client.createMessage(textChannelId, messageContent);
+        return await state.client.createMessage(textChannelID, messageContent);
     } catch (e) {
         logger.error(`Error sending message. err = ${e}. body = ${JSON.stringify(messageContent)}`);
         return null;
@@ -222,7 +222,7 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
             title: updatedOption === null ? "Options" : `${updatedOption.option} ${updatedOption.reset ? "reset" : "updated"}`,
             description:
                 `Now playing the ${optionStrings[GameOption.LIMIT]} most popular songs out of the __${totalSongs.countBeforeLimit}__ by ${guildPreference.isGroupsMode() ? `${optionStrings[GameOption.GROUPS]} (${optionStrings[GameOption.SUBUNIT_PREFERENCE]})` : `${optionStrings[GameOption.GENDER]} ${optionStrings[GameOption.ARTIST_TYPE]}`}\
-                ${guildPreference.isGroupsMode() && guildPreference.isGenderAlternating() && guildPreference.getGroupIds().length > 1 ? ` with ${optionStrings[GameOption.GENDER]}` : ""} ${optionStrings[GameOption.CUTOFF]}\
+                ${guildPreference.isGroupsMode() && guildPreference.isGenderAlternating() && guildPreference.getGroupIDs().length > 1 ? ` with ${optionStrings[GameOption.GENDER]}` : ""} ${optionStrings[GameOption.CUTOFF]}\
                 ${guildPreference.isExcludesMode() && !guildPreference.isGroupsMode() ? `, excluding ${optionStrings[GameOption.EXCLUDE]}` : ""}${guildPreference.isIncludesMode() && !guildPreference.isGroupsMode() ? `, including ${optionStrings[GameOption.INCLUDE]}` : ""}. \nPlaying from the ${optionStrings[GameOption.SEEK_TYPE]} point of each song. ${shuffleUniqueMode ? shuffleMessage : ""}\
                 Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}\
                 \nPlaying \`${guildPreference.getLanguageType()}\` language songs.\
@@ -237,11 +237,11 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
  * @param textChannel - The channel where the message should be delivered
  * @param gameSession - The GameSession that has ended
  */
-export async function sendEndGameMessage(textChannelId: string, gameSession: GameSession) {
+export async function sendEndGameMessage(textChannelID: string, gameSession: GameSession) {
     const { client } = state;
     const footerText = `${gameSession.getCorrectGuesses()}/${gameSession.getRoundsPlayed()} songs correctly guessed!`;
     if (gameSession.scoreboard.isEmpty()) {
-        await sendInfoMessage(new MessageContext(textChannelId), {
+        await sendInfoMessage(new MessageContext(textChannelID), {
             color: EMBED_INFO_COLOR,
             author: {
                 username: client.user.username,
@@ -262,7 +262,7 @@ export async function sendEndGameMessage(textChannelId: string, gameSession: Gam
                 inline: false,
             },
         );
-        await sendInfoMessage(new MessageContext(textChannelId), {
+        await sendInfoMessage(new MessageContext(textChannelID), {
             color: EMBED_SUCCESS_COLOR,
             description: "**Scoreboard**",
             thumbnailUrl: winners[0].getAvatarURL(),
@@ -369,8 +369,8 @@ export function getVoiceChannelFromMessage(message: GuildTextableMessage): Eris.
  * @param message - The Message object
  * @returns the voice channel that the message's author is in
  */
-export function getVoiceChannel(voiceChannelId: string): Eris.VoiceChannel {
-    const voiceChannel = state.client.getChannel(voiceChannelId) as Eris.VoiceChannel;
+export function getVoiceChannel(voiceChannelID: string): Eris.VoiceChannel {
+    const voiceChannel = state.client.getChannel(voiceChannelID) as Eris.VoiceChannel;
     return voiceChannel;
 }
 
@@ -378,8 +378,8 @@ export function getVoiceChannel(voiceChannelId: string): Eris.VoiceChannel {
  * @param message - The Message object
  * @returns the number of persons in the voice channel excluding bots
  */
-export function getNumParticipants(voiceChannelId: string): number {
-    return (getVoiceChannel(voiceChannelId).voiceMembers.filter((x) => !x.bot)).length;
+export function getNumParticipants(voiceChannelID: string): number {
+    return (getVoiceChannel(voiceChannelID).voiceMembers.filter((x) => !x.bot)).length;
 }
 
 /**

@@ -88,7 +88,7 @@ export default class GenderCommand implements BaseCommand {
         }
 
         if (selectedGenders[0] === Gender.ALTERNATING) {
-            if (guildPreference.isGroupsMode() && guildPreference.getGroupIds().length === 1) {
+            if (guildPreference.isGroupsMode() && guildPreference.getGroupIDs().length === 1) {
                 sendErrorMessage(MessageContext.fromMessage(message), { title: "Game Option Warning", description: `With only one group chosen, \`${process.env.BOT_PREFIX}gender alternating\` may not behave as expected. Consider including more groups to correctly alternate genders.` });
             }
             guildPreference.setGender([selectedGenders[0]]);

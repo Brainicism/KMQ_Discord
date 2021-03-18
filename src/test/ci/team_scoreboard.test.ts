@@ -39,7 +39,7 @@ describe("get team of player", () => {
 
         const player = new Player("second_user#1010", USER_IDS[1], AVATAR_URL, 0);
         const secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, player);
-        assert.deepStrictEqual(scoreboard.getTeamOfPlayer(player.getId()), secondTeam);
+        assert.deepStrictEqual(scoreboard.getTeamOfPlayer(player.getID()), secondTeam);
     });
 });
 
@@ -51,8 +51,8 @@ describe("team deletion", () => {
         scoreboard.addPlayer(SECOND_TEAM_NAME, anotherPlayer);
         const bestPlayer = new Player(USER_TAG, USER_IDS[3], AVATAR_URL, 0);
         scoreboard.addPlayer(FIRST_TEAM_NAME, bestPlayer);
-        scoreboard.removePlayer(bestPlayer.getId());
-        scoreboard.removePlayer(player.getId());
+        scoreboard.removePlayer(bestPlayer.getID());
+        scoreboard.removePlayer(player.getID());
         scoreboard.removePlayer(USER_IDS[0]);
         assert.deepStrictEqual(Object.values(scoreboard.getTeams()), [secondTeam]);
     });
@@ -116,7 +116,7 @@ describe("score/xp updating", () => {
         let secondTeam: Team;
         beforeEach(() => {
             scoreboard.addPlayer(FIRST_TEAM_NAME, new Player("second_user#1010", USER_IDS[1], AVATAR_URL, 0));
-            secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, new Player("IU#2325", USER_IDS[2], AVATAR_URL, 0));
+            secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, new Player("jennie#2325", USER_IDS[2], AVATAR_URL, 0));
             scoreboard.addPlayer(SECOND_TEAM_NAME, new Player("g-dragon#9999", USER_IDS[3], AVATAR_URL, 0));
         });
 
@@ -164,7 +164,7 @@ describe("winner detection", () => {
     let secondTeam: Team;
     beforeEach(() => {
         scoreboard.addPlayer(FIRST_TEAM_NAME, new Player("sakura#5478", USER_IDS[1], AVATAR_URL, 0));
-        secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, new Player("IU#2325", USER_IDS[2], AVATAR_URL, 0));
+        secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, new Player("jennie#2325", USER_IDS[2], AVATAR_URL, 0));
         scoreboard.addPlayer(SECOND_TEAM_NAME, new Player("g-dragon#9999", USER_IDS[3], AVATAR_URL, 0));
     });
 
