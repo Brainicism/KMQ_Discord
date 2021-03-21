@@ -4,7 +4,7 @@ import _logger from "../logger";
 
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
-const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★\ \(\)]/g;
+const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★\ \(\)\+]/g;
 
 /** Set of characters to replace in song names/guesses */
 const CHARACTER_REPLACEMENTS = [
