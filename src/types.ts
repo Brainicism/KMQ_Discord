@@ -19,17 +19,8 @@ export interface QueriedSong {
     youtubeLink: string;
     publishDate?: Date;
     members?: Gender;
-    artistId?: number;
+    artistID?: number;
     isSolo?: string;
-}
-
-export interface MessageContext {
-    channel: Eris.GuildTextableChannel;
-    author?: {
-        username: string;
-        id: string;
-        avatarURL: string;
-    };
 }
 
 export interface EmbedPayload {
@@ -41,7 +32,7 @@ export interface EmbedPayload {
     fields?: Eris.EmbedField[];
     author?: {
         username: string;
-        avatarURL: string;
+        avatarUrl: string;
     };
     color?: number;
 }

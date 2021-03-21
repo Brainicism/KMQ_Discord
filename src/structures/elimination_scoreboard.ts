@@ -51,7 +51,7 @@ export default class EliminationScoreboard extends Scoreboard {
     updateScoreboard(_winnerTag: string, winnerID: string, _avatarURL: string, _pointsEarned: number, expGain: number) {
         let maxLives = -1;
         for (const player of Object.values(this.players)) {
-            if (player.getId() !== winnerID) {
+            if (player.getID() !== winnerID) {
                 player.decrementLives();
             } else {
                 player.incrementExp(expGain);
@@ -96,11 +96,11 @@ export default class EliminationScoreboard extends Scoreboard {
     }
 
     /**
-     * @param userId - The Discord user ID to check
+     * @param userID - The Discord user ID to check
      * @returns the number of lives the player has remaining
      */
-    getPlayerLives(userId: string): number {
-        return this.players[userId].getLives();
+    getPlayerLives(userID: string): number {
+        return this.players[userID].getLives();
     }
 
     /** @returns the number of lives of the player with the least amount of lives (who isn't dead) */

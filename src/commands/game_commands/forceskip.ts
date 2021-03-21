@@ -3,14 +3,13 @@ import {
     sendErrorMessage,
     areUserAndBotInSameVoiceChannel,
     getDebugLogHeader,
-    getUserTag,
-    getMessageContext,
 } from "../../helpers/discord_utils";
 import { bold } from "../../helpers/utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { GameType } from "./play";
 import EliminationScoreboard from "../../structures/elimination_scoreboard";
 import _logger from "../../logger";
+import MessageContext from "../../structures/message_context";
 
 const logger = _logger("forceskip");
 
@@ -37,7 +36,7 @@ export default class ForceSkipCommand implements BaseCommand {
             return;
         }
         if (message.author.id !== gameSession.owner.id) {
-            await sendErrorMessage(getMessageContext(message), { title: "Force skip ignored", description: `Only the person who started the game (${bold(getUserTag(gameSession.owner))}) can force-skip.` });
+            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Force skip ignored", description: `Only the person who started the game (${bold(gameSession.owner.tag)}) can force-skip.` });
             return;
         }
         gameSession.gameRound.skipAchieved = true;
@@ -45,8 +44,8 @@ export default class ForceSkipCommand implements BaseCommand {
             const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
             eliminationScoreboard.decrementAllLives();
         }
-        gameSession.endRound({ correct: false }, guildPreference, getMessageContext(message));
-        gameSession.startRound(guildPreference, getMessageContext(message));
+        gameSession.endRound({ correct: false }, guildPreference, MessageContext.fromMessage(message));
+        gameSession.startRound(guildPreference, MessageContext.fromMessage(message));
         logger.info(`${getDebugLogHeader(message)} | Owner force-skipped.`);
         gameSession.lastActiveNow();
     }

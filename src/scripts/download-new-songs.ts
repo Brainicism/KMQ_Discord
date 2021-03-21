@@ -144,10 +144,10 @@ async function getSongsFromDb() {
 
 async function updateNotDownloaded(songs: Array<QueriedSong>) {
     // update list of non-downloaded songs
-    const songIdsNotDownloaded = songs.filter((x) => !fs.existsSync(path.join(process.env.SONG_DOWNLOAD_DIR, `${x.youtubeLink}.ogg`))).map((x) => ({ vlink: x.youtubeLink }));
+    const songIDsNotDownloaded = songs.filter((x) => !fs.existsSync(path.join(process.env.SONG_DOWNLOAD_DIR, `${x.youtubeLink}.ogg`))).map((x) => ({ vlink: x.youtubeLink }));
     await dbContext.kmq.transaction(async (trx) => {
         await dbContext.kmq("not_downloaded").del().transacting(trx);
-        await dbContext.kmq("not_downloaded").insert(songIdsNotDownloaded).transacting(trx);
+        await dbContext.kmq("not_downloaded").insert(songIDsNotDownloaded).transacting(trx);
     });
 }
 
@@ -163,12 +163,12 @@ const downloadNewSongs = async (limit?: number) => {
     // update current list of non-downloaded songs
     await updateNotDownloaded(allSongs);
 
-    const knownDeadIds = new Set((await dbContext.kmq("dead_links")
+    const knownDeadIDs = new Set((await dbContext.kmq("dead_links")
         .select("vlink"))
         .map((x) => x.vlink));
 
     for (const song of songsToDownload) {
-        if (knownDeadIds.has(song.youtubeLink)) {
+        if (knownDeadIDs.has(song.youtubeLink)) {
             deadLinksSkipped++;
             continue;
         }

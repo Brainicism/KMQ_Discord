@@ -35,6 +35,7 @@ import { seedAndDownloadNewSongs } from "../seed/seed_db";
 import backupKmqDatabase from "../scripts/backup-kmq-database";
 import { parseJsonFile } from "./utils";
 import { reloadFactCache } from "../fact_generator";
+import MessageContext from "../structures/message_context";
 
 const glob = promisify(_glob);
 
@@ -82,11 +83,11 @@ export const checkRestartNotification = async (restartNotification: Date): Promi
     if (RESTART_WARNING_INTERVALS.has(timeDiffMin)) {
         for (const gameSession of Object.values(state.gameSessions)) {
             if (gameSession.finished) continue;
-            await sendInfoMessage({ channel: gameSession.textChannel }, {
+            await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
                 color: EMBED_INFO_COLOR,
                 author: {
                     username: state.client.user.username,
-                    avatarURL: state.client.user.avatarURL,
+                    avatarUrl: state.client.user.avatarURL,
                 },
                 title: `Upcoming bot restart in ${timeDiffMin} minutes.`,
                 description: "Downtime will be approximately 2 minutes.",
@@ -120,10 +121,10 @@ function sweepCaches() {
 export async function updatePublishDateOverrides() {
     try {
         const publishDateOverrides = parseJsonFile(publishOverridesFilePath);
-        for (const [videoId, dateOverride] of Object.entries(publishDateOverrides)) {
+        for (const [videoID, dateOverride] of Object.entries(publishDateOverrides)) {
             await dbContext.kmq("available_songs")
                 .update({ publishedon: dateOverride })
-                .where("link", "=", videoId);
+                .where("link", "=", videoID);
         }
     } catch (err) {
         logger.error("Error parsing publish overrides file");
@@ -275,12 +276,12 @@ export function initializeBotStatsPoster() {
 
 /**
  * Deletes the GameSession corresponding to a given guild ID
- * @param guildId - The guild ID
+ * @param guildID - The guild ID
  */
-export function deleteGameSession(guildId: string) {
-    if (!(guildId in state.gameSessions)) {
-        logger.debug(`gid: ${guildId} | GameSession already ended`);
+export function deleteGameSession(guildID: string) {
+    if (!(guildID in state.gameSessions)) {
+        logger.debug(`gid: ${guildID} | GameSession already ended`);
         return;
     }
-    delete state.gameSessions[guildId];
+    delete state.gameSessions[guildID];
 }

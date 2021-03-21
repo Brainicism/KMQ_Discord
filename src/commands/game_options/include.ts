@@ -1,8 +1,9 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { sendOptionsMessage, getDebugLogHeader, sendErrorMessage, getMessageContext } from "../../helpers/discord_utils";
+import { sendOptionsMessage, getDebugLogHeader, sendErrorMessage } from "../../helpers/discord_utils";
 import { getGuildPreference, getMatchingGroupNames } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
+import MessageContext from "../../structures/message_context";
 
 const logger = _logger("includes");
 
@@ -40,7 +41,7 @@ export default class IncludeCommand implements BaseCommand {
         }
         if (guildPreference.isGroupsMode()) {
             logger.warn(`${getDebugLogHeader(message)} | Game option conflict between include and groups.`);
-            sendErrorMessage(getMessageContext(message), { title: "Game Option Conflict", description: `\`groups\` game option is currently set. \`include\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed` });
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "Game Option Conflict", description: `\`groups\` game option is currently set. \`include\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed` });
             return;
         }
 
@@ -48,7 +49,7 @@ export default class IncludeCommand implements BaseCommand {
         const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(groupNames);
         if (unmatchedGroups) {
             logger.info(`${getDebugLogHeader(message)} | Attempted to set unknown includes. includes =  ${unmatchedGroups.join(", ")}`);
-            await sendErrorMessage(getMessageContext(message), { title: "Unknown Group Name", description: `One or more of the specified group names was not recognized. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} ` });
+            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Unknown Group Name", description: `One or more of the specified group names was not recognized. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} ` });
             return;
         }
 

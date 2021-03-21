@@ -99,23 +99,23 @@ export default class Scoreboard {
     }
 
     /**
-     * @param userId - The Discord user ID of the player to check
+     * @param userID - The Discord user ID of the player to check
      * @returns the score of the player
      */
-    getPlayerScore(userId: string): number {
-        if (userId in this.players) {
-            return this.players[userId].getScore();
+    getPlayerScore(userID: string): number {
+        if (userID in this.players) {
+            return this.players[userID].getScore();
         }
         return 0;
     }
 
     /**
-     * @param userId - The Discord user ID of the player to check
+     * @param userID - The Discord user ID of the player to check
      * @returns the exp gained by the player
      */
-    getPlayerExpGain(userId: string): number {
-        if (userId in this.players) {
-            return this.players[userId].getExpGain();
+    getPlayerExpGain(userID: string): number {
+        if (userID in this.players) {
+            return this.players[userID].getExpGain();
         }
         return 0;
     }
@@ -134,10 +134,10 @@ export default class Scoreboard {
     }
 
     /**
-     *  @param userId - The Discord user ID of the Player
+     *  @param userID - The Discord user ID of the Player
      *  @returns a Player object for the corresponding user ID
      * */
-    getPlayerName(userId: string): string {
-        return this.players[userId].getName();
+    getPlayerName(userID: string): string {
+        return this.players[userID].getName();
     }
 }

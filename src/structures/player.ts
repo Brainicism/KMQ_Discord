@@ -38,7 +38,7 @@ export default class Player {
     }
 
     /** @returns the player's Discord ID */
-    getId(): string {
+    getID(): string {
         return this.id;
     }
 

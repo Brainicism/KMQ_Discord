@@ -21,10 +21,10 @@ export function isDebugMode(): boolean {
     return readDebugSettings("active");
 }
 
-/** @returns whether 'forcedSongId' debug option is active */
+/** @returns whether 'forcedSongID' debug option is active */
 export function isForcedSongActive(): boolean {
     if (!isDebugMode()) return null;
-    return readDebugSettings("forcedSongId") !== null;
+    return readDebugSettings("forcedSongID") !== null;
 }
 
 /** @returns whether 'skipSongPlay' debug option is active */
@@ -33,15 +33,15 @@ export function skipSongPlay(): boolean {
     return readDebugSettings("skipSongPlay");
 }
 
-/** @returns the QueriedSong corresponding to the 'forcedSongId' option */
+/** @returns the QueriedSong corresponding to the 'forcedSongID' option */
 export async function getForcePlaySong(): Promise<QueriedSong> {
     if (!isDebugMode()) return null;
-    const forcePlaySongId = readDebugSettings("forcedSongId");
+    const forcePlaySongID = readDebugSettings("forcedSongID");
     const result = await dbContext.kpopVideos("kpop_videos.app_kpop")
         .select(["nome as name", "name as artist", "vlink as youtubeLink"])
         .join("kpop_videos.app_kpop_group", function join() {
             this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id");
         })
-        .where("vlink", forcePlaySongId);
+        .where("vlink", forcePlaySongID);
     return result[0];
 }

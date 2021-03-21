@@ -8,6 +8,7 @@ import { bold, chooseRandom } from "../../helpers/utils";
 import state from "../../kmq";
 import { GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
+import MessageContext from "../../structures/message_context";
 
 const logger = _logger("leaderboard");
 
@@ -102,7 +103,7 @@ export default class LeaderboardCommand implements BaseCommand {
             } else if (action === LeaderboardAction.SERVER) {
                 this.showLeaderboard(message, pageOffset, true);
             } else {
-                sendErrorMessage(message, { title: "Incorrect Leaderboard Usage", description: `See \`${process.env.BOT_PREFIX}help leaderboard\` for more details` });
+                sendErrorMessage(MessageContext.fromMessage(message), { title: "Incorrect Leaderboard Usage", description: `See \`${process.env.BOT_PREFIX}help leaderboard\` for more details` });
             }
         }
     }
@@ -113,7 +114,7 @@ export default class LeaderboardCommand implements BaseCommand {
             .first());
 
         if (alreadyEnrolled) {
-            sendErrorMessage(message, { title: "Player Already Enrolled", description: "You are already visible on the leaderboard. If you'd like to update your display name, unenroll and enroll again." });
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "Player Already Enrolled", description: "You are already visible on the leaderboard. If you'd like to update your display name, unenroll and enroll again." });
             return;
         }
 
@@ -122,14 +123,14 @@ export default class LeaderboardCommand implements BaseCommand {
                 player_id: message.author.id,
                 display_name: getUserTag(message.author),
             });
-        sendInfoMessage(message, { title: "Leaderboard Enrollment Complete", description: "Your name is now visible on the leaderboard" });
+        sendInfoMessage(MessageContext.fromMessage(message), { title: "Leaderboard Enrollment Complete", description: "Your name is now visible on the leaderboard" });
     }
 
     private async unenrollLeaderboard(message: GuildTextableMessage) {
         await dbContext.kmq("leaderboard_enrollment")
             .where("player_id", "=", message.author.id)
             .del();
-        sendInfoMessage(message, { title: "Leaderboard Unenrollment Complete", description: "You are no longer visible on the leaderboard" });
+        sendInfoMessage(MessageContext.fromMessage(message), { title: "Leaderboard Unenrollment Complete", description: "You are no longer visible on the leaderboard" });
     }
     private async showLeaderboard(message: GuildTextableMessage, pageOffset: number, serverSpecific: boolean) {
         const offset = 10 * pageOffset;
@@ -151,7 +152,7 @@ export default class LeaderboardCommand implements BaseCommand {
             .limit(10);
 
         if (topPlayers.length === 0) {
-            sendErrorMessage(message, { title: "😐", description: "The leaderboard doesn't go this far" });
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "😐", description: "The leaderboard doesn't go this far" });
             return;
         }
 
@@ -171,7 +172,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
         const leaderboardType = serverSpecific ? `${state.client.guilds.get(message.guildID).name}'s` : "Global";
         const leaderboardTitle = `${leaderboardType} Leaderboard (Page ${pageOffset + 1})`;
-        sendInfoMessage({ channel: message.channel }, {
+        sendInfoMessage(MessageContext.fromMessage(message), {
             title: bold(leaderboardTitle),
             fields,
             timestamp: new Date(),

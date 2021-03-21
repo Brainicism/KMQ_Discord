@@ -93,10 +93,10 @@ export default class GameRound {
 
     /**
      * Adds a skip vote for the specified user
-     * @param userId - the Discord user ID of the player skipping
+     * @param userID - the Discord user ID of the player skipping
      */
-    userSkipped(userId: string) {
-        this.skippers.add(userId);
+    userSkipped(userID: string) {
+        this.skippers.add(userID);
     }
 
     /**
