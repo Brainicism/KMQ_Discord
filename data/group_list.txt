@@ -49,9 +49,11 @@ ASTRO
 ATEEZ
 Ato6
 B.A.P
+B.I
 B.I.G
 B.O.Y
 B1A4
+BabySoul
 Bae Jin-young
 Bae173
 Baek A Yeon
@@ -114,6 +116,7 @@ ChoColat
 Choi Nakta
 Chung ha
 cignature
+Ciipher
 CIX
 CL
 CLC
@@ -256,6 +259,7 @@ Homme
 Honey Popcorn
 Hong Jin Young
 Hong Joochan
+Hoody
 Hoppipolla
 Hotshot
 Huh Gak
@@ -275,6 +279,7 @@ Hyunsik
 I.M
 I.O.I
 iKON
+Im Si-wan
 Imfact
 IN2IT
 Infinite
@@ -310,6 +315,7 @@ Jeong Se-woon
 Jessi
 Jessica
 Jimin
+Jin
 Jinho
 JINU
 Jinwoon
@@ -350,6 +356,7 @@ Kara
 KARD
 Kassy
 KEEMBO
+Kei
 Ken
 Kevin Oh
 Key
@@ -444,6 +451,7 @@ Minhyun
 Mino
 Minseo
 Minzy
+Mirae
 Miso
 Miss A
 Mixx
@@ -501,6 +509,7 @@ Park Bo Gum
 Park Bom
 Park BoRam
 Park Hyo-shin
+Park Hyung-sik
 Park Ji-yoon
 Park Jihoon
 Park Won
@@ -578,6 +587,7 @@ Shin Seung-hun
 SHINee
 Shinhwa
 Sik-K
+Simon Dominic
 SinB
 Sistar
 Sistar19
@@ -715,6 +725,7 @@ XIA
 Xiumin
 XRO
 XUM
+Xydo
 Yang Da-il
 Yang Yoseob
 Yangpa
