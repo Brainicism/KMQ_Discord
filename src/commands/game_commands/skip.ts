@@ -19,7 +19,7 @@ import MessageContext from "../../structures/message_context";
 const logger = _logger("skip");
 
 function getSkipsRequired(message: GuildTextableMessage): number {
-    return Math.ceil(getNumParticipants(message.member.voiceState.channelID) * 0.5);
+    return Math.floor(getNumParticipants(message.member.voiceState.channelID) * 0.5) + 1;
 }
 
 async function sendSkipNotification(message: GuildTextableMessage, gameSession: GameSession) {
