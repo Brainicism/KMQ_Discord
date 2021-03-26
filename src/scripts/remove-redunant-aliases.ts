@@ -9,31 +9,31 @@ const logger: Logger = _logger("remove-redunant-aliases");
 export default async function removeRedunantAliases() {
     const songAliasPath = path.resolve(__dirname, "../../data/song_aliases.json");
     logger.info("Checking for redunant aliases...");
-    const songAliases: { [songId: string]: Array<string> } = JSON.parse(fs.readFileSync(songAliasPath).toString());
+    const songAliases: { [songID: string]: Array<string> } = JSON.parse(fs.readFileSync(songAliasPath).toString());
     let changeCount = 0;
-    for (const videoId of Object.keys(songAliases)) {
+    for (const videoID of Object.keys(songAliases)) {
         const result = await dbContext.kmq("available_songs")
             .select("song_name as name")
-            .where("link", "=", videoId)
+            .where("link", "=", videoID)
             .first();
 
         if (!result) {
-            logger.warn(`vid ${videoId}, doesn't exist anymore, check if deletion is applicable...`);
+            logger.warn(`vid ${videoID}, doesn't exist anymore, check if deletion is applicable...`);
             continue;
         }
         const songName = result.name;
-        const aliases = songAliases[videoId];
+        const aliases = songAliases[videoID];
         if (aliases.includes(songName)) {
             if (aliases.length === 1) {
-                logger.info(`vid ${videoId}, song_name '${songName}' no longer has any aliases`);
+                logger.info(`vid ${videoID}, song_name '${songName}' no longer has any aliases`);
                 changeCount++;
-                delete songAliases[videoId];
+                delete songAliases[videoID];
                 continue;
             } else {
                 const index = aliases.indexOf(songName);
-                songAliases[videoId].splice(index, 1);
+                songAliases[videoID].splice(index, 1);
                 changeCount++;
-                logger.info(`vid ${videoId}, song_name '${songName}', alias identical to title removed`);
+                logger.info(`vid ${videoID}, song_name '${songName}', alias identical to title removed`);
             }
         }
     }

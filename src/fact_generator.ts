@@ -35,8 +35,8 @@ let factCache: {
 interface GaonWeeklyEntry {
     songName: string;
     artistName: string;
-    artistId?: string;
-    songId?: string;
+    artistID?: string;
+    songID?: string;
     year: string;
 }
 
@@ -62,13 +62,13 @@ function parseGaonWeeklyRankList(ranklist: string, year: string): Array<GaonWeek
     return Object.values(parsedWeeklyRankList).map((x) => {
         const songName = x["0"];
         const artistName = x["1"];
-        const artistId = x["2"] || null;
-        const songId = x["3"] || null;
+        const artistID = x["2"] || null;
+        const songID = x["3"] || null;
         return {
             songName,
             artistName,
-            artistId,
-            songId,
+            artistID,
+            songID,
             year,
         };
     });

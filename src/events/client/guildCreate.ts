@@ -1,6 +1,7 @@
 import Eris from "eris";
 import _logger from "../../logger";
 import { getDebugChannel, sendInfoMessage } from "../../helpers/discord_utils";
+import MessageContext from "../../structures/message_context";
 
 const logger = _logger("guildCreate");
 
@@ -9,10 +10,10 @@ export default async function guildCreateHandler(guild: Eris.Guild) {
     const kmqDebugChannel = getDebugChannel();
     if (!kmqDebugChannel) return;
     const joinDate: Date = new Date(guild.joinedAt);
-    await sendInfoMessage({ channel: kmqDebugChannel }, {
+    await sendInfoMessage(new MessageContext(kmqDebugChannel.id), {
         author: {
             username: guild.name,
-            avatarURL: guild.iconURL,
+            avatarUrl: guild.iconURL,
         },
         title: "New server joined!",
         fields: [

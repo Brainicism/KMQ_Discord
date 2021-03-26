@@ -4,7 +4,7 @@ import _logger from "../logger";
 
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
-const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★\ \(\)]/g;
+const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★\ \(\)\+]/g;
 
 /** Set of characters to replace in song names/guesses */
 const CHARACTER_REPLACEMENTS = [
@@ -93,10 +93,10 @@ export default class GameRound {
 
     /**
      * Adds a skip vote for the specified user
-     * @param userId - the Discord user ID of the player skipping
+     * @param userID - the Discord user ID of the player skipping
      */
-    userSkipped(userId: string) {
-        this.skippers.add(userId);
+    userSkipped(userID: string) {
+        this.skippers.add(userID);
     }
 
     /**

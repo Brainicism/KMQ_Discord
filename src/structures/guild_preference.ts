@@ -179,15 +179,15 @@ export default class GuildPreference {
 
     /** @returns whether the group option is active */
     isGroupsMode(): boolean {
-        return this.getGroupIds().length !== 0;
+        return this.getGroupIDs().length !== 0;
     }
 
     /**
      * Sets the groups option value
-     * @param groupIds - A list of kpop groups, ID and name
+     * @param groupIDs - A list of kpop groups, ID and name
      */
-    async setGroups(groupIds: { id: number, name: string }[]) {
-        this.gameOptions.groups = groupIds;
+    async setGroups(groupIDs: { id: number, name: string }[]) {
+        this.gameOptions.groups = groupIDs;
         await this.updateGuildPreferences();
     }
 
@@ -198,7 +198,7 @@ export default class GuildPreference {
     }
 
     /** @returns the current selected groups, if the groups option is active */
-    getGroupIds(): number[] {
+    getGroupIDs(): number[] {
         if (this.gameOptions.groups === null) return [];
         return this.gameOptions.groups.map((x) => x.id);
     }
@@ -215,15 +215,15 @@ export default class GuildPreference {
 
     /** @returns whether the exclude option is active */
     isExcludesMode(): boolean {
-        return this.getExcludesGroupIds().length !== 0;
+        return this.getExcludesGroupIDs().length !== 0;
     }
 
     /**
      * Sets the exclude option value
-     * @param groupIds - A list of kpop groups, ID and name
+     * @param groupIDs - A list of kpop groups, ID and name
      */
-    async setExcludes(groupIds: { id: number, name: string }[]) {
-        this.gameOptions.excludes = groupIds;
+    async setExcludes(groupIDs: { id: number, name: string }[]) {
+        this.gameOptions.excludes = groupIDs;
         await this.updateGuildPreferences();
     }
 
@@ -234,7 +234,7 @@ export default class GuildPreference {
     }
 
     /** @returns a list containing the excluded group IDs */
-    getExcludesGroupIds(): number[] {
+    getExcludesGroupIDs(): number[] {
         if (this.gameOptions.excludes === null) return [];
         return this.gameOptions.excludes.map((x) => x.id);
     }
@@ -251,15 +251,15 @@ export default class GuildPreference {
 
     /** @returns whether the exclude option is active */
     isIncludesMode(): boolean {
-        return this.getIncludesGroupIds().length !== 0;
+        return this.getIncludesGroupIDs().length !== 0;
     }
 
     /**
      * Sets the include option value
-     * @param groupIds - A list of kpop groups, ID and name
+     * @param groupIDs - A list of kpop groups, ID and name
      */
-    async setIncludes(groupIds: { id: number, name: string }[]) {
-        this.gameOptions.includes = groupIds;
+    async setIncludes(groupIDs: { id: number, name: string }[]) {
+        this.gameOptions.includes = groupIDs;
         await this.updateGuildPreferences();
     }
 
@@ -270,7 +270,7 @@ export default class GuildPreference {
     }
 
     /** @returns a list containing the excluded group IDs */
-    getIncludesGroupIds(): number[] {
+    getIncludesGroupIDs(): number[] {
         if (this.gameOptions.includes === null) return [];
         return this.gameOptions.includes.map((x) => x.id);
     }
