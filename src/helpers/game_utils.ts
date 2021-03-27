@@ -16,8 +16,8 @@ const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 const logger = _logger("game_utils");
 
 interface GroupMatchResults {
-    unmatchedGroups?: Array<string>;
-    matchedGroups?: { id: number, name: string }[];
+    unmatchedGroups: Array<string>;
+    matchedGroups: { id: number, name: string }[];
 }
 
 /**
@@ -228,5 +228,6 @@ export async function getMatchingGroupNames(rawGroupNames: Array<string>): Promi
     }
     return {
         matchedGroups: matchingGroups,
+        unmatchedGroups: [],
     };
 }
