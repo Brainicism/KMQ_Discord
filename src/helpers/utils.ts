@@ -122,6 +122,32 @@ export function chooseRandom(list: Array<any>) {
 }
 
 /**
+ * Chooses random element from a weighted list
+ * Requires some list element to have a "weight" property for weighting to function
+ * From: https://stackoverflow.com/a/55671924
+ * @param list - List of arbitrary elements
+ * @returns the randomly selected element
+ */
+export function chooseWeightedRandom(list: Array<any>) {
+    const weights = [];
+    for (let i = 0; i < list.length; i++) {
+        const previousWeight = weights[i - 1] || 0;
+        if (!list[i].weight) {
+            weights[i] = 1 + previousWeight;
+        } else {
+            weights[i] = list[i].weight + previousWeight;
+        }
+    }
+    const random = Math.random() * weights[weights.length - 1];
+    for (let i = 0; i < weights.length; i++) {
+        if (weights[i] > random) {
+            return list[i];
+        }
+    }
+    return null;
+}
+
+/**
  * @param date - the date Object
  * @returns the date in yyyy-mm-dd format
  */
