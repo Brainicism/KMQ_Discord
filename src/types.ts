@@ -77,5 +77,4 @@ export enum EnvType {
     DEV = "development",
     DRY_RUN = "dry-run",
     TEST = "test",
-    TEST_CI = "test_ci",
 }

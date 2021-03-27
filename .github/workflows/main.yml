@@ -43,8 +43,16 @@ jobs:
       - run: npm install
       - name: npm run lint
         run: npm run lint
+      - name: Retrieve .env for test
+        run: |
+            echo $KMQ_CI_ENV >> .env
+            cat .env
+        shell: bash
+        env:
+          KMQ_CI_ENV : ${{secrets.KMQ_CI_ENV}}
+        shell: bash
       - name: run tests
-        run: npm run test_ci
+        run: npm test
       - name: Build and dry-run
         run: npm run start
         env: 
