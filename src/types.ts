@@ -6,6 +6,10 @@ import { Gender } from "./commands/game_options/gender";
 
 export type GuildTextableMessage = Eris.Message<GuildTextableChannel>;
 
+export interface MatchedArtist {
+    id: number;
+    name: string;
+}
 export interface ParsedMessage {
     action: string;
     argument: string;

@@ -3,7 +3,7 @@ import state from "../kmq";
 import _logger from "../logger";
 import GameSession from "../structures/game_session";
 import GuildPreference from "../structures/guild_preference";
-import { QueriedSong } from "../types";
+import { MatchedArtist, QueriedSong } from "../types";
 import { getForcePlaySong, isDebugMode, isForcedSongActive } from "./debug_utils";
 import { sendEndGameMessage } from "./discord_utils";
 import { Gender } from "../commands/game_options/gender";
@@ -17,7 +17,7 @@ const logger = _logger("game_utils");
 
 interface GroupMatchResults {
     unmatchedGroups?: Array<string>;
-    matchedGroups?: { id: number, name: string }[];
+    matchedGroups?: Array<MatchedArtist>;
 }
 
 /**
