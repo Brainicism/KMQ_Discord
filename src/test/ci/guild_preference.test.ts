@@ -1,14 +1,8 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import assert from "assert";
-import { ArtistType } from "../../commands/game_options/artisttype";
-import { LanguageType } from "../../commands/game_options/language";
-import { ModeType } from "../../commands/game_options/mode";
-import { SeekType } from "../../commands/game_options/seek";
-import { ShuffleType } from "../../commands/game_options/shuffle";
-import { SubunitsPreference } from "../../commands/game_options/subunits";
 import GuildPreference from "../../structures/guild_preference";
 
-describe.only("fromGuild", () => {
+describe("fromGuild", () => {
     describe("no guild preference provided", () => {
         it("should return a guild preference with default options", () => {
             const guildPreference = GuildPreference.fromGuild("123");
