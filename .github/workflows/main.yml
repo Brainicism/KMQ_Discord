@@ -40,7 +40,7 @@ jobs:
         uses: actions/setup-node@v2.1.2
         with:
           node-version: 14.2.0
-      - run: npm install
+      - run: yarn install
       - name: npm run lint
         run: npm run lint
       - name: run tests
