@@ -5,7 +5,7 @@ import dbContext from "../database_context";
 import { md5Hash } from "../helpers/utils";
 import GuildPreference from "../structures/guild_preference";
 import { Gender } from "../commands/game_options/gender";
-import { getFilteredSongList } from "../helpers/game_utils";
+import { getFilteredSongList, getMatchingGroupNames } from "../helpers/game_utils";
 import { EnvType } from "../types";
 import _logger from "../logger";
 import { ArtistType } from "../commands/game_options/artisttype";
@@ -18,34 +18,24 @@ async function setup() {
     await dbContext.kmq.raw("DROP TABLE IF EXISTS kpop_groups");
     await dbContext.kmq.raw("DROP TABLE IF EXISTS guild_preferences");
     await dbContext.kmq.raw("CREATE TABLE available_songs LIKE kmq.available_songs");
-    await dbContext.kmq.raw("CREATE TABLE kpop_groups LIKE kmq.guild_preferences");
+    await dbContext.kmq.raw("CREATE TABLE kpop_groups LIKE kmq.kpop_groups");
     await dbContext.kmq.raw("CREATE TABLE IF NOT EXISTS guild_preferences LIKE kmq.guild_preferences");
     await dbContext.kmq("guild_preferences").insert({ guild_id: "test", guild_preference: JSON.stringify({}) });
 }
-interface MockSong {
-    song_name: string,
-    link: string,
-    artist_name: string,
-    members: string,
-    views: number,
-    id_artist: number,
-    issolo: string,
-    publishedon: Date
-    id_parent_artist: number,
-}
 
 const mockArtists = [
-    { id: 1, name: "A", gender: "male", solo: "n" },
-    { id: 2, name: "B", gender: "male", solo: "n" },
-    { id: 3, name: "C", gender: "male", solo: "n" },
-    { id: 4, name: "D", gender: "male", solo: "y" },
-    { id: 5, name: "E", gender: "female", solo: "n" },
-    { id: 6, name: "F", gender: "female", solo: "n" },
-    { id: 7, name: "G", gender: "female", solo: "n" },
-    { id: 8, name: "H", gender: "female", solo: "y" },
-    { id: 9, name: "I", gender: "female", solo: "y", id_parent_artist: 8 },
-    { id: 10, name: "J", gender: "coed", solo: "n" },
-    { id: 11, name: "K", gender: "coed", solo: "n" },
+    { id: 1, name: "A", members: "male", issolo: "n" },
+    { id: 2, name: "B", members: "male", issolo: "n" },
+    { id: 3, name: "C", members: "male", issolo: "n" },
+    { id: 4, name: "D", members: "male", issolo: "y" },
+    { id: 5, name: "E", members: "female", issolo: "n" },
+    { id: 6, name: "F", members: "female", issolo: "n" },
+    { id: 7, name: "G", members: "female", issolo: "n" },
+    { id: 8, name: "H", members: "female", issolo: "y" },
+    { id: 9, name: "I", members: "female", issolo: "y", id_parentgroup: 8 },
+    { id: 10, name: "J", members: "coed", issolo: "n" },
+    { id: 11, name: "K", members: "coed", issolo: "n" },
+    { id: 12, name: "J + K", members: "coed", issolo: "n", id_artist1: 10, id_artist2: 11 },
 ];
 
 const mockSongs = [...Array(100).keys()].map((i) => {
@@ -54,12 +44,12 @@ const mockSongs = [...Array(100).keys()].map((i) => {
         song_name: crypto.randomBytes(8).toString("hex"),
         link: crypto.randomBytes(4).toString("hex"),
         artist_name: artist.name,
-        members: artist.gender,
+        members: artist.members,
         views: md5Hash(i, 16),
         id_artist: artist.id,
-        issolo: artist.solo,
+        issolo: artist.issolo,
         publishedon: new Date(`${["2008", "2009", "2016", "2017", "2018"][md5Hash(i, 8) % 5]}-06-01`),
-        id_parent_artist: artist.id_parent_artist || 0,
+        id_parent_artist: artist.id_parentgroup || 0,
     };
 });
 async function getMockGuildPreference(): Promise<GuildPreference> {
@@ -69,12 +59,15 @@ async function getMockGuildPreference(): Promise<GuildPreference> {
     return guildPreference;
 }
 
-async function insertMockSongs(): Promise<Array<MockSong>> {
+async function insertMockData(): Promise<void> {
     for (const mockSong of mockSongs) {
         await dbContext.kmq("available_songs").insert(mockSong);
     }
     logger.info("Done inserting mock songs");
-    return mockSongs;
+    for (const mockArtist of mockArtists) {
+        await dbContext.kmq("kpop_groups").insert(mockArtist);
+    }
+    logger.info("Done inserting mock artists");
 }
 
 describe("song query", () => {
@@ -86,8 +79,7 @@ describe("song query", () => {
         this.timeout(10000);
         logger.info("Setting up test database...");
         await setup();
-        logger.info("Inserting mock songs...");
-        await insertMockSongs();
+        await insertMockData();
     });
 
     let guildPreference: GuildPreference;
@@ -184,7 +176,7 @@ describe("song query", () => {
 
     describe("includes", () => {
         const expectedFemaleCount = mockSongs.filter((song) => song.members === Gender.FEMALE).length;
-        const includedArtists = mockArtists.filter((artist) => artist.gender === Gender.MALE).slice(0, 2);
+        const includedArtists = mockArtists.filter((artist) => artist.members === Gender.MALE).slice(0, 2);
         const expectedIncludeCount = mockSongs.filter((song) => includedArtists.map((artist) => artist.id).includes(song.id_artist)).length;
 
         describe("female gender, include 2 male groups", () => {
@@ -199,7 +191,7 @@ describe("song query", () => {
 
     describe("excludes", () => {
         const expectedFemaleCount = mockSongs.filter((song) => song.members === Gender.FEMALE).length;
-        const excludeArtists = mockArtists.filter((artist) => artist.gender === Gender.FEMALE).slice(0, 2);
+        const excludeArtists = mockArtists.filter((artist) => artist.members === Gender.FEMALE).slice(0, 2);
         const expectedExcludeCount = mockSongs.filter((song) => excludeArtists.map((artist) => artist.id).includes(song.id_artist)).length;
 
         describe("female gender, exclude 2 female groups", () => {
@@ -319,6 +311,37 @@ describe("song query", () => {
                 const expectedSongCount = mockSongs.filter((song) => song.members === Gender.COED).length;
                 const { songs } = await getFilteredSongList(guildPreference);
                 assert.strictEqual(songs.length, expectedSongCount);
+            });
+        });
+    });
+
+    describe.only("get matching groups names", () => {
+        describe("collabs", () => {
+            it("should return the group and any collabs they are apart of in matchedGroups", async () => {
+                const matchResults = await getMatchingGroupNames(["J"]);
+                assert.deepStrictEqual(matchResults.matchedGroups.map((x) => x.name), ["J", "J + K"]);
+                assert.strictEqual(matchResults.unmatchedGroups.length, 0);
+            });
+        });
+        describe("fully matching group names", () => {
+            it("should return the corresponding groups in matchedGroups", async () => {
+                const matchResults = await getMatchingGroupNames(["A", "B", "c"]);
+                assert.deepStrictEqual(matchResults.matchedGroups.map((x) => x.name), ["A", "B", "C"]);
+                assert.strictEqual(matchResults.unmatchedGroups.length, 0);
+            });
+        });
+        describe("some names in matchedGroups", () => {
+            it("should return corresponding groups in unmatchedGroups/matchedGroups", async () => {
+                const matchResults = await getMatchingGroupNames(["A", "B", "LinusTechTips", "Rihanna"]);
+                assert.deepStrictEqual(matchResults.matchedGroups.map((x) => x.name), ["A", "B"]);
+                assert.deepStrictEqual(matchResults.unmatchedGroups, ["LinusTechTips", "Rihanna"]);
+            });
+        });
+        describe("no matching group names", () => {
+            it("should return the groups in unmatchedGroups", async () => {
+                const matchResults = await getMatchingGroupNames(["LinusTechTips", "Rihanna"]);
+                assert.deepStrictEqual(matchResults.matchedGroups.length, 0);
+                assert.deepStrictEqual(matchResults.unmatchedGroups, ["LinusTechTips", "Rihanna"]);
             });
         });
     });
