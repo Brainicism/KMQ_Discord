@@ -315,7 +315,7 @@ describe("song query", () => {
         });
     });
 
-    describe.only("get matching groups names", () => {
+    describe("get matching groups names", () => {
         describe("collabs", () => {
             it("should return the group and any collabs they are apart of in matchedGroups", async () => {
                 const matchResults = await getMatchingGroupNames(["J"]);

@@ -9,29 +9,10 @@ import dbContext from "../database_context";
 import { ArtistType, DEFAULT_ARTIST_TYPE } from "../commands/game_options/artisttype";
 import { DEFAULT_LANGUAGE, LanguageType } from "../commands/game_options/language";
 import { DEFAULT_SUBUNIT_PREFERENCE, SubunitsPreference } from "../commands/game_options/subunits";
+import { MatchedArtist } from "../types";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = _logger("guild_preference");
-
-const DEFAULT_OPTIONS = {
-    beginningYear: DEFAULT_BEGINNING_SEARCH_YEAR,
-    endYear: DEFAULT_ENDING_SEARCH_YEAR,
-    gender: DEFAULT_GENDER,
-    limitEnd: DEFAULT_LIMIT,
-    limitStart: 0,
-    seekType: DEFAULT_SEEK,
-    modeType: DEFAULT_MODE,
-    shuffleType: DEFAULT_SHUFFLE,
-    groups: null,
-    excludes: null,
-    includes: null,
-    goal: null,
-    guessTimeout: null,
-    duration: null,
-    artistType: DEFAULT_ARTIST_TYPE,
-    languageType: DEFAULT_LANGUAGE,
-    subunitPreference: DEFAULT_SUBUNIT_PREFERENCE,
-};
 
 interface GameOptions {
     beginningYear: number;
@@ -43,9 +24,9 @@ interface GameOptions {
     modeType: ModeType;
     artistType: ArtistType;
     shuffleType: ShuffleType;
-    groups: { id: number, name: string }[];
-    excludes: { id: number, name: string }[];
-    includes: { id: number, name: string }[];
+    groups: MatchedArtist[];
+    excludes: MatchedArtist[];
+    includes: MatchedArtist[];
     goal: number;
     guessTimeout: number;
     duration: number;
@@ -58,7 +39,7 @@ interface GameOptions {
  * @param length - The number of characters to truncate to
  * @returns the truncated string
  */
-function getGroupNamesString(groups: { id: number, name: string }[], truncate = true, spaceDelimiter = true): string {
+function getGroupNamesString(groups: MatchedArtist[], truncate = true, spaceDelimiter = true): string {
     let displayedGroupNames = groups
         .map((x) => x.name)
         .filter((name) => !name.includes("+"))
@@ -70,35 +51,56 @@ function getGroupNamesString(groups: { id: number, name: string }[], truncate = 
 }
 
 export default class GuildPreference {
+    static DEFAULT_OPTIONS = {
+        beginningYear: DEFAULT_BEGINNING_SEARCH_YEAR,
+        endYear: DEFAULT_ENDING_SEARCH_YEAR,
+        gender: DEFAULT_GENDER,
+        limitEnd: DEFAULT_LIMIT,
+        limitStart: 0,
+        seekType: DEFAULT_SEEK,
+        modeType: DEFAULT_MODE,
+        shuffleType: DEFAULT_SHUFFLE,
+        groups: null,
+        excludes: null,
+        includes: null,
+        goal: null,
+        guessTimeout: null,
+        duration: null,
+        artistType: DEFAULT_ARTIST_TYPE,
+        languageType: DEFAULT_LANGUAGE,
+        subunitPreference: DEFAULT_SUBUNIT_PREFERENCE,
+    };
+
+    public gameOptions: GameOptions;
+
     /** The Discord Guild ID */
     private readonly guildID: string;
 
     /** The GuildPreference's respective GameOptions */
-    private gameOptions: GameOptions;
 
     constructor(guildID: string, options?: GameOptions) {
         this.guildID = guildID;
-        this.gameOptions = options || { ...DEFAULT_OPTIONS };
+        this.gameOptions = options || { ...GuildPreference.DEFAULT_OPTIONS };
     }
 
     static fromGuild(guildID: string, json?: GuildPreference): GuildPreference {
         if (!json) {
-            return new GuildPreference(guildID, { ...DEFAULT_OPTIONS });
+            return new GuildPreference(guildID, { ...GuildPreference.DEFAULT_OPTIONS });
         }
         // eslint-disable-next-line prefer-destructuring
-        const gameOptions = json.gameOptions;
+        const gameOptions = { ...json.gameOptions };
         // apply default game option for empty
         let gameOptionModified = false;
-        for (const defaultOption in DEFAULT_OPTIONS) {
+        for (const defaultOption in GuildPreference.DEFAULT_OPTIONS) {
             if (!(defaultOption in gameOptions)) {
-                gameOptions[defaultOption] = DEFAULT_OPTIONS[defaultOption];
+                gameOptions[defaultOption] = GuildPreference.DEFAULT_OPTIONS[defaultOption];
                 gameOptionModified = true;
             }
         }
 
         // extraneous keys
         for (const option in gameOptions) {
-            if (!(option in DEFAULT_OPTIONS)) {
+            if (!(option in GuildPreference.DEFAULT_OPTIONS)) {
                 delete gameOptions[option];
                 gameOptionModified = true;
             }
@@ -186,7 +188,7 @@ export default class GuildPreference {
      * Sets the groups option value
      * @param groupIDs - A list of kpop groups, ID and name
      */
-    async setGroups(groupIDs: { id: number, name: string }[]) {
+    async setGroups(groupIDs: MatchedArtist[]) {
         this.gameOptions.groups = groupIDs;
         await this.updateGuildPreferences();
     }
@@ -222,7 +224,7 @@ export default class GuildPreference {
      * Sets the exclude option value
      * @param groupIDs - A list of kpop groups, ID and name
      */
-    async setExcludes(groupIDs: { id: number, name: string }[]) {
+    async setExcludes(groupIDs: MatchedArtist[]) {
         this.gameOptions.excludes = groupIDs;
         await this.updateGuildPreferences();
     }
@@ -258,7 +260,7 @@ export default class GuildPreference {
      * Sets the include option value
      * @param groupIDs - A list of kpop groups, ID and name
      */
-    async setIncludes(groupIDs: { id: number, name: string }[]) {
+    async setIncludes(groupIDs: MatchedArtist[]) {
         this.gameOptions.includes = groupIDs;
         await this.updateGuildPreferences();
     }
@@ -524,7 +526,7 @@ export default class GuildPreference {
 
     /** Resets all options to the default value */
     async resetToDefault() {
-        this.gameOptions = { ...DEFAULT_OPTIONS };
+        this.gameOptions = { ...GuildPreference.DEFAULT_OPTIONS };
         await this.updateGuildPreferences();
     }
 }
