@@ -19,6 +19,7 @@ import { ArtistType } from "../commands/game_options/artisttype";
 import { SubunitsPreference } from "../commands/game_options/subunits";
 import { KmqImages } from "../constants";
 import MessageContext from "../structures/message_context";
+import { OstPreference } from "../commands/game_options/ost";
 
 const endGameMessages = parseJsonFile(path.resolve(__dirname, "../../data/end_game_messages.json"));
 
@@ -203,6 +204,7 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
     optionStrings[GameOption.TIMER] = `${guildPreference.getGuessTimeout()}`;
     optionStrings[GameOption.SHUFFLE_TYPE] = `${guildPreference.getShuffleType()}`;
     optionStrings[GameOption.SUBUNIT_PREFERENCE] = `${guildPreference.getSubunitPreference() === SubunitsPreference.INCLUDE ? "including" : "excluding"} subunits`;
+    optionStrings[GameOption.OST_PREFERENCE] = `${guildPreference.getOstPreference() === OstPreference.INCLUDE ? "Including" : "Excluding"}`;
 
     for (const gameOption of Object.keys(optionStrings)) {
         const gameOptionString = optionStrings[gameOption];
@@ -226,7 +228,8 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
                 ${guildPreference.isExcludesMode() && !guildPreference.isGroupsMode() ? `, excluding ${optionStrings[GameOption.EXCLUDE]}` : ""}${guildPreference.isIncludesMode() && !guildPreference.isGroupsMode() ? `, including ${optionStrings[GameOption.INCLUDE]}` : ""}. \nPlaying from the ${optionStrings[GameOption.SEEK_TYPE]} point of each song. ${shuffleUniqueMode ? shuffleMessage : ""}\
                 Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}\
                 \nPlaying \`${guildPreference.getLanguageType()}\` language songs.\
-                \n${guildPreference.isDurationSet() ? `The game will automatically end after \`${guildPreference.getDuration()}\` minutes from the time the game starts.` : ""}`,
+                ${guildPreference.isDurationSet() ? `\nThe game will automatically end after \`${guildPreference.getDuration()}\` minutes from the time the game starts.` : ""}\
+                \n${optionStrings[GameOption.OST_PREFERENCE]} OST music videos.`,
             footerText: footerText !== null ? footerText : null,
             thumbnailUrl: KmqImages.LISTENING,
         });

@@ -14,6 +14,7 @@ import { SubunitsPreference } from "../../commands/game_options/subunits";
 import { LanguageType } from "../../commands/game_options/language";
 import state from "../../kmq";
 import GameSession from "../../structures/game_session";
+import { OstPreference } from "../../commands/game_options/ost";
 
 const logger = _logger("test");
 
@@ -29,7 +30,8 @@ async function setup() {
         id_artist INT(10),
         issolo ENUM('y', 'n'),
         publishedon DATE,
-        id_parent_artist INT(10)
+        id_parent_artist INT(10),
+        vtype ENUM('main','ost')
     )`);
     await dbContext.kmq.raw(`CREATE TABLE kpop_groups(
         id INT(10),
@@ -71,6 +73,7 @@ const mockSongs = [...Array(100).keys()].map((i) => {
         issolo: artist.issolo,
         publishedon: new Date(`${["2008", "2009", "2016", "2017", "2018"][md5Hash(i, 8) % 5]}-06-01`),
         id_parent_artist: artist.id_parentgroup || 0,
+        vtype: (i < 10) ? "ost" : "main",
     };
 });
 async function getMockGuildPreference(): Promise<GuildPreference> {
@@ -78,6 +81,7 @@ async function getMockGuildPreference(): Promise<GuildPreference> {
     sinon.stub(guildPreference, "updateGuildPreferences");
     await guildPreference.setSubunitPreference(SubunitsPreference.EXCLUDE);
     await guildPreference.setLimit(0, 99999);
+    await guildPreference.setOstPreference(OstPreference.INCLUDE);
     return guildPreference;
 }
 
@@ -308,6 +312,26 @@ describe("song query", () => {
                 it("should match the expected song count", async () => {
                     const expectedSongCount = mockSongs.filter((song) => song.id_artist === artistWithSubunit.id || song.id_artist === subunitArtist.id).length;
                     await guildPreference.setSubunitPreference(SubunitsPreference.INCLUDE);
+                    const { songs } = await getFilteredSongList(guildPreference);
+                    assert.strictEqual(songs.length, expectedSongCount);
+                });
+            });
+        });
+
+        describe("OSTs", () => {
+            describe("exclude OSTs", () => {
+                it("should match the expected song count", async () => {
+                    const expectedSongCount = mockSongs.filter((song) => song.vtype === "main").length;
+                    await guildPreference.setOstPreference(OstPreference.EXCLUDE);
+                    const { songs } = await getFilteredSongList(guildPreference);
+                    assert.strictEqual(songs.length, expectedSongCount);
+                });
+            });
+
+            describe("include OSTs", () => {
+                it("should match the expected song count", async () => {
+                    const expectedSongCount = mockSongs.length;
+                    await guildPreference.setOstPreference(OstPreference.INCLUDE);
                     const { songs } = await getFilteredSongList(guildPreference);
                     assert.strictEqual(songs.length, expectedSongCount);
                 });

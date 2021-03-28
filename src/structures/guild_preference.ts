@@ -10,6 +10,7 @@ import { ArtistType, DEFAULT_ARTIST_TYPE } from "../commands/game_options/artist
 import { DEFAULT_LANGUAGE, LanguageType } from "../commands/game_options/language";
 import { DEFAULT_SUBUNIT_PREFERENCE, SubunitsPreference } from "../commands/game_options/subunits";
 import { MatchedArtist } from "../types";
+import { DEFAULT_OST_PREFERENCE, OstPreference } from "../commands/game_options/ost";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = _logger("guild_preference");
@@ -32,6 +33,7 @@ interface GameOptions {
     duration: number;
     languageType: LanguageType;
     subunitPreference: SubunitsPreference;
+    ostPreference: OstPreference;
 }
 
 /**
@@ -69,6 +71,7 @@ export default class GuildPreference {
         artistType: DEFAULT_ARTIST_TYPE,
         languageType: DEFAULT_LANGUAGE,
         subunitPreference: DEFAULT_SUBUNIT_PREFERENCE,
+        ostPreference: DEFAULT_OST_PREFERENCE,
     };
 
     public gameOptions: GameOptions;
@@ -352,6 +355,15 @@ export default class GuildPreference {
         await this.updateGuildPreferences();
     }
 
+    /**
+     * Sets the subunit preference option value
+     * @param subunitPreference - The SubunitsPreference
+     */
+    async setSubunitPreference(subunitPreference: SubunitsPreference) {
+        this.gameOptions.subunitPreference = subunitPreference as SubunitsPreference;
+        await this.updateGuildPreferences();
+    }
+
     /** @returns the current subunit preference option value */
     getSubunitPreference(): SubunitsPreference {
         return this.gameOptions.subunitPreference;
@@ -364,11 +376,22 @@ export default class GuildPreference {
     }
 
     /**
-     * Sets the subunit preference option value
-     * @param subunitPreference - The SubunitsPreference
+     * Sets the OST preference option value
+     * @param ostPreference - The OstPreference
      */
-    async setSubunitPreference(subunitPreference: SubunitsPreference) {
-        this.gameOptions.subunitPreference = subunitPreference as SubunitsPreference;
+    async setOstPreference(ostPreference: OstPreference) {
+        this.gameOptions.ostPreference = ostPreference as OstPreference;
+        await this.updateGuildPreferences();
+    }
+
+    /** @returns the current OST preference option value */
+    getOstPreference(): OstPreference {
+        return this.gameOptions.ostPreference;
+    }
+
+    /** Resets the OST preference option to the default value */
+    async resetOstPreference() {
+        this.gameOptions.ostPreference = DEFAULT_OST_PREFERENCE;
         await this.updateGuildPreferences();
     }
 
