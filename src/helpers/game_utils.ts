@@ -10,6 +10,7 @@ import { Gender } from "../commands/game_options/gender";
 import { ArtistType } from "../commands/game_options/artisttype";
 import { LanguageType } from "../commands/game_options/language";
 import { SubunitsPreference } from "../commands/game_options/subunits";
+import { OstPreference } from "../commands/game_options/ost";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -72,6 +73,12 @@ export async function getFilteredSongList(guildPreference: GuildPreference, igno
             .where("song_name", "NOT LIKE", "%(en)%")
             .where("song_name", "NOT LIKE", "%(jp)%");
     }
+
+    if (guildPreference.getOstPreference() === OstPreference.EXCLUDE) {
+        queryBuilder = queryBuilder
+            .where("vtype", "=", "main");
+    }
+
     queryBuilder = queryBuilder
         .andWhere("publishedon", ">=", `${guildPreference.getBeginningCutoffYear()}-01-01`)
         .andWhere("publishedon", "<=", `${guildPreference.getEndCutoffYear()}-12-31`)

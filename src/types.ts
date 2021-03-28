@@ -70,6 +70,7 @@ export enum GameOption {
     ARTIST_TYPE = "Artist Type",
     LANGUAGE_TYPE = "Language Type",
     SUBUNIT_PREFERENCE = "Subunit Preference",
+    OST_PREFERENCE = "OST Preference",
 }
 
 export enum EnvType {

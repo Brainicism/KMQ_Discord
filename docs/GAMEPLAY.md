@@ -129,3 +129,4 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,add`: Add a single or multiple groups to the `,groups`, `,excludes`, or `,includes` option
 - `,remove`: Remove a single or multiple groups to the `,groups`, `,excludes`, or `,includes` option
 - `,duration`: Sets the maximum length of a KMQ game
+- `,ost`: Includes or excludes OST music videos
