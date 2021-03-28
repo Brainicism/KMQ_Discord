@@ -77,6 +77,9 @@ export async function getFilteredSongList(guildPreference: GuildPreference, igno
     if (guildPreference.getOstPreference() === OstPreference.EXCLUDE) {
         queryBuilder = queryBuilder
             .where("vtype", "=", "main");
+    } else if (guildPreference.getOstPreference() === OstPreference.EXCLUSIVE) {
+        queryBuilder = queryBuilder
+            .where("vtype", "=", "ost");
     }
 
     queryBuilder = queryBuilder
