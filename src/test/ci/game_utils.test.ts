@@ -2,29 +2,46 @@ import crypto from "crypto";
 import assert from "assert";
 import { describe } from "mocha";
 import sinon from "sinon";
-import dbContext from "../database_context";
-import { md5Hash } from "../helpers/utils";
-import GuildPreference from "../structures/guild_preference";
-import { Gender } from "../commands/game_options/gender";
-import { cleanupInactiveGameSessions, getFilteredSongList, getMatchingGroupNames, getSongCount } from "../helpers/game_utils";
-import { EnvType } from "../types";
-import _logger from "../logger";
-import { ArtistType } from "../commands/game_options/artisttype";
-import { SubunitsPreference } from "../commands/game_options/subunits";
-import { LanguageType } from "../commands/game_options/language";
-import state from "../kmq";
-import GameSession from "../structures/game_session";
+import dbContext from "../../database_context";
+import { md5Hash } from "../../helpers/utils";
+import GuildPreference from "../../structures/guild_preference";
+import { Gender } from "../../commands/game_options/gender";
+import { cleanupInactiveGameSessions, getFilteredSongList, getMatchingGroupNames, getSongCount } from "../../helpers/game_utils";
+import { EnvType } from "../../types";
+import _logger from "../../logger";
+import { ArtistType } from "../../commands/game_options/artisttype";
+import { SubunitsPreference } from "../../commands/game_options/subunits";
+import { LanguageType } from "../../commands/game_options/language";
+import state from "../../kmq";
+import GameSession from "../../structures/game_session";
 
 const logger = _logger("test");
 
 async function setup() {
     await dbContext.kmq.raw("DROP TABLE IF EXISTS available_songs");
     await dbContext.kmq.raw("DROP TABLE IF EXISTS kpop_groups");
-    await dbContext.kmq.raw("DROP TABLE IF EXISTS guild_preferences");
-    await dbContext.kmq.raw("CREATE TABLE available_songs LIKE kmq.available_songs");
-    await dbContext.kmq.raw("CREATE TABLE kpop_groups LIKE kmq.kpop_groups");
-    await dbContext.kmq.raw("CREATE TABLE IF NOT EXISTS guild_preferences LIKE kmq.guild_preferences");
-    await dbContext.kmq("guild_preferences").insert({ guild_id: "test", guild_preference: JSON.stringify({}) });
+    await dbContext.kmq.raw(`CREATE TABLE available_songs (
+        song_name VARCHAR(255),
+        link VARCHAR(255),
+        artist_name VARCHAR(255),
+        members ENUM('male', 'female', 'coed'),
+        views BIGINT(19),
+        id_artist INT(10),
+        issolo ENUM('y', 'n'),
+        publishedon DATE,
+        id_parent_artist INT(10)
+    )`);
+    await dbContext.kmq.raw(`CREATE TABLE kpop_groups(
+        id INT(10),
+        name VARCHAR(255),
+        members ENUM('male', 'female', 'coed'),
+        issolo ENUM('y', 'n'),
+        id_parentgroup INT(10),
+        id_artist1 INT(10),
+        id_artist2 INT(10),
+        id_artist3 INT(10),
+        id_artist4 INT(10) 
+    )`);
 }
 
 const mockArtists = [
@@ -58,6 +75,7 @@ const mockSongs = [...Array(100).keys()].map((i) => {
 });
 async function getMockGuildPreference(): Promise<GuildPreference> {
     const guildPreference = new GuildPreference("test");
+    sinon.stub(guildPreference, "updateGuildPreferences");
     await guildPreference.setSubunitPreference(SubunitsPreference.EXCLUDE);
     await guildPreference.setLimit(0, 99999);
     return guildPreference;
