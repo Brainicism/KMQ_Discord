@@ -18,8 +18,7 @@
     "docker-prod": "cd docker/ && START_TYPE=prod docker-compose up --build kmq",
     "backup": "ts-node src/scripts/backup-kmq-database",
     "import": "ts-node src/scripts/backup-kmq-database --import",
-    "test": "NODE_ENV=test mocha -r ts-node/register 'src/test/**/*.ts'",
-    "test_ci": "NODE_ENV=test_ci mocha -r ts-node/register 'src/test/ci/**/*.ts'"
+    "test": "NODE_ENV=test mocha -r ts-node/register 'src/test/**/*.ts'"
   },
   "author": "",
   "license": "ISC",
@@ -50,6 +49,7 @@
   },
   "devDependencies": {
     "@types/mocha": "^8.2.1",
+    "@types/sinon": "^9.0.11",
     "@types/uuid": "^8.3.0",
     "@typescript-eslint/eslint-plugin": "^4.14.1",
     "@typescript-eslint/parser": "^4.14.1",

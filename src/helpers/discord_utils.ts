@@ -7,7 +7,7 @@ import _logger from "../logger";
 import { endSession, getSongCount } from "./game_utils";
 import { getFact } from "../fact_generator";
 import { EmbedPayload, GameOption, GuildTextableMessage } from "../types";
-import { chunkArray, codeLine, bold, parseJsonFile, chooseRandom, getOrdinalNum } from "./utils";
+import { chunkArray, codeLine, bold, parseJsonFile, chooseRandom, chooseWeightedRandom, getOrdinalNum } from "./utils";
 import state from "../kmq";
 import { ModeType } from "../commands/game_options/mode";
 import Scoreboard from "../structures/scoreboard";
@@ -19,6 +19,7 @@ import { ArtistType } from "../commands/game_options/artisttype";
 import { SubunitsPreference } from "../commands/game_options/subunits";
 import { KmqImages } from "../constants";
 import MessageContext from "../structures/message_context";
+import { OstPreference } from "../commands/game_options/ost";
 
 const endGameMessages = parseJsonFile(path.resolve(__dirname, "../../data/end_game_messages.json"));
 
@@ -203,6 +204,7 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
     optionStrings[GameOption.TIMER] = `${guildPreference.getGuessTimeout()}`;
     optionStrings[GameOption.SHUFFLE_TYPE] = `${guildPreference.getShuffleType()}`;
     optionStrings[GameOption.SUBUNIT_PREFERENCE] = `${guildPreference.getSubunitPreference() === SubunitsPreference.INCLUDE ? "including" : "excluding"} subunits`;
+    optionStrings[GameOption.OST_PREFERENCE] = `${guildPreference.getOstPreference() === OstPreference.INCLUDE ? "Including" : "Excluding"}`;
 
     for (const gameOption of Object.keys(optionStrings)) {
         const gameOptionString = optionStrings[gameOption];
@@ -226,7 +228,8 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
                 ${guildPreference.isExcludesMode() && !guildPreference.isGroupsMode() ? `, excluding ${optionStrings[GameOption.EXCLUDE]}` : ""}${guildPreference.isIncludesMode() && !guildPreference.isGroupsMode() ? `, including ${optionStrings[GameOption.INCLUDE]}` : ""}. \nPlaying from the ${optionStrings[GameOption.SEEK_TYPE]} point of each song. ${shuffleUniqueMode ? shuffleMessage : ""}\
                 Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}\
                 \nPlaying \`${guildPreference.getLanguageType()}\` language songs.\
-                \n${guildPreference.isDurationSet() ? `The game will automatically end after \`${guildPreference.getDuration()}\` minutes from the time the game starts.` : ""}`,
+                ${guildPreference.isDurationSet() ? `\nThe game will automatically end after \`${guildPreference.getDuration()}\` minutes from the time the game starts.` : ""}\
+                \n${optionStrings[GameOption.OST_PREFERENCE]} OST music videos.`,
             footerText: footerText !== null ? footerText : null,
             thumbnailUrl: KmqImages.LISTENING,
         });
@@ -254,7 +257,7 @@ export async function sendEndGameMessage(textChannelID: string, gameSession: Gam
     } else {
         const winners = gameSession.scoreboard.getWinners();
         const embedFields = gameSession.scoreboard.getScoreboardEmbedFields().slice(0, 10);
-        const endGameMessage = Math.random() < 0.75 ? chooseRandom(endGameMessages.kmq) : chooseRandom(endGameMessages.game);
+        const endGameMessage = Math.random() < 0.25 ? chooseRandom(endGameMessages.kmq) : chooseWeightedRandom(endGameMessages.game);
         embedFields.push(
             {
                 name: endGameMessage.title,

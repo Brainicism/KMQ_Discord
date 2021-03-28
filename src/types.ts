@@ -6,6 +6,10 @@ import { Gender } from "./commands/game_options/gender";
 
 export type GuildTextableMessage = Eris.Message<GuildTextableChannel>;
 
+export interface MatchedArtist {
+    id: number;
+    name: string;
+}
 export interface ParsedMessage {
     action: string;
     argument: string;
@@ -66,6 +70,7 @@ export enum GameOption {
     ARTIST_TYPE = "Artist Type",
     LANGUAGE_TYPE = "Language Type",
     SUBUNIT_PREFERENCE = "Subunit Preference",
+    OST_PREFERENCE = "OST Preference",
 }
 
 export enum EnvType {
@@ -73,5 +78,4 @@ export enum EnvType {
     DEV = "development",
     DRY_RUN = "dry-run",
     TEST = "test",
-    TEST_CI = "test_ci",
 }
