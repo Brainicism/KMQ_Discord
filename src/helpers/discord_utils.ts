@@ -204,7 +204,12 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
     optionStrings[GameOption.TIMER] = `${guildPreference.getGuessTimeout()}`;
     optionStrings[GameOption.SHUFFLE_TYPE] = `${guildPreference.getShuffleType()}`;
     optionStrings[GameOption.SUBUNIT_PREFERENCE] = `${guildPreference.getSubunitPreference() === SubunitsPreference.INCLUDE ? "including" : "excluding"} subunits`;
-    optionStrings[GameOption.OST_PREFERENCE] = `${guildPreference.getOstPreference() === OstPreference.INCLUDE ? "Including" : "Excluding"}`;
+    const ostPreferenceDisplayStrings = {
+        [OstPreference.INCLUDE]: "Including",
+        [OstPreference.EXCLUDE]: "Excluding",
+        [OstPreference.EXCLUSIVE]: "Exclusively including",
+    };
+    optionStrings[GameOption.OST_PREFERENCE] = `${ostPreferenceDisplayStrings[guildPreference.getOstPreference()]}`;
 
     for (const gameOption of Object.keys(optionStrings)) {
         const gameOptionString = optionStrings[gameOption];

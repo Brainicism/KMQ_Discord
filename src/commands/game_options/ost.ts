@@ -8,6 +8,7 @@ const logger = _logger("ost");
 export enum OstPreference {
     INCLUDE = "include",
     EXCLUDE = "exclude",
+    EXCLUSIVE = "exclusive",
 }
 
 export const DEFAULT_OST_PREFERENCE = OstPreference.EXCLUDE;
@@ -39,6 +40,10 @@ export default class OstCommand implements BaseCommand {
             {
                 example: "`!ost exclude`",
                 explanation: "Exclude OST songs.",
+            },
+            {
+                example: "`!ost exclusive`",
+                explanation: "Exclusively play OST songs",
             },
             {
                 example: "`!ost`",

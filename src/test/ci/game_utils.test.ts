@@ -336,6 +336,15 @@ describe("song query", () => {
                     assert.strictEqual(songs.length, expectedSongCount);
                 });
             });
+
+            describe("exclusive OSTs", () => {
+                it("should match the expected song count", async () => {
+                    const expectedSongCount = mockSongs.filter((song) => song.vtype === "ost").length;
+                    await guildPreference.setOstPreference(OstPreference.EXCLUSIVE);
+                    const { songs } = await getFilteredSongList(guildPreference);
+                    assert.strictEqual(songs.length, expectedSongCount);
+                });
+            });
         });
 
         describe("limit", () => {
