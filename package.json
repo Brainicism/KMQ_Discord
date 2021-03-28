@@ -18,7 +18,8 @@
     "docker-prod": "cd docker/ && START_TYPE=prod docker-compose up --build kmq",
     "backup": "ts-node src/scripts/backup-kmq-database",
     "import": "ts-node src/scripts/backup-kmq-database --import",
-    "test": "NODE_ENV=test mocha -r ts-node/register 'src/test/**/*.ts'"
+    "test": "NODE_ENV=test mocha -r ts-node/register 'src/test/**/*.ts'",
+    "test_ci": "NODE_ENV=test mocha -- --forbid-only -r ts-node/register 'src/test/**/*.ts'"
   },
   "author": "",
   "license": "ISC",
