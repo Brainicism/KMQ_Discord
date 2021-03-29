@@ -507,6 +507,7 @@ export default class GameSession {
         const stream = fs.createReadStream(songLocation);
 
         logger.info(`${getDebugLogHeader(messageContext)} | Playing song in voice connection. seek = ${guildPreference.getSeekType()}. song = ${this.getDebugSongDetails()}. mode = ${guildPreference.getModeType()}`);
+        this.connection.removeAllListeners();
         this.connection.stopPlaying();
         try {
             this.connection.play(stream, {
