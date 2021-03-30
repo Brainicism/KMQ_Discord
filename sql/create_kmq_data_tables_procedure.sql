@@ -15,7 +15,8 @@ BEGIN
 		id_artist INT(11) NOT NULL,
 		issolo ENUM('y', 'n') NOT NULL,
 		id_parent_artist INT(11) NOT NULL,
-		vtype ENUM('main','ost') NOT NULL
+		vtype ENUM('main') NOT NULL,
+		tags VARCHAR(25)
 	);
 
 	CREATE TABLE IF NOT EXISTS available_songs LIKE available_songs_temp;
@@ -23,13 +24,12 @@ BEGIN
 	INSERT INTO available_songs_temp 
 	
 	SELECT TRIM(nome) AS song_name, vlink AS link, TRIM(kpop_videos.app_kpop_group.name) AS artist_name, kpop_videos.app_kpop_group.members as members, kpop_videos.app_kpop.views AS views, publishedon, kpop_videos.app_kpop_group.id as id_artist, issolo,
-	id_parentgroup, vtype
+	id_parentgroup, vtype, tags
 	FROM kpop_videos.app_kpop 
 	JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
 	WHERE vlink NOT IN (SELECT vlink FROM kmq.not_downloaded)
 	AND dead = 'n'
 	AND vtype = 'main'
-	OR vtype = 'ost'
 	ORDER BY kpop_videos.app_kpop.views DESC;
 
 	RENAME TABLE available_songs TO old, available_songs_temp TO available_songs;
