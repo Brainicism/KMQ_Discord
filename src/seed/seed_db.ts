@@ -107,7 +107,13 @@ export async function updateGroupList() {
 
 async function seedAndDownloadNewSongs() {
     await fs.promises.mkdir(`${databaseDownloadDir}/sql`, { recursive: true });
-    await updateKpopDatabase();
+    try {
+        await updateKpopDatabase();
+    } catch (e) {
+        logger.error(`Failed to update kpop_videos database. ${e}`);
+        return;
+    }
+
     await updateGroupList();
     await removeRedunantAliases();
     if (!options.skipDownload) {
