@@ -2,6 +2,7 @@
 /* eslint-disable import/no-dynamic-require */
 import cronParser from "cron-parser";
 import path from "path";
+import fs from "fs";
 import _glob from "glob";
 import { promisify } from "util";
 import schedule from "node-schedule";
@@ -182,6 +183,10 @@ export function registerIntervals() {
     // everyday at 7am UTC => 2am EST
     schedule.scheduleJob("0 7 * * *", async () => {
         logger.info("Performing regularly scheduled AoiMirai database seed");
+        const overrideFileExists = fs.existsSync(path.join(__dirname, "../../data/skip_seed"));
+        if (overrideFileExists) {
+            return;
+        }
         await seedAndDownloadNewSongs();
     });
 

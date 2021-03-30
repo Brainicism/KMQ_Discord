@@ -10,3 +10,4 @@ news.md
 tmp/
 tsconfig.tsbuildinfo
 version
+data/skip_seed
