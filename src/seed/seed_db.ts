@@ -19,7 +19,7 @@ const overridesFilePath = path.join(__dirname, "../../sql/kpop_videos_overrides.
 
 program
     .option("-p, --skip-pull", "Skip re-pull of AoiMirai database dump", false)
-    .option("-r, --force-reseed", "Force drop/create of kpop_videos database", false)
+    .option("-r, --skip-reseed", "Force skip drop/create of kpop_videos database", false)
     .option("-d, --skip-download", "Skip download/encode of videos in database", false)
     .option("--limit <limit>", "Limit the number of songs to download", (x) => parseInt(x, 10));
 
@@ -84,13 +84,14 @@ async function updateKpopDatabase() {
     if (!options.skipPull) {
         await downloadDb();
         await extractDb();
+    } else {
+        logger.info("Skipping download...");
+    }
+
+    if (!options.skipReseed) {
         await seedDb(db);
     } else {
-        logger.info("Recent dump detected, skipping download...");
-        if (options.forceReseed) {
-            logger.info("Forcing reseed");
-            await seedDb(db);
-        }
+        logger.info("Skipping reseed");
     }
 
     await db.destroy();
