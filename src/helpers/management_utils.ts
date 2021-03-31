@@ -107,16 +107,6 @@ export function updateBotStatus() {
     });
 }
 
-/** Sweeps the member/user caches within Eris */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function sweepCaches() {
-    logger.info("Sweeping cache..");
-    const sweepResults = state.client.sweepCaches(15);
-    if (sweepResults.users || sweepResults.members) {
-        logger.info(`Swept ${sweepResults.users} users and ${sweepResults.members} members from cache`);
-    }
-}
-
 /** Applies publish date overrides to available_songs table */
 export async function updatePublishDateOverrides() {
     try {
@@ -149,7 +139,6 @@ export function registerIntervals() {
     schedule.scheduleJob("*/10 * * * *", () => {
         cleanupInactiveGameSessions();
         updateBotStatus();
-        // sweepCaches();
     });
 
     // set up check for restart notifications

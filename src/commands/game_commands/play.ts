@@ -78,7 +78,7 @@ export default class PlayCommand implements BaseCommand {
         ],
     };
 
-    async call({ message, gameSessions, parsedMessage }: CommandArgs) {
+    async call({ message, gameSessions, parsedMessage, channel }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
         const voiceChannel = getVoiceChannelFromMessage(message);
         if (!voiceChannel) {
@@ -101,7 +101,7 @@ export default class PlayCommand implements BaseCommand {
             if (!gameSessions[message.guildID] || (!isEliminationMode && !gameSessions[message.guildID].sessionInitialized)) {
                 // (1) No game session exists yet (create CLASSIC, ELIMINATION, or TEAMS game), or
                 // (2) User attempting to ,play after a ,play elimination/teams that didn't start, start CLASSIC game
-                const textChannel = message.channel;
+                const textChannel = channel;
                 let startTitle: string;
                 let gameInstructions: string;
                 let gameSession: GameSession;

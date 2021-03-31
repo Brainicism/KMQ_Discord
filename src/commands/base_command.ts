@@ -1,10 +1,12 @@
+import Eris from "eris";
 import GameSession from "../structures/game_session";
 import { GuildTextableMessage, ParsedMessage } from "../types";
 
 export interface CommandArgs {
-    gameSessions?: { [guildID: string]: GameSession }
-    message?: GuildTextableMessage;
-    parsedMessage?: ParsedMessage;
+    gameSessions: { [guildID: string]: GameSession }
+    message: GuildTextableMessage;
+    channel: Eris.TextChannel;
+    parsedMessage: ParsedMessage;
 }
 
 export interface CommandValidations {

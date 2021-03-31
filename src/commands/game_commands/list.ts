@@ -46,7 +46,7 @@ export default class ListCommand implements BaseCommand {
         priority: 200,
     };
 
-    async call({ message, parsedMessage }: CommandArgs) {
+    async call({ message, parsedMessage, channel }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
         const optionListed = parsedMessage.components[0] as ListType;
         let optionValue: string;
@@ -67,7 +67,7 @@ export default class ListCommand implements BaseCommand {
 
         if (optionValue.length > 2000) {
             try {
-                await message.channel.createMessage({
+                await channel.createMessage({
                     content: "Too many groups to list in a Discord message, see the attached file",
                 }, {
                     name: "groups.txt",
