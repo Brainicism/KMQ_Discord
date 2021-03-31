@@ -11,10 +11,11 @@ import { EnvType } from "../../types";
 import _logger from "../../logger";
 import { ArtistType } from "../../commands/game_options/artisttype";
 import { SubunitsPreference } from "../../commands/game_options/subunits";
-import { LanguageType } from "../../commands/game_options/language";
+import { FOREIGN_LANGUAGE_TAGS, LanguageType } from "../../commands/game_options/language";
 import state from "../../kmq";
 import GameSession from "../../structures/game_session";
 import { OstPreference } from "../../commands/game_options/ost";
+import { NON_OFFICIAL_VIDEO_TAGS, ReleaseType } from "../../commands/game_options/release";
 
 const logger = _logger("test");
 
@@ -62,7 +63,7 @@ const mockArtists = [
     { id: 12, name: "J + K", members: "coed", issolo: "n", id_artist1: 10, id_artist2: 11 },
 ];
 
-const mockSongs = [...Array(100).keys()].map((i) => {
+const mockSongs = [...Array(1000).keys()].map((i) => {
     const artist = mockArtists[md5Hash(i, 8) % mockArtists.length];
     return {
         song_name: `${crypto.randomBytes(8).toString("hex")}`,
@@ -75,7 +76,7 @@ const mockSongs = [...Array(100).keys()].map((i) => {
         publishedon: new Date(`${["2008", "2009", "2016", "2017", "2018"][md5Hash(i, 8) % 5]}-06-01`),
         id_parent_artist: artist.id_parentgroup || 0,
         vtype: "main",
-        tags: ["", "", "o", "c", "e"][md5Hash(i, 8) % 5],
+        tags: ["", "", "o", "c", "e", "drv", "ax", "ps"][md5Hash(i, 8) % 8],
     };
 });
 async function getMockGuildPreference(): Promise<GuildPreference> {
@@ -84,17 +85,16 @@ async function getMockGuildPreference(): Promise<GuildPreference> {
     await guildPreference.setSubunitPreference(SubunitsPreference.EXCLUDE);
     await guildPreference.setLimit(0, 99999);
     await guildPreference.setOstPreference(OstPreference.INCLUDE);
+    await guildPreference.setReleaseType(ReleaseType.ALL);
     return guildPreference;
 }
 
 async function insertMockData(): Promise<void> {
-    for (const mockSong of mockSongs) {
-        await dbContext.kmq("available_songs").insert(mockSong);
-    }
+    await dbContext.kmq("available_songs").insert(mockSongs);
+
     logger.info("Done inserting mock songs");
-    for (const mockArtist of mockArtists) {
-        await dbContext.kmq("kpop_groups").insert(mockArtist);
-    }
+    await dbContext.kmq("kpop_groups").insert(mockArtists);
+
     logger.info("Done inserting mock artists");
 }
 
@@ -376,7 +376,7 @@ describe("song query", () => {
         describe("language", () => {
             describe("language is set to korean only", () => {
                 it("should match the expected song count", async () => {
-                    const expectedSongCount = mockSongs.filter((song) => !song.tags.includes("e")).length;
+                    const expectedSongCount = mockSongs.filter((song) => !FOREIGN_LANGUAGE_TAGS.some((tag) => song.tags.includes(tag))).length;
                     await guildPreference.setLanguageType(LanguageType.KOREAN);
                     const { songs } = await getFilteredSongList(guildPreference);
                     assert.strictEqual(songs.length, expectedSongCount);
@@ -385,6 +385,24 @@ describe("song query", () => {
             describe("language is set to all", () => {
                 it("should match the expected song count", async () => {
                     await guildPreference.setLanguageType(LanguageType.ALL);
+                    const { songs } = await getFilteredSongList(guildPreference);
+                    assert.strictEqual(songs.length, mockSongs.length);
+                });
+            });
+        });
+
+        describe("release type", () => {
+            describe("release type is set to official only", () => {
+                it("should match the expected song count", async () => {
+                    const expectedSongCount = mockSongs.filter((song) => !NON_OFFICIAL_VIDEO_TAGS.some((tag) => song.tags.includes(tag))).length;
+                    await guildPreference.setReleaseType(ReleaseType.OFFICIAL);
+                    const { songs } = await getFilteredSongList(guildPreference);
+                    assert.strictEqual(songs.length, expectedSongCount);
+                });
+            });
+            describe("release type is set to all", () => {
+                it("should match the expected song count", async () => {
+                    await guildPreference.setReleaseType(ReleaseType.ALL);
                     const { songs } = await getFilteredSongList(guildPreference);
                     assert.strictEqual(songs.length, mockSongs.length);
                 });

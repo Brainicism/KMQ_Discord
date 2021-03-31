@@ -60,6 +60,7 @@ export enum GameOption {
     VOLUME = "Volume",
     SEEK_TYPE = "Seek Type",
     MODE_TYPE = "Guess Mode",
+    RELEASE_TYPE = "Release Type",
     SHUFFLE_TYPE = "Shuffle",
     GROUPS = "Groups",
     GOAL = "Goal",
