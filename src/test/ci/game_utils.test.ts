@@ -31,7 +31,8 @@ async function setup() {
         issolo ENUM('y', 'n'),
         publishedon DATE,
         id_parent_artist INT(10),
-        vtype ENUM('main','ost')
+        vtype ENUM('main'),
+        tags VARCHAR(255)
     )`);
     await dbContext.kmq.raw(`CREATE TABLE kpop_groups(
         id INT(10),
@@ -64,7 +65,7 @@ const mockArtists = [
 const mockSongs = [...Array(100).keys()].map((i) => {
     const artist = mockArtists[md5Hash(i, 8) % mockArtists.length];
     return {
-        song_name: `${crypto.randomBytes(8).toString("hex")}${i % 5 === 0 ? " (en)" : ""}`,
+        song_name: `${crypto.randomBytes(8).toString("hex")}`,
         link: crypto.randomBytes(4).toString("hex"),
         artist_name: artist.name,
         members: artist.members,
@@ -73,7 +74,8 @@ const mockSongs = [...Array(100).keys()].map((i) => {
         issolo: artist.issolo,
         publishedon: new Date(`${["2008", "2009", "2016", "2017", "2018"][md5Hash(i, 8) % 5]}-06-01`),
         id_parent_artist: artist.id_parentgroup || 0,
-        vtype: (i < 10) ? "ost" : "main",
+        vtype: "main",
+        tags: ["", "", "o", "c", "e"][md5Hash(i, 8) % 5],
     };
 });
 async function getMockGuildPreference(): Promise<GuildPreference> {
@@ -321,7 +323,7 @@ describe("song query", () => {
         describe("OSTs", () => {
             describe("exclude OSTs", () => {
                 it("should match the expected song count", async () => {
-                    const expectedSongCount = mockSongs.filter((song) => song.vtype === "main").length;
+                    const expectedSongCount = mockSongs.filter((song) => !song.tags.includes("o")).length;
                     await guildPreference.setOstPreference(OstPreference.EXCLUDE);
                     const { songs } = await getFilteredSongList(guildPreference);
                     assert.strictEqual(songs.length, expectedSongCount);
@@ -339,7 +341,7 @@ describe("song query", () => {
 
             describe("exclusive OSTs", () => {
                 it("should match the expected song count", async () => {
-                    const expectedSongCount = mockSongs.filter((song) => song.vtype === "ost").length;
+                    const expectedSongCount = mockSongs.filter((song) => song.tags.includes("o")).length;
                     await guildPreference.setOstPreference(OstPreference.EXCLUSIVE);
                     const { songs } = await getFilteredSongList(guildPreference);
                     assert.strictEqual(songs.length, expectedSongCount);
@@ -374,7 +376,7 @@ describe("song query", () => {
         describe("language", () => {
             describe("language is set to korean only", () => {
                 it("should match the expected song count", async () => {
-                    const expectedSongCount = mockSongs.filter((song) => !song.song_name.includes("(en)")).length;
+                    const expectedSongCount = mockSongs.filter((song) => !song.tags.includes("e")).length;
                     await guildPreference.setLanguageType(LanguageType.KOREAN);
                     const { songs } = await getFilteredSongList(guildPreference);
                     assert.strictEqual(songs.length, expectedSongCount);

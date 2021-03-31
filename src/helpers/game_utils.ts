@@ -69,17 +69,17 @@ export async function getFilteredSongList(guildPreference: GuildPreference, igno
 
     if (guildPreference.getLanguageType() === LanguageType.KOREAN) {
         queryBuilder = queryBuilder
-            .where("song_name", "NOT LIKE", "%(cn)%")
-            .where("song_name", "NOT LIKE", "%(en)%")
-            .where("song_name", "NOT LIKE", "%(jp)%");
+            .where("tags", "NOT LIKE", "%z%")
+            .where("tags", "NOT LIKE", "%j%")
+            .where("tags", "NOT LIKE", "%e%");
     }
 
     if (guildPreference.getOstPreference() === OstPreference.EXCLUDE) {
         queryBuilder = queryBuilder
-            .where("vtype", "=", "main");
+            .where("tags", "NOT LIKE", "%o%");
     } else if (guildPreference.getOstPreference() === OstPreference.EXCLUSIVE) {
         queryBuilder = queryBuilder
-            .where("vtype", "=", "ost");
+            .where("tags", "LIKE", "%o%");
     }
 
     queryBuilder = queryBuilder
