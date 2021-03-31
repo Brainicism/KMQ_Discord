@@ -12,6 +12,8 @@ export enum LanguageType {
 
 export const DEFAULT_LANGUAGE = LanguageType.ALL;
 
+// z = chinese, j = japanese, e = english, s = spanish
+export const FOREIGN_LANGUAGE_TAGS = ["z", "j", "e", "s"];
 export default class LanguageCommand implements BaseCommand {
     validations = {
         minArgCount: 0,

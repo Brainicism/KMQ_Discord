@@ -11,6 +11,7 @@ import { DEFAULT_LANGUAGE, LanguageType } from "../commands/game_options/languag
 import { DEFAULT_SUBUNIT_PREFERENCE, SubunitsPreference } from "../commands/game_options/subunits";
 import { MatchedArtist } from "../types";
 import { DEFAULT_OST_PREFERENCE, OstPreference } from "../commands/game_options/ost";
+import { DEFAULT_VIDEO_TYPE, VideoType } from "../commands/game_options/videotype";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = _logger("guild_preference");
@@ -23,6 +24,7 @@ interface GameOptions {
     limitEnd: number;
     seekType: SeekType;
     modeType: ModeType;
+    videoType: VideoType;
     artistType: ArtistType;
     shuffleType: ShuffleType;
     groups: MatchedArtist[];
@@ -61,6 +63,7 @@ export default class GuildPreference {
         limitStart: 0,
         seekType: DEFAULT_SEEK,
         modeType: DEFAULT_MODE,
+        videoType: DEFAULT_VIDEO_TYPE,
         shuffleType: DEFAULT_SHUFFLE,
         groups: null,
         excludes: null,
@@ -411,6 +414,26 @@ export default class GuildPreference {
 
     /** Resets the mode type option to the default value */
     async resetModeType() {
+        this.gameOptions.modeType = DEFAULT_MODE;
+        await this.updateGuildPreferences();
+    }
+
+    /**
+     * Sets the video type option value
+     * @param videoType - The VideoType
+     */
+    async setVideoType(videoType: VideoType) {
+        this.gameOptions.videoType = videoType as VideoType;
+        await this.updateGuildPreferences();
+    }
+
+    /** @returns the current video type option value */
+    getVideoType(): VideoType {
+        return this.gameOptions.videoType;
+    }
+
+    /** Resets the video type option to the default value */
+    async resetVideoType() {
         this.gameOptions.modeType = DEFAULT_MODE;
         await this.updateGuildPreferences();
     }

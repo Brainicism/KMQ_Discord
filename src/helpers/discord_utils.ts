@@ -20,6 +20,7 @@ import { SubunitsPreference } from "../commands/game_options/subunits";
 import { KmqImages } from "../constants";
 import MessageContext from "../structures/message_context";
 import { OstPreference } from "../commands/game_options/ost";
+import { VideoType } from "../commands/game_options/videotype";
 
 const endGameMessages = parseJsonFile(path.resolve(__dirname, "../../data/end_game_messages.json"));
 
@@ -210,6 +211,7 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
         [OstPreference.EXCLUSIVE]: "Exclusively including",
     };
     optionStrings[GameOption.OST_PREFERENCE] = `${ostPreferenceDisplayStrings[guildPreference.getOstPreference()]}`;
+    optionStrings[GameOption.VIDEO_TYPE] = `${guildPreference.getVideoType() === VideoType.OFFICIAL ? "only songs with official music videos" : "all songs including covers, dance practices, acoustic versions, remixes, etc"}`;
 
     for (const gameOption of Object.keys(optionStrings)) {
         const gameOptionString = optionStrings[gameOption];
@@ -234,7 +236,8 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
                 Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}\
                 \nPlaying \`${guildPreference.getLanguageType()}\` language songs.\
                 ${guildPreference.isDurationSet() ? `\nThe game will automatically end after \`${guildPreference.getDuration()}\` minutes from the time the game starts.` : ""}\
-                \n${optionStrings[GameOption.OST_PREFERENCE]} OST music videos.`,
+                \n${optionStrings[GameOption.OST_PREFERENCE]} OST songs.\
+                \nPlaying ${optionStrings[GameOption.VIDEO_TYPE]}.`,
             footerText: footerText !== null ? footerText : null,
             thumbnailUrl: KmqImages.LISTENING,
         });

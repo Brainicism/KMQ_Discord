@@ -8,9 +8,10 @@ import { getForcePlaySong, isDebugMode, isForcedSongActive } from "./debug_utils
 import { sendEndGameMessage } from "./discord_utils";
 import { Gender } from "../commands/game_options/gender";
 import { ArtistType } from "../commands/game_options/artisttype";
-import { LanguageType } from "../commands/game_options/language";
+import { FOREIGN_LANGUAGE_TAGS, LanguageType } from "../commands/game_options/language";
 import { SubunitsPreference } from "../commands/game_options/subunits";
 import { OstPreference } from "../commands/game_options/ost";
+import { NON_OFFICIAL_VIDEO_TAGS, VideoType } from "../commands/game_options/videotype";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -28,7 +29,8 @@ interface GroupMatchResults {
  * @returns a list of songs, as well as the number of songs before the filter option was applied
  */
 export async function getFilteredSongList(guildPreference: GuildPreference, ignoredSongs?: Set<string>, genderOverride?: Gender): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
-    const fields = ["song_name as name", "artist_name as artist", "link as youtubeLink", "publishedon as publishDate", "members", "id_artist as artistID", "issolo as isSolo", "members"];
+    const fields = ["song_name as name", "artist_name as artist", "link as youtubeLink",
+        "publishedon as publishDate", "members", "id_artist as artistID", "issolo as isSolo", "members", "tags"];
     let queryBuilder = dbContext.kmq("available_songs")
         .select(fields)
         .where(function artistFilter() {
@@ -68,10 +70,10 @@ export async function getFilteredSongList(guildPreference: GuildPreference, igno
         });
 
     if (guildPreference.getLanguageType() === LanguageType.KOREAN) {
-        queryBuilder = queryBuilder
-            .where("tags", "NOT LIKE", "%z%")
-            .where("tags", "NOT LIKE", "%j%")
-            .where("tags", "NOT LIKE", "%e%");
+        for (const tag of FOREIGN_LANGUAGE_TAGS) {
+            queryBuilder = queryBuilder
+                .where("tags", "NOT LIKE", `%${tag}%`);
+        }
     }
 
     if (guildPreference.getOstPreference() === OstPreference.EXCLUDE) {
@@ -80,6 +82,13 @@ export async function getFilteredSongList(guildPreference: GuildPreference, igno
     } else if (guildPreference.getOstPreference() === OstPreference.EXCLUSIVE) {
         queryBuilder = queryBuilder
             .where("tags", "LIKE", "%o%");
+    }
+
+    if (guildPreference.getVideoType() === VideoType.OFFICIAL) {
+        for (const tag of NON_OFFICIAL_VIDEO_TAGS) {
+            queryBuilder = queryBuilder
+                .where("tags", "NOT LIKE", `%${tag}%`);
+        }
     }
 
     queryBuilder = queryBuilder
