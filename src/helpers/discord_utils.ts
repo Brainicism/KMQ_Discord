@@ -28,8 +28,8 @@ export const EMBED_INFO_COLOR = 0x000000; // BLACK
 export const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 export const EMBED_SUCCESS_COLOR = 0x00FF00; // GREEN
 const EMBED_FIELDS_PER_PAGE = 20;
-const REQUIRED_TEXT_PERMISSIONS = ["addReactions", "embedLinks"];
-const REQUIRED_VOICE_PERMISSIONS = ["voiceConnect", "voiceSpeak"];
+const REQUIRED_TEXT_PERMISSIONS = ["addReactions" as const, "embedLinks" as const];
+const REQUIRED_VOICE_PERMISSIONS = ["voiceConnect" as const, "voiceSpeak" as const];
 
 /**
  * @param user - The User object
@@ -369,7 +369,7 @@ export function areUserAndBotInSameVoiceChannel(message: Eris.Message): boolean 
  * @returns the voice channel that the message's author is in
  */
 export function getVoiceChannelFromMessage(message: GuildTextableMessage): Eris.VoiceChannel {
-    const voiceChannel = message.channel.guild.channels.get(message.member.voiceState.channelID) as Eris.VoiceChannel;
+    const voiceChannel = (message.channel as Eris.TextChannel).guild.channels.get(message.member.voiceState.channelID) as Eris.VoiceChannel;
     return voiceChannel;
 }
 
@@ -430,8 +430,7 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
  * @param message - The Message object
  * @returns whether the bot has permissions to message's originating text channel
  */
-export async function textPermissionsCheck(message: GuildTextableMessage): Promise<boolean> {
-    const { channel } = message;
+export async function textPermissionsCheck(message: GuildTextableMessage, channel: Eris.TextChannel): Promise<boolean> {
     const { client } = state;
     const messageContext = MessageContext.fromMessage(message);
     if (!channel.permissionsOf(client.user.id).has("sendMessages")) {

@@ -38,9 +38,10 @@ export default async function messageCreateHandler(message: Eris.Message) {
     }
 
     const parsedMessage = parseMessage(message.content) || null;
+    const textChannel = message.channel as Eris.TextChannel;
     if (message.mentions.includes(state.client.user) && message.content.split(" ").length === 1) {
         // Any message that mentions the bot sends the current options
-        if (!(await textPermissionsCheck(message))) {
+        if (!(await textPermissionsCheck(message, textChannel))) {
             return;
         }
         const guildPreference = await getGuildPreference(message.guildID);
@@ -50,12 +51,13 @@ export default async function messageCreateHandler(message: Eris.Message) {
     if (parsedMessage && state.commands[parsedMessage.action]) {
         const command = state.commands[parsedMessage.action];
         if (validate(message, parsedMessage, command.validations)) {
-            if (!(await textPermissionsCheck(message))) {
+            if (!(await textPermissionsCheck(message, textChannel))) {
                 return;
             }
             const { gameSessions } = state;
             command.call({
                 gameSessions,
+                channel: textChannel,
                 message,
                 parsedMessage,
             });

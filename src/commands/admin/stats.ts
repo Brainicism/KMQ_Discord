@@ -21,7 +21,7 @@ export default class SkipCommand implements BaseCommand {
         priority: 1,
     };
 
-    async call({ gameSessions, message }: CommandArgs) {
+    async call({ gameSessions, message, channel }: CommandArgs) {
         const activeGameSessions = Object.keys(gameSessions).length;
         const activeUsers = Object.values(gameSessions).reduce((total, curr) => total + curr.participants.size, 0);
         const dateThreshold = new Date();
@@ -91,7 +91,7 @@ export default class SkipCommand implements BaseCommand {
         },
         {
             name: "API Latency",
-            value: `${message.channel.guild.shard.latency} ms`,
+            value: `${channel.guild.shard.latency} ms`,
             inline: true,
         },
         {
