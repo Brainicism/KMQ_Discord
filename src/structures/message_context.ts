@@ -13,7 +13,10 @@ export default class MessageContext {
     /** The guild ID to send the message to */
     public guildID: string;
 
-    constructor(textChannelID: string, author?: KmqMember, guildID?: string) {
+    /** The ID of the originating message */
+    public referencedMessageID: string;
+
+    constructor(textChannelID: string, author?: KmqMember, guildID?: string, referencedMessageID?: string) {
         this.textChannelID = textChannelID;
         if (author === null) {
             const clientUser = state.client.user;
@@ -21,6 +24,7 @@ export default class MessageContext {
         }
         this.author = author;
         this.guildID = guildID;
+        this.referencedMessageID = referencedMessageID;
     }
 
     /**
@@ -28,6 +32,6 @@ export default class MessageContext {
      * @returns a MessageContext
      */
     static fromMessage(message: Eris.Message) {
-        return new MessageContext(message.channel.id, new KmqMember(message.author.username, getUserTag(message.author), message.author.avatarURL, message.author.id), message.guildID);
+        return new MessageContext(message.channel.id, new KmqMember(message.author.username, getUserTag(message.author), message.author.avatarURL, message.author.id), message.guildID, message.id);
     }
 }
