@@ -15,7 +15,7 @@ import { FOREIGN_LANGUAGE_TAGS, LanguageType } from "../../commands/game_options
 import state from "../../kmq";
 import GameSession from "../../structures/game_session";
 import { OstPreference } from "../../commands/game_options/ost";
-import { NON_OFFICIAL_VIDEO_TAGS, VideoType } from "../../commands/game_options/videotype";
+import { NON_OFFICIAL_VIDEO_TAGS, ReleaseType } from "../../commands/game_options/release";
 
 const logger = _logger("test");
 
@@ -85,7 +85,7 @@ async function getMockGuildPreference(): Promise<GuildPreference> {
     await guildPreference.setSubunitPreference(SubunitsPreference.EXCLUDE);
     await guildPreference.setLimit(0, 99999);
     await guildPreference.setOstPreference(OstPreference.INCLUDE);
-    await guildPreference.setVideoType(VideoType.ALL);
+    await guildPreference.setReleaseType(ReleaseType.ALL);
     return guildPreference;
 }
 
@@ -391,18 +391,18 @@ describe("song query", () => {
             });
         });
 
-        describe("video type", () => {
-            describe("video type is set to official only", () => {
+        describe("release type", () => {
+            describe("release type is set to official only", () => {
                 it("should match the expected song count", async () => {
                     const expectedSongCount = mockSongs.filter((song) => !NON_OFFICIAL_VIDEO_TAGS.some((tag) => song.tags.includes(tag))).length;
-                    await guildPreference.setVideoType(VideoType.OFFICIAL);
+                    await guildPreference.setReleaseType(ReleaseType.OFFICIAL);
                     const { songs } = await getFilteredSongList(guildPreference);
                     assert.strictEqual(songs.length, expectedSongCount);
                 });
             });
-            describe("video type is set to all", () => {
+            describe("release type is set to all", () => {
                 it("should match the expected song count", async () => {
-                    await guildPreference.setVideoType(VideoType.ALL);
+                    await guildPreference.setReleaseType(ReleaseType.ALL);
                     const { songs } = await getFilteredSongList(guildPreference);
                     assert.strictEqual(songs.length, mockSongs.length);
                 });

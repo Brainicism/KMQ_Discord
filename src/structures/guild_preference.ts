@@ -11,7 +11,7 @@ import { DEFAULT_LANGUAGE, LanguageType } from "../commands/game_options/languag
 import { DEFAULT_SUBUNIT_PREFERENCE, SubunitsPreference } from "../commands/game_options/subunits";
 import { MatchedArtist } from "../types";
 import { DEFAULT_OST_PREFERENCE, OstPreference } from "../commands/game_options/ost";
-import { DEFAULT_VIDEO_TYPE, VideoType } from "../commands/game_options/videotype";
+import { DEFAULT_RELEASE_TYPE, ReleaseType } from "../commands/game_options/release";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = _logger("guild_preference");
@@ -24,7 +24,7 @@ interface GameOptions {
     limitEnd: number;
     seekType: SeekType;
     modeType: ModeType;
-    videoType: VideoType;
+    releaseType: ReleaseType;
     artistType: ArtistType;
     shuffleType: ShuffleType;
     groups: MatchedArtist[];
@@ -63,7 +63,7 @@ export default class GuildPreference {
         limitStart: 0,
         seekType: DEFAULT_SEEK,
         modeType: DEFAULT_MODE,
-        videoType: DEFAULT_VIDEO_TYPE,
+        releaseType: DEFAULT_RELEASE_TYPE,
         shuffleType: DEFAULT_SHUFFLE,
         groups: null,
         excludes: null,
@@ -419,21 +419,21 @@ export default class GuildPreference {
     }
 
     /**
-     * Sets the video type option value
-     * @param videoType - The VideoType
+     * Sets the release type option value
+     * @param releaseType - The ReleaseType
      */
-    async setVideoType(videoType: VideoType) {
-        this.gameOptions.videoType = videoType as VideoType;
+    async setReleaseType(releaseType: ReleaseType) {
+        this.gameOptions.releaseType = releaseType as ReleaseType;
         await this.updateGuildPreferences();
     }
 
-    /** @returns the current video type option value */
-    getVideoType(): VideoType {
-        return this.gameOptions.videoType;
+    /** @returns the current release type option value */
+    getReleaseType(): ReleaseType {
+        return this.gameOptions.releaseType;
     }
 
-    /** Resets the video type option to the default value */
-    async resetVideoType() {
+    /** Resets the release type option to the default value */
+    async resetReleaseType() {
         this.gameOptions.modeType = DEFAULT_MODE;
         await this.updateGuildPreferences();
     }

@@ -11,7 +11,7 @@ import { ArtistType } from "../commands/game_options/artisttype";
 import { FOREIGN_LANGUAGE_TAGS, LanguageType } from "../commands/game_options/language";
 import { SubunitsPreference } from "../commands/game_options/subunits";
 import { OstPreference } from "../commands/game_options/ost";
-import { NON_OFFICIAL_VIDEO_TAGS, VideoType } from "../commands/game_options/videotype";
+import { NON_OFFICIAL_VIDEO_TAGS, ReleaseType } from "../commands/game_options/release";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -84,7 +84,7 @@ export async function getFilteredSongList(guildPreference: GuildPreference, igno
             .where("tags", "LIKE", "%o%");
     }
 
-    if (guildPreference.getVideoType() === VideoType.OFFICIAL) {
+    if (guildPreference.getReleaseType() === ReleaseType.OFFICIAL) {
         for (const tag of NON_OFFICIAL_VIDEO_TAGS) {
             queryBuilder = queryBuilder
                 .where("tags", "NOT LIKE", `%${tag}%`);
