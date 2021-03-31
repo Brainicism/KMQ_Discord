@@ -174,7 +174,7 @@ const downloadNewSongs = async (limit?: number) => {
             continue;
         }
 
-        logger.info(`Downloading song: '${song.name}' by ${song.artist} | ${song.youtubeLink} (${downloadCount + 1}/${songsToDownload.length})`);
+        logger.info(`Downloading song: '${song.name}' by ${song.artist} | ${song.youtubeLink} (${downloadCount + 1}/${songsToDownload.length - knownDeadIDs.size})`);
         try {
             await retryJob(downloadSong, [song.youtubeLink], 1, true, 5000);
         } catch (err) {
