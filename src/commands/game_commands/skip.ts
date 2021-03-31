@@ -30,7 +30,7 @@ async function sendSkipNotification(message: GuildTextableMessage, gameSession: 
             username: message.author.username,
             avatarUrl: message.author.avatarURL,
         },
-    });
+    }, true);
 }
 
 async function sendSkipMessage(message: GuildTextableMessage, gameRound: GameRound) {
