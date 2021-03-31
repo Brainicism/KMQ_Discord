@@ -29,14 +29,14 @@ export default class BeginCommand implements BaseCommand {
         }
         return true;
     }
-    async call({ message, gameSessions }: CommandArgs) {
+    async call({ message, gameSessions, channel }: CommandArgs) {
         const { guildID, author } = message;
         const gameSession = gameSessions[guildID];
 
         if (!this.canStart(gameSession, author.id, MessageContext.fromMessage(message))) return;
         const guildPreference = await getGuildPreference(guildID);
         if (!gameSession.sessionInitialized) {
-            sendBeginGameMessage(message.channel.name, getVoiceChannelFromMessage(message).name, message);
+            sendBeginGameMessage(channel.name, getVoiceChannelFromMessage(message).name, message);
             gameSession.startRound(guildPreference, MessageContext.fromMessage(message));
             logger.info(`${getDebugLogHeader(message)} | Game session starting (${gameSession.gameType} gameType)`);
         }

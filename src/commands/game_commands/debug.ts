@@ -12,7 +12,7 @@ import MessageContext from "../../structures/message_context";
 const logger = _logger("debug");
 
 export default class DebugCommand implements BaseCommand {
-    async call({ message }: CommandArgs) {
+    async call({ message, channel }: CommandArgs) {
         const debugChannel = getDebugChannel();
         if (!debugChannel) {
             logger.warn("No debug text channel specified");
@@ -36,7 +36,7 @@ export default class DebugCommand implements BaseCommand {
 
         fields.push({
             name: "Text Permissions",
-            value: JSON.stringify(message.channel.permissionsOf(state.client.user.id).json),
+            value: JSON.stringify(channel.permissionsOf(state.client.user.id).json),
             inline: false,
         });
 

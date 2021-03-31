@@ -28,8 +28,8 @@ export const EMBED_INFO_COLOR = 0x000000; // BLACK
 export const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 export const EMBED_SUCCESS_COLOR = 0x00FF00; // GREEN
 const EMBED_FIELDS_PER_PAGE = 20;
-const REQUIRED_TEXT_PERMISSIONS = ["addReactions", "embedLinks"];
-const REQUIRED_VOICE_PERMISSIONS = ["voiceConnect", "voiceSpeak"];
+const REQUIRED_TEXT_PERMISSIONS = ["addReactions" as const, "embedLinks" as const];
+const REQUIRED_VOICE_PERMISSIONS = ["voiceConnect" as const, "voiceSpeak" as const];
 
 /**
  * @param user - The User object
@@ -96,7 +96,7 @@ export async function sendErrorMessage(messageContext: MessageContext, embedPayl
  * @param description - The description of the embed
  * @param footerText - The footer text of the embed
  */
-export async function sendInfoMessage(messageContext: MessageContext, embedPayload: EmbedPayload): Promise<Eris.Message<TextableChannel>> {
+export async function sendInfoMessage(messageContext: MessageContext, embedPayload: EmbedPayload, reply = false): Promise<Eris.Message<TextableChannel>> {
     if (embedPayload.description && embedPayload.description.length > 2048) {
         return sendErrorMessage(messageContext, { title: "Error", description: "Response message was too long, report this error to the KMQ help server" });
     }
@@ -117,7 +117,7 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
         thumbnail: embedPayload.thumbnailUrl ? { url: embedPayload.thumbnailUrl } : null,
         timestamp: embedPayload.timestamp,
     };
-    return sendMessage(messageContext.textChannelID, { embed });
+    return sendMessage(messageContext.textChannelID, { embed, messageReferenceID: reply ? messageContext.referencedMessageID : null });
 }
 
 /**
@@ -164,7 +164,7 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
         thumbnailUrl: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,
         fields,
         footerText: footer ? footer.text : "",
-    });
+    }, guessResult.correct);
 }
 
 /**
@@ -369,7 +369,7 @@ export function areUserAndBotInSameVoiceChannel(message: Eris.Message): boolean 
  * @returns the voice channel that the message's author is in
  */
 export function getVoiceChannelFromMessage(message: GuildTextableMessage): Eris.VoiceChannel {
-    const voiceChannel = message.channel.guild.channels.get(message.member.voiceState.channelID) as Eris.VoiceChannel;
+    const voiceChannel = (message.channel as Eris.TextChannel).guild.channels.get(message.member.voiceState.channelID) as Eris.VoiceChannel;
     return voiceChannel;
 }
 
@@ -430,8 +430,7 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
  * @param message - The Message object
  * @returns whether the bot has permissions to message's originating text channel
  */
-export async function textPermissionsCheck(message: GuildTextableMessage): Promise<boolean> {
-    const { channel } = message;
+export async function textPermissionsCheck(message: GuildTextableMessage, channel: Eris.TextChannel): Promise<boolean> {
     const { client } = state;
     const messageContext = MessageContext.fromMessage(message);
     if (!channel.permissionsOf(client.user.id).has("sendMessages")) {
