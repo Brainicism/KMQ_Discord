@@ -63,7 +63,7 @@ const mockArtists = [
     { id: 12, name: "J + K", members: "coed", issolo: "n", id_artist1: 10, id_artist2: 11 },
 ];
 
-const mockSongs = [...Array(100).keys()].map((i) => {
+const mockSongs = [...Array(1000).keys()].map((i) => {
     const artist = mockArtists[md5Hash(i, 8) % mockArtists.length];
     return {
         song_name: `${crypto.randomBytes(8).toString("hex")}`,
@@ -90,13 +90,11 @@ async function getMockGuildPreference(): Promise<GuildPreference> {
 }
 
 async function insertMockData(): Promise<void> {
-    for (const mockSong of mockSongs) {
-        await dbContext.kmq("available_songs").insert(mockSong);
-    }
+    await dbContext.kmq("available_songs").insert(mockSongs);
+
     logger.info("Done inserting mock songs");
-    for (const mockArtist of mockArtists) {
-        await dbContext.kmq("kpop_groups").insert(mockArtist);
-    }
+    await dbContext.kmq("kpop_groups").insert(mockArtists);
+
     logger.info("Done inserting mock artists");
 }
 
