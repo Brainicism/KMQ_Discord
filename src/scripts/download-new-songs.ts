@@ -139,6 +139,7 @@ async function getSongsFromDb() {
         })
         .andWhere("dead", "n")
         .andWhere("vtype", "main")
+        .andWhere("tags", "NOT LIKE", "%c%")
         .orderBy("kpop_videos.app_kpop.views", "DESC");
 }
 
