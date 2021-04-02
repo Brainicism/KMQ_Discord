@@ -29,12 +29,6 @@ interface GroupMatchResults {
  * @returns a list of songs, as well as the number of songs before the filter option was applied
  */
 export async function getFilteredSongList(guildPreference: GuildPreference, ignoredSongs?: Set<string>, genderOverride?: Gender): Promise<{ songs: QueriedSong[], countBeforeLimit: number }> {
-    const subunits = dbContext.kmq("kpop_groups").select("id").whereIn("id_parentgroup", guildPreference.getGroupIDs());
-    const collabGroupContainingSubunit = dbContext.kmq("kpop_groups").select("id")
-        .whereIn("id_artist1", subunits)
-        .orWhereIn("id_artist2", subunits)
-        .orWhereIn("id_artist3", subunits)
-        .orWhereIn("id_artist4", subunits);
     const fields = ["song_name as name", "artist_name as artist", "link as youtubeLink",
         "publishedon as publishDate", "members", "id_artist as artistID", "issolo as isSolo", "members", "tags"];
     let queryBuilder = dbContext.kmq("available_songs")
@@ -66,6 +60,12 @@ export async function getFilteredSongList(guildPreference: GuildPreference, igno
                     if (guildPreference.getSubunitPreference() === SubunitsPreference.EXCLUDE) {
                         this.whereIn("id_artist", guildPreference.getGroupIDs());
                     } else {
+                        const subunits = dbContext.kmq("kpop_groups").select("id").whereIn("id_parentgroup", guildPreference.getGroupIDs());
+                        const collabGroupContainingSubunit = dbContext.kmq("kpop_groups").select("id")
+                            .whereIn("id_artist1", subunits)
+                            .orWhereIn("id_artist2", subunits)
+                            .orWhereIn("id_artist3", subunits)
+                            .orWhereIn("id_artist4", subunits);
                         this.andWhere(function () {
                             this.whereIn("id_artist", guildPreference.getGroupIDs())
                                 .orWhereIn("id_parent_artist", guildPreference.getGroupIDs())
