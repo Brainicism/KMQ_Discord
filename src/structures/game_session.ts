@@ -273,6 +273,7 @@ export default class GameSession {
                 avg_guess_time: averageGuessTime,
                 session_length: sessionLength,
                 rounds_played: this.roundsPlayed,
+                correct_guesses: this.correctGuesses,
             });
 
         logger.info(`gid: ${this.guildID} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}. gameType = ${this.gameType}`);
