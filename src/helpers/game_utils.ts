@@ -60,9 +60,16 @@ export async function getFilteredSongList(guildPreference: GuildPreference, igno
                     if (guildPreference.getSubunitPreference() === SubunitsPreference.EXCLUDE) {
                         this.whereIn("id_artist", guildPreference.getGroupIDs());
                     } else {
+                        const subunits = dbContext.kmq("kpop_groups").select("id").whereIn("id_parentgroup", guildPreference.getGroupIDs());
+                        const collabGroupContainingSubunit = dbContext.kmq("kpop_groups").select("id")
+                            .whereIn("id_artist1", subunits)
+                            .orWhereIn("id_artist2", subunits)
+                            .orWhereIn("id_artist3", subunits)
+                            .orWhereIn("id_artist4", subunits);
                         this.andWhere(function () {
                             this.whereIn("id_artist", guildPreference.getGroupIDs())
-                                .orWhereIn("id_parent_artist", guildPreference.getGroupIDs());
+                                .orWhereIn("id_parent_artist", guildPreference.getGroupIDs())
+                                .orWhereIn("id_artist", collabGroupContainingSubunit);
                         });
                     }
                 }

@@ -44,7 +44,7 @@ async function setup() {
         id_artist1 INT(10),
         id_artist2 INT(10),
         id_artist3 INT(10),
-        id_artist4 INT(10) 
+        id_artist4 INT(10)
     )`);
 }
 
@@ -54,13 +54,15 @@ const mockArtists = [
     { id: 3, name: "C", members: "male", issolo: "n" },
     { id: 4, name: "D", members: "male", issolo: "y" },
     { id: 5, name: "E", members: "female", issolo: "n" },
-    { id: 6, name: "F", members: "female", issolo: "n" },
+    { id: 6, name: "F", members: "female", issolo: "n", id_parentgroup: 5 },
     { id: 7, name: "G", members: "female", issolo: "n" },
     { id: 8, name: "H", members: "female", issolo: "y" },
     { id: 9, name: "I", members: "female", issolo: "y", id_parentgroup: 8 },
     { id: 10, name: "J", members: "coed", issolo: "n" },
     { id: 11, name: "K", members: "coed", issolo: "n" },
     { id: 12, name: "J + K", members: "coed", issolo: "n", id_artist1: 10, id_artist2: 11 },
+    { id: 13, name: "F + G", members: "female", issolo: "n", id_artist1: 6, id_artist2: 7 },
+    { id: 14, name: "E + H", members: "female", issolo: "n", id_artist1: 5, id_artist2: 8 },
 ];
 
 const mockSongs = [...Array(1000).keys()].map((i) => {
@@ -297,12 +299,10 @@ describe("song query", () => {
         describe("subunits", () => {
             const artistWithSubunit = mockArtists[7];
             const subunitArtist = mockArtists[8];
-            beforeEach(async () => {
-                await guildPreference.setGroups([{ id: artistWithSubunit.id, name: artistWithSubunit.name }]);
-            });
 
             describe("exclude subunits", () => {
                 it("should match the expected song count", async () => {
+                    await guildPreference.setGroups([{ id: artistWithSubunit.id, name: artistWithSubunit.name }]);
                     const expectedSongCount = mockSongs.filter((song) => song.id_artist === artistWithSubunit.id).length;
                     await guildPreference.setSubunitPreference(SubunitsPreference.EXCLUDE);
                     const { songs } = await getFilteredSongList(guildPreference);
@@ -312,10 +312,32 @@ describe("song query", () => {
 
             describe("include subunits", () => {
                 it("should match the expected song count", async () => {
+                    await guildPreference.setGroups([{ id: artistWithSubunit.id, name: artistWithSubunit.name }]);
                     const expectedSongCount = mockSongs.filter((song) => song.id_artist === artistWithSubunit.id || song.id_artist === subunitArtist.id).length;
                     await guildPreference.setSubunitPreference(SubunitsPreference.INCLUDE);
                     const { songs } = await getFilteredSongList(guildPreference);
                     assert.strictEqual(songs.length, expectedSongCount);
+                });
+            });
+            describe("include subunits (and the subunit has a collab)", () => {
+                it("should match the songs from the group, collabs of that group, and collabs of any subunits of that group", async () => {
+                    // E is a group with the subunit F. F is in a collab with G. E has a collab with H.
+                    // E
+                    const artistWithCollabingSubunit = mockArtists[4];
+                    // F
+                    const subunitWithCollab = mockArtists[5];
+                    // F + G
+                    const subunitCollabArtist = mockArtists[12];
+                    // E + H
+                    const parentCollabArtist = mockArtists[13];
+
+                    const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames([artistWithCollabingSubunit.name]);
+                    await guildPreference.setGroups(matchedGroups);
+                    await guildPreference.setSubunitPreference(SubunitsPreference.INCLUDE);
+                    const expectedSongs = mockSongs.filter((song) => [artistWithCollabingSubunit.id, subunitWithCollab.id, subunitCollabArtist.id, parentCollabArtist.id].includes(song.id_artist));
+                    const { songs } = await getFilteredSongList(guildPreference);
+                    assert.strictEqual(unmatchedGroups.length, 0);
+                    assert.deepStrictEqual(songs.map((x) => x.youtubeLink).sort(), expectedSongs.map((x) => x.link).sort());
                 });
             });
         });
@@ -412,7 +434,7 @@ describe("song query", () => {
 
     describe("getMatchingGroupNames", () => {
         describe("collabs", () => {
-            it("should return the group and any collabs they are apart of in matchedGroups", async () => {
+            it("should return the group and any collabs they are a part of in matchedGroups", async () => {
                 const matchResults = await getMatchingGroupNames(["J"]);
                 assert.deepStrictEqual(matchResults.matchedGroups.map((x) => x.name), ["J", "J + K"]);
                 assert.strictEqual(matchResults.unmatchedGroups.length, 0);
