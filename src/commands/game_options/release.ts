@@ -30,7 +30,7 @@ export default class ReleaseCommand implements BaseCommand {
 
     help = {
         name: "release",
-        description: "Choose whether to include only official music videos, or all videos (covers, dance practices, acoustic versions, remixes, etc)",
+        description: "Choose whether to include only official music videos, or all videos (dance practices, acoustic versions, remixes, etc)",
         usage: "!release [release]",
         examples: [
             {
@@ -39,7 +39,7 @@ export default class ReleaseCommand implements BaseCommand {
             },
             {
                 example: "`!release all`",
-                explanation: "Plays all available videos, including covers, dance practices, acoustic versions, remixes",
+                explanation: "Plays all available videos, including dance practices, acoustic versions, remixes",
             },
             {
                 example: "`!release`",
