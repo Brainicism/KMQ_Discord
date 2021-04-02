@@ -214,8 +214,9 @@ export async function getGuildPreference(guildID: string): Promise<GuildPreferen
  * @param gameSession - The GameSession to end
  */
 export async function endSession(gameSession: GameSession) {
-    await sendEndGameMessage(gameSession.textChannelID, gameSession);
+    if (gameSession.finished) return;
     await gameSession.endSession();
+    await sendEndGameMessage(gameSession.textChannelID, gameSession);
 }
 
 /**
