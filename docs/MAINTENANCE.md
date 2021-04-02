@@ -1,5 +1,5 @@
 ## Aliases
-`data/song_aliases.json` contains a mapping for YouTube video ID to an array of aliases. The data source we use is mostly crowdsourced, so it is prone to typos, errors, or a lack of proper song aliasing. Manually edit the song alias file to allow for multiple correct names for a given song. If a song name is geniunely incorrect on Aoimirai, it is preferred that you fix the name on *both* Aoimirai and `data/song_aliases.json`. The change will propagate to our database during the weekly seed, and the alias will be removed automatically. 
+`data/song_aliases.json` contains a mapping for YouTube video ID to an array of aliases. The data source we use is mostly crowdsourced, so it is prone to typos, errors, or a lack of proper song aliasing. Manually edit the song alias file to allow for multiple correct names for a given song. If a song name is geniunely incorrect on Daisuki, it is preferred that you fix the name on *both* Daisuki and `data/song_aliases.json`. The change will propagate to our database during the weekly seed, and the alias will be removed automatically. 
 
 Similarly, `data/artist_aliases.json` is used for the same purpose but for artist names. 
 

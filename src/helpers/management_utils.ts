@@ -171,7 +171,7 @@ export function registerIntervals() {
 
     // everyday at 7am UTC => 2am EST
     schedule.scheduleJob("0 7 * * *", async () => {
-        logger.info("Performing regularly scheduled AoiMirai database seed");
+        logger.info("Performing regularly scheduled Daisuki database seed");
         const overrideFileExists = fs.existsSync(path.join(__dirname, "../../data/skip_seed"));
         if (overrideFileExists) {
             return;

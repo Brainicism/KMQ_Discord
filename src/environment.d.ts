@@ -13,7 +13,7 @@ declare namespace NodeJS {
         DEBUG_SERVER_ID?: string,
         DEBUG_TEXT_CHANNEL_ID?: string,
         LOG_DIR: string,
-        AOIMIRAI_DUMP_DIR: string,
+        DAISUKI_DUMP_DIR: string,
         BOT_PREFIX: string,
         NODE_ENV: string,
     }
