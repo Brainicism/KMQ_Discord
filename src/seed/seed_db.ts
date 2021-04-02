@@ -14,11 +14,11 @@ import dbContext, { DatabaseContext, getDatabaseAgnosticContext } from "../datab
 config({ path: path.resolve(__dirname, "../../.env") });
 const fileUrl = "http://kpop.daisuki.com.br/download.php";
 const logger: Logger = _logger("seed_db");
-const databaseDownloadDir = process.env.AOIMIRAI_DUMP_DIR;
+const databaseDownloadDir = process.env.DAISUKI_DUMP_DIR;
 const overridesFilePath = path.join(__dirname, "../../sql/kpop_videos_overrides.sql");
 
 program
-    .option("-p, --skip-pull", "Skip re-pull of AoiMirai database dump", false)
+    .option("-p, --skip-pull", "Skip re-pull of Daisuki database dump", false)
     .option("-r, --skip-reseed", "Force skip drop/create of kpop_videos database", false)
     .option("-d, --skip-download", "Skip download/encode of videos in database", false)
     .option("--limit <limit>", "Limit the number of songs to download", (x) => parseInt(x, 10));
@@ -36,13 +36,13 @@ const downloadDb = async () => {
     });
 
     await fs.promises.writeFile(output, resp.data, { encoding: null });
-    logger.info("Downloaded AoiMirai database archive");
+    logger.info("Downloaded Daisuki database archive");
 };
 async function extractDb(): Promise<void> {
     // eslint-disable-next-line new-cap
     const zip = new StreamZip.async({ file: `${databaseDownloadDir}/bootstrap.zip` });
     await zip.extract(null, `${databaseDownloadDir}/sql/`);
-    logger.info("Extracted AoiMirai database");
+    logger.info("Extracted Daisuki database");
 }
 
 async function seedDb(db: DatabaseContext) {

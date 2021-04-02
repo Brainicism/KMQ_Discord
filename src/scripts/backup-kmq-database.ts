@@ -5,7 +5,7 @@ import { Logger } from "log4js";
 import _logger from "../logger";
 import { friendlyFormattedDate } from "../helpers/utils";
 
-const databaseBackupDir = `${process.env.AOIMIRAI_DUMP_DIR}/kmq_backup`;
+const databaseBackupDir = `${process.env.DAISUKI_DUMP_DIR}/kmq_backup`;
 const logger: Logger = _logger("backup-kmq");
 
 program
