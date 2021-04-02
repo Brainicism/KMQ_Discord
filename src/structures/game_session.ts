@@ -194,6 +194,8 @@ export default class GameSession {
             sendEndOfRoundMessage(messageContext, this.scoreboard, this.gameRound, guessResult);
         }
 
+        this.incrementSongCount(this.gameRound.videoID, guessResult.correct);
+
         // cleanup
         this.stopGuessTimeout();
         this.gameRound = null;
@@ -695,6 +697,29 @@ export default class GameSession {
         }
 
         return null;
+    }
+
+    /**
+     * Creates song entry, increments play count and correct guesses in the data store
+     * @param vlink - The song's youtube ID
+     * @param correct - Whether the guess was correct
+     */
+    private async incrementSongCount(vlink: string, correct: boolean) {
+        await dbContext.kmq("song_guess_count")
+            .insert(
+                {
+                    vlink,
+                    correct_guesses: 0,
+                    rounds_played: 0,
+                },
+            )
+            .onConflict("vlink")
+            .ignore();
+
+        await dbContext.kmq("song_guess_count")
+            .where("vlink", "=", vlink)
+            .increment("correct_guesses", correct ? 1 : 0)
+            .increment("rounds_played", 1);
     }
 
     /**
