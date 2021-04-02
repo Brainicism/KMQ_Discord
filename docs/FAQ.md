@@ -1,8 +1,8 @@
 # Frequently Asked Questions
 ## Why isn't [x] artist or [y] song available on the bot?
-All song and artist data is retrieved from [the database kindly provided by Aoimirai](http://kpop.aoimirai.net/). According to their guidelines, songs are generally only listed if they are an *official* music video. Album B-sides are not considered on this site, therefore, not considered on this bot.
+All song and artist data is retrieved from [the database kindly provided by Daisuki](http://kpop.daisuki.com.br/). According to their guidelines, songs are generally only listed if they are an *official* music video. Album B-sides are not considered on this site, therefore, not considered on this bot.
 
-If you think an official music video is missing, consider contributing to the Aoimirai database (following their guidelines), and the bot will have the new song within a week.
+If you think an official music video is missing, consider contributing to the Daisuki database (following their guidelines), and the bot will have the new song within a week.
 
 ## I'm entering the correct song name but it's not be accepted as the correct answer
 1. Do *not* submit your answer with the prefix `,`. If the correct answer is `Boombayah`, simply type `Boombayah` in the chat

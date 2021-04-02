@@ -11,7 +11,7 @@ services:
     env_file: .env
     environment:
       SONG_DOWNLOAD_DIR: /songs
-      AOIMIRAI_DUMP_DIR: /dump
+      DAISUKI_DUMP_DIR: /dump
     volumes:
       - songs:/songs
       - dump:/dump
