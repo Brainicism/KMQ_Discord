@@ -12,31 +12,12 @@ const logger = _logger("kmq");
 config({ path: resolve(__dirname, "../.env") });
 
 const ERIS_INTENTS = Eris.Constants.Intents;
-const client = new Eris.Client(process.env.BOT_TOKEN, {
-    disableEvents: {
-        GUILD_ROLE_DELETE: true,
-        CHANNEL_PINS_UPDATE: true,
-        MESSAGE_UPDATE: true,
-        MESSAGE_DELETE: true,
-        MESSAGE_DELETE_BULK: true,
-        MESSAGE_REACTION_REMOVE: true,
-        MESSAGE_REACTION_REMOVE_ALL: true,
-        MESSAGE_REACTION_REMOVE_EMOJI: true,
-        GUILD_BAN_ADD: true,
-        GUILD_BAN_REMOVE: true,
-        TYPING_START: true,
-    },
-    restMode: true,
-    maxShards: "auto",
-    messageLimit: 0,
-    intents: ERIS_INTENTS.guilds ^ ERIS_INTENTS.guildVoiceStates ^ ERIS_INTENTS.guildMessages ^ ERIS_INTENTS.guildMessageReactions,
-});
 
 const state: State = {
     commands: {},
     gameSessions: {},
     botStatsPoster: null,
-    client,
+    client: null,
     aliases: {
         artist: {},
         song: {},
@@ -56,8 +37,6 @@ export default state;
         }
         logger.info("Registering event loops...");
         registerIntervals();
-        logger.info("Registering client event handlers...");
-        registerClientEvents();
         logger.info("Registering process event handlers...");
         registerProcessEvents();
 
@@ -74,6 +53,30 @@ export default state;
             logger.info("Initializing bot stats poster...");
             initializeBotStatsPoster();
         }
-        client.connect();
+
+        state.client = new Eris.Client(process.env.BOT_TOKEN, {
+            disableEvents: {
+                GUILD_ROLE_DELETE: true,
+                CHANNEL_PINS_UPDATE: true,
+                MESSAGE_UPDATE: true,
+                MESSAGE_DELETE: true,
+                MESSAGE_DELETE_BULK: true,
+                MESSAGE_REACTION_REMOVE: true,
+                MESSAGE_REACTION_REMOVE_ALL: true,
+                MESSAGE_REACTION_REMOVE_EMOJI: true,
+                GUILD_BAN_ADD: true,
+                GUILD_BAN_REMOVE: true,
+                TYPING_START: true,
+            },
+            restMode: true,
+            maxShards: "auto",
+            messageLimit: 0,
+            intents: ERIS_INTENTS.guilds ^ ERIS_INTENTS.guildVoiceStates ^ ERIS_INTENTS.guildMessages ^ ERIS_INTENTS.guildMessageReactions,
+        });
+
+        logger.info("Registering client event handlers...");
+        registerClientEvents();
+
+        state.client.connect();
     }
 })();
