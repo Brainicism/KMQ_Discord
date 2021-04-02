@@ -33,7 +33,8 @@ jobs:
         uses: actions/setup-node@v2.1.2
         with:
           node-version: 14.2.0
-      - run: npm install
+      - name: Install node dependencies
+        run: yarn install --frozen-lockfile
       - name: npm run lint
         run: npm run lint
       - name: Copy .env for CI
