@@ -322,21 +322,22 @@ describe("song query", () => {
             describe("include subunits (and the subunit has a collab)", () => {
                 it("should match the songs from the group, collabs of that group, and collabs of any subunits of that group", async () => {
                     // E is a group with the subunit F. F is in a collab with G. E has a collab with H.
+                    // E
                     const artistWithCollabingSubunit = mockArtists[4];
+                    // F
                     const subunitWithCollab = mockArtists[5];
+                    // F + G
                     const subunitCollabArtist = mockArtists[12];
+                    // E + H
                     const parentCollabArtist = mockArtists[13];
 
                     const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames([artistWithCollabingSubunit.name]);
                     await guildPreference.setGroups(matchedGroups);
                     await guildPreference.setSubunitPreference(SubunitsPreference.INCLUDE);
-                    const expectedSongsCount = mockSongs.filter((song) => song.id_artist === artistWithCollabingSubunit.id
-                        || song.id_artist === subunitWithCollab.id
-                        || song.id_artist === subunitCollabArtist.id
-                        || song.id_artist === parentCollabArtist.id).length;
+                    const expectedSongs = mockSongs.filter((song) => [artistWithCollabingSubunit.id, subunitWithCollab.id, subunitCollabArtist.id, parentCollabArtist.id].includes(song.id_artist));
                     const { songs } = await getFilteredSongList(guildPreference);
                     assert.strictEqual(unmatchedGroups.length, 0);
-                    assert.deepStrictEqual(songs.length, expectedSongsCount);
+                    assert.deepStrictEqual(songs.map((x) => x.youtubeLink).sort(), expectedSongs.map((x) => x.link).sort());
                 });
             });
         });
