@@ -3,6 +3,7 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
+import MessageContext from "../../structures/message_context";
 
 const logger = _logger("ost");
 export enum OstPreference {
@@ -59,13 +60,13 @@ export default class OstCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             guildPreference.resetOstPreference();
             logger.info(`${getDebugLogHeader(message)} | OST preference reset.`);
-            await sendOptionsMessage(message, guildPreference, { option: GameOption.OST_PREFERENCE, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.OST_PREFERENCE, reset: true });
             return;
         }
 
         const ostPreference = parsedMessage.components[0].toLowerCase() as OstPreference;
         guildPreference.setOstPreference(ostPreference);
-        await sendOptionsMessage(message, guildPreference, { option: GameOption.OST_PREFERENCE, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.OST_PREFERENCE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | OST preference set to ${ostPreference}`);
     }
 }

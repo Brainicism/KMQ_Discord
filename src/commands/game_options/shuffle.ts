@@ -3,6 +3,7 @@ import _logger from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
 import { GameOption } from "../../types";
+import MessageContext from "../../structures/message_context";
 
 const logger = _logger("shuffle");
 
@@ -52,13 +53,13 @@ export default class ShuffleCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             guildPreference.resetShuffleType();
             logger.info(`${getDebugLogHeader(message)} | Shuffle type reset.`);
-            await sendOptionsMessage(message, guildPreference, { option: GameOption.SHUFFLE_TYPE, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SHUFFLE_TYPE, reset: true });
             return;
         }
 
         const shuffleType = parsedMessage.components[0].toLowerCase() as ShuffleType;
         guildPreference.setShuffleType(shuffleType);
-        await sendOptionsMessage(message, guildPreference, { option: GameOption.SHUFFLE_TYPE, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SHUFFLE_TYPE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Shuffle set to ${shuffleType}`);
     }
 }

@@ -3,6 +3,7 @@ import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_uti
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
+import MessageContext from "../../structures/message_context";
 
 const logger = _logger("seek");
 export enum SeekType {
@@ -51,12 +52,12 @@ export default class SeekCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             guildPreference.resetSeekType();
             logger.info(`${getDebugLogHeader(message)} | Seek reset.`);
-            await sendOptionsMessage(message, guildPreference, { option: GameOption.SEEK_TYPE, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SEEK_TYPE, reset: true });
             return;
         }
         const seekType = parsedMessage.components[0] as SeekType;
         guildPreference.setSeekType(seekType);
-        await sendOptionsMessage(message, guildPreference, { option: GameOption.SEEK_TYPE, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SEEK_TYPE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Seek type set to ${seekType}`);
     }
 }

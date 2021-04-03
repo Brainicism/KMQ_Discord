@@ -87,6 +87,10 @@
             "title": "Did you know?",
             "message": "Ever wanted to team up to defeat that insanely good KMQ player? Start playing with custom teams using `,play teams`! See `,help play` for more details.",
             "weight": 5
+        },
+        {
+            "title": "Did you know?",
+            "message": "Have favorite game option presets? Save and load them with presets! See `,help preset` to learn more."
         }
     ]
 }

@@ -3,6 +3,7 @@ import _logger from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { getDebugLogHeader, sendOptionsMessage } from "../../helpers/discord_utils";
 import { GameOption } from "../../types";
+import MessageContext from "../../structures/message_context";
 
 const logger = _logger("release");
 
@@ -55,13 +56,13 @@ export default class ReleaseCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             guildPreference.resetReleaseType();
             logger.info(`${getDebugLogHeader(message)} | Video type reset.`);
-            await sendOptionsMessage(message, guildPreference, { option: GameOption.RELEASE_TYPE, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.RELEASE_TYPE, reset: true });
             return;
         }
 
         const releaseType = parsedMessage.components[0].toLowerCase() as ReleaseType;
         guildPreference.setReleaseType(releaseType);
-        await sendOptionsMessage(message, guildPreference, { option: GameOption.RELEASE_TYPE, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.RELEASE_TYPE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Video type set to ${releaseType}`);
     }
 }

@@ -175,16 +175,16 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
  * @param updatedOption - Specifies which GameOption was modified
  * @param footerText - The footer text
  */
-export async function sendOptionsMessage(message: GuildTextableMessage, guildPreference: GuildPreference,
+export async function sendOptionsMessage(messageContext: MessageContext, guildPreference: GuildPreference,
     updatedOption?: { option: GameOption, reset: boolean }, footerText?: string) {
     const totalSongs = await getSongCount(guildPreference);
     if (totalSongs === null) {
-        sendErrorMessage(MessageContext.fromMessage(message), { title: "Error retrieving song data", description: `Try again in a bit, or report this error to the official KMQ server found in \`${process.env.BOT_PREFIX}help\`.` });
+        sendErrorMessage(messageContext, { title: "Error retrieving song data", description: `Try again in a bit, or report this error to the official KMQ server found in \`${process.env.BOT_PREFIX}help\`.` });
         return;
     }
 
     const { gameSessions } = state;
-    const isEliminationMode = gameSessions[message.guildID] && gameSessions[message.guildID].gameType === GameType.ELIMINATION;
+    const isEliminationMode = gameSessions[messageContext.guildID] && gameSessions[messageContext.guildID].gameType === GameType.ELIMINATION;
 
     const goalMode = guildPreference.isGoalSet() && !isEliminationMode;
     const guessTimeoutMode = guildPreference.isGuessTimeoutSet();
@@ -226,7 +226,7 @@ export async function sendOptionsMessage(message: GuildTextableMessage, guildPre
         footerText = `Looking for information on how to use this command? Check out '${process.env.BOT_PREFIX}help [command]' to learn more`;
     }
 
-    await sendInfoMessage(MessageContext.fromMessage(message),
+    await sendInfoMessage(messageContext,
         {
             title: updatedOption === null ? "Options" : `${updatedOption.option} ${updatedOption.reset ? "reset" : "updated"}`,
             description:

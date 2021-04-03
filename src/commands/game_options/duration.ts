@@ -60,7 +60,7 @@ export default class DurationCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             guildPreference.resetDuration();
-            await sendOptionsMessage(message, guildPreference, { option: GameOption.DURATION, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.DURATION, reset: true });
             logger.info(`${getDebugLogHeader(message)} | Duration disabled.`);
             return;
         }
@@ -92,7 +92,7 @@ export default class DurationCommand implements BaseCommand {
         }
 
         guildPreference.setDuration(duration);
-        await sendOptionsMessage(message, guildPreference, { option: GameOption.DURATION, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.DURATION, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Duration set to ${guildPreference.getDuration()}`);
     }
 }

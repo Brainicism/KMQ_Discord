@@ -118,6 +118,43 @@ export default class GuildPreference {
         return guildPreference;
     }
 
+    async listPresets(): Promise<string[]> {
+        const presets = (await dbContext.kmq("game_option_presets")
+            .select(["preset_name"])
+            .where("guild_id", "=", this.guildID))
+            .map((x) => x["preset_name"]);
+        return presets;
+    }
+    async deletePreset(presetName: string): Promise<boolean> {
+        const result = await dbContext.kmq("game_option_presets")
+            .where("guild_id", "=", this.guildID)
+            .andWhere("preset_name", "=", presetName)
+            .del();
+        return result !== 0;
+    }
+
+    async savePreset(presetName: string) {
+        await dbContext.kmq("game_option_presets")
+            .insert({
+                guild_id: this.guildID,
+                preset_name: presetName,
+                game_options: JSON.stringify(this.gameOptions),
+            });
+    }
+
+    async loadPreset(presetName: string) {
+        const preset = await dbContext.kmq("game_option_presets")
+            .select(["game_options"])
+            .where("guild_id", "=", this.guildID)
+            .andWhere("preset_name", "=", presetName)
+            .first();
+        if (!preset) {
+            throw new Error(`Preset ${presetName} not found`);
+        }
+        this.gameOptions = JSON.parse(preset["game_options"]);
+        await this.updateGuildPreferences();
+    }
+
     /**
      * Sets the limit option value
      * @param limit - The limit range value

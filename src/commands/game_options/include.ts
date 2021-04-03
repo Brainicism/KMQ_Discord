@@ -36,7 +36,7 @@ export default class IncludeCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             guildPreference.resetIncludes();
             logger.info(`${getDebugLogHeader(message)} | Includes reset.`);
-            await sendOptionsMessage(message, guildPreference, { option: GameOption.INCLUDE, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.INCLUDE, reset: true });
             return;
         }
         if (guildPreference.isGroupsMode()) {
@@ -54,7 +54,7 @@ export default class IncludeCommand implements BaseCommand {
         }
 
         guildPreference.setIncludes(matchedGroups);
-        await sendOptionsMessage(message, guildPreference, { option: GameOption.INCLUDE, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.INCLUDE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Includes set to ${guildPreference.getDisplayedIncludesGroupNames()}`);
     }
 }

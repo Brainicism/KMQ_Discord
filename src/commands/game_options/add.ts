@@ -78,17 +78,17 @@ export default class AddCommand implements BaseCommand {
         switch (optionListed) {
             case AddType.GROUPS:
                 guildPreference.setGroups(matchedGroups);
-                await sendOptionsMessage(message, guildPreference, { option: GameOption.GROUPS, reset: false });
+                await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GROUPS, reset: false });
                 logger.info(`${getDebugLogHeader(message)} | Group added: ${guildPreference.getDisplayedGroupNames()}`);
                 break;
             case AddType.INCLUDES:
                 guildPreference.setIncludes(matchedGroups);
-                await sendOptionsMessage(message, guildPreference, { option: GameOption.INCLUDE, reset: false });
+                await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.INCLUDE, reset: false });
                 logger.info(`${getDebugLogHeader(message)} | Include added: ${guildPreference.getDisplayedIncludesGroupNames()}`);
                 break;
             case AddType.EXCLUDES:
                 guildPreference.setExcludes(matchedGroups);
-                await sendOptionsMessage(message, guildPreference, { option: GameOption.EXCLUDE, reset: false });
+                await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.EXCLUDE, reset: false });
                 logger.info(`${getDebugLogHeader(message)} | Exclude added: ${guildPreference.getDisplayedExcludesGroupNames()}`);
                 break;
             default:

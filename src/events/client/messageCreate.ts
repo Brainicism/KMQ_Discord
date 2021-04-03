@@ -5,6 +5,7 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import state from "../../kmq";
 import validate from "../../helpers/validate";
 import { GuildTextableMessage, ParsedMessage } from "../../types";
+import MessageContext from "../../structures/message_context";
 
 const logger = _logger("messageCreate");
 
@@ -45,7 +46,7 @@ export default async function messageCreateHandler(message: Eris.Message) {
             return;
         }
         const guildPreference = await getGuildPreference(message.guildID);
-        sendOptionsMessage(message, guildPreference, null, `Psst. Your bot prefix is ${process.env.BOT_PREFIX}`);
+        sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, null, `Psst. Your bot prefix is ${process.env.BOT_PREFIX}`);
     }
 
     if (parsedMessage && state.commands[parsedMessage.action]) {
