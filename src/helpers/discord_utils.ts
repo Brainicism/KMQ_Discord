@@ -57,7 +57,16 @@ export function getDebugLogHeader(messageContext: MessageContext | Eris.Message)
  * @param textChannel - The channel where the message should be delivered
  * @param messageContent - The MessageContent to send
  */
-async function sendMessage(textChannelID: string, messageContent: Eris.MessageContent): Promise<Eris.Message> {
+async function sendMessage(textChannelID: string, messageContent: Eris.AdvancedMessageContent): Promise<Eris.Message> {
+    const channel = state.client.getChannel(textChannelID) as Eris.TextChannel;
+
+    // only reply to message if has required permissions
+    if (!channel.permissionsOf(state.client.user.id).has("readMessageHistory")) {
+        if (messageContent.messageReferenceID) {
+            messageContent.messageReferenceID = null;
+        }
+    }
+
     try {
         return await state.client.createMessage(textChannelID, messageContent);
     } catch (e) {
