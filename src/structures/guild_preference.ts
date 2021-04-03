@@ -89,18 +89,13 @@ export default class GuildPreference {
         this.gameOptions = options || { ...GuildPreference.DEFAULT_OPTIONS };
     }
 
-    static fromGuild(guildID: string, json?: GuildPreference): GuildPreference {
-        if (!json) {
-            return new GuildPreference(guildID, { ...GuildPreference.DEFAULT_OPTIONS });
-        }
-        // eslint-disable-next-line prefer-destructuring
-        const gameOptions = { ...json.gameOptions };
+    static validateGameOptions(gameOptions: GameOptions): GameOptions {
+        gameOptions = { ...gameOptions };
+
         // apply default game option for empty
-        let gameOptionModified = false;
         for (const defaultOption in GuildPreference.DEFAULT_OPTIONS) {
             if (!(defaultOption in gameOptions)) {
                 gameOptions[defaultOption] = GuildPreference.DEFAULT_OPTIONS[defaultOption];
-                gameOptionModified = true;
             }
         }
 
@@ -108,13 +103,20 @@ export default class GuildPreference {
         for (const option in gameOptions) {
             if (!(option in GuildPreference.DEFAULT_OPTIONS)) {
                 delete gameOptions[option];
-                gameOptionModified = true;
             }
         }
-        const guildPreference = new GuildPreference(guildID, gameOptions);
-        if (gameOptionModified) {
-            guildPreference.updateGuildPreferences();
+
+        return gameOptions;
+    }
+    static fromGuild(guildID: string, json?: GuildPreference): GuildPreference {
+        if (!json) {
+            return new GuildPreference(guildID, { ...GuildPreference.DEFAULT_OPTIONS });
         }
+        const gameOptions = this.validateGameOptions(json.gameOptions);
+
+        const guildPreference = new GuildPreference(guildID, gameOptions);
+        guildPreference.updateGuildPreferences();
+
         return guildPreference;
     }
 
@@ -151,7 +153,7 @@ export default class GuildPreference {
         if (!preset) {
             throw new Error(`Preset ${presetName} not found`);
         }
-        this.gameOptions = JSON.parse(preset["game_options"]);
+        this.gameOptions = GuildPreference.validateGameOptions(JSON.parse(preset["game_options"]));
         await this.updateGuildPreferences();
     }
 

@@ -102,6 +102,9 @@
         ],
         "@typescript-eslint/dot-notation": [
             "off"
+        ],
+        "no-multiple-empty-lines": [
+            "warn"
         ]
     }
 }
