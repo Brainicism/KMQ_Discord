@@ -9,6 +9,7 @@ import { GameOption } from "../../types";
 
 const logger = _logger("preset");
 const PRESET_NAME_MAX_LENGTH = 25;
+const MAX_NUM_PRESETS = 20;
 
 enum PresetAction {
     LIST = "list",
@@ -108,6 +109,11 @@ export default class PresetCommand implements BaseCommand {
     }
 
     async savePreset(presetName: string, guildPreference: GuildPreference, messageContext: MessageContext) {
+        const presets = await guildPreference.listPresets();
+        if (presets.length > MAX_NUM_PRESETS) {
+            await sendErrorMessage(messageContext, { title: "Preset Error", description: `Each guild may only have up to ${MAX_NUM_PRESETS} presets. Please delete some before adding more.` });
+            return;
+        }
         if (presetName.length > PRESET_NAME_MAX_LENGTH) {
             await sendErrorMessage(messageContext, { title: "Preset Error", description: `Preset name must be shorter than ${PRESET_NAME_MAX_LENGTH} characters` });
             return;
