@@ -87,8 +87,8 @@ export default class PresetCommand implements BaseCommand {
     }
 
     async deletePreset(presetName: string, guildPreference: GuildPreference, messageContext: MessageContext) {
-        const deleted = await guildPreference.deletePreset(presetName);
-        if (!deleted) {
+        const deleteResult = await guildPreference.deletePreset(presetName);
+        if (!deleteResult) {
             logger.warn(`${getDebugLogHeader(messageContext)} | Tried to delete non-existent preset '${presetName}'`);
             await sendErrorMessage(messageContext, { title: "Preset Error", description: `Preset \`${presetName}\` doesn't exist` });
             return;
@@ -98,11 +98,11 @@ export default class PresetCommand implements BaseCommand {
     }
 
     async loadPreset(presetName: string, guildPreference: GuildPreference, messageContext: MessageContext) {
-        try {
-            await guildPreference.loadPreset(presetName);
+        const loadResult = await guildPreference.loadPreset(presetName);
+        if (loadResult) {
             sendOptionsMessage(messageContext, guildPreference, { option: GameOption.PRESET, reset: false });
             logger.info(`${getDebugLogHeader(messageContext)} | Preset '${presetName}' successfully loaded`);
-        } catch (e) {
+        } else {
             logger.warn(`${getDebugLogHeader(messageContext)} | Tried to load non-existent preset '${presetName}'`);
             await sendErrorMessage(messageContext, { title: "Preset Error", description: `Preset \`${presetName}\` doesn't exist` });
         }
@@ -118,11 +118,11 @@ export default class PresetCommand implements BaseCommand {
             await sendErrorMessage(messageContext, { title: "Preset Error", description: `Preset name must be shorter than ${PRESET_NAME_MAX_LENGTH} characters` });
             return;
         }
-        try {
-            await guildPreference.savePreset(presetName);
+        const saveResult = await guildPreference.savePreset(presetName);
+        if (saveResult) {
             logger.info(`${getDebugLogHeader(messageContext)} | Preset '${presetName}' successfully saved`);
             await sendInfoMessage(messageContext, { title: "Preset Loaded", description: `You can load this preset later with \`${process.env.BOT_PREFIX}preset load ${presetName}\``, thumbnailUrl: KmqImages.HAPPY });
-        } catch (e) {
+        } else {
             logger.warn(`${getDebugLogHeader(messageContext)} | Preset '${presetName}' already exists`);
             await sendErrorMessage(messageContext, { title: "Preset Error", description: `Preset \`${presetName}\` already exists. You can delete the old one with \`${process.env.BOT_PREFIX}preset delete ${presetName}\``, thumbnailUrl: KmqImages.DEAD });
         }

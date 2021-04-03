@@ -108,6 +108,13 @@ export default class GuildPreference {
 
         return gameOptions;
     }
+
+    /**
+     * Constructs a GuildPreference from a JSON payload
+     * @param guildID - The guild ID
+     * @param json - the JSON object representing the stored GameOption
+     * @returns a new GuildPreference object
+     */
     static fromGuild(guildID: string, json?: GuildPreference): GuildPreference {
         if (!json) {
             return new GuildPreference(guildID, { ...GuildPreference.DEFAULT_OPTIONS });
@@ -120,6 +127,7 @@ export default class GuildPreference {
         return guildPreference;
     }
 
+    /** @returns a list of saved game option presets by name */
     async listPresets(): Promise<string[]> {
         const presets = (await dbContext.kmq("game_option_presets")
             .select(["preset_name"])
@@ -127,6 +135,11 @@ export default class GuildPreference {
             .map((x) => x["preset_name"]);
         return presets;
     }
+
+    /**
+     * @param presetName - The game preset to be deleted
+     * @returns whether a preset was deleted
+     */
     async deletePreset(presetName: string): Promise<boolean> {
         const result = await dbContext.kmq("game_option_presets")
             .where("guild_id", "=", this.guildID)
@@ -135,26 +148,41 @@ export default class GuildPreference {
         return result !== 0;
     }
 
-    async savePreset(presetName: string) {
-        await dbContext.kmq("game_option_presets")
-            .insert({
-                guild_id: this.guildID,
-                preset_name: presetName,
-                game_options: JSON.stringify(this.gameOptions),
-            });
+    /**
+     * @param presetName - The name of the preset to be saved
+     * @returns whether the preset was saved
+     */
+    async savePreset(presetName: string): Promise<boolean> {
+        try {
+            await dbContext.kmq("game_option_presets")
+                .insert({
+                    guild_id: this.guildID,
+                    preset_name: presetName,
+                    game_options: JSON.stringify(this.gameOptions),
+                });
+            return true;
+        } catch (e) {
+            return false;
+        }
     }
 
-    async loadPreset(presetName: string) {
+    /**
+     * @param presetName - The name of the preset to be loaded
+     * @returns whether the preset was loaded
+     */
+    async loadPreset(presetName: string): Promise<boolean> {
         const preset = await dbContext.kmq("game_option_presets")
             .select(["game_options"])
             .where("guild_id", "=", this.guildID)
             .andWhere("preset_name", "=", presetName)
             .first();
+
         if (!preset) {
-            throw new Error(`Preset ${presetName} not found`);
+            return false;
         }
         this.gameOptions = GuildPreference.validateGameOptions(JSON.parse(preset["game_options"]));
         await this.updateGuildPreferences();
+        return true;
     }
 
     /**
