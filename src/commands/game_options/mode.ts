@@ -3,6 +3,7 @@ import _logger from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
 import { GameOption } from "../../types";
+import MessageContext from "../../structures/message_context";
 
 const logger = _logger("mode");
 
@@ -58,13 +59,13 @@ export default class ModeCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             guildPreference.resetModeType();
             logger.info(`${getDebugLogHeader(message)} | Mode type reset.`);
-            await sendOptionsMessage(message, guildPreference, { option: GameOption.MODE_TYPE, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.MODE_TYPE, reset: true });
             return;
         }
 
         const modeType = parsedMessage.components[0].toLowerCase() as ModeType;
         guildPreference.setModeType(modeType);
-        await sendOptionsMessage(message, guildPreference, { option: GameOption.MODE_TYPE, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.MODE_TYPE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Mode type set to ${modeType}`);
     }
 }

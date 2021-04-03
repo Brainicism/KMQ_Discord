@@ -3,6 +3,7 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { getDebugLogHeader, sendOptionsMessage } from "../../helpers/discord_utils";
 import { GameOption } from "../../types";
+import MessageContext from "../../structures/message_context";
 
 const logger = _logger("language");
 export enum LanguageType {
@@ -53,13 +54,13 @@ export default class LanguageCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             guildPreference.resetLanguageType();
             logger.info(`${getDebugLogHeader(message)} | Language type reset.`);
-            await sendOptionsMessage(message, guildPreference, { option: GameOption.LANGUAGE_TYPE, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.LANGUAGE_TYPE, reset: true });
             return;
         }
 
         const languageType = parsedMessage.components[0] as LanguageType;
         guildPreference.setLanguageType(languageType);
-        await sendOptionsMessage(message, guildPreference, { option: GameOption.LANGUAGE_TYPE, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.LANGUAGE_TYPE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Language type set to ${languageType}`);
     }
 }

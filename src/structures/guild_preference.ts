@@ -89,18 +89,13 @@ export default class GuildPreference {
         this.gameOptions = options || { ...GuildPreference.DEFAULT_OPTIONS };
     }
 
-    static fromGuild(guildID: string, json?: GuildPreference): GuildPreference {
-        if (!json) {
-            return new GuildPreference(guildID, { ...GuildPreference.DEFAULT_OPTIONS });
-        }
-        // eslint-disable-next-line prefer-destructuring
-        const gameOptions = { ...json.gameOptions };
+    static validateGameOptions(gameOptions: GameOptions): GameOptions {
+        gameOptions = { ...gameOptions };
+
         // apply default game option for empty
-        let gameOptionModified = false;
         for (const defaultOption in GuildPreference.DEFAULT_OPTIONS) {
             if (!(defaultOption in gameOptions)) {
                 gameOptions[defaultOption] = GuildPreference.DEFAULT_OPTIONS[defaultOption];
-                gameOptionModified = true;
             }
         }
 
@@ -108,14 +103,86 @@ export default class GuildPreference {
         for (const option in gameOptions) {
             if (!(option in GuildPreference.DEFAULT_OPTIONS)) {
                 delete gameOptions[option];
-                gameOptionModified = true;
             }
         }
-        const guildPreference = new GuildPreference(guildID, gameOptions);
-        if (gameOptionModified) {
-            guildPreference.updateGuildPreferences();
+
+        return gameOptions;
+    }
+
+    /**
+     * Constructs a GuildPreference from a JSON payload
+     * @param guildID - The guild ID
+     * @param json - the JSON object representing the stored GameOption
+     * @returns a new GuildPreference object
+     */
+    static fromGuild(guildID: string, json?: GuildPreference): GuildPreference {
+        if (!json) {
+            return new GuildPreference(guildID, { ...GuildPreference.DEFAULT_OPTIONS });
         }
+        const gameOptions = this.validateGameOptions(json.gameOptions);
+
+        const guildPreference = new GuildPreference(guildID, gameOptions);
+        guildPreference.updateGuildPreferences();
+
         return guildPreference;
+    }
+
+    /** @returns a list of saved game option presets by name */
+    async listPresets(): Promise<string[]> {
+        const presets = (await dbContext.kmq("game_option_presets")
+            .select(["preset_name"])
+            .where("guild_id", "=", this.guildID))
+            .map((x) => x["preset_name"]);
+        return presets;
+    }
+
+    /**
+     * @param presetName - The game preset to be deleted
+     * @returns whether a preset was deleted
+     */
+    async deletePreset(presetName: string): Promise<boolean> {
+        const result = await dbContext.kmq("game_option_presets")
+            .where("guild_id", "=", this.guildID)
+            .andWhere("preset_name", "=", presetName)
+            .del();
+        return result !== 0;
+    }
+
+    /**
+     * @param presetName - The name of the preset to be saved
+     * @returns whether the preset was saved
+     */
+    async savePreset(presetName: string): Promise<boolean> {
+        try {
+            await dbContext.kmq("game_option_presets")
+                .insert({
+                    guild_id: this.guildID,
+                    preset_name: presetName,
+                    game_options: JSON.stringify(this.gameOptions),
+                });
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    /**
+     * @param presetName - The name of the preset to be loaded
+     * @returns whether the preset was loaded
+     */
+    async loadPreset(presetName: string): Promise<boolean> {
+        const preset = await dbContext.kmq("game_option_presets")
+            .select(["game_options"])
+            .where("guild_id", "=", this.guildID)
+            .andWhere("preset_name", "=", presetName)
+            .first();
+
+        if (!preset) {
+            return false;
+        }
+        this.gameOptions = GuildPreference.validateGameOptions(JSON.parse(preset["game_options"]));
+        await this.updateGuildPreferences();
+        return true;
     }
 
     /**

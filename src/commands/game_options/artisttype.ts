@@ -57,7 +57,7 @@ export default class ArtistTypeCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             guildPreference.resetArtistType();
             logger.info(`${getDebugLogHeader(message)} | Artist type reset.`);
-            await sendOptionsMessage(message, guildPreference, { option: GameOption.ARTIST_TYPE, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.ARTIST_TYPE, reset: true });
             return;
         }
 
@@ -69,7 +69,7 @@ export default class ArtistTypeCommand implements BaseCommand {
 
         const artistType = parsedMessage.components[0] as ArtistType;
         guildPreference.setArtistType(artistType);
-        await sendOptionsMessage(message, guildPreference, { option: GameOption.ARTIST_TYPE, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.ARTIST_TYPE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Artist type set to ${artistType}`);
     }
 }

@@ -109,7 +109,7 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,profile`: Shows many games you've played + songs you've guessed
 - `,leaderboard`: Shows the global KMQ leaderboard
 - `,list`: Shows the currently selected groups for `,groups`,`,includes`, or `,excludes`
-
+- `,preset`: Save and load game option presents
 ## Game Option Commands 
 - `,cutoff`: Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen
 - `,limit`: Set a maximum number of results in the song query. This effectively sets the 'Top X number of songs' based on the selected filters

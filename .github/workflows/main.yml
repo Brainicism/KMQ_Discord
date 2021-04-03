@@ -36,7 +36,7 @@ jobs:
       - name: Install node dependencies
         run: yarn install --frozen-lockfile
       - name: npm run lint
-        run: npm run lint
+        run: npm run lint_ci
       - name: Copy .env for CI
         run: |
           echo "DB_USER=$DB_USER_CI" >> .env

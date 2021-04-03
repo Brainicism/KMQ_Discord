@@ -3,6 +3,7 @@ import _logger from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
 import { GameOption } from "../../types";
+import MessageContext from "../../structures/message_context";
 
 const logger = _logger("subunits");
 
@@ -55,13 +56,13 @@ export default class SubunitsCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             guildPreference.resetSubunitPreference();
             logger.info(`${getDebugLogHeader(message)} | Subunit preference reset.`);
-            await sendOptionsMessage(message, guildPreference, { option: GameOption.SUBUNIT_PREFERENCE, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SUBUNIT_PREFERENCE, reset: true });
             return;
         }
 
         const subunitPreference = parsedMessage.components[0].toLowerCase() as SubunitsPreference;
         guildPreference.setSubunitPreference(subunitPreference);
-        await sendOptionsMessage(message, guildPreference, { option: GameOption.SUBUNIT_PREFERENCE, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SUBUNIT_PREFERENCE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Subunit preference set to ${subunitPreference}`);
     }
 }

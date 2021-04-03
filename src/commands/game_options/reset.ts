@@ -2,6 +2,7 @@ import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { getDebugLogHeader, sendOptionsMessage } from "../../helpers/discord_utils";
+import MessageContext from "../../structures/message_context";
 
 const logger = _logger("reset");
 
@@ -28,6 +29,6 @@ export default class ResetCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         guildPreference.resetToDefault();
         logger.info(`${getDebugLogHeader(message)} | Reset to default guild preferences`);
-        await sendOptionsMessage(message, guildPreference, null);
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, null);
     }
 }

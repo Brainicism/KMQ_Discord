@@ -72,6 +72,7 @@ export enum GameOption {
     LANGUAGE_TYPE = "Language Type",
     SUBUNIT_PREFERENCE = "Subunit Preference",
     OST_PREFERENCE = "OST Preference",
+    PRESET = "Preset",
 }
 
 export enum EnvType {

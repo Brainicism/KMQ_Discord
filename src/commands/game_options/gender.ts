@@ -74,7 +74,7 @@ export default class GenderCommand implements BaseCommand {
         if (selectedGenders.length === 0) {
             guildPreference.resetGender();
             logger.info(`${getDebugLogHeader(message)} | Gender reset.`);
-            await sendOptionsMessage(message, guildPreference, { option: GameOption.GENDER, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GENDER, reset: true });
             return;
         }
 
@@ -95,7 +95,7 @@ export default class GenderCommand implements BaseCommand {
         } else {
             guildPreference.setGender(selectedGenders);
         }
-        await sendOptionsMessage(message, guildPreference, { option: GameOption.GENDER, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GENDER, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Genders set to ${guildPreference.getGender().join(", ")}`);
     }
 }

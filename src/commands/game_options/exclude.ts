@@ -36,7 +36,7 @@ export default class ExcludeCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             guildPreference.resetExcludes();
             logger.info(`${getDebugLogHeader(message)} | Excludes reset.`);
-            await sendOptionsMessage(message, guildPreference, { option: GameOption.EXCLUDE, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.EXCLUDE, reset: true });
             return;
         }
         if (guildPreference.isGroupsMode()) {
@@ -54,7 +54,7 @@ export default class ExcludeCommand implements BaseCommand {
         }
 
         guildPreference.setExcludes(matchedGroups);
-        await sendOptionsMessage(message, guildPreference, { option: GameOption.EXCLUDE, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.EXCLUDE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Excludes set to ${guildPreference.getDisplayedExcludesGroupNames()}`);
     }
 }
