@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/dot-notation */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import PHPUnserialize from "php-unserialize";
 import { URL } from "url";
@@ -17,7 +18,7 @@ const musicShows = {
 };
 const funFactFunctions = [recentMusicVideos, recentMilestone, recentMusicShowWin, musicShowWins, mostViewedGroups, mostLikedGroups, mostViewedVideo, mostLikedVideo,
     mostMusicVideos, yearWithMostDebuts, yearWithMostReleases, viewsByGender, mostViewedSoloArtist, viewsBySolo, bigThreeDominance, mostGaonFirsts,
-    mostGaonAppearances, historicalGaonWeekly, recentGaonWeekly];
+    mostGaonAppearances, historicalGaonWeekly, recentGaonWeekly, fanclubName, closeBirthdays];
 
 const kmqFactFunctions = [longestGame, mostGames, mostCorrectGuessed, globalTotalGames, recentGameSessions, recentGames, mostSongsGuessedPlayer,
     mostGamesPlayedPlayer, recentUniquePlayers, topLeveledPlayers];
@@ -320,6 +321,26 @@ async function bigThreeDominance(): Promise<string[]> {
     const bigThreeViews = result.reduce((prev, current) => prev + current.total_views, 0);
     const proportion = (100 * bigThreeViews) / totalViewsResult[0].total_views;
     return [`Fun Fact: BTS, Blackpink and Twice combined account for ${bigThreeViews.toLocaleString()} YouTube views, or ${proportion.toFixed(2)}%!`];
+}
+
+async function fanclubName(): Promise<Array<string>> {
+    const result = await dbContext.kmq("kpop_groups")
+        .select(["name", "fanclub"])
+        .where("fanclub", "!=", "")
+        .orderByRaw("RAND()")
+        .limit(10);
+
+    return result.map((x) => `Fun Fact: ${x.name}'s fanclub name is '${x.fanclub}'!`);
+}
+
+async function closeBirthdays(): Promise<Array<string>> {
+    const result = await dbContext.kmq("kpop_groups")
+        .select(dbContext.kmq.raw("name, MONTH(date_birth) AS birth_month, DATE_FORMAT(date_birth, '%M %e') as formatted_bday"))
+        .whereNotNull("date_birth")
+        .whereRaw("MONTH(date_birth) = MONTH(CURRENT_DATE())")
+        .limit(10);
+
+    return result.map((x) => `Fun Fact: ${x["name"]}'s birthday is this month on ${x["formatted_bday"]}!`);
 }
 
 async function longestGame(): Promise<string[]> {
