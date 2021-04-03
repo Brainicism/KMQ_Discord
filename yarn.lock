@@ -933,18 +933,18 @@ eris-reactions@^0.1.4:
   resolved "https://registry.yarnpkg.com/eris-reactions/-/eris-reactions-0.1.4.tgz#4b642f7411144f164b6097138c262eac6b03def1"
   integrity sha512-U2rMtfywnhh4TmqFcF7uo/ciyQN8vb9ptwSJMQs/uaY1a401f+t3sei1R3IR2gYqaFejJzgjTmzBMT6jIBPYYQ==
 
-"eris@github:brainicism/eris#541d1ea":
+"eris@https://github.com/Brainicism/eris.git#541d1ea":
   version "0.14.0"
-  resolved "https://codeload.github.com/brainicism/eris/tar.gz/541d1eaa9c79c3c3c4de3f47cda0e276c2f4b8df"
+  resolved "https://github.com/Brainicism/eris.git#541d1eaa9c79c3c3c4de3f47cda0e276c2f4b8df"
   dependencies:
     ws "^7.2.1"
   optionalDependencies:
     opusscript "^0.0.8"
     tweetnacl "^1.0.1"
 
-"erlpack@github:abalabahaha/erlpack#5d0064f":
+"erlpack@https://github.com/abalabahaha/erlpack.git#5d0064f":
   version "0.1.3"
-  resolved "https://codeload.github.com/abalabahaha/erlpack/tar.gz/5d0064f9e106841e1eead711a6451f99b0d289fd"
+  resolved "https://github.com/abalabahaha/erlpack.git#5d0064f9e106841e1eead711a6451f99b0d289fd"
   dependencies:
     bindings "^1.5.0"
     nan "^2.14.0"
