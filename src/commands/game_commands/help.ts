@@ -96,7 +96,7 @@ const helpMessage = async (message: GuildTextableMessage, action: string) => {
         await sendInfoMessage(MessageContext.fromMessage(message), {
             title: embedTitle,
             description: embedDesc,
-            footerText: embedFooter.text,
+            footerText: embedFooter ? embedFooter.text : null,
             thumbnailUrl: KmqImages.READING_BOOK,
         });
     }
