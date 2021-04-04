@@ -4,7 +4,7 @@ import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
 import dbContext from "../../database_context";
 import { EMBED_INFO_COLOR, getDebugLogHeader, sendInfoMessage } from "../../helpers/discord_utils";
-import { bold, friendlyFormattedDate } from "../../helpers/utils";
+import { friendlyFormattedDate } from "../../helpers/utils";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 
@@ -47,7 +47,7 @@ export default class NewsCommand implements BaseCommand {
                 username: message.author.username,
                 avatarUrl: message.author.avatarURL,
             },
-            title: bold("Updates"),
+            title: "Updates",
             description: news,
             thumbnailUrl: KmqImages.READING_BOOK,
             footerText: `Latest Song Update: ${friendlyFormattedDate(latestSongDate)}`,
