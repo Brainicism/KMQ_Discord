@@ -31,11 +31,11 @@ export default class TeamScoreboard extends Scoreboard {
      * @param pointsEarned - The amount of points awarded
      * @param expGain - The amount of EXP gained
      */
-    updateScoreboard(_winnerTag: string, winnerID: string, _avatarURL: string, pointsEarned: number, expGain: number) {
-        const correctGuesser = this.getPlayer(winnerID);
+    updateScoreboard(correctGuesserID: string, pointsEarned: number, expGain: number) {
+        const correctGuesser = this.getPlayer(correctGuesserID);
         correctGuesser.incrementScore(pointsEarned);
         correctGuesser.incrementExp(expGain);
-        const correctGuesserTeam = this.getTeamOfPlayer(winnerID);
+        const correctGuesserTeam = this.getTeamOfPlayer(correctGuesserID);
         const correctGuesserTeamScore = correctGuesserTeam.getScore();
         if (correctGuesserTeamScore === this.highestScore) {
             this.firstPlace.push(correctGuesserTeam);

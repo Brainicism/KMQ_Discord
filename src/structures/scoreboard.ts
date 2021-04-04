@@ -2,6 +2,7 @@ import Player from "./player";
 import { roundDecimal } from "../helpers/utils";
 import _logger from "../logger";
 import GuildPreference from "./guild_preference";
+import state from "../kmq";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = _logger("scoreboard");
@@ -60,28 +61,27 @@ export default class Scoreboard {
     }
 
     /**
-     * @param winnerTag - The Discord tag of the correct guesser
-     * @param winnerID  - The Discord ID of the correct guesser
-     * @param avatarURL - The avatar URL of the correct guesser
+     * @param correctGuesserID  - The Discord ID of the correct guesser
      * @param pointsEarned - The amount of points awarded
      * @param expGain - The amount of EXP gained
      */
-    updateScoreboard(winnerTag: string, winnerID: string, avatarURL: string, pointsEarned: number, expGain: number) {
-        if (!this.players[winnerID]) {
-            this.players[winnerID] = new Player(winnerTag, winnerID, avatarURL, pointsEarned);
-        } else {
-            this.players[winnerID].incrementScore(pointsEarned);
+    updateScoreboard(correctGuesserID: string, pointsEarned: number, expGain: number) {
+        if (!this.players[correctGuesserID]) {
+            this.players[correctGuesserID] = Player.fromUser(state.client.users.get(correctGuesserID));
         }
-        this.players[winnerID].incrementExp(expGain);
-        const winnerScore = this.players[winnerID].getScore();
+
+        this.players[correctGuesserID].incrementScore(pointsEarned);
+
+        this.players[correctGuesserID].incrementExp(expGain);
+        const winnerScore = this.players[correctGuesserID].getScore();
 
         if (winnerScore === this.highestScore) {
             // If user is tied for first, add them to the first place array
-            this.firstPlace.push(this.players[winnerID]);
+            this.firstPlace.push(this.players[correctGuesserID]);
         } else if (winnerScore > this.highestScore) {
             // If user is first, reset first place array and add them
             this.highestScore = winnerScore;
-            this.firstPlace = [this.players[winnerID]];
+            this.firstPlace = [this.players[correctGuesserID]];
         }
     }
 

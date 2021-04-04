@@ -3,6 +3,7 @@ import BaseCommand from "./commands/base_command";
 import GameSession from "./structures/game_session";
 import BotStatsPoster from "./helpers/bot_stats_poster";
 import { Gender } from "./commands/game_options/gender";
+import KmqMember from "./structures/kmq_member";
 
 export type GuildTextableMessage = Eris.Message<GuildTextableChannel>;
 
@@ -80,4 +81,10 @@ export enum EnvType {
     DEV = "development",
     DRY_RUN = "dry-run",
     TEST = "test",
+}
+
+export interface PlayerRoundResult {
+    player: KmqMember;
+    streak: number;
+    expGain: number;
 }

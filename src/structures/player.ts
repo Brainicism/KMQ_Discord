@@ -1,3 +1,6 @@
+import Eris from "eris";
+import { getUserTag } from "../helpers/discord_utils";
+
 export default class Player {
     /** The Discord tag of the player */
     public readonly name: string;
@@ -20,6 +23,10 @@ export default class Player {
         this.score = points;
         this.avatarURL = avatarURL;
         this.expGain = 0;
+    }
+
+    static fromUser(user: Eris.User) {
+        return new Player(user.username, getUserTag(user), user.avatarURL, 0);
     }
 
     /** @returns the player's Discord tag  */

@@ -1,6 +1,8 @@
 import { ModeType } from "../commands/game_options/mode";
 import state from "../kmq";
 import _logger from "../logger";
+import KmqMember from "./kmq_member";
+import Player from "./player";
 
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
@@ -68,6 +70,9 @@ export default class GameRound {
     /** List of players who have opted to skip the current GameRound */
     public skippers: Set<string>;
 
+    /** List of players who guessed correctly */
+    public readonly correctGuessers: Array<KmqMember>;
+
     /** Whether the GameRound has been skipped */
     public skipAchieved: boolean;
 
@@ -76,6 +81,9 @@ export default class GameRound {
 
     /** The base EXP for this GameRound */
     public baseExp: number;
+
+    /**  Whether the song has been guessed yet */
+    public finished: boolean;
 
     constructor(song: string, artist: string, videoID: string, year: number) {
         this.songName = song;
@@ -89,6 +97,8 @@ export default class GameRound {
         this.startedAt = Date.now();
         this.songYear = year;
         this.skippers = new Set();
+        this.correctGuessers = [];
+        this.finished = false;
     }
 
     /**
@@ -97,6 +107,14 @@ export default class GameRound {
      */
     userSkipped(userID: string) {
         this.skippers.add(userID);
+    }
+
+    /**
+     * Marks a user as having guessed correctly
+     * @param userID - The user ID of the correct guesser
+     */
+    userCorrect(userID: string) {
+        this.correctGuessers.push(KmqMember.fromUser(state.client.users.get(userID)));
     }
 
     /**

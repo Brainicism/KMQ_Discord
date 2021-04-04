@@ -5,13 +5,13 @@ import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
-    getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndOfRoundMessage, sendInfoMessage, getNumParticipants, checkBotIsAlone, getVoiceChannelFromMessage,
+    getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndOfRoundMessage, sendInfoMessage, getNumParticipants, checkBotIsAlone, getVoiceChannelFromMessage, getUserTag,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, getSongCount, endSession } from "../helpers/game_utils";
-import { delay, getAudioDurationInSeconds, isPowerHour, isWeekend } from "../helpers/utils";
+import { delay, getAudioDurationInSeconds, getOrdinalNum, isPowerHour, isWeekend } from "../helpers/utils";
 import state from "../kmq";
 import _logger from "../logger";
-import { QueriedSong, GuildTextableMessage } from "../types";
+import { QueriedSong, GuildTextableMessage, PlayerRoundResult } from "../types";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
 import Scoreboard from "./scoreboard";
@@ -26,6 +26,7 @@ import EliminationPlayer from "./elimination_player";
 import { KmqImages } from "../constants";
 import MessageContext from "./message_context";
 import KmqMember from "./kmq_member";
+import Player from "./player";
 
 const logger = _logger("game_session");
 const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
@@ -51,11 +52,8 @@ interface LastGuesser {
 
 export interface GuessResult {
     correct: boolean;
-    expGain?: number;
-    guesserUserID?: string;
+    correctGuessers?: Array<KmqMember>;
     pointsEarned?: number;
-    streak?: number;
-    remainingDuration?: number;
 }
 
 export default class GameSession {
@@ -162,25 +160,32 @@ export default class GameSession {
         if (this.gameRound === null) {
             return;
         }
-
+        const playerRoundResults: Array<PlayerRoundResult> = [];
         if (guessResult.correct) {
             // update guessing streaks
-            if (this.lastGuesser === null || this.lastGuesser.userID !== guessResult.guesserUserID) {
-                this.lastGuesser = { userID: guessResult.guesserUserID, streak: 1 };
+            if (this.lastGuesser === null || this.lastGuesser.userID !== guessResult.correctGuessers[0].id) {
+                this.lastGuesser = { userID: guessResult.correctGuessers[0].id, streak: 1 };
             } else {
                 this.lastGuesser.streak++;
             }
             // calculate xp gain
             const guessSpeed = Date.now() - this.gameRound.startedAt;
             this.guessTimes.push(guessSpeed);
-            const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(this.voiceChannelID), guessSpeed);
-            guessResult.expGain = expGain;
-            guessResult.streak = this.lastGuesser.streak;
-            logger.info(`${getDebugLogHeader(messageContext)} | Song correctly guessed. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
+
 
             // update scoreboard
-            const { author } = messageContext;
-            this.scoreboard.updateScoreboard(author.tag, author.id, author.avatarUrl, guessResult.pointsEarned, expGain);
+            for (const [idx, correctGuesser] of guessResult.correctGuessers.entries()) {
+                const guessPosition = idx + 1;
+                const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(this.voiceChannelID), guessSpeed, guessPosition);
+                this.scoreboard.updateScoreboard(correctGuesser.id, guessResult.pointsEarned, expGain);
+                if (idx === 0) {
+                    playerRoundResults.push({ player: correctGuesser, streak: this.lastGuesser.streak, expGain });
+                    logger.info(`${getDebugLogHeader(messageContext)} | Song correctly guessed 1st. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
+                } else {
+                    playerRoundResults.push({ player: correctGuesser, streak: 0, expGain });
+                    logger.info(`${getDebugLogHeader(messageContext)} | Song correctly guessed ${getOrdinalNum(guessPosition)}. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
+                }
+            }
         } else {
             this.lastGuesser = null;
         }
@@ -188,10 +193,9 @@ export default class GameSession {
         // calculate remaining game duration if applicable
         const currGameLength = (Date.now() - this.startedAt) / 60000;
         const remainingDuration = guildPreference.isDurationSet() ? (guildPreference.getDuration() - currGameLength) : null;
-        guessResult.remainingDuration = remainingDuration;
 
         if (messageContext) {
-            sendEndOfRoundMessage(messageContext, this.scoreboard, this.gameRound, guessResult);
+            sendEndOfRoundMessage(messageContext, this.scoreboard, this.gameRound, playerRoundResults, remainingDuration);
         }
 
         this.incrementSongCount(this.gameRound.videoID, guessResult.correct);
@@ -304,25 +308,30 @@ export default class GameSession {
 
         if (!this.guessEligible(message)) return;
 
-        const pointsEarned = this.checkGuess(message, guildPreference.getModeType());
+        const pointsEarned = this.checkGuess(message.author.id, message.content, guildPreference.getModeType());
         if (pointsEarned > 0) {
             this.correctGuesses++;
+            if (this.gameRound.finished) {
+                return;
+            }
+            this.gameRound.finished = true;
+            setTimeout(async () => {
+                // mark round as complete, so no more guesses can go through
+                this.endRound({ correct: true, correctGuessers: this.gameRound.correctGuessers, pointsEarned }, guildPreference, MessageContext.fromMessage(message));
 
-            // mark round as complete, so no more guesses can go through
-            this.endRound({ correct: true, guesserUserID: message.author.id, pointsEarned }, guildPreference, MessageContext.fromMessage(message));
+                // update game session's lastActive
+                const gameSession = state.gameSessions[this.guildID];
+                gameSession.lastActiveNow();
 
-            // update game session's lastActive
-            const gameSession = state.gameSessions[this.guildID];
-            gameSession.lastActiveNow();
+                this.stopGuessTimeout();
 
-            this.stopGuessTimeout();
+                // increment guild's song guess count
+                await dbContext.kmq("guild_preferences")
+                    .where("guild_id", this.guildID)
+                    .increment("songs_guessed", 1);
 
-            // increment guild's song guess count
-            await dbContext.kmq("guild_preferences")
-                .where("guild_id", this.guildID)
-                .increment("songs_guessed", 1);
-
-            this.startRound(guildPreference, MessageContext.fromMessage(message));
+                this.startRound(guildPreference, MessageContext.fromMessage(message));
+            }, 3000);
         }
     }
 
@@ -570,16 +579,21 @@ export default class GameSession {
 
     /**
      *
-     * @param message - The message to check for correct guess
+     * @param userID - The user ID of the user guessing
+     * @param guess - The user's guess
      * @param modeType - The guessing mode type to evaluate the guess against
      * @returns The number of points achieved for the guess
      */
-    private checkGuess(message: Eris.Message, modeType: ModeType): number {
+    private checkGuess(userID: string, guess: string, modeType: ModeType): number {
         if (!this.gameRound) return 0;
         if (this.gameType !== GameType.ELIMINATION) {
-            this.participants.add(message.author.id);
+            this.participants.add(userID);
         }
-        return this.gameRound.checkGuess(message.content, modeType);
+        const guessCorrect = this.gameRound.checkGuess(guess, modeType);
+        if (guessCorrect) {
+            this.gameRound.userCorrect(userID);
+        }
+        return guessCorrect;
     }
 
     /**
@@ -737,7 +751,7 @@ export default class GameSession {
      * @param guessSpeed - The time taken to guess correctly
      * @returns The amount of EXP gained based on the current game options
      */
-    private calculateExpGain(guildPreference: GuildPreference, baseExp: number, numParticipants: number, guessSpeed: number): number {
+    private calculateExpGain(guildPreference: GuildPreference, baseExp: number, numParticipants: number, guessSpeed: number, place: number): number {
         let expModifier = 1;
         // penalize/incentivize for number of participants from 0.75x to 1.25x
         expModifier *= numParticipants === 1 ? 0.75 : (0.0625 * (Math.min(numParticipants, 6)) + 0.875);
@@ -758,7 +772,7 @@ export default class GameSession {
             expModifier *= 1.2;
         }
 
-        return Math.floor(expModifier * baseExp);
+        return Math.floor((expModifier * baseExp) / place);
     }
 
     /**
