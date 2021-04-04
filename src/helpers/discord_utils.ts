@@ -7,7 +7,7 @@ import _logger from "../logger";
 import { endSession, getSongCount } from "./game_utils";
 import { getFact } from "../fact_generator";
 import { EmbedPayload, GameOption, GuildTextableMessage } from "../types";
-import { chunkArray, codeLine, bold, parseJsonFile, chooseRandom, chooseWeightedRandom, getOrdinalNum } from "./utils";
+import { chunkArray, codeLine, bold, parseJsonFile, chooseWeightedRandom, getOrdinalNum } from "./utils";
 import state from "../kmq";
 import { ModeType } from "../commands/game_options/mode";
 import Scoreboard from "../structures/scoreboard";
@@ -274,7 +274,7 @@ export async function sendEndGameMessage(textChannelID: string, gameSession: Gam
     } else {
         const winners = gameSession.scoreboard.getWinners();
         const embedFields = gameSession.scoreboard.getScoreboardEmbedFields().slice(0, 10);
-        const endGameMessage = Math.random() < 0.25 ? chooseRandom(endGameMessages.kmq) : chooseWeightedRandom(endGameMessages.game);
+        const endGameMessage = Math.random() < 0.45 ? chooseWeightedRandom(endGameMessages.kmq) : chooseWeightedRandom(endGameMessages.game);
         embedFields.push(
             {
                 name: endGameMessage.title,
