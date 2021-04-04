@@ -3,7 +3,6 @@ import * as uuid from "uuid";
 import BaseCommand, { CommandArgs } from "../base_command";
 import { getDebugChannel, sendInfoMessage, getVoiceChannelFromMessage } from "../../helpers/discord_utils";
 import { getGuildPreference, getSongCount } from "../../helpers/game_utils";
-import { bold } from "../../helpers/utils";
 import state from "../../kmq";
 import _logger from "../../logger";
 import { KmqImages } from "../../constants";
@@ -56,7 +55,7 @@ export default class DebugCommand implements BaseCommand {
             thumbnailUrl: KmqImages.READING_BOOK,
         });
         sendInfoMessage(new MessageContext(debugChannel.id), {
-            title: bold(`Debug Details for User: ${message.author.id}, Guild: ${message.guildID}`),
+            title: `Debug Details for User: ${message.author.id}, Guild: ${message.guildID}`,
             footerText: debugID,
             fields,
             timestamp: new Date(),

@@ -4,7 +4,7 @@ import dbContext from "../../database_context";
 import { getDebugLogHeader, getUserTag, sendInfoMessage } from "../../helpers/discord_utils";
 import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
-import { bold, friendlyFormattedDate } from "../../helpers/utils";
+import { friendlyFormattedDate } from "../../helpers/utils";
 import { CUM_EXP_TABLE } from "../../structures/game_session";
 import MessageContext from "../../structures/message_context";
 
@@ -141,7 +141,7 @@ export default class ProfileCommand implements BaseCommand {
             }];
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: bold(`${getUserTag(requestedPlayer)}`),
+            title: getUserTag(requestedPlayer),
             fields,
             timestamp: new Date(),
         });

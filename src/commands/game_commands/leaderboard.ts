@@ -4,7 +4,7 @@ import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
 import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import { getRankNameByLevel } from "./profile";
-import { bold, chooseRandom } from "../../helpers/utils";
+import { chooseRandom } from "../../helpers/utils";
 import state from "../../kmq";
 import { GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
@@ -173,7 +173,7 @@ export default class LeaderboardCommand implements BaseCommand {
         const leaderboardType = serverSpecific ? `${state.client.guilds.get(message.guildID).name}'s` : "Global";
         const leaderboardTitle = `${leaderboardType} Leaderboard (Page ${pageOffset + 1})`;
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: bold(leaderboardTitle),
+            title: leaderboardTitle,
             fields,
             timestamp: new Date(),
             thumbnailUrl: KmqImages.THUMBS_UP,

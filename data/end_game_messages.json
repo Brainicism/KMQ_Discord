@@ -9,12 +9,17 @@
             "message": "Is a song from the early 2000s showing up in your 2017-2020 game? Tell us on the official KMQ server!"
         },
         {
-            "title": "Beep Boop",
-            "message": "Did you know KMQ is open source? [Check us out on Github and give us a star!](https://github.com/Brainicism/KMQ_Discord/)"
+            "title": "Beep Boop 🤖",
+            "message": "Did you know KMQ is open source? [Check us out on GitHub and give us a star!](https://github.com/Brainicism/KMQ_Discord/)"
         },
         {
             "title": "Like KMQ?",
             "message": "Give us a vote and leave a review on [Top.GG!](https://top.gg/bot/508759831755096074)"
+        },
+        {
+            "title": "Check out our Discord server!",
+            "message": "Looking for new friends to play KMQ with, or want to play against the best of the best? Feel free to [come by](https://discord.gg/RCuzwYV) and say hi!",
+            "weight": 5
         }
     ],
     "game": [

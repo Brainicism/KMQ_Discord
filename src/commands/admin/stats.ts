@@ -5,7 +5,6 @@ import {
     getDebugLogHeader, sendInfoMessage,
 } from "../../helpers/discord_utils";
 import dbContext from "../../database_context";
-import { bold } from "../../helpers/utils";
 import _logger from "../../logger";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
@@ -102,7 +101,7 @@ export default class SkipCommand implements BaseCommand {
 
         logger.info(`${getDebugLogHeader(message)} | Stats retrieved`);
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: bold("Bot Stats"),
+            title: "Bot Stats",
             fields,
             footerText: "'Recent' statistics represent data from last 24 hours.",
             timestamp: new Date(),

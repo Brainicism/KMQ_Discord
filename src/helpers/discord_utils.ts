@@ -7,7 +7,7 @@ import _logger from "../logger";
 import { endSession, getSongCount } from "./game_utils";
 import { getFact } from "../fact_generator";
 import { EmbedPayload, GameOption, GuildTextableMessage } from "../types";
-import { chunkArray, codeLine, bold, parseJsonFile, chooseRandom, chooseWeightedRandom, getOrdinalNum } from "./utils";
+import { chunkArray, codeLine, bold, parseJsonFile, chooseWeightedRandom, getOrdinalNum } from "./utils";
 import state from "../kmq";
 import { ModeType } from "../commands/game_options/mode";
 import Scoreboard from "../structures/scoreboard";
@@ -155,7 +155,7 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
     const fact = Math.random() <= 0.05 ? getFact() : null;
 
     const emptyScoreBoard = scoreboard.isEmpty();
-    const description = `${guessResult.correct ? (`**${messageContext.author.username}** ${guessResult.streak >= 5 ? `(🔥 ${guessResult.streak})` : ""} guessed correctly  (+${guessResult.expGain} xp)`) : "Nobody got it."}\nhttps://youtube.com/watch?v=${gameRound.videoID} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
+    const description = `${guessResult.correct ? (`**${messageContext.author.username}** ${guessResult.streak >= 5 ? `(🔥 ${guessResult.streak})` : ""} guessed correctly  (+${guessResult.expGain} xp)`) : "Nobody got it."}\nhttps://youtu.be/${gameRound.videoID} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
     const fields = scoreboard.getScoreboardEmbedFields().slice(0, 10);
     if (fact) {
         fields.push({
@@ -274,7 +274,7 @@ export async function sendEndGameMessage(textChannelID: string, gameSession: Gam
     } else {
         const winners = gameSession.scoreboard.getWinners();
         const embedFields = gameSession.scoreboard.getScoreboardEmbedFields().slice(0, 10);
-        const endGameMessage = Math.random() < 0.25 ? chooseRandom(endGameMessages.kmq) : chooseWeightedRandom(endGameMessages.game);
+        const endGameMessage = Math.random() < 0.5 ? chooseWeightedRandom(endGameMessages.kmq) : chooseWeightedRandom(endGameMessages.game);
         embedFields.push(
             {
                 name: endGameMessage.title,
@@ -474,6 +474,10 @@ export async function textPermissionsCheck(message: GuildTextableMessage, channe
  * @returns whether the bot is alone 😔 ends the gameSession if it does
  */
 export function checkBotIsAlone(gameSession: GameSession, channel: Eris.VoiceChannel): boolean {
+    if (!channel) {
+        return true;
+    }
+
     if (channel.voiceMembers.size === 1 && channel.voiceMembers.has(state.client.user.id)) {
         if (gameSession) {
             logger.info(`gid: ${channel.guild.id} | Bot is only user left, leaving voice...`);
