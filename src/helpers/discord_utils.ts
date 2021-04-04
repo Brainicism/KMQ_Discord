@@ -155,7 +155,7 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
     const fact = Math.random() <= 0.05 ? getFact() : null;
 
     const emptyScoreBoard = scoreboard.isEmpty();
-    const description = `${guessResult.correct ? (`**${messageContext.author.username}** ${guessResult.streak >= 5 ? `(🔥 ${guessResult.streak})` : ""} guessed correctly  (+${guessResult.expGain} xp)`) : "Nobody got it."}\nhttps://youtube.com/watch?v=${gameRound.videoID} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
+    const description = `${guessResult.correct ? (`**${messageContext.author.username}** ${guessResult.streak >= 5 ? `(🔥 ${guessResult.streak})` : ""} guessed correctly  (+${guessResult.expGain} xp)`) : "Nobody got it."}\nhttps://youtu.be/${gameRound.videoID} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
     const fields = scoreboard.getScoreboardEmbedFields().slice(0, 10);
     if (fact) {
         fields.push({
