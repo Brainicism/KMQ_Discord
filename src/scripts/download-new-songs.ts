@@ -157,24 +157,20 @@ const downloadNewSongs = async (limit?: number) => {
     let songsToDownload = limit ? allSongs.slice(0, limit) : allSongs.slice();
     let downloadCount = 0;
     let deadLinksSkipped = 0;
+    const knownDeadIDs = new Set((await dbContext.kmq("dead_links")
+        .select("vlink"))
+        .map((x) => x.vlink));
+
     logger.info("Total songs in database:", allSongs.length);
     songsToDownload = songsToDownload.filter((x) => !fs.existsSync(path.join(process.env.SONG_DOWNLOAD_DIR, `${x.youtubeLink}.ogg`)));
+    songsToDownload = songsToDownload.filter((x) => !knownDeadIDs.has(x.youtubeLink));
     logger.info("Total songs to be downloaded:", songsToDownload.length);
 
     // update current list of non-downloaded songs
     await updateNotDownloaded(allSongs);
 
-    const knownDeadIDs = new Set((await dbContext.kmq("dead_links")
-        .select("vlink"))
-        .map((x) => x.vlink));
-
     for (const song of songsToDownload) {
-        if (knownDeadIDs.has(song.youtubeLink)) {
-            deadLinksSkipped++;
-            continue;
-        }
-
-        logger.info(`Downloading song: '${song.name}' by ${song.artist} | ${song.youtubeLink} (${downloadCount + 1}/${songsToDownload.length - knownDeadIDs.size})`);
+        logger.info(`Downloading song: '${song.name}' by ${song.artist} | ${song.youtubeLink} (${downloadCount + 1}/${songsToDownload.length})`);
         try {
             await retryJob(downloadSong, [song.youtubeLink], 1, true, 5000);
         } catch (err) {
