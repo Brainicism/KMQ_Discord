@@ -2,7 +2,6 @@ import { ModeType } from "../commands/game_options/mode";
 import state from "../kmq";
 import _logger from "../logger";
 import KmqMember from "./kmq_member";
-import Player from "./player";
 
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape

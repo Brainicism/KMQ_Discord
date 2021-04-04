@@ -1,5 +1,5 @@
-import Eris from "eris";
 import { getUserTag } from "../helpers/discord_utils";
+import state from "../kmq";
 
 export default class Player {
     /** The Discord tag of the player */
@@ -25,7 +25,8 @@ export default class Player {
         this.expGain = 0;
     }
 
-    static fromUser(user: Eris.User) {
+    static fromUserID(userID: string) {
+        const user = state.client.users.get(userID);
         return new Player(user.username, getUserTag(user), user.avatarURL, 0);
     }
 

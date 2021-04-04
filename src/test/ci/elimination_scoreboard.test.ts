@@ -20,7 +20,7 @@ describe("score/xp updating", () => {
             it("should not affect their lives", () => {
                 scoreboard.addPlayer(userIDs[0], "yeonwoo#4747", "someurl");
                 for (let i = 0; i < 20; i++) {
-                    scoreboard.updateScoreboard("yeonwoo#4785", userIDs[0], "someurl", 1, 0);
+                    scoreboard.updateScoreboard(userIDs[0], 1, 0);
                     assert.strictEqual(scoreboard.getPlayerLives(userIDs[0]), 10);
                 }
             });
@@ -31,7 +31,7 @@ describe("score/xp updating", () => {
         describe("one person guesses correctly multiple times", () => {
             it("should decrement every other user's scores", () => {
                 for (let i = 0; i < 5; i++) {
-                    scoreboard.updateScoreboard("irene#1234", userIDs[0], "someurl", 1, 50);
+                    scoreboard.updateScoreboard(userIDs[0], 1, 50);
                 }
                 assert.strictEqual(scoreboard.getPlayerLives(userIDs[0]), DEFAULT_LIVES);
                 assert.strictEqual(scoreboard.getPlayerLives(userIDs[1]), DEFAULT_LIVES - 5);
@@ -41,12 +41,12 @@ describe("score/xp updating", () => {
 
         describe("each player guesses correctly a different amount of times", () => {
             it("should decrease each player's score by the amount of guesses of every other player", () => {
-                scoreboard.updateScoreboard("irene#1234", userIDs[0], "someurl", 1, 50);
-                scoreboard.updateScoreboard("irene#1234", userIDs[0], "someurl", 1, 50);
-                scoreboard.updateScoreboard("seulgi#7854", userIDs[1], "someurl", 1, 50);
-                scoreboard.updateScoreboard("seulgi#7854", userIDs[1], "someurl", 1, 50);
-                scoreboard.updateScoreboard("seulgi#7854", userIDs[1], "someurl", 1, 50);
-                scoreboard.updateScoreboard("joy#4144", userIDs[2], "someurl", 1, 50);
+                scoreboard.updateScoreboard(userIDs[0], 1, 50);
+                scoreboard.updateScoreboard(userIDs[0], 1, 50);
+                scoreboard.updateScoreboard(userIDs[1], 1, 50);
+                scoreboard.updateScoreboard(userIDs[1], 1, 50);
+                scoreboard.updateScoreboard(userIDs[1], 1, 50);
+                scoreboard.updateScoreboard(userIDs[2], 1, 50);
                 assert.strictEqual(scoreboard.getPlayerLives(userIDs[0]), DEFAULT_LIVES - 4);
                 assert.strictEqual(scoreboard.getPlayerLives(userIDs[1]), DEFAULT_LIVES - 3);
                 assert.strictEqual(scoreboard.getPlayerLives(userIDs[2]), DEFAULT_LIVES - 5);
@@ -70,7 +70,7 @@ describe("winner detection", () => {
     describe("single player, has guessed at least once", () => {
         const userID = "12345";
         it("should return the single player", () => {
-            scoreboard.updateScoreboard("minju#7489", userID, "someurl", 10, 0);
+            scoreboard.updateScoreboard(userID, 10, 0);
             assert.strictEqual(scoreboard.getWinners().length, 1);
             assert.strictEqual(scoreboard.getWinners()[0].getID(), userID);
         });
@@ -78,9 +78,9 @@ describe("winner detection", () => {
 
     describe("multiple players, has different number of lives", () => {
         it("should return the player with most number of lives", () => {
-            scoreboard.updateScoreboard("minju#7489", userIDs[0], "someurl", 1, 0);
-            scoreboard.updateScoreboard("minju#7489", userIDs[0], "someurl", 1, 0);
-            scoreboard.updateScoreboard("sakura#5478", userIDs[1], "someurl", 1, 0);
+            scoreboard.updateScoreboard(userIDs[0], 1, 0);
+            scoreboard.updateScoreboard(userIDs[0], 1, 0);
+            scoreboard.updateScoreboard(userIDs[1], 1, 0);
             assert.strictEqual(scoreboard.getWinners().length, 1);
             assert.strictEqual(scoreboard.getWinners()[0].getID(), userIDs[0]);
         });
@@ -88,11 +88,11 @@ describe("winner detection", () => {
 
     describe("multiple players, tied score", () => {
         it("should return the two tied players", () => {
-            scoreboard.updateScoreboard("minju#7489", userIDs[0], "someurl", 1, 0);
-            scoreboard.updateScoreboard("sakura#5478", userIDs[1], "someurl", 1, 0);
-            scoreboard.updateScoreboard("sakura#5478", userIDs[1], "someurl", 1, 0);
-            scoreboard.updateScoreboard("yuri#4444", userIDs[2], "someurl", 1, 0);
-            scoreboard.updateScoreboard("yuri#4444", userIDs[2], "someurl", 1, 0);
+            scoreboard.updateScoreboard(userIDs[0], 1, 0);
+            scoreboard.updateScoreboard(userIDs[1], 1, 0);
+            scoreboard.updateScoreboard(userIDs[1], 1, 0);
+            scoreboard.updateScoreboard(userIDs[2], 1, 0);
+            scoreboard.updateScoreboard(userIDs[2], 1, 0);
             assert.strictEqual(scoreboard.getWinners().length, 2);
             assert.deepStrictEqual(scoreboard.getWinners().map((x) => x.getID()), [userIDs[1], userIDs[2]]);
         });

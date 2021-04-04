@@ -2,7 +2,6 @@ import Player from "./player";
 import { roundDecimal } from "../helpers/utils";
 import _logger from "../logger";
 import GuildPreference from "./guild_preference";
-import state from "../kmq";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = _logger("scoreboard");
@@ -67,7 +66,7 @@ export default class Scoreboard {
      */
     updateScoreboard(correctGuesserID: string, pointsEarned: number, expGain: number) {
         if (!this.players[correctGuesserID]) {
-            this.players[correctGuesserID] = Player.fromUser(state.client.users.get(correctGuesserID));
+            this.players[correctGuesserID] = Player.fromUserID(correctGuesserID);
         }
 
         this.players[correctGuesserID].incrementScore(pointsEarned);

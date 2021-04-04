@@ -5,7 +5,7 @@ import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
-    getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndOfRoundMessage, sendInfoMessage, getNumParticipants, checkBotIsAlone, getVoiceChannelFromMessage, getUserTag,
+    getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndOfRoundMessage, sendInfoMessage, getNumParticipants, checkBotIsAlone, getVoiceChannelFromMessage,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, getSongCount, endSession } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds, getOrdinalNum, isPowerHour, isWeekend } from "../helpers/utils";
@@ -26,7 +26,6 @@ import EliminationPlayer from "./elimination_player";
 import { KmqImages } from "../constants";
 import MessageContext from "./message_context";
 import KmqMember from "./kmq_member";
-import Player from "./player";
 
 const logger = _logger("game_session");
 const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
@@ -316,6 +315,7 @@ export default class GameSession {
             }
             this.gameRound.finished = true;
             setTimeout(async () => {
+                if (!this.gameRound) return;
                 // mark round as complete, so no more guesses can go through
                 this.endRound({ correct: true, correctGuessers: this.gameRound.correctGuessers, pointsEarned }, guildPreference, MessageContext.fromMessage(message));
 
