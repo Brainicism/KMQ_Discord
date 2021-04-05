@@ -21,6 +21,7 @@ import { KmqImages } from "../constants";
 import MessageContext from "../structures/message_context";
 import { OstPreference } from "../commands/game_options/ost";
 import { ReleaseType } from "../commands/game_options/release";
+import KmqMember from "../structures/kmq_member";
 
 const endGameMessages = parseJsonFile(path.resolve(__dirname, "../../data/end_game_messages.json"));
 
@@ -160,9 +161,13 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
         correctDescription += (`**${playerRoundResults[0].player.tag}** ${playerRoundResults[0].streak >= 5 ? `(🔥 ${playerRoundResults[0].streak})` : ""} guessed correctly  (+${playerRoundResults[0].expGain} xp)`);
         if (playerRoundResults.length > 1) {
             const runnerUps = playerRoundResults.slice(1);
-            const runnerUpsDescription = runnerUps
+            let runnerUpsDescription = runnerUps
+                .map((x) => `${x.player.tag} (+${x.expGain} xp)`)
                 .slice(0, 10)
-                .map((x) => `${x.player.tag} (+${x.expGain} xp)`);
+                .join("\n");
+            if (runnerUps.length >= 10) {
+                runnerUpsDescription += "\nand many others...";
+            }
             correctDescription += `\n\n**Runner Ups**\n${runnerUpsDescription}`;
         }
     }
