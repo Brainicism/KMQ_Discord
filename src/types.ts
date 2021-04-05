@@ -74,6 +74,7 @@ export enum GameOption {
     SUBUNIT_PREFERENCE = "Subunit Preference",
     OST_PREFERENCE = "OST Preference",
     PRESET = "Preset",
+    MULTIGUESS = "Multiguess",
 }
 
 export enum EnvType {

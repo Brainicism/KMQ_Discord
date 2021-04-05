@@ -26,6 +26,7 @@ import EliminationPlayer from "./elimination_player";
 import { KmqImages } from "../constants";
 import MessageContext from "./message_context";
 import KmqMember from "./kmq_member";
+import { MultiGuessType } from "../commands/game_options/multiguess";
 
 const logger = _logger("game_session");
 const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
@@ -171,7 +172,6 @@ export default class GameSession {
             const guessSpeed = Date.now() - this.gameRound.startedAt;
             this.guessTimes.push(guessSpeed);
 
-
             // update scoreboard
             for (const [idx, correctGuesser] of guessResult.correctGuessers.entries()) {
                 const guessPosition = idx + 1;
@@ -314,24 +314,24 @@ export default class GameSession {
                 return;
             }
             this.gameRound.finished = true;
-            setTimeout(async () => {
-                if (!this.gameRound) return;
-                // mark round as complete, so no more guesses can go through
-                this.endRound({ correct: true, correctGuessers: this.gameRound.correctGuessers, pointsEarned }, guildPreference, MessageContext.fromMessage(message));
 
-                // update game session's lastActive
-                const gameSession = state.gameSessions[this.guildID];
-                gameSession.lastActiveNow();
+            await delay(guildPreference.getMultiGuessType() === MultiGuessType.ON ? 3000 : 0);
+            if (!this.gameRound) return;
+            // mark round as complete, so no more guesses can go through
+            this.endRound({ correct: true, correctGuessers: this.gameRound.correctGuessers, pointsEarned }, guildPreference, MessageContext.fromMessage(message));
 
-                this.stopGuessTimeout();
+            // update game session's lastActive
+            const gameSession = state.gameSessions[this.guildID];
+            gameSession.lastActiveNow();
 
-                // increment guild's song guess count
-                await dbContext.kmq("guild_preferences")
-                    .where("guild_id", this.guildID)
-                    .increment("songs_guessed", 1);
+            this.stopGuessTimeout();
 
-                this.startRound(guildPreference, MessageContext.fromMessage(message));
-            }, 3000);
+            // increment guild's song guess count
+            await dbContext.kmq("guild_preferences")
+                .where("guild_id", this.guildID)
+                .increment("songs_guessed", 1);
+
+            this.startRound(guildPreference, MessageContext.fromMessage(message));
         }
     }
 

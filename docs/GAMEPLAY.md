@@ -131,3 +131,4 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,duration`: Sets the maximum length of a KMQ game
 - `,ost`: Includes or excludes OST music videos
 - `,release`: Specify whether only official releases are played, or include dance practices + acoustic versions + remixes, etc.
+- `,multiguess`: Choose whether to allow multiple players to guess correctly for a single round

@@ -21,7 +21,7 @@ import { KmqImages } from "../constants";
 import MessageContext from "../structures/message_context";
 import { OstPreference } from "../commands/game_options/ost";
 import { ReleaseType } from "../commands/game_options/release";
-import KmqMember from "../structures/kmq_member";
+import { MultiGuessType } from "../commands/game_options/multiguess";
 
 const endGameMessages = parseJsonFile(path.resolve(__dirname, "../../data/end_game_messages.json"));
 
@@ -160,15 +160,15 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
     if (correctGuess) {
         correctDescription += (`**${playerRoundResults[0].player.tag}** ${playerRoundResults[0].streak >= 5 ? `(🔥 ${playerRoundResults[0].streak})` : ""} guessed correctly  (+${playerRoundResults[0].expGain} xp)`);
         if (playerRoundResults.length > 1) {
-            const runnerUps = playerRoundResults.slice(1);
-            let runnerUpsDescription = runnerUps
+            const runnersUp = playerRoundResults.slice(1);
+            let runnersUpDescription = runnersUp
                 .map((x) => `${x.player.tag} (+${x.expGain} xp)`)
                 .slice(0, 10)
                 .join("\n");
-            if (runnerUps.length >= 10) {
-                runnerUpsDescription += "\nand many others...";
+            if (runnersUp.length >= 10) {
+                runnersUpDescription += "\nand many others...";
             }
-            correctDescription += `\n\n**Runner Ups**\n${runnerUpsDescription}`;
+            correctDescription += `\n\n**Runners Up**\n${runnersUpDescription}`;
         }
     }
     const description = `${correctGuess ? correctDescription : "Nobody got it."}\nhttps://youtu.be/${gameRound.videoID} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
@@ -237,9 +237,11 @@ export async function sendOptionsMessage(messageContext: MessageContext, guildPr
     };
     optionStrings[GameOption.OST_PREFERENCE] = `${ostPreferenceDisplayStrings[guildPreference.getOstPreference()]}`;
     optionStrings[GameOption.RELEASE_TYPE] = `${guildPreference.getReleaseType() === ReleaseType.OFFICIAL ? "only official song releases" : "all songs including dance practices, acoustic versions, remixes, etc"}`;
+    optionStrings[GameOption.MULTIGUESS] = guildPreference.getMultiGuessType() === MultiGuessType.ON ? "Multiple players are able to guess correctly" : "";
 
     for (const gameOption of Object.keys(optionStrings)) {
         const gameOptionString = optionStrings[gameOption];
+        if (!gameOptionString) continue;
         optionStrings[gameOption] = (updatedOption && updatedOption.option) === gameOption ? bold(gameOptionString) : codeLine(gameOptionString);
     }
 
@@ -262,7 +264,8 @@ export async function sendOptionsMessage(messageContext: MessageContext, guildPr
                 \nPlaying \`${guildPreference.getLanguageType()}\` language songs.\
                 ${guildPreference.isDurationSet() ? `\nThe game will automatically end after \`${guildPreference.getDuration()}\` minutes from the time the game starts.` : ""}\
                 \n${optionStrings[GameOption.OST_PREFERENCE]} OST songs.\
-                \nPlaying ${optionStrings[GameOption.RELEASE_TYPE]}.`,
+                \nPlaying ${optionStrings[GameOption.RELEASE_TYPE]}.\
+                \n${optionStrings[GameOption.MULTIGUESS]}`,
             footerText: footerText !== null ? footerText : null,
             thumbnailUrl: KmqImages.LISTENING,
         });

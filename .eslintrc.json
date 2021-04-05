@@ -108,6 +108,9 @@
         ],
         "padded-blocks": [
             "warn"
+        ],
+        "no-multi-str": [
+            "off"
         ]
     }
 }
