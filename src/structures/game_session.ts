@@ -309,7 +309,6 @@ export default class GameSession {
 
         const pointsEarned = this.checkGuess(message.author.id, message.content, guildPreference.getModeType());
         if (pointsEarned > 0) {
-            this.correctGuesses++;
             if (this.gameRound.finished) {
                 return;
             }
@@ -319,6 +318,7 @@ export default class GameSession {
             if (!this.gameRound) return;
             // mark round as complete, so no more guesses can go through
             this.endRound({ correct: true, correctGuessers: this.gameRound.correctGuessers, pointsEarned }, guildPreference, MessageContext.fromMessage(message));
+            this.correctGuesses++;
 
             // update game session's lastActive
             const gameSession = state.gameSessions[this.guildID];
