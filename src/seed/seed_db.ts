@@ -14,8 +14,12 @@ import dbContext, { DatabaseContext, getDatabaseAgnosticContext } from "../datab
 config({ path: path.resolve(__dirname, "../../.env") });
 const fileUrl = "http://kpop.daisuki.com.br/download.php";
 const logger: Logger = _logger("seed_db");
-const databaseDownloadDir = process.env.DAISUKI_DUMP_DIR;
 const overridesFilePath = path.join(__dirname, "../../sql/kpop_videos_overrides.sql");
+
+const databaseDownloadDir = path.join(__dirname, "../../kpop_db");
+if (!fs.existsSync(databaseDownloadDir)) {
+    fs.mkdirSync(databaseDownloadDir);
+}
 
 program
     .option("-p, --skip-pull", "Skip re-pull of Daisuki database dump", false)
