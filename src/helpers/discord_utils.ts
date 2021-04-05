@@ -493,6 +493,10 @@ export async function textPermissionsCheck(message: GuildTextableMessage, channe
  * @returns whether the bot is alone 😔 ends the gameSession if it does
  */
 export function checkBotIsAlone(gameSession: GameSession, channel: Eris.VoiceChannel): boolean {
+    if (!channel) {
+        return true;
+    }
+
     if (channel.voiceMembers.size === 1 && channel.voiceMembers.has(state.client.user.id)) {
         if (gameSession) {
             logger.info(`gid: ${channel.guild.id} | Bot is only user left, leaving voice...`);
