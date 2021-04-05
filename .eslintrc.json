@@ -111,6 +111,9 @@
         ],
         "no-multi-str": [
             "off"
+        ],
+        "linebreak-style": [
+            "warn"
         ]
     }
 }
