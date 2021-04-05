@@ -105,6 +105,12 @@
         ],
         "no-multiple-empty-lines": [
             "warn"
+        ],
+        "padded-blocks": [
+            "warn"
+        ],
+        "no-multi-str": [
+            "off"
         ]
     }
 }

@@ -43,18 +43,20 @@ export default class EliminationScoreboard extends Scoreboard {
     }
 
     /**
-     * @param _winnerTag - Unused
-     * @param winnerID - The Discord ID of the person who guessed correctly
-     * @param _avatarURL - Unused
+     * @param correctGuesserID - The Discord ID of the person who guessed correctly
      * @param _pointsEarned - Unused
+     * @param expGain - The amount of EXP gained
+     * @param firstGuess - Whether this player was the first to guess
      */
-    updateScoreboard(_winnerTag: string, winnerID: string, _avatarURL: string, _pointsEarned: number, expGain: number) {
+    updateScoreboard(correctGuesserID: string, _pointsEarned: number, expGain: number, firstGuess: boolean) {
+        const correctGuesser = this.players[correctGuesserID];
+        correctGuesser.incrementExp(expGain);
+        if (!firstGuess) return;
+
         let maxLives = -1;
         for (const player of Object.values(this.players)) {
-            if (player.getID() !== winnerID) {
+            if (player.getID() !== correctGuesserID) {
                 player.decrementLives();
-            } else {
-                player.incrementExp(expGain);
             }
             if (player.getLives() === maxLives) {
                 this.firstPlace.push(player);

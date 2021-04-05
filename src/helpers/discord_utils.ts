@@ -2,11 +2,11 @@ import Eris, { EmbedOptions, TextableChannel } from "eris";
 import EmbedPaginator from "eris-pagination";
 import path from "path";
 import GuildPreference from "../structures/guild_preference";
-import GameSession, { GuessResult } from "../structures/game_session";
+import GameSession from "../structures/game_session";
 import _logger from "../logger";
 import { endSession, getSongCount } from "./game_utils";
 import { getFact } from "../fact_generator";
-import { EmbedPayload, GameOption, GuildTextableMessage } from "../types";
+import { EmbedPayload, GameOption, GuildTextableMessage, PlayerRoundResult } from "../types";
 import { chunkArray, codeLine, bold, parseJsonFile, chooseWeightedRandom, getOrdinalNum } from "./utils";
 import state from "../kmq";
 import { ModeType } from "../commands/game_options/mode";
@@ -21,6 +21,7 @@ import { KmqImages } from "../constants";
 import MessageContext from "../structures/message_context";
 import { OstPreference } from "../commands/game_options/ost";
 import { ReleaseType } from "../commands/game_options/release";
+import { MultiGuessType } from "../commands/game_options/multiguess";
 
 const endGameMessages = parseJsonFile(path.resolve(__dirname, "../../data/end_game_messages.json"));
 
@@ -138,7 +139,7 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
  * @param gameRound - The GameSession's corresponding GameRound
  * @param songGuessed - Whether the song was guessed
  */
-export async function sendEndOfRoundMessage(messageContext: MessageContext, scoreboard: Scoreboard, gameRound: GameRound, guessResult: GuessResult) {
+export async function sendEndOfRoundMessage(messageContext: MessageContext, scoreboard: Scoreboard, gameRound: GameRound, playerRoundResults: Array<PlayerRoundResult>, timeRemaining?: number) {
     const footer: Eris.EmbedFooterOptions = {
         text: "",
     };
@@ -147,15 +148,30 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
         footer.text += `Aliases: ${Array.from(gameRound.acceptedSongAnswers).join(", ")}\n`;
     }
 
-    const { remainingDuration } = guessResult;
-    if (remainingDuration) {
-        footer.text += remainingDuration > 0 ? `⏰ ${Math.ceil(guessResult.remainingDuration)} minute(s) remaining` : "⏰ Time's up!";
+    if (timeRemaining) {
+        footer.text += timeRemaining > 0 ? `⏰ ${Math.ceil(timeRemaining)} minute(s) remaining` : "⏰ Time's up!";
     }
 
     const fact = Math.random() <= 0.05 ? getFact() : null;
 
     const emptyScoreBoard = scoreboard.isEmpty();
-    const description = `${guessResult.correct ? (`**${messageContext.author.username}** ${guessResult.streak >= 5 ? `(🔥 ${guessResult.streak})` : ""} guessed correctly  (+${guessResult.expGain} xp)`) : "Nobody got it."}\nhttps://youtu.be/${gameRound.videoID} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
+    const correctGuess = playerRoundResults.length > 0;
+    let correctDescription = "";
+    if (correctGuess) {
+        correctDescription += (`**${playerRoundResults[0].player.tag}** ${playerRoundResults[0].streak >= 5 ? `(🔥 ${playerRoundResults[0].streak})` : ""} guessed correctly  (+${playerRoundResults[0].expGain} xp)`);
+        if (playerRoundResults.length > 1) {
+            const runnersUp = playerRoundResults.slice(1);
+            let runnersUpDescription = runnersUp
+                .map((x) => `${x.player.tag} (+${x.expGain} xp)`)
+                .slice(0, 10)
+                .join("\n");
+            if (runnersUp.length >= 10) {
+                runnersUpDescription += "\nand many others...";
+            }
+            correctDescription += `\n\n**Runners Up**\n${runnersUpDescription}`;
+        }
+    }
+    const description = `${correctGuess ? correctDescription : "Nobody got it."}\nhttps://youtu.be/${gameRound.videoID} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
     const fields = scoreboard.getScoreboardEmbedFields().slice(0, 10);
     if (fact) {
         fields.push({
@@ -164,7 +180,7 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
     }
 
     await sendInfoMessage(messageContext, {
-        color: guessResult.correct ? EMBED_SUCCESS_COLOR : EMBED_ERROR_COLOR,
+        color: correctGuess ? EMBED_SUCCESS_COLOR : EMBED_ERROR_COLOR,
         author: {
             avatarUrl: messageContext.author.avatarUrl,
             username: messageContext.author.username,
@@ -174,7 +190,7 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
         thumbnailUrl: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,
         fields,
         footerText: footer ? footer.text : "",
-    }, guessResult.correct);
+    }, correctGuess);
 }
 
 /**
@@ -221,9 +237,11 @@ export async function sendOptionsMessage(messageContext: MessageContext, guildPr
     };
     optionStrings[GameOption.OST_PREFERENCE] = `${ostPreferenceDisplayStrings[guildPreference.getOstPreference()]}`;
     optionStrings[GameOption.RELEASE_TYPE] = `${guildPreference.getReleaseType() === ReleaseType.OFFICIAL ? "only official song releases" : "all songs including dance practices, acoustic versions, remixes, etc"}`;
+    optionStrings[GameOption.MULTIGUESS] = guildPreference.getMultiGuessType() === MultiGuessType.ON ? "Multiple players are able to guess correctly" : "";
 
     for (const gameOption of Object.keys(optionStrings)) {
         const gameOptionString = optionStrings[gameOption];
+        if (!gameOptionString) continue;
         optionStrings[gameOption] = (updatedOption && updatedOption.option) === gameOption ? bold(gameOptionString) : codeLine(gameOptionString);
     }
 
@@ -246,7 +264,8 @@ export async function sendOptionsMessage(messageContext: MessageContext, guildPr
                 \nPlaying \`${guildPreference.getLanguageType()}\` language songs.\
                 ${guildPreference.isDurationSet() ? `\nThe game will automatically end after \`${guildPreference.getDuration()}\` minutes from the time the game starts.` : ""}\
                 \n${optionStrings[GameOption.OST_PREFERENCE]} OST songs.\
-                \nPlaying ${optionStrings[GameOption.RELEASE_TYPE]}.`,
+                \nPlaying ${optionStrings[GameOption.RELEASE_TYPE]}.\
+                \n${optionStrings[GameOption.MULTIGUESS]}`,
             footerText: footerText !== null ? footerText : null,
             thumbnailUrl: KmqImages.LISTENING,
         });
