@@ -39,6 +39,7 @@ const downloadDb = async () => {
     logger.info("Downloaded Daisuki database archive");
 };
 async function extractDb(): Promise<void> {
+    await fs.promises.mkdir(`${databaseDownloadDir}/sql`, { recursive: true });
     // eslint-disable-next-line new-cap
     const zip = new StreamZip.async({ file: `${databaseDownloadDir}/bootstrap.zip` });
     await zip.extract(null, `${databaseDownloadDir}/sql/`);
@@ -106,7 +107,6 @@ export async function updateGroupList() {
 }
 
 async function seedAndDownloadNewSongs() {
-    await fs.promises.mkdir(`${databaseDownloadDir}/sql`, { recursive: true });
     try {
         await updateKpopDatabase();
     } catch (e) {

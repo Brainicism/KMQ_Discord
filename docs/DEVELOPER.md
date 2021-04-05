@@ -25,7 +25,7 @@ up (see below). The docker-compose file forwards ports for mysql.
 
 ## Native
 ------------
-1. `npm install`
+1. `yarn install`
     - `libsodium` might require the following packages: `autoconf automake g++ libtool`
 2. Use `*.template` files to create own copy of configuration files in `src/config`
     - `.env` contains application specific settings. See `.env.example` to see parameters, and `environment.d.ts` to see which are required. 
