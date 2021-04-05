@@ -43,10 +43,9 @@ export default class EliminationScoreboard extends Scoreboard {
     }
 
     /**
-     * @param _winnerTag - Unused
-     * @param winnerID - The Discord ID of the person who guessed correctly
-     * @param _avatarURL - Unused
+     * @param correctGuesserID - The Discord ID of the person who guessed correctly
      * @param _pointsEarned - Unused
+     * @param expGain - The amount of EXP gained
      * @param firstGuess - Whether this player was the first to guess
      */
     updateScoreboard(correctGuesserID: string, _pointsEarned: number, expGain: number, firstGuess: boolean) {
