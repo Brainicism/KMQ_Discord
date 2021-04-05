@@ -25,16 +25,17 @@ export default class TeamScoreboard extends Scoreboard {
 
     /**
      * Reward points to the player that guessed correctly. Update the team in first place based on the new score
-     * @param winnerTag - Unused
-     * @param winnerID  - The Discord ID of the correct guesser
-     * @param avatarURL - Unused
+     * @param correctGuesserID  - The Discord ID of the correct guesser
      * @param pointsEarned - The amount of points awarded
      * @param expGain - The amount of EXP gained
+     * @param firstGuess - Whether this player was the first to guess
      */
-    updateScoreboard(correctGuesserID: string, pointsEarned: number, expGain: number) {
+    updateScoreboard(correctGuesserID: string, pointsEarned: number, expGain: number, firstGuess: boolean) {
         const correctGuesser = this.getPlayer(correctGuesserID);
-        correctGuesser.incrementScore(pointsEarned);
         correctGuesser.incrementExp(expGain);
+        if (!firstGuess) return;
+
+        correctGuesser.incrementScore(pointsEarned);
         const correctGuesserTeam = this.getTeamOfPlayer(correctGuesserID);
         const correctGuesserTeamScore = correctGuesserTeam.getScore();
         if (correctGuesserTeamScore === this.highestScore) {

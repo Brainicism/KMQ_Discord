@@ -63,8 +63,9 @@ export default class Scoreboard {
      * @param correctGuesserID  - The Discord ID of the correct guesser
      * @param pointsEarned - The amount of points awarded
      * @param expGain - The amount of EXP gained
+     * @param firstGuess - Whether this player was the first to guess
      */
-    updateScoreboard(correctGuesserID: string, pointsEarned: number, expGain: number) {
+    updateScoreboard(correctGuesserID: string, pointsEarned: number, expGain: number, _firstGuess: boolean) {
         if (!this.players[correctGuesserID]) {
             this.players[correctGuesserID] = Player.fromUserID(correctGuesserID);
         }

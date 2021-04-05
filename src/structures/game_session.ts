@@ -176,7 +176,7 @@ export default class GameSession {
             for (const [idx, correctGuesser] of guessResult.correctGuessers.entries()) {
                 const guessPosition = idx + 1;
                 const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(this.voiceChannelID), guessSpeed, guessPosition);
-                this.scoreboard.updateScoreboard(correctGuesser.id, guessResult.pointsEarned, expGain);
+                this.scoreboard.updateScoreboard(correctGuesser.id, guessResult.pointsEarned, expGain, idx === 0);
                 if (idx === 0) {
                     playerRoundResults.push({ player: correctGuesser, streak: this.lastGuesser.streak, expGain });
                     logger.info(`${getDebugLogHeader(messageContext)} | Song correctly guessed 1st. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
