@@ -43,9 +43,9 @@ async function needsBootstrap(db: DatabaseContext) {
 // eslint-disable-next-line import/prefer-default-export
 export function generateKmqDataTables() {
     const createKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/create_kmq_data_tables_procedure.sql");
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq < ${createKmqTablesProcedureSqlPath}`);
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq < ${createKmqTablesProcedureSqlPath}`);
     logger.info("Re-creating KMQ data tables view...");
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq -e "CALL CreateKmqDataTables;"`);
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq -e "CALL CreateKmqDataTables;"`);
 }
 
 function performMigrations() {
