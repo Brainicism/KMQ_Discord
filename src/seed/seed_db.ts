@@ -59,9 +59,9 @@ async function seedDb(db: DatabaseContext) {
     logger.info("Creating K-Pop video database");
     await db.agnostic.raw("CREATE DATABASE kpop_videos;");
     logger.info("Seeding K-Pop video database");
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kpop_videos < ${seedFilePath}`);
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${seedFilePath}`);
     logger.info("Performing data overrides");
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kpop_videos < ${overridesFilePath}`);
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${overridesFilePath}`);
     logger.info(`Imported database dump (${seedFile}) successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing`);
 }
 
@@ -128,6 +128,7 @@ async function seedAndDownloadNewSongs() {
 (async () => {
     if (require.main === module) {
         try {
+            await updateKpopDatabase();
             await seedAndDownloadNewSongs();
             await dbContext.destroy();
         } catch (e) {
