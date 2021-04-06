@@ -5,6 +5,7 @@ declare namespace NodeJS {
         DB_USER: string,
         DB_PASS: string,
         DB_HOST: string,
+        DB_PORT: string,
         SONG_DOWNLOAD_DIR: string,
         RESTART_CRON?: string,
         TOP_GG_TOKEN?: string,
@@ -12,8 +13,6 @@ declare namespace NodeJS {
         DISCORD_BOT_LIST_TOKEN?: string,
         DEBUG_SERVER_ID?: string,
         DEBUG_TEXT_CHANNEL_ID?: string,
-        LOG_DIR: string,
-        DAISUKI_DUMP_DIR: string,
         BOT_PREFIX: string,
         NODE_ENV: string,
     }

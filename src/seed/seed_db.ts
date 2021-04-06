@@ -14,8 +14,12 @@ import dbContext, { DatabaseContext, getDatabaseAgnosticContext } from "../datab
 config({ path: path.resolve(__dirname, "../../.env") });
 const fileUrl = "http://kpop.daisuki.com.br/download.php";
 const logger: Logger = _logger("seed_db");
-const databaseDownloadDir = process.env.DAISUKI_DUMP_DIR;
 const overridesFilePath = path.join(__dirname, "../../sql/kpop_videos_overrides.sql");
+
+const databaseDownloadDir = path.join(__dirname, "../../kpop_db");
+if (!fs.existsSync(databaseDownloadDir)) {
+    fs.mkdirSync(databaseDownloadDir);
+}
 
 program
     .option("-p, --skip-pull", "Skip re-pull of Daisuki database dump", false)
@@ -55,9 +59,9 @@ async function seedDb(db: DatabaseContext) {
     logger.info("Creating K-Pop video database");
     await db.agnostic.raw("CREATE DATABASE kpop_videos;");
     logger.info("Seeding K-Pop video database");
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kpop_videos < ${seedFilePath}`);
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${seedFilePath}`);
     logger.info("Performing data overrides");
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kpop_videos < ${overridesFilePath}`);
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${overridesFilePath}`);
     logger.info(`Imported database dump (${seedFile}) successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing`);
 }
 
@@ -124,6 +128,7 @@ async function seedAndDownloadNewSongs() {
 (async () => {
     if (require.main === module) {
         try {
+            await updateKpopDatabase();
             await seedAndDownloadNewSongs();
             await dbContext.destroy();
         } catch (e) {
