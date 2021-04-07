@@ -156,7 +156,6 @@ export default class GameSession {
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
     endRound(guessResult: GuessResult, guildPreference: GuildPreference, messageContext?: MessageContext) {
-        this.roundsPlayed++;
         if (this.gameRound === null) {
             return;
         }
@@ -173,18 +172,21 @@ export default class GameSession {
             this.guessTimes.push(guessSpeed);
 
             // update scoreboard
-            for (const [idx, correctGuesser] of guessResult.correctGuessers.entries()) {
+            const scoreboardUpdatePayload = guessResult.correctGuessers.map((correctGuesser, idx) => {
                 const guessPosition = idx + 1;
                 const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(this.voiceChannelID), guessSpeed, guessPosition);
-                this.scoreboard.updateScoreboard(correctGuesser.id, guessResult.pointsEarned, expGain, idx === 0);
                 if (idx === 0) {
                     playerRoundResults.push({ player: correctGuesser, streak: this.lastGuesser.streak, expGain });
-                    logger.info(`${getDebugLogHeader(messageContext)} | Song correctly guessed 1st. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
+                    logger.info(`${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed 1st. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
                 } else {
                     playerRoundResults.push({ player: correctGuesser, streak: 0, expGain });
-                    logger.info(`${getDebugLogHeader(messageContext)} | Song correctly guessed ${getOrdinalNum(guessPosition)}. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
+                    logger.info(`${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed ${getOrdinalNum(guessPosition)}. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
                 }
-            }
+                return {
+                    userID: correctGuesser.id, pointsEarned: guessResult.pointsEarned, expGain,
+                };
+            });
+            this.scoreboard.updateScoreboard(scoreboardUpdatePayload);
         } else {
             this.lastGuesser = null;
         }
@@ -207,6 +209,7 @@ export default class GameSession {
         }
 
         if (this.finished) return;
+        this.roundsPlayed++;
         // check if duration has been reached
         if (remainingDuration && remainingDuration < 0) {
             logger.info(`gid: ${this.guildID} | Game session duration reached`);
@@ -314,7 +317,12 @@ export default class GameSession {
             }
             this.gameRound.finished = true;
 
-            await delay(guildPreference.getMultiGuessType() === MultiGuessType.ON ? 3000 : 0);
+            const voiceChannel = state.client.getChannel(this.voiceChannelID) as Eris.VoiceChannel;
+
+            // 1 player + KMQ
+            const playerIsAlone = voiceChannel.voiceMembers.size === 2;
+            await delay((guildPreference.getMultiGuessType() === MultiGuessType.ON) && !playerIsAlone ? 3000 : 0);
+
             if (!this.gameRound) return;
             // mark round as complete, so no more guesses can go through
             this.endRound({ correct: true, correctGuessers: this.gameRound.correctGuessers, pointsEarned }, guildPreference, MessageContext.fromMessage(message));

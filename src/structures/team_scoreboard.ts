@@ -1,4 +1,4 @@
-import Scoreboard from "./scoreboard";
+import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
 import Player from "./player";
 import Team from "./team";
 import _logger from "../logger";
@@ -24,19 +24,22 @@ export default class TeamScoreboard extends Scoreboard {
     }
 
     /**
-     * Reward points to the player that guessed correctly. Update the team in first place based on the new score
-     * @param correctGuesserID  - The Discord ID of the correct guesser
-     * @param pointsEarned - The amount of points awarded
-     * @param expGain - The amount of EXP gained
-     * @param firstGuess - Whether this player was the first to guess
+     * Updates the scoreboard with information about correct guessers
+     * @param guessResults - Objects containing the user ID, points earned, and EXP gain
      */
-    updateScoreboard(correctGuesserID: string, pointsEarned: number, expGain: number, firstGuess: boolean) {
-        const correctGuesser = this.getPlayer(correctGuesserID);
-        correctGuesser.incrementExp(expGain);
-        if (!firstGuess) return;
+    updateScoreboard(guessResults: Array<SuccessfulGuessResult>) {
+        // give everybody EXP
+        for (const guessResult of guessResults) {
+            const correctGuesser = this.getPlayer(guessResult.userID);
+            correctGuesser.incrementExp(guessResult.expGain);
+        }
 
-        correctGuesser.incrementScore(pointsEarned);
-        const correctGuesserTeam = this.getTeamOfPlayer(correctGuesserID);
+        // first guesser gets the point for their team
+        const firstGuessResult = guessResults[0];
+        const firstCorrectGuesser = this.getPlayer(firstGuessResult.userID);
+
+        firstCorrectGuesser.incrementScore(firstGuessResult.pointsEarned);
+        const correctGuesserTeam = this.getTeamOfPlayer(firstGuessResult.userID);
         const correctGuesserTeamScore = correctGuesserTeam.getScore();
         if (correctGuesserTeamScore === this.highestScore) {
             this.firstPlace.push(correctGuesserTeam);
