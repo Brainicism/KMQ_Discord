@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import PHPUnserialize from "php-unserialize";
 import { URL } from "url";
 import dbContext from "./database_context";
 import { chooseRandom, getOrdinalNum, weekOfYear } from "./helpers/utils";
@@ -59,12 +58,11 @@ async function generateFacts() {
 }
 
 function parseGaonWeeklyRankList(ranklist: string, year: string): Array<GaonWeeklyEntry> {
-    const parsedWeeklyRankList = PHPUnserialize.unserialize(ranklist);
-    return Object.values(parsedWeeklyRankList).map((x) => {
-        const songName = x["0"];
-        const artistName = x["1"];
-        const artistID = x["2"] || null;
-        const songID = x["3"] || null;
+    return JSON.parse(ranklist).map((x) => {
+        const songName = x[0];
+        const artistName = x[1];
+        const artistID = x[2] || null;
+        const songID = x[3] || null;
         return {
             songName,
             artistName,

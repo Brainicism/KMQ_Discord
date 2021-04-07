@@ -16,9 +16,9 @@ RUN apk add --no-cache git \
 
 RUN npm install typescript -g
 
-COPY package.json package-lock.json ./
+COPY package.json yarn.lock ./
 
-RUN npm install
+RUN yarn install --frozen-lockfile
 
 COPY . .
 

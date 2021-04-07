@@ -1,4 +1,4 @@
-import Scoreboard from "./scoreboard";
+import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
 import Player from "./player";
 import Team from "./team";
 import _logger from "../logger";
@@ -24,18 +24,22 @@ export default class TeamScoreboard extends Scoreboard {
     }
 
     /**
-     * Reward points to the player that guessed correctly. Update the team in first place based on the new score
-     * @param winnerTag - Unused
-     * @param winnerID  - The Discord ID of the correct guesser
-     * @param avatarURL - Unused
-     * @param pointsEarned - The amount of points awarded
-     * @param expGain - The amount of EXP gained
+     * Updates the scoreboard with information about correct guessers
+     * @param guessResults - Objects containing the user ID, points earned, and EXP gain
      */
-    updateScoreboard(_winnerTag: string, winnerID: string, _avatarURL: string, pointsEarned: number, expGain: number) {
-        const correctGuesser = this.getPlayer(winnerID);
-        correctGuesser.incrementScore(pointsEarned);
-        correctGuesser.incrementExp(expGain);
-        const correctGuesserTeam = this.getTeamOfPlayer(winnerID);
+    updateScoreboard(guessResults: Array<SuccessfulGuessResult>) {
+        // give everybody EXP
+        for (const guessResult of guessResults) {
+            const correctGuesser = this.getPlayer(guessResult.userID);
+            correctGuesser.incrementExp(guessResult.expGain);
+        }
+
+        // first guesser gets the point for their team
+        const firstGuessResult = guessResults[0];
+        const firstCorrectGuesser = this.getPlayer(firstGuessResult.userID);
+
+        firstCorrectGuesser.incrementScore(firstGuessResult.pointsEarned);
+        const correctGuesserTeam = this.getTeamOfPlayer(firstGuessResult.userID);
         const correctGuesserTeamScore = correctGuesserTeam.getScore();
         if (correctGuesserTeamScore === this.highestScore) {
             this.firstPlace.push(correctGuesserTeam);

@@ -1,4 +1,4 @@
-import Scoreboard from "./scoreboard";
+import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
 import EliminationPlayer from "./elimination_player";
 import _logger from "../logger";
 
@@ -43,18 +43,22 @@ export default class EliminationScoreboard extends Scoreboard {
     }
 
     /**
-     * @param _winnerTag - Unused
-     * @param winnerID - The Discord ID of the person who guessed correctly
-     * @param _avatarURL - Unused
-     * @param _pointsEarned - Unused
+     * Updates the scoreboard with information about correct guessers
+     * @param guessResults - Objects containing the user ID, points earned, and EXP gain
      */
-    updateScoreboard(_winnerTag: string, winnerID: string, _avatarURL: string, _pointsEarned: number, expGain: number) {
+    updateScoreboard(guessResults: Array<SuccessfulGuessResult>) {
+        // give everybody EXP
+        for (const guessResult of guessResults) {
+            const correctGuesser = this.players[guessResult.userID];
+            correctGuesser.incrementExp(guessResult.expGain);
+        }
+
+        const guesserIDs = guessResults.map((x) => x.userID);
         let maxLives = -1;
         for (const player of Object.values(this.players)) {
-            if (player.getID() !== winnerID) {
+            // guessers don't have lives decremented
+            if (!guesserIDs.includes(player.id)) {
                 player.decrementLives();
-            } else {
-                player.incrementExp(expGain);
             }
             if (player.getLives() === maxLives) {
                 this.firstPlace.push(player);

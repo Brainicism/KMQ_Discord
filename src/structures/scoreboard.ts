@@ -5,6 +5,11 @@ import GuildPreference from "./guild_preference";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = _logger("scoreboard");
+export interface SuccessfulGuessResult {
+    userID: string;
+    pointsEarned: number;
+    expGain: number;
+}
 
 export default class Scoreboard {
     /** Mapping of Discord user ID to Player */
@@ -60,28 +65,28 @@ export default class Scoreboard {
     }
 
     /**
-     * @param winnerTag - The Discord tag of the correct guesser
-     * @param winnerID  - The Discord ID of the correct guesser
-     * @param avatarURL - The avatar URL of the correct guesser
-     * @param pointsEarned - The amount of points awarded
-     * @param expGain - The amount of EXP gained
+     * Updates the scoreboard with information about correct guessers
+     * @param guessResults - Objects containing the user ID, points earned, and EXP gain
      */
-    updateScoreboard(winnerTag: string, winnerID: string, avatarURL: string, pointsEarned: number, expGain: number) {
-        if (!this.players[winnerID]) {
-            this.players[winnerID] = new Player(winnerTag, winnerID, avatarURL, pointsEarned);
-        } else {
-            this.players[winnerID].incrementScore(pointsEarned);
-        }
-        this.players[winnerID].incrementExp(expGain);
-        const winnerScore = this.players[winnerID].getScore();
+    updateScoreboard(guessResults: Array<SuccessfulGuessResult>) {
+        for (const guessResult of guessResults) {
+            if (!this.players[guessResult.userID]) {
+                this.players[guessResult.userID] = Player.fromUserID(guessResult.userID);
+            }
 
-        if (winnerScore === this.highestScore) {
-            // If user is tied for first, add them to the first place array
-            this.firstPlace.push(this.players[winnerID]);
-        } else if (winnerScore > this.highestScore) {
-            // If user is first, reset first place array and add them
-            this.highestScore = winnerScore;
-            this.firstPlace = [this.players[winnerID]];
+            this.players[guessResult.userID].incrementScore(guessResult.pointsEarned);
+
+            this.players[guessResult.userID].incrementExp(guessResult.expGain);
+            const winnerScore = this.players[guessResult.userID].getScore();
+
+            if (winnerScore === this.highestScore) {
+                // If user is tied for first, add them to the first place array
+                this.firstPlace.push(this.players[guessResult.userID]);
+            } else if (winnerScore > this.highestScore) {
+                // If user is first, reset first place array and add them
+                this.highestScore = winnerScore;
+                this.firstPlace = [this.players[guessResult.userID]];
+            }
         }
     }
 

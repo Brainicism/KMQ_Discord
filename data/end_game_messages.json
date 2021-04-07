@@ -96,6 +96,10 @@
         {
             "title": "Did you know?",
             "message": "Have favorite game option presets? Save and load them with presets! See `,help preset` to learn more."
+        },
+        {
+            "title": "Did you know?",
+            "message": "Slow typer? Allow for multiple correct guesses for a given round using `,multiguess`! See `,help multiguess` to learn more."
         }
     ]
 }

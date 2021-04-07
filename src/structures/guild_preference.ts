@@ -12,6 +12,7 @@ import { DEFAULT_SUBUNIT_PREFERENCE, SubunitsPreference } from "../commands/game
 import { MatchedArtist } from "../types";
 import { DEFAULT_OST_PREFERENCE, OstPreference } from "../commands/game_options/ost";
 import { DEFAULT_RELEASE_TYPE, ReleaseType } from "../commands/game_options/release";
+import { DEFAULT_MULTIGUESS_TYPE, MultiGuessType } from "../commands/game_options/multiguess";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = _logger("guild_preference");
@@ -34,6 +35,7 @@ interface GameOptions {
     guessTimeout: number;
     duration: number;
     languageType: LanguageType;
+    multiGuessType: MultiGuessType;
     subunitPreference: SubunitsPreference;
     ostPreference: OstPreference;
 }
@@ -73,6 +75,7 @@ export default class GuildPreference {
         duration: null,
         artistType: DEFAULT_ARTIST_TYPE,
         languageType: DEFAULT_LANGUAGE,
+        multiGuessType: DEFAULT_MULTIGUESS_TYPE,
         subunitPreference: DEFAULT_SUBUNIT_PREFERENCE,
         ostPreference: DEFAULT_OST_PREFERENCE,
     };
@@ -625,6 +628,26 @@ export default class GuildPreference {
     /** Resets the language type option the the default value */
     async resetLanguageType() {
         this.gameOptions.languageType = DEFAULT_LANGUAGE;
+        await this.updateGuildPreferences();
+    }
+
+    /**
+     * Sets the multiguess type option value
+     * @param multiGuessType - The multiguess type
+     */
+    async setMultiGuessType(multiGuessType: MultiGuessType) {
+        this.gameOptions.multiGuessType = multiGuessType;
+        await this.updateGuildPreferences();
+    }
+
+    /** @returns the multiguess type option value */
+    getMultiGuessType(): MultiGuessType {
+        return this.gameOptions.multiGuessType;
+    }
+
+    /** Resets the multiguess type option the the default value */
+    async resetMultiGuessType() {
+        this.gameOptions.multiGuessType = DEFAULT_MULTIGUESS_TYPE;
         await this.updateGuildPreferences();
     }
 

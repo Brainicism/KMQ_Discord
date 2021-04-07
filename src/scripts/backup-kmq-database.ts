@@ -2,10 +2,12 @@ import fs from "fs";
 import { exec, execSync } from "child_process";
 import { program } from "commander";
 import { Logger } from "log4js";
+import { join } from "path";
 import _logger from "../logger";
 import { friendlyFormattedDate } from "../helpers/utils";
 
-const databaseBackupDir = `${process.env.DAISUKI_DUMP_DIR}/kmq_backup`;
+const databaseBackupDir = join(__dirname, "../../kpop_db/kmq_backup");
+
 const logger: Logger = _logger("backup-kmq");
 
 program
