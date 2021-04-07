@@ -184,7 +184,7 @@ export default class GameSession {
                     logger.info(`${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed ${getOrdinalNum(guessPosition)}. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
                 }
                 return {
-                    userID: correctGuesser.id, pointsEarned: guessResult.pointsEarned, expGain,
+                    userID: correctGuesser.id, pointsEarned: idx === 0 ? guessResult.pointsEarned : guessResult.pointsEarned / 2, expGain,
                 };
             });
             this.scoreboard.updateScoreboard(scoreboardUpdatePayload);
