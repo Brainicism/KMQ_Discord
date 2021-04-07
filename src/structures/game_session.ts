@@ -28,6 +28,7 @@ import MessageContext from "./message_context";
 import KmqMember from "./kmq_member";
 import { MultiGuessType } from "../commands/game_options/multiguess";
 
+const MULTIGUESS_DELAY = 1500;
 const logger = _logger("game_session");
 const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
 
@@ -317,11 +318,7 @@ export default class GameSession {
             }
             this.gameRound.finished = true;
 
-            const voiceChannel = state.client.getChannel(this.voiceChannelID) as Eris.VoiceChannel;
-
-            // 1 player + KMQ
-            const playerIsAlone = voiceChannel.voiceMembers.size === 2;
-            await delay((guildPreference.getMultiGuessType() === MultiGuessType.ON) && !playerIsAlone ? 3000 : 0);
+            await delay(this.multiguessDelayIsActive(guildPreference) ? MULTIGUESS_DELAY : 0);
 
             if (!this.gameRound) return;
             // mark round as complete, so no more guesses can go through
@@ -350,7 +347,7 @@ export default class GameSession {
      */
     async startRound(guildPreference: GuildPreference, messageContext: MessageContext) {
         this.sessionInitialized = true;
-        await delay(3000);
+        await delay(this.multiguessDelayIsActive(guildPreference) ? 3000 - MULTIGUESS_DELAY : 3000);
         if (this.finished || this.gameRound) {
             return;
         }
@@ -799,5 +796,12 @@ export default class GameSession {
         // double xp weekend multiplier
         const multiplier = (isWeekend() || isPowerHour()) ? 2 : 1;
         return (expBase + expJitter) * multiplier;
+    }
+
+    private multiguessDelayIsActive(guildPreference: GuildPreference) {
+        const voiceChannel = state.client.getChannel(this.voiceChannelID) as Eris.VoiceChannel;
+        // 1 player + KMQ
+        const playerIsAlone = voiceChannel.voiceMembers.size === 2;
+        return (guildPreference.getMultiGuessType() === MultiGuessType.ON) && !playerIsAlone;
     }
 }
