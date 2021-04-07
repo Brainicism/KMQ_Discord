@@ -317,7 +317,12 @@ export default class GameSession {
             }
             this.gameRound.finished = true;
 
-            await delay(guildPreference.getMultiGuessType() === MultiGuessType.ON ? 3000 : 0);
+            const voiceChannel = state.client.getChannel(this.voiceChannelID) as Eris.VoiceChannel;
+
+            // 1 player + KMQ
+            const playerIsAlone = voiceChannel.voiceMembers.size === 2;
+            await delay((guildPreference.getMultiGuessType() === MultiGuessType.ON) && !playerIsAlone ? 3000 : 0);
+
             if (!this.gameRound) return;
             // mark round as complete, so no more guesses can go through
             this.endRound({ correct: true, correctGuessers: this.gameRound.correctGuessers, pointsEarned }, guildPreference, MessageContext.fromMessage(message));
