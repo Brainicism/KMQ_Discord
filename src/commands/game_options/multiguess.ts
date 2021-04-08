@@ -28,13 +28,13 @@ export default class MultiGuessCommand implements BaseCommand {
 
     help = {
         name: "multiguess",
-        description: "Sets whether multiple people can guess a song correctly. When `on`, players will have 3 seconds after the first correct answer is given, to continue to answer.\
+        description: "Sets whether multiple people can guess a song correctly. When `on`, players will have 1.5 seconds after the first correct answer is given, to continue to answer.\
         The first answer receives full EXP, correct answers that come after receive multiplicatively less EXP.",
         usage: "!multiguess [on | off]",
         examples: [
             {
                 example: "`!multiguess on`",
-                explanation: "Allows for a 3 second grace period from when the first correct guess occurs. Multiple players are able to guess correctly.",
+                explanation: "Allows for a 1.5 second grace period from when the first correct guess occurs. Multiple players are able to guess correctly.",
             },
             {
                 example: "`!multiguess off`",

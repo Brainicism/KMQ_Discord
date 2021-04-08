@@ -237,7 +237,7 @@ export async function sendOptionsMessage(messageContext: MessageContext, guildPr
     };
     optionStrings[GameOption.OST_PREFERENCE] = `${ostPreferenceDisplayStrings[guildPreference.getOstPreference()]}`;
     optionStrings[GameOption.RELEASE_TYPE] = `${guildPreference.getReleaseType() === ReleaseType.OFFICIAL ? "only official song releases" : "all songs including dance practices, acoustic versions, remixes, etc"}`;
-    optionStrings[GameOption.MULTIGUESS] = guildPreference.getMultiGuessType() === MultiGuessType.ON ? "Multiple players are able to guess correctly" : "";
+    optionStrings[GameOption.MULTIGUESS] = guildPreference.getMultiGuessType() === MultiGuessType.ON ? "Multiple players are able to guess correctly." : "";
 
     for (const gameOption of Object.keys(optionStrings)) {
         const gameOptionString = optionStrings[gameOption];
