@@ -42,7 +42,7 @@ export default class MultiGuessCommand implements BaseCommand {
             },
             {
                 example: "`!multiguess`",
-                explanation: `Reset to the default language of \`${DEFAULT_MULTIGUESS_TYPE}\``,
+                explanation: `Reset to the default multiguess type of \`${DEFAULT_MULTIGUESS_TYPE}\``,
             },
         ],
         priority: 150,
@@ -51,7 +51,7 @@ export default class MultiGuessCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            guildPreference.resetLanguageType();
+            guildPreference.resetMultiGuessType();
             logger.info(`${getDebugLogHeader(message)} | Multiguess type reset.`);
             await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.MULTIGUESS, reset: true });
             return;
