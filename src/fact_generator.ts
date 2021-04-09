@@ -4,6 +4,7 @@ import { URL } from "url";
 import dbContext from "./database_context";
 import { chooseRandom, getOrdinalNum, weekOfYear } from "./helpers/utils";
 import _logger from "./logger";
+import state from "./kmq";
 
 const logger = _logger("fact_generator");
 
@@ -20,7 +21,7 @@ const funFactFunctions = [recentMusicVideos, recentMilestone, recentMusicShowWin
     mostGaonAppearances, historicalGaonWeekly, recentGaonWeekly, fanclubName, closeBirthdays];
 
 const kmqFactFunctions = [longestGame, mostGames, mostCorrectGuessed, globalTotalGames, recentGameSessions, recentGames, mostSongsGuessedPlayer,
-    mostGamesPlayedPlayer, recentUniquePlayers, topLeveledPlayers];
+    mostGamesPlayedPlayer, recentUniquePlayers, topLeveledPlayers, currentUniquePlayers, currentGameSessions];
 
 let factCache: {
     funFacts: string[][],
@@ -413,6 +414,16 @@ async function recentUniquePlayers(): Promise<string[]> {
     }
 
     return output;
+}
+
+async function currentUniquePlayers(): Promise<Array<string>> {
+    const activeUsers = Object.values(state.gameSessions).reduce((total, curr) => total + curr.participants.size, 0);
+    return [`KMQ Fact: There are ${activeUsers} users playing KMQ right now!`];
+}
+
+async function currentGameSessions(): Promise<Array<string>> {
+    const activeGameSessions = Object.keys(state.gameSessions).length;
+    return [`KMQ Fact: There are ${activeGameSessions} games of KMQ happening right now!`];
 }
 
 async function mostSongsGuessedPlayer(): Promise<string[]> {
