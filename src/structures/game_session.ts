@@ -115,6 +115,9 @@ export default class GameSession {
     /** List of songs played with ,shuffle unique enabled */
     private uniqueSongs: Set<string>;
 
+    /** Map of song's YouTube ID to correctGuesses and roundsPlayed */
+    private playCount: { [vlink: string]: { correctGuesses: number, roundsPlayed: number } };
+
     /** The last gender played when gender is set to alternating, can be null (in not alternating mode), GENDER.MALE, or GENDER.FEMALE */
     private lastAlternatingGender: Gender;
 
@@ -146,6 +149,7 @@ export default class GameSession {
         this.owner = gameSessionCreator;
         this.lastPlayedSongs = [];
         this.uniqueSongs = new Set();
+        this.playCount = {};
         this.lastAlternatingGender = null;
         this.lastGuesser = null;
     }
@@ -284,6 +288,9 @@ export default class GameSession {
                 rounds_played: this.roundsPlayed,
                 correct_guesses: this.correctGuesses,
             });
+
+        // commit session's song plays and correct guesses
+        await this.storeSongCounts();
 
         logger.info(`gid: ${this.guildID} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}. gameType = ${this.gameType}`);
         deleteGameSession(this.guildID);
@@ -719,26 +726,44 @@ export default class GameSession {
     }
 
     /**
-     * Creates song entry, increments play count and correct guesses in the data store
-     * @param vlink - The song's youtube ID
+     * Creates song entry (if it doesn't exist) and increments play count and correct guesses
+     * @param vlink - The song's YouTube ID
      * @param correct - Whether the guess was correct
      */
     private async incrementSongCount(vlink: string, correct: boolean) {
-        await dbContext.kmq("song_guess_count")
-            .insert(
-                {
-                    vlink,
-                    correct_guesses: 0,
-                    rounds_played: 0,
-                },
-            )
-            .onConflict("vlink")
-            .ignore();
+        if (!(vlink in this.playCount)) {
+            this.playCount[vlink] = {
+                correctGuesses: 0,
+                roundsPlayed: 0,
+            };
+        }
+        if (correct) {
+            this.playCount[vlink].correctGuesses++;
+        }
+        this.playCount[vlink].roundsPlayed++;
+    }
 
-        await dbContext.kmq("song_guess_count")
-            .where("vlink", "=", vlink)
-            .increment("correct_guesses", correct ? 1 : 0)
-            .increment("rounds_played", 1);
+    /**
+     * Stores song play count and correct guess count in data store
+     */
+    private async storeSongCounts() {
+        for (const vlink of Object.keys(this.playCount)) {
+            await dbContext.kmq("song_guess_count")
+                .insert(
+                    {
+                        vlink,
+                        correct_guesses: 0,
+                        rounds_played: 0,
+                    },
+                )
+                .onConflict("vlink")
+                .ignore();
+
+            await dbContext.kmq("song_guess_count")
+                .where("vlink", "=", vlink)
+                .increment("correct_guesses", this.playCount[vlink].correctGuesses)
+                .increment("rounds_played", this.playCount[vlink].roundsPlayed);
+        }
     }
 
     /**
