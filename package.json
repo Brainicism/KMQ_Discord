@@ -37,7 +37,7 @@
     "erlpack": "https://github.com/abalabahaha/erlpack.git#5d0064f",
     "fluent-ffmpeg": "^2.1.2",
     "glob": "^7.1.6",
-    "knex": "^0.21.17",
+    "knex": "^0.21.19",
     "log4js": "^6.3.0",
     "moment-timezone": "^0.5.32",
     "mysql": "^2.18.1",
