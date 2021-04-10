@@ -161,6 +161,9 @@ export default class GameSession {
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
     endRound(guessResult: GuessResult, guildPreference: GuildPreference, messageContext?: MessageContext) {
+        if (this.connection) {
+            this.connection.removeAllListeners();
+        }
         if (this.gameRound === null) {
             return;
         }
@@ -209,9 +212,6 @@ export default class GameSession {
         // cleanup
         this.stopGuessTimeout();
         this.gameRound = null;
-        if (this.connection) {
-            this.connection.removeAllListeners();
-        }
 
         if (this.finished) return;
         this.roundsPlayed++;
@@ -466,7 +466,7 @@ export default class GameSession {
                 const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
                 eliminationScoreboard.decrementAllLives();
             }
-            this.endRound({ correct: false }, guildPreference, messageContext);
+            this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));
             this.startRound(await getGuildPreference(this.guildID), messageContext);
         }, time * 1000);
     }
@@ -539,7 +539,7 @@ export default class GameSession {
             });
         } catch (e) {
             logger.error(`Erroring playing on voice connection. err = ${e}`);
-            await this.errorRestartRound(messageContext, guildPreference);
+            await this.errorRestartRound(guildPreference);
             return;
         }
 
@@ -549,7 +549,7 @@ export default class GameSession {
         this.connection.once("end", async () => {
             logger.info(`${getDebugLogHeader(messageContext)} | Song finished without being guessed.`);
             this.stopGuessTimeout();
-            this.endRound({ correct: false }, guildPreference, messageContext);
+            this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));
             this.startRound(await getGuildPreference(this.guildID), messageContext);
         });
 
@@ -563,7 +563,7 @@ export default class GameSession {
             }
 
             logger.error(`${getDebugLogHeader(messageContext)} | Unknown error with stream dispatcher. song = ${this.getDebugSongDetails()}. err = ${err}`);
-            this.errorRestartRound(messageContext, guildPreference);
+            this.errorRestartRound(guildPreference);
         });
     }
 
@@ -572,10 +572,11 @@ export default class GameSession {
      * @param messageContext - The MessageContext
      * @param guildPreference - The GuildPreference
      */
-    private async errorRestartRound(messageContext: MessageContext, guildPreference: GuildPreference) {
-        await sendErrorMessage(messageContext, { title: "Error playing song", description: "Starting new round in 3 seconds..." });
+    private async errorRestartRound(guildPreference: GuildPreference) {
+        const messageContext = new MessageContext(this.textChannelID);
         this.roundsPlayed--;
-        this.endRound({ correct: false }, guildPreference, messageContext);
+        this.endRound({ correct: false }, guildPreference);
+        await sendErrorMessage(messageContext, { title: "Error playing song", description: "Starting new round in 3 seconds..." });
         this.startRound(guildPreference, messageContext);
     }
     /**

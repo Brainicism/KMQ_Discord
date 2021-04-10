@@ -18,11 +18,11 @@ export default class MessageContext {
 
     constructor(textChannelID: string, author?: KmqMember, guildID?: string, referencedMessageID?: string) {
         this.textChannelID = textChannelID;
-        if (author === null) {
+        this.author = author;
+        if (!author) {
             const clientUser = state.client.user;
             this.author = new KmqMember(clientUser.username, getUserTag(clientUser), clientUser.avatarURL, clientUser.id);
         }
-        this.author = author;
         this.guildID = guildID;
         this.referencedMessageID = referencedMessageID;
     }
