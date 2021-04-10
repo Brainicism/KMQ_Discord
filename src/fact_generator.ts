@@ -45,11 +45,21 @@ export async function reloadFactCache() {
     await generateFacts();
 }
 
+async function resolveFactPromises(promises: Promise<string[]>[]): Promise<string[][]> {
+    const settledPromises = await Promise.allSettled(promises);
+    const rejectedPromises = settledPromises.filter((x) => x.status === "rejected") as PromiseRejectedResult[];
+    for (const rejectedPromise of rejectedPromises) {
+        logger.error(`Failed to evaluate fact: ${rejectedPromise.reason}`);
+    }
+    const resolvedPromises = settledPromises.filter((x) => x.status === "fulfilled") as PromiseFulfilledResult<string[]>[];
+    return resolvedPromises.map((x) => x.value);
+}
+
 async function generateFacts() {
     const funFactPromises = funFactFunctions.map((x) => x());
     const kmqFactPromises = kmqFactFunctions.map((x) => x());
-    const funFacts = await Promise.all(funFactPromises);
-    const kmqFacts = await Promise.all(kmqFactPromises);
+    const funFacts = await resolveFactPromises(funFactPromises);
+    const kmqFacts = await resolveFactPromises(kmqFactPromises);
     factCache = {
         funFacts: funFacts.filter((facts) => facts.length > 0),
         kmqFacts: kmqFacts.filter((facts) => facts.length > 0),
