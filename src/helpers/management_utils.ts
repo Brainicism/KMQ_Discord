@@ -99,6 +99,19 @@ export const checkRestartNotification = async (restartNotification: Date): Promi
     }
 };
 
+/** Clear inactive voice connections */
+function clearInactiveVoiceConnections() {
+    const existingVoiceChannelGuildIDs = Array.from(state.client.voiceConnections.keys()) as Array<string>;
+    const activeVoiceChannelGuildIDs = Object.values(state.gameSessions).map((x) => x.guildID);
+    for (const existingVoiceChannelGuildID of existingVoiceChannelGuildIDs) {
+        if (!activeVoiceChannelGuildIDs.includes(existingVoiceChannelGuildID)) {
+            const voiceChannelID = state.client.voiceConnections.get(existingVoiceChannelGuildID).channelID;
+            logger.info(`gid: ${existingVoiceChannelGuildID}, vid: ${voiceChannelID} | Disconnected inactive voice connection`);
+            state.client.voiceConnections.leave(existingVoiceChannelGuildID);
+        }
+    }
+}
+
 /** Updates the bot's server count status */
 export function updateBotStatus() {
     const { client } = state;
@@ -189,6 +202,7 @@ export function registerIntervals() {
     schedule.scheduleJob("*/5 * * * *", async () => {
         reloadAliases();
         updatePublishDateOverrides();
+        clearInactiveVoiceConnections();
     });
 }
 

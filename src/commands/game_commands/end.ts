@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { disconnectVoiceConnection, getDebugLogHeader } from "../../helpers/discord_utils";
+import { getDebugLogHeader } from "../../helpers/discord_utils";
 import _logger from "../../logger";
 import { endSession } from "../../helpers/game_utils";
 
@@ -24,6 +24,5 @@ export default class EndCommand implements BaseCommand {
         }
         logger.info(`${getDebugLogHeader(message)} | Game session ended`);
         endSession(gameSession);
-        disconnectVoiceConnection(message);
     }
 }
