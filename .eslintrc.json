@@ -114,6 +114,9 @@
         ],
         "linebreak-style": [
             "warn"
+        ],
+        "import/order": [
+            "warn"
         ]
     }
 }
