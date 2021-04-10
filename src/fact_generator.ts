@@ -17,7 +17,7 @@ const musicShows = {
 };
 const funFactFunctions = [recentMusicVideos, recentMilestone, recentMusicShowWin, musicShowWins, mostViewedGroups, mostLikedGroups, mostViewedVideo, mostLikedVideo,
     mostMusicVideos, yearWithMostDebuts, yearWithMostReleases, viewsByGender, mostViewedSoloArtist, viewsBySolo, bigThreeDominance, mostGaonFirsts,
-    mostGaonAppearances, historicalGaonWeekly, recentGaonWeekly, fanclubName, closeBirthdays];
+    mostGaonAppearances, historicalGaonWeekly, recentGaonWeekly, fanclubName, closeBirthdays, mostArtistsEntertainmentCompany, mostViewedEntertainmentCompany];
 
 const kmqFactFunctions = [longestGame, mostGames, mostCorrectGuessed, globalTotalGames, recentGameSessions, recentGames, mostSongsGuessedPlayer,
     mostGamesPlayedPlayer, recentUniquePlayers, topLeveledPlayers];
@@ -198,6 +198,37 @@ async function mostLikedVideo(): Promise<string[]> {
         .orderBy("likes", "DESC")
         .limit(25);
     return result.map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x.song_name, x.artist_name)} is the ${getOrdinalNum(idx + 1)} most liked music video with ${x.likes.toLocaleString()} YouTube likes!`);
+}
+
+async function mostViewedEntertainmentCompany(): Promise<string[]> {
+    const result = await dbContext.kpopVideos("app_kpop")
+        .select(["app_kpop_company.name as name"])
+        .join("app_kpop_group", function join() {
+            this.on("app_kpop.id_artist", "=", "app_kpop_group.id");
+        })
+        .join("app_kpop_company", function join() {
+            this.on("app_kpop_company.id", "=", "app_kpop_group.id_company");
+        })
+        .groupBy("app_kpop_group.id_company")
+        .sum("app_kpop.views as views")
+        .orderBy("views", "DESC")
+        .limit(15);
+    return result.map((x, idx) => `Fun Fact: ${x.name} is the entertainment company with the ${getOrdinalNum(idx + 1)} most YouTube views at ${x.views.toLocaleString()}!`);
+}
+
+async function mostArtistsEntertainmentCompany(): Promise<string[]> {
+    const result = await dbContext.kpopVideos("app_kpop_group")
+        .select(["app_kpop_company.name as name"])
+        .join("app_kpop_company", function join() {
+            this.on("app_kpop_company.id", "=", "app_kpop_group.id_company");
+        })
+        .where("is_collab", "=", "n")
+        .groupBy("app_kpop_group.id_company")
+        .count("* as count")
+        .orderBy("count", "DESC")
+        .limit(15);
+
+    return result.map((x, idx) => `Fun Fact: ${x.name} is the entertainment company with the ${getOrdinalNum(idx + 1)} most artists (including subunits and solo debuts) at ${x.count}!`);
 }
 
 async function mostMusicVideos(): Promise<string[]> {
@@ -465,7 +496,7 @@ async function historicalGaonWeekly(): Promise<Array<string>> {
         .whereIn("year", yearRange)
         .orderBy("year", "DESC");
     const parsedResults = result.map((x) => parseGaonWeeklyRankList(x.ranklist, x.year));
-    return parsedResults.map((x) => `Fun Fact: On this week in ${x[0].year}, ${generateSongArtistHyperlink(x[0].songName, x[0].artistName)} was the topping charting song on the Gaon Weekly charts!`);
+    return parsedResults.map((x) => `Fun Fact: On this week in ${x[0].year}, ${generateSongArtistHyperlink(x[0].songName, x[0].artistName)} was the top charting song on the Gaon Weekly charts!`);
 }
 
 async function recentGaonWeekly(): Promise<Array<string>> {
