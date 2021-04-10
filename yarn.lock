@@ -947,8 +947,14 @@
   "resolved" "https://registry.npmjs.org/eris-reactions/-/eris-reactions-0.1.4.tgz"
   "version" "0.1.4"
 
+<<<<<<< HEAD
 "eris@^0.13.1", "eris@https://github.com/Brainicism/eris.git#aa344e5":
   "version" "0.14.0"
+=======
+"eris@https://github.com/Brainicism/eris.git#f3a8702":
+  version "0.14.0"
+  resolved "https://github.com/Brainicism/eris.git#f3a8702ae2976363a38be7872bba64dead8ccdb5"
+>>>>>>> 5239d3b64495834511bdb2dd11194a632e02a9b5
   dependencies:
     "ws" "^7.2.1"
   optionalDependencies:

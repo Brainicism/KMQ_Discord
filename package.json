@@ -32,7 +32,7 @@
     "commander": "^7.0.0",
     "cron-parser": "^3.1.0",
     "dotenv": "^8.2.0",
-    "eris": "https://github.com/Brainicism/eris.git#aa344e5",
+    "eris": "https://github.com/Brainicism/eris.git#f3a8702",
     "eris-pagination": "^0.5.2",
     "erlpack": "https://github.com/abalabahaha/erlpack.git#5d0064f",
     "fluent-ffmpeg": "^2.1.2",
