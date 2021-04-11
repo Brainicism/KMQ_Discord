@@ -55,6 +55,7 @@ B.I
 B.I.G
 B.O.Y
 B1A4
+Baby Vox
 BabySoul
 Badkiz
 Bae Jin-young
@@ -66,6 +67,7 @@ Baekhyun
 Bastarz
 BDC
 Beast
+Beenzino
 Ben
 Berry Good
 Berry Good Heart Heart
@@ -111,14 +113,14 @@ Car the garden
 Celeb Five
 Cha Eunwoo
 Changmo
-Changsub
 Chanyeol
 Checkmate
 Cheetah
 Cheeze
 Chen
 Cherry Bullet
-Cho A
+Cho Jung Seok
+Choa
 ChoColat
 Choi Nakta
 Chung ha
@@ -130,6 +132,7 @@ CLC
 CNBlue
 Coco
 CocoSori
+Code Kunst
 Coed School
 CRAVITY
 Craxy
@@ -142,10 +145,9 @@ D.A.N.
 D.Holic
 D.O.
 D1CE
-Daehyun
 Dahye
 Dal★Shabet
-Dalmatian (DMTN)
+Dalmatian
 Dalsooobin
 Davichi
 DAWN
@@ -156,7 +158,6 @@ Demian
 Dia
 DJ Hanmin
 DKB
-Donghan
 Dongkiz
 Dongwoo
 Double S 301
@@ -179,17 +180,13 @@ Epik High
 Eric Nam
 Eru
 Eternity
-Eunji
+EU Erine
 Eunjung
-Eunki
-Eunkwang
-Eurine
 Even of Day
 Everglow
 EvoL
 EXID
 EXO
-EXO-12
 EXO-CBX
 EXO-K
 EXO-M
@@ -201,6 +198,7 @@ Fanatics
 Fanxy Child
 Favorite
 Fiestar
+Fin.K.L
 FLORIA
 Fly to the Sky
 Fromis 9
@@ -236,21 +234,24 @@ GOOD DAY
 GOT7
 Gray
 GSoul
-Gu Yoon Hoe
+Guckkasten
 Gugudan
 Gugudan Oguogu
 Gugudan Semina
 Gummy
+Gunji
 Gwangil Jo
 GWSN
+H.O.T
 H.U.B
 H&D
-Ha Hyun-woo
+Ha Dong Qn
+Ha Hyun Woo
 Ha Hyunsang
 Ha Sung Woon
 HA:TFELT
 HALO
-Han Seungwoo
+Han Seung Woo
 Hani
 Haon
 Hashtag
@@ -269,31 +270,29 @@ Hitchhiker
 Holland
 Homme
 Honey Popcorn
-Hong Jin Young
-Hong Joochan
+Hong Eunki
+Hong Jinyoung
+Hong Joo Chan
 Hoody
 Hoppipolla
+Hoshi
 Hot Place
 Hotshot
 Huh Gak
-Huta
-Hwang Chi-yeul
+Hwang Chi Yeul
 Hwang In Wook
 Hwasa
 Hynn
+Hyo
 Hyolyn
 Hyomin
-Hyoseong
-Hyoyeon
 Hyuk
 Hyukoh
 Hyuna
-Hyunsik
 I.C.E
 I.M
 I.O.I
 iKON
-Im Si-wan
 Imfact
 IN2IT
 Infinite
@@ -315,7 +314,7 @@ Jang Beom June
 Jang Deok Cheol
 Jang Hye Jin
 Jang Hyejin
-Jang Woo Young
+Jang Wooyoung
 Jannabi
 Jay Park
 JBJ
@@ -325,20 +324,19 @@ Jennie
 Jenyer
 Jeon Mido
 Jeon Sang Keun
+Jeong Eun Ji
+Jeong Jinwoon
 Jeong Se-woon
 Jessi
 Jessica
-Jiae
 Jimin
 Jin
 Jinho
-JINU
-Jinwoon
+Jinu
 Jiselle
 Jiyeon
 JJ Project
 JJCC
-Jo Jung-suk
 John Park
 Jonghyun
 Joohoney
@@ -346,17 +344,19 @@ Jooyoung
 Joy
 JQT
 Jukjae
+Jun Hyo Seong
 June
+Jung Dae Hyun
 Jung Ilhoon
+Jung In
 Jung Jinhyeong
+Jung Joon Il
 Jung Key
-Jung Seung-hwan
+Jung Seung Hwan
 Jung Yong Hwa
-Jung-in
 Junggigo
-Junhyung
-JUNIEL
-JUNNY
+Juniel
+Junny
 Jus2
 Jvcki Wai
 JYJ
@@ -365,9 +365,9 @@ K.will
 Kai
 Kan Mi Youn
 Kang Daniel
-Kang Ho-dong
+Kang Ho Dong
 Kang Hye Yeon
-Kang Minkyung
+Kang Min Kyung
 Kang Seung Yoon
 Kangta
 Kara
@@ -381,20 +381,21 @@ Key
 KHAN
 Kiara
 Kihyun
+Kim Bo Hyung
 Kim Bo Kyung
-Kim Bohyung
-Kim Bum-soo
-Kim Dong-Ryul
+Kim Bumsoo
+Kim Dong Han
+Kim Dongryul
 Kim Feel
-Kim Heechul
-Kim Hyun-joong
-Kim Hyung-jun
+Kim Hee Chul
+Kim Hyun Joong
+Kim Hyung Jun
 Kim Jaehwan
 Kim Jaejoong
 Kim Na Young
 Kim Nam Joo
 Kim Sung Kyu
-Kim Wooseok
+Kim Woo Seok
 Kim Yo Han
 Kingdom
 Kiss&Cry
@@ -411,12 +412,14 @@ Laboum
 Ladies' code
 Lay
 Laysha
+Lee Changsub
 Lee Eun Sang
 Lee Hae-ri
 Lee Hi
 Lee Hyori
 Lee Jinhyuk
 Lee Juck
+Lee Minhyuk
 Lee Moonsae
 Lee Sang Soon
 Lee Seung Chul
@@ -429,6 +432,7 @@ LeeSSang
 Lena Park
 Leo
 Lim Chang Jung
+Lim Hyunsik
 Lim Jae Hyun
 Lim Jeong-hee
 Lim Jimin
@@ -474,18 +478,19 @@ Mino
 Minseo
 Minzy
 Mirae
-Miso
+MiSO
 Miss A
 Mixx
 Momoland
 Monday Kiz
 MONSTA X
-Moon Byul
 Moon Hyuna
 Moon Moon
+Moonbyul
 MXM
 MyB
 MYNAME
+MYTEEN
 N.CUS
 N.Flying
 Nam Taehyun
@@ -529,6 +534,7 @@ Ovan
 P.O.P
 P1Harmony
 Paloalto
+Parc Jae Jung
 Park Bo Gum
 Park Bom
 Park BoRam
@@ -548,6 +554,7 @@ Pink Fantasy MDD
 Pink Fantasy SHY
 Pixy
 Playback
+PLT
 Precious
 Primary
 Prisma
@@ -599,7 +606,9 @@ Secret
 Secret Number
 Seenroot
 SeeYa
+Sehun
 Sejeong
+Seo Eunkwang
 Seo Inguk
 Seohyun
 Seori
@@ -610,10 +619,12 @@ Seven O'Clock
 Seventeen
 SF9
 SG Wannabe
+Shannon Williams
 Shaun
 Shin Seung-hun
 SHINee
 Shinhwa
+Si-wan Yim
 Sik-K
 Simon Dominic
 SinB
@@ -684,6 +695,7 @@ The Ark
 The Boyz
 The East Light
 The Rose
+The SeeYa
 Tiffany
 TOO
 Topp Dogg
@@ -762,7 +774,9 @@ Yechan
 Yeri
 Yesung
 Yezi
+Yong Jun Hyung
 Yoo Jae-suk
+Yoo Jiae
 Yoo Young-jin
 Yooa
 Yook Sung-jae
@@ -777,6 +791,7 @@ Youha
 Youngjae
 Youngjoo Song
 Younha
+Yu Seung Woo
 Yubin
 Yuju
 Yukika
