@@ -29,6 +29,7 @@ import BaseCommand from "../commands/base_command";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import debugHandler from "../events/client/debug";
 import guildCreateHandler from "../events/client/guildCreate";
+import guildDeleteHandler from "../events/client/guildDelete";
 import BotStatsPoster from "./bot_stats_poster";
 import { EnvType } from "../types";
 import storeDailyStats from "../scripts/store-daily-stats";
@@ -64,7 +65,8 @@ export function registerClientEvents() {
         .on("shardResume", shardResumeHandler)
         .on("disconnect", disconnectHandler)
         // .on("debug", debugHandler)
-        .on("guildCreate", guildCreateHandler);
+        .on("guildCreate", guildCreateHandler)
+        .on("guildDelete", guildDeleteHandler);
 }
 
 /** Registers listeners on process events */
