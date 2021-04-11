@@ -31,7 +31,7 @@ export const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 export const EMBED_SUCCESS_COLOR = 0x00FF00; // GREEN
 const EMBED_FIELDS_PER_PAGE = 20;
 const REQUIRED_TEXT_PERMISSIONS = ["addReactions" as const, "embedLinks" as const];
-const REQUIRED_VOICE_PERMISSIONS = ["voiceConnect" as const, "voiceSpeak" as const];
+const REQUIRED_VOICE_PERMISSIONS = ["viewChannel" as const, "voiceConnect" as const, "voiceSpeak" as const];
 
 /**
  * @param user - The User object
@@ -439,7 +439,7 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
     const messageContext = MessageContext.fromMessage(message);
     const missingPermissions = REQUIRED_VOICE_PERMISSIONS.filter((permission) => !voiceChannel.permissionsOf(state.client.user.id).has(permission));
     if (missingPermissions.length > 0) {
-        logger.warn(`${getDebugLogHeader(messageContext)} | Missing [${missingPermissions.join(", ")}] permissions`);
+        logger.warn(`${getDebugLogHeader(messageContext)} | Missing Voice Channel [${missingPermissions.join(", ")}] permissions`);
         sendErrorMessage(MessageContext.fromMessage(message), { title: "Missing Permissions", description: missingPermissionsText(missingPermissions) });
         return false;
     }
@@ -479,7 +479,7 @@ export async function textPermissionsCheck(message: GuildTextableMessage, channe
 
     const missingPermissions = REQUIRED_TEXT_PERMISSIONS.filter((permission) => !channel.permissionsOf(client.user.id).has(permission));
     if (missingPermissions.length > 0) {
-        logger.warn(`${getDebugLogHeader(messageContext)} | Missing [${missingPermissions.join(", ")}] permissions`);
+        logger.warn(`${getDebugLogHeader(messageContext)} | Missing Text Channel [${missingPermissions.join(", ")}] permissions`);
         client.createMessage(channel.id, {
             content: missingPermissionsText(missingPermissions),
         });
