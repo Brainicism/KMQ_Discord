@@ -6,7 +6,7 @@ import { Logger } from "log4js";
 import { exec } from "child_process";
 import { QueriedSong } from "../types";
 import _logger from "../logger";
-import dbContext from "../database_context";
+import { DatabaseContext, getNewConnection } from "../database_context";
 import { generateKmqDataTables } from "../seed/bootstrap";
 import { retryJob } from "../helpers/utils";
 
@@ -89,7 +89,7 @@ async function ffmpegOpusJob(id: string): Promise<void> {
             .run();
     });
 }
-const downloadSong = (id: string): Promise<void> => {
+const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
     const cachedSongLocation = path.join(process.env.SONG_DOWNLOAD_DIR, `${id}.mp3`);
     const tempLocation = `${cachedSongLocation}.part`;
     const cacheStream = fs.createWriteStream(tempLocation);
@@ -104,7 +104,7 @@ const downloadSong = (id: string): Promise<void> => {
             const infoResponse = await ytdl.getBasicInfo(`https://www.youtube.com/watch?v=${id}`);
             const { playabilityStatus }: any = infoResponse.player_response;
             if (playabilityStatus.status !== "OK") {
-                await dbContext.kmq("dead_links")
+                await db.kmq("dead_links")
                     .insert({ vlink: id, reason: `Failed to load video: error = ${playabilityStatus.reason}` });
                 reject(new Error(`Failed to load video: error = ${playabilityStatus.reason}`));
                 return;
@@ -113,7 +113,7 @@ const downloadSong = (id: string): Promise<void> => {
             ytdl(`https://www.youtube.com/watch?v=${id}`, ytdlOptions)
                 .pipe(cacheStream);
         } catch (e) {
-            await dbContext.kmq("dead_links")
+            await db.kmq("dead_links")
                 .insert({ vlink: id, reason: `Failed to retrieve video metadata. error = ${e}` });
             reject(new Error(`Failed to retrieve video metadata. error = ${e}`));
             return;
@@ -131,8 +131,8 @@ const downloadSong = (id: string): Promise<void> => {
     });
 };
 
-async function getSongsFromDb() {
-    return dbContext.kpopVideos("kpop_videos.app_kpop")
+async function getSongsFromDb(db: DatabaseContext) {
+    return db.kpopVideos("kpop_videos.app_kpop")
         .select(["nome as name", "name as artist", "vlink as youtubeLink"])
         .join("kpop_videos.app_kpop_group", function join() {
             this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id");
@@ -143,21 +143,21 @@ async function getSongsFromDb() {
         .orderBy("kpop_videos.app_kpop.views", "DESC");
 }
 
-async function updateNotDownloaded(songs: Array<QueriedSong>) {
+async function updateNotDownloaded(db: DatabaseContext, songs: Array<QueriedSong>) {
     // update list of non-downloaded songs
     const songIDsNotDownloaded = songs.filter((x) => !fs.existsSync(path.join(process.env.SONG_DOWNLOAD_DIR, `${x.youtubeLink}.ogg`))).map((x) => ({ vlink: x.youtubeLink }));
-    await dbContext.kmq.transaction(async (trx) => {
-        await dbContext.kmq("not_downloaded").del().transacting(trx);
-        await dbContext.kmq("not_downloaded").insert(songIDsNotDownloaded).transacting(trx);
+    await db.kmq.transaction(async (trx) => {
+        await db.kmq("not_downloaded").del().transacting(trx);
+        await db.kmq("not_downloaded").insert(songIDsNotDownloaded).transacting(trx);
     });
 }
 
-const downloadNewSongs = async (limit?: number) => {
-    const allSongs: Array<QueriedSong> = await getSongsFromDb();
+const downloadNewSongs = async (db: DatabaseContext, limit?: number) => {
+    const allSongs: Array<QueriedSong> = await getSongsFromDb(db);
     let songsToDownload = limit ? allSongs.slice(0, limit) : allSongs.slice();
     let downloadCount = 0;
     let deadLinksSkipped = 0;
-    const knownDeadIDs = new Set((await dbContext.kmq("dead_links")
+    const knownDeadIDs = new Set((await db.kmq("dead_links")
         .select("vlink"))
         .map((x) => x.vlink));
 
@@ -167,7 +167,9 @@ const downloadNewSongs = async (limit?: number) => {
     logger.info("Total songs to be downloaded:", songsToDownload.length);
 
     // update current list of non-downloaded songs
-    await updateNotDownloaded(allSongs);
+    await updateNotDownloaded(db, allSongs);
+
+
 
     for (const song of songsToDownload) {
         logger.info(`Downloading song: '${song.name}' by ${song.artist} | ${song.youtubeLink} (${downloadCount + 1}/${songsToDownload.length})`);
@@ -195,17 +197,22 @@ const downloadNewSongs = async (limit?: number) => {
     }
 
     // update final list of non-downloaded songs
-    await updateNotDownloaded(allSongs);
+    await updateNotDownloaded(db, allSongs);
     logger.info(`Total songs downloaded: ${downloadCount}, (${deadLinksSkipped} dead links skipped)`);
 };
 
 export async function downloadAndConvertSongs(limit?: number) {
-    if (!fs.existsSync(process.env.SONG_DOWNLOAD_DIR)) {
-        logger.error("Song cache directory doesn't exist.");
-        return;
-    }
+    const db = getNewConnection();
+    try {
+        if (!fs.existsSync(process.env.SONG_DOWNLOAD_DIR)) {
+            logger.error("Song cache directory doesn't exist.");
+            return;
+        }
 
-    await clearPartiallyCachedSongs();
-    await downloadNewSongs(limit);
-    generateKmqDataTables();
+        await clearPartiallyCachedSongs();
+        await downloadNewSongs(db, limit);
+        generateKmqDataTables();
+    } finally {
+        await db.destroy();
+    }
 }

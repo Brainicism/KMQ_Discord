@@ -30,6 +30,8 @@ import BaseCommand from "../commands/base_command";
 import debugHandler from "../events/client/debug";
 import guildCreateHandler from "../events/client/guildCreate";
 import guildDeleteHandler from "../events/client/guildDelete";
+import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
+import guildAvailableHandler from "../events/client/guildAvailable";
 import BotStatsPoster from "./bot_stats_poster";
 import { EnvType } from "../types";
 import storeDailyStats from "../scripts/store-daily-stats";
@@ -66,7 +68,9 @@ export function registerClientEvents() {
         .on("disconnect", disconnectHandler)
         // .on("debug", debugHandler)
         .on("guildCreate", guildCreateHandler)
-        .on("guildDelete", guildDeleteHandler);
+        .on("guildDelete", guildDeleteHandler)
+        .on("unavailableGuildCreate", unavailableGuildCreateHandler)
+        .on("guildAvailable", guildAvailableHandler);
 }
 
 /** Registers listeners on process events */
@@ -191,7 +195,7 @@ export function registerIntervals() {
         if (overrideFileExists) {
             return;
         }
-        await seedAndDownloadNewSongs();
+        await seedAndDownloadNewSongs(dbContext);
     });
 
     // every sunday at 1am UTC => 8pm saturday EST
