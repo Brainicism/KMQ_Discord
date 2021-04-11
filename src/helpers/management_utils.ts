@@ -29,6 +29,7 @@ import BaseCommand from "../commands/base_command";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import debugHandler from "../events/client/debug";
 import guildCreateHandler from "../events/client/guildCreate";
+import guildDeleteHandler from "../events/client/guildDelete";
 import BotStatsPoster from "./bot_stats_poster";
 import { EnvType } from "../types";
 import storeDailyStats from "../scripts/store-daily-stats";
@@ -64,7 +65,8 @@ export function registerClientEvents() {
         .on("shardResume", shardResumeHandler)
         .on("disconnect", disconnectHandler)
         // .on("debug", debugHandler)
-        .on("guildCreate", guildCreateHandler);
+        .on("guildCreate", guildCreateHandler)
+        .on("guildDelete", guildDeleteHandler);
 }
 
 /** Registers listeners on process events */
@@ -98,6 +100,19 @@ export const checkRestartNotification = async (restartNotification: Date): Promi
         logger.info(`Impending bot restart in ${timeDiffMin} minutes. ${channelsWarned} servers warned.`);
     }
 };
+
+/** Clear inactive voice connections */
+function clearInactiveVoiceConnections() {
+    const existingVoiceChannelGuildIDs = Array.from(state.client.voiceConnections.keys()) as Array<string>;
+    const activeVoiceChannelGuildIDs = Object.values(state.gameSessions).map((x) => x.guildID);
+    for (const existingVoiceChannelGuildID of existingVoiceChannelGuildIDs) {
+        if (!activeVoiceChannelGuildIDs.includes(existingVoiceChannelGuildID)) {
+            const voiceChannelID = state.client.voiceConnections.get(existingVoiceChannelGuildID).channelID;
+            logger.info(`gid: ${existingVoiceChannelGuildID}, vid: ${voiceChannelID} | Disconnected inactive voice connection`);
+            state.client.voiceConnections.leave(existingVoiceChannelGuildID);
+        }
+    }
+}
 
 /** Updates the bot's server count status */
 export function updateBotStatus() {
@@ -189,6 +204,7 @@ export function registerIntervals() {
     schedule.scheduleJob("*/5 * * * *", async () => {
         reloadAliases();
         updatePublishDateOverrides();
+        clearInactiveVoiceConnections();
     });
 }
 

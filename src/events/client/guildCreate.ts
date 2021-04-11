@@ -22,6 +22,6 @@ export default async function guildCreateHandler(guild: Eris.Guild) {
             { name: "**Language**:", value: guild.preferredLocale },
             { name: "**Nitro Boosts**:", value: guild.premiumSubscriptionCount.toString() },
         ],
-        footerText: `Joined at: ${joinDate.toLocaleDateString("en-US")} ${joinDate.toLocaleTimeString("en-US")}`,
+        footerText: `gid: ${guild.id} | Joined at: ${joinDate.toLocaleDateString("en-US")} ${joinDate.toLocaleTimeString("en-US")}`,
     });
 }
