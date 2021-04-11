@@ -195,7 +195,7 @@ export function registerIntervals() {
         if (overrideFileExists) {
             return;
         }
-        await seedAndDownloadNewSongs();
+        await seedAndDownloadNewSongs(dbContext);
     });
 
     // every sunday at 1am UTC => 8pm saturday EST
