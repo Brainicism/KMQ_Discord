@@ -12,6 +12,7 @@ import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import dbContext, { DatabaseContext, getDatabaseAgnosticContext } from "../database_context";
 
 config({ path: path.resolve(__dirname, "../../.env") });
+const SQL_DUMP_EXPIRY = 10;
 const fileUrl = "http://kpop.daisuki.com.br/download.php";
 const logger: Logger = _logger("seed_db");
 const overridesFilePath = path.join(__dirname, "../../sql/kpop_videos_overrides.sql");
@@ -84,6 +85,15 @@ async function hasRecentDump(): Promise<boolean> {
     return daysDiff < 6;
 }
 
+async function pruneSqlDumps() {
+    try {
+        execSync(`find ${databaseDownloadDir}/sql -mindepth 1 -mtime +${SQL_DUMP_EXPIRY} -delete`);
+        logger.info("Finished pruning old SQL dumps");
+    } catch (err) {
+        logger.error("Error attempting to prune SQL dumps directory, ", err);
+    }
+}
+
 async function updateKpopDatabase() {
     const db = getDatabaseAgnosticContext();
     if (!options.skipPull) {
@@ -111,6 +121,7 @@ export async function updateGroupList() {
 }
 
 async function seedAndDownloadNewSongs() {
+    pruneSqlDumps();
     try {
         await updateKpopDatabase();
     } catch (e) {
