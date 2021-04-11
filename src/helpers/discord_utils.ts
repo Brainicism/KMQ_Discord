@@ -71,7 +71,7 @@ async function sendMessage(textChannelID: string, messageContent: Eris.AdvancedM
     try {
         return await state.client.createMessage(textChannelID, messageContent);
     } catch (e) {
-        logger.error(`Error sending message. err = ${e}. body = ${JSON.stringify(messageContent)}`);
+        logger.error(`Error sending message. textChannelID = ${textChannelID}. textChannel permissions = ${channel.permissionsOf(state.client.user.id).json} err = ${e}. body = ${JSON.stringify(messageContent)}`);
         return null;
     }
 }

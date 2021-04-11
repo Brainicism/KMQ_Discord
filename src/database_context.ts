@@ -13,9 +13,9 @@ export class DatabaseContext {
     public kpopVideos: Knex;
     public agnostic: Knex;
 
-    constructor(initAgnostic = false) {
+    constructor() {
         if ([EnvType.DRY_RUN].includes(process.env.NODE_ENV as EnvType)) return;
-        logger.info(`Initializing database connections ${process.env.NODE_ENV}`);
+        logger.info(`Initializing database connections ${process.env.NODE_ENV || ""}`);
         if (process.env.NODE_ENV === EnvType.TEST) {
             logger.info("Initializing KMQ test database context");
             this.kmq = Knex(kmqTestKnexConfig);
@@ -23,9 +23,7 @@ export class DatabaseContext {
             this.kmq = Knex(kmqKnexConfig);
         }
         this.kpopVideos = Knex(kpopVideosKnexConfig);
-        if (initAgnostic) {
-            this.agnostic = Knex(agnosticKnexConfig);
-        }
+        this.agnostic = Knex(agnosticKnexConfig);
     }
 
     async destroy() {
@@ -41,8 +39,8 @@ export class DatabaseContext {
     }
 }
 
-export function getDatabaseAgnosticContext(): DatabaseContext {
-    return new DatabaseContext(true);
+export function getNewConnection(): DatabaseContext {
+    return new DatabaseContext();
 }
 
 export default new DatabaseContext();

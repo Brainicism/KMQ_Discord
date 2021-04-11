@@ -2,17 +2,17 @@ import fs from "fs";
 import path from "path";
 import { Logger } from "log4js";
 import _logger from "../logger";
-import dbContext from "../database_context";
+import { DatabaseContext, getNewConnection } from "../database_context";
 
 const logger: Logger = _logger("remove-redunant-aliases");
 
-export default async function removeRedunantAliases() {
+export default async function removeRedunantAliases(db: DatabaseContext) {
     const songAliasPath = path.resolve(__dirname, "../../data/song_aliases.json");
     logger.info("Checking for redunant aliases...");
     const songAliases: { [songID: string]: Array<string> } = JSON.parse(fs.readFileSync(songAliasPath).toString());
     let changeCount = 0;
     for (const videoID of Object.keys(songAliases)) {
-        const result = await dbContext.kmq("available_songs")
+        const result = await db.kmq("available_songs")
             .select("song_name as name")
             .where("link", "=", videoID)
             .first();
@@ -56,7 +56,11 @@ export default async function removeRedunantAliases() {
 
 (async () => {
     if (require.main === module) {
-        await removeRedunantAliases();
-        await dbContext.destroy();
+        const db = getNewConnection();
+        try {
+            await removeRedunantAliases(db);
+        } finally {
+            await db.destroy();
+        }
     }
 })();
