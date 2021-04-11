@@ -83,12 +83,13 @@ async function sendMessage(textChannelID: string, messageContent: Eris.AdvancedM
  * @param description - The description of the embed
  */
 export async function sendErrorMessage(messageContext: MessageContext, embedPayload: EmbedPayload): Promise<Eris.Message<TextableChannel>> {
+    const author = embedPayload.author || messageContext.author;
     return sendMessage(messageContext.textChannelID, {
         embed: {
             color: embedPayload.color || EMBED_ERROR_COLOR,
-            author: messageContext.author ? {
-                name: messageContext.author.username,
-                icon_url: messageContext.author.avatarUrl,
+            author: author ? {
+                name: author.username,
+                icon_url: author.avatarUrl,
             } : null,
             title: bold(embedPayload.title),
             description: embedPayload.description,
@@ -112,7 +113,7 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
         return sendErrorMessage(messageContext, { title: "Error", description: "Response message was too long, report this error to the KMQ help server" });
     }
 
-    const author = messageContext.author || embedPayload.author;
+    const author = embedPayload.author || messageContext.author;
     const embed: EmbedOptions = {
         color: embedPayload.color || EMBED_INFO_COLOR,
         author: author ? {
