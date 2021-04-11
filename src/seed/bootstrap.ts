@@ -4,7 +4,7 @@ import { execSync } from "child_process";
 import { updateKpopDatabase } from "./seed_db";
 import _logger from "../logger";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
-import { DatabaseContext, getDatabaseAgnosticContext } from "../database_context";
+import { DatabaseContext, getNewConnection } from "../database_context";
 
 const logger = _logger("bootstrap");
 
@@ -55,14 +55,14 @@ function performMigrations() {
 
 async function bootstrapDatabases() {
     const startTime = Date.now();
-    const db = getDatabaseAgnosticContext();
+    const db = getNewConnection();
 
     if (await needsBootstrap(db)) {
         logger.info("Bootstrapping databases...");
 
         if (!(await kpopDataDatabaseExists(db))) {
             logger.info("Seeding K-pop data database");
-            await updateKpopDatabase();
+            await updateKpopDatabase(db);
         }
 
         if (!(await kmqDatabaseExists(db))) {
