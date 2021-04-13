@@ -18,7 +18,7 @@ services:
       - db
 
   db:
-    image: mysql:5.7
+    image: mariadb:10.3
     restart: on-failure
     env_file: .env
     environment:
@@ -27,6 +27,7 @@ services:
       - mysql:/var/lib/mysql
     ports:
       - 3306:3306
+    command: --max-allowed-packet=32M
 
 volumes:
   songs:
