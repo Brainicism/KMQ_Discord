@@ -169,8 +169,6 @@ const downloadNewSongs = async (db: DatabaseContext, limit?: number) => {
     // update current list of non-downloaded songs
     await updateNotDownloaded(db, allSongs);
 
-
-
     for (const song of songsToDownload) {
         logger.info(`Downloading song: '${song.name}' by ${song.artist} | ${song.youtubeLink} (${downloadCount + 1}/${songsToDownload.length})`);
         try {
@@ -211,7 +209,7 @@ export async function downloadAndConvertSongs(limit?: number) {
 
         await clearPartiallyCachedSongs();
         await downloadNewSongs(db, limit);
-        generateKmqDataTables();
+        await generateKmqDataTables(db);
     } finally {
         await db.destroy();
     }

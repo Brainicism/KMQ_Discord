@@ -1,6 +1,4 @@
-DELIMITER //
-
-DROP PROCEDURE IF EXISTS CreateKmqDataTables //
+DROP PROCEDURE IF EXISTS CreateKmqDataTables;
 CREATE PROCEDURE CreateKmqDataTables()
 BEGIN
 	/* update available_songs table */
@@ -45,5 +43,4 @@ BEGIN
 	RENAME TABLE kmq.kpop_groups TO old, kmq.kpop_groups_temp TO kmq.kpop_groups;
 	DROP TABLE old;
 
-END //
-DELIMITER ;
+END
