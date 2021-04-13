@@ -53,21 +53,19 @@ async function extractDb(): Promise<void> {
 
 async function validateSqlDump(db: DatabaseContext, seedFilePath: string) {
     try {
-        await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_test;");
-        await db.agnostic.raw("CREATE DATABASE kpop_videos_test;");
-        execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_test < ${seedFilePath}`);
-        const songCount = parseInt(execSync(`mysql -sN -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT}\
-                                    kpop_videos_test -e "select count(*) from app_kpop;"`).toString(), 10);
-        const artistCount = parseInt(execSync(`mysql -sN -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT}\
-                                    kpop_videos_test -e "select count(*) from app_kpop_group;"`).toString(), 10);
+        await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_validation;");
+        await db.agnostic.raw("CREATE DATABASE kpop_videos_validation;");
+        await db.kpopVideosValidation.raw(fs.readFileSync(seedFilePath).toString());
+        const songCount = (await db.kpopVideosValidation("app_kpop").count("* as count").first()).count;
+        const artistCount = (await db.kpopVideosValidation("app_kpop_group").count("* as count").first()).count;
         if (songCount < 1000 || artistCount < 100) {
             throw new Error("SQL dump valid, but potentially missing data.");
         }
-        logger.info(`SQL dump validated successfully${songCount}`);
+        logger.info("SQL dump validated successfully");
     } catch (e) {
-        throw new Error(`SQL dump validation failed. ${e}`);
+        throw new Error(`SQL dump validation failed. ${e.sqlMessage}`);
     } finally {
-        await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_test;");
+        await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_validation;");
     }
 }
 
@@ -82,9 +80,9 @@ async function seedDb(db: DatabaseContext) {
     logger.info("Creating K-Pop video database");
     await db.agnostic.raw("CREATE DATABASE kpop_videos;");
     logger.info("Seeding K-Pop video database");
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${seedFilePath}`);
+    await db.kpopVideos.raw(fs.readFileSync(seedFilePath).toString());
     logger.info("Performing data overrides");
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${overridesFilePath}`);
+    await db.kpopVideos.raw(fs.readFileSync(overridesFilePath).toString());
     logger.info(`Imported database dump (${seedFile}) successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing`);
 }
 

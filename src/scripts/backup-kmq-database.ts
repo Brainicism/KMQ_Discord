@@ -1,52 +1,50 @@
 import fs from "fs";
-import { exec, execSync } from "child_process";
-import { program } from "commander";
 import { Logger } from "log4js";
 import { join } from "path";
+import mysqldump from "mysqldump";
 import _logger from "../logger";
 import { friendlyFormattedDate } from "../helpers/utils";
+import { getNewConnection } from "../database_context";
 
 const databaseBackupDir = join(__dirname, "../../kpop_db/kmq_backup");
 
 const logger: Logger = _logger("backup-kmq");
 
-program
-    .option("-i, --import <file>", "The dump file to import");
-
-program.parse();
-const options = program.opts();
-
 async function backupKmqDatabase(): Promise<void> {
     if (!fs.existsSync(databaseBackupDir)) {
         fs.mkdirSync(databaseBackupDir);
     }
-    return new Promise((resolve, reject) => {
-        exec(`mysqldump -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --routines kmq > ${databaseBackupDir}/kmq_backup_${friendlyFormattedDate(new Date())}.sql`, (err) => {
-            if (err) {
-                logger.error(`Error backing up kmq database, err = ${err}`);
-                reject(err);
-                return;
-            }
-            resolve();
+    try {
+        await mysqldump({
+            connection: {
+                host: process.env.DB_HOST,
+                user: process.env.DB_USER,
+                password: process.env.DB_PASS,
+                port: parseInt(process.env.DB_PORT, 10),
+                database: "kmq",
+            },
+            dumpToFile: `${databaseBackupDir}/kmq_backup_${friendlyFormattedDate(new Date())}.sql`,
+            dump: {
+                schema: {
+                    table: {
+                        dropIfExist: true,
+                    },
+                },
+            },
         });
-    });
-}
-
-function importKmqDatabase(fileWithPath: string) {
-    if (!fs.existsSync(fileWithPath)) {
-        logger.error(`Dump file ${fileWithPath} doesn't exist.`);
-        return;
+    } catch (e) {
+        logger.error(`Error backing up kmq database, err = ${e}`);
     }
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} kmq < ${fileWithPath}`);
 }
 
 (async () => {
-    if (require.main === module) {
-        if (options.import) {
-            importKmqDatabase(options.import);
-        } else {
+    const db = getNewConnection();
+    try {
+        if (require.main === module) {
             backupKmqDatabase();
         }
+    } finally {
+        await db.destroy();
     }
 })();
 

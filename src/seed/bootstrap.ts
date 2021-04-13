@@ -1,4 +1,5 @@
 import path from "path";
+import fs from "fs";
 import { config } from "dotenv";
 import { execSync } from "child_process";
 import { updateKpopDatabase } from "./seed_db";
@@ -41,11 +42,11 @@ async function needsBootstrap(db: DatabaseContext) {
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export function generateKmqDataTables() {
+export async function generateKmqDataTables(db: DatabaseContext) {
     const createKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/create_kmq_data_tables_procedure.sql");
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq < ${createKmqTablesProcedureSqlPath}`);
+    await db.kmq.raw(fs.readFileSync(createKmqTablesProcedureSqlPath).toString());
     logger.info("Re-creating KMQ data tables view...");
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq -e "CALL CreateKmqDataTables;"`);
+    await db.kmq.raw("CALL CreateKmqDataTables;");
 }
 
 function performMigrations() {
@@ -77,7 +78,7 @@ async function bootstrapDatabases() {
         }
     } else {
         performMigrations();
-        generateKmqDataTables();
+        await generateKmqDataTables(db);
     }
     logger.info(`Bootstrapped in ${(Date.now() - startTime) / 1000}s`);
     await db.destroy();

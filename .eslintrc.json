@@ -117,6 +117,15 @@
         ],
         "import/order": [
             "warn"
+        ],
+        "@typescript-eslint/brace-style": [
+            "warn"
+        ],
+        "no-empty": [
+            "warn"
+        ],
+        "no-multi-spaces": [
+            "warn"
         ]
     }
 }
