@@ -14,14 +14,15 @@ RUN apk add --no-cache git \
 
 RUN yarn global add typescript
 COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
+RUN yarn install --production
 
 
 # ================================================================= #
 FROM node:15-alpine
 RUN apk add --no-cache mysql-client \
     nodejs \
-    ffmpeg
+    ffmpeg \ 
+    bash
 
 COPY --from=build /app /app
 WORKDIR /app
