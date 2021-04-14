@@ -18,7 +18,7 @@ services:
       - db
 
   db:
-    image: mysql:5.7
+    image: mariadb:10.3
     restart: on-failure
     env_file: .env
     environment:
