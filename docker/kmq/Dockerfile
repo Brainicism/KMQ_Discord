@@ -1,7 +1,7 @@
-FROM node:15-alpine
+FROM node:15-alpine AS build
 
 WORKDIR /app
-
+COPY . .
 RUN apk add --no-cache git \
     python \
     make \
@@ -10,17 +10,21 @@ RUN apk add --no-cache git \
     autoconf \
     automake \
     libtool \
-    mysql-client \
+    nodejs
+
+RUN yarn global add typescript
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+
+
+# ================================================================= #
+FROM node:15-alpine
+RUN apk add --no-cache mysql-client \
     nodejs \
     ffmpeg
 
-RUN npm install typescript -g
-
-COPY package.json yarn.lock ./
-
-RUN yarn install --frozen-lockfile
-
-COPY . .
+COPY --from=build /app /app
+WORKDIR /app
 
 STOPSIGNAL SIGINT
 ARG START_TYPE

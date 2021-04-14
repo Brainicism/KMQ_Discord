@@ -1,4 +1,6 @@
-node_modules
-build
-.env
+node_modules/
+build/
+kpop_db/
+logs/
 docker/
+.env
