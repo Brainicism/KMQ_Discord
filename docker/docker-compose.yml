@@ -27,6 +27,7 @@ services:
       - mysql:/var/lib/mysql
     ports:
       - 3306:3306
+    command: --max-allowed-packet=32M
 
 volumes:
   songs:

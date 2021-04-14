@@ -1,7 +1,7 @@
 FROM node:15-alpine AS build
 
 WORKDIR /app
-
+COPY . .
 RUN apk add --no-cache git \
     python \
     make \
@@ -12,14 +12,12 @@ RUN apk add --no-cache git \
     libtool \
     nodejs
 
-RUN npm install typescript -g
-
+RUN yarn global add typescript
 COPY package.json yarn.lock ./
-
 RUN yarn install --frozen-lockfile
 
-COPY . .
 
+# ================================================================= #
 FROM node:15-alpine
 RUN apk add --no-cache mysql-client \
     nodejs \
