@@ -172,7 +172,7 @@ const downloadNewSongs = async (db: DatabaseContext, limit?: number) => {
     for (const song of songsToDownload) {
         logger.info(`Downloading song: '${song.name}' by ${song.artist} | ${song.youtubeLink} (${downloadCount + 1}/${songsToDownload.length})`);
         try {
-            await retryJob(downloadSong, [song.youtubeLink], 1, true, 5000);
+            await retryJob(downloadSong, [db, song.youtubeLink], 1, true, 5000);
         } catch (err) {
             logger.error(`Error downloading song ${song.youtubeLink}, skipping... err = ${err}`);
             deadLinksSkipped++;
