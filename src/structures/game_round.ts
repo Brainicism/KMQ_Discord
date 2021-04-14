@@ -113,7 +113,9 @@ export default class GameRound {
      * @param userID - The user ID of the correct guesser
      */
     userCorrect(userID: string) {
-        this.correctGuessers.push(KmqMember.fromUser(state.client.users.get(userID)));
+        if (!this.correctGuessers.some((x) => x.id === userID)) {
+            this.correctGuessers.push(KmqMember.fromUser(state.client.users.get(userID)));
+        }
     }
 
     /**
