@@ -145,7 +145,8 @@ async function getSongsFromDb(db: DatabaseContext) {
 
 async function updateNotDownloaded(db: DatabaseContext, songs: Array<QueriedSong>) {
     // update list of non-downloaded songs
-    const songIDsNotDownloaded = songs.filter((x) => !fs.existsSync(path.join(process.env.SONG_DOWNLOAD_DIR, `${x.youtubeLink}.ogg`))).map((x) => ({ vlink: x.youtubeLink }));
+    const currentlyDownloadedFiles = new Set(fs.readdirSync(process.env.SONG_DOWNLOAD_DIR));
+    const songIDsNotDownloaded = songs.filter((x) => !currentlyDownloadedFiles.has(`${x.youtubeLink}.ogg`)).map((x) => ({ vlink: x.youtubeLink }));
     await db.kmq.transaction(async (trx) => {
         await db.kmq("not_downloaded").del().transacting(trx);
         await db.kmq("not_downloaded").insert(songIDsNotDownloaded).transacting(trx);
@@ -161,8 +162,9 @@ const downloadNewSongs = async (db: DatabaseContext, limit?: number) => {
         .select("vlink"))
         .map((x) => x.vlink));
 
+    const currentlyDownloadedFiles = new Set(fs.readdirSync(process.env.SONG_DOWNLOAD_DIR));
     logger.info("Total songs in database:", allSongs.length);
-    songsToDownload = songsToDownload.filter((x) => !fs.existsSync(path.join(process.env.SONG_DOWNLOAD_DIR, `${x.youtubeLink}.ogg`)));
+    songsToDownload = songsToDownload.filter((x) => !currentlyDownloadedFiles.has(`${x.youtubeLink}.ogg`));
     songsToDownload = songsToDownload.filter((x) => !knownDeadIDs.has(x.youtubeLink));
     logger.info("Total songs to be downloaded:", songsToDownload.length);
 

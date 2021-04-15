@@ -13,14 +13,18 @@ const SONG_DOWNLOAD_THRESHOLD = 5;
 
 config({ path: path.resolve(__dirname, "../../.env") });
 
+async function tableExists(db: DatabaseContext, tableName: string) {
+    return (await db.agnostic("information_schema.schemata").where("schema_name", "=", tableName)).length === 1;
+}
 async function kmqDatabaseExists(db: DatabaseContext): Promise<boolean> {
-    const kmqExists = (await db.agnostic("information_schema.schemata").where("schema_name", "=", "kmq")).length === 1;
-    const kmqTestExists = (await db.agnostic("information_schema.schemata").where("schema_name", "=", "kmq_test")).length === 1;
+    const kmqExists = await tableExists(db, "kmq");
+    const kmqTestExists = await tableExists(db, "kmq_test");
     return kmqExists && kmqTestExists;
 }
 
 async function kpopDataDatabaseExists(db: DatabaseContext): Promise<boolean> {
-    return (await db.agnostic("information_schema.schemata").where("schema_name", "=", "kpop_videos")).length === 1;
+    const kpopVideosExists = await tableExists(db, "kpop_videos");
+    return kpopVideosExists;
 }
 
 async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
@@ -78,7 +82,6 @@ async function bootstrapDatabases() {
         }
     } else {
         performMigrations();
-        await generateKmqDataTables(db);
     }
     logger.info(`Bootstrapped in ${(Date.now() - startTime) / 1000}s`);
     await db.destroy();
