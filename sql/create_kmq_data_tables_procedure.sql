@@ -28,8 +28,7 @@ BEGIN
 	WHERE vlink NOT IN (SELECT vlink FROM kmq.not_downloaded)
 	AND dead = 'n'
 	AND vtype = 'main'
-	AND tags NOT LIKE "%c%"
-	ORDER BY kpop_videos.app_kpop.views DESC;
+	AND tags NOT LIKE "%c%";
 
 	RENAME TABLE available_songs TO old, available_songs_temp TO available_songs;
 	DROP TABLE old;
