@@ -26,7 +26,7 @@ program
     .option("-p, --skip-pull", "Skip re-pull of Daisuki database dump", false)
     .option("-r, --skip-reseed", "Force skip drop/create of kpop_videos database", false)
     .option("-d, --skip-download", "Skip download/encode of videos in database", false)
-    .option("--limit <limit>", "Limit the number of songs to download", (x) => parseInt(x, 10));
+    .option("--limit <limit>", "Limit the number of songs to download", (x) => parseInt(x));
 
 program.parse();
 const options = program.opts();

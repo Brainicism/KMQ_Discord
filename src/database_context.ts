@@ -1,14 +1,21 @@
 import Knex from "knex";
-import kmqKnexConfig from "./config/knexfile_kmq";
-import kpopVideosKnexConfig from "./config/knexfile_kpop_videos";
-import agnosticKnexConfig from "./config/knexfile_agnostic";
-import kmqTestKnexConfig from "./config/knexfile_kmq_test";
-import kpopVideosKnexValidationConfig from "./config/knexfile_kpop_videos_validation";
 import _logger from "./logger";
 import { EnvType } from "./types";
 
 const logger = _logger("database_context");
 
+function generateKnexContext(databaseName: string, minPoolSize = 0, maxPoolSize: number) {
+    return {
+        client: "mysql",
+        connection: {
+            user: process.env.DB_USER, password: process.env.DB_PASS, database: databaseName, host: process.env.DB_HOST, charset: "utf8mb4", port: parseInt(process.env.DB_PORT), multipleStatements: true,
+        },
+        pool: {
+            min: minPoolSize,
+            max: maxPoolSize,
+        },
+    };
+}
 export class DatabaseContext {
     public kmq: Knex;
     public kpopVideos: Knex;
@@ -20,13 +27,13 @@ export class DatabaseContext {
         logger.info(`Initializing database connections ${process.env.NODE_ENV || ""}`);
         if (process.env.NODE_ENV === EnvType.TEST) {
             logger.info("Initializing KMQ test database context");
-            this.kmq = Knex(kmqTestKnexConfig);
+            this.kmq = Knex(generateKnexContext("kmq_test", 0, 1));
         } else {
-            this.kmq = Knex(kmqKnexConfig);
+            this.kmq = Knex(generateKnexContext("kmq", 0, 10));
         }
-        this.kpopVideos = Knex(kpopVideosKnexConfig);
-        this.agnostic = Knex(agnosticKnexConfig);
-        this.kpopVideosValidation = Knex(kpopVideosKnexValidationConfig);
+        this.kpopVideos = Knex(generateKnexContext("kpop_videos", 0, 10));
+        this.agnostic = Knex(generateKnexContext(null, 0, 1));
+        this.kpopVideosValidation = Knex(generateKnexContext("kpop_videos_validation", 0, 1));
     }
 
     async destroy() {

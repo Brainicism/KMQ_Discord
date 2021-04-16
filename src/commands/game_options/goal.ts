@@ -47,7 +47,7 @@ export default class GoalCommand implements BaseCommand {
         }
 
         const gameSession = gameSessions[message.guildID];
-        const userGoal = parseInt(parsedMessage.components[0], 10);
+        const userGoal = parseInt(parsedMessage.components[0]);
         if (gameSession && !gameSession.scoreboard.isEmpty() && userGoal <= gameSession.scoreboard.getWinners()[0].getScore()) {
             logger.info(`${getDebugLogHeader(message)} | Goal update ignored.`);
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Error applying goal", description: "Given goal exceeds highest score. Please raise your goal, or start a new game." });

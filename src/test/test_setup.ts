@@ -2,7 +2,7 @@
 import sinon from "sinon";
 import log4js from "log4js";
 import * as discordUtils from "../helpers/discord_utils";
-import kmqTestKnexConfig from "../config/knexfile_kmq_test";
+import kmqKnexConfig from "../config/knexfile_kmq";
 import dbContext from "../database_context";
 import Player from "../structures/player";
 
@@ -14,7 +14,7 @@ before(async () => {
     sandbox.stub(Player, "fromUserID").callsFake((id) => (new Player("", id, "", 0)));
     log4js.getLogger().level = "off";
     await dbContext.kmq.migrate.latest({
-        directory: kmqTestKnexConfig.migrations.directory,
+        directory: kmqKnexConfig.migrations.directory,
     });
     return false;
 });

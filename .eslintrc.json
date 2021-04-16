@@ -126,6 +126,9 @@
         ],
         "no-multi-spaces": [
             "warn"
+        ],
+        "radix": [
+            "off"
         ]
     }
 }

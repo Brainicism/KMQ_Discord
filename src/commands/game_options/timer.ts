@@ -51,7 +51,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
             logger.info(`${getDebugLogHeader(message)} | Guess timeout disabled.`);
             return;
         }
-        const time = parseInt(parsedMessage.components[0], 10);
+        const time = parseInt(parsedMessage.components[0]);
 
         guildPreference.setGuessTimeout(time);
         if (gameSession && gameSession.gameRound && gameSession.connection.playing) {

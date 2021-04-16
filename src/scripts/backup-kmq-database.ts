@@ -20,7 +20,7 @@ async function backupKmqDatabase(): Promise<void> {
                 host: process.env.DB_HOST,
                 user: process.env.DB_USER,
                 password: process.env.DB_PASS,
-                port: parseInt(process.env.DB_PORT, 10),
+                port: parseInt(process.env.DB_PORT),
                 database: "kmq",
             },
             dumpToFile: `${databaseBackupDir}/kmq_backup_${friendlyFormattedDate(new Date())}.sql`,
