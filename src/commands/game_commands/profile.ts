@@ -84,29 +84,29 @@ export default class ProfileCommand implements BaseCommand {
         const totalPlayers = (await dbContext.kmq("player_stats")
             .count("* as count")
             .where("exp", ">", "0")
-            .first())["count"];
-
-        const relativeSongRank = ((await dbContext.kmq("player_stats")
-            .count("* as count")
-            .where("songs_guessed", ">", songsGuessed)
-            .where("exp", ">", "0")
-            .first())["count"] as number) + 1;
-
-        const relativeGamesPlayedRank = ((await dbContext.kmq("player_stats")
-            .count("* as count")
-            .where("games_played", ">", gamesPlayed)
-            .where("exp", ">", "0")
-            .first())["count"] as number) + 1;
+            .first())["count"] as number;
 
         const { exp, level } = (await dbContext.kmq("player_stats")
             .select(["exp", "level"])
             .where("player_id", "=", requestedPlayer.id)
             .first());
 
-        const relativeLevelRank = ((await dbContext.kmq("player_stats")
+        const relativeSongRank = Math.min(((await dbContext.kmq("player_stats")
+            .count("* as count")
+            .where("songs_guessed", ">", songsGuessed)
+            .where("exp", ">", "0")
+            .first())["count"] as number) + 1, totalPlayers);
+
+        const relativeGamesPlayedRank = Math.min(((await dbContext.kmq("player_stats")
+            .count("* as count")
+            .where("games_played", ">", gamesPlayed)
+            .where("exp", ">", "0")
+            .first())["count"] as number) + 1, totalPlayers);
+
+        const relativeLevelRank = Math.min(((await dbContext.kmq("player_stats")
             .count("* as count")
             .where("exp", ">", exp)
-            .first())["count"] as number) + 1;
+            .first())["count"] as number) + 1, totalPlayers);
 
         const fields: Array<Eris.EmbedField> = [
             {
