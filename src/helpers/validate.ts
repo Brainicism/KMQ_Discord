@@ -40,7 +40,7 @@ export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, val
                     return false;
                 }
                 // parse as integer for now, might cause problems later?
-                const intArg = parseInt(arg, 10);
+                const intArg = parseInt(arg);
                 if ("minValue" in validation && intArg < validation.minValue) {
                     sendValidationErrorMessage(message,
                         `Expected value greater than \`${validation.minValue}\` for \`${validation.name}\`.`,

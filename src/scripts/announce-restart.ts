@@ -5,7 +5,7 @@ import dbContext from "../database_context";
 
 program
     .option("--no-restart", "Automatically restart pm2 process when countdown is over")
-    .option("--timer <minutes>", "Countdown duration", (x) => parseInt(x, 10), 5);
+    .option("--timer <minutes>", "Countdown duration", (x) => parseInt(x), 5);
 program.parse();
 
 function serverShutdown(restartMinutes: number, restartDate: Date, restart: boolean): Promise<void> {

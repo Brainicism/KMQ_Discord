@@ -97,7 +97,7 @@ export default class LeaderboardCommand implements BaseCommand {
         }
 
         if (parsedMessage.components.length === 2) {
-            const pageOffset = parseInt(parsedMessage.components[1], 10) - 1;
+            const pageOffset = parseInt(parsedMessage.components[1]) - 1;
             if (action === LeaderboardAction.PAGE) {
                 this.showLeaderboard(message, pageOffset, false);
             } else if (action === LeaderboardAction.SERVER) {

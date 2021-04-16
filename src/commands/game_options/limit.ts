@@ -61,14 +61,14 @@ export default class LimitCommand implements BaseCommand {
         let limitEnd: number;
         if (parsedMessage.components.length === 1) {
             limitStart = 0;
-            limitEnd = parseInt(parsedMessage.components[0], 10);
+            limitEnd = parseInt(parsedMessage.components[0]);
             if (limitEnd === 0) {
                 sendErrorMessage(MessageContext.fromMessage(message), { title: "Game Option Error", description: "End limit must be greater than 0" });
                 return;
             }
         } else {
-            limitStart = parseInt(parsedMessage.components[0], 10);
-            limitEnd = parseInt(parsedMessage.components[1], 10);
+            limitStart = parseInt(parsedMessage.components[0]);
+            limitEnd = parseInt(parsedMessage.components[1]);
             if (limitEnd <= limitStart) {
                 sendErrorMessage(MessageContext.fromMessage(message), { title: "Game Option Error", description: "End limit must be greater than start limit" });
                 return;

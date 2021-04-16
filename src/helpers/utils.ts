@@ -73,7 +73,7 @@ export function getAudioDurationInSeconds(songPath: string): Promise<number> {
                 resolve(0);
                 return;
             }
-            resolve(parseInt(stdout, 10));
+            resolve(parseInt(stdout));
         });
     });
 }

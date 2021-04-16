@@ -65,7 +65,7 @@ export default class DurationCommand implements BaseCommand {
             return;
         }
         let duration: number;
-        const durationDelta = parseInt(parsedMessage.components[0], 10);
+        const durationDelta = parseInt(parsedMessage.components[0]);
         if (parsedMessage.components[1]) {
             const action = parsedMessage.components[1] as DurationAction;
             const currentDuration = guildPreference.getDuration();
@@ -88,7 +88,7 @@ export default class DurationCommand implements BaseCommand {
                 }
             }
         } else {
-            duration = parseInt(parsedMessage.components[0], 10);
+            duration = parseInt(parsedMessage.components[0]);
         }
 
         guildPreference.setDuration(duration);
