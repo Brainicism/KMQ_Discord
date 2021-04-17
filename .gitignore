@@ -5,7 +5,7 @@ src/config/debug_settings.json
 .cache/
 logs/
 build/
-kpop_db/
+sql_dumps/
 news.md
 tmp/
 tsconfig.tsbuildinfo

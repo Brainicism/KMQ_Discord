@@ -17,7 +17,7 @@ const fileUrl = "http://kpop.daisuki.com.br/download.php";
 const logger: Logger = _logger("seed_db");
 const overridesFilePath = path.join(__dirname, "../../sql/kpop_videos_overrides.sql");
 
-const databaseDownloadDir = path.join(__dirname, "../../kpop_db");
+const databaseDownloadDir = path.join(__dirname, "../../sql_dumps/daisuki");
 if (!fs.existsSync(databaseDownloadDir)) {
     fs.mkdirSync(databaseDownloadDir);
 }
@@ -32,7 +32,7 @@ program.parse();
 const options = program.opts();
 
 const downloadDb = async () => {
-    const output = `${databaseDownloadDir}/bootstrap.zip`;
+    const output = `${databaseDownloadDir}/download.zip`;
     const resp = await Axios.get(fileUrl, {
         responseType: "arraybuffer",
         headers: {
@@ -44,10 +44,10 @@ const downloadDb = async () => {
     logger.info("Downloaded Daisuki database archive");
 };
 async function extractDb(): Promise<void> {
-    await fs.promises.mkdir(`${databaseDownloadDir}/sql`, { recursive: true });
+    await fs.promises.mkdir(`${databaseDownloadDir}/`, { recursive: true });
     // eslint-disable-next-line new-cap
-    const zip = new StreamZip.async({ file: `${databaseDownloadDir}/bootstrap.zip` });
-    await zip.extract(null, `${databaseDownloadDir}/sql/`);
+    const zip = new StreamZip.async({ file: `${databaseDownloadDir}/download.zip` });
+    await zip.extract(null, `${databaseDownloadDir}/`);
     logger.info("Extracted Daisuki database");
 }
 
@@ -69,11 +69,11 @@ async function validateSqlDump(db: DatabaseContext, seedFilePath: string) {
     }
 }
 
-async function seedDb(db: DatabaseContext) {
-    const files = await fs.promises.readdir(`${databaseDownloadDir}/sql`);
+async function seedDb(db: DatabaseContext, bootstrap: boolean) {
+    const files = (await fs.promises.readdir(`${databaseDownloadDir}`)).filter((x) => x.endsWith(".sql") && x.startsWith("backup_"));
     const seedFile = files[files.length - 1];
-    const seedFilePath = `${databaseDownloadDir}/sql/${seedFile}`;
-    logger.info("Validating SQL dump");
+    const seedFilePath = bootstrap ? `${databaseDownloadDir}/bootstrap.sql` : `${databaseDownloadDir}/${seedFile}`;
+    logger.info(`Validating SQL dump (${path.basename(seedFilePath)})`);
     await validateSqlDump(db, seedFilePath);
     logger.info("Dropping K-Pop video database");
     await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos;");
@@ -83,7 +83,7 @@ async function seedDb(db: DatabaseContext) {
     await db.kpopVideos.raw(fs.readFileSync(seedFilePath).toString());
     logger.info("Performing data overrides");
     await db.kpopVideos.raw(fs.readFileSync(overridesFilePath).toString());
-    logger.info(`Imported database dump (${seedFile}) successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing`);
+    logger.info("Imported database dump successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing");
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -107,15 +107,15 @@ async function hasRecentDump(): Promise<boolean> {
 
 async function pruneSqlDumps() {
     try {
-        execSync(`find ${databaseDownloadDir}/sql -mindepth 1 -mtime +${SQL_DUMP_EXPIRY} -delete`);
+        execSync(`find ${databaseDownloadDir} -mindepth 1 -mtime +${SQL_DUMP_EXPIRY} -delete`);
         logger.info("Finished pruning old SQL dumps");
     } catch (err) {
         logger.error("Error attempting to prune SQL dumps directory, ", err);
     }
 }
 
-async function updateKpopDatabase(db: DatabaseContext) {
-    if (!options.skipPull) {
+async function updateKpopDatabase(db: DatabaseContext, bootstrap = false) {
+    if (!options.skipPull && !bootstrap) {
         await downloadDb();
         await extractDb();
     } else {
@@ -123,7 +123,7 @@ async function updateKpopDatabase(db: DatabaseContext) {
     }
 
     if (!options.skipReseed) {
-        await seedDb(db);
+        await seedDb(db, bootstrap);
     } else {
         logger.info("Skipping reseed");
     }
