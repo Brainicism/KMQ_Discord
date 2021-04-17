@@ -15,7 +15,8 @@ services:
       - songs:/songs
       - dump:/dump
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: mariadb:10.3
@@ -28,6 +29,10 @@ services:
     ports:
       - 3306:3306
     command: --max-allowed-packet=32M
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 12
 
 volumes:
   songs:
