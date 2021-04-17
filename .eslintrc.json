@@ -13,7 +13,7 @@
             "warn"
         ],
         "@typescript-eslint/indent": [
-            "error",
+            "warn",
             4
         ],
         "@typescript-eslint/quotes": [
@@ -129,6 +129,15 @@
         ],
         "radix": [
             "off"
+        ],
+        "@typescript-eslint/space-infix-ops": [
+            "warn"
+        ],
+        "@typescript-eslint/semi": [
+            "warn"
+        ],
+        "@typescript-eslint/comma-dangle": [
+            "warn"
         ]
     }
 }
