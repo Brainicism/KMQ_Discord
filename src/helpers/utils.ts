@@ -232,3 +232,16 @@ export function romanize(num: number) {
     }
     return Array(+digits.join("") + 1).join("M") + roman;
 }
+
+/**
+ * @param a - the starting set
+ * @param b - the set whose elements are removed from a
+ * @returns the difference of the two sets (a - b)
+ */
+export function setDifference<Type>(a: Set<Type>, b: Set<Type>): Set<Type> {
+    const difference = new Set(a);
+    for (const element of b) {
+        difference.delete(element);
+    }
+    return difference;
+}

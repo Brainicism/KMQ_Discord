@@ -8,7 +8,7 @@ import {
     getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndOfRoundMessage, sendInfoMessage, getNumParticipants, checkBotIsAlone, getVoiceChannelFromMessage,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, getSongCount, endSession } from "../helpers/game_utils";
-import { delay, getAudioDurationInSeconds, getOrdinalNum, isPowerHour, isWeekend } from "../helpers/utils";
+import { delay, getAudioDurationInSeconds, getOrdinalNum, isPowerHour, isWeekend, setDifference } from "../helpers/utils";
 import state from "../kmq";
 import _logger from "../logger";
 import { QueriedSong, GuildTextableMessage, PlayerRoundResult } from "../types";
@@ -123,6 +123,9 @@ export default class GameSession {
     /** The most recent Guesser, including their current streak */
     private lastGuesser: LastGuesser;
 
+    /** The amount of songs that can be played with the current game options */
+    private songCount: number;
+
     constructor(textChannelID: string, voiceChannelID: string, guildID: string, gameSessionCreator: KmqMember, gameType: GameType, eliminationLives?: number) {
         this.gameType = gameType;
         this.guildID = guildID;
@@ -151,6 +154,7 @@ export default class GameSession {
         this.playCount = {};
         this.lastAlternatingGender = null;
         this.lastGuesser = null;
+        this.songCount = 0;
     }
 
     /**
@@ -203,7 +207,10 @@ export default class GameSession {
         const remainingDuration = guildPreference.isDurationSet() ? (guildPreference.getDuration() - currGameLength) : null;
 
         if (messageContext) {
-            sendEndOfRoundMessage(messageContext, this.scoreboard, this.gameRound, playerRoundResults, remainingDuration);
+            const uniqueSongsPlayed = guildPreference.isShuffleUnique() ? this.uniqueSongs.size : null;
+            const totalSongs = guildPreference.isShuffleUnique() ? this.songCount : null;
+
+            sendEndOfRoundMessage(messageContext, this.scoreboard, this.gameRound, playerRoundResults, remainingDuration, uniqueSongsPlayed, totalSongs);
         }
 
         this.incrementSongCount(this.gameRound.videoID, guessResult.correct);
@@ -358,14 +365,20 @@ export default class GameSession {
             return;
         }
 
-        const totalSongs = await getFilteredSongList(guildPreference);
-        const totalSongsCount = totalSongs.songs.length;
+        const filteredSongs = new Set((await getFilteredSongList(guildPreference)).songs.map((x) => x.youtubeLink));
+        const totalSongsCount = filteredSongs.size;
+        if (this.songCount === 0) {
+            // Initialize songCount
+            this.songCount = totalSongsCount;
+        }
 
         // manage unique songs
         if (guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
-            const songsNotPlayed = totalSongs.songs.filter((song) => !this.uniqueSongs.has(song.youtubeLink));
-            if (songsNotPlayed.length === 0) {
-                logger.info(`${getDebugLogHeader(messageContext)} | Resetting uniqueSongs (all ${totalSongsCount} unique songs played)`);
+            if (setDifference<string>(filteredSongs, this.uniqueSongs).size === 0) {
+                logger.info(`${getDebugLogHeader(messageContext)} | Resetting uniqueSongs (all ${this.songCount} unique songs played)`);
+                // In updateSongCount, songs already played are added to songCount when options change. On unique reset, remove them
+                this.songCount = totalSongsCount;
+                await sendInfoMessage(messageContext, { title: "Resetting unique songs", description: `All songs have been played. ${this.songCount} songs will be reshuffled.`, thumbnailUrl: KmqImages.LISTENING });
                 this.resetUniqueSongs();
             }
         } else {
@@ -379,7 +392,7 @@ export default class GameSession {
             this.lastPlayedSongs.shift();
 
             // Randomize songs from oldest LAST_PLAYED_SONG_QUEUE_SIZE / 2 songs
-            // when lastPlayedSongsQueue is in use but totalSongsCount small
+            // when lastPlayedSongs is in use but totalSongsCount small
             if (totalSongsCount <= LAST_PLAYED_SONG_QUEUE_SIZE * 2) {
                 this.lastPlayedSongs.splice(0, LAST_PLAYED_SONG_QUEUE_SIZE / 2);
             }
@@ -500,6 +513,12 @@ export default class GameSession {
 
     getCorrectGuesses() {
         return this.correctGuesses;
+    }
+
+    async updateSongCount(guildPreference: GuildPreference) {
+        const totalSongs = await getFilteredSongList(guildPreference);
+        // Include songs already played in the count
+        this.songCount = new Set([...this.uniqueSongs, ...totalSongs.songs.map((x) => x.youtubeLink)]).size;
     }
 
     /**
