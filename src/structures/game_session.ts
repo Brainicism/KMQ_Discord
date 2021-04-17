@@ -27,6 +27,7 @@ import { KmqImages } from "../constants";
 import MessageContext from "./message_context";
 import KmqMember from "./kmq_member";
 import { MultiGuessType } from "../commands/game_options/multiguess";
+import { usersQualifyForVoteBonus } from "../helpers/bot_stats_poster";
 
 const MULTIGUESS_DELAY = 1500;
 const logger = _logger("game_session");
@@ -190,7 +191,7 @@ export default class GameSession {
             // update scoreboard
             const scoreboardUpdatePayload = guessResult.correctGuessers.map((correctGuesser, idx) => {
                 const guessPosition = idx + 1;
-                const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(this.voiceChannelID), guessSpeed, guessPosition);
+                const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(this.voiceChannelID), guessSpeed, guessPosition, correctGuesser.voteBonusExp);
                 if (idx === 0) {
                     playerRoundResults.push({ player: correctGuesser, streak: this.lastGuesser.streak, expGain });
                     logger.info(`${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
@@ -343,6 +344,16 @@ export default class GameSession {
             this.gameRound.finished = true;
 
             await delay(this.multiguessDelayIsActive(guildPreference) ? MULTIGUESS_DELAY : 0);
+
+            const bonusExpPlayers = await usersQualifyForVoteBonus(this.gameRound.correctGuessers.map((x) => x.id));
+
+            for (const player of this.gameRound.correctGuessers) {
+                if (bonusExpPlayers.includes(player.id)) {
+                    player.voteBonusExp = true;
+                    continue;
+                }
+                player.voteBonusExp = false;
+            }
 
             if (!this.gameRound) return;
             // mark round as complete, so no more guesses can go through
@@ -808,7 +819,7 @@ export default class GameSession {
      * @param guessSpeed - The time taken to guess correctly
      * @returns The amount of EXP gained based on the current game options
      */
-    private calculateExpGain(guildPreference: GuildPreference, baseExp: number, numParticipants: number, guessSpeed: number, place: number): number {
+    private calculateExpGain(guildPreference: GuildPreference, baseExp: number, numParticipants: number, guessSpeed: number, place: number, voteBonusExp: boolean): number {
         let expModifier = 1;
         // penalize/incentivize for number of participants from 0.75x to 1.25x
         expModifier *= numParticipants === 1 ? 0.75 : (0.0625 * (Math.min(numParticipants, 6)) + 0.875);
@@ -827,6 +838,11 @@ export default class GameSession {
         // bonus for guess streaks
         if (this.lastGuesser.streak >= 5) {
             expModifier *= 1.2;
+        }
+
+        // bonus for voting
+        if (voteBonusExp) {
+            expModifier *= 2;
         }
 
         return Math.floor((expModifier * baseExp) / place);

@@ -40,6 +40,7 @@ import backupKmqDatabase from "../scripts/backup-kmq-database";
 import { chooseRandom, parseJsonFile } from "./utils";
 import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
+import { clearExpiredBonusExpPlayers } from "../commands/game_commands/vote";
 
 const glob = promisify(_glob);
 
@@ -216,6 +217,10 @@ export function registerIntervals() {
         reloadAliases();
         updatePublishDateOverrides();
         clearInactiveVoiceConnections();
+    });
+
+    schedule.scheduleJob("*/5 * * * *", async () => {
+        clearExpiredBonusExpPlayers();
     });
 }
 
