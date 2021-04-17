@@ -1,7 +1,15 @@
 FROM node:15-alpine AS build
 
 WORKDIR /app
-COPY . .
+COPY src/ src/
+COPY yarn.lock yarn.lock
+COPY data/ data/
+COPY migrations/ migrations/
+COPY sql_dumps/daisuki/bootstrap.sql sql_dumps/daisuki/bootstrap.sql
+COPY start.sh start.sh
+COPY tsconfig.json tsconfig.json
+COPY sql/ sql/
+
 RUN apk add --no-cache git \
     python \
     make \
