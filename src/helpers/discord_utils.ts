@@ -258,14 +258,15 @@ export async function sendOptionsMessage(messageContext: MessageContext, guildPr
         {
             title: updatedOption === null ? "Options" : `${updatedOption.option} ${updatedOption.reset ? "reset" : "updated"}`,
             description:
-                `Now playing the ${optionStrings[GameOption.LIMIT]} most popular songs out of the __${totalSongs.countBeforeLimit}__ by ${guildPreference.isGroupsMode() ? `${optionStrings[GameOption.GROUPS]} (${optionStrings[GameOption.SUBUNIT_PREFERENCE]})` : `${optionStrings[GameOption.GENDER]} ${optionStrings[GameOption.ARTIST_TYPE]}`}\
+                `-Now playing the ${optionStrings[GameOption.LIMIT]} most popular songs out of __${totalSongs.countBeforeLimit}__ by ${guildPreference.isGroupsMode() ? `${optionStrings[GameOption.GROUPS]} (${optionStrings[GameOption.SUBUNIT_PREFERENCE]})` : `${optionStrings[GameOption.GENDER]} ${optionStrings[GameOption.ARTIST_TYPE]}`}\
                 ${guildPreference.isGroupsMode() && guildPreference.isGenderAlternating() && guildPreference.getGroupIDs().length > 1 ? ` with ${optionStrings[GameOption.GENDER]}` : ""} ${optionStrings[GameOption.CUTOFF]}\
-                ${guildPreference.isExcludesMode() && !guildPreference.isGroupsMode() ? `, excluding ${optionStrings[GameOption.EXCLUDE]}` : ""}${guildPreference.isIncludesMode() && !guildPreference.isGroupsMode() ? `, including ${optionStrings[GameOption.INCLUDE]}` : ""}. \nPlaying from the ${optionStrings[GameOption.SEEK_TYPE]} point of each song. ${shuffleUniqueMode ? shuffleMessage : ""}\
-                Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}\
-                \nPlaying \`${guildPreference.getLanguageType()}\` language songs.\
-                ${guildPreference.isDurationSet() ? `\nThe game will automatically end after \`${guildPreference.getDuration()}\` minutes from the time the game starts.` : ""}\
-                \n${optionStrings[GameOption.OST_PREFERENCE]} OST songs.\
-                \nPlaying ${optionStrings[GameOption.RELEASE_TYPE]}.\
+                ${guildPreference.isExcludesMode() && !guildPreference.isGroupsMode() ? `, excluding ${optionStrings[GameOption.EXCLUDE]}` : ""}${guildPreference.isIncludesMode() && !guildPreference.isGroupsMode() ? `, including ${optionStrings[GameOption.INCLUDE]}` : ""}.\
+                \n-Playing from the ${optionStrings[GameOption.SEEK_TYPE]} point of each song. ${shuffleUniqueMode ? shuffleMessage : ""}\
+                \n-Playing \`${guildPreference.getLanguageType()}\` language songs.\
+                ${guildPreference.isDurationSet() ? `\n-The game will automatically end after \`${guildPreference.getDuration()}\` minutes from the time the game starts.` : ""}\
+                \n-${optionStrings[GameOption.OST_PREFERENCE]} OST songs.\
+                \n-Playing ${optionStrings[GameOption.RELEASE_TYPE]}.\
+                \n-Guess the ${optionStrings[GameOption.MODE_TYPE]}'s name${guessTimeoutMode ? guessTimeoutMessage : ""}! ${goalMode ? goalMessage : ""}
                 \n${optionStrings[GameOption.MULTIGUESS]}`,
             footerText: footerText !== null ? footerText : null,
             thumbnailUrl: KmqImages.LISTENING,
