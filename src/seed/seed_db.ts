@@ -107,7 +107,7 @@ async function hasRecentDump(): Promise<boolean> {
 
 async function pruneSqlDumps() {
     try {
-        execSync(`find ${databaseDownloadDir} -mindepth 1 -mtime +${SQL_DUMP_EXPIRY} -delete`);
+        execSync(`find ${databaseDownloadDir} -mindepth 1 -regextype posix-extended -regex ".*backup_[0-9]{4}-[0-9]{2}-[0-9]{2}.*" -mtime +${SQL_DUMP_EXPIRY} -delete`);
         logger.info("Finished pruning old SQL dumps");
     } catch (err) {
         logger.error("Error attempting to prune SQL dumps directory, ", err);
