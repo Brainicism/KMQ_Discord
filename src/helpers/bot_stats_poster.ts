@@ -1,9 +1,11 @@
 import Axios from "axios";
 import _logger from "../logger";
 import state from "../kmq";
+import dbContext from "../database_context";
 
 const logger = _logger("bot_stats_poster");
-
+const VOTE_COOLDOWN_HOURS = 12;
+const VOTE_BONUS_DURATION = 1;
 interface BotListing {
     endpoint: string;
     payloadKeyName: string;
@@ -55,4 +57,47 @@ export default class BotStatsPoster {
             logger.error(`Error updating ${botListing.name} server count. error = ${e}`);
         }
     }
+}
+
+/**
+ * @param userIDs - List of user IDs to check if vote bonus is active
+ * @returns - list of user IDs with vote bonus active
+ */
+export async function usersQualifyForVoteBonus(userIDs: Array<string>): Promise<Array<string>> {
+    const qualifiedIDs = (await dbContext.kmq("top_gg_user_votes")
+        .whereIn("user_id", userIDs)
+        .andWhere("last_voted", ">", new Date(Date.now() - (VOTE_BONUS_DURATION * 1000 * 60 * 60))))
+        .map((x) => x["user_id"]);
+    return qualifiedIDs;
+}
+
+/**
+ * @param userID - The user's Discord ID
+ * @returns the hours remaining until the user is eligible to vote again
+ */
+export async function userVoted(userID: string): Promise<number> {
+    const userVoterStatus = await dbContext.kmq("top_gg_user_votes")
+        .where("user_id", "=", userID)
+        .first();
+    if (userVoterStatus) {
+        const lastVote = userVoterStatus["last_voted"];
+        const hoursSinceLastVote = (Date.now() - lastVote) / (1000 * 60 * 60);
+        if (hoursSinceLastVote < VOTE_COOLDOWN_HOURS) {
+            const cooldownRemaining = (VOTE_COOLDOWN_HOURS - hoursSinceLastVote);
+            logger.warn(`uid: ${userID} | User has already voted recently, try again in ${cooldownRemaining.toFixed(1)} hours`);
+            return cooldownRemaining;
+        }
+    }
+    const currentVotes = userVoterStatus ? userVoterStatus["total_votes"] : 0;
+    await dbContext.kmq("top_gg_user_votes")
+        .insert({
+            user_id: userID,
+            last_voted: new Date(),
+            total_votes: currentVotes + 1,
+        })
+        .onConflict("user_id")
+        .merge();
+
+    logger.info(`uid: ${userID} | User vote recorded`);
+    return 0;
 }
