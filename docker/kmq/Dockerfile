@@ -4,34 +4,26 @@ RUN apk add --no-cache git \
     python \
     make \
     g++ \
-    libsodium-dev \
     autoconf \
     automake \
-    libtool \
-    nodejs
-
-RUN yarn global add typescript
+    libtool
 
 WORKDIR /app
 
-COPY package.json yarn.lock ./
+COPY yarn.lock package.json ./
+
 RUN yarn install --production
 
+COPY start.sh tsconfig.json ./
 COPY src/ src/
-COPY yarn.lock yarn.lock
 COPY data/ data/
 COPY migrations/ migrations/
 COPY sql_dumps/daisuki/bootstrap.sql sql_dumps/daisuki/bootstrap.sql
-COPY start.sh start.sh
-COPY tsconfig.json tsconfig.json
 COPY sql/ sql/
-
-
 
 # ================================================================= #
 FROM node:15-alpine
 RUN apk add --no-cache mysql-client \
-    nodejs \
     ffmpeg \ 
     bash
 

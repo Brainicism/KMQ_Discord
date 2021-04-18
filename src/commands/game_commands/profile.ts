@@ -4,7 +4,7 @@ import dbContext from "../../database_context";
 import { getDebugLogHeader, getUserTag, sendInfoMessage } from "../../helpers/discord_utils";
 import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
-import { friendlyFormattedDate } from "../../helpers/utils";
+import { friendlyFormattedDate, romanize } from "../../helpers/utils";
 import { CUM_EXP_TABLE } from "../../structures/game_session";
 import MessageContext from "../../structures/message_context";
 
@@ -33,6 +33,13 @@ const RANK_TITLES = [
 ];
 
 export function getRankNameByLevel(level: number): string {
+    const highestRankTitle = RANK_TITLES[RANK_TITLES.length - 1];
+    const levelsPastMaxRank = level - (highestRankTitle.req + 10);
+    if (levelsPastMaxRank >= 0) {
+        // add roman numeral suffix for every 5 levels above max rank title
+        const stepsAboveMaxRank = Math.floor(levelsPastMaxRank / 5) + 1;
+        return `${highestRankTitle.title} ${romanize(stepsAboveMaxRank + 1)}`;
+    }
     for (let i = RANK_TITLES.length - 1; i >= 0; i--) {
         const rankTitle = RANK_TITLES[i];
         if (level >= rankTitle.req) return rankTitle.title;
