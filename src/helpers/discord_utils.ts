@@ -268,11 +268,11 @@ export async function sendOptionsMessage(messageContext: MessageContext, guildPr
                 \n${PREFIX}seek: ${optionStrings[GameOption.SEEK_TYPE]}
                 ${PREFIX}shuffle: ${shuffleUniqueMode ? shuffleMessage : codeLine("random")}
                 ${PREFIX}language: ${codeLine(guildPreference.getLanguageType())} 
-                ${guildPreference.isDurationSet() ? `${PREFIX}duration: \`${guildPreference.getDuration()}\`` : ""}
                 ${PREFIX}ost: ${optionStrings[GameOption.OST_PREFERENCE]}
                 ${PREFIX}release: ${optionStrings[GameOption.RELEASE_TYPE]}
                 ${PREFIX}mode: ${optionStrings[GameOption.MODE_TYPE]} ${guessTimeoutMode ? `\n${PREFIX}timer: ${guessTimeoutMessage}` : ""} ${goalMode ? `\n${PREFIX}goal: ${goalMessage}` : ""}
-                ${PREFIX}multiguess: ${optionStrings[GameOption.MULTIGUESS]}`,
+                ${PREFIX}multiguess: ${optionStrings[GameOption.MULTIGUESS]}
+                ${guildPreference.isDurationSet() ? `${PREFIX}duration: \`${guildPreference.getDuration()}\`` : ""}`,
             footerText: footerText !== null ? footerText : null,
             thumbnailUrl: KmqImages.LISTENING,
         });
