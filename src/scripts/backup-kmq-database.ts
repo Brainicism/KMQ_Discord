@@ -6,7 +6,7 @@ import _logger from "../logger";
 import { friendlyFormattedDate } from "../helpers/utils";
 import { getNewConnection } from "../database_context";
 
-const databaseBackupDir = join(__dirname, "../../kpop_db/kmq_backup");
+const databaseBackupDir = join(__dirname, "../../sql_dumps/kmq_backup");
 
 const logger: Logger = _logger("backup-kmq");
 
