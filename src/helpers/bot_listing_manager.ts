@@ -35,10 +35,9 @@ const BOT_LISTING_SITES: { [siteName: string]: BotListing } = {
  * @param userIDs - List of user IDs to check if vote bonus is active
  * @returns - list of user IDs with vote bonus active
  */
-export async function usersQualifyForVoteBonus(userIDs: Array<string>): Promise<Array<string>> {
+export async function usersQualifiedForVoteBonus(): Promise<Array<string>> {
     const qualifiedIDs = (await dbContext.kmq("top_gg_user_votes")
-        .whereIn("user_id", userIDs)
-        .andWhere("buff_expiry_date", ">", new Date()))
+        .where("buff_expiry_date", ">", new Date()))
         .map((x) => x["user_id"]);
     return qualifiedIDs;
 }
