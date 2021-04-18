@@ -82,6 +82,12 @@ export default class BotListingManager {
         }
         const httpServer = fastify({});
         httpServer.post("/voted", {}, async (request, reply) => {
+            const requestAuthorizationToken = request.headers["authorization"];
+            if (requestAuthorizationToken !== process.env.TOP_GG_WEBHOOK_AUTH) {
+                logger.warn("Webhook received with non-matching authorization token");
+                reply.code(401).send();
+                return;
+            }
             const userID = request.body["user"];
             await userVoted(userID);
             reply.code(200).send();
