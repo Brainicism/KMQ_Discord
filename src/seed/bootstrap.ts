@@ -67,7 +67,7 @@ async function bootstrapDatabases() {
 
         if (!(await kpopDataDatabaseExists(db))) {
             logger.info("Seeding K-pop data database");
-            await updateKpopDatabase(db);
+            await updateKpopDatabase(db, true);
         }
 
         if (!(await kmqDatabaseExists(db))) {
