@@ -38,7 +38,7 @@ const BOT_LISTING_SITES: { [siteName: string]: BotListing } = {
 export async function usersQualifyForVoteBonus(userIDs: Array<string>): Promise<Array<string>> {
     const qualifiedIDs = (await dbContext.kmq("top_gg_user_votes")
         .whereIn("user_id", userIDs)
-        .andWhere("last_voted", ">", new Date(Date.now() - (VOTE_BONUS_DURATION * 1000 * 60 * 60))))
+        .andWhere("buff_expiry_date", ">", new Date()))
         .map((x) => x["user_id"]);
     return qualifiedIDs;
 }
@@ -55,7 +55,7 @@ export async function userVoted(userID: string) {
     await dbContext.kmq("top_gg_user_votes")
         .insert({
             user_id: userID,
-            last_voted: new Date(),
+            buff_expiry_date: new Date(Date.now() + (VOTE_BONUS_DURATION * 1000 * 60 * 60)),
             total_votes: currentVotes + 1,
         })
         .onConflict("user_id")
