@@ -24,6 +24,7 @@
 9Muses A
 A-REAL
 A.C.E
+A.KOR
 AB6IX
 Aespa
 After School
@@ -50,6 +51,7 @@ Astin
 ASTRO
 ATEEZ
 Ato6
+Azer
 B.A.P
 B.I
 B.I.G
@@ -60,6 +62,7 @@ BabySoul
 Badkiz
 Bae Jin-young
 Bae173
+Baechigi
 Baek A Yeon
 Baek Ji-young
 Baek Yerin
@@ -120,6 +123,7 @@ Cheeze
 Chen
 Cherry Bullet
 Cho Jung Seok
+Cho Yong-pil
 Choa
 ChoColat
 Choi Nakta
@@ -134,6 +138,7 @@ Coco
 CocoSori
 Code Kunst
 Coed School
+Colde
 CRAVITY
 Craxy
 Crayon Pop
@@ -158,7 +163,8 @@ Demian
 Dia
 DJ Hanmin
 DKB
-Dongkiz
+DONGKIZ
+DONGKIZ I:KAN
 Dongwoo
 Double S 301
 Doyoung
@@ -242,6 +248,7 @@ Gummy
 Gunji
 Gwangil Jo
 GWSN
+Gyeongree
 H.O.T
 H.U.B
 H&D
@@ -288,6 +295,7 @@ Hyolyn
 Hyomin
 Hyuk
 Hyukoh
+Hyun Bin
 Hyuna
 I.C.E
 I.M
@@ -373,6 +381,7 @@ Kangta
 Kara
 KARD
 Kassy
+KCM
 KEEMBO
 Kei
 Ken
@@ -392,6 +401,7 @@ Kim Hyun Joong
 Kim Hyung Jun
 Kim Jaehwan
 Kim Jaejoong
+Kim Jinho
 Kim Na Young
 Kim Nam Joo
 Kim Sung Kyu
@@ -407,7 +417,6 @@ Kwon Jungyeol
 KyeongSeo
 Kyuhyun
 Kyung Park
-Kyungri
 Laboum
 Ladies' code
 Lay
@@ -438,6 +447,7 @@ Lim Jeong-hee
 Lim Jimin
 Lim Kim
 Lim Young Woong
+LIMESODA
 Limitless
 Loco
 LOONA
@@ -449,6 +459,7 @@ Luna
 Lunarsolar
 Luri
 Lyn
+M to M
 M.C The Max
 M.O.N.T
 Mad Clown
@@ -583,6 +594,7 @@ REDSQUARE
 Refund Sisters
 RM
 Rocket Punch
+Rocoberry
 Rolling Quartz
 Romeo
 Rosé
@@ -690,6 +702,7 @@ Tahiti
 Target
 Teen Teen
 Teen Top
+Ten
 Thama
 The Ark
 The Boyz
@@ -697,6 +710,7 @@ The East Light
 The Rose
 The SeeYa
 Tiffany
+TO1
 TOO
 Topp Dogg
 Toy
@@ -777,6 +791,7 @@ Yezi
 Yong Jun Hyung
 Yoo Jae-suk
 Yoo Jiae
+Yoo Seonho
 Yoo Young-jin
 Yooa
 Yook Sung-jae
