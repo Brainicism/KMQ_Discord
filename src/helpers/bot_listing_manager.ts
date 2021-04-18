@@ -6,7 +6,6 @@ import dbContext from "../database_context";
 import { EnvType } from "../types";
 
 const logger = _logger("bot_stats_poster");
-const VOTE_COOLDOWN_HOURS = 12;
 const VOTE_BONUS_DURATION = 1;
 interface BotListing {
     endpoint: string;
@@ -48,19 +47,10 @@ export async function usersQualifyForVoteBonus(userIDs: Array<string>): Promise<
  * @param userID - The user's Discord ID
  * @returns the hours remaining until the user is eligible to vote again
  */
-export async function userVoted(userID: string): Promise<number> {
+export async function userVoted(userID: string) {
     const userVoterStatus = await dbContext.kmq("top_gg_user_votes")
         .where("user_id", "=", userID)
         .first();
-    if (userVoterStatus) {
-        const lastVote = userVoterStatus["last_voted"];
-        const hoursSinceLastVote = (Date.now() - lastVote) / (1000 * 60 * 60);
-        if (hoursSinceLastVote < VOTE_COOLDOWN_HOURS) {
-            const cooldownRemaining = (VOTE_COOLDOWN_HOURS - hoursSinceLastVote);
-            logger.warn(`uid: ${userID} | User has already voted recently, try again in ${cooldownRemaining.toFixed(1)} hours`);
-            return cooldownRemaining;
-        }
-    }
     const currentVotes = userVoterStatus ? userVoterStatus["total_votes"] : 0;
     await dbContext.kmq("top_gg_user_votes")
         .insert({
@@ -72,7 +62,6 @@ export async function userVoted(userID: string): Promise<number> {
         .merge();
 
     logger.info(`uid: ${userID} | User vote recorded`);
-    return 0;
 }
 
 export default class BotListingManager {
