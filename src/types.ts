@@ -1,7 +1,7 @@
 import Eris, { GuildTextableChannel } from "eris";
 import BaseCommand from "./commands/base_command";
 import GameSession from "./structures/game_session";
-import BotStatsPoster from "./helpers/bot_stats_poster";
+import BotListingManager from "./helpers/bot_listing_manager";
 import { Gender } from "./commands/game_options/gender";
 import KmqMember from "./structures/kmq_member";
 
@@ -45,7 +45,7 @@ export interface EmbedPayload {
 export interface State {
     commands: { [commandName: string]: BaseCommand };
     gameSessions: { [guildID: string]: GameSession };
-    botStatsPoster: BotStatsPoster;
+    botListingManager: BotListingManager;
     client: Eris.Client;
     aliases: {
         artist: { [artistName: string]: Array<string> },
