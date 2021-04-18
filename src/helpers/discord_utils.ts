@@ -204,6 +204,7 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
 export async function sendOptionsMessage(messageContext: MessageContext, guildPreference: GuildPreference,
     updatedOption?: { option: GameOption, reset: boolean }, footerText?: string) {
     const totalSongs = await getSongCount(guildPreference);
+    const PREFIX = process.env.BOT_PREFIX;
     if (totalSongs === null) {
         sendErrorMessage(messageContext, { title: "Error retrieving song data", description: `Try again in a bit, or report this error to the official KMQ server found in \`${process.env.BOT_PREFIX}help\`.` });
         return;
@@ -219,7 +220,7 @@ export async function sendOptionsMessage(messageContext: MessageContext, guildPr
     const visibleLimitStart = Math.min(totalSongs.countBeforeLimit, guildPreference.getLimitStart());
     const optionStrings = {};
     optionStrings[GameOption.CUTOFF] = `${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
-    optionStrings[GameOption.GENDER] = guildPreference.isGenderAlternating() ? "alternating gender" : `${guildPreference.getGender().join(", ")}`;
+    optionStrings[GameOption.GENDER] = guildPreference.isGenderAlternating() ? "alternating" : `${guildPreference.getGender().join(", ")}`;
     optionStrings[GameOption.ARTIST_TYPE] = `${guildPreference.getArtistType() === ArtistType.BOTH ? "artists" : guildPreference.getArtistType()}`;
     optionStrings[GameOption.GROUPS] = guildPreference.isGroupsMode() ? `${guildPreference.getDisplayedGroupNames()}` : null;
     optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode() ? `${guildPreference.getDisplayedExcludesGroupNames()}` : null;
@@ -232,13 +233,13 @@ export async function sendOptionsMessage(messageContext: MessageContext, guildPr
     optionStrings[GameOption.SHUFFLE_TYPE] = `${guildPreference.getShuffleType()}`;
     optionStrings[GameOption.SUBUNIT_PREFERENCE] = `${guildPreference.getSubunitPreference() === SubunitsPreference.INCLUDE ? "including" : "excluding"} subunits`;
     const ostPreferenceDisplayStrings = {
-        [OstPreference.INCLUDE]: "Included",
-        [OstPreference.EXCLUDE]: "Excluded",
-        [OstPreference.EXCLUSIVE]: "Exclusively included",
+        [OstPreference.INCLUDE]: "include",
+        [OstPreference.EXCLUDE]: "exclude",
+        [OstPreference.EXCLUSIVE]: "exclusive include",
     };
     optionStrings[GameOption.OST_PREFERENCE] = `${ostPreferenceDisplayStrings[guildPreference.getOstPreference()]}`;
-    optionStrings[GameOption.RELEASE_TYPE] = `${guildPreference.getReleaseType() === ReleaseType.OFFICIAL ? "Only official song releases" : "All songs including dance practices, acoustic versions, remixes, etc"}`;
-    optionStrings[GameOption.MULTIGUESS] = guildPreference.getMultiGuessType() === MultiGuessType.ON ? "Multiple players are able to guess correctly." : "Off";
+    optionStrings[GameOption.RELEASE_TYPE] = `${guildPreference.getReleaseType() === ReleaseType.OFFICIAL ? "official" : "all including dance practices, acoustic versions, remixes, etc"}`;
+    optionStrings[GameOption.MULTIGUESS] = guildPreference.getMultiGuessType() === MultiGuessType.ON ? "on" : "off";
 
     for (const gameOption of Object.keys(optionStrings)) {
         const gameOptionString = optionStrings[gameOption];
@@ -246,32 +247,32 @@ export async function sendOptionsMessage(messageContext: MessageContext, guildPr
         optionStrings[gameOption] = (updatedOption && updatedOption.option) === gameOption ? bold(gameOptionString) : codeLine(gameOptionString);
     }
 
-    const goalMessage = `First one to score ${optionStrings[GameOption.GOAL]} points wins`;
-    const guessTimeoutMessage = ` in less than ${optionStrings[GameOption.TIMER]} seconds`;
-    const shuffleMessage = `Songs will be shuffled in ${optionStrings[GameOption.SHUFFLE_TYPE]} order`;
+    const goalMessage = optionStrings[GameOption.GOAL];
+    const guessTimeoutMessage = optionStrings[GameOption.TIMER];
+    const shuffleMessage = optionStrings[GameOption.SHUFFLE_TYPE];
 
     if (updatedOption && updatedOption.reset) {
-        footerText = `Looking for information on how to use this command? Check out '${process.env.BOT_PREFIX}help [command]' to learn more`;
+        footerText = `Looking for information on how to use this command? Check out '${PREFIX}help [command]' to learn more`;
     }
 
     await sendInfoMessage(messageContext,
         {
             title: updatedOption === null ? "Options" : `${updatedOption.option} ${updatedOption.reset ? "reset" : "updated"}`,
             description:
-                `Limit :  ${optionStrings[GameOption.LIMIT]} out of ${codeLine(String(totalSongs.countBeforeLimit))}
-                  ${guildPreference.isGroupsMode() ? `Groups : ${optionStrings[GameOption.GROUPS]} (${optionStrings[GameOption.SUBUNIT_PREFERENCE]})` : `Gender : ${optionStrings[GameOption.GENDER]} \nType : ${optionStrings[GameOption.ARTIST_TYPE]}`}\
-                ${guildPreference.isGroupsMode() && guildPreference.isGenderAlternating() && guildPreference.getGroupIDs().length > 1 ? `Gender : ${optionStrings[GameOption.GENDER]}` : ""}\
-                \nYears : ${optionStrings[GameOption.CUTOFF]}\
-                ${guildPreference.isExcludesMode() && !guildPreference.isGroupsMode() ? `\nExcluding : ${optionStrings[GameOption.EXCLUDE]}` : ""}\
-                ${guildPreference.isIncludesMode() && !guildPreference.isGroupsMode() ? `\nIncluding : ${optionStrings[GameOption.INCLUDE]}` : ""}\
-                \nSeek : ${optionStrings[GameOption.SEEK_TYPE]}\
-                \nShuffle : ${shuffleUniqueMode ? shuffleMessage : codeLine("Random")}\
-                \nLanguage : ${codeLine(guildPreference.getLanguageType())} 
-                ${guildPreference.isDurationSet() ? `\nRemaining Time : \`${guildPreference.getDuration()}\` .` : ""}\
-                OST songs : ${optionStrings[GameOption.OST_PREFERENCE]}
-                Release : ${optionStrings[GameOption.RELEASE_TYPE]}
-                Mode : Guess ${optionStrings[GameOption.MODE_TYPE]}'s name ${guessTimeoutMode ? guessTimeoutMessage : ""} ${goalMode ? `\nGoal : ${goalMessage}` : ""}
-                Multiguess : ${optionStrings[GameOption.MULTIGUESS]}`,
+                `${PREFIX}limit:  ${optionStrings[GameOption.LIMIT]} / ${codeLine(String(totalSongs.countBeforeLimit))}
+                  ${guildPreference.isGroupsMode() ? `${PREFIX}groups: ${optionStrings[GameOption.GROUPS]} (${optionStrings[GameOption.SUBUNIT_PREFERENCE]})` : `${PREFIX}gender: ${optionStrings[GameOption.GENDER]} \n${PREFIX}type: ${optionStrings[GameOption.ARTIST_TYPE]}`}\
+                ${guildPreference.isGroupsMode() && guildPreference.isGenderAlternating() && guildPreference.getGroupIDs().length > 1 ? `${PREFIX}gender: ${optionStrings[GameOption.GENDER]}` : ""}\
+                \n${PREFIX}years: ${optionStrings[GameOption.CUTOFF]}\
+                ${guildPreference.isExcludesMode() && !guildPreference.isGroupsMode() ? `\n${PREFIX}exclude: ${optionStrings[GameOption.EXCLUDE]}` : ""}\
+                ${guildPreference.isIncludesMode() && !guildPreference.isGroupsMode() ? `\n${PREFIX}include: ${optionStrings[GameOption.INCLUDE]}` : ""}\
+                \n${PREFIX}seek: ${optionStrings[GameOption.SEEK_TYPE]}
+                ${PREFIX}shuffle: ${shuffleUniqueMode ? shuffleMessage : codeLine("random")}
+                ${PREFIX}language: ${codeLine(guildPreference.getLanguageType())} 
+                ${guildPreference.isDurationSet() ? `${PREFIX}duration: \`${guildPreference.getDuration()}\`` : ""}
+                ${PREFIX}ost: ${optionStrings[GameOption.OST_PREFERENCE]}
+                ${PREFIX}release: ${optionStrings[GameOption.RELEASE_TYPE]}
+                ${PREFIX}mode: ${optionStrings[GameOption.MODE_TYPE]} ${guessTimeoutMode ? `\n${PREFIX}timer: ${guessTimeoutMessage}` : ""} ${goalMode ? `\n${PREFIX}goal: ${goalMessage}` : ""}
+                ${PREFIX}multiguess: ${optionStrings[GameOption.MULTIGUESS]}`,
             footerText: footerText !== null ? footerText : null,
             thumbnailUrl: KmqImages.LISTENING,
         });
