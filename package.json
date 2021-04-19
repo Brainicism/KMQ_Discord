@@ -31,7 +31,7 @@
     "commander": "^7.0.0",
     "cron-parser": "^3.1.0",
     "dotenv": "^8.2.0",
-    "eris": "https://github.com/Brainicism/eris.git#f3a8702",
+    "eris": "https://github.com/Brainicism/eris.git#7d9fded",
     "eris-pagination": "^0.5.2",
     "erlpack": "https://github.com/abalabahaha/erlpack.git#5d0064f",
     "fastify": "^3.14.2",
