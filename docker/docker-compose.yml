@@ -17,6 +17,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    ports: 
+      - 5858:5858
 
   db:
     image: mariadb:10.3
