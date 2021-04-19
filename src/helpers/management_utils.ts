@@ -32,7 +32,7 @@ import guildCreateHandler from "../events/client/guildCreate";
 import guildDeleteHandler from "../events/client/guildDelete";
 import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
 import guildAvailableHandler from "../events/client/guildAvailable";
-import BotStatsPoster from "./bot_stats_poster";
+import BotListingManager from "./bot_listing_manager";
 import { EnvType } from "../types";
 import storeDailyStats from "../scripts/store-daily-stats";
 import { seedAndDownloadNewSongs } from "../seed/seed_db";
@@ -284,8 +284,8 @@ export async function registerCommands(initialLoad: boolean) {
 
 /** Initialize server count posting to bot listing sites */
 export function initializeBotStatsPoster() {
-    state.botStatsPoster = new BotStatsPoster();
-    state.botStatsPoster.start();
+    state.botListingManager = new BotListingManager();
+    state.botListingManager.start();
 }
 
 /**
