@@ -16,4 +16,4 @@ jobs:
       - name: Build Docker image
         run: docker build --file docker/kmq/Dockerfile . --tag kmq-ci
       - name: Dry-run
-        run: NODE_ENV=dry-run docker run kmq-ci
+        run: docker run kmq-ci --env NODE_ENV=dry-run
