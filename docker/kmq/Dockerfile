@@ -12,7 +12,7 @@ WORKDIR /app
 
 COPY yarn.lock package.json ./
 
-RUN yarn install --production
+RUN yarn install
 
 COPY start.sh tsconfig.json ./
 COPY src/ src/
@@ -31,6 +31,6 @@ COPY --from=build /app /app
 WORKDIR /app
 
 STOPSIGNAL SIGINT
-ARG START_TYPE
-ENV START_TYPE=$START_TYPE
+ARG NODE_ENV
+ENV NODE_ENV=$NODE_ENV
 ENTRYPOINT ["npm", "run", "start"]

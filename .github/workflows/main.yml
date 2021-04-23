@@ -60,4 +60,4 @@ jobs:
       - name: Build and dry-run
         run: npm run start
         env: 
-            START_TYPE: dry-run
+            NODE_ENV: dry-run
