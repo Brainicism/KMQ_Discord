@@ -17,7 +17,7 @@ const musicShows = {
 };
 const funFactFunctions = [recentMusicVideos, recentMilestone, recentMusicShowWin, musicShowWins, mostViewedGroups, mostLikedGroups, mostViewedVideo, mostLikedVideo,
     mostMusicVideos, yearWithMostDebuts, yearWithMostReleases, viewsByGender, mostViewedSoloArtist, viewsBySolo, bigThreeDominance, mostGaonFirsts,
-    mostGaonAppearances, historicalGaonWeekly, recentGaonWeekly, fanclubName, closeBirthdays, mostArtistsEntertainmentCompany, mostViewedEntertainmentCompany];
+    mostGaonAppearances, historicalGaonWeekly, recentGaonWeekly, fanclubName, closeBirthdays, mostArtistsEntertainmentCompany, mostViewedEntertainmentCompany, songReleasAnniversaries];
 
 const kmqFactFunctions = [longestGame, mostGames, mostCorrectGuessed, globalTotalGames, recentGameSessions, recentGames, mostSongsGuessedPlayer,
     mostGamesPlayedPlayer, recentUniquePlayers, topLeveledPlayers];
@@ -342,6 +342,15 @@ async function viewsBySolo(): Promise<string[]> {
         },
     };
     return [`Fun Fact: There is a combined total of ${totalViews.toLocaleString()} views on all K-Pop music videos on YouTube. ${data.group.views} (${data.group.proportion}%) of which are groups, while ${data.solo.views} (${data.solo.proportion}%) are from solo artists!`];
+}
+
+async function songReleasAnniversaries(): Promise<string[]> {
+    const result = await dbContext.kmq("available_songs")
+        .select(dbContext.kmq.raw("song_name, artist_name, YEAR(publishedon) as publish_year"))
+        .whereRaw("WEEK(publishedon) = WEEK(NOW())")
+        .orderBy("views", "DESC")
+        .limit(25);
+    return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"])} was released this week back in ${x["publish_year"]}`);
 }
 
 async function bigThreeDominance(): Promise<string[]> {
