@@ -77,6 +77,29 @@ export enum GameOption {
     MULTIGUESS = "Multiguess",
 }
 
+export enum GameOptionCommand {
+    GENDER = "gender",
+    CUTOFF = "cutoff",
+    LIMIT = "limit",
+    VOLUME = "volume",
+    SEEK_TYPE = "seek",
+    MODE_TYPE = "mode",
+    RELEASE_TYPE = "release",
+    SHUFFLE_TYPE = "shuffle",
+    GROUPS = "groups",
+    GOAL = "goal",
+    TIMER = "timer",
+    DURATION = "duration",
+    EXCLUDE = "exclude",
+    INCLUDE = "include",
+    ARTIST_TYPE = "type",
+    LANGUAGE_TYPE = "language",
+    SUBUNIT_PREFERENCE = "subunit",
+    OST_PREFERENCE = "ost",
+    PRESET = "preset",
+    MULTIGUESS = "multiguess",
+}
+
 export enum EnvType {
     PROD = "production",
     DEV = "development",
