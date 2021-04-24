@@ -125,7 +125,7 @@ export async function updateBotStatus() {
     oneMonthPriorDate.setMonth(oneMonthPriorDate.getMonth() - 1);
     const randomPopularSongs = await dbContext.kmq("available_songs")
         .where("publishedon", ">", oneMonthPriorDate)
-        .orderBy("views")
+        .orderBy("views", "DESC")
         .limit(25);
     const randomPopularSong = chooseRandom(randomPopularSongs);
     client.editStatus("online", {
