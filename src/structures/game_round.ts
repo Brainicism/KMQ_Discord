@@ -112,9 +112,9 @@ export default class GameRound {
      * Marks a user as having guessed correctly
      * @param userID - The user ID of the correct guesser
      */
-    userCorrect(userID: string) {
+    userCorrect(userID: string, pointsAwarded: number) {
         if (!this.correctGuessers.some((x) => x.id === userID)) {
-            this.correctGuessers.push(KmqMember.fromUser(state.client.users.get(userID)));
+            this.correctGuessers.push(KmqMember.fromUser(state.client.users.get(userID), pointsAwarded));
         }
     }
 
