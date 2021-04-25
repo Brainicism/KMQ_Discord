@@ -211,3 +211,24 @@ export function isPowerHour(): boolean {
 export function getOrdinalNum(n: number): string {
     return n + (n > 0 ? ["th", "st", "nd", "rd"][(n > 3 && n < 21) || n % 10 > 3 ? 0 : n % 10] : "");
 }
+
+/**
+ * https://stackoverflow.com/a/9083076/11002711
+ * @param num - The decimal number to be converted
+ * @returns the roman numeral representation
+ */
+export function romanize(num: number) {
+    if (Number.isNaN(num)) {
+        return NaN;
+    }
+    const digits = String(+num).split("");
+    const key = ["", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM",
+        "", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC",
+        "", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"];
+    let roman = "";
+    let i = 3;
+    while (i--) {
+        roman = (key[+digits.pop() + (i * 10)] || "") + roman;
+    }
+    return Array(+digits.join("") + 1).join("M") + roman;
+}

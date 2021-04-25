@@ -9,6 +9,7 @@ declare namespace NodeJS {
         SONG_DOWNLOAD_DIR: string,
         RESTART_CRON?: string,
         TOP_GG_TOKEN?: string,
+        TOP_GG_WEBHOOK_AUTH?: string,
         DISCORD_BOTS_GG_TOKEN?: string,
         DISCORD_BOT_LIST_TOKEN?: string,
         DEBUG_SERVER_ID?: string,

@@ -8,22 +8,19 @@ rebuild () {
     tsc
     cd build/
 }
-if [ "${START_TYPE}" == "dry-run" ]; then
+if [ "${NODE_ENV}" == "dry-run" ]; then
     rebuild
     echo "Starting bot..."
-    export NODE_ENV=dry-run 
     exec node kmq.js
 else
     echo "Bootstrapping..."
     npm run bootstrap
     echo "Starting bot..."
-    if [ "${START_TYPE}" == "dev" ]; then
+    if [ "${NODE_ENV}" == "development" ]; then
         cd src
-        export NODE_ENV=development
         exec node -r ts-node/register --inspect=9229 kmq
-    elif [ "${START_TYPE}" == "prod" ]; then
+    elif [ "${NODE_ENV}" == "production" ]; then
         rebuild
-        export NODE_ENV=production
         git log -n 1 --pretty=format:"%H" > ../version
         exec node kmq.js
     fi

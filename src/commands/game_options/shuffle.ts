@@ -12,7 +12,7 @@ export enum ShuffleType {
     UNIQUE = "unique",
 }
 
-export const DEFAULT_SHUFFLE = ShuffleType.RANDOM;
+export const DEFAULT_SHUFFLE = ShuffleType.UNIQUE;
 
 export default class ShuffleCommand implements BaseCommand {
     validations = {

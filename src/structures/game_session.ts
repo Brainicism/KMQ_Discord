@@ -54,7 +54,6 @@ interface LastGuesser {
 export interface GuessResult {
     correct: boolean;
     correctGuessers?: Array<KmqMember>;
-    pointsEarned?: number;
 }
 
 export default class GameSession {
@@ -185,13 +184,13 @@ export default class GameSession {
                 const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(this.voiceChannelID), guessSpeed, guessPosition);
                 if (idx === 0) {
                     playerRoundResults.push({ player: correctGuesser, streak: this.lastGuesser.streak, expGain });
-                    logger.info(`${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed 1st. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
+                    logger.info(`${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
                 } else {
                     playerRoundResults.push({ player: correctGuesser, streak: 0, expGain });
                     logger.info(`${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed ${getOrdinalNum(guessPosition)}. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
                 }
                 return {
-                    userID: correctGuesser.id, pointsEarned: idx === 0 ? guessResult.pointsEarned : guessResult.pointsEarned / 2, expGain,
+                    userID: correctGuesser.id, pointsEarned: idx === 0 ? correctGuesser.pointsAwarded : correctGuesser.pointsAwarded / 2, expGain,
                 };
             });
             this.scoreboard.updateScoreboard(scoreboardUpdatePayload);
@@ -329,7 +328,7 @@ export default class GameSession {
 
             if (!this.gameRound) return;
             // mark round as complete, so no more guesses can go through
-            this.endRound({ correct: true, correctGuessers: this.gameRound.correctGuessers, pointsEarned }, guildPreference, MessageContext.fromMessage(message));
+            this.endRound({ correct: true, correctGuessers: this.gameRound.correctGuessers }, guildPreference, MessageContext.fromMessage(message));
             this.correctGuesses++;
 
             // update game session's lastActive
@@ -602,11 +601,11 @@ export default class GameSession {
         if (this.gameType !== GameType.ELIMINATION) {
             this.participants.add(userID);
         }
-        const guessCorrect = this.gameRound.checkGuess(guess, modeType);
-        if (guessCorrect) {
-            this.gameRound.userCorrect(userID);
+        const pointsAwarded = this.gameRound.checkGuess(guess, modeType);
+        if (pointsAwarded) {
+            this.gameRound.userCorrect(userID, pointsAwarded);
         }
-        return guessCorrect;
+        return pointsAwarded;
     }
 
     /**
