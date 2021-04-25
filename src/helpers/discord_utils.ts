@@ -209,17 +209,18 @@ export async function sendOptionsMessage(messageContext: MessageContext, guildPr
         return;
     }
 
-    const { gameSessions } = state;
-    const isEliminationMode = gameSessions[messageContext.guildID] && gameSessions[messageContext.guildID].gameType === GameType.ELIMINATION;
+    // required for the upcoming filtering helper function
+    // const { gameSessions } = state;
+    // const isEliminationMode = gameSessions[messageContext.guildID] && gameSessions[messageContext.guildID].gameType === GameType.ELIMINATION;
 
-    const goalMode = guildPreference.isGoalSet() && !isEliminationMode;
-    const guessTimeoutMode = guildPreference.isGuessTimeoutSet();
+    // const goalMode = guildPreference.isGoalSet() && !isEliminationMode;
+    // const guessTimeoutMode = guildPreference.isGuessTimeoutSet();
     const visibleLimitEnd = Math.min(totalSongs.countBeforeLimit, guildPreference.getLimitEnd());
     const visibleLimitStart = Math.min(totalSongs.countBeforeLimit, guildPreference.getLimitStart());
     const optionStrings = {};
     optionStrings[GameOption.CUTOFF] = `${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
-    optionStrings[GameOption.GENDER] = guildPreference.isGenderAlternating() ? "alternating" : `${guildPreference.getGender().join(", ")}`;
-    optionStrings[GameOption.ARTIST_TYPE] = guildPreference.getArtistType() === ArtistType.BOTH ? "artists" : guildPreference.getArtistType();
+    optionStrings[GameOption.GENDER] = guildPreference.getGender().join(", ");
+    optionStrings[GameOption.ARTIST_TYPE] = guildPreference.getArtistType();
     optionStrings[GameOption.GROUPS] = guildPreference.isGroupsMode() ? guildPreference.getDisplayedGroupNames() : null;
     optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode() ? guildPreference.getDisplayedExcludesGroupNames() : null;
     optionStrings[GameOption.INCLUDE] = guildPreference.isIncludesMode() ? guildPreference.getDisplayedIncludesGroupNames() : null;
@@ -230,17 +231,18 @@ export async function sendOptionsMessage(messageContext: MessageContext, guildPr
     optionStrings[GameOption.GOAL] = guildPreference.getGoal();
     optionStrings[GameOption.TIMER] = guildPreference.getGuessTimeout();
     optionStrings[GameOption.SHUFFLE_TYPE] = guildPreference.getShuffleType();
-    optionStrings[GameOption.SUBUNIT_PREFERENCE] = guildPreference.getSubunitPreference() === SubunitsPreference.INCLUDE ? "include" : "exclude";
+    optionStrings[GameOption.SUBUNIT_PREFERENCE] = guildPreference.getSubunitPreference();
+
     const ostPreferenceDisplayStrings = {
         [OstPreference.INCLUDE]: "include",
         [OstPreference.EXCLUDE]: "exclude",
         [OstPreference.EXCLUSIVE]: "exclusively include",
     };
     optionStrings[GameOption.OST_PREFERENCE] = ostPreferenceDisplayStrings[guildPreference.getOstPreference()];
-    optionStrings[GameOption.RELEASE_TYPE] = guildPreference.getReleaseType() === ReleaseType.OFFICIAL ? "official" : "all";
-    optionStrings[GameOption.MULTIGUESS] = guildPreference.getMultiGuessType() === MultiGuessType.ON ? "on" : "off";
+    optionStrings[GameOption.RELEASE_TYPE] = guildPreference.getReleaseType();
+    optionStrings[GameOption.MULTIGUESS] = guildPreference.getMultiGuessType();
     optionStrings[GameOption.LANGUAGE_TYPE] = guildPreference.getLanguageType();
-    optionStrings[GameOption.DURATION] = guildPreference.getDuration();
+    optionStrings[GameOption.DURATION] = guildPreference.isDurationSet() ? guildPreference.getDuration() : "disabled";
 
     for (const gameOption of Object.keys(optionStrings)) {
         const gameOptionString = optionStrings[gameOption];
@@ -254,56 +256,14 @@ export async function sendOptionsMessage(messageContext: MessageContext, guildPr
         footerText = `Looking for information on how to use a command? Check out '${PREFIX}help [command]' to learn more`;
     }
 
-    const gameOptionArray = Object.values(GameOption);
-    const optionFields: Array<Eris.EmbedField> = [];
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const allOptionFields: Array<Eris.EmbedField> = gameOptionArray.map((option) => {
-        const fieldOption = {
-            name: `${PREFIX}${italicize(GameOptionCommand.get(option))}`,
-            value: optionStrings[option] || "none",
-            inline: true,
-        };
-
-        if (option === GameOption.GROUPS || option === GameOption.SUBUNIT_PREFERENCE) {
-            if (guildPreference.isGroupsMode()) {
-                optionFields.push(fieldOption);
-            }
-        } else if (option === GameOption.GENDER || option === GameOption.ARTIST_TYPE) {
-            if (!guildPreference.isGroupsMode()) {
-                optionFields.push(fieldOption);
-            }
-        } else if (option === GameOption.EXCLUDE) {
-            if (guildPreference.isExcludesMode() && !guildPreference.isGroupsMode()) {
-                optionFields.push(fieldOption);
-            }
-        } else if (option === GameOption.INCLUDE) {
-            if (guildPreference.isIncludesMode() && !guildPreference.isGroupsMode()) {
-                optionFields.push(fieldOption);
-            }
-        } else if (option === GameOption.TIMER) {
-            if (guessTimeoutMode) {
-                optionFields.push(fieldOption);
-            }
-        } else if (option === GameOption.GOAL) {
-            if (goalMode) {
-                optionFields.push(fieldOption);
-            }
-        } else if (option === GameOption.DURATION) {
-            if (guildPreference.isDurationSet()) {
-                optionFields.push(fieldOption);
-            }
-        } else if (GameOptionCommand.has(option)) {
-            optionFields.push(fieldOption);
-        }
-
-        return fieldOption;
-    });
-
     await sendInfoMessage(messageContext,
         {
             title: updatedOption === null ? "Options" : `${updatedOption.option} ${updatedOption.reset ? "reset" : "updated"}`,
-            fields: optionFields,
+            fields: Object.entries(GameOptionCommand).map((option) => ({
+                name: `${PREFIX}${italicize(option[1])}`,
+                value: optionStrings[option[0]],
+                inline: true,
+            })),
             footerText: footerText !== null ? footerText : null,
             thumbnailUrl: KmqImages.LISTENING,
         });

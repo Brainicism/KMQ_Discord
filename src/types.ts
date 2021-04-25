@@ -77,26 +77,26 @@ export enum GameOption {
     MULTIGUESS = "Multiguess",
 }
 
-export const GameOptionCommand: Map<string, string> = new Map([
-    [GameOption.GENDER, "gender"],
-    [GameOption.CUTOFF, "cutoff"],
-    [GameOption.LIMIT, "limit"],
-    [GameOption.SEEK_TYPE, "seek"],
-    [GameOption.MODE_TYPE, "mode"],
-    [GameOption.RELEASE_TYPE, "release"],
-    [GameOption.SHUFFLE_TYPE, "shuffle"],
-    [GameOption.GROUPS, "groups"],
-    [GameOption.GOAL, "goal"],
-    [GameOption.TIMER, "timer"],
-    [GameOption.DURATION, "duration"],
-    [GameOption.EXCLUDE, "exclude"],
-    [GameOption.INCLUDE, "include"],
-    [GameOption.ARTIST_TYPE, "type"],
-    [GameOption.LANGUAGE_TYPE, "language"],
-    [GameOption.SUBUNIT_PREFERENCE, "subunit"],
-    [GameOption.OST_PREFERENCE, "ost"],
-    [GameOption.MULTIGUESS, "multiguess"],
-]);
+export const GameOptionCommand: { [option: string]: string } = {
+    [GameOption.GENDER]: "gender",
+    [GameOption.CUTOFF]: "cutoff",
+    [GameOption.LIMIT]: "limit",
+    [GameOption.SEEK_TYPE]: "seek",
+    [GameOption.MODE_TYPE]: "mode",
+    [GameOption.RELEASE_TYPE]: "release",
+    [GameOption.SHUFFLE_TYPE]: "shuffle",
+    [GameOption.GROUPS]: "groups",
+    [GameOption.GOAL]: "goal",
+    [GameOption.TIMER]: "timer",
+    [GameOption.DURATION]: "duration",
+    [GameOption.EXCLUDE]: "exclude",
+    [GameOption.INCLUDE]: "include",
+    [GameOption.ARTIST_TYPE]: "type",
+    [GameOption.LANGUAGE_TYPE]: "language",
+    [GameOption.SUBUNIT_PREFERENCE]: "subunit",
+    [GameOption.OST_PREFERENCE]: "ost",
+    [GameOption.MULTIGUESS]: "multiguess",
+};
 
 export enum EnvType {
     PROD = "production",
