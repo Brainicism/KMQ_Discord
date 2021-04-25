@@ -52,10 +52,11 @@ export default class IncludeCommand implements BaseCommand {
             await sendErrorMessage(MessageContext.fromMessage(message), { title: "Unknown Group Name", description: `One or more of the specified group names was not recognized. Those groups that matched are added. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} ` });
         }
 
-        if (matchedGroups.length) {
-            guildPreference.setIncludes(matchedGroups);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.INCLUDE, reset: false });
-            logger.info(`${getDebugLogHeader(message)} | Includes set to ${guildPreference.getDisplayedIncludesGroupNames()}`);
+        if (matchedGroups.length === 0) {
+            return;
         }
+        guildPreference.setIncludes(matchedGroups);
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.INCLUDE, reset: false });
+        logger.info(`${getDebugLogHeader(message)} | Includes set to ${guildPreference.getDisplayedIncludesGroupNames()}`);
     }
 }

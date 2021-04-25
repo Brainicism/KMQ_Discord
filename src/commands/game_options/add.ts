@@ -74,25 +74,26 @@ export default class AddCommand implements BaseCommand {
             await sendErrorMessage(MessageContext.fromMessage(message), { title: "Unknown Group Name", description: `One or more of the specified group names was not recognized. Those groups that matched are added. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} ` });
         }
 
-        if (matchedGroups.length) {
-            switch (optionListed) {
-                case AddType.GROUPS:
-                    guildPreference.setGroups(matchedGroups);
-                    await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GROUPS, reset: false });
-                    logger.info(`${getDebugLogHeader(message)} | Group added: ${guildPreference.getDisplayedGroupNames()}`);
-                    break;
-                case AddType.INCLUDES:
-                    guildPreference.setIncludes(matchedGroups);
-                    await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.INCLUDE, reset: false });
-                    logger.info(`${getDebugLogHeader(message)} | Include added: ${guildPreference.getDisplayedIncludesGroupNames()}`);
-                    break;
-                case AddType.EXCLUDES:
-                    guildPreference.setExcludes(matchedGroups);
-                    await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.EXCLUDE, reset: false });
-                    logger.info(`${getDebugLogHeader(message)} | Exclude added: ${guildPreference.getDisplayedExcludesGroupNames()}`);
-                    break;
-                default:
-            }
+        if (matchedGroups.length === 0) {
+            return;
+        }
+        switch (optionListed) {
+            case AddType.GROUPS:
+                guildPreference.setGroups(matchedGroups);
+                await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GROUPS, reset: false });
+                logger.info(`${getDebugLogHeader(message)} | Group added: ${guildPreference.getDisplayedGroupNames()}`);
+                break;
+            case AddType.INCLUDES:
+                guildPreference.setIncludes(matchedGroups);
+                await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.INCLUDE, reset: false });
+                logger.info(`${getDebugLogHeader(message)} | Include added: ${guildPreference.getDisplayedIncludesGroupNames()}`);
+                break;
+            case AddType.EXCLUDES:
+                guildPreference.setExcludes(matchedGroups);
+                await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.EXCLUDE, reset: false });
+                logger.info(`${getDebugLogHeader(message)} | Exclude added: ${guildPreference.getDisplayedExcludesGroupNames()}`);
+                break;
+            default:
         }
     }
 }
