@@ -32,12 +32,12 @@ import guildCreateHandler from "../events/client/guildCreate";
 import guildDeleteHandler from "../events/client/guildDelete";
 import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
 import guildAvailableHandler from "../events/client/guildAvailable";
-import BotStatsPoster from "./bot_stats_poster";
+import BotListingManager from "./bot_listing_manager";
 import { EnvType } from "../types";
 import storeDailyStats from "../scripts/store-daily-stats";
 import { seedAndDownloadNewSongs } from "../seed/seed_db";
 import backupKmqDatabase from "../scripts/backup-kmq-database";
-import { parseJsonFile } from "./utils";
+import { chooseRandom, parseJsonFile } from "./utils";
 import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
 
@@ -118,12 +118,19 @@ function clearInactiveVoiceConnections() {
     }
 }
 
-/** Updates the bot's server count status */
-export function updateBotStatus() {
+/** Updates the bot's song listening status */
+export async function updateBotStatus() {
     const { client } = state;
+    const oneMonthPriorDate = new Date();
+    oneMonthPriorDate.setMonth(oneMonthPriorDate.getMonth() - 1);
+    const randomPopularSongs = await dbContext.kmq("available_songs")
+        .where("publishedon", ">", oneMonthPriorDate)
+        .orderBy("views", "DESC")
+        .limit(25);
+    const randomPopularSong = chooseRandom(randomPopularSongs);
     client.editStatus("online", {
-        name: `over ${Math.floor(client.guilds.size / 100) * 100} servers`,
-        type: 3,
+        name: `${randomPopularSong["song_name"]} by ${randomPopularSong["artist_name"]}`,
+        type: 2,
     });
 }
 
@@ -284,8 +291,8 @@ export async function registerCommands(initialLoad: boolean) {
 
 /** Initialize server count posting to bot listing sites */
 export function initializeBotStatsPoster() {
-    state.botStatsPoster = new BotStatsPoster();
-    state.botStatsPoster.start();
+    state.botListingManager = new BotListingManager();
+    state.botListingManager.start();
 }
 
 /**

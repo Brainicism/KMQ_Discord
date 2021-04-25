@@ -11,7 +11,7 @@ export enum MultiGuessType {
     OFF = "off",
 }
 
-export const DEFAULT_MULTIGUESS_TYPE = MultiGuessType.OFF;
+export const DEFAULT_MULTIGUESS_TYPE = MultiGuessType.ON;
 
 export default class MultiGuessCommand implements BaseCommand {
     validations = {

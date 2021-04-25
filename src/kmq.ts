@@ -16,7 +16,7 @@ const ERIS_INTENTS = Eris.Constants.Intents;
 const state: State = {
     commands: {},
     gameSessions: {},
-    botStatsPoster: null,
+    botListingManager: null,
     client: null,
     aliases: {
         artist: {},
@@ -49,10 +49,8 @@ export default state;
         reloadCaches();
         updatePublishDateOverrides();
 
-        if (process.env.NODE_ENV === EnvType.PROD) {
-            logger.info("Initializing bot stats poster...");
-            initializeBotStatsPoster();
-        }
+        logger.info("Initializing bot stats poster...");
+        initializeBotStatsPoster();
 
         state.client = new Eris.Client(process.env.BOT_TOKEN, {
             disableEvents: {
