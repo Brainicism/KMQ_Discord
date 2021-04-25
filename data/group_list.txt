@@ -16,6 +16,7 @@
 2YOON
 2Z
 3YE
+4L
 4Men
 4Minute
 4Ten
@@ -46,6 +47,7 @@ April
 Argon
 Ariaz
 As One
+Ash Island
 ASome.D
 Astin
 ASTRO
@@ -161,6 +163,7 @@ Daybreak
 Dean
 Demian
 Dia
+DinDin
 DJ Hanmin
 DKB
 DONGKIZ
@@ -234,6 +237,7 @@ Girls Girls
 Girls' Generation
 Girls' Generation Oh!GG
 Girls' Generation TTS
+Glam
 Golden Child
 Goo Hara
 GOOD DAY
@@ -277,6 +281,7 @@ Hitchhiker
 Holland
 Homme
 Honey Popcorn
+Hong Dae Kwang
 Hong Eunki
 Hong Jinyoung
 Hong Joo Chan
@@ -297,6 +302,7 @@ Hyuk
 Hyukoh
 Hyun Bin
 Hyuna
+Hyunjun Hur
 I.C.E
 I.M
 I.O.I
@@ -345,6 +351,7 @@ Jiselle
 Jiyeon
 JJ Project
 JJCC
+Jo Kwon
 John Park
 Jonghyun
 Joohoney
@@ -402,6 +409,7 @@ Kim Hyung Jun
 Kim Jaehwan
 Kim Jaejoong
 Kim Jinho
+Kim Kihyun
 Kim Na Young
 Kim Nam Joo
 Kim Sung Kyu
@@ -431,8 +439,10 @@ Lee Juck
 Lee Minhyuk
 Lee Moonsae
 Lee Sang Soon
+Lee Seok Hoon
 Lee Seung Chul
 Lee Seung Gi
+Lee Seung-yoon
 Lee SoRa
 Lee Suhyun
 Lee Sun Hee
@@ -454,6 +464,7 @@ LOONA
 Loopy
 Lovelyz
 Løren
+LU:KUS
 Lucy
 Luna
 Lunarsolar
@@ -478,6 +489,7 @@ MCND
 MelodyDay
 MeloMance
 MFBTY
+Mia
 Midnight
 Mido and Falasol
 Min Kyung Hoon
@@ -522,6 +534,7 @@ NeonPunch
 Newkidd
 Nichkhun
 Nick & Sammy
+Nicole Jung
 Nilo
 Noel
 Noir
@@ -555,6 +568,7 @@ Park Ji-yoon
 Park Jihoon
 Park Won
 Paul Kim
+Peakboy
 Peniel Shin
 Penomeco
 PENTAGON
@@ -710,7 +724,9 @@ The East Light
 The Rose
 The SeeYa
 Tiffany
+Tiny-G
 TO1
+Toheart
 TOO
 Topp Dogg
 Toy
@@ -743,6 +759,7 @@ V
 V.O.S
 Vanner
 VAV
+Verbal Jint
 Verivery
 Vibe
 Victon
