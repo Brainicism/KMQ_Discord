@@ -138,6 +138,9 @@
         ],
         "@typescript-eslint/comma-dangle": [
             "warn"
+        ],
+        "@typescript-eslint/space-before-function-paren": [
+            "warn"
         ]
     }
 }
