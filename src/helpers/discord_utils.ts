@@ -214,35 +214,33 @@ export async function sendOptionsMessage(messageContext: MessageContext, guildPr
 
     const goalMode = guildPreference.isGoalSet() && !isEliminationMode;
     const guessTimeoutMode = guildPreference.isGuessTimeoutSet();
-    const shuffleUniqueMode = guildPreference.isShuffleUnique();
     const visibleLimitEnd = Math.min(totalSongs.countBeforeLimit, guildPreference.getLimitEnd());
     const visibleLimitStart = Math.min(totalSongs.countBeforeLimit, guildPreference.getLimitStart());
     const optionStrings = {};
     optionStrings[GameOption.CUTOFF] = `${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
     optionStrings[GameOption.GENDER] = guildPreference.isGenderAlternating() ? "alternating" : `${guildPreference.getGender().join(", ")}`;
-    optionStrings[GameOption.ARTIST_TYPE] = `${guildPreference.getArtistType() === ArtistType.BOTH ? "artists" : guildPreference.getArtistType()}`;
-    optionStrings[GameOption.GROUPS] = guildPreference.isGroupsMode() ? `${guildPreference.getDisplayedGroupNames()}` : null;
-    optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode() ? `${guildPreference.getDisplayedExcludesGroupNames()}` : null;
-    optionStrings[GameOption.INCLUDE] = guildPreference.isIncludesMode() ? `${guildPreference.getDisplayedIncludesGroupNames()}` : null;
+    optionStrings[GameOption.ARTIST_TYPE] = guildPreference.getArtistType() === ArtistType.BOTH ? "artists" : guildPreference.getArtistType();
+    optionStrings[GameOption.GROUPS] = guildPreference.isGroupsMode() ? guildPreference.getDisplayedGroupNames() : null;
+    optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode() ? guildPreference.getDisplayedExcludesGroupNames() : null;
+    optionStrings[GameOption.INCLUDE] = guildPreference.isIncludesMode() ? guildPreference.getDisplayedIncludesGroupNames() : null;
     optionStrings[GameOption.LIMIT] = guildPreference.getLimitStart() === 0 ? `${visibleLimitEnd}` : `${getOrdinalNum(visibleLimitStart)} to ${getOrdinalNum(visibleLimitEnd)} (${totalSongs.count} songs)`;
     optionStrings[GameOption.LIMIT] = `${optionStrings[GameOption.LIMIT]} / ${totalSongs.countBeforeLimit}`;
     optionStrings[GameOption.SEEK_TYPE] = guildPreference.getSeekType();
-    optionStrings[GameOption.MODE_TYPE] = `${guildPreference.getModeType() === ModeType.BOTH ? "song or artist" : guildPreference.getModeType()}`;
-    optionStrings[GameOption.GOAL] = `${guildPreference.getGoal()}`;
-    optionStrings[GameOption.TIMER] = `${guildPreference.getGuessTimeout()}`;
-    optionStrings[GameOption.SHUFFLE_TYPE] = `${guildPreference.getShuffleType()}`;
-    optionStrings[GameOption.SUBUNIT_PREFERENCE] = `${guildPreference.getSubunitPreference() === SubunitsPreference.INCLUDE ? "include" : "exclude"}`;
+    optionStrings[GameOption.MODE_TYPE] = guildPreference.getModeType() === ModeType.BOTH ? "song or artist" : guildPreference.getModeType();
+    optionStrings[GameOption.GOAL] = guildPreference.getGoal();
+    optionStrings[GameOption.TIMER] = guildPreference.getGuessTimeout();
+    optionStrings[GameOption.SHUFFLE_TYPE] = guildPreference.getShuffleType();
+    optionStrings[GameOption.SUBUNIT_PREFERENCE] = guildPreference.getSubunitPreference() === SubunitsPreference.INCLUDE ? "include" : "exclude";
     const ostPreferenceDisplayStrings = {
         [OstPreference.INCLUDE]: "include",
         [OstPreference.EXCLUDE]: "exclude",
-        [OstPreference.EXCLUSIVE]: "exclusive include",
+        [OstPreference.EXCLUSIVE]: "exclusively include",
     };
-    optionStrings[GameOption.OST_PREFERENCE] = `${ostPreferenceDisplayStrings[guildPreference.getOstPreference()]}`;
-    optionStrings[GameOption.RELEASE_TYPE] = `${guildPreference.getReleaseType() === ReleaseType.OFFICIAL ? "official" : "all"}`;
+    optionStrings[GameOption.OST_PREFERENCE] = ostPreferenceDisplayStrings[guildPreference.getOstPreference()];
+    optionStrings[GameOption.RELEASE_TYPE] = guildPreference.getReleaseType() === ReleaseType.OFFICIAL ? "official" : "all";
     optionStrings[GameOption.MULTIGUESS] = guildPreference.getMultiGuessType() === MultiGuessType.ON ? "on" : "off";
-
     optionStrings[GameOption.LANGUAGE_TYPE] = guildPreference.getLanguageType();
-    optionStrings[GameOption.DURATION] = `${guildPreference.getDuration()}`;
+    optionStrings[GameOption.DURATION] = guildPreference.getDuration();
 
     for (const gameOption of Object.keys(optionStrings)) {
         const gameOptionString = optionStrings[gameOption];
@@ -257,17 +255,49 @@ export async function sendOptionsMessage(messageContext: MessageContext, guildPr
     }
 
     const gameOptionArray = Object.values(GameOption);
-    const gameCommandArray = Object.values(GameOptionCommand);
+    const optionFields: Array<Eris.EmbedField> = [];
 
-    const optionFields:Array<Eris.EmbedField> = gameOptionArray.map((option, idx) => {
-        const optionName = `${PREFIX}${italicize(gameCommandArray[idx])}`;
-        const optionValue = optionStrings[option] || "none";
-
-        return {
-            name: optionName,
-            value: optionValue,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const allOptionFields: Array<Eris.EmbedField> = gameOptionArray.map((option) => {
+        const fieldOption = {
+            name: `${PREFIX}${italicize(GameOptionCommand.get(option))}`,
+            value: optionStrings[option] || "none",
             inline: true,
         };
+
+        if (option === GameOption.GROUPS || option === GameOption.SUBUNIT_PREFERENCE) {
+            if (guildPreference.isGroupsMode()) {
+                optionFields.push(fieldOption);
+            }
+        } else if (option === GameOption.GENDER || option === GameOption.ARTIST_TYPE) {
+            if (!guildPreference.isGroupsMode()) {
+                optionFields.push(fieldOption);
+            }
+        } else if (option === GameOption.EXCLUDE) {
+            if (guildPreference.isExcludesMode() && !guildPreference.isGroupsMode()) {
+                optionFields.push(fieldOption);
+            }
+        } else if (option === GameOption.INCLUDE) {
+            if (guildPreference.isIncludesMode() && !guildPreference.isGroupsMode()) {
+                optionFields.push(fieldOption);
+            }
+        } else if (option === GameOption.TIMER) {
+            if (guessTimeoutMode) {
+                optionFields.push(fieldOption);
+            }
+        } else if (option === GameOption.GOAL) {
+            if (goalMode) {
+                optionFields.push(fieldOption);
+            }
+        } else if (option === GameOption.DURATION) {
+            if (guildPreference.isDurationSet()) {
+                optionFields.push(fieldOption);
+            }
+        } else if (GameOptionCommand.has(option)) {
+            optionFields.push(fieldOption);
+        }
+
+        return fieldOption;
     });
 
     await sendInfoMessage(messageContext,
