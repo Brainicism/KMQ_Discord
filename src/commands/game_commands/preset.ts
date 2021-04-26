@@ -16,6 +16,7 @@ enum PresetAction {
     SAVE = "save",
     LOAD = "load",
     DELETE = "delete",
+    REPLACE = "replace",
 }
 
 export default class PresetCommand implements BaseCommand {
@@ -51,6 +52,10 @@ export default class PresetCommand implements BaseCommand {
                 explanation: "Loads the mentioned preset into the game options",
             },
             {
+                example: "`!preset replace [preset_name]`",
+                explanation: "Replaces the current game options as the mentioned preset",
+            },
+            {
                 example: "`!preset delete [preset_name]`",
                 explanation: "Deletes the mentioned preset",
             },
@@ -81,6 +86,9 @@ export default class PresetCommand implements BaseCommand {
                 break;
             case PresetAction.DELETE:
                 await this.deletePreset(presetName, guildPreference, messageContext);
+                break;
+            case PresetAction.REPLACE:
+                await this.replacePreset(presetName, guildPreference, messageContext);
                 break;
             default:
         }
@@ -126,6 +134,16 @@ export default class PresetCommand implements BaseCommand {
             logger.warn(`${getDebugLogHeader(messageContext)} | Preset '${presetName}' already exists`);
             await sendErrorMessage(messageContext, { title: "Preset Error", description: `Preset \`${presetName}\` already exists. You can delete the old one with \`${process.env.BOT_PREFIX}preset delete ${presetName}\`.`, thumbnailUrl: KmqImages.DEAD });
         }
+    }
+
+    async replacePreset(presetName: string, guildPreference: GuildPreference, messageContext: MessageContext) {
+        const deleteResult = await guildPreference.deletePreset(presetName);
+        if (!deleteResult) {
+            logger.info(`${getDebugLogHeader(messageContext)} | Preset '${presetName}' replace, preset did not exist`);
+        }
+        await guildPreference.savePreset(presetName);
+        logger.info(`${getDebugLogHeader(messageContext)} | Preset '${presetName}' successfully replaced`);
+        await sendInfoMessage(messageContext, { title: "Preset Replaced", description: `You can load this preset later with \`${process.env.BOT_PREFIX}preset load ${presetName}\`.`, thumbnailUrl: KmqImages.HAPPY });
     }
 
     async listPresets(guildPreference: GuildPreference, messageContext: MessageContext) {
