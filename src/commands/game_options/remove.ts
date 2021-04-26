@@ -79,10 +79,12 @@ export default class RemoveCommand implements BaseCommand {
         const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(remainingGroups);
         if (unmatchedGroups.length) {
             logger.info(`${getDebugLogHeader(message)} | Attempted to set unknown groups. groups =  ${unmatchedGroups.join(", ")}`);
-            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Unknown Group Name", description: `One or more of the specified group names was not recognized. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} ` });
-            return;
+            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Unknown Group Name", description: `One or more of the specified group names was not recognized. Those groups that matched are removed. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} ` });
         }
 
+        if (matchedGroups.length === 0) {
+            return;
+        }
         switch (optionListed) {
             case RemoveType.GROUPS:
                 guildPreference.setGroups(matchedGroups);
