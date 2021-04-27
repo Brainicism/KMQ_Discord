@@ -56,6 +56,11 @@ export interface GuessResult {
     correctGuessers?: Array<KmqMember>;
 }
 
+export interface UniqueSongCounter {
+    uniqueSongsPlayed: number;
+    totalSongs: number;
+}
+
 export default class GameSession {
     /** The GameType that the GameSession started in */
     public readonly gameType: GameType;
@@ -112,7 +117,7 @@ export default class GameSession {
     private lastPlayedSongs: Array<string>;
 
     /** List of songs played with ,shuffle unique enabled */
-    private uniqueSongs: Set<string>;
+    private uniqueSongsPlayed: Set<string>;
 
     /** Map of song's YouTube ID to correctGuesses and roundsPlayed */
     private playCount: { [vlink: string]: { correctGuesses: number, roundsPlayed: number } };
@@ -150,11 +155,11 @@ export default class GameSession {
         this.gameRound = null;
         this.owner = gameSessionCreator;
         this.lastPlayedSongs = [];
-        this.uniqueSongs = new Set();
+        this.uniqueSongsPlayed = new Set();
         this.playCount = {};
         this.lastAlternatingGender = null;
         this.lastGuesser = null;
-        this.songCount = 0;
+        this.songCount = null;
     }
 
     /**
@@ -207,10 +212,15 @@ export default class GameSession {
         const remainingDuration = guildPreference.isDurationSet() ? (guildPreference.getDuration() - currGameLength) : null;
 
         if (messageContext) {
-            const uniqueSongsPlayed = guildPreference.isShuffleUnique() ? this.uniqueSongs.size : null;
-            const totalSongs = guildPreference.isShuffleUnique() ? this.songCount : null;
+            let uniqueSongCounter: UniqueSongCounter;
+            if (guildPreference.isShuffleUnique()) {
+                uniqueSongCounter = {
+                    uniqueSongsPlayed: this.uniqueSongsPlayed.size,
+                    totalSongs: this.songCount,
+                };
+            }
 
-            sendEndOfRoundMessage(messageContext, this.scoreboard, this.gameRound, playerRoundResults, remainingDuration, uniqueSongsPlayed, totalSongs);
+            sendEndOfRoundMessage(messageContext, this.scoreboard, this.gameRound, playerRoundResults, remainingDuration, uniqueSongCounter);
         }
 
         this.incrementSongCount(this.gameRound.videoID, guessResult.correct);
@@ -367,15 +377,15 @@ export default class GameSession {
 
         const filteredSongs = new Set((await getFilteredSongList(guildPreference)).songs.map((x) => x.youtubeLink));
         const totalSongsCount = filteredSongs.size;
-        if (this.songCount === 0) {
+        if (this.songCount === null) {
             // Initialize songCount
             this.songCount = totalSongsCount;
         }
 
         // manage unique songs
         if (guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
-            if (setDifference<string>(filteredSongs, this.uniqueSongs).size === 0) {
-                logger.info(`${getDebugLogHeader(messageContext)} | Resetting uniqueSongs (all ${this.songCount} unique songs played)`);
+            if (setDifference<string>(filteredSongs, this.uniqueSongsPlayed).size === 0) {
+                logger.info(`${getDebugLogHeader(messageContext)} | Resetting uniqueSongsPlayed (all ${this.songCount} unique songs played)`);
                 // In updateSongCount, songs already played are added to songCount when options change. On unique reset, remove them
                 this.songCount = totalSongsCount;
                 await sendInfoMessage(messageContext, { title: "Resetting unique songs", description: `All songs have been played. ${this.songCount} songs will be reshuffled.`, thumbnailUrl: KmqImages.LISTENING });
@@ -412,7 +422,7 @@ export default class GameSession {
         // query for random song
         let randomSong: QueriedSong;
         try {
-            const ignoredSongs = new Set([...this.lastPlayedSongs, ...this.uniqueSongs]);
+            const ignoredSongs = new Set([...this.lastPlayedSongs, ...this.uniqueSongsPlayed]);
             if (this.lastAlternatingGender) {
                 randomSong = await selectRandomSong(guildPreference, ignoredSongs, this.lastAlternatingGender);
             } else {
@@ -434,7 +444,7 @@ export default class GameSession {
             this.lastPlayedSongs.push(randomSong.youtubeLink);
         }
         if (guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
-            this.uniqueSongs.add(randomSong.youtubeLink);
+            this.uniqueSongsPlayed.add(randomSong.youtubeLink);
         }
 
         // create a new round with randomly chosen song
@@ -494,7 +504,7 @@ export default class GameSession {
      * Resets the unique songs set
      */
     resetUniqueSongs() {
-        this.uniqueSongs.clear();
+        this.uniqueSongsPlayed.clear();
     }
 
     /**
@@ -518,7 +528,8 @@ export default class GameSession {
     async updateSongCount(guildPreference: GuildPreference) {
         const totalSongs = await getFilteredSongList(guildPreference);
         // Include songs already played in the count
-        this.songCount = new Set([...this.uniqueSongs, ...totalSongs.songs.map((x) => x.youtubeLink)]).size;
+        this.songCount = Math.max(guildPreference.getLimitEnd() - guildPreference.getLimitStart(),
+            new Set([...this.uniqueSongsPlayed, ...totalSongs.songs.map((x) => x.youtubeLink)]).size);
     }
 
     /**

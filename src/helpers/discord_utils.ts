@@ -2,7 +2,7 @@ import Eris, { EmbedOptions, TextableChannel } from "eris";
 import EmbedPaginator from "eris-pagination";
 import path from "path";
 import GuildPreference from "../structures/guild_preference";
-import GameSession from "../structures/game_session";
+import GameSession, { UniqueSongCounter } from "../structures/game_session";
 import _logger from "../logger";
 import { endSession, getSongCount } from "./game_utils";
 import { getFact } from "../fact_generator";
@@ -145,8 +145,7 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext,
     gameRound: GameRound,
     playerRoundResults: Array<PlayerRoundResult>,
     timeRemaining?: number,
-    uniqueSongsPlayed?: number,
-    totalSongs?: number) {
+    uniqueSongCounter?: UniqueSongCounter) {
     const footer: Eris.EmbedFooterOptions = {
         text: "",
     };
@@ -178,8 +177,8 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext,
             correctDescription += `\n\n**Runners Up**\n${runnersUpDescription}`;
         }
     }
-    const uniqueSongCounter = uniqueSongsPlayed ? `\n${codeLine(`${uniqueSongsPlayed}/${totalSongs}`)} unique songs played.` : "";
-    const description = `${correctGuess ? correctDescription : "Nobody got it."}\nhttps://youtu.be/${gameRound.videoID}${uniqueSongCounter} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
+    const uniqueSongMessage = uniqueSongCounter ? `\n${codeLine(`${uniqueSongCounter.uniqueSongsPlayed}/${uniqueSongCounter.totalSongs}`)} unique songs played.` : "";
+    const description = `${correctGuess ? correctDescription : "Nobody got it."}\nhttps://youtu.be/${gameRound.videoID}${uniqueSongMessage} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
     const fields = scoreboard.getScoreboardEmbedFields().slice(0, 10);
     if (fact) {
         fields.push({
