@@ -141,7 +141,7 @@ export async function selectRandomSong(filteredSongs: Set<QueriedSong>, ignoredS
     if (ignoredSongs) {
         queriedSongList = queriedSongList.filter((x) => !ignoredSongs.has(x.youtubeLink));
     }
-    if (alternatingGender && queriedSongList.map((x) => x.members).some((y) => y === alternatingGender)) {
+    if (alternatingGender && queriedSongList.some((y) => y.members === alternatingGender)) {
         queriedSongList = queriedSongList.filter((song) => song.members === alternatingGender);
     }
     if (queriedSongList.length === 0) {
