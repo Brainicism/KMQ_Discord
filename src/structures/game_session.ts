@@ -7,7 +7,7 @@ import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
     getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndOfRoundMessage, sendInfoMessage, getNumParticipants, checkBotIsAlone, getVoiceChannelFromMessage,
 } from "../helpers/discord_utils";
-import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, getSongCount, endSession } from "../helpers/game_utils";
+import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, endSession } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds, getOrdinalNum, isPowerHour, isWeekend, setDifference } from "../helpers/utils";
 import state from "../kmq";
 import _logger from "../logger";
@@ -131,9 +131,6 @@ export default class GameSession {
     /** The most recent Guesser, including their current streak */
     private lastGuesser: LastGuesser;
 
-    /** The amount of songs in uniqueSongsPlayed that can no longer be played with the current game options */
-    private unreachableSongCount: number;
-
     constructor(textChannelID: string, voiceChannelID: string, guildID: string, gameSessionCreator: KmqMember, gameType: GameType, eliminationLives?: number) {
         this.gameType = gameType;
         this.guildID = guildID;
@@ -163,7 +160,6 @@ export default class GameSession {
         this.playCount = {};
         this.lastAlternatingGender = null;
         this.lastGuesser = null;
-        this.unreachableSongCount = 0;
     }
 
     /**
@@ -218,8 +214,9 @@ export default class GameSession {
         if (messageContext) {
             let uniqueSongCounter: UniqueSongCounter;
             if (guildPreference.isShuffleUnique()) {
+                const filteredSongs = new Set([...this.filteredSongs.songs].map((x) => x.youtubeLink));
                 uniqueSongCounter = {
-                    uniqueSongsPlayed: this.uniqueSongsPlayed.size - this.unreachableSongCount,
+                    uniqueSongsPlayed: this.uniqueSongsPlayed.size - setDifference<string>(this.uniqueSongsPlayed, filteredSongs).size,
                     totalSongs: Math.min(this.filteredSongs.countBeforeLimit, guildPreference.getLimitEnd() - guildPreference.getLimitStart()),
                 };
             }
@@ -452,7 +449,7 @@ export default class GameSession {
 
         // create a new round with randomly chosen song
         this.prepareRound(randomSong.name, randomSong.artist, randomSong.youtubeLink, randomSong.publishDate.getFullYear());
-        this.gameRound.setBaseExpReward(await this.calculateBaseExp(guildPreference));
+        this.gameRound.setBaseExpReward(await this.calculateBaseExp());
 
         const voiceChannel = state.client.getChannel(this.voiceChannelID) as Eris.VoiceChannel;
         if (checkBotIsAlone(this, voiceChannel)) {
@@ -508,7 +505,6 @@ export default class GameSession {
      */
     resetUniqueSongs() {
         this.uniqueSongsPlayed.clear();
-        this.unreachableSongCount = 0;
     }
 
     /**
@@ -531,11 +527,6 @@ export default class GameSession {
 
     async updateFilteredSongs(guildPreference: GuildPreference) {
         this.filteredSongs = await getFilteredSongList(guildPreference);
-    }
-
-    async updateUnreachableSongCount() {
-        const filteredSongs = new Set([...this.filteredSongs.songs].map((x) => x.youtubeLink));
-        this.unreachableSongCount = setDifference<string>(this.uniqueSongsPlayed, filteredSongs).size;
     }
 
     /**
@@ -846,8 +837,8 @@ export default class GameSession {
      * @param guildPreference - The GuildPreference
      * @returns the base EXP reward for the gameround
      */
-    private async calculateBaseExp(guildPreference: GuildPreference): Promise<number> {
-        const songCount = await getSongCount(guildPreference);
+    private async calculateBaseExp(): Promise<number> {
+        const songCount = this.getSongCount();
         // minimum amount of songs for exp gain
         if (songCount.count < 10) return 0;
         const expBase = 1000 / (1 + (Math.exp(1 - (0.00125 * songCount.count))));
@@ -864,5 +855,12 @@ export default class GameSession {
         // 1 player + KMQ
         const playerIsAlone = voiceChannel.voiceMembers.size === 2;
         return (guildPreference.getMultiGuessType() === MultiGuessType.ON) && !playerIsAlone;
+    }
+
+    private getSongCount() {
+        return {
+            count: this.filteredSongs.songs.size,
+            countBeforeLimit: this.filteredSongs.countBeforeLimit,
+        };
     }
 }
