@@ -113,6 +113,9 @@ export default class GameSession {
     /** Timer function used to for ,timer command */
     private guessTimeoutFunc: NodeJS.Timer;
 
+    /** List of songs matching the user's game options */
+    private filteredSongs: { songs: Set<QueriedSong>, countBeforeLimit: number };
+
     /** List of recently played songs used to prevent frequent repeats */
     private lastPlayedSongs: Array<string>;
 
@@ -128,8 +131,8 @@ export default class GameSession {
     /** The most recent Guesser, including their current streak */
     private lastGuesser: LastGuesser;
 
-    /** The amount of songs that can be played with the current game options */
-    private songCount: number;
+    /** The amount of songs in uniqueSongsPlayed that can no longer be played with the current game options */
+    private unreachableSongCount: number;
 
     constructor(textChannelID: string, voiceChannelID: string, guildID: string, gameSessionCreator: KmqMember, gameType: GameType, eliminationLives?: number) {
         this.gameType = gameType;
@@ -154,12 +157,13 @@ export default class GameSession {
         this.textChannelID = textChannelID;
         this.gameRound = null;
         this.owner = gameSessionCreator;
+        this.filteredSongs = null;
         this.lastPlayedSongs = [];
         this.uniqueSongsPlayed = new Set();
         this.playCount = {};
         this.lastAlternatingGender = null;
         this.lastGuesser = null;
-        this.songCount = null;
+        this.unreachableSongCount = 0;
     }
 
     /**
@@ -215,8 +219,8 @@ export default class GameSession {
             let uniqueSongCounter: UniqueSongCounter;
             if (guildPreference.isShuffleUnique()) {
                 uniqueSongCounter = {
-                    uniqueSongsPlayed: this.uniqueSongsPlayed.size,
-                    totalSongs: this.songCount,
+                    uniqueSongsPlayed: this.uniqueSongsPlayed.size - this.unreachableSongCount,
+                    totalSongs: Math.min(this.filteredSongs.countBeforeLimit, guildPreference.getLimitEnd() - guildPreference.getLimitStart()),
                 };
             }
 
@@ -375,20 +379,26 @@ export default class GameSession {
             return;
         }
 
-        const filteredSongs = new Set((await getFilteredSongList(guildPreference)).songs.map((x) => x.youtubeLink));
-        const totalSongsCount = filteredSongs.size;
-        if (this.songCount === null) {
-            // Initialize songCount
-            this.songCount = totalSongsCount;
+        try {
+            if (this.filteredSongs === null) {
+                this.filteredSongs = await getFilteredSongList(guildPreference);
+            }
+        } catch (err) {
+            await sendErrorMessage(messageContext, { title: "Error selecting song", description: "Please try starting the round again. If the issue persists, report it in our official KMQ server." });
+            logger.error(`${getDebugLogHeader(messageContext)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
+            this.endSession();
+            return;
         }
+
+        const totalSongsCount = this.filteredSongs.songs.size;
 
         // manage unique songs
         if (guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
+            const filteredSongs = new Set([...this.filteredSongs.songs].map((x) => x.youtubeLink));
             if (setDifference<string>(filteredSongs, this.uniqueSongsPlayed).size === 0) {
-                logger.info(`${getDebugLogHeader(messageContext)} | Resetting uniqueSongsPlayed (all ${this.songCount} unique songs played)`);
+                logger.info(`${getDebugLogHeader(messageContext)} | Resetting uniqueSongsPlayed (all ${totalSongsCount} unique songs played)`);
                 // In updateSongCount, songs already played are added to songCount when options change. On unique reset, remove them
-                this.songCount = totalSongsCount;
-                await sendInfoMessage(messageContext, { title: "Resetting unique songs", description: `All songs have been played. ${this.songCount} songs will be reshuffled.`, thumbnailUrl: KmqImages.LISTENING });
+                await sendInfoMessage(messageContext, { title: "Resetting unique songs", description: `All songs have been played. ${totalSongsCount} songs will be reshuffled.`, thumbnailUrl: KmqImages.LISTENING });
                 this.resetUniqueSongs();
             }
         } else {
@@ -421,21 +431,14 @@ export default class GameSession {
 
         // query for random song
         let randomSong: QueriedSong;
-        try {
-            const ignoredSongs = new Set([...this.lastPlayedSongs, ...this.uniqueSongsPlayed]);
-            if (this.lastAlternatingGender) {
-                randomSong = await selectRandomSong(guildPreference, ignoredSongs, this.lastAlternatingGender);
-            } else {
-                randomSong = await selectRandomSong(guildPreference, ignoredSongs);
-            }
-            if (randomSong === null) {
-                sendErrorMessage(messageContext, { title: "Song Query Error", description: "Failed to find songs matching this criteria. Try to broaden your search." });
-                this.endSession();
-                return;
-            }
-        } catch (err) {
-            await sendErrorMessage(messageContext, { title: "Error selecting song", description: "Please try starting the round again. If the issue persists, report it in our official KMQ server." });
-            logger.error(`${getDebugLogHeader(messageContext)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
+        const ignoredSongs = new Set([...this.lastPlayedSongs, ...this.uniqueSongsPlayed]);
+        if (this.lastAlternatingGender) {
+            randomSong = await selectRandomSong(this.filteredSongs.songs, ignoredSongs, this.lastAlternatingGender);
+        } else {
+            randomSong = await selectRandomSong(this.filteredSongs.songs, ignoredSongs);
+        }
+        if (randomSong === null) {
+            sendErrorMessage(messageContext, { title: "Song Query Error", description: "Failed to find songs matching this criteria. Try to broaden your search." });
             this.endSession();
             return;
         }
@@ -505,6 +508,7 @@ export default class GameSession {
      */
     resetUniqueSongs() {
         this.uniqueSongsPlayed.clear();
+        this.unreachableSongCount = 0;
     }
 
     /**
@@ -525,11 +529,13 @@ export default class GameSession {
         return this.correctGuesses;
     }
 
-    async updateSongCount(guildPreference: GuildPreference) {
-        const totalSongs = await getFilteredSongList(guildPreference);
-        // Include songs already played in the count
-        this.songCount = Math.max(guildPreference.getLimitEnd() - guildPreference.getLimitStart(),
-            new Set([...this.uniqueSongsPlayed, ...totalSongs.songs.map((x) => x.youtubeLink)]).size);
+    async updateFilteredSongs(guildPreference: GuildPreference) {
+        this.filteredSongs = await getFilteredSongList(guildPreference);
+    }
+
+    async updateUnreachableSongCount() {
+        const filteredSongs = new Set([...this.filteredSongs.songs].map((x) => x.youtubeLink));
+        this.unreachableSongCount = setDifference<string>(this.uniqueSongsPlayed, filteredSongs).size;
     }
 
     /**

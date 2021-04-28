@@ -661,7 +661,8 @@ export default class GuildPreference {
             .update({ guild_preference: JSON.stringify(this) });
         const gameSession = state.gameSessions[this.guildID];
         if (gameSession && updateGameSession) {
-            await gameSession.updateSongCount(this);
+            await gameSession.updateFilteredSongs(this);
+            await gameSession.updateUnreachableSongCount();
         }
     }
 
