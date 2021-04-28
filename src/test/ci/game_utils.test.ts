@@ -411,7 +411,7 @@ describe("song query", () => {
                 it("should match the expected song count", async () => {
                     const femaleSongs = [];
                     const filteredSongs = (await getFilteredSongList(guildPreference)).songs;
-                    const femaleSongCount = [...filteredSongs].map((x) => x.members === Gender.FEMALE).length;
+                    const femaleSongCount = [...filteredSongs].filter((x) => x.members === Gender.FEMALE).length;
                     for (let i = 0; i < femaleSongCount; i++) {
                         femaleSongs.push(await selectRandomSong(filteredSongs, new Set(femaleSongs.map((x) => x.youtubeLink)), Gender.FEMALE));
                     }
@@ -424,7 +424,7 @@ describe("song query", () => {
                 it("should match the expected song count", async () => {
                     const maleSongs = [];
                     const filteredSongs = (await getFilteredSongList(guildPreference)).songs;
-                    const maleSongCount = [...filteredSongs].map((x) => x.members === Gender.MALE).length;
+                    const maleSongCount = [...filteredSongs].filter((x) => x.members === Gender.MALE).length;
                     for (let i = 0; i < maleSongCount; i++) {
                         maleSongs.push(await selectRandomSong(filteredSongs, new Set(maleSongs.map((x) => x.youtubeLink)), Gender.MALE));
                     }
@@ -441,7 +441,7 @@ describe("song query", () => {
                     const ignoredSongs = new Set(mockSongs.slice(0, numIgnored).map((song) => song.link));
                     const filteredSongs = (await getFilteredSongList(guildPreference)).songs;
                     const selectedSongs = [];
-                    for (let i = 0; i < filteredSongs.size; i++) {
+                    for (let i = 0; i < filteredSongs.size - numIgnored; i++) {
                         selectedSongs.push(await selectRandomSong(filteredSongs, new Set([...ignoredSongs, ...selectedSongs])));
                     }
                     assert.ok(selectedSongs.length === filteredSongs.size - numIgnored);
