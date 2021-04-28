@@ -411,7 +411,7 @@ describe("song query", () => {
                 it("should match the expected song count", async () => {
                     const femaleSongs = [];
                     const filteredSongs = (await getFilteredSongList(guildPreference)).songs;
-                    const femaleSongCount = [...filteredSongs].map((x) => x.members === Gender.MALE).length;
+                    const femaleSongCount = [...filteredSongs].map((x) => x.members === Gender.FEMALE).length;
                     for (let i = 0; i < femaleSongCount; i++) {
                         femaleSongs.push(await selectRandomSong(filteredSongs, new Set(femaleSongs.map((x) => x.youtubeLink)), Gender.FEMALE));
                     }
@@ -419,6 +419,7 @@ describe("song query", () => {
                     assert.strictEqual(femaleSongCount, femaleSongs.length);
                 });
             });
+
             describe("override to male", () => {
                 it("should match the expected song count", async () => {
                     const maleSongs = [];
@@ -443,7 +444,7 @@ describe("song query", () => {
                     for (let i = 0; i < filteredSongs.size; i++) {
                         selectedSongs.push(await selectRandomSong(filteredSongs, new Set([...ignoredSongs, ...selectedSongs])));
                     }
-                    assert.ok(selectedSongs.length === mockSongs.length - numIgnored);
+                    assert.ok(selectedSongs.length === filteredSongs.size - numIgnored);
                     assert.ok(selectedSongs.every((song) => !ignoredSongs.has(song.youtubeLink)));
                 });
             });
