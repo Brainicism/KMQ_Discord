@@ -376,15 +376,15 @@ export default class GameSession {
             return;
         }
 
-        try {
-            if (this.filteredSongs === null) {
+        if (this.filteredSongs === null) {
+            try {
                 this.filteredSongs = await getFilteredSongList(guildPreference);
+            } catch (err) {
+                await sendErrorMessage(messageContext, { title: "Error selecting song", description: "Please try starting the round again. If the issue persists, report it in our official KMQ server." });
+                logger.error(`${getDebugLogHeader(messageContext)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
+                this.endSession();
+                return;
             }
-        } catch (err) {
-            await sendErrorMessage(messageContext, { title: "Error selecting song", description: "Please try starting the round again. If the issue persists, report it in our official KMQ server." });
-            logger.error(`${getDebugLogHeader(messageContext)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
-            this.endSession();
-            return;
         }
 
         const totalSongsCount = this.filteredSongs.songs.size;
