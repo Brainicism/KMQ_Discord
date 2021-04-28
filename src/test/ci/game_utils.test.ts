@@ -6,7 +6,7 @@ import dbContext from "../../database_context";
 import { md5Hash } from "../../helpers/utils";
 import GuildPreference from "../../structures/guild_preference";
 import { Gender } from "../../commands/game_options/gender";
-import { cleanupInactiveGameSessions, getFilteredSongList, getMatchingGroupNames, getSongCount } from "../../helpers/game_utils";
+import { cleanupInactiveGameSessions, getFilteredSongList, selectRandomSong, getMatchingGroupNames, getSongCount } from "../../helpers/game_utils";
 import { EnvType } from "../../types";
 import _logger from "../../logger";
 import { ArtistType } from "../../commands/game_options/artisttype";
@@ -130,7 +130,7 @@ describe("song query", () => {
                     for (const gender of [Gender.MALE, Gender.FEMALE, Gender.COED]) {
                         await guildPreference.setGender([gender]);
                         const { songs } = await getFilteredSongList(guildPreference);
-                        assert.strictEqual(songs.length, expectedSongCounts[gender], `Gender query (${gender}) does not match with actual gender count`);
+                        assert.strictEqual(songs.size, expectedSongCounts[gender], `Gender query (${gender}) does not match with actual gender count`);
                     }
                 });
             });
@@ -139,38 +139,7 @@ describe("song query", () => {
                 it("should match the expected song count", async () => {
                     await guildPreference.setGender([Gender.MALE, Gender.FEMALE]);
                     const { songs } = await getFilteredSongList(guildPreference);
-                    assert.strictEqual(songs.length, expectedSongCounts[Gender.MALE] + expectedSongCounts[Gender.FEMALE]);
-                });
-            });
-        });
-
-        describe("gender override", () => {
-            beforeEach(async () => {
-                await guildPreference.setGender([Gender.ALTERNATING]);
-            });
-
-            describe("override to female", () => {
-                it("should match the expected song count", async () => {
-                    const { songs: femaleSongs } = await getFilteredSongList(guildPreference, null, Gender.FEMALE);
-                    assert.ok(femaleSongs.every((song) => song.members === Gender.FEMALE));
-                });
-            });
-            describe("override to male", () => {
-                it("should match the expected song count", async () => {
-                    const { songs: maleSongs } = await getFilteredSongList(guildPreference, null, Gender.MALE);
-                    assert.ok(maleSongs.every((song) => song.members === Gender.MALE));
-                });
-            });
-        });
-
-        describe("ignored songs", () => {
-            describe("ignoring first 10 songs", () => {
-                it("should match the expected song count", async () => {
-                    const numIgnored = 10;
-                    const ignoredSongs = new Set(mockSongs.slice(0, numIgnored).map((song) => song.link));
-                    const { songs } = await getFilteredSongList(guildPreference, ignoredSongs);
-                    assert.ok(songs.length === mockSongs.length - numIgnored);
-                    assert.ok(songs.filter((song) => ignoredSongs.has(song.youtubeLink)).length === 0);
+                    assert.strictEqual(songs.size, expectedSongCounts[Gender.MALE] + expectedSongCounts[Gender.FEMALE]);
                 });
             });
         });
@@ -190,7 +159,7 @@ describe("song query", () => {
                     for (const artist of mockArtists) {
                         await guildPreference.setGroups([{ id: artist.id, name: artist.name }]);
                         const { songs } = await getFilteredSongList(guildPreference);
-                        assert.strictEqual(songs.length, expectedSongCounts[artist.id]);
+                        assert.strictEqual(songs.size, expectedSongCounts[artist.id]);
                     }
                 });
             });
@@ -200,7 +169,7 @@ describe("song query", () => {
                     await guildPreference.setGroups(mockArtistSubset.map((artist) => ({ id: artist.id, name: artist.name })));
                     const { songs } = await getFilteredSongList(guildPreference);
                     const expectedMultiSongCount = mockArtistSubset.reduce((sum, artist) => sum + expectedSongCounts[artist.id], 0);
-                    assert.strictEqual(songs.length, expectedMultiSongCount);
+                    assert.strictEqual(songs.size, expectedMultiSongCount);
                 });
             });
         });
@@ -215,7 +184,7 @@ describe("song query", () => {
                     await guildPreference.setGender([Gender.FEMALE]);
                     await guildPreference.setIncludes(includedArtists.map((artist) => ({ id: artist.id, name: artist.name })));
                     const { songs } = await getFilteredSongList(guildPreference);
-                    assert.strictEqual(songs.length, expectedFemaleCount + expectedIncludeCount);
+                    assert.strictEqual(songs.size, expectedFemaleCount + expectedIncludeCount);
                 });
             });
         });
@@ -230,7 +199,7 @@ describe("song query", () => {
                     await guildPreference.setGender([Gender.FEMALE]);
                     await guildPreference.setExcludes(excludeArtists.map((artist) => ({ id: artist.id, name: artist.name })));
                     const { songs } = await getFilteredSongList(guildPreference);
-                    assert.strictEqual(songs.length, expectedFemaleCount - expectedExcludeCount);
+                    assert.strictEqual(songs.size, expectedFemaleCount - expectedExcludeCount);
                 });
             });
         });
@@ -243,7 +212,7 @@ describe("song query", () => {
                 it("should match the expected song count", async () => {
                     await guildPreference.setArtistType(ArtistType.SOLOIST);
                     const { songs } = await getFilteredSongList(guildPreference);
-                    assert.strictEqual(songs.length, expectedSoloistCount);
+                    assert.strictEqual(songs.size, expectedSoloistCount);
                 });
             });
 
@@ -251,7 +220,7 @@ describe("song query", () => {
                 it("should match the expected song count", async () => {
                     await guildPreference.setArtistType(ArtistType.GROUP);
                     const { songs } = await getFilteredSongList(guildPreference);
-                    assert.strictEqual(songs.length, expectedGroupsCount);
+                    assert.strictEqual(songs.size, expectedGroupsCount);
                 });
             });
         });
@@ -262,7 +231,7 @@ describe("song query", () => {
                     const expectedSongCount = mockSongs.filter((song) => song.publishedon >= new Date("2016-01-01")).length;
                     await guildPreference.setBeginningCutoffYear(2016);
                     const { songs } = await getFilteredSongList(guildPreference);
-                    assert.strictEqual(songs.length, expectedSongCount);
+                    assert.strictEqual(songs.size, expectedSongCount);
                 });
             });
 
@@ -271,7 +240,7 @@ describe("song query", () => {
                     const expectedSongCount = mockSongs.filter((song) => song.publishedon <= new Date("2015-12-31")).length;
                     await guildPreference.setEndCutoffYear(2015);
                     const { songs } = await getFilteredSongList(guildPreference);
-                    assert.strictEqual(songs.length, expectedSongCount);
+                    assert.strictEqual(songs.size, expectedSongCount);
                 });
             });
 
@@ -281,7 +250,7 @@ describe("song query", () => {
                     await guildPreference.setBeginningCutoffYear(2008);
                     await guildPreference.setEndCutoffYear(2018);
                     const { songs } = await getFilteredSongList(guildPreference);
-                    assert.strictEqual(songs.length, expectedSongCount);
+                    assert.strictEqual(songs.size, expectedSongCount);
                 });
             });
 
@@ -291,7 +260,7 @@ describe("song query", () => {
                     await guildPreference.setBeginningCutoffYear(2017);
                     await guildPreference.setEndCutoffYear(2017);
                     const { songs } = await getFilteredSongList(guildPreference);
-                    assert.strictEqual(songs.length, expectedSongCount);
+                    assert.strictEqual(songs.size, expectedSongCount);
                 });
             });
         });
@@ -306,7 +275,7 @@ describe("song query", () => {
                     const expectedSongCount = mockSongs.filter((song) => song.id_artist === artistWithSubunit.id).length;
                     await guildPreference.setSubunitPreference(SubunitsPreference.EXCLUDE);
                     const { songs } = await getFilteredSongList(guildPreference);
-                    assert.strictEqual(songs.length, expectedSongCount);
+                    assert.strictEqual(songs.size, expectedSongCount);
                 });
             });
 
@@ -316,7 +285,7 @@ describe("song query", () => {
                     const expectedSongCount = mockSongs.filter((song) => song.id_artist === artistWithSubunit.id || song.id_artist === subunitArtist.id).length;
                     await guildPreference.setSubunitPreference(SubunitsPreference.INCLUDE);
                     const { songs } = await getFilteredSongList(guildPreference);
-                    assert.strictEqual(songs.length, expectedSongCount);
+                    assert.strictEqual(songs.size, expectedSongCount);
                 });
             });
             describe("include subunits (and the subunit has a collab)", () => {
@@ -337,7 +306,7 @@ describe("song query", () => {
                     const expectedSongs = mockSongs.filter((song) => [artistWithCollabingSubunit.id, subunitWithCollab.id, subunitCollabArtist.id, parentCollabArtist.id].includes(song.id_artist));
                     const { songs } = await getFilteredSongList(guildPreference);
                     assert.strictEqual(unmatchedGroups.length, 0);
-                    assert.deepStrictEqual(songs.map((x) => x.youtubeLink).sort(), expectedSongs.map((x) => x.link).sort());
+                    assert.deepStrictEqual([...songs].map((x) => x.youtubeLink).sort(), expectedSongs.map((x) => x.link).sort());
                 });
             });
         });
@@ -348,7 +317,7 @@ describe("song query", () => {
                     const expectedSongCount = mockSongs.filter((song) => !song.tags.includes("o")).length;
                     await guildPreference.setOstPreference(OstPreference.EXCLUDE);
                     const { songs } = await getFilteredSongList(guildPreference);
-                    assert.strictEqual(songs.length, expectedSongCount);
+                    assert.strictEqual(songs.size, expectedSongCount);
                 });
             });
 
@@ -357,7 +326,7 @@ describe("song query", () => {
                     const expectedSongCount = mockSongs.length;
                     await guildPreference.setOstPreference(OstPreference.INCLUDE);
                     const { songs } = await getFilteredSongList(guildPreference);
-                    assert.strictEqual(songs.length, expectedSongCount);
+                    assert.strictEqual(songs.size, expectedSongCount);
                 });
             });
 
@@ -366,7 +335,7 @@ describe("song query", () => {
                     const expectedSongCount = mockSongs.filter((song) => song.tags.includes("o")).length;
                     await guildPreference.setOstPreference(OstPreference.EXCLUSIVE);
                     const { songs } = await getFilteredSongList(guildPreference);
-                    assert.strictEqual(songs.length, expectedSongCount);
+                    assert.strictEqual(songs.size, expectedSongCount);
                 });
             });
         });
@@ -382,7 +351,7 @@ describe("song query", () => {
                     const expectedSongCount = limit;
                     await guildPreference.setLimit(0, limit);
                     const { songs } = await getFilteredSongList(guildPreference);
-                    assert.strictEqual(songs.length, expectedSongCount);
+                    assert.strictEqual(songs.size, expectedSongCount);
                 });
             });
 
@@ -390,7 +359,7 @@ describe("song query", () => {
                 it("should match the expected song count", async () => {
                     const expectedSongCount = mockSongs.filter((song) => song.members === Gender.COED).length;
                     const { songs } = await getFilteredSongList(guildPreference);
-                    assert.strictEqual(songs.length, expectedSongCount);
+                    assert.strictEqual(songs.size, expectedSongCount);
                 });
             });
         });
@@ -401,14 +370,14 @@ describe("song query", () => {
                     const expectedSongCount = mockSongs.filter((song) => !FOREIGN_LANGUAGE_TAGS.some((tag) => song.tags.includes(tag))).length;
                     await guildPreference.setLanguageType(LanguageType.KOREAN);
                     const { songs } = await getFilteredSongList(guildPreference);
-                    assert.strictEqual(songs.length, expectedSongCount);
+                    assert.strictEqual(songs.size, expectedSongCount);
                 });
             });
             describe("language is set to all", () => {
                 it("should match the expected song count", async () => {
                     await guildPreference.setLanguageType(LanguageType.ALL);
                     const { songs } = await getFilteredSongList(guildPreference);
-                    assert.strictEqual(songs.length, mockSongs.length);
+                    assert.strictEqual(songs.size, mockSongs.length);
                 });
             });
         });
@@ -419,14 +388,64 @@ describe("song query", () => {
                     const expectedSongCount = mockSongs.filter((song) => !NON_OFFICIAL_VIDEO_TAGS.some((tag) => song.tags.includes(tag))).length;
                     await guildPreference.setReleaseType(ReleaseType.OFFICIAL);
                     const { songs } = await getFilteredSongList(guildPreference);
-                    assert.strictEqual(songs.length, expectedSongCount);
+                    assert.strictEqual(songs.size, expectedSongCount);
                 });
             });
             describe("release type is set to all", () => {
                 it("should match the expected song count", async () => {
                     await guildPreference.setReleaseType(ReleaseType.ALL);
                     const { songs } = await getFilteredSongList(guildPreference);
-                    assert.strictEqual(songs.length, mockSongs.length);
+                    assert.strictEqual(songs.size, mockSongs.length);
+                });
+            });
+        });
+    });
+
+    describe("selectRandomSong", () => {
+        describe("gender override", () => {
+            beforeEach(async () => {
+                await guildPreference.setGender([Gender.ALTERNATING]);
+            });
+
+            describe("override to female", () => {
+                it("should match the expected song count", async () => {
+                    const femaleSongs = [];
+                    const filteredSongs = (await getFilteredSongList(guildPreference)).songs;
+                    const femaleSongCount = [...filteredSongs].filter((x) => x.members === Gender.FEMALE).length;
+                    for (let i = 0; i < femaleSongCount; i++) {
+                        femaleSongs.push(await selectRandomSong(filteredSongs, new Set(femaleSongs.map((x) => x.youtubeLink)), Gender.FEMALE));
+                    }
+                    assert.ok(femaleSongs.every((song) => song.members === Gender.FEMALE));
+                    assert.strictEqual(femaleSongCount, femaleSongs.length);
+                });
+            });
+
+            describe("override to male", () => {
+                it("should match the expected song count", async () => {
+                    const maleSongs = [];
+                    const filteredSongs = (await getFilteredSongList(guildPreference)).songs;
+                    const maleSongCount = [...filteredSongs].filter((x) => x.members === Gender.MALE).length;
+                    for (let i = 0; i < maleSongCount; i++) {
+                        maleSongs.push(await selectRandomSong(filteredSongs, new Set(maleSongs.map((x) => x.youtubeLink)), Gender.MALE));
+                    }
+                    assert.ok(maleSongs.every((song) => song.members === Gender.MALE));
+                    assert.strictEqual(maleSongCount, maleSongs.length);
+                });
+            });
+        });
+
+        describe("ignored songs", () => {
+            describe("ignoring first 10 songs", () => {
+                it("should match the expected song count", async () => {
+                    const numIgnored = 10;
+                    const ignoredSongs = new Set(mockSongs.slice(0, numIgnored).map((song) => song.link));
+                    const filteredSongs = (await getFilteredSongList(guildPreference)).songs;
+                    const selectedSongs = [];
+                    for (let i = 0; i < filteredSongs.size - numIgnored; i++) {
+                        selectedSongs.push(await selectRandomSong(filteredSongs, new Set([...ignoredSongs, ...selectedSongs])));
+                    }
+                    assert.ok(selectedSongs.length === filteredSongs.size - numIgnored);
+                    assert.ok(selectedSongs.every((song) => !ignoredSongs.has(song.youtubeLink)));
                 });
             });
         });
