@@ -39,7 +39,7 @@ export default class BeginCommand implements BaseCommand {
         if (!gameSession.sessionInitialized) {
             let participants: Array<{ id: string, username: string, discriminator: string }>;
             if (gameSession.gameType === GameType.ELIMINATION) {
-                participants = [...gameSession.participants].map((x) => state.client.users[x]);
+                participants = [...gameSession.participants].map((x) => state.client.users.get(x));
             } else if (gameSession.gameType === GameType.TEAMS) {
                 const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
                 participants = teamScoreboard.getPlayers().map((player) => ({ id: player.id, username: player.name.split("#")[0], discriminator: player.name.split("#")[1] }));
