@@ -851,9 +851,7 @@ export default class GameSession {
     }
 
     private multiguessDelayIsActive(guildPreference: GuildPreference) {
-        const voiceChannel = state.client.getChannel(this.voiceChannelID) as Eris.VoiceChannel;
-        // 1 player + KMQ
-        const playerIsAlone = voiceChannel.voiceMembers.size === 2;
+        const playerIsAlone = getNumParticipants(this.voiceChannelID) === 1;
         return (guildPreference.getMultiGuessType() === MultiGuessType.ON) && !playerIsAlone;
     }
 
