@@ -34,10 +34,10 @@ const REQUIRED_TEXT_PERMISSIONS = ["addReactions" as const, "embedLinks" as cons
 const REQUIRED_VOICE_PERMISSIONS = ["viewChannel" as const, "voiceConnect" as const, "voiceSpeak" as const];
 
 /**
- * @param user - The User object
+ * @param user - The user (must be some object with username and discriminator fields)
  * @returns the user's Discord tag
  */
-export function getUserTag(user: Eris.User): string {
+export function getUserTag(user: { username: string, discriminator: string }): string {
     return `${user.username}#${user.discriminator}`;
 }
 
@@ -421,11 +421,19 @@ export function getVoiceChannel(voiceChannelID: string): Eris.VoiceChannel {
 }
 
 /**
- * @param message - The Message object
- * @returns the number of persons in the voice channel excluding bots
+ * @param voiceChannelID - The voice channel to check
+ * @returns the users in the voice channel, excluding bots
+ */
+export function getCurrentVoiceMembers(voiceChannelID: string): Array<Eris.Member> {
+    return getVoiceChannel(voiceChannelID).voiceMembers.filter((x) => !x.bot);
+}
+
+/**
+ * @param voiceChannelID - The voice channel to check
+ * @returns the number of persons in the voice channel, excluding bots
  */
 export function getNumParticipants(voiceChannelID: string): number {
-    return (getVoiceChannel(voiceChannelID).voiceMembers.filter((x) => !x.bot)).length;
+    return getCurrentVoiceMembers(voiceChannelID).length;
 }
 
 /**

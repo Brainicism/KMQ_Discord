@@ -23,7 +23,7 @@ const state: State = {
         song: {},
     },
     processStartTime: Date.now(),
-    bonusUsers: {},
+    bonusUsers: new Set(),
 };
 
 export default state;

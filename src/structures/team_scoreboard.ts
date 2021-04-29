@@ -172,4 +172,11 @@ export default class TeamScoreboard extends Scoreboard {
     getPlayerName(userID: string): string {
         return this.getPlayer(userID).getName();
     }
+
+    /**
+     * @returns all players in every team
+     */
+    getPlayers(): Array<Player> {
+        return Object.values(this.players).flatMap((team) => team.getPlayers());
+    }
 }

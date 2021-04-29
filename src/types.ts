@@ -52,7 +52,7 @@ export interface State {
         song: { [songName: string]: Array<string> }
     };
     processStartTime: number;
-    bonusUsers: { [userID: string]: Date };
+    bonusUsers: Set<string>;
 }
 
 export enum GameOption {

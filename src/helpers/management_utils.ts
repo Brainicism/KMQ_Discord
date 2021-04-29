@@ -32,7 +32,7 @@ import guildCreateHandler from "../events/client/guildCreate";
 import guildDeleteHandler from "../events/client/guildDelete";
 import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
 import guildAvailableHandler from "../events/client/guildAvailable";
-import BotListingManager from "./bot_listing_manager";
+import BotListingManager, { usersQualifiedForVoteBonus } from "./bot_listing_manager";
 import { EnvType } from "../types";
 import storeDailyStats from "../scripts/store-daily-stats";
 import { seedAndDownloadNewSongs } from "../seed/seed_db";
@@ -40,7 +40,6 @@ import backupKmqDatabase from "../scripts/backup-kmq-database";
 import { chooseRandom, parseJsonFile } from "./utils";
 import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
-import { clearExpiredBonusExpPlayers } from "../commands/game_commands/vote";
 
 const glob = promisify(_glob);
 
@@ -219,8 +218,8 @@ export function registerIntervals() {
         clearInactiveVoiceConnections();
     });
 
-    schedule.scheduleJob("*/5 * * * *", async () => {
-        clearExpiredBonusExpPlayers();
+    schedule.scheduleJob("*/1 * * * *", async () => {
+        state.bonusUsers = await usersQualifiedForVoteBonus();
     });
 }
 

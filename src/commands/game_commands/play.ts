@@ -1,6 +1,6 @@
 import GameSession from "../../structures/game_session";
 import {
-    sendErrorMessage, getDebugLogHeader, sendInfoMessage, voicePermissionsCheck, getVoiceChannelFromMessage,
+    sendErrorMessage, getDebugLogHeader, sendInfoMessage, voicePermissionsCheck, getVoiceChannelFromMessage, getUserTag, getCurrentVoiceMembers,
 } from "../../helpers/discord_utils";
 import { deleteGameSession } from "../../helpers/management_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
@@ -11,6 +11,7 @@ import { GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
+import state from "../../kmq";
 
 const logger = _logger("play");
 const DEFAULT_LIVES = 10;
@@ -21,8 +22,16 @@ export enum GameType {
     TEAMS = "teams",
 }
 
-export async function sendBeginGameMessage(textChannelName: string, voiceChannelName: string, message: GuildTextableMessage) {
+export async function sendBeginGameMessage(textChannelName: string,
+    voiceChannelName: string,
+    message: GuildTextableMessage,
+    participants: Array<{ id: string, username: string, discriminator: string }>) {
     let gameInstructions = "Listen to the song and type your guess!";
+    const bonusUsers = participants.filter((x) => state.bonusUsers.has(x.id));
+    if (bonusUsers.length > 0) {
+        const bonusUserTags = bonusUsers.map((x) => `\`${getUserTag(x)}\``);
+        gameInstructions += `\n\n${bonusUserTags.join(", ")} will receive double EXP for [voting](https://top.gg/bot/508759831755096074/vote)! See \`,vote\` for info on how to vote. Thanks for supporting KMQ!`;
+    }
     if (isWeekend()) {
         gameInstructions += "\n\n**⬆️ DOUBLE EXP WEEKEND ACTIVE ⬆️**";
     } else if (isPowerHour()) {
@@ -98,6 +107,7 @@ export default class PlayCommand implements BaseCommand {
                 // User sent ,play elimination or ,play teams twice, reset the GameSession
                 deleteGameSession(message.guildID);
             }
+            const messageContext = MessageContext.fromMessage(message);
             if (!gameSessions[message.guildID] || (!isEliminationMode && !gameSessions[message.guildID].sessionInitialized)) {
                 // (1) No game session exists yet (create CLASSIC, ELIMINATION, or TEAMS game), or
                 // (2) User attempting to ,play after a ,play elimination/teams that didn't start, start CLASSIC game
@@ -114,23 +124,32 @@ export default class PlayCommand implements BaseCommand {
                     gameInstructions = `Type \`${process.env.BOT_PREFIX}join\` to play in the upcoming elimination game. Once all have joined, ${bold(gameOwner.tag)} must send \`${process.env.BOT_PREFIX}begin\` to start the game. Everyone begins with \`${lives}\` lives.`;
                     gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, GameType.ELIMINATION, lives);
                     gameSession.addEliminationParticipant(gameOwner);
-                    await sendInfoMessage(MessageContext.fromMessage(message), { title: startTitle, description: gameInstructions, thumbnailUrl: KmqImages.HAPPY });
+                    await sendInfoMessage(messageContext, { title: startTitle, description: gameInstructions, thumbnailUrl: KmqImages.HAPPY });
                 } else if (isTeamsMode) {
                     // (1) TEAMS game creation
                     startTitle = `\`${process.env.BOT_PREFIX}join\` a team!`;
                     gameInstructions = `Type \`${process.env.BOT_PREFIX}join [team name]\` to form a new team. Remember, switching teams mid-game will forfeit all your current score and EXP.`;
-                    await sendInfoMessage(MessageContext.fromMessage(message), { title: startTitle, description: gameInstructions, thumbnailUrl: KmqImages.HAPPY });
+                    await sendInfoMessage(messageContext, { title: startTitle, description: gameInstructions, thumbnailUrl: KmqImages.HAPPY });
                     gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, GameType.TEAMS);
                 } else {
                     // (1 and 2) CLASSIC game creation
+                    if (gameSessions[message.guildID]) {
+                        // (2) Let the user know they're starting a non-elimination/teams game
+                        const oldGameType = gameSessions[message.guildID].gameType;
+                        const prefix = process.env.BOT_PREFIX;
+                        const ignoringOldGameTypeTitle = `Ignoring \`${prefix}play ${oldGameType}\``;
+                        const gameSpecificInstructions = oldGameType === GameType.ELIMINATION ? `\`${prefix}join\` the game` : `\`${prefix}join [team name]\` a team`;
+                        const oldGameTypeInstructions = `If you meant to start a \`${oldGameType}\` game, \`${prefix}end\` this game, call \`${prefix}play ${oldGameType}\`, ${gameSpecificInstructions}, and then call \`${prefix}begin\`.`;
+                        sendErrorMessage(messageContext, { title: ignoringOldGameTypeTitle, description: oldGameTypeInstructions, thumbnailUrl: KmqImages.DEAD });
+                    }
                     gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, GameType.CLASSIC);
-                    await sendBeginGameMessage(textChannel.name, voiceChannel.name, message);
-                    gameSession.startRound(guildPreference, MessageContext.fromMessage(message));
+                    await sendBeginGameMessage(textChannel.name, voiceChannel.name, message, getCurrentVoiceMembers(voiceChannel.id));
+                    gameSession.startRound(guildPreference, messageContext);
                     logger.info(`${getDebugLogHeader(message)} | Game session starting`);
                 }
                 gameSessions[message.guildID] = gameSession;
             } else {
-                await sendErrorMessage(MessageContext.fromMessage(message), { title: "Game already in session" });
+                await sendErrorMessage(messageContext, { title: "Game already in session" });
             }
         }
     }

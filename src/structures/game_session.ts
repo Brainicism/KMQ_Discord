@@ -27,7 +27,6 @@ import { KmqImages } from "../constants";
 import MessageContext from "./message_context";
 import KmqMember from "./kmq_member";
 import { MultiGuessType } from "../commands/game_options/multiguess";
-import { usersQualifyForVoteBonus } from "../helpers/bot_stats_poster";
 
 const MULTIGUESS_DELAY = 1500;
 const logger = _logger("game_session");
@@ -345,14 +344,8 @@ export default class GameSession {
 
             await delay(this.multiguessDelayIsActive(guildPreference) ? MULTIGUESS_DELAY : 0);
 
-            const bonusExpPlayers = await usersQualifyForVoteBonus(this.gameRound.correctGuessers.map((x) => x.id));
-
             for (const player of this.gameRound.correctGuessers) {
-                if (bonusExpPlayers.includes(player.id)) {
-                    player.voteBonusExp = true;
-                    continue;
-                }
-                player.voteBonusExp = false;
+                player.voteBonusExp = state.bonusUsers.has(player.id);
             }
 
             if (!this.gameRound) return;
