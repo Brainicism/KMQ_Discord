@@ -38,7 +38,12 @@ export async function sendBeginGameMessage(textChannelName: string,
         gameInstructions += "\n\n**⬆️ KMQ POWER HOUR ACTIVE ⬆️**";
     }
     const startTitle = `Game starting in #${textChannelName} in 🔊 ${voiceChannelName}`;
-    await sendInfoMessage(MessageContext.fromMessage(message), { title: startTitle, description: gameInstructions, thumbnailUrl: KmqImages.HAPPY });
+    await sendInfoMessage(MessageContext.fromMessage(message), {
+        title: startTitle,
+        description: gameInstructions,
+        footerText: bonusUsers.length === 0 && Math.random() < 0.2 ? "Psst. Earn more EXP by voting (see ,vote)" : null,
+        thumbnailUrl: KmqImages.HAPPY,
+    });
 }
 
 export default class PlayCommand implements BaseCommand {

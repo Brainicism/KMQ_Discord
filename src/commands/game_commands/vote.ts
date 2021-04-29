@@ -14,7 +14,7 @@ export default class VoteCommand implements BaseCommand {
         description: "Shows instructions on how to vote to receive 2x EXP for an hour.",
         usage: "!vote",
         examples: [],
-        priority: 210,
+        priority: 60,
     };
 
     async call({ message }: CommandArgs) {
