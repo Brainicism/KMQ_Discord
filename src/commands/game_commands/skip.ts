@@ -67,7 +67,7 @@ export default class SkipCommand implements BaseCommand {
     async call({ gameSessions, message }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
         const gameSession = gameSessions[message.guildID];
-        if (!gameSession || !gameSession.gameRound || !areUserAndBotInSameVoiceChannel(message)) {
+        if (!gameSession || !gameSession.gameRound || gameSession.gameRound.finished || !areUserAndBotInSameVoiceChannel(message)) {
             logger.warn(`${getDebugLogHeader(message)} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.gameRound: ${gameSession && !gameSession.gameRound}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
             return;
         }
