@@ -32,7 +32,7 @@ import guildCreateHandler from "../events/client/guildCreate";
 import guildDeleteHandler from "../events/client/guildDelete";
 import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
 import guildAvailableHandler from "../events/client/guildAvailable";
-import BotListingManager from "./bot_listing_manager";
+import BotListingManager, { usersQualifiedForVoteBonus } from "./bot_listing_manager";
 import { EnvType } from "../types";
 import storeDailyStats from "../scripts/store-daily-stats";
 import { seedAndDownloadNewSongs } from "../seed/seed_db";
@@ -216,6 +216,10 @@ export function registerIntervals() {
         reloadAliases();
         updatePublishDateOverrides();
         clearInactiveVoiceConnections();
+    });
+
+    schedule.scheduleJob("*/1 * * * *", async () => {
+        state.bonusUsers = await usersQualifiedForVoteBonus();
     });
 }
 

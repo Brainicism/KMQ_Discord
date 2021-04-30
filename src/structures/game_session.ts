@@ -5,7 +5,7 @@ import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
-    getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndOfRoundMessage, sendInfoMessage, getNumParticipants, checkBotIsAlone, getVoiceChannelFromMessage,
+    getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, checkBotIsAlone, getVoiceChannelFromMessage,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, endSession } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds, getOrdinalNum, isPowerHour, isWeekend, setDifference } from "../helpers/utils";
@@ -190,7 +190,12 @@ export default class GameSession {
             // update scoreboard
             const scoreboardUpdatePayload = guessResult.correctGuessers.map((correctGuesser, idx) => {
                 const guessPosition = idx + 1;
-                const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(this.voiceChannelID), guessSpeed, guessPosition);
+                const expGain = this.calculateExpGain(guildPreference,
+                    this.gameRound.baseExp,
+                    getNumParticipants(this.voiceChannelID),
+                    guessSpeed,
+                    guessPosition,
+                    state.bonusUsers.has(correctGuesser.id));
                 if (idx === 0) {
                     playerRoundResults.push({ player: correctGuesser, streak: this.lastGuesser.streak, expGain });
                     logger.info(`${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
@@ -221,7 +226,7 @@ export default class GameSession {
                 };
             }
 
-            sendEndOfRoundMessage(messageContext, this.scoreboard, this.gameRound, playerRoundResults, remainingDuration, uniqueSongCounter);
+            sendEndRoundMessage(messageContext, this.scoreboard, this.gameRound, playerRoundResults, remainingDuration, uniqueSongCounter);
         }
 
         this.incrementSongCount(this.gameRound.videoID, guessResult.correct);
@@ -808,7 +813,7 @@ export default class GameSession {
      * @param guessSpeed - The time taken to guess correctly
      * @returns The amount of EXP gained based on the current game options
      */
-    private calculateExpGain(guildPreference: GuildPreference, baseExp: number, numParticipants: number, guessSpeed: number, place: number): number {
+    private calculateExpGain(guildPreference: GuildPreference, baseExp: number, numParticipants: number, guessSpeed: number, place: number, voteBonusExp: boolean): number {
         let expModifier = 1;
         // penalize/incentivize for number of participants from 0.75x to 1.25x
         expModifier *= numParticipants === 1 ? 0.75 : (0.0625 * (Math.min(numParticipants, 6)) + 0.875);
@@ -827,6 +832,11 @@ export default class GameSession {
         // bonus for guess streaks
         if (this.lastGuesser.streak >= 5) {
             expModifier *= 1.2;
+        }
+
+        // bonus for voting
+        if (voteBonusExp) {
+            expModifier *= 2;
         }
 
         return Math.floor((expModifier * baseExp) / place);

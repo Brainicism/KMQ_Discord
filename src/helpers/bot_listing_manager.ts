@@ -32,19 +32,17 @@ const BOT_LISTING_SITES: { [siteName: string]: BotListing } = {
 };
 
 /**
- * @param userIDs - List of user IDs to check if vote bonus is active
  * @returns - list of user IDs with vote bonus active
  */
-export async function usersQualifiedForVoteBonus(): Promise<Array<string>> {
+export async function usersQualifiedForVoteBonus(): Promise<Set<string>> {
     const qualifiedIDs = (await dbContext.kmq("top_gg_user_votes")
         .where("buff_expiry_date", ">", new Date()))
         .map((x) => x["user_id"]);
-    return qualifiedIDs;
+    return new Set(qualifiedIDs);
 }
 
 /**
  * @param userID - The user's Discord ID
- * @returns the hours remaining until the user is eligible to vote again
  */
 export async function userVoted(userID: string) {
     const userVoterStatus = await dbContext.kmq("top_gg_user_votes")
@@ -86,6 +84,8 @@ export default class BotListingManager {
         } catch (err) {
             logger.error(`Erroring starting HTTP server: ${err}`);
         }
+
+        state.bonusUsers = await usersQualifiedForVoteBonus();
     }
 
     private async postStats() {

@@ -7,6 +7,7 @@ import { bold } from "../../helpers/utils";
 import _logger from "../../logger";
 import MessageContext from "../../structures/message_context";
 import GameSession from "../../structures/game_session";
+import state from "../../kmq";
 
 const logger = _logger("begin");
 
@@ -36,7 +37,14 @@ export default class BeginCommand implements BaseCommand {
         if (!this.canStart(gameSession, author.id, MessageContext.fromMessage(message))) return;
         const guildPreference = await getGuildPreference(guildID);
         if (!gameSession.sessionInitialized) {
-            sendBeginGameMessage(channel.name, getVoiceChannelFromMessage(message).name, message);
+            let participants: Array<{ id: string, username: string, discriminator: string }>;
+            if (gameSession.gameType === GameType.ELIMINATION) {
+                participants = [...gameSession.participants].map((x) => state.client.users.get(x));
+            } else if (gameSession.gameType === GameType.TEAMS) {
+                const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
+                participants = teamScoreboard.getPlayers().map((player) => ({ id: player.id, username: player.name.split("#")[0], discriminator: player.name.split("#")[1] }));
+            }
+            sendBeginGameMessage(channel.name, getVoiceChannelFromMessage(message).name, message, participants);
             gameSession.startRound(guildPreference, MessageContext.fromMessage(message));
             logger.info(`${getDebugLogHeader(message)} | Game session starting (${gameSession.gameType} gameType)`);
         }

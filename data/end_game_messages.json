@@ -25,7 +25,7 @@
     "game": [
         {
             "title": "Did you know?",
-            "message": "Raise the stakes and try `elimination` mode where you lose a life for not guessing correctly ☠. See `,help play` for more details.",
+            "message": "Raise the stakes and try `elimination` mode, where you lose a life for not guessing correctly ☠. See `,help play` for more details.",
             "weight": 5
         },
         {
