@@ -5,10 +5,10 @@ import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
-    getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndOfRoundMessage, sendInfoMessage, getNumParticipants, checkBotIsAlone, getVoiceChannelFromMessage,
+    getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, checkBotIsAlone, getVoiceChannelFromMessage,
 } from "../helpers/discord_utils";
-import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, getSongCount, endSession } from "../helpers/game_utils";
-import { delay, getAudioDurationInSeconds, getOrdinalNum, isPowerHour, isWeekend } from "../helpers/utils";
+import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, endSession } from "../helpers/game_utils";
+import { delay, getAudioDurationInSeconds, getOrdinalNum, isPowerHour, isWeekend, setDifference } from "../helpers/utils";
 import state from "../kmq";
 import _logger from "../logger";
 import { QueriedSong, GuildTextableMessage, PlayerRoundResult } from "../types";
@@ -54,6 +54,11 @@ interface LastGuesser {
 export interface GuessResult {
     correct: boolean;
     correctGuessers?: Array<KmqMember>;
+}
+
+export interface UniqueSongCounter {
+    uniqueSongsPlayed: number;
+    totalSongs: number;
 }
 
 export default class GameSession {
@@ -108,11 +113,14 @@ export default class GameSession {
     /** Timer function used to for ,timer command */
     private guessTimeoutFunc: NodeJS.Timer;
 
+    /** List of songs matching the user's game options */
+    private filteredSongs: { songs: Set<QueriedSong>, countBeforeLimit: number };
+
     /** List of recently played songs used to prevent frequent repeats */
     private lastPlayedSongs: Array<string>;
 
     /** List of songs played with ,shuffle unique enabled */
-    private uniqueSongs: Set<string>;
+    private uniqueSongsPlayed: Set<string>;
 
     /** Map of song's YouTube ID to correctGuesses and roundsPlayed */
     private playCount: { [vlink: string]: { correctGuesses: number, roundsPlayed: number } };
@@ -146,8 +154,9 @@ export default class GameSession {
         this.textChannelID = textChannelID;
         this.gameRound = null;
         this.owner = gameSessionCreator;
+        this.filteredSongs = null;
         this.lastPlayedSongs = [];
-        this.uniqueSongs = new Set();
+        this.uniqueSongsPlayed = new Set();
         this.playCount = {};
         this.lastAlternatingGender = null;
         this.lastGuesser = null;
@@ -181,7 +190,12 @@ export default class GameSession {
             // update scoreboard
             const scoreboardUpdatePayload = guessResult.correctGuessers.map((correctGuesser, idx) => {
                 const guessPosition = idx + 1;
-                const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(this.voiceChannelID), guessSpeed, guessPosition);
+                const expGain = this.calculateExpGain(guildPreference,
+                    this.gameRound.baseExp,
+                    getNumParticipants(this.voiceChannelID),
+                    guessSpeed,
+                    guessPosition,
+                    state.bonusUsers.has(correctGuesser.id));
                 if (idx === 0) {
                     playerRoundResults.push({ player: correctGuesser, streak: this.lastGuesser.streak, expGain });
                     logger.info(`${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
@@ -203,7 +217,16 @@ export default class GameSession {
         const remainingDuration = guildPreference.isDurationSet() ? (guildPreference.getDuration() - currGameLength) : null;
 
         if (messageContext) {
-            sendEndOfRoundMessage(messageContext, this.scoreboard, this.gameRound, playerRoundResults, remainingDuration);
+            let uniqueSongCounter: UniqueSongCounter;
+            if (guildPreference.isShuffleUnique()) {
+                const filteredSongs = new Set([...this.filteredSongs.songs].map((x) => x.youtubeLink));
+                uniqueSongCounter = {
+                    uniqueSongsPlayed: this.uniqueSongsPlayed.size - setDifference<string>(this.uniqueSongsPlayed, filteredSongs).size,
+                    totalSongs: Math.min(this.filteredSongs.countBeforeLimit, guildPreference.getLimitEnd() - guildPreference.getLimitStart()),
+                };
+            }
+
+            sendEndRoundMessage(messageContext, this.scoreboard, this.gameRound, playerRoundResults, remainingDuration, uniqueSongCounter);
         }
 
         this.incrementSongCount(this.gameRound.videoID, guessResult.correct);
@@ -358,14 +381,26 @@ export default class GameSession {
             return;
         }
 
-        const totalSongs = await getFilteredSongList(guildPreference);
-        const totalSongsCount = totalSongs.songs.length;
+        if (this.filteredSongs === null) {
+            try {
+                this.filteredSongs = await getFilteredSongList(guildPreference);
+            } catch (err) {
+                await sendErrorMessage(messageContext, { title: "Error selecting song", description: "Please try starting the round again. If the issue persists, report it in our official KMQ server." });
+                logger.error(`${getDebugLogHeader(messageContext)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
+                this.endSession();
+                return;
+            }
+        }
+
+        const totalSongsCount = this.filteredSongs.songs.size;
 
         // manage unique songs
         if (guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
-            const songsNotPlayed = totalSongs.songs.filter((song) => !this.uniqueSongs.has(song.youtubeLink));
-            if (songsNotPlayed.length === 0) {
-                logger.info(`${getDebugLogHeader(messageContext)} | Resetting uniqueSongs (all ${totalSongsCount} unique songs played)`);
+            const filteredSongs = new Set([...this.filteredSongs.songs].map((x) => x.youtubeLink));
+            if (setDifference<string>(filteredSongs, this.uniqueSongsPlayed).size === 0) {
+                logger.info(`${getDebugLogHeader(messageContext)} | Resetting uniqueSongsPlayed (all ${totalSongsCount} unique songs played)`);
+                // In updateSongCount, songs already played are added to songCount when options change. On unique reset, remove them
+                await sendInfoMessage(messageContext, { title: "Resetting unique songs", description: `All songs have been played. ${totalSongsCount} songs will be reshuffled.`, thumbnailUrl: KmqImages.LISTENING });
                 this.resetUniqueSongs();
             }
         } else {
@@ -379,7 +414,7 @@ export default class GameSession {
             this.lastPlayedSongs.shift();
 
             // Randomize songs from oldest LAST_PLAYED_SONG_QUEUE_SIZE / 2 songs
-            // when lastPlayedSongsQueue is in use but totalSongsCount small
+            // when lastPlayedSongs is in use but totalSongsCount small
             if (totalSongsCount <= LAST_PLAYED_SONG_QUEUE_SIZE * 2) {
                 this.lastPlayedSongs.splice(0, LAST_PLAYED_SONG_QUEUE_SIZE / 2);
             }
@@ -398,21 +433,14 @@ export default class GameSession {
 
         // query for random song
         let randomSong: QueriedSong;
-        try {
-            const ignoredSongs = new Set([...this.lastPlayedSongs, ...this.uniqueSongs]);
-            if (this.lastAlternatingGender) {
-                randomSong = await selectRandomSong(guildPreference, ignoredSongs, this.lastAlternatingGender);
-            } else {
-                randomSong = await selectRandomSong(guildPreference, ignoredSongs);
-            }
-            if (randomSong === null) {
-                sendErrorMessage(messageContext, { title: "Song Query Error", description: "Failed to find songs matching this criteria. Try to broaden your search." });
-                this.endSession();
-                return;
-            }
-        } catch (err) {
-            await sendErrorMessage(messageContext, { title: "Error selecting song", description: "Please try starting the round again. If the issue persists, report it in our official KMQ server." });
-            logger.error(`${getDebugLogHeader(messageContext)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
+        const ignoredSongs = new Set([...this.lastPlayedSongs, ...this.uniqueSongsPlayed]);
+        if (this.lastAlternatingGender) {
+            randomSong = await selectRandomSong(this.filteredSongs.songs, ignoredSongs, this.lastAlternatingGender);
+        } else {
+            randomSong = await selectRandomSong(this.filteredSongs.songs, ignoredSongs);
+        }
+        if (randomSong === null) {
+            sendErrorMessage(messageContext, { title: "Song Query Error", description: "Failed to find songs matching this criteria. Try to broaden your search." });
             this.endSession();
             return;
         }
@@ -421,12 +449,12 @@ export default class GameSession {
             this.lastPlayedSongs.push(randomSong.youtubeLink);
         }
         if (guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
-            this.uniqueSongs.add(randomSong.youtubeLink);
+            this.uniqueSongsPlayed.add(randomSong.youtubeLink);
         }
 
         // create a new round with randomly chosen song
         this.prepareRound(randomSong.name, randomSong.artist, randomSong.youtubeLink, randomSong.publishDate.getFullYear());
-        this.gameRound.setBaseExpReward(await this.calculateBaseExp(guildPreference));
+        this.gameRound.setBaseExpReward(await this.calculateBaseExp());
 
         const voiceChannel = state.client.getChannel(this.voiceChannelID) as Eris.VoiceChannel;
         if (checkBotIsAlone(this, voiceChannel)) {
@@ -481,7 +509,7 @@ export default class GameSession {
      * Resets the unique songs set
      */
     resetUniqueSongs() {
-        this.uniqueSongs.clear();
+        this.uniqueSongsPlayed.clear();
     }
 
     /**
@@ -500,6 +528,10 @@ export default class GameSession {
 
     getCorrectGuesses() {
         return this.correctGuesses;
+    }
+
+    async updateFilteredSongs(guildPreference: GuildPreference) {
+        this.filteredSongs = await getFilteredSongList(guildPreference);
     }
 
     /**
@@ -781,7 +813,7 @@ export default class GameSession {
      * @param guessSpeed - The time taken to guess correctly
      * @returns The amount of EXP gained based on the current game options
      */
-    private calculateExpGain(guildPreference: GuildPreference, baseExp: number, numParticipants: number, guessSpeed: number, place: number): number {
+    private calculateExpGain(guildPreference: GuildPreference, baseExp: number, numParticipants: number, guessSpeed: number, place: number, voteBonusExp: boolean): number {
         let expModifier = 1;
         // penalize/incentivize for number of participants from 0.75x to 1.25x
         expModifier *= numParticipants === 1 ? 0.75 : (0.0625 * (Math.min(numParticipants, 6)) + 0.875);
@@ -802,6 +834,11 @@ export default class GameSession {
             expModifier *= 1.2;
         }
 
+        // bonus for voting
+        if (voteBonusExp) {
+            expModifier *= 2;
+        }
+
         return Math.floor((expModifier * baseExp) / place);
     }
 
@@ -810,8 +847,8 @@ export default class GameSession {
      * @param guildPreference - The GuildPreference
      * @returns the base EXP reward for the gameround
      */
-    private async calculateBaseExp(guildPreference: GuildPreference): Promise<number> {
-        const songCount = await getSongCount(guildPreference);
+    private async calculateBaseExp(): Promise<number> {
+        const songCount = this.getSongCount();
         // minimum amount of songs for exp gain
         if (songCount.count < 10) return 0;
         const expBase = 1000 / (1 + (Math.exp(1 - (0.00125 * songCount.count))));
@@ -824,9 +861,14 @@ export default class GameSession {
     }
 
     private multiguessDelayIsActive(guildPreference: GuildPreference) {
-        const voiceChannel = state.client.getChannel(this.voiceChannelID) as Eris.VoiceChannel;
-        // 1 player + KMQ
-        const playerIsAlone = voiceChannel.voiceMembers.size === 2;
+        const playerIsAlone = getNumParticipants(this.voiceChannelID) === 1;
         return (guildPreference.getMultiGuessType() === MultiGuessType.ON) && !playerIsAlone;
+    }
+
+    private getSongCount() {
+        return {
+            count: this.filteredSongs.songs.size,
+            countBeforeLimit: this.filteredSongs.countBeforeLimit,
+        };
     }
 }

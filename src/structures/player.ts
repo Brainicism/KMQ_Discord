@@ -27,7 +27,7 @@ export default class Player {
 
     static fromUserID(userID: string) {
         const user = state.client.users.get(userID);
-        return new Player(user.username, getUserTag(user), user.avatarURL, 0);
+        return new Player(getUserTag(user), user.id, user.avatarURL, 0);
     }
 
     /** @returns the player's Discord tag  */

@@ -2,7 +2,7 @@ import Eris, { EmbedOptions, TextableChannel } from "eris";
 import EmbedPaginator from "eris-pagination";
 import path from "path";
 import GuildPreference from "../structures/guild_preference";
-import GameSession from "../structures/game_session";
+import GameSession, { UniqueSongCounter } from "../structures/game_session";
 import _logger from "../logger";
 import { endSession, getSongCount } from "./game_utils";
 import { getFact } from "../fact_generator";
@@ -29,15 +29,16 @@ const logger = _logger("utils");
 export const EMBED_INFO_COLOR = 0x000000; // BLACK
 export const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 export const EMBED_SUCCESS_COLOR = 0x00FF00; // GREEN
+export const EMBED_SUCCESS_BONUS_COLOR = 0xFFD700; // GOLD
 const EMBED_FIELDS_PER_PAGE = 20;
 const REQUIRED_TEXT_PERMISSIONS = ["addReactions" as const, "embedLinks" as const];
 const REQUIRED_VOICE_PERMISSIONS = ["viewChannel" as const, "voiceConnect" as const, "voiceSpeak" as const];
 
 /**
- * @param user - The User object
+ * @param user - The user (must be some object with username and discriminator fields)
  * @returns the user's Discord tag
  */
-export function getUserTag(user: Eris.User): string {
+export function getUserTag(user: { username: string, discriminator: string }): string {
     return `${user.username}#${user.discriminator}`;
 }
 
@@ -140,7 +141,12 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
  * @param gameRound - The GameSession's corresponding GameRound
  * @param songGuessed - Whether the song was guessed
  */
-export async function sendEndOfRoundMessage(messageContext: MessageContext, scoreboard: Scoreboard, gameRound: GameRound, playerRoundResults: Array<PlayerRoundResult>, timeRemaining?: number) {
+export async function sendEndRoundMessage(messageContext: MessageContext,
+    scoreboard: Scoreboard,
+    gameRound: GameRound,
+    playerRoundResults: Array<PlayerRoundResult>,
+    timeRemaining?: number,
+    uniqueSongCounter?: UniqueSongCounter) {
     const footer: Eris.EmbedFooterOptions = {
         text: "",
     };
@@ -172,7 +178,8 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
             correctDescription += `\n\n**Runners Up**\n${runnersUpDescription}`;
         }
     }
-    const description = `${correctGuess ? correctDescription : "Nobody got it."}\nhttps://youtu.be/${gameRound.videoID} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
+    const uniqueSongMessage = (uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0) ? `\n${codeLine(`${uniqueSongCounter.uniqueSongsPlayed}/${uniqueSongCounter.totalSongs}`)} unique songs played.` : "";
+    const description = `${correctGuess ? correctDescription : "Nobody got it."}\nhttps://youtu.be/${gameRound.videoID}${uniqueSongMessage} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
     const fields = scoreboard.getScoreboardEmbedFields().slice(0, 10);
     if (fact) {
         fields.push({
@@ -180,8 +187,19 @@ export async function sendEndOfRoundMessage(messageContext: MessageContext, scor
         });
     }
 
+    let color: number;
+    if (correctGuess) {
+        if (state.bonusUsers.has(playerRoundResults[0].player.id)) {
+            color = EMBED_SUCCESS_BONUS_COLOR;
+        } else {
+            color = EMBED_SUCCESS_COLOR;
+        }
+    } else {
+        color = EMBED_ERROR_COLOR;
+    }
+
     await sendInfoMessage(messageContext, {
-        color: correctGuess ? EMBED_SUCCESS_COLOR : EMBED_ERROR_COLOR,
+        color,
         author: {
             avatarUrl: messageContext.author.avatarUrl,
             username: messageContext.author.username,
@@ -303,7 +321,7 @@ export async function sendEndGameMessage(textChannelID: string, gameSession: Gam
             },
         );
         await sendInfoMessage(new MessageContext(textChannelID), {
-            color: EMBED_SUCCESS_COLOR,
+            color: gameSession.gameType !== GameType.TEAMS && state.bonusUsers.has(winners[0].id) ? EMBED_SUCCESS_BONUS_COLOR : EMBED_SUCCESS_COLOR,
             description: "**Scoreboard**",
             thumbnailUrl: winners[0].getAvatarURL(),
             title: `🎉 ${gameSession.scoreboard.getWinnerMessage()} 🎉`,
@@ -415,11 +433,19 @@ export function getVoiceChannel(voiceChannelID: string): Eris.VoiceChannel {
 }
 
 /**
- * @param message - The Message object
- * @returns the number of persons in the voice channel excluding bots
+ * @param voiceChannelID - The voice channel to check
+ * @returns the users in the voice channel, excluding bots
+ */
+export function getCurrentVoiceMembers(voiceChannelID: string): Array<Eris.Member> {
+    return getVoiceChannel(voiceChannelID).voiceMembers.filter((x) => !x.bot);
+}
+
+/**
+ * @param voiceChannelID - The voice channel to check
+ * @returns the number of persons in the voice channel, excluding bots
  */
 export function getNumParticipants(voiceChannelID: string): number {
-    return (getVoiceChannel(voiceChannelID).voiceMembers.filter((x) => !x.bot)).length;
+    return getCurrentVoiceMembers(voiceChannelID).length;
 }
 
 /**
