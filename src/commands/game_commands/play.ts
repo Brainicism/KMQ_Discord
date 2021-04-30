@@ -29,7 +29,11 @@ export async function sendBeginGameMessage(textChannelName: string,
     let gameInstructions = "Listen to the song and type your guess!";
     const bonusUsers = participants.filter((x) => state.bonusUsers.has(x.id));
     if (bonusUsers.length > 0) {
-        const bonusUserTags = bonusUsers.map((x) => `\`${getUserTag(x)}\``);
+        let bonusUserTags = bonusUsers.map((x) => `\`${getUserTag(x)}\``);
+        if (bonusUserTags.length > 10) {
+            bonusUserTags = bonusUserTags.slice(0, 10);
+            bonusUserTags.push("and many others");
+        }
         gameInstructions += `\n\n${bonusUserTags.join(", ")} will receive double EXP for [voting](https://top.gg/bot/508759831755096074/vote)! See \`,vote\` for info on how to vote. Thanks for supporting KMQ!`;
     }
     if (isWeekend()) {

@@ -5,7 +5,7 @@ import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
-    getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndOfRoundMessage, sendInfoMessage, getNumParticipants, checkBotIsAlone, getVoiceChannelFromMessage,
+    getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, checkBotIsAlone, getVoiceChannelFromMessage,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, endSession } from "../helpers/game_utils";
 import { delay, getAudioDurationInSeconds, getOrdinalNum, isPowerHour, isWeekend, setDifference } from "../helpers/utils";
@@ -190,7 +190,12 @@ export default class GameSession {
             // update scoreboard
             const scoreboardUpdatePayload = guessResult.correctGuessers.map((correctGuesser, idx) => {
                 const guessPosition = idx + 1;
-                const expGain = this.calculateExpGain(guildPreference, this.gameRound.baseExp, getNumParticipants(this.voiceChannelID), guessSpeed, guessPosition, correctGuesser.voteBonusExp);
+                const expGain = this.calculateExpGain(guildPreference,
+                    this.gameRound.baseExp,
+                    getNumParticipants(this.voiceChannelID),
+                    guessSpeed,
+                    guessPosition,
+                    state.bonusUsers.has(correctGuesser.id));
                 if (idx === 0) {
                     playerRoundResults.push({ player: correctGuesser, streak: this.lastGuesser.streak, expGain });
                     logger.info(`${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed. song = ${this.gameRound.songName}. Gained ${expGain} EXP`);
@@ -221,7 +226,7 @@ export default class GameSession {
                 };
             }
 
-            sendEndOfRoundMessage(messageContext, this.scoreboard, this.gameRound, playerRoundResults, remainingDuration, uniqueSongCounter);
+            sendEndRoundMessage(messageContext, this.scoreboard, this.gameRound, playerRoundResults, remainingDuration, uniqueSongCounter);
         }
 
         this.incrementSongCount(this.gameRound.videoID, guessResult.correct);
@@ -343,10 +348,6 @@ export default class GameSession {
             this.gameRound.finished = true;
 
             await delay(this.multiguessDelayIsActive(guildPreference) ? MULTIGUESS_DELAY : 0);
-
-            for (const player of this.gameRound.correctGuessers) {
-                player.voteBonusExp = state.bonusUsers.has(player.id);
-            }
 
             if (!this.gameRound) return;
             // mark round as complete, so no more guesses can go through
