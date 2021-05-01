@@ -286,7 +286,7 @@ export default class GuildPreference {
     getDisplayedGroupNames(original = false): string {
         if (this.gameOptions.groups === null) return null;
         if (original) {
-            return getGroupNamesString(this.gameOptions.groups.filter((group) => !group.name.includes("+")), false, false);
+            return getGroupNamesString(this.gameOptions.groups.filter((group) => !group.name.includes("+")), false, original);
         }
         const displayedGroupNames = getGroupNamesString(this.gameOptions.groups);
         return displayedGroupNames;
@@ -322,7 +322,7 @@ export default class GuildPreference {
     getDisplayedExcludesGroupNames(original = false): string {
         if (this.gameOptions.excludes === null) return null;
         if (original) {
-            return getGroupNamesString(this.gameOptions.excludes.filter((group) => !group.name.includes("+")), false, false);
+            return getGroupNamesString(this.gameOptions.excludes.filter((group) => !group.name.includes("+")), false, original);
         }
         const displayedGroupNames = getGroupNamesString(this.gameOptions.excludes);
         return displayedGroupNames;
@@ -358,7 +358,7 @@ export default class GuildPreference {
     getDisplayedIncludesGroupNames(original = false): string {
         if (this.gameOptions.includes === null) return null;
         if (original) {
-            return getGroupNamesString(this.gameOptions.includes.filter((group) => !group.name.includes("+")), false, false);
+            return getGroupNamesString(this.gameOptions.includes.filter((group) => !group.name.includes("+")), false, original);
         }
         const displayedGroupNames = getGroupNamesString(this.gameOptions.includes);
         return displayedGroupNames;
