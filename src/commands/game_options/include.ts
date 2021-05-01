@@ -11,18 +11,18 @@ export default class IncludeCommand implements BaseCommand {
     help = {
         name: "include",
         description: "Select as many groups that you would like to forcefully include, ignoring other filters (`gender`, `artisttype`, etc), separated by commas. A list of group names can be found [here](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/data/group_list.txt)",
-        usage: "!include [group1],{group2}",
+        usage: ",include [group1],{group2}",
         examples: [
             {
-                example: "`!include blackpink`",
+                example: "`,include blackpink`",
                 explanation: "Forcefully include songs from Blackpink",
             },
             {
-                example: "`!include blackpink, bts, red velvet`",
+                example: "`,include blackpink, bts, red velvet`",
                 explanation: "Forcefully include songs from Blackpink, BTS, and Red Velvet",
             },
             {
-                example: "`!include`",
+                example: "`,include`",
                 explanation: "Resets the include option",
             },
         ],

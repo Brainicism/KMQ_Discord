@@ -10,7 +10,7 @@ export default class OptionsCommand implements BaseCommand {
     help = {
         name: "options",
         description: "Displays the current game options.",
-        usage: "!options",
+        usage: ",options",
         examples: [],
         priority: 50,
     };

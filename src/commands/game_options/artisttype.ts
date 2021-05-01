@@ -30,22 +30,22 @@ export default class ArtistTypeCommand implements BaseCommand {
     help = {
         name: "artisttype",
         description: "Choose whether you'd like to hear from soloists, groups, or both. Options are the following, `soloists`, `groups`, and `both`.",
-        usage: "!artisttype [artisttype]",
+        usage: ",artisttype [artisttype]",
         examples: [
             {
-                example: "`!artisttype soloists`",
+                example: "`,artisttype soloists`",
                 explanation: "Play songs only from `soloists`",
             },
             {
-                example: "`!artisttype groups`",
+                example: "`,artisttype groups`",
                 explanation: "Play songs only from `groups`",
             },
             {
-                example: "`!artisttype both`",
+                example: "`,artisttype both`",
                 explanation: "Plays songs from both `soloists` and `groups`",
             },
             {
-                example: "`!artisttype`",
+                example: "`,artisttype`",
                 explanation: "Resets the artist type option",
             },
         ],

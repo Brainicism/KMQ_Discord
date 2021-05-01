@@ -23,14 +23,14 @@ export default class GoalCommand implements BaseCommand {
     help = {
         name: "goal",
         description: "Once the player with the most points reaches the goal score, the game ends. Calling it with no arguments disables the goal. If a game is in progress, the goal must exceed the highest score",
-        usage: "!goal [goal]",
+        usage: ",goal [goal]",
         examples: [
             {
-                example: "`!goal 30`",
+                example: "`,goal 30`",
                 explanation: "The first player to 30 wins the game",
             },
             {
-                example: "`!goal`",
+                example: "`,goal`",
                 explanation: "Disables the goal",
             },
         ],

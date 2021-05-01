@@ -31,18 +31,18 @@ export default class LimitCommand implements BaseCommand {
     help = {
         name: "limit",
         description: "Set a maximum number of results in the song query. This effectively sets the 'Top X number of songs' based on the selected filters.",
-        usage: "!limit [limit]",
+        usage: ",limit [limit]",
         examples: [
             {
-                example: "`!limit 250`",
+                example: "`,limit 250`",
                 explanation: "Plays the top 250 most listened songs from the currently selected options.",
             },
             {
-                example: "`!limit 250 500`",
+                example: "`,limit 250 500`",
                 explanation: "Plays between the 250th to 500th most listened songs from the currently selected options.",
             },
             {
-                example: "`!limit`",
+                example: "`,limit`",
                 explanation: `Reset to the default limit of \`${DEFAULT_LIMIT}\``,
             },
         ],

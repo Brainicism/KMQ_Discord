@@ -34,22 +34,22 @@ export default class DurationCommand implements BaseCommand {
     help = {
         name: "duration",
         description: "Sets a maximum length for the KMQ game in minutes.",
-        usage: "!duration [minutes]",
+        usage: ",duration [minutes]",
         examples: [
             {
-                example: "`!duration 15`",
+                example: "`,duration 15`",
                 explanation: "The game will automatically end after 15 minutes.",
             },
             {
-                example: "`!duration 5 add`",
+                example: "`,duration 5 add`",
                 explanation: "Remove 5 minutes from the current game's duration",
             },
             {
-                example: "`!duration 5 remove`",
+                example: "`,duration 5 remove`",
                 explanation: "Add 5 minutes to the current game's duration.",
             },
             {
-                example: "`!duration`",
+                example: "`,duration`",
                 explanation: "Disables the duration",
             },
         ],

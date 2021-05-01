@@ -15,7 +15,7 @@ export default class VoteCommand implements BaseCommand {
     help = {
         name: "vote",
         description: "Shows instructions on how to vote to receive 2x EXP for an hour.",
-        usage: "!vote",
+        usage: ",vote",
         examples: [],
         priority: 60,
     };

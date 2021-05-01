@@ -17,7 +17,7 @@ export default class ForceSkipCommand implements BaseCommand {
     help = {
         name: "forceskip",
         description: "The person that started the game can force-skip the current song, no majority necessary.",
-        usage: "!forceskip",
+        usage: ",forceskip",
         examples: [],
         priority: 1009,
     };
