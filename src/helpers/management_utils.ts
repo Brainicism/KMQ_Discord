@@ -151,12 +151,24 @@ export async function updatePublishDateOverrides() {
 export function reloadAliases() {
     try {
         state.aliases.song = parseJsonFile(songAliasesFilePath);
+        logger.info("Reloaded song alias data");
+    } catch (err) {
+        logger.error("Error parsing song alias file");
+    }
+
+    try {
         state.aliases.artist = parseJsonFile(artistAliasesFilePath);
-        logger.info("Reloaded song and artist alias data");
+        logger.info("Reloaded artist alias data");
     } catch (err) {
         logger.error("Error parsing alias files");
-        state.aliases.song = {};
-        state.aliases.artist = {};
+    }
+}
+
+export function reloadEndGameMessages() {
+    try {
+        state.endGameMessages = parseJsonFile(path.resolve(__dirname, "../../data/end_game_messages.json"));
+    } catch (err) {
+        logger.error("Error parsing end game messages file");
     }
 }
 
@@ -214,6 +226,7 @@ export function registerIntervals() {
     // every 5 minutes
     schedule.scheduleJob("*/5 * * * *", async () => {
         reloadAliases();
+        reloadEndGameMessages();
         updatePublishDateOverrides();
         clearInactiveVoiceConnections();
     });
@@ -227,6 +240,7 @@ export function registerIntervals() {
 export async function reloadCaches() {
     reloadAliases();
     reloadFactCache();
+    reloadEndGameMessages();
 }
 
 /** @returns a mapping of command name to command source file */
