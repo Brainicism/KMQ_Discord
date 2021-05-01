@@ -45,7 +45,7 @@ export async function sendBeginGameMessage(textChannelName: string,
     await sendInfoMessage(MessageContext.fromMessage(message), {
         title: startTitle,
         description: gameInstructions,
-        footerText: bonusUsers.length === 0 && Math.random() < 0.2 ? "Psst. Earn more EXP by voting (see ,vote)" : null,
+        footerText: bonusUsers.length === 0 && Math.random() < 0.5 ? "Psst. Earn more EXP by voting (see ,vote)" : null,
         thumbnailUrl: KmqImages.HAPPY,
     });
 }
