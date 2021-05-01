@@ -53,7 +53,14 @@ export interface State {
     botListingManager: BotListingManager;
     client: Eris.Client;
     aliases: {
-        artist: { [artistName: string]: Array<string> },
+        artist: {
+            guessAliases: {
+                [artistName: string]: Array<string>
+            },
+            matchAliases: {
+                [alias: string]: string
+            }
+        },
         song: { [songName: string]: Array<string> }
     };
     endGameMessages: {

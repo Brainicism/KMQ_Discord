@@ -219,6 +219,14 @@ export async function endSession(gameSession: GameSession) {
  * @returns a list of recognized/unrecognized groups
  */
 export async function getMatchingGroupNames(rawGroupNames: Array<string>): Promise<GroupMatchResults> {
+    // apply artist aliases
+    for (let i = 0; i < rawGroupNames.length; i++) {
+        const groupName = rawGroupNames[i];
+        const matchingAlias = Object.entries(state.aliases.artist.matchAliases).find((x) => x[0].toLowerCase() === groupName.toLowerCase());
+        if (matchingAlias) {
+            rawGroupNames[i] = matchingAlias[1];
+        }
+    }
     const artistIDQuery = dbContext.kmq("kpop_groups")
         .select(["id"])
         .whereIn("name", rawGroupNames);
