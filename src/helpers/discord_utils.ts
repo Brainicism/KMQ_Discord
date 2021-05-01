@@ -213,7 +213,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
  * @param message - The Message object
  * @param guildPreference - The corresponding GuildPreference
  * @param updatedOption - Specifies which GameOption was modified
- * @param footerText - the footer text (shows prefix when bot is pinged)
+ * @param footerText - The footer text (shows prefix when bot is pinged)
  */
 export async function sendOptionsMessage(messageContext: MessageContext,
     guildPreference: GuildPreference,
@@ -225,7 +225,6 @@ export async function sendOptionsMessage(messageContext: MessageContext,
         return;
     }
 
-    const DISABLED_OPTION = italicize("disabled");
     const NOT_SET_OPTION = italicize("Not set");
     const CONFLICT = "conflict";
 
@@ -233,22 +232,22 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     const visibleLimitStart = Math.min(totalSongs.countBeforeLimit, guildPreference.getLimitStart());
     const optionStrings = {};
     optionStrings[GameOption.GROUPS] = guildPreference.isGroupsMode() ? guildPreference.getDisplayedGroupNames() : null;
-    optionStrings[GameOption.INCLUDE] = guildPreference.isIncludesMode() ? guildPreference.getDisplayedIncludesGroupNames() : null;
-    optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode ? guildPreference.getDisplayedExcludesGroupNames() : null;
     optionStrings[GameOption.LIMIT] = guildPreference.getLimitStart() === 0 ? `${visibleLimitEnd}` : `${getOrdinalNum(visibleLimitStart)} to ${getOrdinalNum(visibleLimitEnd)} (${totalSongs.count} songs)`;
     optionStrings[GameOption.LIMIT] = `${optionStrings[GameOption.LIMIT]} / ${totalSongs.countBeforeLimit}`;
-    optionStrings[GameOption.CUTOFF] = `${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
     optionStrings[GameOption.GENDER] = guildPreference.getGender().join(", ");
+    optionStrings[GameOption.CUTOFF] = `${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
     optionStrings[GameOption.ARTIST_TYPE] = guildPreference.getArtistType();
+    optionStrings[GameOption.RELEASE_TYPE] = guildPreference.getReleaseType();
+    optionStrings[GameOption.LANGUAGE_TYPE] = guildPreference.getLanguageType();
+    optionStrings[GameOption.SUBUNIT_PREFERENCE] = guildPreference.getSubunitPreference();
+    optionStrings[GameOption.MULTIGUESS] = guildPreference.getMultiGuessType();
+    optionStrings[GameOption.SHUFFLE_TYPE] = guildPreference.getShuffleType();
     optionStrings[GameOption.SEEK_TYPE] = guildPreference.getSeekType();
     optionStrings[GameOption.MODE_TYPE] = guildPreference.getModeType() === ModeType.BOTH ? `${ModeType.SONG_NAME} or ${ModeType.ARTIST} (\`${ModeType.BOTH}\`)` : guildPreference.getModeType();
     optionStrings[GameOption.TIMER] = guildPreference.isGuessTimeoutSet() ? `${guildPreference.getGuessTimeout()} sec` : null;
-    optionStrings[GameOption.SHUFFLE_TYPE] = guildPreference.getShuffleType();
-    optionStrings[GameOption.SUBUNIT_PREFERENCE] = guildPreference.getSubunitPreference();
-    optionStrings[GameOption.RELEASE_TYPE] = guildPreference.getReleaseType();
-    optionStrings[GameOption.MULTIGUESS] = guildPreference.getMultiGuessType();
-    optionStrings[GameOption.LANGUAGE_TYPE] = guildPreference.getLanguageType();
     optionStrings[GameOption.DURATION] = guildPreference.isDurationSet ? `${guildPreference.getDuration()} mins` : null;
+    optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode ? guildPreference.getDisplayedExcludesGroupNames() : null;
+    optionStrings[GameOption.INCLUDE] = guildPreference.isIncludesMode() ? guildPreference.getDisplayedIncludesGroupNames() : null;
 
     const ostPreferenceDisplayStrings = {
         [OstPreference.INCLUDE]: OstPreference.INCLUDE,
@@ -261,19 +260,19 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     const { gameSessions } = state;
     const isEliminationMode = gameSessions[messageContext.guildID] && gameSessions[messageContext.guildID].gameType === GameType.ELIMINATION;
     optionStrings[GameOption.GOAL] = guildPreference.isGoalSet() ? guildPreference.getGoal() : NOT_SET_OPTION;
-    optionStrings[GameOption.GOAL] = !isEliminationMode ? optionStrings[GameOption.GOAL] : `${DISABLED_OPTION} (\`${PREFIX}play ${GameType.ELIMINATION}\` conflict)`;
+    optionStrings[GameOption.GOAL] = !isEliminationMode ? optionStrings[GameOption.GOAL] : `(\`${PREFIX}play ${GameType.ELIMINATION}\` ${CONFLICT})`;
 
     if (guildPreference.isGroupsMode()) {
         for (const option of ConflictingGameOptions[GameOption.GROUPS]) {
-            optionStrings[option] = `${optionStrings[option] !== null ? strikethrough(optionStrings[option]) : DISABLED_OPTION} (\`${PREFIX}${GameOptionCommand[GameOption.GROUPS]}\` ${CONFLICT})`;
+            optionStrings[option] = `${optionStrings[option] !== null ? strikethrough(optionStrings[option]) : ""}(\`${PREFIX}${GameOptionCommand[GameOption.GROUPS]}\` ${CONFLICT})`;
         }
     } else if (guildPreference.isIncludesMode()) {
         for (const option of ConflictingGameOptions[GameOption.INCLUDE]) {
-            optionStrings[option] = `${optionStrings[option] !== null ? strikethrough(optionStrings[option]) : DISABLED_OPTION} (\`${PREFIX}${GameOptionCommand[GameOption.INCLUDE]}\` ${CONFLICT})`;
+            optionStrings[option] = `${optionStrings[option] !== null ? strikethrough(optionStrings[option]) : ""}(\`${PREFIX}${GameOptionCommand[GameOption.INCLUDE]}\` ${CONFLICT})`;
         }
     } else if (guildPreference.isExcludesMode()) {
         for (const option of ConflictingGameOptions[GameOption.EXCLUDE]) {
-            optionStrings[option] = `${optionStrings[option] !== null ? strikethrough(optionStrings[option]) : DISABLED_OPTION} (\`${PREFIX}${GameOptionCommand[GameOption.EXCLUDE]}\` ${CONFLICT})`;
+            optionStrings[option] = `${optionStrings[option] !== null ? strikethrough(optionStrings[option]) : ""}(\`${PREFIX}${GameOptionCommand[GameOption.EXCLUDE]}\` ${CONFLICT})`;
         }
     }
 
@@ -282,7 +281,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
         if (!gameOptionString) continue;
         if (updatedOption && updatedOption.option === gameOption) {
             optionStrings[gameOption] = underline(gameOptionString);
-        } else if ([NOT_SET_OPTION, DISABLED_OPTION, CONFLICT].every((x) => !gameOptionString.includes(x))) {
+        } else if ([NOT_SET_OPTION, CONFLICT].every((x) => !gameOptionString.includes(x))) {
             optionStrings[gameOption] = codeLine(gameOptionString);
         }
     }
@@ -295,13 +294,13 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     const strikethroughPrefixIfConflict = (optionKey: string) => {
         let prefix = `${bold(PREFIX + GameOptionCommand[optionKey])}: `;
         if (optionStrings[optionKey] && optionStrings[optionKey].includes(CONFLICT)) {
-            const disabledPrefix = optionStrings[optionKey].includes(DISABLED_OPTION);
-            if (disabledPrefix) {
+            const disabledOption = optionStrings[optionKey].indexOf("(") === 0;
+            if (disabledOption) {
                 // Don't strikethrough past colon if no value set
                 prefix = prefix.slice(0, -2);
             }
             prefix = strikethrough(prefix);
-            if (disabledPrefix) {
+            if (disabledOption) {
                 prefix += ": ";
             }
         }

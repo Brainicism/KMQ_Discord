@@ -73,8 +73,6 @@ export interface State {
 
 export enum GameOption {
     GROUPS = "Groups",
-    INCLUDE = "Include",
-    EXCLUDE = "Exclude",
     LIMIT = "Limit",
     GENDER = "Gender",
     CUTOFF = "Cutoff",
@@ -90,6 +88,8 @@ export enum GameOption {
     GOAL = "Goal",
     TIMER = "Timer",
     DURATION = "Duration",
+    EXCLUDE = "Exclude",
+    INCLUDE = "Include",
     PRESET = "Preset",
 }
 
@@ -110,8 +110,8 @@ export const GameOptionCommand: { [option: string]: string } = {
     [GameOption.GOAL]: "goal",
     [GameOption.TIMER]: "timer",
     [GameOption.DURATION]: "duration",
-    [GameOption.INCLUDE]: "include",
     [GameOption.EXCLUDE]: "exclude",
+    [GameOption.INCLUDE]: "include",
 };
 
 export const PriorityGameOption: Array<GameOption> = [
@@ -123,8 +123,8 @@ export const PriorityGameOption: Array<GameOption> = [
 
 export const ConflictingGameOptions: { [option: string]: Array<GameOption> } = {
     [GameOption.GROUPS]: [GameOption.INCLUDE, GameOption.EXCLUDE, GameOption.GENDER, GameOption.ARTIST_TYPE],
-    [GameOption.INCLUDE]: [GameOption.GROUPS],
     [GameOption.EXCLUDE]: [GameOption.GROUPS],
+    [GameOption.INCLUDE]: [GameOption.GROUPS],
 };
 
 export enum EnvType {
