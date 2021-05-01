@@ -41,7 +41,7 @@ export default class ExcludeCommand implements BaseCommand {
         }
         if (guildPreference.isGroupsMode()) {
             logger.warn(`${getDebugLogHeader(message)} | Game option conflict between include and groups.`);
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Game Option Conflict", description: `\`groups\` game option is currently set. \`include\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed` });
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "Game Option Conflict", description: `\`groups\` game option is currently set. \`include\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed.` });
             return;
         }
 

@@ -6,8 +6,8 @@ import GameSession, { UniqueSongCounter } from "../structures/game_session";
 import _logger from "../logger";
 import { endSession, getSongCount } from "./game_utils";
 import { getFact } from "../fact_generator";
-import { EmbedPayload, GameOption, GameOptionCommand, GuildTextableMessage, PlayerRoundResult } from "../types";
-import { chunkArray, codeLine, bold, italicize, parseJsonFile, chooseWeightedRandom, getOrdinalNum } from "./utils";
+import { EmbedPayload, GameOption, GameOptionCommand, PriorityGameOption, ConflictingGameOptions, GuildTextableMessage, PlayerRoundResult } from "../types";
+import { chunkArray, codeLine, bold, underline, italicize, strikethrough, parseJsonFile, chooseWeightedRandom, getOrdinalNum } from "./utils";
 import state from "../kmq";
 import { ModeType } from "../commands/game_options/mode";
 import Scoreboard from "../structures/scoreboard";
@@ -15,13 +15,9 @@ import GameRound from "../structures/game_round";
 import EliminationScoreboard from "../structures/elimination_scoreboard";
 import TeamScoreboard from "../structures/team_scoreboard";
 import { GameType } from "../commands/game_commands/play";
-import { ArtistType } from "../commands/game_options/artisttype";
-import { SubunitsPreference } from "../commands/game_options/subunits";
 import { KmqImages } from "../constants";
 import MessageContext from "../structures/message_context";
 import { OstPreference } from "../commands/game_options/ost";
-import { ReleaseType } from "../commands/game_options/release";
-import { MultiGuessType } from "../commands/game_options/multiguess";
 
 const endGameMessages = parseJsonFile(path.resolve(__dirname, "../../data/end_game_messages.json"));
 
@@ -217,72 +213,128 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
  * @param message - The Message object
  * @param guildPreference - The corresponding GuildPreference
  * @param updatedOption - Specifies which GameOption was modified
- * @param footerText - The footer text
+ * @param footerText - the footer text (shows prefix when bot is pinged)
  */
-export async function sendOptionsMessage(messageContext: MessageContext, guildPreference: GuildPreference,
-    updatedOption?: { option: GameOption, reset: boolean }, footerText?: string) {
+export async function sendOptionsMessage(messageContext: MessageContext,
+    guildPreference: GuildPreference,
+    updatedOption?: { option: GameOption, reset: boolean },
+    footerText?: string) {
     const totalSongs = await getSongCount(guildPreference);
     if (totalSongs === null) {
         sendErrorMessage(messageContext, { title: "Error retrieving song data", description: `Try again in a bit, or report this error to the official KMQ server found in \`${process.env.BOT_PREFIX}help\`.` });
         return;
     }
 
-    // required for the upcoming filtering helper function
-    // const { gameSessions } = state;
-    // const isEliminationMode = gameSessions[messageContext.guildID] && gameSessions[messageContext.guildID].gameType === GameType.ELIMINATION;
+    const DISABLED_OPTION = italicize("disabled");
+    const NOT_SET_OPTION = italicize("Not set");
+    const CONFLICT = "conflict";
 
-    // const goalMode = guildPreference.isGoalSet() && !isEliminationMode;
-    // const guessTimeoutMode = guildPreference.isGuessTimeoutSet();
     const visibleLimitEnd = Math.min(totalSongs.countBeforeLimit, guildPreference.getLimitEnd());
     const visibleLimitStart = Math.min(totalSongs.countBeforeLimit, guildPreference.getLimitStart());
     const optionStrings = {};
+    optionStrings[GameOption.GROUPS] = guildPreference.isGroupsMode() ? guildPreference.getDisplayedGroupNames() : null;
+    optionStrings[GameOption.INCLUDE] = guildPreference.isIncludesMode() ? guildPreference.getDisplayedIncludesGroupNames() : null;
+    optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode ? guildPreference.getDisplayedExcludesGroupNames() : null;
+    optionStrings[GameOption.LIMIT] = guildPreference.getLimitStart() === 0 ? `${visibleLimitEnd}` : `${getOrdinalNum(visibleLimitStart)} to ${getOrdinalNum(visibleLimitEnd)} (${totalSongs.count} songs)`;
+    optionStrings[GameOption.LIMIT] = `${optionStrings[GameOption.LIMIT]} / ${totalSongs.countBeforeLimit}`;
     optionStrings[GameOption.CUTOFF] = `${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
     optionStrings[GameOption.GENDER] = guildPreference.getGender().join(", ");
     optionStrings[GameOption.ARTIST_TYPE] = guildPreference.getArtistType();
-    optionStrings[GameOption.GROUPS] = guildPreference.isGroupsMode() ? guildPreference.getDisplayedGroupNames() : null;
-    optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode() ? guildPreference.getDisplayedExcludesGroupNames() : null;
-    optionStrings[GameOption.INCLUDE] = guildPreference.isIncludesMode() ? guildPreference.getDisplayedIncludesGroupNames() : null;
-    optionStrings[GameOption.LIMIT] = guildPreference.getLimitStart() === 0 ? `${visibleLimitEnd}` : `${getOrdinalNum(visibleLimitStart)} to ${getOrdinalNum(visibleLimitEnd)} (${totalSongs.count} songs)`;
-    optionStrings[GameOption.LIMIT] = `${optionStrings[GameOption.LIMIT]} / ${totalSongs.countBeforeLimit}`;
     optionStrings[GameOption.SEEK_TYPE] = guildPreference.getSeekType();
-    optionStrings[GameOption.MODE_TYPE] = guildPreference.getModeType() === ModeType.BOTH ? "song or artist" : guildPreference.getModeType();
-    optionStrings[GameOption.GOAL] = guildPreference.getGoal();
-    optionStrings[GameOption.TIMER] = guildPreference.getGuessTimeout();
+    optionStrings[GameOption.MODE_TYPE] = guildPreference.getModeType() === ModeType.BOTH ? `${ModeType.SONG_NAME} or ${ModeType.ARTIST} (\`${ModeType.BOTH}\`)` : guildPreference.getModeType();
+    optionStrings[GameOption.TIMER] = guildPreference.isGuessTimeoutSet() ? `${guildPreference.getGuessTimeout()} sec` : null;
     optionStrings[GameOption.SHUFFLE_TYPE] = guildPreference.getShuffleType();
     optionStrings[GameOption.SUBUNIT_PREFERENCE] = guildPreference.getSubunitPreference();
-
-    const ostPreferenceDisplayStrings = {
-        [OstPreference.INCLUDE]: "include",
-        [OstPreference.EXCLUDE]: "exclude",
-        [OstPreference.EXCLUSIVE]: "exclusively include",
-    };
-    optionStrings[GameOption.OST_PREFERENCE] = ostPreferenceDisplayStrings[guildPreference.getOstPreference()];
     optionStrings[GameOption.RELEASE_TYPE] = guildPreference.getReleaseType();
     optionStrings[GameOption.MULTIGUESS] = guildPreference.getMultiGuessType();
     optionStrings[GameOption.LANGUAGE_TYPE] = guildPreference.getLanguageType();
-    optionStrings[GameOption.DURATION] = guildPreference.isDurationSet() ? guildPreference.getDuration() : "disabled";
+    optionStrings[GameOption.DURATION] = guildPreference.isDurationSet ? `${guildPreference.getDuration()} mins` : null;
+
+    const ostPreferenceDisplayStrings = {
+        [OstPreference.INCLUDE]: OstPreference.INCLUDE,
+        [OstPreference.EXCLUDE]: OstPreference.EXCLUDE,
+        [OstPreference.EXCLUSIVE]: `exclusively include (\`${OstPreference.EXCLUSIVE}\`)`,
+    };
+    optionStrings[GameOption.OST_PREFERENCE] = ostPreferenceDisplayStrings[guildPreference.getOstPreference()];
+
+    const PREFIX = process.env.BOT_PREFIX;
+    const { gameSessions } = state;
+    const isEliminationMode = gameSessions[messageContext.guildID] && gameSessions[messageContext.guildID].gameType === GameType.ELIMINATION;
+    optionStrings[GameOption.GOAL] = guildPreference.isGoalSet() ? guildPreference.getGoal() : NOT_SET_OPTION;
+    optionStrings[GameOption.GOAL] = !isEliminationMode ? optionStrings[GameOption.GOAL] : `${DISABLED_OPTION} (\`${PREFIX}play ${GameType.ELIMINATION}\` conflict)`;
+
+    if (guildPreference.isGroupsMode()) {
+        for (const option of ConflictingGameOptions[GameOption.GROUPS]) {
+            optionStrings[option] = `${optionStrings[option] !== null ? strikethrough(optionStrings[option]) : DISABLED_OPTION} (\`${PREFIX}${GameOptionCommand[GameOption.GROUPS]}\` ${CONFLICT})`;
+        }
+    } else if (guildPreference.isIncludesMode()) {
+        for (const option of ConflictingGameOptions[GameOption.INCLUDE]) {
+            optionStrings[option] = `${optionStrings[option] !== null ? strikethrough(optionStrings[option]) : DISABLED_OPTION} (\`${PREFIX}${GameOptionCommand[GameOption.INCLUDE]}\` ${CONFLICT})`;
+        }
+    } else if (guildPreference.isExcludesMode()) {
+        for (const option of ConflictingGameOptions[GameOption.EXCLUDE]) {
+            optionStrings[option] = `${optionStrings[option] !== null ? strikethrough(optionStrings[option]) : DISABLED_OPTION} (\`${PREFIX}${GameOptionCommand[GameOption.EXCLUDE]}\` ${CONFLICT})`;
+        }
+    }
 
     for (const gameOption of Object.keys(optionStrings)) {
         const gameOptionString = optionStrings[gameOption];
         if (!gameOptionString) continue;
-        optionStrings[gameOption] = (updatedOption && updatedOption.option) === gameOption ? bold(gameOptionString) : codeLine(gameOptionString);
+        if (updatedOption && updatedOption.option === gameOption) {
+            optionStrings[gameOption] = underline(gameOptionString);
+        } else if ([NOT_SET_OPTION, DISABLED_OPTION, CONFLICT].every((x) => !gameOptionString.includes(x))) {
+            optionStrings[gameOption] = codeLine(gameOptionString);
+        }
     }
 
-    const PREFIX = process.env.BOT_PREFIX;
+    const fieldOptions = Object.keys(GameOptionCommand).filter((option) => !PriorityGameOption.includes(option as GameOption));
+    const firstHalfOptions = fieldOptions.slice(0, fieldOptions.length / 2);
+    const secondHalfOptions = fieldOptions.slice(fieldOptions.length / 2);
+    const ZERO_WIDTH_SPACE = "​";
 
-    if (updatedOption && updatedOption.reset) {
+    const strikethroughPrefixIfConflict = (optionKey: string) => {
+        let prefix = `${bold(PREFIX + GameOptionCommand[optionKey])}: `;
+        if (optionStrings[optionKey] && optionStrings[optionKey].includes(CONFLICT)) {
+            const disabledPrefix = optionStrings[optionKey].includes(DISABLED_OPTION);
+            if (disabledPrefix) {
+                // Don't strikethrough past colon if no value set
+                prefix = prefix.slice(0, -2);
+            }
+            prefix = strikethrough(prefix);
+            if (disabledPrefix) {
+                prefix += ": ";
+            }
+        }
+        return prefix;
+    };
+
+    const fields = [
+        {
+            name: ZERO_WIDTH_SPACE,
+            value: firstHalfOptions.map((option) => `${strikethroughPrefixIfConflict(option)}${optionStrings[option] || NOT_SET_OPTION}`).join("\n"),
+            inline: true,
+        },
+        {
+            name: ZERO_WIDTH_SPACE,
+            value: secondHalfOptions.map((option) => `${strikethroughPrefixIfConflict(option)}${optionStrings[option] || NOT_SET_OPTION}`).join("\n"),
+            inline: true,
+        },
+    ];
+
+    if (!footerText && Math.random() < 0.25) {
         footerText = `Looking for information on how to use a command? Check out '${PREFIX}help [command]' to learn more`;
     }
+
+    const priorityOptions = PriorityGameOption
+        .map((option) => `${strikethroughPrefixIfConflict(option)}${optionStrings[option] || NOT_SET_OPTION}`)
+        .join("\n");
 
     await sendInfoMessage(messageContext,
         {
             title: updatedOption === null ? "Options" : `${updatedOption.option} ${updatedOption.reset ? "reset" : "updated"}`,
-            fields: Object.entries(GameOptionCommand).map((option) => ({
-                name: `${PREFIX}${italicize(option[1])}`,
-                value: optionStrings[option[0]],
-                inline: true,
-            })),
-            footerText: footerText !== null ? footerText : null,
+            description: priorityOptions,
+            fields,
+            footerText,
             thumbnailUrl: KmqImages.LISTENING,
         });
 }

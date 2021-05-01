@@ -72,47 +72,59 @@ export interface State {
 }
 
 export enum GameOption {
+    GROUPS = "Groups",
+    INCLUDE = "Include",
+    EXCLUDE = "Exclude",
+    LIMIT = "Limit",
     GENDER = "Gender",
     CUTOFF = "Cutoff",
-    LIMIT = "Limit",
-    VOLUME = "Volume",
-    SEEK_TYPE = "Seek Type",
-    MODE_TYPE = "Guess Mode",
-    RELEASE_TYPE = "Release Type",
-    SHUFFLE_TYPE = "Shuffle",
-    GROUPS = "Groups",
-    GOAL = "Goal",
-    TIMER = "Timer",
-    DURATION = "Duration",
-    EXCLUDE = "Exclude",
-    INCLUDE = "Include",
     ARTIST_TYPE = "Artist Type",
+    RELEASE_TYPE = "Release Type",
     LANGUAGE_TYPE = "Language Type",
     SUBUNIT_PREFERENCE = "Subunit Preference",
     OST_PREFERENCE = "OST Preference",
-    PRESET = "Preset",
     MULTIGUESS = "Multiguess",
+    SHUFFLE_TYPE = "Shuffle",
+    SEEK_TYPE = "Seek Type",
+    MODE_TYPE = "Guess Mode",
+    GOAL = "Goal",
+    TIMER = "Timer",
+    DURATION = "Duration",
+    PRESET = "Preset",
 }
 
 export const GameOptionCommand: { [option: string]: string } = {
+    [GameOption.GROUPS]: "groups",
+    [GameOption.LIMIT]: "limit",
     [GameOption.GENDER]: "gender",
     [GameOption.CUTOFF]: "cutoff",
-    [GameOption.LIMIT]: "limit",
-    [GameOption.SEEK_TYPE]: "seek",
-    [GameOption.MODE_TYPE]: "mode",
-    [GameOption.RELEASE_TYPE]: "release",
-    [GameOption.SHUFFLE_TYPE]: "shuffle",
-    [GameOption.GROUPS]: "groups",
-    [GameOption.GOAL]: "goal",
-    [GameOption.TIMER]: "timer",
-    [GameOption.DURATION]: "duration",
-    [GameOption.EXCLUDE]: "exclude",
-    [GameOption.INCLUDE]: "include",
     [GameOption.ARTIST_TYPE]: "type",
+    [GameOption.RELEASE_TYPE]: "release",
     [GameOption.LANGUAGE_TYPE]: "language",
     [GameOption.SUBUNIT_PREFERENCE]: "subunit",
     [GameOption.OST_PREFERENCE]: "ost",
     [GameOption.MULTIGUESS]: "multiguess",
+    [GameOption.SHUFFLE_TYPE]: "shuffle",
+    [GameOption.SEEK_TYPE]: "seek",
+    [GameOption.MODE_TYPE]: "mode",
+    [GameOption.GOAL]: "goal",
+    [GameOption.TIMER]: "timer",
+    [GameOption.DURATION]: "duration",
+    [GameOption.INCLUDE]: "include",
+    [GameOption.EXCLUDE]: "exclude",
+};
+
+export const PriorityGameOption: Array<GameOption> = [
+    GameOption.GROUPS,
+    GameOption.LIMIT,
+    GameOption.GENDER,
+    GameOption.CUTOFF,
+];
+
+export const ConflictingGameOptions: { [option: string]: Array<GameOption> } = {
+    [GameOption.GROUPS]: [GameOption.INCLUDE, GameOption.EXCLUDE, GameOption.GENDER, GameOption.ARTIST_TYPE],
+    [GameOption.INCLUDE]: [GameOption.GROUPS],
+    [GameOption.EXCLUDE]: [GameOption.GROUPS],
 };
 
 export enum EnvType {

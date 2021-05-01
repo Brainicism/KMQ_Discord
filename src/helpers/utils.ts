@@ -39,6 +39,22 @@ export function codeLine(text: string): string {
 }
 
 /**
+ * @param text - Text to underline
+ * @returns underlined text
+ */
+export function underline(text: string): string {
+    return `__${text}__`;
+}
+
+/**
+ * @param text - Text to strikethrough
+ * @returns struckthrough text
+ */
+export function strikethrough(text: string): string {
+    return `~~${text}~~`;
+}
+
+/**
  * @param num - The number to round
  * @param places - The number of places to round
  * @returns the rounded number
