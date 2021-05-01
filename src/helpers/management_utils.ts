@@ -160,6 +160,16 @@ export function reloadAliases() {
     }
 }
 
+export function reloadEndGameMessages() {
+    try {
+        state.endGameMessages = parseJsonFile(path.resolve(__dirname, "../../data/end_game_messages.json"));
+    } catch (err) {
+        logger.error("Error parsing end game messages file");
+        state.endGameMessages.kmq = [];
+        state.endGameMessages.game = [];
+    }
+}
+
 /** Sets up recurring cron-based tasks */
 export function registerIntervals() {
     // set up cleanup for inactive game sessions
@@ -214,6 +224,7 @@ export function registerIntervals() {
     // every 5 minutes
     schedule.scheduleJob("*/5 * * * *", async () => {
         reloadAliases();
+        reloadEndGameMessages();
         updatePublishDateOverrides();
         clearInactiveVoiceConnections();
     });
@@ -227,6 +238,7 @@ export function registerIntervals() {
 export async function reloadCaches() {
     reloadAliases();
     reloadFactCache();
+    reloadEndGameMessages();
 }
 
 /** @returns a mapping of command name to command source file */

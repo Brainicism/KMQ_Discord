@@ -22,6 +22,10 @@ const state: State = {
         artist: {},
         song: {},
     },
+    endGameMessages: {
+        game: [],
+        kmq: [],
+    },
     processStartTime: Date.now(),
     bonusUsers: new Set(),
 };
