@@ -294,7 +294,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     const secondHalfOptions = fieldOptions.slice(fieldOptions.length / 2);
     const ZERO_WIDTH_SPACE = "​";
 
-    const strikethroughPrefixIfConflict = (optionKey: string) => {
+    const strikethroughPrefixIfConflict = ((optionKey: string) => {
         let prefix = `${bold(PREFIX + GameOptionCommand[optionKey])}: `;
         if (optionStrings[optionKey] && optionStrings[optionKey].includes(CONFLICT)) {
             const disabledOption = optionStrings[optionKey].indexOf("(") === 0;
@@ -308,27 +308,37 @@ export async function sendOptionsMessage(messageContext: MessageContext,
             }
         }
         return prefix;
-    };
+    });
+
+    const removeDoubleStrikethrough = ((option: string) => {
+        // Discord on Android (maybe iOS?) doesn't correctly parse ~~~~
+        // so we remove any instances (the outer strikethrough still strikes throuh the text)
+        while (option.indexOf("~~~~") >= 0) {
+            const idx = option.indexOf("~~~~");
+            option = option.substring(0, idx) + option.substring(idx + 4);
+        }
+        return option;
+    });
 
     const fields = [
         {
             name: ZERO_WIDTH_SPACE,
-            value: firstHalfOptions.map((option) => `${strikethroughPrefixIfConflict(option)}${optionStrings[option] || NOT_SET_OPTION}`).join("\n"),
+            value: firstHalfOptions.map((option) => removeDoubleStrikethrough(`${strikethroughPrefixIfConflict(option)}${optionStrings[option] || NOT_SET_OPTION}`)).join("\n"),
             inline: true,
         },
         {
             name: ZERO_WIDTH_SPACE,
-            value: secondHalfOptions.map((option) => `${strikethroughPrefixIfConflict(option)}${optionStrings[option] || NOT_SET_OPTION}`).join("\n"),
+            value: secondHalfOptions.map((option) => removeDoubleStrikethrough(`${strikethroughPrefixIfConflict(option)}${optionStrings[option] || NOT_SET_OPTION}`)).join("\n"),
             inline: true,
         },
     ];
 
     if (!footerText && Math.random() < 0.25) {
-        footerText = `Looking for information on how to use a command? Check out '${PREFIX}help [command]' to learn more`;
+        footerText = `Looking for information on how to use a command? Check out '${PREFIX}help [command]' to learn more.`;
     }
 
     const priorityOptions = PriorityGameOption
-        .map((option) => `${strikethroughPrefixIfConflict(option)}${optionStrings[option] || NOT_SET_OPTION}`)
+        .map((option) => removeDoubleStrikethrough(`${strikethroughPrefixIfConflict(option)}${optionStrings[option] || NOT_SET_OPTION}`))
         .join("\n");
 
     await sendInfoMessage(messageContext,
