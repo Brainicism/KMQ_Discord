@@ -37,26 +37,26 @@ export default class PresetCommand implements BaseCommand {
     help = {
         name: "preset",
         description: "Various actions to save/load game option presets. Preset name must be one word long.",
-        usage: "!preset [list | save | load | delete] {preset_name}",
+        usage: ",preset [list | save | load | delete] {preset_name}",
         examples: [
             {
-                example: "`!preset list`",
+                example: "`,preset list`",
                 explanation: "Lists all of the server's presets",
             },
             {
-                example: "`!preset save [preset_name]`",
+                example: "`,preset save [preset_name]`",
                 explanation: "Saves the current game options as a preset",
             },
             {
-                example: "`!preset load [preset_name]`",
+                example: "`,preset load [preset_name]`",
                 explanation: "Loads the mentioned preset into the game options",
             },
             {
-                example: "`!preset replace [preset_name]`",
+                example: "`,preset replace [preset_name]`",
                 explanation: "Replaces the current game options as the mentioned preset",
             },
             {
-                example: "`!preset delete [preset_name]`",
+                example: "`,preset delete [preset_name]`",
                 explanation: "Deletes the mentioned preset",
             },
         ],

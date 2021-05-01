@@ -57,7 +57,7 @@ export default class SkipCommand implements BaseCommand {
     help = {
         name: "skip",
         description: "Vote to skip the current song. A song is skipped when majority of participants vote to skip it.",
-        usage: "!skip",
+        usage: ",skip",
         examples: [],
         priority: 1010,
     };

@@ -28,18 +28,18 @@ export default class AddCommand implements BaseCommand {
     help = {
         name: "add",
         description: "Adds one or more groups to the current `,groups`, `,excludes`, or `,includes` options",
-        usage: "!add [groups | excludes | includes] [list of groups]",
+        usage: ",add [groups | excludes | includes] [list of groups]",
         examples: [
             {
-                example: "`!add groups twice, red velvet`",
+                example: "`,add groups twice, red velvet`",
                 explanation: "Adds Twice and Red Velvet to the current `,groups` option",
             },
             {
-                example: "`!add excludes BESTie, Dia, iKON`",
+                example: "`,add excludes BESTie, Dia, iKON`",
                 explanation: "Adds BESTie, Dia, and IKON to the current `,excludes` option",
             },
             {
-                example: "`!add includes exo`",
+                example: "`,add includes exo`",
                 explanation: "Adds EXO to the current `,includes` option",
             },
         ],

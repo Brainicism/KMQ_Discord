@@ -9,7 +9,7 @@ export default class EndCommand implements BaseCommand {
     help = {
         name: "end",
         description: "Finishes the current game and decides on a winner.",
-        usage: "!end",
+        usage: ",end",
         examples: [],
         priority: 1020,
     };

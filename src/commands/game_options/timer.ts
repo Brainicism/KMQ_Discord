@@ -24,14 +24,14 @@ export default class GuessTimeoutCommand implements BaseCommand {
     help = {
         name: "timer",
         description: "Try your best to guess correctly before the timer runs out! Enter a time in seconds, or give no arguments to disable.",
-        usage: "!timer [time]",
+        usage: ",timer [time]",
         examples: [
             {
-                example: "`!timer 15`",
+                example: "`,timer 15`",
                 explanation: "In 15 seconds, if no user has guessed correctly, the round ends and the next one begins automatically",
             },
             {
-                example: "`!timer`",
+                example: "`,timer`",
                 explanation: "Disables the timer",
             },
         ],

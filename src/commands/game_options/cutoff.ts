@@ -32,18 +32,18 @@ export default class CutoffCommand implements BaseCommand {
     help = {
         name: "cutoff",
         description: "Set a cutoff year range for songs. If one value is specified, only songs AFTER that year will be played. If two values are specified, only songs BETWEEN those two years will be played",
-        usage: "!cutoff [year_start] {year_end}",
+        usage: ",cutoff [year_start] {year_end}",
         examples: [
             {
-                example: "`!cutoff 2015`",
+                example: "`,cutoff 2015`",
                 explanation: "Play songs released after the year 2015.",
             },
             {
-                example: "`!cutoff 2015 2018`",
+                example: "`,cutoff 2015 2018`",
                 explanation: "Play songs released between the years 2015-2018.",
             },
             {
-                example: "`!cutoff`",
+                example: "`,cutoff`",
                 explanation: `Reset to the default cutoff of \`${DEFAULT_BEGINNING_SEARCH_YEAR}\` to \`${DEFAULT_ENDING_SEARCH_YEAR}\``,
             },
         ],
