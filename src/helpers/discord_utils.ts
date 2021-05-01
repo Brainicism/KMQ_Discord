@@ -264,15 +264,18 @@ export async function sendOptionsMessage(messageContext: MessageContext,
 
     if (guildPreference.isGroupsMode()) {
         for (const option of ConflictingGameOptions[GameOption.GROUPS]) {
-            optionStrings[option] = `${optionStrings[option] !== null ? strikethrough(optionStrings[option]) : ""}(\`${PREFIX}${GameOptionCommand[GameOption.GROUPS]}\` ${CONFLICT})`;
+            const prefix = optionStrings[option] !== null ? `${strikethrough(optionStrings[option])} ` : "";
+            optionStrings[option] = `${prefix}(\`${PREFIX}${GameOptionCommand[GameOption.GROUPS]}\` ${CONFLICT})`;
         }
     } else if (guildPreference.isIncludesMode()) {
         for (const option of ConflictingGameOptions[GameOption.INCLUDE]) {
-            optionStrings[option] = `${optionStrings[option] !== null ? strikethrough(optionStrings[option]) : ""}(\`${PREFIX}${GameOptionCommand[GameOption.INCLUDE]}\` ${CONFLICT})`;
+            const prefix = optionStrings[option] !== null ? `${strikethrough(optionStrings[option])} ` : "";
+            optionStrings[option] = `${prefix}(\`${PREFIX}${GameOptionCommand[GameOption.INCLUDE]}\` ${CONFLICT})`;
         }
     } else if (guildPreference.isExcludesMode()) {
         for (const option of ConflictingGameOptions[GameOption.EXCLUDE]) {
-            optionStrings[option] = `${optionStrings[option] !== null ? strikethrough(optionStrings[option]) : ""}(\`${PREFIX}${GameOptionCommand[GameOption.EXCLUDE]}\` ${CONFLICT})`;
+            const prefix = optionStrings[option] !== null ? `${strikethrough(optionStrings[option])} ` : "";
+            optionStrings[option] = `${prefix}(\`${PREFIX}${GameOptionCommand[GameOption.EXCLUDE]}\` ${CONFLICT})`;
         }
     }
 
