@@ -151,12 +151,16 @@ export async function updatePublishDateOverrides() {
 export function reloadAliases() {
     try {
         state.aliases.song = parseJsonFile(songAliasesFilePath);
+        logger.info("Reloaded song alias data");
+    } catch (err) {
+        logger.error("Error parsing song alias file");
+    }
+
+    try {
         state.aliases.artist = parseJsonFile(artistAliasesFilePath);
-        logger.info("Reloaded song and artist alias data");
+        logger.info("Reloaded artist alias data");
     } catch (err) {
         logger.error("Error parsing alias files");
-        state.aliases.song = {};
-        state.aliases.artist = {};
     }
 }
 
@@ -165,8 +169,6 @@ export function reloadEndGameMessages() {
         state.endGameMessages = parseJsonFile(path.resolve(__dirname, "../../data/end_game_messages.json"));
     } catch (err) {
         logger.error("Error parsing end game messages file");
-        state.endGameMessages.kmq = [];
-        state.endGameMessages.game = [];
     }
 }
 
