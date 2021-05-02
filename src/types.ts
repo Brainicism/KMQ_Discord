@@ -98,7 +98,7 @@ export const GameOptionCommand: { [option: string]: string } = {
     [GameOption.LIMIT]: "limit",
     [GameOption.GENDER]: "gender",
     [GameOption.CUTOFF]: "cutoff",
-    [GameOption.ARTIST_TYPE]: "type",
+    [GameOption.ARTIST_TYPE]: "artisttype",
     [GameOption.RELEASE_TYPE]: "release",
     [GameOption.LANGUAGE_TYPE]: "language",
     [GameOption.SUBUNIT_PREFERENCE]: "subunit",
@@ -123,8 +123,6 @@ export const PriorityGameOption: Array<GameOption> = [
 
 export const ConflictingGameOptions: { [option: string]: Array<GameOption> } = {
     [GameOption.GROUPS]: [GameOption.INCLUDE, GameOption.EXCLUDE, GameOption.GENDER, GameOption.ARTIST_TYPE],
-    [GameOption.EXCLUDE]: [GameOption.GROUPS],
-    [GameOption.INCLUDE]: [GameOption.GROUPS],
 };
 
 export enum EnvType {
