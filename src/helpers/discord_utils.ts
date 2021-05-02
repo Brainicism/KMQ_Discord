@@ -286,8 +286,6 @@ export async function sendOptionsMessage(messageContext: MessageContext,
         if (!gameOptionString) continue;
         if (updatedOption && updatedOption.option === gameOption) {
             optionStrings[gameOption] = underline(gameOptionString);
-        } else if ([NOT_SET_OPTION, CONFLICT].every((x) => !gameOptionString.includes(x))) {
-            optionStrings[gameOption] = codeLine(gameOptionString);
         }
     }
 
