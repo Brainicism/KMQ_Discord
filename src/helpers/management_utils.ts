@@ -129,8 +129,9 @@ export async function updateBotStatus() {
         .limit(25);
     const randomPopularSong = chooseRandom(randomPopularSongs);
     client.editStatus("online", {
-        name: `${randomPopularSong["song_name"]} by ${randomPopularSong["artist_name"]}`,
-        type: 2,
+        name: `'${randomPopularSong["song_name"]}' by ${randomPopularSong["artist_name"]}`,
+        type: 1,
+        url: `https://www.youtube.com/watch?v=${randomPopularSong["link"]}`,
     });
 }
 
