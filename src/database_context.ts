@@ -31,7 +31,7 @@ export class DatabaseContext {
         } else {
             this.kmq = Knex(generateKnexContext("kmq", 0, 10));
         }
-        this.kpopVideos = Knex(generateKnexContext("kpop_videos", 0, 10));
+        this.kpopVideos = Knex(generateKnexContext("kpop_videos", 0, 1));
         this.agnostic = Knex(generateKnexContext(null, 0, 1));
         this.kpopVideosValidation = Knex(generateKnexContext("kpop_videos_validation", 0, 1));
     }
