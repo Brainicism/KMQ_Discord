@@ -25,9 +25,11 @@ You start off as a `Novice`, and work your way up through the works of `Trainee`
 - Playing with more people will increase how much EXP you gain, ranging between 0.75x (single player) to 1.25x EXP (6+ players).
 - Guessing quickly will earn you 1.1x EXP.
 - Guess streaks greater than 5 will earn you 1.2x EXP.
+- Voting on [top.gg](https://top.gg/bot/508759831755096074/vote) rewards you 2x EXP for an hour. You can vote once every 12 hours. See `,vote` for more details.
 - Every weekend is a 2x EXP weekend, all days on Saturdays and Sundays EST time.
 - On weekdays, there are 3 daily `KMQ Power Hours` lasting two hours each for 2x EXP, at random points in the day.
 - Winning a game in teams mode earns your team 1.1x EXP.
+- All EXP bonuses stack on one another.
 
 ## Requirements
 You will only gain EXP if:
@@ -110,6 +112,7 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,leaderboard`: Shows the global KMQ leaderboard
 - `,list`: Shows the currently selected groups for `,groups`,`,includes`, or `,excludes`
 - `,preset`: Save and load game option presents
+- `,vote`: Shows your current 2x bonus EXP modifier status from voting for the bot on [top.gg](https://top.gg/bot/508759831755096074/vote). Thanks for supporting KMQ!
 ## Game Option Commands 
 - `,cutoff`: Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen
 - `,limit`: Set a maximum number of results in the song query. This effectively sets the 'Top X number of songs' based on the selected filters
