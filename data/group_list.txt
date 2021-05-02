@@ -219,6 +219,7 @@ G.O.D
 Gaeko
 Gaho
 Gain
+Gangkiz
 Gary
 Gavy NJ
 GB9
@@ -243,6 +244,7 @@ Goo Hara
 GOOD DAY
 GOT7
 Gray
+GreatGuys
 GSoul
 Guckkasten
 Gugudan
@@ -288,6 +290,7 @@ Hong Joo Chan
 Hoody
 Hoppipolla
 Hoshi
+Hot Issue
 Hot Place
 Hotshot
 Huh Gak
@@ -415,6 +418,7 @@ Kim Nam Joo
 Kim Sung Kyu
 Kim Woo Seok
 Kim Yo Han
+Kim Young-Chul
 Kingdom
 Kiss&Cry
 Kisum
@@ -543,6 +547,7 @@ NS Yoon-G
 NTX
 NU'EST
 NU'EST W
+O3ohn
 Oh My Girl
 Oh My Girl Banhana
 Oh Seunghee
@@ -553,6 +558,7 @@ Onewe
 ONF
 Ong Seongwu
 OnlyOneOf
+OOHYO
 Orange Caramel
 Ovan
 P.O.P
@@ -812,6 +818,7 @@ Yoo Seonho
 Yoo Young-jin
 Yooa
 Yook Sung-jae
+Yoon Gun
 Yoon Hyun-sang
 Yoon Jisung
 Yoon Jong-shin
@@ -834,3 +841,4 @@ Zhou Mi
 Zia
 Zico
 Zion.T
+Zizo
