@@ -9,7 +9,6 @@ import { getFact } from "../fact_generator";
 import { EmbedPayload, GameOption, GameOptionCommand, PriorityGameOption, ConflictingGameOptions, GuildTextableMessage, PlayerRoundResult } from "../types";
 import { chunkArray, codeLine, bold, underline, italicize, strikethrough, parseJsonFile, chooseWeightedRandom, getOrdinalNum } from "./utils";
 import state from "../kmq";
-import { ModeType } from "../commands/game_options/mode";
 import Scoreboard from "../structures/scoreboard";
 import GameRound from "../structures/game_round";
 import EliminationScoreboard from "../structures/elimination_scoreboard";
@@ -246,7 +245,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     optionStrings[GameOption.MULTIGUESS] = guildPreference.getMultiGuessType();
     optionStrings[GameOption.SHUFFLE_TYPE] = guildPreference.getShuffleType();
     optionStrings[GameOption.SEEK_TYPE] = guildPreference.getSeekType();
-    optionStrings[GameOption.MODE_TYPE] = guildPreference.getModeType() === ModeType.BOTH ? `${ModeType.SONG_NAME} or ${ModeType.ARTIST} (\`${ModeType.BOTH}\`)` : guildPreference.getModeType();
+    optionStrings[GameOption.GUESS_MODE_TYPE] = guildPreference.getGuessModeType();
     optionStrings[GameOption.TIMER] = guildPreference.isGuessTimeoutSet() ? `${guildPreference.getGuessTimeout()} sec` : null;
     optionStrings[GameOption.DURATION] = guildPreference.isDurationSet() ? `${guildPreference.getDuration()} mins` : null;
     optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode() ? guildPreference.getDisplayedExcludesGroupNames() : null;

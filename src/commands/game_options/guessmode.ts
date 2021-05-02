@@ -5,49 +5,49 @@ import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_uti
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 
-const logger = _logger("mode");
+const logger = _logger("guessmode");
 
-export enum ModeType {
+export enum GuessModeType {
     SONG_NAME = "song",
     ARTIST = "artist",
     BOTH = "both",
 }
 
-export const DEFAULT_MODE = ModeType.SONG_NAME;
+export const DEFAULT_GUESS_MODE = GuessModeType.SONG_NAME;
 
-export default class ModeCommand implements BaseCommand {
+export default class GuessModeCommand implements BaseCommand {
     validations = {
         minArgCount: 0,
         maxArgCount: 1,
         arguments: [
             {
-                name: "modeType",
+                name: "guessModeType",
                 type: "enum" as const,
-                enums: Object.values(ModeType),
+                enums: Object.values(GuessModeType),
             },
         ],
     };
 
     help = {
-        name: "mode",
+        name: "guessmode",
         description: "Choose whether to guess by song title or artist name. Valid values are `artist`, `song`, or `both`",
-        usage: ",mode [guessType]",
+        usage: ",guessmode [guessType]",
         examples: [
             {
-                example: "`,mode song`",
+                example: "`,guessmode song`",
                 explanation: "Type the correct song name to win a game round",
             },
             {
-                example: "`,mode artist`",
+                example: "`,guessmode artist`",
                 explanation: "Type the correct name of the artist to win a game round",
             },
             {
-                example: "`,mode both`",
+                example: "`,guessmode both`",
                 explanation: "Type the correct name of the artist (0.2 points) or the name of the song (1 point) to win a game round",
             },
             {
-                example: "`,mode`",
-                explanation: `Reset to the default mode of \`${DEFAULT_MODE}\``,
+                example: "`,guessmode`",
+                explanation: `Reset to the default guess mode of \`${DEFAULT_GUESS_MODE}\``,
             },
         ],
         priority: 130,
@@ -57,15 +57,15 @@ export default class ModeCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
 
         if (parsedMessage.components.length === 0) {
-            guildPreference.resetModeType();
-            logger.info(`${getDebugLogHeader(message)} | Mode type reset.`);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.MODE_TYPE, reset: true });
+            guildPreference.resetGuessModeType();
+            logger.info(`${getDebugLogHeader(message)} | Guess mode type reset.`);
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GUESS_MODE_TYPE, reset: true });
             return;
         }
 
-        const modeType = parsedMessage.components[0].toLowerCase() as ModeType;
-        guildPreference.setModeType(modeType);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.MODE_TYPE, reset: false });
-        logger.info(`${getDebugLogHeader(message)} | Mode type set to ${modeType}`);
+        const modeType = parsedMessage.components[0].toLowerCase() as GuessModeType;
+        guildPreference.setGuessModeType(modeType);
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GUESS_MODE_TYPE, reset: false });
+        logger.info(`${getDebugLogHeader(message)} | Guess mode type set to ${modeType}`);
     }
 }

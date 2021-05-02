@@ -19,7 +19,7 @@ import EliminationScoreboard from "./elimination_scoreboard";
 import TeamScoreboard from "./team_scoreboard";
 import { deleteGameSession } from "../helpers/management_utils";
 import { GameType } from "../commands/game_commands/play";
-import { ModeType } from "../commands/game_options/mode";
+import { GuessModeType } from "../commands/game_options/guessmode";
 import { getRankNameByLevel } from "../commands/game_commands/profile";
 import { Gender } from "../commands/game_options/gender";
 import EliminationPlayer from "./elimination_player";
@@ -340,7 +340,7 @@ export default class GameSession {
 
         if (!this.guessEligible(message)) return;
 
-        const pointsEarned = this.checkGuess(message.author.id, message.content, guildPreference.getModeType());
+        const pointsEarned = this.checkGuess(message.author.id, message.content, guildPreference.getGuessModeType());
         if (pointsEarned > 0) {
             if (this.gameRound.finished) {
                 return;
@@ -561,7 +561,7 @@ export default class GameSession {
 
         const stream = fs.createReadStream(songLocation);
 
-        logger.info(`${getDebugLogHeader(messageContext)} | Playing song in voice connection. seek = ${guildPreference.getSeekType()}. song = ${this.getDebugSongDetails()}. mode = ${guildPreference.getModeType()}`);
+        logger.info(`${getDebugLogHeader(messageContext)} | Playing song in voice connection. seek = ${guildPreference.getSeekType()}. song = ${this.getDebugSongDetails()}. guess mode = ${guildPreference.getGuessModeType()}`);
         this.connection.removeAllListeners();
         this.connection.stopPlaying();
         try {
@@ -625,15 +625,15 @@ export default class GameSession {
      *
      * @param userID - The user ID of the user guessing
      * @param guess - The user's guess
-     * @param modeType - The guessing mode type to evaluate the guess against
+     * @param guessModeType - The guessing mode type to evaluate the guess against
      * @returns The number of points achieved for the guess
      */
-    private checkGuess(userID: string, guess: string, modeType: ModeType): number {
+    private checkGuess(userID: string, guess: string, guessModeType: GuessModeType): number {
         if (!this.gameRound) return 0;
         if (this.gameType !== GameType.ELIMINATION) {
             this.participants.add(userID);
         }
-        const pointsAwarded = this.gameRound.checkGuess(guess, modeType);
+        const pointsAwarded = this.gameRound.checkGuess(guess, guessModeType);
         if (pointsAwarded) {
             this.gameRound.userCorrect(userID, pointsAwarded);
         }
@@ -819,7 +819,7 @@ export default class GameSession {
         expModifier *= numParticipants === 1 ? 0.75 : (0.0625 * (Math.min(numParticipants, 6)) + 0.875);
 
         // penalize for using artist guess modes
-        if (guildPreference.getModeType() === ModeType.ARTIST || guildPreference.getModeType() === ModeType.BOTH) {
+        if (guildPreference.getGuessModeType() === GuessModeType.ARTIST || guildPreference.getGuessModeType() === GuessModeType.BOTH) {
             if (guildPreference.isGroupsMode()) return 0;
             expModifier *= 0.3;
         }
