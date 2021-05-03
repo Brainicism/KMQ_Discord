@@ -211,7 +211,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
  * @param message - The Message object
  * @param guildPreference - The corresponding GuildPreference
  * @param updatedOption - Specifies which GameOption was modified
- * @param footerText - The footer text (shows prefix when bot is pinged)
+ * @param footerText - The footer text
  */
 export async function sendOptionsMessage(messageContext: MessageContext,
     guildPreference: GuildPreference,
@@ -222,9 +222,6 @@ export async function sendOptionsMessage(messageContext: MessageContext,
         sendErrorMessage(messageContext, { title: "Error retrieving song data", description: `Try again in a bit, or report this error to the official KMQ server found in \`${process.env.BOT_PREFIX}help\`.` });
         return;
     }
-
-    const NOT_SET_OPTION = italicize("Not set");
-    const CONFLICT = "conflict";
 
     const visibleLimitEnd = Math.min(totalSongs.countBeforeLimit, guildPreference.getLimitEnd());
     const visibleLimitStart = Math.min(totalSongs.countBeforeLimit, guildPreference.getLimitStart());
@@ -251,14 +248,19 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode() ? guildPreference.getDisplayedExcludesGroupNames() : null;
     optionStrings[GameOption.INCLUDE] = guildPreference.isIncludesMode() ? guildPreference.getDisplayedIncludesGroupNames() : null;
 
-    const PREFIX = process.env.BOT_PREFIX;
-    const CONFLICT_WARNING_EMOJI = "⚠";
+    const generateConflictingCommandEntry = ((commandValue: string, conflictingOption: string) => `${strikethrough(commandValue)} (⚠ \`${process.env.BOT_PREFIX}${conflictingOption}\` ${italicize("conflict")})`);
+
+    const NOT_SET_OPTION = italicize("Not set");
     const { gameSessions } = state;
     const isEliminationMode = gameSessions[messageContext.guildID] && gameSessions[messageContext.guildID].gameType === GameType.ELIMINATION;
 
     // Special case: ,goal is conflicting only when current game is elimination
-    optionStrings[GameOption.GOAL] = guildPreference.isGoalSet() ? String(guildPreference.getGoal()) : NOT_SET_OPTION;
-    optionStrings[GameOption.GOAL] = !isEliminationMode ? optionStrings[GameOption.GOAL] : `${strikethrough(optionStrings[GameOption.GOAL])} (${CONFLICT_WARNING_EMOJI}\`${PREFIX}play ${GameType.ELIMINATION}\` ${CONFLICT})`;
+    if (guildPreference.isGoalSet()) {
+        optionStrings[GameOption.GOAL] = String(guildPreference.getGoal());
+        if (isEliminationMode) {
+            optionStrings[GameOption.GOAL] = generateConflictingCommandEntry(optionStrings[GameOption.GOAL], `play ${GameType.ELIMINATION}`);
+        }
+    }
 
     const gameOptionConflictCheckMap = [
         { conflictCheck: guildPreference.isGroupsMode.bind(guildPreference), gameOption: GameOption.GROUPS },
@@ -269,8 +271,8 @@ export async function sendOptionsMessage(messageContext: MessageContext,
         const doesConflict = gameOptionConflictCheck.conflictCheck();
         if (doesConflict) {
             for (const option of ConflictingGameOptions[gameOptionConflictCheck.gameOption]) {
-                if (optionStrings[option] !== null) {
-                    optionStrings[option] = `${strikethrough(optionStrings[option])} (${CONFLICT_WARNING_EMOJI}\`${PREFIX}${GameOptionCommand[gameOptionConflictCheck.gameOption]}\` ${CONFLICT})`;
+                if (optionStrings[option]) {
+                    optionStrings[option] = generateConflictingCommandEntry(optionStrings[option], GameOptionCommand[gameOptionConflictCheck.gameOption]);
                 } else {
                     optionStrings[option] = "";
                 }
@@ -278,19 +280,19 @@ export async function sendOptionsMessage(messageContext: MessageContext,
         }
     }
 
-    // Surround changed option with code block, underline all other "set" options
-    // Unset options are set to NOT_SET_OPTION later
-    for (const gameOption of Object.keys(optionStrings)) {
-        const gameOptionString = optionStrings[gameOption];
-        if (!gameOptionString) continue;
-        if (updatedOption && updatedOption.option === gameOption) {
-            optionStrings[gameOption] = underline(gameOptionString);
-        }
+    // Set unset options to NOT_SET_OPTION
+    for (const option of Object.values(GameOption)) {
+        optionStrings[option] = optionStrings[option] || NOT_SET_OPTION;
+    }
+
+    // Underline changed option
+    if (updatedOption) {
+        optionStrings[updatedOption.option] = underline(optionStrings[updatedOption.option]);
     }
 
     // Options excluded from embed fields since they are of higher importance (shown above them as part of the embed description)
     const priorityOptions = PriorityGameOption
-        .map((option) => `${bold(PREFIX + GameOptionCommand[option])}: ${optionStrings[option] || NOT_SET_OPTION}`)
+        .map((option) => `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${optionStrings[option]}`)
         .join("\n");
 
     const fieldOptions = Object.keys(GameOptionCommand).filter((option) => !PriorityGameOption.includes(option as GameOption));
@@ -300,18 +302,18 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     const fields = [
         {
             name: ZERO_WIDTH_SPACE,
-            value: firstHalfOptions.map((option) => `${bold(PREFIX + GameOptionCommand[option])}: ${optionStrings[option] || NOT_SET_OPTION}`).join("\n"),
+            value: firstHalfOptions.map((option) => `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${optionStrings[option]}`).join("\n"),
             inline: true,
         },
         {
             name: ZERO_WIDTH_SPACE,
-            value: secondHalfOptions.map((option) => `${bold(PREFIX + GameOptionCommand[option])}: ${optionStrings[option] || NOT_SET_OPTION}`).join("\n"),
+            value: secondHalfOptions.map((option) => `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${optionStrings[option]}`).join("\n"),
             inline: true,
         },
     ];
 
-    if (!footerText && Math.random() < 0.25) {
-        footerText = `Looking for information on how to use a command? Check out '${PREFIX}help [command]' to learn more.`;
+    if (updatedOption && updatedOption.reset) {
+        footerText = `Looking for information on how to use a command? Check out '${process.env.BOT_PREFIX}help [command]' to learn more.`;
     }
 
     await sendInfoMessage(messageContext,
