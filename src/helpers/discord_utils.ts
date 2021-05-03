@@ -227,7 +227,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     const visibleLimitStart = Math.min(totalSongs.countBeforeLimit, guildPreference.getLimitStart());
 
     // Store the VALUE of ,[option]: [VALUE] into optionStrings
-    // Null optionStrings values are set to NOT_SET_OPTION below
+    // Null optionStrings values are set to "Not set" below
     const optionStrings = {};
     optionStrings[GameOption.GROUPS] = guildPreference.isGroupsMode() ? guildPreference.getDisplayedGroupNames() : null;
     optionStrings[GameOption.LIMIT] = guildPreference.getLimitStart() === 0 ? `${visibleLimitEnd}` : `${getOrdinalNum(visibleLimitStart)} to ${getOrdinalNum(visibleLimitEnd)} (${totalSongs.count} songs)`;
@@ -250,7 +250,6 @@ export async function sendOptionsMessage(messageContext: MessageContext,
 
     const generateConflictingCommandEntry = ((commandValue: string, conflictingOption: string) => `${strikethrough(commandValue)} (⚠ \`${process.env.BOT_PREFIX}${conflictingOption}\` ${italicize("conflict")})`);
 
-    const NOT_SET_OPTION = italicize("Not set");
     const { gameSessions } = state;
     const isEliminationMode = gameSessions[messageContext.guildID] && gameSessions[messageContext.guildID].gameType === GameType.ELIMINATION;
 
@@ -280,9 +279,8 @@ export async function sendOptionsMessage(messageContext: MessageContext,
         }
     }
 
-    // Set unset options to NOT_SET_OPTION
     for (const option of Object.values(GameOption)) {
-        optionStrings[option] = optionStrings[option] || NOT_SET_OPTION;
+        optionStrings[option] = optionStrings[option] || italicize("Not set");
     }
 
     // Underline changed option
