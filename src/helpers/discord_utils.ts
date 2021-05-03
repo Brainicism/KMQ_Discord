@@ -225,13 +225,13 @@ export async function sendOptionsMessage(messageContext: MessageContext,
 
     const visibleLimitEnd = Math.min(totalSongs.countBeforeLimit, guildPreference.getLimitEnd());
     const visibleLimitStart = Math.min(totalSongs.countBeforeLimit, guildPreference.getLimitStart());
+    const limit = guildPreference.getLimitStart() === 0 ? `${visibleLimitEnd}` : `${getOrdinalNum(visibleLimitStart)} to ${getOrdinalNum(visibleLimitEnd)} (${totalSongs.count} songs)`;
 
     // Store the VALUE of ,[option]: [VALUE] into optionStrings
     // Null optionStrings values are set to "Not set" below
     const optionStrings = {};
     optionStrings[GameOption.GROUPS] = guildPreference.isGroupsMode() ? guildPreference.getDisplayedGroupNames() : null;
-    optionStrings[GameOption.LIMIT] = guildPreference.getLimitStart() === 0 ? `${visibleLimitEnd}` : `${getOrdinalNum(visibleLimitStart)} to ${getOrdinalNum(visibleLimitEnd)} (${totalSongs.count} songs)`;
-    optionStrings[GameOption.LIMIT] = `${optionStrings[GameOption.LIMIT]} / ${totalSongs.countBeforeLimit}`;
+    optionStrings[GameOption.LIMIT] = `${limit} / ${totalSongs.countBeforeLimit}`;
     optionStrings[GameOption.GENDER] = guildPreference.getGender().join(", ");
     optionStrings[GameOption.CUTOFF] = `${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
     optionStrings[GameOption.ARTIST_TYPE] = guildPreference.getArtistType();
@@ -289,23 +289,29 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     }
 
     // Options excluded from embed fields since they are of higher importance (shown above them as part of the embed description)
-    const priorityOptions = PriorityGameOption
+    let priorityOptions = PriorityGameOption
         .map((option) => `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${optionStrings[option]}`)
         .join("\n");
 
+    priorityOptions = `Now playing the top ${bold(limit)} out of ${bold(String(totalSongs.countBeforeLimit))} available songs from the following game options:\n\n${priorityOptions}`;
+
     const fieldOptions = Object.keys(GameOptionCommand).filter((option) => !PriorityGameOption.includes(option as GameOption));
-    const firstHalfOptions = fieldOptions.slice(0, fieldOptions.length / 2);
-    const secondHalfOptions = fieldOptions.slice(fieldOptions.length / 2);
     const ZERO_WIDTH_SPACE = "​";
+    // Split non-priority options into three fields
     const fields = [
         {
             name: ZERO_WIDTH_SPACE,
-            value: firstHalfOptions.map((option) => `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${optionStrings[option]}`).join("\n"),
+            value: fieldOptions.slice(0, Math.ceil(fieldOptions.length / 3)).map((option) => `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${optionStrings[option]}`).join("\n"),
             inline: true,
         },
         {
             name: ZERO_WIDTH_SPACE,
-            value: secondHalfOptions.map((option) => `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${optionStrings[option]}`).join("\n"),
+            value: fieldOptions.slice(Math.ceil(fieldOptions.length / 3), Math.ceil((2 * fieldOptions.length) / 3)).map((option) => `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${optionStrings[option]}`).join("\n"),
+            inline: true,
+        },
+        {
+            name: ZERO_WIDTH_SPACE,
+            value: fieldOptions.slice(Math.ceil((2 * fieldOptions.length) / 3)).map((option) => `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${optionStrings[option]}`).join("\n"),
             inline: true,
         },
     ];
