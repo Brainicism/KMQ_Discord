@@ -230,8 +230,8 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     // Store the VALUE of ,[option]: [VALUE] into optionStrings
     // Null optionStrings values are set to "Not set" below
     const optionStrings = {};
-    optionStrings[GameOption.GROUPS] = guildPreference.isGroupsMode() ? guildPreference.getDisplayedGroupNames() : null;
     optionStrings[GameOption.LIMIT] = `${limit} / ${totalSongs.countBeforeLimit}`;
+    optionStrings[GameOption.GROUPS] = guildPreference.isGroupsMode() ? guildPreference.getDisplayedGroupNames() : null;
     optionStrings[GameOption.GENDER] = guildPreference.getGender().join(", ");
     optionStrings[GameOption.CUTOFF] = `${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
     optionStrings[GameOption.ARTIST_TYPE] = guildPreference.getArtistType();
@@ -272,8 +272,6 @@ export async function sendOptionsMessage(messageContext: MessageContext,
             for (const option of ConflictingGameOptions[gameOptionConflictCheck.gameOption]) {
                 if (optionStrings[option]) {
                     optionStrings[option] = generateConflictingCommandEntry(optionStrings[option], GameOptionCommand[gameOptionConflictCheck.gameOption]);
-                } else {
-                    optionStrings[option] = "";
                 }
             }
         }

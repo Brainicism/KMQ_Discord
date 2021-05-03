@@ -72,8 +72,8 @@ export interface State {
 }
 
 export enum GameOption {
-    GROUPS = "Groups",
     LIMIT = "Limit",
+    GROUPS = "Groups",
     GENDER = "Gender",
     CUTOFF = "Cutoff",
     ARTIST_TYPE = "Artist Type",
@@ -94,8 +94,8 @@ export enum GameOption {
 }
 
 export const GameOptionCommand: { [option: string]: string } = {
-    [GameOption.GROUPS]: "groups",
     [GameOption.LIMIT]: "limit",
+    [GameOption.GROUPS]: "groups",
     [GameOption.GENDER]: "gender",
     [GameOption.CUTOFF]: "cutoff",
     [GameOption.ARTIST_TYPE]: "artisttype",
@@ -115,8 +115,8 @@ export const GameOptionCommand: { [option: string]: string } = {
 };
 
 export const PriorityGameOption: Array<GameOption> = [
-    GameOption.GROUPS,
     GameOption.LIMIT,
+    GameOption.GROUPS,
     GameOption.GENDER,
     GameOption.CUTOFF,
 ];
