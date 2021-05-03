@@ -32,7 +32,7 @@ export default class VoteCommand implements BaseCommand {
         sendInfoMessage(MessageContext.fromMessage(message), {
             color: boostActive ? EMBED_SUCCESS_BONUS_COLOR : EMBED_INFO_COLOR,
             title: boostActive ? "Boost active!" : "Boost inactive",
-            description: `${timeRemaining}Vote for KMQ on [top.gg](https://top.gg/bot/508759831755096074/vote) and you'll receive 2x EXP for an hour! You can vote once every 12 hours.\n\nWe'd appreciate it if you could also leave a [review](https://top.gg/bot/508759831755096074#reviews).`,
+            description: `${timeRemaining}Vote for KMQ on [top.gg](https://top.gg/bot/508759831755096074/vote) and you'll receive 2x EXP for an hour! You can vote once every 12 hours. (We don't make any money off the ads shown)\n\nWe'd appreciate it if you could also leave a [review](https://top.gg/bot/508759831755096074#reviews).`,
             thumbnailUrl: KmqImages.THUMBS_UP,
         });
         logger.info(`${getDebugLogHeader(message)} | Vote instructions retrieved.`);
