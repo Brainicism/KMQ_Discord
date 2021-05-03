@@ -34,8 +34,8 @@ You start off as a `Novice`, and work your way up through the works of `Trainee`
 ## Requirements
 You will only gain EXP if:
 - There is a minimum of 10 songs selected
-- You are using `,mode song` (full EXP)
-- You are using `,mode artist` or `,mode both` and you are not using `,groups` (30% EXP)
+- You are using `,guessmode song` (full EXP)
+- You are using `,guessmode artist` or `,mode both` and you are not using `,groups` (30% EXP)
 
 # Game Options
 KMQ offers different game options to narrow down the selection of random songs based on your preferences. The current game options can be viewed by using `,options` or simply tagging KMQ Bot.
@@ -66,10 +66,10 @@ Setting the seek type changes at which point in a song KMQ bot starts playing fr
 
 ![seek](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/seek.png)
 
-## ,mode [mode_type]
-Setting the mode type changes the objective of the game, between guessing the name of the artist (`,mode artist`) vs guessing the name of the song (`,mode song`). `,mode both` can be used to allow for guessing either the song or artist, where a song guess will net you 1 point, and an artist guess will net you 0.2 points.
+## ,guessmode [guess_mode_type]
+Setting the guess mode type changes the objective of the game, between guessing the name of the artist (`,guessmode artist`) vs guessing the name of the song (`,guessmode song`). `,guessmode both` can be used to allow for guessing either the song or artist, where a song guess will net you 1 point, and an artist guess will net you 0.2 points.
 
-![mode](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/mode.png)
+![guessmode](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/guessmode.png)
 
 ## ,groups [group_1],{group_2},{group_3} ...
 Setting the groups option limits the selection of songs to those belonging to the artist specified. For instance `,groups blackpink,itzy,fromis 9,bts` would exclusively play songs from those four artists. You can view the list of groups with `,help groups`. Make sure to separate the groups with commas. You must enter the names of all of the groups at one time. In order to reset this option, simply type `,groups`.
@@ -121,7 +121,7 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,groups`: Specify what groups/artists you'd like to hear from
 - `,exclude`: Specify what groups/artists you'd like to exclude
 - `,include`: Specify what groups/artists you'd like to forcefully include, regardless of other game options
-- `,mode`: Choose whether to guess based on song name or artist name
+- `,guessmode`: Choose whether to guess based on song name or artist name
 - `,goal`: Specify a number of points to be reached before a winner is selected, and the game ends 
 - `,timer`: Try your best to guess correctly before the timer runs out! Enter a time in seconds, or give no arguments to disable
 - `,shuffle`: Choose whether songs should play in "true" random order or in uniquely random order.

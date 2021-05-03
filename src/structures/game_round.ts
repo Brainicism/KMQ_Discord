@@ -1,4 +1,4 @@
-import { ModeType } from "../commands/game_options/mode";
+import { GuessModeType } from "../commands/game_options/guessmode";
 import state from "../kmq";
 import _logger from "../logger";
 import KmqMember from "./kmq_member";
@@ -129,22 +129,22 @@ export default class GameRound {
     /**
      * Checks whether a user's guess is correct given a guesing mode type
      * @param message - The Message that contains the guess
-     * @param modeType - The guessing mode
+     * @param guessModeType - The guessing mode
      * @returns the number of points as defined by the mode type and correctness of the guess
      */
-    checkGuess(guess: string, modeType: ModeType): number {
-        if (modeType === ModeType.SONG_NAME) {
+    checkGuess(guess: string, guessModeType: GuessModeType): number {
+        if (guessModeType === GuessModeType.SONG_NAME) {
             return this.checkSongGuess(guess) ? 1 : 0;
         }
-        if (modeType === ModeType.ARTIST) {
+        if (guessModeType === GuessModeType.ARTIST) {
             return this.checkArtistGuess(guess) ? 1 : 0;
         }
-        if (modeType === ModeType.BOTH) {
+        if (guessModeType === GuessModeType.BOTH) {
             if (this.checkSongGuess(guess)) return 1;
             if (this.checkArtistGuess(guess)) return 0.2;
             return 0;
         }
-        logger.error(`Illegal mode type: ${modeType}`);
+        logger.error(`Illegal guess mode type: ${guessModeType}`);
         return 0;
     }
 

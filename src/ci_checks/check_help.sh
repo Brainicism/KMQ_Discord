@@ -2,7 +2,7 @@
 
 filenames[0]='./src/commands/game_commands/*.ts'
 filenames[1]='./src/commands/game_options/*.ts'
-exceptions=("debug", "join", "begin", "vote")
+exceptions=("debug", "join", "begin")
 
 for command_path in ${filenames[@]}
 do

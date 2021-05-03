@@ -44,7 +44,7 @@ export default class OstCommand implements BaseCommand {
             },
             {
                 example: "`,ost exclusive`",
-                explanation: "Exclusively play OST songs",
+                explanation: "Exclusively play OST songs.",
             },
             {
                 example: "`,ost`",
