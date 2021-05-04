@@ -16,10 +16,10 @@ export default class ResetCommand implements BaseCommand {
     help = {
         name: "reset",
         description: "Reset to the default game options",
-        usage: "!reset",
+        usage: ",reset",
         examples: [
             {
-                example: "`!reset`",
+                example: "`,reset`",
                 explanation: "Resets to the default game options",
             },
         ],

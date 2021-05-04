@@ -12,11 +12,10 @@ import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 
 const logger = _logger("help");
-export const placeholder = /!/g;
+export const placeholder = /,/g;
 const FIELDS_PER_EMBED = 6;
 const helpMessages = parseJsonFile(path.resolve(__dirname, "../../../data/help_strings.json"));
 
-// Usage: `!help [action]` or `!help`
 const helpMessage = async (message: GuildTextableMessage, action: string) => {
     let embedTitle = "";
     let embedDesc = "";
@@ -106,14 +105,14 @@ export default class HelpCommand implements BaseCommand {
     help = {
         name: "help",
         description: "Get help about the game's commands. Add a command to get information about the specific command.",
-        usage: "!help [command]",
+        usage: ",help [command]",
         examples: [
             {
-                example: "`!help`",
+                example: "`,help`",
                 explanation: "Shows all available commands and a short description",
             },
             {
-                example: "`!help cutoff`",
+                example: "`,help cutoff`",
                 explanation: "Shows a detailed description for the cutoff command",
             },
         ],

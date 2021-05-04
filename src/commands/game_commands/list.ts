@@ -28,18 +28,18 @@ export default class ListCommand implements BaseCommand {
     help = {
         name: "list",
         description: "Displays the currently selected groups for a given game option.",
-        usage: "!list [groups | excludes | includes]",
+        usage: ",list [groups | excludes | includes]",
         examples: [
             {
-                example: "`!list groups`",
+                example: "`,list groups`",
                 explanation: "Lists the current `,groups` options",
             },
             {
-                example: "`!list excludes`",
+                example: "`,list excludes`",
                 explanation: "Lists the current `,excludes` options",
             },
             {
-                example: "`!list includes`",
+                example: "`,list includes`",
                 explanation: "Lists the current `,includes` options",
             },
         ],

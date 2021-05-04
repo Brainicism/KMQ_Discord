@@ -3,7 +3,7 @@ import { DEFAULT_LIMIT } from "../commands/game_options/limit";
 import { Gender, DEFAULT_GENDER } from "../commands/game_options/gender";
 import { SeekType, DEFAULT_SEEK } from "../commands/game_options/seek";
 import { ShuffleType, DEFAULT_SHUFFLE } from "../commands/game_options/shuffle";
-import { ModeType, DEFAULT_MODE } from "../commands/game_options/mode";
+import { GuessModeType, DEFAULT_GUESS_MODE } from "../commands/game_options/guessmode";
 import _logger from "../logger";
 import dbContext from "../database_context";
 import { ArtistType, DEFAULT_ARTIST_TYPE } from "../commands/game_options/artisttype";
@@ -25,7 +25,7 @@ interface GameOptions {
     limitStart: number;
     limitEnd: number;
     seekType: SeekType;
-    modeType: ModeType;
+    guessModeType: GuessModeType;
     releaseType: ReleaseType;
     artistType: ArtistType;
     shuffleType: ShuffleType;
@@ -65,7 +65,7 @@ export default class GuildPreference {
         limitEnd: DEFAULT_LIMIT,
         limitStart: 0,
         seekType: DEFAULT_SEEK,
-        modeType: DEFAULT_MODE,
+        guessModeType: DEFAULT_GUESS_MODE,
         releaseType: DEFAULT_RELEASE_TYPE,
         shuffleType: DEFAULT_SHUFFLE,
         groups: null,
@@ -471,21 +471,21 @@ export default class GuildPreference {
 
     /**
      * Sets the mode type option value
-     * @param modeType - The ModeType
+     * @param guessModeType - The GuessModeType
      */
-    async setModeType(modeType: ModeType) {
-        this.gameOptions.modeType = modeType as ModeType;
+    async setGuessModeType(guessModeType: GuessModeType) {
+        this.gameOptions.guessModeType = guessModeType as GuessModeType;
         await this.updateGuildPreferences(true);
     }
 
     /** @returns the current mode type option value */
-    getModeType(): ModeType {
-        return this.gameOptions.modeType;
+    getGuessModeType(): GuessModeType {
+        return this.gameOptions.guessModeType;
     }
 
     /** Resets the mode type option to the default value */
-    async resetModeType() {
-        this.gameOptions.modeType = DEFAULT_MODE;
+    async resetGuessModeType() {
+        this.gameOptions.guessModeType = DEFAULT_GUESS_MODE;
         await this.updateGuildPreferences(true);
     }
 
@@ -505,7 +505,7 @@ export default class GuildPreference {
 
     /** Resets the release type option to the default value */
     async resetReleaseType() {
-        this.gameOptions.modeType = DEFAULT_MODE;
+        this.gameOptions.guessModeType = DEFAULT_GUESS_MODE;
         await this.updateGuildPreferences(true);
     }
 

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import assert from "assert";
-import { ModeType } from "../../commands/game_options/mode";
+import { GuessModeType } from "../../commands/game_options/guessmode";
 import state from "../../kmq";
 import GameRound, { cleanArtistName, cleanSongName } from "../../structures/game_round";
 
@@ -29,7 +29,7 @@ describe("constructor defaults", () => {
 
     describe("aliases", () => {
         beforeEach(() => {
-            state.aliases.artist = {};
+            state.aliases.artist.guessAliases = {};
             state.aliases.song = {};
         });
         describe("song aliases", () => {
@@ -44,7 +44,7 @@ describe("constructor defaults", () => {
         describe("artist aliases", () => {
             describe("artist has an alias", () => {
                 it("records the aliases as an accepted answer", () => {
-                    state.aliases.artist["Person2"] = ["Person Two", "Person Too"];
+                    state.aliases.artist.guessAliases["Person2"] = ["Person Two", "Person Too"];
                     gameRound = new GameRound("A really epic song", "Person2", "abcde", 2021);
                     assert.deepStrictEqual(gameRound.acceptedArtistAnswers, ["Person2", "Person Two", "Person Too"]);
                 });
@@ -140,31 +140,31 @@ describe("check guess", () => {
     });
     describe("incorrect guess", () => {
         it("should return 0 points", () => {
-            assert.strictEqual(gameRound.checkGuess("wrong_song", ModeType.SONG_NAME), 0);
-            assert.strictEqual(gameRound.checkGuess("wrong_artist", ModeType.ARTIST), 0);
-            assert.strictEqual(gameRound.checkGuess("wrong_both", ModeType.BOTH), 0);
+            assert.strictEqual(gameRound.checkGuess("wrong_song", GuessModeType.SONG_NAME), 0);
+            assert.strictEqual(gameRound.checkGuess("wrong_artist", GuessModeType.ARTIST), 0);
+            assert.strictEqual(gameRound.checkGuess("wrong_both", GuessModeType.BOTH), 0);
         });
     });
     describe("correct guess", () => {
         describe("song guessing mode", () => {
             it("should return 1 point", () => {
-                assert.strictEqual(gameRound.checkGuess("song", ModeType.SONG_NAME), 1);
+                assert.strictEqual(gameRound.checkGuess("song", GuessModeType.SONG_NAME), 1);
             });
         });
         describe("artist guessing mode", () => {
             it("should return 1 point", () => {
-                assert.strictEqual(gameRound.checkGuess("artist", ModeType.ARTIST), 1);
+                assert.strictEqual(gameRound.checkGuess("artist", GuessModeType.ARTIST), 1);
             });
         });
         describe("both guessing mode", () => {
             describe("guessed song", () => {
                 it("should return 1 point", () => {
-                    assert.strictEqual(gameRound.checkGuess("song", ModeType.BOTH), 1);
+                    assert.strictEqual(gameRound.checkGuess("song", GuessModeType.BOTH), 1);
                 });
             });
             describe("guessed artist", () => {
                 it("should return 0.2 points", () => {
-                    assert.strictEqual(gameRound.checkGuess("artist", ModeType.BOTH), 0.2);
+                    assert.strictEqual(gameRound.checkGuess("artist", GuessModeType.BOTH), 0.2);
                 });
             });
         });

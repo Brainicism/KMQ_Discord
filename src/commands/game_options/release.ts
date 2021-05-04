@@ -32,18 +32,18 @@ export default class ReleaseCommand implements BaseCommand {
     help = {
         name: "release",
         description: "Choose whether to include only official music videos, or all videos (dance practices, acoustic versions, remixes, etc)",
-        usage: "!release [release]",
+        usage: ",release [release]",
         examples: [
             {
-                example: "`!release official`",
+                example: "`,release official`",
                 explanation: "Plays only `official` music videos",
             },
             {
-                example: "`!release all`",
+                example: "`,release all`",
                 explanation: "Plays all available videos, including dance practices, acoustic versions, remixes",
             },
             {
-                example: "`!release`",
+                example: "`,release`",
                 explanation: `Reset to the default release type of \`${DEFAULT_RELEASE_TYPE}\``,
             },
         ],

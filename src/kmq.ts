@@ -19,8 +19,15 @@ const state: State = {
     botListingManager: null,
     client: null,
     aliases: {
-        artist: {},
+        artist: {
+            matchAliases: {},
+            guessAliases: {},
+        },
         song: {},
+    },
+    endGameMessages: {
+        game: [],
+        kmq: [],
     },
     processStartTime: Date.now(),
     bonusUsers: new Set(),

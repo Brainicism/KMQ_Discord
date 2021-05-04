@@ -30,18 +30,18 @@ export default class ShuffleCommand implements BaseCommand {
     help = {
         name: "shuffle",
         description: "Choose whether songs are played in truly random order (`random`) or randomly but uniquely until all songs are played (`shuffle`).",
-        usage: "!shuffle [random | unique]",
+        usage: ",shuffle [random | unique]",
         examples: [
             {
-                example: "`!shuffle random`",
+                example: "`,shuffle random`",
                 explanation: "Songs will play randomly.",
             },
             {
-                example: "`!shuffle unique`",
+                example: "`,shuffle unique`",
                 explanation: "Every song will play once before any are repeated.",
             },
             {
-                example: "`!shuffle`",
+                example: "`,shuffle`",
                 explanation: `Reset to the default shuffle mode of \`${DEFAULT_SHUFFLE}\``,
             },
         ],

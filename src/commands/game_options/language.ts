@@ -31,18 +31,18 @@ export default class LanguageCommand implements BaseCommand {
     help = {
         name: "language",
         description: "Sets korean-only or all available songs",
-        usage: "!language [korean | all]",
+        usage: ",language [korean | all]",
         examples: [
             {
-                example: "`!language korean`",
+                example: "`,language korean`",
                 explanation: "Plays only korean songs. Ignores songs that are in foreign languages: english, japanese, chinese.",
             },
             {
-                example: "`!language all`",
+                example: "`,language all`",
                 explanation: "Play all available songs.",
             },
             {
-                example: "`!language`",
+                example: "`,language`",
                 explanation: "Reset to the default language of `all`",
             },
         ],

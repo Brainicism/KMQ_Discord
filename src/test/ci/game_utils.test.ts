@@ -480,6 +480,26 @@ describe("song query", () => {
                 assert.deepStrictEqual(matchResults.unmatchedGroups, ["LinusTechTips", "Rihanna"]);
             });
         });
+        describe("artist aliases", () => {
+            describe("no alias is specified", () => {
+                it("should not match any groups", async () => {
+                    state.aliases.artist.matchAliases = {};
+                    const artistBAlias = "B's other name";
+                    const matchResults = await getMatchingGroupNames([artistBAlias]);
+                    assert.deepStrictEqual(matchResults.matchedGroups.length, 0);
+                    assert.deepStrictEqual(matchResults.unmatchedGroups, [artistBAlias]);
+                });
+            });
+            describe("alias is specified", () => {
+                it("should match group", async () => {
+                    const artistBAlias = "B's other name";
+                    state.aliases.artist.matchAliases[artistBAlias] = "B";
+                    const matchResults = await getMatchingGroupNames([artistBAlias]);
+                    assert.deepStrictEqual(matchResults.matchedGroups.map((x) => x.name), ["B"]);
+                    assert.deepStrictEqual(matchResults.unmatchedGroups.length, 0);
+                });
+            });
+        });
     });
 
     describe("getSongCount", () => {

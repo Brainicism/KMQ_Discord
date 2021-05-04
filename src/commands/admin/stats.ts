@@ -15,7 +15,7 @@ export default class SkipCommand implements BaseCommand {
     help = {
         name: "stats",
         description: "Various usage/system statistics.",
-        usage: "!stats",
+        usage: ",stats",
         examples: [],
         priority: 1,
     };

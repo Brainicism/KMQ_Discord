@@ -28,30 +28,30 @@ export default class LeaderboardCommand implements BaseCommand {
     help = {
         name: "leaderboard",
         description: "View the KMQ leaderboard.",
-        usage: "!leaderboard",
+        usage: ",leaderboard",
         examples: [
             {
-                example: "`!leaderboard`",
+                example: "`,leaderboard`",
                 explanation: "Show the global leaderboard",
             },
             {
-                example: "`!leaderboard page 3`",
+                example: "`,leaderboard page 3`",
                 explanation: "Shows the 3rd page of the global leaderboard",
             },
             {
-                example: "`!leaderboard server`",
+                example: "`,leaderboard server`",
                 explanation: "Show the server-wide leaderboard",
             },
             {
-                example: "`!leaderboard server 3`",
+                example: "`,leaderboard server 3`",
                 explanation: "Show the 3rd page of the server-wide leaderboard",
             },
             {
-                example: "`!leaderboard enroll`",
+                example: "`,leaderboard enroll`",
                 explanation: "Allows your name to be displayed on the leaderboard",
             },
             {
-                example: "`!leaderboard unenroll`",
+                example: "`,leaderboard unenroll`",
                 explanation: "Hides your name from the leaderboard",
             },
         ],

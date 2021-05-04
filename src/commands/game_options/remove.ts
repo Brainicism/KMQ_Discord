@@ -28,18 +28,18 @@ export default class RemoveCommand implements BaseCommand {
     help = {
         name: "remove",
         description: "Removes one or more groups from the current `,groups`, `,excludes`, or `,includes` options",
-        usage: "!remove [groups | excludes | includes] [list of groups]",
+        usage: ",remove [groups | excludes | includes] [list of groups]",
         examples: [
             {
-                example: "`!remove groups twice, red velvet`",
+                example: "`,remove groups twice, red velvet`",
                 explanation: "Removes Twice and Red Velvet from the current `,groups` option",
             },
             {
-                example: "`!remove excludes BESTie, Dia, iKON`",
+                example: "`,remove excludes BESTie, Dia, iKON`",
                 explanation: "Removes BESTie, Dia, and IKON from the current `,excludes` option",
             },
             {
-                example: "`!remove includes exo`",
+                example: "`,remove includes exo`",
                 explanation: "Removes EXO from the current `,includes` option",
             },
         ],

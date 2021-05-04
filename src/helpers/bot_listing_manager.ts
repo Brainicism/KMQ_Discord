@@ -58,6 +58,7 @@ export async function userVoted(userID: string) {
         .onConflict("user_id")
         .merge();
 
+    state.bonusUsers.add(userID);
     logger.info(`uid: ${userID} | User vote recorded`);
 }
 

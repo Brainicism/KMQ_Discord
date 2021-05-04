@@ -32,22 +32,22 @@ export default class OstCommand implements BaseCommand {
     help = {
         name: "ost",
         description: "Choose whether to include OST songs",
-        usage: "!ost [include | exclude]",
+        usage: ",ost [include | exclude]",
         examples: [
             {
-                example: "`!ost include`",
+                example: "`,ost include`",
                 explanation: "Include OST songs.",
             },
             {
-                example: "`!ost exclude`",
+                example: "`,ost exclude`",
                 explanation: "Exclude OST songs.",
             },
             {
-                example: "`!ost exclusive`",
-                explanation: "Exclusively play OST songs",
+                example: "`,ost exclusive`",
+                explanation: "Exclusively play OST songs.",
             },
             {
-                example: "`!ost`",
+                example: "`,ost`",
                 explanation: `Reset to the default option of \`${DEFAULT_OST_PREFERENCE}\``,
             },
         ],

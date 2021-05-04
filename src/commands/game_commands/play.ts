@@ -45,7 +45,7 @@ export async function sendBeginGameMessage(textChannelName: string,
     await sendInfoMessage(MessageContext.fromMessage(message), {
         title: startTitle,
         description: gameInstructions,
-        footerText: bonusUsers.length === 0 && Math.random() < 0.2 ? "Psst. Earn more EXP by voting (see ,vote)" : null,
+        footerText: bonusUsers.length === 0 && Math.random() < 0.5 ? "Psst. Earn more EXP by voting (see ,vote)" : null,
         thumbnailUrl: KmqImages.HAPPY,
     });
 }
@@ -74,23 +74,23 @@ export default class PlayCommand implements BaseCommand {
     help = {
         name: "play",
         description: "Starts a game of KMQ. Pick between classic (default) and elimination mode",
-        usage: "!play",
+        usage: ",play",
         priority: 1050,
         examples: [
             {
-                example: "`!play`",
+                example: "`,play`",
                 explanation: "Start a classic game of KMQ (type in your guess first to get a point)",
             },
             {
-                example: "`!play elimination 5`",
+                example: "`,play elimination 5`",
                 explanation: "Start an elimination game of KMQ where each player starts with `5` lives.",
             },
             {
-                example: "`!play elimination`",
+                example: "`,play elimination`",
                 explanation: `Start an elimination game of KMQ where each player starts with \`${DEFAULT_LIVES}\` lives.`,
             },
             {
-                example: "`!play teams`",
+                example: "`,play teams`",
                 explanation: "Split up into as many teams as you want and see who you can depend on to help you win!",
             },
         ],

@@ -9,7 +9,7 @@ export default class ScoreCommand implements BaseCommand {
     help = {
         name: "score",
         description: "See the scoreboard for the current game",
-        usage: "!score",
+        usage: ",score",
         examples: [],
         priority: 50,
     };

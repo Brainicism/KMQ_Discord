@@ -32,18 +32,18 @@ export default class SubunitsCommand implements BaseCommand {
     help = {
         name: "subunits",
         description: `Choose whether to automatically include a group's subunits, when using \`${process.env.BOT_PREFIX}groups\``,
-        usage: "!subunits [include | exclude]",
+        usage: ",subunits [include | exclude]",
         examples: [
             {
-                example: "`!subunits include`",
+                example: "`,subunits include`",
                 explanation: `Automatically include subunits. For example, \`${process.env.BOT_PREFIX}groups BTS\` would include songs by BTS, J-Hope, RM, etc.`,
             },
             {
-                example: "`!subunits exclude`",
+                example: "`,subunits exclude`",
                 explanation: "Do not include subunits.",
             },
             {
-                example: "`!subunits`",
+                example: "`,subunits`",
                 explanation: `Reset to the default option of \`${DEFAULT_SUBUNIT_PREFERENCE}\``,
             },
         ],
