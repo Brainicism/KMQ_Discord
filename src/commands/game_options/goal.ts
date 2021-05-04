@@ -53,11 +53,14 @@ export default class GoalCommand implements BaseCommand {
             if (!gameSession.scoreboard.isEmpty() && userGoal <= gameSession.scoreboard.getWinners()[0].getScore()) {
                 logger.info(`${getDebugLogHeader(message)} | Goal update ignored.`);
                 sendErrorMessage(MessageContext.fromMessage(message), { title: "Error applying goal", description: "Given goal exceeds highest score. Please raise your goal, or start a new game." });
-            } else if (gameSession.gameType === GameType.ELIMINATION) {
+                return;
+            }
+
+            if (gameSession.gameType === GameType.ELIMINATION) {
                 logger.warn(`${getDebugLogHeader(message)} | Game option conflict between goal and ${gameSession.gameType} gameType.`);
                 sendErrorMessage(MessageContext.fromMessage(message), { title: "Game Option Conflict", description: `An \`${GameType.ELIMINATION}\` game is currently in progress. \`goal\` and \`${GameType.ELIMINATION}\` are incompatible. Play a \`${GameType.CLASSIC}\` or \`${GameType.TEAMS}\` game to use \`goal\`.` });
+                return;
             }
-            return;
         }
 
         guildPreference.setGoal(userGoal);
