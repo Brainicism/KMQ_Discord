@@ -58,8 +58,8 @@ async function sendMessage(textChannelID: string, messageContent: Eris.AdvancedM
 
     // only reply to message if has required permissions
     if (!channel.permissionsOf(state.client.user.id).has("readMessageHistory")) {
-        if (messageContent.messageReferenceID) {
-            messageContent.messageReferenceID = null;
+        if (messageContent.messageReference) {
+            messageContent.messageReference = null;
         }
     }
 
@@ -124,7 +124,7 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
         thumbnail: embedPayload.thumbnailUrl ? { url: embedPayload.thumbnailUrl } : null,
         timestamp: embedPayload.timestamp,
     };
-    return sendMessage(messageContext.textChannelID, { embed, messageReferenceID: reply ? messageContext.referencedMessageID : null });
+    return sendMessage(messageContext.textChannelID, { embed, messageReference: reply ? { messageID: messageContext.referencedMessageID, failIfNotExists: false } : null });
 }
 
 /**
