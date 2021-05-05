@@ -41,7 +41,7 @@ export default class GoalCommand implements BaseCommand {
     async call({ message, parsedMessage, gameSessions }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            guildPreference.resetGoal();
+            await guildPreference.resetGoal();
             await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GOAL, reset: true });
             logger.info(`${getDebugLogHeader(message)} | Goal disabled.`);
             return;
@@ -63,7 +63,7 @@ export default class GoalCommand implements BaseCommand {
             }
         }
 
-        guildPreference.setGoal(userGoal);
+        await guildPreference.setGoal(userGoal);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GOAL, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Goal set to ${guildPreference.getGoal()}`);
     }
