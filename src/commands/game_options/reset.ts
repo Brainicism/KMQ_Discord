@@ -27,7 +27,7 @@ export default class ResetCommand implements BaseCommand {
     };
     async call({ message }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
-        guildPreference.resetToDefault();
+        await guildPreference.resetToDefault();
         logger.info(`${getDebugLogHeader(message)} | Reset to default guild preferences`);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, null);
     }

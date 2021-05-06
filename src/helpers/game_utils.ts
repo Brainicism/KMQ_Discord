@@ -12,6 +12,7 @@ import { FOREIGN_LANGUAGE_TAGS, LanguageType } from "../commands/game_options/la
 import { SubunitsPreference } from "../commands/game_options/subunits";
 import { OstPreference } from "../commands/game_options/ost";
 import { NON_OFFICIAL_VIDEO_TAGS, ReleaseType } from "../commands/game_options/release";
+import { cleanArtistName } from "../structures/game_round";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -222,7 +223,7 @@ export async function getMatchingGroupNames(rawGroupNames: Array<string>): Promi
     // apply artist aliases
     for (let i = 0; i < rawGroupNames.length; i++) {
         const groupName = rawGroupNames[i];
-        const matchingAlias = Object.entries(state.aliases.artist.matchAliases).find((x) => x[0].toLowerCase() === groupName.toLowerCase());
+        const matchingAlias = Object.entries(state.aliases.artist.matchAliases).find((x) => cleanArtistName(x[0]) === cleanArtistName(groupName));
         if (matchingAlias) {
             rawGroupNames[i] = matchingAlias[1];
         }

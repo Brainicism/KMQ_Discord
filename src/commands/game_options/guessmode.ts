@@ -59,14 +59,14 @@ export default class GuessModeCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
 
         if (parsedMessage.components.length === 0) {
-            guildPreference.resetGuessModeType();
-            logger.info(`${getDebugLogHeader(message)} | Guess mode type reset.`);
+            await guildPreference.resetGuessModeType();
             await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GUESS_MODE_TYPE, reset: true });
+            logger.info(`${getDebugLogHeader(message)} | Guess mode type reset.`);
             return;
         }
 
         const modeType = parsedMessage.components[0].toLowerCase() as GuessModeType;
-        guildPreference.setGuessModeType(modeType);
+        await guildPreference.setGuessModeType(modeType);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GUESS_MODE_TYPE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Guess mode type set to ${modeType}`);
     }
