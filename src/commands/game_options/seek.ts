@@ -50,13 +50,13 @@ export default class SeekCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            guildPreference.resetSeekType();
-            logger.info(`${getDebugLogHeader(message)} | Seek reset.`);
+            await guildPreference.resetSeekType();
             await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SEEK_TYPE, reset: true });
+            logger.info(`${getDebugLogHeader(message)} | Seek reset.`);
             return;
         }
         const seekType = parsedMessage.components[0] as SeekType;
-        guildPreference.setSeekType(seekType);
+        await guildPreference.setSeekType(seekType);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SEEK_TYPE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Seek type set to ${seekType}`);
     }
