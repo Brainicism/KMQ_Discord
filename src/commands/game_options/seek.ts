@@ -9,6 +9,7 @@ const logger = _logger("seek");
 export enum SeekType {
     BEGINNING = "beginning",
     RANDOM = "random",
+    MIDDLE = "middle",
 }
 
 export const DEFAULT_SEEK = SeekType.RANDOM;
@@ -34,6 +35,10 @@ export default class SeekCommand implements BaseCommand {
             {
                 example: "`,seek random`",
                 explanation: "Songs will be played starting from a random point in the middle",
+            },
+            {
+                example: "`,seek middle`",
+                explanation: "Songs will be played starting from the middle point",
             },
             {
                 example: "`,seek beginning`",

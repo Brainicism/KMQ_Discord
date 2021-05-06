@@ -552,11 +552,16 @@ export default class GameSession {
         const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${gameRound.videoID}.ogg`;
 
         let seekLocation: number;
-        if (guildPreference.getSeekType() === SeekType.RANDOM) {
-            const songDuration = await getAudioDurationInSeconds(songLocation);
-            seekLocation = songDuration * (0.6 * Math.random());
-        } else {
+        const seekType = guildPreference.getSeekType();
+        if (seekType === SeekType.BEGINNING) {
             seekLocation = 0;
+        } else {
+            const songDuration = await getAudioDurationInSeconds(songLocation);
+            if (guildPreference.getSeekType() === SeekType.RANDOM) {
+                seekLocation = songDuration * (0.6 * Math.random());
+            } else if (guildPreference.getSeekType() === SeekType.MIDDLE) {
+                seekLocation = songDuration * (0.4 + 0.2 * Math.random());
+            }
         }
 
         const stream = fs.createReadStream(songLocation);
