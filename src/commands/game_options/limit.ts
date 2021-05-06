@@ -52,9 +52,9 @@ export default class LimitCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            guildPreference.resetLimit();
-            logger.info(`${getDebugLogHeader(message)} | Limit reset.`);
+            await guildPreference.resetLimit();
             await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.LIMIT, reset: true });
+            logger.info(`${getDebugLogHeader(message)} | Limit reset.`);
             return;
         }
         let limitStart: number;
@@ -74,7 +74,7 @@ export default class LimitCommand implements BaseCommand {
                 return;
             }
         }
-        guildPreference.setLimit(limitStart, limitEnd);
+        await guildPreference.setLimit(limitStart, limitEnd);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.LIMIT, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Limit set to ${guildPreference.getLimitStart()} - ${guildPreference.getLimitEnd()}`);
     }
