@@ -5,6 +5,7 @@ BEGIN
 	DROP TABLE IF EXISTS available_songs_temp;
 	CREATE TABLE available_songs_temp (
 		song_name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+		song_aliases VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
 		link VARCHAR(255) NOT NULL,
 		artist_name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
 		members ENUM('female','male','coed') NOT NULL,
@@ -21,7 +22,7 @@ BEGIN
 
 	INSERT INTO available_songs_temp 
 	
-	SELECT TRIM(name) AS song_name, vlink AS link, TRIM(kpop_videos.app_kpop_group.name) AS artist_name, kpop_videos.app_kpop_group.members as members, kpop_videos.app_kpop.views AS views, publishedon, kpop_videos.app_kpop_group.id as id_artist, issolo,
+	SELECT TRIM(app_kpop.name) AS song_name, name_aka as song_aliases, vlink AS link, TRIM(kpop_videos.app_kpop_group.name) AS artist_name, kpop_videos.app_kpop_group.members as members, kpop_videos.app_kpop.views AS views, publishedon, kpop_videos.app_kpop_group.id as id_artist, issolo,
 	id_parentgroup, vtype, tags
 	FROM kpop_videos.app_kpop 
 	JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
