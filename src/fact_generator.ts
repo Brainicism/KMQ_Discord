@@ -113,7 +113,7 @@ async function recentMilestone(): Promise<string[]> {
     const twoWeeksPriorDate = new Date();
     twoWeeksPriorDate.setDate(twoWeeksPriorDate.getDate() - 14);
     const result = await dbContext.kpopVideos("app_kpop_miles")
-        .select(["app_kpop_miles.mvalue as milestone_views", "app_kpop.name as song_name", "app_kpop_group.name as artist_name"])
+        .select(["app_kpop_miles.mvalue as milestone_views", "app_kpop.name as song_name", "app_kpop_group.name as artist_name", "app_kpop.vlink as link"])
         .where("date", ">", twoWeeksPriorDate)
         .join("app_kpop", function join() {
             this.on("app_kpop.id", "=", "app_kpop_miles.id_mv");
@@ -125,23 +125,26 @@ async function recentMilestone(): Promise<string[]> {
         logger.warn("recentMilestone generated no facts");
         return [];
     }
-    return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x.song_name, x.artist_name)} recently reached ${x.milestone_views.toLocaleString()} views on YouTube!`);
+    return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x.song_name, x.artist_name, x.link)} recently reached ${x.milestone_views.toLocaleString()} views on YouTube!`);
 }
-
 async function recentMusicShowWin(): Promise<string[]> {
     const twoWeeksPriorDate = new Date();
     twoWeeksPriorDate.setDate(twoWeeksPriorDate.getDate() - 7);
     const result = await dbContext.kpopVideos("app_kpop_ms")
-        .select(["app_kpop_ms.musicshow as music_show", "app_kpop_ms.date as win_date", "app_kpop_group.name as artist_name"])
+        .select(["app_kpop_ms.musicshow as music_show", "app_kpop_ms.date as win_date", "app_kpop_ms.musicname as winning_song", "app_kpop_group.name as artist_name", "app_kpop.vlink as link"])
         .where("date", ">", twoWeeksPriorDate)
+        .where("app_kpop_ms.id_musicvideo", "!=", 0)
         .join("app_kpop_group", function join() {
             this.on("app_kpop_ms.id_artist", "=", "app_kpop_group.id");
+        })
+        .join("app_kpop", function join() {
+            this.on("app_kpop_ms.id_musicvideo", "=", "app_kpop.vlink");
         });
     if (result.length === 0) {
         logger.warn("recentMusicShowWin generated no facts");
         return [];
     }
-    return result.map((x) => `Fun Fact: '${x.artist_name}' recently won on ${musicShows[x.music_show]} on ${x.win_date.toISOString().substring(0, 10)}!`);
+    return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x["winning_song"], x["artist_name"], x["link"])} recently won on ${musicShows[x.music_show]} on ${x.win_date.toISOString().substring(0, 10)}!`);
 }
 
 async function musicShowWins(): Promise<string[]> {
@@ -189,25 +192,25 @@ async function mostLikedGroups(): Promise<string[]> {
 
 async function mostViewedVideo(): Promise<string[]> {
     const result = await dbContext.kpopVideos("app_kpop")
-        .select(["app_kpop_group.name as artist_name", "app_kpop.name as song_name", "app_kpop.views as views"])
+        .select(["app_kpop_group.name as artist_name", "app_kpop.name as song_name", "app_kpop.views as views", "app_kpop.vlink as link"])
         .join("app_kpop_group", function join() {
             this.on("app_kpop.id_artist", "=", "app_kpop_group.id");
         })
         .where("app_kpop.vtype", "main")
         .orderBy("views", "DESC")
         .limit(25);
-    return result.map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x.song_name, x.artist_name)} is the ${getOrdinalNum(idx + 1)} most viewed music video with ${x.views.toLocaleString()} YouTube views!`);
+    return result.map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x.song_name, x.artist_name, x.link)} is the ${getOrdinalNum(idx + 1)} most viewed music video with ${x.views.toLocaleString()} YouTube views!`);
 }
 
 async function mostLikedVideo(): Promise<string[]> {
     const result = await dbContext.kpopVideos("app_kpop")
-        .select(["app_kpop_group.name as artist_name", "app_kpop.name as song_name", "app_kpop.likes as likes"])
+        .select(["app_kpop_group.name as artist_name", "app_kpop.name as song_name", "app_kpop.likes as likes", "app_kpop.vlink as link"])
         .join("app_kpop_group", function join() {
             this.on("app_kpop.id_artist", "=", "app_kpop_group.id");
         })
         .orderBy("likes", "DESC")
         .limit(25);
-    return result.map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x.song_name, x.artist_name)} is the ${getOrdinalNum(idx + 1)} most liked music video with ${x.likes.toLocaleString()} YouTube likes!`);
+    return result.map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x.song_name, x.artist_name, x.link)} is the ${getOrdinalNum(idx + 1)} most liked music video with ${x.likes.toLocaleString()} YouTube likes!`);
 }
 
 async function mostViewedEntertainmentCompany(): Promise<string[]> {
@@ -346,12 +349,12 @@ async function viewsBySolo(): Promise<string[]> {
 
 async function songReleaseAnniversaries(): Promise<string[]> {
     const result = await dbContext.kmq("available_songs")
-        .select(dbContext.kmq.raw("song_name, artist_name, YEAR(publishedon) as publish_year"))
+        .select(dbContext.kmq.raw("song_name, artist_name, YEAR(publishedon) as publish_year, link"))
         .whereRaw("WEEK(publishedon) = WEEK(NOW())")
         .andWhereRaw("YEAR(publishedon) != YEAR(NOW())")
         .orderBy("views", "DESC")
         .limit(25);
-    return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"])} was released this week back in ${x["publish_year"]}`);
+    return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} was released this week back in ${x["publish_year"]}`);
 }
 
 async function bigThreeDominance(): Promise<string[]> {
@@ -537,8 +540,15 @@ async function topLeveledPlayers(): Promise<Array<string>> {
     return result.map((x, idx) => `KMQ Fact: The ${getOrdinalNum(idx + 1)} highest leveled KMQ player is Level \`${x.level}\` with \`${x.songs_guessed}\` songs guessed over \`${x.games_played}\` games!`);
 }
 
-function generateSongArtistHyperlink(songName: string, artistName: string): string {
-    const searchUrl = new URL("https://youtube.com/results");
-    searchUrl.searchParams.append("search_query", `${songName} ${artistName}`);
-    return `['${songName}' by '${artistName}'](${searchUrl.toString()})`;
+function generateSongArtistHyperlink(songName: string, artistName: string, videoId?: string): string {
+    let url: string;
+    if (videoId) {
+        url = `https://www.youtube.com/watch?v=${videoId}`;
+    } else {
+        const searchUrl = new URL("https://youtube.com/results");
+        searchUrl.searchParams.append("search_query", `${songName} ${artistName}`);
+        url = searchUrl.toString();
+    }
+
+    return `['${songName}' by '${artistName}'](${url})`;
 }
