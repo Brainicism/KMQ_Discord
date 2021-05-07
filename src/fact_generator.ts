@@ -94,7 +94,7 @@ async function recentMusicVideos(): Promise<string[]> {
     const oneMonthPriorDate = new Date();
     oneMonthPriorDate.setMonth(oneMonthPriorDate.getMonth() - 1);
     const result = await dbContext.kpopVideos("kpop_videos.app_kpop")
-        .select(["nome as name", "name as artist", "vlink as youtubeLink", "publishedon"])
+        .select(["app_kpop.name as name", "app_kpop_group.name as artist", "vlink as youtubeLink", "publishedon"])
         .join("kpop_videos.app_kpop_group", function join() {
             this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id");
         })
@@ -113,8 +113,8 @@ async function recentMilestone(): Promise<string[]> {
     const twoWeeksPriorDate = new Date();
     twoWeeksPriorDate.setDate(twoWeeksPriorDate.getDate() - 14);
     const result = await dbContext.kpopVideos("app_kpop_miles")
-        .select(["app_kpop_miles.mvalue as milestone_views", "app_kpop_miles.data as milestone_data", "app_kpop.nome as song_name", "app_kpop_group.name as artist_name"])
-        .where("data", ">", twoWeeksPriorDate)
+        .select(["app_kpop_miles.mvalue as milestone_views", "app_kpop.name as song_name", "app_kpop_group.name as artist_name"])
+        .where("date", ">", twoWeeksPriorDate)
         .join("app_kpop", function join() {
             this.on("app_kpop.id", "=", "app_kpop_miles.id_mv");
         })
@@ -132,8 +132,8 @@ async function recentMusicShowWin(): Promise<string[]> {
     const twoWeeksPriorDate = new Date();
     twoWeeksPriorDate.setDate(twoWeeksPriorDate.getDate() - 7);
     const result = await dbContext.kpopVideos("app_kpop_ms")
-        .select(["app_kpop_ms.musicshow as music_show", "app_kpop_ms.data as win_date", "app_kpop_group.name as artist_name"])
-        .where("data", ">", twoWeeksPriorDate)
+        .select(["app_kpop_ms.musicshow as music_show", "app_kpop_ms.date as win_date", "app_kpop_group.name as artist_name"])
+        .where("date", ">", twoWeeksPriorDate)
         .join("app_kpop_group", function join() {
             this.on("app_kpop_ms.id_artist", "=", "app_kpop_group.id");
         });
@@ -189,7 +189,7 @@ async function mostLikedGroups(): Promise<string[]> {
 
 async function mostViewedVideo(): Promise<string[]> {
     const result = await dbContext.kpopVideos("app_kpop")
-        .select(["app_kpop_group.name as artist_name", "app_kpop.nome as song_name", "app_kpop.views as views"])
+        .select(["app_kpop_group.name as artist_name", "app_kpop.name as song_name", "app_kpop.views as views"])
         .join("app_kpop_group", function join() {
             this.on("app_kpop.id_artist", "=", "app_kpop_group.id");
         })
@@ -201,7 +201,7 @@ async function mostViewedVideo(): Promise<string[]> {
 
 async function mostLikedVideo(): Promise<string[]> {
     const result = await dbContext.kpopVideos("app_kpop")
-        .select(["app_kpop_group.name as artist_name", "app_kpop.nome as song_name", "app_kpop.likes as likes"])
+        .select(["app_kpop_group.name as artist_name", "app_kpop.name as song_name", "app_kpop.likes as likes"])
         .join("app_kpop_group", function join() {
             this.on("app_kpop.id_artist", "=", "app_kpop_group.id");
         })

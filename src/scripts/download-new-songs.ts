@@ -133,7 +133,7 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
 
 async function getSongsFromDb(db: DatabaseContext) {
     return db.kpopVideos("kpop_videos.app_kpop")
-        .select(["nome as name", "name as artist", "vlink as youtubeLink"])
+        .select(["app_kpop.name", "app_kpop_group.name as artist", "vlink as youtubeLink"])
         .join("kpop_videos.app_kpop_group", function join() {
             this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id");
         })
