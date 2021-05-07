@@ -8,7 +8,7 @@
         "moduleResolution": "node",
         "baseUrl": ".",
         "rootDir": "src",
-        "lib": ["ES2020.Promise", "es2019", "ESNext"],
+        "lib": ["ES2020.Promise", "es2019"],
         "resolveJsonModule": true,
         "esModuleInterop": true,
         "sourceMap": true,

@@ -64,10 +64,10 @@ async function validateSqlDump(db: DatabaseContext, seedFilePath: string) {
             throw new Error("SQL dump valid, but potentially missing data.");
         }
         logger.info("Validating overrides");
-        await db.kpopVideosValidation.raw(fs.readFileSync(overridesFilePath).toString().replaceAll("kpop_videos", "kpop_videos_validation"));
+        await db.kpopVideosValidation.raw(fs.readFileSync(overridesFilePath).toString().replace(/kpop_videos/g, "kpop_videos_validation"));
         logger.info("Validating creation of data tables");
         const createKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/create_kmq_data_tables_procedure.sql");
-        await db.kpopVideosValidation.raw(fs.readFileSync(createKmqTablesProcedureSqlPath).toString().replaceAll("kpop_videos", "kpop_videos_validation"));
+        await db.kpopVideosValidation.raw(fs.readFileSync(createKmqTablesProcedureSqlPath).toString().replace(/kpop_videos/g, "kpop_videos_validation"));
         await db.kpopVideosValidation.raw("CALL CreateKmqDataTables;");
         logger.info("SQL dump validated successfully");
     } catch (e) {
