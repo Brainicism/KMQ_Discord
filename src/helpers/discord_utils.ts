@@ -248,7 +248,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode() ? guildPreference.getDisplayedExcludesGroupNames() : null;
     optionStrings[GameOption.INCLUDE] = guildPreference.isIncludesMode() ? guildPreference.getDisplayedIncludesGroupNames() : null;
 
-    const generateConflictingCommandEntry = ((commandValue: string, conflictingOption: string) => `${strikethrough(commandValue)} (⚠ \`${process.env.BOT_PREFIX}${conflictingOption}\` ${italicize("conflict")})`);
+    const generateConflictingCommandEntry = ((commandValue: string, conflictingOption: string) => `${strikethrough(commandValue)} (\`${process.env.BOT_PREFIX}${conflictingOption}\` ${italicize("conflict")})`);
 
     const { gameSessions } = state;
     const isEliminationMode = gameSessions[messageContext.guildID] && gameSessions[messageContext.guildID].gameType === GameType.ELIMINATION;

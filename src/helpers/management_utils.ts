@@ -48,7 +48,6 @@ const logger = _logger("management_utils");
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 2, 1]);
 
 const publishOverridesFilePath = path.resolve(__dirname, "../../data/publish_date_overrides.json");
-const songAliasesFilePath = path.resolve(__dirname, "../../data/song_aliases.json");
 const artistAliasesFilePath = path.resolve(__dirname, "../../data/artist_aliases.json");
 let cachedCommandFiles: { [commandName: string]: BaseCommand } = null;
 
@@ -148,14 +147,19 @@ export async function updatePublishDateOverrides() {
         logger.error("Error parsing publish overrides file");
     }
 }
+
 /** Reload song/artist aliases */
-export function reloadAliases() {
-    try {
-        state.aliases.song = parseJsonFile(songAliasesFilePath);
-        logger.info("Reloaded song alias data");
-    } catch (err) {
-        logger.error("Error parsing song alias file");
+export async function reloadAliases() {
+    const songAliasMapping = await dbContext.kmq("available_songs")
+        .select(["link", "song_aliases"])
+        .where("song_aliases", "<>", "");
+    const newSongAliases = {};
+    for (const mapping of songAliasMapping) {
+        newSongAliases[mapping["link"]] = mapping["song_aliases"].split(",");
     }
+
+    state.aliases.song = newSongAliases;
+    logger.info("Reloaded song alias data");
 
     try {
         state.aliases.artist = parseJsonFile(artistAliasesFilePath);
@@ -208,8 +212,8 @@ export function registerIntervals() {
         reloadFactCache();
     });
 
-    // everyday at 7am UTC => 2am EST
-    schedule.scheduleJob("0 7 * * *", async () => {
+    // every hour
+    schedule.scheduleJob("15 * * * *", async () => {
         logger.info("Performing regularly scheduled Daisuki database seed");
         const overrideFileExists = fs.existsSync(path.join(__dirname, "../../data/skip_seed"));
         if (overrideFileExists) {
@@ -232,6 +236,7 @@ export function registerIntervals() {
         clearInactiveVoiceConnections();
     });
 
+    // every minute
     schedule.scheduleJob("*/1 * * * *", async () => {
         state.bonusUsers = await usersQualifiedForVoteBonus();
     });

@@ -56,11 +56,19 @@ async function validateSqlDump(db: DatabaseContext, seedFilePath: string) {
         await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_validation;");
         await db.agnostic.raw("CREATE DATABASE kpop_videos_validation;");
         await db.kpopVideosValidation.raw(fs.readFileSync(seedFilePath).toString());
+        logger.info("Validating song count");
         const songCount = (await db.kpopVideosValidation("app_kpop").count("* as count").first()).count;
+        logger.info("Validating group count");
         const artistCount = (await db.kpopVideosValidation("app_kpop_group").count("* as count").first()).count;
         if (songCount < 1000 || artistCount < 100) {
             throw new Error("SQL dump valid, but potentially missing data.");
         }
+        logger.info("Validating overrides");
+        await db.kpopVideosValidation.raw(fs.readFileSync(overridesFilePath).toString().replaceAll("kpop_videos", "kpop_videos_validation"));
+        logger.info("Validating creation of data tables");
+        const createKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/create_kmq_data_tables_procedure.sql");
+        await db.kpopVideosValidation.raw(fs.readFileSync(createKmqTablesProcedureSqlPath).toString().replaceAll("kpop_videos", "kpop_videos_validation"));
+        await db.kpopVideosValidation.raw("CALL CreateKmqDataTables;");
         logger.info("SQL dump validated successfully");
     } catch (e) {
         throw new Error(`SQL dump validation failed. ${e.sqlMessage}`);
