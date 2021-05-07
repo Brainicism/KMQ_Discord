@@ -7,7 +7,6 @@ import { program } from "commander";
 import { config } from "dotenv";
 import path from "path";
 import _logger from "../logger";
-import removeRedunantAliases from "../scripts/remove-redunant-aliases";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import { DatabaseContext, getNewConnection } from "../database_context";
 
@@ -155,7 +154,6 @@ async function seedAndDownloadNewSongs(db: DatabaseContext) {
     }
 
     await updateGroupList(db);
-    await removeRedunantAliases(db);
     if (!options.skipDownload) {
         await downloadAndConvertSongs(options.limit);
     }
