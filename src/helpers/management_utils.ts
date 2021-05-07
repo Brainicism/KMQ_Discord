@@ -212,8 +212,8 @@ export function registerIntervals() {
         reloadFactCache();
     });
 
-    // everyday at 7am UTC => 2am EST
-    schedule.scheduleJob("0 7 * * *", async () => {
+    // every hour
+    schedule.scheduleJob("15 * * * *", async () => {
         logger.info("Performing regularly scheduled Daisuki database seed");
         const overrideFileExists = fs.existsSync(path.join(__dirname, "../../data/skip_seed"));
         if (overrideFileExists) {
@@ -236,6 +236,7 @@ export function registerIntervals() {
         clearInactiveVoiceConnections();
     });
 
+    // every minute
     schedule.scheduleJob("*/1 * * * *", async () => {
         state.bonusUsers = await usersQualifiedForVoteBonus();
     });
