@@ -141,6 +141,9 @@
         ],
         "@typescript-eslint/space-before-function-paren": [
             "warn"
+        ],
+        "no-lonely-if": [
+            "off"
         ]
     }
 }

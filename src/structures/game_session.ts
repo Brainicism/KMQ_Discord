@@ -226,7 +226,7 @@ export default class GameSession {
                 };
             }
 
-            sendEndRoundMessage(messageContext, this.scoreboard, this.gameRound, playerRoundResults, remainingDuration, uniqueSongCounter);
+            sendEndRoundMessage(messageContext, this.scoreboard, this.gameRound, guildPreference.getGuessModeType(), playerRoundResults, remainingDuration, uniqueSongCounter);
         }
 
         this.incrementSongCount(this.gameRound.videoID, guessResult.correct);
@@ -808,7 +808,7 @@ export default class GameSession {
      */
     private getDebugSongDetails(): string {
         if (!this.gameRound) return "No active game round";
-        return `${this.gameRound.songName}:${this.gameRound.artist}:${this.gameRound.videoID}`;
+        return `${this.gameRound.songName}:${this.gameRound.artistName}:${this.gameRound.videoID}`;
     }
 
     /**

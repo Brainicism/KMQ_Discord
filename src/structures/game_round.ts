@@ -48,14 +48,14 @@ export default class GameRound {
     /** The song name */
     public readonly songName: string;
 
-    /** The accepted answers for the song name */
-    public readonly acceptedSongAnswers: Array<string>;
+    /** The potential song aliases */
+    public readonly songAliases: string[];
 
     /** The artist name */
-    public readonly artist: string;
+    public readonly artistName: string;
 
-    /** The accepted answers for the artist name */
-    public readonly acceptedArtistAnswers: Array<string>;
+    /** The potential artist aliases */
+    public readonly artistAliases: string[];
 
     /** The youtube video ID of the current song */
     public readonly videoID: string;
@@ -84,13 +84,20 @@ export default class GameRound {
     /**  Whether the song has been guessed yet */
     public finished: boolean;
 
+    /** The accepted answers for the song name */
+    public readonly acceptedSongAnswers: Array<string>;
+
+    /** The accepted answers for the artist name */
+    public readonly acceptedArtistAnswers: Array<string>;
+
     constructor(song: string, artist: string, videoID: string, year: number) {
         this.songName = song;
-        this.acceptedSongAnswers = [song, ...(state.aliases.song[videoID] || [])];
+        this.songAliases = state.aliases.song[videoID] || [];
+        this.acceptedSongAnswers = [song, ...this.songAliases];
         const artistNames = artist.split("+").map((x) => x.trim());
-        const artistAliases = artistNames.flatMap((x) => [x, ...(state.aliases.artist.guessAliases[x] || [])]);
-        this.acceptedArtistAnswers = artistAliases;
-        this.artist = artist;
+        this.artistAliases = artistNames.flatMap((x) => state.aliases.artist.guessAliases[x] || []);
+        this.acceptedArtistAnswers = [...artistNames, ...this.artistAliases];
+        this.artistName = artist;
         this.videoID = videoID;
         this.skipAchieved = false;
         this.startedAt = Date.now();
