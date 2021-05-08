@@ -32,7 +32,7 @@ const MULTIGUESS_DELAY = 1500;
 const logger = _logger("game_session");
 const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
 
-const EXP_TABLE = [...Array(200).keys()].map((level) => {
+const EXP_TABLE = [...Array(1000).keys()].map((level) => {
     if (level === 0 || level === 1) return 0;
     return 10 * (level ** 2) + 200 * level - 200;
 });
