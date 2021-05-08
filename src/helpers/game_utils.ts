@@ -56,7 +56,6 @@ export async function getFilteredSongList(guildPreference: GuildPreference): Pro
                         this.andWhere("issolo", "=", guildPreference.getArtistType() === ArtistType.SOLOIST ? "y" : "n");
                     }
                 } else {
-                    // eslint-disable-next-line no-lonely-if
                     if (guildPreference.getSubunitPreference() === SubunitsPreference.EXCLUDE) {
                         this.whereIn("id_artist", guildPreference.getGroupIDs());
                     } else {

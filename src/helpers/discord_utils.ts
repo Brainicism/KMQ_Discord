@@ -16,6 +16,7 @@ import TeamScoreboard from "../structures/team_scoreboard";
 import { GameType } from "../commands/game_commands/play";
 import { KmqImages } from "../constants";
 import MessageContext from "../structures/message_context";
+import { GuessModeType } from "../commands/game_options/guessmode";
 
 const endGameMessages = parseJsonFile(path.resolve(__dirname, "../../data/end_game_messages.json"));
 
@@ -138,6 +139,7 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
 export async function sendEndRoundMessage(messageContext: MessageContext,
     scoreboard: Scoreboard,
     gameRound: GameRound,
+    guessModeType: GuessModeType,
     playerRoundResults: Array<PlayerRoundResult>,
     timeRemaining?: number,
     uniqueSongCounter?: UniqueSongCounter) {
@@ -145,8 +147,14 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         text: "",
     };
 
-    if (gameRound.acceptedSongAnswers.length > 1) {
-        footer.text += `Aliases: ${Array.from(gameRound.acceptedSongAnswers).join(", ")}\n`;
+    if (guessModeType === GuessModeType.ARTIST) {
+        if (gameRound.artistAliases.length > 0) {
+            footer.text += `Aliases: ${Array.from(gameRound.artistAliases).join(", ")}\n`;
+        }
+    } else {
+        if (gameRound.songAliases.length > 0) {
+            footer.text += `Aliases: ${Array.from(gameRound.songAliases).join(", ")}\n`;
+        }
     }
 
     if (timeRemaining) {
@@ -198,7 +206,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
             avatarUrl: messageContext.author.avatarUrl,
             username: messageContext.author.username,
         },
-        title: `"${gameRound.songName}" (${gameRound.songYear}) - ${gameRound.artist}`,
+        title: `"${gameRound.songName}" (${gameRound.songYear}) - ${gameRound.artistName}`,
         description,
         thumbnailUrl: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,
         fields,
