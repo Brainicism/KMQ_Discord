@@ -32,6 +32,15 @@
     },
     "matchAliases": {
         "Dal Shabet": "Dal★Shabet",
-        "Bol4": "Bolbbalgan4"
+        "Bol4": "Bolbbalgan4",
+        "SNSD": "Girls' Generation",
+        "Girl's Generation": "Girls' Generation",
+        "Girls Generation": "Girls' Generation",
+        "Cosmic Girls": "WJSN",
+        "IZONE": "IZ*ONE",
+        "DBSK": "TVXQ!",
+        "Tohoshinki": "TVXQ!",
+        "TVXQ": "TVXQ!",
+        "GD": "G-DRAGON"
     }
 }

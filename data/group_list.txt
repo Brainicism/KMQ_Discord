@@ -16,6 +16,7 @@
 2YOON
 2Z
 3YE
+4L
 4Men
 4Minute
 4Ten
@@ -24,6 +25,7 @@
 9Muses A
 A-REAL
 A.C.E
+A.KOR
 AB6IX
 Aespa
 After School
@@ -45,11 +47,13 @@ April
 Argon
 Ariaz
 As One
+Ash Island
 ASome.D
 Astin
 ASTRO
 ATEEZ
 Ato6
+Azer
 B.A.P
 B.I
 B.I.G
@@ -60,6 +64,7 @@ BabySoul
 Badkiz
 Bae Jin-young
 Bae173
+Baechigi
 Baek A Yeon
 Baek Ji-young
 Baek Yerin
@@ -120,6 +125,7 @@ Cheeze
 Chen
 Cherry Bullet
 Cho Jung Seok
+Cho Yong-pil
 Choa
 ChoColat
 Choi Nakta
@@ -134,6 +140,7 @@ Coco
 CocoSori
 Code Kunst
 Coed School
+Colde
 CRAVITY
 Craxy
 Crayon Pop
@@ -156,9 +163,12 @@ Daybreak
 Dean
 Demian
 Dia
+DinDin
+DJ D.O.C.
 DJ Hanmin
 DKB
-Dongkiz
+DONGKIZ
+DONGKIZ I:KAN
 Dongwoo
 Double S 301
 Doyoung
@@ -173,6 +183,7 @@ Dynamic Duo
 E'LAST
 eaJ
 Eddy Kim
+Elly
 Elris
 Enhypen
 ENOi
@@ -210,6 +221,7 @@ G.O.D
 Gaeko
 Gaho
 Gain
+Gangkiz
 Gary
 Gavy NJ
 GB9
@@ -228,11 +240,13 @@ Girls Girls
 Girls' Generation
 Girls' Generation Oh!GG
 Girls' Generation TTS
+Glam
 Golden Child
 Goo Hara
 GOOD DAY
 GOT7
 Gray
+GreatGuys
 GSoul
 Guckkasten
 Gugudan
@@ -242,6 +256,7 @@ Gummy
 Gunji
 Gwangil Jo
 GWSN
+Gyeongree
 H.O.T
 H.U.B
 H&D
@@ -251,6 +266,7 @@ Ha Hyunsang
 Ha Sung Woon
 HA:TFELT
 HALO
+Han Dong Geun
 Han Seung Woo
 Hani
 Haon
@@ -270,17 +286,20 @@ Hitchhiker
 Holland
 Homme
 Honey Popcorn
+Hong Dae Kwang
 Hong Eunki
 Hong Jinyoung
 Hong Joo Chan
 Hoody
 Hoppipolla
 Hoshi
+Hot Issue
 Hot Place
 Hotshot
 Huh Gak
 Hwang Chi Yeul
 Hwang In Wook
+Hwanhee
 Hwasa
 Hynn
 Hyo
@@ -288,7 +307,9 @@ Hyolyn
 Hyomin
 Hyuk
 Hyukoh
+Hyun Bin
 Hyuna
+Hyunjun Hur
 I.C.E
 I.M
 I.O.I
@@ -337,6 +358,8 @@ Jiselle
 Jiyeon
 JJ Project
 JJCC
+Jo Kwon
+Jo Sungmo
 John Park
 Jonghyun
 Joohoney
@@ -345,6 +368,7 @@ Joy
 JQT
 Jukjae
 Jun Hyo Seong
+Jun. K
 June
 Jung Dae Hyun
 Jung Ilhoon
@@ -355,6 +379,7 @@ Jung Key
 Jung Seung Hwan
 Jung Yong Hwa
 Junggigo
+Junho
 Juniel
 Junny
 Jus2
@@ -362,6 +387,7 @@ Jvcki Wai
 JYJ
 JYPark
 K.will
+Kahi
 Kai
 Kan Mi Youn
 Kang Daniel
@@ -373,9 +399,11 @@ Kangta
 Kara
 KARD
 Kassy
+KCM
 KEEMBO
 Kei
 Ken
+Keumjo
 Kevin Oh
 Key
 KHAN
@@ -385,6 +413,7 @@ Kim Bo Hyung
 Kim Bo Kyung
 Kim Bumsoo
 Kim Dong Han
+Kim Dong Jun
 Kim Dongryul
 Kim Feel
 Kim Hee Chul
@@ -392,12 +421,17 @@ Kim Hyun Joong
 Kim Hyung Jun
 Kim Jaehwan
 Kim Jaejoong
+Kim Jinho
+Kim Kihyun
 Kim Na Young
 Kim Nam Joo
 Kim Sung Kyu
 Kim Woo Seok
+Kim Yeonji
 Kim Yo Han
+Kim Young-Chul
 Kingdom
+Kiss
 Kiss&Cry
 Kisum
 KNK
@@ -407,7 +441,6 @@ Kwon Jungyeol
 KyeongSeo
 Kyuhyun
 Kyung Park
-Kyungri
 Laboum
 Ladies' code
 Lay
@@ -422,8 +455,10 @@ Lee Juck
 Lee Minhyuk
 Lee Moonsae
 Lee Sang Soon
+Lee Seok Hoon
 Lee Seung Chul
 Lee Seung Gi
+Lee Seung-yoon
 Lee SoRa
 Lee Suhyun
 Lee Sun Hee
@@ -438,17 +473,20 @@ Lim Jeong-hee
 Lim Jimin
 Lim Kim
 Lim Young Woong
+LIMESODA
 Limitless
 Loco
 LOONA
 Loopy
 Lovelyz
 Løren
+LU:KUS
 Lucy
 Luna
 Lunarsolar
 Luri
 Lyn
+M to M
 M.C The Max
 M.O.N.T
 Mad Clown
@@ -467,6 +505,7 @@ MCND
 MelodyDay
 MeloMance
 MFBTY
+Mia
 Midnight
 Mido and Falasol
 Min Kyung Hoon
@@ -511,6 +550,7 @@ NeonPunch
 Newkidd
 Nichkhun
 Nick & Sammy
+Nicole Jung
 Nilo
 Noel
 Noir
@@ -519,16 +559,19 @@ NS Yoon-G
 NTX
 NU'EST
 NU'EST W
+O3ohn
 Oh My Girl
 Oh My Girl Banhana
 Oh Seunghee
 ONE
+Onestar
 Oneus
 Onew
 Onewe
 ONF
 Ong Seongwu
 OnlyOneOf
+OOHYO
 Orange Caramel
 Ovan
 P.O.P
@@ -544,6 +587,7 @@ Park Ji-yoon
 Park Jihoon
 Park Won
 Paul Kim
+Peakboy
 Peniel Shin
 Penomeco
 PENTAGON
@@ -571,6 +615,7 @@ Purplebeck
 R.Tee
 Raiden
 Rain
+Raina
 Rainbow
 Rainbow blaxx
 Rainbow Pixie
@@ -583,6 +628,7 @@ REDSQUARE
 Refund Sisters
 RM
 Rocket Punch
+Rocoberry
 Rolling Quartz
 Romeo
 Rosé
@@ -690,6 +736,7 @@ Tahiti
 Target
 Teen Teen
 Teen Top
+Ten
 Thama
 The Ark
 The Boyz
@@ -697,6 +744,9 @@ The East Light
 The Rose
 The SeeYa
 Tiffany
+Tiny-G
+TO1
+Toheart
 TOO
 Topp Dogg
 Toy
@@ -729,12 +779,14 @@ V
 V.O.S
 Vanner
 VAV
+Verbal Jint
 Verivery
 Vibe
 Victon
 Viini
 Villain
 Vince
+Vincent Blue
 Vinxen
 VIXX
 VIXX LR
@@ -777,9 +829,11 @@ Yezi
 Yong Jun Hyung
 Yoo Jae-suk
 Yoo Jiae
+Yoo Seonho
 Yoo Young-jin
 Yooa
 Yook Sung-jae
+Yoon Gun
 Yoon Hyun-sang
 Yoon Jisung
 Yoon Jong-shin
@@ -802,3 +856,5 @@ Zhou Mi
 Zia
 Zico
 Zion.T
+Zitten
+Zizo

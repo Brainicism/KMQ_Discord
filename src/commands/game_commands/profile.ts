@@ -115,6 +115,13 @@ export default class ProfileCommand implements BaseCommand {
             .where("exp", ">", exp)
             .first())["count"] as number) + 1, totalPlayers);
 
+        const timesVotedData = (await dbContext.kmq("top_gg_user_votes")
+            .select(["total_votes"])
+            .where("user_id", "=", requestedPlayer.id)
+            .first());
+
+        const timesVoted = timesVotedData ? timesVotedData["total_votes"] : 0;
+
         const fields: Array<Eris.EmbedField> = [
             {
                 name: "Level",
@@ -129,22 +136,32 @@ export default class ProfileCommand implements BaseCommand {
             {
                 name: "Overall Rank",
                 value: `#${relativeLevelRank}/${totalPlayers}`,
+                inline: true,
             },
             {
                 name: "Songs Guessed",
                 value: `${songsGuessed} | #${relativeSongRank}/${totalPlayers} `,
+                inline: true,
             },
             {
                 name: "Games Played",
                 value: `${gamesPlayed} | #${relativeGamesPlayedRank}/${totalPlayers} `,
+                inline: true,
             },
             {
                 name: "First Played",
                 value: firstPlayDateString,
+                inline: true,
             },
             {
                 name: "Last Active",
                 value: lastActiveDateString,
+                inline: true,
+            },
+            {
+                name: "Times Voted",
+                value: timesVoted,
+                inline: true,
             }];
 
         sendInfoMessage(MessageContext.fromMessage(message), {

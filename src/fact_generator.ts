@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/dot-notation */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { URL } from "url";
 import dbContext from "./database_context";
@@ -47,12 +46,12 @@ export async function reloadFactCache() {
 
 async function resolveFactPromises(promises: Promise<string[]>[]): Promise<string[][]> {
     const settledPromises = await Promise.allSettled(promises);
-    const rejectedPromises = settledPromises.filter((x) => x.status === "rejected") as PromiseRejectedResult[];
+    const rejectedPromises = settledPromises.filter((x) => x["status"] === "rejected") as PromiseRejectedResult[];
     for (const rejectedPromise of rejectedPromises) {
         logger.error(`Failed to evaluate fact: ${rejectedPromise.reason}`);
     }
-    const resolvedPromises = settledPromises.filter((x) => x.status === "fulfilled") as PromiseFulfilledResult<string[]>[];
-    return resolvedPromises.map((x) => x.value);
+    const resolvedPromises = settledPromises.filter((x) => x["status"] === "fulfilled") as PromiseFulfilledResult<string[]>[];
+    return resolvedPromises.map((x) => x["value"]);
 }
 
 async function generateFacts() {
@@ -94,7 +93,7 @@ async function recentMusicVideos(): Promise<string[]> {
     const oneMonthPriorDate = new Date();
     oneMonthPriorDate.setMonth(oneMonthPriorDate.getMonth() - 1);
     const result = await dbContext.kpopVideos("kpop_videos.app_kpop")
-        .select(["nome as name", "name as artist", "vlink as youtubeLink", "publishedon"])
+        .select(["app_kpop.name as name", "app_kpop_group.name as artist", "vlink as youtubeLink", "publishedon"])
         .join("kpop_videos.app_kpop_group", function join() {
             this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id");
         })
@@ -106,15 +105,15 @@ async function recentMusicVideos(): Promise<string[]> {
         logger.warn("recentMusicVideos generated no facts");
         return [];
     }
-    return result.map((x) => `New Song Alert: Check out this recently released music video, ['${x.name}' by '${x.artist}'](https://youtu.be/${x.youtubeLink})`);
+    return result.map((x) => `New Song Alert: Check out this recently released music video, ['${x["name"]}' by '${x["artist"]}'](https://youtu.be/${x["youtubeLink"]})`);
 }
 
 async function recentMilestone(): Promise<string[]> {
     const twoWeeksPriorDate = new Date();
     twoWeeksPriorDate.setDate(twoWeeksPriorDate.getDate() - 14);
     const result = await dbContext.kpopVideos("app_kpop_miles")
-        .select(["app_kpop_miles.mvalue as milestone_views", "app_kpop_miles.data as milestone_data", "app_kpop.nome as song_name", "app_kpop_group.name as artist_name"])
-        .where("data", ">", twoWeeksPriorDate)
+        .select(["app_kpop_miles.mvalue as milestone_views", "app_kpop.name as song_name", "app_kpop_group.name as artist_name", "app_kpop.vlink as link"])
+        .where("date", ">", twoWeeksPriorDate)
         .join("app_kpop", function join() {
             this.on("app_kpop.id", "=", "app_kpop_miles.id_mv");
         })
@@ -125,23 +124,26 @@ async function recentMilestone(): Promise<string[]> {
         logger.warn("recentMilestone generated no facts");
         return [];
     }
-    return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x.song_name, x.artist_name)} recently reached ${x.milestone_views.toLocaleString()} views on YouTube!`);
+    return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} recently reached ${x["milestone_views"].toLocaleString()} views on YouTube!`);
 }
-
 async function recentMusicShowWin(): Promise<string[]> {
     const twoWeeksPriorDate = new Date();
     twoWeeksPriorDate.setDate(twoWeeksPriorDate.getDate() - 7);
     const result = await dbContext.kpopVideos("app_kpop_ms")
-        .select(["app_kpop_ms.musicshow as music_show", "app_kpop_ms.data as win_date", "app_kpop_group.name as artist_name"])
-        .where("data", ">", twoWeeksPriorDate)
+        .select(["app_kpop_ms.musicshow as music_show", "app_kpop_ms.date as win_date", "app_kpop_ms.musicname as winning_song", "app_kpop_group.name as artist_name", "app_kpop.vlink as link"])
+        .where("date", ">", twoWeeksPriorDate)
+        .where("app_kpop_ms.id_musicvideo", "!=", 0)
         .join("app_kpop_group", function join() {
             this.on("app_kpop_ms.id_artist", "=", "app_kpop_group.id");
+        })
+        .join("app_kpop", function join() {
+            this.on("app_kpop_ms.id_musicvideo", "=", "app_kpop.vlink");
         });
     if (result.length === 0) {
         logger.warn("recentMusicShowWin generated no facts");
         return [];
     }
-    return result.map((x) => `Fun Fact: '${x.artist_name}' recently won on ${musicShows[x.music_show]} on ${x.win_date.toISOString().substring(0, 10)}!`);
+    return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x["winning_song"], x["artist_name"], x["link"])} recently won on ${musicShows[x["music_show"]]} on ${x["win_date"].toISOString().substring(0, 10)}!`);
 }
 
 async function musicShowWins(): Promise<string[]> {
@@ -155,7 +157,7 @@ async function musicShowWins(): Promise<string[]> {
         })
         .orderBy("count", "DESC")
         .limit(25);
-    return result.map((x, idx) => `Fun Fact: '${x.artist_name}' has won the ${getOrdinalNum(idx + 1)} most music show with ${x.count} wins!`);
+    return result.map((x, idx) => `Fun Fact: '${x["artist_name"]}' has won the ${getOrdinalNum(idx + 1)} most music show with ${x["count"]} wins!`);
 }
 
 async function mostViewedGroups(): Promise<string[]> {
@@ -170,7 +172,7 @@ async function mostViewedGroups(): Promise<string[]> {
         .orderBy("total_views", "DESC")
         .limit(25);
 
-    return result.map((x, idx) => `Fun Fact: '${x.artist_name}' is the ${getOrdinalNum(idx + 1)} most viewed group with ${x.total_views.toLocaleString()} total YouTube views!`);
+    return result.map((x, idx) => `Fun Fact: '${x["artist_name"]}' is the ${getOrdinalNum(idx + 1)} most viewed group with ${x["total_views"].toLocaleString()} total YouTube views!`);
 }
 
 async function mostLikedGroups(): Promise<string[]> {
@@ -184,30 +186,30 @@ async function mostLikedGroups(): Promise<string[]> {
         })
         .where("app_kpop_group.issolo", "=", "n")
         .orderBy("total_likes", "DESC");
-    return result.map((x, idx) => `Fun Fact: '${x.artist_name}' is the ${getOrdinalNum(idx + 1)} most liked group with ${x.total_likes.toLocaleString()} total YouTube likes!`);
+    return result.map((x, idx) => `Fun Fact: '${x["artist_name"]}' is the ${getOrdinalNum(idx + 1)} most liked group with ${x["total_likes"].toLocaleString()} total YouTube likes!`);
 }
 
 async function mostViewedVideo(): Promise<string[]> {
     const result = await dbContext.kpopVideos("app_kpop")
-        .select(["app_kpop_group.name as artist_name", "app_kpop.nome as song_name", "app_kpop.views as views"])
+        .select(["app_kpop_group.name as artist_name", "app_kpop.name as song_name", "app_kpop.views as views", "app_kpop.vlink as link"])
         .join("app_kpop_group", function join() {
             this.on("app_kpop.id_artist", "=", "app_kpop_group.id");
         })
         .where("app_kpop.vtype", "main")
         .orderBy("views", "DESC")
         .limit(25);
-    return result.map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x.song_name, x.artist_name)} is the ${getOrdinalNum(idx + 1)} most viewed music video with ${x.views.toLocaleString()} YouTube views!`);
+    return result.map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} is the ${getOrdinalNum(idx + 1)} most viewed music video with ${x["views"].toLocaleString()} YouTube views!`);
 }
 
 async function mostLikedVideo(): Promise<string[]> {
     const result = await dbContext.kpopVideos("app_kpop")
-        .select(["app_kpop_group.name as artist_name", "app_kpop.nome as song_name", "app_kpop.likes as likes"])
+        .select(["app_kpop_group.name as artist_name", "app_kpop.name as song_name", "app_kpop.likes as likes", "app_kpop.vlink as link"])
         .join("app_kpop_group", function join() {
             this.on("app_kpop.id_artist", "=", "app_kpop_group.id");
         })
         .orderBy("likes", "DESC")
         .limit(25);
-    return result.map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x.song_name, x.artist_name)} is the ${getOrdinalNum(idx + 1)} most liked music video with ${x.likes.toLocaleString()} YouTube likes!`);
+    return result.map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} is the ${getOrdinalNum(idx + 1)} most liked music video with ${x["likes"].toLocaleString()} YouTube likes!`);
 }
 
 async function mostViewedEntertainmentCompany(): Promise<string[]> {
@@ -223,7 +225,7 @@ async function mostViewedEntertainmentCompany(): Promise<string[]> {
         .sum("app_kpop.views as views")
         .orderBy("views", "DESC")
         .limit(15);
-    return result.map((x, idx) => `Fun Fact: ${x.name} is the entertainment company with the ${getOrdinalNum(idx + 1)} most YouTube views at ${x.views.toLocaleString()}!`);
+    return result.map((x, idx) => `Fun Fact: ${x["name"]} is the entertainment company with the ${getOrdinalNum(idx + 1)} most YouTube views at ${x["views"].toLocaleString()}!`);
 }
 
 async function mostArtistsEntertainmentCompany(): Promise<string[]> {
@@ -238,7 +240,7 @@ async function mostArtistsEntertainmentCompany(): Promise<string[]> {
         .orderBy("count", "DESC")
         .limit(15);
 
-    return result.map((x, idx) => `Fun Fact: ${x.name} is the entertainment company with the ${getOrdinalNum(idx + 1)} most artists (including subunits and solo debuts) at ${x.count}!`);
+    return result.map((x, idx) => `Fun Fact: ${x["name"]} is the entertainment company with the ${getOrdinalNum(idx + 1)} most artists (including subunits and solo debuts) at ${x["count"]}!`);
 }
 
 async function mostMusicVideos(): Promise<string[]> {
@@ -253,7 +255,7 @@ async function mostMusicVideos(): Promise<string[]> {
         .orderBy("count", "DESC")
         .limit(25);
 
-    return result.map((x, idx) => `Fun Fact: '${x.artist_name}' has the ${getOrdinalNum(idx + 1)} most music videos with ${x.count} on YouTube!`);
+    return result.map((x, idx) => `Fun Fact: '${x["artist_name"]}' has the ${getOrdinalNum(idx + 1)} most music videos with ${x["count"]} on YouTube!`);
 }
 
 async function yearWithMostDebuts(): Promise<string[]> {
@@ -265,7 +267,7 @@ async function yearWithMostDebuts(): Promise<string[]> {
         .orderBy("count", "DESC")
         .limit(15);
 
-    return result.map((x, idx) => `Fun Fact: ${x.formation_year} had the ${getOrdinalNum(idx + 1)} most debuts with ${x.count} groups debuting!`);
+    return result.map((x, idx) => `Fun Fact: ${x["formation_year"]} had the ${getOrdinalNum(idx + 1)} most debuts with ${x["count"]} groups debuting!`);
 }
 
 async function yearWithMostReleases(): Promise<string[]> {
@@ -277,7 +279,7 @@ async function yearWithMostReleases(): Promise<string[]> {
         .orderBy("count", "DESC")
         .limit(15);
 
-    return result.map((x, idx) => `Fun Fact: ${x.release_year} was the ${getOrdinalNum(idx + 1)} most active year in K-Pop with ${x.count} music video releases!`);
+    return result.map((x, idx) => `Fun Fact: ${x["release_year"]} was the ${getOrdinalNum(idx + 1)} most active year in K-Pop with ${x["count"]} music video releases!`);
 }
 
 async function viewsByGender(): Promise<string[]> {
@@ -316,7 +318,7 @@ async function mostViewedSoloArtist(): Promise<string[]> {
         .where("app_kpop_group.issolo", "=", "y")
         .orderBy("total_views", "DESC")
         .limit(25);
-    return result.map((x, idx) => `Fun Fact: '${x.artist_name}' is the ${getOrdinalNum(idx + 1)} most viewed solo artist with ${x.total_views.toLocaleString()} total YouTube views!`);
+    return result.map((x, idx) => `Fun Fact: '${x["artist_name"]}' is the ${getOrdinalNum(idx + 1)} most viewed solo artist with ${x["total_views"].toLocaleString()} total YouTube views!`);
 }
 
 async function viewsBySolo(): Promise<string[]> {
@@ -346,12 +348,12 @@ async function viewsBySolo(): Promise<string[]> {
 
 async function songReleaseAnniversaries(): Promise<string[]> {
     const result = await dbContext.kmq("available_songs")
-        .select(dbContext.kmq.raw("song_name, artist_name, YEAR(publishedon) as publish_year"))
+        .select(dbContext.kmq.raw("song_name, artist_name, YEAR(publishedon) as publish_year, link"))
         .whereRaw("WEEK(publishedon) = WEEK(NOW())")
         .andWhereRaw("YEAR(publishedon) != YEAR(NOW())")
         .orderBy("views", "DESC")
         .limit(25);
-    return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"])} was released this week back in ${x["publish_year"]}`);
+    return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} was released this week back in ${x["publish_year"]}`);
 }
 
 async function bigThreeDominance(): Promise<string[]> {
@@ -379,7 +381,7 @@ async function fanclubName(): Promise<Array<string>> {
         .orderByRaw("RAND()")
         .limit(10);
 
-    return result.map((x) => `Fun Fact: ${x.name}'s fanclub name is '${x.fanclub}'!`);
+    return result.map((x) => `Fun Fact: ${x["name"]}'s fanclub name is '${x["fanclub"]}'!`);
 }
 
 async function closeBirthdays(): Promise<Array<string>> {
@@ -489,7 +491,7 @@ async function mostGaonFirsts(): Promise<string[]> {
         .select(["name as artist_name", "gaondigital_firsts as firsts"])
         .orderBy("firsts", "DESC")
         .limit(25);
-    return result.map((x, idx) => `Fun Fact: '${x.artist_name}' has topped the GAON digital weekly charts the ${getOrdinalNum(idx + 1)} most times with ${x.firsts} first place appearances!`);
+    return result.map((x, idx) => `Fun Fact: '${x["artist_name"]}' has topped the GAON digital weekly charts the ${getOrdinalNum(idx + 1)} most times with ${x["firsts"]} first place appearances!`);
 }
 
 async function mostGaonAppearances(): Promise<string[]> {
@@ -497,7 +499,7 @@ async function mostGaonAppearances(): Promise<string[]> {
         .select(["name as artist_name", "gaondigital_times as appearances"])
         .orderBy("appearances", "DESC")
         .limit(25);
-    return result.map((x, idx) => `Fun Fact: '${x.artist_name}' has placed on the GAON digital weekly charts the ${getOrdinalNum(idx + 1)} most times with ${x.appearances} appearances!`);
+    return result.map((x, idx) => `Fun Fact: '${x["artist_name"]}' has placed on the GAON digital weekly charts the ${getOrdinalNum(idx + 1)} most times with ${x["appearances"]} appearances!`);
 }
 
 async function historicalGaonWeekly(): Promise<Array<string>> {
@@ -515,7 +517,7 @@ async function historicalGaonWeekly(): Promise<Array<string>> {
         .where("week", "=", week)
         .whereIn("year", yearRange)
         .orderBy("year", "DESC");
-    const parsedResults = result.map((x) => parseGaonWeeklyRankList(x.ranklist, x.year));
+    const parsedResults = result.map((x) => parseGaonWeeklyRankList(x["ranklist"], x["year"]));
     return parsedResults.map((x) => `Fun Fact: On this week in ${x[0].year}, ${generateSongArtistHyperlink(x[0].songName, x[0].artistName)} was the top charting song on the Gaon Weekly charts!`);
 }
 
@@ -526,7 +528,7 @@ async function recentGaonWeekly(): Promise<Array<string>> {
         .orderBy("week", "DESC")
         .limit(1);
     const parsedResult = parseGaonWeeklyRankList(result[0].ranklist, result[0].year);
-    return parsedResult.slice(0, 10).map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x.songName, x.artistName)} is the ${getOrdinalNum(idx + 1)} highest charting song on the Gaon Weekly charts last week!`);
+    return parsedResult.slice(0, 10).map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x["songName"], x["artistName"])} is the ${getOrdinalNum(idx + 1)} highest charting song on the Gaon Weekly charts last week!`);
 }
 
 async function topLeveledPlayers(): Promise<Array<string>> {
@@ -534,11 +536,18 @@ async function topLeveledPlayers(): Promise<Array<string>> {
         .select(["songs_guessed", "games_played", "level"])
         .orderBy("exp", "DESC")
         .limit(10);
-    return result.map((x, idx) => `KMQ Fact: The ${getOrdinalNum(idx + 1)} highest leveled KMQ player is Level \`${x.level}\` with \`${x.songs_guessed}\` songs guessed over \`${x.games_played}\` games!`);
+    return result.map((x, idx) => `KMQ Fact: The ${getOrdinalNum(idx + 1)} highest leveled KMQ player is Level \`${x["level"]}\` with \`${x["songs_guessed"]}\` songs guessed over \`${x["games_played"]}\` games!`);
 }
 
-function generateSongArtistHyperlink(songName: string, artistName: string): string {
-    const searchUrl = new URL("https://youtube.com/results");
-    searchUrl.searchParams.append("search_query", `${songName} ${artistName}`);
-    return `['${songName}' by '${artistName}'](${searchUrl.toString()})`;
+function generateSongArtistHyperlink(songName: string, artistName: string, videoId?: string): string {
+    let url: string;
+    if (videoId) {
+        url = `https://www.youtube.com/watch?v=${videoId}`;
+    } else {
+        const searchUrl = new URL("https://youtube.com/results");
+        searchUrl.searchParams.append("search_query", `${songName} ${artistName}`);
+        url = searchUrl.toString();
+    }
+
+    return `['${songName}' by '${artistName}'](${url})`;
 }

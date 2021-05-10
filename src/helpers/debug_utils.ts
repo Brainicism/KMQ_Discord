@@ -38,7 +38,7 @@ export async function getForcePlaySong(): Promise<QueriedSong> {
     if (!isDebugMode()) return null;
     const forcePlaySongID = readDebugSettings("forcedSongID");
     const result = await dbContext.kpopVideos("kpop_videos.app_kpop")
-        .select(["nome as name", "name as artist", "vlink as youtubeLink"])
+        .select(["app_kpop.name as name", "app_kpop_group.name as artist", "vlink as youtubeLink"])
         .join("kpop_videos.app_kpop_group", function join() {
             this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id");
         })

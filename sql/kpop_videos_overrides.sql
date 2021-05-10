@@ -1,6 +1,6 @@
 /* These two are distinct music videos */
-UPDATE kpop_videos.app_kpop SET nome = 'Roly Poly in Copabana' WHERE vlink = '3Xolk2cFzlo';
-UPDATE kpop_videos.app_kpop SET nome = 'Roly Poly', vtype = 'main' WHERE vlink = 'afwK0Mv0IsY';
+UPDATE kpop_videos.app_kpop SET name = 'Roly Poly in Copabana' WHERE vlink = '3Xolk2cFzlo';
+UPDATE kpop_videos.app_kpop SET name = 'Roly Poly', vtype = 'main' WHERE vlink = 'afwK0Mv0IsY';
 
 /* 'main' versions are not available in North America, use dance/duplicate instead */
 /* Jet Coaster love (jp) */

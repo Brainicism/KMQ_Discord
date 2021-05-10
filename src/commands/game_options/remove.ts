@@ -87,17 +87,17 @@ export default class RemoveCommand implements BaseCommand {
         }
         switch (optionListed) {
             case RemoveType.GROUPS:
-                guildPreference.setGroups(matchedGroups);
+                await guildPreference.setGroups(matchedGroups);
                 await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GROUPS, reset: false });
                 logger.info(`${getDebugLogHeader(message)} | Group removed: ${guildPreference.getDisplayedGroupNames()}`);
                 break;
             case RemoveType.INCLUDES:
-                guildPreference.setIncludes(matchedGroups);
+                await guildPreference.setIncludes(matchedGroups);
                 await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.INCLUDE, reset: false });
                 logger.info(`${getDebugLogHeader(message)} | Include removed: ${guildPreference.getDisplayedIncludesGroupNames()}`);
                 break;
             case RemoveType.EXCLUDES:
-                guildPreference.setExcludes(matchedGroups);
+                await guildPreference.setExcludes(matchedGroups);
                 await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.EXCLUDE, reset: false });
                 logger.info(`${getDebugLogHeader(message)} | Exclude removed: ${guildPreference.getDisplayedExcludesGroupNames()}`);
                 break;

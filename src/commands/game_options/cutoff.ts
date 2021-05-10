@@ -6,7 +6,7 @@ import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 
 const logger = _logger("cutoff");
-export const DEFAULT_BEGINNING_SEARCH_YEAR = 2008;
+export const DEFAULT_BEGINNING_SEARCH_YEAR = 2005;
 export const DEFAULT_ENDING_SEARCH_YEAR = (new Date()).getFullYear();
 
 export default class CutoffCommand implements BaseCommand {
@@ -53,8 +53,8 @@ export default class CutoffCommand implements BaseCommand {
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            guildPreference.setBeginningCutoffYear(DEFAULT_BEGINNING_SEARCH_YEAR);
-            guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
+            await guildPreference.setBeginningCutoffYear(DEFAULT_BEGINNING_SEARCH_YEAR);
+            await guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
             await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.CUTOFF, reset: true });
             logger.info(`${getDebugLogHeader(message)} | Cutoff set to ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`);
             return;
@@ -62,16 +62,16 @@ export default class CutoffCommand implements BaseCommand {
         const yearRange = parsedMessage.components;
         const startYear = yearRange[0];
         if (yearRange.length === 1) {
-            guildPreference.setBeginningCutoffYear(parseInt(startYear));
-            guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
+            await guildPreference.setBeginningCutoffYear(parseInt(startYear));
+            await guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
         } else if (yearRange.length === 2) {
             const endYear = yearRange[1];
             if (endYear < startYear) {
                 await sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid end year", description: "End year must be after or equal to start year" });
                 return;
             }
-            guildPreference.setBeginningCutoffYear(parseInt(startYear));
-            guildPreference.setEndCutoffYear(parseInt(endYear));
+            await guildPreference.setBeginningCutoffYear(parseInt(startYear));
+            await guildPreference.setEndCutoffYear(parseInt(endYear));
         }
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.CUTOFF, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Cutoff set to ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`);

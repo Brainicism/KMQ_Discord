@@ -32,7 +32,7 @@ const MULTIGUESS_DELAY = 1500;
 const logger = _logger("game_session");
 const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
 
-const EXP_TABLE = [...Array(200).keys()].map((level) => {
+const EXP_TABLE = [...Array(1000).keys()].map((level) => {
     if (level === 0 || level === 1) return 0;
     return 10 * (level ** 2) + 200 * level - 200;
 });
@@ -226,7 +226,7 @@ export default class GameSession {
                 };
             }
 
-            sendEndRoundMessage(messageContext, this.scoreboard, this.gameRound, playerRoundResults, remainingDuration, uniqueSongCounter);
+            sendEndRoundMessage(messageContext, this.scoreboard, this.gameRound, guildPreference.getGuessModeType(), playerRoundResults, remainingDuration, uniqueSongCounter);
         }
 
         this.incrementSongCount(this.gameRound.videoID, guessResult.correct);
@@ -552,11 +552,16 @@ export default class GameSession {
         const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${gameRound.videoID}.ogg`;
 
         let seekLocation: number;
-        if (guildPreference.getSeekType() === SeekType.RANDOM) {
-            const songDuration = await getAudioDurationInSeconds(songLocation);
-            seekLocation = songDuration * (0.6 * Math.random());
-        } else {
+        const seekType = guildPreference.getSeekType();
+        if (seekType === SeekType.BEGINNING) {
             seekLocation = 0;
+        } else {
+            const songDuration = await getAudioDurationInSeconds(songLocation);
+            if (guildPreference.getSeekType() === SeekType.RANDOM) {
+                seekLocation = songDuration * (0.6 * Math.random());
+            } else if (guildPreference.getSeekType() === SeekType.MIDDLE) {
+                seekLocation = songDuration * (0.4 + 0.2 * Math.random());
+            }
         }
 
         const stream = fs.createReadStream(songLocation);
@@ -803,7 +808,7 @@ export default class GameSession {
      */
     private getDebugSongDetails(): string {
         if (!this.gameRound) return "No active game round";
-        return `${this.gameRound.songName}:${this.gameRound.artist}:${this.gameRound.videoID}`;
+        return `${this.gameRound.songName}:${this.gameRound.artistName}:${this.gameRound.videoID}`;
     }
 
     /**

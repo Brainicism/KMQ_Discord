@@ -2,25 +2,23 @@
 set -e
 
 rebuild () {
-    echo "Cleaning build..."
-    npm run clean
     echo "Compiling typescript..."
     tsc
-    cd build/
 }
 if [ "${NODE_ENV}" == "dry-run" ]; then
     rebuild
     echo "Starting bot..."
+    cd build/
     exec node kmq.js
 else
+    rebuild
     echo "Bootstrapping..."
-    npm run bootstrap
+    node build/seed/bootstrap.js
     echo "Starting bot..."
+    cd build/
     if [ "${NODE_ENV}" == "development" ]; then
-        cd src
-        exec node -r ts-node/register --inspect=9229 kmq
+        exec node --inspect=9229 kmq.js
     elif [ "${NODE_ENV}" == "production" ]; then
-        rebuild
         git log -n 1 --pretty=format:"%H" > ../version
         exec node kmq.js
     fi

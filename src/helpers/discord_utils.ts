@@ -16,6 +16,7 @@ import TeamScoreboard from "../structures/team_scoreboard";
 import { GameType } from "../commands/game_commands/play";
 import { KmqImages } from "../constants";
 import MessageContext from "../structures/message_context";
+import { GuessModeType } from "../commands/game_options/guessmode";
 
 const endGameMessages = parseJsonFile(path.resolve(__dirname, "../../data/end_game_messages.json"));
 
@@ -58,8 +59,8 @@ async function sendMessage(textChannelID: string, messageContent: Eris.AdvancedM
 
     // only reply to message if has required permissions
     if (!channel.permissionsOf(state.client.user.id).has("readMessageHistory")) {
-        if (messageContent.messageReferenceID) {
-            messageContent.messageReferenceID = null;
+        if (messageContent.messageReference) {
+            messageContent.messageReference = null;
         }
     }
 
@@ -124,7 +125,7 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
         thumbnail: embedPayload.thumbnailUrl ? { url: embedPayload.thumbnailUrl } : null,
         timestamp: embedPayload.timestamp,
     };
-    return sendMessage(messageContext.textChannelID, { embed, messageReferenceID: reply ? messageContext.referencedMessageID : null });
+    return sendMessage(messageContext.textChannelID, { embed, messageReference: reply ? { messageID: messageContext.referencedMessageID, failIfNotExists: false } : null });
 }
 
 /**
@@ -138,6 +139,7 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
 export async function sendEndRoundMessage(messageContext: MessageContext,
     scoreboard: Scoreboard,
     gameRound: GameRound,
+    guessModeType: GuessModeType,
     playerRoundResults: Array<PlayerRoundResult>,
     timeRemaining?: number,
     uniqueSongCounter?: UniqueSongCounter) {
@@ -145,8 +147,14 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         text: "",
     };
 
-    if (gameRound.acceptedSongAnswers.length > 1) {
-        footer.text += `Aliases: ${Array.from(gameRound.acceptedSongAnswers).join(", ")}\n`;
+    if (guessModeType === GuessModeType.ARTIST) {
+        if (gameRound.artistAliases.length > 0) {
+            footer.text += `Aliases: ${Array.from(gameRound.artistAliases).join(", ")}\n`;
+        }
+    } else {
+        if (gameRound.songAliases.length > 0) {
+            footer.text += `Aliases: ${Array.from(gameRound.songAliases).join(", ")}\n`;
+        }
     }
 
     if (timeRemaining) {
@@ -198,7 +206,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
             avatarUrl: messageContext.author.avatarUrl,
             username: messageContext.author.username,
         },
-        title: `"${gameRound.songName}" (${gameRound.songYear}) - ${gameRound.artist}`,
+        title: `"${gameRound.songName}" (${gameRound.songYear}) - ${gameRound.artistName}`,
         description,
         thumbnailUrl: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,
         fields,
@@ -248,7 +256,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode() ? guildPreference.getDisplayedExcludesGroupNames() : null;
     optionStrings[GameOption.INCLUDE] = guildPreference.isIncludesMode() ? guildPreference.getDisplayedIncludesGroupNames() : null;
 
-    const generateConflictingCommandEntry = ((commandValue: string, conflictingOption: string) => `${strikethrough(commandValue)} (⚠ \`${process.env.BOT_PREFIX}${conflictingOption}\` ${italicize("conflict")})`);
+    const generateConflictingCommandEntry = ((commandValue: string, conflictingOption: string) => `${strikethrough(commandValue)} (\`${process.env.BOT_PREFIX}${conflictingOption}\` ${italicize("conflict")})`);
 
     const { gameSessions } = state;
     const isEliminationMode = gameSessions[messageContext.guildID] && gameSessions[messageContext.guildID].gameType === GameType.ELIMINATION;
