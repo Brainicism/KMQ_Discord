@@ -50,7 +50,7 @@ async function extractDb(): Promise<void> {
     logger.info("Extracted Daisuki database");
 }
 
-async function validateSqlDump(db: DatabaseContext, seedFilePath: string) {
+async function validateSqlDump(db: DatabaseContext, seedFilePath: string, bootstrap = false) {
     try {
         await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_validation;");
         await db.agnostic.raw("CREATE DATABASE kpop_videos_validation;");
@@ -64,10 +64,12 @@ async function validateSqlDump(db: DatabaseContext, seedFilePath: string) {
         }
         logger.info("Validating overrides");
         await db.kpopVideosValidation.raw(fs.readFileSync(overridesFilePath).toString().replace(/kpop_videos/g, "kpop_videos_validation"));
-        logger.info("Validating creation of data tables");
-        const createKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/create_kmq_data_tables_procedure.sql");
-        await db.kpopVideosValidation.raw(fs.readFileSync(createKmqTablesProcedureSqlPath).toString().replace(/kpop_videos/g, "kpop_videos_validation"));
-        await db.kpopVideosValidation.raw("CALL CreateKmqDataTables;");
+        if (!bootstrap) {
+            logger.info("Validating creation of data tables");
+            const createKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/create_kmq_data_tables_procedure.sql");
+            await db.kpopVideosValidation.raw(fs.readFileSync(createKmqTablesProcedureSqlPath).toString().replace(/kpop_videos/g, "kpop_videos_validation"));
+            await db.kpopVideosValidation.raw("CALL CreateKmqDataTables;");
+        }
         logger.info("SQL dump validated successfully");
     } catch (e) {
         throw new Error(`SQL dump validation failed. ${e.sqlMessage}`);
@@ -81,7 +83,7 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean) {
     const seedFile = files[files.length - 1];
     const seedFilePath = bootstrap ? `${databaseDownloadDir}/bootstrap.sql` : `${databaseDownloadDir}/${seedFile}`;
     logger.info(`Validating SQL dump (${path.basename(seedFilePath)})`);
-    await validateSqlDump(db, seedFilePath);
+    await validateSqlDump(db, seedFilePath, bootstrap);
     logger.info("Dropping K-Pop video database");
     await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos;");
     logger.info("Creating K-Pop video database");

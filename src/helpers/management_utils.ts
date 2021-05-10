@@ -33,13 +33,13 @@ import guildDeleteHandler from "../events/client/guildDelete";
 import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
 import guildAvailableHandler from "../events/client/guildAvailable";
 import BotListingManager, { usersQualifiedForVoteBonus } from "./bot_listing_manager";
-import { EnvType } from "../types";
 import storeDailyStats from "../scripts/store-daily-stats";
 import { seedAndDownloadNewSongs } from "../seed/seed_db";
 import backupKmqDatabase from "../scripts/backup-kmq-database";
 import { chooseRandom, parseJsonFile } from "./utils";
 import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
+import { EnvType } from "../types";
 
 const glob = promisify(_glob);
 
@@ -127,6 +127,11 @@ export async function updateBotStatus() {
         .orderBy("views", "DESC")
         .limit(25);
     const randomPopularSong = chooseRandom(randomPopularSongs);
+    if (!randomPopularSong) {
+        client.editStatus("online");
+        return;
+    }
+
     client.editStatus("online", {
         name: `'${randomPopularSong["song_name"]}' by ${randomPopularSong["artist_name"]}`,
         type: 1,
@@ -187,6 +192,7 @@ export function registerIntervals() {
 
     // set up check for restart notifications
     schedule.scheduleJob("* * * * *", async () => {
+        if (process.env.NODE_ENV !== EnvType.PROD) return;
         // unscheduled restarts
         const restartNotification = (await dbContext.kmq("restart_notifications").where("id", 1))[0].restart_time;
         if (restartNotification) {
@@ -214,6 +220,7 @@ export function registerIntervals() {
 
     // every hour
     schedule.scheduleJob("15 * * * *", async () => {
+        if (process.env.NODE_ENV !== EnvType.PROD) return;
         logger.info("Performing regularly scheduled Daisuki database seed");
         const overrideFileExists = fs.existsSync(path.join(__dirname, "../../data/skip_seed"));
         if (overrideFileExists) {
@@ -224,6 +231,7 @@ export function registerIntervals() {
 
     // every sunday at 1am UTC => 8pm saturday EST
     schedule.scheduleJob("0 1 * * 0", async () => {
+        if (process.env.NODE_ENV !== EnvType.PROD) return;
         logger.info("Backing up kmq database");
         await backupKmqDatabase();
     });
@@ -259,7 +267,7 @@ export function getCommandFiles(shouldReload: boolean): Promise<{ [commandName: 
         const commandMap = {};
         let files: Array<string>;
         try {
-            files = await glob(process.env.NODE_ENV === EnvType.DEV ? "commands/**/*.ts" : "commands/**/*.js");
+            files = await glob("commands/**/*.js");
             await Promise.all(files.map(async (file) => {
                 const commandFilePath = path.join("../", file);
                 if (shouldReload) {

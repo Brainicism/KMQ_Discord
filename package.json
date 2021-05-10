@@ -8,9 +8,8 @@
     "dry-run": "npm run lint && NODE_ENV=dry-run npm run start",
     "dev": "npm run lint && NODE_ENV=development npm run start",
     "dev-no-lint": "NODE_ENV=development npm run start",
-    "prod": "npm run lint && NODE_ENV=production npm run start",
+    "prod": "NODE_ENV=production npm run start",
     "clean": "rm -rf build/ && rm -f tsconfig.tsbuildinfo",
-    "bootstrap": "ts-node src/seed/bootstrap.ts",
     "download_songs": "ts-node src/scripts/download-new-songs.ts",
     "lint": "npx eslint . --ext .js,.ts",
     "lint_ci": "npx eslint . --ext .js,.ts --max-warnings=0",
@@ -22,8 +21,8 @@
     "test": "NODE_ENV=test mocha -r ts-node/register 'src/test/**/*.ts'",
     "test_ci": "NODE_ENV=test mocha -- --forbid-only -r ts-node/register 'src/test/**/*.ts'"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Brian Le",
+  "license": "GPL-3.0",
   "dependencies": {
     "@discordjs/opus": "^0.5.0",
     "@types/node-schedule": "^1.3.1",
@@ -65,5 +64,5 @@
     "sinon": "^10.0.0",
     "typescript": "~4.2.4"
   },
-  "description": ""
+  "description": "K-pop guessing game over Discord"
 }
