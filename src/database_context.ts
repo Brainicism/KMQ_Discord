@@ -23,7 +23,6 @@ export class DatabaseContext {
     public agnostic: Knex;
 
     constructor() {
-        if ([EnvType.DRY_RUN].includes(process.env.NODE_ENV as EnvType)) return;
         logger.info(`Initializing database connections ${process.env.NODE_ENV || ""}`);
         if (process.env.NODE_ENV === EnvType.TEST) {
             logger.info("Initializing KMQ test database context");
