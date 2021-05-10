@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+    paths-ignore: 
+      - 'images/**'
+      - 'sql/**'
+      - '**.md'
+      - 'docs/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DB_PASS_CI: kmq_ci_password
+      DB_USER_CI: kmq_ci
+    steps:
+      - name: Checkout KMQ_Discord
+        uses: actions/checkout@v2
+      - name: Check for undocumented game option commands
+        run: src/ci_checks/check_help.sh
+      - name: Setup Python 3.6
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.6'
+      - name: Check for newly introduced environment variables
+        run: python src/ci_checks/check_env_var.py
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2.1.2
+        with:
+          node-version: 14.2.0
+      - name: Install node dependencies
+        run: yarn install --frozen-lockfile
+      - name: npm run lint
+        run: npm run lint_ci
+      - name: Copy .env for CI
+        run: |
+          echo "DB_USER=$DB_USER_CI" >> .env
+          echo "DB_PASS=$DB_PASS_CI" >> .env
+          echo "DB_HOST=127.0.0.1" >> .env
+        shell: bash
+      - name: Setup MySQL server
+        uses: mirromutth/mysql-action@v1.1
+        with:
+          mysql database: 'kmq_test'
+          mysql version: '5.7' 
+          mysql user: '$DB_USER_CI'
+          mysql password: '$DB_PASS_CI'
+      - name: Wait for MySQL server to start
+        run: |
+          while ! mysqladmin ping --host=127.0.0.1 --password="$DB_PASS_CI" --silent; do
+            sleep 1
+          done
+      - name: Run tests
+        run: npm run test_ci
+      - name: Build and E2E dry-run
+        run: npm run dry-run
