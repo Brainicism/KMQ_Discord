@@ -17,7 +17,6 @@ RUN yarn install
 COPY start.sh tsconfig.json ./
 COPY src/ src/
 COPY data/ data/
-COPY migrations/ migrations/
 COPY sql_dumps/daisuki/bootstrap.sql sql_dumps/daisuki/bootstrap.sql
 COPY sql/ sql/
 
