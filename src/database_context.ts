@@ -1,4 +1,4 @@
-import Knex from "knex";
+import { Knex, knex } from "knex";
 import _logger from "./logger";
 import { EnvType } from "./types";
 
@@ -27,13 +27,13 @@ export class DatabaseContext {
         logger.info(`Initializing database connections ${process.env.NODE_ENV || ""}`);
         if (process.env.NODE_ENV === EnvType.TEST) {
             logger.info("Initializing KMQ test database context");
-            this.kmq = Knex(generateKnexContext("kmq_test", 0, 1));
+            this.kmq = knex(generateKnexContext("kmq_test", 0, 1));
         } else {
-            this.kmq = Knex(generateKnexContext("kmq", 0, 10));
+            this.kmq = knex(generateKnexContext("kmq", 0, 10));
         }
-        this.kpopVideos = Knex(generateKnexContext("kpop_videos", 0, 1));
-        this.agnostic = Knex(generateKnexContext(null, 0, 1));
-        this.kpopVideosValidation = Knex(generateKnexContext("kpop_videos_validation", 0, 1));
+        this.kpopVideos = knex(generateKnexContext("kpop_videos", 0, 1));
+        this.agnostic = knex(generateKnexContext(null, 0, 1));
+        this.kpopVideosValidation = knex(generateKnexContext("kpop_videos_validation", 0, 1));
     }
 
     async destroy() {
