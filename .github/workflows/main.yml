@@ -57,7 +57,5 @@ jobs:
           done
       - name: Run tests
         run: npm run test_ci
-      - name: Build and dry-run
-        run: npm run start
-        env: 
-            NODE_ENV: dry-run
+      - name: Build and CI dry-run
+        run: npm run ci

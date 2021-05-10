@@ -38,7 +38,7 @@ export default state;
 (async () => {
     if (require.main === module) {
         logger.info("Registering commands...");
-        if (process.env.NODE_ENV === EnvType.DRY_RUN) {
+        if ([EnvType.CI, EnvType.DRY_RUN].includes(process.env.NODE_ENV as EnvType)) {
             await registerCommands(true);
         } else {
             registerCommands(true);
@@ -48,7 +48,7 @@ export default state;
         logger.info("Registering process event handlers...");
         registerProcessEvents();
 
-        if (process.env.NODE_ENV === EnvType.DRY_RUN) {
+        if ([EnvType.CI, EnvType.DRY_RUN].includes(process.env.NODE_ENV as EnvType)) {
             logger.info("Dry run finished successfully.");
             process.exit(0);
         }

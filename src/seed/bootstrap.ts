@@ -91,7 +91,7 @@ async function bootstrapDatabases() {
 
 (async () => {
     if (require.main === module) {
-        if (process.env.NODE_ENV === EnvType.DRY_RUN) return;
+        if (process.env.NODE_ENV === EnvType.CI) return;
         await bootstrapDatabases();
     }
 })();
