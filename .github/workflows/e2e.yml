@@ -1,4 +1,4 @@
-name: CI
+name: E2E
 
 on:
   push:
@@ -19,30 +19,11 @@ jobs:
       DB_PASS_CI: kmq_ci_password
       DB_USER_CI: kmq_ci
     steps:
-      - name: Checkout KMQ_Discord
-        uses: actions/checkout@v2
-      - name: Check for undocumented game option commands
-        run: src/ci_checks/check_help.sh
-      - name: Setup Python 3.6
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.6'
-      - name: Check for newly introduced environment variables
-        run: python src/ci_checks/check_env_var.py
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v2.1.2
-        with:
-          node-version: 14.2.0
-      - name: Install node dependencies
-        run: yarn install --frozen-lockfile
-      - name: npm run lint
-        run: npm run lint_ci
       - name: Copy .env for CI
         run: |
           echo "DB_USER=$DB_USER_CI" >> .env
           echo "DB_PASS=$DB_PASS_CI" >> .env
           echo "DB_HOST=127.0.0.1" >> .env
-        shell: bash
       - name: Setup MySQL server
         uses: mirromutth/mysql-action@v1.1
         with:
@@ -55,6 +36,16 @@ jobs:
           while ! mysqladmin ping --host=127.0.0.1 --password="$DB_PASS_CI" --silent; do
             sleep 1
           done
+          mysql --port 3306 --host=127.0.0.1 -u $DB_USER_CI --password="$DB_PASS_CI" -e "GRANT ALL ON *.* to $DB_USER_CI@'%' IDENTIFIED BY 'password';"    
+      - name: Checkout KMQ_Discord
+        uses: actions/checkout@v2
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2.1.2
+        with:
+          node-version: 14.2.0
+      - name: Install node dependencies
+        run: yarn install --frozen-lockfile
+        shell: bash
       - name: Run tests
         run: npm run test_ci
       - name: Build and E2E dry-run
