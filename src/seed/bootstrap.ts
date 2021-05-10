@@ -6,7 +6,6 @@ import { updateKpopDatabase } from "./seed_db";
 import _logger from "../logger";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import { DatabaseContext, getNewConnection } from "../database_context";
-import { EnvType } from "../types";
 
 const logger = _logger("bootstrap");
 

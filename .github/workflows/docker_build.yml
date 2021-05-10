@@ -18,5 +18,11 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build Docker image
         run: docker build --file docker/kmq/Dockerfile . --tag kmq-ci
+      - name: Copy .env for CI
+        run: |
+          echo "DB_USER=$DB_USER_CI" >> docker/.env
+          echo "DB_PASS=$DB_PASS_CI" >> docker/.env
+          echo "DB_PORT=3307" >> docker/.env
+          echo "DB_HOST=db" >> docker/.env
       - name: Dry-run
-        run: docker run -e NODE_ENV='dry-run' kmq-ci
+        run: npm run docker-dryrun
