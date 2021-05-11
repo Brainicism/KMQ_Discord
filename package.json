@@ -5,8 +5,9 @@
   "scripts": {
     "seed": "ts-node src/seed/seed_db",
     "start": "./start.sh",
-    "dry-run": "npm run lint && NODE_ENV=dry-run npm run start",
+    "dry-run": "NODE_ENV=dry-run npm run start",
     "dev": "npm run lint && NODE_ENV=development npm run start",
+    "ci": "npm run lint && NODE_ENV=ci npm run start",
     "dev-no-lint": "NODE_ENV=development npm run start",
     "prod": "NODE_ENV=production npm run start",
     "clean": "rm -rf build/ && rm -f tsconfig.tsbuildinfo",

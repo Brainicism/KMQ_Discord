@@ -33,8 +33,9 @@ services:
     command: --max-allowed-packet=32M
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      timeout: 5s
-      retries: 12
+      timeout: 20s
+      interval: 5s
+      retries: 10
 
 volumes:
   songs:

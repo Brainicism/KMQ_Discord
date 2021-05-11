@@ -1,0 +1,25 @@
+name: E2E
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DB_PASS_CI: kmq_ci_password
+      DB_USER_CI: root
+    steps:
+      - name: Checkout KMQ_Discord
+        uses: actions/checkout@v2
+      - name: Copy .env for CI
+        run: |
+          echo "DB_USER=$DB_USER_CI" >> docker/.env
+          echo "DB_PASS=$DB_PASS_CI" >> docker/.env
+          echo "DB_HOST=db" >> docker/.env
+      - name: Build and E2E dry-run
+        run: npm run docker-dryrun
+
