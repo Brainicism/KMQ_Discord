@@ -17,7 +17,7 @@ jobs:
     timeout-minutes: 10
     env:
       DB_PASS_CI: kmq_ci_password
-      DB_USER_CI: kmq_ci
+      DB_USER_CI: root
     steps:
       - name: Copy .env for CI
         run: |
