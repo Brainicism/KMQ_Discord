@@ -251,6 +251,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     optionStrings[GameOption.SHUFFLE_TYPE] = guildPreference.getShuffleType();
     optionStrings[GameOption.SEEK_TYPE] = guildPreference.getSeekType();
     optionStrings[GameOption.GUESS_MODE_TYPE] = guildPreference.getGuessModeType();
+    optionStrings[GameOption.SPECIAL_TYPE] = guildPreference.getSpecialType();
     optionStrings[GameOption.TIMER] = guildPreference.isGuessTimeoutSet() ? `${guildPreference.getGuessTimeout()} sec` : null;
     optionStrings[GameOption.DURATION] = guildPreference.isDurationSet() ? `${guildPreference.getDuration()} mins` : null;
     optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode() ? guildPreference.getDisplayedExcludesGroupNames() : null;

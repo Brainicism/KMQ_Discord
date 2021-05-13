@@ -85,11 +85,7 @@
             }
         ],
         "prefer-destructuring": [
-            "error",
-            {
-                "object": true,
-                "array": false
-            }
+            "off"
         ],
         "func-names": [
             "off"

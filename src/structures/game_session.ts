@@ -27,6 +27,7 @@ import { KmqImages } from "../constants";
 import MessageContext from "./message_context";
 import KmqMember from "./kmq_member";
 import { MultiGuessType } from "../commands/game_options/multiguess";
+import { specialFfmpegArgs } from "../commands/game_options/special";
 
 const MULTIGUESS_DELAY = 1500;
 const logger = _logger("game_session");
@@ -570,8 +571,18 @@ export default class GameSession {
         this.connection.removeAllListeners();
         this.connection.stopPlaying();
         try {
+            let inputArgs = ["-ss", seekLocation.toString()];
+            let encoderArgs = [];
+            const specialType = guildPreference.getSpecialType();
+            if (specialType) {
+                const ffmpegArgs = specialFfmpegArgs[specialType](seekLocation);
+                inputArgs = ffmpegArgs.inputArgs;
+                encoderArgs = ffmpegArgs.encoderArgs;
+            }
             this.connection.play(stream, {
-                inputArgs: ["-ss", seekLocation.toString()],
+                inputArgs,
+                encoderArgs,
+                opusPassthrough: specialType === null,
             });
         } catch (e) {
             logger.error(`Erroring playing on voice connection. err = ${e}`);
