@@ -14,6 +14,7 @@ import { DEFAULT_OST_PREFERENCE, OstPreference } from "../commands/game_options/
 import { DEFAULT_RELEASE_TYPE, ReleaseType } from "../commands/game_options/release";
 import { DEFAULT_MULTIGUESS_TYPE, MultiGuessType } from "../commands/game_options/multiguess";
 import state from "../kmq";
+import { SpecialType } from "../commands/game_options/special";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = _logger("guild_preference");
@@ -25,6 +26,7 @@ interface GameOptions {
     limitStart: number;
     limitEnd: number;
     seekType: SeekType;
+    specialType: SpecialType;
     guessModeType: GuessModeType;
     releaseType: ReleaseType;
     artistType: ArtistType;
@@ -65,6 +67,7 @@ export default class GuildPreference {
         limitEnd: DEFAULT_LIMIT,
         limitStart: 0,
         seekType: DEFAULT_SEEK,
+        specialType: null,
         guessModeType: DEFAULT_GUESS_MODE,
         releaseType: DEFAULT_RELEASE_TYPE,
         shuffleType: DEFAULT_SHUFFLE,
@@ -406,6 +409,26 @@ export default class GuildPreference {
     /** Resets the seek type option to the default value */
     async resetSeekType() {
         this.gameOptions.seekType = DEFAULT_SEEK;
+        await this.updateGuildPreferences(true);
+    }
+
+    /**
+     * Sets the special type option value
+     * @param specialType - The SpecialType
+     */
+    async setSpecialType(specialType: SpecialType) {
+        this.gameOptions.specialType = specialType;
+        await this.updateGuildPreferences(true);
+    }
+
+    /** Gets the current special type option value */
+    getSpecialType(): SpecialType {
+        return this.gameOptions.specialType;
+    }
+
+    /** Resets the special type option to the default value */
+    async resetSpecialType() {
+        this.gameOptions.specialType = null;
         await this.updateGuildPreferences(true);
     }
 
