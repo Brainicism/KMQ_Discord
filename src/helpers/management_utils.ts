@@ -96,7 +96,7 @@ export const checkRestartNotification = async (restartNotification: Date): Promi
                     avatarUrl: state.client.user.avatarURL,
                 },
                 title: `Upcoming bot restart in ${timeDiffMin} minutes.`,
-                description: "Downtime will be approximately 2 minutes.",
+                description: "Downtime will be approximately 2 minutes. Please end the current game to ensure your progress is saved!",
             });
             channelsWarned++;
         }
