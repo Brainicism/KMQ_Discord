@@ -1,7 +1,3 @@
-/* These two are distinct music videos */
-UPDATE kpop_videos.app_kpop SET name = 'Roly Poly in Copabana' WHERE vlink = '3Xolk2cFzlo';
-UPDATE kpop_videos.app_kpop SET name = 'Roly Poly', vtype = 'main' WHERE vlink = 'afwK0Mv0IsY';
-
 /* 'main' versions are not available in North America, use dance/duplicate instead */
 /* Jet Coaster love (jp) */
 UPDATE kpop_videos.app_kpop SET vtype = 'duplicate' WHERE vlink = 'cWDzVr3vPsg';
@@ -35,3 +31,7 @@ UPDATE kpop_videos.app_kpop_group SET name = 'Car the garden' WHERE id = 700;
 /* T-ara Day by Day, swap main and dance versions. Main version is 15 minutes long */
 UPDATE kpop_videos.app_kpop SET vtype = 'duplicate' WHERE vlink = 'brnCe8lL7l4';
 UPDATE kpop_videos.app_kpop SET vtype = 'main' WHERE vlink = 'kb6mCsvLqP0';
+
+/* T-ara Roly Poly, swap long with short version*/
+UPDATE kpop_videos.app_kpop SET vtype = 'alternate' WHERE vlink = 'afwK0Mv0IsY';
+UPDATE kpop_videos.app_kpop SET vtype = 'main' WHERE vlink = '3Xu-GYneWQ8';
