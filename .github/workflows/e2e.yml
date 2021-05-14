@@ -15,6 +15,7 @@ jobs:
     env:
       DB_PASS_CI: kmq_ci_password
       DB_USER_CI: root
+      DB_PORT: 3306
     steps:
       - name: Checkout KMQ_Discord
         uses: actions/checkout@v2
