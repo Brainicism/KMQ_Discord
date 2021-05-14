@@ -164,6 +164,7 @@ async function seedAndDownloadNewSongs(db: DatabaseContext) {
             await seedAndDownloadNewSongs(db);
         } catch (e) {
             logger.error(e);
+            process.exit(1);
         } finally {
             await db.destroy();
         }
