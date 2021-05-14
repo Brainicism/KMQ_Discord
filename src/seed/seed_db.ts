@@ -14,7 +14,6 @@ config({ path: path.resolve(__dirname, "../../.env") });
 const SQL_DUMP_EXPIRY = 10;
 const fileUrl = "http://kpop.daisuki.com.br/download.php";
 const logger: Logger = _logger("seed_db");
-const overridesFilePath = path.join(__dirname, "../../sql/kpop_videos_overrides.sql");
 
 const databaseDownloadDir = path.join(__dirname, "../../sql_dumps/daisuki");
 if (!fs.existsSync(databaseDownloadDir)) {
@@ -54,7 +53,7 @@ async function validateSqlDump(db: DatabaseContext, seedFilePath: string, bootst
     try {
         await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_validation;");
         await db.agnostic.raw("CREATE DATABASE kpop_videos_validation;");
-        await db.kpopVideosValidation.raw(fs.readFileSync(seedFilePath).toString());
+        execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${seedFilePath}`);
         logger.info("Validating song count");
         const songCount = (await db.kpopVideosValidation("app_kpop").count("* as count").first()).count;
         logger.info("Validating group count");
@@ -62,12 +61,10 @@ async function validateSqlDump(db: DatabaseContext, seedFilePath: string, bootst
         if (songCount < 1000 || artistCount < 100) {
             throw new Error("SQL dump valid, but potentially missing data.");
         }
-        logger.info("Validating overrides");
-        await db.kpopVideosValidation.raw(fs.readFileSync(overridesFilePath).toString().replace(/kpop_videos/g, "kpop_videos_validation"));
         if (!bootstrap) {
             logger.info("Validating creation of data tables");
-            const createKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/create_kmq_data_tables_procedure.sql");
-            await db.kpopVideosValidation.raw(fs.readFileSync(createKmqTablesProcedureSqlPath).toString().replace(/kpop_videos/g, "kpop_videos_validation"));
+            const createKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/create_kmq_data_tables_procedure_validation.sql");
+            execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${createKmqTablesProcedureSqlPath}`);
             await db.kpopVideosValidation.raw("CALL CreateKmqDataTables;");
         }
         logger.info("SQL dump validated successfully");
@@ -89,9 +86,7 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean) {
     logger.info("Creating K-Pop video database");
     await db.agnostic.raw("CREATE DATABASE kpop_videos;");
     logger.info("Seeding K-Pop video database");
-    await db.kpopVideos.raw(fs.readFileSync(seedFilePath).toString());
-    logger.info("Performing data overrides");
-    await db.kpopVideos.raw(fs.readFileSync(overridesFilePath).toString());
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${seedFilePath}`);
     logger.info("Imported database dump successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing");
 }
 

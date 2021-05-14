@@ -23,10 +23,10 @@ BEGIN
 
 	INSERT INTO available_songs_temp 
 	
-	SELECT TRIM(app_kpop.name) AS song_name, name_aka as song_aliases, vlink AS link, TRIM(kpop_videos.app_kpop_group.name) AS artist_name, kpop_videos.app_kpop_group.members as members, kpop_videos.app_kpop.views AS views, publishedon, kpop_videos.app_kpop_group.id as id_artist, issolo,
+	SELECT TRIM(app_kpop.name) AS song_name, name_aka as song_aliases, vlink AS link, TRIM(kpop_videos_validation.app_kpop_group.name) AS artist_name, kpop_videos_validation.app_kpop_group.members as members, kpop_videos_validation.app_kpop.views AS views, publishedon, kpop_videos_validation.app_kpop_group.id as id_artist, issolo,
 	id_parentgroup, vtype, tags
-	FROM kpop_videos.app_kpop 
-	JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
+	FROM kpop_videos_validation.app_kpop 
+	JOIN kpop_videos_validation.app_kpop_group ON kpop_videos_validation.app_kpop.id_artist = kpop_videos_validation.app_kpop_group.id
 	WHERE vlink NOT IN (SELECT vlink FROM kmq.not_downloaded)
 	AND dead = 'n'
 	AND vtype = 'main'
@@ -37,10 +37,10 @@ BEGIN
 	
 	/* copy over new copy of app_kpop_group */
 	DROP TABLE IF EXISTS kmq.kpop_groups_temp;
-	CREATE TABLE kmq.kpop_groups_temp LIKE kpop_videos.app_kpop_group;
-	INSERT kmq.kpop_groups_temp	SELECT	* FROM kpop_videos.app_kpop_group;
+	CREATE TABLE kmq.kpop_groups_temp LIKE kpop_videos_validation.app_kpop_group;
+	INSERT kmq.kpop_groups_temp	SELECT	* FROM kpop_videos_validation.app_kpop_group;
 
-	CREATE TABLE IF NOT EXISTS kmq.kpop_groups LIKE kpop_videos.app_kpop_group;
+	CREATE TABLE IF NOT EXISTS kmq.kpop_groups LIKE kpop_videos_validation.app_kpop_group;
 	RENAME TABLE kmq.kpop_groups TO old, kmq.kpop_groups_temp TO kmq.kpop_groups;
 	DROP TABLE old;
 END //
