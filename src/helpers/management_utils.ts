@@ -219,7 +219,7 @@ export function registerIntervals() {
     });
 
     // every hour
-    schedule.scheduleJob("15 00 * * *", async () => {
+    schedule.scheduleJob("15 * * * *", async () => {
         if (process.env.NODE_ENV !== EnvType.PROD) return;
         logger.info("Performing regularly scheduled Daisuki database seed");
         const overrideFileExists = fs.existsSync(path.join(__dirname, "../../data/skip_seed"));
