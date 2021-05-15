@@ -192,7 +192,7 @@ export default class GameSession {
             const scoreboardUpdatePayload = guessResult.correctGuessers.map((correctGuesser, idx) => {
                 const guessPosition = idx + 1;
                 const expGain = this.calculateExpGain(guildPreference,
-                    this.gameRound.baseExp,
+                    this.gameRound.getExpReward(),
                     getNumParticipants(this.voiceChannelID),
                     guessSpeed,
                     guessPosition,

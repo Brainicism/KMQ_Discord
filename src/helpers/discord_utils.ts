@@ -598,3 +598,11 @@ export function getSqlDateString(timeInMs?: number): string {
     }
     return new Date().toISOString().slice(0, 19).replace("T", " ");
 }
+
+/**
+ * @param message - The message
+ * @returns the number of users required for a majority
+ */
+export function getMajorityCount(message: GuildTextableMessage): number {
+    return Math.floor(getNumParticipants(message.member.voiceState.channelID) * 0.5) + 1;
+}

@@ -1,8 +1,7 @@
+import _ from "lodash";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import state from "../kmq";
-import _logger from "../logger";
 import KmqMember from "./kmq_member";
-
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
 const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★\ \(\)\+]/g;
@@ -12,8 +11,6 @@ const CHARACTER_REPLACEMENTS = [
     { pattern: REMOVED_CHARACTERS, replacement: "" },
     { pattern: /&/g, replacement: "and" },
 ];
-
-const logger = _logger("game_round");
 
 /**
  * Takes in a song name and removes the characters in the predefined list
@@ -44,6 +41,18 @@ export function cleanArtistName(name: string): string {
     return cleanName;
 }
 
+/** Generate the round hints */
+function generateHint(name: string): string {
+    const HIDDEN_CHARACTER_PERCENTAGE = 0.75;
+    const nameLength = name.length;
+    const hideMask = _.sampleSize(_.range(0, nameLength), Math.floor(nameLength * HIDDEN_CHARACTER_PERCENTAGE));
+    const hiddenName = name.split("").map((char, idx) => {
+        if (!REMOVED_CHARACTERS.test(char) && (!hideMask.length || hideMask.includes(idx))) return "_";
+        return char;
+    }).join(" ");
+    return hiddenName;
+}
+
 export default class GameRound {
     /** The song name */
     public readonly songName: string;
@@ -69,6 +78,12 @@ export default class GameRound {
     /** List of players who have opted to skip the current GameRound */
     public skippers: Set<string>;
 
+    /** List of players who requested a hint */
+    public hintRequesters: Set<string>;
+
+    /** Whether a hint was used */
+    public hintUsed: boolean;
+
     /** List of players who guessed correctly */
     public readonly correctGuessers: Array<KmqMember>;
 
@@ -78,9 +93,6 @@ export default class GameRound {
     /** Timestamp of the last time the GameRound was interacted with in epoch milliseconds */
     public lastActive: number;
 
-    /** The base EXP for this GameRound */
-    public baseExp: number;
-
     /**  Whether the song has been guessed yet */
     public finished: boolean;
 
@@ -89,6 +101,12 @@ export default class GameRound {
 
     /** The accepted answers for the artist name */
     public readonly acceptedArtistAnswers: Array<string>;
+
+    /** Song/artist name hints */
+    public readonly hints: { songHint: string, artistHint: string };
+
+    /** The base EXP for this GameRound */
+    private baseExp: number;
 
     constructor(song: string, artist: string, videoID: string, year: number) {
         this.songName = song;
@@ -103,8 +121,14 @@ export default class GameRound {
         this.startedAt = Date.now();
         this.songYear = year;
         this.skippers = new Set();
+        this.hintUsed = false;
+        this.hintRequesters = new Set();
         this.correctGuessers = [];
         this.finished = false;
+        this.hints = {
+            songHint: generateHint(this.songName),
+            artistHint: generateHint(this.artistName),
+        };
     }
 
     /**
@@ -113,6 +137,30 @@ export default class GameRound {
      */
     userSkipped(userID: string) {
         this.skippers.add(userID);
+    }
+
+    /**
+     * Gets the number of players who have opted to skip the GameRound
+     * @returns the number of skippers
+     */
+    getNumSkippers(): number {
+        return this.skippers.size;
+    }
+
+    /**
+     * Adds a skip vote for the specified user
+     * @param userID - the Discord user ID of the player skipping
+     */
+    hintRequested(userID: string) {
+        this.hintRequesters.add(userID);
+    }
+
+    /**
+     * Gets the number of players who have opted to skip the GameRound
+     * @returns the number of skippers
+     */
+    getHintRequests(): number {
+        return this.hintRequesters.size;
     }
 
     /**
@@ -125,12 +173,8 @@ export default class GameRound {
         }
     }
 
-    /**
-     * Gets the number of players who have opted to skip the GameRound
-     * @returns the number of skippers
-     */
-    getNumSkippers(): number {
-        return this.skippers.size;
+    getExpReward(): number {
+        return this.hintUsed ? this.baseExp / 2 : this.baseExp;
     }
 
     /**
@@ -140,19 +184,19 @@ export default class GameRound {
      * @returns the number of points as defined by the mode type and correctness of the guess
      */
     checkGuess(guess: string, guessModeType: GuessModeType): number {
+        let pointReward = 0;
         if (guessModeType === GuessModeType.SONG_NAME) {
-            return this.checkSongGuess(guess) ? 1 : 0;
+            pointReward = this.checkSongGuess(guess) ? 1 : 0;
         }
         if (guessModeType === GuessModeType.ARTIST) {
-            return this.checkArtistGuess(guess) ? 1 : 0;
+            pointReward = this.checkArtistGuess(guess) ? 1 : 0;
         }
         if (guessModeType === GuessModeType.BOTH) {
-            if (this.checkSongGuess(guess)) return 1;
-            if (this.checkArtistGuess(guess)) return 0.2;
-            return 0;
+            if (this.checkSongGuess(guess)) pointReward = 1;
+            if (this.checkArtistGuess(guess)) pointReward = 0.2;
         }
-        logger.error(`Illegal guess mode type: ${guessModeType}`);
-        return 0;
+
+        return this.hintUsed ? pointReward / 2 : pointReward;
     }
 
     /**

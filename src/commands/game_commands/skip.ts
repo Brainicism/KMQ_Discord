@@ -4,8 +4,8 @@ import {
     areUserAndBotInSameVoiceChannel,
     getDebugLogHeader,
     EMBED_SUCCESS_COLOR,
-    getNumParticipants,
     sendInfoMessage,
+    getMajorityCount,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { GameType } from "./play";
@@ -18,14 +18,10 @@ import MessageContext from "../../structures/message_context";
 
 const logger = _logger("skip");
 
-function getSkipsRequired(message: GuildTextableMessage): number {
-    return Math.floor(getNumParticipants(message.member.voiceState.channelID) * 0.5) + 1;
-}
-
 async function sendSkipNotification(message: GuildTextableMessage, gameSession: GameSession) {
     await sendInfoMessage(MessageContext.fromMessage(message), {
         title: "**Skip**",
-        description: `${gameSession.gameRound.getNumSkippers()}/${getSkipsRequired(message)} skips received.`,
+        description: `${gameSession.gameRound.getNumSkippers()}/${getMajorityCount(message)} skips received.`,
         author: {
             username: message.author.username,
             avatarUrl: message.author.avatarURL,
@@ -41,7 +37,7 @@ async function sendSkipMessage(message: GuildTextableMessage, gameRound: GameRou
             avatarUrl: message.author.avatarURL,
         },
         title: "**Skip**",
-        description: `${gameRound.getNumSkippers()}/${getSkipsRequired(message)} skips achieved, skipping...`,
+        description: `${gameRound.getNumSkippers()}/${getMajorityCount(message)} skips achieved, skipping...`,
         thumbnailUrl: KmqImages.NOT_IMPRESSED,
     });
     setTimeout(() => {
@@ -50,7 +46,7 @@ async function sendSkipMessage(message: GuildTextableMessage, gameRound: GameRou
 }
 
 function isSkipMajority(message: GuildTextableMessage, gameSession: GameSession): boolean {
-    return gameSession.gameRound.getNumSkippers() >= getSkipsRequired(message);
+    return gameSession.gameRound.getNumSkippers() >= getMajorityCount(message);
 }
 
 export default class SkipCommand implements BaseCommand {
