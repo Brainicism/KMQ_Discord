@@ -14,7 +14,7 @@ config({ path: path.resolve(__dirname, "../../.env") });
 const SQL_DUMP_EXPIRY = 10;
 const fileUrl = "http://kpop.daisuki.com.br/download.php";
 const logger: Logger = _logger("seed_db");
-
+const overridesFilePath = path.join(__dirname, "../../sql/kpop_videos_overrides.sql");
 const databaseDownloadDir = path.join(__dirname, "../../sql_dumps/daisuki");
 if (!fs.existsSync(databaseDownloadDir)) {
     fs.mkdirSync(databaseDownloadDir);
@@ -87,6 +87,8 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean) {
     await db.agnostic.raw("CREATE DATABASE kpop_videos;");
     logger.info("Seeding K-Pop video database");
     execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${seedFilePath}`);
+    logger.info("Performing data overrides");
+    await db.kpopVideos.raw(fs.readFileSync(overridesFilePath).toString());
     logger.info("Imported database dump successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing");
 }
 
