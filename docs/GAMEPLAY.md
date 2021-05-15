@@ -29,6 +29,7 @@ You start off as a `Novice`, and work your way up through the works of `Trainee`
 - Every weekend is a 2x EXP weekend, all days on Saturdays and Sundays EST time.
 - On weekdays, there are 3 daily `KMQ Power Hours` lasting two hours each for 2x EXP, at random points in the day.
 - Winning a game in teams mode earns your team 1.1x EXP.
+- Using a hint reduces EXP by 0.5x
 - All EXP bonuses stack on one another.
 
 ## Requirements
@@ -113,6 +114,8 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,list`: Shows the currently selected groups for `,groups`,`,includes`, or `,excludes`
 - `,preset`: Save and load game option presents
 - `,vote`: Shows your current 2x bonus EXP modifier status from voting for the bot on [top.gg](https://top.gg/bot/508759831755096074/vote). Thanks for supporting KMQ!
+- `,hint`: Shows a hint for the current song playing
+
 ## Game Option Commands 
 - `,cutoff`: Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen
 - `,limit`: Set a maximum number of results in the song query. This effectively sets the 'Top X number of songs' based on the selected filters

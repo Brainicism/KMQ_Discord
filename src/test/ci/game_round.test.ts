@@ -146,6 +146,12 @@ describe("check guess", () => {
         });
     });
     describe("correct guess", () => {
+        describe("hint used", () => {
+            it("should return half the amount of points", () => {
+                gameRound.hintUsed = true;
+                assert.strictEqual(gameRound.checkGuess("song", GuessModeType.SONG_NAME), 0.5);
+            });
+        });
         describe("song guessing mode", () => {
             it("should return 1 point", () => {
                 assert.strictEqual(gameRound.checkGuess("song", GuessModeType.SONG_NAME), 1);
@@ -167,6 +173,28 @@ describe("check guess", () => {
                     assert.strictEqual(gameRound.checkGuess("artist", GuessModeType.BOTH), 0.2);
                 });
             });
+        });
+    });
+});
+
+describe("getExpReward", () => {
+    const exp = 500;
+    beforeEach(() => {
+        gameRound = new GameRound("song", "artist", "a1b2c3", 2015);
+    });
+
+    describe("no hint used", () => {
+        it("should return the same amount of exp", () => {
+            gameRound.setBaseExpReward(exp);
+            assert.strictEqual(gameRound.getExpReward(), exp);
+        });
+    });
+
+    describe("hint used", () => {
+        it("should return the same amount of exp", () => {
+            gameRound.setBaseExpReward(exp);
+            gameRound.hintUsed = true;
+            assert.strictEqual(gameRound.getExpReward(), exp / 2);
         });
     });
 });
