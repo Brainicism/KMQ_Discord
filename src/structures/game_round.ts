@@ -187,11 +187,9 @@ export default class GameRound {
         let pointReward = 0;
         if (guessModeType === GuessModeType.SONG_NAME) {
             pointReward = this.checkSongGuess(guess) ? 1 : 0;
-        }
-        if (guessModeType === GuessModeType.ARTIST) {
+        } else if (guessModeType === GuessModeType.ARTIST) {
             pointReward = this.checkArtistGuess(guess) ? 1 : 0;
-        }
-        if (guessModeType === GuessModeType.BOTH) {
+        } else if (guessModeType === GuessModeType.BOTH) {
             if (this.checkSongGuess(guess)) pointReward = 1;
             if (this.checkArtistGuess(guess)) pointReward = 0.2;
         }

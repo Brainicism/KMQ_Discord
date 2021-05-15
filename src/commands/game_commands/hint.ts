@@ -37,13 +37,13 @@ export default class HintCommand implements BaseCommand {
 
     async call({ gameSessions, message }: CommandArgs) {
         const gameSession = gameSessions[message.guildID];
-        if (!gameSession || !gameSession.gameRound) {
+        const gameRound = gameSession.gameRound;
+        if (!gameSession || !gameRound) {
             logger.warn(`${getDebugLogHeader(message)} | No active game session`);
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Error", description: "This command can only be used if a song is currently playing", thumbnailUrl: KmqImages.NOT_IMPRESSED });
             return;
         }
         const guildPreference = await getGuildPreference(message.guildID);
-        const gameRound = gameSession.gameRound;
         gameRound.hintRequested(message.author.id);
 
         const guessMode = guildPreference.getGuessModeType();
