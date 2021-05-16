@@ -1,14 +1,16 @@
-name: docker
+name: docker-build
 
 on:
-  schedule:
-    - cron: '0 0 * * 0'
   push:
     branches: [ master ]
-    paths: 'docker/**'
+    paths:
+      - 'docker/**'
+      - '.github/workflows/docker_build.yml'
   pull_request:
     branches: [ master ]
-    paths: 'docker/**'
+    paths: 
+      - 'docker/**'
+      - .github/workflows/docker_build.yml
   workflow_dispatch:
 
 jobs:
