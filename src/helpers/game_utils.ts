@@ -194,14 +194,19 @@ export async function cleanupInactiveGameSessions(): Promise<void> {
  * @returns the correspond guild's GuildPreference
  */
 export async function getGuildPreference(guildID: string): Promise<GuildPreference> {
-    const guildPreferences = await dbContext.kmq("guild_preferences").select("*").where("guild_id", guildID);
+    const guildPreferences = await dbContext.kmq("guild_preferences").select("*").where("guild_id", "=", guildID);
     if (guildPreferences.length === 0) {
         const guildPreference = GuildPreference.fromGuild(guildID);
         await dbContext.kmq("guild_preferences")
-            .insert({ guild_id: guildID, guild_preference: JSON.stringify(guildPreference), join_date: new Date() });
+            .insert({ guild_id: guildID, join_date: new Date() });
         return guildPreference;
     }
-    return GuildPreference.fromGuild(guildPreferences[0].guild_id, JSON.parse(guildPreferences[0].guild_preference));
+    const gameOptionPairs = (await dbContext.kmq("game_options")
+        .select("*")
+        .where({ guild_id: guildID }))
+        .map((x) => ({ [x["option_name"]]: JSON.parse(x["option_value"]) }))
+        .reduce(((total, curr) => Object.assign(total, curr)), {});
+    return GuildPreference.fromGuild(guildPreferences[0].guild_id, gameOptionPairs);
 }
 
 /**
