@@ -43,6 +43,7 @@ AOA
 AOA Black
 AOA CREAM
 Apink
+Apple.B
 April
 Argon
 Ariaz
@@ -53,6 +54,7 @@ Astin
 ASTRO
 ATEEZ
 Ato6
+AWEEK
 Azer
 B.A.P
 B.I
@@ -78,6 +80,7 @@ Berry Good
 Berry Good Heart Heart
 BESTie
 Bibi
+BIG Naughty
 BIGBANG
 Bigflo
 Bigstar
@@ -114,7 +117,7 @@ Buzz
 BVNDIT
 BXK
 C-Clown
-Car the garden
+Car, the garden
 Celeb Five
 Cha Eunwoo
 Changmo
@@ -149,6 +152,7 @@ Crush
 CSVC
 D-Crunch
 D.A.N.
+D.Ark
 D.Holic
 D.O.
 D1CE
@@ -156,6 +160,7 @@ Dahye
 Dal★Shabet
 Dalmatian
 Dalsooobin
+Dareharu
 Davichi
 DAWN
 Day6
@@ -181,6 +186,7 @@ Drug Restaurant
 Dvwn
 Dynamic Duo
 E'LAST
+eAeon
 eaJ
 Eddy Kim
 Elly
@@ -242,7 +248,7 @@ Girls' Generation Oh!GG
 Girls' Generation TTS
 Glam
 Golden Child
-Goo Hara
+Goo Hara ☮
 GOOD DAY
 GOT7
 Gray
@@ -276,6 +282,7 @@ Heize
 Hellovenus
 Henry
 Heo Young-saeng
+Hey Girls
 HI SUHYUN
 High School
 HIGH4
@@ -290,6 +297,7 @@ Hong Dae Kwang
 Hong Eunki
 Hong Jinyoung
 Hong Joo Chan
+Hongki
 Hoody
 Hoppipolla
 Hoshi
@@ -329,6 +337,7 @@ J-Hope
 J-Min
 J.Don
 J.Fla
+Jackson Wang
 Jaehyun
 Jamie
 Jang Beom June
@@ -337,6 +346,7 @@ Jang Hye Jin
 Jang Hyejin
 Jang Wooyoung
 Jannabi
+Jay B
 Jay Park
 JBJ
 JBJ95
@@ -345,6 +355,7 @@ Jennie
 Jenyer
 Jeon Mido
 Jeon Sang Keun
+Jeong Dongwon
 Jeong Eun Ji
 Jeong Jinwoon
 Jeong Se-woon
@@ -361,7 +372,7 @@ JJCC
 Jo Kwon
 Jo Sungmo
 John Park
-Jonghyun
+Jonghyun ☮
 Joohoney
 Jooyoung
 Joy
@@ -387,6 +398,7 @@ Jvcki Wai
 JYJ
 JYPark
 K.will
+K/DA
 Kahi
 Kai
 Kan Mi Youn
@@ -414,6 +426,7 @@ Kim Bo Kyung
 Kim Bumsoo
 Kim Dong Han
 Kim Dong Jun
+Kim Dong-wan
 Kim Dongryul
 Kim Feel
 Kim Hee Chul
@@ -490,6 +503,7 @@ M to M
 M.C The Max
 M.O.N.T
 Mad Clown
+Mad Monster
 Maddox
 Madtown
 Majors
@@ -552,6 +566,7 @@ Nichkhun
 Nick & Sammy
 Nicole Jung
 Nilo
+NiziU
 Noel
 Noir
 Norazo
@@ -657,6 +672,7 @@ Sejeong
 Seo Eunkwang
 Seo Inguk
 Seohyun
+Seomoon Tak
 Seori
 Sera Ryu
 Seulgi
@@ -707,7 +723,7 @@ Stellar
 Stray Kids
 Sugarbowl
 Suho
-Sulli
+Sulli ☮
 Sung Si-kyung
 Sungyeol
 Sunmi
@@ -750,10 +766,12 @@ Toheart
 TOO
 Topp Dogg
 Toy
+TRADE L
 TraxX
 TRCNG
 Treasure
 TREI
+TREN-D
 Tri.be
 Triple H
 Trouble Maker
@@ -794,6 +812,7 @@ Voisper
 WA$$UP
 Wanna One
 WANNA.B
+WayV
 Weeekly
 WEi
 Weki Meki
@@ -804,10 +823,12 @@ WhiteDay
 Winner
 WJSN
 WJSN Chocome
+WJSN THE BLACK
 Wonder Girls
 Wonho
 Woo Won-jae
 woo!ah!
+Woodie Gochild
 Woody
 Woodz
 Wooseok X Kuanlin
@@ -827,6 +848,7 @@ Yeri
 Yesung
 Yezi
 Yong Jun Hyung
+Yoo Hweseung
 Yoo Jae-suk
 Yoo Jiae
 Yoo Seonho
@@ -850,6 +872,7 @@ Yubin
 Yuju
 Yukika
 Yun Ddan Ddan
+Yuqi
 Yuri
 ZE:A
 Zhou Mi
