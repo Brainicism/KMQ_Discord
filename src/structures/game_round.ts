@@ -47,7 +47,7 @@ function generateHint(name: string): string {
     const nameLength = name.length;
     const hideMask = _.sampleSize(_.range(0, nameLength), Math.floor(nameLength * HIDDEN_CHARACTER_PERCENTAGE));
     const hiddenName = name.split("").map((char, idx) => {
-        if (!REMOVED_CHARACTERS.test(char) && (!hideMask.length || hideMask.includes(idx))) return "_";
+        if (!char.match(REMOVED_CHARACTERS) && (!hideMask.length || hideMask.includes(idx))) return "_";
         return char;
     }).join(" ");
     return hiddenName;
