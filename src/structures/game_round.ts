@@ -44,6 +44,7 @@ export function cleanArtistName(name: string): string {
 /** Generate the round hints */
 function generateHint(name: string): string {
     const HIDDEN_CHARACTER_PERCENTAGE = 0.75;
+    name = name.toLowerCase().split("(")[0];
     const nameLength = name.length;
     const hideMask = _.sampleSize(_.range(0, nameLength), Math.floor(nameLength * HIDDEN_CHARACTER_PERCENTAGE));
     const hiddenName = name.split("").map((char, idx) => {
