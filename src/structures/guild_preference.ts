@@ -15,6 +15,7 @@ import { DEFAULT_RELEASE_TYPE, ReleaseType } from "../commands/game_options/rele
 import { DEFAULT_MULTIGUESS_TYPE, MultiGuessType } from "../commands/game_options/multiguess";
 import state from "../kmq";
 import { SpecialType } from "../commands/game_options/special";
+import { deepArraysEqual } from "../helpers/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = _logger("guild_preference");
@@ -230,7 +231,12 @@ export default class GuildPreference {
         }
         const oldOptions = this.gameOptions;
         this.gameOptions = GuildPreference.validateGameOptions(preset as GameOptions);
-        const updatedOptions = Object.entries(this.gameOptions).filter((option) => oldOptions[option[0]] !== option[1]);
+        const updatedOptions = Object.entries(this.gameOptions).filter((option) => {
+            if (Array.isArray(oldOptions[option[0]]) && Array.isArray(option[1])) {
+                return !deepArraysEqual(oldOptions[option[0]], option[1]);
+            }
+            return oldOptions[option[0]] !== option[1];
+        });
         const updatedOptionsObj = updatedOptions.map((x) => {
             const optionName = x[0];
             const optionValue = x[1];

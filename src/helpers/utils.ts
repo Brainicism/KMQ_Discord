@@ -261,3 +261,19 @@ export function setDifference<Type>(a: Set<Type>, b: Set<Type>): Set<Type> {
     }
     return difference;
 }
+
+/**
+ * @param a - an array to compare
+ * @param b - another array to compare
+ * @returns whether both arrays are deeply equal, ignoring sorting
+ */
+export function deepArraysEqual(a: Array<any>, b: Array<any>): boolean {
+    const sortedA = a.sort();
+    const sortedB = b.sort();
+    return a.length === b.length && sortedA.every((value, index) => {
+        if (value instanceof Object) {
+            return JSON.stringify(value) === JSON.stringify(sortedB[index]);
+        }
+        return value === sortedB[index];
+    });
+}
