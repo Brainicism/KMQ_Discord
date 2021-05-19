@@ -163,7 +163,7 @@ export default class GuildPreference {
      * @param gameOptionsJson - the JSON object representing the stored GameOption
      * @returns a new GuildPreference object
      */
-    static fromGuild(guildID: string, gameOptionsJson?: { [x: string]: any }): GuildPreference {
+    static fromGuild(guildID: string, gameOptionsJson?: Object): GuildPreference {
         if (!gameOptionsJson) {
             return new GuildPreference(guildID, { ...GuildPreference.DEFAULT_OPTIONS });
         }
@@ -174,7 +174,8 @@ export default class GuildPreference {
     async listPresets(): Promise<string[]> {
         const presets = (await dbContext.kmq("game_option_presets")
             .select(["preset_name"])
-            .where("guild_id", "=", this.guildID))
+            .where("guild_id", "=", this.guildID)
+            .distinct("preset_name"))
             .map((x) => x["preset_name"]);
         return presets;
     }
@@ -197,12 +198,17 @@ export default class GuildPreference {
      */
     async savePreset(presetName: string): Promise<boolean> {
         try {
-            await dbContext.kmq("game_option_presets")
-                .insert({
-                    guild_id: this.guildID,
-                    preset_name: presetName,
-                    game_options: JSON.stringify(this.gameOptions),
-                });
+            await Promise.all(
+                Object.entries(this.gameOptions).map(async (option) => {
+                    await dbContext.kmq("game_option_presets")
+                        .insert({
+                            guild_id: this.guildID,
+                            preset_name: presetName,
+                            option_name: option[0],
+                            option_value: JSON.stringify(option[1]),
+                        });
+                }),
+            );
             return true;
         } catch (e) {
             return false;
@@ -214,17 +220,18 @@ export default class GuildPreference {
      * @returns whether the preset was loaded
      */
     async loadPreset(presetName: string): Promise<boolean> {
-        const preset = await dbContext.kmq("game_option_presets")
-            .select(["game_options"])
+        const preset = (await dbContext.kmq("game_option_presets")
+            .select(["option_name", "option_value"])
             .where("guild_id", "=", this.guildID)
-            .andWhere("preset_name", "=", presetName)
-            .first();
+            .andWhere("preset_name", "=", presetName))
+            .map((x) => ({ [x["option_name"]]: JSON.parse(x["option_value"]) }))
+            .reduce(((total, curr) => Object.assign(total, curr)), {});
 
         if (!preset) {
             return false;
         }
-        this.gameOptions = GuildPreference.validateGameOptions(JSON.parse(preset["game_options"]), true);
-        const updatedOptions = Object.entries(GuildPreference.validateGameOptions(JSON.parse(preset["game_options"]), false)).map((x) => {
+        this.gameOptions = GuildPreference.validateGameOptions(preset as GameOptions, true);
+        const updatedOptions = Object.entries(GuildPreference.validateGameOptions(preset as GameOptions, false)).map((x) => {
             const optionName = x[0];
             const optionValue = x[1];
             return { name: optionName, value: optionValue };
