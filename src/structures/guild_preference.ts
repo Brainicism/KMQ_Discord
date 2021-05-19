@@ -135,15 +135,13 @@ export default class GuildPreference {
         this.gameOptions = options || { ...GuildPreference.DEFAULT_OPTIONS };
     }
 
-    static validateGameOptions(gameOptions: GameOptions, fillMissingKeys: boolean): GameOptions {
+    static validateGameOptions(gameOptions: GameOptions): GameOptions {
         gameOptions = { ...gameOptions };
 
-        if (fillMissingKeys) {
-            // apply default game option for empty
-            for (const defaultOption in GuildPreference.DEFAULT_OPTIONS) {
-                if (!(defaultOption in gameOptions)) {
-                    gameOptions[defaultOption] = GuildPreference.DEFAULT_OPTIONS[defaultOption];
-                }
+        // apply default game option for empty
+        for (const defaultOption in GuildPreference.DEFAULT_OPTIONS) {
+            if (!(defaultOption in gameOptions)) {
+                gameOptions[defaultOption] = GuildPreference.DEFAULT_OPTIONS[defaultOption];
             }
         }
 
@@ -167,7 +165,7 @@ export default class GuildPreference {
         if (!gameOptionsJson) {
             return new GuildPreference(guildID, { ...GuildPreference.DEFAULT_OPTIONS });
         }
-        return new GuildPreference(guildID, this.validateGameOptions(gameOptionsJson as GameOptions, true));
+        return new GuildPreference(guildID, this.validateGameOptions(gameOptionsJson as GameOptions));
     }
 
     /** @returns a list of saved game option presets by name */
@@ -230,13 +228,15 @@ export default class GuildPreference {
         if (!preset) {
             return false;
         }
-        this.gameOptions = GuildPreference.validateGameOptions(preset as GameOptions, true);
-        const updatedOptions = Object.entries(GuildPreference.validateGameOptions(preset as GameOptions, false)).map((x) => {
+        const oldOptions = this.gameOptions;
+        this.gameOptions = GuildPreference.validateGameOptions(preset as GameOptions);
+        const updatedOptions = Object.entries(this.gameOptions).filter((option) => oldOptions[option[0]] !== option[1]);
+        const updatedOptionsObj = updatedOptions.map((x) => {
             const optionName = x[0];
             const optionValue = x[1];
             return { name: optionName, value: optionValue };
         });
-        await this.updateGuildPreferences(updatedOptions);
+        await this.updateGuildPreferences(updatedOptionsObj);
         return true;
     }
 
