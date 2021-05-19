@@ -263,14 +263,7 @@ export default class GuildPreference {
 
     /** Resets the limit option to the default value */
     async resetLimit() {
-        this.gameOptions.limitEnd = DEFAULT_LIMIT;
-        this.gameOptions.limitStart = 0;
-        await this.updateGuildPreferences(
-            [
-                { name: GameOptionInternal.LIMIT_START, value: this.getLimitStart() },
-                { name: GameOptionInternal.LIMIT_END, value: this.getLimitEnd() },
-            ],
-        );
+        await this.setLimit(0, DEFAULT_LIMIT);
     }
 
     /** @returns the current limit start option value */
@@ -294,8 +287,7 @@ export default class GuildPreference {
 
     /** Resets the beginning cutoff year option to the default value */
     async resetBeginningCutoffYear() {
-        this.gameOptions.beginningYear = DEFAULT_BEGINNING_SEARCH_YEAR;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.BEGINNING_YEAR, value: this.getBeginningCutoffYear() }]);
+        await this.setBeginningCutoffYear(DEFAULT_BEGINNING_SEARCH_YEAR);
     }
 
     /** @returns the current beginning cutoff year option value */
@@ -314,8 +306,7 @@ export default class GuildPreference {
 
     /** Resets the end cutoff year option to the default value */
     async resetEndCutoffYear() {
-        this.gameOptions.endYear = DEFAULT_ENDING_SEARCH_YEAR;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.END_YEAR, value: this.getEndCutoffYear() }]);
+        await this.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
     }
 
     /** @returns the current end cutoff year option value */
@@ -339,8 +330,7 @@ export default class GuildPreference {
 
     /** Resets the groups option to the default value */
     async resetGroups() {
-        this.gameOptions.groups = null;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.GROUPS, value: this.getGroups() }]);
+        await this.setGroups(null);
     }
 
     /** @returns the current selected groups by ID, if the groups option is active */
@@ -380,8 +370,7 @@ export default class GuildPreference {
 
     /** Resets the exclude option to the default value */
     async resetExcludes() {
-        this.gameOptions.excludes = null;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.EXCLUDES, value: this.getExcludesGroups() }]);
+        await this.setExcludes(null);
     }
 
     /** @returns a list containing the excluded group IDs */
@@ -421,8 +410,7 @@ export default class GuildPreference {
 
     /** Resets the include option to the default value */
     async resetIncludes() {
-        this.gameOptions.includes = null;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.INCLUDES, value: this.getIncludesGroups() }]);
+        await this.setIncludes(null);
     }
 
     /** @returns a list containing the excluded group IDs */
@@ -448,8 +436,7 @@ export default class GuildPreference {
 
     /** Resets the gender option to the default value */
     async resetGender() {
-        this.gameOptions.gender = DEFAULT_GENDER;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.GENDER, value: this.getGender() }]);
+        await this.setGender(DEFAULT_GENDER);
     }
 
     /**
@@ -487,8 +474,7 @@ export default class GuildPreference {
 
     /** Resets the seek type option to the default value */
     async resetSeekType() {
-        this.gameOptions.seekType = DEFAULT_SEEK;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.SEEK_TYPE, value: this.getSeekType() }]);
+        await this.setSeekType(DEFAULT_SEEK);
     }
 
     /**
@@ -507,8 +493,7 @@ export default class GuildPreference {
 
     /** Resets the special type option to the default value */
     async resetSpecialType() {
-        this.gameOptions.specialType = null;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.SPECIAL_TYPE, value: this.getSpecialType() }]);
+        await this.setSpecialType(null);
     }
 
     /** @returns the current artist type option value */
@@ -518,8 +503,7 @@ export default class GuildPreference {
 
     /** Resets the artist type option to the default value */
     async resetArtistType() {
-        this.gameOptions.artistType = DEFAULT_ARTIST_TYPE;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.ARTIST_TYPE, value: this.getArtistType() }]);
+        await this.setArtistType(DEFAULT_ARTIST_TYPE);
     }
 
     /**
@@ -547,8 +531,7 @@ export default class GuildPreference {
 
     /** Resets the subunit preference option to the default value */
     async resetSubunitPreference() {
-        this.gameOptions.subunitPreference = DEFAULT_SUBUNIT_PREFERENCE;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.SUBUNIT_PREFERENCE, value: this.getSubunitPreference() }]);
+        await this.setSubunitPreference(DEFAULT_SUBUNIT_PREFERENCE);
     }
 
     /**
@@ -567,8 +550,7 @@ export default class GuildPreference {
 
     /** Resets the OST preference option to the default value */
     async resetOstPreference() {
-        this.gameOptions.ostPreference = DEFAULT_OST_PREFERENCE;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.OST_PREFERENCE, value: this.getOstPreference() }]);
+        await this.setOstPreference(DEFAULT_OST_PREFERENCE);
     }
 
     /**
@@ -587,8 +569,7 @@ export default class GuildPreference {
 
     /** Resets the mode type option to the default value */
     async resetGuessModeType() {
-        this.gameOptions.guessModeType = DEFAULT_GUESS_MODE;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.GUESS_MODE_TYPE, value: this.getGuessModeType() }]);
+        await this.setGuessModeType(DEFAULT_GUESS_MODE);
     }
 
     /**
@@ -607,8 +588,7 @@ export default class GuildPreference {
 
     /** Resets the release type option to the default value */
     async resetReleaseType() {
-        this.gameOptions.guessModeType = DEFAULT_GUESS_MODE;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.RELEASE_TYPE, value: this.getReleaseType() }]);
+        await this.setReleaseType(DEFAULT_RELEASE_TYPE);
     }
 
     /**
@@ -627,8 +607,7 @@ export default class GuildPreference {
 
     /** Resets the goal option to the default value */
     async resetGoal() {
-        this.gameOptions.goal = null;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.GOAL, value: this.getGoal() }]);
+        await this.setGoal(null);
     }
 
     /** @returns whether the goal option is set */
@@ -652,8 +631,7 @@ export default class GuildPreference {
 
     /** Resets the duration option to the default value */
     async resetDuration() {
-        this.gameOptions.duration = null;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.DURATION, value: this.getDuration() }]);
+        await this.setDuration(null);
     }
 
     /** @returns whether the duratiopn option is active */
@@ -677,8 +655,7 @@ export default class GuildPreference {
 
     /** Resets the timer option to the default value */
     async resetGuessTimeout() {
-        this.gameOptions.guessTimeout = null;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.GUESS_TIMEOUT, value: this.getGuessTimeout() }]);
+        await this.setGuessTimeout(null);
     }
 
     /** @returns whether the timer option is active */
@@ -705,8 +682,7 @@ export default class GuildPreference {
 
     /** Resets the shuffle type to the default value */
     async resetShuffleType() {
-        this.gameOptions.shuffleType = DEFAULT_SHUFFLE;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.SHUFFLE_TYPE, value: this.getShuffleType() }]);
+        await this.setShuffleType(DEFAULT_SHUFFLE);
     }
 
     /** @returns whether the current shuffle type is UNIQUE */
@@ -730,8 +706,7 @@ export default class GuildPreference {
 
     /** Resets the language type option the the default value */
     async resetLanguageType() {
-        this.gameOptions.languageType = DEFAULT_LANGUAGE;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.LANGUAGE_TYPE, value: this.getLanguageType() }]);
+        await this.setLanguageType(DEFAULT_LANGUAGE);
     }
 
     /**
@@ -750,8 +725,7 @@ export default class GuildPreference {
 
     /** Resets the multiguess type option the the default value */
     async resetMultiGuessType() {
-        this.gameOptions.multiGuessType = DEFAULT_MULTIGUESS_TYPE;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.MULTI_GUESS_TYPE, value: this.getMultiGuessType() }]);
+        await this.setMultiGuessType(DEFAULT_MULTIGUESS_TYPE);
     }
 
     /**
