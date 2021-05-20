@@ -35,6 +35,8 @@ export default class HintCommand implements BaseCommand {
         priority: 1020,
     };
 
+    aliases = ["h"];
+
     async call({ gameSessions, message }: CommandArgs) {
         const gameSession = gameSessions[message.guildID];
         const gameRound = gameSession.gameRound;
