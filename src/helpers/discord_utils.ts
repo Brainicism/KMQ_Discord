@@ -1,13 +1,12 @@
 import Eris, { EmbedOptions, TextableChannel } from "eris";
 import EmbedPaginator from "eris-pagination";
-import path from "path";
 import GuildPreference from "../structures/guild_preference";
 import GameSession, { UniqueSongCounter } from "../structures/game_session";
 import _logger from "../logger";
 import { endSession, getSongCount } from "./game_utils";
 import { getFact } from "../fact_generator";
 import { EmbedPayload, GameOption, GameOptionCommand, PriorityGameOption, ConflictingGameOptions, GuildTextableMessage, PlayerRoundResult } from "../types";
-import { chunkArray, codeLine, bold, underline, italicize, strikethrough, parseJsonFile, chooseWeightedRandom, getOrdinalNum } from "./utils";
+import { chunkArray, codeLine, bold, underline, italicize, strikethrough, chooseWeightedRandom, getOrdinalNum } from "./utils";
 import state from "../kmq";
 import Scoreboard from "../structures/scoreboard";
 import GameRound from "../structures/game_round";
@@ -17,8 +16,6 @@ import { GameType } from "../commands/game_commands/play";
 import { KmqImages } from "../constants";
 import MessageContext from "../structures/message_context";
 import { GuessModeType } from "../commands/game_options/guessmode";
-
-const endGameMessages = parseJsonFile(path.resolve(__dirname, "../../data/end_game_messages.json"));
 
 const logger = _logger("utils");
 export const EMBED_INFO_COLOR = 0x000000; // BLACK
@@ -359,7 +356,7 @@ export async function sendEndGameMessage(textChannelID: string, gameSession: Gam
     } else {
         const winners = gameSession.scoreboard.getWinners();
         const embedFields = gameSession.scoreboard.getScoreboardEmbedFields().slice(0, 10);
-        const endGameMessage = Math.random() < 0.5 ? chooseWeightedRandom(endGameMessages.kmq) : chooseWeightedRandom(endGameMessages.game);
+        const endGameMessage = Math.random() < 0.5 ? chooseWeightedRandom(state.endGameMessages.kmq) : chooseWeightedRandom(state.endGameMessages.game);
         embedFields.push(
             {
                 name: endGameMessage.title,
