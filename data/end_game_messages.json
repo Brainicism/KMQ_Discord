@@ -20,9 +20,19 @@
             "title": "Check out our Discord server!",
             "message": "Looking for new friends to play KMQ with, or want to play against the best of the best? Feel free to [come by](https://discord.gg/RCuzwYV) and say hi!",
             "weight": 5
+        },
+        {
+            "title": "KMQ Event!",
+            "message": "We're hosting a competition with over $300 in prizes in the [official KMQ server](https://discord.gg/RCuzwYV) from May 28th to May 30th!",
+            "weight": 15
         }
     ],
     "game": [
+        {
+            "title": "KMQ Event!",
+            "message": "We're hosting a competition with over $300 in prizes in the [official KMQ server](https://discord.gg/RCuzwYV) from May 28th to May 30th!",
+            "weight": 15
+        },
         {
             "title": "Did you know?",
             "message": "Raise the stakes and try `elimination` mode, where you lose a life for not guessing correctly ☠. See `,help play` for more details.",
