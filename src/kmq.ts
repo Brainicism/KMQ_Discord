@@ -4,7 +4,7 @@ import { resolve } from "path";
 import _logger from "./logger";
 import { EnvType, State } from "./types";
 import {
-    registerClientEvents, registerProcessEvents, registerCommands, registerIntervals, initializeBotStatsPoster, reloadCaches, updatePublishDateOverrides,
+    registerClientEvents, registerProcessEvents, registerCommands, registerIntervals, initializeBotStatsPoster, reloadCaches, reloadEndGameMessages, updatePublishDateOverrides,
 } from "./helpers/management_utils";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -53,9 +53,10 @@ export default state;
             process.exit(0);
         }
 
-        logger.info("Reloading cached application data...");
+        logger.info("Loading cached application data...");
         reloadCaches();
         updatePublishDateOverrides();
+        reloadEndGameMessages();
 
         logger.info("Initializing bot stats poster...");
         initializeBotStatsPoster();
