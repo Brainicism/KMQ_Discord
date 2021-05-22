@@ -1,4 +1,7 @@
 import { DatabaseContext, getNewConnection } from "../database_context";
+import _logger from "../logger";
+
+const logger = _logger("json-presets-to-new-format");
 
 async function exportJsonPresetsToNewTable(db: DatabaseContext): Promise<void> {
     const jsonPresets = await db.kmq("game_option_presets_json").select("*");
@@ -6,17 +9,21 @@ async function exportJsonPresetsToNewTable(db: DatabaseContext): Promise<void> {
         const guildID = preset["guild_id"];
         const presetName = preset["preset_name"];
         const options = JSON.parse(preset["game_options"]);
-        await Promise.all(
-            Object.entries(options).map(async (option) => {
-                await db.kmq("game_option_presets")
-                    .insert({
-                        guild_id: guildID,
-                        preset_name: presetName,
-                        option_name: option[0],
-                        option_value: JSON.stringify(option[1]),
-                    });
-            }),
-        );
+        try {
+            await Promise.all(
+                Object.entries(options).map(async (option) => {
+                    await db.kmq("game_option_presets")
+                        .insert({
+                            guild_id: guildID,
+                            preset_name: presetName,
+                            option_name: option[0],
+                            option_value: JSON.stringify(option[1]),
+                        });
+                }),
+            );
+        } catch (err) {
+            logger.error(`Migration of preset ${presetName} of ${guildID} failed, err = ${err}`);
+        }
     }));
 }
 

@@ -23,7 +23,7 @@ export default class PresetCommand implements BaseCommand {
     aliases = ["presets"];
 
     validations = {
-        minArgCount: 1,
+        minArgCount: 0,
         maxArgCount: 2,
         arguments: [
             {
@@ -65,9 +65,9 @@ export default class PresetCommand implements BaseCommand {
 
     async call({ message, parsedMessage }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
-        const presetAction = parsedMessage.components[0] as PresetAction;
+        const presetAction = parsedMessage.components[0] as PresetAction || null;
         const messageContext = MessageContext.fromMessage(message);
-        if (presetAction === PresetAction.LIST) {
+        if (!presetAction || presetAction === PresetAction.LIST) {
             this.listPresets(guildPreference, messageContext);
             return;
         }
@@ -148,7 +148,11 @@ export default class PresetCommand implements BaseCommand {
 
     async listPresets(guildPreference: GuildPreference, messageContext: MessageContext) {
         const presets = await guildPreference.listPresets();
-        sendInfoMessage(messageContext, { title: "Available Presets", description: presets.length > 0 ? presets.join("\n") : "You have no presets. Refer to `,help preset` to see how to create one." });
+        sendInfoMessage(messageContext, {
+            title: "Available Presets",
+            description: presets.length > 0 ? presets.join("\n") : "You have no presets. Refer to `,help preset` to see how to create one.",
+            footerText: presets.length > 0 ? "Load a preset with ,preset load [presetName]" : null,
+        });
         logger.info(`${getDebugLogHeader(messageContext)} | Listed all presets`);
     }
 }

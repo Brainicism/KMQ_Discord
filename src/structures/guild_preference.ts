@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { DEFAULT_BEGINNING_SEARCH_YEAR, DEFAULT_ENDING_SEARCH_YEAR } from "../commands/game_options/cutoff";
 import { DEFAULT_LIMIT } from "../commands/game_options/limit";
 import { Gender, DEFAULT_GENDER } from "../commands/game_options/gender";
@@ -15,7 +16,6 @@ import { DEFAULT_RELEASE_TYPE, ReleaseType } from "../commands/game_options/rele
 import { DEFAULT_MULTIGUESS_TYPE, MultiGuessType } from "../commands/game_options/multiguess";
 import state from "../kmq";
 import { SpecialType } from "../commands/game_options/special";
-import { deepArraysEqual } from "../helpers/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = _logger("guild_preference");
@@ -197,17 +197,17 @@ export default class GuildPreference {
      */
     async savePreset(presetName: string): Promise<boolean> {
         try {
-            await Promise.all(
-                Object.entries(this.gameOptions).map(async (option) => {
-                    await dbContext.kmq("game_option_presets")
-                        .insert({
-                            guild_id: this.guildID,
-                            preset_name: presetName,
-                            option_name: option[0],
-                            option_value: JSON.stringify(option[1]),
-                        });
-                }),
-            );
+            const presetOptions = Object.entries(this.gameOptions).map((option) => ({
+                guild_id: this.guildID,
+                preset_name: presetName,
+                option_name: option[0],
+                option_value: JSON.stringify(option[1]),
+            }));
+            await dbContext.kmq.transaction(async (trx) => {
+                await dbContext.kmq("game_option_presets")
+                    .insert(presetOptions)
+                    .transacting(trx);
+            });
             return true;
         } catch (e) {
             return false;
@@ -231,12 +231,11 @@ export default class GuildPreference {
         }
         const oldOptions = this.gameOptions;
         this.gameOptions = GuildPreference.validateGameOptions(preset as GameOptions);
-        const updatedOptions = Object.entries(this.gameOptions).filter((option) => {
-            if (Array.isArray(oldOptions[option[0]]) && Array.isArray(option[1])) {
-                return !deepArraysEqual(oldOptions[option[0]], option[1]);
-            }
-            return oldOptions[option[0]] !== option[1];
-        });
+        const updatedOptions = Object.entries(this.gameOptions).filter((option) => !_.isEqual(oldOptions[option[0]], option[1]));
+        if (updatedOptions.length === 0) {
+            // User loads a preset with the exact same options as what is currently set
+            return true;
+        }
         const updatedOptionsObj = updatedOptions.map((x) => {
             const optionName = x[0];
             const optionValue = x[1];
@@ -251,12 +250,12 @@ export default class GuildPreference {
      * @param limit - The limit range value
      */
     async setLimit(limitStart: number, limitEnd: number) {
-        this.gameOptions.limitEnd = limitEnd;
         this.gameOptions.limitStart = limitStart;
+        this.gameOptions.limitEnd = limitEnd;
         await this.updateGuildPreferences(
             [
-                { name: GameOptionInternal.LIMIT_START, value: this.getLimitStart() },
-                { name: GameOptionInternal.LIMIT_END, value: this.getLimitEnd() },
+                { name: GameOptionInternal.LIMIT_START, value: limitStart },
+                { name: GameOptionInternal.LIMIT_END, value: limitEnd },
             ],
         );
     }
@@ -282,7 +281,7 @@ export default class GuildPreference {
      */
     async setBeginningCutoffYear(year: number) {
         this.gameOptions.beginningYear = year;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.BEGINNING_YEAR, value: this.getBeginningCutoffYear() }]);
+        await this.updateGuildPreferences([{ name: GameOptionInternal.BEGINNING_YEAR, value: year }]);
     }
 
     /** Resets the beginning cutoff year option to the default value */
@@ -301,7 +300,7 @@ export default class GuildPreference {
      */
     async setEndCutoffYear(year: number) {
         this.gameOptions.endYear = year;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.END_YEAR, value: this.getEndCutoffYear() }]);
+        await this.updateGuildPreferences([{ name: GameOptionInternal.END_YEAR, value: year }]);
     }
 
     /** Resets the end cutoff year option to the default value */
@@ -321,11 +320,11 @@ export default class GuildPreference {
 
     /**
      * Sets the groups option value
-     * @param groupIDs - A list of kpop groups, ID and name
+     * @param groupIDs - A list of kpop groups (ID and name)
      */
-    async setGroups(groupIDs: MatchedArtist[]) {
-        this.gameOptions.groups = groupIDs;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.GROUPS, value: this.getGroups() }]);
+    async setGroups(groups: MatchedArtist[]) {
+        this.gameOptions.groups = groups;
+        await this.updateGuildPreferences([{ name: GameOptionInternal.GROUPS, value: groups }]);
     }
 
     /** Resets the groups option to the default value */
@@ -337,11 +336,6 @@ export default class GuildPreference {
     getGroupIDs(): number[] {
         if (this.gameOptions.groups === null) return [];
         return this.gameOptions.groups.map((x) => x.id);
-    }
-
-    /** @returns the current selected groups (name and ID), if the groups option is active */
-    getGroups(): MatchedArtist[] {
-        return this.gameOptions.groups;
     }
 
     /** @returns a friendly, potentially truncated, string displaying the currently selected groups option */
@@ -361,11 +355,11 @@ export default class GuildPreference {
 
     /**
      * Sets the exclude option value
-     * @param groupIDs - A list of kpop groups, ID and name
+     * @param groups - A list of kpop groups (ID and name)
      */
-    async setExcludes(groupIDs: MatchedArtist[]) {
-        this.gameOptions.excludes = groupIDs;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.EXCLUDES, value: this.getExcludesGroups() }]);
+    async setExcludes(groups: MatchedArtist[]) {
+        this.gameOptions.excludes = groups;
+        await this.updateGuildPreferences([{ name: GameOptionInternal.EXCLUDES, value: groups }]);
     }
 
     /** Resets the exclude option to the default value */
@@ -377,11 +371,6 @@ export default class GuildPreference {
     getExcludesGroupIDs(): number[] {
         if (this.gameOptions.excludes === null) return [];
         return this.gameOptions.excludes.map((x) => x.id);
-    }
-
-    /** @returns a list containing the excluded groups (name and ID) */
-    getExcludesGroups(): MatchedArtist[] {
-        return this.gameOptions.excludes;
     }
 
     /** @returns a friendly, potentially truncated, string displaying the currently selected exclude option */
@@ -401,11 +390,11 @@ export default class GuildPreference {
 
     /**
      * Sets the include option value
-     * @param groupIDs - A list of kpop groups, ID and name
+     * @param groupIDs - A list of kpop groups (ID and name)
      */
-    async setIncludes(groupIDs: MatchedArtist[]) {
-        this.gameOptions.includes = groupIDs;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.INCLUDES, value: this.getIncludesGroups() }]);
+    async setIncludes(groups: MatchedArtist[]) {
+        this.gameOptions.includes = groups;
+        await this.updateGuildPreferences([{ name: GameOptionInternal.INCLUDES, value: groups }]);
     }
 
     /** Resets the include option to the default value */
@@ -417,11 +406,6 @@ export default class GuildPreference {
     getIncludesGroupIDs(): number[] {
         if (this.gameOptions.includes === null) return [];
         return this.gameOptions.includes.map((x) => x.id);
-    }
-
-    /** @returns a list containing the included groups (name and ID) */
-    getIncludesGroups(): MatchedArtist[] {
-        return this.gameOptions.includes;
     }
 
     /** @returns a friendly, potentially truncated, string displaying the currently selected include option */
@@ -445,7 +429,7 @@ export default class GuildPreference {
      */
     async setGender(genderArr: Array<Gender>) {
         this.gameOptions.gender = [...new Set(genderArr)];
-        await this.updateGuildPreferences([{ name: GameOptionInternal.GENDER, value: this.getGender() }]);
+        await this.updateGuildPreferences([{ name: GameOptionInternal.GENDER, value: this.gameOptions.gender }]);
     }
 
     /** @returns an array containing the currently selected gender option */
@@ -464,7 +448,7 @@ export default class GuildPreference {
      */
     async setSeekType(seekType: SeekType) {
         this.gameOptions.seekType = seekType;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.SEEK_TYPE, value: this.getSeekType() }]);
+        await this.updateGuildPreferences([{ name: GameOptionInternal.SEEK_TYPE, value: seekType }]);
     }
 
     /** Gets the current seek type option value */
@@ -483,7 +467,7 @@ export default class GuildPreference {
      */
     async setSpecialType(specialType: SpecialType) {
         this.gameOptions.specialType = specialType;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.SPECIAL_TYPE, value: this.getSpecialType() }]);
+        await this.updateGuildPreferences([{ name: GameOptionInternal.SPECIAL_TYPE, value: specialType }]);
     }
 
     /** Gets the current special type option value */
@@ -511,8 +495,8 @@ export default class GuildPreference {
      * @param artistType - The ArtistType
      */
     async setArtistType(artistType: ArtistType) {
-        this.gameOptions.artistType = artistType as ArtistType;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.ARTIST_TYPE, value: this.getArtistType() }]);
+        this.gameOptions.artistType = artistType;
+        await this.updateGuildPreferences([{ name: GameOptionInternal.ARTIST_TYPE, value: artistType }]);
     }
 
     /**
@@ -520,8 +504,8 @@ export default class GuildPreference {
      * @param subunitPreference - The SubunitsPreference
      */
     async setSubunitPreference(subunitPreference: SubunitsPreference) {
-        this.gameOptions.subunitPreference = subunitPreference as SubunitsPreference;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.SUBUNIT_PREFERENCE, value: this.getSubunitPreference() }]);
+        this.gameOptions.subunitPreference = subunitPreference;
+        await this.updateGuildPreferences([{ name: GameOptionInternal.SUBUNIT_PREFERENCE, value: subunitPreference }]);
     }
 
     /** @returns the current subunit preference option value */
@@ -539,8 +523,8 @@ export default class GuildPreference {
      * @param ostPreference - The OstPreference
      */
     async setOstPreference(ostPreference: OstPreference) {
-        this.gameOptions.ostPreference = ostPreference as OstPreference;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.OST_PREFERENCE, value: this.getOstPreference() }]);
+        this.gameOptions.ostPreference = ostPreference;
+        await this.updateGuildPreferences([{ name: GameOptionInternal.OST_PREFERENCE, value: ostPreference }]);
     }
 
     /** @returns the current OST preference option value */
@@ -558,8 +542,8 @@ export default class GuildPreference {
      * @param guessModeType - The GuessModeType
      */
     async setGuessModeType(guessModeType: GuessModeType) {
-        this.gameOptions.guessModeType = guessModeType as GuessModeType;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.GUESS_MODE_TYPE, value: this.getGuessModeType() }]);
+        this.gameOptions.guessModeType = guessModeType;
+        await this.updateGuildPreferences([{ name: GameOptionInternal.GUESS_MODE_TYPE, value: guessModeType }]);
     }
 
     /** @returns the current mode type option value */
@@ -577,8 +561,8 @@ export default class GuildPreference {
      * @param releaseType - The ReleaseType
      */
     async setReleaseType(releaseType: ReleaseType) {
-        this.gameOptions.releaseType = releaseType as ReleaseType;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.RELEASE_TYPE, value: this.getReleaseType() }]);
+        this.gameOptions.releaseType = releaseType;
+        await this.updateGuildPreferences([{ name: GameOptionInternal.RELEASE_TYPE, value: releaseType }]);
     }
 
     /** @returns the current release type option value */
@@ -597,7 +581,7 @@ export default class GuildPreference {
      */
     async setGoal(goal: number) {
         this.gameOptions.goal = goal;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.GOAL, value: this.getGoal() }]);
+        await this.updateGuildPreferences([{ name: GameOptionInternal.GOAL, value: goal }]);
     }
 
     /** @returns the current goal option value */
@@ -621,7 +605,7 @@ export default class GuildPreference {
      */
     async setDuration(duration: number) {
         this.gameOptions.duration = duration;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.DURATION, value: this.getDuration() }]);
+        await this.updateGuildPreferences([{ name: GameOptionInternal.DURATION, value: duration }]);
     }
 
     /** @returns the current duration option value */
@@ -645,7 +629,7 @@ export default class GuildPreference {
      */
     async setGuessTimeout(guessTimeout: number) {
         this.gameOptions.guessTimeout = guessTimeout;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.GUESS_TIMEOUT, value: this.getGuessTimeout() }]);
+        await this.updateGuildPreferences([{ name: GameOptionInternal.GUESS_TIMEOUT, value: guessTimeout }]);
     }
 
     /** @returns the current timer option value */
@@ -672,7 +656,7 @@ export default class GuildPreference {
 
         // Doesn't actually modify list of available_songs, but we need to
         // reset lastPlayedSongsQueue when changing shuffling modes
-        await this.updateGuildPreferences([{ name: GameOptionInternal.SHUFFLE_TYPE, value: this.getShuffleType() }]);
+        await this.updateGuildPreferences([{ name: GameOptionInternal.SHUFFLE_TYPE, value: shuffleType }]);
     }
 
     /** Returns the current shuffle type option value */
@@ -696,7 +680,7 @@ export default class GuildPreference {
      */
     async setLanguageType(languageType: LanguageType) {
         this.gameOptions.languageType = languageType;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.LANGUAGE_TYPE, value: this.getLanguageType() }]);
+        await this.updateGuildPreferences([{ name: GameOptionInternal.LANGUAGE_TYPE, value: languageType }]);
     }
 
     /** @returns the langauge type option value */
@@ -715,7 +699,7 @@ export default class GuildPreference {
      */
     async setMultiGuessType(multiGuessType: MultiGuessType) {
         this.gameOptions.multiGuessType = multiGuessType;
-        await this.updateGuildPreferences([{ name: GameOptionInternal.MULTI_GUESS_TYPE, value: this.getMultiGuessType() }]);
+        await this.updateGuildPreferences([{ name: GameOptionInternal.MULTI_GUESS_TYPE, value: multiGuessType }]);
     }
 
     /** @returns the multiguess type option value */
@@ -730,16 +714,21 @@ export default class GuildPreference {
 
     /**
      * Persists the current guild preference to the data store
+     * @param updatedOptionsObjects - An array of objects containing the names and values of updated options
      */
-    async updateGuildPreferences(updatedOptions: Array<{ name: string, value: GameOptionValue }>) {
-        await Promise.all(
-            updatedOptions.map(async (option) => {
-                await dbContext.kmq("game_options")
-                    .insert({ guild_id: this.guildID, option_name: option.name, option_value: JSON.stringify(option.value) })
-                    .onConflict(option.name)
-                    .merge();
-            }),
-        );
+    async updateGuildPreferences(updatedOptionsObjects: Array<{ name: string, value: GameOptionValue }>) {
+        const updatedOptions = Object.values(updatedOptionsObjects).map((option) => ({
+            guild_id: this.guildID,
+            option_name: option.name,
+            option_value: JSON.stringify(option.value),
+        }));
+        await dbContext.kmq.transaction(async (trx) => {
+            await dbContext.kmq("game_options")
+                .insert(updatedOptions)
+                .onConflict(["guild_id", "option_name"])
+                .merge()
+                .transacting(trx);
+        });
         const gameSession = state.gameSessions[this.guildID];
         if (gameSession) {
             await gameSession.updateFilteredSongs(this);
