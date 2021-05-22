@@ -1,6 +1,5 @@
 /* eslint-disable global-require */
 /* eslint-disable import/no-dynamic-require */
-import cronParser from "cron-parser";
 import path from "path";
 import fs from "fs";
 import _glob from "glob";
@@ -80,13 +79,22 @@ export function registerProcessEvents() {
 }
 
 /**
+ * Gets the remaining time until the next server restart
+ * @returns null if no restart is imminent, a date in epoch milliseconds
+ */
+export async function getTimeUntilRestart(): Promise<number> {
+    const restartNotificationTime = (await dbContext.kmq("restart_notifications").where("id", 1))[0].restart_time;
+    if (!restartNotificationTime) return null;
+    return Math.floor((restartNotificationTime - (new Date()).getTime()) / (1000 * 60));
+}
+
+/**
  * Sends a warning message to all active GameSessions for impending restarts at predefined intervals
  * @param restartNotification - The date of the impending restart
  */
-export const checkRestartNotification = async (restartNotification: Date): Promise<void> => {
-    const timeDiffMin = Math.floor((restartNotification.getTime() - (new Date()).getTime()) / (1000 * 60));
-    let channelsWarned = 0;
-    if (RESTART_WARNING_INTERVALS.has(timeDiffMin)) {
+export const checkRestartNotification = async (timeUntilRestart: number): Promise<void> => {
+    let serversWarned = 0;
+    if (RESTART_WARNING_INTERVALS.has(timeUntilRestart)) {
         for (const gameSession of Object.values(state.gameSessions)) {
             if (gameSession.finished) continue;
             await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
@@ -95,12 +103,12 @@ export const checkRestartNotification = async (restartNotification: Date): Promi
                     username: state.client.user.username,
                     avatarUrl: state.client.user.avatarURL,
                 },
-                title: `Upcoming bot restart in ${timeDiffMin} minutes.`,
+                title: `Upcoming bot restart in ${timeUntilRestart} minutes.`,
                 description: "Downtime will be approximately 2 minutes. Please end the current game to ensure your progress is saved!",
             });
-            channelsWarned++;
+            serversWarned++;
         }
-        logger.info(`Impending bot restart in ${timeDiffMin} minutes. ${channelsWarned} servers warned.`);
+        logger.info(`Impending bot restart in ${timeUntilRestart} minutes. ${serversWarned} servers warned.`);
     }
 };
 
@@ -120,6 +128,14 @@ function clearInactiveVoiceConnections() {
 /** Updates the bot's song listening status */
 export async function updateBotStatus() {
     const { client } = state;
+    const timeUntilRestart = await getTimeUntilRestart();
+    if (timeUntilRestart) {
+        client.editStatus("dnd", {
+            name: `Restarting in ${timeUntilRestart} minutes...`,
+        });
+        return;
+    }
+
     const oneMonthPriorDate = new Date();
     oneMonthPriorDate.setMonth(oneMonthPriorDate.getMonth() - 1);
     const randomPopularSongs = await dbContext.kmq("available_songs")
@@ -183,16 +199,6 @@ export function reloadEndGameMessages() {
 }
 
 /**
- * Gets the upcoming server restart time
- * @returns null if no restart is imminent, a date in epoch milliseconds otherwise
- */
-export async function getRestartTime(): Promise<Date> {
-    const restartNotificationTime = (await dbContext.kmq("restart_notifications").where("id", 1))[0].restart_time;
-    if (!restartNotificationTime) return null;
-    return new Date(restartNotificationTime);
-}
-
-/**
  * Clears any existing restart timers
  */
 export async function clearRestartNotification() {
@@ -212,19 +218,10 @@ export function registerIntervals() {
     schedule.scheduleJob("* * * * *", async () => {
         if (process.env.NODE_ENV !== EnvType.PROD) return;
         // unscheduled restarts
-        const restartNotification = await getRestartTime();
-        if (restartNotification) {
-            if (restartNotification.getTime() > Date.now()) {
-                await checkRestartNotification(restartNotification);
-                return;
-            }
-        }
-
-        // cron based restart
-        if (process.env.RESTART_CRON) {
-            const interval = cronParser.parseExpression(process.env.RESTART_CRON);
-            const nextRestartTime = interval.next();
-            await checkRestartNotification(nextRestartTime.toDate());
+        const timeUntilRestart = await getTimeUntilRestart();
+        if (timeUntilRestart) {
+            updateBotStatus();
+            await checkRestartNotification(timeUntilRestart);
         }
     });
 
