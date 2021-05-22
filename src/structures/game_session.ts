@@ -252,6 +252,7 @@ export default class GameSession {
      */
     endSession = async (): Promise<void> => {
         this.finished = true;
+        deleteGameSession(this.guildID);
         this.endRound({ correct: false }, await getGuildPreference(this.guildID));
         const voiceConnection = state.client.voiceConnections.get(this.guildID);
 
@@ -316,7 +317,6 @@ export default class GameSession {
         await this.storeSongCounts();
 
         logger.info(`gid: ${this.guildID} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}. gameType = ${this.gameType}`);
-        deleteGameSession(this.guildID);
     };
 
     /**
