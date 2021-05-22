@@ -7,7 +7,6 @@ declare namespace NodeJS {
         DB_HOST: string,
         DB_PORT: string,
         SONG_DOWNLOAD_DIR: string,
-        RESTART_CRON?: string,
         TOP_GG_TOKEN?: string,
         TOP_GG_WEBHOOK_AUTH?: string,
         DISCORD_BOTS_GG_TOKEN?: string,

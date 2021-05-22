@@ -4,7 +4,8 @@ import { resolve } from "path";
 import _logger from "./logger";
 import { EnvType, State } from "./types";
 import {
-    registerClientEvents, registerProcessEvents, registerCommands, registerIntervals, initializeBotStatsPoster, reloadCaches, reloadEndGameMessages, updatePublishDateOverrides,
+    registerClientEvents, registerProcessEvents, registerCommands, registerIntervals,
+    initializeBotStatsPoster, reloadCaches, reloadEndGameMessages, updatePublishDateOverrides, clearRestartNotification,
 } from "./helpers/management_utils";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -60,6 +61,9 @@ export default state;
 
         logger.info("Initializing bot stats poster...");
         initializeBotStatsPoster();
+
+        logger.info("Clearing existing restart notifications...");
+        await clearRestartNotification();
 
         state.client = new Eris.Client(process.env.BOT_TOKEN, {
             disableEvents: {
