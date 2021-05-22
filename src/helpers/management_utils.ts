@@ -45,7 +45,7 @@ const glob = promisify(_glob);
 
 const logger = _logger("management_utils");
 
-const RESTART_WARNING_INTERVALS = new Set([10, 5, 2, 1]);
+const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
 
 const publishOverridesFilePath = path.resolve(__dirname, "../../data/publish_date_overrides.json");
 const artistAliasesFilePath = path.resolve(__dirname, "../../data/artist_aliases.json");
@@ -182,6 +182,24 @@ export function reloadEndGameMessages() {
     }
 }
 
+/**
+ * Gets the upcoming server restart time
+ * @returns null if no restart is imminent, a date in epoch milliseconds otherwise
+ */
+export async function getRestartTime(): Promise<Date> {
+    const restartNotificationTime = (await dbContext.kmq("restart_notifications").where("id", 1))[0].restart_time;
+    if (!restartNotificationTime) return null;
+    return new Date(restartNotificationTime);
+}
+
+/**
+ * Clears any existing restart timers
+ */
+export async function clearRestartNotification() {
+    await dbContext.kmq("restart_notifications").where("id", "=", "1")
+        .update({ restart_time: null });
+}
+
 /** Sets up recurring cron-based tasks */
 export function registerIntervals() {
     // set up cleanup for inactive game sessions
@@ -194,11 +212,10 @@ export function registerIntervals() {
     schedule.scheduleJob("* * * * *", async () => {
         if (process.env.NODE_ENV !== EnvType.PROD) return;
         // unscheduled restarts
-        const restartNotification = (await dbContext.kmq("restart_notifications").where("id", 1))[0].restart_time;
+        const restartNotification = await getRestartTime();
         if (restartNotification) {
-            const restartNotificationTime = new Date(restartNotification);
-            if (restartNotificationTime.getTime() > Date.now()) {
-                await checkRestartNotification(restartNotificationTime);
+            if (restartNotification.getTime() > Date.now()) {
+                await checkRestartNotification(restartNotification);
                 return;
             }
         }

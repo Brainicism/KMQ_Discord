@@ -2,7 +2,7 @@ import GameSession from "../../structures/game_session";
 import {
     sendErrorMessage, getDebugLogHeader, sendInfoMessage, voicePermissionsCheck, getVoiceChannelFromMessage, getUserTag, getCurrentVoiceMembers,
 } from "../../helpers/discord_utils";
-import { deleteGameSession } from "../../helpers/management_utils";
+import { deleteGameSession, getRestartTime } from "../../helpers/management_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { bold, isPowerHour, isWeekend } from "../../helpers/utils";
 import BaseCommand, { CommandArgs } from "../base_command";
@@ -99,6 +99,12 @@ export default class PlayCommand implements BaseCommand {
     async call({ message, gameSessions, parsedMessage, channel }: CommandArgs) {
         const guildPreference = await getGuildPreference(message.guildID);
         const voiceChannel = getVoiceChannelFromMessage(message);
+        const restartImpending = await getRestartTime();
+        if (restartImpending) {
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "Cannot start new game", description: "Bot is restarting soon, please wait until the bot is back up!" });
+            return;
+        }
+
         if (!voiceChannel) {
             await sendErrorMessage(MessageContext.fromMessage(message),
                 {
