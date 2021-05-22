@@ -21,6 +21,14 @@ function serverShutdown(restartMinutes: number, restartDate: Date, restart: bool
     });
 }
 
+process.on("SIGINT", async () => {
+    console.log("Aborting restart");
+    await dbContext.kmq("restart_notifications").where("id", "=", "1")
+        .update({ restart_time: null });
+    await dbContext.destroy();
+    process.exit(0);
+});
+
 (async () => {
     const options = program.opts();
     const restartMinutes = options.timer;
@@ -31,6 +39,6 @@ function serverShutdown(restartMinutes: number, restartDate: Date, restart: bool
         .update({ restart_time: restartDate });
 
     console.log(`Next ${options.restart ? "restart" : "shutdown"} scheduled at ${restartDate}`);
-    dbContext.destroy();
     await serverShutdown(restartMinutes, restartDate, options.restart);
+    await dbContext.destroy();
 })();

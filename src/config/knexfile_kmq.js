@@ -11,6 +11,6 @@ module.exports = {
     max: 10
   },
   migrations: {
-    directory: resolve(__dirname, "../migrations")
+    directory: resolve(__dirname, "../../src/migrations")
   }
 }
