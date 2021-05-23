@@ -7,7 +7,6 @@ import { exec } from "child_process";
 import { QueriedSong } from "../types";
 import _logger from "../logger";
 import { DatabaseContext, getNewConnection } from "../database_context";
-import { generateKmqDataTables } from "../seed/bootstrap";
 import { retryJob } from "../helpers/utils";
 
 const logger: Logger = _logger("download-new-songs");
@@ -211,7 +210,6 @@ export async function downloadAndConvertSongs(limit?: number) {
 
         await clearPartiallyCachedSongs();
         await downloadNewSongs(db, limit);
-        await generateKmqDataTables(db);
     } finally {
         await db.destroy();
     }

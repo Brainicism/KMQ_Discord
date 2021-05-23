@@ -9,6 +9,7 @@ import path from "path";
 import _logger from "../logger";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import { DatabaseContext, getNewConnection } from "../database_context";
+import { generateKmqDataTables } from "./bootstrap";
 
 config({ path: path.resolve(__dirname, "../../.env") });
 const SQL_DUMP_EXPIRY = 10;
@@ -152,10 +153,11 @@ async function seedAndDownloadNewSongs(db: DatabaseContext) {
         return;
     }
 
-    await updateGroupList(db);
     if (!options.skipDownload) {
         await downloadAndConvertSongs(options.limit);
     }
+    await generateKmqDataTables(db);
+    await updateGroupList(db);
     logger.info("Finishing seeding and downloading new songs");
 }
 
