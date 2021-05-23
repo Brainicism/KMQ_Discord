@@ -8,7 +8,7 @@ import {
     getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, checkBotIsAlone, getVoiceChannelFromMessage,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, endSession } from "../helpers/game_utils";
-import { delay, getAudioDurationInSeconds, getOrdinalNum, isPowerHour, isWeekend, setDifference } from "../helpers/utils";
+import { delay, getAudioDurationInSeconds, getOrdinalNum, isPowerHour, isWeekend, setDifference, roundDecimal } from "../helpers/utils";
 import state from "../kmq";
 import _logger from "../logger";
 import { QueriedSong, GuildTextableMessage, PlayerRoundResult } from "../types";
@@ -255,6 +255,17 @@ export default class GameSession {
         deleteGameSession(this.guildID);
         this.endRound({ correct: false }, await getGuildPreference(this.guildID));
         const voiceConnection = state.client.voiceConnections.get(this.guildID);
+
+        // log scoreboard
+        logger.info("Scoreboard:");
+        logger.info(this.scoreboard.getPlayers()
+            .sort((a, b) => b.getScore() - a.getScore())
+            .map((x) => (
+                {
+                    name: x.getName(),
+                    id: x.getID(),
+                    score: Number.isInteger(roundDecimal(x.getScore(), 1)) ? roundDecimal(x.getScore(), 1).toString() : x.getScore().toFixed(1),
+                })));
 
         // leave voice channel
         if (voiceConnection && voiceConnection.channelID) {

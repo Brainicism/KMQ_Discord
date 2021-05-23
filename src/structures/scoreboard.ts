@@ -138,6 +138,11 @@ export default class Scoreboard {
         return Object.values(this.players).map((player) => player.getName());
     }
 
+    /** @returns a list of tags of the player participating in the game */
+    getPlayers(): Array<Player> {
+        return Object.values(this.players);
+    }
+
     /**
      *  @param userID - The Discord user ID of the Player
      *  @returns a Player object for the corresponding user ID
