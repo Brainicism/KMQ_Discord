@@ -488,7 +488,7 @@ export default class GameSession {
 
         const time = guildPreference.getGuessTimeout();
         this.guessTimeoutFunc = setTimeout(async () => {
-            if (this.finished) return;
+            if (this.finished || this.gameRound.finished) return;
             logger.info(`${getDebugLogHeader(messageContext)} | Song finished without being guessed, timer of: ${time} seconds.`);
             if (this.gameType === GameType.ELIMINATION) {
                 const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
