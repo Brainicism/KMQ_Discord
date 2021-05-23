@@ -1,11 +1,12 @@
 import Eris from "eris";
 import _logger from "../../logger";
-import { textPermissionsCheck, sendOptionsMessage } from "../../helpers/discord_utils";
+import { textPermissionsCheck, sendOptionsMessage, sendErrorMessage } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import state from "../../kmq";
 import validate from "../../helpers/validate";
 import { GuildTextableMessage, ParsedMessage } from "../../types";
 import MessageContext from "../../structures/message_context";
+import { CompetitionModeratorIDs } from "../../constants";
 
 const logger = _logger("messageCreate");
 
@@ -47,6 +48,11 @@ export default async function messageCreateHandler(message: Eris.Message) {
         }
         const guildPreference = await getGuildPreference(message.guildID);
         sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, null, `Psst. Your bot prefix is ${process.env.BOT_PREFIX}`);
+    }
+
+    if (!CompetitionModeratorIDs.includes(message.author.id) && !["score", "scoreboard", "options", "help", "news", "stats"].includes(parsedMessage.action)) {
+        sendErrorMessage(MessageContext.fromMessage(message), { title: "Disabled command", description: "This command has been disabled for use by regular users in the competition." });
+        return;
     }
 
     if (parsedMessage && state.commands[parsedMessage.action]) {

@@ -7,3 +7,8 @@ export class KmqImages {
     public static LISTENING = "https://lovearrowshoot.me/kmq/images/listening_bg.png";
     public static THUMBS_UP = "https://lovearrowshoot.me/kmq/images/thumbs_up_bg.png";
 }
+
+export const CompetitionModeratorIDs = [
+    "141734249702096896", // ohmi#7183
+    "156971607057760256", // Cool#0001
+];
