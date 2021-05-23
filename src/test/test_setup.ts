@@ -8,7 +8,8 @@ import Player from "../structures/player";
 
 const sandbox = sinon.createSandbox();
 
-before(async () => {
+before(async function () {
+    this.timeout(10000);
     sandbox.stub(discordUtils, "sendErrorMessage");
     sandbox.stub(discordUtils, "sendInfoMessage");
     sandbox.stub(Player, "fromUserID").callsFake((id) => (new Player("", id, "", 0)));
