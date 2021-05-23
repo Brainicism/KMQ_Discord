@@ -54,7 +54,7 @@ async function validateSqlDump(db: DatabaseContext, seedFilePath: string, bootst
     try {
         await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_validation;");
         await db.agnostic.raw("CREATE DATABASE kpop_videos_validation;");
-        execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${seedFilePath}`);
+        execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${seedFilePath} 2>/dev/null`);
         logger.info("Validating song count");
         const songCount = (await db.kpopVideosValidation("app_kpop").count("* as count").first()).count;
         logger.info("Validating group count");
@@ -65,7 +65,7 @@ async function validateSqlDump(db: DatabaseContext, seedFilePath: string, bootst
         if (!bootstrap) {
             logger.info("Validating creation of data tables");
             const createKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/create_kmq_data_tables_procedure_validation.sql");
-            execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${createKmqTablesProcedureSqlPath}`);
+            execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${createKmqTablesProcedureSqlPath} 2>/dev/null`);
             await db.kpopVideosValidation.raw("CALL CreateKmqDataTables;");
         }
         logger.info("SQL dump validated successfully");
@@ -87,7 +87,7 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean) {
     logger.info("Creating K-Pop video database");
     await db.agnostic.raw("CREATE DATABASE kpop_videos;");
     logger.info("Seeding K-Pop video database");
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${seedFilePath}`);
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${seedFilePath} 2>/dev/null`);
     logger.info("Performing data overrides");
     await db.kpopVideos.raw(fs.readFileSync(overridesFilePath).toString());
     logger.info("Imported database dump successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing");
@@ -139,7 +139,7 @@ async function updateKpopDatabase(db: DatabaseContext, bootstrap = false) {
 export async function updateGroupList(db: DatabaseContext) {
     const result = await db.kmq("kpop_groups")
         .select(["name", "members as gender"])
-        .where("name", "NOT LIKE", "%+%")
+        .where("is_collab", "=", "n")
         .orderBy("name", "ASC");
     fs.writeFileSync(path.resolve(__dirname, "../../data/group_list.txt"), result.map((x) => x.name).join("\n"));
 }
