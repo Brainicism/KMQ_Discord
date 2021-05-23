@@ -3,7 +3,7 @@ exports.up = function(knex) {
     return knex.schema.createTable("game_options", (table) => {
         table.string("guild_id").notNullable();
         table.string("option_name").notNullable();
-        table.string("option_value");
+        table.json("option_value");
         table.unique(["guild_id", "option_name"]);
     });
 };

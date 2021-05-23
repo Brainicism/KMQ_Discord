@@ -1,5 +1,7 @@
+const { execSync } = require("child_process");
 
 exports.up = function(knex) {
+    execSync("ts-node ../scripts/json-presets-to-new-format.ts", { stdio: "inherit" });
     return knex.schema.table("guild_preferences", function (table) {
         table.dropColumn("guild_preference");
     });

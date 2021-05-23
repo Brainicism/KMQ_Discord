@@ -4,7 +4,7 @@ exports.up = function(knex) {
         table.string("guild_id").notNullable();
         table.string("preset_name").notNullable();
         table.string("option_name").notNullable();
-        table.string("option_value");
+        table.json("option_value");
         table.unique(["guild_id", "preset_name", "option_name"]);
     });
 };

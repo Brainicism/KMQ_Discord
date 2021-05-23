@@ -10,17 +10,17 @@ async function exportJsonPresetsToNewTable(db: DatabaseContext): Promise<void> {
         const presetName = preset["preset_name"];
         const options = JSON.parse(preset["game_options"]);
         try {
-            await Promise.all(
-                Object.entries(options).map(async (option) => {
-                    await db.kmq("game_option_presets")
-                        .insert({
-                            guild_id: guildID,
-                            preset_name: presetName,
-                            option_name: option[0],
-                            option_value: JSON.stringify(option[1]),
-                        });
-                }),
-            );
+            const presetOptions = Object.entries(options).map((option) => ({
+                guild_id: guildID,
+                preset_name: presetName,
+                option_name: option[0],
+                option_value: JSON.stringify(option[1]),
+            }));
+            await db.kmq.transaction(async (trx) => {
+                await db.kmq("game_option_presets")
+                    .insert(presetOptions)
+                    .transacting(trx);
+            });
         } catch (err) {
             logger.error(`Migration of preset ${presetName} of ${guildID} failed, err = ${err}`);
         }
