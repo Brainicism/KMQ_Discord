@@ -3,7 +3,7 @@ set -e
 
 rebuild () {
     echo "Compiling typescript..."
-    tsc
+    npx tsc
 }
 rebuild
 echo "Bootstrapping..."
