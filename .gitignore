@@ -2,7 +2,6 @@ node_modules/
 main.db
 .env
 src/config/debug_settings.json
-.cache/
 logs/
 build/
 sql_dumps/
