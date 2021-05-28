@@ -164,6 +164,20 @@ export default class ProfileCommand implements BaseCommand {
                 inline: true,
             }];
 
+        // Optional fields
+        const badges = (await dbContext.kmq("badges")
+            .select(["badge_name"])
+            .where("user_id", "=", requestedPlayer.id))
+            .map((x) => x["badge_name"])
+            .join("\n");
+        if (badges) {
+            fields.push({
+                name: "Badges",
+                value: badges,
+                inline: false,
+            });
+        }
+
         sendInfoMessage(MessageContext.fromMessage(message), {
             title: getUserTag(requestedPlayer),
             fields,
