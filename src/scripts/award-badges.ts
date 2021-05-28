@@ -2,7 +2,7 @@ import { createInterface } from "readline";
 import dbContext from "../database_context";
 import _logger from "../logger";
 
-const logger = _logger("daily_stats");
+const logger = _logger("award-badges");
 
 async function getObjects(): Promise<[{ id: string, name: string }]> {
     const rl = createInterface({
