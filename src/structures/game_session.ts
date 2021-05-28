@@ -258,14 +258,14 @@ export default class GameSession {
 
         // log scoreboard
         logger.info("Scoreboard:");
-        logger.info(this.scoreboard.getPlayers()
+        logger.info(JSON.stringify(this.scoreboard.getPlayers()
             .sort((a, b) => b.getScore() - a.getScore())
             .map((x) => (
                 {
                     name: x.getName(),
                     id: x.getID(),
                     score: Number.isInteger(roundDecimal(x.getScore(), 1)) ? roundDecimal(x.getScore(), 1).toString() : x.getScore().toFixed(1),
-                })));
+                }))));
 
         // leave voice channel
         if (voiceConnection && voiceConnection.channelID) {
