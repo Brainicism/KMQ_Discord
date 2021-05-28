@@ -50,9 +50,11 @@ export default async function messageCreateHandler(message: Eris.Message) {
         sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, null, `Psst. Your bot prefix is ${process.env.BOT_PREFIX}`);
     }
 
-    if (!CompetitionModeratorIDs.includes(message.author.id) && !["score", "scoreboard", "options", "help", "news", "stats"].includes(parsedMessage.action)) {
-        sendErrorMessage(MessageContext.fromMessage(message), { title: "Disabled command", description: "This command has been disabled for use by regular users in the competition." });
-        return;
+    if (parsedMessage) {
+        if (!CompetitionModeratorIDs.includes(message.author.id) && !["score", "scoreboard", "options", "help", "news", "stats"].includes(parsedMessage.action)) {
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "Disabled command", description: "This command has been disabled for use by regular users in the competition." });
+            return;
+        }
     }
 
     if (parsedMessage && state.commands[parsedMessage.action]) {
