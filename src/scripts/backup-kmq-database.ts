@@ -4,7 +4,6 @@ import { join } from "path";
 import mysqldump from "mysqldump";
 import _logger from "../logger";
 import { friendlyFormattedDate } from "../helpers/utils";
-import { getNewConnection } from "../database_context";
 
 const databaseBackupDir = join(__dirname, "../../sql_dumps/kmq_backup");
 
@@ -38,13 +37,8 @@ async function backupKmqDatabase(): Promise<void> {
 }
 
 (async () => {
-    const db = getNewConnection();
-    try {
-        if (require.main === module) {
-            backupKmqDatabase();
-        }
-    } finally {
-        await db.destroy();
+    if (require.main === module) {
+        backupKmqDatabase();
     }
 })();
 
