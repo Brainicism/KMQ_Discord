@@ -39,10 +39,10 @@ export default class HintCommand implements BaseCommand {
 
     async call({ gameSessions, message }: CommandArgs) {
         const gameSession = gameSessions[message.guildID];
-        const gameRound = gameSession.gameRound;
+        const gameRound = gameSession?.gameRound;
         if (!gameSession || !gameRound) {
             logger.warn(`${getDebugLogHeader(message)} | No active game session`);
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Error", description: "This command can only be used if a song is currently playing", thumbnailUrl: KmqImages.NOT_IMPRESSED });
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid hint request", description: "A hint can only be requested when a song is playing.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
             return;
         }
         const guildPreference = await getGuildPreference(message.guildID);
