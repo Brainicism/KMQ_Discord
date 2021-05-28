@@ -1,3 +1,4 @@
+import { execSync } from "child_process";
 import _logger from "../../logger";
 import { registerCommands } from "../../helpers/management_utils";
 import BaseCommand, { CommandArgs } from "../base_command";
@@ -17,6 +18,7 @@ export default class EvalCommand implements BaseCommand {
 
         logger.info("Reloading KMQ commands");
         try {
+            execSync("npx tsc");
             await registerCommands(false);
             logger.info("Reload KMQ commands complete");
             sendInfoMessage(MessageContext.fromMessage(message), { title: "Reload Complete", description: "All changes should now be applied" });
