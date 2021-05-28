@@ -356,8 +356,7 @@ export default class GameSession {
             this.correctGuesses++;
 
             // update game session's lastActive
-            const gameSession = state.gameSessions[this.guildID];
-            gameSession.lastActiveNow();
+            this.lastActiveNow();
 
             this.stopGuessTimeout();
 
