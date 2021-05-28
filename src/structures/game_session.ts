@@ -20,7 +20,7 @@ import TeamScoreboard from "./team_scoreboard";
 import { deleteGameSession } from "../helpers/management_utils";
 import { GameType } from "../commands/game_commands/play";
 import { GuessModeType } from "../commands/game_options/guessmode";
-import { getRankNameByLevel } from "../commands/game_commands/profile";
+// import { getRankNameByLevel } from "../commands/game_commands/profile";
 import { Gender } from "../commands/game_options/gender";
 import EliminationPlayer from "./elimination_player";
 import { KmqImages } from "../constants";
@@ -295,14 +295,16 @@ export default class GameSession {
         }
 
         // send level up message
-        if (leveledUpPlayers.length > 0) {
-            let levelUpMessages = leveledUpPlayers.map((leveledUpPlayer) => `\`${this.scoreboard.getPlayerName(leveledUpPlayer.userID)}\` has leveled from \`${leveledUpPlayer.startLevel}\` to \`${leveledUpPlayer.endLevel} (${getRankNameByLevel(leveledUpPlayer.endLevel)})\``);
-            if (levelUpMessages.length > 10) {
-                levelUpMessages = levelUpMessages.slice(0, 10);
-                levelUpMessages.push("and many others...");
-            }
-            sendInfoMessage(new MessageContext(this.textChannelID), { title: "🚀 Power up!", description: levelUpMessages.join("\n"), thumbnailUrl: KmqImages.THUMBS_UP });
-        }
+        // if (leveledUpPlayers.length > 0) {
+        //     let levelUpMessages = leveledUpPlayers.map((leveledUpPlayer) =>
+        //          `\`${this.scoreboard.getPlayerName(leveledUpPlayer.userID)}\` has leveled from \`${leveledUpPlayer.startLevel}\` to \`${leveledUpPlayer.endLevel}
+        //          (${getRankNameByLevel(leveledUpPlayer.endLevel)})\``);
+        //     if (levelUpMessages.length > 10) {
+        //         levelUpMessages = levelUpMessages.slice(0, 10);
+        //         levelUpMessages.push("and many others...");
+        //     }
+        //     sendInfoMessage(new MessageContext(this.textChannelID), { title: "🚀 Power up!", description: levelUpMessages.join("\n"), thumbnailUrl: KmqImages.THUMBS_UP });
+        // }
 
         // commit guild stats
         await dbContext.kmq("guild_preferences")
