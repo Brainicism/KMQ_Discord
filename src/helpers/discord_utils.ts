@@ -178,8 +178,8 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         }
     }
     const uniqueSongMessage = (uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0) ? `\n${codeLine(`${uniqueSongCounter.uniqueSongsPlayed}/${uniqueSongCounter.totalSongs}`)} unique songs played.` : "";
-    const description = `${correctGuess ? correctDescription : "Nobody got it."}\nhttps://youtu.be/${gameRound.videoID}${uniqueSongMessage} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
-    const fields = scoreboard.getScoreboardEmbedFields().slice(0, 25);
+    const description = `${correctGuess ? correctDescription : "Nobody got it."}\nhttps://youtu.be/${gameRound.videoID}${uniqueSongMessage} ${!emptyScoreBoard ? `\n\n**Scoreboard**\n\n${scoreboard.getScoreboardAsString().slice(0, 30).join("\n")}` : ""}`;
+    const fields = [];
     if (fact) {
         fields.push({
             name: "__Did you know?__", value: fact, inline: false,

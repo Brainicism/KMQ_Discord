@@ -1,5 +1,5 @@
 import Player from "./player";
-import { roundDecimal } from "../helpers/utils";
+import { roundDecimal, bold } from "../helpers/utils";
 import _logger from "../logger";
 import GuildPreference from "./guild_preference";
 
@@ -62,6 +62,13 @@ export default class Scoreboard {
                     value: Number.isInteger(roundDecimal(x.getScore(), 1)) ? roundDecimal(x.getScore(), 1).toString() : x.getScore().toFixed(1),
                     inline: true,
                 }));
+    }
+
+    /** @returns An array of DiscordEmbed fields representing each participant's score */
+    getScoreboardAsString(): Array<string> {
+        return Object.values(this.players)
+            .sort((a, b) => b.getScore() - a.getScore())
+            .map((x, idx) => `${idx + 1}. ${bold(x.getName())} - ${Number.isInteger(roundDecimal(x.getScore(), 1)) ? roundDecimal(x.getScore(), 1).toString() : x.getScore().toFixed(1)}`);
     }
 
     /**
