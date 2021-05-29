@@ -29,7 +29,7 @@ import KmqMember from "./kmq_member";
 import { MultiGuessType } from "../commands/game_options/multiguess";
 import { specialFfmpegArgs } from "../commands/game_options/special";
 
-const MULTIGUESS_DELAY = 1500;
+const MULTIGUESS_DELAY = 2000;
 const logger = _logger("game_session");
 const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
 
