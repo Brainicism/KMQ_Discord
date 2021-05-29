@@ -179,7 +179,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     }
     const uniqueSongMessage = (uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0) ? `\n${codeLine(`${uniqueSongCounter.uniqueSongsPlayed}/${uniqueSongCounter.totalSongs}`)} unique songs played.` : "";
     const description = `${correctGuess ? correctDescription : "Nobody got it."}\nhttps://youtu.be/${gameRound.videoID}${uniqueSongMessage} ${!emptyScoreBoard ? "\n\n**Scoreboard**" : ""}`;
-    const fields = scoreboard.getScoreboardEmbedFields().slice(0, 10);
+    const fields = scoreboard.getScoreboardEmbedFields().slice(0, 25);
     if (fact) {
         fields.push({
             name: "__Did you know?__", value: fact, inline: false,
