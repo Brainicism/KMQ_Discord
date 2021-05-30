@@ -51,7 +51,7 @@ export default async function messageCreateHandler(message: Eris.Message) {
     }
 
     if (parsedMessage) {
-        if (!CompetitionModeratorIDs.includes(message.author.id) && !["skip", "score", "scoreboard", "options", "help", "news", "stats"].includes(parsedMessage.action)) {
+        if (!CompetitionModeratorIDs.includes(message.author.id) && !["skip", "score", "scoreboard", "options", "help", "news", "stats", "s"].includes(parsedMessage.action)) {
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Disabled command", description: "This command has been disabled for use by regular users in the competition." });
             return;
         }
