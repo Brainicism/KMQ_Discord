@@ -202,7 +202,7 @@ export function isWeekend(): boolean {
  * @param bits - The number of bits wanted in the output
  * @returns the output hash as a number
  */
-export function md5Hash(input: string | number, bits: number) {
+export function md5HashInteger(input: string | number, bits: number) {
     if (bits > 128) {
         logger.warn("Maximum bit length is 128");
     }
@@ -210,12 +210,21 @@ export function md5Hash(input: string | number, bits: number) {
     return parseInt(hash.slice(0, bits / 4), 16);
 }
 
+/**
+ * @param input - The hash input
+ * @returns the output hash as a number
+ */
+export function md5Hash(input: string | number) {
+    const hash = crypto.createHash("md5").update(input.toString()).digest("hex");
+    return hash;
+}
+
 /** @returns whether its a KMQ power hour */
 export function isPowerHour(): boolean {
     const date = new Date();
     const dateSeed = (date.getDate() * 31 + date.getMonth()) * 31 + date.getFullYear();
     // distribute between each third of the day to accomodate timezone differences
-    const powerHours = [md5Hash(dateSeed, 8) % 7, (md5Hash(dateSeed + 1, 8) % 7) + 8, (md5Hash(dateSeed + 2, 8) % 7) + 16];
+    const powerHours = [md5HashInteger(dateSeed, 8) % 7, (md5HashInteger(dateSeed + 1, 8) % 7) + 8, (md5HashInteger(dateSeed + 2, 8) % 7) + 16];
     const currentHour = date.getHours();
     return powerHours.some((powerHour) => currentHour >= powerHour && currentHour <= (powerHour + 1));
 }

@@ -3,7 +3,7 @@ import assert from "assert";
 import { describe } from "mocha";
 import sinon from "sinon";
 import dbContext from "../../database_context";
-import { md5Hash } from "../../helpers/utils";
+import { md5HashInteger } from "../../helpers/utils";
 import GuildPreference from "../../structures/guild_preference";
 import { Gender } from "../../commands/game_options/gender";
 import { cleanupInactiveGameSessions, getFilteredSongList, selectRandomSong, getMatchingGroupNames, getSongCount } from "../../helpers/game_utils";
@@ -66,19 +66,19 @@ const mockArtists = [
 ];
 
 const mockSongs = [...Array(1000).keys()].map((i) => {
-    const artist = mockArtists[md5Hash(i, 8) % mockArtists.length];
+    const artist = mockArtists[md5HashInteger(i, 8) % mockArtists.length];
     return {
         song_name: `${crypto.randomBytes(8).toString("hex")}`,
         link: crypto.randomBytes(4).toString("hex"),
         artist_name: artist.name,
         members: artist.members,
-        views: md5Hash(i, 16),
+        views: md5HashInteger(i, 16),
         id_artist: artist.id,
         issolo: artist.issolo,
-        publishedon: new Date(`${["2008", "2009", "2016", "2017", "2018"][md5Hash(i, 8) % 5]}-06-01`),
+        publishedon: new Date(`${["2008", "2009", "2016", "2017", "2018"][md5HashInteger(i, 8) % 5]}-06-01`),
         id_parent_artist: artist.id_parentgroup || 0,
         vtype: "main",
-        tags: ["", "", "o", "c", "e", "drv", "ax", "ps"][md5Hash(i, 8) % 8],
+        tags: ["", "", "o", "c", "e", "drv", "ax", "ps"][md5HashInteger(i, 8) % 8],
     };
 });
 async function getMockGuildPreference(): Promise<GuildPreference> {
