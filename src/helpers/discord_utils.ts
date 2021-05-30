@@ -177,7 +177,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
             if (runnersUp.length >= 10) {
                 runnersUpDescription += "\nand many others...";
             }
-            correctDescription += `\n\n**Runners Up**\n${runnersUpDescription}`;
+            correctDescription += `\n\n**Runners Up**\n${runnersUpDescription}\n`;
         }
     }
     const uniqueSongMessage = (uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0) ? `\n${codeLine(`${uniqueSongCounter.uniqueSongsPlayed}/${uniqueSongCounter.totalSongs}`)} unique songs played.` : "";
