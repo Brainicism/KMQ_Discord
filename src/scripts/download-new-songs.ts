@@ -152,7 +152,7 @@ async function updateNotDownloaded(db: DatabaseContext, songs: Array<QueriedSong
     });
 }
 
-const downloadNewSongs = async (db: DatabaseContext, limit?: number) => {
+const downloadNewSongs = async (db: DatabaseContext, limit?: number): Promise<number> => {
     const allSongs: Array<QueriedSong> = await getSongsFromDb(db);
     let songsToDownload = limit ? allSongs.slice(0, limit) : allSongs.slice();
     let downloadCount = 0;
@@ -198,18 +198,20 @@ const downloadNewSongs = async (db: DatabaseContext, limit?: number) => {
     // update final list of non-downloaded songs
     await updateNotDownloaded(db, allSongs);
     logger.info(`Total songs downloaded: ${downloadCount}, (${deadLinksSkipped} dead links skipped)`);
+    return downloadCount;
 };
 
-export async function downloadAndConvertSongs(limit?: number) {
+export async function downloadAndConvertSongs(limit?: number): Promise<number> {
     const db = getNewConnection();
     try {
         if (!fs.existsSync(process.env.SONG_DOWNLOAD_DIR)) {
             logger.error("Song cache directory doesn't exist.");
-            return;
+            return 0;
         }
 
         await clearPartiallyCachedSongs();
-        await downloadNewSongs(db, limit);
+        const songsDownloaded = await downloadNewSongs(db, limit);
+        return songsDownloaded;
     } finally {
         await db.destroy();
     }

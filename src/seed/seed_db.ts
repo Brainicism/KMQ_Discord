@@ -153,10 +153,15 @@ async function seedAndDownloadNewSongs(db: DatabaseContext) {
         return;
     }
 
+    let songsDownloaded = 0;
     if (!options.skipDownload) {
-        await downloadAndConvertSongs(options.limit);
+        songsDownloaded = await downloadAndConvertSongs(options.limit);
     }
-    await generateKmqDataTables(db);
+
+    if (songsDownloaded) {
+        await generateKmqDataTables(db);
+    }
+
     await updateGroupList(db);
     logger.info("Finishing seeding and downloading new songs");
 }
