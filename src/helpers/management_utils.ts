@@ -113,17 +113,17 @@ export const checkRestartNotification = async (timeUntilRestart: number): Promis
 };
 
 /** Clear inactive voice connections */
-function clearInactiveVoiceConnections() {
-    const existingVoiceChannelGuildIDs = Array.from(state.client.voiceConnections.keys()) as Array<string>;
-    const activeVoiceChannelGuildIDs = Object.values(state.gameSessions).map((x) => x.guildID);
-    for (const existingVoiceChannelGuildID of existingVoiceChannelGuildIDs) {
-        if (!activeVoiceChannelGuildIDs.includes(existingVoiceChannelGuildID)) {
-            const voiceChannelID = state.client.voiceConnections.get(existingVoiceChannelGuildID).channelID;
-            logger.info(`gid: ${existingVoiceChannelGuildID}, vid: ${voiceChannelID} | Disconnected inactive voice connection`);
-            state.client.voiceConnections.leave(existingVoiceChannelGuildID);
-        }
-    }
-}
+// function clearInactiveVoiceConnections() {
+//     const existingVoiceChannelGuildIDs = Array.from(state.client.voiceConnections.keys()) as Array<string>;
+//     const activeVoiceChannelGuildIDs = Object.values(state.gameSessions).map((x) => x.guildID);
+//     for (const existingVoiceChannelGuildID of existingVoiceChannelGuildIDs) {
+//         if (!activeVoiceChannelGuildIDs.includes(existingVoiceChannelGuildID)) {
+//             const voiceChannelID = state.client.voiceConnections.get(existingVoiceChannelGuildID).channelID;
+//             logger.info(`gid: ${existingVoiceChannelGuildID}, vid: ${voiceChannelID} | Disconnected inactive voice connection`);
+//             state.client.voiceConnections.leave(existingVoiceChannelGuildID);
+//         }
+//     }
+// }
 
 /** Updates the bot's song listening status */
 export async function updateBotStatus() {
@@ -210,7 +210,7 @@ export async function clearRestartNotification() {
 export function registerIntervals() {
     // set up cleanup for inactive game sessions
     schedule.scheduleJob("*/10 * * * *", () => {
-        cleanupInactiveGameSessions();
+        // cleanupInactiveGameSessions();
         updateBotStatus();
     });
 
@@ -255,7 +255,7 @@ export function registerIntervals() {
         reloadAliases();
         reloadEndGameMessages();
         updatePublishDateOverrides();
-        clearInactiveVoiceConnections();
+        // clearInactiveVoiceConnections();
     });
 
     // every minute
