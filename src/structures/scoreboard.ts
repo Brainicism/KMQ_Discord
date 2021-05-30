@@ -68,7 +68,7 @@ export default class Scoreboard {
     getScoreboardAsString(): Array<string> {
         return Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
-            .map((x, idx) => `${idx + 1}. ${bold(x.getName())} - ${Number.isInteger(roundDecimal(x.getScore(), 1)) ? roundDecimal(x.getScore(), 1).toString() : x.getScore().toFixed(1)}`);
+            .map((x, idx) => `${idx + 1}. ${bold(x.getName())}: ${Number.isInteger(roundDecimal(x.getScore(), 1)) ? roundDecimal(x.getScore(), 1).toString() : x.getScore().toFixed(1)}`);
     }
 
     /**

@@ -158,6 +158,9 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         footer.text += timeRemaining > 0 ? `⏰ ${Math.ceil(timeRemaining)} minute(s) remaining` : "⏰ Time's up!";
     }
 
+    const scoreboardPlayers = scoreboard.getScoreboardAsString();
+    const morePlayersThanShown = scoreboardPlayers.length > 30;
+
     const fact = Math.random() <= 0.05 ? getFact() : null;
 
     const emptyScoreBoard = scoreboard.isEmpty();
@@ -178,12 +181,17 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         }
     }
     const uniqueSongMessage = (uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0) ? `\n${codeLine(`${uniqueSongCounter.uniqueSongsPlayed}/${uniqueSongCounter.totalSongs}`)} unique songs played.` : "";
-    const description = `${correctGuess ? correctDescription : "Nobody got it."}\nhttps://youtu.be/${gameRound.videoID}${uniqueSongMessage} ${!emptyScoreBoard ? `\n\n**Scoreboard**\n\n${scoreboard.getScoreboardAsString().slice(0, 30).join("\n")}` : ""}`;
+    let description = `${correctGuess ? correctDescription : "Nobody got it."}\nhttps://youtu.be/${gameRound.videoID}${uniqueSongMessage} ${!emptyScoreBoard ? `\n\n**Scoreboard**\n\n${scoreboardPlayers.slice(0, 30).join("\n")}` : ""}`;
     const fields = [];
     if (fact) {
         fields.push({
             name: "__Did you know?__", value: fact, inline: false,
         });
+    }
+
+    if (morePlayersThanShown) {
+        description += "\nand many others...";
+        footer.text += "See your score with ,score!";
     }
 
     let color: number;
