@@ -191,7 +191,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     }
 
     if (morePlayersThanShown) {
-        description += `\nand ${bold(String(runnersUp.length <= 30 ? runnersUp.slice(15).length : runnersUp.slice(30).length))} others...`;
+        description += `\nand ${bold(String(runnersUp.length > 30 ? scoreboardPlayers.slice(15).length : scoreboardPlayers.slice(30).length))} others...`;
         footer.text += "See your score with ,score!";
     }
 
