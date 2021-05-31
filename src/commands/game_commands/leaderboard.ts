@@ -166,7 +166,7 @@ export default class LeaderboardCommand implements BaseCommand {
             const displayName = enrolledPlayer ? enrolledPlayer.display_name : `Rank #${(rank) + 1}`;
             return {
                 name: `${medalIcon} ${displayName}`,
-                value: `${player.exp} xp | Level ${player.level} (${getRankNameByLevel(player.level)})`,
+                value: `${player.exp} EXP | Level ${player.level} (${getRankNameByLevel(player.level)})`,
             };
         }));
 

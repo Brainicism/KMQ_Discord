@@ -163,11 +163,11 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     const correctGuess = playerRoundResults.length > 0;
     let correctDescription = "";
     if (correctGuess) {
-        correctDescription += `**${playerRoundResults[0].player.tag}** ${playerRoundResults[0].streak >= 5 ? `(🔥 ${playerRoundResults[0].streak}) ` : ""}guessed correctly (+${playerRoundResults[0].expGain} xp)`;
+        correctDescription += `**${playerRoundResults[0].player.tag}** ${playerRoundResults[0].streak >= 5 ? `(🔥 ${playerRoundResults[0].streak}) ` : ""}guessed correctly (+${playerRoundResults[0].expGain} EXP)`;
         if (playerRoundResults.length > 1) {
             const runnersUp = playerRoundResults.slice(1);
             let runnersUpDescription = runnersUp
-                .map((x) => `${x.player.tag} (+${x.expGain} xp)`)
+                .map((x) => `${x.player.tag} (+${x.expGain} EXP)`)
                 .slice(0, 10)
                 .join("\n");
             if (runnersUp.length >= 10) {

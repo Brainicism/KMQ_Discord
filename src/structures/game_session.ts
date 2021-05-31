@@ -184,7 +184,7 @@ export default class GameSession {
             } else {
                 this.lastGuesser.streak++;
             }
-            // calculate xp gain
+            // calculate exp gain
             const guessSpeed = Date.now() - this.gameRound.startedAt;
             this.guessTimes.push(guessSpeed);
 
@@ -870,7 +870,7 @@ export default class GameSession {
         let expJitter = expBase * (0.05 * Math.random());
         expJitter *= Math.round(Math.random()) ? 1 : -1;
 
-        // double xp weekend multiplier
+        // double exp weekend multiplier
         const multiplier = (isWeekend() || isPowerHour()) ? 2 : 1;
         return (expBase + expJitter) * multiplier;
     }
