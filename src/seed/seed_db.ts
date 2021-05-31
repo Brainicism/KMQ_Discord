@@ -10,6 +10,7 @@ import _logger from "../logger";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import { DatabaseContext, getNewConnection } from "../database_context";
 import { generateKmqDataTables } from "./bootstrap";
+import { md5Hash } from "../helpers/utils";
 
 config({ path: path.resolve(__dirname, "../../.env") });
 const SQL_DUMP_EXPIRY = 10;
@@ -42,12 +43,24 @@ const downloadDb = async () => {
     await fs.promises.writeFile(output, resp.data, { encoding: null });
     logger.info("Downloaded Daisuki database archive");
 };
-async function extractDb(): Promise<void> {
+
+async function latestSeedFile(): Promise<string> {
+    const files = (await fs.promises.readdir(`${databaseDownloadDir}`)).filter((x) => x.endsWith(".sql") && x.startsWith("backup_"));
+    if (files.length === 0) return null;
+    return `${databaseDownloadDir}/${files[files.length - 1]}`;
+}
+
+async function extractDb(): Promise<boolean> {
     await fs.promises.mkdir(`${databaseDownloadDir}/`, { recursive: true });
+    let latestSeed = await latestSeedFile();
+    const oldHash = latestSeed ? md5Hash(fs.readFileSync(latestSeed).toString()) : null;
     // eslint-disable-next-line new-cap
     const zip = new StreamZip.async({ file: `${databaseDownloadDir}/download.zip` });
     await zip.extract(null, `${databaseDownloadDir}/`);
     logger.info("Extracted Daisuki database");
+    latestSeed = await latestSeedFile();
+    const newHash = md5Hash(fs.readFileSync(latestSeed).toString());
+    return oldHash !== newHash;
 }
 
 async function validateSqlDump(db: DatabaseContext, seedFilePath: string, bootstrap = false) {
@@ -77,9 +90,7 @@ async function validateSqlDump(db: DatabaseContext, seedFilePath: string, bootst
 }
 
 async function seedDb(db: DatabaseContext, bootstrap: boolean) {
-    const files = (await fs.promises.readdir(`${databaseDownloadDir}`)).filter((x) => x.endsWith(".sql") && x.startsWith("backup_"));
-    const seedFile = files[files.length - 1];
-    const seedFilePath = bootstrap ? `${databaseDownloadDir}/bootstrap.sql` : `${databaseDownloadDir}/${seedFile}`;
+    const seedFilePath = bootstrap ? `${databaseDownloadDir}/bootstrap.sql` : await latestSeedFile();
     logger.info(`Validating SQL dump (${path.basename(seedFilePath)})`);
     await validateSqlDump(db, seedFilePath, bootstrap);
     logger.info("Dropping K-Pop video database");
@@ -121,19 +132,26 @@ async function pruneSqlDumps() {
     }
 }
 
-async function updateKpopDatabase(db: DatabaseContext, bootstrap = false) {
+async function updateKpopDatabase(db: DatabaseContext, bootstrap = false): Promise<boolean> {
+    let shouldSeed = !options.skipReseed;
     if (!options.skipPull && !bootstrap) {
         await downloadDb();
-        await extractDb();
+        const dataChanged = await extractDb();
+        if (!dataChanged) {
+            logger.info("SQL dump data did not change...");
+        }
+        shouldSeed &&= dataChanged;
     } else {
         logger.info("Skipping Daisuki SQL dump pull...");
     }
 
-    if (!options.skipReseed) {
+    if (shouldSeed) {
         await seedDb(db, bootstrap);
-    } else {
-        logger.info("Skipping reseed");
+        return true;
     }
+
+    logger.info("Skipping reseed");
+    return false;
 }
 
 export async function updateGroupList(db: DatabaseContext) {
@@ -146,15 +164,16 @@ export async function updateGroupList(db: DatabaseContext) {
 
 async function seedAndDownloadNewSongs(db: DatabaseContext) {
     pruneSqlDumps();
+    let dataChanged = false;
     try {
-        await updateKpopDatabase(db);
+        dataChanged = await updateKpopDatabase(db);
     } catch (e) {
         logger.error(`Failed to update kpop_videos database. ${e}`);
         return;
     }
 
     let songsDownloaded = 0;
-    if (!options.skipDownload) {
+    if (!options.skipDownload && dataChanged) {
         songsDownloaded = await downloadAndConvertSongs(options.limit);
     }
 
