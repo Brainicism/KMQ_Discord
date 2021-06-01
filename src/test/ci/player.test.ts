@@ -19,8 +19,8 @@ describe("increment score", () => {
 });
 
 describe("increment xp", () => {
-    describe("player's xp is incremented multiple times", () => {
-        it("should increment their xp", () => {
+    describe("player's exp is incremented multiple times", () => {
+        it("should increment their exp", () => {
             const numIncrements = 25;
             for (let i = 0; i < numIncrements; i++) {
                 player.incrementExp(10);

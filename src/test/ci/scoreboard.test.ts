@@ -9,7 +9,7 @@ beforeEach(() => {
 
 let guildPreference: GuildPreference;
 
-describe("score/xp updating", () => {
+describe("score/exp updating", () => {
     const userIDs = ["12345", "23456"];
     describe("single player scoreboard", () => {
         describe("user guesses correctly multiple times", () => {
