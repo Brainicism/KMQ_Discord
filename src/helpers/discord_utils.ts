@@ -178,7 +178,10 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     }
     const uniqueSongMessage = (uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0) ? `\n${codeLine(`${uniqueSongCounter.uniqueSongsPlayed}/${uniqueSongCounter.totalSongs}`)} unique songs played.` : "";
     const description = `${correctGuess ? correctDescription : "Nobody got it."}\nhttps://youtu.be/${gameRound.videoID}${uniqueSongMessage} ${!scoreboard.isEmpty() ? "\n\n**Scoreboard**" : ""}`;
-    const fields = scoreboard.getScoreboardEmbedFields().slice(0, 10);
+    const fields = scoreboard.getScoreboardEmbedFields().slice(0, 15);
+    for (const [index, field] of Object.entries(fields)) {
+        fields[index].name = `${Number(index) + 1}. ${field.name}`;
+    }
     if (fact) {
         fields.push({
             name: "__Did you know?__", value: fact, inline: false,
@@ -354,9 +357,12 @@ export async function sendEndGameMessage(textChannelID: string, gameSession: Gam
         });
     } else {
         const winners = gameSession.scoreboard.getWinners();
-        const embedFields = gameSession.scoreboard.getScoreboardEmbedFields().slice(0, 10);
+        const fields = gameSession.scoreboard.getScoreboardEmbedFields().slice(0, 15);
+        for (const [index, field] of Object.entries(fields)) {
+            fields[index].name = `${Number(index) + 1}. ${field.name}`;
+        }
         const endGameMessage = Math.random() < 0.5 ? chooseWeightedRandom(state.endGameMessages.kmq) : chooseWeightedRandom(state.endGameMessages.game);
-        embedFields.push(
+        fields.push(
             {
                 name: endGameMessage.title,
                 value: endGameMessage.message,
@@ -368,7 +374,7 @@ export async function sendEndGameMessage(textChannelID: string, gameSession: Gam
             description: "**Scoreboard**",
             thumbnailUrl: winners[0].getAvatarURL(),
             title: `🎉 ${gameSession.scoreboard.getWinnerMessage()} 🎉`,
-            fields: embedFields,
+            fields,
             footerText,
         });
     }
