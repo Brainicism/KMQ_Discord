@@ -39,7 +39,7 @@ export async function sendBeginGameMessage(textChannelName: string,
     if (isWeekend()) {
         gameInstructions += "\n\n**⬆️ DOUBLE EXP WEEKEND ACTIVE ⬆️**";
     } else if (isPowerHour()) {
-        gameInstructions += "\n\n**⬆️ KMQ POWER HOUR ACTIVE ⬆️**";
+        gameInstructions += "\n\n**⬆️ KMQ PRIDE HOUR ACTIVE ⬆️**";
     }
     const startTitle = `Game starting in #${textChannelName} in 🔊 ${voiceChannelName}`;
     await sendInfoMessage(MessageContext.fromMessage(message), {
