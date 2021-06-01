@@ -77,7 +77,7 @@ async function validateSqlDump(db: DatabaseContext, seedFilePath: string, bootst
 }
 
 async function seedDb(db: DatabaseContext, bootstrap: boolean) {
-    const files = (await fs.promises.readdir(`${databaseDownloadDir}`)).filter((x) => x.endsWith(".sql") && x.startsWith("backup_"));
+    const files = (await fs.promises.readdir(`${databaseDownloadDir}`)).filter((x) => x.endsWith(".sql") && x.startsWith("mainbackup_"));
     const seedFile = files[files.length - 1];
     const seedFilePath = bootstrap ? `${databaseDownloadDir}/bootstrap.sql` : `${databaseDownloadDir}/${seedFile}`;
     logger.info(`Validating SQL dump (${path.basename(seedFilePath)})`);
@@ -106,7 +106,7 @@ async function hasRecentDump(): Promise<boolean> {
         throw err;
     }
     if (files.length === 0) return false;
-    const seedFileDateString = files[files.length - 1].match(/backup_([0-9]{4}-[0-9]{2}-[0-9]{2}).sql/)[1];
+    const seedFileDateString = files[files.length - 1].match(/mainbackup_([0-9]{4}-[0-9]{2}-[0-9]{2}).sql/)[1];
     logger.info(`Most recent seed file has date: ${seedFileDateString}`);
     const daysDiff = ((new Date()).getTime() - Date.parse(seedFileDateString)) / 86400000;
     return daysDiff < 6;
