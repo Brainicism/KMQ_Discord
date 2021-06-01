@@ -58,10 +58,10 @@ describe("team deletion", () => {
     });
 });
 
-describe("score/xp updating", () => {
+describe("score/exp updating", () => {
     describe("single player, single team scoreboard", () => {
         describe("user guesses correctly multiple times", () => {
-            it("should increment the user's score/xp, team score should be player's score, no bonus xp since 1 team", () => {
+            it("should increment the user's score/exp, team score should be player's score, no bonus exp since 1 team", () => {
                 for (let i = 0; i < 20; i++) {
                     scoreboard.updateScoreboard([{ userID: USER_IDS[0], pointsEarned: 1, expGain: 50 }]);
                     assert.strictEqual(scoreboard.getPlayerScore(USER_IDS[0]), i + 1);

@@ -9,7 +9,7 @@ beforeEach(() => {
     scoreboard = new EliminationScoreboard(DEFAULT_LIVES);
 });
 
-describe("score/xp updating", () => {
+describe("score/exp updating", () => {
     beforeEach(() => {
         scoreboard.addPlayer(userIDs[0], "irene#1234", "someurl");
         scoreboard.addPlayer(userIDs[1], "seulgi#7854", "someurl");

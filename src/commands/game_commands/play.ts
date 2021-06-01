@@ -39,7 +39,7 @@ export async function sendBeginGameMessage(textChannelName: string,
     if (isWeekend()) {
         gameInstructions += "\n\n**⬆️ DOUBLE EXP WEEKEND ACTIVE ⬆️**";
     } else if (isPowerHour()) {
-        gameInstructions += "\n\n**⬆️ KMQ POWER HOUR ACTIVE ⬆️**";
+        gameInstructions += "\n\n**⬆️ KMQ PRIDE HOUR ACTIVE ⬆️**";
     }
     const startTitle = `Game starting in #${textChannelName} in 🔊 ${voiceChannelName}`;
     await sendInfoMessage(MessageContext.fromMessage(message), {
@@ -143,7 +143,7 @@ export default class PlayCommand implements BaseCommand {
                 } else if (isTeamsMode) {
                     // (1) TEAMS game creation
                     startTitle = `\`${process.env.BOT_PREFIX}join\` a team!`;
-                    gameInstructions = `Type \`${process.env.BOT_PREFIX}join [team name]\` to form a new team. Remember, switching teams mid-game will forfeit all your current score and EXP.`;
+                    gameInstructions = `Team leaders, type \`${process.env.BOT_PREFIX}join [team name]\` to form a new team. Remember, switching teams mid-game will forfeit all your current score and EXP.`;
                     await sendInfoMessage(messageContext, { title: startTitle, description: gameInstructions, thumbnailUrl: KmqImages.HAPPY });
                     gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, GameType.TEAMS);
                 } else {
