@@ -41,14 +41,8 @@ async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
         .first()).count >= SONG_DOWNLOAD_THRESHOLD;
 }
 
-async function needsBootstrap(db: DatabaseContext) {
-    return (await Promise.all([kmqDatabaseExists(db), kpopDataDatabaseExists(db), songThresholdReached(db)])).some((x) => x === false);
-}
-
 // eslint-disable-next-line import/prefer-default-export
 export async function generateKmqDataTables(db: DatabaseContext) {
-    const createKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/create_kmq_data_tables_procedure.sql");
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq < ${createKmqTablesProcedureSqlPath} 2>/dev/null`);
     logger.info("Re-creating KMQ data tables view...");
     await db.kmq.raw("CALL CreateKmqDataTables;");
 }
@@ -63,27 +57,28 @@ async function bootstrapDatabases() {
     const startTime = Date.now();
     const db = getNewConnection();
 
-    if (await needsBootstrap(db)) {
-        logger.info("Bootstrapping databases...");
-
-        if (!(await kpopDataDatabaseExists(db))) {
-            logger.info("Seeding K-pop data database");
-            await updateKpopDatabase(db, true);
-        }
-
-        if (!(await kmqDatabaseExists(db))) {
-            logger.info("Performing migrations on KMQ database");
-            await db.agnostic.raw("CREATE DATABASE IF NOT EXISTS kmq");
-            await db.agnostic.raw("CREATE DATABASE IF NOT EXISTS kmq_test");
-            performMigrations();
-        }
-        if (!(await songThresholdReached(db))) {
-            logger.info(`Downloading minimum threshold (${SONG_DOWNLOAD_THRESHOLD}) songs`);
-            await downloadAndConvertSongs(SONG_DOWNLOAD_THRESHOLD);
-        }
-    } else {
-        performMigrations();
+    if (!(await kpopDataDatabaseExists(db))) {
+        logger.info("Seeding K-pop data database");
+        await updateKpopDatabase(db, true);
     }
+
+    if (!(await kmqDatabaseExists(db))) {
+        logger.info("Performing migrations on KMQ database");
+        await db.agnostic.raw("CREATE DATABASE IF NOT EXISTS kmq");
+        await db.agnostic.raw("CREATE DATABASE IF NOT EXISTS kmq_test");
+    }
+
+    performMigrations();
+
+    const createKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/create_kmq_data_tables_procedure.sql");
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq < ${createKmqTablesProcedureSqlPath} 2>/dev/null`);
+
+    if (!(await songThresholdReached(db))) {
+        logger.info(`Downloading minimum threshold (${SONG_DOWNLOAD_THRESHOLD}) songs`);
+        await downloadAndConvertSongs(SONG_DOWNLOAD_THRESHOLD);
+        await generateKmqDataTables(db);
+    }
+
     logger.info(`Bootstrapped in ${(Date.now() - startTime) / 1000}s`);
     await db.destroy();
 }

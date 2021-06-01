@@ -6,7 +6,11 @@ on:
   workflow_dispatch:
   pull_request:
     branches: [ master ]
-    paths: '.github/workflows/e2e.yml'
+    paths: 
+      - .github/workflows/e2e.yml
+      - src/seed/seed_db.ts
+      - src/scripts/download-new-songs.ts
+      - src/seed/bootstrap.ts
 
 jobs:
   build:
