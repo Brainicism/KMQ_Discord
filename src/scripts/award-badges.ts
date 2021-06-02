@@ -4,7 +4,7 @@ import _logger from "../logger";
 
 const logger = _logger("award-badges");
 
-async function getObjects(): Promise<[{ id: string, name: string }]> {
+async function getObjects(): Promise<[{ id: string }]> {
     const rl = createInterface({
         input: process.stdin,
         output: process.stdout,
@@ -16,7 +16,7 @@ async function getObjects(): Promise<[{ id: string, name: string }]> {
         rl.on("line", (line) => {
             jsonInput += line;
         }).on("close", () => {
-            let badgesObj: [{ id: string, name: string }];
+            let badgesObj: [{ id: string }];
             try {
                 badgesObj = JSON.parse(jsonInput);
             } catch (err) {
@@ -52,7 +52,7 @@ async function awardBadges() {
 
     const playerNamesWithBadgeAlready = badgesObj
         .filter((player) => playerIDsWithBadgeAlready.has(player.id))
-        .map((player) => player.name);
+        .map((player) => player.id);
 
     if (playerIDsWithBadgeAlready.size > 0) {
         logger.info(`Players ${[...playerNamesWithBadgeAlready].join(", ")} already have the badge.`);
