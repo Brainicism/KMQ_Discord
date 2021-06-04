@@ -16,7 +16,7 @@ function isGuildMessage(message: Eris.Message): message is GuildTextableMessage 
 const parseMessage = (message: string): ParsedMessage => {
     if (message.charAt(0) !== process.env.BOT_PREFIX) return null;
     const components = message.split(/\s+/);
-    const action = components.shift().substring(1);
+    const action = components.shift().substring(1).toLowerCase();
     const argument = components.join(" ");
     return {
         action,
