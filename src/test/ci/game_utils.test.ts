@@ -408,28 +408,28 @@ describe("song query", () => {
             });
 
             describe("override to female", () => {
-                it("should match the expected song count", async () => {
-                    const femaleSongs = [];
+                it("should match the expected song count of female + coed songs", async () => {
+                    const femaleOrCoedSongs = [];
                     const filteredSongs = (await getFilteredSongList(guildPreference)).songs;
-                    const femaleSongCount = [...filteredSongs].filter((x) => x.members === Gender.FEMALE).length;
-                    for (let i = 0; i < femaleSongCount; i++) {
-                        femaleSongs.push(await selectRandomSong(filteredSongs, new Set(femaleSongs.map((x) => x.youtubeLink)), Gender.FEMALE));
+                    const femaleOrCoedSongCount = [...filteredSongs].filter((x) => [Gender.FEMALE, Gender.COED].includes(x.members)).length;
+                    for (let i = 0; i < femaleOrCoedSongCount; i++) {
+                        femaleOrCoedSongs.push(await selectRandomSong(filteredSongs, new Set(femaleOrCoedSongs.map((x) => x.youtubeLink)), Gender.FEMALE));
                     }
-                    assert.ok(femaleSongs.every((song) => song.members === Gender.FEMALE));
-                    assert.strictEqual(femaleSongCount, femaleSongs.length);
+                    assert.ok(femaleOrCoedSongs.every((song) => [Gender.FEMALE, Gender.COED].includes(song.members)));
+                    assert.strictEqual(femaleOrCoedSongCount, femaleOrCoedSongs.length);
                 });
             });
 
             describe("override to male", () => {
-                it("should match the expected song count", async () => {
-                    const maleSongs = [];
+                it("should match the expected song count of male + coed songs", async () => {
+                    const maleOrCoedSongs = [];
                     const filteredSongs = (await getFilteredSongList(guildPreference)).songs;
-                    const maleSongCount = [...filteredSongs].filter((x) => x.members === Gender.MALE).length;
-                    for (let i = 0; i < maleSongCount; i++) {
-                        maleSongs.push(await selectRandomSong(filteredSongs, new Set(maleSongs.map((x) => x.youtubeLink)), Gender.MALE));
+                    const maleOrCoedSongCount = [...filteredSongs].filter((x) => [Gender.MALE, Gender.COED].includes(x.members)).length;
+                    for (let i = 0; i < maleOrCoedSongCount; i++) {
+                        maleOrCoedSongs.push(await selectRandomSong(filteredSongs, new Set(maleOrCoedSongs.map((x) => x.youtubeLink)), Gender.MALE));
                     }
-                    assert.ok(maleSongs.every((song) => song.members === Gender.MALE));
-                    assert.strictEqual(maleSongCount, maleSongs.length);
+                    assert.ok(maleOrCoedSongs.every((song) => [Gender.MALE, Gender.COED].includes(song.members)));
+                    assert.strictEqual(maleOrCoedSongCount, maleOrCoedSongs.length);
                 });
             });
         });

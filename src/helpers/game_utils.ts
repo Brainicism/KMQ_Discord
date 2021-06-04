@@ -48,7 +48,7 @@ export async function getFilteredSongList(guildPreference: GuildPreference): Pro
             }).orWhere(function mainInnerArtistFilter() {
                 this.whereNotIn("id_artist", guildPreference.getExcludesGroupIDs());
                 if (!guildPreference.isGroupsMode()) {
-                    const gender = guildPreference.isGenderAlternating() ? [Gender.MALE, Gender.FEMALE] : guildPreference.getGender();
+                    const gender = guildPreference.isGenderAlternating() ? [Gender.MALE, Gender.FEMALE, Gender.COED] : guildPreference.getGender();
                     this.whereIn("members", gender);
 
                     // filter by artist type only in non-groups
@@ -141,8 +141,8 @@ export async function selectRandomSong(filteredSongs: Set<QueriedSong>, ignoredS
     if (ignoredSongs) {
         queriedSongList = queriedSongList.filter((x) => !ignoredSongs.has(x.youtubeLink));
     }
-    if (alternatingGender && queriedSongList.some((y) => y.members === alternatingGender)) {
-        queriedSongList = queriedSongList.filter((song) => song.members === alternatingGender);
+    if (alternatingGender && queriedSongList.some((y) => y.members === alternatingGender || y.members === Gender.COED)) {
+        queriedSongList = queriedSongList.filter((song) => song.members === alternatingGender || song.members === Gender.COED);
     }
     if (queriedSongList.length === 0) {
         return null;
