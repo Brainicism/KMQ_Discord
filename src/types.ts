@@ -42,11 +42,12 @@ export interface EmbedPayload {
     color?: number;
 }
 
-interface EndGameMessage {
+export interface EndGameMessage {
     title: string;
     message: string;
     weight: number;
 }
+
 export interface State {
     commands: { [commandName: string]: BaseCommand };
     gameSessions: { [guildID: string]: GameSession };
@@ -63,10 +64,6 @@ export interface State {
         },
         song: { [songName: string]: Array<string> }
     };
-    endGameMessages: {
-        kmq: EndGameMessage[],
-        game: EndGameMessage[],
-    },
     processStartTime: number;
     bonusUsers: Set<string>;
 }
