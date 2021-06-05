@@ -19,10 +19,6 @@ async function sendHintNotification(message: GuildTextableMessage, gameSession: 
     await sendInfoMessage(MessageContext.fromMessage(message), {
         title: "**Hint Request**",
         description: `${gameSession.gameRound.getHintRequests()}/${getMajorityCount(message)} hint requests received.`,
-        author: {
-            username: message.author.username,
-            avatarUrl: message.author.avatarURL,
-        },
     }, true);
 }
 

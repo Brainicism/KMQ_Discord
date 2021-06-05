@@ -22,20 +22,12 @@ async function sendSkipNotification(message: GuildTextableMessage, gameSession: 
     await sendInfoMessage(MessageContext.fromMessage(message), {
         title: "**Skip**",
         description: `${gameSession.gameRound.getNumSkippers()}/${getMajorityCount(message)} skips received.`,
-        author: {
-            username: message.author.username,
-            avatarUrl: message.author.avatarURL,
-        },
     }, true);
 }
 
 async function sendSkipMessage(message: GuildTextableMessage, gameRound: GameRound) {
     const skipMessage = await sendInfoMessage(MessageContext.fromMessage(message), {
         color: EMBED_SUCCESS_COLOR,
-        author: {
-            username: message.author.username,
-            avatarUrl: message.author.avatarURL,
-        },
         title: "**Skip**",
         description: `${gameRound.getNumSkippers()}/${getMajorityCount(message)} skips achieved, skipping...`,
         thumbnailUrl: KmqImages.NOT_IMPRESSED,

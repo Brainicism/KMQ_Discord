@@ -43,10 +43,6 @@ export default class NewsCommand implements BaseCommand {
         logger.info(`${getDebugLogHeader(message)} | News retrieved.`);
         await sendInfoMessage(MessageContext.fromMessage(message), {
             color: EMBED_INFO_COLOR,
-            author: {
-                username: message.author.username,
-                avatarUrl: message.author.avatarURL,
-            },
             title: "Updates",
             description: news,
             thumbnailUrl: KmqImages.READING_BOOK,

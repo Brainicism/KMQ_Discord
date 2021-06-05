@@ -28,10 +28,6 @@ const parseMessage = (message: string): ParsedMessage => {
 
 export default async function messageCreateHandler(message: Eris.Message) {
     if (message.author.id === state.client.user.id || message.author.bot) return;
-    if (!message.guildID) {
-        logger.info(`Received message in DMs: message = ${message.content}`);
-        return;
-    }
     if (!isGuildMessage(message)) return;
     if (state.client.unavailableGuilds.has(message.guildID)) {
         logger.warn(`Server was unavailable. id = ${message.guildID}`);
@@ -47,23 +43,24 @@ export default async function messageCreateHandler(message: Eris.Message) {
         }
         const guildPreference = await getGuildPreference(message.guildID);
         sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, null, `Psst. Your bot prefix is ${process.env.BOT_PREFIX}`);
+        return;
     }
 
-    if (parsedMessage && state.commands[parsedMessage.action]) {
-        const command = state.commands[parsedMessage.action];
-        if (validate(message, parsedMessage, command.validations)) {
+    const invokedCommand = parsedMessage ? state.commands[parsedMessage.action] : null;
+    if (invokedCommand) {
+        if (validate(message, parsedMessage, invokedCommand.validations)) {
             if (!(await textPermissionsCheck(message, textChannel))) {
                 return;
             }
             const { gameSessions } = state;
-            command.call({
+            invokedCommand.call({
                 gameSessions,
                 channel: textChannel,
                 message,
                 parsedMessage,
             });
         }
-    } else if (state.gameSessions[message.guildID] && state.gameSessions[message.guildID].gameRound) {
+    } else if (state.gameSessions[message.guildID]?.gameRound) {
         const gameSession = state.gameSessions[message.guildID];
         gameSession.guessSong(message);
     }
