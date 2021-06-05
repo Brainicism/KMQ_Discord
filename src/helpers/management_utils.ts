@@ -175,14 +175,6 @@ export async function reloadAliases() {
     }
 }
 
-export function reloadEndGameMessages() {
-    try {
-        state.endGameMessages = parseJsonFile(path.resolve(__dirname, "../../data/end_game_messages.json"));
-    } catch (err) {
-        logger.error("Error parsing end game messages file");
-    }
-}
-
 /**
  * Clears any existing restart timers
  */
@@ -238,7 +230,6 @@ export function registerIntervals() {
     // every 5 minutes
     schedule.scheduleJob("*/5 * * * *", async () => {
         reloadAliases();
-        reloadEndGameMessages();
         clearInactiveVoiceConnections();
     });
 
@@ -252,7 +243,6 @@ export function registerIntervals() {
 export async function reloadCaches() {
     reloadAliases();
     reloadFactCache();
-    reloadEndGameMessages();
 }
 
 /** @returns a mapping of command name to command source file */
