@@ -46,7 +46,6 @@ const logger = _logger("management_utils");
 
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
 
-const publishOverridesFilePath = path.resolve(__dirname, "../../data/publish_date_overrides.json");
 const artistAliasesFilePath = path.resolve(__dirname, "../../data/artist_aliases.json");
 let cachedCommandFiles: { [commandName: string]: BaseCommand } = null;
 
@@ -155,20 +154,6 @@ export async function updateBotStatus() {
     });
 }
 
-/** Applies publish date overrides to available_songs table */
-export async function updatePublishDateOverrides() {
-    try {
-        const publishDateOverrides = parseJsonFile(publishOverridesFilePath);
-        for (const [videoID, dateOverride] of Object.entries(publishDateOverrides)) {
-            await dbContext.kmq("available_songs")
-                .update({ publishedon: dateOverride })
-                .where("link", "=", videoID);
-        }
-    } catch (err) {
-        logger.error("Error parsing publish overrides file");
-    }
-}
-
 /** Reload song/artist aliases */
 export async function reloadAliases() {
     const songAliasMapping = await dbContext.kmq("available_songs")
@@ -254,7 +239,6 @@ export function registerIntervals() {
     schedule.scheduleJob("*/5 * * * *", async () => {
         reloadAliases();
         reloadEndGameMessages();
-        updatePublishDateOverrides();
         clearInactiveVoiceConnections();
     });
 

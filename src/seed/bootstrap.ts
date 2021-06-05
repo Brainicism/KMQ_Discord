@@ -1,3 +1,4 @@
+import fs from "fs";
 import path from "path";
 import { config } from "dotenv";
 import { execSync } from "child_process";
@@ -41,6 +42,14 @@ async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
         .first()).count >= SONG_DOWNLOAD_THRESHOLD;
 }
 
+function loadStoredProcedures() {
+    const storedProcedureDefinitions = fs.readdirSync(path.join(__dirname, "../../sql/procedures"))
+        .map((x) => path.join(__dirname, "../../sql/procedures", x));
+    for (const storedProcedureDefinition of storedProcedureDefinitions) {
+        execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq < ${storedProcedureDefinition}`);
+    }
+}
+
 // eslint-disable-next-line import/prefer-default-export
 export async function generateKmqDataTables(db: DatabaseContext) {
     logger.info("Re-creating KMQ data tables view...");
@@ -69,9 +78,7 @@ async function bootstrapDatabases() {
     }
 
     performMigrations();
-
-    const createKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/create_kmq_data_tables_procedure.sql");
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq < ${createKmqTablesProcedureSqlPath} 2>/dev/null`);
+    loadStoredProcedures();
 
     if (!(await songThresholdReached(db))) {
         logger.info(`Downloading minimum threshold (${SONG_DOWNLOAD_THRESHOLD}) songs`);
