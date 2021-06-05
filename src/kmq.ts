@@ -5,7 +5,7 @@ import _logger from "./logger";
 import { EnvType, State } from "./types";
 import {
     registerClientEvents, registerProcessEvents, registerCommands, registerIntervals,
-    initializeBotStatsPoster, reloadCaches, reloadEndGameMessages, updatePublishDateOverrides, clearRestartNotification,
+    initializeBotStatsPoster, reloadCaches, reloadEndGameMessages, clearRestartNotification,
 } from "./helpers/management_utils";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -56,7 +56,6 @@ export default state;
 
         logger.info("Loading cached application data...");
         reloadCaches();
-        updatePublishDateOverrides();
         reloadEndGameMessages();
 
         logger.info("Initializing bot stats poster...");
