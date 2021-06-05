@@ -72,14 +72,19 @@ export default class ProfileCommand implements BaseCommand {
         let requestedPlayer: Eris.User;
         if (parsedMessage.components.length === 0) {
             requestedPlayer = message.author;
-        } else if (message.mentions.length === 1) {
-            requestedPlayer = message.mentions[0];
-        } else {
-            requestedPlayer = state.client.users.get(parsedMessage.argument);
-            if (!requestedPlayer) {
-                sendErrorMessage(MessageContext.fromMessage(message), { title: "No profile found", description: "Could not find the specified user ID. Make sure the user has been active recently." });
-                return;
+        } else if (parsedMessage.components.length === 1) {
+            if (message.mentions.length === 1) {
+                requestedPlayer = message.mentions[0];
+            } else {
+                requestedPlayer = state.client.users.get(parsedMessage.argument);
+                if (!requestedPlayer) {
+                    sendErrorMessage(MessageContext.fromMessage(message), { title: "No profile found", description: "Could not find the specified user ID. Make sure the user has been active recently. See `,help profile` for details." });
+                    return;
+                }
             }
+        } else {
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "No profile found", description: "Make sure you're using this command correctly. See `,help profile` for more details." });
+            return;
         }
 
         const playerStats = await dbContext.kmq("player_stats")

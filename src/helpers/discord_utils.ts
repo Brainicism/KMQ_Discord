@@ -330,7 +330,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
             fields,
             footerText,
             thumbnailUrl: KmqImages.LISTENING,
-        });
+        }, true);
 }
 
 /**

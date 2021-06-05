@@ -26,15 +26,12 @@ async function sendSkipNotification(message: GuildTextableMessage, gameSession: 
 }
 
 async function sendSkipMessage(message: GuildTextableMessage, gameRound: GameRound) {
-    const skipMessage = await sendInfoMessage(MessageContext.fromMessage(message), {
+    await sendInfoMessage(MessageContext.fromMessage(message), {
         color: EMBED_SUCCESS_COLOR,
         title: "**Skip**",
         description: `${gameRound.getNumSkippers()}/${getMajorityCount(message)} skips achieved, skipping...`,
         thumbnailUrl: KmqImages.NOT_IMPRESSED,
     });
-    setTimeout(() => {
-        skipMessage.delete();
-    }, 2500);
 }
 
 function isSkipMajority(message: GuildTextableMessage, gameSession: GameSession): boolean {
