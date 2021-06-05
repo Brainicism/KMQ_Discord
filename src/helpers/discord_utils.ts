@@ -5,11 +5,12 @@ import GameSession, { UniqueSongCounter } from "../structures/game_session";
 import _logger from "../logger";
 import { endSession, getSongCount } from "./game_utils";
 import { getFact } from "../fact_generator";
-import { EmbedPayload, GameOption, GameOptionCommand, PriorityGameOption, ConflictingGameOptions, GuildTextableMessage, PlayerRoundResult } from "../types";
+import { EmbedPayload, GameOption, GameOptionCommand, PriorityGameOption, ConflictingGameOptions, GuildTextableMessage, PlayerRoundResult, EndGameMessage } from "../types";
 import { chunkArray, codeLine, bold, underline, italicize, strikethrough, chooseWeightedRandom, getOrdinalNum } from "./utils";
 import state from "../kmq";
 import Scoreboard from "../structures/scoreboard";
 import GameRound from "../structures/game_round";
+import dbContext from "../database_context";
 import EliminationScoreboard from "../structures/elimination_scoreboard";
 import TeamScoreboard from "../structures/team_scoreboard";
 import { GameType } from "../commands/game_commands/play";
@@ -361,7 +362,8 @@ export async function sendEndGameMessage(textChannelID: string, gameSession: Gam
         for (const [index, field] of Object.entries(fields)) {
             fields[index].name = `${Number(index) + 1}. ${field.name}`;
         }
-        const endGameMessage = Math.random() < 0.5 ? chooseWeightedRandom(state.endGameMessages.kmq) : chooseWeightedRandom(state.endGameMessages.game);
+
+        const endGameMessage: EndGameMessage = chooseWeightedRandom(await dbContext.kmq("end_game_messages").where("category", "=", Math.random() < 0.5 ? "kmq" : "game"));
         fields.push(
             {
                 name: endGameMessage.title,
