@@ -19,7 +19,7 @@ const funFactFunctions = [recentMusicVideos, recentMilestone, recentMusicShowWin
     mostGaonAppearances, historicalGaonWeekly, recentGaonWeekly, fanclubName, closeBirthdays, mostArtistsEntertainmentCompany, mostViewedEntertainmentCompany, songReleaseAnniversaries];
 
 const kmqFactFunctions = [longestGame, mostGames, mostCorrectGuessed, globalTotalGames, recentGameSessions, recentGames, mostSongsGuessedPlayer,
-    mostGamesPlayedPlayer, recentUniquePlayers, topLeveledPlayers];
+    mostGamesPlayedPlayer, recentUniquePlayers, topLeveledPlayers, songGuessRate];
 
 let factCache: {
     funFacts: string[][],
@@ -354,6 +354,18 @@ async function songReleaseAnniversaries(): Promise<string[]> {
         .orderBy("views", "DESC")
         .limit(25);
     return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} was released this week back in ${x["publish_year"]}`);
+}
+
+async function songGuessRate(): Promise<string[]> {
+    const result = await dbContext.kmq("song_guess_count")
+        .select(dbContext.kmq.raw("song_name, artist_name, ROUND(correct_guesses/rounds_played * 100, 2) as c, link, rounds_played"))
+        .where("rounds_played", ">", 2500)
+        .join("available_songs", function join() {
+            this.on("available_songs.link", "=", "song_guess_count.vlink");
+        })
+        .orderByRaw("RAND()")
+        .limit(100);
+    return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} has a guess rate of ${x["c"]}% over ${x["rounds_played"]} rounds played`);
 }
 
 async function bigThreeDominance(): Promise<string[]> {
