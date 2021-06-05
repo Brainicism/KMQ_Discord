@@ -5,7 +5,7 @@ import _logger from "./logger";
 import { EnvType, State } from "./types";
 import {
     registerClientEvents, registerProcessEvents, registerCommands, registerIntervals,
-    initializeBotStatsPoster, reloadCaches, reloadEndGameMessages, clearRestartNotification,
+    initializeBotStatsPoster, reloadCaches, clearRestartNotification,
 } from "./helpers/management_utils";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -25,10 +25,6 @@ const state: State = {
             guessAliases: {},
         },
         song: {},
-    },
-    endGameMessages: {
-        game: [],
-        kmq: [],
     },
     processStartTime: Date.now(),
     bonusUsers: new Set(),
@@ -56,7 +52,6 @@ export default state;
 
         logger.info("Loading cached application data...");
         reloadCaches();
-        reloadEndGameMessages();
 
         logger.info("Initializing bot stats poster...");
         initializeBotStatsPoster();

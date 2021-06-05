@@ -349,6 +349,9 @@ async function viewsBySolo(): Promise<string[]> {
 async function songReleaseAnniversaries(): Promise<string[]> {
     const result = await dbContext.kmq("available_songs")
         .select(dbContext.kmq.raw("song_name, artist_name, YEAR(publishedon) as publish_year, link"))
+        .whereNotIn("link", function () {
+            this.select("video_id").from("publish_date_overrides");
+        })
         .whereRaw("WEEK(publishedon) = WEEK(NOW())")
         .andWhereRaw("YEAR(publishedon) != YEAR(NOW())")
         .orderBy("views", "DESC")
