@@ -4,7 +4,7 @@ exports.up = function(knex) {
         table.string("category").notNullable();
         table.string("title").notNullable();
         table.string("message").notNullable();
-        table.integer("weight").defaultTo(0);
+        table.integer("weight").defaultTo(1);
         table.unique(["category", "title", "message"]);
     });
 };
