@@ -21,9 +21,14 @@ function isHintMajority(message: GuildTextableMessage, gameSession: GameSession)
 }
 
 async function sendHintNotification(message: GuildTextableMessage, gameSession: GameSession) {
+    let majorityCount = getMajorityCount(message);
+    if (gameSession.gameType === GameType.ELIMINATION) {
+        const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
+        majorityCount = Math.floor(eliminationScoreboard.getAlivePlayersCount() * 0.5) + 1;
+    }
     await sendInfoMessage(MessageContext.fromMessage(message), {
         title: "**Hint Request**",
-        description: `${gameSession.gameRound.getHintRequests()}/${getMajorityCount(message)} hint requests received.`,
+        description: `${gameSession.gameRound.getHintRequests()}/${majorityCount} hint requests received.`,
     }, true);
 }
 
