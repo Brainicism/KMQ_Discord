@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import Eris from "eris";
 import dbContext from "../../database_context";
-import { getDebugLogHeader, getUserTag, sendInfoMessage } from "../../helpers/discord_utils";
+import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
 import { friendlyFormattedDate, romanize } from "../../helpers/utils";
 import { CUM_EXP_TABLE } from "../../structures/game_session";
 import MessageContext from "../../structures/message_context";
+import state from "../../kmq";
 
 const logger = _logger("profile");
 
@@ -59,16 +60,31 @@ export default class ProfileCommand implements BaseCommand {
         {
             example: "`,profile @FortnitePlayer`",
             explanation: "Views FortnitePlayer's player profile.",
+        },
+        {
+            example: "`,profile 141734249702096896`",
+            explanation: "Views a player profile based on their Discord ID.",
         }],
         priority: 50,
     };
 
-    async call({ message }: CommandArgs) {
+    async call({ message, parsedMessage }: CommandArgs) {
         let requestedPlayer: Eris.User;
-        if (message.mentions.length === 1) {
-            requestedPlayer = message.mentions[0];
-        } else {
+        if (parsedMessage.components.length === 0) {
             requestedPlayer = message.author;
+        } else if (parsedMessage.components.length === 1) {
+            if (message.mentions.length === 1) {
+                requestedPlayer = message.mentions[0];
+            } else {
+                requestedPlayer = state.client.users.get(parsedMessage.argument);
+                if (!requestedPlayer) {
+                    sendErrorMessage(MessageContext.fromMessage(message), { title: "No profile found", description: "Could not find the specified user ID. Make sure the user has been active recently. See `,help profile` for details." });
+                    return;
+                }
+            }
+        } else {
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "No profile found", description: "Make sure you're using this command correctly. See `,help profile` for more details." });
+            return;
         }
 
         const playerStats = await dbContext.kmq("player_stats")
@@ -181,6 +197,10 @@ export default class ProfileCommand implements BaseCommand {
         sendInfoMessage(MessageContext.fromMessage(message), {
             title: getUserTag(requestedPlayer),
             fields,
+            author: {
+                username: requestedPlayer.username,
+                avatarUrl: requestedPlayer.avatarURL,
+            },
             timestamp: new Date(),
         });
     }

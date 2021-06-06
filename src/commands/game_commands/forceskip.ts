@@ -3,6 +3,8 @@ import {
     sendErrorMessage,
     areUserAndBotInSameVoiceChannel,
     getDebugLogHeader,
+    EMBED_SUCCESS_COLOR,
+    sendInfoMessage,
 } from "../../helpers/discord_utils";
 import { bold } from "../../helpers/utils";
 import { getGuildPreference } from "../../helpers/game_utils";
@@ -10,6 +12,7 @@ import { GameType } from "./play";
 import EliminationScoreboard from "../../structures/elimination_scoreboard";
 import _logger from "../../logger";
 import MessageContext from "../../structures/message_context";
+import { KmqImages } from "../../constants";
 
 const logger = _logger("forceskip");
 
@@ -44,6 +47,13 @@ export default class ForceSkipCommand implements BaseCommand {
             const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
             eliminationScoreboard.decrementAllLives();
         }
+        sendInfoMessage(MessageContext.fromMessage(message), {
+            color: EMBED_SUCCESS_COLOR,
+            title: "**Skip**",
+            description: "Owner has forceskipped the round...",
+            thumbnailUrl: KmqImages.NOT_IMPRESSED,
+        }, true);
+
         gameSession.endRound({ correct: false }, guildPreference, MessageContext.fromMessage(message));
         gameSession.startRound(guildPreference, MessageContext.fromMessage(message));
         logger.info(`${getDebugLogHeader(message)} | Owner force-skipped.`);

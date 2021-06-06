@@ -77,7 +77,7 @@ async function sendMessage(textChannelID: string, messageContent: Eris.AdvancedM
  * @param description - The description of the embed
  */
 export async function sendErrorMessage(messageContext: MessageContext, embedPayload: EmbedPayload): Promise<Eris.Message<TextableChannel>> {
-    const author = embedPayload.author || messageContext.author;
+    const author = (embedPayload.author == null || embedPayload.author) ? embedPayload.author : messageContext.author;
     return sendMessage(messageContext.textChannelID, {
         embed: {
             color: embedPayload.color || EMBED_ERROR_COLOR,
@@ -107,7 +107,7 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
         return sendErrorMessage(messageContext, { title: "Error", description: "Response message was too long, report this error to the KMQ help server" });
     }
 
-    const author = embedPayload.author || messageContext.author;
+    const author = (embedPayload.author == null || embedPayload.author) ? embedPayload.author : messageContext.author;
     const embed: EmbedOptions = {
         color: embedPayload.color || EMBED_INFO_COLOR,
         author: author ? {
@@ -202,10 +202,6 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
 
     await sendInfoMessage(messageContext, {
         color,
-        author: {
-            avatarUrl: messageContext.author.avatarUrl,
-            username: messageContext.author.username,
-        },
         title: `"${gameRound.songName}" (${gameRound.songYear}) - ${gameRound.artistName}`,
         description,
         thumbnailUrl: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,
@@ -334,7 +330,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
             fields,
             footerText,
             thumbnailUrl: KmqImages.LISTENING,
-        });
+        }, true);
 }
 
 /**
@@ -343,15 +339,10 @@ export async function sendOptionsMessage(messageContext: MessageContext,
  * @param gameSession - The GameSession that has ended
  */
 export async function sendEndGameMessage(textChannelID: string, gameSession: GameSession) {
-    const { client } = state;
     const footerText = `${gameSession.getCorrectGuesses()}/${gameSession.getRoundsPlayed()} songs correctly guessed!`;
     if (gameSession.scoreboard.isEmpty()) {
         await sendInfoMessage(new MessageContext(textChannelID), {
             color: EMBED_INFO_COLOR,
-            author: {
-                username: client.user.username,
-                avatarUrl: client.user.avatarURL,
-            },
             title: "Nobody won",
             footerText,
             thumbnailUrl: KmqImages.NOT_IMPRESSED,
@@ -403,10 +394,6 @@ export async function sendScoreboardMessage(message: GuildTextableMessage, gameS
     if (gameSession.scoreboard.isEmpty() && gameSession.gameType !== GameType.ELIMINATION) {
         return sendInfoMessage(MessageContext.fromMessage(message), {
             color: EMBED_SUCCESS_COLOR,
-            author: {
-                username: message.author.username,
-                avatarUrl: message.author.avatarURL,
-            },
             description: "(╯°□°）╯︵ ┻━┻",
             title: "**Scoreboard**",
         });
@@ -422,10 +409,6 @@ export async function sendScoreboardMessage(message: GuildTextableMessage, gameS
     }
     const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map((winnersFieldSubset) => ({
         color: EMBED_SUCCESS_COLOR,
-        author: {
-            name: message.author.username,
-            icon_url: message.author.avatarURL,
-        },
         title: "**Scoreboard**",
         fields: winnersFieldSubset,
         footer: {
