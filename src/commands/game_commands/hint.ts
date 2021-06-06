@@ -21,15 +21,18 @@ function isHintMajority(message: GuildTextableMessage, gameSession: GameSession)
 }
 
 async function sendHintNotification(message: GuildTextableMessage, gameSession: GameSession) {
-    let majorityCount = getMajorityCount(message);
     if (gameSession.gameType === GameType.ELIMINATION) {
         const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
-        majorityCount = Math.floor(eliminationScoreboard.getAlivePlayersCount() * 0.5) + 1;
+        await sendInfoMessage(MessageContext.fromMessage(message), {
+            title: "**Hint Request**",
+            description: `${gameSession.gameRound.getHintRequests()}/${Math.floor(eliminationScoreboard.getAlivePlayersCount() * 0.5) + 1} hint requests received.`,
+        }, true);
+    } else {
+        await sendInfoMessage(MessageContext.fromMessage(message), {
+            title: "**Hint Request**",
+            description: `${gameSession.gameRound.getHintRequests()}/${getMajorityCount(message)} hint requests received.`,
+        }, true);
     }
-    await sendInfoMessage(MessageContext.fromMessage(message), {
-        title: "**Hint Request**",
-        description: `${gameSession.gameRound.getHintRequests()}/${majorityCount} hint requests received.`,
-    }, true);
 }
 
 export default class HintCommand implements BaseCommand {
@@ -55,6 +58,7 @@ export default class HintCommand implements BaseCommand {
             const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
             if (eliminationScoreboard.isPlayerEliminated(message.author.id)) {
                 sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid hint request", description: "Only alive players may request hints.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
+                return;
             }
         }
         const guildPreference = await getGuildPreference(message.guildID);
