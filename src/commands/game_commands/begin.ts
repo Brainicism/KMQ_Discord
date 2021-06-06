@@ -1,6 +1,7 @@
 import BaseCommand, { CommandArgs } from "../base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { GameType, sendBeginGameMessage } from "./play";
+import { sendBeginGameMessage } from "./play";
+import { GameType } from "../../types";
 import TeamScoreboard from "../../structures/team_scoreboard";
 import { getDebugLogHeader, sendErrorMessage, getVoiceChannelFromMessage } from "../../helpers/discord_utils";
 import { bold } from "../../helpers/utils";

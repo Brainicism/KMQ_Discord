@@ -2,9 +2,8 @@ import BaseCommand, { CommandArgs } from "../base_command";
 import { getDebugLogHeader, sendOptionsMessage, sendErrorMessage } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
-import { GameOption } from "../../types";
+import { GameOption, GameType } from "../../types";
 import MessageContext from "../../structures/message_context";
-import { GameType } from "../game_commands/play";
 
 const logger = _logger("goal");
 

@@ -1,6 +1,6 @@
 import assert from "assert";
 import BeginCommand from "../../commands/game_commands/begin";
-import { GameType } from "../../commands/game_commands/play";
+import { GameType } from "../../types";
 import GameSession from "../../structures/game_session";
 import KmqMember from "../../structures/kmq_member";
 import Player from "../../structures/player";

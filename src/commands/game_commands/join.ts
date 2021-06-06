@@ -1,9 +1,8 @@
 import BaseCommand, { CommandArgs } from "../base_command";
-import { GameType } from "./play";
 import GameSession from "../../structures/game_session";
 import TeamScoreboard from "../../structures/team_scoreboard";
 import Player from "../../structures/player";
-import { GuildTextableMessage, ParsedMessage } from "../../types";
+import { GuildTextableMessage, ParsedMessage, GameType } from "../../types";
 import { getUserTag, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import { KmqImages } from "../../constants";
 import { bold } from "../../helpers/utils";

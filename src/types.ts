@@ -137,3 +137,9 @@ export interface PlayerRoundResult {
     streak: number;
     expGain: number;
 }
+
+export enum GameType {
+    CLASSIC = "classic",
+    ELIMINATION = "elimination",
+    TEAMS = "teams",
+}
