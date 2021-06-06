@@ -7,7 +7,7 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import { bold, isPowerHour, isWeekend } from "../../helpers/utils";
 import BaseCommand, { CommandArgs } from "../base_command";
 import _logger from "../../logger";
-import { GuildTextableMessage } from "../../types";
+import { GameType, GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
@@ -15,12 +15,6 @@ import state from "../../kmq";
 
 const logger = _logger("play");
 const DEFAULT_LIVES = 10;
-
-export enum GameType {
-    CLASSIC = "classic",
-    ELIMINATION = "elimination",
-    TEAMS = "teams",
-}
 
 export async function sendBeginGameMessage(textChannelName: string,
     voiceChannelName: string,

@@ -8,7 +8,7 @@ import {
 } from "../../helpers/discord_utils";
 import { bold } from "../../helpers/utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { GameType } from "./play";
+import { GameType } from "../../types";
 import EliminationScoreboard from "../../structures/elimination_scoreboard";
 import _logger from "../../logger";
 import MessageContext from "../../structures/message_context";

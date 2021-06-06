@@ -6,12 +6,17 @@ import { KmqImages } from "../../constants";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { GuessModeType } from "../game_options/guessmode";
 import { codeLine } from "../../helpers/utils";
-import { GuildTextableMessage } from "../../types";
+import { GuildTextableMessage, GameType } from "../../types";
 import GameSession from "../../structures/game_session";
+import EliminationScoreboard from "../../structures/elimination_scoreboard";
 
 const logger = _logger("hint");
 
 function isHintMajority(message: GuildTextableMessage, gameSession: GameSession): boolean {
+    if (gameSession.gameType === GameType.ELIMINATION) {
+        const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
+        return gameSession.gameRound.getHintRequests() >= Math.floor(eliminationScoreboard.getAlivePlayersCount() * 0.5) + 1;
+    }
     return gameSession.gameRound.getHintRequests() >= getMajorityCount(message);
 }
 
@@ -40,6 +45,12 @@ export default class HintCommand implements BaseCommand {
             logger.warn(`${getDebugLogHeader(message)} | No active game session`);
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid hint request", description: "A hint can only be requested when a song is playing.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
             return;
+        }
+        if (gameSession.gameType === GameType.ELIMINATION) {
+            const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
+            if (eliminationScoreboard.isPlayerEliminated(message.author.id)) {
+                sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid hint request", description: "Only alive players may request hints.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
+            }
         }
         const guildPreference = await getGuildPreference(message.guildID);
         gameRound.hintRequested(message.author.id);

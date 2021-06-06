@@ -8,11 +8,10 @@ import {
     getMajorityCount,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { GameType } from "./play";
 import EliminationScoreboard from "../../structures/elimination_scoreboard";
 import _logger from "../../logger";
 import GameRound from "../../structures/game_round";
-import { GuildTextableMessage } from "../../types";
+import { GuildTextableMessage, GameType } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 

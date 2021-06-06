@@ -116,4 +116,9 @@ export default class EliminationScoreboard extends Scoreboard {
 
         return minimumLives;
     }
+
+    /** @returns the number of players that are alive */
+    getAlivePlayersCount(): number {
+        return Object.values(this.players).filter((player) => !player.isEliminated()).length;
+    }
 }

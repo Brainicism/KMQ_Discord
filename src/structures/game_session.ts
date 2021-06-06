@@ -11,14 +11,13 @@ import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFiltere
 import { delay, getAudioDurationInSeconds, getOrdinalNum, isPowerHour, isWeekend, setDifference } from "../helpers/utils";
 import state from "../kmq";
 import _logger from "../logger";
-import { QueriedSong, GuildTextableMessage, PlayerRoundResult } from "../types";
+import { QueriedSong, GuildTextableMessage, PlayerRoundResult, GameType } from "../types";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
 import Scoreboard from "./scoreboard";
 import EliminationScoreboard from "./elimination_scoreboard";
 import TeamScoreboard from "./team_scoreboard";
 import { deleteGameSession } from "../helpers/management_utils";
-import { GameType } from "../commands/game_commands/play";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { getRankNameByLevel } from "../commands/game_commands/profile";
 import { Gender } from "../commands/game_options/gender";
@@ -595,6 +594,10 @@ export default class GameSession {
         this.connection.once("end", async () => {
             logger.info(`${getDebugLogHeader(messageContext)} | Song finished without being guessed.`);
             this.stopGuessTimeout();
+            if (this.gameType === GameType.ELIMINATION) {
+                const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
+                eliminationScoreboard.decrementAllLives();
+            }
             this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));
             this.startRound(await getGuildPreference(this.guildID), messageContext);
         });
