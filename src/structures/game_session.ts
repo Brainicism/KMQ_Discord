@@ -623,9 +623,9 @@ export default class GameSession {
      */
     private async errorRestartRound(guildPreference: GuildPreference) {
         const messageContext = new MessageContext(this.textChannelID);
-        this.roundsPlayed--;
         this.endRound({ correct: false }, guildPreference);
         await sendErrorMessage(messageContext, { title: "Error playing song", description: "Starting new round in 3 seconds..." });
+        this.roundsPlayed--;
         this.startRound(guildPreference, messageContext);
     }
     /**
