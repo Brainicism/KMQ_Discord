@@ -177,7 +177,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         }
     }
     const uniqueSongMessage = (uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0) ? `\n${codeLine(`${uniqueSongCounter.uniqueSongsPlayed}/${uniqueSongCounter.totalSongs}`)} unique songs played.` : "";
-    const description = `${correctGuess ? correctDescription : "Nobody got it."}\nhttps://youtu.be/${gameRound.videoID}${uniqueSongMessage} ${!scoreboard.isEmpty() ? "\n\n**Scoreboard**" : ""}`;
+    const description = `${correctGuess ? correctDescription : "Nobody got it."}\n\nhttps://youtu.be/${gameRound.videoID}${uniqueSongMessage} ${!scoreboard.isEmpty() ? "\n\n**Scoreboard**" : ""}`;
     const fields = scoreboard.getScoreboardEmbedFields().slice(0, 15);
     for (const [index, field] of Object.entries(fields)) {
         fields[index].name = `${Number(index) + 1}. ${field.name}`;
