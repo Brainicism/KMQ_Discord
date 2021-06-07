@@ -8,7 +8,7 @@ import {
     getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, checkBotIsAlone, getVoiceChannelFromMessage,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, endSession } from "../helpers/game_utils";
-import { delay, getAudioDurationInSeconds, getOrdinalNum, isPowerHour, isWeekend, setDifference } from "../helpers/utils";
+import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference } from "../helpers/utils";
 import state from "../kmq";
 import _logger from "../logger";
 import { QueriedSong, GuildTextableMessage, PlayerRoundResult, GameType } from "../types";
@@ -555,21 +555,10 @@ export default class GameSession {
         if (seekType === SeekType.BEGINNING) {
             seekLocation = 0;
         } else {
-            let songDuration = (await dbContext.kmq("cached_song_duration")
+            const songDuration = (await dbContext.kmq("cached_song_duration")
                 .select(["duration"])
                 .where("vlink", "=", gameRound.videoID)
-                .first())?.duration;
-            if (!songDuration) {
-                songDuration = await getAudioDurationInSeconds(songLocation);
-                await dbContext.kmq("cached_song_duration")
-                    .insert({
-                        vlink: gameRound.videoID,
-                        duration: songDuration,
-                    })
-                    // Ignore potential race condition; correct value is eventually inserted
-                    .onConflict(["vlink"])
-                    .ignore();
-            }
+                .first()).duration;
             if (guildPreference.getSeekType() === SeekType.RANDOM) {
                 seekLocation = songDuration * (0.6 * Math.random());
             } else if (guildPreference.getSeekType() === SeekType.MIDDLE) {
