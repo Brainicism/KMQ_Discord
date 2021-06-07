@@ -555,7 +555,21 @@ export default class GameSession {
         if (seekType === SeekType.BEGINNING) {
             seekLocation = 0;
         } else {
-            const songDuration = await getAudioDurationInSeconds(songLocation);
+            let songDuration = (await dbContext.kmq("cached_song_duration")
+                .select(["duration"])
+                .where("vlink", "=", gameRound.videoID)
+                .first())?.duration;
+            if (!songDuration) {
+                songDuration = await getAudioDurationInSeconds(songLocation);
+                await dbContext.kmq("cached_song_duration")
+                    .insert({
+                        vlink: gameRound.videoID,
+                        duration: songDuration,
+                    })
+                    // Ignore potential race condition; correct value is eventually inserted
+                    .onConflict(["vlink"])
+                    .ignore();
+            }
             if (guildPreference.getSeekType() === SeekType.RANDOM) {
                 seekLocation = songDuration * (0.6 * Math.random());
             } else if (guildPreference.getSeekType() === SeekType.MIDDLE) {
