@@ -7,7 +7,7 @@ import { exec } from "child_process";
 import { QueriedSong } from "../types";
 import _logger from "../logger";
 import { DatabaseContext, getNewConnection } from "../database_context";
-import { retryJob } from "../helpers/utils";
+import { retryJob, getAudioDurationInSeconds } from "../helpers/utils";
 
 const logger: Logger = _logger("download-new-songs");
 const TARGET_AVERAGE_VOLUME = -30;
@@ -121,6 +121,11 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
         cacheStream.once("finish", async () => {
             try {
                 await fs.promises.rename(tempLocation, cachedSongLocation);
+                const duration = await getAudioDurationInSeconds(cachedSongLocation);
+                await db.kmq("cached_song_duration")
+                    .insert({ vlink: id, duration })
+                    .onConflict(["vlink"])
+                    .merge();
                 resolve();
             } catch (err) {
                 reject(new Error(`Error renaming temp song file from ${tempLocation} to ${cachedSongLocation}. err = ${err}`));
