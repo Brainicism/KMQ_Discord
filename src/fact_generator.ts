@@ -564,5 +564,5 @@ function generateSongArtistHyperlink(songName: string, artistName: string, video
         url = searchUrl.toString();
     }
 
-    return `['${songName}' by '${artistName}'](${url})`;
+    return `["${songName}" by ${artistName}](${url})`;
 }
