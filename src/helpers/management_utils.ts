@@ -144,7 +144,7 @@ export async function updateBotStatus() {
     }
 
     client.editStatus("online", {
-        name: `'${randomPopularSong["song_name"]}' by ${randomPopularSong["artist_name"]}`,
+        name: `"${randomPopularSong["song_name"]}" by ${randomPopularSong["artist_name"]}`,
         type: 1,
         url: `https://www.youtube.com/watch?v=${randomPopularSong["link"]}`,
     });
