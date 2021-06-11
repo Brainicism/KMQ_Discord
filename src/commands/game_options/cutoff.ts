@@ -6,7 +6,7 @@ import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 
 const logger = _logger("cutoff");
-export const DEFAULT_BEGINNING_SEARCH_YEAR = 2005;
+export const DEFAULT_BEGINNING_SEARCH_YEAR = 2000;
 export const DEFAULT_ENDING_SEARCH_YEAR = (new Date()).getFullYear();
 
 export default class CutoffCommand implements BaseCommand {
