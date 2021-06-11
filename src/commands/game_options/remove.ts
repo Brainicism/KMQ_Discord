@@ -8,8 +8,18 @@ import MessageContext from "../../structures/message_context";
 const logger = _logger("remove");
 
 enum RemoveType {
+    // Groups with aliases
     GROUPS = "groups",
+    GROUP = "group",
+    ARTIST = "artist",
+    ARTISTS = "artists",
+
+    // Exclude with aliases
+    EXCLUDE = "exclude",
     EXCLUDES = "excludes",
+
+    // Include with aliases
+    INCLUDE = "include",
     INCLUDES = "includes",
 }
 
@@ -27,20 +37,20 @@ export default class RemoveCommand implements BaseCommand {
 
     help = {
         name: "remove",
-        description: "Removes one or more groups from the current `,groups`, `,excludes`, or `,includes` options",
-        usage: ",remove [groups | excludes | includes] [list of groups]",
+        description: "Removes one or more groups from the current `,groups`, `,exclude`, or `,include` options",
+        usage: ",remove [groups | exclude | include] [list of groups]",
         examples: [
             {
                 example: "`,remove groups twice, red velvet`",
                 explanation: "Removes Twice and Red Velvet from the current `,groups` option",
             },
             {
-                example: "`,remove excludes BESTie, Dia, iKON`",
-                explanation: "Removes BESTie, Dia, and IKON from the current `,excludes` option",
+                example: "`,remove exclude BESTie, Dia, iKON`",
+                explanation: "Removes BESTie, Dia, and IKON from the current `,exclude` option",
             },
             {
-                example: "`,remove includes exo`",
-                explanation: "Removes EXO from the current `,includes` option",
+                example: "`,remove include exo`",
+                explanation: "Removes EXO from the current `,include` option",
             },
         ],
         priority: 200,
@@ -52,11 +62,16 @@ export default class RemoveCommand implements BaseCommand {
         let groupNamesString: string;
         switch (optionListed) {
             case RemoveType.GROUPS:
+            case RemoveType.GROUP:
+            case RemoveType.ARTIST:
+            case RemoveType.ARTISTS:
                 groupNamesString = guildPreference.getDisplayedGroupNames(true);
                 break;
+            case RemoveType.INCLUDE:
             case RemoveType.INCLUDES:
                 groupNamesString = guildPreference.getDisplayedIncludesGroupNames(true);
                 break;
+            case RemoveType.EXCLUDE:
             case RemoveType.EXCLUDES:
                 groupNamesString = guildPreference.getDisplayedExcludesGroupNames(true);
                 break;
@@ -87,15 +102,20 @@ export default class RemoveCommand implements BaseCommand {
         }
         switch (optionListed) {
             case RemoveType.GROUPS:
+            case RemoveType.GROUP:
+            case RemoveType.ARTIST:
+            case RemoveType.ARTISTS:
                 await guildPreference.setGroups(matchedGroups);
                 await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GROUPS, reset: false });
                 logger.info(`${getDebugLogHeader(message)} | Group removed: ${guildPreference.getDisplayedGroupNames()}`);
                 break;
+            case RemoveType.INCLUDE:
             case RemoveType.INCLUDES:
                 await guildPreference.setIncludes(matchedGroups);
                 await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.INCLUDE, reset: false });
                 logger.info(`${getDebugLogHeader(message)} | Include removed: ${guildPreference.getDisplayedIncludesGroupNames()}`);
                 break;
+            case RemoveType.EXCLUDE:
             case RemoveType.EXCLUDES:
                 await guildPreference.setExcludes(matchedGroups);
                 await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.EXCLUDE, reset: false });

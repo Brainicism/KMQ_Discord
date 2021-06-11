@@ -354,13 +354,15 @@ export async function sendEndGameMessage(textChannelID: string, gameSession: Gam
         }
 
         const endGameMessage: EndGameMessage = chooseWeightedRandom(await dbContext.kmq("end_game_messages").where("category", "=", Math.random() < 0.5 ? "kmq" : "game"));
-        fields.push(
-            {
-                name: endGameMessage.title,
-                value: endGameMessage.message,
-                inline: false,
-            },
-        );
+        if (endGameMessage) {
+            fields.push(
+                {
+                    name: endGameMessage.title,
+                    value: endGameMessage.message,
+                    inline: false,
+                },
+            );
+        }
         await sendInfoMessage(new MessageContext(textChannelID), {
             color: gameSession.gameType !== GameType.TEAMS && state.bonusUsers.has(winners[0].id) ? EMBED_SUCCESS_BONUS_COLOR : EMBED_SUCCESS_COLOR,
             description: "**Scoreboard**",
