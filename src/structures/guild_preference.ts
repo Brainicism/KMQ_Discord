@@ -219,7 +219,7 @@ export default class GuildPreference {
      * @returns whether the preset was loaded
      */
     async loadPreset(presetName: string): Promise<boolean> {
-        const preset = (await dbContext.kmq("game_option_presets")
+        const preset: { [x: string]: any } = (await dbContext.kmq("game_option_presets")
             .select(["option_name", "option_value"])
             .where("guild_id", "=", this.guildID)
             .andWhere("preset_name", "=", presetName))
