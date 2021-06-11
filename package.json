@@ -46,7 +46,6 @@
     "mysql": "^2.18.1",
     "mysqldump": "^3.2.0",
     "node-schedule": "^2.0.0",
-    "node-stream-zip": "^1.13.2",
     "sodium-native": "^3.2.1",
     "ts-node": "^10.0.0",
     "uuid": "^8.3.2",

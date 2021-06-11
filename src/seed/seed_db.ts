@@ -1,7 +1,6 @@
 import Axios from "axios";
 import fs from "fs";
 import { execSync } from "child_process";
-import StreamZip from "node-stream-zip";
 import { Logger } from "log4js";
 import { program } from "commander";
 import { config } from "dotenv";
@@ -43,9 +42,7 @@ const downloadDb = async () => {
 };
 async function extractDb(): Promise<void> {
     await fs.promises.mkdir(`${databaseDownloadDir}/`, { recursive: true });
-    // eslint-disable-next-line new-cap
-    const zip = new StreamZip.async({ file: `${databaseDownloadDir}/download.zip` });
-    await zip.extract(null, `${databaseDownloadDir}/`);
+    execSync(`unzip -q ${databaseDownloadDir}/download.zip -d ${databaseDownloadDir}/`);
     logger.info("Extracted Daisuki database");
 }
 
