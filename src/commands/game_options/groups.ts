@@ -38,12 +38,19 @@ export default class GroupsCommand implements BaseCommand {
             logger.info(`${getDebugLogHeader(message)} | Groups reset.`);
             return;
         }
+        let groupsWarning = "";
+        if (parsedMessage.components.length > 1) {
+            if (["add", "remove"].includes(parsedMessage.components[0])) {
+                groupsWarning = `Did you mean to use ${process.env.BOT_PREFIX}${parsedMessage.components[0]} groups?`;
+            }
+        }
         const groupNames = parsedMessage.argument.split(",").map((groupName) => groupName.trim());
         const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(groupNames);
         if (unmatchedGroups.length) {
             logger.info(`${getDebugLogHeader(message)} | Attempted to set unknown groups. groups =  ${unmatchedGroups.join(", ")}`);
             await sendErrorMessage(MessageContext.fromMessage(message), { title: "Unknown Group Name",
-                description: `One or more of the specified group names was not recognized. Those groups that matched are added. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} \nUse \`${process.env.BOT_PREFIX}add\` to add the unmatched groups.` });
+                description: `One or more of the specified group names was not recognized. Those groups that matched are added. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} \nUse \`${process.env.BOT_PREFIX}add\` to add the unmatched groups.`,
+                footerText: groupsWarning });
         }
         if (matchedGroups.length === 0) {
             return;

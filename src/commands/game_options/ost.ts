@@ -32,7 +32,7 @@ export default class OstCommand implements BaseCommand {
     help = {
         name: "ost",
         description: "Choose whether to include OST songs",
-        usage: ",ost [include | exclude]",
+        usage: ",ost [include | exclude | exclusive]",
         examples: [
             {
                 example: "`,ost include`",

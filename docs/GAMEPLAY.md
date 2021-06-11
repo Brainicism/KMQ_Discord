@@ -1,5 +1,3 @@
-Gameplay
-=======
 Welcome to KMQ, the K-Pop song guessing game. Type `,play` while in a voice channel to begin a game of KMQ! The bot will automatically start playing a random song, and the first person to type in the correct guess will win a point. 
 
 ![guess_song](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/guess_song.png)
@@ -111,7 +109,7 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,forceskip`: The person that started the game can force-skip the current song, no majority necessary
 - `,profile`: Shows many games you've played + songs you've guessed
 - `,leaderboard`: Shows the global KMQ leaderboard
-- `,list`: Shows the currently selected groups for `,groups`,`,includes`, or `,excludes`
+- `,list`: Shows the currently selected groups for `,groups`, `,include`, or `,exclude`
 - `,preset`: Save and load game option presents
 - `,vote`: Shows your current 2x bonus EXP modifier status from voting for the bot on [top.gg](https://top.gg/bot/508759831755096074/vote). Thanks for supporting KMQ!
 - `,hint`: Shows a hint for the current song playing
@@ -132,9 +130,9 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,language`: Choose whether to include Japanese/English/Chinese songs, or only Korean songs
 - `,reset`: Reset to the default settings
 - `,subunits`: Choose whether to automatically include a group's subunits when using `,groups`
-- `,add`: Add a single or multiple groups to the `,groups`, `,excludes`, or `,includes` option
-- `,remove`: Remove a single or multiple groups to the `,groups`, `,excludes`, or `,includes` option
+- `,add`: Add a single or multiple groups to the `,groups`, `,exclude`, or `,include` option
+- `,remove`: Remove a single or multiple groups to the `,groups`, `,exclude`, or `,include` option
 - `,duration`: Sets the maximum length of a KMQ game
-- `,ost`: Includes or excludes OST music videos
+- `,ost`: Includes, excludes, or exclusively plays OST music videos
 - `,release`: Specify whether only official releases are played, or include dance practices + acoustic versions + remixes, etc.
 - `,multiguess`: Choose whether to allow multiple players to guess correctly for a single round

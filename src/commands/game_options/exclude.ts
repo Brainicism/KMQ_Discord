@@ -39,6 +39,12 @@ export default class ExcludeCommand implements BaseCommand {
             logger.info(`${getDebugLogHeader(message)} | Excludes reset.`);
             return;
         }
+        let excludeWarning = "";
+        if (parsedMessage.components.length > 1) {
+            if (["add", "remove"].includes(parsedMessage.components[0])) {
+                excludeWarning = `Did you mean to use ${process.env.BOT_PREFIX}${parsedMessage.components[0]} exclude?`;
+            }
+        }
         if (guildPreference.isGroupsMode()) {
             logger.warn(`${getDebugLogHeader(message)} | Game option conflict between include and groups.`);
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Game Option Conflict", description: `\`groups\` game option is currently set. \`include\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed.` });
@@ -50,7 +56,8 @@ export default class ExcludeCommand implements BaseCommand {
         if (unmatchedGroups.length) {
             logger.info(`${getDebugLogHeader(message)} | Attempted to set unknown excludes. excludes =  ${unmatchedGroups.join(", ")}`);
             await sendErrorMessage(MessageContext.fromMessage(message), { title: "Unknown Group Name",
-                description: `One or more of the specified group names was not recognized. Those groups that matched are excluded. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} \nUse \`${process.env.BOT_PREFIX}add\` to add the unmatched groups.` });
+                description: `One or more of the specified group names was not recognized. Those groups that matched are excluded. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} \nUse \`${process.env.BOT_PREFIX}add\` to add the unmatched groups.`,
+                footerText: excludeWarning });
         }
 
         if (matchedGroups.length === 0) {

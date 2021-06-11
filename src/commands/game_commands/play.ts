@@ -121,23 +121,21 @@ export default class PlayCommand implements BaseCommand {
                 // (1) No game session exists yet (create CLASSIC, ELIMINATION, or TEAMS game), or
                 // (2) User attempting to ,play after a ,play elimination/teams that didn't start, start CLASSIC game
                 const textChannel = channel;
-                let startTitle: string;
-                let gameInstructions: string;
                 let gameSession: GameSession;
 
                 const gameOwner = KmqMember.fromUser(message.author);
                 if (isEliminationMode) {
                     // (1) ELIMINATION game creation
                     const lives = parsedMessage.components.length > 1 ? parseInt(parsedMessage.components[1]) : DEFAULT_LIVES;
-                    startTitle = `\`${process.env.BOT_PREFIX}join\` the game and start it with \`${process.env.BOT_PREFIX}begin\`!`;
-                    gameInstructions = `Type \`${process.env.BOT_PREFIX}join\` to play in the upcoming elimination game. Once all have joined, ${bold(gameOwner.tag)} must send \`${process.env.BOT_PREFIX}begin\` to start the game. Everyone begins with \`${lives}\` lives.`;
+                    const startTitle = `\`${process.env.BOT_PREFIX}join\` the game and start it with \`${process.env.BOT_PREFIX}begin\`!`;
+                    const gameInstructions = `Type \`${process.env.BOT_PREFIX}join\` to play in the upcoming elimination game. Once all have joined, ${bold(gameOwner.tag)} must send \`${process.env.BOT_PREFIX}begin\` to start the game. Everyone begins with \`${lives}\` lives.`;
                     gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, GameType.ELIMINATION, lives);
                     gameSession.addEliminationParticipant(gameOwner);
                     await sendInfoMessage(messageContext, { title: startTitle, description: gameInstructions, thumbnailUrl: KmqImages.HAPPY });
                 } else if (isTeamsMode) {
                     // (1) TEAMS game creation
-                    startTitle = `\`${process.env.BOT_PREFIX}join\` a team!`;
-                    gameInstructions = `Team leaders, type \`${process.env.BOT_PREFIX}join [team name]\` to form a new team. Remember, switching teams mid-game will forfeit all your current score and EXP.`;
+                    const startTitle = `\`${process.env.BOT_PREFIX}join\` a team!`;
+                    const gameInstructions = `Team leaders, type \`${process.env.BOT_PREFIX}join [team name]\` to form a new team. Remember, switching teams mid-game will forfeit all your current score and EXP.`;
                     await sendInfoMessage(messageContext, { title: startTitle, description: gameInstructions, thumbnailUrl: KmqImages.HAPPY });
                     gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, GameType.TEAMS);
                 } else {

@@ -8,8 +8,18 @@ import MessageContext from "../../structures/message_context";
 const logger = _logger("add");
 
 enum AddType {
+    // Groups with aliases
     GROUPS = "groups",
+    GROUP = "group",
+    ARTIST = "artist",
+    ARTISTS = "artists",
+
+    // Exclude with aliases
+    EXCLUDE = "exclude",
     EXCLUDES = "excludes",
+
+    // Include with aliases
+    INCLUDE = "include",
     INCLUDES = "includes",
 }
 
@@ -27,16 +37,16 @@ export default class AddCommand implements BaseCommand {
 
     help = {
         name: "add",
-        description: "Adds one or more groups to the current `,groups`, `,excludes`, or `,includes` options",
-        usage: ",add [groups | excludes | includes] [list of groups]",
+        description: "Adds one or more groups to the current `,groups`, `,exclude`, or `,include` options",
+        usage: ",add [groups | exclude | include] [list of groups]",
         examples: [
             {
                 example: "`,add groups twice, red velvet`",
                 explanation: "Adds Twice and Red Velvet to the current `,groups` option",
             },
             {
-                example: "`,add excludes BESTie, Dia, iKON`",
-                explanation: "Adds BESTie, Dia, and IKON to the current `,excludes` option",
+                example: "`,add exclude BESTie, Dia, iKON`",
+                explanation: "Adds BESTie, Dia, and IKON to the current `,exclude` option",
             },
             {
                 example: "`,add includes exo`",
@@ -52,11 +62,16 @@ export default class AddCommand implements BaseCommand {
         let groupNamesString: string;
         switch (optionListed) {
             case AddType.GROUPS:
+            case AddType.GROUP:
+            case AddType.ARTIST:
+            case AddType.ARTISTS:
                 groupNamesString = guildPreference.getDisplayedGroupNames(true);
                 break;
+            case AddType.INCLUDE:
             case AddType.INCLUDES:
                 groupNamesString = guildPreference.getDisplayedIncludesGroupNames(true);
                 break;
+            case AddType.EXCLUDE:
             case AddType.EXCLUDES:
                 groupNamesString = guildPreference.getDisplayedExcludesGroupNames(true);
                 break;
@@ -79,15 +94,20 @@ export default class AddCommand implements BaseCommand {
         }
         switch (optionListed) {
             case AddType.GROUPS:
+            case AddType.GROUP:
+            case AddType.ARTIST:
+            case AddType.ARTISTS:
                 await guildPreference.setGroups(matchedGroups);
                 await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GROUPS, reset: false });
                 logger.info(`${getDebugLogHeader(message)} | Group added: ${guildPreference.getDisplayedGroupNames()}`);
                 break;
+            case AddType.INCLUDE:
             case AddType.INCLUDES:
                 await guildPreference.setIncludes(matchedGroups);
                 await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.INCLUDE, reset: false });
                 logger.info(`${getDebugLogHeader(message)} | Include added: ${guildPreference.getDisplayedIncludesGroupNames()}`);
                 break;
+            case AddType.EXCLUDE:
             case AddType.EXCLUDES:
                 await guildPreference.setExcludes(matchedGroups);
                 await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.EXCLUDE, reset: false });
