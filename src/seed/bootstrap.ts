@@ -59,7 +59,12 @@ export async function generateKmqDataTables(db: DatabaseContext) {
 function performMigrations() {
     logger.info("Performing migrations...");
     const migrationsPath = path.join(__dirname, "../config/knexfile_kmq.js");
-    execSync(`npx knex migrate:latest --knexfile ${migrationsPath}`);
+    try {
+        execSync(`npx knex migrate:latest --knexfile ${migrationsPath}`);
+    } catch (e) {
+        logger.error(`Migration failed: ${e}`);
+        process.exit(1);
+    }
 }
 
 async function bootstrapDatabases() {
