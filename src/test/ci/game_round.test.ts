@@ -140,37 +140,37 @@ describe("check guess", () => {
     });
     describe("incorrect guess", () => {
         it("should return 0 points", () => {
-            assert.strictEqual(gameRound.checkGuess("wrong_song", GuessModeType.SONG_NAME), 0);
-            assert.strictEqual(gameRound.checkGuess("wrong_artist", GuessModeType.ARTIST), 0);
-            assert.strictEqual(gameRound.checkGuess("wrong_both", GuessModeType.BOTH), 0);
+            assert.strictEqual(gameRound.checkGuess("123", "wrong_song", GuessModeType.SONG_NAME), 0);
+            assert.strictEqual(gameRound.checkGuess("123", "wrong_artist", GuessModeType.ARTIST), 0);
+            assert.strictEqual(gameRound.checkGuess("123", "wrong_both", GuessModeType.BOTH), 0);
         });
     });
     describe("correct guess", () => {
         describe("hint used", () => {
             it("should return half the amount of points", () => {
                 gameRound.hintUsed = true;
-                assert.strictEqual(gameRound.checkGuess("song", GuessModeType.SONG_NAME), 0.5);
+                assert.strictEqual(gameRound.checkGuess("123", "song", GuessModeType.SONG_NAME), 0.5);
             });
         });
         describe("song guessing mode", () => {
             it("should return 1 point", () => {
-                assert.strictEqual(gameRound.checkGuess("song", GuessModeType.SONG_NAME), 1);
+                assert.strictEqual(gameRound.checkGuess("123", "song", GuessModeType.SONG_NAME), 1);
             });
         });
         describe("artist guessing mode", () => {
             it("should return 1 point", () => {
-                assert.strictEqual(gameRound.checkGuess("artist", GuessModeType.ARTIST), 1);
+                assert.strictEqual(gameRound.checkGuess("123", "artist", GuessModeType.ARTIST), 1);
             });
         });
         describe("both guessing mode", () => {
             describe("guessed song", () => {
                 it("should return 1 point", () => {
-                    assert.strictEqual(gameRound.checkGuess("song", GuessModeType.BOTH), 1);
+                    assert.strictEqual(gameRound.checkGuess("123", "song", GuessModeType.BOTH), 1);
                 });
             });
             describe("guessed artist", () => {
                 it("should return 0.2 points", () => {
-                    assert.strictEqual(gameRound.checkGuess("artist", GuessModeType.BOTH), 0.2);
+                    assert.strictEqual(gameRound.checkGuess("123", "artist", GuessModeType.BOTH), 0.2);
                 });
             });
         });

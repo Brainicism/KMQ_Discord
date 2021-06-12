@@ -106,6 +106,9 @@ export default class GameRound {
     /** Song/artist name hints */
     public readonly hints: { songHint: string, artistHint: string };
 
+    /** Guesses used per played */
+    public guessesUsed: { [playerId: string]: number };
+
     /** The base EXP for this GameRound */
     private baseExp: number;
 
@@ -125,6 +128,7 @@ export default class GameRound {
         this.hintUsed = false;
         this.hintRequesters = new Set();
         this.correctGuessers = [];
+        this.guessesUsed = {};
         this.finished = false;
         this.hints = {
             songHint: generateHint(this.songName),
@@ -184,7 +188,7 @@ export default class GameRound {
      * @param guessModeType - The guessing mode
      * @returns the number of points as defined by the mode type and correctness of the guess
      */
-    checkGuess(guess: string, guessModeType: GuessModeType): number {
+    checkGuess(playerID: string, guess: string, guessModeType: GuessModeType): GuessCheckResult {
         let pointReward = 0;
         if (guessModeType === GuessModeType.SONG_NAME) {
             pointReward = this.checkSongGuess(guess) ? 1 : 0;
@@ -195,7 +199,20 @@ export default class GameRound {
             if (this.checkArtistGuess(guess)) pointReward = 0.2;
         }
 
-        return this.hintUsed ? pointReward / 2 : pointReward;
+        if (pointReward === 0) {
+            this.guessesUsed[playerID] = (this.guessesUsed[playerID] ?? 0) + 1;
+            return {
+                pointsAwarded: 0,
+                correct: false,
+                guessesRemaining: 5 - (this.guessesUsed[playerID]),
+            };
+        }
+
+        return {
+            pointsAwarded: this.hintUsed ? pointReward / 2 : pointReward,
+            correct: true,
+            guessesRemaining: null,
+        };
     }
 
     /**
@@ -214,17 +231,25 @@ export default class GameRound {
     private checkSongGuess(message: string): boolean {
         const guess = cleanSongName(message);
         const cleanedSongAliases = this.acceptedSongAnswers.map((x) => cleanSongName(x));
-        return this.songName && cleanedSongAliases.includes(guess);
+        const isCorrect = this.songName && cleanedSongAliases.includes(guess);
+        return isCorrect;
     }
 
     /**
-     * Checks whether the artist guess matches the GameRound's aritst
+     * Checks whether the artist guess matches the GameRound's artist
      * @param message - The Message that contains the guess
      * @returns whether or not the guess was correct
      */
     private checkArtistGuess(message: string): boolean {
         const guess = cleanArtistName(message);
         const cleanedArtistAliases = this.acceptedArtistAnswers.map((x) => cleanArtistName(x));
-        return this.songName && cleanedArtistAliases.includes(guess);
+        const isCorrect = this.songName && cleanedArtistAliases.includes(guess);
+        return isCorrect;
     }
+}
+
+export interface GuessCheckResult {
+    correct: boolean;
+    guessesRemaining: number;
+    pointsAwarded: number;
 }

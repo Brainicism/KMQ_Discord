@@ -12,7 +12,7 @@ import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference } from "../
 import state from "../kmq";
 import _logger from "../logger";
 import { QueriedSong, GuildTextableMessage, PlayerRoundResult, GameType } from "../types";
-import GameRound from "./game_round";
+import GameRound, { GuessCheckResult } from "./game_round";
 import GuildPreference from "./guild_preference";
 import Scoreboard from "./scoreboard";
 import EliminationScoreboard from "./elimination_scoreboard";
@@ -340,7 +340,15 @@ export default class GameSession {
 
         if (!this.guessEligible(message)) return;
 
-        const pointsEarned = this.checkGuess(message.author.id, message.content, guildPreference.getGuessModeType());
+        const guessCheckResult = this.checkGuess(message.author.id, message.content, guildPreference.getGuessModeType());
+        if (guessCheckResult.guessesRemaining === 0) {
+            sendInfoMessage(MessageContext.fromMessage(message), { title: "Out of Guesses", description: "You ran out of guesses!", thumbnailUrl: KmqImages.NOT_IMPRESSED });
+            return;
+        }
+
+        if (guessCheckResult.guessesRemaining < 0) return;
+
+        const pointsEarned = guessCheckResult.pointsAwarded;
         if (pointsEarned > 0) {
             if (this.gameRound.finished) {
                 return;
@@ -649,16 +657,16 @@ export default class GameSession {
      * @param guessModeType - The guessing mode type to evaluate the guess against
      * @returns The number of points achieved for the guess
      */
-    private checkGuess(userID: string, guess: string, guessModeType: GuessModeType): number {
-        if (!this.gameRound) return 0;
+    private checkGuess(userID: string, guess: string, guessModeType: GuessModeType): GuessCheckResult {
+        if (!this.gameRound) return null;
         if (this.gameType !== GameType.ELIMINATION) {
             this.participants.add(userID);
         }
-        const pointsAwarded = this.gameRound.checkGuess(guess, guessModeType);
-        if (pointsAwarded) {
-            this.gameRound.userCorrect(userID, pointsAwarded);
+        const guessResult = this.gameRound.checkGuess(userID, guess, guessModeType);
+        if (guessResult.correct) {
+            this.gameRound.userCorrect(userID, guessResult.pointsAwarded);
         }
-        return pointsAwarded;
+        return guessResult;
     }
 
     /**
