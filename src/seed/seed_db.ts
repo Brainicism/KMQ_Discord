@@ -42,7 +42,7 @@ const downloadDb = async () => {
 };
 async function extractDb(): Promise<void> {
     await fs.promises.mkdir(`${databaseDownloadDir}/`, { recursive: true });
-    execSync(`unzip -q ${databaseDownloadDir}/download.zip -d ${databaseDownloadDir}/`);
+    execSync(`unzip -oq ${databaseDownloadDir}/download.zip -d ${databaseDownloadDir}/`);
     logger.info("Extracted Daisuki database");
 }
 
