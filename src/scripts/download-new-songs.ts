@@ -141,7 +141,6 @@ async function getSongsFromDb(db: DatabaseContext) {
         .join("kpop_videos.app_kpop_group", function join() {
             this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id");
         })
-        .andWhere("dead", "n")
         .andWhere("vtype", "main")
         .andWhere("tags", "NOT LIKE", "%c%")
         .orderBy("kpop_videos.app_kpop.views", "DESC");
