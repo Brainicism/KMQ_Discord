@@ -76,6 +76,7 @@ export default state;
             restMode: true,
             maxShards: "auto",
             messageLimit: 0,
+            useMaxConcurrency: true,
             intents: ERIS_INTENTS.guilds ^ ERIS_INTENTS.guildVoiceStates ^ ERIS_INTENTS.guildMessages ^ ERIS_INTENTS.guildMessageReactions,
         });
 
