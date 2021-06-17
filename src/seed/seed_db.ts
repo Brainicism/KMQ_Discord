@@ -15,7 +15,7 @@ config({ path: path.resolve(__dirname, "../../.env") });
 const SQL_DUMP_EXPIRY = 10;
 const mvFileUrl = "http://kpop.daisuki.com.br/download.php?file=full";
 const audioFileUrl = "http://kpop.daisuki.com.br/download.php?file=audio";
-const DEFAULT_SONGS_PER_ARTIST = 25;
+const DEFAULT_AUDIO_ONLY_SONGS_PER_ARTIST = 25;
 const logger: Logger = _logger("seed_db");
 const databaseDownloadDir = path.join(__dirname, "../../sql_dumps/daisuki");
 if (!fs.existsSync(databaseDownloadDir)) {
@@ -27,7 +27,7 @@ program
     .option("-r, --skip-reseed", "Force skip drop/create of kpop_videos database", false)
     .option("-d, --skip-download", "Skip download/encode of videos in database", false)
     .option("--limit <limit>", "Limit the number of songs to download", (x) => parseInt(x))
-    .option("--songs-per-artist <songs>", "Maximum number of songs to download for each artist", (x) => parseInt(x), DEFAULT_SONGS_PER_ARTIST);
+    .option("--songs-per-artist <songs>", "Maximum number of songs to download for each artist", (x) => parseInt(x), DEFAULT_AUDIO_ONLY_SONGS_PER_ARTIST);
 
 program.parse();
 const options = program.opts();
@@ -200,4 +200,4 @@ async function seedAndDownloadNewSongs(db: DatabaseContext) {
 })();
 
 // eslint-disable-next-line import/prefer-default-export
-export { seedAndDownloadNewSongs, updateKpopDatabase, DEFAULT_SONGS_PER_ARTIST };
+export { seedAndDownloadNewSongs, updateKpopDatabase };

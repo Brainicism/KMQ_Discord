@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { config } from "dotenv";
 import { execSync } from "child_process";
-import { updateKpopDatabase, DEFAULT_SONGS_PER_ARTIST } from "./seed_db";
+import { updateKpopDatabase } from "./seed_db";
 import _logger from "../logger";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import { DatabaseContext, getNewConnection } from "../database_context";
@@ -87,7 +87,7 @@ async function bootstrapDatabases() {
 
     if (!(await songThresholdReached(db))) {
         logger.info(`Downloading minimum threshold (${SONG_DOWNLOAD_THRESHOLD}) songs`);
-        await downloadAndConvertSongs(DEFAULT_SONGS_PER_ARTIST, SONG_DOWNLOAD_THRESHOLD);
+        await downloadAndConvertSongs(1, SONG_DOWNLOAD_THRESHOLD);
         await generateKmqDataTables(db);
     }
 
