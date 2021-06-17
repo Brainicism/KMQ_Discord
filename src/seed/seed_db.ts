@@ -94,7 +94,7 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean) {
     const [mvSeedFile] = sqlFiles.filter((x) => x.endsWith(".sql") && x.startsWith("mainbackup_")).slice(-1);
     const [audioSeedFile] = sqlFiles.filter((x) => x.endsWith(".sql") && x.startsWith("audiobackup_")).slice(-1);
     const mvSeedFilePath = bootstrap ? `${databaseDownloadDir}/bootstrap.sql` : `${databaseDownloadDir}/${mvSeedFile}`;
-    const audioSeedFilePath = `${databaseDownloadDir}/${audioSeedFile}`;
+    const audioSeedFilePath = bootstrap ? `${databaseDownloadDir}/bootstrap-audio.sql` : `${databaseDownloadDir}/${audioSeedFile}`;
     logger.info(`Validating SQL dump (${path.basename(mvSeedFilePath)} and ${path.basename(audioSeedFilePath)})`);
     await validateSqlDump(db, mvSeedFilePath, audioSeedFilePath, bootstrap);
     logger.info("Dropping K-Pop video database");
