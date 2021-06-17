@@ -11,7 +11,6 @@ import { retryJob, getAudioDurationInSeconds } from "../helpers/utils";
 
 const logger: Logger = _logger("download-new-songs");
 const TARGET_AVERAGE_VOLUME = -30;
-const SONGS_PER_ARTIST = 25;
 export async function clearPartiallyCachedSongs(): Promise<void> {
     logger.info("Clearing partially cached songs");
     if (!fs.existsSync(process.env.SONG_DOWNLOAD_DIR)) {
@@ -136,7 +135,7 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
     });
 };
 
-async function getSongsFromDb(db: DatabaseContext) {
+async function getSongsFromDb(db: DatabaseContext, songsPerArtist: number) {
     return db.kpopVideos.with("rankedAudioSongs",
         db.kpopVideos.select(["app_kpop_audio.name", "app_kpop_group.name AS artist", "vlink AS youtubeLink", "app_kpop_audio.views AS views", "app_kpop_audio.tags AS tags", db.kpopVideos.raw("RANK() OVER(PARTITION BY app_kpop_audio.id_artist ORDER BY views) AS rank")])
             .from("app_kpop_audio")
@@ -144,7 +143,7 @@ async function getSongsFromDb(db: DatabaseContext) {
         .select("name", "artist", "youtubeLink", "views")
         .from("rankedAudioSongs")
         .where("tags", "NOT LIKE", "%c%")
-        .andWhere("rank", "<=", SONGS_PER_ARTIST)
+        .andWhere("rank", "<=", songsPerArtist)
         .union(function () {
             this.select("app_kpop.name", "app_kpop_group.name AS artist", "vlink AS youtubeLink", "app_kpop.views AS views")
                 .from("app_kpop")
@@ -165,8 +164,8 @@ async function updateNotDownloaded(db: DatabaseContext, songs: Array<QueriedSong
     });
 }
 
-const downloadNewSongs = async (db: DatabaseContext, limit?: number): Promise<number> => {
-    const allSongs: Array<QueriedSong> = await getSongsFromDb(db);
+const downloadNewSongs = async (db: DatabaseContext, songsPerArtist: number, limit?: number): Promise<number> => {
+    const allSongs: Array<QueriedSong> = await getSongsFromDb(db, songsPerArtist);
     let songsToDownload = limit ? allSongs.slice(0, limit) : allSongs.slice();
     let downloadCount = 0;
     let deadLinksSkipped = 0;
@@ -214,7 +213,7 @@ const downloadNewSongs = async (db: DatabaseContext, limit?: number): Promise<nu
     return downloadCount;
 };
 
-export async function downloadAndConvertSongs(limit?: number): Promise<number> {
+export async function downloadAndConvertSongs(songsPerArtist: number, limit?: number): Promise<number> {
     const db = getNewConnection();
     try {
         if (!fs.existsSync(process.env.SONG_DOWNLOAD_DIR)) {
@@ -223,7 +222,7 @@ export async function downloadAndConvertSongs(limit?: number): Promise<number> {
         }
 
         await clearPartiallyCachedSongs();
-        const songsDownloaded = await downloadNewSongs(db, limit);
+        const songsDownloaded = await downloadNewSongs(db, songsPerArtist, limit);
         return songsDownloaded;
     } finally {
         await db.destroy();

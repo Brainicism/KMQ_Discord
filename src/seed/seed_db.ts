@@ -15,6 +15,7 @@ config({ path: path.resolve(__dirname, "../../.env") });
 const SQL_DUMP_EXPIRY = 10;
 const mvFileUrl = "http://kpop.daisuki.com.br/download.php?file=full";
 const audioFileUrl = "http://kpop.daisuki.com.br/download.php?file=audio";
+const DEFAULT_SONGS_PER_ARTIST = 25;
 const logger: Logger = _logger("seed_db");
 const databaseDownloadDir = path.join(__dirname, "../../sql_dumps/daisuki");
 if (!fs.existsSync(databaseDownloadDir)) {
@@ -25,7 +26,8 @@ program
     .option("-p, --skip-pull", "Skip re-pull of Daisuki database dump", false)
     .option("-r, --skip-reseed", "Force skip drop/create of kpop_videos database", false)
     .option("-d, --skip-download", "Skip download/encode of videos in database", false)
-    .option("--limit <limit>", "Limit the number of songs to download", (x) => parseInt(x));
+    .option("--limit <limit>", "Limit the number of songs to download", (x) => parseInt(x))
+    .option("--songs-per-artist <songs>", "Maximum number of songs to download for each artist", (x) => parseInt(x), DEFAULT_SONGS_PER_ARTIST);
 
 program.parse();
 const options = program.opts();
@@ -91,8 +93,8 @@ async function validateSqlDump(db: DatabaseContext, mvSeedFilePath: string, audi
 
 async function seedDb(db: DatabaseContext, bootstrap: boolean) {
     const sqlFiles = (await fs.promises.readdir(`${databaseDownloadDir}`)).filter((x) => x.endsWith(".sql"));
-    const [mvSeedFile] = sqlFiles.filter((x) => x.endsWith(".sql") && x.startsWith("mainbackup_")).slice(-1);
-    const [audioSeedFile] = sqlFiles.filter((x) => x.endsWith(".sql") && x.startsWith("audiobackup_")).slice(-1);
+    const mvSeedFile = sqlFiles.filter((x) => x.endsWith(".sql") && x.startsWith("mainbackup_")).slice(-1)[0];
+    const audioSeedFile = sqlFiles.filter((x) => x.endsWith(".sql") && x.startsWith("audiobackup_")).slice(-1)[0];
     const mvSeedFilePath = bootstrap ? `${databaseDownloadDir}/bootstrap.sql` : `${databaseDownloadDir}/${mvSeedFile}`;
     const audioSeedFilePath = bootstrap ? `${databaseDownloadDir}/bootstrap-audio.sql` : `${databaseDownloadDir}/${audioSeedFile}`;
     logger.info(`Validating SQL dump (${path.basename(mvSeedFilePath)} and ${path.basename(audioSeedFilePath)})`);
@@ -169,7 +171,7 @@ async function seedAndDownloadNewSongs(db: DatabaseContext) {
 
     let songsDownloaded = 0;
     if (!options.skipDownload) {
-        songsDownloaded = await downloadAndConvertSongs(options.limit);
+        songsDownloaded = await downloadAndConvertSongs(options.songsPerArtist, options.limit);
     }
 
     if (songsDownloaded) {
@@ -198,4 +200,4 @@ async function seedAndDownloadNewSongs(db: DatabaseContext) {
 })();
 
 // eslint-disable-next-line import/prefer-default-export
-export { seedAndDownloadNewSongs, updateKpopDatabase };
+export { seedAndDownloadNewSongs, updateKpopDatabase, DEFAULT_SONGS_PER_ARTIST };
