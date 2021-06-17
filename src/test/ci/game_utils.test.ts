@@ -32,7 +32,7 @@ async function setup() {
         issolo ENUM('y', 'n'),
         publishedon DATE,
         id_parent_artist INT(10),
-        vtype ENUM('main'),
+        vtype ENUM('main', 'audio'),
         tags VARCHAR(255)
     )`);
     await dbContext.kmq.raw(`CREATE TABLE kpop_groups(
@@ -77,7 +77,7 @@ const mockSongs = [...Array(1000).keys()].map((i) => {
         issolo: artist.issolo,
         publishedon: new Date(`${["2008", "2009", "2016", "2017", "2018"][md5Hash(i, 8) % 5]}-06-01`),
         id_parent_artist: artist.id_parentgroup || 0,
-        vtype: "main",
+        vtype: Math.random() < 0.25 ? "audio" : "main",
         tags: ["", "", "o", "c", "e", "drv", "ax", "ps"][md5Hash(i, 8) % 8],
     };
 });

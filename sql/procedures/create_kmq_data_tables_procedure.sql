@@ -15,20 +15,30 @@ BEGIN
 		id_artist INT(11) NOT NULL,
 		issolo ENUM('y', 'n') NOT NULL,
 		id_parent_artist INT(11) NOT NULL,
-		vtype ENUM('main') NOT NULL,
+		vtype ENUM('main', 'audio') NOT NULL,
 		tags VARCHAR(25)
 	);
 
 	CREATE TABLE IF NOT EXISTS available_songs LIKE available_songs_temp;
 
-	INSERT INTO available_songs_temp 
-	
+    /* music videos */
+	INSERT INTO available_songs_temp
 	SELECT TRIM(app_kpop.name) AS song_name, name_aka as song_aliases, vlink AS link, TRIM(kpop_videos.app_kpop_group.name) AS artist_name, kpop_videos.app_kpop_group.members as members, kpop_videos.app_kpop.views AS views, publishedon, kpop_videos.app_kpop_group.id as id_artist, issolo,
 	id_parentgroup, vtype, tags
-	FROM kpop_videos.app_kpop 
+	FROM kpop_videos.app_kpop
 	JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
 	WHERE vlink NOT IN (SELECT vlink FROM kmq.not_downloaded)
 	AND vtype = 'main'
+	AND tags NOT LIKE "%c%"
+	AND vlink IN (SELECT vlink FROM kmq.cached_song_duration);
+
+    /* audio-only videos */
+	INSERT INTO available_songs_temp
+	SELECT TRIM(app_kpop_audio.name) AS song_name, name_aka as song_aliases, vlink AS link, TRIM(kpop_videos.app_kpop_group.name) AS artist_name, kpop_videos.app_kpop_group.members as members, kpop_videos.app_kpop_audio.views AS views, publishedon, kpop_videos.app_kpop_group.id as id_artist, issolo,
+	id_parentgroup, 'audio' as vtype, tags
+	FROM kpop_videos.app_kpop_audio
+	JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop_audio.id_artist = kpop_videos.app_kpop_group.id
+	WHERE vlink NOT IN (SELECT vlink FROM kmq.not_downloaded)
 	AND tags NOT LIKE "%c%"
 	AND vlink IN (SELECT vlink FROM kmq.cached_song_duration);
 

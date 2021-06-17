@@ -11,6 +11,7 @@ import { retryJob, getAudioDurationInSeconds } from "../helpers/utils";
 
 const logger: Logger = _logger("download-new-songs");
 const TARGET_AVERAGE_VOLUME = -30;
+const SONGS_PER_ARTIST = 25;
 export async function clearPartiallyCachedSongs(): Promise<void> {
     logger.info("Clearing partially cached songs");
     if (!fs.existsSync(process.env.SONG_DOWNLOAD_DIR)) {
@@ -136,14 +137,22 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
 };
 
 async function getSongsFromDb(db: DatabaseContext) {
-    return db.kpopVideos("kpop_videos.app_kpop")
-        .select(["app_kpop.name", "app_kpop_group.name as artist", "vlink as youtubeLink"])
-        .join("kpop_videos.app_kpop_group", function join() {
-            this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id");
+    return db.kpopVideos.with("rankedAudioSongs",
+        db.kpopVideos.select(["app_kpop_audio.name", "app_kpop_group.name AS artist", "vlink AS youtubeLink", "app_kpop_audio.views AS views", "app_kpop_audio.tags AS tags", db.kpopVideos.raw("RANK() OVER(PARTITION BY app_kpop_audio.id_artist ORDER BY views) AS rank")])
+            .from("app_kpop_audio")
+            .join("app_kpop_group", "kpop_videos.app_kpop_audio.id_artist", "=", "kpop_videos.app_kpop_group.id"))
+        .select("name", "artist", "youtubeLink", "views")
+        .from("rankedAudioSongs")
+        .where("tags", "NOT LIKE", "%c%")
+        .andWhere("rank", "<=", SONGS_PER_ARTIST)
+        .union(function () {
+            this.select("app_kpop.name", "app_kpop_group.name AS artist", "vlink AS youtubeLink", "app_kpop.views AS views")
+                .from("app_kpop")
+                .join("kpop_videos.app_kpop_group", "kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id")
+                .where("vtype", "=", "main")
+                .andWhere("tags", "NOT LIKE", "%c%");
         })
-        .andWhere("vtype", "main")
-        .andWhere("tags", "NOT LIKE", "%c%")
-        .orderBy("kpop_videos.app_kpop.views", "DESC");
+        .orderBy("views", "DESC");
 }
 
 async function updateNotDownloaded(db: DatabaseContext, songs: Array<QueriedSong>) {
