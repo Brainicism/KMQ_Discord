@@ -194,6 +194,7 @@ async function mostViewedVideo(): Promise<string[]> {
         .join("app_kpop_group", function join() {
             this.on("app_kpop.id_artist", "=", "app_kpop_group.id");
         })
+        .where("app_kpop.vtype", "main")
         .orderBy("views", "DESC")
         .limit(25);
     return result.map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} is the ${getOrdinalNum(idx + 1)} most viewed music video with ${x["views"].toLocaleString()} YouTube views!`);

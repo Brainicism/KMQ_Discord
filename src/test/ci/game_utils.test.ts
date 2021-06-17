@@ -385,7 +385,7 @@ describe("song query", () => {
         describe("release type", () => {
             describe("release type is set to official only", () => {
                 it("should match the expected song count", async () => {
-                    const expectedSongCount = mockSongs.filter((song) => !NON_OFFICIAL_VIDEO_TAGS.some((tag) => song.tags.includes(tag))).length;
+                    const expectedSongCount = mockSongs.filter((song) => !NON_OFFICIAL_VIDEO_TAGS.some((tag) => song.tags.includes(tag)) && song.vtype === "main").length;
                     await guildPreference.setReleaseType(ReleaseType.OFFICIAL);
                     const { songs } = await getFilteredSongList(guildPreference);
                     assert.strictEqual(songs.size, expectedSongCount);
