@@ -23,8 +23,19 @@ BEGIN
 
     /* music videos */
 	INSERT INTO available_songs_temp
-	SELECT TRIM(app_kpop.name) AS song_name, name_aka as song_aliases, vlink AS link, TRIM(kpop_videos.app_kpop_group.name) AS artist_name, kpop_videos.app_kpop_group.members as members, kpop_videos.app_kpop.views AS views, publishedon, kpop_videos.app_kpop_group.id as id_artist, issolo,
-	id_parentgroup, vtype, tags
+	SELECT
+        TRIM(app_kpop.name) AS song_name,
+        name_aka AS song_aliases,
+        vlink AS link,
+        TRIM(kpop_videos.app_kpop_group.name) AS artist_name,
+        kpop_videos.app_kpop_group.members AS members,
+        kpop_videos.app_kpop.views AS views,
+        publishedon,
+        kpop_videos.app_kpop_group.id as id_artist,
+        issolo,
+        id_parentgroup,
+        vtype,
+        tags
 	FROM kpop_videos.app_kpop
 	JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
 	WHERE vlink NOT IN (SELECT vlink FROM kmq.not_downloaded)
@@ -34,8 +45,19 @@ BEGIN
 
     /* audio-only videos */
 	INSERT INTO available_songs_temp
-	SELECT TRIM(app_kpop_audio.name) AS song_name, name_aka as song_aliases, vlink AS link, TRIM(kpop_videos.app_kpop_group.name) AS artist_name, kpop_videos.app_kpop_group.members as members, kpop_videos.app_kpop_audio.views AS views, publishedon, kpop_videos.app_kpop_group.id as id_artist, issolo,
-	id_parentgroup, 'audio' as vtype, tags
+	SELECT
+        TRIM(app_kpop_audio.name) AS song_name,
+        name_aka AS song_aliases,
+        vlink AS link,
+        TRIM(kpop_videos.app_kpop_group.name) AS artist_name,
+        kpop_videos.app_kpop_group.members AS members,
+        kpop_videos.app_kpop_audio.views AS views,
+        publishedon,
+        kpop_videos.app_kpop_group.id AS id_artist,
+        issolo,
+        id_parentgroup,
+        'audio' AS vtype,
+        tags
 	FROM kpop_videos.app_kpop_audio
 	JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop_audio.id_artist = kpop_videos.app_kpop_group.id
 	WHERE vlink NOT IN (SELECT vlink FROM kmq.not_downloaded)
