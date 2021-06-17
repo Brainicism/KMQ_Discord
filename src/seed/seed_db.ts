@@ -66,11 +66,11 @@ async function validateSqlDump(db: DatabaseContext, mvSeedFilePath: string, audi
         execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${audioSeedFilePath}`);
         logger.info("Validating MV song count");
         const mvSongCount = (await db.kpopVideosValidation("app_kpop").count("* as count").first()).count;
+        logger.info("Validating audio-only song count");
+        const audioSongCount = (await db.kpopVideosValidation("app_kpop_audio").count("* as count").first()).count;
         logger.info("Validating group count");
         const artistCount = (await db.kpopVideosValidation("app_kpop_group").count("* as count").first()).count;
-        logger.info("Validating audio song count");
-        const audioSongCount = (await db.kpopVideosValidation("app_kpop_audio").count("* as count").first()).count;
-        if (mvSongCount < 10000 || artistCount < 1000 || audioSongCount < 1000) {
+        if (mvSongCount < 10000 || audioSongCount < 1000 || artistCount < 1000) {
             throw new Error("SQL dump valid, but potentially missing data.");
         }
         if (!bootstrap) {
