@@ -9,6 +9,7 @@ import _logger from "../logger";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import { DatabaseContext, getNewConnection } from "../database_context";
 import { generateKmqDataTables } from "./bootstrap";
+import { EnvType } from "../types";
 
 config({ path: path.resolve(__dirname, "../../.env") });
 const SQL_DUMP_EXPIRY = 10;
@@ -50,7 +51,7 @@ async function validateSqlDump(db: DatabaseContext, seedFilePath: string, bootst
     try {
         await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_validation;");
         await db.agnostic.raw("CREATE DATABASE kpop_videos_validation;");
-        execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${seedFilePath} 2>/dev/null`);
+        execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${seedFilePath}`);
         logger.info("Validating song count");
         const songCount = (await db.kpopVideosValidation("app_kpop").count("* as count").first()).count;
         logger.info("Validating group count");
@@ -60,8 +61,10 @@ async function validateSqlDump(db: DatabaseContext, seedFilePath: string, bootst
         }
         if (!bootstrap) {
             logger.info("Validating creation of data tables");
-            const createKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/create_kmq_data_tables_procedure_validation.sql");
-            execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${createKmqTablesProcedureSqlPath} 2>/dev/null`);
+            const originalCreateKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/procedures/create_kmq_data_tables_procedure.sql");
+            const validationCreateKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/create_kmq_data_tables_procedure.validation.sql");
+            execSync(`sed 's/kpop_videos/kpop_videos_validation/g' ${originalCreateKmqTablesProcedureSqlPath} > ${validationCreateKmqTablesProcedureSqlPath}`);
+            execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${validationCreateKmqTablesProcedureSqlPath}`);
             await db.kpopVideosValidation.raw("CALL CreateKmqDataTables;");
         }
         logger.info("SQL dump validated successfully");
@@ -83,7 +86,7 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean) {
     logger.info("Creating K-Pop video database");
     await db.agnostic.raw("CREATE DATABASE kpop_videos;");
     logger.info("Seeding K-Pop video database");
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${seedFilePath} 2>/dev/null`);
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${seedFilePath}`);
     logger.info("Imported database dump successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing");
 }
 
@@ -157,7 +160,9 @@ async function seedAndDownloadNewSongs(db: DatabaseContext) {
     }
 
     await db.kmq.raw("CALL OverridePublishDates();");
-    await updateGroupList(db);
+    if (process.env.NODE_ENV === EnvType.PROD) {
+        await updateGroupList(db);
+    }
     logger.info("Finishing seeding and downloading new songs");
 }
 

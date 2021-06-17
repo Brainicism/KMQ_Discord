@@ -10,3 +10,4 @@ tmp/
 tsconfig.tsbuildinfo
 version
 data/skip_seed
+*.validation.sql
