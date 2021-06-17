@@ -90,9 +90,10 @@ async function validateSqlDump(db: DatabaseContext, mvSeedFilePath: string, audi
 }
 
 async function seedDb(db: DatabaseContext, bootstrap: boolean) {
-    const [mvSeedFile] = (await fs.promises.readdir(`${databaseDownloadDir}`)).filter((x) => x.endsWith(".sql") && x.startsWith("mainbackup_")).slice(-1);
+    const sqlFiles = (await fs.promises.readdir(`${databaseDownloadDir}`)).filter((x) => x.endsWith(".sql"));
+    const [mvSeedFile] = sqlFiles.filter((x) => x.endsWith(".sql") && x.startsWith("mainbackup_")).slice(-1);
+    const [audioSeedFile] = sqlFiles.filter((x) => x.endsWith(".sql") && x.startsWith("audiobackup_")).slice(-1);
     const mvSeedFilePath = bootstrap ? `${databaseDownloadDir}/bootstrap.sql` : `${databaseDownloadDir}/${mvSeedFile}`;
-    const [audioSeedFile] = (await fs.promises.readdir(`${databaseDownloadDir}`)).filter((x) => x.endsWith(".sql") && x.startsWith("audiobackup_")).slice(-1);
     const audioSeedFilePath = `${databaseDownloadDir}/${audioSeedFile}`;
     logger.info(`Validating SQL dump (${path.basename(mvSeedFilePath)} and ${path.basename(audioSeedFilePath)})`);
     await validateSqlDump(db, mvSeedFilePath, audioSeedFilePath, bootstrap);
