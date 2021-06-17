@@ -8,6 +8,7 @@ const logger = _logger("guildDelete");
 export default async function guildDeleteHandler(guild: Eris.Guild | { id: string }) {
     logger.info(`Server left: ${guild.id}`);
     const kmqDebugChannel = getDebugChannel();
+    if (!kmqDebugChannel) return;
     const leaveDate = new Date();
     const title = "Server left";
     const footerText = `gid: ${guild.id} | Left at: ${leaveDate.toLocaleDateString("en-US")} ${leaveDate.toLocaleTimeString("en-US")}`;
