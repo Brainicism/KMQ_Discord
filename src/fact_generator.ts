@@ -97,7 +97,6 @@ async function recentMusicVideos(): Promise<string[]> {
         .join("kpop_videos.app_kpop_group", function join() {
             this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id");
         })
-        .where("dead", "n")
         .andWhere("vtype", "main")
         .andWhere("publishedon", ">", oneMonthPriorDate)
         .orderBy("kpop_videos.app_kpop.publishedon", "DESC");
@@ -105,7 +104,7 @@ async function recentMusicVideos(): Promise<string[]> {
         logger.warn("recentMusicVideos generated no facts");
         return [];
     }
-    return result.map((x) => `New Song Alert: Check out this recently released music video, ['${x["name"]}' by '${x["artist"]}'](https://youtu.be/${x["youtubeLink"]})`);
+    return result.map((x) => `New Song Alert: Check out this recently released music video, ["${x["name"]}" by ${x["artist"]}](https://youtu.be/${x["youtubeLink"]})`);
 }
 
 async function recentMilestone(): Promise<string[]> {
@@ -157,7 +156,7 @@ async function musicShowWins(): Promise<string[]> {
         })
         .orderBy("count", "DESC")
         .limit(25);
-    return result.map((x, idx) => `Fun Fact: '${x["artist_name"]}' has won the ${getOrdinalNum(idx + 1)} most music show with ${x["count"]} wins!`);
+    return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} has won the ${getOrdinalNum(idx + 1)} most music show with ${x["count"]} wins!`);
 }
 
 async function mostViewedGroups(): Promise<string[]> {
@@ -172,7 +171,7 @@ async function mostViewedGroups(): Promise<string[]> {
         .orderBy("total_views", "DESC")
         .limit(25);
 
-    return result.map((x, idx) => `Fun Fact: '${x["artist_name"]}' is the ${getOrdinalNum(idx + 1)} most viewed group with ${x["total_views"].toLocaleString()} total YouTube views!`);
+    return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} is the ${getOrdinalNum(idx + 1)} most viewed group with ${x["total_views"].toLocaleString()} total YouTube views!`);
 }
 
 async function mostLikedGroups(): Promise<string[]> {
@@ -186,7 +185,7 @@ async function mostLikedGroups(): Promise<string[]> {
         })
         .where("app_kpop_group.issolo", "=", "n")
         .orderBy("total_likes", "DESC");
-    return result.map((x, idx) => `Fun Fact: '${x["artist_name"]}' is the ${getOrdinalNum(idx + 1)} most liked group with ${x["total_likes"].toLocaleString()} total YouTube likes!`);
+    return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} is the ${getOrdinalNum(idx + 1)} most liked group with ${x["total_likes"].toLocaleString()} total YouTube likes!`);
 }
 
 async function mostViewedVideo(): Promise<string[]> {
@@ -255,7 +254,7 @@ async function mostMusicVideos(): Promise<string[]> {
         .orderBy("count", "DESC")
         .limit(25);
 
-    return result.map((x, idx) => `Fun Fact: '${x["artist_name"]}' has the ${getOrdinalNum(idx + 1)} most music videos with ${x["count"]} on YouTube!`);
+    return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} has the ${getOrdinalNum(idx + 1)} most music videos with ${x["count"]} on YouTube!`);
 }
 
 async function yearWithMostDebuts(): Promise<string[]> {
@@ -318,7 +317,7 @@ async function mostViewedSoloArtist(): Promise<string[]> {
         .where("app_kpop_group.issolo", "=", "y")
         .orderBy("total_views", "DESC")
         .limit(25);
-    return result.map((x, idx) => `Fun Fact: '${x["artist_name"]}' is the ${getOrdinalNum(idx + 1)} most viewed solo artist with ${x["total_views"].toLocaleString()} total YouTube views!`);
+    return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} is the ${getOrdinalNum(idx + 1)} most viewed solo artist with ${x["total_views"].toLocaleString()} total YouTube views!`);
 }
 
 async function viewsBySolo(): Promise<string[]> {
@@ -506,7 +505,7 @@ async function mostGaonFirsts(): Promise<string[]> {
         .select(["name as artist_name", "gaondigital_firsts as firsts"])
         .orderBy("firsts", "DESC")
         .limit(25);
-    return result.map((x, idx) => `Fun Fact: '${x["artist_name"]}' has topped the GAON digital weekly charts the ${getOrdinalNum(idx + 1)} most times with ${x["firsts"]} first place appearances!`);
+    return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} has topped the GAON digital weekly charts the ${getOrdinalNum(idx + 1)} most times with ${x["firsts"]} first place appearances!`);
 }
 
 async function mostGaonAppearances(): Promise<string[]> {
@@ -514,7 +513,7 @@ async function mostGaonAppearances(): Promise<string[]> {
         .select(["name as artist_name", "gaondigital_times as appearances"])
         .orderBy("appearances", "DESC")
         .limit(25);
-    return result.map((x, idx) => `Fun Fact: '${x["artist_name"]}' has placed on the GAON digital weekly charts the ${getOrdinalNum(idx + 1)} most times with ${x["appearances"]} appearances!`);
+    return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} has placed on the GAON digital weekly charts the ${getOrdinalNum(idx + 1)} most times with ${x["appearances"]} appearances!`);
 }
 
 async function historicalGaonWeekly(): Promise<Array<string>> {

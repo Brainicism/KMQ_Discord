@@ -87,7 +87,7 @@ async function bootstrapDatabases() {
 
     if (!(await songThresholdReached(db))) {
         logger.info(`Downloading minimum threshold (${SONG_DOWNLOAD_THRESHOLD}) songs`);
-        await downloadAndConvertSongs(SONG_DOWNLOAD_THRESHOLD);
+        await downloadAndConvertSongs(1, SONG_DOWNLOAD_THRESHOLD);
         await generateKmqDataTables(db);
     }
 

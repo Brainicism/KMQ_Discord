@@ -91,6 +91,7 @@ export async function getFilteredSongList(guildPreference: GuildPreference): Pro
     }
 
     if (guildPreference.getReleaseType() === ReleaseType.OFFICIAL) {
+        queryBuilder = queryBuilder.where("vtype", "=", "main");
         for (const tag of NON_OFFICIAL_VIDEO_TAGS) {
             queryBuilder = queryBuilder
                 .where("tags", "NOT LIKE", `%${tag}%`);
