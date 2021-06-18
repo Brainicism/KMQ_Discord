@@ -26,8 +26,8 @@ describe("add a team", () => {
 
         assert.strictEqual(scoreboard.hasTeam(SECOND_TEAM_NAME), false);
         const secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, player);
-        assert.deepStrictEqual(scoreboard.getTeam(secondTeam.getName()), secondTeam);
-        assert.strictEqual(scoreboard.hasTeam(secondTeam.getName()), true);
+        assert.deepStrictEqual(scoreboard.getTeam(secondTeam.getNameWithoutTeam()), secondTeam);
+        assert.strictEqual(scoreboard.hasTeam(secondTeam.getNameWithoutTeam()), true);
         assert.deepStrictEqual(Object.values(scoreboard.getTeams()), [firstTeam, secondTeam]);
     });
 });

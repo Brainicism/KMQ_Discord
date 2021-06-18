@@ -17,12 +17,6 @@ export default class TeamScoreboard extends Scoreboard {
     */
     protected players: TeamMap;
 
-    /** @returns An array of DiscordEmbed fields representing each participant's score */
-    getScoreboardEmbedFields(): Array<{ name: string, value: string, inline: boolean }> {
-        if (this.isEmpty()) return [];
-        return super.getScoreboardEmbedFields().map((x) => ({ name: `Team ${x.name}`, value: x.value, inline: x.inline }));
-    }
-
     /**
      * Updates the scoreboard with information about correct guessers
      * @param guessResults - Objects containing the user ID, points earned, and EXP gain
@@ -69,6 +63,13 @@ export default class TeamScoreboard extends Scoreboard {
      */
     getTeams(): TeamMap {
         return this.players;
+    }
+
+    /**
+     * @returns the number of teams
+     */
+    getNumTeams(): number {
+        return super.getNumPlayers();
     }
 
     /**

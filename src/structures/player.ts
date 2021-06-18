@@ -1,4 +1,5 @@
 import { getUserTag } from "../helpers/discord_utils";
+import { roundDecimal } from "../helpers/utils";
 import state from "../kmq";
 
 export default class Player {
@@ -8,11 +9,11 @@ export default class Player {
     /** The Discord user ID of the player */
     public readonly id: string;
 
+    /** The player's current score */
+    protected score: number;
+
     /** The player's avatar URL */
     private readonly avatarURL: string;
-
-    /** The player's current score */
-    private score: number;
 
     /** The player's EXP gain */
     private expGain: number;
@@ -38,6 +39,11 @@ export default class Player {
     /** @returns the player's current score */
     getScore(): number {
         return this.score;
+    }
+
+    /** @returns what to display as the score in the scoreboard for the player */
+    getDisplayedScore(): string {
+        return Number.isInteger(roundDecimal(this.getScore(), 1)) ? roundDecimal(this.getScore(), 1).toString() : this.getScore().toFixed(1);
     }
 
     /** @returns the player's EXP gain */

@@ -25,6 +25,8 @@ export const EMBED_SUCCESS_BONUS_COLOR = 0xFFD700; // GOLD
 const EMBED_FIELDS_PER_PAGE = 20;
 const REQUIRED_TEXT_PERMISSIONS = ["addReactions" as const, "embedLinks" as const];
 const REQUIRED_VOICE_PERMISSIONS = ["viewChannel" as const, "voiceConnect" as const, "voiceSpeak" as const];
+const SCOREBOARD_FIELD_CUTOFF = 9;
+const MAX_SCOREBOARD_PLAYERS = 30;
 
 /**
  * @param user - The user (must be some object with username and discriminator fields)
@@ -178,9 +180,11 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     }
     const uniqueSongMessage = (uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0) ? `\n${codeLine(`${uniqueSongCounter.uniqueSongsPlayed}/${uniqueSongCounter.totalSongs}`)} unique songs played.` : "";
     const description = `${correctGuess ? correctDescription : "Nobody got it."}\n\nhttps://youtu.be/${gameRound.videoID}${uniqueSongMessage} ${!scoreboard.isEmpty() ? "\n\n**Scoreboard**" : ""}`;
-    const fields = scoreboard.getScoreboardEmbedFields().slice(0, 15);
-    for (const [index, field] of Object.entries(fields)) {
-        fields[index].name = `${Number(index) + 1}. ${field.name}`;
+    let fields: Array<{ name: string, value: string, inline: boolean }>;
+    if (scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF) {
+        fields = scoreboard.getScoreboardEmbedTwoFields(MAX_SCOREBOARD_PLAYERS);
+    } else {
+        fields = scoreboard.getScoreboardEmbedFields();
     }
     if (fact) {
         fields.push({
@@ -348,9 +352,11 @@ export async function sendEndGameMessage(textChannelID: string, gameSession: Gam
         });
     } else {
         const winners = gameSession.scoreboard.getWinners();
-        const fields = gameSession.scoreboard.getScoreboardEmbedFields().slice(0, 15);
-        for (const [index, field] of Object.entries(fields)) {
-            fields[index].name = `${Number(index) + 1}. ${field.name}`;
+        let fields: Array<{ name: string, value: string, inline: boolean }>;
+        if (gameSession.scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF) {
+            fields = gameSession.scoreboard.getScoreboardEmbedTwoFields(MAX_SCOREBOARD_PLAYERS);
+        } else {
+            fields = gameSession.scoreboard.getScoreboardEmbedFields();
         }
 
         const endGameMessage: EndGameMessage = chooseWeightedRandom(await dbContext.kmq("end_game_messages").where("category", "=", Math.random() < 0.5 ? "kmq" : "game"));

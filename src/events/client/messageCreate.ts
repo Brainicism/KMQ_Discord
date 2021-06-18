@@ -42,7 +42,7 @@ export default async function messageCreateHandler(message: Eris.Message) {
             return;
         }
         const guildPreference = await getGuildPreference(message.guildID);
-        sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, null, `Psst. Your bot prefix is ${process.env.BOT_PREFIX}`);
+        sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, null, `Psst. The bot prefix is ${process.env.BOT_PREFIX}`);
         return;
     }
 

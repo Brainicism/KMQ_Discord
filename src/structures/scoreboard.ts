@@ -1,5 +1,5 @@
 import Player from "./player";
-import { roundDecimal } from "../helpers/utils";
+import { bold } from "../helpers/utils";
 import _logger from "../logger";
 import GuildPreference from "./guild_preference";
 
@@ -56,12 +56,40 @@ export default class Scoreboard {
     getScoreboardEmbedFields(): Array<{ name: string, value: string, inline: boolean }> {
         return Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
-            .map((x) => (
+            .map((x, index) => (
                 {
-                    name: x.getName(),
-                    value: Number.isInteger(roundDecimal(x.getScore(), 1)) ? roundDecimal(x.getScore(), 1).toString() : x.getScore().toFixed(1),
+                    name: `${index + 1}. ${x.getName()}`,
+                    value: x.getDisplayedScore(),
                     inline: true,
                 }));
+    }
+
+    /**
+     * Separates scoreboard players into two fields for large games
+     * @param cutoff - How many players to include before truncating the scoreboard
+     * @returns An array of 2 DiscordEmbed fields containing each player and their score, separated by newline
+     */
+    getScoreboardEmbedTwoFields(cutoff: number): Array<{ name: string, value: string, inline: boolean }> {
+        const ZERO_WIDTH_SPACE = "​";
+        const players = Object.values(this.players)
+            .sort((a, b) => b.getScore() - a.getScore())
+            .slice(0, cutoff)
+            .map((x, index) => `${index + 1}. ${bold(x.getName())}: ${x.getDisplayedScore()}`);
+        if (this.getNumPlayers() > cutoff) {
+            players.push("and many others...");
+        }
+        return [
+            {
+                name: ZERO_WIDTH_SPACE,
+                value: players.slice(0, Math.ceil(players.length / 2)).join("\n"),
+                inline: true,
+            },
+            {
+                name: ZERO_WIDTH_SPACE,
+                value: players.slice(Math.ceil(players.length / 2)).join("\n"),
+                inline: true,
+            },
+        ];
     }
 
     /**
@@ -144,5 +172,12 @@ export default class Scoreboard {
      * */
     getPlayerName(userID: string): string {
         return this.players[userID].getName();
+    }
+
+    /**
+     *  @returns the number of players on the scoreboard
+     * */
+    getNumPlayers(): number {
+        return Object.keys(this.players).length;
     }
 }

@@ -14,6 +14,16 @@ export default class Team extends Player {
         return this.getPlayers().reduce((totalScore, player) => totalScore + player.getScore(), 0);
     }
 
+    /** @returns the displayed name of the team, without prepending "Team" */
+    getNameWithoutTeam(): string {
+        return super.getName();
+    }
+
+    /** @returns the displayed name of the team */
+    getName(): string {
+        return `Team ${this.getNameWithoutTeam()}`;
+    }
+
     /**
      * @param player - The player to add
      * Adds player to this team

@@ -58,7 +58,7 @@ export default class PlayCommand implements BaseCommand {
                 name: "lives",
                 type: "number" as const,
                 minValue: 1,
-                maxValue: 500,
+                maxValue: 10000,
             },
         ],
     };
