@@ -15,7 +15,7 @@ config({ path: path.resolve(__dirname, "../../.env") });
 const SQL_DUMP_EXPIRY = 10;
 const mvFileUrl = "http://kpop.daisuki.com.br/download.php?file=full";
 const audioFileUrl = "http://kpop.daisuki.com.br/download.php?file=audio";
-const DEFAULT_AUDIO_ONLY_SONGS_PER_ARTIST = 25;
+const DEFAULT_AUDIO_ONLY_SONGS_PER_ARTIST = 10;
 const logger: Logger = _logger("seed_db");
 const databaseDownloadDir = path.join(__dirname, "../../sql_dumps/daisuki");
 if (!fs.existsSync(databaseDownloadDir)) {
