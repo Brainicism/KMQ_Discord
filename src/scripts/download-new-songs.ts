@@ -137,7 +137,7 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
 
 async function getSongsFromDb(db: DatabaseContext, songsPerArtist: number) {
     return db.kpopVideos.with("rankedAudioSongs",
-        db.kpopVideos.select(["app_kpop_audio.name", "app_kpop_group.name AS artist", "vlink AS youtubeLink", "app_kpop_audio.views AS views", "app_kpop_audio.tags AS tags", db.kpopVideos.raw("RANK() OVER(PARTITION BY app_kpop_audio.id_artist ORDER BY views) AS rank")])
+        db.kpopVideos.select(["app_kpop_audio.name", "app_kpop_group.name AS artist", "vlink AS youtubeLink", "app_kpop_audio.views AS views", "app_kpop_audio.tags AS tags", db.kpopVideos.raw("RANK() OVER(PARTITION BY app_kpop_audio.id_artist ORDER BY views DESC) AS rank")])
             .from("app_kpop_audio")
             .join("app_kpop_group", "kpop_videos.app_kpop_audio.id_artist", "=", "kpop_videos.app_kpop_group.id"))
         .select("name", "artist", "youtubeLink", "views")
