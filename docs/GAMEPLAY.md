@@ -134,5 +134,5 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,remove`: Remove a single or multiple groups to the `,groups`, `,exclude`, or `,include` option
 - `,duration`: Sets the maximum length of a KMQ game
 - `,ost`: Includes, excludes, or exclusively plays OST music videos
-- `,release`: Specify whether only official releases are played, or include dance practices + acoustic versions + remixes, etc.
+- `,release`: Specify whether only official releases are played, or include b-sides + dance practices + acoustic versions + remixes, etc.
 - `,multiguess`: Choose whether to allow multiple players to guess correctly for a single round
