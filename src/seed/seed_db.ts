@@ -178,7 +178,6 @@ async function seedAndDownloadNewSongs(db: DatabaseContext) {
         await generateKmqDataTables(db);
     }
 
-    await db.kmq.raw("CALL OverridePublishDates();");
     if (process.env.NODE_ENV === EnvType.PROD) {
         await updateGroupList(db);
     }
