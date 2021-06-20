@@ -580,8 +580,9 @@ export function checkBotIsAlone(gameSession: GameSession, channel: Eris.VoiceCha
 /** @returns the debug TextChannel */
 export function getDebugChannel(): Eris.TextChannel {
     if (!process.env.DEBUG_SERVER_ID || !process.env.DEBUG_TEXT_CHANNEL_ID) return null;
-    return <Eris.TextChannel>state.client.guilds.get(process.env.DEBUG_SERVER_ID)
-        .channels.get(process.env.DEBUG_TEXT_CHANNEL_ID);
+    const debugGuild = state.client.guilds.get(process.env.DEBUG_SERVER_ID);
+    if (!debugGuild) return null;
+    return <Eris.TextChannel>debugGuild.channels.get(process.env.DEBUG_TEXT_CHANNEL_ID);
 }
 
 /**
