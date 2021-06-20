@@ -67,9 +67,9 @@ export default class Scoreboard {
     /**
      * Separates scoreboard players into two fields for large games
      * @param cutoff - How many players to include before truncating the scoreboard
-     * @returns An array of 2 DiscordEmbed fields containing each player and their score, separated by newline
+     * @returns An array of 3 DiscordEmbed fields containing each player and their score, separated by newline
      */
-    getScoreboardEmbedTwoFields(cutoff: number): Array<{ name: string, value: string, inline: boolean }> {
+    getScoreboardEmbedThreeFields(cutoff: number): Array<{ name: string, value: string, inline: boolean }> {
         const ZERO_WIDTH_SPACE = "​";
         const players = Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
@@ -84,12 +84,17 @@ export default class Scoreboard {
         return [
             {
                 name: "**Scoreboard**",
-                value: players.slice(0, Math.ceil(players.length / 2)).join("\n"),
+                value: players.slice(0, Math.ceil(players.length / 3)).join("\n"),
                 inline: true,
             },
             {
                 name: ZERO_WIDTH_SPACE,
-                value: players.slice(Math.ceil(players.length / 2)).join("\n"),
+                value: players.slice(Math.ceil(players.length / 3), Math.ceil((2 * players.length) / 3)).join("\n"),
+                inline: true,
+            },
+            {
+                name: ZERO_WIDTH_SPACE,
+                value: players.slice(Math.ceil((2 * players.length) / 3)).join("\n"),
                 inline: true,
             },
         ];

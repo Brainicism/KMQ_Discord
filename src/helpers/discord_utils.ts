@@ -183,7 +183,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     const description = `${correctGuess ? correctDescription : "Nobody got it."}\n\nhttps://youtu.be/${gameRound.videoID}${uniqueSongMessage} ${!scoreboard.isEmpty() && !useLargerScoreboard ? "\n\n**Scoreboard**" : ""}`;
     let fields: Array<{ name: string, value: string, inline: boolean }>;
     if (useLargerScoreboard) {
-        fields = scoreboard.getScoreboardEmbedTwoFields(MAX_SCOREBOARD_PLAYERS);
+        fields = scoreboard.getScoreboardEmbedThreeFields(MAX_SCOREBOARD_PLAYERS);
     } else {
         fields = scoreboard.getScoreboardEmbedFields();
     }
@@ -356,7 +356,7 @@ export async function sendEndGameMessage(textChannelID: string, gameSession: Gam
         let fields: Array<{ name: string, value: string, inline: boolean }>;
         const useLargerScoreboard = gameSession.scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
         if (useLargerScoreboard) {
-            fields = gameSession.scoreboard.getScoreboardEmbedTwoFields(MAX_SCOREBOARD_PLAYERS);
+            fields = gameSession.scoreboard.getScoreboardEmbedThreeFields(MAX_SCOREBOARD_PLAYERS);
         } else {
             fields = gameSession.scoreboard.getScoreboardEmbedFields();
         }
