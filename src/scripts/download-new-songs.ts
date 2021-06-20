@@ -135,15 +135,15 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
     });
 };
 
-async function getSongsFromDb(db: DatabaseContext, songsPerArtist: number) {
+async function getSongsFromDb(db: DatabaseContext, audioSongsPerArtist: number) {
     return db.kpopVideos.with("rankedAudioSongs",
         db.kpopVideos.select(["app_kpop_audio.name", "app_kpop_group.name AS artist", "vlink AS youtubeLink", "app_kpop_audio.views AS views", "app_kpop_audio.tags AS tags", db.kpopVideos.raw("RANK() OVER(PARTITION BY app_kpop_audio.id_artist ORDER BY views DESC) AS rank")])
             .from("app_kpop_audio")
-            .join("app_kpop_group", "kpop_videos.app_kpop_audio.id_artist", "=", "kpop_videos.app_kpop_group.id"))
+            .join("app_kpop_group", "kpop_videos.app_kpop_audio.id_artist", "=", "kpop_videos.app_kpop_group.id")
+            .where("tags", "NOT LIKE", "%c%"))
         .select("name", "artist", "youtubeLink", "views")
         .from("rankedAudioSongs")
-        .where("tags", "NOT LIKE", "%c%")
-        .andWhere("rank", "<=", songsPerArtist)
+        .where("rank", "<=", audioSongsPerArtist)
         .union(function () {
             this.select("app_kpop.name", "app_kpop_group.name AS artist", "vlink AS youtubeLink", "app_kpop.views AS views")
                 .from("app_kpop")
@@ -164,8 +164,8 @@ async function updateNotDownloaded(db: DatabaseContext, songs: Array<QueriedSong
     });
 }
 
-const downloadNewSongs = async (db: DatabaseContext, songsPerArtist: number, limit?: number): Promise<number> => {
-    const allSongs: Array<QueriedSong> = await getSongsFromDb(db, songsPerArtist);
+const downloadNewSongs = async (db: DatabaseContext, audioSongsPerArtist: number, limit?: number): Promise<number> => {
+    const allSongs: Array<QueriedSong> = await getSongsFromDb(db, audioSongsPerArtist);
     let songsToDownload = limit ? allSongs.slice(0, limit) : allSongs.slice();
     let downloadCount = 0;
     let deadLinksSkipped = 0;
@@ -213,7 +213,7 @@ const downloadNewSongs = async (db: DatabaseContext, songsPerArtist: number, lim
     return downloadCount;
 };
 
-export async function downloadAndConvertSongs(songsPerArtist: number, limit?: number): Promise<number> {
+export async function downloadAndConvertSongs(audioSongsPerArtist: number, limit?: number): Promise<number> {
     const db = getNewConnection();
     try {
         if (!fs.existsSync(process.env.SONG_DOWNLOAD_DIR)) {
@@ -222,7 +222,7 @@ export async function downloadAndConvertSongs(songsPerArtist: number, limit?: nu
         }
 
         await clearPartiallyCachedSongs();
-        const songsDownloaded = await downloadNewSongs(db, songsPerArtist, limit);
+        const songsDownloaded = await downloadNewSongs(db, audioSongsPerArtist, limit);
         return songsDownloaded;
     } finally {
         await db.destroy();
