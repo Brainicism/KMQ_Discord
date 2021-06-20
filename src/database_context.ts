@@ -6,7 +6,7 @@ const logger = _logger("database_context");
 
 function generateKnexContext(databaseName: string, minPoolSize = 0, maxPoolSize: number) {
     return {
-        client: "mysql",
+        client: "mysql2",
         connection: {
             user: process.env.DB_USER, password: process.env.DB_PASS, database: databaseName, host: process.env.DB_HOST, charset: "utf8mb4", port: parseInt(process.env.DB_PORT), multipleStatements: true,
         },
