@@ -14,14 +14,16 @@ export default class Team extends Player {
         return this.getPlayers().reduce((totalScore, player) => totalScore + player.getScore(), 0);
     }
 
-    /** @returns the displayed name of the team, without prepending "Team" */
-    getNameWithoutTeam(): string {
-        return super.getName();
+    /** @returns the name of the team */
+    getName(): string {
+        return this.name;
     }
 
-    /** @returns the displayed name of the team */
-    getName(): string {
-        return `Team ${this.getNameWithoutTeam()}`;
+    /**
+     * @returns what to display as the name of the team in the scoreboard
+     */
+    getDisplayedName(_largerScoreboard: boolean, _duplicateName?: boolean): string {
+        return `Team ${this.getName()}`;
     }
 
     /**

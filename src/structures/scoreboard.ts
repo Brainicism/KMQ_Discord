@@ -58,7 +58,7 @@ export default class Scoreboard {
             .sort((a, b) => b.getScore() - a.getScore())
             .map((x, index) => (
                 {
-                    name: `${index + 1}. ${x.getName()}`,
+                    name: `${index + 1}. ${x.getDisplayedName(false)}`,
                     value: x.getDisplayedScore(),
                     inline: true,
                 }));
@@ -74,13 +74,16 @@ export default class Scoreboard {
         const players = Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
             .slice(0, cutoff)
-            .map((x, index) => `${index + 1}. ${bold(x.getName())}: ${x.getDisplayedScore()}`);
+            .map((x, index, arr) => {
+                const duplicateName = arr.filter((y) => y.getName().slice(0, -5) === x.getName().slice(0, -5)).length > 1;
+                return `${bold(`${index + 1}. ${x.getDisplayedName(true, duplicateName)}`)}: ${x.getDisplayedScore()}`;
+            });
         if (this.getNumPlayers() > cutoff) {
-            players.push("and many others...");
+            players.push("\nand many others...");
         }
         return [
             {
-                name: ZERO_WIDTH_SPACE,
+                name: "**Scoreboard**",
                 value: players.slice(0, Math.ceil(players.length / 2)).join("\n"),
                 inline: true,
             },

@@ -25,7 +25,7 @@ export const EMBED_SUCCESS_BONUS_COLOR = 0xFFD700; // GOLD
 const EMBED_FIELDS_PER_PAGE = 20;
 const REQUIRED_TEXT_PERMISSIONS = ["addReactions" as const, "embedLinks" as const];
 const REQUIRED_VOICE_PERMISSIONS = ["viewChannel" as const, "voiceConnect" as const, "voiceSpeak" as const];
-const SCOREBOARD_FIELD_CUTOFF = 9;
+const SCOREBOARD_FIELD_CUTOFF = 12;
 const MAX_SCOREBOARD_PLAYERS = 30;
 
 /**
@@ -179,9 +179,10 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         }
     }
     const uniqueSongMessage = (uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0) ? `\n${codeLine(`${uniqueSongCounter.uniqueSongsPlayed}/${uniqueSongCounter.totalSongs}`)} unique songs played.` : "";
-    const description = `${correctGuess ? correctDescription : "Nobody got it."}\n\nhttps://youtu.be/${gameRound.videoID}${uniqueSongMessage} ${!scoreboard.isEmpty() ? "\n\n**Scoreboard**" : ""}`;
+    const useLargerScoreboard = scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
+    const description = `${correctGuess ? correctDescription : "Nobody got it."}\n\nhttps://youtu.be/${gameRound.videoID}${uniqueSongMessage} ${!scoreboard.isEmpty() && !useLargerScoreboard ? "\n\n**Scoreboard**" : ""}`;
     let fields: Array<{ name: string, value: string, inline: boolean }>;
-    if (scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF) {
+    if (useLargerScoreboard) {
         fields = scoreboard.getScoreboardEmbedTwoFields(MAX_SCOREBOARD_PLAYERS);
     } else {
         fields = scoreboard.getScoreboardEmbedFields();
@@ -353,7 +354,8 @@ export async function sendEndGameMessage(textChannelID: string, gameSession: Gam
     } else {
         const winners = gameSession.scoreboard.getWinners();
         let fields: Array<{ name: string, value: string, inline: boolean }>;
-        if (gameSession.scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF) {
+        const useLargerScoreboard = gameSession.scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
+        if (useLargerScoreboard) {
             fields = gameSession.scoreboard.getScoreboardEmbedTwoFields(MAX_SCOREBOARD_PLAYERS);
         } else {
             fields = gameSession.scoreboard.getScoreboardEmbedFields();
@@ -371,7 +373,7 @@ export async function sendEndGameMessage(textChannelID: string, gameSession: Gam
         }
         await sendInfoMessage(new MessageContext(textChannelID), {
             color: gameSession.gameType !== GameType.TEAMS && state.bonusUsers.has(winners[0].id) ? EMBED_SUCCESS_BONUS_COLOR : EMBED_SUCCESS_COLOR,
-            description: "**Scoreboard**",
+            description: !useLargerScoreboard ? "**Scoreboard**" : null,
             thumbnailUrl: winners[0].getAvatarURL(),
             title: `🎉 ${gameSession.scoreboard.getWinnerMessage()} 🎉`,
             fields,
