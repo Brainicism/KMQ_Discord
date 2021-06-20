@@ -27,7 +27,7 @@ program
     .option("-r, --skip-reseed", "Force skip drop/create of kpop_videos database", false)
     .option("-d, --skip-download", "Skip download/encode of videos in database", false)
     .option("--limit <limit>", "Limit the number of songs to download", (x) => parseInt(x))
-    .option("--songs-per-artist <songs>", "Maximum number of songs to download for each artist", (x) => parseInt(x), DEFAULT_AUDIO_ONLY_SONGS_PER_ARTIST);
+    .option("--audio-songs-per-artist <songs>", "Maximum number of audio-only songs to download for each artist", (x) => parseInt(x), DEFAULT_AUDIO_ONLY_SONGS_PER_ARTIST);
 
 program.parse();
 const options = program.opts();
@@ -171,7 +171,7 @@ async function seedAndDownloadNewSongs(db: DatabaseContext) {
 
     let songsDownloaded = 0;
     if (!options.skipDownload) {
-        songsDownloaded = await downloadAndConvertSongs(options.songsPerArtist, options.limit);
+        songsDownloaded = await downloadAndConvertSongs(options.audioSongsPerArtist, options.limit);
     }
 
     if (songsDownloaded) {
