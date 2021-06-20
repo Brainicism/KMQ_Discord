@@ -1,28 +1,27 @@
 import Player from "./player";
 
 export default class EliminationPlayer extends Player {
-    /** The number of lives the player has remaining */
-    private lives: number;
-
-    constructor(name: string, id: string, avatarURL: string, points: number, lives: number) {
-        super(name, id, avatarURL, points);
-        this.lives = lives;
-    }
+    // this.score => the player's lives
 
     /** @returns the number of lives the player has remaining */
     getLives(): number {
-        return this.lives;
+        return this.score;
     }
 
     /** Decreases the amount of lives the player has remaining */
     decrementLives(): void {
-        if (this.lives > 0) {
-            this.lives--;
+        if (this.score > 0) {
+            this.score--;
         }
     }
 
     /** @returns whether the player has ran out of lives */
     isEliminated(): boolean {
-        return this.lives === 0;
+        return this.score === 0;
+    }
+
+    /** @returns the lives of the player formatted for the scoreboard */
+    getDisplayedScore(): string {
+        return !this.isEliminated() ? `❤️ x ${this.getLives()}` : "☠️";
     }
 }

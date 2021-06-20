@@ -24,7 +24,7 @@ export default class BeginCommand implements BaseCommand {
             }
         } else if (gameSession.gameType === GameType.TEAMS) {
             const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
-            if (Object.keys(teamScoreboard.getTeams()).length === 0) {
+            if (teamScoreboard.getNumTeams() === 0) {
                 sendErrorMessage(messageContext, { title: "Begin ignored", description: "Create a team using `,join [team name]` before you can start the game." });
                 return false;
             }

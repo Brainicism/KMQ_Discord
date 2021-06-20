@@ -14,6 +14,18 @@ export default class Team extends Player {
         return this.getPlayers().reduce((totalScore, player) => totalScore + player.getScore(), 0);
     }
 
+    /** @returns the name of the team */
+    getName(): string {
+        return this.name;
+    }
+
+    /**
+     * @returns what to display as the name of the team in the scoreboard
+     */
+    getDisplayedName(_largerScoreboard: boolean, _duplicateName?: boolean): string {
+        return `Team ${this.getName()}`;
+    }
+
     /**
      * @param player - The player to add
      * Adds player to this team

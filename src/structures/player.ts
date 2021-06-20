@@ -1,18 +1,19 @@
 import { getUserTag } from "../helpers/discord_utils";
+import { roundDecimal } from "../helpers/utils";
 import state from "../kmq";
 
 export default class Player {
-    /** The Discord tag of the player */
+    /** The Discord tag of the player, of the format "Player#1234" */
     public readonly name: string;
 
     /** The Discord user ID of the player */
     public readonly id: string;
 
+    /** The player's current score */
+    protected score: number;
+
     /** The player's avatar URL */
     private readonly avatarURL: string;
-
-    /** The player's current score */
-    private score: number;
 
     /** The player's EXP gain */
     private expGain: number;
@@ -34,10 +35,28 @@ export default class Player {
     getName(): string {
         return this.name;
     }
+    /**
+     * Prints the tag (including the discriminator) in the smaller scoreboard, but only
+     * the username in the larger scoreboard
+     * @param largerScoreboard - Whether the name format is for the larger scoreboard
+     * @param duplicateName - Whether another user shares the same name
+     * @returns what to display as the name of the player in the scoreboard
+     */
+    getDisplayedName(largerScoreboard: boolean, duplicateName?: boolean): string {
+        if (largerScoreboard && !duplicateName) {
+            return this.name.slice(0, -5);
+        }
+        return this.name;
+    }
 
     /** @returns the player's current score */
     getScore(): number {
         return this.score;
+    }
+
+    /** @returns what to display as the score in the scoreboard for the player */
+    getDisplayedScore(): string {
+        return Number.isInteger(roundDecimal(this.getScore(), 1)) ? roundDecimal(this.getScore(), 1).toString() : this.getScore().toFixed(1);
     }
 
     /** @returns the player's EXP gain */
@@ -50,7 +69,7 @@ export default class Player {
         return this.id;
     }
 
-    /** returns the player's avatar URL */
+    /** @returns the player's avatar URL */
     getAvatarURL(): string {
         return this.avatarURL;
     }

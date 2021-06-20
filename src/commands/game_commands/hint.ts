@@ -70,16 +70,16 @@ export default class HintCommand implements BaseCommand {
             let hint: string;
             switch (guessMode) {
                 case GuessModeType.ARTIST:
-                    hint = `Artist Name: ${gameRound.hints.artistHint}`;
+                    hint = `Artist Name: ${codeLine(gameRound.hints.artistHint)}`;
                     break;
                 case GuessModeType.SONG_NAME:
                 case GuessModeType.BOTH:
                 default:
-                    hint = `Song Name: ${gameRound.hints.songHint}`;
+                    hint = `Song Name: ${codeLine(gameRound.hints.songHint)}`;
             }
             logger.info(`${getDebugLogHeader(message)} | Hint majority received.`);
             gameRound.hintUsed = true;
-            sendInfoMessage(MessageContext.fromMessage(message), { title: "Hint", description: codeLine(hint), thumbnailUrl: KmqImages.READING_BOOK });
+            sendInfoMessage(MessageContext.fromMessage(message), { title: "Hint", description: hint, thumbnailUrl: KmqImages.READING_BOOK });
         } else {
             logger.info(`${getDebugLogHeader(message)} | Hint request received.`);
             sendHintNotification(message, gameSession);
