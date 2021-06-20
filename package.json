@@ -20,7 +20,8 @@
     "docker-prod": "cd docker/ && NODE_ENV=production docker-compose up --exit-code-from kmq --build kmq",
     "backup": "ts-node src/scripts/backup-kmq-database",
     "test": "NODE_ENV=test mocha -r ts-node/register 'src/test/**/*.ts'",
-    "test_ci": "NODE_ENV=test mocha -- --forbid-only -r ts-node/register 'src/test/**/*.ts'"
+    "test_ci": "NODE_ENV=test mocha -- --forbid-only -r ts-node/register 'src/test/**/*.ts'",
+    "test_facts": "ts-node src/fact_generator.ts"
   },
   "author": "Brian Le",
   "license": "GPL-3.0",
