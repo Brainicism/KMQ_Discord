@@ -53,12 +53,12 @@ export default class Scoreboard {
     }
 
     /** @returns An array of DiscordEmbed fields representing each participant's score */
-    getScoreboardEmbedFields(): Array<{ name: string, value: string, inline: boolean }> {
+    getScoreboardEmbedFields(playerRoundResultIDs?: Set<string>): Array<{ name: string, value: string, inline: boolean }> {
         return Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
             .map((x, index) => (
                 {
-                    name: `${index + 1}. ${x.getDisplayedName(false)}`,
+                    name: `${index + 1}. ${x.getDisplayedName(playerRoundResultIDs?.has(x.getID()), true)}`,
                     value: x.getDisplayedScore(),
                     inline: true,
                 }));
@@ -69,14 +69,14 @@ export default class Scoreboard {
      * @param cutoff - How many players to include before truncating the scoreboard
      * @returns An array of 3 DiscordEmbed fields containing each player and their score, separated by newline
      */
-    getScoreboardEmbedThreeFields(cutoff: number): Array<{ name: string, value: string, inline: boolean }> {
+    getScoreboardEmbedThreeFields(cutoff: number, playerRoundResultIDs?: Set<string>): Array<{ name: string, value: string, inline: boolean }> {
         const ZERO_WIDTH_SPACE = "​";
         const players = Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
             .slice(0, cutoff)
             .map((x, index, arr) => {
                 const duplicateName = arr.filter((y) => y.getName().slice(0, -5) === x.getName().slice(0, -5)).length > 1;
-                return `${bold(`${index + 1}. ${x.getDisplayedName(true, duplicateName)}`)}: ${x.getDisplayedScore()}`;
+                return `${bold(String(index + 1))}. ${x.getDisplayedName(playerRoundResultIDs?.has(x.getID()), duplicateName)}: ${x.getDisplayedScore()}`;
             });
         if (this.getNumPlayers() > cutoff) {
             players.push("\nand many others...");

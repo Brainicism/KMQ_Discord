@@ -182,10 +182,11 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     const useLargerScoreboard = scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
     const description = `${correctGuess ? correctDescription : "Nobody got it."}\n\nhttps://youtu.be/${gameRound.videoID}${uniqueSongMessage} ${!scoreboard.isEmpty() && !useLargerScoreboard ? "\n\n**Scoreboard**" : ""}`;
     let fields: Array<{ name: string, value: string, inline: boolean }>;
+    const playerRoundResultIDs = new Set(playerRoundResults.map((x) => x.player.id));
     if (useLargerScoreboard) {
-        fields = scoreboard.getScoreboardEmbedThreeFields(MAX_SCOREBOARD_PLAYERS);
+        fields = scoreboard.getScoreboardEmbedThreeFields(MAX_SCOREBOARD_PLAYERS, playerRoundResultIDs);
     } else {
-        fields = scoreboard.getScoreboardEmbedFields();
+        fields = scoreboard.getScoreboardEmbedFields(playerRoundResultIDs);
     }
     if (fact) {
         fields.push({
