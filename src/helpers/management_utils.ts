@@ -157,7 +157,7 @@ export async function reloadAliases() {
         .where("song_aliases", "<>", "");
     const newSongAliases = {};
     for (const mapping of songAliasMapping) {
-        newSongAliases[mapping["link"]] = mapping["song_aliases"].split(",");
+        newSongAliases[mapping["link"]] = mapping["song_aliases"].split(";");
     }
 
     state.aliases.song = newSongAliases;
