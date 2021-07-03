@@ -17,13 +17,13 @@ export default class LimitCommand implements BaseCommand {
                 name: "limit_1",
                 type: "number" as const,
                 minValue: 0,
-                maxValue: 10000,
+                maxValue: 100000,
             },
             {
                 name: "limit_2",
                 type: "number" as const,
                 minValue: 1,
-                maxValue: 10000,
+                maxValue: 100000,
             },
         ],
     };
