@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getDebugLogHeader, sendOptionsMessage } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
@@ -39,7 +39,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
     };
     aliases = ["time", "timeout", "t"];
 
-    async call({ message, parsedMessage, gameSessions }: CommandArgs) {
+    call = async ({ message, parsedMessage, gameSessions }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         const gameSession = gameSessions[message.guildID];
         if (parsedMessage.components.length === 0) {
@@ -61,5 +61,5 @@ export default class GuessTimeoutCommand implements BaseCommand {
         }
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.TIMER, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Guess timeout set to ${guildPreference.getGuessTimeout()}`);
-    }
+    };
 }

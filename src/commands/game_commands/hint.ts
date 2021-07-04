@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import { CommandArgs } from "../interfaces/base_command";
 import { getDebugLogHeader, getMajorityCount, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import _logger from "../../logger";
 import MessageContext from "../../structures/message_context";
@@ -36,6 +36,8 @@ async function sendHintNotification(message: GuildTextableMessage, gameSession: 
 }
 
 export default class HintCommand implements BaseCommand {
+    inGameOnly = true;
+
     help = {
         name: "hint",
         description: "Gives a hint to the currently playing song",
@@ -46,7 +48,7 @@ export default class HintCommand implements BaseCommand {
 
     aliases = ["h"];
 
-    async call({ gameSessions, message }: CommandArgs) {
+    call = async ({ gameSessions, message }: CommandArgs) => {
         const gameSession = gameSessions[message.guildID];
         const gameRound = gameSession?.gameRound;
         if (!gameSession || !gameRound) {
@@ -54,6 +56,7 @@ export default class HintCommand implements BaseCommand {
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid hint request", description: "A hint can only be requested when a song is playing.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
             return;
         }
+
         if (gameSession.gameType === GameType.ELIMINATION) {
             const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
             if (eliminationScoreboard.isPlayerEliminated(message.author.id)) {
@@ -84,5 +87,5 @@ export default class HintCommand implements BaseCommand {
             logger.info(`${getDebugLogHeader(message)} | Hint request received.`);
             sendHintNotification(message, gameSession);
         }
-    }
+    };
 }

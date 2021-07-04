@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import _logger from "../../logger";
 import dbContext from "../../database_context";
 import { EMBED_INFO_COLOR, getDebugLogHeader, sendInfoMessage } from "../../helpers/discord_utils";
@@ -21,7 +21,7 @@ export default class NewsCommand implements BaseCommand {
 
     aliases = ["updates"];
 
-    async call({ message }: CommandArgs) {
+    call = async ({ message }: CommandArgs) => {
         let latestSongDate: Date;
         try {
             const data = await dbContext.kmq("available_songs")
@@ -48,5 +48,5 @@ export default class NewsCommand implements BaseCommand {
             thumbnailUrl: KmqImages.READING_BOOK,
             footerText: `Latest Song Update: ${friendlyFormattedDate(latestSongDate)}`,
         });
-    }
+    };
 }

@@ -1,6 +1,6 @@
 import path from "path";
 import { EmbedOptions } from "eris";
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import {
     EMBED_INFO_COLOR, sendErrorMessage, getDebugLogHeader, sendPaginationedEmbed, sendInfoMessage,
 } from "../../helpers/discord_utils";
@@ -119,7 +119,7 @@ export default class HelpCommand implements BaseCommand {
         priority: 1000,
     };
 
-    async call({ parsedMessage, message }: CommandArgs) {
+    call = async ({ parsedMessage, message }: CommandArgs) => {
         await helpMessage(message, parsedMessage.argument);
-    }
+    };
 }

@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { sendBeginGameMessage } from "./play";
 import { GameType } from "../../types";
@@ -31,7 +31,7 @@ export default class BeginCommand implements BaseCommand {
         }
         return true;
     }
-    async call({ message, gameSessions, channel }: CommandArgs) {
+    call = async ({ message, gameSessions, channel }: CommandArgs) => {
         const { guildID, author } = message;
         const gameSession = gameSessions[guildID];
 
@@ -49,5 +49,5 @@ export default class BeginCommand implements BaseCommand {
             gameSession.startRound(guildPreference, MessageContext.fromMessage(message));
             logger.info(`${getDebugLogHeader(message)} | Game session starting (${gameSession.gameType} gameType)`);
         }
-    }
+    };
 }

@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
@@ -52,7 +52,7 @@ export default class SeekCommand implements BaseCommand {
         priority: 130,
     };
 
-    async call({ message, parsedMessage }: CommandArgs) {
+    call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.resetSeekType();
@@ -64,5 +64,5 @@ export default class SeekCommand implements BaseCommand {
         await guildPreference.setSeekType(seekType);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SEEK_TYPE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Seek type set to ${seekType}`);
-    }
+    };
 }

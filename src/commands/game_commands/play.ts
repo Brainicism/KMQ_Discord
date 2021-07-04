@@ -5,7 +5,7 @@ import {
 import { deleteGameSession, getTimeUntilRestart } from "../../helpers/management_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { bold, isPowerHour, isWeekend } from "../../helpers/utils";
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import _logger from "../../logger";
 import { GameType, GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
@@ -90,7 +90,7 @@ export default class PlayCommand implements BaseCommand {
         ],
     };
 
-    async call({ message, gameSessions, parsedMessage, channel }: CommandArgs) {
+    call = async ({ message, gameSessions, parsedMessage, channel }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         const voiceChannel = getVoiceChannelFromMessage(message);
         const timeUntilRestart = await getTimeUntilRestart();
@@ -159,5 +159,5 @@ export default class PlayCommand implements BaseCommand {
                 await sendErrorMessage(messageContext, { title: "Game already in session" });
             }
         }
-    }
+    };
 }

@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import { CommandArgs } from "../interfaces/base_command";
 import GameSession from "../../structures/game_session";
 import {
     areUserAndBotInSameVoiceChannel,
@@ -38,6 +38,8 @@ function isSkipMajority(message: GuildTextableMessage, gameSession: GameSession)
 }
 
 export default class SkipCommand implements BaseCommand {
+    inGameOnly = true;
+
     help = {
         name: "skip",
         description: "Vote to skip the current song. A song is skipped when majority of participants vote to skip it.",
@@ -48,13 +50,14 @@ export default class SkipCommand implements BaseCommand {
 
     aliases = ["s"];
 
-    async call({ gameSessions, message }: CommandArgs) {
+    call = async ({ gameSessions, message }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         const gameSession = gameSessions[message.guildID];
         if (!gameSession || !gameSession.gameRound || gameSession.gameRound.finished || !areUserAndBotInSameVoiceChannel(message)) {
             logger.warn(`${getDebugLogHeader(message)} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.gameRound: ${gameSession && !gameSession.gameRound}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
             return;
         }
+
         gameSession.gameRound.userSkipped(message.author.id);
         if (gameSession.gameRound.skipAchieved || !gameSession.gameRound) {
             // song already being skipped
@@ -75,5 +78,5 @@ export default class SkipCommand implements BaseCommand {
             logger.info(`${getDebugLogHeader(message)} | Skip vote received.`);
         }
         gameSession.lastActiveNow();
-    }
+    };
 }

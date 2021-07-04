@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import _logger from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
@@ -48,7 +48,7 @@ export default class ShuffleCommand implements BaseCommand {
         priority: 110,
     };
 
-    async call({ message, parsedMessage }: CommandArgs) {
+    call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.resetShuffleType();
@@ -61,5 +61,5 @@ export default class ShuffleCommand implements BaseCommand {
         await guildPreference.setShuffleType(shuffleType);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SHUFFLE_TYPE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Shuffle set to ${shuffleType}`);
-    }
+    };
 }

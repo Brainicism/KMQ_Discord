@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import { CommandArgs } from "../interfaces/base_command";
 import {
     sendErrorMessage,
     areUserAndBotInSameVoiceChannel,
@@ -17,6 +17,8 @@ import { KmqImages } from "../../constants";
 const logger = _logger("forceskip");
 
 export default class ForceSkipCommand implements BaseCommand {
+    inGameOnly = true;
+
     help = {
         name: "forceskip",
         description: "The person that started the game can force-skip the current song, no majority necessary.",
@@ -27,7 +29,7 @@ export default class ForceSkipCommand implements BaseCommand {
 
     aliases = ["fskip", "fs"];
 
-    async call({ gameSessions, message }: CommandArgs) {
+    call = async ({ gameSessions, message }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         const gameSession = gameSessions[message.guildID];
         if (!gameSession || !gameSession.gameRound || !areUserAndBotInSameVoiceChannel(message)) {
@@ -38,10 +40,12 @@ export default class ForceSkipCommand implements BaseCommand {
             // song already being skipped
             return;
         }
+
         if (message.author.id !== gameSession.owner.id) {
             await sendErrorMessage(MessageContext.fromMessage(message), { title: "Force skip ignored", description: `Only the person who started the game (${bold(gameSession.owner.tag)}) can force-skip.` });
             return;
         }
+
         gameSession.gameRound.skipAchieved = true;
         if (gameSession.gameType === GameType.ELIMINATION) {
             const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
@@ -58,5 +62,5 @@ export default class ForceSkipCommand implements BaseCommand {
         gameSession.startRound(guildPreference, MessageContext.fromMessage(message));
         logger.info(`${getDebugLogHeader(message)} | Owner force-skipped.`);
         gameSession.lastActiveNow();
-    }
+    };
 }

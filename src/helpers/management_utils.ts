@@ -24,7 +24,7 @@ import uncaughtExceptionHandler from "../events/process/uncaughtException";
 import SIGINTHandler from "../events/process/SIGINT";
 import { cleanupInactiveGameSessions } from "./game_utils";
 import dbContext from "../database_context";
-import BaseCommand from "../commands/base_command";
+import BaseCommand from "../commands/interfaces/base_command";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import debugHandler from "../events/client/debug";
 import guildCreateHandler from "../events/client/guildCreate";
@@ -251,7 +251,7 @@ export function getCommandFiles(shouldReload: boolean): Promise<{ [commandName: 
         const commandMap = {};
         let files: Array<string>;
         try {
-            files = await glob("commands/**/*.js");
+            files = await glob("commands/{admin,game_options,game_commands}/*.js");
             await Promise.all(files.map(async (file) => {
                 const commandFilePath = path.join("../", file);
                 if (shouldReload) {
@@ -295,7 +295,6 @@ export async function registerCommands(initialLoad: boolean) {
     state.commands = {};
     const commandFiles = await getCommandFiles(!initialLoad);
     for (const [commandName, command] of Object.entries(commandFiles)) {
-        if (commandName === "base_command") continue;
         registerCommand(command, commandName);
         if (command.aliases) {
             for (const alias of command.aliases) {
