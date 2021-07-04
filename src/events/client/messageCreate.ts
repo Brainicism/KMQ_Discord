@@ -53,6 +53,10 @@ export default async function messageCreateHandler(message: Eris.Message) {
                 return;
             }
             const { gameSessions } = state;
+            if (invokedCommand.preRunCheck) {
+                const preCheckResult = await invokedCommand.preRunCheck(message);
+                if (!preCheckResult) return;
+            }
             invokedCommand.call({
                 gameSessions,
                 channel: textChannel,

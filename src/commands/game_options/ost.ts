@@ -1,6 +1,6 @@
 import { getDebugLogHeader, sendOptionsMessage } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
@@ -54,7 +54,7 @@ export default class OstCommand implements BaseCommand {
         priority: 130,
     };
 
-    async call({ message, parsedMessage }: CommandArgs) {
+    call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
 
         if (parsedMessage.components.length === 0) {
@@ -68,5 +68,5 @@ export default class OstCommand implements BaseCommand {
         await guildPreference.setOstPreference(ostPreference);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.OST_PREFERENCE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | OST preference set to ${ostPreference}`);
-    }
+    };
 }

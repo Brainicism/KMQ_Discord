@@ -1,6 +1,6 @@
 import { getDebugLogHeader, sendErrorMessage } from "./discord_utils";
 import { GuildTextableMessage, ParsedMessage } from "../types";
-import { CommandValidations } from "../commands/base_command";
+import { CommandValidations } from "../commands/interfaces/base_command";
 import _logger from "../logger";
 import { arrayToString } from "./utils";
 import MessageContext from "../structures/message_context";

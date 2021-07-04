@@ -1,11 +1,12 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import { CommandArgs } from "../interfaces/base_command";
 import { getDebugLogHeader } from "../../helpers/discord_utils";
 import _logger from "../../logger";
 import { endSession } from "../../helpers/game_utils";
+import InGameCommand from "../interfaces/ingame_command";
 
 const logger = _logger("end");
 
-export default class EndCommand implements BaseCommand {
+export default class EndCommand extends InGameCommand {
     help = {
         name: "end",
         description: "Finishes the current game and decides on a winner.",
@@ -16,13 +17,14 @@ export default class EndCommand implements BaseCommand {
 
     aliases = ["stop", "e"];
 
-    async call({ gameSessions, message }: CommandArgs) {
+    call = async ({ gameSessions, message }: CommandArgs) => {
         const gameSession = gameSessions[message.guildID];
         if (!gameSession) {
             logger.warn(`${getDebugLogHeader(message)} | No active game session`);
             return;
         }
+
         logger.info(`${getDebugLogHeader(message)} | Game session ended`);
         endSession(gameSession);
-    }
+    };
 }

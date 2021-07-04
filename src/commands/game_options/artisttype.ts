@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { sendOptionsMessage, getDebugLogHeader, sendErrorMessage } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
@@ -52,7 +52,7 @@ export default class ArtistTypeCommand implements BaseCommand {
         priority: 150,
     };
 
-    async call({ message, parsedMessage }: CommandArgs) {
+    call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.resetArtistType();
@@ -71,5 +71,5 @@ export default class ArtistTypeCommand implements BaseCommand {
         await guildPreference.setArtistType(artistType);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.ARTIST_TYPE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Artist type set to ${artistType}`);
-    }
+    };
 }

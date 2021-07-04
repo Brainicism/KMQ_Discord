@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import { CommandArgs } from "../interfaces/base_command";
 import {
     sendErrorMessage,
     getDebugLogHeader,
@@ -10,10 +10,11 @@ import _logger from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
 import { generateHint, validHintCheck } from "./hint";
+import InGameCommand from "../interfaces/ingame_command";
 
 const logger = _logger("forcehint");
 
-export default class ForceHintCommand implements BaseCommand {
+export default class ForceHintCommand extends InGameCommand {
     help = {
         name: "forcehint",
         description: "The person that started the game can force-hint the current song, no majority necessary.",
@@ -24,7 +25,7 @@ export default class ForceHintCommand implements BaseCommand {
 
     aliases = ["fhint", "fh"];
 
-    async call({ gameSessions, message }: CommandArgs) {
+    call = async ({ gameSessions, message }: CommandArgs) => {
         const gameSession = gameSessions[message.guildID];
         const gameRound = gameSession?.gameRound;
 
@@ -39,5 +40,5 @@ export default class ForceHintCommand implements BaseCommand {
         logger.info(`${getDebugLogHeader(message)} | Owner force-hinted.`);
         gameRound.hintUsed = true;
         sendInfoMessage(MessageContext.fromMessage(message), { title: "Hint", description: generateHint(guildPreference.getGuessModeType(), gameRound), thumbnailUrl: KmqImages.READING_BOOK });
-    }
+    };
 }

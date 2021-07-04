@@ -2,7 +2,7 @@
 import Eris from "eris";
 import dbContext from "../../database_context";
 import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import _logger from "../../logger";
 import { friendlyFormattedDate, romanize } from "../../helpers/utils";
 import { CUM_EXP_TABLE } from "../../structures/game_session";
@@ -68,7 +68,7 @@ export default class ProfileCommand implements BaseCommand {
         priority: 50,
     };
 
-    async call({ message, parsedMessage }: CommandArgs) {
+    call = async ({ message, parsedMessage }: CommandArgs) => {
         let requestedPlayer: Eris.User;
         if (parsedMessage.components.length === 0) {
             requestedPlayer = message.author;
@@ -203,5 +203,5 @@ export default class ProfileCommand implements BaseCommand {
             },
             timestamp: new Date(),
         });
-    }
+    };
 }

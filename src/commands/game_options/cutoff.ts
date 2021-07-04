@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { sendOptionsMessage, getDebugLogHeader, sendErrorMessage } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
@@ -50,7 +50,7 @@ export default class CutoffCommand implements BaseCommand {
         priority: 140,
     };
 
-    async call({ message, parsedMessage }: CommandArgs) {
+    call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.setBeginningCutoffYear(DEFAULT_BEGINNING_SEARCH_YEAR);
@@ -75,5 +75,5 @@ export default class CutoffCommand implements BaseCommand {
         }
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.CUTOFF, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Cutoff set to ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`);
-    }
+    };
 }
