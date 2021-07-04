@@ -39,8 +39,6 @@ function isSkipMajority(message: GuildTextableMessage, gameSession: GameSession)
 }
 
 export default class SkipCommand extends InGameCommand {
-    inGameOnly = true;
-
     help = {
         name: "skip",
         description: "Vote to skip the current song. A song is skipped when majority of participants vote to skip it.",

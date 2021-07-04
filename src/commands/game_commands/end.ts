@@ -7,8 +7,6 @@ import InGameCommand from "../interfaces/ingame_command";
 const logger = _logger("end");
 
 export default class EndCommand extends InGameCommand {
-    inGameOnly = true;
-
     help = {
         name: "end",
         description: "Finishes the current game and decides on a winner.",

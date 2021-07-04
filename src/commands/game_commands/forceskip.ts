@@ -18,8 +18,6 @@ import InGameCommand from "../interfaces/ingame_command";
 const logger = _logger("forceskip");
 
 export default class ForceSkipCommand extends InGameCommand {
-    inGameOnly = true;
-
     help = {
         name: "forceskip",
         description: "The person that started the game can force-skip the current song, no majority necessary.",
