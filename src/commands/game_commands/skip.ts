@@ -14,6 +14,7 @@ import GameRound from "../../structures/game_round";
 import { GuildTextableMessage, GameType } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
+import InGameCommand from "../interfaces/ingame_command";
 
 const logger = _logger("skip");
 
@@ -37,7 +38,7 @@ function isSkipMajority(message: GuildTextableMessage, gameSession: GameSession)
     return gameSession.gameRound.getNumSkippers() >= getMajorityCount(message);
 }
 
-export default class SkipCommand implements BaseCommand {
+export default class SkipCommand extends InGameCommand {
     inGameOnly = true;
 
     help = {

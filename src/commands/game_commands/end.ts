@@ -1,11 +1,12 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import { CommandArgs } from "../interfaces/base_command";
 import { getDebugLogHeader } from "../../helpers/discord_utils";
 import _logger from "../../logger";
 import { endSession } from "../../helpers/game_utils";
+import InGameCommand from "../interfaces/ingame_command";
 
 const logger = _logger("end");
 
-export default class EndCommand implements BaseCommand {
+export default class EndCommand extends InGameCommand {
     inGameOnly = true;
 
     help = {

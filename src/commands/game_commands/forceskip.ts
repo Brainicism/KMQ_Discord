@@ -13,10 +13,11 @@ import EliminationScoreboard from "../../structures/elimination_scoreboard";
 import _logger from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
+import InGameCommand from "../interfaces/ingame_command";
 
 const logger = _logger("forceskip");
 
-export default class ForceSkipCommand implements BaseCommand {
+export default class ForceSkipCommand extends InGameCommand {
     inGameOnly = true;
 
     help = {
