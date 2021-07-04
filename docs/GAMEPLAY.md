@@ -103,16 +103,17 @@ Use `,help [command_name]` for more details for any of the following commands.
 - `,play`: Begin a game of KMQ. The bot will play a random song based on the currently chosen filters
 - `,end`: Stop the current game of KMQ. The bot will display the winner of the game
 - `,skip`: Starts a vote to skip the current playing song. Based on majority rule
+- `,forceskip`: The person that started the game can force-skip the current song, no majority necessary
 - `,options`: Shows the current game options, which filters the songs that will be played
 - `,help`: Shows a general overview of available commands, as well as specific instructions for each command
 - `,news`: Show the latest features/changes to the bot
-- `,forceskip`: The person that started the game can force-skip the current song, no majority necessary
 - `,profile`: Shows many games you've played + songs you've guessed
 - `,leaderboard`: Shows the global KMQ leaderboard
 - `,list`: Shows the currently selected groups for `,groups`, `,include`, or `,exclude`
 - `,preset`: Save and load game option presents
 - `,vote`: Shows your current 2x bonus EXP modifier status from voting for the bot on [top.gg](https://top.gg/bot/508759831755096074/vote). Thanks for supporting KMQ!
 - `,hint`: Shows a hint for the current song playing
+- `,forcehint`: The person that started the game can force-hint the current song, no majority necessary
 
 ## Game Option Commands 
 - `,cutoff`: Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen
