@@ -32,6 +32,8 @@ jobs:
       - name: Build and bootstrap dry-run
         run: npm run docker-dryrun
       - name: Post-bootstrap dry-run
-        run: npm run docker-dryrun
+        run: npm run docker-dryrun-keep-alive
       - name: Test fact generation
-        run: npm run test_facts
+        run: docker exec kmq-bot /bin/sh -c 'npm run test_facts' 
+      - name: Stop KMQ
+        run: docker stop kmq-bot

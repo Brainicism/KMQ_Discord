@@ -41,15 +41,9 @@ export default state;
         } else {
             registerCommands(true);
         }
-        logger.info("Registering event loops...");
-        registerIntervals();
+
         logger.info("Registering process event handlers...");
         registerProcessEvents();
-
-        if ([EnvType.CI, EnvType.DRY_RUN].includes(process.env.NODE_ENV as EnvType)) {
-            logger.info("Dry run finished successfully.");
-            process.exit(0);
-        }
 
         logger.info("Loading cached application data...");
         reloadCaches();
@@ -60,36 +54,48 @@ export default state;
         logger.info("Clearing existing restart notifications...");
         await clearRestartNotification();
 
-        state.client = new Eris.Client(process.env.BOT_TOKEN, {
-            disableEvents: {
-                GUILD_ROLE_DELETE: true,
-                CHANNEL_PINS_UPDATE: true,
-                MESSAGE_UPDATE: true,
-                MESSAGE_DELETE: true,
-                MESSAGE_DELETE_BULK: true,
-                MESSAGE_REACTION_REMOVE: true,
-                MESSAGE_REACTION_REMOVE_ALL: true,
-                MESSAGE_REACTION_REMOVE_EMOJI: true,
-                GUILD_BAN_ADD: true,
-                GUILD_BAN_REMOVE: true,
-                TYPING_START: true,
-            },
-            restMode: true,
-            maxShards: "auto",
-            messageLimit: 0,
-            useMaxConcurrency: true,
-            intents: ERIS_INTENTS.guilds ^ ERIS_INTENTS.guildVoiceStates ^ ERIS_INTENTS.guildMessages ^ ERIS_INTENTS.guildMessageReactions,
-        });
+        if ([EnvType.CI, EnvType.DRY_RUN].includes(process.env.NODE_ENV as EnvType)) {
+            logger.info("Dry run finished successfully.");
+            if (process.env.DRY_RUN_KEEP_ALIVE) {
+                setInterval(() => { }, 1 << 30);
+            } else {
+                process.exit(0);
+            }
+        } else {
+            logger.info("Registering event loops...");
+            registerIntervals();
 
-        logger.info("Registering client event handlers...");
-        registerClientEvents();
-        const gatewayResponse = (await Axios.get("https://discordapp.com/api/gateway/bot", {
-            headers: {
-                Authorization: `Bot ${process.env.BOT_TOKEN}`,
-            },
-        })).data;
+            state.client = new Eris.Client(process.env.BOT_TOKEN, {
+                disableEvents: {
+                    GUILD_ROLE_DELETE: true,
+                    CHANNEL_PINS_UPDATE: true,
+                    MESSAGE_UPDATE: true,
+                    MESSAGE_DELETE: true,
+                    MESSAGE_DELETE_BULK: true,
+                    MESSAGE_REACTION_REMOVE: true,
+                    MESSAGE_REACTION_REMOVE_ALL: true,
+                    MESSAGE_REACTION_REMOVE_EMOJI: true,
+                    GUILD_BAN_ADD: true,
+                    GUILD_BAN_REMOVE: true,
+                    TYPING_START: true,
+                },
+                restMode: true,
+                maxShards: "auto",
+                messageLimit: 0,
+                useMaxConcurrency: true,
+                intents: ERIS_INTENTS.guilds ^ ERIS_INTENTS.guildVoiceStates ^ ERIS_INTENTS.guildMessages ^ ERIS_INTENTS.guildMessageReactions,
+            });
 
-        logger.info(`Number of shards: ${gatewayResponse["shards"]}. max_concurrency: ${gatewayResponse["session_start_limit"]["max_concurrency"]}`);
-        state.client.connect();
+            logger.info("Registering client event handlers...");
+            registerClientEvents();
+            const gatewayResponse = (await Axios.get("https://discordapp.com/api/gateway/bot", {
+                headers: {
+                    Authorization: `Bot ${process.env.BOT_TOKEN}`,
+                },
+            })).data;
+
+            logger.info(`Number of shards: ${gatewayResponse["shards"]}. max_concurrency: ${gatewayResponse["session_start_limit"]["max_concurrency"]}`);
+            state.client.connect();
+        }
     }
 })();
