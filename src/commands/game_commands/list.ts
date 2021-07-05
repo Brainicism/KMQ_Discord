@@ -1,5 +1,5 @@
 import { getDebugLogHeader, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import MessageContext from "../../structures/message_context";
@@ -46,7 +46,7 @@ export default class ListCommand implements BaseCommand {
         priority: 200,
     };
 
-    async call({ message, parsedMessage, channel }: CommandArgs) {
+    call = async ({ message, parsedMessage, channel }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         const optionListed = parsedMessage.components[0] as ListType;
         let optionValue: string;
@@ -83,5 +83,5 @@ export default class ListCommand implements BaseCommand {
         }
 
         logger.info(`${getDebugLogHeader(message)} | List '${optionListed}' retrieved`);
-    }
+    };
 }

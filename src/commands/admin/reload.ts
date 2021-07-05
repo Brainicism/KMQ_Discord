@@ -1,14 +1,14 @@
 import { execSync } from "child_process";
 import _logger from "../../logger";
 import { registerCommands } from "../../helpers/management_utils";
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getDebugChannel, getDebugLogHeader, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import MessageContext from "../../structures/message_context";
 
 const logger = _logger("reload");
 
 export default class EvalCommand implements BaseCommand {
-    async call({ message }: CommandArgs) {
+    call = async ({ message }: CommandArgs) => {
         const kmqDebugChannel = getDebugChannel();
         if (!kmqDebugChannel || message.channel.id !== kmqDebugChannel.id) {
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Error", description: "You are not allowed to reload in this channel" });
@@ -26,5 +26,5 @@ export default class EvalCommand implements BaseCommand {
             logger.error(`Error reloading KMQ commands: err = ${e}`);
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Error Reloading", description: `Uh oh.\n${e}` });
         }
-    }
+    };
 }

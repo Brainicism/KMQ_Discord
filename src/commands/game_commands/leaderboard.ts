@@ -1,6 +1,6 @@
 import Eris from "eris";
 import dbContext from "../../database_context";
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import _logger from "../../logger";
 import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import { getRankNameByLevel } from "./profile";
@@ -77,7 +77,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
     aliases = ["lb"];
 
-    async call({ message, parsedMessage }: CommandArgs) {
+    call = async ({ message, parsedMessage }: CommandArgs) => {
         if (parsedMessage.components.length === 0) {
             this.showLeaderboard(message, 0, false);
             return;
@@ -106,7 +106,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 sendErrorMessage(MessageContext.fromMessage(message), { title: "Incorrect Leaderboard Usage", description: `See \`${process.env.BOT_PREFIX}help leaderboard\` for more details` });
             }
         }
-    }
+    };
 
     private async enrollLeaderboard(message: GuildTextableMessage) {
         const alreadyEnrolled = !!(await dbContext.kmq("leaderboard_enrollment")

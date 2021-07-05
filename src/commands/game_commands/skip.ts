@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import { CommandArgs } from "../interfaces/base_command";
 import GameSession from "../../structures/game_session";
 import {
     areUserAndBotInSameVoiceChannel,
@@ -14,6 +14,7 @@ import GameRound from "../../structures/game_round";
 import { GuildTextableMessage, GameType } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
+import InGameCommand from "../interfaces/ingame_command";
 
 const logger = _logger("skip");
 
@@ -37,7 +38,7 @@ function isSkipMajority(message: GuildTextableMessage, gameSession: GameSession)
     return gameSession.gameRound.getNumSkippers() >= getMajorityCount(message);
 }
 
-export default class SkipCommand implements BaseCommand {
+export default class SkipCommand extends InGameCommand {
     help = {
         name: "skip",
         description: "Vote to skip the current song. A song is skipped when majority of participants vote to skip it.",
@@ -48,13 +49,14 @@ export default class SkipCommand implements BaseCommand {
 
     aliases = ["s"];
 
-    async call({ gameSessions, message }: CommandArgs) {
+    call = async ({ gameSessions, message }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         const gameSession = gameSessions[message.guildID];
         if (!gameSession || !gameSession.gameRound || gameSession.gameRound.finished || !areUserAndBotInSameVoiceChannel(message)) {
             logger.warn(`${getDebugLogHeader(message)} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.gameRound: ${gameSession && !gameSession.gameRound}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
             return;
         }
+
         gameSession.gameRound.userSkipped(message.author.id);
         if (gameSession.gameRound.skipAchieved || !gameSession.gameRound) {
             // song already being skipped
@@ -75,5 +77,5 @@ export default class SkipCommand implements BaseCommand {
             logger.info(`${getDebugLogHeader(message)} | Skip vote received.`);
         }
         gameSession.lastActiveNow();
-    }
+    };
 }

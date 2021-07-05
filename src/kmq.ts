@@ -1,6 +1,7 @@
 import Eris from "eris";
 import { config } from "dotenv";
 import { resolve } from "path";
+import Axios from "axios";
 import _logger from "./logger";
 import { EnvType, State } from "./types";
 import {
@@ -82,7 +83,13 @@ export default state;
 
         logger.info("Registering client event handlers...");
         registerClientEvents();
+        const gatewayResponse = (await Axios.get("https://discordapp.com/api/gateway/bot", {
+            headers: {
+                Authorization: `Bot ${process.env.BOT_TOKEN}`,
+            },
+        })).data;
 
+        logger.info(`Number of shards: ${gatewayResponse["shards"]}. max_concurrency: ${gatewayResponse["session_start_limit"]["max_concurrency"]}`);
         state.client.connect();
     }
 })();

@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import _logger from "../../logger";
 import { getDebugLogHeader, sendInfoMessage, EMBED_SUCCESS_BONUS_COLOR, EMBED_INFO_COLOR } from "../../helpers/discord_utils";
 import MessageContext from "../../structures/message_context";
@@ -20,7 +20,7 @@ export default class VoteCommand implements BaseCommand {
         priority: 60,
     };
 
-    async call({ message }: CommandArgs) {
+    call = async ({ message }: CommandArgs) => {
         let timeRemainingString = "";
         const boostActive = state.bonusUsers.has(message.author.id);
         if (boostActive) {
@@ -37,5 +37,5 @@ export default class VoteCommand implements BaseCommand {
             thumbnailUrl: KmqImages.THUMBS_UP,
         }, true);
         logger.info(`${getDebugLogHeader(message)} | Vote instructions retrieved.`);
-    }
+    };
 }

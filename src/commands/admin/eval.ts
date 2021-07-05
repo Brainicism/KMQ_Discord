@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import {
     getDebugChannel, getDebugLogHeader, sendErrorMessage, sendInfoMessage,
 } from "../../helpers/discord_utils";
@@ -9,7 +9,7 @@ import MessageContext from "../../structures/message_context";
 const logger = _logger("eval");
 
 export default class EvalCommand implements BaseCommand {
-    async call({ message, parsedMessage }: CommandArgs) {
+    call = async ({ message, parsedMessage }: CommandArgs) => {
         const kmqDebugChannel = getDebugChannel();
         if (!kmqDebugChannel || message.channel.id !== kmqDebugChannel.id) {
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Error", description: "You are not allowed to eval in this channel" });
@@ -30,5 +30,5 @@ export default class EvalCommand implements BaseCommand {
                 sendErrorMessage(MessageContext.fromMessage(message), { title: evalString, description: e.toString() });
             }
         }.call(state, evalString);
-    }
+    };
 }

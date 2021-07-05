@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { sendOptionsMessage, getDebugLogHeader, sendErrorMessage } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
@@ -67,7 +67,7 @@ export default class GenderCommand implements BaseCommand {
         priority: 150,
     };
 
-    async call({ message, parsedMessage }: CommandArgs) {
+    call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         const selectedGenders = parsedMessage.components as Array<Gender>;
 
@@ -97,5 +97,5 @@ export default class GenderCommand implements BaseCommand {
         }
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GENDER, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Genders set to ${guildPreference.getGender().join(", ")}`);
-    }
+    };
 }

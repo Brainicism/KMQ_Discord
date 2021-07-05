@@ -1,5 +1,5 @@
 import { getDebugLogHeader, sendErrorMessage, sendInfoMessage, sendOptionsMessage } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import MessageContext from "../../structures/message_context";
@@ -63,7 +63,7 @@ export default class PresetCommand implements BaseCommand {
         priority: 200,
     };
 
-    async call({ message, parsedMessage }: CommandArgs) {
+    call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         const presetAction = parsedMessage.components[0] as PresetAction || null;
         const messageContext = MessageContext.fromMessage(message);
@@ -92,7 +92,7 @@ export default class PresetCommand implements BaseCommand {
                 break;
             default:
         }
-    }
+    };
 
     async deletePreset(presetName: string, guildPreference: GuildPreference, messageContext: MessageContext) {
         const deleteResult = await guildPreference.deletePreset(presetName);

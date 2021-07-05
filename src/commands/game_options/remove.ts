@@ -1,5 +1,5 @@
 import { getDebugLogHeader, sendErrorMessage, sendOptionsMessage } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getGuildPreference, getMatchingGroupNames } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { GameOption } from "../../types";
@@ -56,7 +56,7 @@ export default class RemoveCommand implements BaseCommand {
         priority: 200,
     };
 
-    async call({ message, parsedMessage }: CommandArgs) {
+    call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         const optionListed = parsedMessage.components[0] as RemoveType;
         let groupNamesString: string;
@@ -123,5 +123,5 @@ export default class RemoveCommand implements BaseCommand {
                 break;
             default:
         }
-    }
+    };
 }

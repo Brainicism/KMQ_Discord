@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import GameSession from "../../structures/game_session";
 import TeamScoreboard from "../../structures/team_scoreboard";
 import Player from "../../structures/player";
@@ -13,7 +13,7 @@ import KmqMember from "../../structures/kmq_member";
 export default class JoinCommand implements BaseCommand {
     aliases = ["j"];
 
-    async call({ message, gameSessions, parsedMessage }: CommandArgs) {
+    call = async ({ message, gameSessions, parsedMessage }: CommandArgs) => {
         const gameSession = gameSessions[message.guildID];
         if (!gameSession || gameSession.gameType === GameType.CLASSIC) {
             return;
@@ -23,7 +23,7 @@ export default class JoinCommand implements BaseCommand {
         } else if (gameSession.gameType === GameType.TEAMS) {
             this.joinTeamsGame(message, parsedMessage, gameSession);
         }
-    }
+    };
 
     joinEliminationGame(message: GuildTextableMessage, gameSession: GameSession) {
         const kmqMember = KmqMember.fromUser(message.author);

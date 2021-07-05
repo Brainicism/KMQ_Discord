@@ -1,5 +1,5 @@
 import Eris, { GuildTextableChannel } from "eris";
-import BaseCommand from "./commands/base_command";
+import BaseCommand from "./commands/interfaces/base_command";
 import GameSession from "./structures/game_session";
 import BotListingManager from "./helpers/bot_listing_manager";
 import { Gender } from "./commands/game_options/gender";

@@ -8,7 +8,7 @@ import {
     getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, checkBotIsAlone, getVoiceChannelFromMessage,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, endSession } from "../helpers/game_utils";
-import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference } from "../helpers/utils";
+import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference, bold, codeLine } from "../helpers/utils";
 import state from "../kmq";
 import _logger from "../logger";
 import { QueriedSong, GuildTextableMessage, PlayerRoundResult, GameType } from "../types";
@@ -284,7 +284,7 @@ export default class GameSession {
 
         // send level up message
         if (leveledUpPlayers.length > 0) {
-            let levelUpMessages = leveledUpPlayers.map((leveledUpPlayer) => `\`${this.scoreboard.getPlayerName(leveledUpPlayer.userID)}\` has leveled from \`${leveledUpPlayer.startLevel}\` to \`${leveledUpPlayer.endLevel} (${getRankNameByLevel(leveledUpPlayer.endLevel)})\``);
+            let levelUpMessages = leveledUpPlayers.map((leveledUpPlayer) => `${bold(this.scoreboard.getPlayerName(leveledUpPlayer.userID))} has leveled from ${codeLine(String(leveledUpPlayer.startLevel))} to ${codeLine(String(leveledUpPlayer.endLevel))} (${codeLine(getRankNameByLevel(leveledUpPlayer.endLevel))})`);
             if (levelUpMessages.length > 10) {
                 levelUpMessages = levelUpMessages.slice(0, 10);
                 levelUpMessages.push("and many others...");

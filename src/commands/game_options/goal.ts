@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getDebugLogHeader, sendOptionsMessage, sendErrorMessage } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
@@ -37,7 +37,7 @@ export default class GoalCommand implements BaseCommand {
         priority: 120,
     };
 
-    async call({ message, parsedMessage, gameSessions }: CommandArgs) {
+    call = async ({ message, parsedMessage, gameSessions }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.resetGoal();
@@ -65,5 +65,5 @@ export default class GoalCommand implements BaseCommand {
         await guildPreference.setGoal(userGoal);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GOAL, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Goal set to ${guildPreference.getGoal()}`);
-    }
+    };
 }

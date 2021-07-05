@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { sendOptionsMessage, getDebugLogHeader, sendErrorMessage } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
@@ -74,7 +74,7 @@ export default class SpecialCommand implements BaseCommand {
         priority: 130,
     };
 
-    async call({ message, parsedMessage }: CommandArgs) {
+    call = async ({ message, parsedMessage }: CommandArgs) => {
         if (process.env.DEBUG_SERVER_ID !== message.guildID) {
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Error", description: "This is an unreleased game option, and can only be used on the official KMQ server" });
             return;
@@ -90,5 +90,5 @@ export default class SpecialCommand implements BaseCommand {
         await guildPreference.setSpecialType(specialType);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SPECIAL_TYPE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Special type set to ${specialType}`);
-    }
+    };
 }

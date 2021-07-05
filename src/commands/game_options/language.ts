@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { getDebugLogHeader, sendOptionsMessage } from "../../helpers/discord_utils";
@@ -49,7 +49,7 @@ export default class LanguageCommand implements BaseCommand {
         priority: 150,
     };
 
-    async call({ message, parsedMessage }: CommandArgs) {
+    call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.resetLanguageType();
@@ -62,5 +62,5 @@ export default class LanguageCommand implements BaseCommand {
         await guildPreference.setLanguageType(languageType);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.LANGUAGE_TYPE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Language type set to ${languageType}`);
-    }
+    };
 }
