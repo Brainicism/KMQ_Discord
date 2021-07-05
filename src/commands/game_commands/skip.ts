@@ -21,7 +21,7 @@ const logger = _logger("skip");
 async function sendSkipNotification(message: GuildTextableMessage, gameSession: GameSession) {
     await sendInfoMessage(MessageContext.fromMessage(message), {
         title: "**Skip**",
-        description: `${gameSession.gameRound.getNumSkippers()}/${getMajorityCount(message)} skips received.`,
+        description: `${gameSession.gameRound.getNumSkippers()}/${getMajorityCount(message.guildID)} skips received.`,
     }, true);
 }
 
@@ -29,13 +29,13 @@ async function sendSkipMessage(message: GuildTextableMessage, gameRound: GameRou
     await sendInfoMessage(MessageContext.fromMessage(message), {
         color: EMBED_SUCCESS_COLOR,
         title: "**Skip**",
-        description: `${gameRound.getNumSkippers()}/${getMajorityCount(message)} skips achieved, skipping...`,
+        description: `${gameRound.getNumSkippers()}/${getMajorityCount(message.guildID)} skips achieved, skipping...`,
         thumbnailUrl: KmqImages.NOT_IMPRESSED,
     });
 }
 
 function isSkipMajority(message: GuildTextableMessage, gameSession: GameSession): boolean {
-    return gameSession.gameRound.getNumSkippers() >= getMajorityCount(message);
+    return gameSession.gameRound.getNumSkippers() >= getMajorityCount(message.guildID);
 }
 
 export default class SkipCommand extends InGameCommand {

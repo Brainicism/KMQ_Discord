@@ -19,7 +19,7 @@ function isHintMajority(message: GuildTextableMessage, gameSession: GameSession)
         const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
         return gameSession.gameRound.getHintRequests() >= Math.floor(eliminationScoreboard.getAlivePlayersCount() * 0.5) + 1;
     }
-    return gameSession.gameRound.getHintRequests() >= getMajorityCount(message);
+    return gameSession.gameRound.getHintRequests() >= getMajorityCount(message.guildID);
 }
 
 function isHintAvailable(message: GuildTextableMessage, gameSession: GameSession) {
@@ -36,7 +36,7 @@ async function sendHintNotification(message: GuildTextableMessage, gameSession: 
     } else {
         await sendInfoMessage(MessageContext.fromMessage(message), {
             title: "**Hint Request**",
-            description: `${gameSession.gameRound.getHintRequests()}/${getMajorityCount(message)} hint requests received.`,
+            description: `${gameSession.gameRound.getHintRequests()}/${getMajorityCount(message.guildID)} hint requests received.`,
         }, true);
     }
 }
