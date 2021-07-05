@@ -464,8 +464,7 @@ export function areUserAndBotInSameVoiceChannel(message: Eris.Message): boolean 
 export function getUserVoiceChannel(message: GuildTextableMessage): Eris.VoiceChannel {
     const voiceChannelID = message.member.voiceState.channelID;
     if (!voiceChannelID) return null;
-    const voiceChannel = state.client.getChannel(message.member.voiceState.channelID) as Eris.VoiceChannel;
-    return voiceChannel;
+    return state.client.getChannel(voiceChannelID) as Eris.VoiceChannel;
 }
 
 /**
