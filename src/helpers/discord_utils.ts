@@ -3,7 +3,7 @@ import EmbedPaginator from "eris-pagination";
 import GuildPreference from "../structures/guild_preference";
 import GameSession, { UniqueSongCounter } from "../structures/game_session";
 import _logger from "../logger";
-import { endSession, getSongCount } from "./game_utils";
+import { getSongCount } from "./game_utils";
 import { getFact } from "../fact_generator";
 import { EmbedPayload, GameOption, GameOptionCommand, PriorityGameOption, ConflictingGameOptions, GuildTextableMessage, PlayerRoundResult, EndGameMessage, GameType } from "../types";
 import { chunkArray, codeLine, bold, underline, italicize, strikethrough, chooseWeightedRandom, getOrdinalNum } from "./utils";
@@ -450,7 +450,7 @@ export function getVoiceConnection(message: Eris.Message): Eris.VoiceConnection 
  * @returns whether the message's author and the bot are in the same voice channel
  */
 export function areUserAndBotInSameVoiceChannel(message: Eris.Message): boolean {
-    const botVoiceConnection = getVoiceConnection(message);
+    const botVoiceConnection = state.client.voiceConnections.get(message.guildID);
     if (!message.member.voiceState || !botVoiceConnection) {
         return false;
     }
@@ -461,9 +461,10 @@ export function areUserAndBotInSameVoiceChannel(message: Eris.Message): boolean 
  * @param message - The Message object
  * @returns the voice channel that the message's author is in
  */
-export function getVoiceChannelFromMessage(message: GuildTextableMessage): Eris.VoiceChannel {
-    const voiceChannel = (message.channel as Eris.TextChannel).guild.channels.get(message.member.voiceState.channelID) as Eris.VoiceChannel;
-    return voiceChannel;
+export function getUserVoiceChannel(message: GuildTextableMessage): Eris.VoiceChannel {
+    const voiceChannelID = message.member.voiceState.channelID;
+    if (!voiceChannelID) return null;
+    return state.client.getChannel(voiceChannelID) as Eris.VoiceChannel;
 }
 
 /**
@@ -504,7 +505,7 @@ function missingPermissionsText(missingPermissions: string[]): string {
  * @returns whether the bot has permissions to join the message author's currently active voice channel
  */
 export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
-    const voiceChannel = getVoiceChannelFromMessage(message);
+    const voiceChannel = getUserVoiceChannel(message);
     const messageContext = MessageContext.fromMessage(message);
     const missingPermissions = REQUIRED_VOICE_PERMISSIONS.filter((permission) => !voiceChannel.permissionsOf(state.client.user.id).has(permission));
     if (missingPermissions.length > 0) {
@@ -558,20 +559,15 @@ export async function textPermissionsCheck(message: GuildTextableMessage, channe
 }
 
 /**
- * @param gameSession - The currently active GameSession
- * @param channel - The voice channel the bot could be in
+ * @param guildID - The guild ID
  * @returns whether the bot is alone 😔 ends the gameSession if it does
  */
-export function checkBotIsAlone(gameSession: GameSession, channel: Eris.VoiceChannel): boolean {
-    if (!channel) {
-        return true;
-    }
-
+export function checkBotIsAlone(guildID: string): boolean {
+    const voiceConnection = state.client.voiceConnections.get(guildID);
+    if (!voiceConnection) return true;
+    const channel = state.client.getChannel(voiceConnection.channelID) as Eris.VoiceChannel;
+    if (channel.voiceMembers.size === 0) return true;
     if (channel.voiceMembers.size === 1 && channel.voiceMembers.has(state.client.user.id)) {
-        if (gameSession) {
-            logger.info(`gid: ${channel.guild.id} | Bot is only user left, leaving voice...`);
-            endSession(gameSession);
-        }
         return true;
     }
     return false;
@@ -600,6 +596,10 @@ export function getSqlDateString(timeInMs?: number): string {
  * @param message - The message
  * @returns the number of users required for a majority
  */
-export function getMajorityCount(message: GuildTextableMessage): number {
-    return Math.floor(getNumParticipants(message.member.voiceState.channelID) * 0.5) + 1;
+export function getMajorityCount(guildID: string): number {
+    const voiceChannelID = state.client.voiceConnections.get(guildID)?.channelID;
+    if (voiceChannelID) {
+        return Math.floor(getNumParticipants(voiceChannelID) * 0.5) + 1;
+    }
+    return 0;
 }

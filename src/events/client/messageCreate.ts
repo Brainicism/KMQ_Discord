@@ -1,6 +1,6 @@
 import Eris from "eris";
 import _logger from "../../logger";
-import { textPermissionsCheck, sendOptionsMessage } from "../../helpers/discord_utils";
+import { textPermissionsCheck, sendOptionsMessage, areUserAndBotInSameVoiceChannel } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import state from "../../kmq";
 import validate from "../../helpers/validate";
@@ -65,7 +65,9 @@ export default async function messageCreateHandler(message: Eris.Message) {
             });
         }
     } else if (state.gameSessions[message.guildID]?.gameRound) {
-        const gameSession = state.gameSessions[message.guildID];
-        gameSession.guessSong(message);
+        if (areUserAndBotInSameVoiceChannel(message)) {
+            const gameSession = state.gameSessions[message.guildID];
+            gameSession.guessSong(message);
+        }
     }
 }

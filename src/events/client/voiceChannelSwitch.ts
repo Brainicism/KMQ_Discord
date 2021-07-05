@@ -4,6 +4,10 @@ import { checkBotIsAlone } from "../../helpers/discord_utils";
 
 export default async function voiceChannelSwitchHandler(member: Eris.Member, newChannel: Eris.VoiceChannel, oldChannel: Eris.VoiceChannel) {
     const guildID = oldChannel.guild.id;
-    const gameSession = state.gameSessions[guildID];
-    checkBotIsAlone(gameSession, oldChannel);
+    if (checkBotIsAlone(guildID)) {
+        const gameSession = state.gameSessions[guildID];
+        if (gameSession) {
+            gameSession.endSession();
+        }
+    }
 }

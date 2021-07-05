@@ -5,7 +5,7 @@ import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
-    getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, checkBotIsAlone, getVoiceChannelFromMessage,
+    getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, getUserVoiceChannel,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, endSession } from "../helpers/game_utils";
 import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference, bold, codeLine } from "../helpers/utils";
@@ -456,9 +456,6 @@ export default class GameSession {
         this.gameRound.setBaseExpReward(await this.calculateBaseExp());
 
         const voiceChannel = state.client.getChannel(this.voiceChannelID) as Eris.VoiceChannel;
-        if (checkBotIsAlone(this, voiceChannel)) {
-            return;
-        }
         if (voiceChannel.voiceMembers.size === 0) {
             await this.endSession();
             return;
@@ -667,7 +664,7 @@ export default class GameSession {
      * @param message - The message to check for guess eligibility
      */
     private guessEligible(message: GuildTextableMessage): boolean {
-        const userVoiceChannel = getVoiceChannelFromMessage(message);
+        const userVoiceChannel = getUserVoiceChannel(message);
         // if user isn't in the same voice channel
         if (!userVoiceChannel || (userVoiceChannel.id !== this.voiceChannelID)) {
             return false;

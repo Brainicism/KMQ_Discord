@@ -3,7 +3,7 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import { sendBeginGameMessage } from "./play";
 import { GameType } from "../../types";
 import TeamScoreboard from "../../structures/team_scoreboard";
-import { getDebugLogHeader, sendErrorMessage, getVoiceChannelFromMessage } from "../../helpers/discord_utils";
+import { getDebugLogHeader, sendErrorMessage, getUserVoiceChannel } from "../../helpers/discord_utils";
 import { bold } from "../../helpers/utils";
 import _logger from "../../logger";
 import MessageContext from "../../structures/message_context";
@@ -45,7 +45,7 @@ export default class BeginCommand implements BaseCommand {
                 const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
                 participants = teamScoreboard.getPlayers().map((player) => ({ id: player.id, username: player.name.split("#")[0], discriminator: player.name.split("#")[1] }));
             }
-            sendBeginGameMessage(channel.name, getVoiceChannelFromMessage(message).name, message, participants);
+            sendBeginGameMessage(channel.name, getUserVoiceChannel(message).name, message, participants);
             gameSession.startRound(guildPreference, MessageContext.fromMessage(message));
             logger.info(`${getDebugLogHeader(message)} | Game session starting (${gameSession.gameType} gameType)`);
         }

@@ -1,7 +1,7 @@
 import Eris from "eris";
 import * as uuid from "uuid";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { getDebugChannel, sendInfoMessage, getVoiceChannelFromMessage } from "../../helpers/discord_utils";
+import { getDebugChannel, sendInfoMessage, getUserVoiceChannel } from "../../helpers/discord_utils";
 import { getGuildPreference, getSongCount } from "../../helpers/game_utils";
 import state from "../../kmq";
 import _logger from "../../logger";
@@ -39,7 +39,7 @@ export default class DebugCommand implements BaseCommand {
             inline: false,
         });
 
-        const voiceChannel = getVoiceChannelFromMessage(message);
+        const voiceChannel = getUserVoiceChannel(message);
         if (voiceChannel) {
             fields.push({
                 name: "Voice Permissions",
