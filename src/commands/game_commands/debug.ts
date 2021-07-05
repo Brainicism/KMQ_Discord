@@ -1,6 +1,6 @@
 import Eris from "eris";
 import * as uuid from "uuid";
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getDebugChannel, sendInfoMessage, getVoiceChannelFromMessage } from "../../helpers/discord_utils";
 import { getGuildPreference, getSongCount } from "../../helpers/game_utils";
 import state from "../../kmq";
@@ -11,7 +11,7 @@ import MessageContext from "../../structures/message_context";
 const logger = _logger("debug");
 
 export default class DebugCommand implements BaseCommand {
-    async call({ message, channel }: CommandArgs) {
+    call = async ({ message, channel }: CommandArgs) => {
         const debugChannel = getDebugChannel();
         if (!debugChannel) {
             logger.warn("No debug text channel specified");
@@ -60,5 +60,5 @@ export default class DebugCommand implements BaseCommand {
             fields,
             timestamp: new Date(),
         });
-    }
+    };
 }

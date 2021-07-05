@@ -1,6 +1,6 @@
 import Eris from "eris";
 import os from "os";
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import {
     getDebugLogHeader, sendInfoMessage,
 } from "../../helpers/discord_utils";
@@ -20,7 +20,7 @@ export default class SkipCommand implements BaseCommand {
         priority: 1,
     };
 
-    async call({ gameSessions, message, channel }: CommandArgs) {
+    call = async ({ gameSessions, message, channel }: CommandArgs) => {
         const activeGameSessions = Object.keys(gameSessions).length;
         const activeUsers = Object.values(gameSessions).reduce((total, curr) => total + curr.participants.size, 0);
         const dateThreshold = new Date();
@@ -107,5 +107,5 @@ export default class SkipCommand implements BaseCommand {
             timestamp: new Date(),
             thumbnailUrl: KmqImages.READING_BOOK,
         });
-    }
+    };
 }

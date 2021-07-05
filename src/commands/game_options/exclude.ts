@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { sendOptionsMessage, getDebugLogHeader, sendErrorMessage } from "../../helpers/discord_utils";
 import { getGuildPreference, getMatchingGroupNames } from "../../helpers/game_utils";
 import _logger from "../../logger";
@@ -31,7 +31,7 @@ export default class ExcludeCommand implements BaseCommand {
 
     aliases = ["excludes", "ignore", "ignores"];
 
-    async call({ message, parsedMessage }: CommandArgs) {
+    call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.resetExcludes();
@@ -66,5 +66,5 @@ export default class ExcludeCommand implements BaseCommand {
         await guildPreference.setExcludes(matchedGroups);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.EXCLUDE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Excludes set to ${guildPreference.getDisplayedExcludesGroupNames()}`);
-    }
+    };
 }

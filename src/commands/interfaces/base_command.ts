@@ -1,6 +1,6 @@
 import Eris from "eris";
-import GameSession from "../structures/game_session";
-import { GuildTextableMessage, ParsedMessage } from "../types";
+import GameSession from "../../structures/game_session";
+import { GuildTextableMessage, ParsedMessage } from "../../types";
 
 export interface CommandArgs {
     gameSessions: { [guildID: string]: GameSession }
@@ -21,11 +21,11 @@ export interface CommandValidations {
     }>
 }
 
-interface CallFunc {
+export interface CallFunc {
     (args: CommandArgs): Promise<void>;
 }
 
-export default class BaseCommand {
+export default interface BaseCommand {
     call: CallFunc;
     help?: {
         name: string;
@@ -36,4 +36,5 @@ export default class BaseCommand {
     };
     aliases?: Array<string>;
     validations?: CommandValidations;
+    preRunCheck?: (message: GuildTextableMessage) => Promise<boolean>;
 }

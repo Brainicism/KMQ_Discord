@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import _logger from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
@@ -55,7 +55,7 @@ export default class GuessModeCommand implements BaseCommand {
         priority: 130,
     };
 
-    async call({ message, parsedMessage }: CommandArgs) {
+    call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
 
         if (parsedMessage.components.length === 0) {
@@ -69,5 +69,5 @@ export default class GuessModeCommand implements BaseCommand {
         await guildPreference.setGuessModeType(modeType);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GUESS_MODE_TYPE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Guess mode type set to ${modeType}`);
-    }
+    };
 }

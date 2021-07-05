@@ -3,21 +3,19 @@
         "airbnb-typescript/base"
     ],
     "plugins": [
-        "eslint-plugin-tsdoc"
+        "eslint-plugin-tsdoc",
+        "only-warn"
     ],
     "parserOptions": {
         "project": "./tsconfig.json"
     },
     "rules": {
-        "tsdoc/syntax": [
-            "warn"
-        ],
         "@typescript-eslint/indent": [
             "warn",
             4
         ],
         "@typescript-eslint/quotes": [
-            "error",
+            "warn",
             "double"
         ],
         "import/no-cycle": [
@@ -35,7 +33,7 @@
             }
         ],
         "no-restricted-syntax": [
-            "error",
+            "warn",
             {
                 "selector": "CallExpression[callee.property.name='forEach']",
                 "message": "Do not use `forEach()`, use `for/of` instead"
@@ -93,50 +91,17 @@
         "no-bitwise": [
             "off"
         ],
-        "no-trailing-spaces": [
-            "warn"
-        ],
         "@typescript-eslint/dot-notation": [
             "off"
         ],
-        "no-multiple-empty-lines": [
-            "warn"
-        ],
-        "padded-blocks": [
-            "warn"
-        ],
         "no-multi-str": [
             "off"
-        ],
-        "linebreak-style": [
-            "warn"
-        ],
-        "import/order": [
-            "warn"
-        ],
-        "@typescript-eslint/brace-style": [
-            "warn"
-        ],
-        "no-empty": [
-            "warn"
         ],
         "no-multi-spaces": [
             "warn"
         ],
         "radix": [
             "off"
-        ],
-        "@typescript-eslint/space-infix-ops": [
-            "warn"
-        ],
-        "@typescript-eslint/semi": [
-            "warn"
-        ],
-        "@typescript-eslint/comma-dangle": [
-            "warn"
-        ],
-        "@typescript-eslint/space-before-function-paren": [
-            "warn"
         ],
         "no-lonely-if": [
             "off"

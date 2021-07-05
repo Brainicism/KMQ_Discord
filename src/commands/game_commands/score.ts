@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { sendInfoMessage, sendScoreboardMessage, getDebugLogHeader } from "../../helpers/discord_utils";
 import _logger from "../../logger";
 import MessageContext from "../../structures/message_context";
@@ -16,7 +16,7 @@ export default class ScoreCommand implements BaseCommand {
 
     aliases = ["scoreboard"];
 
-    async call({ message, gameSessions }: CommandArgs) {
+    call = async ({ message, gameSessions }: CommandArgs) => {
         const gameSession = gameSessions[message.guildID];
         if (!gameSession) {
             sendInfoMessage(MessageContext.fromMessage(message), { title: "No Active Game", description: `There is no currently active game of KMQ. Start a new game with \`${process.env.BOT_PREFIX}play\`!` });
@@ -25,5 +25,5 @@ export default class ScoreCommand implements BaseCommand {
         }
         logger.info(`${getDebugLogHeader(message)} | Score retrieved`);
         await sendScoreboardMessage(message, gameSession);
-    }
+    };
 }

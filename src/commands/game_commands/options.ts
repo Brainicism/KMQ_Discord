@@ -1,5 +1,5 @@
 import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import MessageContext from "../../structures/message_context";
@@ -15,9 +15,9 @@ export default class OptionsCommand implements BaseCommand {
         priority: 50,
     };
 
-    async call({ message }: CommandArgs) {
+    call = async ({ message }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         logger.info(`${getDebugLogHeader(message)} | Options retrieved`);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, null);
-    }
+    };
 }

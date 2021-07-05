@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import _logger from "../../logger";
 import { getDebugLogHeader, sendOptionsMessage } from "../../helpers/discord_utils";
@@ -48,7 +48,7 @@ export default class MultiGuessCommand implements BaseCommand {
         priority: 150,
     };
 
-    async call({ message, parsedMessage }: CommandArgs) {
+    call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.resetMultiGuessType();
@@ -61,5 +61,5 @@ export default class MultiGuessCommand implements BaseCommand {
         await guildPreference.setMultiGuessType(multiGuessType);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.MULTIGUESS, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Multiguess type set to ${multiGuessType}`);
-    }
+    };
 }

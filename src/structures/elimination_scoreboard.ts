@@ -24,22 +24,8 @@ export default class EliminationScoreboard extends Scoreboard {
      * @param avatarUrl - The player's Discord avatar URL
      */
     addPlayer(userID: string, tag: string, avatarUrl: string, lives?: number): EliminationPlayer {
-        this.players[userID] = new EliminationPlayer(tag, userID, avatarUrl, 0, lives === undefined || lives === null ? this.startingLives : lives);
+        this.players[userID] = new EliminationPlayer(tag, userID, avatarUrl, lives ?? this.startingLives);
         return this.players[userID];
-    }
-
-    /** @returns An array of DiscordEmbed fields representing each participant's lives */
-    getScoreboardEmbedFields(): Array<{ name: string, value: string, inline: boolean }> {
-        return Object.values(this.players)
-            .sort((a, b) => b.getLives() - a.getLives())
-            .map((x) => {
-                const lives = !x.isEliminated() ? `❤️ x ${x.getLives()}` : "☠️";
-                return {
-                    name: x.getName(),
-                    value: lives,
-                    inline: true,
-                };
-            });
     }
 
     /**
