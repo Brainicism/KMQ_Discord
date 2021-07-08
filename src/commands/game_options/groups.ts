@@ -57,7 +57,7 @@ export default class GroupsCommand implements BaseCommand {
         }
 
         if (guildPreference.isExcludesMode()) {
-            const intersection = setIntersection(new Set(matchedGroups.map((x) => x.name)), new Set(guildPreference.getExcludesGroupNames()));
+            const intersection = setIntersection(matchedGroups.map((x) => x.name), guildPreference.getExcludesGroupNames());
             matchedGroups = matchedGroups.filter((x) => !intersection.has(x.name));
             if (intersection.size > 0) {
                 sendErrorMessage(MessageContext.fromMessage(message), { title: "Groups and Exclude Conflict", description: `One or more of the given \`groups\` is already included in \`exclude\`. \nThe following groups were **not** added to \`groups\`:\n ${[...intersection].filter((x) => !x.includes("+")).join(", ")} \nUse \`${process.env.BOT_PREFIX}remove exclude\` and then \`${process.env.BOT_PREFIX}groups\` to allow them to play.` });

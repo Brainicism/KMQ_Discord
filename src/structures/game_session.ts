@@ -221,7 +221,7 @@ export default class GameSession {
             if (guildPreference.isShuffleUnique()) {
                 const filteredSongs = new Set([...this.filteredSongs.songs].map((x) => x.youtubeLink));
                 uniqueSongCounter = {
-                    uniqueSongsPlayed: this.uniqueSongsPlayed.size - setDifference<string>(this.uniqueSongsPlayed, filteredSongs).size,
+                    uniqueSongsPlayed: this.uniqueSongsPlayed.size - setDifference([...this.uniqueSongsPlayed], [...filteredSongs]).size,
                     totalSongs: Math.min(this.filteredSongs.countBeforeLimit, guildPreference.getLimitEnd() - guildPreference.getLimitStart()),
                 };
             }
@@ -396,7 +396,7 @@ export default class GameSession {
         // manage unique songs
         if (guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
             const filteredSongs = new Set([...this.filteredSongs.songs].map((x) => x.youtubeLink));
-            if (setDifference<string>(filteredSongs, this.uniqueSongsPlayed).size === 0) {
+            if (setDifference([...filteredSongs], [...this.uniqueSongsPlayed]).size === 0) {
                 logger.info(`${getDebugLogHeader(messageContext)} | Resetting uniqueSongsPlayed (all ${totalSongsCount} unique songs played)`);
                 // In updateSongCount, songs already played are added to songCount when options change. On unique reset, remove them
                 await sendInfoMessage(messageContext, { title: "Resetting unique songs", description: `All songs have been played. ${totalSongsCount} songs will be reshuffled.`, thumbnailUrl: KmqImages.LISTENING });

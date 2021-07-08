@@ -2,6 +2,7 @@ import fs from "fs";
 import { exec } from "child_process";
 import moment from "moment-timezone";
 import crypto from "crypto";
+import _ from "lodash";
 import _logger from "../logger";
 
 const logger = _logger("utils");
@@ -250,29 +251,18 @@ export function romanize(num: number) {
 }
 
 /**
- * @param a - the starting set
- * @param b - the set whose elements are removed from a
- * @returns the difference of the two sets (a \ b)
+ * @param a - the starting set (as an array)
+ * @param args - the sets whose elements are removed from a (as arrays)
+ * @returns the difference of the n sets (a \ (b ∪ c ... ∪ z))
  */
-export function setDifference<Type>(a: Set<Type>, b: Set<Type>): Set<Type> {
-    const difference = new Set(a);
-    for (const element of b) {
-        difference.delete(element);
-    }
-    return difference;
+export function setDifference<Type>(a: Array<Type>, ...args: Array<Array<Type>>): Set<Type> {
+    return new Set(_.difference(a, ...args));
 }
 
 /**
- * @param a - the starting set
- * @param b - the starting set
- * @returns the intersection of the two sets (a ∩ b)
+ * @param args - the starting sets (as arrays)
+ * @returns the intersection of the given sets (a ∩ b ... ∩ z)
  */
-export function setIntersection<Type>(a: Set<Type>, b: Set<Type>): Set<Type> {
-    const intersection = new Set<Type>();
-    for (const element of a) {
-        if (b.has(element)) {
-            intersection.add(element);
-        }
-    }
-    return intersection;
+export function setIntersection<Type>(...args: Array<Array<Type>>): Set<Type> {
+    return new Set(_.intersection(...args));
 }
