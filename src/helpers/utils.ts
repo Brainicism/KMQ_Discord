@@ -252,7 +252,7 @@ export function romanize(num: number) {
 /**
  * @param a - the starting set
  * @param b - the set whose elements are removed from a
- * @returns the difference of the two sets (a - b)
+ * @returns the difference of the two sets (a \ b)
  */
 export function setDifference<Type>(a: Set<Type>, b: Set<Type>): Set<Type> {
     const difference = new Set(a);
@@ -260,4 +260,19 @@ export function setDifference<Type>(a: Set<Type>, b: Set<Type>): Set<Type> {
         difference.delete(element);
     }
     return difference;
+}
+
+/**
+ * @param a - the starting set
+ * @param b - the starting set
+ * @returns the intersection of the two sets (a ∩ b)
+ */
+export function setIntersection<Type>(a: Set<Type>, b: Set<Type>): Set<Type> {
+    const intersection = new Set<Type>();
+    for (const element of a) {
+        if (b.has(element)) {
+            intersection.add(element);
+        }
+    }
+    return intersection;
 }

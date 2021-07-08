@@ -121,7 +121,7 @@ export const PriorityGameOption: Array<GameOption> = [
 ];
 
 export const ConflictingGameOptions: { [option: string]: Array<GameOption> } = {
-    [GameOption.GROUPS]: [GameOption.INCLUDE, GameOption.EXCLUDE, GameOption.GENDER, GameOption.ARTIST_TYPE],
+    [GameOption.GROUPS]: [GameOption.INCLUDE, GameOption.GENDER, GameOption.ARTIST_TYPE],
 };
 
 export enum EnvType {

@@ -4,6 +4,7 @@ import { getGuildPreference, getMatchingGroupNames } from "../../helpers/game_ut
 import _logger from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
+import { setIntersection } from "../../helpers/utils";
 
 const logger = _logger("add");
 
@@ -83,10 +84,12 @@ export default class AddCommand implements BaseCommand {
             .split(",")
             .map((groupName) => groupName.trim());
 
-        const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(currentGroupNames.concat(newGroupNames));
+        const groups = await getMatchingGroupNames(currentGroupNames.concat(newGroupNames));
+        let { matchedGroups } = groups;
+        const { unmatchedGroups } = groups;
         if (unmatchedGroups.length) {
             logger.info(`${getDebugLogHeader(message)} | Attempted to set unknown groups. groups =  ${unmatchedGroups.join(", ")}`);
-            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Unknown Group Name", description: `One or more of the specified group names was not recognized. Those groups that matched are added. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} ` });
+            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Unknown Group Name", description: `One or more of the specified group names was not recognized. Those groups that matched are added. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\`. \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} ` });
         }
 
         if (matchedGroups.length === 0) {
@@ -97,10 +100,22 @@ export default class AddCommand implements BaseCommand {
             case AddType.GROUP:
             case AddType.ARTIST:
             case AddType.ARTISTS:
+            {
+                const intersection = setIntersection(new Set(matchedGroups.map((x) => x.name)), new Set(guildPreference.getExcludesGroupNames()));
+                matchedGroups = matchedGroups.filter((x) => !intersection.has(x.name));
+                if (intersection.size > 0) {
+                    sendErrorMessage(MessageContext.fromMessage(message), { title: "Groups and Exclude Conflict", description: `One or more of the given \`groups\` is already included in \`exclude\`. \nThe following groups were **not** added to \`groups\`:\n ${[...intersection].filter((x) => !x.includes("+")).join(", ")} \nUse \`${process.env.BOT_PREFIX}remove exclude\` and then \`${process.env.BOT_PREFIX}groups\` to allow them to play.` });
+                }
+
+                if (matchedGroups.length === 0) {
+                    return;
+                }
+
                 await guildPreference.setGroups(matchedGroups);
                 await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GROUPS, reset: false });
                 logger.info(`${getDebugLogHeader(message)} | Group added: ${guildPreference.getDisplayedGroupNames()}`);
                 break;
+            }
             case AddType.INCLUDE:
             case AddType.INCLUDES:
                 await guildPreference.setIncludes(matchedGroups);
@@ -109,10 +124,22 @@ export default class AddCommand implements BaseCommand {
                 break;
             case AddType.EXCLUDE:
             case AddType.EXCLUDES:
+            {
+                const intersection = setIntersection(new Set(matchedGroups.map((x) => x.name)), new Set(guildPreference.getGroupNames()));
+                matchedGroups = matchedGroups.filter((x) => !intersection.has(x.name));
+                if (intersection.size > 0) {
+                    sendErrorMessage(MessageContext.fromMessage(message), { title: "Groups and Exclude Conflict", description: `One or more of the given \`exclude\` groups is already included in \`groups\`. \nThe following groups were **not** added to \`exclude\`:\n ${[...intersection].filter((x) => !x.includes("+")).join(", ")} \nUse \`${process.env.BOT_PREFIX}remove groups\` and then \`${process.env.BOT_PREFIX}add exclude\` these groups to prevent them from playing.` });
+                }
+
+                if (matchedGroups.length === 0) {
+                    return;
+                }
+
                 await guildPreference.setExcludes(matchedGroups);
                 await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.EXCLUDE, reset: false });
                 logger.info(`${getDebugLogHeader(message)} | Exclude added: ${guildPreference.getDisplayedExcludesGroupNames()}`);
                 break;
+            }
             default:
         }
     };
