@@ -21,10 +21,7 @@ const state: State = {
     botListingManager: null,
     client: null,
     aliases: {
-        artist: {
-            matchAliases: {},
-            guessAliases: {},
-        },
+        artist: {},
         song: {},
     },
     processStartTime: Date.now(),

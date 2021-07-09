@@ -115,7 +115,7 @@ export default class GameRound {
         this.songAliases = state.aliases.song[videoID] || [];
         this.acceptedSongAnswers = [song, ...this.songAliases];
         const artistNames = artist.split("+").map((x) => x.trim());
-        this.artistAliases = artistNames.flatMap((x) => state.aliases.artist.guessAliases[x] || []);
+        this.artistAliases = artistNames.flatMap((x) => state.aliases.artist[x] || []);
         this.acceptedArtistAnswers = [...artistNames, ...this.artistAliases];
         this.artistName = artist;
         this.videoID = videoID;
