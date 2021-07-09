@@ -4,6 +4,7 @@ import { getGuildPreference, getMatchingGroupNames } from "../../helpers/game_ut
 import _logger from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
+import { setIntersection } from "../../helpers/utils";
 
 const logger = _logger("excludes");
 
@@ -45,24 +46,29 @@ export default class ExcludeCommand implements BaseCommand {
                 excludeWarning = `Did you mean to use ${process.env.BOT_PREFIX}${parsedMessage.components[0]} exclude?`;
             }
         }
-        if (guildPreference.isGroupsMode()) {
-            logger.warn(`${getDebugLogHeader(message)} | Game option conflict between include and groups.`);
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Game Option Conflict", description: `\`groups\` game option is currently set. \`include\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed.` });
-            return;
-        }
-
         const groupNames = parsedMessage.argument.split(",").map((groupName) => groupName.trim());
-        const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(groupNames);
+        const groups = await getMatchingGroupNames(groupNames);
+        let { matchedGroups } = groups;
+        const { unmatchedGroups } = groups;
         if (unmatchedGroups.length) {
             logger.info(`${getDebugLogHeader(message)} | Attempted to set unknown excludes. excludes =  ${unmatchedGroups.join(", ")}`);
             await sendErrorMessage(MessageContext.fromMessage(message), { title: "Unknown Group Name",
-                description: `One or more of the specified group names was not recognized. Those groups that matched are excluded. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} \nUse \`${process.env.BOT_PREFIX}add\` to add the unmatched groups.`,
+                description: `One or more of the specified group names was not recognized. Those groups that matched are excluded. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\`. \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} \nUse \`${process.env.BOT_PREFIX}add\` to add the unmatched groups.`,
                 footerText: excludeWarning });
+        }
+
+        if (guildPreference.isGroupsMode()) {
+            const intersection = setIntersection(matchedGroups.map((x) => x.name), guildPreference.getGroupNames());
+            matchedGroups = matchedGroups.filter((x) => !intersection.has(x.name));
+            if (intersection.size > 0) {
+                sendErrorMessage(MessageContext.fromMessage(message), { title: "Groups and Exclude Conflict", description: `One or more of the given \`exclude\` groups is already included in \`groups\`. \nThe following groups were **not** added to \`exclude\`:\n ${[...intersection].filter((x) => !x.includes("+")).join(", ")} \nUse \`${process.env.BOT_PREFIX}remove groups\` and then \`${process.env.BOT_PREFIX}exclude\` these groups to prevent them from playing.` });
+            }
         }
 
         if (matchedGroups.length === 0) {
             return;
         }
+
         await guildPreference.setExcludes(matchedGroups);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.EXCLUDE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Excludes set to ${guildPreference.getDisplayedExcludesGroupNames()}`);

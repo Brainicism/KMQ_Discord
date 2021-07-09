@@ -56,7 +56,7 @@ export default class IncludeCommand implements BaseCommand {
         if (unmatchedGroups.length) {
             logger.info(`${getDebugLogHeader(message)} | Attempted to set unknown includes. includes =  ${unmatchedGroups.join(", ")}`);
             await sendErrorMessage(MessageContext.fromMessage(message), { title: "Unknown Group Name",
-                description: `One or more of the specified group names was not recognized. Those groups that matched are included. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\` \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} \nUse \`${process.env.BOT_PREFIX}add\` to add the unmatched groups.`,
+                description: `One or more of the specified group names was not recognized. Those groups that matched are included. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\`. \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} \nUse \`${process.env.BOT_PREFIX}add\` to add the unmatched groups.`,
                 footerText: includeWarning });
         }
 

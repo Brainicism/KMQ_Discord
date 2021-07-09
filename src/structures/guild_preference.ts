@@ -338,6 +338,12 @@ export default class GuildPreference {
         return this.gameOptions.groups.map((x) => x.id);
     }
 
+    /** @returns the current selected groups by name, if the groups option is active */
+    getGroupNames(): string[] {
+        if (this.gameOptions.groups === null) return [];
+        return this.gameOptions.groups.map((x) => x.name);
+    }
+
     /** @returns a friendly, potentially truncated, string displaying the currently selected groups option */
     getDisplayedGroupNames(original = false): string {
         if (this.gameOptions.groups === null) return null;
@@ -371,6 +377,12 @@ export default class GuildPreference {
     getExcludesGroupIDs(): number[] {
         if (this.gameOptions.excludes === null) return [];
         return this.gameOptions.excludes.map((x) => x.id);
+    }
+
+    /** @returns a list containing the excluded group names */
+    getExcludesGroupNames(): string[] {
+        if (this.gameOptions.excludes === null) return [];
+        return this.gameOptions.excludes.map((x) => x.name);
     }
 
     /** @returns a friendly, potentially truncated, string displaying the currently selected exclude option */
