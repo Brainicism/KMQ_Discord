@@ -38,17 +38,17 @@ export default class Player {
     /**
      * Prints the tag (including the discriminator) in the smaller scoreboard, but only
      * the username in the larger scoreboard
-     * @param boldName - Whether the player's name should be bolded
+     * @param roundWinner - Whether the player won the previous round
      * @param keepDiscriminator - Whether the displayed name should include the Discord discriminator
      * @returns what to display as the name of the player in the scoreboard
      */
-    getDisplayedName(boldName: boolean, keepDiscriminator: boolean): string {
+    getDisplayedName(roundWinner: boolean, keepDiscriminator: boolean): string {
         let name = this.name;
         if (!keepDiscriminator) {
             name = this.name.slice(0, -5);
         }
-        if (boldName) {
-            name = bold(name);
+        if (roundWinner) {
+            name = `🎵 ${bold(name)}`;
         }
         return name;
     }

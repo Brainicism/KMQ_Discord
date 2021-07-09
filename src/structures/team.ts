@@ -1,4 +1,5 @@
 import Player from "./player";
+import { bold } from "../helpers/utils";
 
 export default class Team extends Player {
     private players: { [userID: string]: Player };
@@ -20,10 +21,15 @@ export default class Team extends Player {
     }
 
     /**
+     * @param roundWinner - Whether the team won the previous round
      * @returns what to display as the name of the team in the scoreboard
      */
-    getDisplayedName(_largerScoreboard: boolean, _duplicateName?: boolean): string {
-        return `Team ${this.getName()}`;
+    getDisplayedName(roundWinner: boolean, _duplicateName: boolean): string {
+        let name = `Team ${this.getName()}`;
+        if (roundWinner) {
+            name = `🎵 ${bold(name)}`;
+        }
+        return name;
     }
 
     /**
