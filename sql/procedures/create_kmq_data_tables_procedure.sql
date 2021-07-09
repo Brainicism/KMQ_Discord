@@ -7,6 +7,7 @@ BEGIN
 	CREATE TABLE available_songs_temp (
 		song_name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
 		song_aliases VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+		artist_aliases VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
 		link VARCHAR(255) NOT NULL,
 		artist_name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
 		members ENUM('female','male','coed') NOT NULL,
@@ -26,6 +27,7 @@ BEGIN
 	SELECT
 		TRIM(app_kpop.name) AS song_name,
 		name_aka AS song_aliases,
+		kpop_videos.app_kpop_group.alias AS artist_aliases,
 		vlink AS link,
 		TRIM(kpop_videos.app_kpop_group.name) AS artist_name,
 		kpop_videos.app_kpop_group.members AS members,
@@ -48,6 +50,7 @@ BEGIN
 	SELECT
 		TRIM(app_kpop_audio.name) AS song_name,
 		name_aka AS song_aliases,
+		kpop_videos.app_kpop_group.alias AS artist_aliases,
 		vlink AS link,
 		TRIM(kpop_videos.app_kpop_group.name) AS artist_name,
 		kpop_videos.app_kpop_group.members AS members,

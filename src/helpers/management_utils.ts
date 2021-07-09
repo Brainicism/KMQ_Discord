@@ -35,7 +35,7 @@ import BotListingManager, { usersQualifiedForVoteBonus } from "./bot_listing_man
 import storeDailyStats from "../scripts/store-daily-stats";
 import { seedAndDownloadNewSongs } from "../seed/seed_db";
 import backupKmqDatabase from "../scripts/backup-kmq-database";
-import { chooseRandom, parseJsonFile } from "./utils";
+import { chooseRandom } from "./utils";
 import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
 import { EnvType } from "../types";
@@ -46,7 +46,6 @@ const logger = _logger("management_utils");
 
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
 
-const artistAliasesFilePath = path.resolve(__dirname, "../../data/artist_aliases.json");
 let cachedCommandFiles: { [commandName: string]: BaseCommand } = null;
 
 /** Registers listeners on client events */
@@ -155,20 +154,24 @@ export async function reloadAliases() {
     const songAliasMapping = await dbContext.kmq("available_songs")
         .select(["link", "song_aliases"])
         .where("song_aliases", "<>", "");
+
+    const artistAliasMapping = await dbContext.kmq("available_songs")
+        .distinct(["artist_name", "artist_aliases"])
+        .select(["artist_name", "artist_aliases"])
+        .where("artist_aliases", "<>", "");
+
     const newSongAliases = {};
     for (const mapping of songAliasMapping) {
         newSongAliases[mapping["link"]] = mapping["song_aliases"].split(";");
     }
 
-    state.aliases.song = newSongAliases;
-    logger.info("Reloaded song alias data");
-
-    try {
-        state.aliases.artist = parseJsonFile(artistAliasesFilePath);
-        logger.info("Reloaded artist alias data");
-    } catch (err) {
-        logger.error("Error parsing alias files");
+    const newArtistAliases = {};
+    for (const mapping of artistAliasMapping) {
+        newArtistAliases[mapping["artist_name"]] = mapping["artist_aliases"].split(";");
     }
+    state.aliases.artist = newArtistAliases;
+    state.aliases.song = newSongAliases;
+    logger.info("Reloaded alias data");
 }
 
 /**

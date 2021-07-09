@@ -228,9 +228,9 @@ export async function getMatchingGroupNames(rawGroupNames: Array<string>): Promi
     // apply artist aliases
     for (let i = 0; i < rawGroupNames.length; i++) {
         const groupName = rawGroupNames[i];
-        const matchingAlias = Object.entries(state.aliases.artist.matchAliases).find((x) => cleanArtistName(x[0]) === cleanArtistName(groupName));
+        const matchingAlias = Object.entries(state.aliases.artist).find((artistAliasTuple) => artistAliasTuple[1].map((x) => cleanArtistName(x)).includes(cleanArtistName(groupName)));
         if (matchingAlias) {
-            rawGroupNames[i] = matchingAlias[1];
+            rawGroupNames[i] = matchingAlias[0];
         }
     }
     const artistIDQuery = dbContext.kmq("kpop_groups")

@@ -29,7 +29,7 @@ describe("constructor defaults", () => {
 
     describe("aliases", () => {
         beforeEach(() => {
-            state.aliases.artist.guessAliases = {};
+            state.aliases.artist = {};
             state.aliases.song = {};
         });
         describe("song aliases", () => {
@@ -44,7 +44,7 @@ describe("constructor defaults", () => {
         describe("artist aliases", () => {
             describe("artist has an alias", () => {
                 it("records the aliases as an accepted answer", () => {
-                    state.aliases.artist.guessAliases["Person2"] = ["Person Two", "Person Too"];
+                    state.aliases.artist["Person2"] = ["Person Two", "Person Too"];
                     gameRound = new GameRound("A really epic song", "Person2", "abcde", 2021);
                     assert.deepStrictEqual(gameRound.acceptedArtistAnswers, ["Person2", "Person Two", "Person Too"]);
                 });
