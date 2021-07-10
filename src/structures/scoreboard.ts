@@ -51,14 +51,16 @@ export default class Scoreboard {
         winnerStr += "win!";
         return winnerStr;
     }
-
-    /** @returns An array of DiscordEmbed fields representing each participant's score */
-    getScoreboardEmbedFields(roundResultIDs?: Set<string>): Array<{ name: string, value: string, inline: boolean }> {
+    /**
+     * @param roundWinnerIDs - The IDs of all players that won the current round, if any
+     * @returns An array of DiscordEmbed fields representing each participant's score
+     */
+    getScoreboardEmbedFields(roundWinnerIDs?: Set<string>): Array<{ name: string, value: string, inline: boolean }> {
         return Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
             .map((x, index) => (
                 {
-                    name: `${index + 1}. ${x.getDisplayedName(roundResultIDs?.has(x.getID()), true)}`,
+                    name: `${index + 1}. ${x.getDisplayedName(roundWinnerIDs?.has(x.getID()), true)}`,
                     value: x.getDisplayedScore(),
                     inline: true,
                 }));
