@@ -12,6 +12,7 @@ declare namespace NodeJS {
         DISCORD_BOTS_GG_TOKEN?: string,
         DISCORD_BOT_LIST_TOKEN?: string,
         DEBUG_SERVER_ID?: string,
+        DRY_RUN_KEEP_ALIVE?: boolean,
         DEBUG_TEXT_CHANNEL_ID?: string,
         BOT_PREFIX: string,
         NODE_ENV: string,

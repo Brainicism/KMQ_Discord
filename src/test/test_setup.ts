@@ -13,7 +13,9 @@ before(async function () {
     sandbox.stub(discordUtils, "sendErrorMessage");
     sandbox.stub(discordUtils, "sendInfoMessage");
     sandbox.stub(Player, "fromUserID").callsFake((id) => (new Player("", id, "", 0)));
-    log4js.getLogger().level = "off";
+    log4js.getLogger().level = "error";
+    await dbContext.agnostic.raw("DROP DATABASE kmq_test");
+    await dbContext.agnostic.raw("CREATE DATABASE kmq_test");
     await dbContext.kmq.migrate.latest({
         directory: kmqKnexConfig.migrations.directory,
     });

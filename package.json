@@ -17,10 +17,12 @@
     "docker-db": "cd docker/ && docker-compose up -d db",
     "docker-dev": "cd docker/ && NODE_ENV=development docker-compose up  --exit-code-from kmq --build kmq",
     "docker-dryrun": "cd docker/ && NODE_ENV=dry-run docker-compose up --exit-code-from kmq --build kmq",
+    "docker-dryrun-keep-alive": "cd docker/ && NODE_ENV=dry-run DRY_RUN_KEEP_ALIVE=true docker-compose up --exit-code-from kmq --build kmq",
     "docker-prod": "cd docker/ && NODE_ENV=production docker-compose up --exit-code-from kmq --build kmq",
     "backup": "ts-node src/scripts/backup-kmq-database",
     "test": "NODE_ENV=test mocha -r ts-node/register 'src/test/**/*.ts'",
-    "test_ci": "NODE_ENV=test mocha -- --forbid-only -r ts-node/register 'src/test/**/*.ts'"
+    "test_ci": "NODE_ENV=test mocha -- --forbid-only -r ts-node/register 'src/test/**/*.ts'",
+    "test_facts": "npx ts-node src/fact_generator.ts"
   },
   "author": "Brian Le",
   "license": "GPL-3.0",
@@ -50,7 +52,8 @@
     "ts-node": "^10.0.0",
     "uuid": "^8.3.2",
     "ytdl-core": "^4.8.3",
-    "zlib-sync": "^0.1.7"
+    "zlib-sync": "^0.1.7",
+    "typescript": "~4.3.2"
   },
   "devDependencies": {
     "@types/mocha": "^8.2.1",
@@ -64,8 +67,7 @@
     "eslint-plugin-only-warn": "^1.0.2",
     "eslint-plugin-tsdoc": "^0.2.11",
     "mocha": "^9.0.0",
-    "sinon": "^11.1.1",
-    "typescript": "~4.3.2"
+    "sinon": "^11.1.1"
   },
   "description": "K-pop guessing game over Discord"
 }

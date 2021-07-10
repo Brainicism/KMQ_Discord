@@ -3,6 +3,7 @@ import { URL } from "url";
 import dbContext from "./database_context";
 import { chooseRandom, getOrdinalNum, weekOfYear } from "./helpers/utils";
 import _logger from "./logger";
+import { EnvType } from "./types";
 
 const logger = _logger("fact_generator");
 
@@ -41,28 +42,35 @@ interface GaonWeeklyEntry {
 
 export async function reloadFactCache() {
     logger.info("Regenerating fact cache...");
-    await generateFacts();
+    factCache = await generateFacts();
 }
 
-async function resolveFactPromises(promises: Promise<string[]>[]): Promise<string[][]> {
-    const settledPromises = await Promise.allSettled(promises);
+async function resolveFactPromises(promises: (() => Promise<string[]>)[]): Promise<{ failures: number, result: string[][] }> {
+    const settledPromises = await Promise.allSettled(promises.map((x) => x()));
     const rejectedPromises = settledPromises.filter((x) => x["status"] === "rejected") as PromiseRejectedResult[];
     for (const rejectedPromise of rejectedPromises) {
         logger.error(`Failed to evaluate fact: ${rejectedPromise.reason}`);
     }
     const resolvedPromises = settledPromises.filter((x) => x["status"] === "fulfilled") as PromiseFulfilledResult<string[]>[];
-    return resolvedPromises.map((x) => x["value"]);
+    return { failures: rejectedPromises.length, result: resolvedPromises.map((x) => x["value"]) };
 }
 
-async function generateFacts() {
-    const funFactPromises = funFactFunctions.map((x) => x());
-    const kmqFactPromises = kmqFactFunctions.map((x) => x());
+export async function generateFacts(): Promise<{
+    funFacts: string[][],
+    kmqFacts: string[][],
+    lastUpdated: number,
+    failures: number
+}> {
+    const funFactPromises = funFactFunctions.map((x) => x);
+    const kmqFactPromises = kmqFactFunctions.map((x) => x);
     const funFacts = await resolveFactPromises(funFactPromises);
     const kmqFacts = await resolveFactPromises(kmqFactPromises);
-    factCache = {
-        funFacts: funFacts.filter((facts) => facts.length > 0),
-        kmqFacts: kmqFacts.filter((facts) => facts.length > 0),
+
+    return {
+        funFacts: funFacts.result.filter((facts) => facts.length > 0),
+        kmqFacts: kmqFacts.result.filter((facts) => facts.length > 0),
         lastUpdated: Date.now(),
+        failures: funFacts.failures + kmqFacts.failures,
     };
 }
 
@@ -346,6 +354,7 @@ async function viewsBySolo(): Promise<string[]> {
 }
 
 async function songReleaseAnniversaries(): Promise<string[]> {
+    if (process.env.NODE_ENV === EnvType.TEST) return [];
     const result = await dbContext.kmq("available_songs")
         .select(dbContext.kmq.raw("song_name, artist_name, YEAR(publishedon) as publish_year, link"))
         .whereRaw("WEEK(publishedon) = WEEK(NOW())")
@@ -356,6 +365,7 @@ async function songReleaseAnniversaries(): Promise<string[]> {
 }
 
 async function songGuessRate(): Promise<string[]> {
+    if (process.env.NODE_ENV === EnvType.TEST) return [];
     const result = await dbContext.kmq("song_guess_count")
         .select(dbContext.kmq.raw("song_name, artist_name, ROUND(correct_guesses/rounds_played * 100, 2) as c, link, rounds_played"))
         .where("rounds_played", ">", 2500)
@@ -386,7 +396,7 @@ async function bigThreeDominance(): Promise<string[]> {
 }
 
 async function fanclubName(): Promise<Array<string>> {
-    const result = await dbContext.kmq("kpop_groups")
+    const result = await dbContext.kpopVideos("app_kpop_group")
         .select(["name", "fanclub"])
         .where("fanclub", "!=", "")
         .orderByRaw("RAND()")
@@ -396,7 +406,7 @@ async function fanclubName(): Promise<Array<string>> {
 }
 
 async function closeBirthdays(): Promise<Array<string>> {
-    const result = await dbContext.kmq("kpop_groups")
+    const result = await dbContext.kpopVideos("app_kpop_group")
         .select(dbContext.kmq.raw("name, MONTH(date_birth) AS birth_month, DATE_FORMAT(date_birth, '%M %e') as formatted_bday"))
         .whereNotNull("date_birth")
         .whereRaw("MONTH(date_birth) = MONTH(CURRENT_DATE())")
@@ -562,3 +572,11 @@ function generateSongArtistHyperlink(songName: string, artistName: string, video
 
     return `["${songName}" by ${artistName}](${url})`;
 }
+
+(async () => {
+    if (require.main === module) {
+        const facts = await generateFacts();
+        await dbContext.destroy();
+        process.exit(facts.failures === 0 ? 0 : 1);
+    }
+})();

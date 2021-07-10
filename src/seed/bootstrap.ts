@@ -18,9 +18,7 @@ async function tableExists(db: DatabaseContext, tableName: string) {
     return (await db.agnostic("information_schema.schemata").where("schema_name", "=", tableName)).length === 1;
 }
 async function kmqDatabaseExists(db: DatabaseContext): Promise<boolean> {
-    const kmqExists = await tableExists(db, "kmq");
-    const kmqTestExists = await tableExists(db, "kmq_test");
-    return kmqExists && kmqTestExists;
+    return tableExists(db, "kmq");
 }
 
 async function kpopDataDatabaseExists(db: DatabaseContext): Promise<boolean> {
@@ -79,7 +77,6 @@ async function bootstrapDatabases() {
     if (!(await kmqDatabaseExists(db))) {
         logger.info("Performing migrations on KMQ database");
         await db.agnostic.raw("CREATE DATABASE IF NOT EXISTS kmq");
-        await db.agnostic.raw("CREATE DATABASE IF NOT EXISTS kmq_test");
     }
 
     performMigrations();
