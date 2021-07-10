@@ -1,5 +1,9 @@
 Welcome to KMQ, the K-Pop song guessing game. Type `,play` while in a voice channel to begin a game of KMQ! The bot will automatically start playing a random song, and the first person to type in the correct guess will win a point. 
 
+You can invite the bot [here](https://discord.com/oauth2/authorize?client_id=508759831755096074&scope=bot&permissions=3501120).
+
+Join the official KMQ Discord server [here](https://discord.com/invite/RCuzwYV).
+
 ![guess_song](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/guess_song.png)
 
 You can see the current scoreboard by typing `,score`. It is also shown after the end of each round. A song can be skipped by using `,skip`, which will skip the song once a majority of participants do the same.  A game of KMQ can be ended by typing `,end`, and a winner will be announced.
@@ -92,7 +96,7 @@ Setting a timer limits players to guess in under `time` seconds before the round
 
 ![timer](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/timer.png)
 
-## ,shuffle [random|unique]
+## ,shuffle [random | unique]
 Setting the shuffle mode to `unique` plays through every song once before any are repeated. With `,shuffle random`, songs matching the user's criteria are randomly chosen from before every round, so there is a chance of repeated songs within a timespan depending on the total amount of songs.
 
 ![shuffle](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/shuffle.png)
