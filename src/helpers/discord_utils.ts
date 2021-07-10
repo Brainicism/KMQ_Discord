@@ -25,7 +25,7 @@ export const EMBED_SUCCESS_BONUS_COLOR = 0xFFD700; // GOLD
 const EMBED_FIELDS_PER_PAGE = 20;
 const REQUIRED_TEXT_PERMISSIONS = ["addReactions" as const, "embedLinks" as const];
 const REQUIRED_VOICE_PERMISSIONS = ["viewChannel" as const, "voiceConnect" as const, "voiceSpeak" as const];
-const SCOREBOARD_FIELD_CUTOFF = 12;
+const SCOREBOARD_FIELD_CUTOFF = 9;
 const MAX_SCOREBOARD_PLAYERS = 30;
 
 /**
@@ -182,10 +182,17 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     const useLargerScoreboard = scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
     const description = `${correctGuess ? correctDescription : "Nobody got it."}\n\nhttps://youtu.be/${gameRound.videoID}${uniqueSongMessage} ${!scoreboard.isEmpty() && !useLargerScoreboard ? "\n\n**Scoreboard**" : ""}`;
     let fields: Array<{ name: string, value: string, inline: boolean }>;
-    if (useLargerScoreboard) {
-        fields = scoreboard.getScoreboardEmbedThreeFields(MAX_SCOREBOARD_PLAYERS);
+    let roundResultIDs: Set<string>;
+    if (scoreboard instanceof TeamScoreboard) {
+        const teamScoreboard = scoreboard as TeamScoreboard;
+        roundResultIDs = new Set(playerRoundResults.map((x) => teamScoreboard.getTeamOfPlayer(x.player.id).getID()));
     } else {
-        fields = scoreboard.getScoreboardEmbedFields();
+        roundResultIDs = new Set(playerRoundResults.map((x) => x.player.id));
+    }
+    if (useLargerScoreboard) {
+        fields = scoreboard.getScoreboardEmbedThreeFields(MAX_SCOREBOARD_PLAYERS, roundResultIDs);
+    } else {
+        fields = scoreboard.getScoreboardEmbedFields(roundResultIDs);
     }
     if (fact) {
         fields.push({
