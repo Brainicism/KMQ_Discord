@@ -1,5 +1,5 @@
 import { getUserTag } from "../helpers/discord_utils";
-import { roundDecimal } from "../helpers/utils";
+import { roundDecimal, bold } from "../helpers/utils";
 import state from "../kmq";
 
 export default class Player {
@@ -38,15 +38,19 @@ export default class Player {
     /**
      * Prints the tag (including the discriminator) in the smaller scoreboard, but only
      * the username in the larger scoreboard
-     * @param largerScoreboard - Whether the name format is for the larger scoreboard
-     * @param duplicateName - Whether another user shares the same name
+     * @param wonRound - Whether the player won the previous round
+     * @param keepDiscriminator - Whether the displayed name should include the Discord discriminator
      * @returns what to display as the name of the player in the scoreboard
      */
-    getDisplayedName(largerScoreboard: boolean, duplicateName?: boolean): string {
-        if (largerScoreboard && !duplicateName) {
-            return this.name.slice(0, -5);
+    getDisplayedName(wonRound: boolean, keepDiscriminator: boolean): string {
+        let name = this.name;
+        if (!keepDiscriminator) {
+            name = this.name.slice(0, -5);
         }
-        return this.name;
+        if (wonRound) {
+            name = `🎵 ${bold(name)}`;
+        }
+        return name;
     }
 
     /** @returns the player's current score */
