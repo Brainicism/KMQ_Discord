@@ -241,16 +241,17 @@ export async function getMatchingGroupNames(rawGroupNames: Array<string>, aliasA
 
     const matchingGroupNames = matchingGroups.map((x) => x.name.toUpperCase());
     const unrecognizedGroups = rawGroupNames.filter((x) => !matchingGroupNames.includes(x.toUpperCase()));
-
-    if (unrecognizedGroups.length > 0 && !aliasApplied) {
-        // apply artist aliases
-        for (let i = 0; i < rawGroupNames.length; i++) {
-            const groupName = rawGroupNames[i];
+    const result: GroupMatchResults = { unmatchedGroups: unrecognizedGroups, matchedGroups: matchingGroups };
+    if (result.unmatchedGroups.length > 0 && !aliasApplied) {
+        // apply artist aliases for unmatched groups
+        for (let i = 0; i < result.unmatchedGroups.length; i++) {
+            const groupName = result.unmatchedGroups[i];
             const matchingAlias = Object.entries(state.aliases.artist).find((artistAliasTuple) => artistAliasTuple[1].map((x) => cleanArtistName(x)).includes(cleanArtistName(groupName)));
             if (matchingAlias) {
-                rawGroupNames[i] = matchingAlias[0];
+                rawGroupNames[rawGroupNames.indexOf(groupName)] = matchingAlias[0];
             }
         }
+        // try again but with aliases
         return getMatchingGroupNames(rawGroupNames, true);
     }
 

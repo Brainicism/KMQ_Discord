@@ -63,7 +63,6 @@ const mockArtists = [
     { id: 12, name: "J + K", members: "coed", issolo: "n", id_artist1: 10, id_artist2: 11 },
     { id: 13, name: "F + G", members: "female", issolo: "n", id_artist1: 6, id_artist2: 7 },
     { id: 14, name: "E + H", members: "female", issolo: "n", id_artist1: 5, id_artist2: 8 },
-    { id: 15, name: "conflictingName", members: "coed", issolo: "n" },
 ];
 
 const mockSongs = [...Array(1000).keys()].map((i) => {
@@ -482,16 +481,10 @@ describe("song query", () => {
             });
         });
         describe("artist aliases", () => {
-            describe("an artist name and an artist alias conflict", () => {
-                it("should prefer the name matching the artist over the alias", async () => {
-                    const conflictingArtistActualName = "conflictingName";
-                    const conflictingName = "A";
-                    state.aliases.artist[conflictingArtistActualName] = [conflictingName];
-                    const matchResults = await getMatchingGroupNames([conflictingName]);
-                    assert.deepStrictEqual(matchResults.matchedGroups.map((x) => x.name), [conflictingName]);
-                    assert.deepStrictEqual(matchResults.unmatchedGroups.length, 0);
-                });
+            beforeEach(() => {
+                state.aliases.artist = {};
             });
+
             describe("no alias is specified", () => {
                 it("should not match any groups", async () => {
                     state.aliases.artist = {};
@@ -501,7 +494,38 @@ describe("song query", () => {
                     assert.deepStrictEqual(matchResults.unmatchedGroups, [artistBAlias]);
                 });
             });
+
             describe("alias is specified", () => {
+                beforeEach(() => {
+                    state.aliases.artist = {};
+                });
+
+                describe("an artist name and an artist alias conflict", () => {
+                    it("should prefer the name matching the artist over the alias", async () => {
+                        // Artist 'A', Artist 'B' with conflicting alias 'A'
+                        const conflictingArtistActualName = "B";
+                        const conflictingName = "A";
+                        state.aliases.artist[conflictingArtistActualName] = [conflictingName];
+                        const matchResults = await getMatchingGroupNames([conflictingName]);
+                        assert.deepStrictEqual(matchResults.matchedGroups.map((x) => x.name), [conflictingName]);
+                        assert.deepStrictEqual(matchResults.unmatchedGroups.length, 0);
+                    });
+                });
+
+                describe("one alias match, one non-alias match", () => {
+                    it("should not try to alias the non-alias match", async () => {
+                        // Artist 'B' matches with alias, Artist 'D' matches with non-alias (has conflicting alias with 'C')
+                        const artistBAlias = "B's other name";
+                        const randomArtist = "C";
+                        const randomArtistConflictingAlias = "D";
+                        state.aliases.artist["B"] = [artistBAlias];
+                        state.aliases.artist[randomArtist] = [randomArtistConflictingAlias];
+                        const matchResults = await getMatchingGroupNames([artistBAlias, randomArtistConflictingAlias]);
+                        assert.deepStrictEqual(matchResults.matchedGroups.map((x) => x.name), ["B", randomArtistConflictingAlias]);
+                        assert.deepStrictEqual(matchResults.unmatchedGroups.length, 0);
+                    });
+                });
+
                 describe("names match exactly", () => {
                     it("should match group", async () => {
                         const artistBAlias = "B's other name";
@@ -519,6 +543,17 @@ describe("song query", () => {
                         const matchResults = await getMatchingGroupNames([artistBAlias]);
                         assert.deepStrictEqual(matchResults.matchedGroups.map((x) => x.name), ["B"]);
                         assert.deepStrictEqual(matchResults.unmatchedGroups.length, 0);
+                    });
+                });
+
+                describe("one alias match, one non-match", () => {
+                    it("should have one match, and one non-match", async () => {
+                        const artistBAlias = "        B'sother:name!         ";
+                        state.aliases.artist["B"] = [artistBAlias];
+                        const nonMatchArtist = "Weee";
+                        const matchResults = await getMatchingGroupNames([artistBAlias, nonMatchArtist]);
+                        assert.deepStrictEqual(matchResults.matchedGroups.map((x) => x.name), ["B"]);
+                        assert.deepStrictEqual(matchResults.unmatchedGroups, [nonMatchArtist]);
                     });
                 });
             });
