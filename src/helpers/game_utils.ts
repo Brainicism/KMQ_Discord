@@ -224,15 +224,7 @@ export async function endSession(gameSession: GameSession) {
  * @param rawGroupNames - List of user-inputted group names
  * @returns a list of recognized/unrecognized groups
  */
-export async function getMatchingGroupNames(rawGroupNames: Array<string>): Promise<GroupMatchResults> {
-    // apply artist aliases
-    for (let i = 0; i < rawGroupNames.length; i++) {
-        const groupName = rawGroupNames[i];
-        const matchingAlias = Object.entries(state.aliases.artist).find((artistAliasTuple) => artistAliasTuple[1].map((x) => cleanArtistName(x)).includes(cleanArtistName(groupName)));
-        if (matchingAlias) {
-            rawGroupNames[i] = matchingAlias[0];
-        }
-    }
+export async function getMatchingGroupNames(rawGroupNames: Array<string>, aliasApplied = false): Promise<GroupMatchResults> {
     const artistIDQuery = dbContext.kmq("kpop_groups")
         .select(["id"])
         .whereIn("name", rawGroupNames);
@@ -249,6 +241,19 @@ export async function getMatchingGroupNames(rawGroupNames: Array<string>): Promi
 
     const matchingGroupNames = matchingGroups.map((x) => x.name.toUpperCase());
     const unrecognizedGroups = rawGroupNames.filter((x) => !matchingGroupNames.includes(x.toUpperCase()));
+
+    if (unrecognizedGroups.length > 0 && !aliasApplied) {
+        // apply artist aliases
+        for (let i = 0; i < rawGroupNames.length; i++) {
+            const groupName = rawGroupNames[i];
+            const matchingAlias = Object.entries(state.aliases.artist).find((artistAliasTuple) => artistAliasTuple[1].map((x) => cleanArtistName(x)).includes(cleanArtistName(groupName)));
+            if (matchingAlias) {
+                rawGroupNames[i] = matchingAlias[0];
+            }
+        }
+        return getMatchingGroupNames(rawGroupNames, true);
+    }
+
     if (unrecognizedGroups.length) {
         return {
             unmatchedGroups: unrecognizedGroups,
