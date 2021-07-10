@@ -63,6 +63,7 @@ const mockArtists = [
     { id: 12, name: "J + K", members: "coed", issolo: "n", id_artist1: 10, id_artist2: 11 },
     { id: 13, name: "F + G", members: "female", issolo: "n", id_artist1: 6, id_artist2: 7 },
     { id: 14, name: "E + H", members: "female", issolo: "n", id_artist1: 5, id_artist2: 8 },
+    { id: 15, name: "conflictingName", members: "coed", issolo: "n" },
 ];
 
 const mockSongs = [...Array(1000).keys()].map((i) => {
@@ -481,10 +482,16 @@ describe("song query", () => {
             });
         });
         describe("artist aliases", () => {
-            beforeEach(() => {
-                state.aliases.artist = {};
+            describe("an artist name and an artist alias conflict", () => {
+                it("should prefer the name matching the artist over the alias", async () => {
+                    const conflictingArtistActualName = "conflictingName";
+                    const conflictingName = "A";
+                    state.aliases.artist[conflictingArtistActualName] = [conflictingName];
+                    const matchResults = await getMatchingGroupNames([conflictingName]);
+                    assert.deepStrictEqual(matchResults.matchedGroups.map((x) => x.name), [conflictingName]);
+                    assert.deepStrictEqual(matchResults.unmatchedGroups.length, 0);
+                });
             });
-
             describe("no alias is specified", () => {
                 it("should not match any groups", async () => {
                     state.aliases.artist = {};

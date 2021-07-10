@@ -14,7 +14,7 @@ export default class ScoreCommand implements BaseCommand {
         priority: 50,
     };
 
-    aliases = ["scoreboard"];
+    aliases = ["scoreboard", "sb"];
 
     call = async ({ message, gameSessions }: CommandArgs) => {
         const gameSession = gameSessions[message.guildID];
