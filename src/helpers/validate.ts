@@ -12,18 +12,19 @@ const logger = _logger("validate");
  * @param warning - the warning text
  * @param arg - The incorrect argument
  */
-async function sendValidationErrorMessage(message: GuildTextableMessage, warning: string, arg: string | Array<string>) {
-    await sendErrorMessage(MessageContext.fromMessage(message), { title: "Input validation error", description: warning });
+async function sendValidationErrorMessage(message: GuildTextableMessage, warning: string, arg: string | Array<string>, usage: string) {
+    await sendErrorMessage(MessageContext.fromMessage(message), { title: "Input validation error", description: warning, footerText: usage });
     logger.warn(`${getDebugLogHeader(message)} | ${warning}. val = ${arg}`);
 }
 
-export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, validations: CommandValidations) => {
+export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, validations: CommandValidations, usage: string) => {
     if (!validations) return true;
     const args = parsedMessage.components;
     if (args.length > validations.maxArgCount || args.length < validations.minArgCount) {
         sendValidationErrorMessage(message,
             `Incorrect number of arguments. See \`${process.env.BOT_PREFIX}help ${parsedMessage.action}\` for usage.`,
-            args);
+            args,
+            usage);
         return false;
     }
     for (let i = 0; i < args.length; i++) {
@@ -36,7 +37,8 @@ export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, val
                 if (Number.isNaN(Number(arg))) {
                     sendValidationErrorMessage(message,
                         `Expected numeric value for \`${validation.name}\`.`,
-                        arg);
+                        arg,
+                        usage);
                     return false;
                 }
                 // parse as integer for now, might cause problems later?
@@ -44,13 +46,15 @@ export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, val
                 if ("minValue" in validation && intArg < validation.minValue) {
                     sendValidationErrorMessage(message,
                         `Expected value greater than \`${validation.minValue}\` for \`${validation.name}\`.`,
-                        arg);
+                        arg,
+                        usage);
                     return false;
                 }
                 if ("maxValue" in validation && intArg > validation.maxValue) {
                     sendValidationErrorMessage(message,
                         `Expected value less than or equal to \`${validation.maxValue}\` for \`${validation.name}\`.`,
-                        arg);
+                        arg,
+                        usage);
                     return false;
                 }
                 break;
@@ -60,7 +64,8 @@ export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, val
                 if (!(arg === "false" || arg === "true")) {
                     sendValidationErrorMessage(message,
                         `Expected true/false value for \`${validation.name}\`.`,
-                        arg);
+                        arg,
+                        usage);
                     return false;
                 }
                 break;
@@ -71,7 +76,8 @@ export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, val
                 if (!enums.includes(arg)) {
                     sendValidationErrorMessage(message,
                         `Expected one of the following valid \`${validation.name}\` values: (${arrayToString(enums)}).`,
-                        arg);
+                        arg,
+                        usage);
                     return false;
                 }
                 args[i] = arg;
@@ -81,7 +87,8 @@ export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, val
                 if (arg.length !== 1) {
                     sendValidationErrorMessage(message,
                         `Expected a character for \`${validation.name}\`.`,
-                        arg);
+                        arg,
+                        usage);
                     return false;
                 }
                 break;

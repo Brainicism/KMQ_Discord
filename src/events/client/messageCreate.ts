@@ -48,7 +48,7 @@ export default async function messageCreateHandler(message: Eris.Message) {
 
     const invokedCommand = parsedMessage ? state.commands[parsedMessage.action] : null;
     if (invokedCommand) {
-        if (validate(message, parsedMessage, invokedCommand.validations)) {
+        if (validate(message, parsedMessage, invokedCommand.validations, invokedCommand.help.usage)) {
             if (!(await textPermissionsCheck(message, textChannel))) {
                 return;
             }
