@@ -5,7 +5,6 @@ import GameSession from "../structures/game_session";
 import GuildPreference from "../structures/guild_preference";
 import { MatchedArtist, QueriedSong } from "../types";
 import { getForcePlaySong, isDebugMode, isForcedSongActive } from "./debug_utils";
-import { sendEndGameMessage } from "./discord_utils";
 import { Gender } from "../commands/game_options/gender";
 import { ArtistType } from "../commands/game_options/artisttype";
 import { FOREIGN_LANGUAGE_TAGS, LanguageType } from "../commands/game_options/language";
@@ -208,16 +207,6 @@ export async function getGuildPreference(guildID: string): Promise<GuildPreferen
         .map((x) => ({ [x["option_name"]]: JSON.parse(x["option_value"]) }))
         .reduce(((total, curr) => Object.assign(total, curr)), {});
     return GuildPreference.fromGuild(guildPreferences[0].guild_id, gameOptionPairs);
-}
-
-/**
- * Perform end of GameSession cleanup activities
- * @param gameSession - The GameSession to end
- */
-export async function endSession(gameSession: GameSession) {
-    if (gameSession.finished) return;
-    await gameSession.endSession();
-    await sendEndGameMessage(gameSession.textChannelID, gameSession);
 }
 
 /**

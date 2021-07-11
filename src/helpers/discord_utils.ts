@@ -349,10 +349,10 @@ export async function sendOptionsMessage(messageContext: MessageContext,
  * @param textChannel - The channel where the message should be delivered
  * @param gameSession - The GameSession that has ended
  */
-export async function sendEndGameMessage(textChannelID: string, gameSession: GameSession) {
+export async function sendEndGameMessage(gameSession: GameSession) {
     const footerText = `${gameSession.getCorrectGuesses()}/${gameSession.getRoundsPlayed()} songs correctly guessed!`;
     if (gameSession.scoreboard.isEmpty()) {
-        await sendInfoMessage(new MessageContext(textChannelID), {
+        await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
             color: EMBED_INFO_COLOR,
             title: "Nobody won",
             footerText,
@@ -378,7 +378,7 @@ export async function sendEndGameMessage(textChannelID: string, gameSession: Gam
                 },
             );
         }
-        await sendInfoMessage(new MessageContext(textChannelID), {
+        await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
             color: gameSession.gameType !== GameType.TEAMS && state.bonusUsers.has(winners[0].id) ? EMBED_SUCCESS_BONUS_COLOR : EMBED_SUCCESS_COLOR,
             description: !useLargerScoreboard ? "**Scoreboard**" : null,
             thumbnailUrl: winners[0].getAvatarURL(),
