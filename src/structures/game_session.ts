@@ -5,9 +5,9 @@ import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
-    getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, getUserVoiceChannel,
+    getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, getUserVoiceChannel, sendEndGameMessage,
 } from "../helpers/discord_utils";
-import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, endSession } from "../helpers/game_utils";
+import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList } from "../helpers/game_utils";
 import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference, bold, codeLine } from "../helpers/utils";
 import state from "../kmq";
 import _logger from "../logger";
@@ -240,9 +240,9 @@ export default class GameSession {
         // check if duration has been reached
         if (remainingDuration && remainingDuration < 0) {
             logger.info(`gid: ${this.guildID} | Game session duration reached`);
-            endSession(this);
+            this.endSession();
         } else if (this.scoreboard.gameFinished(guildPreference)) {
-            endSession(this);
+            this.endSession();
         }
     }
 
@@ -250,6 +250,9 @@ export default class GameSession {
      * Ends the current GameSession
      */
     endSession = async (): Promise<void> => {
+        if (this.finished) {
+            return;
+        }
         this.finished = true;
         deleteGameSession(this.guildID);
         this.endRound({ correct: false }, await getGuildPreference(this.guildID));
@@ -291,6 +294,8 @@ export default class GameSession {
             }
             sendInfoMessage(new MessageContext(this.textChannelID), { title: "🚀 Power up!", description: levelUpMessages.join("\n"), thumbnailUrl: KmqImages.THUMBS_UP });
         }
+
+        await sendEndGameMessage(this);
 
         // commit guild stats
         await dbContext.kmq("guild_preferences")
@@ -386,7 +391,7 @@ export default class GameSession {
             } catch (err) {
                 await sendErrorMessage(messageContext, { title: "Error selecting song", description: "Please try starting the round again. If the issue persists, report it in our official KMQ server." });
                 logger.error(`${getDebugLogHeader(messageContext)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
-                this.endSession();
+                await this.endSession();
                 return;
             }
         }
@@ -440,7 +445,7 @@ export default class GameSession {
         }
         if (randomSong === null) {
             sendErrorMessage(messageContext, { title: "Song Query Error", description: "Failed to find songs matching this criteria. Try to broaden your search." });
-            this.endSession();
+            await this.endSession();
             return;
         }
 
@@ -607,7 +612,7 @@ export default class GameSession {
             if (!this.connection.channelID) {
                 logger.info(`${getDebugLogHeader(messageContext)} | Bot was kicked from voice channel`);
                 this.stopGuessTimeout();
-                endSession(this);
+                await this.endSession();
                 return;
             }
 
