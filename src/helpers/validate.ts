@@ -12,12 +12,12 @@ const logger = _logger("validate");
  * @param warning - the warning text
  * @param arg - The incorrect argument
  */
-async function sendValidationErrorMessage(message: GuildTextableMessage, warning: string, arg: string | Array<string>, usage: string) {
+async function sendValidationErrorMessage(message: GuildTextableMessage, warning: string, arg: string | Array<string>, usage?: string) {
     await sendErrorMessage(MessageContext.fromMessage(message), { title: "Input validation error", description: warning, footerText: usage });
     logger.warn(`${getDebugLogHeader(message)} | ${warning}. val = ${arg}`);
 }
 
-export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, validations: CommandValidations, usage: string) => {
+export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, validations: CommandValidations, usage?: string) => {
     if (!validations) return true;
     const args = parsedMessage.components;
     if (args.length > validations.maxArgCount || args.length < validations.minArgCount) {

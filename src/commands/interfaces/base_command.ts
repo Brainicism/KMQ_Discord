@@ -36,5 +36,5 @@ export default interface BaseCommand {
     };
     aliases?: Array<string>;
     validations?: CommandValidations;
-    preRunCheck?: (message: GuildTextableMessage) => Promise<boolean>;
+    preRunCheck?: (message: GuildTextableMessage, gameSession: GameSession) => Promise<boolean>;
 }
