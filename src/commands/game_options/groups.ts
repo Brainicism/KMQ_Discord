@@ -10,7 +10,7 @@ const logger = _logger("groups");
 export default class GroupsCommand implements BaseCommand {
     help = {
         name: "groups",
-        description: "Select as many groups that you would like to hear from, separated by commas. A list of group names can be found [here](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/data/group_list.txt).",
+        description: `Select as many groups that you would like to hear from, separated by commas. A list of group names can be found [here](http://${process.env.WEB_SERVER_IP}:${process.env.WEB_SERVER_PORT}/groups).`,
         usage: ",groups [group1],{group2}",
         examples: [
             {

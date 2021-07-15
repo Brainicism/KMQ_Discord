@@ -11,7 +11,7 @@ const logger = _logger("excludes");
 export default class ExcludeCommand implements BaseCommand {
     help = {
         name: "exclude",
-        description: "Select as many groups that you would like to ignore, separated by commas. A list of group names can be found [here](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/data/group_list.txt)",
+        description: `Select as many groups that you would like to ignore, separated by commas. A list of group names can be found [here](http://${process.env.WEB_SERVER_IP}:${process.env.WEB_SERVER_PORT}/groups)`,
         usage: ",exclude [group1],{group2}",
         examples: [
             {

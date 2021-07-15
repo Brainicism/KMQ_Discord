@@ -10,7 +10,7 @@ const logger = _logger("includes");
 export default class IncludeCommand implements BaseCommand {
     help = {
         name: "include",
-        description: "Select as many groups that you would like to forcefully include, ignoring other filters (`gender`, `artisttype`, etc), separated by commas. A list of group names can be found [here](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/data/group_list.txt)",
+        description: `Select as many groups that you would like to forcefully include, ignoring other filters (\`gender\`, \`artisttype\`, etc), separated by commas. A list of group names can be found [here](http://${process.env.WEB_SERVER_IP}:${process.env.WEB_SERVER_PORT}/groups)`,
         usage: ",include [group1],{group2}",
         examples: [
             {
