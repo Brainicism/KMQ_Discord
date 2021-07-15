@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare namespace NodeJS {
     export interface ProcessEnv {
         BOT_TOKEN: string,
@@ -15,5 +14,7 @@ declare namespace NodeJS {
         DEBUG_TEXT_CHANNEL_ID?: string,
         BOT_PREFIX: string,
         NODE_ENV: string,
+        WEB_SERVER_IP: string,
+        WEB_SERVER_PORT: string,
     }
 }

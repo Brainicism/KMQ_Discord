@@ -1,17 +1,20 @@
 import Eris from "eris";
 import { config } from "dotenv";
-import { resolve } from "path";
+import path from "path";
 import Axios from "axios";
+import fs from "fs";
+import fastify from "fastify";
 import _logger from "./logger";
 import { EnvType, State } from "./types";
 import {
     registerClientEvents, registerProcessEvents, registerCommands, registerIntervals,
     initializeBotStatsPoster, reloadCaches, clearRestartNotification,
 } from "./helpers/management_utils";
+import { userVoted } from "./helpers/bot_listing_manager";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = _logger("kmq");
-config({ path: resolve(__dirname, "../.env") });
+config({ path: path.resolve(__dirname, "../.env") });
 
 const ERIS_INTENTS = Eris.Constants.Intents;
 
@@ -29,6 +32,32 @@ const state: State = {
 };
 
 export default state;
+
+async function startWebServer() {
+    const httpServer = fastify({});
+    httpServer.post("/voted", {}, async (request, reply) => {
+        const requestAuthorizationToken = request.headers["authorization"];
+        if (requestAuthorizationToken !== process.env.TOP_GG_WEBHOOK_AUTH) {
+            logger.warn("Webhook received with non-matching authorization token");
+            reply.code(401).send();
+            return;
+        }
+        const userID = request.body["user"];
+        await userVoted(userID);
+        reply.code(200).send();
+    });
+
+    httpServer.get("/groups", async (_request, reply) => {
+        const groups = (await fs.promises.readFile(path.resolve(__dirname, "../data/group_list.txt"))).toString();
+        reply.send(groups);
+    });
+
+    try {
+        await httpServer.listen(process.env.WEB_SERVER_PORT, "0.0.0.0");
+    } catch (err) {
+        logger.error(`Erroring starting HTTP server: ${err}`);
+    }
+}
 
 (async () => {
     if (require.main === module) {
@@ -56,6 +85,9 @@ export default state;
 
         logger.info("Clearing existing restart notifications...");
         await clearRestartNotification();
+
+        logger.info("Starting web server...");
+        await startWebServer();
 
         state.client = new Eris.Client(process.env.BOT_TOKEN, {
             disableEvents: {

@@ -1,5 +1,4 @@
 import Axios from "axios";
-import fastify from "fastify";
 import _logger from "../logger";
 import state from "../kmq";
 import dbContext from "../database_context";
@@ -67,25 +66,6 @@ export default class BotListingManager {
         if (process.env.NODE_ENV === EnvType.PROD) {
             setInterval(() => { this.postStats(); }, 1800000);
         }
-        const httpServer = fastify({});
-        httpServer.post("/voted", {}, async (request, reply) => {
-            const requestAuthorizationToken = request.headers["authorization"];
-            if (requestAuthorizationToken !== process.env.TOP_GG_WEBHOOK_AUTH) {
-                logger.warn("Webhook received with non-matching authorization token");
-                reply.code(401).send();
-                return;
-            }
-            const userID = request.body["user"];
-            await userVoted(userID);
-            reply.code(200).send();
-        });
-
-        try {
-            await httpServer.listen(5858, "0.0.0.0");
-        } catch (err) {
-            logger.error(`Erroring starting HTTP server: ${err}`);
-        }
-
         state.bonusUsers = await usersQualifiedForVoteBonus();
     }
 
