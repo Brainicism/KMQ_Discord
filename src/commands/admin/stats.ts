@@ -37,11 +37,11 @@ export default class SkipCommand implements BaseCommand {
         const recentGameRounds = (await dbContext.kmq("game_sessions")
             .where("start_date", ">", dateThreshold)
             .sum("rounds_played as total")
-            .first()).total;
+            .first()).total || 0;
 
         const totalGameRounds = (await dbContext.kmq("game_sessions")
             .sum("rounds_played as total")
-            .first()).total;
+            .first()).total || 0;
 
         const recentPlayers = (await dbContext.kmq("player_stats")
             .where("last_active", ">", dateThreshold)
