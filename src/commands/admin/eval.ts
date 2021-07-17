@@ -3,7 +3,7 @@ import {
     getDebugChannel, getDebugLogHeader, sendErrorMessage, sendInfoMessage,
 } from "../../helpers/discord_utils";
 import _logger from "../../logger";
-import state from "../../kmq";
+import { state } from "../../kmq";
 import MessageContext from "../../structures/message_context";
 
 const logger = _logger("eval");

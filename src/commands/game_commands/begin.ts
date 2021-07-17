@@ -8,7 +8,7 @@ import { bold } from "../../helpers/utils";
 import _logger from "../../logger";
 import MessageContext from "../../structures/message_context";
 import GameSession from "../../structures/game_session";
-import state from "../../kmq";
+import { state } from "../../kmq";
 
 const logger = _logger("begin");
 

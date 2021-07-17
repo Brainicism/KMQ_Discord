@@ -1,5 +1,5 @@
 import _logger from "../../logger";
-import state from "../../kmq";
+import { state } from "../../kmq";
 import dbContext from "../../database_context";
 
 const logger = _logger("SIGINT");

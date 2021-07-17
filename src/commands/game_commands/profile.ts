@@ -7,7 +7,7 @@ import _logger from "../../logger";
 import { friendlyFormattedDate, romanize } from "../../helpers/utils";
 import { CUM_EXP_TABLE } from "../../structures/game_session";
 import MessageContext from "../../structures/message_context";
-import state from "../../kmq";
+import { state } from "../../kmq";
 
 const logger = _logger("profile");
 

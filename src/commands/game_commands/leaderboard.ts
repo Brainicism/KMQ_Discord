@@ -5,7 +5,7 @@ import _logger from "../../logger";
 import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import { getRankNameByLevel } from "./profile";
 import { chooseRandom } from "../../helpers/utils";
-import state from "../../kmq";
+import { state } from "../../kmq";
 import { GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";

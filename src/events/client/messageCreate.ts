@@ -2,7 +2,7 @@ import Eris from "eris";
 import _logger from "../../logger";
 import { textPermissionsCheck, sendOptionsMessage, areUserAndBotInSameVoiceChannel } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import state from "../../kmq";
+import { state } from "../../kmq";
 import validate from "../../helpers/validate";
 import { GuildTextableMessage, ParsedMessage } from "../../types";
 import MessageContext from "../../structures/message_context";

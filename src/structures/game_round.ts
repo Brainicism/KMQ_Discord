@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { GuessModeType } from "../commands/game_options/guessmode";
-import state from "../kmq";
+import { state } from "../kmq";
 import KmqMember from "./kmq_member";
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape

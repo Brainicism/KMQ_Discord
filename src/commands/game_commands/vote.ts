@@ -4,7 +4,7 @@ import { getDebugLogHeader, sendInfoMessage, EMBED_SUCCESS_BONUS_COLOR, EMBED_IN
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
 import dbContext from "../../database_context";
-import state from "../../kmq";
+import { state } from "../../kmq";
 import { bold } from "../../helpers/utils";
 
 const logger = _logger("vote");

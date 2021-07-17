@@ -1,4 +1,4 @@
-import state from "../../kmq";
+import { state } from "../../kmq";
 import _logger from "../../logger";
 import { updateBotStatus } from "../../helpers/management_utils";
 

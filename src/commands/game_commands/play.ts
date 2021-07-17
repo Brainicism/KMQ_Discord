@@ -11,7 +11,7 @@ import { GameType, GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
-import state from "../../kmq";
+import { state } from "../../kmq";
 
 const logger = _logger("play");
 const DEFAULT_LIVES = 10;

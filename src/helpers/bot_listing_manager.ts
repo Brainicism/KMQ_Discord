@@ -1,6 +1,6 @@
 import Axios from "axios";
 import _logger from "../logger";
-import state from "../kmq";
+import { state } from "../kmq";
 import dbContext from "../database_context";
 import { EnvType } from "../types";
 

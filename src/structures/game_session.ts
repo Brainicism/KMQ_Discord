@@ -9,7 +9,7 @@ import {
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList } from "../helpers/game_utils";
 import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference, bold, codeLine } from "../helpers/utils";
-import state from "../kmq";
+import { state } from "../kmq";
 import _logger from "../logger";
 import { QueriedSong, GuildTextableMessage, PlayerRoundResult, GameType } from "../types";
 import GameRound from "./game_round";

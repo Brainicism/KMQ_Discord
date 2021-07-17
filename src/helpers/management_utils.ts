@@ -5,8 +5,9 @@ import fs from "fs";
 import _glob from "glob";
 import { promisify } from "util";
 import schedule from "node-schedule";
+import fastify from "fastify";
 import _logger from "../logger";
-import state from "../kmq";
+import { state } from "../kmq";
 import { EMBED_INFO_COLOR, sendInfoMessage } from "./discord_utils";
 import readyHandler from "../events/client/ready";
 import messageCreateHandler from "../events/client/messageCreate";
@@ -31,7 +32,7 @@ import guildCreateHandler from "../events/client/guildCreate";
 import guildDeleteHandler from "../events/client/guildDelete";
 import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
 import guildAvailableHandler from "../events/client/guildAvailable";
-import BotListingManager, { usersQualifiedForVoteBonus } from "./bot_listing_manager";
+import BotListingManager, { usersQualifiedForVoteBonus, userVoted } from "./bot_listing_manager";
 import storeDailyStats from "../scripts/store-daily-stats";
 import { seedAndDownloadNewSongs } from "../seed/seed_db";
 import backupKmqDatabase from "../scripts/backup-kmq-database";
@@ -74,6 +75,33 @@ export function registerProcessEvents() {
     process.on("unhandledRejection", unhandledRejectionHandler)
         .on("uncaughtException", uncaughtExceptionHandler)
         .on("SIGINT", SIGINTHandler);
+}
+
+/** Starts web server */
+export async function startWebServer() {
+    const httpServer = fastify({});
+    httpServer.post("/voted", {}, async (request, reply) => {
+        const requestAuthorizationToken = request.headers["authorization"];
+        if (requestAuthorizationToken !== process.env.TOP_GG_WEBHOOK_AUTH) {
+            logger.warn("Webhook received with non-matching authorization token");
+            reply.code(401).send();
+            return;
+        }
+        const userID = request.body["user"];
+        await userVoted(userID);
+        reply.code(200).send();
+    });
+
+    httpServer.get("/groups", async (_request, reply) => {
+        const groups = (await fs.promises.readFile(path.resolve(__dirname, "../data/group_list.txt"))).toString();
+        reply.send(groups);
+    });
+
+    try {
+        await httpServer.listen(process.env.WEB_SERVER_PORT, "0.0.0.0");
+    } catch (err) {
+        logger.error(`Erroring starting HTTP server: ${err}`);
+    }
 }
 
 /**
