@@ -31,16 +31,6 @@ const BOT_LISTING_SITES: { [siteName: string]: BotListing } = {
 };
 
 /**
- * @returns - list of user IDs with vote bonus active
- */
-export async function usersQualifiedForVoteBonus(): Promise<Set<string>> {
-    const qualifiedIDs = (await dbContext.kmq("top_gg_user_votes")
-        .where("buff_expiry_date", ">", new Date()))
-        .map((x) => x["user_id"]);
-    return new Set(qualifiedIDs);
-}
-
-/**
  * @param userID - The user's Discord ID
  */
 export async function userVoted(userID: string) {
@@ -57,7 +47,6 @@ export async function userVoted(userID: string) {
         .onConflict("user_id")
         .merge();
 
-    state.bonusUsers.add(userID);
     logger.info(`uid: ${userID} | User vote recorded`);
 }
 
@@ -66,7 +55,6 @@ export default class BotListingManager {
         if (process.env.NODE_ENV === EnvType.PROD) {
             setInterval(() => { this.postStats(); }, 1800000);
         }
-        state.bonusUsers = await usersQualifiedForVoteBonus();
     }
 
     private async postStats() {

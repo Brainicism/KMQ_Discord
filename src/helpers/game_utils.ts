@@ -210,6 +210,27 @@ export async function getGuildPreference(guildID: string): Promise<GuildPreferen
 }
 
 /**
+ * @param userId - The user ID
+ * @returns whether the player has bonus active
+ */
+export async function userBonusIsActive(userId: string): Promise<boolean> {
+    return !!(await dbContext.kmq("top_gg_user_votes")
+        .where("user_id", "=", userId)
+        .where("buff_expiry_date", ">", new Date())
+        .first());
+}
+
+/**
+ * @param userId - The user ID
+ * @returns whether the player has bonus active
+ */
+export async function activeBonusUsers(): Promise<Set<string>> {
+    const bonusUsers = (await dbContext.kmq("top_gg_user_votes")
+        .where("buff_expiry_date", ">", new Date()));
+    return new Set(bonusUsers.map((x) => x.user_id));
+}
+
+/**
  * @param rawGroupNames - List of user-inputted group names
  * @returns a list of recognized/unrecognized groups
  */
