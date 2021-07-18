@@ -32,7 +32,7 @@ import guildCreateHandler from "../events/client/guildCreate";
 import guildDeleteHandler from "../events/client/guildDelete";
 import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
 import guildAvailableHandler from "../events/client/guildAvailable";
-import BotListingManager, { userVoted } from "./bot_listing_manager";
+import { userVoted } from "./bot_listing_manager";
 import backupKmqDatabase from "../scripts/backup-kmq-database";
 import { chooseRandom } from "./utils";
 import { reloadFactCache } from "../fact_generator";
@@ -313,12 +313,6 @@ export async function registerCommands(initialLoad: boolean) {
             }
         }
     }
-}
-
-/** Initialize server count posting to bot listing sites */
-export function initializeBotStatsPoster() {
-    state.botListingManager = new BotListingManager();
-    state.botListingManager.start();
 }
 
 /**

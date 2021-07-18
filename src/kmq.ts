@@ -14,7 +14,6 @@ config({ path: path.resolve(__dirname, "../.env") });
 const state: State = {
     commands: {},
     gameSessions: {},
-    botListingManager: null,
     client: null,
     aliases: {
         artist: {},
@@ -30,12 +29,10 @@ export class BotWorker extends BaseClusterWorker {
         super(setup);
         state.client = this.bot;
         logger.info(`Started worker ID: ${this.workerID} on cluster ID: ${this.clusterID}`);
+
         logger.info("Registering commands...");
-        if ([EnvType.CI, EnvType.DRY_RUN].includes(process.env.NODE_ENV as EnvType)) {
-            registerCommands(true);
-        } else {
-            registerCommands(true);
-        }
+        registerCommands(true);
+
         logger.info("Registering event loops...");
         registerIntervals();
 

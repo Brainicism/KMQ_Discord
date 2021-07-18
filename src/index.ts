@@ -6,12 +6,13 @@ import fs from "fs";
 import Eris from "eris";
 import schedule from "node-schedule";
 import _logger from "./logger";
-import { clearRestartNotification, initializeBotStatsPoster, registerProcessEvents, startWebServer } from "./helpers/management_utils";
+import { clearRestartNotification, registerProcessEvents, startWebServer } from "./helpers/management_utils";
 import storeDailyStats from "./scripts/store-daily-stats";
 import dbContext from "./database_context";
 import { reloadFactCache } from "./fact_generator";
 import { EnvType } from "./types";
 import { seedAndDownloadNewSongs } from "./seed/seed_db";
+import BotListingManager from "./helpers/bot_listing_manager";
 
 const logger = _logger("index");
 
@@ -79,7 +80,8 @@ function registerGlobalIntervals(fleet: Fleet) {
         registerProcessEvents();
 
         logger.info("Initializing bot stats poster...");
-        initializeBotStatsPoster();
+        const botListingManager = new BotListingManager();
+        botListingManager.start();
 
         logger.info("Clearing existing restart notifications...");
         await clearRestartNotification();
