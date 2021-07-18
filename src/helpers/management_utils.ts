@@ -2,8 +2,6 @@
 /* eslint-disable import/no-dynamic-require */
 import path from "path";
 import fs from "fs";
-import _glob from "glob";
-import { promisify } from "util";
 import schedule from "node-schedule";
 import fastify from "fastify";
 import _logger from "../logger";
@@ -38,8 +36,6 @@ import { chooseRandom } from "./utils";
 import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
 import { EnvType } from "../types";
-
-const glob = promisify(_glob);
 
 const logger = _logger("management_utils");
 

@@ -39,7 +39,6 @@
     "erlpack": "https://github.com/abalabahaha/erlpack.git#5d0064f",
     "fastify": "^3.17.0",
     "fluent-ffmpeg": "^2.1.2",
-    "glob": "^7.1.6",
     "knex": "^0.95.6",
     "lodash": "^4.17.21",
     "log4js": "^6.3.0",
