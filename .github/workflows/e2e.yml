@@ -11,6 +11,7 @@ on:
       - src/seed/seed_db.ts
       - src/scripts/download-new-songs.ts
       - src/seed/bootstrap.ts
+      - start.sh
 
 jobs:
   build:
