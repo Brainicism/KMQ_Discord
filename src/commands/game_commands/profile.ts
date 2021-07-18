@@ -78,6 +78,10 @@ export default class ProfileCommand implements BaseCommand {
             } else {
                 requestedPlayer = state.client.users.get(parsedMessage.argument);
                 if (!requestedPlayer) {
+                    // check in other clusters
+                    requestedPlayer = await state.ipc.fetchUser(parsedMessage.argument);
+                }
+                if (!requestedPlayer) {
                     sendErrorMessage(MessageContext.fromMessage(message), { title: "No profile found", description: "Could not find the specified user ID. Make sure the user has been active recently. See `,help profile` for details." });
                     return;
                 }
