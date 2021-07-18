@@ -255,7 +255,7 @@ export default class GameSession {
         }
         this.finished = true;
         deleteGameSession(this.guildID);
-        this.endRound({ correct: false }, await getGuildPreference(this.guildID));
+        await this.endRound({ correct: false }, await getGuildPreference(this.guildID));
         const voiceConnection = state.client.voiceConnections.get(this.guildID);
 
         // leave voice channel
@@ -356,7 +356,7 @@ export default class GameSession {
 
             if (!this.gameRound) return;
             // mark round as complete, so no more guesses can go through
-            this.endRound({ correct: true, correctGuessers: this.gameRound.correctGuessers }, guildPreference, MessageContext.fromMessage(message));
+            await this.endRound({ correct: true, correctGuessers: this.gameRound.correctGuessers }, guildPreference, MessageContext.fromMessage(message));
             this.correctGuesses++;
 
             // update game session's lastActive
@@ -494,7 +494,7 @@ export default class GameSession {
                 const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
                 eliminationScoreboard.decrementAllLives();
             }
-            this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));
+            await this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));
             this.startRound(await getGuildPreference(this.guildID), messageContext);
         }, time * 1000);
     }
@@ -603,7 +603,7 @@ export default class GameSession {
                 const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
                 eliminationScoreboard.decrementAllLives();
             }
-            this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));
+            await this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));
             this.startRound(await getGuildPreference(this.guildID), messageContext);
         });
 
@@ -628,7 +628,7 @@ export default class GameSession {
      */
     private async errorRestartRound(guildPreference: GuildPreference) {
         const messageContext = new MessageContext(this.textChannelID);
-        this.endRound({ correct: false }, guildPreference);
+        await this.endRound({ correct: false }, guildPreference);
         await sendErrorMessage(messageContext, { title: "Error playing song", description: "Starting new round in 3 seconds..." });
         this.roundsPlayed--;
         this.startRound(guildPreference, messageContext);
