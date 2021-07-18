@@ -253,39 +253,41 @@ export async function reloadCaches() {
 }
 
 /** @returns a mapping of command name to command source file */
-export function getCommandFiles(shouldReload: boolean): Promise<{ [commandName: string]: BaseCommand }> {
+export function getCommandFiles(shouldReload: boolean): { [commandName: string]: BaseCommand } {
     if (cachedCommandFiles && !shouldReload) {
-        return Promise.resolve(cachedCommandFiles);
+        return cachedCommandFiles;
     }
 
-    return new Promise(async (resolve, reject) => {
-        const commandMap = {};
-        let files: Array<string>;
-        try {
-            files = await glob("commands/{admin,game_options,game_commands}/*.js");
-            await Promise.all(files.map(async (file) => {
-                const commandFilePath = path.join("../", file);
-                if (shouldReload) {
-                    // invalidate require cache
-                    delete require.cache[require.resolve(commandFilePath)];
-                }
-                try {
-                    const command = require(commandFilePath);
-                    const commandName = path.parse(file).name;
-                    logger.info(`Registering command: ${commandName}`);
-                    // eslint-disable-next-line new-cap
-                    commandMap[commandName] = new command.default();
-                } catch (e) {
-                    throw new Error(`Failed to load file: ${commandFilePath}`);
-                }
-            }));
-            cachedCommandFiles = commandMap;
-            resolve(commandMap);
-        } catch (err) {
-            reject(err);
-            logger.error(`Unable to read commands error = ${err}`);
+    const commandMap = {};
+    try {
+        let files: Array<string> = [];
+        for (const category of ["admin", "game_options", "game_options"]) {
+            files = files.concat(fs.readdirSync(path.resolve(__dirname, "../commands", category))
+                .filter((x) => x.endsWith(".js"))
+                .map((x) => path.resolve(__dirname, "../commands", category, x)));
         }
-    });
+
+        for (const commandFile of files) {
+            const commandFilePath = path.resolve(__dirname, "../commands", commandFile);
+            if (shouldReload) {
+                // invalidate require cache
+                delete require.cache[require.resolve(commandFilePath)];
+            }
+            try {
+                const command = require(commandFilePath);
+                const commandName = path.parse(commandFile).name;
+                // eslint-disable-next-line new-cap
+                commandMap[commandName] = new command.default();
+            } catch (e) {
+                throw new Error(`Failed to load file: ${commandFilePath}`);
+            }
+        }
+        cachedCommandFiles = commandMap;
+        return commandMap;
+    } catch (err) {
+        logger.error(`Unable to read commands error = ${err}`);
+        throw err;
+    }
 }
 
 /**
@@ -301,10 +303,10 @@ function registerCommand(command: BaseCommand, commandName: string) {
 }
 
 /** Registers commands */
-export async function registerCommands(initialLoad: boolean) {
+export function registerCommands(initialLoad: boolean) {
     // load commands
     state.commands = {};
-    const commandFiles = await getCommandFiles(!initialLoad);
+    const commandFiles = getCommandFiles(!initialLoad);
     for (const [commandName, command] of Object.entries(commandFiles)) {
         registerCommand(command, commandName);
         if (command.aliases) {
