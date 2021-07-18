@@ -30,11 +30,7 @@ export class BotWorker extends BaseClusterWorker {
     constructor(setup) {
         super(setup);
         state.client = this.bot;
-
-        // Demonstration of the properties the cluster has (Keep reading for info on IPC):
-        logger.info(this.workerID); // ID of the worker
-        logger.info(this.clusterID); // The ID of the cluster
-
+        logger.info(`Started worker ID: ${this.workerID} on cluster ID: ${this.clusterID}`);
         logger.info("Registering commands...");
         if ([EnvType.CI, EnvType.DRY_RUN].includes(process.env.NODE_ENV as EnvType)) {
             registerCommands(true);

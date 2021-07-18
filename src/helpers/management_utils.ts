@@ -32,9 +32,7 @@ import guildCreateHandler from "../events/client/guildCreate";
 import guildDeleteHandler from "../events/client/guildDelete";
 import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
 import guildAvailableHandler from "../events/client/guildAvailable";
-import BotListingManager, { usersQualifiedForVoteBonus, userVoted } from "./bot_listing_manager";
-import storeDailyStats from "../scripts/store-daily-stats";
-import { seedAndDownloadNewSongs } from "../seed/seed_db";
+import BotListingManager, { userVoted } from "./bot_listing_manager";
 import backupKmqDatabase from "../scripts/backup-kmq-database";
 import { chooseRandom } from "./utils";
 import { reloadFactCache } from "../fact_generator";
@@ -231,20 +229,7 @@ export function registerIntervals() {
 
     // everyday at 12am UTC => 7pm EST
     schedule.scheduleJob("0 0 * * *", async () => {
-        const serverCount = state.client.guilds.size;
-        storeDailyStats(serverCount);
         reloadFactCache();
-    });
-
-    // every hour
-    schedule.scheduleJob("15 * * * *", async () => {
-        if (process.env.NODE_ENV !== EnvType.PROD) return;
-        logger.info("Performing regularly scheduled Daisuki database seed");
-        const overrideFileExists = fs.existsSync(path.join(__dirname, "../../data/skip_seed"));
-        if (overrideFileExists) {
-            return;
-        }
-        await seedAndDownloadNewSongs(dbContext);
     });
 
     // every sunday at 1am UTC => 8pm saturday EST
@@ -258,11 +243,6 @@ export function registerIntervals() {
     schedule.scheduleJob("*/5 * * * *", async () => {
         reloadAliases();
         clearInactiveVoiceConnections();
-    });
-
-    // every minute
-    schedule.scheduleJob("*/1 * * * *", async () => {
-        state.bonusUsers = await usersQualifiedForVoteBonus();
     });
 }
 
