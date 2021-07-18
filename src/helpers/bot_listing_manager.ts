@@ -1,10 +1,10 @@
 import Axios from "axios";
-import _logger from "../logger";
+import { IPCLogger } from "../logger";
 import { state } from "../kmq";
 import dbContext from "../database_context";
 import { EnvType } from "../types";
 
-const logger = _logger("bot_stats_poster");
+const logger = new IPCLogger("bot_stats_poster");
 const VOTE_BONUS_DURATION = 1;
 interface BotListing {
     endpoint: string;

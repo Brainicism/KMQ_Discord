@@ -1,8 +1,8 @@
 import { createInterface } from "readline";
 import dbContext from "../database_context";
-import _logger from "../logger";
+import { IPCLogger } from "../logger";
 
-const logger = _logger("award-badges");
+const logger = new IPCLogger("award-badges");
 
 async function getObjects(): Promise<[{ id: string }]> {
     const rl = createInterface({
@@ -20,7 +20,7 @@ async function getObjects(): Promise<[{ id: string }]> {
             try {
                 badgesObj = JSON.parse(jsonInput);
             } catch (err) {
-                logger.error("Error parsing array of object, err:", err);
+                logger.error(`Error parsing array of object, err: ${err}`);
                 reject(err);
             }
             resolve(badgesObj);

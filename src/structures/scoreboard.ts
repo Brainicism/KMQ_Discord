@@ -1,10 +1,10 @@
 import Player from "./player";
 import { bold } from "../helpers/utils";
-import _logger from "../logger";
+import { IPCLogger } from "../logger";
 import GuildPreference from "./guild_preference";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const logger = _logger("scoreboard");
+const logger = new IPCLogger("scoreboard");
 export interface SuccessfulGuessResult {
     userID: string;
     pointsEarned: number;

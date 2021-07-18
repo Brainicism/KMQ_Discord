@@ -2,14 +2,13 @@ import ytdl from "ytdl-core";
 import fs from "fs";
 import ffmpeg from "fluent-ffmpeg";
 import path from "path";
-import { Logger } from "log4js";
 import { exec } from "child_process";
 import { QueriedSong } from "../types";
-import _logger from "../logger";
+import { IPCLogger } from "../logger";
 import { DatabaseContext, getNewConnection } from "../database_context";
 import { retryJob, getAudioDurationInSeconds } from "../helpers/utils";
 
-const logger: Logger = _logger("download-new-songs");
+const logger = new IPCLogger("download-new-songs");
 const TARGET_AVERAGE_VOLUME = -30;
 export async function clearPartiallyCachedSongs(): Promise<void> {
     logger.info("Clearing partially cached songs");
@@ -175,10 +174,10 @@ const downloadNewSongs = async (db: DatabaseContext, audioSongsPerArtist: number
         .map((x) => x.vlink));
 
     const currentlyDownloadedFiles = new Set(fs.readdirSync(process.env.SONG_DOWNLOAD_DIR));
-    logger.info("Total songs in database:", allSongs.length);
+    logger.info(`Total songs in database: ${allSongs.length}`);
     songsToDownload = songsToDownload.filter((x) => !currentlyDownloadedFiles.has(`${x.youtubeLink}.ogg`));
     songsToDownload = songsToDownload.filter((x) => !knownDeadIDs.has(x.youtubeLink));
-    logger.info("Total songs to be downloaded:", songsToDownload.length);
+    logger.info(`Total songs to be downloaded: ${songsToDownload.length}`);
 
     // update current list of non-downloaded songs
     await updateNotDownloaded(db, allSongs);

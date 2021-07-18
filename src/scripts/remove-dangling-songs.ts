@@ -3,11 +3,10 @@ import path from "path";
 import { program } from "commander";
 import { config } from "dotenv";
 import _ from "lodash";
-import { Logger } from "log4js";
 import { getNewConnection } from "../database_context";
-import _logger from "../logger";
+import { IPCLogger } from "../logger";
 
-const logger: Logger = _logger("remove-dangling-songs");
+const logger = new IPCLogger("remove-dangling-songs");
 
 config({ path: path.resolve(__dirname, "../../.env") });
 

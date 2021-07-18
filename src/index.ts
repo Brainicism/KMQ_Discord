@@ -5,7 +5,7 @@ import { Fleet, Options } from "eris-fleet";
 import fs from "fs";
 import Eris from "eris";
 import schedule from "node-schedule";
-import _logger from "./logger";
+import { getInternalLogger } from "./logger";
 import { clearRestartNotification, registerProcessEvents, startWebServer } from "./helpers/management_utils";
 import storeDailyStats from "./scripts/store-daily-stats";
 import dbContext from "./database_context";
@@ -14,7 +14,7 @@ import { EnvType } from "./types";
 import { seedAndDownloadNewSongs } from "./seed/seed_db";
 import BotListingManager from "./helpers/bot_listing_manager";
 
-const logger = _logger("index");
+const logger = getInternalLogger("fleet");
 
 config({ path: path.resolve(__dirname, "../.env") });
 const ERIS_INTENTS = Eris.Constants.Intents;
@@ -41,7 +41,6 @@ const options: Options = {
         restMode: true,
         maxShards: "auto" as const,
         messageLimit: 0,
-        useMaxConcurrency: true,
         intents: ERIS_INTENTS.guilds ^ ERIS_INTENTS.guildVoiceStates ^ ERIS_INTENTS.guildMessages ^ ERIS_INTENTS.guildMessageReactions,
     },
 };

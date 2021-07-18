@@ -1,14 +1,14 @@
 import { config } from "dotenv";
 import path from "path";
 import { BaseClusterWorker } from "eris-fleet";
-import _logger from "./logger";
+import { IPCLogger } from "./logger";
 import { EnvType, State } from "./types";
 import {
     registerClientEvents, registerCommands, registerIntervals, reloadCaches,
 } from "./helpers/management_utils";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const logger = _logger("kmq");
+const logger = new IPCLogger("kmq");
 config({ path: path.resolve(__dirname, "../.env") });
 
 const state: State = {

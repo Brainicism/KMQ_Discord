@@ -1,8 +1,8 @@
 import { Knex, knex } from "knex";
-import _logger from "./logger";
+import { IPCLogger } from "./logger";
 import { EnvType } from "./types";
 
-const logger = _logger("database_context");
+const logger = new IPCLogger("database_context");
 
 function generateKnexContext(databaseName: string, minPoolSize = 0, maxPoolSize: number) {
     return {

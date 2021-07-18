@@ -2,10 +2,11 @@
 import log4js from "log4js";
 import { config } from "dotenv";
 import { resolve } from "path";
+import { isMaster } from "cluster";
 import fs from "fs";
 
 config({ path: resolve(__dirname, "../.env") });
-export default (name: string): log4js.Logger => {
+export function getInternalLogger(name): log4js.Logger {
     const LOG_DIR = resolve(__dirname, "../logs");
     if (!fs.existsSync(LOG_DIR)) {
         fs.mkdirSync(LOG_DIR);
@@ -25,4 +26,51 @@ export default (name: string): log4js.Logger => {
         },
     });
     return log4js.getLogger(name);
-};
+}
+
+/**
+ * eris-fleet overrides console.* methods to facilitate IPC to the master process
+ */
+export class IPCLogger {
+    private category: string;
+    private logger: log4js.Logger;
+    constructor(category: string) {
+        this.category = category;
+        this.logger = getInternalLogger("kmq");
+    }
+
+    getCategorizedMessage(msg: string) {
+        return `${this.category} | ${msg}`;
+    }
+    info(msg: string) {
+        if (!isMaster) {
+            console.log(this.getCategorizedMessage(msg));
+        } else {
+            this.logger.info(this.getCategorizedMessage(msg));
+        }
+    }
+
+    error(msg: string) {
+        if (!isMaster) {
+            console.error(this.getCategorizedMessage(msg));
+        } else {
+            this.logger.error(this.getCategorizedMessage(msg));
+        }
+    }
+
+    debug(msg: string) {
+        if (!isMaster) {
+            console.debug(this.getCategorizedMessage(msg));
+        } else {
+            this.logger.debug(this.getCategorizedMessage(msg));
+        }
+    }
+
+    warn(msg: string) {
+        if (!isMaster) {
+            console.warn(this.getCategorizedMessage(msg));
+        } else {
+            this.logger.warn(this.getCategorizedMessage(msg));
+        }
+    }
+}

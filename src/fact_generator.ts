@@ -2,9 +2,9 @@
 import { URL } from "url";
 import dbContext from "./database_context";
 import { chooseRandom, getOrdinalNum, weekOfYear } from "./helpers/utils";
-import _logger from "./logger";
+import { IPCLogger } from "./logger";
 
-const logger = _logger("fact_generator");
+const logger = new IPCLogger("fact_generator");
 
 const musicShows = {
     inkigayo: "Inkigayo",

@@ -5,7 +5,7 @@ import { Gender, DEFAULT_GENDER } from "../commands/game_options/gender";
 import { SeekType, DEFAULT_SEEK } from "../commands/game_options/seek";
 import { ShuffleType, DEFAULT_SHUFFLE } from "../commands/game_options/shuffle";
 import { GuessModeType, DEFAULT_GUESS_MODE } from "../commands/game_options/guessmode";
-import _logger from "../logger";
+import { IPCLogger } from "../logger";
 import dbContext from "../database_context";
 import { ArtistType, DEFAULT_ARTIST_TYPE } from "../commands/game_options/artisttype";
 import { DEFAULT_LANGUAGE, LanguageType } from "../commands/game_options/language";
@@ -18,7 +18,7 @@ import { state } from "../kmq";
 import { SpecialType } from "../commands/game_options/special";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const logger = _logger("guild_preference");
+const logger = new IPCLogger("guild_preference");
 
 interface GameOptions {
     beginningYear: number;

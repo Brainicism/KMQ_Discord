@@ -5,12 +5,12 @@ import { GameType } from "../../types";
 import TeamScoreboard from "../../structures/team_scoreboard";
 import { getDebugLogHeader, sendErrorMessage, getUserVoiceChannel } from "../../helpers/discord_utils";
 import { bold } from "../../helpers/utils";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import GameSession from "../../structures/game_session";
 import { state } from "../../kmq";
 
-const logger = _logger("begin");
+const logger = new IPCLogger("begin");
 
 export default class BeginCommand implements BaseCommand {
     canStart(gameSession: GameSession, authorID: string, messageContext: MessageContext): boolean {

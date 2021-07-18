@@ -1,6 +1,6 @@
 import { CommandArgs } from "../interfaces/base_command";
 import { getDebugLogHeader, getMajorityCount, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
 import { getGuildPreference } from "../../helpers/game_utils";
@@ -12,7 +12,7 @@ import EliminationScoreboard from "../../structures/elimination_scoreboard";
 import InGameCommand from "../interfaces/ingame_command";
 import GameRound from "../../structures/game_round";
 
-const logger = _logger("hint");
+const logger = new IPCLogger("hint");
 
 function isHintMajority(message: GuildTextableMessage, gameSession: GameSession): boolean {
     if (gameSession.gameType === GameType.ELIMINATION) {

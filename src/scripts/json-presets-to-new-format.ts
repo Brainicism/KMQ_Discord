@@ -1,7 +1,7 @@
 import { DatabaseContext, getNewConnection } from "../database_context";
-import _logger from "../logger";
+import { IPCLogger } from "../logger";
 
-const logger = _logger("json-presets-to-new-format");
+const logger = new IPCLogger("json-presets-to-new-format");
 
 async function exportJsonPresetsToNewTable(db: DatabaseContext): Promise<void> {
     const jsonPresets = await db.kmq("game_option_presets_json").select("*");

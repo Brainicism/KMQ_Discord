@@ -8,7 +8,7 @@ import GuildPreference from "../../structures/guild_preference";
 import { Gender } from "../../commands/game_options/gender";
 import { cleanupInactiveGameSessions, getFilteredSongList, selectRandomSong, getMatchingGroupNames, getSongCount } from "../../helpers/game_utils";
 import { EnvType } from "../../types";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import { ArtistType } from "../../commands/game_options/artisttype";
 import { SubunitsPreference } from "../../commands/game_options/subunits";
 import { FOREIGN_LANGUAGE_TAGS, LanguageType } from "../../commands/game_options/language";
@@ -17,7 +17,7 @@ import GameSession from "../../structures/game_session";
 import { OstPreference } from "../../commands/game_options/ost";
 import { NON_OFFICIAL_VIDEO_TAGS, ReleaseType } from "../../commands/game_options/release";
 
-const logger = _logger("test");
+const logger = new IPCLogger("test");
 
 async function setup() {
     await dbContext.kmq.raw("DROP TABLE IF EXISTS available_songs");

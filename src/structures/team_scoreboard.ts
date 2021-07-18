@@ -1,10 +1,10 @@
 import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
 import Player from "./player";
 import Team from "./team";
-import _logger from "../logger";
+import { IPCLogger } from "../logger";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const logger = _logger("team_scoreboard");
+const logger = new IPCLogger("team_scoreboard");
 
 interface TeamMap {
     [teamName: string]: Team;

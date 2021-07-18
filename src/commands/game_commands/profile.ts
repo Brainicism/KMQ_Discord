@@ -3,13 +3,13 @@ import Eris from "eris";
 import dbContext from "../../database_context";
 import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import { friendlyFormattedDate, romanize } from "../../helpers/utils";
 import { CUM_EXP_TABLE } from "../../structures/game_session";
 import MessageContext from "../../structures/message_context";
 import { state } from "../../kmq";
 
-const logger = _logger("profile");
+const logger = new IPCLogger("profile");
 
 const RANK_TITLES = [
     { title: "Novice", req: 0 },

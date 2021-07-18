@@ -6,13 +6,13 @@ import {
 } from "../../helpers/discord_utils";
 import { bold } from "../../helpers/utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
 import { generateHint, validHintCheck } from "./hint";
 import InGameCommand from "../interfaces/ingame_command";
 
-const logger = _logger("forcehint");
+const logger = new IPCLogger("forcehint");
 
 export default class ForceHintCommand extends InGameCommand {
     help = {

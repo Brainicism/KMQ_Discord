@@ -2,10 +2,10 @@ import { areUserAndBotInSameVoiceChannel, getDebugLogHeader, sendErrorMessage } 
 import MessageContext from "../../structures/message_context";
 import { GuildTextableMessage, GameType } from "../../types";
 import BaseCommand, { CallFunc } from "./base_command";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import GameSession from "../../structures/game_session";
 
-const logger = _logger("ingame_command");
+const logger = new IPCLogger("ingame_command");
 
 export default abstract class InGameCommand implements BaseCommand {
     abstract call: CallFunc;

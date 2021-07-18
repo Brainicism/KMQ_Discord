@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 import schedule from "node-schedule";
 import fastify from "fastify";
-import _logger from "../logger";
+import { IPCLogger } from "../logger";
 import { state } from "../kmq";
 import { EMBED_INFO_COLOR, sendInfoMessage } from "./discord_utils";
 import readyHandler from "../events/client/ready";
@@ -37,7 +37,7 @@ import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
 import { EnvType } from "../types";
 
-const logger = _logger("management_utils");
+const logger = new IPCLogger("management_utils");
 
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
 

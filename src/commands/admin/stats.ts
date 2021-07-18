@@ -5,12 +5,12 @@ import {
     getDebugLogHeader, sendInfoMessage,
 } from "../../helpers/discord_utils";
 import dbContext from "../../database_context";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import { state } from "../../kmq";
 
-const logger = _logger("stats");
+const logger = new IPCLogger("stats");
 
 export default class SkipCommand implements BaseCommand {
     help = {

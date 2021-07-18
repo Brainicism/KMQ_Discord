@@ -1,14 +1,14 @@
 import fs from "fs";
 import path from "path";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import dbContext from "../../database_context";
 import { EMBED_INFO_COLOR, getDebugLogHeader, sendInfoMessage } from "../../helpers/discord_utils";
 import { friendlyFormattedDate } from "../../helpers/utils";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 
-const logger = _logger("news");
+const logger = new IPCLogger("news");
 
 export default class NewsCommand implements BaseCommand {
     help = {

@@ -9,14 +9,14 @@ import {
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import EliminationScoreboard from "../../structures/elimination_scoreboard";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import GameRound from "../../structures/game_round";
 import { GuildTextableMessage, GameType } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import InGameCommand from "../interfaces/ingame_command";
 
-const logger = _logger("skip");
+const logger = new IPCLogger("skip");
 
 async function sendSkipNotification(message: GuildTextableMessage, gameSession: GameSession) {
     await sendInfoMessage(MessageContext.fromMessage(message), {

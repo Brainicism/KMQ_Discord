@@ -1,7 +1,7 @@
 import Eris from "eris";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 
-const logger = _logger("unavailableGuildCreate");
+const logger = new IPCLogger("unavailableGuildCreate");
 
 export default async function unavailableGuildCreateHandler(guild: Eris.UnavailableGuild) {
     logger.info(`Guild now unavailable. gid = ${guild.id}`);

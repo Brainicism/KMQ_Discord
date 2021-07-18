@@ -1,6 +1,6 @@
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 
-const logger = _logger("shardResume");
+const logger = new IPCLogger("shardResume");
 
 export default function shardResumeHandler(shardID: number) {
     logger.info(`Shard #${shardID} resumed.`);
