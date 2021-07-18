@@ -257,7 +257,7 @@ export function getCommandFiles(shouldReload: boolean): { [commandName: string]:
     const commandMap = {};
     try {
         let files: Array<string> = [];
-        for (const category of ["admin", "game_options", "game_options"]) {
+        for (const category of ["admin", "game_options", "game_commands"]) {
             files = files.concat(fs.readdirSync(path.resolve(__dirname, "../commands", category))
                 .filter((x) => x.endsWith(".js"))
                 .map((x) => path.resolve(__dirname, "../commands", category, x)));
