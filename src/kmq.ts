@@ -20,6 +20,7 @@ const state: State = {
         song: {},
     },
     processStartTime: Date.now(),
+    ipc: null,
 };
 
 export { state };
@@ -27,6 +28,7 @@ export { state };
 export class BotWorker extends BaseClusterWorker {
     constructor(setup) {
         super(setup);
+        state.ipc = this.ipc;
         state.client = this.bot;
         logger.info(`Started worker ID: ${this.workerID} on cluster ID: ${this.clusterID}`);
 

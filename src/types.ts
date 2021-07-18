@@ -1,4 +1,5 @@
 import Eris, { GuildTextableChannel } from "eris";
+import { IPC } from "eris-fleet/dist/util/IPC";
 import BaseCommand from "./commands/interfaces/base_command";
 import GameSession from "./structures/game_session";
 import { Gender } from "./commands/game_options/gender";
@@ -56,6 +57,7 @@ export interface State {
         song: { [songName: string]: Array<string> }
     };
     processStartTime: number;
+    ipc: IPC;
 }
 
 export enum GameOption {
