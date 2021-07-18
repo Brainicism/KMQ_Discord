@@ -31,7 +31,7 @@ import guildCreateHandler from "../events/client/guildCreate";
 import guildDeleteHandler from "../events/client/guildDelete";
 import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
 import guildAvailableHandler from "../events/client/guildAvailable";
-import BotListingManager, { usersQualifiedForVoteBonus } from "./bot_listing_manager";
+import BotListingManager from "./bot_listing_manager";
 import storeDailyStats from "../scripts/store-daily-stats";
 import { seedAndDownloadNewSongs } from "../seed/seed_db";
 import backupKmqDatabase from "../scripts/backup-kmq-database";
@@ -230,11 +230,6 @@ export function registerIntervals() {
     schedule.scheduleJob("*/5 * * * *", async () => {
         reloadAliases();
         clearInactiveVoiceConnections();
-    });
-
-    // every minute
-    schedule.scheduleJob("*/1 * * * *", async () => {
-        state.bonusUsers = await usersQualifiedForVoteBonus();
     });
 }
 

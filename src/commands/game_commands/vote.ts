@@ -4,8 +4,8 @@ import { getDebugLogHeader, sendInfoMessage, EMBED_SUCCESS_BONUS_COLOR, EMBED_IN
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
 import dbContext from "../../database_context";
-import state from "../../kmq";
 import { bold } from "../../helpers/utils";
+import { userBonusIsActive } from "../../helpers/game_utils";
 
 const logger = _logger("vote");
 
@@ -22,7 +22,7 @@ export default class VoteCommand implements BaseCommand {
 
     call = async ({ message }: CommandArgs) => {
         let timeRemainingString = "";
-        const boostActive = state.bonusUsers.has(message.author.id);
+        const boostActive = await userBonusIsActive(message.author.id);
         if (boostActive) {
             const userVoterStatus = await dbContext.kmq("top_gg_user_votes")
                 .where("user_id", "=", message.author.id)

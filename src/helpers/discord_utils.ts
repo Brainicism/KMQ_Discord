@@ -3,7 +3,7 @@ import EmbedPaginator from "eris-pagination";
 import GuildPreference from "../structures/guild_preference";
 import GameSession, { UniqueSongCounter } from "../structures/game_session";
 import _logger from "../logger";
-import { getSongCount } from "./game_utils";
+import { getSongCount, userBonusIsActive } from "./game_utils";
 import { getFact } from "../fact_generator";
 import { EmbedPayload, GameOption, GameOptionCommand, PriorityGameOption, ConflictingGameOptions, GuildTextableMessage, PlayerRoundResult, EndGameMessage, GameType } from "../types";
 import { chunkArray, codeLine, bold, underline, italicize, strikethrough, chooseWeightedRandom, getOrdinalNum } from "./utils";
@@ -202,7 +202,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
 
     let color: number;
     if (correctGuess) {
-        if (state.bonusUsers.has(playerRoundResults[0].player.id)) {
+        if (await userBonusIsActive(playerRoundResults[0].player.id)) {
             color = EMBED_SUCCESS_BONUS_COLOR;
         } else {
             color = EMBED_SUCCESS_COLOR;
@@ -379,7 +379,7 @@ export async function sendEndGameMessage(gameSession: GameSession) {
             );
         }
         await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
-            color: gameSession.gameType !== GameType.TEAMS && state.bonusUsers.has(winners[0].id) ? EMBED_SUCCESS_BONUS_COLOR : EMBED_SUCCESS_COLOR,
+            color: gameSession.gameType !== GameType.TEAMS && await userBonusIsActive(winners[0].id) ? EMBED_SUCCESS_BONUS_COLOR : EMBED_SUCCESS_COLOR,
             description: !useLargerScoreboard ? "**Scoreboard**" : null,
             thumbnailUrl: winners[0].getAvatarURL(),
             title: `🎉 ${gameSession.scoreboard.getWinnerMessage()} 🎉`,
