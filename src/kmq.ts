@@ -38,15 +38,15 @@ export class BotWorker extends BaseClusterWorker {
         logger.info("Registering event loops...");
         registerIntervals();
 
-        if ([EnvType.CI, EnvType.DRY_RUN].includes(process.env.NODE_ENV as EnvType)) {
-            logger.info("Dry run finished successfully.");
-            process.exit(0);
-        }
-
         logger.info("Loading cached application data...");
         reloadCaches();
 
         logger.info("Registering client event handlers...");
         registerClientEvents();
+
+        if ([EnvType.CI, EnvType.DRY_RUN].includes(process.env.NODE_ENV as EnvType)) {
+            logger.info("Dry run finished successfully.");
+            state.ipc.totalShutdown();
+        }
     }
 }

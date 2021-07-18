@@ -80,8 +80,10 @@ function registerGlobalIntervals(fleet: Fleet) {
         registerProcessEvents();
 
         logger.info("Initializing bot stats poster...");
-        const botListingManager = new BotListingManager();
-        botListingManager.start();
+        if (process.env.NODE_ENV === EnvType.PROD) {
+            const botListingManager = new BotListingManager();
+            botListingManager.start();
+        }
 
         logger.info("Clearing existing restart notifications...");
         await clearRestartNotification();
