@@ -3,7 +3,7 @@ import {
     sendErrorMessage, getDebugLogHeader, sendInfoMessage, voicePermissionsCheck, getUserVoiceChannel, getUserTag, getCurrentVoiceMembers,
 } from "../../helpers/discord_utils";
 import { deleteGameSession, getTimeUntilRestart } from "../../helpers/management_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
+import { activeBonusUsers, getGuildPreference } from "../../helpers/game_utils";
 import { bold, isPowerHour, isWeekend } from "../../helpers/utils";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import _logger from "../../logger";
@@ -11,7 +11,6 @@ import { GameType, GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
-import { state } from "../../kmq";
 
 const logger = _logger("play");
 const DEFAULT_LIVES = 10;
@@ -21,9 +20,10 @@ export async function sendBeginGameMessage(textChannelName: string,
     message: GuildTextableMessage,
     participants: Array<{ id: string, username: string, discriminator: string }>) {
     let gameInstructions = "Listen to the song and type your guess!";
-    const bonusUsers = participants.filter((x) => state.bonusUsers.has(x.id));
-    if (bonusUsers.length > 0) {
-        let bonusUserTags = bonusUsers.map((x) => `\`${getUserTag(x)}\``);
+    const bonusUsers = await activeBonusUsers();
+    const bonusUserParticipants = participants.filter((x) => bonusUsers.has(x.id));
+    if (bonusUserParticipants.length > 0) {
+        let bonusUserTags = bonusUserParticipants.map((x) => `\`${getUserTag(x)}\``);
         if (bonusUserTags.length > 10) {
             bonusUserTags = bonusUserTags.slice(0, 10);
             bonusUserTags.push("and many others");
@@ -39,7 +39,7 @@ export async function sendBeginGameMessage(textChannelName: string,
     await sendInfoMessage(MessageContext.fromMessage(message), {
         title: startTitle,
         description: gameInstructions,
-        footerText: bonusUsers.length === 0 && Math.random() < 0.5 ? "Psst. Earn more EXP by voting (see ,vote)" : null,
+        footerText: bonusUserParticipants.length === 0 && Math.random() < 0.5 ? "Psst. Earn more EXP by voting (see ,vote)" : null,
         thumbnailUrl: KmqImages.HAPPY,
     });
 }

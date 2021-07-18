@@ -21,7 +21,6 @@ const state: State = {
         song: {},
     },
     processStartTime: Date.now(),
-    bonusUsers: new Set(),
 };
 
 export { state };
