@@ -14,7 +14,7 @@ import { EnvType } from "./types";
 import { seedAndDownloadNewSongs } from "./seed/seed_db";
 import BotListingManager from "./helpers/bot_listing_manager";
 
-const logger = getInternalLogger("fleet");
+const logger = getInternalLogger("cluster_manager");
 
 config({ path: path.resolve(__dirname, "../.env") });
 const ERIS_INTENTS = Eris.Constants.Intents;
