@@ -1,7 +1,7 @@
 import dbContext from "../database_context";
-import _logger from "../logger";
+import { IPCLogger } from "../logger";
 
-const logger = _logger("daily_stats");
+const logger = new IPCLogger("daily_stats");
 
 const storeDailyStats = async (serverCount: number) => {
     const dateThreshold = new Date();

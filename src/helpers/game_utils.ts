@@ -1,6 +1,6 @@
 import dbContext from "../database_context";
-import state from "../kmq";
-import _logger from "../logger";
+import { state } from "../kmq";
+import { IPCLogger } from "../logger";
 import GameSession from "../structures/game_session";
 import GuildPreference from "../structures/guild_preference";
 import { MatchedArtist, QueriedSong } from "../types";
@@ -15,7 +15,7 @@ import { cleanArtistName } from "../structures/game_round";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
-const logger = _logger("game_utils");
+const logger = new IPCLogger("game_utils");
 
 interface GroupMatchResults {
     unmatchedGroups: Array<string>;

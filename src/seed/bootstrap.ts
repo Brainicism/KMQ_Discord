@@ -3,12 +3,12 @@ import path from "path";
 import { config } from "dotenv";
 import { execSync } from "child_process";
 import { updateKpopDatabase } from "./seed_db";
-import _logger from "../logger";
+import { IPCLogger } from "../logger";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import { DatabaseContext, getNewConnection } from "../database_context";
 import { EnvType } from "../types";
 
-const logger = _logger("bootstrap");
+const logger = new IPCLogger("bootstrap");
 
 const SONG_DOWNLOAD_THRESHOLD = 5;
 

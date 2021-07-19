@@ -1,11 +1,11 @@
 import { execSync } from "child_process";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import { registerCommands } from "../../helpers/management_utils";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getDebugChannel, getDebugLogHeader, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import MessageContext from "../../structures/message_context";
 
-const logger = _logger("reload");
+const logger = new IPCLogger("reload");
 
 export default class EvalCommand implements BaseCommand {
     call = async ({ message }: CommandArgs) => {

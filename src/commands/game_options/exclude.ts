@@ -1,12 +1,12 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { sendOptionsMessage, getDebugLogHeader, sendErrorMessage } from "../../helpers/discord_utils";
 import { getGuildPreference, getMatchingGroupNames } from "../../helpers/game_utils";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
 
-const logger = _logger("excludes");
+const logger = new IPCLogger("excludes");
 
 export default class ExcludeCommand implements BaseCommand {
     help = {

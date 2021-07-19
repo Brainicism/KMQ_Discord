@@ -1,9 +1,9 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { sendInfoMessage, sendScoreboardMessage, getDebugLogHeader } from "../../helpers/discord_utils";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 
-const logger = _logger("score");
+const logger = new IPCLogger("score");
 
 export default class ScoreCommand implements BaseCommand {
     help = {

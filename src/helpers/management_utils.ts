@@ -2,11 +2,10 @@
 /* eslint-disable import/no-dynamic-require */
 import path from "path";
 import fs from "fs";
-import _glob from "glob";
-import { promisify } from "util";
 import schedule from "node-schedule";
-import _logger from "../logger";
-import state from "../kmq";
+import fastify from "fastify";
+import { IPCLogger } from "../logger";
+import { state } from "../kmq";
 import { EMBED_INFO_COLOR, sendInfoMessage } from "./discord_utils";
 import readyHandler from "../events/client/ready";
 import messageCreateHandler from "../events/client/messageCreate";
@@ -31,18 +30,14 @@ import guildCreateHandler from "../events/client/guildCreate";
 import guildDeleteHandler from "../events/client/guildDelete";
 import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
 import guildAvailableHandler from "../events/client/guildAvailable";
-import BotListingManager from "./bot_listing_manager";
-import storeDailyStats from "../scripts/store-daily-stats";
-import { seedAndDownloadNewSongs } from "../seed/seed_db";
+import { userVoted } from "./bot_listing_manager";
 import backupKmqDatabase from "../scripts/backup-kmq-database";
 import { chooseRandom } from "./utils";
 import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
 import { EnvType } from "../types";
 
-const glob = promisify(_glob);
-
-const logger = _logger("management_utils");
+const logger = new IPCLogger("management_utils");
 
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
 
@@ -74,6 +69,33 @@ export function registerProcessEvents() {
     process.on("unhandledRejection", unhandledRejectionHandler)
         .on("uncaughtException", uncaughtExceptionHandler)
         .on("SIGINT", SIGINTHandler);
+}
+
+/** Starts web server */
+export async function startWebServer() {
+    const httpServer = fastify({});
+    httpServer.post("/voted", {}, async (request, reply) => {
+        const requestAuthorizationToken = request.headers["authorization"];
+        if (requestAuthorizationToken !== process.env.TOP_GG_WEBHOOK_AUTH) {
+            logger.warn("Webhook received with non-matching authorization token");
+            reply.code(401).send();
+            return;
+        }
+        const userID = request.body["user"];
+        await userVoted(userID);
+        reply.code(200).send();
+    });
+
+    httpServer.get("/groups", async (_request, reply) => {
+        const groups = (await fs.promises.readFile(path.resolve(__dirname, "../data/group_list.txt"))).toString();
+        reply.send(groups);
+    });
+
+    try {
+        await httpServer.listen(process.env.WEB_SERVER_PORT, "0.0.0.0");
+    } catch (err) {
+        logger.error(`Erroring starting HTTP server: ${err}`);
+    }
 }
 
 /**
@@ -203,20 +225,7 @@ export function registerIntervals() {
 
     // everyday at 12am UTC => 7pm EST
     schedule.scheduleJob("0 0 * * *", async () => {
-        const serverCount = state.client.guilds.size;
-        storeDailyStats(serverCount);
         reloadFactCache();
-    });
-
-    // every hour
-    schedule.scheduleJob("15 * * * *", async () => {
-        if (process.env.NODE_ENV !== EnvType.PROD) return;
-        logger.info("Performing regularly scheduled Daisuki database seed");
-        const overrideFileExists = fs.existsSync(path.join(__dirname, "../../data/skip_seed"));
-        if (overrideFileExists) {
-            return;
-        }
-        await seedAndDownloadNewSongs(dbContext);
     });
 
     // every sunday at 1am UTC => 8pm saturday EST
@@ -240,39 +249,41 @@ export async function reloadCaches() {
 }
 
 /** @returns a mapping of command name to command source file */
-export function getCommandFiles(shouldReload: boolean): Promise<{ [commandName: string]: BaseCommand }> {
+export function getCommandFiles(shouldReload: boolean): { [commandName: string]: BaseCommand } {
     if (cachedCommandFiles && !shouldReload) {
-        return Promise.resolve(cachedCommandFiles);
+        return cachedCommandFiles;
     }
 
-    return new Promise(async (resolve, reject) => {
-        const commandMap = {};
-        let files: Array<string>;
-        try {
-            files = await glob("commands/{admin,game_options,game_commands}/*.js");
-            await Promise.all(files.map(async (file) => {
-                const commandFilePath = path.join("../", file);
-                if (shouldReload) {
-                    // invalidate require cache
-                    delete require.cache[require.resolve(commandFilePath)];
-                }
-                try {
-                    const command = require(commandFilePath);
-                    const commandName = path.parse(file).name;
-                    logger.info(`Registering command: ${commandName}`);
-                    // eslint-disable-next-line new-cap
-                    commandMap[commandName] = new command.default();
-                } catch (e) {
-                    throw new Error(`Failed to load file: ${commandFilePath}`);
-                }
-            }));
-            cachedCommandFiles = commandMap;
-            resolve(commandMap);
-        } catch (err) {
-            reject(err);
-            logger.error(`Unable to read commands error = ${err}`);
+    const commandMap = {};
+    try {
+        let files: Array<string> = [];
+        for (const category of ["admin", "game_options", "game_commands"]) {
+            files = files.concat(fs.readdirSync(path.resolve(__dirname, "../commands", category))
+                .filter((x) => x.endsWith(".js"))
+                .map((x) => path.resolve(__dirname, "../commands", category, x)));
         }
-    });
+
+        for (const commandFile of files) {
+            const commandFilePath = path.resolve(__dirname, "../commands", commandFile);
+            if (shouldReload) {
+                // invalidate require cache
+                delete require.cache[require.resolve(commandFilePath)];
+            }
+            try {
+                const command = require(commandFilePath);
+                const commandName = path.parse(commandFile).name;
+                // eslint-disable-next-line new-cap
+                commandMap[commandName] = new command.default();
+            } catch (e) {
+                throw new Error(`Failed to load file: ${commandFilePath}`);
+            }
+        }
+        cachedCommandFiles = commandMap;
+        return commandMap;
+    } catch (err) {
+        logger.error(`Unable to read commands error = ${err}`);
+        throw err;
+    }
 }
 
 /**
@@ -288,10 +299,10 @@ function registerCommand(command: BaseCommand, commandName: string) {
 }
 
 /** Registers commands */
-export async function registerCommands(initialLoad: boolean) {
+export function registerCommands(initialLoad: boolean) {
     // load commands
     state.commands = {};
-    const commandFiles = await getCommandFiles(!initialLoad);
+    const commandFiles = getCommandFiles(!initialLoad);
     for (const [commandName, command] of Object.entries(commandFiles)) {
         registerCommand(command, commandName);
         if (command.aliases) {
@@ -300,12 +311,6 @@ export async function registerCommands(initialLoad: boolean) {
             }
         }
     }
-}
-
-/** Initialize server count posting to bot listing sites */
-export function initializeBotStatsPoster() {
-    state.botListingManager = new BotListingManager();
-    state.botListingManager.start();
 }
 
 /**

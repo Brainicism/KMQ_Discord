@@ -1,8 +1,8 @@
 import { QueriedSong } from "../types";
 import dbContext from "../database_context";
-import _logger from "../logger";
+import { IPCLogger } from "../logger";
 
-const logger = _logger("get-unclean-song-names");
+const logger = new IPCLogger("get-unclean-song-names");
 
 (async () => {
     const songs: Array<QueriedSong> = await dbContext.kmq("available_songs")

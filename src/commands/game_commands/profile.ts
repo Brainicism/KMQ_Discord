@@ -3,13 +3,13 @@ import Eris from "eris";
 import dbContext from "../../database_context";
 import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import { friendlyFormattedDate, romanize } from "../../helpers/utils";
 import { CUM_EXP_TABLE } from "../../structures/game_session";
 import MessageContext from "../../structures/message_context";
-import state from "../../kmq";
+import { state } from "../../kmq";
 
-const logger = _logger("profile");
+const logger = new IPCLogger("profile");
 
 const RANK_TITLES = [
     { title: "Novice", req: 0 },
@@ -77,6 +77,10 @@ export default class ProfileCommand implements BaseCommand {
                 requestedPlayer = message.mentions[0];
             } else {
                 requestedPlayer = state.client.users.get(parsedMessage.argument);
+                if (!requestedPlayer) {
+                    // check in other clusters
+                    requestedPlayer = await state.ipc.fetchUser(parsedMessage.argument);
+                }
                 if (!requestedPlayer) {
                     sendErrorMessage(MessageContext.fromMessage(message), { title: "No profile found", description: "Could not find the specified user ID. Make sure the user has been active recently. See `,help profile` for details." });
                     return;

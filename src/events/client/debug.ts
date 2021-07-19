@@ -1,6 +1,6 @@
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 
-const logger = _logger("debug");
+const logger = new IPCLogger("debug");
 export default function debugHandler(message: string, shardID: number) {
     if (shardID) {
         logger.debug(`Shard #${shardID} received debug message: ${message}`);

@@ -5,11 +5,12 @@ import {
     getDebugLogHeader, sendInfoMessage,
 } from "../../helpers/discord_utils";
 import dbContext from "../../database_context";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
+import { state } from "../../kmq";
 
-const logger = _logger("stats");
+const logger = new IPCLogger("stats");
 
 export default class SkipCommand implements BaseCommand {
     help = {
@@ -21,6 +22,7 @@ export default class SkipCommand implements BaseCommand {
     };
 
     call = async ({ gameSessions, message, channel }: CommandArgs) => {
+        const fleetStats = await state.ipc.getStats();
         const activeGameSessions = Object.keys(gameSessions).length;
         const activeUsers = Object.values(gameSessions).reduce((total, curr) => total + curr.participants.size, 0);
         const dateThreshold = new Date();
@@ -85,7 +87,7 @@ export default class SkipCommand implements BaseCommand {
         },
         {
             name: "Process Memory Usage",
-            value: `${(process.memoryUsage().rss / 1024 / 1024).toFixed(2)} MB`,
+            value: `${(fleetStats.totalRam).toFixed(2)} MB`,
             inline: true,
         },
         {

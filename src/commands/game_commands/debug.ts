@@ -3,12 +3,12 @@ import * as uuid from "uuid";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getDebugChannel, sendInfoMessage, getUserVoiceChannel } from "../../helpers/discord_utils";
 import { getGuildPreference, getSongCount } from "../../helpers/game_utils";
-import state from "../../kmq";
-import _logger from "../../logger";
+import { state } from "../../kmq";
+import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 
-const logger = _logger("debug");
+const logger = new IPCLogger("debug");
 
 export default class DebugCommand implements BaseCommand {
     call = async ({ message, channel }: CommandArgs) => {

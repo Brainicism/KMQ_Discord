@@ -1,11 +1,11 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import { getDebugLogHeader, sendOptionsMessage } from "../../helpers/discord_utils";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 
-const logger = _logger("multiguess");
+const logger = new IPCLogger("multiguess");
 export enum MultiGuessType {
     ON = "on",
     OFF = "off",

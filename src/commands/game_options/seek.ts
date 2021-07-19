@@ -1,11 +1,11 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 
-const logger = _logger("seek");
+const logger = new IPCLogger("seek");
 export enum SeekType {
     BEGINNING = "beginning",
     RANDOM = "random",

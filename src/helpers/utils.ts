@@ -3,9 +3,9 @@ import { exec } from "child_process";
 import moment from "moment-timezone";
 import crypto from "crypto";
 import _ from "lodash";
-import _logger from "../logger";
+import { IPCLogger } from "../logger";
 
-const logger = _logger("utils");
+const logger = new IPCLogger("utils");
 
 /**
  * Promise-based delay function

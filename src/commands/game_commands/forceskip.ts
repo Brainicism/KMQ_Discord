@@ -10,12 +10,12 @@ import { bold } from "../../helpers/utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { GameType } from "../../types";
 import EliminationScoreboard from "../../structures/elimination_scoreboard";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
 import InGameCommand from "../interfaces/ingame_command";
 
-const logger = _logger("forceskip");
+const logger = new IPCLogger("forceskip");
 
 export default class ForceSkipCommand extends InGameCommand {
     help = {

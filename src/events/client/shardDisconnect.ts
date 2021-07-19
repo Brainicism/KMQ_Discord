@@ -1,6 +1,6 @@
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 
-const logger = _logger("shardDisconnect");
+const logger = new IPCLogger("shardDisconnect");
 
 export default function shardDisconnectHandler(err: Error, shardID: number) {
     if (err) {

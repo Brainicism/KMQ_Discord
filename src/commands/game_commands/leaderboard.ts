@@ -1,16 +1,16 @@
 import Eris from "eris";
 import dbContext from "../../database_context";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import { getRankNameByLevel } from "./profile";
 import { chooseRandom } from "../../helpers/utils";
-import state from "../../kmq";
+import { state } from "../../kmq";
 import { GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 
-const logger = _logger("leaderboard");
+const logger = new IPCLogger("leaderboard");
 
 enum LeaderboardAction {
     ENROLL = "enroll",

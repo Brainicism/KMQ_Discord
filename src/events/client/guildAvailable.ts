@@ -1,7 +1,7 @@
 import Eris from "eris";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 
-const logger = _logger("guildAvailable");
+const logger = new IPCLogger("guildAvailable");
 
 export default async function guildAvailableHandler(guild: Eris.Guild) {
     logger.info(`Guild now available. gid = ${guild.id}`);

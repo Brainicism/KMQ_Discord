@@ -105,6 +105,9 @@
         ],
         "no-lonely-if": [
             "off"
+        ],
+        "no-console": [
+            "off"
         ]
     }
 }

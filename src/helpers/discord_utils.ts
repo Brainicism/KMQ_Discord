@@ -2,12 +2,12 @@ import Eris, { EmbedOptions, TextableChannel } from "eris";
 import EmbedPaginator from "eris-pagination";
 import GuildPreference from "../structures/guild_preference";
 import GameSession, { UniqueSongCounter } from "../structures/game_session";
-import _logger from "../logger";
+import { IPCLogger } from "../logger";
 import { getSongCount, userBonusIsActive } from "./game_utils";
 import { getFact } from "../fact_generator";
 import { EmbedPayload, GameOption, GameOptionCommand, PriorityGameOption, ConflictingGameOptions, GuildTextableMessage, PlayerRoundResult, EndGameMessage, GameType } from "../types";
 import { chunkArray, codeLine, bold, underline, italicize, strikethrough, chooseWeightedRandom, getOrdinalNum } from "./utils";
-import state from "../kmq";
+import { state } from "../kmq";
 import Scoreboard from "../structures/scoreboard";
 import GameRound from "../structures/game_round";
 import dbContext from "../database_context";
@@ -17,7 +17,7 @@ import { KmqImages } from "../constants";
 import MessageContext from "../structures/message_context";
 import { GuessModeType } from "../commands/game_options/guessmode";
 
-const logger = _logger("utils");
+const logger = new IPCLogger("utils");
 export const EMBED_INFO_COLOR = 0x000000; // BLACK
 export const EMBED_ERROR_COLOR = 0xE74C3C; // RED
 export const EMBED_SUCCESS_COLOR = 0x00FF00; // GREEN

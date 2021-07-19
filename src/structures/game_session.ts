@@ -9,8 +9,8 @@ import {
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, userBonusIsActive } from "../helpers/game_utils";
 import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference, bold, codeLine } from "../helpers/utils";
-import state from "../kmq";
-import _logger from "../logger";
+import { state } from "../kmq";
+import { IPCLogger } from "../logger";
 import { QueriedSong, GuildTextableMessage, PlayerRoundResult, GameType } from "../types";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
@@ -29,7 +29,7 @@ import { MultiGuessType } from "../commands/game_options/multiguess";
 import { specialFfmpegArgs } from "../commands/game_options/special";
 
 const MULTIGUESS_DELAY = 1500;
-const logger = _logger("game_session");
+const logger = new IPCLogger("game_session");
 const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
 
 const EXP_TABLE = [...Array(1000).keys()].map((level) => {

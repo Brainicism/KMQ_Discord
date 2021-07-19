@@ -1,8 +1,8 @@
-import _logger from "../../logger";
-import state from "../../kmq";
+import { IPCLogger } from "../../logger";
+import { state } from "../../kmq";
 import dbContext from "../../database_context";
 
-const logger = _logger("SIGINT");
+const logger = new IPCLogger("SIGINT");
 
 export default async function SIGINTHandler() {
     logger.debug("SIGINT received, cleaning up...");

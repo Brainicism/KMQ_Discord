@@ -1,11 +1,10 @@
 import fs from "fs";
 import path from "path";
-import { Logger } from "log4js";
 import { DatabaseContext, getNewConnection } from "../database_context";
 import { getAudioDurationInSeconds } from "../helpers/utils";
-import _logger from "../logger";
+import { IPCLogger } from "../logger";
 
-const logger: Logger = _logger("cache-song-duration");
+const logger = new IPCLogger("cache-song-duration");
 
 async function cacheSongDuration(db: DatabaseContext): Promise<void> {
     let files: Array<string>;

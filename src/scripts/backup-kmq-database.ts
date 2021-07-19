@@ -1,13 +1,12 @@
 import fs from "fs";
-import { Logger } from "log4js";
 import { join } from "path";
 import mysqldump from "mysqldump";
-import _logger from "../logger";
 import { friendlyFormattedDate } from "../helpers/utils";
+import { IPCLogger } from "../logger";
 
 const databaseBackupDir = join(__dirname, "../../sql_dumps/kmq_backup");
 
-const logger: Logger = _logger("backup-kmq");
+const logger = new IPCLogger("backup-kmq");
 
 async function backupKmqDatabase(): Promise<void> {
     if (!fs.existsSync(databaseBackupDir)) {

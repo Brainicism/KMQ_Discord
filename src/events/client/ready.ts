@@ -1,8 +1,8 @@
-import state from "../../kmq";
-import _logger from "../../logger";
+import { state } from "../../kmq";
+import { IPCLogger } from "../../logger";
 import { updateBotStatus } from "../../helpers/management_utils";
 
-const logger = _logger("ready");
+const logger = new IPCLogger("ready");
 
 export default function readyHandler() {
     const { client } = state;

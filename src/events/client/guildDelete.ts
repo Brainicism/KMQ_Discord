@@ -1,9 +1,9 @@
 import Eris from "eris";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import { getDebugChannel, sendInfoMessage } from "../../helpers/discord_utils";
 import MessageContext from "../../structures/message_context";
 
-const logger = _logger("guildDelete");
+const logger = new IPCLogger("guildDelete");
 
 export default async function guildDeleteHandler(guild: Eris.Guild | { id: string }) {
     logger.info(`Server left: ${guild.id}`);

@@ -1,6 +1,6 @@
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 
-const logger = _logger("disconnect");
+const logger = new IPCLogger("disconnect");
 
 export default function disconnectHandler() {
     logger.info("All shards have disconnected");

@@ -1,9 +1,9 @@
 import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
 import EliminationPlayer from "./elimination_player";
-import _logger from "../logger";
+import { IPCLogger } from "../logger";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const logger = _logger("elimination_scoreboard");
+const logger = new IPCLogger("elimination_scoreboard");
 
 export default class EliminationScoreboard extends Scoreboard {
     /** Mapping of Discord user ID to EliminationPlayer */

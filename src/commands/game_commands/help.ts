@@ -4,14 +4,14 @@ import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import {
     EMBED_INFO_COLOR, sendErrorMessage, getDebugLogHeader, sendPaginationedEmbed, sendInfoMessage,
 } from "../../helpers/discord_utils";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import { chunkArray, parseJsonFile } from "../../helpers/utils";
 import { getCommandFiles } from "../../helpers/management_utils";
 import { GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 
-const logger = _logger("help");
+const logger = new IPCLogger("help");
 export const placeholder = /,/g;
 const FIELDS_PER_EMBED = 6;
 const helpMessages = parseJsonFile(path.resolve(__dirname, "../../../data/help_strings.json"));

@@ -1,13 +1,13 @@
 import Eris from "eris";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import { textPermissionsCheck, sendOptionsMessage, areUserAndBotInSameVoiceChannel } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import state from "../../kmq";
+import { state } from "../../kmq";
 import validate from "../../helpers/validate";
 import { GuildTextableMessage, ParsedMessage } from "../../types";
 import MessageContext from "../../structures/message_context";
 
-const logger = _logger("messageCreate");
+const logger = new IPCLogger("messageCreate");
 
 function isGuildMessage(message: Eris.Message): message is GuildTextableMessage {
     return (message.channel instanceof Eris.TextChannel);

@@ -1,11 +1,10 @@
 import Axios from "axios";
 import fs from "fs";
 import { execSync } from "child_process";
-import { Logger } from "log4js";
 import { program } from "commander";
 import { config } from "dotenv";
 import path from "path";
-import _logger from "../logger";
+import { IPCLogger } from "../logger";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import { DatabaseContext, getNewConnection } from "../database_context";
 import { generateKmqDataTables } from "./bootstrap";
@@ -16,7 +15,7 @@ const SQL_DUMP_EXPIRY = 10;
 const mvFileUrl = "http://kpop.daisuki.com.br/download.php?file=full";
 const audioFileUrl = "http://kpop.daisuki.com.br/download.php?file=audio";
 const DEFAULT_AUDIO_ONLY_SONGS_PER_ARTIST = 10;
-const logger: Logger = _logger("seed_db");
+const logger = new IPCLogger("seed_db");
 const databaseDownloadDir = path.join(__dirname, "../../sql_dumps/daisuki");
 if (!fs.existsSync(databaseDownloadDir)) {
     fs.mkdirSync(databaseDownloadDir);
@@ -133,7 +132,7 @@ async function pruneSqlDumps() {
         execSync(`find ${databaseDownloadDir} -mindepth 1 -name "*backup_*" -mtime +${SQL_DUMP_EXPIRY} -delete`);
         logger.info("Finished pruning old SQL dumps");
     } catch (err) {
-        logger.error("Error attempting to prune SQL dumps directory, ", err);
+        logger.error(`Error attempting to prune SQL dumps directory, ${err}`);
     }
 }
 

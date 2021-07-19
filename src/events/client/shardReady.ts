@@ -1,6 +1,6 @@
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 
-const logger = _logger("shardReady");
+const logger = new IPCLogger("shardReady");
 
 export default function shardReadyHandler(shardID: number) {
     logger.info(`Shard #${shardID} ready.`);

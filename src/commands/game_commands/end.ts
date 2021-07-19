@@ -1,9 +1,9 @@
 import { CommandArgs } from "../interfaces/base_command";
 import { getDebugLogHeader } from "../../helpers/discord_utils";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import InGameCommand from "../interfaces/ingame_command";
 
-const logger = _logger("end");
+const logger = new IPCLogger("end");
 
 export default class EndCommand extends InGameCommand {
     help = {

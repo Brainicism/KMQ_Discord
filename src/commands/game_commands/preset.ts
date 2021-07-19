@@ -1,13 +1,13 @@
 import { getDebugLogHeader, sendErrorMessage, sendInfoMessage, sendOptionsMessage } from "../../helpers/discord_utils";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import GuildPreference from "../../structures/guild_preference";
 import { KmqImages } from "../../constants";
 import { GameOption } from "../../types";
 
-const logger = _logger("preset");
+const logger = new IPCLogger("preset");
 const PRESET_NAME_MAX_LENGTH = 25;
 const MAX_NUM_PRESETS = 20;
 

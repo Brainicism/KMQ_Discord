@@ -1,8 +1,9 @@
 import { Knex, knex } from "knex";
-import _logger from "./logger";
+import { resolve } from "path";
+import { config } from "dotenv";
 import { EnvType } from "./types";
 
-const logger = _logger("database_context");
+config({ path: resolve(__dirname, "../.env") });
 
 function generateKnexContext(databaseName: string, minPoolSize = 0, maxPoolSize: number) {
     return {
@@ -24,12 +25,10 @@ export class DatabaseContext {
 
     constructor() {
         if ([EnvType.CI].includes(process.env.NODE_ENV as EnvType)) return;
-        logger.info(`Initializing database connections ${process.env.NODE_ENV || ""}`);
         if (process.env.NODE_ENV === EnvType.TEST) {
-            logger.info("Initializing KMQ test database context");
             this.kmq = knex(generateKnexContext("kmq_test", 0, 1));
         } else {
-            this.kmq = knex(generateKnexContext("kmq", 0, 10));
+            this.kmq = knex(generateKnexContext("kmq", 0, 5));
         }
         this.kpopVideos = knex(generateKnexContext("kpop_videos", 0, 1));
         this.agnostic = knex(generateKnexContext(null, 0, 1));

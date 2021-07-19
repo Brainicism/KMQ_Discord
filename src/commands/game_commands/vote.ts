@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import { getDebugLogHeader, sendInfoMessage, EMBED_SUCCESS_BONUS_COLOR, EMBED_INFO_COLOR } from "../../helpers/discord_utils";
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
@@ -7,7 +7,7 @@ import dbContext from "../../database_context";
 import { bold } from "../../helpers/utils";
 import { userBonusIsActive } from "../../helpers/game_utils";
 
-const logger = _logger("vote");
+const logger = new IPCLogger("vote");
 
 export default class VoteCommand implements BaseCommand {
     aliases = ["v", "voted"];

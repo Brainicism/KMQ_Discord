@@ -1,7 +1,7 @@
 import Eris, { GuildTextableChannel } from "eris";
+import { IPC } from "eris-fleet/dist/util/IPC";
 import BaseCommand from "./commands/interfaces/base_command";
 import GameSession from "./structures/game_session";
-import BotListingManager from "./helpers/bot_listing_manager";
 import { Gender } from "./commands/game_options/gender";
 import KmqMember from "./structures/kmq_member";
 
@@ -51,13 +51,13 @@ export interface EndGameMessage {
 export interface State {
     commands: { [commandName: string]: BaseCommand };
     gameSessions: { [guildID: string]: GameSession };
-    botListingManager: BotListingManager;
     client: Eris.Client;
     aliases: {
         artist: { [artistName: string]: Array<string> },
         song: { [songName: string]: Array<string> }
     };
     processStartTime: number;
+    ipc: IPC;
 }
 
 export enum GameOption {

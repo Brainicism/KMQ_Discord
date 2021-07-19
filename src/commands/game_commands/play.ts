@@ -6,13 +6,13 @@ import { deleteGameSession, getTimeUntilRestart } from "../../helpers/management
 import { activeBonusUsers, getGuildPreference } from "../../helpers/game_utils";
 import { bold, isPowerHour, isWeekend } from "../../helpers/utils";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import { GameType, GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
 
-const logger = _logger("play");
+const logger = new IPCLogger("play");
 const DEFAULT_LIVES = 10;
 
 export async function sendBeginGameMessage(textChannelName: string,

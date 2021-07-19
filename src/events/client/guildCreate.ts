@@ -1,9 +1,9 @@
 import Eris from "eris";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import { getDebugChannel, sendInfoMessage } from "../../helpers/discord_utils";
 import MessageContext from "../../structures/message_context";
 
-const logger = _logger("guildCreate");
+const logger = new IPCLogger("guildCreate");
 
 export default async function guildCreateHandler(guild: Eris.Guild) {
     logger.info(`New server joined: ${guild.id} with ${guild.memberCount} users`);

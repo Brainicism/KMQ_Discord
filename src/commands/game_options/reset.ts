@@ -1,10 +1,10 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { getDebugLogHeader, sendOptionsMessage } from "../../helpers/discord_utils";
 import MessageContext from "../../structures/message_context";
 
-const logger = _logger("reset");
+const logger = new IPCLogger("reset");
 
 export default class ResetCommand implements BaseCommand {
     validations = {

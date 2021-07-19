@@ -1,11 +1,11 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getDebugLogHeader, sendOptionsMessage } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import _logger from "../../logger";
+import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 
-const logger = _logger("guessTimeout");
+const logger = new IPCLogger("guessTimeout");
 
 export default class GuessTimeoutCommand implements BaseCommand {
     validations = {
