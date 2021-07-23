@@ -12,7 +12,6 @@ import dbContext from "./database_context";
 import { reloadFactCache } from "./fact_generator";
 import { EnvType } from "./types";
 import { seedAndDownloadNewSongs } from "./seed/seed_db";
-import BotListingManager from "./helpers/bot_listing_manager";
 
 const logger = getInternalLogger("cluster_manager");
 
@@ -77,12 +76,6 @@ function registerGlobalIntervals(fleet: Fleet) {
 
         logger.info("Registering process event handlers...");
         registerProcessEvents();
-
-        logger.info("Initializing bot stats poster...");
-        if (process.env.NODE_ENV === EnvType.PROD) {
-            const botListingManager = new BotListingManager();
-            botListingManager.start();
-        }
 
         logger.info("Clearing existing restart notifications...");
         await clearRestartNotification();

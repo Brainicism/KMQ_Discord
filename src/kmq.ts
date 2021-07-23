@@ -6,6 +6,7 @@ import { EnvType, State } from "./types";
 import {
     registerClientEvents, registerCommands, registerIntervals, reloadCaches,
 } from "./helpers/management_utils";
+import BotListingManager from "./helpers/bot_listing_manager";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("kmq");
@@ -43,6 +44,12 @@ export class BotWorker extends BaseClusterWorker {
 
         logger.info("Registering client event handlers...");
         registerClientEvents();
+
+        if (process.env.NODE_ENV === EnvType.PROD && this.clusterID === 0) {
+            logger.info("Initializing bot stats poster...");
+            const botListingManager = new BotListingManager();
+            botListingManager.start();
+        }
 
         if ([EnvType.CI, EnvType.DRY_RUN].includes(process.env.NODE_ENV as EnvType)) {
             logger.info("Dry run finished successfully.");
