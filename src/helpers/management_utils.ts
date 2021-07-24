@@ -356,6 +356,13 @@ export function registerCommands(initialLoad: boolean) {
     }
 }
 
+/** Reloads commands */
+export function reloadCommands() {
+    logger.info("Reloading KMQ commands");
+    registerCommands(false);
+    logger.info("Reload KMQ commands complete");
+}
+
 /**
  * Deletes the GameSession corresponding to a given guild ID
  * @param guildID - The guild ID
