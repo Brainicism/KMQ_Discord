@@ -21,6 +21,7 @@ describe("score/exp updating", () => {
                 }
             });
         });
+
         describe("user has not guessed yet", () => {
             it("should not increment the user's score/xp", () => {
                 assert.strictEqual(scoreboard.getPlayerScore(userIDs[0]), 0);
@@ -38,12 +39,14 @@ describe("score/exp updating", () => {
                         scoreboard.updateScoreboard([{ userID: userIDs[1], pointsEarned: 1, expGain: 50 }]);
                     }
                 }
+
                 assert.strictEqual(scoreboard.getPlayerScore(userIDs[0]), 20);
                 assert.strictEqual(scoreboard.getPlayerExpGain(userIDs[0]), 1000);
                 assert.strictEqual(scoreboard.getPlayerScore(userIDs[1]), 10);
                 assert.strictEqual(scoreboard.getPlayerExpGain(userIDs[1]), 500);
             });
         });
+
         describe("both users have not guessed yet", () => {
             it("should not increment each user's score", () => {
                 assert.strictEqual(scoreboard.getPlayerScore(userIDs[0]), 0);
@@ -74,6 +77,7 @@ describe("winner detection", () => {
             assert.deepStrictEqual(scoreboard.getWinners(), []);
         });
     });
+
     describe("single player, has score", () => {
         const userID = "12345";
         it("should return the single player", () => {
@@ -125,6 +129,7 @@ describe("game finished", () => {
                 assert.strictEqual(scoreboard.gameFinished(guildPreference), false);
             });
         });
+
         describe("first place is not equal/above the goal", () => {
             it("should return false", () => {
                 scoreboard.updateScoreboard([{ userID: userIDs[0], pointsEarned: 2, expGain: 0 }]);
@@ -132,6 +137,7 @@ describe("game finished", () => {
                 assert.strictEqual(scoreboard.gameFinished(guildPreference), false);
             });
         });
+
         describe("first place is equal/above the goal", () => {
             it("should return true", () => {
                 scoreboard.updateScoreboard([{ userID: userIDs[0], pointsEarned: 5, expGain: 0 }]);

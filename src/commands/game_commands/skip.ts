@@ -62,12 +62,14 @@ export default class SkipCommand extends InGameCommand {
             // song already being skipped
             return;
         }
+
         if (isSkipMajority(message, gameSession)) {
             gameSession.gameRound.skipAchieved = true;
             if (gameSession.gameType === GameType.ELIMINATION) {
                 const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
                 eliminationScoreboard.decrementAllLives();
             }
+
             sendSkipMessage(message, gameSession.gameRound);
             gameSession.endRound({ correct: false }, guildPreference, MessageContext.fromMessage(message));
             gameSession.startRound(guildPreference, MessageContext.fromMessage(message));
@@ -76,6 +78,7 @@ export default class SkipCommand extends InGameCommand {
             await sendSkipNotification(message, gameSession);
             logger.info(`${getDebugLogHeader(message)} | Skip vote received.`);
         }
+
         gameSession.lastActiveNow();
     };
 }

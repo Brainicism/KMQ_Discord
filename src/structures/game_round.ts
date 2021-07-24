@@ -21,9 +21,11 @@ export function cleanSongName(name: string): string {
     let cleanName = name.toLowerCase()
         .split("(")[0]
         .trim();
+
     for (const characterReplacement of CHARACTER_REPLACEMENTS) {
         cleanName = cleanName.replace(characterReplacement.pattern, characterReplacement.replacement);
     }
+
     return cleanName;
 }
 
@@ -35,9 +37,11 @@ export function cleanSongName(name: string): string {
 export function cleanArtistName(name: string): string {
     let cleanName = name.toLowerCase()
         .trim();
+
     for (const characterReplacement of CHARACTER_REPLACEMENTS) {
         cleanName = cleanName.replace(characterReplacement.pattern, characterReplacement.replacement);
     }
+
     return cleanName;
 }
 
@@ -52,6 +56,7 @@ function generateHint(name: string): string {
         if (hideMask.includes(idx)) return "_";
         return char;
     }).join(" ");
+
     return hiddenName;
 }
 

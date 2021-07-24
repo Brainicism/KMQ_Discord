@@ -45,6 +45,7 @@ const helpMessage = async (message: GuildTextableMessage, action: string) => {
             });
             return;
         }
+
         const helpManual = commandFilesWithAliases[action].help;
         embedTitle = `\`${helpManual.usage.replace(placeholder, process.env.BOT_PREFIX)}\``;
         embedDesc = helpManual.description;

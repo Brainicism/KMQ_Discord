@@ -46,6 +46,7 @@ export default class EliminationScoreboard extends Scoreboard {
             if (!guesserIDs.includes(player.id)) {
                 player.decrementLives();
             }
+
             if (player.getLives() === maxLives) {
                 this.firstPlace.push(player);
             } else if (player.getLives() > maxLives) {

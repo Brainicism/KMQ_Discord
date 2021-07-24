@@ -27,9 +27,11 @@ export default class VoteCommand implements BaseCommand {
             const userVoterStatus = await dbContext.kmq("top_gg_user_votes")
                 .where("user_id", "=", message.author.id)
                 .first();
+
             const timeRemaining = new Date(userVoterStatus["buff_expiry_date"] - Date.now()).getTime() / (1000 * 60);
             timeRemainingString = `${bold(String(Math.max(Math.ceil(timeRemaining), 0)))} minutes left.\n\n`;
         }
+
         sendInfoMessage(MessageContext.fromMessage(message), {
             color: boostActive ? EMBED_SUCCESS_BONUS_COLOR : EMBED_INFO_COLOR,
             title: boostActive ? "Boost active!" : "Boost inactive",

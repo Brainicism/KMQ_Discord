@@ -13,6 +13,7 @@ describe("increment score", () => {
             for (let i = 0; i < numIncrements; i++) {
                 player.incrementScore(1);
             }
+
             assert.strictEqual(player.getScore(), numIncrements);
         });
     });
@@ -25,6 +26,7 @@ describe("increment xp", () => {
             for (let i = 0; i < numIncrements; i++) {
                 player.incrementExp(10);
             }
+
             assert.strictEqual(player.getExpGain(), numIncrements * 10);
         });
     });

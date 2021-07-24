@@ -17,6 +17,7 @@ config({ path: path.resolve(__dirname, "../../.env") });
 async function tableExists(db: DatabaseContext, tableName: string) {
     return (await db.agnostic("information_schema.schemata").where("schema_name", "=", tableName)).length === 1;
 }
+
 async function kmqDatabaseExists(db: DatabaseContext): Promise<boolean> {
     const kmqExists = await tableExists(db, "kmq");
     const kmqTestExists = await tableExists(db, "kmq_test");
@@ -45,6 +46,7 @@ async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
 function loadStoredProcedures() {
     const storedProcedureDefinitions = fs.readdirSync(path.join(__dirname, "../../sql/procedures"))
         .map((x) => path.join(__dirname, "../../sql/procedures", x));
+
     for (const storedProcedureDefinition of storedProcedureDefinitions) {
         execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq < ${storedProcedureDefinition}`);
     }

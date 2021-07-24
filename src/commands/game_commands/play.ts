@@ -28,13 +28,16 @@ export async function sendBeginGameMessage(textChannelName: string,
             bonusUserTags = bonusUserTags.slice(0, 10);
             bonusUserTags.push("and many others");
         }
+
         gameInstructions += `\n\n${bonusUserTags.join(", ")} will receive double EXP for [voting](https://top.gg/bot/508759831755096074/vote)! See \`,vote\` for info on how to vote. Thanks for supporting KMQ!`;
     }
+
     if (isWeekend()) {
         gameInstructions += "\n\n**⬆️ DOUBLE EXP WEEKEND ACTIVE ⬆️**";
     } else if (isPowerHour()) {
         gameInstructions += "\n\n**⬆️ KMQ POWER HOUR ACTIVE ⬆️**";
     }
+
     const startTitle = `Game starting in #${textChannelName} in 🔊 ${voiceChannelName}`;
     await sendInfoMessage(MessageContext.fromMessage(message), {
         title: startTitle,
@@ -110,12 +113,14 @@ export default class PlayCommand implements BaseCommand {
             if (!voicePermissionsCheck(message)) {
                 return;
             }
+
             const isEliminationMode = parsedMessage.components.length >= 1 && parsedMessage.components[0].toLowerCase() === "elimination";
             const isTeamsMode = parsedMessage.components.length >= 1 && parsedMessage.components[0].toLowerCase() === "teams";
             if (gameSessions[message.guildID] && !gameSessions[message.guildID].sessionInitialized && (isEliminationMode || isTeamsMode)) {
                 // User sent ,play elimination or ,play teams twice, reset the GameSession
                 deleteGameSession(message.guildID);
             }
+
             const messageContext = MessageContext.fromMessage(message);
             if (!gameSessions[message.guildID] || (!isEliminationMode && !gameSessions[message.guildID].sessionInitialized)) {
                 // (1) No game session exists yet (create CLASSIC, ELIMINATION, or TEAMS game), or
@@ -149,11 +154,13 @@ export default class PlayCommand implements BaseCommand {
                         const oldGameTypeInstructions = `If you meant to start a \`${oldGameType}\` game, \`${prefix}end\` this game, call \`${prefix}play ${oldGameType}\`, ${gameSpecificInstructions}, and then call \`${prefix}begin\`.`;
                         sendErrorMessage(messageContext, { title: ignoringOldGameTypeTitle, description: oldGameTypeInstructions, thumbnailUrl: KmqImages.DEAD });
                     }
+
                     gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, GameType.CLASSIC);
                     await sendBeginGameMessage(textChannel.name, voiceChannel.name, message, getCurrentVoiceMembers(voiceChannel.id));
                     gameSession.startRound(guildPreference, messageContext);
                     logger.info(`${getDebugLogHeader(message)} | Game session starting`);
                 }
+
                 gameSessions[message.guildID] = gameSession;
             } else {
                 await sendErrorMessage(messageContext, { title: "Game already in session" });

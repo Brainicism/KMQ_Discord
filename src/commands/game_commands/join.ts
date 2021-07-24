@@ -18,6 +18,7 @@ export default class JoinCommand implements BaseCommand {
         if (!gameSession || gameSession.gameType === GameType.CLASSIC) {
             return;
         }
+
         if (gameSession.gameType === GameType.ELIMINATION) {
             this.joinEliminationGame(message, gameSession);
         } else if (gameSession.gameType === GameType.TEAMS) {
@@ -43,6 +44,7 @@ export default class JoinCommand implements BaseCommand {
             previouslyJoinedPlayers = previouslyJoinedPlayers.slice(0, 10);
             previouslyJoinedPlayers.push("and many others...");
         }
+
         const players = `${bold(kmqMember.tag)}, ${previouslyJoinedPlayers.join(", ")}`;
         sendInfoMessage(MessageContext.fromMessage(message), { title: "Player joined", description: players });
         gameSession.addEliminationParticipant(kmqMember);
@@ -56,6 +58,7 @@ export default class JoinCommand implements BaseCommand {
             });
             return;
         }
+
         // Limit length to 128 chars, filter out Discord markdown modifiers
         // Ignore: \ _ * ~ | `
         const teamName = parsedMessage.argument.replace(/\\|_|\*|~|\||`/gm, "").substr(0, 128);
@@ -72,10 +75,12 @@ export default class JoinCommand implements BaseCommand {
                 return;
             }
         }
+
         if (teamName.length === 0) {
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Join error", description: "Your team name consists of only invalid characters." });
             return;
         }
+
         const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
         if (!teamScoreboard.hasTeam(teamName)) {
             teamScoreboard.addTeam(teamName, new Player(getUserTag(message.author), message.author.id, message.author.avatarURL, 0));
@@ -91,6 +96,7 @@ export default class JoinCommand implements BaseCommand {
                 sendErrorMessage(MessageContext.fromMessage(message), { title: "Join error", description: "You're already a member of this team." });
                 return;
             }
+
             teamScoreboard.addPlayer(team.id, new Player(getUserTag(message.author), message.author.id, message.author.avatarURL, 0));
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: `${getUserTag(message.author)} joined ${team.name}`,

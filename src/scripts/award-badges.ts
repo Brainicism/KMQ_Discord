@@ -9,6 +9,7 @@ async function getObjects(): Promise<[{ id: string }]> {
         input: process.stdin,
         output: process.stdout,
     });
+
     return new Promise((resolve, reject) => {
         logger.info("Enter a stringified JSON array of objects where each object has an \"id\" and \"name\" property, then Ctrl-d:");
         rl.prompt();
@@ -23,6 +24,7 @@ async function getObjects(): Promise<[{ id: string }]> {
                 logger.error(`Error parsing array of object, err: ${err}`);
                 reject(err);
             }
+
             resolve(badgesObj);
         });
     });
@@ -33,6 +35,7 @@ async function getBadgeName(): Promise<string> {
         input: process.stdin,
         output: process.stdout,
     });
+
     return new Promise((resolve) => {
         rl.question("Enter badge name: ", (badgeName) => {
             rl.close();
@@ -57,6 +60,7 @@ async function awardBadges() {
     if (playerIDsWithBadgeAlready.size > 0) {
         logger.info(`Players ${[...playerNamesWithBadgeAlready].join(", ")} already have the badge.`);
     }
+
     if (playerIDsWithBadgeAlready.size === badgesObj.length) {
         logger.info("All players already have this badge.");
         return;

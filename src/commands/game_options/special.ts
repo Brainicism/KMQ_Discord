@@ -79,6 +79,7 @@ export default class SpecialCommand implements BaseCommand {
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Error", description: "This is an unreleased game option, and can only be used on the official KMQ server" });
             return;
         }
+
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.resetSpecialType();
@@ -86,6 +87,7 @@ export default class SpecialCommand implements BaseCommand {
             logger.info(`${getDebugLogHeader(message)} | Special reset.`);
             return;
         }
+
         const specialType = parsedMessage.components[0] as SpecialType;
         await guildPreference.setSpecialType(specialType);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SPECIAL_TYPE, reset: false });

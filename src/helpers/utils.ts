@@ -75,6 +75,7 @@ export function chunkArray<T>(array: Array<T>, chunkSize: number): Array<Array<T
         const embedFieldsSubset = array.slice(i, Math.min(i + chunkSize, array.length));
         chunkedArrays.push(embedFieldsSubset);
     }
+
     return chunkedArrays;
 }
 
@@ -90,6 +91,7 @@ export function getAudioDurationInSeconds(songPath: string): Promise<number> {
                 resolve(0);
                 return;
             }
+
             resolve(parseInt(stdout));
         });
     });
@@ -155,12 +157,14 @@ export function chooseWeightedRandom(list: Array<any>) {
             weights[i] = list[i].weight + previousWeight;
         }
     }
+
     const random = Math.random() * weights[weights.length - 1];
     for (let i = 0; i < weights.length; i++) {
         if (weights[i] > random) {
             return list[i];
         }
     }
+
     return null;
 }
 
@@ -183,11 +187,13 @@ export async function retryJob(job: (...args: any) => Promise<void>, jobArgs: Ar
     if (!firstTry && delayDuration) {
         await delay(delayDuration);
     }
+
     return job(...jobArgs).catch((err) => {
         logger.error(`err = ${err}`);
         if (maxRetries <= 0) {
             throw err;
         }
+
         return retryJob(job, jobArgs, maxRetries - 1, false, delayDuration);
     });
 }
@@ -207,6 +213,7 @@ export function md5Hash(input: string | number, bits: number) {
     if (bits > 128) {
         logger.warn("Maximum bit length is 128");
     }
+
     const hash = crypto.createHash("md5").update(input.toString()).digest("hex");
     return parseInt(hash.slice(0, bits / 4), 16);
 }
@@ -238,15 +245,18 @@ export function romanize(num: number) {
     if (Number.isNaN(num)) {
         return NaN;
     }
+
     const digits = String(+num).split("");
     const key = ["", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM",
         "", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC",
         "", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"];
+
     let roman = "";
     let i = 3;
     while (i--) {
         roman = (key[+digits.pop() + (i * 10)] || "") + roman;
     }
+
     return Array(+digits.join("") + 1).join("M") + roman;
 }
 

@@ -81,6 +81,7 @@ export async function startWebServer() {
             reply.code(401).send();
             return;
         }
+
         const userID = request.body["user"];
         await userVoted(userID);
         reply.code(200).send();
@@ -124,6 +125,7 @@ export const checkRestartNotification = async (timeUntilRestart: number): Promis
             });
             serversWarned++;
         }
+
         logger.info(`Impending bot restart in ${timeUntilRestart} minutes. ${serversWarned} servers warned.`);
     }
 };
@@ -189,6 +191,7 @@ export async function updateBotStatus() {
         .where("publishedon", ">", oneMonthPriorDate)
         .orderBy("views", "DESC")
         .limit(25);
+
     const randomPopularSong = chooseRandom(randomPopularSongs);
     if (!randomPopularSong) {
         client.editStatus("online");
@@ -222,6 +225,7 @@ export async function reloadAliases() {
     for (const mapping of artistAliasMapping) {
         newArtistAliases[mapping["artist_name"]] = mapping["artist_aliases"].split(";");
     }
+
     state.aliases.artist = newArtistAliases;
     state.aliases.song = newSongAliases;
     logger.info("Reloaded alias data");
@@ -305,6 +309,7 @@ export function getCommandFiles(shouldReload: boolean): { [commandName: string]:
                 // invalidate require cache
                 delete require.cache[require.resolve(commandFilePath)];
             }
+
             try {
                 const command = require(commandFilePath);
                 const commandName = path.parse(commandFile).name;
@@ -314,6 +319,7 @@ export function getCommandFiles(shouldReload: boolean): { [commandName: string]:
                 throw new Error(`Failed to load file: ${commandFilePath}`);
             }
         }
+
         cachedCommandFiles = commandMap;
         return commandMap;
     } catch (err) {
@@ -331,6 +337,7 @@ function registerCommand(command: BaseCommand, commandName: string) {
     if (commandName in state.commands) {
         logger.error(`Command \`${commandName}\` already exists. Possible conflict?`);
     }
+
     state.commands[commandName] = command;
 }
 
@@ -358,5 +365,6 @@ export function deleteGameSession(guildID: string) {
         logger.debug(`gid: ${guildID} | GameSession already ended`);
         return;
     }
+
     delete state.gameSessions[guildID];
 }

@@ -48,6 +48,7 @@ export default class Scoreboard {
                 winnerStr += ", ";
             }
         }
+
         winnerStr += "win!";
         return winnerStr;
     }
@@ -80,9 +81,11 @@ export default class Scoreboard {
                 const duplicateName = arr.filter((y) => y.getName().slice(0, -5) === x.getName().slice(0, -5)).length > 1;
                 return `${bold(String(index + 1))}. ${x.getDisplayedName(roundResultIDs?.has(x.getID()), duplicateName)}: ${x.getDisplayedScore()}`;
             });
+
         if (this.getNumPlayers() > cutoff) {
             players.push("\nand many others...");
         }
+
         return [
             {
                 name: "**Scoreboard**",
@@ -149,6 +152,7 @@ export default class Scoreboard {
         if (userID in this.players) {
             return this.players[userID].getScore();
         }
+
         return 0;
     }
 
@@ -160,6 +164,7 @@ export default class Scoreboard {
         if (userID in this.players) {
             return this.players[userID].getExpGain();
         }
+
         return 0;
     }
 

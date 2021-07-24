@@ -44,6 +44,7 @@ export function getDebugLogHeader(messageContext: MessageContext | Eris.Message)
     if (messageContext instanceof Eris.Message) {
         return `gid: ${messageContext.guildID}, uid: ${messageContext.author.id}`;
     }
+
     return `gid: ${messageContext.guildID}`;
 }
 
@@ -124,6 +125,7 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
         thumbnail: embedPayload.thumbnailUrl ? { url: embedPayload.thumbnailUrl } : null,
         timestamp: embedPayload.timestamp,
     };
+
     return sendMessage(messageContext.textChannelID, { embed, messageReference: reply ? { messageID: messageContext.referencedMessageID, failIfNotExists: false } : null });
 }
 
@@ -172,12 +174,15 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
                 .map((x) => `${x.player.tag} (+${x.expGain} EXP)`)
                 .slice(0, 10)
                 .join("\n");
+
             if (runnersUp.length >= 10) {
                 runnersUpDescription += "\nand many others...";
             }
+
             correctDescription += `\n\n**Runners Up**\n${runnersUpDescription}`;
         }
     }
+
     const uniqueSongMessage = (uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0) ? `\n${codeLine(`${uniqueSongCounter.uniqueSongsPlayed}/${uniqueSongCounter.totalSongs}`)} unique songs played.` : "";
     const useLargerScoreboard = scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
     const description = `${correctGuess ? correctDescription : "Nobody got it."}\n\nhttps://youtu.be/${gameRound.videoID}${uniqueSongMessage} ${!scoreboard.isEmpty() && !useLargerScoreboard ? "\n\n**Scoreboard**" : ""}`;
@@ -189,11 +194,13 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     } else {
         roundResultIDs = new Set(playerRoundResults.map((x) => x.player.id));
     }
+
     if (useLargerScoreboard) {
         fields = scoreboard.getScoreboardEmbedThreeFields(MAX_SCOREBOARD_PLAYERS, roundResultIDs);
     } else {
         fields = scoreboard.getScoreboardEmbedFields(roundResultIDs);
     }
+
     if (fact) {
         fields.push({
             name: "__Did you know?__", value: fact, inline: false,
@@ -378,6 +385,7 @@ export async function sendEndGameMessage(gameSession: GameSession) {
                 },
             );
         }
+
         await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
             color: gameSession.gameType !== GameType.TEAMS && await userBonusIsActive(winners[0].id) ? EMBED_SUCCESS_BONUS_COLOR : EMBED_SUCCESS_COLOR,
             description: !useLargerScoreboard ? "**Scoreboard**" : null,
@@ -398,6 +406,7 @@ export async function sendPaginationedEmbed(message: GuildTextableMessage, embed
     if (embeds.length > 1) {
         return EmbedPaginator.createPaginationEmbed(message, embeds, { timeout: 60000 });
     }
+
     return sendMessage(message.channel.id, { embed: embeds[0] });
 }
 
@@ -414,6 +423,7 @@ export async function sendScoreboardMessage(message: GuildTextableMessage, gameS
             title: "**Scoreboard**",
         });
     }
+
     const winnersFieldSubsets = chunkArray(gameSession.scoreboard.getScoreboardEmbedFields(), EMBED_FIELDS_PER_PAGE);
     let footerText = `Your score is ${gameSession.scoreboard.getPlayerScore(message.author.id)}.`;
     if (gameSession.gameType === GameType.ELIMINATION) {
@@ -423,6 +433,7 @@ export async function sendScoreboardMessage(message: GuildTextableMessage, gameS
         const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
         footerText = `Your team's score: ${teamScoreboard.getTeamOfPlayer(message.author.id).getScore()}\nYour score: ${teamScoreboard.getPlayerScore(message.author.id)}`;
     }
+
     const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map((winnersFieldSubset) => ({
         color: EMBED_SUCCESS_COLOR,
         title: "**Scoreboard**",
@@ -461,6 +472,7 @@ export function areUserAndBotInSameVoiceChannel(message: Eris.Message): boolean 
     if (!message.member.voiceState || !botVoiceConnection) {
         return false;
     }
+
     return message.member.voiceState.channelID === botVoiceConnection.channelID;
 }
 
@@ -520,18 +532,21 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
         sendErrorMessage(MessageContext.fromMessage(message), { title: "Missing Permissions", description: missingPermissionsText(missingPermissions) });
         return false;
     }
+
     const channelFull = voiceChannel.userLimit && (voiceChannel.voiceMembers.size >= voiceChannel.userLimit);
     if (channelFull) {
         logger.warn(`${getDebugLogHeader(messageContext)} | Channel full`);
         sendInfoMessage(MessageContext.fromMessage(message), { title: "Voice Channel Full", description: "Ensure that there's enough room in the voice channel for me to join" });
         return false;
     }
+
     const afkChannel = voiceChannel.id === voiceChannel.guild.afkChannelID;
     if (afkChannel) {
         logger.warn(`${getDebugLogHeader(messageContext)} | Attempted to start game in AFK voice channel`);
         sendInfoMessage(MessageContext.fromMessage(message), { title: "AFK Voice Channel", description: "Ensure you're not in the inactive voice channel so that you can hear me!" });
         return false;
     }
+
     return true;
 }
 
@@ -549,6 +564,7 @@ export async function textPermissionsCheck(message: GuildTextableMessage, channe
             title: "Missing Permissions",
             description: `Hi! I'm unable to message in ${channel.guild.name}'s #${channel.name} channel. Please make sure the bot has permissions to message in this channel.`,
         };
+
         const dmChannel = await client.getDMChannel(message.author.id);
         await client.createMessage(dmChannel.id, { embed });
         return false;
@@ -562,6 +578,7 @@ export async function textPermissionsCheck(message: GuildTextableMessage, channe
         });
         return false;
     }
+
     return true;
 }
 
@@ -577,6 +594,7 @@ export function checkBotIsAlone(guildID: string): boolean {
     if (channel.voiceMembers.size === 1 && channel.voiceMembers.has(state.client.user.id)) {
         return true;
     }
+
     return false;
 }
 
@@ -596,6 +614,7 @@ export function getSqlDateString(timeInMs?: number): string {
     if (timeInMs) {
         return new Date(timeInMs).toISOString().slice(0, 19).replace("T", " ");
     }
+
     return new Date().toISOString().slice(0, 19).replace("T", " ");
 }
 
@@ -608,5 +627,6 @@ export function getMajorityCount(guildID: string): number {
     if (voiceChannelID) {
         return Math.floor(getNumParticipants(voiceChannelID) * 0.5) + 1;
     }
+
     return 0;
 }

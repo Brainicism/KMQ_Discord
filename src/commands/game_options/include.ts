@@ -39,12 +39,14 @@ export default class IncludeCommand implements BaseCommand {
             logger.info(`${getDebugLogHeader(message)} | Includes reset.`);
             return;
         }
+
         let includeWarning = "";
         if (parsedMessage.components.length > 1) {
             if (["add", "remove"].includes(parsedMessage.components[0])) {
                 includeWarning = `Did you mean to use ${process.env.BOT_PREFIX}${parsedMessage.components[0]} include?`;
             }
         }
+
         if (guildPreference.isGroupsMode()) {
             logger.warn(`${getDebugLogHeader(message)} | Game option conflict between include and groups.`);
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Game Option Conflict", description: `\`groups\` game option is currently set. \`include\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed.` });
@@ -63,6 +65,7 @@ export default class IncludeCommand implements BaseCommand {
         if (matchedGroups.length === 0) {
             return;
         }
+
         await guildPreference.setIncludes(matchedGroups);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.INCLUDE, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Includes set to ${guildPreference.getDisplayedIncludesGroupNames()}`);

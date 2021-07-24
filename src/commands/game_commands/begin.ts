@@ -17,6 +17,7 @@ export default class BeginCommand implements BaseCommand {
         if (!gameSession || gameSession.gameType === GameType.CLASSIC) {
             return false;
         }
+
         if (gameSession.gameType === GameType.ELIMINATION) {
             if (gameSession.owner.id !== authorID) {
                 sendErrorMessage(messageContext, { title: "Begin ignored", description: `Only the person who did \`${process.env.BOT_PREFIX}play elimination\` (${bold(gameSession.owner.tag)}) can start the game.` });
@@ -29,6 +30,7 @@ export default class BeginCommand implements BaseCommand {
                 return false;
             }
         }
+
         return true;
     }
     call = async ({ message, gameSessions, channel }: CommandArgs) => {
@@ -45,6 +47,7 @@ export default class BeginCommand implements BaseCommand {
                 const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
                 participants = teamScoreboard.getPlayers().map((player) => ({ id: player.id, username: player.name.split("#")[0], discriminator: player.name.split("#")[1] }));
             }
+
             sendBeginGameMessage(channel.name, getUserVoiceChannel(message).name, message, participants);
             gameSession.startRound(guildPreference, MessageContext.fromMessage(message));
             logger.info(`${getDebugLogHeader(message)} | Game session starting (${gameSession.gameType} gameType)`);

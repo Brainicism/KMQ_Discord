@@ -16,6 +16,7 @@ describe("score/exp updating", () => {
         scoreboard.addPlayer(userIDs[2], "joy#4144", "someurl");
         scoreboard.addPlayer(userIDs[3], "wendy#4747", "someurl");
     });
+
     describe("single player scoreboard", () => {
         describe("user guesses correctly multiple times", () => {
             it("should not affect their lives", () => {
@@ -34,6 +35,7 @@ describe("score/exp updating", () => {
                 for (let i = 0; i < 5; i++) {
                     scoreboard.updateScoreboard([{ userID: userIDs[0], pointsEarned: 1, expGain: 50 }]);
                 }
+
                 assert.strictEqual(scoreboard.getPlayerLives(userIDs[0]), DEFAULT_LIVES);
                 assert.strictEqual(scoreboard.getPlayerLives(userIDs[1]), DEFAULT_LIVES - 5);
                 assert.strictEqual(scoreboard.getPlayerLives(userIDs[2]), DEFAULT_LIVES - 5);
@@ -62,6 +64,7 @@ describe("score/exp updating", () => {
                 { userID: userIDs[1], pointsEarned: 1, expGain: 25 },
             ]);
         });
+
         it("should decrement the lives of everyone except for the ones who guessed", () => {
             assert.strictEqual(scoreboard.getPlayerLives(userIDs[0]), DEFAULT_LIVES);
             assert.strictEqual(scoreboard.getPlayerLives(userIDs[1]), DEFAULT_LIVES);
@@ -82,6 +85,7 @@ describe("winner detection", () => {
         scoreboard.addPlayer(userIDs[1], "seulgi#7854", "someurl");
         scoreboard.addPlayer(userIDs[2], "joy#4144", "someurl");
     });
+
     describe("nobody has a score yet", () => {
         it("should return an empty array", () => {
             assert.deepStrictEqual(scoreboard.getWinners(), []);
@@ -164,6 +168,7 @@ describe("getLivesOfWeakestPlayer", () => {
             assert.strictEqual(scoreboard.getLivesOfWeakestPlayer(), 2);
         });
     });
+
     describe("tie for the weakest", () => {
         it("should return the number of lives", () => {
             scoreboard.addPlayer(userIDs[0], "irene#1234", "someurl", 3);
@@ -181,6 +186,7 @@ describe("starting lives", () => {
             assert.strictEqual(scoreboard.getPlayerLives(userIDs[0]), DEFAULT_LIVES);
         });
     });
+
     describe("explicit number of lives set for player", () => {
         it("should use the explicitly set number of lives", () => {
             scoreboard.addPlayer(userIDs[0], "irene#1234", "someurl", 17);

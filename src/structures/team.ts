@@ -29,6 +29,7 @@ export default class Team extends Player {
         if (wonRound) {
             name = `🎵 ${bold(name)}`;
         }
+
         return name;
     }
 

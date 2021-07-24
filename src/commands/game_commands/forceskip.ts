@@ -35,6 +35,7 @@ export default class ForceSkipCommand extends InGameCommand {
             logger.warn(`${getDebugLogHeader(message)} | Invalid force-skip. !gameSession: ${!gameSession}. !gameSession.gameRound: ${gameSession && !gameSession.gameRound}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
             return;
         }
+
         if (gameSession.gameRound.skipAchieved || !gameSession.gameRound) {
             // song already being skipped
             return;
@@ -50,6 +51,7 @@ export default class ForceSkipCommand extends InGameCommand {
             const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
             eliminationScoreboard.decrementAllLives();
         }
+
         sendInfoMessage(MessageContext.fromMessage(message), {
             color: EMBED_SUCCESS_COLOR,
             title: "**Skip**",

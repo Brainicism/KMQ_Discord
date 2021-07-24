@@ -57,6 +57,7 @@ export default class LimitCommand implements BaseCommand {
             logger.info(`${getDebugLogHeader(message)} | Limit reset.`);
             return;
         }
+
         let limitStart: number;
         let limitEnd: number;
         if (parsedMessage.components.length === 1) {
@@ -74,6 +75,7 @@ export default class LimitCommand implements BaseCommand {
                 return;
             }
         }
+
         await guildPreference.setLimit(limitStart, limitEnd);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.LIMIT, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Limit set to ${guildPreference.getLimitStart()} - ${guildPreference.getLimitEnd()}`);

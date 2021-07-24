@@ -52,6 +52,7 @@ const downloadDb = async () => {
     await fs.promises.writeFile(audioOutput, audioResp.data, { encoding: null });
     logger.info("Downloaded Daisuki database archive");
 };
+
 async function extractDb(): Promise<void> {
     await fs.promises.mkdir(`${databaseDownloadDir}/`, { recursive: true });
     execSync(`unzip -oq ${databaseDownloadDir}/mv-download.zip -d ${databaseDownloadDir}/`);
@@ -74,6 +75,7 @@ async function validateSqlDump(db: DatabaseContext, mvSeedFilePath: string, audi
         if (mvSongCount < 10000 || audioSongCount < 1000 || artistCount < 1000) {
             throw new Error("SQL dump valid, but potentially missing data.");
         }
+
         if (!bootstrap) {
             logger.info("Validating creation of data tables");
             const originalCreateKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/procedures/create_kmq_data_tables_procedure.sql");
@@ -82,6 +84,7 @@ async function validateSqlDump(db: DatabaseContext, mvSeedFilePath: string, audi
             execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${validationCreateKmqTablesProcedureSqlPath}`);
             await db.kpopVideosValidation.raw("CALL CreateKmqDataTables;");
         }
+
         logger.info("SQL dump validated successfully");
     } catch (e) {
         throw new Error(`SQL dump validation failed. ${e.sqlMessage}`);
@@ -120,6 +123,7 @@ async function hasRecentDump(): Promise<boolean> {
         // Otherwise just throw.
         throw err;
     }
+
     if (files.length === 0) return false;
     const seedFileDateString = files[files.length - 1].match(/mainbackup_([0-9]{4}-[0-9]{2}-[0-9]{2}).sql/)[1];
     logger.info(`Most recent seed file has date: ${seedFileDateString}`);
@@ -156,6 +160,7 @@ export async function updateGroupList(db: DatabaseContext) {
         .select(["name", "members as gender"])
         .where("is_collab", "=", "n")
         .orderBy("name", "ASC");
+
     fs.writeFileSync(path.resolve(__dirname, "../../data/group_list.txt"), result.map((x) => x.name).join("\n"));
 }
 
@@ -180,6 +185,7 @@ async function seedAndDownloadNewSongs(db: DatabaseContext) {
     if (process.env.NODE_ENV === EnvType.PROD) {
         await updateGroupList(db);
     }
+
     logger.info("Finishing seeding and downloading new songs");
 }
 

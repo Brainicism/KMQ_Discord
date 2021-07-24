@@ -93,9 +93,11 @@ function getGroupNamesString(groups: MatchedArtist[], truncate = true, spaceDeli
         .map((x) => x.name)
         .filter((name) => !name.includes("+"))
         .join(spaceDelimiter ? ", " : ",");
+
     if (truncate && displayedGroupNames.length > 200) {
         displayedGroupNames = `${displayedGroupNames.substr(0, 200)} and many others...`;
     }
+
     return displayedGroupNames;
 }
 
@@ -166,6 +168,7 @@ export default class GuildPreference {
         if (!gameOptionsJson) {
             return new GuildPreference(guildID, { ...GuildPreference.DEFAULT_OPTIONS });
         }
+
         return new GuildPreference(guildID, this.validateGameOptions(gameOptionsJson as GameOptions));
     }
 
@@ -176,6 +179,7 @@ export default class GuildPreference {
             .where("guild_id", "=", this.guildID)
             .distinct("preset_name"))
             .map((x) => x["preset_name"]);
+
         return presets;
     }
 
@@ -188,6 +192,7 @@ export default class GuildPreference {
             .where("guild_id", "=", this.guildID)
             .andWhere("preset_name", "=", presetName)
             .del();
+
         return result !== 0;
     }
 
@@ -203,6 +208,7 @@ export default class GuildPreference {
                 option_name: option[0],
                 option_value: JSON.stringify(option[1]),
             }));
+
             await dbContext.kmq.transaction(async (trx) => {
                 await dbContext.kmq("game_option_presets")
                     .insert(presetOptions)
@@ -229,6 +235,7 @@ export default class GuildPreference {
         if (!preset) {
             return false;
         }
+
         const oldOptions = this.gameOptions;
         this.gameOptions = GuildPreference.validateGameOptions(preset as GameOptions);
         const updatedOptions = Object.entries(this.gameOptions).filter((option) => !_.isEqual(oldOptions[option[0]], option[1]));
@@ -236,11 +243,13 @@ export default class GuildPreference {
             // User loads a preset with the exact same options as what is currently set
             return true;
         }
+
         const updatedOptionsObj = updatedOptions.map((x) => {
             const optionName = x[0];
             const optionValue = x[1];
             return { name: optionName, value: optionValue };
         });
+
         await this.updateGuildPreferences(updatedOptionsObj);
         return true;
     }
@@ -350,6 +359,7 @@ export default class GuildPreference {
         if (original) {
             return getGroupNamesString(this.gameOptions.groups.filter((group) => !group.name.includes("+")), false, false);
         }
+
         const displayedGroupNames = getGroupNamesString(this.gameOptions.groups);
         return displayedGroupNames;
     }
@@ -391,6 +401,7 @@ export default class GuildPreference {
         if (original) {
             return getGroupNamesString(this.gameOptions.excludes.filter((group) => !group.name.includes("+")), false, false);
         }
+
         const displayedGroupNames = getGroupNamesString(this.gameOptions.excludes);
         return displayedGroupNames;
     }
@@ -426,6 +437,7 @@ export default class GuildPreference {
         if (original) {
             return getGroupNamesString(this.gameOptions.includes.filter((group) => !group.name.includes("+")), false, false);
         }
+
         const displayedGroupNames = getGroupNamesString(this.gameOptions.includes);
         return displayedGroupNames;
     }
@@ -734,6 +746,7 @@ export default class GuildPreference {
             option_name: option.name,
             option_value: JSON.stringify(option.value),
         }));
+
         await dbContext.kmq.transaction(async (trx) => {
             await dbContext.kmq("game_options")
                 .insert(updatedOptions)
@@ -755,6 +768,7 @@ export default class GuildPreference {
             const optionValue = x[1];
             return { name: optionName, value: optionValue };
         });
+
         await this.updateGuildPreferences(options);
     }
 }

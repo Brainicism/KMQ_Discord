@@ -16,6 +16,7 @@ async function exportJsonPresetsToNewTable(db: DatabaseContext): Promise<void> {
                 option_name: option[0],
                 option_value: JSON.stringify(option[1]),
             }));
+
             await db.kmq.transaction(async (trx) => {
                 await db.kmq("game_option_presets")
                     .insert(presetOptions)

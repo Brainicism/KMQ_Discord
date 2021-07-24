@@ -59,6 +59,7 @@ function registerGlobalIntervals(fleet: Fleet) {
         if (overrideFileExists) {
             return;
         }
+
         await seedAndDownloadNewSongs(dbContext);
     });
 }

@@ -16,6 +16,7 @@ export async function clearPartiallyCachedSongs(): Promise<void> {
         logger.error("Song cache directory doesn't exist.");
         return;
     }
+
     let files: Array<string>;
     try {
         files = await fs.promises.readdir(process.env.SONG_DOWNLOAD_DIR);
@@ -33,6 +34,7 @@ export async function clearPartiallyCachedSongs(): Promise<void> {
             logger.error(err);
         }
     }
+
     if (partFiles.length) {
         logger.info(`${partFiles.length} stale cached songs deleted.`);
     }
@@ -46,6 +48,7 @@ function getAverageVolume(mp3File: string): Promise<number> {
                 reject();
                 return;
             }
+
             resolve(parseFloat(stdout));
         });
     });
@@ -58,6 +61,7 @@ async function ffmpegOpusJob(id: string): Promise<void> {
         if (fs.existsSync(oggFileWithPath)) {
             resolve();
         }
+
         const oggPartWithPath = `${oggFileWithPath}.part`;
         const oggFfmpegOutputStream = fs.createWriteStream(oggPartWithPath);
 
@@ -78,6 +82,7 @@ async function ffmpegOpusJob(id: string): Promise<void> {
                     if (!fs.existsSync(oggFileWithPath)) {
                         reject(new Error(`File ${oggFileWithPath} wasn't created. err = ${err}`));
                     }
+
                     reject(new Error(`File ${oggFileWithPath} might have duplicate entries in db. err = ${err}`));
                 }
             })
@@ -87,6 +92,7 @@ async function ffmpegOpusJob(id: string): Promise<void> {
             .run();
     });
 }
+
 const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
     const cachedSongLocation = path.join(process.env.SONG_DOWNLOAD_DIR, `${id}.mp3`);
     const tempLocation = `${cachedSongLocation}.part`;
@@ -107,6 +113,7 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
                 reject(new Error(`Failed to load video: error = ${playabilityStatus.reason}`));
                 return;
             }
+
             // download video
             ytdl(`https://www.youtube.com/watch?v=${id}`, ytdlOptions)
                 .pipe(cacheStream);
@@ -194,6 +201,7 @@ const downloadNewSongs = async (db: DatabaseContext, audioSongsPerArtist: number
             } catch (tempErr) {
                 logger.error(`Error deleting temp file ${song.youtubeLink}.mp3.part, err = ${tempErr}`);
             }
+
             continue;
         }
 
@@ -204,6 +212,7 @@ const downloadNewSongs = async (db: DatabaseContext, audioSongsPerArtist: number
             logger.error(`Error encoding song ${song.youtubeLink}, exiting... err = ${err}`);
             break;
         }
+
         downloadCount++;
     }
 

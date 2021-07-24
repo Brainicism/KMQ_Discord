@@ -27,6 +27,7 @@ describe("eliminated", () => {
             assert.strictEqual(player.isEliminated(), false);
         });
     });
+
     describe("the player has zero lives", () => {
         it("should return true", () => {
             player = new EliminationPlayer("miyeon#7489", "12345", "someurl", 0);

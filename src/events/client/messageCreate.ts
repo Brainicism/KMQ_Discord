@@ -41,6 +41,7 @@ export default async function messageCreateHandler(message: Eris.Message) {
         if (!(await textPermissionsCheck(message, textChannel))) {
             return;
         }
+
         const guildPreference = await getGuildPreference(message.guildID);
         sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, null, `Psst. The bot prefix is ${process.env.BOT_PREFIX}`);
         return;
@@ -52,11 +53,13 @@ export default async function messageCreateHandler(message: Eris.Message) {
             if (!(await textPermissionsCheck(message, textChannel))) {
                 return;
             }
+
             const { gameSessions } = state;
             if (invokedCommand.preRunCheck) {
                 const preCheckResult = await invokedCommand.preRunCheck(message, gameSessions[message.guildID]);
                 if (!preCheckResult) return;
             }
+
             invokedCommand.call({
                 gameSessions,
                 channel: textChannel,

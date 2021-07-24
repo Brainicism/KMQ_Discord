@@ -91,10 +91,12 @@ export default class GenderCommand implements BaseCommand {
             if (guildPreference.isGroupsMode() && guildPreference.getGroupIDs().length === 1) {
                 sendErrorMessage(MessageContext.fromMessage(message), { title: "Game Option Warning", description: `With only one group chosen, \`${process.env.BOT_PREFIX}gender alternating\` may not behave as expected. Consider including more groups to correctly alternate genders.` });
             }
+
             await guildPreference.setGender([selectedGenders[0]]);
         } else {
             await guildPreference.setGender(selectedGenders);
         }
+
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GENDER, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Genders set to ${guildPreference.getGender().join(", ")}`);
     };
