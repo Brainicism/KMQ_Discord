@@ -13,6 +13,7 @@ describe("constructor defaults", () => {
             assert.deepStrictEqual(gameRound.acceptedSongAnswers, ["Song1"]);
         });
     });
+
     describe("artist collabs", () => {
         it("should record them as two separate artists", () => {
             gameRound = new GameRound("Poggers Song", "IU + Blackpink", "abcde", 2021);
@@ -32,6 +33,7 @@ describe("constructor defaults", () => {
             state.aliases.artist = {};
             state.aliases.song = {};
         });
+
         describe("song aliases", () => {
             describe("song has an alias", () => {
                 it("records the aliases as an accepted answer", () => {
@@ -41,6 +43,7 @@ describe("constructor defaults", () => {
                 });
             });
         });
+
         describe("artist aliases", () => {
             describe("artist has an alias", () => {
                 it("records the aliases as an accepted answer", () => {
@@ -60,6 +63,7 @@ describe("clean song/artist name", () => {
             assert.strictEqual(cleanArtistName("ClaHClaH"), "clahclah");
         });
     });
+
     describe("has trailing or leading spaces", () => {
         it("removes the whitespace", () => {
             assert.strictEqual(cleanSongName("       blahblah          "), "blahblah");
@@ -73,18 +77,21 @@ describe("clean song/artist name", () => {
             assert.strictEqual(cleanArtistName("!cl:ah clah?"), "clahclah");
         });
     });
+
     describe("has punctuation to replace", () => {
         it("replaces the punctuation with the correct replacement", () => {
             assert.strictEqual(cleanSongName("blah & blah"), "blahandblah");
             assert.strictEqual(cleanArtistName("clah & clah"), "clahandclah");
         });
     });
+
     describe("has brackets in them", () => {
         describe("song names", () => {
             it("removes the sections in the brackets", () => {
                 assert.strictEqual(cleanSongName("blahblah (123)"), "blahblah");
             });
         });
+
         describe("artist names", () => {
             it("does not ignore the sections in the brackets", () => {
                 assert.strictEqual(cleanArtistName("cla(hclah)"), "clahclah");
@@ -105,6 +112,7 @@ describe("skipping", () => {
                 assert.strictEqual(gameRound.getNumSkippers(), 1);
             });
         });
+
         describe("3 people skipping", () => {
             it("should increment the number of skippers by 3", () => {
                 gameRound.userSkipped("user1");
@@ -123,6 +131,7 @@ describe("skipping", () => {
                 assert.strictEqual(gameRound.getNumSkippers(), 1);
             });
         });
+
         describe("2 unique people skipping, total of 3 times", () => {
             it("should increment the number of skippers by 2", () => {
                 gameRound.userSkipped("user1");
@@ -138,6 +147,7 @@ describe("check guess", () => {
     beforeEach(() => {
         gameRound = new GameRound("song", "artist", "a1b2c3", 2015);
     });
+
     describe("incorrect guess", () => {
         it("should return 0 points", () => {
             assert.strictEqual(gameRound.checkGuess("wrong_song", GuessModeType.SONG_NAME), 0);
@@ -145,6 +155,7 @@ describe("check guess", () => {
             assert.strictEqual(gameRound.checkGuess("wrong_both", GuessModeType.BOTH), 0);
         });
     });
+
     describe("correct guess", () => {
         describe("hint used", () => {
             it("should return half the amount of points", () => {
@@ -152,22 +163,26 @@ describe("check guess", () => {
                 assert.strictEqual(gameRound.checkGuess("song", GuessModeType.SONG_NAME), 0.5);
             });
         });
+
         describe("song guessing mode", () => {
             it("should return 1 point", () => {
                 assert.strictEqual(gameRound.checkGuess("song", GuessModeType.SONG_NAME), 1);
             });
         });
+
         describe("artist guessing mode", () => {
             it("should return 1 point", () => {
                 assert.strictEqual(gameRound.checkGuess("artist", GuessModeType.ARTIST), 1);
             });
         });
+
         describe("both guessing mode", () => {
             describe("guessed song", () => {
                 it("should return 1 point", () => {
                     assert.strictEqual(gameRound.checkGuess("song", GuessModeType.BOTH), 1);
                 });
             });
+
             describe("guessed artist", () => {
                 it("should return 0.2 points", () => {
                     assert.strictEqual(gameRound.checkGuess("artist", GuessModeType.BOTH), 0.2);

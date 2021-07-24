@@ -19,6 +19,7 @@ function isHintMajority(message: GuildTextableMessage, gameSession: GameSession)
         const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
         return gameSession.gameRound.getHintRequests() >= Math.floor(eliminationScoreboard.getAlivePlayersCount() * 0.5) + 1;
     }
+
     return gameSession.gameRound.getHintRequests() >= getMajorityCount(message.guildID);
 }
 
@@ -47,6 +48,7 @@ export function validHintCheck(gameSession: GameSession, gameRound: GameRound, m
         sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid hint request", description: "A hint can only be requested when a song is playing.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
         return false;
     }
+
     if (gameSession.gameType === GameType.ELIMINATION) {
         const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
         if (eliminationScoreboard.isPlayerEliminated(message.author.id)) {
@@ -54,6 +56,7 @@ export function validHintCheck(gameSession: GameSession, gameRound: GameRound, m
             return false;
         }
     }
+
     return true;
 }
 

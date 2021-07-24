@@ -54,6 +54,7 @@ export default class DebugCommand implements BaseCommand {
             description: `If you were asked by a bot developer to do this, give them this:\n\`${debugID}\``,
             thumbnailUrl: KmqImages.READING_BOOK,
         });
+
         sendInfoMessage(new MessageContext(debugChannel.id), {
             title: `Debug Details for User: ${message.author.id}, Guild: ${message.guildID}`,
             footerText: debugID,

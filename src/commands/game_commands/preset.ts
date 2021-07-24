@@ -71,12 +71,14 @@ export default class PresetCommand implements BaseCommand {
             this.listPresets(guildPreference, messageContext);
             return;
         }
+
         const presetName = parsedMessage.components[1];
         if (!presetName) {
             sendErrorMessage(messageContext, { title: "Preset Name Missing", description: "You must specify a preset name.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
             logger.warn(`${getDebugLogHeader(message)} | Preset name not specified`);
             return;
         }
+
         switch (presetAction) {
             case PresetAction.SAVE:
                 await this.savePreset(presetName, guildPreference, messageContext);
@@ -101,6 +103,7 @@ export default class PresetCommand implements BaseCommand {
             await sendErrorMessage(messageContext, { title: "Preset Error", description: `Preset \`${presetName}\` doesn't exist.` });
             return;
         }
+
         await sendInfoMessage(messageContext, { title: "Preset Deleted", description: `Preset \`${presetName}\` successfully deleted.`, thumbnailUrl: KmqImages.NOT_IMPRESSED });
         logger.info(`${getDebugLogHeader(messageContext)} | Preset '${presetName}' successfully deleted.`);
     }
@@ -122,10 +125,12 @@ export default class PresetCommand implements BaseCommand {
             await sendErrorMessage(messageContext, { title: "Preset Error", description: `Each guild may only have up to ${MAX_NUM_PRESETS} presets. Please delete some before adding more.` });
             return;
         }
+
         if (presetName.length > PRESET_NAME_MAX_LENGTH) {
             await sendErrorMessage(messageContext, { title: "Preset Error", description: `Preset name must be at most ${PRESET_NAME_MAX_LENGTH} characters.` });
             return;
         }
+
         const saveResult = await guildPreference.savePreset(presetName);
         if (saveResult) {
             logger.info(`${getDebugLogHeader(messageContext)} | Preset '${presetName}' successfully saved`);
@@ -141,6 +146,7 @@ export default class PresetCommand implements BaseCommand {
         if (!deleteResult) {
             logger.info(`${getDebugLogHeader(messageContext)} | Preset '${presetName}' replace, preset did not exist`);
         }
+
         await guildPreference.savePreset(presetName);
         logger.info(`${getDebugLogHeader(messageContext)} | Preset '${presetName}' successfully replaced`);
         await sendInfoMessage(messageContext, { title: "Preset Replaced", description: `You can load this preset later with \`${process.env.BOT_PREFIX}preset load ${presetName}\`.`, thumbnailUrl: KmqImages.HAPPY });

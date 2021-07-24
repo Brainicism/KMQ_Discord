@@ -43,5 +43,6 @@ export async function getForcePlaySong(): Promise<QueriedSong> {
             this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id");
         })
         .where("vlink", forcePlaySongID);
+
     return result[0];
 }

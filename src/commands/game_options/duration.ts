@@ -64,6 +64,7 @@ export default class DurationCommand implements BaseCommand {
             logger.info(`${getDebugLogHeader(message)} | Duration disabled.`);
             return;
         }
+
         let duration: number;
         const durationDelta = parseInt(parsedMessage.components[0]);
         if (parsedMessage.components[1]) {

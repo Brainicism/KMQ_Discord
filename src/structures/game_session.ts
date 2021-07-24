@@ -141,6 +141,7 @@ export default class GameSession {
         } else {
             this.scoreboard = new Scoreboard();
         }
+
         this.lastActive = Date.now();
         this.sessionInitialized = false;
         this.startedAt = Date.now();
@@ -172,9 +173,11 @@ export default class GameSession {
         if (this.connection) {
             this.connection.removeAllListeners();
         }
+
         if (this.gameRound === null) {
             return;
         }
+
         const gameRound = this.gameRound;
         this.gameRound = null;
         const playerRoundResults: Array<PlayerRoundResult> = [];
@@ -198,6 +201,7 @@ export default class GameSession {
                     guessSpeed,
                     guessPosition,
                     await userBonusIsActive(correctGuesser.id));
+
                 if (idx === 0) {
                     playerRoundResults.push({ player: correctGuesser, streak: this.lastGuesser.streak, expGain });
                     logger.info(`${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed. song = ${gameRound.songName}. Gained ${expGain} EXP`);
@@ -205,10 +209,12 @@ export default class GameSession {
                     playerRoundResults.push({ player: correctGuesser, streak: 0, expGain });
                     logger.info(`${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed ${getOrdinalNum(guessPosition)}. song = ${gameRound.songName}. Gained ${expGain} EXP`);
                 }
+
                 return {
                     userID: correctGuesser.id, pointsEarned: idx === 0 ? correctGuesser.pointsAwarded : correctGuesser.pointsAwarded / 2, expGain,
                 };
             });
+
             this.scoreboard.updateScoreboard(await Promise.all(scoreboardUpdatePayload));
         } else {
             this.lastGuesser = null;
@@ -254,6 +260,7 @@ export default class GameSession {
         if (this.finished) {
             return;
         }
+
         this.finished = true;
         deleteGameSession(this.guildID);
         await this.endRound({ correct: false }, await getGuildPreference(this.guildID));
@@ -277,6 +284,7 @@ export default class GameSession {
             if (playerScore > 0) {
                 await this.incrementPlayerSongsGuessed(participant, playerScore);
             }
+
             const playerExpGain = this.scoreboard.getPlayerExpGain(participant);
             if (playerExpGain > 0) {
                 const levelUpResult = await this.incrementPlayerExp(participant, playerExpGain);
@@ -293,6 +301,7 @@ export default class GameSession {
                 levelUpMessages = levelUpMessages.slice(0, 10);
                 levelUpMessages.push("and many others...");
             }
+
             sendInfoMessage(new MessageContext(this.textChannelID), { title: "🚀 Power up!", description: levelUpMessages.join("\n"), thumbnailUrl: KmqImages.THUMBS_UP });
         }
 
@@ -351,6 +360,7 @@ export default class GameSession {
             if (this.gameRound.finished) {
                 return;
             }
+
             this.gameRound.finished = true;
 
             await delay(this.multiguessDelayIsActive(guildPreference) ? MULTIGUESS_DELAY : 0);
@@ -444,6 +454,7 @@ export default class GameSession {
         } else {
             randomSong = await selectRandomSong(this.filteredSongs.songs, ignoredSongs);
         }
+
         if (randomSong === null) {
             sendErrorMessage(messageContext, { title: "Song Query Error", description: "Failed to find songs matching this criteria. Try to broaden your search." });
             await this.endSession();
@@ -453,6 +464,7 @@ export default class GameSession {
         if (totalSongsCount > LAST_PLAYED_SONG_QUEUE_SIZE) {
             this.lastPlayedSongs.push(randomSong.youtubeLink);
         }
+
         if (guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
             this.uniqueSongsPlayed.add(randomSong.youtubeLink);
         }
@@ -476,6 +488,7 @@ export default class GameSession {
             await sendErrorMessage(messageContext, { title: "Error joining voice channel", description: "Something went wrong, try starting the game again in a bit." });
             return;
         }
+
         this.playSong(guildPreference, messageContext);
     }
 
@@ -495,6 +508,7 @@ export default class GameSession {
                 const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
                 eliminationScoreboard.decrementAllLives();
             }
+
             await this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));
             this.startRound(await getGuildPreference(this.guildID), messageContext);
         }, time * 1000);
@@ -551,6 +565,7 @@ export default class GameSession {
             logger.debug(`${getDebugLogHeader(messageContext)} | Not playing song in voice connection. song = ${this.getDebugSongDetails()}`);
             return;
         }
+
         const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${gameRound.videoID}.ogg`;
 
         let seekLocation: number;
@@ -562,6 +577,7 @@ export default class GameSession {
                 .select(["duration"])
                 .where("vlink", "=", gameRound.videoID)
                 .first()).duration;
+
             if (guildPreference.getSeekType() === SeekType.RANDOM) {
                 seekLocation = songDuration * (0.6 * Math.random());
             } else if (guildPreference.getSeekType() === SeekType.MIDDLE) {
@@ -583,6 +599,7 @@ export default class GameSession {
                 inputArgs = ffmpegArgs.inputArgs;
                 encoderArgs = ffmpegArgs.encoderArgs;
             }
+
             this.connection.play(stream, {
                 inputArgs,
                 encoderArgs,
@@ -604,6 +621,7 @@ export default class GameSession {
                 const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
                 eliminationScoreboard.decrementAllLives();
             }
+
             await this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));
             this.startRound(await getGuildPreference(this.guildID), messageContext);
         });
@@ -657,10 +675,12 @@ export default class GameSession {
         if (this.gameType !== GameType.ELIMINATION) {
             this.participants.add(userID);
         }
+
         const pointsAwarded = this.gameRound.checkGuess(guess, guessModeType);
         if (pointsAwarded) {
             this.gameRound.userCorrect(userID, pointsAwarded);
         }
+
         return pointsAwarded;
     }
 
@@ -756,6 +776,7 @@ export default class GameSession {
             .select(["exp", "level"])
             .where("player_id", "=", userID)
             .first());
+
         const newExp = currentExp + expGain;
         let newLevel = level;
 
@@ -793,9 +814,11 @@ export default class GameSession {
                 roundsPlayed: 0,
             };
         }
+
         if (correct) {
             this.playCount[vlink].correctGuesses++;
         }
+
         this.playCount[vlink].roundsPlayed++;
     }
 

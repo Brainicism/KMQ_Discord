@@ -9,6 +9,7 @@ describe("fromGuild", () => {
             assert.deepStrictEqual(GuildPreference.DEFAULT_OPTIONS, guildPreference.gameOptions);
         });
     });
+
     describe("guild preference provided", () => {
         describe("it is neither missing, nor has extra game options", () => {
             const filledGameOptions = { ...GuildPreference.DEFAULT_OPTIONS };

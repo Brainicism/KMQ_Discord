@@ -47,9 +47,11 @@ export default class Player {
         if (!keepDiscriminator) {
             name = this.name.slice(0, -5);
         }
+
         if (wonRound) {
             name = `🎵 ${bold(name)}`;
         }
+
         return name;
     }
 

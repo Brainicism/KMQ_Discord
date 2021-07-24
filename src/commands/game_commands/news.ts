@@ -28,16 +28,19 @@ export default class NewsCommand implements BaseCommand {
                 .select("publishedon")
                 .orderBy("publishedon", "DESC")
                 .limit(1);
+
             latestSongDate = new Date(data[0].publishedon);
         } catch (e) {
             logger.error(`${getDebugLogHeader(message)} | Error retrieving latest song date`);
             latestSongDate = null;
         }
+
         const newsFilePath = path.resolve(__dirname, "../../../data/news.md");
         if (!fs.existsSync(newsFilePath)) {
             logger.error("News file does not exist");
             return;
         }
+
         const news = fs.readFileSync(newsFilePath).toString();
 
         logger.info(`${getDebugLogHeader(message)} | News retrieved.`);

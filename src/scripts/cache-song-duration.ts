@@ -14,6 +14,7 @@ async function cacheSongDuration(db: DatabaseContext): Promise<void> {
         logger.error(err);
         return;
     }
+
     let cachedSongs = 0;
     for (const fileName of files) {
         const vlink = fileName.slice(0, -4);
@@ -31,6 +32,7 @@ async function cacheSongDuration(db: DatabaseContext): Promise<void> {
             }
         }
     }
+
     logger.info(`${cachedSongs} song durations were cached.`);
 }
 

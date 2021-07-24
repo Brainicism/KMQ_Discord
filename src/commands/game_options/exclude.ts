@@ -40,12 +40,14 @@ export default class ExcludeCommand implements BaseCommand {
             logger.info(`${getDebugLogHeader(message)} | Excludes reset.`);
             return;
         }
+
         let excludeWarning = "";
         if (parsedMessage.components.length > 1) {
             if (["add", "remove"].includes(parsedMessage.components[0])) {
                 excludeWarning = `Did you mean to use ${process.env.BOT_PREFIX}${parsedMessage.components[0]} exclude?`;
             }
         }
+
         const groupNames = parsedMessage.argument.split(",").map((groupName) => groupName.trim());
         const groups = await getMatchingGroupNames(groupNames);
         let { matchedGroups } = groups;

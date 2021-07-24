@@ -63,6 +63,7 @@ export default class ListCommand implements BaseCommand {
             default:
                 optionValue = null;
         }
+
         optionValue = optionValue || "Nothing currently selected";
 
         if (optionValue.length > 2000) {

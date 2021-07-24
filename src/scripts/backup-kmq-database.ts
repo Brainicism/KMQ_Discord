@@ -12,6 +12,7 @@ async function backupKmqDatabase(): Promise<void> {
     if (!fs.existsSync(databaseBackupDir)) {
         fs.mkdirSync(databaseBackupDir);
     }
+
     try {
         await mysqldump({
             connection: {

@@ -20,14 +20,17 @@ program.parse();
     const availableSongs = (await db.kmq("available_songs")
         .select("link"))
         .map((x) => x["link"]);
+
     const downloadedSongs = (await fs.promises.readdir(process.env.SONG_DOWNLOAD_DIR))
         .filter((x) => x.endsWith(".ogg"))
         .map((x) => x.replace(".ogg", ""));
+
     const danglingSongs = _.difference(downloadedSongs, availableSongs).map((x) => path.join(process.env.SONG_DOWNLOAD_DIR, `${x}.ogg`));
     let totalSize = 0;
     for (const danglingSong of danglingSongs) {
         totalSize += fs.statSync(danglingSong).size;
     }
+
     await db.destroy();
 
     const shouldDelete = options.delete;
@@ -35,6 +38,7 @@ program.parse();
         logger.info(`${danglingSongs.length} songs (${(totalSize / (1024 * 1024)).toFixed(2)} MB) to be deleted. Re-run with --delete to remove.`);
         return;
     }
+
     await Promise.all(danglingSongs.map((song) => fs.promises.unlink(song)));
     logger.info(`${danglingSongs.length} songs (${(totalSize / (1024 * 1024)).toFixed(2)} MB) removed`);
 })();

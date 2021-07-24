@@ -27,6 +27,7 @@ export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, val
             usage);
         return false;
     }
+
     for (let i = 0; i < args.length; i++) {
         const validation = validations.arguments[i];
         if (!validation) continue;
@@ -41,6 +42,7 @@ export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, val
                         usage);
                     return false;
                 }
+
                 // parse as integer for now, might cause problems later?
                 const intArg = parseInt(arg);
                 if ("minValue" in validation && intArg < validation.minValue) {
@@ -50,6 +52,7 @@ export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, val
                         usage);
                     return false;
                 }
+
                 if ("maxValue" in validation && intArg > validation.maxValue) {
                     sendValidationErrorMessage(message,
                         `Expected value less than or equal to \`${validation.maxValue}\` for \`${validation.name}\`.`,
@@ -57,8 +60,10 @@ export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, val
                         usage);
                     return false;
                 }
+
                 break;
             }
+
             case "boolean": {
                 arg = arg.toLowerCase();
                 if (!(arg === "false" || arg === "true")) {
@@ -68,8 +73,10 @@ export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, val
                         usage);
                     return false;
                 }
+
                 break;
             }
+
             case "enum": {
                 const { enums } = validation;
                 arg = arg.toLowerCase();
@@ -80,9 +87,11 @@ export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, val
                         usage);
                     return false;
                 }
+
                 args[i] = arg;
                 break;
             }
+
             case "char": {
                 if (arg.length !== 1) {
                     sendValidationErrorMessage(message,
@@ -91,12 +100,15 @@ export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, val
                         usage);
                     return false;
                 }
+
                 break;
             }
+
             default: {
                 logger.error(`Undefined argument type. ${validation}`);
             }
         }
     }
+
     return true;
 };

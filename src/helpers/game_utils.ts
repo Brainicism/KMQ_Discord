@@ -30,6 +30,7 @@ interface GroupMatchResults {
 export async function getFilteredSongList(guildPreference: GuildPreference): Promise<{ songs: Set<QueriedSong>, countBeforeLimit: number }> {
     const fields = ["song_name as name", "artist_name as artist", "link as youtubeLink",
         "publishedon as publishDate", "members", "id_artist as artistID", "issolo as isSolo", "members", "tags"];
+
     let queryBuilder = dbContext.kmq("available_songs")
         .select(fields)
         .where(function artistFilter() {
@@ -64,6 +65,7 @@ export async function getFilteredSongList(guildPreference: GuildPreference): Pro
                             .orWhereIn("id_artist2", subunits)
                             .orWhereIn("id_artist3", subunits)
                             .orWhereIn("id_artist4", subunits);
+
                         this.andWhere(function () {
                             this.whereIn("id_artist", guildPreference.getGroupIDs())
                                 .orWhereIn("id_parent_artist", guildPreference.getGroupIDs())
@@ -137,13 +139,16 @@ export async function selectRandomSong(filteredSongs: Set<QueriedSong>, ignoredS
         logger.info(`Force playing ${forcePlayedQueriedSong.name} by ${forcePlayedQueriedSong.artist} | ${forcePlayedQueriedSong.youtubeLink}`);
         return forcePlayedQueriedSong;
     }
+
     let queriedSongList = [...filteredSongs];
     if (ignoredSongs) {
         queriedSongList = queriedSongList.filter((x) => !ignoredSongs.has(x.youtubeLink));
     }
+
     if (alternatingGender && queriedSongList.some((y) => y.members === alternatingGender || y.members === Gender.COED)) {
         queriedSongList = queriedSongList.filter((song) => song.members === alternatingGender || song.members === Gender.COED);
     }
+
     if (queriedSongList.length === 0) {
         return null;
     }
@@ -183,6 +188,7 @@ export async function cleanupInactiveGameSessions(): Promise<void> {
             await gameSessions[guildID].endSession();
         }
     }
+
     if (inactiveSessions > 0) {
         logger.info(`Ended ${inactiveSessions} inactive game sessions out of ${totalSessions}`);
     }
@@ -201,11 +207,13 @@ export async function getGuildPreference(guildID: string): Promise<GuildPreferen
             .insert({ guild_id: guildID, join_date: new Date() });
         return guildPreference;
     }
+
     const gameOptionPairs = (await dbContext.kmq("game_options")
         .select("*")
         .where({ guild_id: guildID }))
         .map((x) => ({ [x["option_name"]]: JSON.parse(x["option_value"]) }))
         .reduce(((total, curr) => Object.assign(total, curr)), {});
+
     return GuildPreference.fromGuild(guildPreferences[0].guild_id, gameOptionPairs);
 }
 
@@ -227,6 +235,7 @@ export async function userBonusIsActive(userId: string): Promise<boolean> {
 export async function activeBonusUsers(): Promise<Set<string>> {
     const bonusUsers = (await dbContext.kmq("top_gg_user_votes")
         .where("buff_expiry_date", ">", new Date()));
+
     return new Set(bonusUsers.map((x) => x.user_id));
 }
 
@@ -263,6 +272,7 @@ export async function getMatchingGroupNames(rawGroupNames: Array<string>, aliasA
                 aliasFound = true;
             }
         }
+
         if (aliasFound) {
             // try again but with aliases
             return getMatchingGroupNames(rawGroupNames, true);

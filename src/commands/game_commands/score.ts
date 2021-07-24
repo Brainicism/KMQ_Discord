@@ -23,6 +23,7 @@ export default class ScoreCommand implements BaseCommand {
             logger.warn(`${getDebugLogHeader(message)} | No active game session.`);
             return;
         }
+
         logger.info(`${getDebugLogHeader(message)} | Score retrieved`);
         await sendScoreboardMessage(message, gameSession);
     };

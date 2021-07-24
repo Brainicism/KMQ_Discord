@@ -37,6 +37,7 @@ export async function userVoted(userID: string) {
     const userVoterStatus = await dbContext.kmq("top_gg_user_votes")
         .where("user_id", "=", userID)
         .first();
+
     const currentVotes = userVoterStatus ? userVoterStatus["total_votes"] : 0;
     await dbContext.kmq("top_gg_user_votes")
         .insert({

@@ -47,10 +47,12 @@ export default class GuessTimeoutCommand implements BaseCommand {
             if (gameSession) {
                 gameSession.stopGuessTimeout();
             }
+
             await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.TIMER, reset: true });
             logger.info(`${getDebugLogHeader(message)} | Guess timeout disabled.`);
             return;
         }
+
         const time = parseInt(parsedMessage.components[0]);
 
         await guildPreference.setGuessTimeout(time);
@@ -59,6 +61,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
             gameSession.stopGuessTimeout();
             gameSession.startGuessTimeout(MessageContext.fromMessage(message), guildPreference);
         }
+
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.TIMER, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Guess timeout set to ${guildPreference.getGuessTimeout()}`);
     };

@@ -39,12 +39,14 @@ export default class GroupsCommand implements BaseCommand {
             logger.info(`${getDebugLogHeader(message)} | Groups reset.`);
             return;
         }
+
         let groupsWarning = "";
         if (parsedMessage.components.length > 1) {
             if (["add", "remove"].includes(parsedMessage.components[0])) {
                 groupsWarning = `Did you mean to use ${process.env.BOT_PREFIX}${parsedMessage.components[0]} groups?`;
             }
         }
+
         const groupNames = parsedMessage.argument.split(",").map((groupName) => groupName.trim());
         const groups = await getMatchingGroupNames(groupNames);
         let { matchedGroups } = groups;

@@ -93,6 +93,7 @@ describe("score/exp updating", () => {
                         scoreboard.updateScoreboard([{ userID: USER_IDS[1], pointsEarned: 1, expGain: 50 }]);
                     }
                 }
+
                 assert.strictEqual(scoreboard.getPlayerScore(USER_IDS[0]), 20);
                 assert.strictEqual(scoreboard.getPlayerExpGain(USER_IDS[0]), 1000);
                 assert.strictEqual(scoreboard.getPlayerScore(USER_IDS[1]), 10);
@@ -127,10 +128,12 @@ describe("score/exp updating", () => {
                     if (i === 0) {
                         scoreboard.updateScoreboard([{ userID: USER_IDS[1], pointsEarned: 1, expGain: 50 }]);
                     }
+
                     if (i % 10 === 0) {
                         scoreboard.updateScoreboard([{ userID: USER_IDS[2], pointsEarned: 1, expGain: 50 }]);
                     }
                 }
+
                 assert.strictEqual(scoreboard.getPlayerScore(USER_IDS[0]), 20);
                 assert.strictEqual(scoreboard.getPlayerExpGain(USER_IDS[0]), 1000 * 1.1);
 

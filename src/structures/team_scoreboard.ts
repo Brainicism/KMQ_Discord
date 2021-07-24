@@ -54,6 +54,7 @@ export default class TeamScoreboard extends Scoreboard {
         if (this.getPlayer(player.id)) {
             this.removePlayer(player.id);
         }
+
         this.players[name] = new Team(name, player);
         return this.players[name];
     }
@@ -153,6 +154,7 @@ export default class TeamScoreboard extends Scoreboard {
         if (this.isTeamFirstPlace(this.getTeamOfPlayer(userID).name) && Object.keys(this.getTeams()).length > 1 && this.firstPlace.length === 1) {
             return this.getPlayer(userID).getExpGain() * 1.1;
         }
+
         return this.getPlayer(userID).getExpGain();
     }
 
@@ -164,6 +166,7 @@ export default class TeamScoreboard extends Scoreboard {
         if (player) {
             return player.getScore();
         }
+
         return 0;
     }
 

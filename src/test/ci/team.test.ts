@@ -49,6 +49,7 @@ describe("single player score", () => {
             for (let i = 0; i < numIncrements; i++) {
                 team.getPlayer(goodPlayer.id).incrementScore(1);
             }
+
             assert.strictEqual(team.getScore(), numIncrements);
             assert.strictEqual(team.getScore(), team.getPlayer(goodPlayer.id).getScore());
         });
@@ -66,6 +67,7 @@ describe("multiple players score", () => {
                     team.getPlayer(goodPlayer.id).incrementScore(1);
                 }
             }
+
             assert.strictEqual(team.getScore(), numIncrements + numIncrements / 5);
         });
     });
@@ -80,6 +82,7 @@ describe("score after removal", () => {
             for (let i = 0; i < numIncrements; i++) {
                 team.getPlayers().map((p: Player) => p.incrementScore(1));
             }
+
             assert.deepStrictEqual(team.getPlayers(), [subparPlayer, goodPlayer, firstOnLeaderboardPlayer]);
             assert.strictEqual(team.getScore(), 75);
 

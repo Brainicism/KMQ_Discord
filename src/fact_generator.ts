@@ -14,6 +14,7 @@ const musicShows = {
     musicbank: "Music Bank",
     showchampion: "Show Champion",
 };
+
 const funFactFunctions = [recentMusicVideos, recentMilestone, recentMusicShowWin, musicShowWins, mostViewedGroups, mostLikedGroups, mostViewedVideo, mostLikedVideo,
     mostMusicVideos, yearWithMostDebuts, yearWithMostReleases, viewsByGender, mostViewedSoloArtist, viewsBySolo, bigThreeDominance, mostGaonFirsts,
     mostGaonAppearances, historicalGaonWeekly, recentGaonWeekly, fanclubName, closeBirthdays, mostArtistsEntertainmentCompany, mostViewedEntertainmentCompany, songReleaseAnniversaries];
@@ -50,6 +51,7 @@ async function resolveFactPromises(promises: Promise<string[]>[]): Promise<strin
     for (const rejectedPromise of rejectedPromises) {
         logger.error(`Failed to evaluate fact: ${rejectedPromise.reason}`);
     }
+
     const resolvedPromises = settledPromises.filter((x) => x["status"] === "fulfilled") as PromiseFulfilledResult<string[]>[];
     return resolvedPromises.map((x) => x["value"]);
 }
@@ -100,10 +102,12 @@ async function recentMusicVideos(): Promise<string[]> {
         .andWhere("vtype", "main")
         .andWhere("publishedon", ">", oneMonthPriorDate)
         .orderBy("kpop_videos.app_kpop.publishedon", "DESC");
+
     if (result.length === 0) {
         logger.warn("recentMusicVideos generated no facts");
         return [];
     }
+
     return result.map((x) => `New Song Alert: Check out this recently released music video, ["${x["name"]}" by ${x["artist"]}](https://youtu.be/${x["youtubeLink"]})`);
 }
 
@@ -119,12 +123,15 @@ async function recentMilestone(): Promise<string[]> {
         .join("app_kpop_group", function join() {
             this.on("app_kpop.id_artist", "=", "app_kpop_group.id");
         });
+
     if (result.length === 0) {
         logger.warn("recentMilestone generated no facts");
         return [];
     }
+
     return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} recently reached ${x["milestone_views"].toLocaleString()} views on YouTube!`);
 }
+
 async function recentMusicShowWin(): Promise<string[]> {
     const twoWeeksPriorDate = new Date();
     twoWeeksPriorDate.setDate(twoWeeksPriorDate.getDate() - 7);
@@ -138,10 +145,12 @@ async function recentMusicShowWin(): Promise<string[]> {
         .join("app_kpop", function join() {
             this.on("app_kpop_ms.id_musicvideo", "=", "app_kpop.vlink");
         });
+
     if (result.length === 0) {
         logger.warn("recentMusicShowWin generated no facts");
         return [];
     }
+
     return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x["winning_song"], x["artist_name"], x["link"])} recently won on ${musicShows[x["music_show"]]} on ${x["win_date"].toISOString().substring(0, 10)}!`);
 }
 
@@ -156,6 +165,7 @@ async function musicShowWins(): Promise<string[]> {
         })
         .orderBy("count", "DESC")
         .limit(25);
+
     return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} has won the ${getOrdinalNum(idx + 1)} most music show with ${x["count"]} wins!`);
 }
 
@@ -185,6 +195,7 @@ async function mostLikedGroups(): Promise<string[]> {
         })
         .where("app_kpop_group.issolo", "=", "n")
         .orderBy("total_likes", "DESC");
+
     return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} is the ${getOrdinalNum(idx + 1)} most liked group with ${x["total_likes"].toLocaleString()} total YouTube likes!`);
 }
 
@@ -197,6 +208,7 @@ async function mostViewedVideo(): Promise<string[]> {
         .where("app_kpop.vtype", "main")
         .orderBy("views", "DESC")
         .limit(25);
+
     return result.map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} is the ${getOrdinalNum(idx + 1)} most viewed music video with ${x["views"].toLocaleString()} YouTube views!`);
 }
 
@@ -208,6 +220,7 @@ async function mostLikedVideo(): Promise<string[]> {
         })
         .orderBy("likes", "DESC")
         .limit(25);
+
     return result.map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} is the ${getOrdinalNum(idx + 1)} most liked music video with ${x["likes"].toLocaleString()} YouTube likes!`);
 }
 
@@ -224,6 +237,7 @@ async function mostViewedEntertainmentCompany(): Promise<string[]> {
         .sum("app_kpop.views as views")
         .orderBy("views", "DESC")
         .limit(15);
+
     return result.map((x, idx) => `Fun Fact: ${x["name"]} is the entertainment company with the ${getOrdinalNum(idx + 1)} most YouTube views at ${x["views"].toLocaleString()}!`);
 }
 
@@ -297,12 +311,14 @@ async function viewsByGender(): Promise<string[]> {
     for (const genderViews of result) {
         totalViews += genderViews.views;
     }
+
     for (const genderViews of result) {
         data[genderViews.gender] = {
             views: genderViews.views.toLocaleString(),
             proportion: ((100 * genderViews.views) / totalViews).toFixed(2),
         };
     }
+
     return [`Fun Fact: There is a combined total of ${totalViews.toLocaleString()} views on all K-Pop music videos on YouTube. ${data.male.views} (${data.male.proportion}%) of which are from male, ${data.female.views} (${data.female.proportion}%) from female, and the remaining ${data.coed.views} (${data.coed.proportion}%) from co-ed groups!`];
 }
 
@@ -317,6 +333,7 @@ async function mostViewedSoloArtist(): Promise<string[]> {
         .where("app_kpop_group.issolo", "=", "y")
         .orderBy("total_views", "DESC")
         .limit(25);
+
     return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} is the ${getOrdinalNum(idx + 1)} most viewed solo artist with ${x["total_views"].toLocaleString()} total YouTube views!`);
 }
 
@@ -342,6 +359,7 @@ async function viewsBySolo(): Promise<string[]> {
             proportion: ((100 * result[1].views) / totalViews).toFixed(2),
         },
     };
+
     return [`Fun Fact: There is a combined total of ${totalViews.toLocaleString()} views on all K-Pop music videos on YouTube. ${data.group.views} (${data.group.proportion}%) of which are groups, while ${data.solo.views} (${data.solo.proportion}%) are from solo artists!`];
 }
 
@@ -352,6 +370,7 @@ async function songReleaseAnniversaries(): Promise<string[]> {
         .andWhereRaw("YEAR(publishedon) != YEAR(NOW())")
         .orderBy("views", "DESC")
         .limit(25);
+
     return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} was released this week back in ${x["publish_year"]}`);
 }
 
@@ -364,6 +383,7 @@ async function songGuessRate(): Promise<string[]> {
         })
         .orderByRaw("RAND()")
         .limit(100);
+
     return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} has a guess rate of ${x["c"]}% over ${x["rounds_played"]} rounds played`);
 }
 
@@ -380,6 +400,7 @@ async function bigThreeDominance(): Promise<string[]> {
 
     const totalViewsResult = await dbContext.kpopVideos("app_kpop")
         .sum("views as total_views");
+
     const bigThreeViews = result.reduce((prev, current) => prev + current.total_views, 0);
     const proportion = (100 * bigThreeViews) / totalViewsResult[0].total_views;
     return [`Fun Fact: BTS, Blackpink and Twice combined account for ${bigThreeViews.toLocaleString()} YouTube views, or ${proportion.toFixed(2)}%!`];
@@ -409,6 +430,7 @@ async function longestGame(): Promise<string[]> {
     const result = await dbContext.kmq("game_sessions")
         .select(["rounds_played", "session_length", "num_participants", "avg_guess_time"])
         .orderBy("session_length", "DESC");
+
     if (result.length === 0) return [];
     const longestKmqGame = result[0];
     return [`KMQ Fact: The world's (current) longest game of KMQ lasted ${longestKmqGame.session_length} minutes, with over ${longestKmqGame.rounds_played} songs played, an average guess time of ${longestKmqGame.avg_guess_time} seconds, with ${longestKmqGame.num_participants} participants! Can you beat that?`];
@@ -418,6 +440,7 @@ async function mostGames(): Promise<string[]> {
     const result = await dbContext.kmq("guild_preferences")
         .select("games_played", "songs_guessed")
         .orderBy("games_played", "DESC");
+
     if (result.length === 0) return [];
     const mostGamesPlayed = result[0];
     return [`KMQ Fact: The most active server has played ${mostGamesPlayed.games_played} games of KMQ, with a total of ${mostGamesPlayed.songs_guessed} songs guessed!`];
@@ -427,6 +450,7 @@ async function mostCorrectGuessed(): Promise<string[]> {
     const result = await dbContext.kmq("guild_preferences")
         .select("games_played", "songs_guessed")
         .orderBy("songs_guessed", "DESC");
+
     if (result.length === 0) return [];
     const mostGamesPlayed = result[0];
     return [`KMQ Fact: The server with the most correct guesses has played ${mostGamesPlayed.games_played} games of KMQ, with a total of ${mostGamesPlayed.songs_guessed} songs guessed!`];
@@ -435,6 +459,7 @@ async function mostCorrectGuessed(): Promise<string[]> {
 async function globalTotalGames(): Promise<string[]> {
     const result = await dbContext.kmq("game_sessions")
         .count("* as count");
+
     if (result.length === 0) return [];
     const totalGamesPlayed = result[0].count;
     return [`KMQ Fact: A grand total of ${totalGamesPlayed} games of KMQ have been played!`];
@@ -446,6 +471,7 @@ async function recentGameSessions(): Promise<string[]> {
     const result = await dbContext.kmq("game_sessions")
         .count("* as count")
         .where("start_date", ">", oneWeeksPriorDate);
+
     if (result.length === 0) return [];
     const recentSessions = result[0].count;
     return [`KMQ Fact: A total of ${recentSessions} games of KMQ have been played in the last week!`];
@@ -457,6 +483,7 @@ async function recentGames(): Promise<string[]> {
     const result = await dbContext.kmq("game_sessions")
         .count("* as count")
         .where("start_date", ">", oneWeekPriorDate);
+
     if (result.length === 0) return [];
     const recentGameCount = result[0].count as number;
     return [`KMQ Fact: There has been a total of ${recentGameCount} games of KMQ played in the last week, averaging ${Math.round(recentGameCount / 7)} per day!`];
@@ -471,6 +498,7 @@ async function recentUniquePlayers(): Promise<string[]> {
         const result = await dbContext.kmq("player_stats")
             .count("* as count")
             .where("last_active", ">", priorDate);
+
         if (result.length === 0) return [];
         const recentActivePlayers = result[0].count as number;
         output.push(`KMQ Fact: ${recentActivePlayers} unique players have played KMQ in the past ${interval} day(s)!`);
@@ -484,6 +512,7 @@ async function mostSongsGuessedPlayer(): Promise<string[]> {
         .select(["songs_guessed"])
         .orderBy("songs_guessed", "DESC")
         .limit(1);
+
     if (result.length === 0) return [];
     return [`KMQ Fact: The most active player has guessed ${result[0].songs_guessed} songs since Nov 8th, 2020!`];
 }
@@ -493,6 +522,7 @@ async function mostGamesPlayedPlayer(): Promise<string[]> {
         .select(["games_played"])
         .orderBy("games_played", "DESC")
         .limit(1);
+
     if (result.length === 0) return [];
     return [`KMQ Fact: The most active player has played ${result[0].games_played} games since Nov 8th, 2020!`];
 }
@@ -502,6 +532,7 @@ async function mostGaonFirsts(): Promise<string[]> {
         .select(["name as artist_name", "gaondigital_firsts as firsts"])
         .orderBy("firsts", "DESC")
         .limit(25);
+
     return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} has topped the GAON digital weekly charts the ${getOrdinalNum(idx + 1)} most times with ${x["firsts"]} first place appearances!`);
 }
 
@@ -510,6 +541,7 @@ async function mostGaonAppearances(): Promise<string[]> {
         .select(["name as artist_name", "gaondigital_times as appearances"])
         .orderBy("appearances", "DESC")
         .limit(25);
+
     return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} has placed on the GAON digital weekly charts the ${getOrdinalNum(idx + 1)} most times with ${x["appearances"]} appearances!`);
 }
 
@@ -528,6 +560,7 @@ async function historicalGaonWeekly(): Promise<Array<string>> {
         .where("week", "=", week)
         .whereIn("year", yearRange)
         .orderBy("year", "DESC");
+
     const parsedResults = result.map((x) => parseGaonWeeklyRankList(x["ranklist"], x["year"]));
     return parsedResults.map((x) => `Fun Fact: On this week in ${x[0].year}, ${generateSongArtistHyperlink(x[0].songName, x[0].artistName)} was the top charting song on the Gaon Weekly charts!`);
 }
@@ -538,6 +571,7 @@ async function recentGaonWeekly(): Promise<Array<string>> {
         .orderBy("year", "DESC")
         .orderBy("week", "DESC")
         .limit(1);
+
     const parsedResult = parseGaonWeeklyRankList(result[0].ranklist, result[0].year);
     return parsedResult.slice(0, 10).map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x["songName"], x["artistName"])} is the ${getOrdinalNum(idx + 1)} highest charting song on the Gaon Weekly charts last week!`);
 }
@@ -547,6 +581,7 @@ async function topLeveledPlayers(): Promise<Array<string>> {
         .select(["songs_guessed", "games_played", "level"])
         .orderBy("exp", "DESC")
         .limit(10);
+
     return result.map((x, idx) => `KMQ Fact: The ${getOrdinalNum(idx + 1)} highest leveled KMQ player is Level \`${x["level"]}\` with \`${x["songs_guessed"]}\` songs guessed over \`${x["games_played"]}\` games!`);
 }
 

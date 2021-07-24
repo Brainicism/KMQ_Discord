@@ -20,6 +20,7 @@ describe("begin command", () => {
                 assert.strictEqual(command.canStart(null, "123", null), false);
             });
         });
+
         describe("classic game session", () => {
             const gameSession = new GameSession(null, null, null, gameStarter, GameType.CLASSIC);
             it("should return false (classic games are not started using ,begin)", () => {
@@ -35,6 +36,7 @@ describe("begin command", () => {
                     assert.strictEqual(command.canStart(gameSession, "123", null), true);
                 });
             });
+
             describe("invoker is not the game session's author", () => {
                 it("should return false", () => {
                     assert.strictEqual(command.canStart(gameSession, "567", null), false);

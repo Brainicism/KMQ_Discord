@@ -60,6 +60,7 @@ export default class SeekCommand implements BaseCommand {
             logger.info(`${getDebugLogHeader(message)} | Seek reset.`);
             return;
         }
+
         const seekType = parsedMessage.components[0] as SeekType;
         await guildPreference.setSeekType(seekType);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SEEK_TYPE, reset: false });

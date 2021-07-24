@@ -13,6 +13,7 @@ export default abstract class InGameCommand implements BaseCommand {
         if (!gameSession) {
             return false;
         }
+
         if (!areUserAndBotInSameVoiceChannel(message)) {
             if (gameSession.gameType === GameType.ELIMINATION || gameSession.gameType === GameType.TEAMS) {
                 if (!gameSession.sessionInitialized) {
@@ -21,10 +22,12 @@ export default abstract class InGameCommand implements BaseCommand {
                     return true;
                 }
             }
+
             logger.warn(`${getDebugLogHeader(message)} | User and bot are not in the same voice connection`);
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Wait...", description: "You must be in the same voice channel as the bot to use this command." });
             return false;
         }
+
         return true;
     };
 }

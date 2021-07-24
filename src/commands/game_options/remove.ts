@@ -100,6 +100,7 @@ export default class RemoveCommand implements BaseCommand {
         if (matchedGroups.length === 0) {
             return;
         }
+
         switch (optionListed) {
             case RemoveType.GROUPS:
             case RemoveType.GROUP:

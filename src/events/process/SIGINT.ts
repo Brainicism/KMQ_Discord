@@ -12,6 +12,7 @@ export default async function SIGINTHandler() {
         logger.debug(`gid: ${guildID} | Forcing game session end`);
         await gameSession.endSession();
     });
+
     await Promise.allSettled(endSessionPromises);
     await dbContext.destroy();
     process.exit(0);

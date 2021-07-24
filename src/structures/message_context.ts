@@ -23,6 +23,7 @@ export default class MessageContext {
             const clientUser = state.client.user;
             this.author = new KmqMember(clientUser.username, getUserTag(clientUser), clientUser.avatarURL, clientUser.id);
         }
+
         this.guildID = guildID;
         this.referencedMessageID = referencedMessageID;
     }

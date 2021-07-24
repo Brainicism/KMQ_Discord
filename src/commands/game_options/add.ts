@@ -95,6 +95,7 @@ export default class AddCommand implements BaseCommand {
         if (matchedGroups.length === 0) {
             return;
         }
+
         switch (optionListed) {
             case AddType.GROUPS:
             case AddType.GROUP:
@@ -116,6 +117,7 @@ export default class AddCommand implements BaseCommand {
                 logger.info(`${getDebugLogHeader(message)} | Group added: ${guildPreference.getDisplayedGroupNames()}`);
                 break;
             }
+
             case AddType.INCLUDE:
             case AddType.INCLUDES:
                 await guildPreference.setIncludes(matchedGroups);
@@ -140,6 +142,7 @@ export default class AddCommand implements BaseCommand {
                 logger.info(`${getDebugLogHeader(message)} | Exclude added: ${guildPreference.getDisplayedExcludesGroupNames()}`);
                 break;
             }
+
             default:
         }
     };

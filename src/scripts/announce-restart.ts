@@ -13,6 +13,7 @@ function serverShutdown(restartMinutes: number, restartDate: Date, restart: bool
         setInterval(() => {
             console.log(`Restarting in ${Math.floor((restartDate.getTime() - Date.now()) / 1000)} seconds`);
         }, 1000 * 10).unref();
+
         setTimeout(() => {
             console.log(restart ? "Restarting now..." : "Stopping now");
             execSync(restart ? "pm2 restart kmq" : "pm2 stop kmq");

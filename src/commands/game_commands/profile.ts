@@ -41,10 +41,12 @@ export function getRankNameByLevel(level: number): string {
         const stepsAboveMaxRank = Math.floor(levelsPastMaxRank / 5) + 1;
         return `${highestRankTitle.title} ${romanize(stepsAboveMaxRank + 1)}`;
     }
+
     for (let i = RANK_TITLES.length - 1; i >= 0; i--) {
         const rankTitle = RANK_TITLES[i];
         if (level >= rankTitle.req) return rankTitle.title;
     }
+
     return RANK_TITLES[0].title;
 }
 
@@ -81,6 +83,7 @@ export default class ProfileCommand implements BaseCommand {
                     // check in other clusters
                     requestedPlayer = await state.ipc.fetchUser(parsedMessage.argument);
                 }
+
                 if (!requestedPlayer) {
                     sendErrorMessage(MessageContext.fromMessage(message), { title: "No profile found", description: "Could not find the specified user ID. Make sure the user has been active recently. See `,help profile` for details." });
                     return;
@@ -190,6 +193,7 @@ export default class ProfileCommand implements BaseCommand {
             .where("user_id", "=", requestedPlayer.id))
             .map((x) => x["badge_name"])
             .join("\n");
+
         if (badges) {
             fields.push({
                 name: "Badges",

@@ -35,6 +35,7 @@ async function setup() {
         vtype ENUM('main', 'audio'),
         tags VARCHAR(255)
     )`);
+
     await dbContext.kmq.raw(`CREATE TABLE kpop_groups(
         id INT(10),
         name VARCHAR(255),
@@ -82,6 +83,7 @@ const mockSongs = [...Array(1000).keys()].map((i) => {
         tags: ["", "", "o", "c", "e", "drv", "ax", "ps"][md5Hash(i, 8) % 8],
     };
 });
+
 async function getMockGuildPreference(): Promise<GuildPreference> {
     const guildPreference = new GuildPreference("test");
     sinon.stub(guildPreference, "updateGuildPreferences");
@@ -107,6 +109,7 @@ describe("song query", () => {
             logger.error("Must be running with NODE_ENV=EnvType.TEST");
             process.exit(1);
         }
+
         this.timeout(10000);
         logger.info("Setting up test database...");
         await setup();
@@ -164,6 +167,7 @@ describe("song query", () => {
                     }
                 });
             });
+
             describe("multi-selected groups", () => {
                 it("should match the expected song count", async () => {
                     const mockArtistSubset = mockArtists.slice(0, 5);
@@ -289,6 +293,7 @@ describe("song query", () => {
                     assert.strictEqual(songs.size, expectedSongCount);
                 });
             });
+
             describe("include subunits (and the subunit has a collab)", () => {
                 it("should match the songs from the group, collabs of that group, and collabs of any subunits of that group", async () => {
                     // E is a group with the subunit F. F is in a collab with G. E has a collab with H.
@@ -374,6 +379,7 @@ describe("song query", () => {
                     assert.strictEqual(songs.size, expectedSongCount);
                 });
             });
+
             describe("language is set to all", () => {
                 it("should match the expected song count", async () => {
                     await guildPreference.setLanguageType(LanguageType.ALL);
@@ -392,6 +398,7 @@ describe("song query", () => {
                     assert.strictEqual(songs.size, expectedSongCount);
                 });
             });
+
             describe("release type is set to all", () => {
                 it("should match the expected song count", async () => {
                     await guildPreference.setReleaseType(ReleaseType.ALL);
@@ -416,6 +423,7 @@ describe("song query", () => {
                     for (let i = 0; i < femaleOrCoedSongCount; i++) {
                         femaleOrCoedSongs.push(await selectRandomSong(filteredSongs, new Set(femaleOrCoedSongs.map((x) => x.youtubeLink)), Gender.FEMALE));
                     }
+
                     assert.ok(femaleOrCoedSongs.every((song) => [Gender.FEMALE, Gender.COED].includes(song.members)));
                     assert.strictEqual(femaleOrCoedSongCount, femaleOrCoedSongs.length);
                 });
@@ -429,6 +437,7 @@ describe("song query", () => {
                     for (let i = 0; i < maleOrCoedSongCount; i++) {
                         maleOrCoedSongs.push(await selectRandomSong(filteredSongs, new Set(maleOrCoedSongs.map((x) => x.youtubeLink)), Gender.MALE));
                     }
+
                     assert.ok(maleOrCoedSongs.every((song) => [Gender.MALE, Gender.COED].includes(song.members)));
                     assert.strictEqual(maleOrCoedSongCount, maleOrCoedSongs.length);
                 });
@@ -445,6 +454,7 @@ describe("song query", () => {
                     for (let i = 0; i < filteredSongs.size - numIgnored; i++) {
                         selectedSongs.push(await selectRandomSong(filteredSongs, new Set([...ignoredSongs, ...selectedSongs])));
                     }
+
                     assert.ok(selectedSongs.length === filteredSongs.size - numIgnored);
                     assert.ok(selectedSongs.every((song) => !ignoredSongs.has(song.youtubeLink)));
                 });
@@ -460,6 +470,7 @@ describe("song query", () => {
                 assert.strictEqual(matchResults.unmatchedGroups.length, 0);
             });
         });
+
         describe("fully matching group names", () => {
             it("should return the corresponding groups in matchedGroups", async () => {
                 const matchResults = await getMatchingGroupNames(["A", "B", "c"]);
@@ -467,6 +478,7 @@ describe("song query", () => {
                 assert.strictEqual(matchResults.unmatchedGroups.length, 0);
             });
         });
+
         describe("some names in matchedGroups", () => {
             it("should return corresponding groups in unmatchedGroups/matchedGroups", async () => {
                 const matchResults = await getMatchingGroupNames(["A", "B", "LinusTechTips", "Rihanna"]);
@@ -474,6 +486,7 @@ describe("song query", () => {
                 assert.deepStrictEqual(matchResults.unmatchedGroups, ["LinusTechTips", "Rihanna"]);
             });
         });
+
         describe("no matching group names", () => {
             it("should return the groups in unmatchedGroups", async () => {
                 const matchResults = await getMatchingGroupNames(["LinusTechTips", "Rihanna"]);
@@ -481,6 +494,7 @@ describe("song query", () => {
                 assert.deepStrictEqual(matchResults.unmatchedGroups, ["LinusTechTips", "Rihanna"]);
             });
         });
+
         describe("artist aliases", () => {
             describe("an artist name and an artist alias conflict", () => {
                 it("should prefer the name matching the artist over the alias", async () => {
@@ -492,6 +506,7 @@ describe("song query", () => {
                     assert.deepStrictEqual(matchResults.unmatchedGroups.length, 0);
                 });
             });
+
             describe("no alias is specified", () => {
                 it("should not match any groups", async () => {
                     state.aliases.artist = {};
@@ -597,6 +612,7 @@ describe("song query", () => {
                 sinon.assert.notCalled(endSessionStub);
             });
         });
+
         describe("has inactive gamesessions", () => {
             it("should clean up", async () => {
                 gameSession.lastActive = Date.now() - (1000 * 60 * 60);

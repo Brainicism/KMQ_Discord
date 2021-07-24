@@ -82,6 +82,7 @@ export default class LeaderboardCommand implements BaseCommand {
             this.showLeaderboard(message, 0, false);
             return;
         }
+
         const action = parsedMessage.components[0] as LeaderboardAction;
         if (parsedMessage.components.length === 1) {
             if (action === LeaderboardAction.ENROLL) {
@@ -93,6 +94,7 @@ export default class LeaderboardCommand implements BaseCommand {
             } else if (action === LeaderboardAction.SERVER) {
                 this.showLeaderboard(message, 0, true);
             }
+
             return;
         }
 
@@ -162,6 +164,7 @@ export default class LeaderboardCommand implements BaseCommand {
             const enrolledPlayer = await dbContext.kmq("leaderboard_enrollment")
                 .where("player_id", "=", player.player_id)
                 .first();
+
             const medalIcon = ["🥇", "🥈", "🥉"][rank] || "";
             const displayName = enrolledPlayer ? enrolledPlayer.display_name : `Rank #${(rank) + 1}`;
             return {
