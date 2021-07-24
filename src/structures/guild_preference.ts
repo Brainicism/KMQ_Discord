@@ -1,4 +1,5 @@
 import _ from "lodash";
+import * as uuid from "uuid";
 import { DEFAULT_BEGINNING_SEARCH_YEAR, DEFAULT_ENDING_SEARCH_YEAR } from "../commands/game_options/cutoff";
 import { DEFAULT_LIMIT } from "../commands/game_options/limit";
 import { Gender, DEFAULT_GENDER } from "../commands/game_options/gender";
@@ -185,22 +186,29 @@ export default class GuildPreference {
 
     /**
      * @param presetName - The game preset to be deleted
-     * @returns whether a preset was deleted
+     * @returns the old UUID if the deletion was successful and the empty string otherwise
      */
-    async deletePreset(presetName: string): Promise<boolean> {
-        const result = await dbContext.kmq("game_option_presets")
+    async deletePreset(presetName: string): Promise<string> {
+        const presetUUID = this.getPresetUUID(presetName);
+
+        if (!presetUUID) {
+            return "";
+        }
+
+        await dbContext.kmq("game_option_presets")
             .where("guild_id", "=", this.guildID)
             .andWhere("preset_name", "=", presetName)
             .del();
 
-        return result !== 0;
+        return presetUUID["option_value"];
     }
 
     /**
      * @param presetName - The name of the preset to be saved
+     * @param oldUUID - The UUID of a previous preset with the same name (in case of replacement)
      * @returns whether the preset was saved
      */
-    async savePreset(presetName: string): Promise<boolean> {
+    async savePreset(presetName: string, oldUUID?: string): Promise<boolean> {
         try {
             const presetOptions = Object.entries(this.gameOptions).map((option) => ({
                 guild_id: this.guildID,
@@ -208,6 +216,13 @@ export default class GuildPreference {
                 option_name: option[0],
                 option_value: JSON.stringify(option[1]),
             }));
+
+            presetOptions.push({
+                guild_id: this.guildID,
+                preset_name: presetName,
+                option_name: "uuid",
+                option_value: oldUUID || uuid.v4(),
+            });
 
             await dbContext.kmq.transaction(async (trx) => {
                 await dbContext.kmq("game_option_presets")
@@ -228,7 +243,8 @@ export default class GuildPreference {
         const preset: { [x: string]: any } = (await dbContext.kmq("game_option_presets")
             .select(["option_name", "option_value"])
             .where("guild_id", "=", this.guildID)
-            .andWhere("preset_name", "=", presetName))
+            .andWhere("preset_name", "=", presetName)
+            .andWhere("option_name", "!=", "uuid"))
             .map((x) => ({ [x["option_name"]]: JSON.parse(x["option_value"]) }))
             .reduce(((total, curr) => Object.assign(total, curr)), {});
 
@@ -252,6 +268,25 @@ export default class GuildPreference {
 
         await this.updateGuildPreferences(updatedOptionsObj);
         return true;
+    }
+
+    /**
+     * @param presetName - The name of the preset whose UUID is requested
+     * @returns whether the UUID of the given preset or the empty string if the preset doesn't exist
+     */
+    async getPresetUUID(presetName: string): Promise<string> {
+        const presetID = await dbContext.kmq("game_option_presets")
+            .select(["option_value"])
+            .where("guild_id", "=", this.guildID)
+            .andWhere("preset_name", "=", presetName)
+            .andWhere("option_name", "=", "uuid")
+            .first();
+
+        if (!presetID) {
+            return "";
+        }
+
+        return presetID["option_value"];
     }
 
     /**
