@@ -6,7 +6,7 @@ import fs from "fs";
 import Eris from "eris";
 import schedule from "node-schedule";
 import { getInternalLogger } from "./logger";
-import { clearRestartNotification, registerProcessEvents, startWebServer } from "./helpers/management_utils";
+import { clearClusterActivityStats, clearRestartNotification, registerProcessEvents, startWebServer } from "./helpers/management_utils";
 import storeDailyStats from "./scripts/store-daily-stats";
 import dbContext from "./database_context";
 import { reloadFactCache } from "./fact_generator";
@@ -79,6 +79,7 @@ function registerGlobalIntervals(fleet: Fleet) {
 
         logger.info("Clearing existing restart notifications...");
         await clearRestartNotification();
+        await clearClusterActivityStats();
 
         logger.info("Registering global intervals");
         registerGlobalIntervals(fleet);

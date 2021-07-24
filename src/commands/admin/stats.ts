@@ -21,10 +21,19 @@ export default class SkipCommand implements BaseCommand {
         priority: 1,
     };
 
-    call = async ({ gameSessions, message, channel }: CommandArgs) => {
+    call = async ({ message, channel }: CommandArgs) => {
         const fleetStats = await state.ipc.getStats();
-        const activeGameSessions = Object.keys(gameSessions).length;
-        const activeUsers = Object.values(gameSessions).reduce((total, curr) => total + curr.participants.size, 0);
+
+        const activeGameSessions = (await dbContext.kmq("cluster_stats")
+            .where("stat_name", "=", "active_sessions")
+            .sum("stat_value as count")
+            .first()).count ?? "Loading...";
+
+        const activeUsers = (await dbContext.kmq("cluster_stats")
+            .where("stat_name", "=", "active_players")
+            .sum("stat_value as count")
+            .first()).count ?? "Loading...";
+
         const dateThreshold = new Date();
         dateThreshold.setHours(dateThreshold.getHours() - 24);
         const recentGameSessions = (await dbContext.kmq("game_sessions")

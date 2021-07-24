@@ -37,7 +37,7 @@ export class BotWorker extends BaseClusterWorker {
         registerCommands(true);
 
         logger.info("Registering event loops...");
-        registerIntervals();
+        registerIntervals(this.clusterID);
 
         logger.info("Loading cached application data...");
         reloadCaches();
