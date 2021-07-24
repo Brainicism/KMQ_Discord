@@ -12,6 +12,7 @@ export enum ReloadType {
     CLUSTER = "cluster",
     ALL = "all",
 }
+
 export default class ReloadCommand implements BaseCommand {
     validations = {
         minArgCount: 1,
