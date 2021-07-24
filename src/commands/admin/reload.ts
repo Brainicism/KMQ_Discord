@@ -19,7 +19,7 @@ export default class ReloadCommand implements BaseCommand {
         maxArgCount: 1,
         arguments: [
             {
-                name: "seekType",
+                name: "reloadType",
                 type: "enum" as const,
                 enums: Object.values(ReloadType),
             },
@@ -33,6 +33,7 @@ export default class ReloadCommand implements BaseCommand {
             logger.warn(`${getDebugLogHeader(message)} | Attempted to reload in non-debug channel`);
             return;
         }
+
         try {
             execSync("npx tsc");
         } catch (e) {
@@ -44,7 +45,7 @@ export default class ReloadCommand implements BaseCommand {
         const reloadType = parsedMessage.components[0] as ReloadType;
         if (reloadType === ReloadType.ALL) {
             state.ipc.broadcast("reload_commands");
-            sendInfoMessage(MessageContext.fromMessage(message), { title: "Reloading all clusters", description: "See logs for completion status" });
+            sendInfoMessage(MessageContext.fromMessage(message), { title: "Reloading All Clusters", description: "See logs for completion status" });
             return;
         }
 
