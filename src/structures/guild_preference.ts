@@ -221,7 +221,7 @@ export default class GuildPreference {
                 guild_id: this.guildID,
                 preset_name: presetName,
                 option_name: "uuid",
-                option_value: oldUUID || uuid.v4(),
+                option_value: oldUUID ?? uuid.v4(),
             });
 
             await dbContext.kmq.transaction(async (trx) => {
