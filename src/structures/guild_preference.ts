@@ -186,13 +186,13 @@ export default class GuildPreference {
 
     /**
      * @param presetName - The game preset to be deleted
-     * @returns the old UUID if the deletion was successful and the empty string otherwise
+     * @returns the old UUID if the deletion was successful and null otherwise
      */
     async deletePreset(presetName: string): Promise<string> {
         const presetUUID = this.getPresetUUID(presetName);
 
         if (!presetUUID) {
-            return "";
+            return null;
         }
 
         await dbContext.kmq("game_option_presets")
@@ -237,18 +237,19 @@ export default class GuildPreference {
 
     /**
      * @param presetName - The name of the preset to be loaded
+     * @param guildID - The guildID of the guild containing presetName
      * @returns whether the preset was loaded
      */
-    async loadPreset(presetName: string): Promise<boolean> {
+    async loadPreset(presetName: string, guildID: string): Promise<boolean> {
         const preset: { [x: string]: any } = (await dbContext.kmq("game_option_presets")
             .select(["option_name", "option_value"])
-            .where("guild_id", "=", this.guildID)
+            .where("guild_id", "=", guildID)
             .andWhere("preset_name", "=", presetName)
             .andWhere("option_name", "!=", "uuid"))
             .map((x) => ({ [x["option_name"]]: JSON.parse(x["option_value"]) }))
             .reduce(((total, curr) => Object.assign(total, curr)), {});
 
-        if (!preset) {
+        if (!preset || Object.keys(preset).length === 0) {
             return false;
         }
 
@@ -272,7 +273,7 @@ export default class GuildPreference {
 
     /**
      * @param presetName - The name of the preset whose UUID is requested
-     * @returns whether the UUID of the given preset or the empty string if the preset doesn't exist
+     * @returns whether the UUID of the given preset or null if the preset doesn't exist
      */
     async getPresetUUID(presetName: string): Promise<string> {
         const presetID = await dbContext.kmq("game_option_presets")
@@ -283,7 +284,7 @@ export default class GuildPreference {
             .first();
 
         if (!presetID) {
-            return "";
+            return null;
         }
 
         return presetID["option_value"];
