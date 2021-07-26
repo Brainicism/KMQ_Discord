@@ -11,15 +11,15 @@ RUN apk add --no-cache git \
 WORKDIR /app
 
 COPY yarn.lock package.json ./
-
-RUN yarn install
-
 COPY start.sh tsconfig.json ./
 COPY src/ src/
 COPY data/ data/
 COPY sql_dumps/daisuki/bootstrap.sql sql_dumps/daisuki/bootstrap.sql
 COPY sql_dumps/daisuki/bootstrap-audio.sql sql_dumps/daisuki/bootstrap-audio.sql
 COPY sql/ sql/
+
+RUN yarn install
+RUN npx tsc
 
 # ================================================================= #
 FROM node:15-alpine
@@ -33,4 +33,4 @@ WORKDIR /app
 STOPSIGNAL SIGINT
 ARG NODE_ENV
 ENV NODE_ENV=$NODE_ENV
-ENTRYPOINT ["npm", "run", "start"]
+ENTRYPOINT ["./start.sh", "docker"]

@@ -5,7 +5,7 @@
   "scripts": {
     "seed": "ts-node src/seed/seed_db",
     "bootstrap": "ts-node src/seed/bootstrap.ts",
-    "start": "./start.sh",
+    "start": "./start.sh native",
     "dry-run": "NODE_ENV=dry-run npm run start",
     "dev": "NODE_ENV=development npm run start",
     "ci": "npm run lint && NODE_ENV=ci npm run start",
