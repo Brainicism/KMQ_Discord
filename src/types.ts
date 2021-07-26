@@ -128,6 +128,7 @@ export interface PlayerRoundResult {
     player: KmqMember;
     streak: number;
     expGain: number;
+    pointsEarned: number;
 }
 
 export enum GameType {

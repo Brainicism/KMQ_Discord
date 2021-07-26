@@ -14,7 +14,7 @@ import { IPCLogger } from "../logger";
 import { QueriedSong, GuildTextableMessage, PlayerRoundResult, GameType } from "../types";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
-import Scoreboard from "./scoreboard";
+import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
 import EliminationScoreboard from "./elimination_scoreboard";
 import TeamScoreboard from "./team_scoreboard";
 import { deleteGameSession } from "../helpers/management_utils";
@@ -180,7 +180,7 @@ export default class GameSession {
 
         const gameRound = this.gameRound;
         this.gameRound = null;
-        const playerRoundResults: Array<PlayerRoundResult> = [];
+        let playerRoundResults: Array<PlayerRoundResult> = [];
         if (guessResult.correct) {
             // update guessing streaks
             if (this.lastGuesser === null || this.lastGuesser.userID !== guessResult.correctGuessers[0].id) {
@@ -193,7 +193,7 @@ export default class GameSession {
             this.guessTimes.push(guessSpeed);
 
             // update scoreboard
-            const scoreboardUpdatePayload = guessResult.correctGuessers.map(async (correctGuesser, idx) => {
+            playerRoundResults = await Promise.all(guessResult.correctGuessers.map(async (correctGuesser, idx) => {
                 const guessPosition = idx + 1;
                 const expGain = this.calculateExpGain(guildPreference,
                     gameRound.getExpReward(),
@@ -202,20 +202,22 @@ export default class GameSession {
                     guessPosition,
                     await userBonusIsActive(correctGuesser.id));
 
+                let streak = 0;
                 if (idx === 0) {
-                    playerRoundResults.push({ player: correctGuesser, streak: this.lastGuesser.streak, expGain });
+                    streak = this.lastGuesser.streak;
                     logger.info(`${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed. song = ${gameRound.songName}. Gained ${expGain} EXP`);
                 } else {
-                    playerRoundResults.push({ player: correctGuesser, streak: 0, expGain });
+                    streak = 0;
                     logger.info(`${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed ${getOrdinalNum(guessPosition)}. song = ${gameRound.songName}. Gained ${expGain} EXP`);
                 }
 
                 return {
-                    userID: correctGuesser.id, pointsEarned: idx === 0 ? correctGuesser.pointsAwarded : correctGuesser.pointsAwarded / 2, expGain,
+                    player: correctGuesser, pointsEarned: idx === 0 ? correctGuesser.pointsAwarded : correctGuesser.pointsAwarded / 2, expGain, streak,
                 };
-            });
+            }));
 
-            this.scoreboard.updateScoreboard(await Promise.all(scoreboardUpdatePayload));
+            const scoreboardUpdatePayload: SuccessfulGuessResult[] = playerRoundResults.map((x) => ({ userID: x.player.id, expGain: x.expGain, pointsEarned: x.pointsEarned }));
+            this.scoreboard.updateScoreboard(scoreboardUpdatePayload);
         } else {
             this.lastGuesser = null;
         }
