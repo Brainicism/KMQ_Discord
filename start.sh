@@ -5,7 +5,12 @@ rebuild () {
     echo "Compiling typescript..."
     npx tsc
 }
-rebuild
+
+if [[ $1 == 'native' ]]
+then
+    rebuild
+fi
+
 echo "Bootstrapping..."
 node build/seed/bootstrap.js
 echo "Starting bot..."
