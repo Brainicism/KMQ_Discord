@@ -135,7 +135,7 @@ export default class PresetCommand implements BaseCommand {
 
     async loadPreset(presetName: string, guildPreference: GuildPreference, messageContext: MessageContext) {
         let guildID = messageContext.guildID;
-        if (presetName.slice(0, 4) === "KMQ-") {
+        if (presetName.startsWith("KMQ-")) {
             // User is loading a preset via UUID
             const presetUUID = presetName;
             const existingPresetIdentifiers = await dbContext.kmq("game_option_presets")
@@ -175,7 +175,7 @@ export default class PresetCommand implements BaseCommand {
             return;
         }
 
-        if (presetName.slice(0, 4) === "KMQ-") {
+        if (presetName.startsWith("KMQ-")) {
             await sendErrorMessage(messageContext, { title: "Preset Error", description: "Preset name cannot begin with `KMQ-`." });
             return;
         }
