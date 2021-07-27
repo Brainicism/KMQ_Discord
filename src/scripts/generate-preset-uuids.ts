@@ -27,7 +27,7 @@ async function generatePresetUUIDs() {
                 guild_id: preset.guild_id,
                 preset_name: preset.preset_name,
                 option_name: "uuid",
-                option_value: `KMQ-${uuid.v4()}`,
+                option_value: JSON.stringify(`KMQ-${uuid.v4()}`),
             });
     }
 }

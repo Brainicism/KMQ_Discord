@@ -140,7 +140,7 @@ export default class PresetCommand implements BaseCommand {
             const presetUUID = presetName;
             const existingPresetIdentifiers = await dbContext.kmq("game_option_presets")
                 .select(["guild_id", "preset_name"])
-                .where("option_value", "=", presetUUID)
+                .where("option_value", "=", JSON.stringify(presetUUID))
                 .first();
 
             if (!existingPresetIdentifiers) {
@@ -209,7 +209,7 @@ export default class PresetCommand implements BaseCommand {
             return;
         }
 
-        await sendInfoMessage(messageContext, { title: "Preset Exported Successfully", description: `Import \`${presetName}\` as a new preset in other servers using \`${process.env.BOT_PREFIX}preset import ${presetUUID} [preset_name]\`. Alternatively, load the preset's options directly using \`${process.env.BOT_PREFIX}preset load ${presetUUID}\`.`, thumbnailUrl: KmqImages.THUMBS_UP });
+        await sendInfoMessage(messageContext, { title: "Preset Exported Successfully", description: `Import \`${presetName}\` as a new preset in other servers using \`${process.env.BOT_PREFIX}preset import ${presetUUID} [preset_name]\`.\n\nAlternatively, load the preset's options directly using \`${process.env.BOT_PREFIX}preset load ${presetUUID}\`.`, thumbnailUrl: KmqImages.THUMBS_UP });
         logger.info(`${getDebugLogHeader(messageContext)} | Preset '${presetName}' successfully exported as ${presetUUID}`);
     }
 
@@ -222,7 +222,7 @@ export default class PresetCommand implements BaseCommand {
 
         const existingPresetIdentifiers = await dbContext.kmq("game_option_presets")
             .select(["guild_id", "preset_name"])
-            .where("option_value", "=", presetUUID)
+            .where("option_value", "=", JSON.stringify(presetUUID))
             .first();
 
         if (!existingPresetIdentifiers) {
@@ -257,7 +257,7 @@ export default class PresetCommand implements BaseCommand {
                     guild_id: messageContext.guildID,
                     preset_name: presetName,
                     option_name: "uuid",
-                    option_value: uuid.v4(),
+                    option_value: JSON.stringify(`KMQ-${uuid.v4()}`),
                 })
                 .onConflict(["guild_id", "preset_name", "option_name"])
                 .ignore()

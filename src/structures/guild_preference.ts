@@ -189,7 +189,7 @@ export default class GuildPreference {
      * @returns the old UUID if the deletion was successful and null otherwise
      */
     async deletePreset(presetName: string): Promise<string> {
-        const presetUUID = this.getPresetUUID(presetName);
+        const presetUUID = await this.getPresetUUID(presetName);
 
         if (!presetUUID) {
             return null;
@@ -200,7 +200,7 @@ export default class GuildPreference {
             .andWhere("preset_name", "=", presetName)
             .del();
 
-        return presetUUID["option_value"];
+        return presetUUID;
     }
 
     /**
@@ -221,7 +221,7 @@ export default class GuildPreference {
                 guild_id: this.guildID,
                 preset_name: presetName,
                 option_name: "uuid",
-                option_value: oldUUID ?? uuid.v4(),
+                option_value: JSON.stringify(oldUUID ?? `KMQ-${uuid.v4()}`),
             });
 
             await dbContext.kmq.transaction(async (trx) => {
@@ -244,8 +244,7 @@ export default class GuildPreference {
         const preset: { [x: string]: any } = (await dbContext.kmq("game_option_presets")
             .select(["option_name", "option_value"])
             .where("guild_id", "=", guildID)
-            .andWhere("preset_name", "=", presetName)
-            .andWhere("option_name", "!=", "uuid"))
+            .andWhere("preset_name", "=", presetName))
             .map((x) => ({ [x["option_name"]]: JSON.parse(x["option_value"]) }))
             .reduce(((total, curr) => Object.assign(total, curr)), {});
 
@@ -287,7 +286,7 @@ export default class GuildPreference {
             return null;
         }
 
-        return presetID["option_value"];
+        return JSON.parse(presetID["option_value"]);
     }
 
     /**
