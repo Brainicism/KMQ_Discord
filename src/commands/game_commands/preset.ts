@@ -209,7 +209,7 @@ export default class PresetCommand implements BaseCommand {
             return;
         }
 
-        await sendInfoMessage(messageContext, { title: "Preset Exported Successfully", description: `Import \`${presetName}\` as a new preset in other servers using \`${process.env.BOT_PREFIX}preset import ${presetUUID} [preset_name]\`.\n\nAlternatively, load the preset's options directly using \`${process.env.BOT_PREFIX}preset load ${presetUUID}\`.`, thumbnailUrl: KmqImages.THUMBS_UP });
+        await sendInfoMessage(messageContext, { title: "Preset Exported Successfully", description: `Import \`${presetName}\` as a new preset in other servers using:\n\`${process.env.BOT_PREFIX}preset import ${presetUUID} [preset_name]\`\n\nAlternatively, load the preset's options directly using:\n\`${process.env.BOT_PREFIX}preset load ${presetUUID}\``, thumbnailUrl: KmqImages.THUMBS_UP });
         logger.info(`${getDebugLogHeader(messageContext)} | Preset '${presetName}' successfully exported as ${presetUUID}`);
     }
 
