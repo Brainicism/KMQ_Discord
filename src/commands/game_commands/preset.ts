@@ -152,7 +152,8 @@ export default class PresetCommand implements BaseCommand {
             const presetUUID = presetName;
             const existingPresetID = await dbContext.kmq("game_option_presets")
                 .select(["guild_id", "preset_name"])
-                .where("option_value", "=", JSON.stringify(presetUUID))
+                .where("option_name", "=", "uuid")
+                .andWhere("option_value", "=", JSON.stringify(presetUUID))
                 .first();
 
             if (!existingPresetID) {
@@ -234,7 +235,8 @@ export default class PresetCommand implements BaseCommand {
 
         const existingPresetID = await dbContext.kmq("game_option_presets")
             .select(["guild_id", "preset_name"])
-            .where("option_value", "=", JSON.stringify(presetUUID))
+            .where("option_name", "=", "uuid")
+            .andWhere("option_value", "=", JSON.stringify(presetUUID))
             .first();
 
         if (!existingPresetID) {
