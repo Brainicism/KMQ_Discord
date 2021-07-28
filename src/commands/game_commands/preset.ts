@@ -65,7 +65,7 @@ export default class PresetCommand implements BaseCommand {
             },
             {
                 example: "`,preset export [preset_name]`",
-                explanation: "Returns a unique identifier associated with the mentioned preset",
+                explanation: "Returns a unique identifier that can be used to load/import the mentioned preset",
             },
             {
                 example: "`,preset import [preset_identifier] [preset_name]`",
@@ -84,17 +84,14 @@ export default class PresetCommand implements BaseCommand {
             return;
         }
 
-        const presetName = parsedMessage.components[presetAction !== PresetAction.IMPORT ? 1 : 2];
-        const presetUUID = parsedMessage.components[1];
-        if (!presetName) {
-            if (presetAction === PresetAction.IMPORT && !presetUUID) {
-                sendErrorMessage(messageContext, { title: "Preset Identifier Missing", description: `You must specify a preset identifier. Use \`${process.env.BOT_PREFIX}preset export [preset_name]\` to retrieve a preset's identifier.`, thumbnailUrl: KmqImages.NOT_IMPRESSED });
-                logger.warn(`${getDebugLogHeader(message)} | Preset UUID not specified`);
-                return;
-            }
-
+        const missingPresetMessage = (() => {
             sendErrorMessage(messageContext, { title: "Preset Name Missing", description: "You must specify a preset name.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
             logger.warn(`${getDebugLogHeader(message)} | Preset name not specified`);
+        });
+
+        const presetName = parsedMessage.components[presetAction !== PresetAction.IMPORT ? 1 : 2];
+        if (presetAction !== PresetAction.IMPORT && !presetName) {
+            missingPresetMessage();
             return;
         }
 
@@ -115,8 +112,23 @@ export default class PresetCommand implements BaseCommand {
                 await this.exportPreset(presetName, guildPreference, messageContext);
                 break;
             case PresetAction.IMPORT:
+            {
+                const presetUUID = parsedMessage.components[1];
+                if (!presetUUID) {
+                    sendErrorMessage(messageContext, { title: "Preset Identifier Missing", description: `You must specify a preset identifier. Use \`${process.env.BOT_PREFIX}preset export [preset_name]\` to retrieve a preset's identifier.`, thumbnailUrl: KmqImages.NOT_IMPRESSED });
+                    logger.warn(`${getDebugLogHeader(message)} | Preset UUID not specified`);
+                    break;
+                }
+
+                if (!presetName) {
+                    missingPresetMessage();
+                    break;
+                }
+
                 await this.importPreset(presetUUID, presetName, guildPreference, messageContext);
                 break;
+            }
+
             default:
         }
     };
@@ -138,19 +150,19 @@ export default class PresetCommand implements BaseCommand {
         if (presetName.startsWith("KMQ-")) {
             // User is loading a preset via UUID
             const presetUUID = presetName;
-            const existingPresetIdentifiers = await dbContext.kmq("game_option_presets")
+            const existingPresetID = await dbContext.kmq("game_option_presets")
                 .select(["guild_id", "preset_name"])
                 .where("option_value", "=", JSON.stringify(presetUUID))
                 .first();
 
-            if (!existingPresetIdentifiers) {
+            if (!existingPresetID) {
                 logger.warn(`${getDebugLogHeader(messageContext)} | Tried to load non-existent preset identifier \`${presetUUID}\`.`);
                 await sendErrorMessage(messageContext, { title: "Preset Error", description: `Preset identifier \`${presetUUID}\` doesn't exist.` });
                 return;
             }
 
-            guildID = existingPresetIdentifiers["guild_id"];
-            presetName = existingPresetIdentifiers["preset_name"];
+            guildID = existingPresetID["guild_id"];
+            presetName = existingPresetID["preset_name"];
         }
 
         const loadResult = await guildPreference.loadPreset(presetName, guildID);
@@ -220,12 +232,12 @@ export default class PresetCommand implements BaseCommand {
             return;
         }
 
-        const existingPresetIdentifiers = await dbContext.kmq("game_option_presets")
+        const existingPresetID = await dbContext.kmq("game_option_presets")
             .select(["guild_id", "preset_name"])
             .where("option_value", "=", JSON.stringify(presetUUID))
             .first();
 
-        if (!existingPresetIdentifiers) {
+        if (!existingPresetID) {
             logger.warn(`${getDebugLogHeader(messageContext)} | Tried to load non-existent preset identifier \`${presetUUID}\`.`);
             await sendErrorMessage(messageContext, { title: "Preset Error", description: `Preset identifier \`${presetUUID}\` doesn't exist.` });
             return;
@@ -233,8 +245,8 @@ export default class PresetCommand implements BaseCommand {
 
         const presetOptions = await dbContext.kmq("game_option_presets")
             .select(["option_name", "option_value"])
-            .where("guild_id", "=", existingPresetIdentifiers["guild_id"])
-            .andWhere("preset_name", "=", existingPresetIdentifiers["preset_name"]);
+            .where("guild_id", "=", existingPresetID["guild_id"])
+            .andWhere("preset_name", "=", existingPresetID["preset_name"]);
 
         await dbContext.kmq.transaction(async (trx) => {
             const preset = presetOptions
@@ -246,21 +258,17 @@ export default class PresetCommand implements BaseCommand {
                     option_value: option["option_value"],
                 }));
 
+            preset.push({
+                guild_id: messageContext.guildID,
+                preset_name: presetName,
+                option_name: "uuid",
+                option_value: JSON.stringify(`KMQ-${uuid.v4()}`),
+            });
+
             await dbContext.kmq("game_option_presets")
                 .insert(preset)
                 .onConflict(["guild_id", "preset_name", "option_name"])
                 .merge()
-                .transacting(trx);
-
-            await dbContext.kmq("game_option_presets")
-                .insert({
-                    guild_id: messageContext.guildID,
-                    preset_name: presetName,
-                    option_name: "uuid",
-                    option_value: JSON.stringify(`KMQ-${uuid.v4()}`),
-                })
-                .onConflict(["guild_id", "preset_name", "option_name"])
-                .ignore()
                 .transacting(trx);
         });
 
