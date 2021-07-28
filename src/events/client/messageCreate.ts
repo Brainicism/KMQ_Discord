@@ -1,6 +1,6 @@
 import Eris from "eris";
 import { IPCLogger } from "../../logger";
-import { textPermissionsCheck, sendOptionsMessage, areUserAndBotInSameVoiceChannel } from "../../helpers/discord_utils";
+import { sendOptionsMessage, areUserAndBotInSameVoiceChannel } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { state } from "../../kmq";
 import validate from "../../helpers/validate";
@@ -38,10 +38,6 @@ export default async function messageCreateHandler(message: Eris.Message) {
     const textChannel = message.channel as Eris.TextChannel;
     if (message.mentions.includes(state.client.user) && message.content.split(" ").length === 1) {
         // Any message that mentions the bot sends the current options
-        if (!(await textPermissionsCheck(message, textChannel))) {
-            return;
-        }
-
         const guildPreference = await getGuildPreference(message.guildID);
         sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, null, `Psst. The bot prefix is ${process.env.BOT_PREFIX}`);
         return;
@@ -50,10 +46,6 @@ export default async function messageCreateHandler(message: Eris.Message) {
     const invokedCommand = parsedMessage ? state.commands[parsedMessage.action] : null;
     if (invokedCommand) {
         if (validate(message, parsedMessage, invokedCommand.validations, invokedCommand.help?.usage)) {
-            if (!(await textPermissionsCheck(message, textChannel))) {
-                return;
-            }
-
             const { gameSessions } = state;
             if (invokedCommand.preRunCheck) {
                 const preCheckResult = await invokedCommand.preRunCheck(message, gameSessions[message.guildID]);
