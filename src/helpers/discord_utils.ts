@@ -1,4 +1,4 @@
-import Eris, { EmbedOptions, TextableChannel } from "eris";
+import Eris, { EmbedOptions, TextableChannel, TextChannel } from "eris";
 import EmbedPaginator from "eris-pagination";
 import GuildPreference from "../structures/guild_preference";
 import GameSession, { UniqueSongCounter } from "../structures/game_session";
@@ -49,12 +49,55 @@ export function getDebugLogHeader(messageContext: MessageContext | Eris.Message)
 }
 
 /**
+ * @param missingPermissions - List of missing text permissions
+ * @returns a friendly string describing the missing text permissions
+ */
+function missingPermissionsText(missingPermissions: string[]): string {
+    return `Ensure that the bot has the following permissions: \`${missingPermissions.join(", ")}\`\n\nSee the following link for details: https://support.discord.com/hc/en-us/articles/206029707-How-do-I-set-up-Permissions-. If you are still having issues, join the official KMQ server found in \`${process.env.BOT_PREFIX}help\``;
+}
+
+/**
+ * @param textChannelID - the text channel's ID
+ * @param authorID - the sender's ID
+ * @returns whether the bot has permissions to message's originating text channel
+ */
+export async function textPermissionsCheck(textChannelID: string, guildID: string, authorID: string): Promise<boolean> {
+    const { client } = state;
+    const messageContext = new MessageContext(textChannelID, null, guildID);
+    const channel = client.getChannel(textChannelID) as TextChannel;
+    if (!channel.permissionsOf(client.user.id).has("sendMessages")) {
+        logger.warn(`${getDebugLogHeader(messageContext)} | Missing SEND_MESSAGES permissions`);
+        const embed = {
+            color: EMBED_INFO_COLOR,
+            title: "Missing Permissions",
+            description: `Hi! I'm unable to message in ${channel.guild.name}'s #${channel.name} channel. Please make sure the bot has permissions to message in this channel.`,
+        };
+
+        const dmChannel = await client.getDMChannel(authorID);
+        await client.createMessage(dmChannel.id, { embed });
+        return false;
+    }
+
+    const missingPermissions = REQUIRED_TEXT_PERMISSIONS.filter((permission) => !channel.permissionsOf(client.user.id).has(permission));
+    if (missingPermissions.length > 0) {
+        logger.warn(`${getDebugLogHeader(messageContext)} | Missing Text Channel [${missingPermissions.join(", ")}] permissions`);
+        client.createMessage(channel.id, {
+            content: missingPermissionsText(missingPermissions),
+        });
+        return false;
+    }
+
+    return true;
+}
+
+/**
  * A lower level message sending utility
  * and when a Eris Message object isn't available in the context
- * @param textChannel - The channel where the message should be delivered
+ * @param textChannelID - The channel ID where the message should be delivered
+ * @param authorID - the author's ID
  * @param messageContent - The MessageContent to send
  */
-async function sendMessage(textChannelID: string, messageContent: Eris.AdvancedMessageContent): Promise<Eris.Message> {
+async function sendMessage(textChannelID: string, authorID: string, messageContent: Eris.AdvancedMessageContent): Promise<Eris.Message> {
     const channel = state.client.getChannel(textChannelID) as Eris.TextChannel;
 
     // only reply to message if has required permissions
@@ -67,6 +110,11 @@ async function sendMessage(textChannelID: string, messageContent: Eris.AdvancedM
     try {
         return await state.client.createMessage(textChannelID, messageContent);
     } catch (e) {
+        // check for text permissions if sending message failed
+        if (!(await textPermissionsCheck(textChannelID, channel.guild.id, authorID))) {
+            return null;
+        }
+
         logger.error(`Error sending message. textChannelID = ${textChannelID}. textChannel permissions = ${channel.permissionsOf(state.client.user.id).json} err = ${e}. body = ${JSON.stringify(messageContent)}`);
         return null;
     }
@@ -80,7 +128,7 @@ async function sendMessage(textChannelID: string, messageContent: Eris.AdvancedM
  */
 export async function sendErrorMessage(messageContext: MessageContext, embedPayload: EmbedPayload): Promise<Eris.Message<TextableChannel>> {
     const author = (embedPayload.author == null || embedPayload.author) ? embedPayload.author : messageContext.author;
-    return sendMessage(messageContext.textChannelID, {
+    return sendMessage(messageContext.textChannelID, messageContext.author.id, {
         embed: {
             color: embedPayload.color || EMBED_ERROR_COLOR,
             author: author ? {
@@ -126,7 +174,7 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
         timestamp: embedPayload.timestamp,
     };
 
-    return sendMessage(messageContext.textChannelID, { embed, messageReference: reply ? { messageID: messageContext.referencedMessageID, failIfNotExists: false } : null });
+    return sendMessage(messageContext.textChannelID, messageContext.author.id, { embed, messageReference: reply ? { messageID: messageContext.referencedMessageID, failIfNotExists: false } : null });
 }
 
 /**
@@ -404,10 +452,14 @@ export async function sendEndGameMessage(gameSession: GameSession) {
  */
 export async function sendPaginationedEmbed(message: GuildTextableMessage, embeds: Array<Eris.EmbedOptions>) {
     if (embeds.length > 1) {
-        return EmbedPaginator.createPaginationEmbed(message, embeds, { timeout: 60000 });
+        if ((await textPermissionsCheck(message.channel.id, message.guildID, message.author.id))) {
+            return EmbedPaginator.createPaginationEmbed(message, embeds, { timeout: 60000 });
+        }
+
+        return null;
     }
 
-    return sendMessage(message.channel.id, { embed: embeds[0] });
+    return sendMessage(message.channel.id, message.author.id, { embed: embeds[0] });
 }
 
 /**
@@ -512,14 +564,6 @@ export function getNumParticipants(voiceChannelID: string): number {
 }
 
 /**
- * @param missingPermissions - List of missing text permissions
- * @returns a friendly string describing the missing text permissions
- */
-function missingPermissionsText(missingPermissions: string[]): string {
-    return `Ensure that the bot has the following permissions: \`${missingPermissions.join(", ")}\`\n\nSee the following link for details: https://support.discord.com/hc/en-us/articles/206029707-How-do-I-set-up-Permissions-. If you are still having issues, join the official KMQ server found in \`${process.env.BOT_PREFIX}help\``;
-}
-
-/**
  * @param message - The Message object
  * @returns whether the bot has permissions to join the message author's currently active voice channel
  */
@@ -544,38 +588,6 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
     if (afkChannel) {
         logger.warn(`${getDebugLogHeader(messageContext)} | Attempted to start game in AFK voice channel`);
         sendInfoMessage(MessageContext.fromMessage(message), { title: "AFK Voice Channel", description: "Ensure you're not in the inactive voice channel so that you can hear me!" });
-        return false;
-    }
-
-    return true;
-}
-
-/**
- * @param message - The Message object
- * @returns whether the bot has permissions to message's originating text channel
- */
-export async function textPermissionsCheck(message: GuildTextableMessage, channel: Eris.TextChannel): Promise<boolean> {
-    const { client } = state;
-    const messageContext = MessageContext.fromMessage(message);
-    if (!channel.permissionsOf(client.user.id).has("sendMessages")) {
-        logger.warn(`${getDebugLogHeader(messageContext)} | Missing SEND_MESSAGES permissions`);
-        const embed = {
-            color: EMBED_INFO_COLOR,
-            title: "Missing Permissions",
-            description: `Hi! I'm unable to message in ${channel.guild.name}'s #${channel.name} channel. Please make sure the bot has permissions to message in this channel.`,
-        };
-
-        const dmChannel = await client.getDMChannel(message.author.id);
-        await client.createMessage(dmChannel.id, { embed });
-        return false;
-    }
-
-    const missingPermissions = REQUIRED_TEXT_PERMISSIONS.filter((permission) => !channel.permissionsOf(client.user.id).has(permission));
-    if (missingPermissions.length > 0) {
-        logger.warn(`${getDebugLogHeader(messageContext)} | Missing Text Channel [${missingPermissions.join(", ")}] permissions`);
-        client.createMessage(channel.id, {
-            content: missingPermissionsText(missingPermissions),
-        });
         return false;
     }
 
