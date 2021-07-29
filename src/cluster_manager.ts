@@ -10,8 +10,10 @@ import { clearClusterActivityStats, clearRestartNotification, registerProcessEve
 import storeDailyStats from "./scripts/store-daily-stats";
 import dbContext from "./database_context";
 import { reloadFactCache } from "./fact_generator";
-import { EnvType } from "./types";
+// import { EnvType } from "./types";
 import { seedAndDownloadNewSongs } from "./seed/seed_db";
+import { sendErrorMessage, getDebugLogHeader } from "./helpers/discord_utils";
+import MessageContext from "./structures/message_context";
 
 const logger = getInternalLogger("cluster_manager");
 
@@ -52,15 +54,25 @@ function registerGlobalIntervals(fleet: Fleet) {
     });
 
     // every hour
-    schedule.scheduleJob("15 * * * *", async () => {
-        if (process.env.NODE_ENV !== EnvType.PROD) return;
+    schedule.scheduleJob("* * * * *", async () => {
+        // if (process.env.NODE_ENV !== EnvType.PROD) return;
         logger.info("Performing regularly scheduled Daisuki database seed");
         const overrideFileExists = fs.existsSync(path.join(__dirname, "../../data/skip_seed"));
         if (overrideFileExists) {
             return;
         }
 
-        await seedAndDownloadNewSongs(dbContext);
+        try {
+            await seedAndDownloadNewSongs(dbContext);
+        } catch (err) {
+            const messageContext = new MessageContext(process.env.DEBUG_TEXT_CHANNEL_ID);
+            sendErrorMessage(messageContext, {
+                title: "Seed failure",
+                description: `@here\n${err.substring}`.substring(0, 4096),
+                footerText: `Error at: ${(new Date()).toLocaleDateString("en-US")} ${(new Date()).toLocaleTimeString("en-US")}`,
+            });
+            logger.error(`${getDebugLogHeader(messageContext)} | Error during seed. err = ${err}`);
+        }
     });
 }
 

@@ -165,12 +165,13 @@ export async function updateGroupList(db: DatabaseContext) {
 }
 
 async function seedAndDownloadNewSongs(db: DatabaseContext) {
+    throw Error("Fake error");
     pruneSqlDumps();
     try {
         await updateKpopDatabase(db);
     } catch (e) {
         logger.error(`Failed to update kpop_videos database. ${e}`);
-        return;
+        throw Error(e);
     }
 
     let songsDownloaded = 0;
