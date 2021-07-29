@@ -600,7 +600,7 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
  */
 export function checkBotIsAlone(guildID: string): boolean {
     const voiceConnection = state.client.voiceConnections.get(guildID);
-    if (!voiceConnection) return true;
+    if (!voiceConnection || !voiceConnection.channelID) return true;
     const channel = state.client.getChannel(voiceConnection.channelID) as Eris.VoiceChannel;
     if (channel.voiceMembers.size === 0) return true;
     if (channel.voiceMembers.size === 1 && channel.voiceMembers.has(state.client.user.id)) {
