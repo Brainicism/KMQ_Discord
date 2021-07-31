@@ -170,7 +170,7 @@ async function seedAndDownloadNewSongs(db: DatabaseContext) {
         await updateKpopDatabase(db);
     } catch (e) {
         logger.error(`Failed to update kpop_videos database. ${e}`);
-        return;
+        throw e;
     }
 
     let songsDownloaded = 0;

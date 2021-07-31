@@ -12,6 +12,7 @@ import dbContext from "./database_context";
 import { reloadFactCache } from "./fact_generator";
 import { EnvType } from "./types";
 import { seedAndDownloadNewSongs } from "./seed/seed_db";
+import { sendDebugAlertWebhook } from "./helpers/discord_utils";
 
 const logger = getInternalLogger("cluster_manager");
 
@@ -60,7 +61,11 @@ function registerGlobalIntervals(fleet: Fleet) {
             return;
         }
 
-        await seedAndDownloadNewSongs(dbContext);
+        try {
+            await seedAndDownloadNewSongs(dbContext);
+        } catch (e) {
+            sendDebugAlertWebhook("Download and seed failure", e.toString());
+        }
     });
 }
 

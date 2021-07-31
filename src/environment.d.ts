@@ -16,5 +16,6 @@ declare namespace NodeJS {
         NODE_ENV: string,
         WEB_SERVER_IP: string,
         WEB_SERVER_PORT: string,
+        ALERT_WEBHOOK_URL?: string,
     }
 }
