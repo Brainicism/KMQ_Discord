@@ -1,5 +1,6 @@
 import Eris, { EmbedOptions, TextableChannel, TextChannel } from "eris";
 import EmbedPaginator from "eris-pagination";
+import axios from "axios";
 import GuildPreference from "../structures/guild_preference";
 import GameSession, { UniqueSongCounter } from "../structures/game_session";
 import { IPCLogger } from "../logger";
@@ -641,4 +642,22 @@ export function getMajorityCount(guildID: string): number {
     }
 
     return 0;
+}
+
+/**
+ * Sends an alert to the message webhook
+ * @param title - The embed title
+ * @param description - the embed description
+ */
+export function sendDebugAlertWebhook(title: string, description: string) {
+    if (!process.env.ALERT_WEBHOOK_URL) return;
+    axios.post(process.env.ALERT_WEBHOOK_URL, {
+        embeds: [{
+            title,
+            description,
+            color: EMBED_ERROR_COLOR,
+        }],
+        username: "Kimiqo",
+        avatar_url: KmqImages.NOT_IMPRESSED,
+    });
 }
