@@ -14,7 +14,6 @@ config({ path: path.resolve(__dirname, "../../.env") });
 const SQL_DUMP_EXPIRY = 10;
 const mvFileUrl = "http://kpop.daisuki.com.br/download.php?file=full";
 const audioFileUrl = "http://kpop.daisuki.com.br/download.php?file=audio";
-const DEFAULT_AUDIO_ONLY_SONGS_PER_ARTIST = 10;
 const logger = new IPCLogger("seed_db");
 const databaseDownloadDir = path.join(__dirname, "../../sql_dumps/daisuki");
 if (!fs.existsSync(databaseDownloadDir)) {
@@ -25,8 +24,7 @@ program
     .option("-p, --skip-pull", "Skip re-pull of Daisuki database dump", false)
     .option("-r, --skip-reseed", "Force skip drop/create of kpop_videos database", false)
     .option("-d, --skip-download", "Skip download/encode of videos in database", false)
-    .option("--limit <limit>", "Limit the number of songs to download", (x) => parseInt(x))
-    .option("--audio-songs-per-artist <songs>", "Maximum number of audio-only songs to download for each artist", (x) => parseInt(x), DEFAULT_AUDIO_ONLY_SONGS_PER_ARTIST);
+    .option("--limit <limit>", "Limit the number of songs to download", (x) => parseInt(x));
 
 program.parse();
 const options = program.opts();
@@ -82,7 +80,7 @@ async function validateSqlDump(db: DatabaseContext, mvSeedFilePath: string, audi
             const validationCreateKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/create_kmq_data_tables_procedure.validation.sql");
             execSync(`sed 's/kpop_videos/kpop_videos_validation/g' ${originalCreateKmqTablesProcedureSqlPath} > ${validationCreateKmqTablesProcedureSqlPath}`);
             execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${validationCreateKmqTablesProcedureSqlPath}`);
-            await db.kpopVideosValidation.raw("CALL CreateKmqDataTables;");
+            await db.kpopVideosValidation.raw(`CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`);
         }
 
         logger.info("SQL dump validated successfully");
@@ -175,7 +173,7 @@ async function seedAndDownloadNewSongs(db: DatabaseContext) {
 
     let songsDownloaded = 0;
     if (!options.skipDownload) {
-        songsDownloaded = await downloadAndConvertSongs(options.audioSongsPerArtist, options.limit);
+        songsDownloaded = await downloadAndConvertSongs(options.limit);
     }
 
     if (songsDownloaded) {

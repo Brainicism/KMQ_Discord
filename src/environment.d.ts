@@ -17,5 +17,7 @@ declare namespace NodeJS {
         WEB_SERVER_IP: string,
         WEB_SERVER_PORT: string,
         ALERT_WEBHOOK_URL?: string,
+        AUDIO_SONGS_PER_ARTIST: number,
+        PREMIUM_AUDIO_SONGS_PER_ARTIST: number,
     }
 }

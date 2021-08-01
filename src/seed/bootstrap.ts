@@ -55,7 +55,7 @@ function loadStoredProcedures() {
 // eslint-disable-next-line import/prefer-default-export
 export async function generateKmqDataTables(db: DatabaseContext) {
     logger.info("Re-creating KMQ data tables view...");
-    await db.kmq.raw("CALL CreateKmqDataTables;");
+    await db.kmq.raw(`CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`);
 }
 
 function performMigrations() {
@@ -89,7 +89,7 @@ async function bootstrapDatabases() {
 
     if (!(await songThresholdReached(db))) {
         logger.info(`Downloading minimum threshold (${SONG_DOWNLOAD_THRESHOLD}) songs`);
-        await downloadAndConvertSongs(1, SONG_DOWNLOAD_THRESHOLD);
+        await downloadAndConvertSongs(SONG_DOWNLOAD_THRESHOLD);
         await generateKmqDataTables(db);
     }
 
