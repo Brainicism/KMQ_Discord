@@ -150,7 +150,7 @@ async function getSongsFromDb(db: DatabaseContext) {
             .andWhere("tags", "NOT LIKE", "%c%"))
         .select("name", "artist", "youtubeLink", "views")
         .from("rankedAudioSongs")
-        .where("rank", "<=", process.env.PATREON_AUDIO_SONGS_PER_ARTIST)
+        .where("rank", "<=", process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST)
         .union(function () {
             this.select("app_kpop.name", "app_kpop_group.name AS artist", "vlink AS youtubeLink", "app_kpop.views AS views")
                 .from("app_kpop")

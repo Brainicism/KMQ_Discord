@@ -55,7 +55,7 @@ function loadStoredProcedures() {
 // eslint-disable-next-line import/prefer-default-export
 export async function generateKmqDataTables(db: DatabaseContext) {
     logger.info("Re-creating KMQ data tables view...");
-    await db.kmq.raw(`CALL CreateKmqDataTables(${process.env.PATREON_AUDIO_SONGS_PER_ARTIST});`);
+    await db.kmq.raw(`CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`);
 }
 
 function performMigrations() {

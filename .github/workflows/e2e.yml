@@ -23,7 +23,7 @@ jobs:
       DB_USER_CI: root
       DB_PORT: 3306
       AUDIO_SONGS_PER_ARTIST: 10
-      PATREON_AUDIO_SONGS_PER_ARTIST: 10
+      PREMIUM_AUDIO_SONGS_PER_ARTIST: 10
     steps:
       - name: Checkout KMQ_Discord
         uses: actions/checkout@v2
@@ -37,7 +37,7 @@ jobs:
           echo "DB_HOST=db" >> docker/.env
           echo "BOT_TOKEN=$BOT_TOKEN" >> docker/.env
           echo "AUDIO_SONGS_PER_ARTIST=$AUDIO_SONGS_PER_ARTIST" >> docker/.env
-          echo "PATREON_AUDIO_SONGS_PER_ARTIST=$PATREON_AUDIO_SONGS_PER_ARTIST" >> docker/.env
+          echo "PREMIUM_AUDIO_SONGS_PER_ARTIST=$PREMIUM_AUDIO_SONGS_PER_ARTIST" >> docker/.env
       - name: Build and bootstrap dry-run
         run: npm run docker-dryrun
       - name: Post-bootstrap dry-run

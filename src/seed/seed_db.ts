@@ -80,7 +80,7 @@ async function validateSqlDump(db: DatabaseContext, mvSeedFilePath: string, audi
             const validationCreateKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/create_kmq_data_tables_procedure.validation.sql");
             execSync(`sed 's/kpop_videos/kpop_videos_validation/g' ${originalCreateKmqTablesProcedureSqlPath} > ${validationCreateKmqTablesProcedureSqlPath}`);
             execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${validationCreateKmqTablesProcedureSqlPath}`);
-            await db.kpopVideosValidation.raw(`CALL CreateKmqDataTables(${process.env.PATREON_AUDIO_SONGS_PER_ARTIST});`);
+            await db.kpopVideosValidation.raw(`CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`);
         }
 
         logger.info("SQL dump validated successfully");
