@@ -137,7 +137,7 @@ Similarly, to force groups in to the game regardless of the current options, use
 ![exclude](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/exclude.png)
 
 ## ,goal [goal]
-Setting the goal ends the game when the given goal score is reached. For example, if a player were to use `,goal 5`, the first player to five points would win the game (`,end` is called automatically).
+Setting the goal ends the game when the given goal score is reached. For example, if a player were to use `,goal 50`, the first player to 50 points would win the game (`,end` is called automatically).
 
 To disable a goal, use `,goal`.
 
