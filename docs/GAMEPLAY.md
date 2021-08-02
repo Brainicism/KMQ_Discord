@@ -67,29 +67,30 @@ When applying a new game option, the newly updated option will be bold in the bo
 ## ,limit [beginning_limit] {end_limit}
 Setting this option "limits" KMQ bot to the **top most viewed** `beginning_limit` **music videos** out of the total number of songs. Increasing the limit allows less popular songs to play; decreasing it restricts it to more popular songs.
 
-For example, `,limit 100` will play the 100 most viewed songs in the current game options, while `,limit 250 500 `will play between the 250th and 500th most viewed songs.
+For example, `,limit 100` will play the 100 most viewed songs in the current game options, while `,limit 250 500` will play between the 250th and 500th most viewed songs.
 
 View counts are frequently updated from YouTube.
 
 ![limit](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/limit.png)
 
 ## ,groups [group_1], {group_2}, {group_3} ...
-Setting the groups option limits the selection of songs to those belonging to the artist specified. For instance `,groups blackpink, itzy, fromis 9, bts` will exclusively play songs from those four artists. You can view the list of groups via the link in `,help groups`. **Make sure to separate the groups with commas**.
+Setting the groups option limits the selection of songs to those belonging to the artist specified. For instance `,groups blackpink, itzy, fromis 9, bts` will exclusively play songs from those four artists. You can view the list of groups names via the link in `,help groups`. **Make sure to separate the groups with commas**.
 
-* List all set groups using `,list groups`.
-* Add and remove groups using `,add groups [group_1], {group_2}, ...` and `,remove groups [group_1], {group_2}, ...` respectively.
-* In order to reset this option, simply type `,groups`.
+* List all set groups using `,list groups`
+* Add groups using `,add groups [group_1], {group_2}, ...`
+* Remove groups using `,remove groups [group_1], {group_2}, ...`
+* In order to reset this option, simply type `,groups`
 
 ![groups](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/groups.png)
 
 ## ,gender [gender_1 | alternating] {gender_2} {gender_3}
 Setting a gender specifies the gender of the groups you'd like to hear from.
 
-* `,gender male` will only play songs by boy groups and male soloists.
-* `,gender female` will only play songs by female groups and female soloists.
-* `,gender male female` will play song by boy groups, girl groups, and all soloists.
-* `,gender alternating` will alternate between `male` and `female` artists each round.
-* `,gender coed` refers to groups that contain a mix of male and female members. 
+* `,gender male` will play songs by boy groups and male soloists
+* `,gender female` will play songs by female groups and female soloists
+* `,gender male female` will play songs by boy groups, girl groups, and all soloists
+* `,gender coed` will play songs by groups containing a mix of male and female members
+* `,gender alternating` will alternate between `male` and `female` artist songs each round
 
 `male`, `female`, and `coed` can all be used at once (`,gender male female coed`), but `alternating` must be used on its own.
 
@@ -105,30 +106,31 @@ Setting a cutoff limits songs based on which year they were released. Using `,cu
 ![cutoff](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/cutoff.png)
 
 ## ,seek [seek_type]
-Setting the seek type changes which point in a song KMQ bot starts playing from.
+Setting the seek type changes which point in a song the bot starts playing from.
 
-* `,seek beginning` will make KMQ bot play every song starting from the beginning.
-* `,seek random` will play from a random point in the song.
-* `,seek middle` will play from the middle of the song.
+* `,seek beginning` will play every song starting from the beginning
+* `,seek random` will play from a random point in the song
+* `,seek middle` will play from the middle of the song
 
 ![seek](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/seek.png)
 
 ## ,guessmode [guess_mode_type]
 Setting the guess mode changes the objective of the game to guessing the name of the song, the artist, or both.
 
-* `,guessmode song` only accepts song names as guesses.
-* `,guessmode artist` only accepts artist names as guesses.
-* `,guessmode both` can be used to allow guessing either the song or artist name, where a song guess will net you 1 point and an artist guess will net you 0.2 points.
+* `,guessmode song` only accepts song names as guesses
+* `,guessmode artist` only accepts artist names as guesses
+* `,guessmode both` accepts either the song or artist name
+    * A song guess will net you 1 point and an artist guess will net you 0.2 points
 
 ![guessmode](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/guessmode.png)
 
 ## ,exclude [group_1], {group_2}, {group_3} ...
-Setting the exclude option ignores songs by the specified artists. For instance `,exclude Day6, Momoland` ignore songs by those two artists. You can view the list of groups via the link in `,help exclude`. **Make sure to separate the groups with commas**.
+Setting the exclude option ignores songs by the specified artists. For instance `,exclude Day6, Momoland` ignore songs by those two artists. You can view the list of groups names via the link in `,help exclude`. **Make sure to separate the groups with commas**.
 
-* List all set excluded groups using `,list exclude`.
-* Add excluded groups (these artist won't play) using `,add exclude [group_1], {group_2}, ...`.
-* Remove excluded groups (these artists will play) using `,remove exclude [group_1], {group_2}, ...`.
-* In order to reset this option, simply type `,exclude`.
+* List all set excluded groups using `,list exclude`
+* Add excluded groups (these artist won't play) using `,add exclude [group_1], {group_2}, ...`
+* Remove excluded groups (these artists will play) using `,remove exclude [group_1], {group_2}, ...`
+* In order to reset this option, simply type `,exclude`
 
 Similarly, to force groups in to the game regardless of the current options, use `,include`.
 
@@ -142,11 +144,13 @@ To disable a goal, use `,goal`.
 ![goal](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/goal.png)
 
 ## ,timer [time (seconds)]
-Setting a timer limits players to guess in under `time` seconds before the round ends automatically. Once a user gives a valid timeout, the timer will start at the beginning of every round. If no one guesses right in the allotted time, the round is over. **Typing** `,timer` **disables the timer**.
+Setting a timer limits players to guess in under `time` seconds before the round ends automatically. Once a user gives a valid timeout, the timer will start at the beginning of every round. If no one guesses right in the allotted time, the round is over.
 
-Set the timer under 10 (5? 3?) seconds and face off with your friends to see who the ultimate KMQ champ is!
+Set the timer to 10 (5? 3?) seconds and face off with your friends to see who the ultimate KMQ champ is!
 
 Alternatively, set it above 30 seconds and avoid the `,skip` spam.
+
+To disable a timer, use `,timer`.
 
 ![timer](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/timer.png)
 
@@ -167,7 +171,7 @@ See who can survive the longest into a KMQ game with elimination mode. Using `,p
 Use elimination mode in conjunction with `,timer` to raise the pressure!
 
 ## Teams mode
-Team up with your friends and crush the competition in `,play teams`! Split up into as many teams as you'd like and see who will emerge triumphant in the battle for 10% more EXP! Once your team is confident of its abilities, join the [official KMQ server](https://discord.gg/RCuzwYV) to face-off with the best of the best.
+Team up with your friends and crush the competition in `,play teams`! Split up into as many teams as you'd like and see who will emerge triumphant in the battle for 10% more EXP! Once your team is confident of its abilities, join the [official KMQ server](https://discord.gg/R55g4CRESW) to face-off with the best of the best.
 
 To keep things fair, switching teams mid-game forfeits your current points and EXP.
 
@@ -178,18 +182,18 @@ Use `,help [command_name]` for more details for any of the following commands:
 ## General Commands 
 - `,play`: Begin a game of KMQ. The bot will play a random song based on the currently chosen filters
 - `,end`: Stop the current game of KMQ. The bot will display the winner of the game
-- `,hint`: Shows a hint for the current song playing
+- `,hint`: Show a hint for the current song playing
 - `,forcehint`: The person that started the game can force-hint the current song, no majority necessary
-- `,skip`: Starts a vote to skip the current playing song. Based on majority rule
+- `,skip`: Start a vote to skip the current playing song. Based on majority rule
 - `,forceskip`: The person that started the game can force-skip the current song, no majority necessary
-- `,options`: Shows the current game options, which filter the songs that will be played
-- `,help`: Shows a general overview of available commands, as well as specific instructions for each command
+- `,options`: Show the current game options, which filter the songs that will be played
+- `,help`: Show a general overview of available commands, as well as specific instructions for each command
 - `,news`: Show the latest features/changes to the bot
-- `,profile`: Shows per-player stats, along with a ranking against everyone else
-- `,leaderboard`: Shows the server/game/global KMQ leaderboard
-- `,list`: Shows the currently selected groups for `,groups`, `,include`, or `,exclude`
+- `,profile`: Show per-player stats, along with a ranking against everyone else
+- `,leaderboard`: Show the server/game/global KMQ leaderboard
+- `,list`: Show the currently selected groups for `,groups`, `,include`, or `,exclude`
 - `,preset`: Quickly save, load, and export game options as presets (even across servers!)
-- `,vote`: Shows your current 2x bonus EXP modifier status from voting for the bot on [top.gg](https://top.gg/bot/508759831755096074/vote). Thanks for supporting KMQ!
+- `,vote`: Show your current 2x bonus EXP modifier status from voting for the bot on [top.gg](https://top.gg/bot/508759831755096074/vote). Thanks for supporting KMQ!
 
 ## Game Option Commands 
 - `,limit`: Set a maximum number of results in the song query. This effectively sets the "top `x` number of songs" based on the selected filters

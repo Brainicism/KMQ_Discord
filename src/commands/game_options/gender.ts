@@ -41,7 +41,7 @@ export default class GenderCommand implements BaseCommand {
     help = {
         name: "gender",
         description: `Choose the gender of the artists you'd like to hear from. Options are the following, \`male\`, \`female\`, and \`coed\`. Alternatively, use \`${process.env.BOT_PREFIX}gender alternating\` to rotate between \`male\` and \`female\` artists every round.`,
-        usage: ",gender [gender1] {gender2} {gender3}",
+        usage: ",gender [gender_1 | alternating] {gender_2} {gender_3}",
         examples: [
             {
                 example: "`,gender female`",
