@@ -7,7 +7,7 @@ import { IPCLogger } from "../logger";
 import { getSongCount, userBonusIsActive } from "./game_utils";
 import { getFact } from "../fact_generator";
 import { EmbedPayload, GameOption, GameOptionCommand, PriorityGameOption, ConflictingGameOptions, GuildTextableMessage, PlayerRoundResult, EndGameMessage, GameType } from "../types";
-import { chunkArray, codeLine, bold, underline, italicize, strikethrough, chooseWeightedRandom, getOrdinalNum } from "./utils";
+import { chunkArray, codeLine, bold, underline, italicize, strikethrough, chooseWeightedRandom, getOrdinalNum, friendlyFormattedNumber } from "./utils";
 import { state } from "../kmq";
 import Scoreboard from "../structures/scoreboard";
 import GameRound from "../structures/game_round";
@@ -296,12 +296,12 @@ export async function sendOptionsMessage(messageContext: MessageContext,
 
     const visibleLimitEnd = Math.min(totalSongs.countBeforeLimit, guildPreference.getLimitEnd());
     const visibleLimitStart = Math.min(totalSongs.countBeforeLimit, guildPreference.getLimitStart());
-    const limit = guildPreference.getLimitStart() === 0 ? `${visibleLimitEnd}` : `${getOrdinalNum(visibleLimitStart)} to ${getOrdinalNum(visibleLimitEnd)} (${totalSongs.count} songs)`;
+    const limit = guildPreference.getLimitStart() === 0 ? `${friendlyFormattedNumber(visibleLimitEnd)}` : `${getOrdinalNum(visibleLimitStart)} to ${getOrdinalNum(visibleLimitEnd)} (${friendlyFormattedNumber(totalSongs.count)} songs)`;
 
     // Store the VALUE of ,[option]: [VALUE] into optionStrings
     // Null optionStrings values are set to "Not set" below
     const optionStrings = {};
-    optionStrings[GameOption.LIMIT] = `${limit} / ${totalSongs.countBeforeLimit}`;
+    optionStrings[GameOption.LIMIT] = `${limit} / ${friendlyFormattedNumber(totalSongs.countBeforeLimit)}`;
     optionStrings[GameOption.GROUPS] = guildPreference.isGroupsMode() ? guildPreference.getDisplayedGroupNames() : null;
     optionStrings[GameOption.GENDER] = guildPreference.getGender().join(", ");
     optionStrings[GameOption.CUTOFF] = `${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
@@ -363,7 +363,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
         .map((option) => `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${optionStrings[option]}`)
         .join("\n");
 
-    priorityOptions = `Now playing the top ${bold(limit)} out of ${bold(String(totalSongs.countBeforeLimit))} available songs from the following game options:\n\n${priorityOptions}`;
+    priorityOptions = `Now playing the top ${bold(limit)} out of ${bold(String(friendlyFormattedNumber(totalSongs.countBeforeLimit)))} available songs from the following game options:\n\n${priorityOptions}`;
 
     const fieldOptions = Object.keys(GameOptionCommand).filter((option) => !PriorityGameOption.includes(option as GameOption));
     const ZERO_WIDTH_SPACE = "​";
