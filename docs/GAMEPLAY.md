@@ -58,7 +58,7 @@ For each command's usage, arguments:
 - surrounded by `{curly_brackets}` are optional
 - containing `[values | separated | by | pipes]` are the only valid argument values (in this case, only `values`, `separated`, `by`, and `pipes` would be accepted)
 
-**If no arguments are passed, the game option is reset to its original value.**
+**If no arguments are passed, the game option is reset to its original value.** To reset all options, use `,reset`.
 
 ![options](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/options.png)
 
