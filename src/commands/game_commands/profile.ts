@@ -4,7 +4,7 @@ import dbContext from "../../database_context";
 import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
-import { friendlyFormattedDate, romanize } from "../../helpers/utils";
+import { friendlyFormattedDate, romanize, friendlyFormattedNumber } from "../../helpers/utils";
 import { CUM_EXP_TABLE } from "../../structures/game_session";
 import MessageContext from "../../structures/message_context";
 import { state } from "../../kmq";
@@ -148,27 +148,27 @@ export default class ProfileCommand implements BaseCommand {
         const fields: Array<Eris.EmbedField> = [
             {
                 name: "Level",
-                value: `${level} (${getRankNameByLevel(level)})`,
+                value: `${friendlyFormattedNumber(level)} (${getRankNameByLevel(level)})`,
                 inline: true,
             },
             {
                 name: "Experience",
-                value: `${exp}/${CUM_EXP_TABLE[level + 1]}`,
+                value: `${friendlyFormattedNumber(exp)}/${friendlyFormattedNumber(CUM_EXP_TABLE[level + 1])}`,
                 inline: true,
             },
             {
                 name: "Overall Rank",
-                value: `#${relativeLevelRank}/${totalPlayers}`,
+                value: `#${friendlyFormattedNumber(relativeLevelRank)}/${friendlyFormattedNumber(totalPlayers)}`,
                 inline: true,
             },
             {
                 name: "Songs Guessed",
-                value: `${songsGuessed} | #${relativeSongRank}/${totalPlayers} `,
+                value: `${friendlyFormattedNumber(songsGuessed)} | #${friendlyFormattedNumber(relativeSongRank)}/${friendlyFormattedNumber(totalPlayers)} `,
                 inline: true,
             },
             {
                 name: "Games Played",
-                value: `${gamesPlayed} | #${relativeGamesPlayedRank}/${totalPlayers} `,
+                value: `${friendlyFormattedNumber(gamesPlayed)} | #${friendlyFormattedNumber(relativeGamesPlayedRank)}/${friendlyFormattedNumber(totalPlayers)} `,
                 inline: true,
             },
             {
@@ -183,7 +183,7 @@ export default class ProfileCommand implements BaseCommand {
             },
             {
                 name: "Times Voted",
-                value: timesVoted,
+                value: friendlyFormattedNumber(timesVoted),
                 inline: true,
             }];
 

@@ -9,6 +9,7 @@ import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import { state } from "../../kmq";
+import { friendlyFormattedNumber } from "../../helpers/utils";
 
 const logger = new IPCLogger("stats");
 
@@ -24,15 +25,15 @@ export default class SkipCommand implements BaseCommand {
     call = async ({ message, channel }: CommandArgs) => {
         const fleetStats = await state.ipc.getStats();
 
-        const activeGameSessions = (await dbContext.kmq("cluster_stats")
+        const activeGameSessions = friendlyFormattedNumber((await dbContext.kmq("cluster_stats")
             .where("stat_name", "=", "active_sessions")
             .sum("stat_value as count")
-            .first()).count ?? "Loading...";
+            .first()).count) ?? "Loading...";
 
-        const activeUsers = (await dbContext.kmq("cluster_stats")
+        const activeUsers = friendlyFormattedNumber((await dbContext.kmq("cluster_stats")
             .where("stat_name", "=", "active_players")
             .sum("stat_value as count")
-            .first()).count ?? "Loading...";
+            .first()).count) ?? "Loading...";
 
         const dateThreshold = new Date();
         dateThreshold.setHours(dateThreshold.getHours() - 24);
@@ -66,27 +67,27 @@ export default class SkipCommand implements BaseCommand {
 
         const fields: Array<Eris.EmbedField> = [{
             name: "Active Game Sessions",
-            value: activeGameSessions.toString(),
+            value: activeGameSessions,
             inline: true,
         },
         {
             name: "Active Players",
-            value: activeUsers.toString(),
+            value: activeUsers,
             inline: true,
         },
         {
             name: "(Recent) Game Sessions",
-            value: `${recentGameSessions} | ${totalGameSessions}`,
+            value: `${friendlyFormattedNumber(Number(recentGameSessions))} | ${friendlyFormattedNumber(Number(totalGameSessions))}`,
             inline: true,
         },
         {
             name: "(Recent) Rounds Played",
-            value: `${recentGameRounds} | ${totalGameRounds}`,
+            value: `${friendlyFormattedNumber(recentGameRounds)} | ${friendlyFormattedNumber(totalGameRounds)}`,
             inline: true,
         },
         {
             name: "(Recent) Players",
-            value: `${recentPlayers} | ${totalPlayers}`,
+            value: `${friendlyFormattedNumber(Number(recentPlayers))} | ${friendlyFormattedNumber(Number(totalPlayers))}`,
             inline: true,
         },
         {
