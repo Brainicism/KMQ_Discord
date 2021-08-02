@@ -4,7 +4,7 @@ import { BaseClusterWorker } from "eris-fleet";
 import { IPCLogger } from "./logger";
 import { EnvType, State } from "./types";
 import {
-    registerClientEvents, registerCommands, registerIntervals, reloadCaches, reloadCommands,
+    registerClientEvents, registerCommands, registerIntervals, reloadCaches, reloadCommands, updateBotStatus,
 } from "./helpers/management_utils";
 import BotListingManager from "./helpers/bot_listing_manager";
 
@@ -60,5 +60,8 @@ export class BotWorker extends BaseClusterWorker {
             logger.info("Dry run finished successfully.");
             state.ipc.totalShutdown();
         }
+
+        updateBotStatus();
+        logger.info(`Logged in as ${state.client.user.username}#${state.client.user.discriminator}! in '${process.env.NODE_ENV}' mode (${(Date.now() - state.processStartTime) / 1000}s)`);
     }
 }

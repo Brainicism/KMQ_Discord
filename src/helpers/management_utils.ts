@@ -7,7 +7,6 @@ import fastify from "fastify";
 import { IPCLogger } from "../logger";
 import { state } from "../kmq";
 import { EMBED_INFO_COLOR, sendInfoMessage } from "./discord_utils";
-import readyHandler from "../events/client/ready";
 import messageCreateHandler from "../events/client/messageCreate";
 import voiceChannelLeaveHandler from "../events/client/voiceChannelLeave";
 import voiceChannelSwitchHandler from "../events/client/voiceChannelSwitch";
@@ -46,8 +45,7 @@ let cachedCommandFiles: { [commandName: string]: BaseCommand } = null;
 /** Registers listeners on client events */
 export function registerClientEvents() {
     const { client } = state;
-    client.on("ready", readyHandler)
-        .on("messageCreate", messageCreateHandler)
+    client.on("messageCreate", messageCreateHandler)
         .on("voiceChannelLeave", voiceChannelLeaveHandler)
         .on("voiceChannelSwitch", voiceChannelSwitchHandler)
         .on("connect", connectHandler)
