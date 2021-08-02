@@ -185,10 +185,7 @@ export async function updateBotStatus() {
         return;
     }
 
-    const oneMonthPriorDate = new Date();
-    oneMonthPriorDate.setMonth(oneMonthPriorDate.getMonth() - 1);
     const randomPopularSongs = await dbContext.kmq("available_songs")
-        .where("publishedon", ">", oneMonthPriorDate)
         .orderBy("views", "DESC")
         .limit(25);
 
