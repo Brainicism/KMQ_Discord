@@ -12,11 +12,18 @@ import MessageContext from "../../structures/message_context";
 
 const logger = new IPCLogger("leaderboard");
 
+enum LeaderboardType {
+    GLOBAL = "global",
+    SERVER = "server",
+    GAME = "game",
+}
+
 enum LeaderboardAction {
     ENROLL = "enroll",
     UNEROLL = "unenroll",
     PAGE = "page",
     SERVER = "server",
+    GAME = "game",
 }
 
 const leaderboardQuotes = [
@@ -28,7 +35,7 @@ export default class LeaderboardCommand implements BaseCommand {
     help = {
         name: "leaderboard",
         description: "View the KMQ leaderboard.",
-        usage: ",leaderboard",
+        usage: ",leaderboard\n,leaderboard [server | game] {page_number}\n,leaderboard page {page_number}\n,leaderboard [enroll | unenroll]",
         examples: [
             {
                 example: "`,leaderboard`",
@@ -40,11 +47,19 @@ export default class LeaderboardCommand implements BaseCommand {
             },
             {
                 example: "`,leaderboard server`",
-                explanation: "Show the server-wide leaderboard",
+                explanation: "Shows the server-wide leaderboard",
             },
             {
                 example: "`,leaderboard server 3`",
-                explanation: "Show the 3rd page of the server-wide leaderboard",
+                explanation: "Shows the 3rd page of the server-wide leaderboard",
+            },
+            {
+                example: "`,leaderboard game`",
+                explanation: "Shows the leaderboard of players with points in the current game",
+            },
+            {
+                example: "`,leaderboard game 2`",
+                explanation: "Shows the 2nd page of the players with points in the current game",
             },
             {
                 example: "`,leaderboard enroll`",
@@ -79,7 +94,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
     call = async ({ message, parsedMessage }: CommandArgs) => {
         if (parsedMessage.components.length === 0) {
-            this.showLeaderboard(message, 0, false);
+            this.showLeaderboard(message, 0, LeaderboardType.GLOBAL);
             return;
         }
 
@@ -90,9 +105,11 @@ export default class LeaderboardCommand implements BaseCommand {
             } else if (action === LeaderboardAction.UNEROLL) {
                 this.unenrollLeaderboard(message);
             } else if (action === LeaderboardAction.PAGE) {
-                this.showLeaderboard(message, 0, false);
+                this.showLeaderboard(message, 0, LeaderboardType.GLOBAL);
             } else if (action === LeaderboardAction.SERVER) {
-                this.showLeaderboard(message, 0, true);
+                this.showLeaderboard(message, 0, LeaderboardType.SERVER);
+            } else if (action === LeaderboardAction.GAME) {
+                this.showLeaderboard(message, 0, LeaderboardType.GAME);
             }
 
             return;
@@ -101,9 +118,11 @@ export default class LeaderboardCommand implements BaseCommand {
         if (parsedMessage.components.length === 2) {
             const pageOffset = parseInt(parsedMessage.components[1]) - 1;
             if (action === LeaderboardAction.PAGE) {
-                this.showLeaderboard(message, pageOffset, false);
+                this.showLeaderboard(message, pageOffset, LeaderboardType.GLOBAL);
             } else if (action === LeaderboardAction.SERVER) {
-                this.showLeaderboard(message, pageOffset, true);
+                this.showLeaderboard(message, pageOffset, LeaderboardType.SERVER);
+            } else if (action === LeaderboardAction.GAME) {
+                this.showLeaderboard(message, pageOffset, LeaderboardType.GAME);
             } else {
                 sendErrorMessage(MessageContext.fromMessage(message), { title: "Incorrect Leaderboard Usage", description: `See \`${process.env.BOT_PREFIX}help leaderboard\` for more details` });
             }
@@ -134,18 +153,36 @@ export default class LeaderboardCommand implements BaseCommand {
             .del();
         sendInfoMessage(MessageContext.fromMessage(message), { title: "Leaderboard Unenrollment Complete", description: "You are no longer visible on the leaderboard" });
     }
-    private async showLeaderboard(message: GuildTextableMessage, pageOffset: number, serverSpecific: boolean) {
+
+    private async showLeaderboard(message: GuildTextableMessage, pageOffset: number, type: LeaderboardType) {
         const offset = 10 * pageOffset;
         let topPlayersQuery = dbContext.kmq("player_stats")
             .select(["exp", "level", "player_id"])
             .where("exp", ">", 0);
 
-        if (serverSpecific) {
+        if (type === LeaderboardType.SERVER) {
             const serverPlayers = (await dbContext.kmq("player_servers")
                 .select("player_id")
                 .where("server_id", "=", message.guildID)).map((x) => x.player_id);
 
             topPlayersQuery = topPlayersQuery.whereIn("player_id", serverPlayers);
+        } else if (type === LeaderboardType.GAME) {
+            if (!state.gameSessions[message.guildID]) {
+                sendErrorMessage(MessageContext.fromMessage(message), { title: "No Active Game", description: "There is no game in progress.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
+                return;
+            }
+
+            const participantIDs = state.gameSessions[message.guildID].participants;
+            if (participantIDs.size === 0) {
+                sendErrorMessage(MessageContext.fromMessage(message), { title: "No Participants", description: "Someone needs to score a point before this command works!", thumbnailUrl: KmqImages.NOT_IMPRESSED });
+                return;
+            }
+
+            const gamePlayers = (await dbContext.kmq("player_stats")
+                .select("player_id")
+                .whereIn("player_id", [...participantIDs])).map((x) => x.player_id);
+
+            topPlayersQuery = topPlayersQuery.whereIn("player_id", gamePlayers);
         }
 
         const topPlayers = await topPlayersQuery
@@ -154,7 +191,7 @@ export default class LeaderboardCommand implements BaseCommand {
             .limit(10);
 
         if (topPlayers.length === 0) {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "😐", description: "The leaderboard doesn't go this far" });
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "😐", description: "The leaderboard doesn't go this far", thumbnailUrl: KmqImages.NOT_IMPRESSED });
             return;
         }
 
@@ -173,7 +210,20 @@ export default class LeaderboardCommand implements BaseCommand {
             };
         }));
 
-        const leaderboardType = serverSpecific ? `${state.client.guilds.get(message.guildID).name}'s` : "Global";
+        let leaderboardType: string;
+        switch (type) {
+            case LeaderboardType.GLOBAL:
+                leaderboardType = "Global";
+                break;
+            case LeaderboardType.SERVER:
+                leaderboardType = `${state.client.guilds.get(message.guildID).name}'s`;
+                break;
+            case LeaderboardType.GAME:
+                leaderboardType = "Current Game's";
+                break;
+            default:
+        }
+
         const leaderboardTitle = `${leaderboardType} Leaderboard (Page ${pageOffset + 1})`;
         sendInfoMessage(MessageContext.fromMessage(message), {
             title: leaderboardTitle,
