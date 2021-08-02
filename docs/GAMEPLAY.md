@@ -31,15 +31,15 @@ Think you have what it takes to be a KMQ master? Rise through the ranks, gaining
 Everyone starts off as a `Novice` and works their way up as a `Trainee` (Level 10), `Pre-debut` (Level 20), `Nugu` (Level 30), and many more! Check out `,profile` and `,scoreboard` to see where you and other players stand!
 
 ## EXP Modifiers
-- Playing with more people will increase how much EXP you gain, ranging between 0.75x (single player) to 1.25x EXP (6+ players).
-- Guessing quickly will earn you 1.1x EXP.
-- Guess streaks greater than 5 will earn you 1.2x EXP.
-- Voting on [top.gg](https://top.gg/bot/508759831755096074/vote) rewards you 2x EXP for an hour. You can vote once every 12 hours. See `,vote` for more details.
-- Every weekend is a 2x EXP weekend! Available all day on Saturdays and Sundays EST time.
-- On weekdays, there are 3 daily `KMQ Power Hours` lasting two hours each for 2x EXP at random points of the day.
-- Winning a game in teams mode earns your team 1.1x EXP.
-- Using a hint reduces EXP by 0.5x.
-- All EXP bonuses stack on one another.
+- Playing with more people will increase how much EXP you gain, ranging between 0.75x (single player) to 1.25x EXP (6+ players)
+- Guessing quickly will earn you 1.1x EXP
+- Guess streaks greater than 5 will earn you 1.2x EXP
+- Voting on [top.gg](https://top.gg/bot/508759831755096074/vote) rewards you 2x EXP for an hour. You can vote once every 12 hours. See `,vote` for more details
+- Every weekend is a 2x EXP weekend! Available all day on Saturdays and Sundays EST time
+- On weekdays, there are 3 daily `KMQ Power Hours` lasting two hours each for 2x EXP at random points of the day
+- Winning a game in teams mode earns your team 1.1x EXP
+- Using a hint reduces EXP by 0.5x
+- All EXP bonuses stack on one another
 
 ## Requirements
 You will only gain EXP if:
