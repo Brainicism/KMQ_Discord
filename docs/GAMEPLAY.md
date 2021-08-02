@@ -203,7 +203,7 @@ Use `,help [command_name]` for more details for any of the following commands:
 - `,artisttype`: Choose whether to hear from soloists, groups, or both. 
 - `,release`: Specify whether only official releases are played, or include b-sides + dance practices + acoustic versions + remixes
 - `,language`: Choose whether to include Japanese/English/Chinese songs, or only Korean songs
-- `,subunit`: Choose whether to automatically include a group's subunits when using `,groups`
+- `,subunits`: Choose whether to automatically include a group's subunits when using `,groups`
 - `,ost`: Include, exclude, or exclusively play OST music videos
 - `,multiguess`: Choose whether to allow multiple players to guess correctly in a round
 - `,shuffle`: Choose whether songs should play in "true" random order or in uniquely random order.
