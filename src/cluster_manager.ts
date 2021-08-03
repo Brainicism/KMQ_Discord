@@ -70,12 +70,23 @@ function registerGlobalIntervals(fleet: Fleet) {
 }
 
 (async () => {
-    const fleet = new Fleet(options);
+    let fleet: Fleet;
+    try {
+        fleet = new Fleet(options);
+    } catch (e) {
+        logger.error(`Unable to start fleet. Error = ${e}`);
+        process.exit(1);
+    }
+
     if (isMaster) {
         fleet.on("log", (m) => logger.info(m));
         fleet.on("debug", (m) => logger.debug(m));
         fleet.on("warn", (m) => logger.warn(m));
         fleet.on("error", (m) => logger.error(m));
+        fleet.on("abort", () => {
+            logger.error("Cluster manager received abort...");
+            process.exit(1);
+        });
 
         if (process.env.NODE_ENV === EnvType.CI) return;
         logger.info("Starting web servers...");

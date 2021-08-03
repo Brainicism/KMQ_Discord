@@ -4,7 +4,7 @@ import { BaseClusterWorker } from "eris-fleet";
 import { IPCLogger } from "./logger";
 import { EnvType, State } from "./types";
 import {
-    registerClientEvents, registerCommands, registerIntervals, reloadCaches, reloadCommands, updateBotStatus,
+    registerClientEvents, registerCommands, registerIntervals, registerProcessEvents, reloadCaches, reloadCommands, updateBotStatus,
 } from "./helpers/management_utils";
 import BotListingManager from "./helpers/bot_listing_manager";
 
@@ -41,6 +41,9 @@ export class BotWorker extends BaseClusterWorker {
 
         logger.info("Registering client event handlers...");
         registerClientEvents();
+
+        logger.info("Registering process event handlers...");
+        registerProcessEvents();
 
         this.ipc.register("reload_commands", async () => {
             logger.info("Received 'reload_commands' IPC message");
