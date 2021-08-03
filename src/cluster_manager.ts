@@ -12,7 +12,8 @@ import dbContext from "./database_context";
 import { reloadFactCache } from "./fact_generator";
 import { EnvType } from "./types";
 import { seedAndDownloadNewSongs } from "./seed/seed_db";
-import { sendDebugAlertWebhook } from "./helpers/discord_utils";
+import { EMBED_ERROR_COLOR, EMBED_SUCCESS_COLOR, sendDebugAlertWebhook } from "./helpers/discord_utils";
+import { KmqImages } from "./constants";
 
 const logger = getInternalLogger("cluster_manager");
 
@@ -64,7 +65,7 @@ function registerGlobalIntervals(fleet: Fleet) {
         try {
             await seedAndDownloadNewSongs(dbContext);
         } catch (e) {
-            sendDebugAlertWebhook("Download and seed failure", e.toString());
+            sendDebugAlertWebhook("Download and seed failure", e.toString(), EMBED_ERROR_COLOR, KmqImages.NOT_IMPRESSED);
         }
     });
 }
@@ -86,6 +87,11 @@ function registerGlobalIntervals(fleet: Fleet) {
         fleet.on("abort", () => {
             logger.error("Cluster manager received abort...");
             process.exit(1);
+        });
+
+        fleet.on("ready", () => {
+            logger.info("All shards have connected.");
+            sendDebugAlertWebhook("Bot started successfully", "Shards have connected!", EMBED_SUCCESS_COLOR, KmqImages.HAPPY);
         });
 
         if (process.env.NODE_ENV === EnvType.CI) return;
