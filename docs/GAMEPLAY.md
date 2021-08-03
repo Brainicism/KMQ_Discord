@@ -87,7 +87,7 @@ Setting the groups option limits the selection of songs to those belonging to th
 Setting a gender specifies the gender of the groups you'd like to hear from.
 
 * `,gender male` will play songs by boy groups and male soloists
-* `,gender female` will play songs by female groups and female soloists
+* `,gender female` will play songs by girl groups and female soloists
 * `,gender male female` will play songs by boy groups, girl groups, and all soloists
 * `,gender coed` will play songs by groups containing a mix of male and female members
 * `,gender alternating` will alternate between `male` and `female` artist songs each round
