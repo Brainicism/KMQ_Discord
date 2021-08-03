@@ -39,9 +39,6 @@ export class BotWorker extends BaseClusterWorker {
         logger.info("Registering event loops...");
         registerIntervals(this.clusterID);
 
-        logger.info("Loading cached application data...");
-        reloadCaches();
-
         logger.info("Registering client event handlers...");
         registerClientEvents();
 
@@ -59,8 +56,13 @@ export class BotWorker extends BaseClusterWorker {
         if ([EnvType.CI, EnvType.DRY_RUN].includes(process.env.NODE_ENV as EnvType)) {
             logger.info("Dry run finished successfully.");
             state.ipc.totalShutdown();
+            return;
         }
 
+        logger.info("Loading cached application data...");
+        reloadCaches();
+
+        logger.info("Updating bot's status..");
         updateBotStatus();
         logger.info(`Logged in as ${state.client.user.username}#${state.client.user.discriminator}! in '${process.env.NODE_ENV}' mode (${(Date.now() - state.processStartTime) / 1000}s)`);
     }

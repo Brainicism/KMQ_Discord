@@ -77,6 +77,7 @@ function registerGlobalIntervals(fleet: Fleet) {
         fleet.on("warn", (m) => logger.warn(m));
         fleet.on("error", (m) => logger.error(m));
 
+        if (process.env.NODE_ENV === EnvType.CI) return;
         logger.info("Starting web servers...");
         await startWebServer();
 
