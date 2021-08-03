@@ -41,7 +41,7 @@ export default class PresetCommand implements BaseCommand {
     help = {
         name: "preset",
         description: "Various actions to save/load game option presets. Preset name must be one word long.",
-        usage: ",preset [list | save | load | delete | export] {preset_name}\n\n,preset import [preset_identifier] [preset_name]",
+        usage: ",preset [list | save | load | delete | export] {preset_name}\n,preset import [preset_identifier] [preset_name]",
         examples: [
             {
                 example: "`,preset list`",
@@ -57,7 +57,7 @@ export default class PresetCommand implements BaseCommand {
             },
             {
                 example: "`,preset replace [preset_name]`",
-                explanation: "Replaces the current game options as the mentioned preset",
+                explanation: "Replace the mentioned preset's options with the current game options",
             },
             {
                 example: "`,preset delete [preset_name]`",

@@ -20,6 +20,7 @@ We update our songs frequently! Expect to see songs on the bot the same day they
 * [EXP System](#exp-system)
 * [Game Options](#game-options)
 * [Game Modes](#game-modes)
+* [Presets](#presets)
 * [Full Command List](#full-command-list)
 
 ![guess_song](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/guess_song.png)
@@ -162,18 +163,45 @@ With `,shuffle random`, songs are randomly chosen from before every round, so so
 ![shuffle](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/shuffle.png)
 
 
+# Presets
+Want to store a set of options and be able to load them with one command? Use `,presets`!
+
+## ,preset save [preset_name]
+Save the current options as a preset called `preset_name`.
+
+## ,preset export [preset_name]
+Return a preset identifier (`KMQ-XXXXX-...`) that can be used to load or import the mentioned preset in other servers.
+
+## ,preset load [preset_name | preset_identifier]
+Load the mentioned preset or exported preset identifier into the game options.
+
+## ,preset import [preset_identifier] [preset_name]
+Create a new preset with name `preset_name` using a preset identifier.
+
+## ,preset replace [preset_name]
+Replace the mentioned preset's options with the current game options.
+
+## ,preset delete [preset_name]
+Delete the mentioned preset.
+
+## ,preset list
+List all of the server's presets.
+
+![preset](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/preset.png)
+
+
 # Game Modes
 Getting tired of classic KMQ? Try out elimination and teams mode!
 
-## Elimination mode
+## ,play elimination x
 See who can survive the longest into a KMQ game with elimination mode. Using `,play elimination x`, everyone starts with `x` lives; the last one alive wins! Guessing correctly will save your life while everyone else loses one.
 
 Use elimination mode in conjunction with `,timer` to raise the pressure!
 
 ![elimination](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/elimination.png)
 
-## Teams mode
-Team up with your friends and crush the competition in `,play teams`! Split up into as many teams as you'd like and see who will emerge triumphant in the battle for 10% more EXP! Once your team is confident of its abilities, join the [official KMQ server](https://discord.gg/R55g4CRESW) to face-off with the best of the best.
+## ,play teams
+Team up with your friends and crush the competition with teams mode! Split up into as many teams as you'd like and see who will emerge triumphant in the battle for 10% more EXP! Once your team is confident of its abilities, join the [official KMQ server](https://discord.gg/R55g4CRESW) to face-off with the best of the best.
 
 To keep things fair, switching teams mid-game forfeits your current points and EXP.
 
