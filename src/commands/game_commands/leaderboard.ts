@@ -4,7 +4,7 @@ import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import { getRankNameByLevel } from "./profile";
-import { chooseRandom } from "../../helpers/utils";
+import { chooseRandom, friendlyFormattedNumber } from "../../helpers/utils";
 import { state } from "../../kmq";
 import { GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
@@ -206,7 +206,7 @@ export default class LeaderboardCommand implements BaseCommand {
             const displayName = enrolledPlayer ? enrolledPlayer.display_name : `Rank #${(rank) + 1}`;
             return {
                 name: `${medalIcon} ${displayName}`,
-                value: `${player.exp} EXP | Level ${player.level} (${getRankNameByLevel(player.level)})`,
+                value: `${friendlyFormattedNumber(player.exp)} EXP | Level ${friendlyFormattedNumber(player.level)} (${getRankNameByLevel(player.level)})`,
             };
         }));
 
