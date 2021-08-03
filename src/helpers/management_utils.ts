@@ -86,7 +86,7 @@ export async function startWebServer() {
     });
 
     httpServer.get("/groups", async (_request, reply) => {
-        const groups = (await fs.promises.readFile(path.resolve(__dirname, "../data/group_list.txt"))).toString();
+        const groups = (await fs.promises.readFile(path.resolve(__dirname, "../../data/group_list.txt"))).toString();
         reply.send(groups);
     });
 
