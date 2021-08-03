@@ -170,10 +170,14 @@ See who can survive the longest into a KMQ game with elimination mode. Using `,p
 
 Use elimination mode in conjunction with `,timer` to raise the pressure!
 
+![elimination](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/elimination.png)
+
 ## Teams mode
 Team up with your friends and crush the competition in `,play teams`! Split up into as many teams as you'd like and see who will emerge triumphant in the battle for 10% more EXP! Once your team is confident of its abilities, join the [official KMQ server](https://discord.gg/R55g4CRESW) to face-off with the best of the best.
 
 To keep things fair, switching teams mid-game forfeits your current points and EXP.
+
+![teams](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/teams.png)
 
 
 # Full Command List
