@@ -785,10 +785,10 @@ enquirer@^2.3.5:
   dependencies:
     ansi-colors "^4.1.1"
 
-eris-fleet@^0.3.7:
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/eris-fleet/-/eris-fleet-0.3.7.tgz#90a749dc81dd87ce17c531ca57da2e380e75ad88"
-  integrity sha512-irrGAZIwTXWxIfsSoi8YIm0nHImUADKG+wSr7yk5QgJfSFzIpCEgqFr4x7hdskfcwRa4CCR2HUrjuWDc0zITvg==
+eris-fleet@^0.3.8:
+  version "0.3.8"
+  resolved "https://registry.yarnpkg.com/eris-fleet/-/eris-fleet-0.3.8.tgz#6351063e53f5a7e6036bd20ae52b461431e27be3"
+  integrity sha512-OjrUYrYbWdb1Bs79EbfV4aS+Y0WvjmbCxdkXyDMETne8X6HHqApG31o/DH6S0F8H6TcN0kBsTwE/NrsK/RlOUQ==
 
 eris-pagination@^0.5.2:
   version "0.5.2"
