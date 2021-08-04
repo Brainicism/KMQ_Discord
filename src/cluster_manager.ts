@@ -6,7 +6,7 @@ import fs from "fs";
 import Eris from "eris";
 import schedule from "node-schedule";
 import { getInternalLogger } from "./logger";
-import { clearClusterActivityStats, clearRestartNotification, registerProcessEvents, startWebServer } from "./helpers/management_utils";
+import { clearClusterActivityStats, clearRestartNotification, startWebServer } from "./helpers/management_utils";
 import storeDailyStats from "./scripts/store-daily-stats";
 import dbContext from "./database_context";
 import { reloadFactCache } from "./fact_generator";
@@ -70,6 +70,21 @@ function registerGlobalIntervals(fleet: Fleet) {
     });
 }
 
+function registerProcessEvents(fleet: Fleet) {
+    process.on("unhandledRejection", (error: Error) => {
+        logger.error(`Admiral Unhandled Rejection at: Reason: ${error.message}. Trace: ${error.stack}`);
+    });
+
+    process.on("uncaughtException", (err: Error) => {
+        logger.error(`Admiral Uncaught Exception. Reason: ${err}. Trace: ${err.stack}`);
+    });
+
+    process.on("SIGINT", () => {
+        logger.info("Received SIGINT. Shutting down");
+        fleet.totalShutdown(false);
+    });
+}
+
 (async () => {
     let fleet: Fleet;
     try {
@@ -99,7 +114,7 @@ function registerGlobalIntervals(fleet: Fleet) {
         await startWebServer();
 
         logger.info("Registering process event handlers...");
-        registerProcessEvents();
+        registerProcessEvents(fleet);
 
         logger.info("Clearing existing restart notifications...");
         await clearRestartNotification();
