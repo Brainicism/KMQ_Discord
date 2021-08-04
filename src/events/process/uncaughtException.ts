@@ -5,7 +5,7 @@ import { EnvType } from "../../types";
 const logger = new IPCLogger("uncaughtException");
 
 export default function uncaughtExceptionHandler(err: Error) {
-    logger.error(`Uncaught Exception. Reason: ${err}. Trace: ${err.stack}`);
+    logger.error(`Cluster Uncaught Exception. Reason: ${err}. Trace: ${err.stack}`);
     if (process.env.NODE_ENV === EnvType.CI) {
         state.ipc.admiralBroadcast("abort");
     }
