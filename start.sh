@@ -8,6 +8,12 @@ rebuild () {
 
 if [[ $1 == 'native' ]]
 then
+    if [ "${NODE_ENV}" == "production" ]; then
+        echo "Cleaning project..."
+        npm run clean
+        echo "Installing dependencies..."
+        yarn install --frozen-lockfile
+    fi
     rebuild
 fi
 
