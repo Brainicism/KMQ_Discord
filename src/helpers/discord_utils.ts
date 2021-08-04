@@ -649,7 +649,7 @@ export function getMajorityCount(guildID: string): number {
  * @param title - The embed title
  * @param description - the embed description
  */
-export function sendDebugAlertWebhook(title: string, description: string, color: number, avatar_url: string) {
+export function sendDebugAlertWebhook(title: string, description: string, color: number, avatarUrl: string) {
     if (!process.env.ALERT_WEBHOOK_URL) return;
     axios.post(process.env.ALERT_WEBHOOK_URL, {
         embeds: [{
@@ -658,6 +658,6 @@ export function sendDebugAlertWebhook(title: string, description: string, color:
             color,
         }],
         username: "Kimiqo",
-        avatar_url,
+        avatar_url: avatarUrl,
     });
 }
