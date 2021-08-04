@@ -648,6 +648,8 @@ export function getMajorityCount(guildID: string): number {
  * Sends an alert to the message webhook
  * @param title - The embed title
  * @param description - the embed description
+ * @param color - The embed color
+ * @param avatarUrl - The avatar URl to show on the embed
  */
 export function sendDebugAlertWebhook(title: string, description: string, color: number, avatarUrl: string) {
     if (!process.env.ALERT_WEBHOOK_URL) return;
