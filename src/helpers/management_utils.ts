@@ -184,7 +184,7 @@ export async function updateBotStatus() {
     }
 
     const randomPopularSongs = await dbContext.kmq("available_songs")
-        .orderBy("views", "DESC")
+        .orderBy("publishedon", "DESC")
         .limit(25);
 
     const randomPopularSong = chooseRandom(randomPopularSongs);
