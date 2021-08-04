@@ -32,7 +32,7 @@ services:
       - 3306:3306
     command: --max-allowed-packet=32M
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      test: mysql --password=$$MYSQL_ROOT_PASSWORD -e 'SELECT 1;'
       timeout: 20s
       interval: 5s
       retries: 10

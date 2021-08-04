@@ -93,6 +93,10 @@ async function bootstrapDatabases() {
         await generateKmqDataTables(db);
     }
 
+    if (process.env.NODE_ENV === EnvType.PROD) {
+        await generateKmqDataTables(db);
+    }
+
     logger.info(`Bootstrapped in ${(Date.now() - startTime) / 1000}s`);
     await db.destroy();
 }
