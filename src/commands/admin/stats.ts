@@ -9,7 +9,7 @@ import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import { state } from "../../kmq";
-import { friendlyFormattedNumber } from "../../helpers/utils";
+import { friendlyFormattedNumber, measureExecutionTime } from "../../helpers/utils";
 
 const logger = new IPCLogger("stats");
 
@@ -65,6 +65,8 @@ export default class SkipCommand implements BaseCommand {
             .where("exp", ">", "0")
             .first()).count;
 
+        const mysqlLatency = await measureExecutionTime(dbContext.kmq.raw("SELECT 1;"));
+
         const fields: Array<Eris.EmbedField> = [{
             name: "Active Game Sessions",
             value: activeGameSessions,
@@ -108,6 +110,11 @@ export default class SkipCommand implements BaseCommand {
         {
             name: "Uptime",
             value: `${(process.uptime() / (60 * 60)).toFixed(2)} hours`,
+            inline: true,
+        },
+        {
+            name: "Database Latency",
+            value: `${mysqlLatency.toFixed(2)} ms`,
             inline: true,
         }];
 
