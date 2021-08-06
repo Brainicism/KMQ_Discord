@@ -284,3 +284,14 @@ export function setDifference<Type>(a: Array<Type>, ...args: Array<Array<Type>>)
 export function setIntersection<Type>(...args: Array<Array<Type>>): Set<Type> {
     return new Set(_.intersection(...args));
 }
+
+/**
+ * @param promise - The promise to measure execution time against
+ * @returns - The execution time in ms
+ */
+export async function measureExecutionTime(promise: Promise<any>): Promise<number> {
+    const hrstart = process.hrtime();
+    await promise;
+    const hrend = process.hrtime(hrstart);
+    return (hrend[0] * 1000) + (hrend[1] / 1000000);
+}
