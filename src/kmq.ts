@@ -4,16 +4,16 @@ import { BaseClusterWorker } from "eris-fleet";
 import { IPCLogger } from "./logger";
 import { EnvType, State } from "./types";
 import {
-    registerClientEvents, registerCommands, registerIntervals, registerProcessEvents, reloadCaches, reloadCommands, updateBotStatus,
+    registerClientEvents, registerIntervals, registerProcessEvents, reloadCaches, updateBotStatus,
 } from "./helpers/management_utils";
 import BotListingManager from "./helpers/bot_listing_manager";
+import KmqClient from "./kmq_client";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("kmq");
 config({ path: path.resolve(__dirname, "../.env") });
 
 const state: State = {
-    commands: {},
     gameSessions: {},
     client: null,
     aliases: {
@@ -30,11 +30,8 @@ export class BotWorker extends BaseClusterWorker {
     constructor(setup) {
         super(setup);
         state.ipc = this.ipc;
-        state.client = this.bot;
+        state.client = this.bot as KmqClient;
         logger.info(`Started worker ID: ${this.workerID} on cluster ID: ${this.clusterID}`);
-
-        logger.info("Registering commands...");
-        registerCommands(true);
 
         logger.info("Registering event loops...");
         registerIntervals(this.clusterID);
@@ -47,7 +44,7 @@ export class BotWorker extends BaseClusterWorker {
 
         this.ipc.register("reload_commands", async () => {
             logger.info("Received 'reload_commands' IPC message");
-            reloadCommands();
+            state.client.reloadCommands();
         });
 
         if (process.env.NODE_ENV === EnvType.PROD && this.clusterID === 0) {

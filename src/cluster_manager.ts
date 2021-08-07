@@ -14,6 +14,7 @@ import { EnvType } from "./types";
 import { seedAndDownloadNewSongs } from "./seed/seed_db";
 import { EMBED_ERROR_COLOR, EMBED_SUCCESS_COLOR, sendDebugAlertWebhook } from "./helpers/discord_utils";
 import { KmqImages } from "./constants";
+import KmqClient from "./kmq_client";
 
 const logger = getInternalLogger("cluster_manager");
 
@@ -124,3 +125,10 @@ function registerProcessEvents(fleet: Fleet) {
         registerGlobalIntervals(fleet);
     }
 })();
+
+Eris.Client = KmqClient;
+
+export {
+    // eslint-disable-next-line import/prefer-default-export
+    Eris,
+};
