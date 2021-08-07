@@ -179,6 +179,7 @@ export async function updateBotStatus() {
     if (timeUntilRestart) {
         client.editStatus("dnd", {
             name: `Restarting in ${timeUntilRestart} minutes...`,
+            type: 1,
         });
         return;
     }

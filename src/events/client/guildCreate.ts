@@ -18,7 +18,6 @@ export default async function guildCreateHandler(guild: Eris.Guild) {
         title: "New server joined!",
         fields: [
             { name: "**Member Count**:", value: guild.memberCount.toString() },
-            { name: "**Region**:", value: guild.region },
             { name: "**Language**:", value: guild.preferredLocale },
             { name: "**Nitro Boosts**:", value: guild.premiumSubscriptionCount.toString() },
         ],
