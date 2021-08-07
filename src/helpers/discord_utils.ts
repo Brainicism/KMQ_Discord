@@ -130,7 +130,7 @@ async function sendMessage(textChannelID: string, authorID: string, messageConte
 export async function sendErrorMessage(messageContext: MessageContext, embedPayload: EmbedPayload): Promise<Eris.Message<TextableChannel>> {
     const author = (embedPayload.author == null || embedPayload.author) ? embedPayload.author : messageContext.author;
     return sendMessage(messageContext.textChannelID, messageContext.author.id, {
-        embed: {
+        embeds: [{
             color: embedPayload.color || EMBED_ERROR_COLOR,
             author: author ? {
                 name: author.username,
@@ -142,7 +142,7 @@ export async function sendErrorMessage(messageContext: MessageContext, embedPayl
                 text: embedPayload.footerText,
             } : null,
             thumbnail: embedPayload.thumbnailUrl ? { url: embedPayload.thumbnailUrl } : { url: KmqImages.DEAD },
-        },
+        }],
     });
 }
 
@@ -175,7 +175,8 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
         timestamp: embedPayload.timestamp,
     };
 
-    return sendMessage(messageContext.textChannelID, messageContext.author.id, { embed, messageReference: reply ? { messageID: messageContext.referencedMessageID, failIfNotExists: false } : null });
+    return sendMessage(messageContext.textChannelID, messageContext.author.id,
+        { embeds: [embed], messageReference: reply ? { messageID: messageContext.referencedMessageID, failIfNotExists: false } : null });
 }
 
 /**
@@ -460,7 +461,7 @@ export async function sendPaginationedEmbed(message: GuildTextableMessage, embed
         return null;
     }
 
-    return sendMessage(message.channel.id, message.author.id, { embed: embeds[0] });
+    return sendMessage(message.channel.id, message.author.id, { embeds: [embeds[0]] });
 }
 
 /**
