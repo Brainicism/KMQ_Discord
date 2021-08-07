@@ -66,56 +66,29 @@ export default class SkipCommand implements BaseCommand {
             .first()).count;
 
         const mysqlLatency = await measureExecutionTime(dbContext.kmq.raw("SELECT 1;"));
+        const gameStatistics = {
+            "Active Game Sessions": activeGameSessions,
+            "Active Players": activeUsers,
+            "(Recent) Game Sessions": `${friendlyFormattedNumber(Number(recentGameSessions))} | ${friendlyFormattedNumber(Number(totalGameSessions))}`,
+            "(Recent) Game Rounds": `${friendlyFormattedNumber(recentGameRounds)} | ${friendlyFormattedNumber(totalGameRounds)}`,
+            "(Recent) Players": `${friendlyFormattedNumber(Number(recentPlayers))} | ${friendlyFormattedNumber(Number(totalPlayers))}`,
+        };
+
+        const systemStatistics = {
+            "System Load Average": os.loadavg().map((x) => x.toFixed(2)).toString(),
+            "Process Memory Usage": `${(fleetStats.totalRam).toFixed(2)} MB`,
+            "API Latency": `${channel.guild.shard.latency} ms`,
+            "Database Latency": `${mysqlLatency.toFixed(2)} ms`,
+            "Uptime": `${(process.uptime() / (60 * 60)).toFixed(2)} hours`,
+        };
 
         const fields: Array<Eris.EmbedField> = [{
-            name: "Active Game Sessions",
-            value: activeGameSessions,
-            inline: true,
+            name: "Game Statistics",
+            value: `\`\`\`\n${Object.entries(gameStatistics).map((stat) => `${stat[0]}: ${stat[1]}`).join("\n")}\`\`\``,
         },
         {
-            name: "Active Players",
-            value: activeUsers,
-            inline: true,
-        },
-        {
-            name: "(Recent) Game Sessions",
-            value: `${friendlyFormattedNumber(Number(recentGameSessions))} | ${friendlyFormattedNumber(Number(totalGameSessions))}`,
-            inline: true,
-        },
-        {
-            name: "(Recent) Rounds Played",
-            value: `${friendlyFormattedNumber(recentGameRounds)} | ${friendlyFormattedNumber(totalGameRounds)}`,
-            inline: true,
-        },
-        {
-            name: "(Recent) Players",
-            value: `${friendlyFormattedNumber(Number(recentPlayers))} | ${friendlyFormattedNumber(Number(totalPlayers))}`,
-            inline: true,
-        },
-        {
-            name: "System Load Average",
-            value: os.loadavg().map((x) => x.toFixed(2)).toString(),
-            inline: true,
-        },
-        {
-            name: "Process Memory Usage",
-            value: `${(fleetStats.totalRam).toFixed(2)} MB`,
-            inline: true,
-        },
-        {
-            name: "API Latency",
-            value: `${channel.guild.shard.latency} ms`,
-            inline: true,
-        },
-        {
-            name: "Uptime",
-            value: `${(process.uptime() / (60 * 60)).toFixed(2)} hours`,
-            inline: true,
-        },
-        {
-            name: "Database Latency",
-            value: `${mysqlLatency.toFixed(2)} ms`,
-            inline: true,
+            name: "System Statistics",
+            value: `\`\`\`\n${Object.entries(systemStatistics).map((stat) => `${stat[0]}: ${stat[1]}`).join("\n")}\`\`\``,
         }];
 
         logger.info(`${getDebugLogHeader(message)} | Stats retrieved`);
