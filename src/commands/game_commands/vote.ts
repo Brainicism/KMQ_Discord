@@ -12,6 +12,9 @@ const logger = new IPCLogger("vote");
 export const VOTE_BONUS_DURATION = 1;
 const VOTE_RESET_DURATION = 12;
 
+const VOTE_LINK = "https://top.gg/bot/508759831755096074/vote";
+const REVIEW_LINK = "https://top.gg/bot/508759831755096074#reviews";
+
 export default class VoteCommand implements BaseCommand {
     aliases = ["v", "voted"];
 
@@ -56,14 +59,14 @@ export default class VoteCommand implements BaseCommand {
         sendInfoMessage(MessageContext.fromMessage(message), {
             color: boostActive ? EMBED_SUCCESS_BONUS_COLOR : EMBED_INFO_COLOR,
             title: boostActive ? "Boost active!" : "Boost inactive",
-            description: `${voteStatusString}\n\nVote for KMQ on [top.gg](https://top.gg/bot/508759831755096074/vote) and you'll receive 2x EXP for an hour! You can vote once every ${VOTE_RESET_DURATION} hours.\n\nWe'd appreciate it if you could also leave a [review](https://top.gg/bot/508759831755096074#reviews).`,
+            description: `${voteStatusString}\n\nVote for KMQ on [top.gg](${VOTE_LINK}) and you'll receive 2x EXP for an hour! You can vote once every ${VOTE_RESET_DURATION} hours.\n\nWe'd appreciate it if you could also leave a [review](${REVIEW_LINK}).`,
             thumbnailUrl: KmqImages.THUMBS_UP,
             components: [
                 {
                     type: 1,
                     components: [
-                        { style: 5, url: "https://top.gg/bot/508759831755096074/vote", type: 2 as const, emoji: { name: "✅" }, label: "Vote!" },
-                        { style: 5, url: "https://top.gg/bot/508759831755096074/vote", type: 2 as const, emoji: { name: "📖" }, label: "Leave a review!" }],
+                        { style: 5, url: VOTE_LINK, type: 2 as const, emoji: { name: "✅" }, label: "Vote!" },
+                        { style: 5, url: REVIEW_LINK, type: 2 as const, emoji: { name: "📖" }, label: "Leave a review!" }],
                 },
             ],
         }, true);
