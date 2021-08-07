@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { URL } from "url";
 import dbContext from "./database_context";
-import { chooseRandom, getOrdinalNum, weekOfYear } from "./helpers/utils";
+import { chooseRandom, getOrdinalNum, weekOfYear, friendlyFormattedNumber } from "./helpers/utils";
 import { IPCLogger } from "./logger";
 
 const logger = new IPCLogger("fact_generator");
@@ -129,7 +129,7 @@ async function recentMilestone(): Promise<string[]> {
         return [];
     }
 
-    return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} recently reached ${x["milestone_views"].toLocaleString()} views on YouTube!`);
+    return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} recently reached ${friendlyFormattedNumber(x["milestone_views"])} views on YouTube!`);
 }
 
 async function recentMusicShowWin(): Promise<string[]> {
@@ -181,7 +181,7 @@ async function mostViewedGroups(): Promise<string[]> {
         .orderBy("total_views", "DESC")
         .limit(25);
 
-    return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} is the ${getOrdinalNum(idx + 1)} most viewed group with ${x["total_views"].toLocaleString()} total YouTube views!`);
+    return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} is the ${getOrdinalNum(idx + 1)} most viewed group with ${friendlyFormattedNumber(x["total_views"])} total YouTube views!`);
 }
 
 async function mostLikedGroups(): Promise<string[]> {
@@ -196,7 +196,7 @@ async function mostLikedGroups(): Promise<string[]> {
         .where("app_kpop_group.issolo", "=", "n")
         .orderBy("total_likes", "DESC");
 
-    return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} is the ${getOrdinalNum(idx + 1)} most liked group with ${x["total_likes"].toLocaleString()} total YouTube likes!`);
+    return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} is the ${getOrdinalNum(idx + 1)} most liked group with ${friendlyFormattedNumber(x["total_likes"])} total YouTube likes!`);
 }
 
 async function mostViewedVideo(): Promise<string[]> {
@@ -209,7 +209,7 @@ async function mostViewedVideo(): Promise<string[]> {
         .orderBy("views", "DESC")
         .limit(25);
 
-    return result.map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} is the ${getOrdinalNum(idx + 1)} most viewed music video with ${x["views"].toLocaleString()} YouTube views!`);
+    return result.map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} is the ${getOrdinalNum(idx + 1)} most viewed music video with ${friendlyFormattedNumber(x["views"])} YouTube views!`);
 }
 
 async function mostLikedVideo(): Promise<string[]> {
@@ -221,7 +221,7 @@ async function mostLikedVideo(): Promise<string[]> {
         .orderBy("likes", "DESC")
         .limit(25);
 
-    return result.map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} is the ${getOrdinalNum(idx + 1)} most liked music video with ${x["likes"].toLocaleString()} YouTube likes!`);
+    return result.map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} is the ${getOrdinalNum(idx + 1)} most liked music video with ${friendlyFormattedNumber(x["likes"])} YouTube likes!`);
 }
 
 async function mostViewedEntertainmentCompany(): Promise<string[]> {
@@ -238,7 +238,7 @@ async function mostViewedEntertainmentCompany(): Promise<string[]> {
         .orderBy("views", "DESC")
         .limit(15);
 
-    return result.map((x, idx) => `Fun Fact: ${x["name"]} is the entertainment company with the ${getOrdinalNum(idx + 1)} most YouTube views at ${x["views"].toLocaleString()}!`);
+    return result.map((x, idx) => `Fun Fact: ${x["name"]} is the entertainment company with the ${getOrdinalNum(idx + 1)} most YouTube views at ${friendlyFormattedNumber(x["views"])}!`);
 }
 
 async function mostArtistsEntertainmentCompany(): Promise<string[]> {
@@ -314,12 +314,12 @@ async function viewsByGender(): Promise<string[]> {
 
     for (const genderViews of result) {
         data[genderViews.gender] = {
-            views: genderViews.views.toLocaleString(),
+            views: friendlyFormattedNumber(genderViews.views),
             proportion: ((100 * genderViews.views) / totalViews).toFixed(2),
         };
     }
 
-    return [`Fun Fact: There is a combined total of ${totalViews.toLocaleString()} views on all K-Pop music videos on YouTube. ${data.male.views} (${data.male.proportion}%) of which are from male, ${data.female.views} (${data.female.proportion}%) from female, and the remaining ${data.coed.views} (${data.coed.proportion}%) from co-ed groups!`];
+    return [`Fun Fact: There is a combined total of ${friendlyFormattedNumber(totalViews)} views on all K-Pop music videos on YouTube. ${data.male.views} (${data.male.proportion}%) of which are from male, ${data.female.views} (${data.female.proportion}%) from female, and the remaining ${data.coed.views} (${data.coed.proportion}%) from co-ed groups!`];
 }
 
 async function mostViewedSoloArtist(): Promise<string[]> {
@@ -334,7 +334,7 @@ async function mostViewedSoloArtist(): Promise<string[]> {
         .orderBy("total_views", "DESC")
         .limit(25);
 
-    return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} is the ${getOrdinalNum(idx + 1)} most viewed solo artist with ${x["total_views"].toLocaleString()} total YouTube views!`);
+    return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} is the ${getOrdinalNum(idx + 1)} most viewed solo artist with ${friendlyFormattedNumber(x["total_views"])} total YouTube views!`);
 }
 
 async function viewsBySolo(): Promise<string[]> {
@@ -351,16 +351,16 @@ async function viewsBySolo(): Promise<string[]> {
     const totalViews = result[0].views + result[1].views;
     const data = {
         group: {
-            views: result[0].views.toLocaleString(),
+            views: friendlyFormattedNumber(result[0].views),
             proportion: ((100 * result[0].views) / totalViews).toFixed(2),
         },
         solo: {
-            views: result[1].views.toLocaleString(),
+            views: friendlyFormattedNumber(result[1].views),
             proportion: ((100 * result[1].views) / totalViews).toFixed(2),
         },
     };
 
-    return [`Fun Fact: There is a combined total of ${totalViews.toLocaleString()} views on all K-Pop music videos on YouTube. ${data.group.views} (${data.group.proportion}%) of which are groups, while ${data.solo.views} (${data.solo.proportion}%) are from solo artists!`];
+    return [`Fun Fact: There is a combined total of ${friendlyFormattedNumber(totalViews)} views on all K-Pop music videos on YouTube. ${data.group.views} (${data.group.proportion}%) of which are groups, while ${data.solo.views} (${data.solo.proportion}%) are from solo artists!`];
 }
 
 async function songReleaseAnniversaries(): Promise<string[]> {
@@ -403,7 +403,7 @@ async function bigThreeDominance(): Promise<string[]> {
 
     const bigThreeViews = result.reduce((prev, current) => prev + current.total_views, 0);
     const proportion = (100 * bigThreeViews) / totalViewsResult[0].total_views;
-    return [`Fun Fact: BTS, Blackpink and Twice combined account for ${bigThreeViews.toLocaleString()} YouTube views, or ${proportion.toFixed(2)}%!`];
+    return [`Fun Fact: BTS, Blackpink and Twice combined account for ${friendlyFormattedNumber(bigThreeViews)} YouTube views, or ${proportion.toFixed(2)}%!`];
 }
 
 async function fanclubName(): Promise<Array<string>> {
