@@ -67,8 +67,8 @@ const helpMessage = async (message: GuildTextableMessage, action: string) => {
         const commandsWithHelp = Object.values(commandFiles).filter((command) => command.help);
         commandsWithHelp.sort((x, y) => y.help.priority - x.help.priority);
         embedTitle = "K-pop Music Quiz Command Help";
-        embedDesc = `Type \`${process.env.BOT_PREFIX}play\` in chat and the bot will play a random kpop song in VC. The goal of this game is to be the first person to guess the song name in chat. 
-        See your current game options with \`${process.env.BOT_PREFIX}options\`. Use \`${process.env.BOT_PREFIX}help [command]\` to get more details about a command.`;
+        embedDesc = `Type \`${process.env.BOT_PREFIX}play\` in chat and the bot will play a random kpop song in VC. The goal of this game is to be the first person to guess the song name in chat.
+See your current game options with \`${process.env.BOT_PREFIX}options\`. Use \`${process.env.BOT_PREFIX}help [command]\` to get more details about a command.`;
 
         embedFields = commandsWithHelp.map((command) => {
             const helpManual = command.help;
