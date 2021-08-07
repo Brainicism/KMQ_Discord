@@ -472,16 +472,16 @@ export async function sendEndGameMessage(gameSession: GameSession) {
  * @param message - The Message object
  * @param embeds - A list of embeds to paginate over
  */
-export async function sendPaginationedEmbed(message: GuildTextableMessage, embeds: Array<Eris.EmbedOptions>) {
+export async function sendPaginationedEmbed(message: GuildTextableMessage, embeds: Array<Eris.EmbedOptions>, components?: Array<Eris.ActionRow>) {
     if (embeds.length > 1) {
         if ((await textPermissionsCheck(message.channel.id, message.guildID, message.author.id))) {
-            return EmbedPaginator.createPaginationEmbed(message, embeds, { timeout: 60000 });
+            return EmbedPaginator.createPaginationEmbed(message, embeds, { timeout: 60000 }, components);
         }
 
         return null;
     }
 
-    return sendMessage(message.channel.id, message.author.id, { embeds: [embeds[0]] });
+    return sendMessage(message.channel.id, message.author.id, { embeds: [embeds[0]], components });
 }
 
 /**

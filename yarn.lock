@@ -790,10 +790,9 @@ eris-fleet@^0.3.9:
   resolved "https://registry.yarnpkg.com/eris-fleet/-/eris-fleet-0.3.9.tgz#f0737aedc9a1696d003e2b32a5df1ffced4e3fcf"
   integrity sha512-qV4pPIsz+/lJo1QfJH7DtfrWrqCu1rvN2jXq26bTetUhPG/TRyorqwoGBIJrYmEScGeJFGKuTlITHXkCE4SSAg==
 
-eris-pagination@^0.5.2:
+"eris-pagination@https://github.com/brainicism/eris-pagination#86ab739":
   version "0.5.2"
-  resolved "https://registry.yarnpkg.com/eris-pagination/-/eris-pagination-0.5.2.tgz#006e4a27c344130503a267805ef96c9d5508d80b"
-  integrity sha512-LKwVWm4yP4eqWE6shILeY0X7WWt8a2SAwl4I5NPW1HMdNLrG6ThHy6oc84jAOTqlRddRLzQtGISEkPkdXjYMjQ==
+  resolved "https://github.com/brainicism/eris-pagination#86ab7396b2098bab5b957fdc360013b4a883fe64"
   dependencies:
     eris-reactions "^0.1.4"
 

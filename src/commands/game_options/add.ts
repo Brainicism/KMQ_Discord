@@ -5,6 +5,7 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
+import { GROUP_LIST_URL } from "./groups";
 
 const logger = new IPCLogger("add");
 
@@ -55,6 +56,7 @@ export default class AddCommand implements BaseCommand {
             },
         ],
         priority: 200,
+        actionRowComponents: [{ style: 5 as const, url: GROUP_LIST_URL, type: 2 as const, label: "Full List of Groups" }],
     };
 
     call = async ({ message, parsedMessage }: CommandArgs) => {

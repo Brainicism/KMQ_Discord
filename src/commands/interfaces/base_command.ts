@@ -33,6 +33,7 @@ export default interface BaseCommand {
         usage: string;
         examples: Array<{ example: string, explanation: string }>;
         priority: number;
+        actionRowComponents?: Eris.ActionRowComponents[];
     };
     aliases?: Array<string>;
     validations?: CommandValidations;

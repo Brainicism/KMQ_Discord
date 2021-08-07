@@ -58,6 +58,14 @@ export default class VoteCommand implements BaseCommand {
             title: boostActive ? "Boost active!" : "Boost inactive",
             description: `${voteStatusString}\n\nVote for KMQ on [top.gg](https://top.gg/bot/508759831755096074/vote) and you'll receive 2x EXP for an hour! You can vote once every ${VOTE_RESET_DURATION} hours.\n\nWe'd appreciate it if you could also leave a [review](https://top.gg/bot/508759831755096074#reviews).`,
             thumbnailUrl: KmqImages.THUMBS_UP,
+            components: [
+                {
+                    type: 1,
+                    components: [
+                        { style: 5, url: "https://top.gg/bot/508759831755096074/vote", type: 2 as const, emoji: { name: "✅" }, label: "Vote!" },
+                        { style: 5, url: "https://top.gg/bot/508759831755096074/vote", type: 2 as const, emoji: { name: "📖" }, label: "Leave a review!" }],
+                },
+            ],
         }, true);
         logger.info(`${getDebugLogHeader(message)} | Vote instructions retrieved.`);
     };
