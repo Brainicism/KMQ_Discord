@@ -109,6 +109,9 @@
         "no-console": [
             "off"
         ],
+        "quote-props": [
+            "off"
+        ],
         "padding-line-between-statements": [
             "error",
             {
