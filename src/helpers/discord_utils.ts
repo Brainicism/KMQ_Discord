@@ -216,11 +216,11 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     const correctGuess = playerRoundResults.length > 0;
     let correctDescription = "";
     if (correctGuess) {
-        correctDescription += `**${playerRoundResults[0].player.tag}** ${playerRoundResults[0].streak >= 5 ? `(🔥 ${playerRoundResults[0].streak}) ` : ""}guessed correctly (+${playerRoundResults[0].expGain} EXP)`;
+        correctDescription += `**${playerRoundResults[0].player.tag}** ${playerRoundResults[0].streak >= 5 ? `(🔥 ${friendlyFormattedNumber(playerRoundResults[0].streak)}) ` : ""}guessed correctly (+${friendlyFormattedNumber(playerRoundResults[0].expGain)} EXP)`;
         if (playerRoundResults.length > 1) {
             const runnersUp = playerRoundResults.slice(1);
             let runnersUpDescription = runnersUp
-                .map((x) => `${x.player.tag} (+${x.expGain} EXP)`)
+                .map((x) => `${x.player.tag} (+${friendlyFormattedNumber(x.expGain)} EXP)`)
                 .slice(0, 10)
                 .join("\n");
 
@@ -232,7 +232,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         }
     }
 
-    const uniqueSongMessage = (uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0) ? `\n${codeLine(`${uniqueSongCounter.uniqueSongsPlayed}/${uniqueSongCounter.totalSongs}`)} unique songs played.` : "";
+    const uniqueSongMessage = (uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0) ? `\n${codeLine(`${friendlyFormattedNumber(uniqueSongCounter.uniqueSongsPlayed)}/${friendlyFormattedNumber(uniqueSongCounter.totalSongs)}`)} unique songs played.` : "";
     const useLargerScoreboard = scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
     const description = `${correctGuess ? correctDescription : "Nobody got it."}\n\nhttps://youtu.be/${gameRound.videoID}${uniqueSongMessage} ${!scoreboard.isEmpty() && !useLargerScoreboard ? "\n\n**Scoreboard**" : ""}`;
     let fields: Array<{ name: string, value: string, inline: boolean }>;

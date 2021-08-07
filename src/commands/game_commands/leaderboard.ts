@@ -27,8 +27,8 @@ enum LeaderboardAction {
 }
 
 const leaderboardQuotes = [
-    `Want your name to show up on the leaderboard? See \`${process.env.BOT_PREFIX}help leaderboard\``,
-    `Want to see the next page of the leaderboard? See \`${process.env.BOT_PREFIX}help leaderboard\``,
+    `Want your name to show up on the leaderboard? See ${process.env.BOT_PREFIX}help leaderboard`,
+    `Want to see the next page of the leaderboard? See ${process.env.BOT_PREFIX}help leaderboard`,
 ];
 
 export default class LeaderboardCommand implements BaseCommand {
