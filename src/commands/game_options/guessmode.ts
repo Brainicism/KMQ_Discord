@@ -32,8 +32,8 @@ export default class GuessModeCommand implements BaseCommand {
 
     help = {
         name: "guessmode",
-        description: "Choose whether to guess by song title or artist name. Valid values are `artist`, `song`, or `both`",
-        usage: ",guessmode [guessType]",
+        description: "Choose whether to guess by song title, artist name, or both.",
+        usage: ",guessmode [song | artist | both]",
         examples: [
             {
                 example: "`,guessmode song`",
