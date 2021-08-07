@@ -48,7 +48,7 @@ export default class SpecialCommand implements BaseCommand {
     help = {
         name: "special",
         description: "Hey. This hasn't been announced yet, but check out the KMQ server to try it out! Play a special mode with modified audio.",
-        usage: ",special [specialType]",
+        usage: ",special [reverse | slow | fast | faster]",
         examples: [
             {
                 example: "`,special reverse`",

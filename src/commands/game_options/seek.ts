@@ -29,8 +29,8 @@ export default class SeekCommand implements BaseCommand {
 
     help = {
         name: "seek",
-        description: "Choose whether each song is played from the beginning, or at a random point. Valid values are `beginning` or `random`",
-        usage: ",seek [seekType]",
+        description: "Choose whether each song is played from the beginning, middle, or at a random point",
+        usage: ",seek [beginning | middle | random]",
         examples: [
             {
                 example: "`,seek random`",

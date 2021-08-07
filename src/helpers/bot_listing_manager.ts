@@ -3,9 +3,9 @@ import { IPCLogger } from "../logger";
 import { state } from "../kmq";
 import dbContext from "../database_context";
 import { EnvType } from "../types";
+import { VOTE_BONUS_DURATION } from "../commands/game_commands/vote";
 
 const logger = new IPCLogger("bot_stats_poster");
-const VOTE_BONUS_DURATION = 1;
 interface BotListing {
     endpoint: string;
     payloadKeyName: string;
