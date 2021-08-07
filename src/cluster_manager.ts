@@ -45,6 +45,7 @@ const options: Options = {
         messageLimit: 0,
         intents: ERIS_INTENTS.guilds ^ ERIS_INTENTS.guildVoiceStates ^ ERIS_INTENTS.guildMessages ^ ERIS_INTENTS.guildMessageReactions,
     },
+    customClient: KmqClient,
 };
 
 function registerGlobalIntervals(fleet: Fleet) {
@@ -125,10 +126,3 @@ function registerProcessEvents(fleet: Fleet) {
         registerGlobalIntervals(fleet);
     }
 })();
-
-Eris.Client = KmqClient;
-
-export {
-    // eslint-disable-next-line import/prefer-default-export
-    Eris,
-};
