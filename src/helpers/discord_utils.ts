@@ -143,15 +143,15 @@ export async function sendErrorMessage(messageContext: MessageContext, embedPayl
             } : null,
             thumbnail: embedPayload.thumbnailUrl ? { url: embedPayload.thumbnailUrl } : { url: KmqImages.DEAD },
         }],
+        components: embedPayload.components,
     });
 }
 
 /**
  * Sends an info embed with the specified title/description/footer text
  * @param messageContext - An object containing relevant parts of Eris.Message
- * @param title - The title of the embed
- * @param description - The description of the embed
- * @param footerText - The footer text of the embed
+ * @param embedPayload - What to include in the message
+ * @param reply - Whether to reply to the given message
  */
 export async function sendInfoMessage(messageContext: MessageContext, embedPayload: EmbedPayload, reply = false): Promise<Eris.Message<TextableChannel>> {
     if (embedPayload.description && embedPayload.description.length > 2048) {
@@ -175,8 +175,11 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
         timestamp: embedPayload.timestamp,
     };
 
-    return sendMessage(messageContext.textChannelID, messageContext.author.id,
-        { embeds: [embed], messageReference: reply ? { messageID: messageContext.referencedMessageID, failIfNotExists: false } : null });
+    return sendMessage(messageContext.textChannelID, messageContext.author.id, {
+        embeds: [embed],
+        messageReference: reply ? { messageID: messageContext.referencedMessageID, failIfNotExists: false } : null,
+        components: embedPayload.components,
+    });
 }
 
 /**
