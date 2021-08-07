@@ -802,11 +802,11 @@ eris-reactions@^0.1.4:
   resolved "https://registry.yarnpkg.com/eris-reactions/-/eris-reactions-0.1.4.tgz#4b642f7411144f164b6097138c262eac6b03def1"
   integrity sha512-U2rMtfywnhh4TmqFcF7uo/ciyQN8vb9ptwSJMQs/uaY1a401f+t3sei1R3IR2gYqaFejJzgjTmzBMT6jIBPYYQ==
 
-"eris@https://github.com/Brainicism/eris.git#2c15eab":
-  version "0.15.1-dev"
-  resolved "https://github.com/Brainicism/eris.git#2c15eab4c2e87a020b85ed651a4ceb87c44ccab3"
+"eris@https://github.com/Brainicism/eris.git#7ff6167":
+  version "0.15.2-dev"
+  resolved "https://github.com/Brainicism/eris.git#7ff6167ab5d6d70f6dafee9ba9b8256364e5879b"
   dependencies:
-    ws "^7.2.1"
+    ws "^7.4.6"
   optionalDependencies:
     opusscript "^0.0.8"
     tweetnacl "^1.0.1"
@@ -2976,10 +2976,10 @@ wrappy@1:
   resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
   integrity sha1-tSQ9jz7BqjXxNkYFvA0QNuMKtp8=
 
-ws@^7.2.1:
-  version "7.4.6"
-  resolved "https://registry.yarnpkg.com/ws/-/ws-7.4.6.tgz#5654ca8ecdeee47c33a9a4bf6d28e2be2980377c"
-  integrity sha512-YmhHDO4MzaDLB+M9ym/mDA5z0naX8j7SIlT8f8z+I0VtzsRbekxEutHSme7NPS2qE8StCYQNUnfWdXta/Yu85A==
+ws@^7.4.6:
+  version "7.5.3"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.3.tgz#160835b63c7d97bfab418fc1b8a9fced2ac01a74"
+  integrity sha512-kQ/dHIzuLrS6Je9+uv81ueZomEwH0qVYstcAQ4/Z93K8zeko9gtAbttJWzoC5ukqXY1PpoouV3+VSOqEAFt5wg==
 
 y18n@^5.0.5:
   version "5.0.8"

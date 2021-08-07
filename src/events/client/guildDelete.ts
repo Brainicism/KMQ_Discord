@@ -22,7 +22,6 @@ export default async function guildDeleteHandler(guild: Eris.Guild | { id: strin
             title,
             fields: [
                 { name: "**Member Count**:", value: guild.memberCount.toString() },
-                { name: "**Region**:", value: guild.region },
                 { name: "**Language**:", value: guild.preferredLocale },
                 { name: "**Nitro Boosts**:", value: guild.premiumSubscriptionCount.toString() },
             ],
