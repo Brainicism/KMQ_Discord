@@ -13,7 +13,6 @@ WORKDIR /app
 COPY yarn.lock package.json ./
 COPY start.sh tsconfig.json ./
 COPY src/ src/
-COPY data/ data/
 COPY sql_dumps/daisuki/bootstrap.sql sql_dumps/daisuki/bootstrap.sql
 COPY sql_dumps/daisuki/bootstrap-audio.sql sql_dumps/daisuki/bootstrap-audio.sql
 COPY sql/ sql/
