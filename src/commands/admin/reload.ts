@@ -1,6 +1,5 @@
 import { execSync } from "child_process";
 import { IPCLogger } from "../../logger";
-import { reloadCommands } from "../../helpers/management_utils";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getDebugChannel, getDebugLogHeader, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import MessageContext from "../../structures/message_context";
@@ -49,7 +48,7 @@ export default class ReloadCommand implements BaseCommand {
             return;
         }
 
-        reloadCommands();
+        state.client.reloadCommands();
         sendInfoMessage(MessageContext.fromMessage(message), { title: "Cluster Reload Complete", description: "All changes should now be applied" });
     };
 }

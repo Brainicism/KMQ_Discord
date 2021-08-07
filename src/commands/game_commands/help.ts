@@ -6,10 +6,10 @@ import {
 } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
 import { chunkArray, parseJsonFile } from "../../helpers/utils";
-import { getCommandFiles } from "../../helpers/management_utils";
 import { GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
+import { state } from "../../kmq";
 
 const logger = new IPCLogger("help");
 export const placeholder = /,/g;
@@ -21,7 +21,7 @@ const helpMessage = async (message: GuildTextableMessage, action: string) => {
     let embedDesc = "";
     let embedFields = [];
 
-    const commandFiles = await getCommandFiles(false);
+    const commandFiles = state.client.getCommandFiles(false);
 
     const commandFilesWithAliases: { [commandName: string]: BaseCommand } = {};
     Object.assign(commandFilesWithAliases, commandFiles);

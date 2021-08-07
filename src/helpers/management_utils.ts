@@ -22,7 +22,6 @@ import uncaughtExceptionHandler from "../events/process/uncaughtException";
 import SIGINTHandler from "../events/process/SIGINT";
 import { cleanupInactiveGameSessions } from "./game_utils";
 import dbContext from "../database_context";
-import BaseCommand from "../commands/interfaces/base_command";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import debugHandler from "../events/client/debug";
 import guildCreateHandler from "../events/client/guildCreate";
@@ -39,8 +38,6 @@ import { EnvType } from "../types";
 const logger = new IPCLogger("management_utils");
 
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
-
-let cachedCommandFiles: { [commandName: string]: BaseCommand } = null;
 
 /** Registers listeners on client events */
 export function registerClientEvents() {
@@ -282,81 +279,6 @@ export function registerIntervals(clusterID: number) {
 export async function reloadCaches() {
     reloadAliases();
     reloadFactCache();
-}
-
-/** @returns a mapping of command name to command source file */
-export function getCommandFiles(shouldReload: boolean): { [commandName: string]: BaseCommand } {
-    if (cachedCommandFiles && !shouldReload) {
-        return cachedCommandFiles;
-    }
-
-    const commandMap = {};
-    try {
-        let files: Array<string> = [];
-        for (const category of ["admin", "game_options", "game_commands"]) {
-            files = files.concat(fs.readdirSync(path.resolve(__dirname, "../commands", category))
-                .filter((x) => x.endsWith(".js"))
-                .map((x) => path.resolve(__dirname, "../commands", category, x)));
-        }
-
-        for (const commandFile of files) {
-            const commandFilePath = path.resolve(__dirname, "../commands", commandFile);
-            if (shouldReload) {
-                // invalidate require cache
-                delete require.cache[require.resolve(commandFilePath)];
-            }
-
-            try {
-                const command = require(commandFilePath);
-                const commandName = path.parse(commandFile).name;
-                // eslint-disable-next-line new-cap
-                commandMap[commandName] = new command.default();
-            } catch (e) {
-                throw new Error(`Failed to load file: ${commandFilePath}`);
-            }
-        }
-
-        cachedCommandFiles = commandMap;
-        return commandMap;
-    } catch (err) {
-        logger.error(`Unable to read commands error = ${err}`);
-        throw err;
-    }
-}
-
-/**
- * Registers a command
- * @param command - The Command class
- * @param commandName - The name/alias of the command
- */
-function registerCommand(command: BaseCommand, commandName: string) {
-    if (commandName in state.commands) {
-        logger.error(`Command \`${commandName}\` already exists. Possible conflict?`);
-    }
-
-    state.commands[commandName] = command;
-}
-
-/** Registers commands */
-export function registerCommands(initialLoad: boolean) {
-    // load commands
-    state.commands = {};
-    const commandFiles = getCommandFiles(!initialLoad);
-    for (const [commandName, command] of Object.entries(commandFiles)) {
-        registerCommand(command, commandName);
-        if (command.aliases) {
-            for (const alias of command.aliases) {
-                registerCommand(command, alias);
-            }
-        }
-    }
-}
-
-/** Reloads commands */
-export function reloadCommands() {
-    logger.info("Reloading KMQ commands");
-    registerCommands(false);
-    logger.info("Reload KMQ commands complete");
 }
 
 /**

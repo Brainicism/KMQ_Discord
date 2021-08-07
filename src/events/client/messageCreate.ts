@@ -43,7 +43,7 @@ export default async function messageCreateHandler(message: Eris.Message) {
         return;
     }
 
-    const invokedCommand = parsedMessage ? state.commands[parsedMessage.action] : null;
+    const invokedCommand = parsedMessage ? state.client.commands[parsedMessage.action] : null;
     if (invokedCommand) {
         if (validate(message, parsedMessage, invokedCommand.validations, invokedCommand.help?.usage)) {
             const { gameSessions } = state;

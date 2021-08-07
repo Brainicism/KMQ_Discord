@@ -1,9 +1,9 @@
 import Eris, { GuildTextableChannel } from "eris";
 import { IPC } from "eris-fleet/dist/util/IPC";
-import BaseCommand from "./commands/interfaces/base_command";
 import GameSession from "./structures/game_session";
 import { Gender } from "./commands/game_options/gender";
 import KmqMember from "./structures/kmq_member";
+import KmqClient from "./kmq_client";
 
 export type GuildTextableMessage = Eris.Message<GuildTextableChannel>;
 
@@ -49,9 +49,8 @@ export interface EndGameMessage {
 }
 
 export interface State {
-    commands: { [commandName: string]: BaseCommand };
     gameSessions: { [guildID: string]: GameSession };
-    client: Eris.Client;
+    client: KmqClient;
     aliases: {
         artist: { [artistName: string]: Array<string> },
         song: { [songName: string]: Array<string> }
