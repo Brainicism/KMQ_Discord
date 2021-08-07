@@ -1,11 +1,10 @@
-import path from "path";
 import { EmbedOptions } from "eris";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import {
     EMBED_INFO_COLOR, sendErrorMessage, getDebugLogHeader, sendPaginationedEmbed, sendInfoMessage,
 } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
-import { chunkArray, parseJsonFile } from "../../helpers/utils";
+import { chunkArray } from "../../helpers/utils";
 import { GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
@@ -14,7 +13,6 @@ import { state } from "../../kmq";
 const logger = new IPCLogger("help");
 export const placeholder = /,/g;
 const FIELDS_PER_EMBED = 6;
-const helpMessages = parseJsonFile(path.resolve(__dirname, "../../../data/help_strings.json"));
 
 const helpMessage = async (message: GuildTextableMessage, action: string) => {
     let embedTitle = "";
@@ -68,7 +66,9 @@ const helpMessage = async (message: GuildTextableMessage, action: string) => {
         const commandsWithHelp = Object.values(commandFiles).filter((command) => command.help);
         commandsWithHelp.sort((x, y) => y.help.priority - x.help.priority);
         embedTitle = "K-pop Music Quiz Command Help";
-        embedDesc = helpMessages.rules.replace(placeholder, process.env.BOT_PREFIX);
+        embedDesc = `Type \`${process.env.BOT_PREFIX}play\` in chat and the bot will play a random kpop song in VC. The goal of this game is to be the first person to guess the song name in chat. 
+        See your current game options with \`${process.env.BOT_PREFIX}options\`. Use \`${process.env.BOT_PREFIX}help [command]\` to get more details about a command.`;
+
         embedFields = commandsWithHelp.map((command) => {
             const helpManual = command.help;
             return {
@@ -91,7 +91,14 @@ const helpMessage = async (message: GuildTextableMessage, action: string) => {
             },
         }));
 
-        await sendPaginationedEmbed(message, embeds);
+        await sendPaginationedEmbed(message, embeds, [{
+            type: 1,
+            components: [
+                { style: 5, url: "https://discord.gg/RCuzwYV", type: 2, label: "Official KMQ Server" },
+                { style: 5, url: "https://brainicism.github.io/KMQ_Discord/GAMEPLAY", type: 2, label: "How To Play" },
+                { style: 5, url: "https://brainicism.github.io/KMQ_Discord/FAQ", type: 2, label: "Frequently Asked Questions" },
+            ],
+        }]);
     } else {
         await sendInfoMessage(MessageContext.fromMessage(message), {
             title: embedTitle,
