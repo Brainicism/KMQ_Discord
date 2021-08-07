@@ -40,6 +40,7 @@ export interface EmbedPayload {
         avatarUrl: string;
     };
     color?: number;
+    components?: Eris.ActionRow[];
 }
 
 export interface EndGameMessage {
