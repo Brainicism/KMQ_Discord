@@ -7,10 +7,11 @@ import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
 
 const logger = new IPCLogger("groups");
+export const GROUP_LIST_URL = `http://${process.env.WEB_SERVER_IP}:${process.env.WEB_SERVER_PORT}/groups`;
 export default class GroupsCommand implements BaseCommand {
     help = {
         name: "groups",
-        description: `Select as many groups that you would like to hear from, separated by commas. A list of group names can be found [here](http://${process.env.WEB_SERVER_IP}:${process.env.WEB_SERVER_PORT}/groups).`,
+        description: `Select as many groups that you would like to hear from, separated by commas. A list of group names can be found [here](${GROUP_LIST_URL}).`,
         usage: ",groups [group1],{group2}",
         examples: [
             {
@@ -27,6 +28,7 @@ export default class GroupsCommand implements BaseCommand {
             },
         ],
         priority: 135,
+        actionRowComponents: [{ style: 5 as const, url: GROUP_LIST_URL, type: 2 as const, label: "Full List of Groups" }],
     };
 
     aliases = ["group", "artist", "artists"];
@@ -53,9 +55,11 @@ export default class GroupsCommand implements BaseCommand {
         const { unmatchedGroups } = groups;
         if (unmatchedGroups.length) {
             logger.info(`${getDebugLogHeader(message)} | Attempted to set unknown groups. groups =  ${unmatchedGroups.join(", ")}`);
-            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Unknown Group Name",
+            await sendErrorMessage(MessageContext.fromMessage(message), {
+                title: "Unknown Group Name",
                 description: `One or more of the specified group names was not recognized. Those groups that matched are added. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\`. \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} \nUse \`${process.env.BOT_PREFIX}add\` to add the unmatched groups.`,
-                footerText: groupsWarning });
+                footerText: groupsWarning,
+            });
         }
 
         if (guildPreference.isExcludesMode()) {

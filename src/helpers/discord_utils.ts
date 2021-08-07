@@ -481,7 +481,7 @@ export async function sendPaginationedEmbed(message: GuildTextableMessage, embed
         return null;
     }
 
-    return sendMessage(message.channel.id, message.author.id, { embeds: [embeds[0]] });
+    return sendMessage(message.channel.id, message.author.id, { embeds: [embeds[0]], components });
 }
 
 /**

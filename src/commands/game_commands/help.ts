@@ -1,4 +1,4 @@
-import { EmbedOptions } from "eris";
+import Eris, { EmbedOptions } from "eris";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import {
     EMBED_INFO_COLOR, sendErrorMessage, getDebugLogHeader, sendPaginationedEmbed, sendInfoMessage,
@@ -18,7 +18,7 @@ const helpMessage = async (message: GuildTextableMessage, action: string) => {
     let embedTitle = "";
     let embedDesc = "";
     let embedFields = [];
-
+    let embedActionRowComponents: Eris.ActionRowComponents[] = null;
     const commandFiles = state.client.getCommandFiles(false);
 
     const commandFilesWithAliases: { [commandName: string]: BaseCommand } = {};
@@ -47,6 +47,7 @@ const helpMessage = async (message: GuildTextableMessage, action: string) => {
         const helpManual = commandFilesWithAliases[action].help;
         embedTitle = `\`${helpManual.usage.replace(placeholder, process.env.BOT_PREFIX)}\``;
         embedDesc = helpManual.description;
+        embedActionRowComponents = helpManual.actionRowComponents;
         if (helpManual.examples.length > 0) {
             embedDesc += "\n\n**Examples**\n";
         }
@@ -76,6 +77,12 @@ const helpMessage = async (message: GuildTextableMessage, action: string) => {
                 value: `${helpManual.description}\nUsage: \`${helpManual.usage.replace(placeholder, process.env.BOT_PREFIX)}\``,
             };
         });
+
+        embedActionRowComponents = [
+            { style: 5, url: "https://discord.gg/RCuzwYV", type: 2, label: "Official KMQ Server" },
+            { style: 5, url: "https://brainicism.github.io/KMQ_Discord/GAMEPLAY", type: 2, label: "How To Play" },
+            { style: 5, url: "https://brainicism.github.io/KMQ_Discord/FAQ", type: 2, label: "Frequently Asked Questions" },
+        ];
     }
 
     if (embedFields.length > 0) {
@@ -91,20 +98,14 @@ const helpMessage = async (message: GuildTextableMessage, action: string) => {
             },
         }));
 
-        await sendPaginationedEmbed(message, embeds, [{
-            type: 1,
-            components: [
-                { style: 5, url: "https://discord.gg/RCuzwYV", type: 2, label: "Official KMQ Server" },
-                { style: 5, url: "https://brainicism.github.io/KMQ_Discord/GAMEPLAY", type: 2, label: "How To Play" },
-                { style: 5, url: "https://brainicism.github.io/KMQ_Discord/FAQ", type: 2, label: "Frequently Asked Questions" },
-            ],
-        }]);
+        await sendPaginationedEmbed(message, embeds, embedActionRowComponents ? [{ type: 1, components: embedActionRowComponents }] : undefined);
     } else {
         await sendInfoMessage(MessageContext.fromMessage(message), {
             title: embedTitle,
             description: embedDesc,
             footerText: embedFooter ? embedFooter.text : null,
             thumbnailUrl: KmqImages.READING_BOOK,
+            components: embedActionRowComponents ? [{ type: 1, components: embedActionRowComponents }] : undefined,
         });
     }
 };
