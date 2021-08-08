@@ -236,9 +236,9 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         }
     }
 
-    const uniqueSongMessage = (uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0) ? `\n${codeLine(`${friendlyFormattedNumber(uniqueSongCounter.uniqueSongsPlayed)}/${friendlyFormattedNumber(uniqueSongCounter.totalSongs)}`)} unique songs played.\n` : "";
+    const uniqueSongMessage = (uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0) ? `\n${codeLine(`${friendlyFormattedNumber(uniqueSongCounter.uniqueSongsPlayed)}/${friendlyFormattedNumber(uniqueSongCounter.totalSongs)}`)} unique songs played.` : "";
     const useLargerScoreboard = scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
-    const description = `${correctGuess ? correctDescription : "Nobody got it."}\n${uniqueSongMessage}${!scoreboard.isEmpty() && !useLargerScoreboard ? "\n**Scoreboard**" : ""}`;
+    const description = `${correctGuess ? correctDescription : "Nobody got it."}\n\nhttps://youtu.be/${gameRound.videoID}${uniqueSongMessage} ${!scoreboard.isEmpty() && !useLargerScoreboard ? "\n\n**Scoreboard**" : ""}`;
     let fields: Array<{ name: string, value: string, inline: boolean }>;
     let roundResultIDs: Set<string>;
     if (scoreboard instanceof TeamScoreboard) {
@@ -278,23 +278,6 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         thumbnailUrl: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,
         fields,
         footerText: footer ? footer.text : "",
-        components: [
-            {
-                type: 1,
-                components: [
-                    {
-                        type: 2,
-                        style: 5,
-                        label: "YouTube",
-                        emoji: {
-                            id: null,
-                            name: "📽️",
-                        },
-                        url: `https://youtu.be/${gameRound.videoID}`,
-                    },
-                ],
-            },
-        ],
     }, correctGuess);
 }
 
