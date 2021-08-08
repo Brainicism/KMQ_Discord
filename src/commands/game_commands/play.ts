@@ -136,11 +136,12 @@ export default class PlayCommand implements BaseCommand {
             if (isMcMode) {
                 // (1) MC game creation
                 let difficulty: GameType.MC_EASY | GameType.MC_MEDIUM | GameType.MC_HARD;
-                if (parsedMessage.components.length === 1 || parsedMessage.components[1].toLowerCase() === "easy") {
+                const difficultyString = parsedMessage.components[1].toLowerCase();
+                if (parsedMessage.components.length === 1 || difficultyString === "easy") {
                     difficulty = GameType.MC_EASY;
-                } else if (parsedMessage.components[1].toLowerCase() === "medium") {
+                } else if (difficultyString === "medium") {
                     difficulty = GameType.MC_MEDIUM;
-                } else if (parsedMessage.components[1].toLowerCase() === "hard") {
+                } else if (difficultyString === "hard") {
                     difficulty = GameType.MC_HARD;
                 } else {
                     sendErrorMessage(messageContext, { title: "Unknown difficulty", description: `Please use one of \`easy\`, \`medium\`, or \`hard\` with \`${prefix}play mc\`.`, thumbnailUrl: KmqImages.DEAD });

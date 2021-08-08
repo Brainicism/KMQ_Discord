@@ -55,9 +55,9 @@ export function validHintCheck(gameSession: GameSession, gameRound: GameRound, m
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid hint request", description: "Only alive players may request hints.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
             return false;
         }
-    } else if ([GameType.MC_EASY, GameType.MC_MEDIUM, GameType.MC_HARD].includes(gameSession.gameType)) {
+    } else if (gameSession.isMultipleChoiceMode()) {
         if (gameSession.gameRound.incorrectMCGuessers.has(message.author.id)) {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid hint request", description: "Eliminated players cannot request hints.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid hint request", description: "You can only guess once per round.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
             return false;
         }
     }

@@ -13,7 +13,7 @@ import { OstPreference } from "../commands/game_options/ost";
 import { NON_OFFICIAL_VIDEO_TAGS, ReleaseType } from "../commands/game_options/release";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { cleanArtistName } from "../structures/game_round";
-import { chooseRandom } from "./utils";
+import { chooseRandom, setDifference } from "./utils";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -290,40 +290,61 @@ export async function getMatchingGroupNames(rawGroupNames: Array<string>, aliasA
  * @param gender - The correct answer's group's gender
  * @param answer - The correct answer
  * @param artistID - The correct answer's group's ID
- * @returns three unshuffled incorrect choices based on difficulty
+ * @returns unshuffled incorrect choices based on difficulty
  */
-export async function getThreeChoices(difficulty: GameType, guessMode: GuessModeType, gender: Gender, answer: string, artistID: number): Promise<[string, string, string]> {
-    let names: string[];
-    let sameArtistSong: string;
+export async function getMultipleChoiceOptions(
+    difficulty: GameType,
+    guessMode: GuessModeType,
+    gender: Gender,
+    answer: string,
+    artistID: number,
+): Promise<string[]> {
+    // Precompute easyNames as drop-in replacement if other difficulty criteria fail
+    let easyNames: Set<string>;
+    if (guessMode === GuessModeType.SONG_NAME || guessMode === GuessModeType.BOTH) {
+        easyNames = new Set((await dbContext.kmq("available_songs").select("song_name")
+            .where("members", gender)
+            .andWhereNot("id_artist", artistID)).map((x) => x["song_name"]));
+    } else {
+        easyNames = new Set((await dbContext.kmq("available_songs").select("artist_name")
+            .whereNot("artist_name", answer)).map((x) => x["artist_name"]));
+    }
+
+    let names: Set<string>;
+    let sameArtistSongs: [string, string];
     if (guessMode === GuessModeType.SONG_NAME || guessMode === GuessModeType.BOTH) {
         switch (difficulty) {
             case GameType.MC_EASY:
-                // Same gender as chosen artist
-                names = (await dbContext.kmq("available_songs").select("song_name")
-                    .where("members", gender)
-                    .andWhereNot("id_artist", artistID)).map((x) => x["song_name"]);
+                // 3 from same gender as chosen artist
                 break;
             case GameType.MC_MEDIUM:
             {
-                // 2 same gender as chosen artist, 1 choice from chosen artist
-                const sameArtistSongList = await dbContext.kmq("available_songs").select("song_name")
+                // 3 from same gender as chosen artist, 2 from chosen artist
+                const firstSameArtistSong = chooseRandom((await dbContext.kmq("available_songs").select("song_name")
                     .where("id_artist", artistID)
-                    .andWhereNot("song_name", answer);
+                    .andWhereNot("song_name", answer)) ?? [...easyNames])["song_name"];
 
-                sameArtistSong = chooseRandom(sameArtistSongList)["song_name"];
+                sameArtistSongs = [firstSameArtistSong,
+                    chooseRandom((await dbContext.kmq("available_songs").select("song_name")
+                        .where("id_artist", artistID)
+                        .andWhereNot("song_name", firstSameArtistSong)
+                        .andWhereNot("song_name", answer)) ?? [...easyNames])["song_name"],
+                ];
 
-                names = (await dbContext.kmq("available_songs").select("song_name")
+                names = new Set((await dbContext.kmq("available_songs").select("song_name")
                     .where("members", gender)
-                    .andWhereNot("song_name", sameArtistSong)
-                    .andWhereNot("song_name", answer)).map((x) => x["song_name"]);
+                    .andWhereNot("id_artist", artistID)
+                    .andWhereNot("song_name", sameArtistSongs[0])
+                    .andWhereNot("song_name", sameArtistSongs[1])
+                    .andWhereNot("song_name", answer)).map((x) => x["song_name"]));
                 break;
             }
 
             case GameType.MC_HARD:
-                // All choices from chosen artist
-                names = (await dbContext.kmq("available_songs").select("song_name")
+                // 7 from chosen artist
+                names = new Set((await dbContext.kmq("available_songs").select("song_name")
                     .where("id_artist", artistID)
-                    .andWhereNot("song_name", answer)).map((x) => x["song_name"]);
+                    .andWhereNot("song_name", answer)).map((x) => x["song_name"]));
                 break;
             default:
                 break;
@@ -331,25 +352,64 @@ export async function getThreeChoices(difficulty: GameType, guessMode: GuessMode
     } else {
         switch (difficulty) {
             case GameType.MC_EASY:
-                // Any artist
-                names = (await dbContext.kmq("available_songs").select("artist_name")
-                    .whereNot("artist_name", answer)).map((x) => x["artist_name"]);
+                // 3 from any artist
                 break;
             case GameType.MC_MEDIUM:
-            case GameType.MC_HARD:
-                // Artists of the same gender
-                names = (await dbContext.kmq("available_songs").select("artist_name")
+                // 5 from same gender
+                names = new Set((await dbContext.kmq("available_songs").select("artist_name")
                     .where("members", gender)
-                    .andWhereNot("artist_name", answer)).map((x) => x["artist_name"]);
+                    .andWhereNot("artist_name", answer)).map((x) => x["artist_name"]));
+                break;
+            case GameType.MC_HARD:
+                // 7 from same gender
+                names = new Set((await dbContext.kmq("available_songs").select("artist_name")
+                    .where("members", gender)
+                    .andWhereNot("artist_name", answer)).map((x) => x["artist_name"]));
                 break;
             default:
                 break;
         }
     }
 
-    const firstChoice = chooseRandom(names);
-    const secondChoice = chooseRandom(names.filter((x) => x !== firstChoice));
-    const thirdChoice = (guessMode !== GuessModeType.ARTIST && difficulty === GameType.MC_MEDIUM) ? sameArtistSong : chooseRandom(names.filter((x) => x !== firstChoice && x !== secondChoice));
+    const choices: Set<string> = new Set();
 
-    return [firstChoice, secondChoice, thirdChoice];
+    switch (difficulty) {
+        case GameType.MC_EASY:
+            for (let i = 0; i < 3; i++) {
+                choices.add(chooseRandom([...easyNames]));
+                easyNames = setDifference([...easyNames], [...choices]);
+            }
+
+            break;
+        case GameType.MC_MEDIUM:
+            if (guessMode !== GuessModeType.ARTIST) {
+                choices.add(sameArtistSongs[0]);
+                choices.add(sameArtistSongs[1]);
+            }
+
+            names = setDifference([...names], [...choices]);
+
+            for (let i = 0; i < (guessMode !== GuessModeType.ARTIST ? 3 : 5); i++) {
+                choices.add(chooseRandom([...names]));
+                names = setDifference([...names], [...choices]);
+            }
+
+            break;
+        case GameType.MC_HARD:
+            for (let i = 0; i < 7; i++) {
+                let random = chooseRandom([...names]);
+                if (!random) {
+                    random = chooseRandom([...easyNames]);
+                }
+
+                choices.add(random);
+                names = setDifference([...names], [...choices]);
+            }
+
+            break;
+        default:
+            break;
+    }
+
+    return [...choices];
 }

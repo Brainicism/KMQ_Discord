@@ -41,7 +41,11 @@ function isSkipMajority(message: GuildTextableMessage, gameSession: GameSession)
         return gameSession.gameRound.getNumSkippers() >= Math.floor(eliminationScoreboard.getAlivePlayersCount() * 0.5) + 1;
     }
 
-    return gameSession.gameRound.getNumSkippers() >= getMajorityCount(message.guildID) - gameSession.gameRound.incorrectMCGuessers.size;
+    if (gameSession.isMultipleChoiceMode()) {
+        return gameSession.gameRound.getNumSkippers() >= getMajorityCount(message.guildID) - gameSession.gameRound.incorrectMCGuessers.size;
+    }
+
+    return gameSession.gameRound.getNumSkippers() >= getMajorityCount(message.guildID);
 }
 
 export default class SkipCommand extends InGameCommand {

@@ -280,7 +280,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         thumbnailUrl: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,
         fields,
         footerText: footer ? footer.text : "",
-    }, correctGuess && !gameSession.isMultipleChoice());
+    }, correctGuess && !gameSession.isMultipleChoiceMode());
 }
 
 /**

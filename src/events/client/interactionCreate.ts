@@ -1,10 +1,12 @@
 import Eris from "eris";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
-import { getUserTag } from "../../helpers/discord_utils";
+import { getUserTag, EMBED_ERROR_COLOR } from "../../helpers/discord_utils";
 import { state } from "../../kmq";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { GuessModeType } from "../../commands/game_options/guessmode";
+import { bold } from "../../helpers/utils";
+import { KmqImages } from "../../constants";
 
 export default async function interactionCreateHandler(interaction: Eris.PingInteraction | Eris.CommandInteraction | Eris.ComponentInteraction | Eris.UnknownInteraction) {
     if (interaction instanceof Eris.ComponentInteraction) {
@@ -20,26 +22,36 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
         );
 
         if (gameSession.gameRound.incorrectMCGuessers.has(interaction.member.id)) {
-            interaction.acknowledge();
+            await interaction.acknowledge();
             return;
         }
 
         if (!gameSession.isValidInteractionGuess(interaction.data.custom_id)) {
-            interaction.acknowledge();
+            await interaction.acknowledge();
             return;
         }
 
         if (!gameSession.isCorrectInteractionAnswer(interaction.data.custom_id)) {
-            gameSession.guessSong(messageContext, "", interaction);
             gameSession.gameRound.incorrectMCGuessers.add(interaction.member.id);
+            await interaction.createMessage({
+                embeds: [{
+                    color: EMBED_ERROR_COLOR,
+                    author: {
+                        name: messageContext.author.username,
+                        icon_url: messageContext.author.avatarUrl,
+                    },
+                    title: bold("Incorrect guess"),
+                    description: "You've been eliminated for this round.",
+                    thumbnail: { url: KmqImages.DEAD },
+                }],
+                flags: 64,
+            });
+            gameSession.guessSong(messageContext, "");
             return;
         }
 
+        await interaction.acknowledge();
         const guildPreference = await getGuildPreference(messageContext.guildID);
-        gameSession.guessSong(
-            messageContext,
-            guildPreference.getGuessModeType() !== GuessModeType.ARTIST ? gameSession.gameRound.songName : gameSession.gameRound.artistName,
-            interaction,
-        );
+        await gameSession.guessSong(messageContext, guildPreference.getGuessModeType() !== GuessModeType.ARTIST ? gameSession.gameRound.songName : gameSession.gameRound.artistName);
     }
 }

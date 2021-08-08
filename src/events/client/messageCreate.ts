@@ -62,7 +62,7 @@ export default async function messageCreateHandler(message: Eris.Message) {
     } else if (state.gameSessions[message.guildID]?.gameRound) {
         if (areUserAndBotInSameVoiceChannel(message)) {
             const gameSession = state.gameSessions[message.guildID];
-            if (!gameSession.isMultipleChoice()) {
+            if (!gameSession.isMultipleChoiceMode()) {
                 gameSession.guessSong(MessageContext.fromMessage(message), message.content);
             }
         }
