@@ -233,7 +233,7 @@ export function isPowerHour(): boolean {
  * @returns the given number, with thousands separated by spaces
  */
 export function friendlyFormattedNumber(n: number): string {
-    return n?.toLocaleString("en").replace(/,/g, " ");
+    return n?.toLocaleString("en");
 }
 
 /**
