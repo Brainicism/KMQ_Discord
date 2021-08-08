@@ -52,17 +52,11 @@ export default class PlayCommand implements BaseCommand {
         minArgCount: 0,
         maxArgCount: 2,
         arguments: [
-            {
-                name: "gameType",
-                type: "enum" as const,
-                enums: Object.values(GameType),
-            },
-            {
-                name: "lives",
-                type: "number" as const,
-                minValue: 1,
-                maxValue: 10000,
-            },
+            // {
+            //     name: "gameType",
+            //     type: "enum" as const,
+            //     enums: Object.values(GameType),
+            // },
         ],
     };
 
@@ -71,7 +65,7 @@ export default class PlayCommand implements BaseCommand {
     help = {
         name: "play",
         description: "Starts a game of KMQ. Pick between classic (default), elimination mode, and teams mode",
-        usage: ",play {classic | elimination | teams}\n,play mc [easy | medium | hard]",
+        usage: ",play {classic | elimination | teams}\n,play elimination [lives]\n,play mc [easy | medium | hard]",
         priority: 1050,
         examples: [
             {
@@ -99,7 +93,7 @@ export default class PlayCommand implements BaseCommand {
 
     call = async ({ message, gameSessions, parsedMessage, channel }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
-        const voiceChannel = getUserVoiceChannel(message);
+        const voiceChannel = getUserVoiceChannel(MessageContext.fromMessage(message));
         const timeUntilRestart = await getTimeUntilRestart();
         if (timeUntilRestart) {
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Cannot start new game", description: `Bot is restarting in \`${timeUntilRestart}\` minutes, please wait until the bot is back up!` });
@@ -122,6 +116,7 @@ export default class PlayCommand implements BaseCommand {
 
         const isEliminationMode = parsedMessage.components.length >= 1 && parsedMessage.components[0].toLowerCase() === "elimination";
         const isTeamsMode = parsedMessage.components.length >= 1 && parsedMessage.components[0].toLowerCase() === "teams";
+        const isMcMode = parsedMessage.components.length >= 1 && parsedMessage.components[0].toLowerCase() === "mc";
 
         if (gameSessions[message.guildID] && !gameSessions[message.guildID].sessionInitialized && (isEliminationMode || isTeamsMode)) {
             // User sent ,play elimination or ,play teams twice, reset the GameSession
@@ -129,25 +124,52 @@ export default class PlayCommand implements BaseCommand {
         }
 
         const messageContext = MessageContext.fromMessage(message);
-        if (!gameSessions[message.guildID] || (!isEliminationMode && !gameSessions[message.guildID].sessionInitialized)) {
-            // (1) No game session exists yet (create CLASSIC, ELIMINATION, or TEAMS game), or
+        const prefix = process.env.BOT_PREFIX;
+
+        if (!gameSessions[message.guildID] || !gameSessions[message.guildID].sessionInitialized) {
+            // (1) No game session exists yet (create MC, ELIMINATION, TEAMS, or CLASSIC game), or
             // (2) User attempting to ,play after a ,play elimination/teams that didn't start, start CLASSIC game
             const textChannel = channel;
+            const gameOwner = KmqMember.fromUser(message.author);
             let gameSession: GameSession;
 
-            const gameOwner = KmqMember.fromUser(message.author);
-            if (isEliminationMode) {
+            if (isMcMode) {
+                // (1) MC game creation
+                let difficulty: GameType.MC_EASY | GameType.MC_MEDIUM | GameType.MC_HARD;
+                if (parsedMessage.components.length === 1 || parsedMessage.components[1].toLowerCase() === "easy") {
+                    difficulty = GameType.MC_EASY;
+                } else if (parsedMessage.components[1].toLowerCase() === "medium") {
+                    difficulty = GameType.MC_MEDIUM;
+                } else if (parsedMessage.components[1].toLowerCase() === "hard") {
+                    difficulty = GameType.MC_HARD;
+                } else {
+                    sendErrorMessage(messageContext, { title: "Unknown difficulty", description: `Please use one of \`easy\`, \`medium\`, or \`hard\` with \`${prefix}play mc\`.`, thumbnailUrl: KmqImages.DEAD });
+                    return;
+                }
+
+                gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, difficulty);
+                await sendBeginGameMessage(textChannel.name, voiceChannel.name, message, getCurrentVoiceMembers(voiceChannel.id));
+                gameSession.startRound(guildPreference, messageContext);
+                logger.info(`${getDebugLogHeader(message)} | Game session starting`);
+            } else if (isEliminationMode) {
                 // (1) ELIMINATION game creation
-                const lives = parsedMessage.components.length > 1 ? parseInt(parsedMessage.components[1]) : DEFAULT_LIVES;
-                const startTitle = `\`${process.env.BOT_PREFIX}join\` the game and start it with \`${process.env.BOT_PREFIX}begin\`!`;
-                const gameInstructions = `Type \`${process.env.BOT_PREFIX}join\` to play in the upcoming elimination game. Once all have joined, ${bold(gameOwner.tag)} must send \`${process.env.BOT_PREFIX}begin\` to start the game. Everyone begins with \`${lives}\` lives.`;
+                const lives = (parsedMessage.components.length > 1
+                               && Number.isInteger(parsedMessage.components[1])
+                               && parseInt(parsedMessage.components[1]) > 0
+                               && parseInt(parsedMessage.components[1]) <= 10000)
+                    ? parseInt(parsedMessage.components[1]) : DEFAULT_LIVES;
+
+                const startTitle = `\`${prefix}join\` the game and start it with \`${prefix}begin\`!`;
+                const gameInstructions = `Type \`${prefix}join\` to play in the upcoming elimination game. Once all have joined, ${bold(gameOwner.tag)} must send \`${prefix}begin\` to start the game. Everyone begins with \`${lives}\` lives.`;
+
                 gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, GameType.ELIMINATION, lives);
                 gameSession.addEliminationParticipant(gameOwner);
                 await sendInfoMessage(messageContext, { title: startTitle, description: gameInstructions, thumbnailUrl: KmqImages.HAPPY });
             } else if (isTeamsMode) {
                 // (1) TEAMS game creation
-                const startTitle = `\`${process.env.BOT_PREFIX}join\` a team!`;
-                const gameInstructions = `Team leaders, type \`${process.env.BOT_PREFIX}join [team name]\` to form a new team. Remember, switching teams mid-game will forfeit all your current score and EXP.`;
+                const startTitle = `\`${prefix}join\` a team!`;
+                const gameInstructions = `Team leaders, type \`${prefix}join [team name]\` to form a new team. Remember, switching teams mid-game will forfeit all your current score and EXP.`;
+
                 await sendInfoMessage(messageContext, { title: startTitle, description: gameInstructions, thumbnailUrl: KmqImages.HAPPY });
                 gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, GameType.TEAMS);
             } else {
@@ -155,10 +177,10 @@ export default class PlayCommand implements BaseCommand {
                 if (gameSessions[message.guildID]) {
                     // (2) Let the user know they're starting a non-elimination/teams game
                     const oldGameType = gameSessions[message.guildID].gameType;
-                    const prefix = process.env.BOT_PREFIX;
                     const ignoringOldGameTypeTitle = `Ignoring \`${prefix}play ${oldGameType}\``;
                     const gameSpecificInstructions = oldGameType === GameType.ELIMINATION ? `\`${prefix}join\` the game` : `\`${prefix}join [team name]\` a team`;
                     const oldGameTypeInstructions = `If you meant to start a \`${oldGameType}\` game, \`${prefix}end\` this game, call \`${prefix}play ${oldGameType}\`, ${gameSpecificInstructions}, and then call \`${prefix}begin\`.`;
+
                     sendErrorMessage(messageContext, { title: ignoringOldGameTypeTitle, description: oldGameTypeInstructions, thumbnailUrl: KmqImages.DEAD });
                 }
 

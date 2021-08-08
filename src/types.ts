@@ -135,4 +135,7 @@ export enum GameType {
     CLASSIC = "classic",
     ELIMINATION = "elimination",
     TEAMS = "teams",
+    MC_EASY = "mc easy",
+    MC_MEDIUM = "mc medium",
+    MC_HARD = "mc hard",
 }

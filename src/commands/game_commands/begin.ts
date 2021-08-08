@@ -48,7 +48,7 @@ export default class BeginCommand implements BaseCommand {
                 participants = teamScoreboard.getPlayers().map((player) => ({ id: player.id, username: player.name.split("#")[0], discriminator: player.name.split("#")[1] }));
             }
 
-            sendBeginGameMessage(channel.name, getUserVoiceChannel(message).name, message, participants);
+            sendBeginGameMessage(channel.name, getUserVoiceChannel(MessageContext.fromMessage(message)).name, message, participants);
             gameSession.startRound(guildPreference, MessageContext.fromMessage(message));
             logger.info(`${getDebugLogHeader(message)} | Game session starting (${gameSession.gameType} gameType)`);
         }

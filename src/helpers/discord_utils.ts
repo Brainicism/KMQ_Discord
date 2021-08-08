@@ -271,6 +271,8 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         color = EMBED_ERROR_COLOR;
     }
 
+    const gameSession = state.gameSessions[messageContext.guildID];
+
     await sendInfoMessage(messageContext, {
         color,
         title: `"${gameRound.songName}" (${gameRound.songYear}) - ${gameRound.artistName}`,
@@ -278,7 +280,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         thumbnailUrl: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,
         fields,
         footerText: footer ? footer.text : "",
-    }, correctGuess);
+    }, correctGuess && !gameSession.isMultipleChoice());
 }
 
 /**
@@ -534,11 +536,12 @@ export function areUserAndBotInSameVoiceChannel(message: Eris.Message): boolean 
 }
 
 /**
- * @param message - The Message object
+ * @param messageContext - The messageContext object
  * @returns the voice channel that the message's author is in
  */
-export function getUserVoiceChannel(message: GuildTextableMessage): Eris.VoiceChannel {
-    const voiceChannelID = message.member.voiceState.channelID;
+export function getUserVoiceChannel(messageContext: MessageContext): Eris.VoiceChannel {
+    const member = state.client.guilds.get(messageContext.guildID).members.get(messageContext.author.id);
+    const voiceChannelID = member.voiceState.channelID;
     if (!voiceChannelID) return null;
     return state.client.getChannel(voiceChannelID) as Eris.VoiceChannel;
 }
@@ -573,7 +576,7 @@ export function getNumParticipants(voiceChannelID: string): number {
  * @returns whether the bot has permissions to join the message author's currently active voice channel
  */
 export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
-    const voiceChannel = getUserVoiceChannel(message);
+    const voiceChannel = getUserVoiceChannel(MessageContext.fromMessage(message));
     const messageContext = MessageContext.fromMessage(message);
     const missingPermissions = REQUIRED_VOICE_PERMISSIONS.filter((permission) => !voiceChannel.permissionsOf(state.client.user.id).has(permission));
     if (missingPermissions.length > 0) {

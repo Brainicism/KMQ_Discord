@@ -20,7 +20,7 @@ function isHintMajority(message: GuildTextableMessage, gameSession: GameSession)
         return gameSession.gameRound.getHintRequests() >= Math.floor(eliminationScoreboard.getAlivePlayersCount() * 0.5) + 1;
     }
 
-    return gameSession.gameRound.getHintRequests() >= getMajorityCount(message.guildID);
+    return gameSession.gameRound.getHintRequests() >= getMajorityCount(message.guildID) - gameSession.gameRound.incorrectMCGuessers.size;
 }
 
 function isHintAvailable(message: GuildTextableMessage, gameSession: GameSession) {
@@ -53,6 +53,11 @@ export function validHintCheck(gameSession: GameSession, gameRound: GameRound, m
         const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
         if (eliminationScoreboard.isPlayerEliminated(message.author.id)) {
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid hint request", description: "Only alive players may request hints.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
+            return false;
+        }
+    } else if ([GameType.MC_EASY, GameType.MC_MEDIUM, GameType.MC_HARD].includes(gameSession.gameType)) {
+        if (gameSession.gameRound.incorrectMCGuessers.has(message.author.id)) {
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid hint request", description: "Eliminated players cannot request hints.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
             return false;
         }
     }

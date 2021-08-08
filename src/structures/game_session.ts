@@ -1,17 +1,19 @@
 import Eris from "eris";
 import fs from "fs";
+import _ from "lodash";
+import * as uuid from "uuid";
 import { SeekType } from "../commands/game_options/seek";
 import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
-    getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, getUserVoiceChannel, sendEndGameMessage,
+    getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, getUserVoiceChannel, sendEndGameMessage, EMBED_ERROR_COLOR, getCurrentVoiceMembers,
 } from "../helpers/discord_utils";
-import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, userBonusIsActive } from "../helpers/game_utils";
+import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, userBonusIsActive, getThreeChoices } from "../helpers/game_utils";
 import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference, bold, codeLine } from "../helpers/utils";
 import { state } from "../kmq";
 import { IPCLogger } from "../logger";
-import { QueriedSong, GuildTextableMessage, PlayerRoundResult, GameType } from "../types";
+import { QueriedSong, PlayerRoundResult, GameType } from "../types";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
 import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
@@ -347,17 +349,18 @@ export default class GameSession {
 
     /**
      * Process a message to see if it is a valid and correct guess
-     * @param message - The message to check
+     * @param messageContext - The context of the message to check
+     * @param guess - the content of the message to check
      */
-    async guessSong(message: GuildTextableMessage) {
+    async guessSong(messageContext: MessageContext, guess: string, interaction?: Eris.ComponentInteraction) {
         if (!this.connection) return;
         if (this.connection.listenerCount("end") === 0) return;
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await getGuildPreference(messageContext.guildID);
         if (!this.gameRound) return;
 
-        if (!this.guessEligible(message)) return;
+        if (!this.guessEligible(messageContext)) return;
 
-        const pointsEarned = this.checkGuess(message.author.id, message.content, guildPreference.getGuessModeType());
+        const pointsEarned = this.checkGuess(messageContext.author.id, guess, guildPreference.getGuessModeType());
         if (pointsEarned > 0) {
             if (this.gameRound.finished) {
                 return;
@@ -367,9 +370,11 @@ export default class GameSession {
 
             await delay(this.multiguessDelayIsActive(guildPreference) ? MULTIGUESS_DELAY : 0);
 
+            interaction?.acknowledge();
+
             if (!this.gameRound) return;
             // mark round as complete, so no more guesses can go through
-            await this.endRound({ correct: true, correctGuessers: this.gameRound.correctGuessers }, guildPreference, MessageContext.fromMessage(message));
+            await this.endRound({ correct: true, correctGuessers: this.gameRound.correctGuessers }, guildPreference, messageContext);
             this.correctGuesses++;
 
             // update game session's lastActive
@@ -382,7 +387,28 @@ export default class GameSession {
                 .where("guild_id", this.guildID)
                 .increment("songs_guessed", 1);
 
-            this.startRound(guildPreference, MessageContext.fromMessage(message));
+            this.startRound(guildPreference, messageContext);
+        } else if (interaction) {
+            await delay(this.multiguessDelayIsActive(guildPreference) ? MULTIGUESS_DELAY : 0);
+            await interaction.createMessage({
+                embeds: [{
+                    color: EMBED_ERROR_COLOR,
+                    author: {
+                        name: messageContext.author.username,
+                        icon_url: messageContext.author.avatarUrl,
+                    },
+                    title: bold("Incorrect guess"),
+                    description: "You've been eliminated for this round.",
+                    thumbnail: { url: KmqImages.DEAD },
+                }],
+                flags: 64,
+            });
+            if (!this.gameRound) return;
+
+            if (getCurrentVoiceMembers(this.voiceChannelID).length === this.gameRound.incorrectMCGuessers.size) {
+                await this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));
+                this.startRound(await getGuildPreference(this.guildID), messageContext);
+            }
         }
     }
 
@@ -492,6 +518,49 @@ export default class GameSession {
         }
 
         this.playSong(guildPreference, messageContext);
+
+        if ([GameType.MC_EASY, GameType.MC_MEDIUM, GameType.MC_HARD].includes(this.gameType)) {
+            const correctChoice = guildPreference.getGuessModeType() === GuessModeType.ARTIST ? this.gameRound.artistName : this.gameRound.songName;
+            const wrongChoices = await getThreeChoices(this.gameType,
+                guildPreference.getGuessModeType(),
+                randomSong.members,
+                correctChoice,
+                randomSong.artistID);
+
+            this.gameRound.correctAnswerUUID = uuid.v4();
+            this.gameRound.incorrectAnswerUUIDs = [
+                uuid.v4(),
+                uuid.v4(),
+                uuid.v4(),
+            ];
+
+            const backupWrongChoices = await getThreeChoices(GameType.MC_EASY,
+                guildPreference.getGuessModeType(),
+                randomSong.members,
+                correctChoice,
+                randomSong.artistID);
+
+            const components: Array<Eris.InteractionButton> = [{ type: 2, style: 1, label: correctChoice, custom_id: this.gameRound.correctAnswerUUID }];
+            for (const [i, choice] of wrongChoices.entries()) {
+                if (choice) {
+                    components.push({ type: 2, style: 1, label: wrongChoices[i], custom_id: this.gameRound.incorrectAnswerUUIDs[i] });
+                } else {
+                    // Fill any null choices with easy choices
+                    components.push({ type: 2, style: 1, label: backupWrongChoices[i], custom_id: this.gameRound.incorrectAnswerUUIDs[i] });
+                }
+            }
+
+            sendInfoMessage(new MessageContext(this.textChannelID), {
+                title: "Choose your guess!",
+                components: [
+                    {
+                        type: 1,
+                        components: _.shuffle(components),
+                    },
+                ],
+                thumbnailUrl: KmqImages.LISTENING,
+            });
+        }
     }
 
     /**
@@ -550,6 +619,27 @@ export default class GameSession {
 
     async updateFilteredSongs(guildPreference: GuildPreference) {
         this.filteredSongs = await getFilteredSongList(guildPreference);
+    }
+
+    /**
+     * @param interactionUUID - the UUID of an interaction
+     * @returns true if the given UUID is one of the guesses of the current game round
+     */
+    isValidInteractionGuess(interactionUUID: string): boolean {
+        return interactionUUID === this.gameRound?.correctAnswerUUID || this.gameRound?.incorrectAnswerUUIDs?.includes(interactionUUID);
+    }
+
+    /**
+     * @param interactionUUID - the UUID of an interaction
+     * @returns true if the given UUID is associated with the interaction corresponding to
+     * the correct guess
+     */
+    isCorrectInteractionAnswer(interactionUUID: string): boolean {
+        return this.gameRound?.correctAnswerUUID === interactionUUID;
+    }
+
+    isMultipleChoice(): boolean {
+        return [GameType.MC_EASY, GameType.MC_MEDIUM, GameType.MC_HARD].includes(this.gameType);
     }
 
     /**
@@ -689,29 +779,29 @@ export default class GameSession {
     /**
      * Checks whether the author of the message is eligible to guess in the
      * current game session
-     * @param message - The message to check for guess eligibility
+     * @param messageContext - The context of the message to check for guess eligibility
      */
-    private guessEligible(message: GuildTextableMessage): boolean {
-        const userVoiceChannel = getUserVoiceChannel(message);
+    private guessEligible(messageContext: MessageContext): boolean {
+        const userVoiceChannel = getUserVoiceChannel(messageContext);
         // if user isn't in the same voice channel
         if (!userVoiceChannel || (userVoiceChannel.id !== this.voiceChannelID)) {
             return false;
         }
 
         // if message isn't in the active game session's text channel
-        if (message.channel.id !== this.textChannelID) {
+        if (messageContext.textChannelID !== this.textChannelID) {
             return false;
         }
 
         // check elimination mode constraints
         if (this.gameType === GameType.ELIMINATION) {
             const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
-            if (!this.participants.has(message.author.id) || eliminationScoreboard.isPlayerEliminated(message.author.id)) {
+            if (!this.participants.has(messageContext.author.id) || eliminationScoreboard.isPlayerEliminated(messageContext.author.id)) {
                 return false;
             }
         } else if (this.gameType === GameType.TEAMS) {
             const teamScoreboard = this.scoreboard as TeamScoreboard;
-            if (!teamScoreboard.getPlayer(message.author.id)) {
+            if (!teamScoreboard.getPlayer(messageContext.author.id)) {
                 return false;
             }
         }

@@ -112,6 +112,15 @@ export default class GameRound {
     /** Song/artist name hints */
     public readonly hints: { songHint: string, artistHint: string };
 
+    /** UUID associated with right guess interaction custom_id */
+    public correctAnswerUUID: string;
+
+    /** UUID associated with wrong guesses in multiple choice */
+    public incorrectAnswerUUIDs: [string, string, string];
+
+    /** List of players who incorrectly guessed in the multiple choice */
+    public incorrectMCGuessers: Set<string>;
+
     /** The base EXP for this GameRound */
     private baseExp: number;
 
@@ -136,6 +145,9 @@ export default class GameRound {
             songHint: generateHint(this.songName),
             artistHint: generateHint(this.artistName),
         };
+        this.correctAnswerUUID = null;
+        this.incorrectAnswerUUIDs = null;
+        this.incorrectMCGuessers = new Set();
     }
 
     /**

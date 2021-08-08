@@ -5,6 +5,7 @@ import {
     getDebugLogHeader,
     EMBED_SUCCESS_COLOR,
     sendInfoMessage,
+    sendErrorMessage,
     getMajorityCount,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
@@ -35,7 +36,12 @@ async function sendSkipMessage(message: GuildTextableMessage, gameRound: GameRou
 }
 
 function isSkipMajority(message: GuildTextableMessage, gameSession: GameSession): boolean {
-    return gameSession.gameRound.getNumSkippers() >= getMajorityCount(message.guildID);
+    if (gameSession.gameType === GameType.ELIMINATION) {
+        const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
+        return gameSession.gameRound.getNumSkippers() >= Math.floor(eliminationScoreboard.getAlivePlayersCount() * 0.5) + 1;
+    }
+
+    return gameSession.gameRound.getNumSkippers() >= getMajorityCount(message.guildID) - gameSession.gameRound.incorrectMCGuessers.size;
 }
 
 export default class SkipCommand extends InGameCommand {
@@ -61,6 +67,13 @@ export default class SkipCommand extends InGameCommand {
         if (gameSession.gameRound.skipAchieved || !gameSession.gameRound) {
             // song already being skipped
             return;
+        }
+
+        if ([GameType.MC_EASY, GameType.MC_MEDIUM, GameType.MC_HARD].includes(gameSession.gameType)) {
+            if (gameSession.gameRound.incorrectMCGuessers.has(message.author.id)) {
+                sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid skip request", description: "Eliminated players cannot request to skip.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
+                return;
+            }
         }
 
         if (isSkipMajority(message, gameSession)) {
