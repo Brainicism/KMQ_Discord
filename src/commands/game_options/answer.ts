@@ -1,5 +1,5 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { sendOptionsMessage, getDebugLogHeader, sendErrorMessage } from "../../helpers/discord_utils";
+import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
@@ -21,7 +21,7 @@ export default class AnswerCommand implements BaseCommand {
         maxArgCount: 1,
         arguments: [
             {
-                name: "artist_Type",
+                name: "answerType",
                 type: "enum" as const,
                 enums: Object.values(AnswerType),
             },
@@ -39,15 +39,15 @@ export default class AnswerCommand implements BaseCommand {
             },
             {
                 example: "`,answer mc_easy`",
-                explanation: "Click on the button from 3 multiple choice options to guess",
+                explanation: "Click on the button from 4 multiple choice options to guess",
             },
             {
                 example: "`,answer mc_medium`",
-                explanation: "Click on the button from 5 multiple choice options to guess",
+                explanation: "Click on the button from 6 multiple choice options to guess",
             },
             {
                 example: "`,answer mc_hard`",
-                explanation: "Click on the button from 7 multiple choice options to guess",
+                explanation: "Click on the button from 8 multiple choice options to guess",
             },
         ],
         priority: 150,
@@ -62,15 +62,9 @@ export default class AnswerCommand implements BaseCommand {
             return;
         }
 
-        if (guildPreference.isGroupsMode()) {
-            logger.warn(`${getDebugLogHeader(message)} | Game option conflict between artist type and groups.`);
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Game Option Conflict", description: `\`groups\` game option is currently set. \`artisttype\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed` });
-            return;
-        }
-
         const answerType = parsedMessage.components[0] as AnswerType;
         await guildPreference.setAnswerType(answerType);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.ANSWER_TYPE, reset: false });
-        logger.info(`${getDebugLogHeader(message)} | Artist type set to ${answerType}`);
+        logger.info(`${getDebugLogHeader(message)} | Answer type set to ${answerType}`);
     };
 }
