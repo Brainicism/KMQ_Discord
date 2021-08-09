@@ -149,7 +149,7 @@ export default class PlayCommand implements BaseCommand {
             } else if (isEliminationMode) {
                 // (1) ELIMINATION game creation
                 const lives = (parsedMessage.components.length > 1
-                               && Number.isInteger(parsedMessage.components[1])
+                               && Number.isInteger(parseInt(parsedMessage.components[1]))
                                && parseInt(parsedMessage.components[1]) > 0
                                && parseInt(parsedMessage.components[1]) <= 10000)
                     ? parseInt(parsedMessage.components[1]) : DEFAULT_LIVES;
