@@ -327,12 +327,6 @@ export async function getMultipleChoiceOptions(answerType: AnswerType, guessMode
 
                 result = new Set([...sameArtistSongs, ...sameGenderSongs]);
                 easyNames = setDifference([...easyNames], [...result]);
-                if (result.size < MEDIUM_CHOICES) {
-                    for (const choice of _.sampleSize([...easyNames], MEDIUM_CHOICES - result.size)) {
-                        result.add(choice);
-                    }
-                }
-
                 break;
             }
 
@@ -342,15 +336,21 @@ export async function getMultipleChoiceOptions(answerType: AnswerType, guessMode
                     .where("id_artist", artistID)
                     .andWhereNot("song_name", answer)).map((x) => x["song_name"]));
                 result = new Set(_.sampleSize([...names], HARD_CHOICES));
-                if (result.size < HARD_CHOICES) {
-                    for (const choice of _.sampleSize([...easyNames], HARD_CHOICES - result.size)) {
-                        result.add(choice);
-                    }
-                }
-
                 break;
             default:
                 break;
+        }
+
+        const CHOICES_BY_DIFFICULTY = {
+            [AnswerType.MULTIPLE_CHOICE_EASY]: EASY_CHOICES,
+            [AnswerType.MULTIPLE_CHOICE_MED]: MEDIUM_CHOICES,
+            [AnswerType.MULTIPLE_CHOICE_HARD]: HARD_CHOICES,
+        };
+
+        if (result.size < CHOICES_BY_DIFFICULTY[answerType]) {
+            for (const choice of _.sampleSize([...easyNames], CHOICES_BY_DIFFICULTY[answerType] - result.size)) {
+                result.add(choice);
+            }
         }
     } else {
         easyNames = new Set((await dbContext.kmq("available_songs").select("artist_name")

@@ -66,10 +66,8 @@ export function validHintCheck(gameSession: GameSession, guildPreference: GuildP
             return false;
         }
     } else if (guildPreference.isMultipleChoiceMode()) {
-        if (gameSession.gameRound.incorrectMCGuessers.has(message.author.id)) {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid hint request", description: "Only alive players may request hints.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
-            return false;
-        }
+        sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid hint request", description: "You cannot request hints while playing multiple choice.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
+        return false;
     }
 
     return true;

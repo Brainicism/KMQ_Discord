@@ -376,7 +376,7 @@ export default class GameSession {
             await delay(this.multiguessDelayIsActive(guildPreference) ? MULTIGUESS_DELAY : 0);
             if (!this.gameRound) return;
             if (interaction) {
-                await interactionMarkAnswers(this.gameRound);
+                await interactionMarkAnswers(this.gameRound.interactionMessage, this.gameRound.interactionComponents, this.gameRound.interactionCorrectAnswerUUID);
             }
 
             // mark round as complete, so no more guesses can go through
@@ -397,7 +397,7 @@ export default class GameSession {
         } else if (guildPreference.isMultipleChoiceMode()) {
             if (setDifference([...new Set(getCurrentVoiceMembers(this.voiceChannelID).map((x) => x.id))], [...this.gameRound.incorrectMCGuessers]).size === 0) {
                 if (interaction) {
-                    await interactionMarkAnswers(this.gameRound);
+                    await interactionMarkAnswers(this.gameRound.interactionMessage, this.gameRound.interactionComponents, this.gameRound.interactionCorrectAnswerUUID);
                 }
 
                 await this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));

@@ -35,11 +35,6 @@ async function sendSkipMessage(message: GuildTextableMessage, gameRound: GameRou
 }
 
 function isSkipMajority(message: GuildTextableMessage, gameSession: GameSession): boolean {
-    if (gameSession.gameType === GameType.ELIMINATION) {
-        const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
-        return gameSession.gameRound.getNumSkippers() >= Math.floor(eliminationScoreboard.getAlivePlayersCount() * 0.5) + 1;
-    }
-
     return gameSession.gameRound.getNumSkippers() >= getMajorityCount(message.guildID);
 }
 

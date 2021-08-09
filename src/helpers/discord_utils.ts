@@ -671,16 +671,16 @@ export function sendDebugAlertWebhook(title: string, description: string, color:
     });
 }
 
-export async function interactionMarkAnswers(gameRound: GameRound) {
-    await gameRound.interactionMessage.edit({
-        components: gameRound.interactionComponents.map((x) => ({
+export async function interactionMarkAnswers(message: Eris.Message<Eris.TextableChannel>, components: Array<Eris.ActionRow>, correctAnswerUUID: string) {
+    await message.edit({
+        components: components.map((x) => ({
             type: 1,
             components: x.components.map((y) => {
                 const z = y as Eris.InteractionButton;
                 const a: Eris.InteractionButton = {
                     label: z.label,
                     custom_id: z.custom_id,
-                    style: gameRound.interactionCorrectAnswerUUID === z.custom_id ? 3 : 1,
+                    style: correctAnswerUUID === z.custom_id ? 3 : 1,
                     type: 2,
                     disabled: true,
                 };
