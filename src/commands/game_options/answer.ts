@@ -30,7 +30,7 @@ export default class AnswerCommand implements BaseCommand {
 
     help = {
         name: "answer",
-        description: "Choose how to answer: by typing your answer, or via multiple choice. Options are the following, `typing`, `easy`, `medium`, and `hard`.",
+        description: "Choose how to answer: by typing your answer, or via multiple choice. Options are the following, `typing`, `easy`, `medium`, and `hard`. Playing on multiple choice mode reduces EXP by (0.25x, 0.5x, 0.75x) based on difficulty",
         usage: ",answer [answerType]",
         examples: [
             {
