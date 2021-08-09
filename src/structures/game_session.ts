@@ -335,7 +335,10 @@ export default class GameSession {
             });
 
         // commit session's song plays and correct guesses
-        await this.storeSongCounts();
+        const guildPreference = await getGuildPreference(this.guildID);
+        if (guildPreference.isMultipleChoiceMode()) {
+            await this.storeSongCounts();
+        }
 
         logger.info(`gid: ${this.guildID} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}. gameType = ${this.gameType}`);
     };
