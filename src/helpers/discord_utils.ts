@@ -670,3 +670,23 @@ export function sendDebugAlertWebhook(title: string, description: string, color:
         avatar_url: avatarUrl,
     });
 }
+
+export async function interactionMarkAnswers(interaction: Eris.ComponentInteraction, gameRound: GameRound) {
+    await interaction.editParent({
+        components: gameRound.interactionComponents.map((x) => ({
+            type: 1,
+            components: x.components.map((y) => {
+                const z = y as Eris.InteractionButton;
+                const a: Eris.InteractionButton = {
+                    label: z.label,
+                    custom_id: z.custom_id,
+                    style: gameRound.interactionCorrectAnswerUUID === z.custom_id ? 3 : 1,
+                    type: 2,
+                    disabled: true,
+                };
+
+                return a;
+            }),
+        })),
+    });
+}

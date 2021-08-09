@@ -1,4 +1,5 @@
 import _ from "lodash";
+import Eris from "eris";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { state } from "../kmq";
 import KmqMember from "./kmq_member";
@@ -121,6 +122,9 @@ export default class GameRound {
     /** List of players who incorrectly guessed in the multiple choice */
     public incorrectMCGuessers: Set<string>;
 
+    /** List of players who incorrectly guessed in the multiple choice */
+    public interactionComponents: Array<Eris.ActionRow>;
+
     /** The base EXP for this GameRound */
     private baseExp: number;
 
@@ -148,6 +152,7 @@ export default class GameRound {
         this.interactionCorrectAnswerUUID = null;
         this.interactionIncorrectAnswerUUIDs = [];
         this.incorrectMCGuessers = new Set();
+        this.interactionComponents = [];
     }
 
     /**

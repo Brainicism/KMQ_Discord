@@ -1,7 +1,7 @@
 import Eris from "eris";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
-import { getUserTag, EMBED_ERROR_COLOR } from "../../helpers/discord_utils";
+import { getUserTag, EMBED_ERROR_COLOR, getCurrentVoiceMembers } from "../../helpers/discord_utils";
 import { state } from "../../kmq";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { GuessModeType } from "../../commands/game_options/guessmode";
@@ -12,6 +12,7 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
     if (interaction instanceof Eris.ComponentInteraction) {
         const gameSession = state.gameSessions[interaction.guildID];
         if (!gameSession || !gameSession.gameRound) {
+            interaction.acknowledge();
             return;
         }
 
@@ -20,6 +21,11 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
             new KmqMember(interaction.member.username, getUserTag(interaction.member), interaction.member.avatarURL, interaction.member.id),
             interaction.guildID,
         );
+
+        if (!(getCurrentVoiceMembers(gameSession.voiceChannelID).map((x) => x.id).includes(interaction.member.id))) {
+            interaction.acknowledge();
+            return;
+        }
 
         if (gameSession.gameRound.incorrectMCGuessers.has(interaction.member.id)) {
             await interaction.createMessage({
@@ -70,11 +76,11 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
                 }],
                 flags: 64,
             });
-            gameSession.guessSong(messageContext, "");
+            gameSession.guessSong(messageContext, "", interaction);
             return;
         }
 
         const guildPreference = await getGuildPreference(messageContext.guildID);
-        await gameSession.guessSong(messageContext, guildPreference.getGuessModeType() !== GuessModeType.ARTIST ? gameSession.gameRound.songName : gameSession.gameRound.artistName);
+        await gameSession.guessSong(messageContext, guildPreference.getGuessModeType() !== GuessModeType.ARTIST ? gameSession.gameRound.songName : gameSession.gameRound.artistName, interaction);
     }
 }

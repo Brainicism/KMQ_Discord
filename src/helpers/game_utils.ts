@@ -300,6 +300,7 @@ export async function getMultipleChoiceOptions(difficulty: GameType, guessMode: 
 
     const EASY_CHOICES = 3;
     const MEDIUM_CHOICES = 5;
+    const MEDIUM_SAME_ARIST_CHOICES = 2;
     const HARD_CHOICES = 7;
 
     if (guessMode === GuessModeType.SONG_NAME || guessMode === GuessModeType.BOTH) {
@@ -309,20 +310,28 @@ export async function getMultipleChoiceOptions(difficulty: GameType, guessMode: 
         switch (difficulty) {
             case GameType.MC_EASY:
                 // Easy: EASY_CHOICES from same gender as chosen artist
+                result = new Set(_.sampleSize([...easyNames], EASY_CHOICES));
                 break;
             case GameType.MC_MEDIUM:
             {
-                // Medium: MEDIUM_CHOICES - 2 from same gender as chosen artist, 2 from chosen artist
+                // Medium: MEDIUM_CHOICES - MEDIUM_SAME_ARIST_CHOICES from same gender as chosen artist, MEDIUM_SAME_ARIST_CHOICES from chosen artist
                 const sameArtistSongs = _.sampleSize((await dbContext.kmq("available_songs").select("song_name")
                     .where("id_artist", artistID)
-                    .andWhereNot("song_name", answer)).map((x) => x["song_name"]), 2);
+                    .andWhereNot("song_name", answer)).map((x) => x["song_name"]), MEDIUM_SAME_ARIST_CHOICES);
 
                 const sameGenderSongs = _.sampleSize((await dbContext.kmq("available_songs").select("song_name")
                     .whereNotIn("song_name", [...sameArtistSongs, answer])
                     .where("members", gender)
-                    .andWhereNot("id_artist", artistID)).map((x) => x["song_name"]), MEDIUM_CHOICES - 2);
+                    .andWhereNot("id_artist", artistID)).map((x) => x["song_name"]), MEDIUM_CHOICES - MEDIUM_SAME_ARIST_CHOICES);
 
                 result = new Set([...sameArtistSongs, ...sameGenderSongs]);
+                easyNames = setDifference([...easyNames], [...result]);
+                if (result.size < MEDIUM_CHOICES) {
+                    for (const choice of _.sampleSize([...easyNames], MEDIUM_CHOICES - result.size)) {
+                        result.add(choice);
+                    }
+                }
+
                 break;
             }
 
@@ -331,6 +340,13 @@ export async function getMultipleChoiceOptions(difficulty: GameType, guessMode: 
                 names = new Set((await dbContext.kmq("available_songs").select("song_name")
                     .where("id_artist", artistID)
                     .andWhereNot("song_name", answer)).map((x) => x["song_name"]));
+                result = new Set(_.sampleSize([...names], HARD_CHOICES));
+                if (result.size < HARD_CHOICES) {
+                    for (const choice of _.sampleSize([...easyNames], HARD_CHOICES - result.size)) {
+                        result.add(choice);
+                    }
+                }
+
                 break;
             default:
                 break;
@@ -341,6 +357,7 @@ export async function getMultipleChoiceOptions(difficulty: GameType, guessMode: 
         switch (difficulty) {
             case GameType.MC_EASY:
                 // Easy: EASY_CHOICES from any artist
+                result = new Set(_.sampleSize([...easyNames], EASY_CHOICES));
                 break;
             case GameType.MC_MEDIUM:
             case GameType.MC_HARD:
@@ -349,40 +366,11 @@ export async function getMultipleChoiceOptions(difficulty: GameType, guessMode: 
                 names = new Set((await dbContext.kmq("available_songs").select("artist_name")
                     .where("members", gender)
                     .andWhereNot("artist_name", answer)).map((x) => x["artist_name"]));
+                result = new Set(_.sampleSize([...names], difficulty === GameType.MC_MEDIUM ? MEDIUM_CHOICES : HARD_CHOICES));
                 break;
             default:
                 break;
         }
-    }
-
-    switch (difficulty) {
-        case GameType.MC_EASY:
-            result = new Set(_.sampleSize([...easyNames], EASY_CHOICES));
-            break;
-        case GameType.MC_MEDIUM:
-            if (guessMode === GuessModeType.ARTIST) {
-                result = new Set(_.sampleSize([...names], MEDIUM_CHOICES));
-            }
-
-            easyNames = setDifference([...easyNames], [...result]);
-            if (result.size < MEDIUM_CHOICES) {
-                for (const choice of _.sampleSize([...easyNames], MEDIUM_CHOICES - result.size)) {
-                    result.add(choice);
-                }
-            }
-
-            break;
-        case GameType.MC_HARD:
-            result = new Set(_.sampleSize([...names], HARD_CHOICES));
-            if (result.size < HARD_CHOICES) {
-                for (const choice of _.sampleSize([...easyNames], HARD_CHOICES - result.size)) {
-                    result.add(choice);
-                }
-            }
-
-            break;
-        default:
-            break;
     }
 
     return [...result];
