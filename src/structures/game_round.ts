@@ -114,10 +114,10 @@ export default class GameRound {
     public readonly hints: { songHint: string, artistHint: string };
 
     /** UUID associated with right guess interaction custom_id */
-    public interactionCorrectAnswerUUID: string;
+    public interactionCorrectAnswerUUID: [string, number];
 
     /** UUID associated with wrong guesses in multiple choice */
-    public interactionIncorrectAnswerUUIDs: string[];
+    public interactionIncorrectAnswerUUIDs: { [uuid: string]: number };
 
     /** List of players who incorrectly guessed in the multiple choice */
     public incorrectMCGuessers: Set<string>;
@@ -153,7 +153,7 @@ export default class GameRound {
             artistHint: generateHint(this.artistName),
         };
         this.interactionCorrectAnswerUUID = null;
-        this.interactionIncorrectAnswerUUIDs = [];
+        this.interactionIncorrectAnswerUUIDs = {};
         this.incorrectMCGuessers = new Set();
         this.interactionComponents = [];
         this.interactionMessage = null;

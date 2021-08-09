@@ -36,7 +36,7 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
                         icon_url: messageContext.author.avatarUrl,
                     },
                     title: bold("Uh-oh"),
-                    description: "You've already been eliminated for this round.",
+                    description: "You've already been eliminated this round.",
                     thumbnail: { url: KmqImages.DEAD },
                 }],
                 flags: 64,
@@ -63,6 +63,7 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
 
         if (!gameSession.isCorrectInteractionAnswer(interaction.data.custom_id)) {
             gameSession.gameRound.incorrectMCGuessers.add(interaction.member.id);
+            gameSession.gameRound.interactionIncorrectAnswerUUIDs[interaction.data.custom_id]++;
             await interaction.createMessage({
                 embeds: [{
                     color: EMBED_ERROR_COLOR,
@@ -71,7 +72,7 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
                         icon_url: messageContext.author.avatarUrl,
                     },
                     title: bold("Incorrect guess"),
-                    description: "You've been eliminated for this round.",
+                    description: "You've been eliminated this round.",
                     thumbnail: { url: KmqImages.DEAD },
                 }],
                 flags: 64,
@@ -81,6 +82,7 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
         }
 
         await interaction.acknowledge();
+        gameSession.gameRound.interactionCorrectAnswerUUID[1]++;
         const guildPreference = await getGuildPreference(messageContext.guildID);
         await gameSession.guessSong(messageContext, guildPreference.getGuessModeType() !== GuessModeType.ARTIST ? gameSession.gameRound.songName : gameSession.gameRound.artistName, true);
     }

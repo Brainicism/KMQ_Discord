@@ -376,7 +376,10 @@ export default class GameSession {
             await delay(this.multiguessDelayIsActive(guildPreference) ? MULTIGUESS_DELAY : 0);
             if (!this.gameRound) return;
             if (interaction) {
-                await interactionMarkAnswers(this.gameRound.interactionMessage, this.gameRound.interactionComponents, this.gameRound.interactionCorrectAnswerUUID);
+                await interactionMarkAnswers(this.gameRound.interactionMessage,
+                    this.gameRound.interactionComponents,
+                    this.gameRound.interactionCorrectAnswerUUID,
+                    this.gameRound.interactionIncorrectAnswerUUIDs);
             }
 
             // mark round as complete, so no more guesses can go through
@@ -397,7 +400,10 @@ export default class GameSession {
         } else if (guildPreference.isMultipleChoiceMode()) {
             if (setDifference([...new Set(getCurrentVoiceMembers(this.voiceChannelID).map((x) => x.id))], [...this.gameRound.incorrectMCGuessers]).size === 0) {
                 if (interaction) {
-                    await interactionMarkAnswers(this.gameRound.interactionMessage, this.gameRound.interactionComponents, this.gameRound.interactionCorrectAnswerUUID);
+                    await interactionMarkAnswers(this.gameRound.interactionMessage,
+                        this.gameRound.interactionComponents,
+                        this.gameRound.interactionCorrectAnswerUUID,
+                        this.gameRound.interactionIncorrectAnswerUUIDs);
                 }
 
                 await this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));
@@ -522,13 +528,14 @@ export default class GameSession {
                 randomSong.artistID);
 
             let buttons: Array<Eris.InteractionButton> = [];
-            for (const [i, choice] of wrongChoices.entries()) {
-                this.gameRound.interactionIncorrectAnswerUUIDs.push(uuid.v4());
-                buttons.push({ type: 2, style: 1, label: choice, custom_id: this.gameRound.interactionIncorrectAnswerUUIDs[i] });
+            for (const choice of wrongChoices) {
+                const id = uuid.v4();
+                this.gameRound.interactionIncorrectAnswerUUIDs[id] = 0;
+                buttons.push({ type: 2, style: 1, label: choice, custom_id: id });
             }
 
-            this.gameRound.interactionCorrectAnswerUUID = uuid.v4();
-            buttons.push({ type: 2, style: 1, label: correctChoice, custom_id: this.gameRound.interactionCorrectAnswerUUID });
+            this.gameRound.interactionCorrectAnswerUUID = [uuid.v4(), 0];
+            buttons.push({ type: 2, style: 1, label: correctChoice, custom_id: this.gameRound.interactionCorrectAnswerUUID[0] });
 
             buttons = _.shuffle(buttons);
 
@@ -625,7 +632,7 @@ export default class GameSession {
      * @returns true if the given UUID is one of the guesses of the current game round
      */
     isValidInteractionGuess(interactionUUID: string): boolean {
-        return interactionUUID === this.gameRound?.interactionCorrectAnswerUUID || this.gameRound?.interactionIncorrectAnswerUUIDs?.includes(interactionUUID);
+        return interactionUUID === this.gameRound?.interactionCorrectAnswerUUID[0] || Object.keys(this.gameRound?.interactionIncorrectAnswerUUIDs)?.includes(interactionUUID);
     }
 
     /**
@@ -634,7 +641,7 @@ export default class GameSession {
      * the correct guess
      */
     isCorrectInteractionAnswer(interactionUUID: string): boolean {
-        return this.gameRound?.interactionCorrectAnswerUUID === interactionUUID;
+        return this.gameRound?.interactionCorrectAnswerUUID[0] === interactionUUID;
     }
 
     /**
