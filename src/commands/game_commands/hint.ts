@@ -21,7 +21,7 @@ function isHintMajority(message: GuildTextableMessage, gameSession: GameSession)
     }
 
     if (gameSession.isMultipleChoiceMode()) {
-        return gameSession.gameRound.getNumSkippers() >= getMajorityCount(message.guildID) - gameSession.gameRound.incorrectMCGuessers.size;
+        return gameSession.gameRound.getHintRequests() >= getMajorityCount(message.guildID) - gameSession.gameRound.incorrectMCGuessers.size;
     }
 
     return gameSession.gameRound.getHintRequests() >= getMajorityCount(message.guildID);
@@ -37,6 +37,11 @@ async function sendHintNotification(message: GuildTextableMessage, gameSession: 
         await sendInfoMessage(MessageContext.fromMessage(message), {
             title: "**Hint Request**",
             description: `${gameSession.gameRound.getHintRequests()}/${Math.floor(eliminationScoreboard.getAlivePlayersCount() * 0.5) + 1} hint requests received.`,
+        }, true);
+    } else if (gameSession.isMultipleChoiceMode()) {
+        await sendInfoMessage(MessageContext.fromMessage(message), {
+            title: "**Hint Request**",
+            description: `${gameSession.gameRound.getHintRequests()}/${Math.max(getMajorityCount(message.guildID) - gameSession.gameRound.incorrectMCGuessers.size, 1)} hint requests received.`,
         }, true);
     } else {
         await sendInfoMessage(MessageContext.fromMessage(message), {
@@ -61,7 +66,7 @@ export function validHintCheck(gameSession: GameSession, gameRound: GameRound, m
         }
     } else if (gameSession.isMultipleChoiceMode()) {
         if (gameSession.gameRound.incorrectMCGuessers.has(message.author.id)) {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid hint request", description: "You can only guess once per round.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid hint request", description: "Only alive players may request hints.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
             return false;
         }
     }
