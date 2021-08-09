@@ -22,7 +22,7 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
             interaction.guildID,
         );
 
-        if (!(getCurrentVoiceMembers(gameSession.voiceChannelID).map((x) => x.id).includes(interaction.member.id))) {
+        if (!getCurrentVoiceMembers(gameSession.voiceChannelID).map((x) => x.id).includes(interaction.member.id)) {
             interaction.acknowledge();
             return;
         }
