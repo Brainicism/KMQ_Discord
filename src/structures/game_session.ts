@@ -553,7 +553,7 @@ export default class GameSession {
             this.gameRound.interactionComponents = components;
 
             sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: `Guess the ${guildPreference.getGuessModeType()}!`,
+                title: `Guess the ${guildPreference.getGuessModeType() === GuessModeType.BOTH ? "song" : guildPreference.getGuessModeType()}!`,
                 components,
                 thumbnailUrl: KmqImages.LISTENING,
             });
