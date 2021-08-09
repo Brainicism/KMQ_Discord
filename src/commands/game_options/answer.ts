@@ -8,9 +8,9 @@ import MessageContext from "../../structures/message_context";
 const logger = new IPCLogger("answer");
 export enum AnswerType {
     TYPING = "typing",
-    MULTIPLE_CHOICE_EASY = "mc_easy",
-    MULTIPLE_CHOICE_MED = "mc_med",
-    MULTIPLE_CHOICE_HARD = "mc_hard",
+    MULTIPLE_CHOICE_EASY = "easy",
+    MULTIPLE_CHOICE_MED = "medium",
+    MULTIPLE_CHOICE_HARD = "hard",
 }
 
 export const DEFAULT_ANSWER_TYPE = AnswerType.TYPING;
@@ -30,7 +30,7 @@ export default class AnswerCommand implements BaseCommand {
 
     help = {
         name: "answer",
-        description: "Choose how to answer: by typing your answer, or via multiple choice. Options are the following, `typing`, `mc_easy`, `mc_medium`, and `mc_hard`.",
+        description: "Choose how to answer: by typing your answer, or via multiple choice. Options are the following, `typing`, `easy`, `medium`, and `hard`.",
         usage: ",answer [answerType]",
         examples: [
             {
@@ -38,15 +38,15 @@ export default class AnswerCommand implements BaseCommand {
                 explanation: "Type your answer in the chat to guess",
             },
             {
-                example: "`,answer mc_easy`",
+                example: "`,answer easy`",
                 explanation: "Click on the button from 4 multiple choice options to guess",
             },
             {
-                example: "`,answer mc_medium`",
+                example: "`,answer medium`",
                 explanation: "Click on the button from 6 multiple choice options to guess",
             },
             {
-                example: "`,answer mc_hard`",
+                example: "`,answer hard`",
                 explanation: "Click on the button from 8 multiple choice options to guess",
             },
         ],
