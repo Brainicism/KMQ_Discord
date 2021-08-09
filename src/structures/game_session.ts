@@ -971,6 +971,23 @@ export default class GameSession {
             expModifier *= 2;
         }
 
+        if (guildPreference.isMultipleChoiceMode()) {
+            const difficulty = guildPreference.getAnswerType();
+            switch (difficulty) {
+                case AnswerType.MULTIPLE_CHOICE_EASY:
+                    expModifier *= 0.25;
+                    break;
+                case AnswerType.MULTIPLE_CHOICE_MED:
+                    expModifier *= 0.5;
+                    break;
+                case AnswerType.MULTIPLE_CHOICE_HARD:
+                    expModifier *= 0.75;
+                    break;
+                default:
+                    break;
+            }
+        }
+
         return Math.floor((expModifier * baseExp) / place);
     }
 

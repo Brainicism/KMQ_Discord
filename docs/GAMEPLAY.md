@@ -41,6 +41,7 @@ Everyone starts off as a `Novice` and works their way up as a `Trainee` (Level 1
 - Winning a game in teams mode earns your team 1.1x EXP
 - Using a hint reduces EXP by 0.5x
 - All EXP bonuses stack on one another
+- Playing on multiple choice mode reduces EXP by (0.25x, 0.5x, 0.75x) based on difficulty
 
 ## Requirements
 You will only gain EXP if:
