@@ -63,6 +63,11 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
 
         if (!gameSession.isCorrectInteractionAnswer(interaction.data.custom_id)) {
             gameSession.gameRound.incorrectMCGuessers.add(interaction.member.id);
+            await gameSession.guessSong(messageContext, "", interaction);
+            if (interaction.acknowledged) {
+                return;
+            }
+
             await interaction.createMessage({
                 embeds: [{
                     color: EMBED_ERROR_COLOR,
@@ -76,7 +81,6 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
                 }],
                 flags: 64,
             });
-            gameSession.guessSong(messageContext, "", interaction);
             return;
         }
 
