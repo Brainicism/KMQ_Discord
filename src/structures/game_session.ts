@@ -30,6 +30,7 @@ import MessageContext from "./message_context";
 import KmqMember from "./kmq_member";
 import { MultiGuessType } from "../commands/game_options/multiguess";
 import { specialFfmpegArgs } from "../commands/game_options/special";
+import { AnswerType } from "../commands/game_options/answer";
 
 const MULTIGUESS_DELAY = 1500;
 const logger = new IPCLogger("game_session");
@@ -239,7 +240,8 @@ export default class GameSession {
                 };
             }
 
-            sendEndRoundMessage(messageContext, this.scoreboard, gameRound, guildPreference.getGuessModeType(), playerRoundResults, remainingDuration, uniqueSongCounter);
+            sendEndRoundMessage(messageContext, this.scoreboard, gameRound, guildPreference.getGuessModeType(),
+                playerRoundResults, guildPreference.isMultipleChoiceMode(), remainingDuration, uniqueSongCounter);
         }
 
         this.incrementSongCount(gameRound.videoID, guessResult.correct);
@@ -390,7 +392,7 @@ export default class GameSession {
                 .increment("songs_guessed", 1);
 
             this.startRound(guildPreference, messageContext);
-        } else if (this.isMultipleChoiceMode()) {
+        } else if (guildPreference.isMultipleChoiceMode()) {
             if (setDifference([...new Set(getCurrentVoiceMembers(this.voiceChannelID).map((x) => x.id))], [...this.gameRound.incorrectMCGuessers]).size === 0) {
                 if (interaction) {
                     await interactionMarkAnswers(interaction, this.gameRound);
@@ -509,9 +511,9 @@ export default class GameSession {
 
         this.playSong(guildPreference, messageContext);
 
-        if (this.isMultipleChoiceMode()) {
+        if (guildPreference.isMultipleChoiceMode()) {
             const correctChoice = guildPreference.getGuessModeType() === GuessModeType.ARTIST ? this.gameRound.artistName : this.gameRound.songName;
-            const wrongChoices = await getMultipleChoiceOptions(this.gameType,
+            const wrongChoices = await getMultipleChoiceOptions(guildPreference.getAnswerType(),
                 guildPreference.getGuessModeType(),
                 randomSong.members,
                 correctChoice,
@@ -529,8 +531,8 @@ export default class GameSession {
             buttons = _.shuffle(buttons);
 
             let components: Array<Eris.ActionRow>;
-            switch (this.gameType) {
-                case GameType.MC_EASY:
+            switch (guildPreference.getAnswerType()) {
+                case AnswerType.MULTIPLE_CHOICE_EASY:
                     components = [
                         {
                             type: 1,
@@ -538,10 +540,10 @@ export default class GameSession {
                         },
                     ];
                     break;
-                case GameType.MC_MEDIUM:
+                case AnswerType.MULTIPLE_CHOICE_MED:
                     components = chunkArray(buttons, 3).map((x) => ({ type: 1, components: x }));
                     break;
-                case GameType.MC_HARD:
+                case AnswerType.MULTIPLE_CHOICE_HARD:
                     components = chunkArray(buttons, 4).map((x) => ({ type: 1, components: x }));
                     break;
                 default:
@@ -631,10 +633,6 @@ export default class GameSession {
      */
     isCorrectInteractionAnswer(interactionUUID: string): boolean {
         return this.gameRound?.interactionCorrectAnswerUUID === interactionUUID;
-    }
-
-    isMultipleChoiceMode(): boolean {
-        return [GameType.MC_EASY, GameType.MC_MEDIUM, GameType.MC_HARD].includes(this.gameType);
     }
 
     /**

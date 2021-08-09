@@ -28,14 +28,14 @@ export default class ForceHintCommand extends InGameCommand {
     call = async ({ gameSessions, message }: CommandArgs) => {
         const gameSession = gameSessions[message.guildID];
         const gameRound = gameSession?.gameRound;
+        const guildPreference = await getGuildPreference(message.guildID);
 
-        if (!validHintCheck(gameSession, gameRound, message)) return;
+        if (!validHintCheck(gameSession, guildPreference, gameRound, message)) return;
         if (message.author.id !== gameSession.owner.id) {
             await sendErrorMessage(MessageContext.fromMessage(message), { title: "Force hint ignored", description: `Only the person who started the game (${bold(gameSession.owner.tag)}) can force-hint.` });
             return;
         }
 
-        const guildPreference = await getGuildPreference(message.guildID);
         gameRound.hintRequested(message.author.id);
         logger.info(`${getDebugLogHeader(message)} | Owner force-hinted.`);
         gameRound.hintUsed = true;

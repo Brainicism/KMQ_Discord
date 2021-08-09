@@ -4,7 +4,7 @@ import { state } from "../kmq";
 import { IPCLogger } from "../logger";
 import GameSession from "../structures/game_session";
 import GuildPreference from "../structures/guild_preference";
-import { MatchedArtist, QueriedSong, GameType } from "../types";
+import { MatchedArtist, QueriedSong } from "../types";
 import { getForcePlaySong, isDebugMode, isForcedSongActive } from "./debug_utils";
 import { Gender } from "../commands/game_options/gender";
 import { ArtistType } from "../commands/game_options/artisttype";
@@ -15,6 +15,7 @@ import { NON_OFFICIAL_VIDEO_TAGS, ReleaseType } from "../commands/game_options/r
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { cleanArtistName } from "../structures/game_round";
 import { setDifference } from "./utils";
+import { AnswerType } from "../commands/game_options/answer";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -286,14 +287,14 @@ export async function getMatchingGroupNames(rawGroupNames: Array<string>, aliasA
 }
 
 /**
- * @param difficulty - The multiple choice difficulty
+ * @param answerType - The answer type
  * @param guessMode - The guess mode
  * @param gender - The correct answer's group's gender
  * @param answer - The correct answer
  * @param artistID - The correct answer's group's ID
  * @returns unshuffled incorrect choices based on difficulty
  */
-export async function getMultipleChoiceOptions(difficulty: GameType, guessMode: GuessModeType, gender: Gender, answer: string, artistID: number): Promise<string[]> {
+export async function getMultipleChoiceOptions(answerType: AnswerType, guessMode: GuessModeType, gender: Gender, answer: string, artistID: number): Promise<string[]> {
     let easyNames: Set<string>;
     let names: Set<string>;
     let result: Set<string>;
@@ -307,12 +308,12 @@ export async function getMultipleChoiceOptions(difficulty: GameType, guessMode: 
         easyNames = new Set((await dbContext.kmq("available_songs").select("song_name")
             .where("members", gender)
             .andWhereNot("id_artist", artistID)).map((x) => x["song_name"]));
-        switch (difficulty) {
-            case GameType.MC_EASY:
+        switch (answerType) {
+            case AnswerType.MULTIPLE_CHOICE_EASY:
                 // Easy: EASY_CHOICES from same gender as chosen artist
                 result = new Set(_.sampleSize([...easyNames], EASY_CHOICES));
                 break;
-            case GameType.MC_MEDIUM:
+            case AnswerType.MULTIPLE_CHOICE_MED:
             {
                 // Medium: MEDIUM_CHOICES - MEDIUM_SAME_ARIST_CHOICES from same gender as chosen artist, MEDIUM_SAME_ARIST_CHOICES from chosen artist
                 const sameArtistSongs = _.sampleSize((await dbContext.kmq("available_songs").select("song_name")
@@ -335,7 +336,7 @@ export async function getMultipleChoiceOptions(difficulty: GameType, guessMode: 
                 break;
             }
 
-            case GameType.MC_HARD:
+            case AnswerType.MULTIPLE_CHOICE_HARD:
                 // Hard: HARD_CHOICES from chosen artist
                 names = new Set((await dbContext.kmq("available_songs").select("song_name")
                     .where("id_artist", artistID)
@@ -354,19 +355,19 @@ export async function getMultipleChoiceOptions(difficulty: GameType, guessMode: 
     } else {
         easyNames = new Set((await dbContext.kmq("available_songs").select("artist_name")
             .whereNot("artist_name", answer)).map((x) => x["artist_name"]));
-        switch (difficulty) {
-            case GameType.MC_EASY:
+        switch (answerType) {
+            case AnswerType.MULTIPLE_CHOICE_EASY:
                 // Easy: EASY_CHOICES from any artist
                 result = new Set(_.sampleSize([...easyNames], EASY_CHOICES));
                 break;
-            case GameType.MC_MEDIUM:
-            case GameType.MC_HARD:
+            case AnswerType.MULTIPLE_CHOICE_MED:
+            case AnswerType.MULTIPLE_CHOICE_HARD:
                 // Medium: MEDIUM_CHOICES from same gender
                 // Hard: HARD_CHOICES from same gender
                 names = new Set((await dbContext.kmq("available_songs").select("artist_name")
                     .where("members", gender)
                     .andWhereNot("artist_name", answer)).map((x) => x["artist_name"]));
-                result = new Set(_.sampleSize([...names], difficulty === GameType.MC_MEDIUM ? MEDIUM_CHOICES : HARD_CHOICES));
+                result = new Set(_.sampleSize([...names], answerType === AnswerType.MULTIPLE_CHOICE_MED ? MEDIUM_CHOICES : HARD_CHOICES));
                 break;
             default:
                 break;

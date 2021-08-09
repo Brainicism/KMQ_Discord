@@ -17,6 +17,7 @@ import { DEFAULT_RELEASE_TYPE, ReleaseType } from "../commands/game_options/rele
 import { DEFAULT_MULTIGUESS_TYPE, MultiGuessType } from "../commands/game_options/multiguess";
 import { state } from "../kmq";
 import { SpecialType } from "../commands/game_options/special";
+import { AnswerType, DEFAULT_ANSWER_TYPE } from "../commands/game_options/answer";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("guild_preference");
@@ -32,6 +33,7 @@ interface GameOptions {
     guessModeType: GuessModeType;
     releaseType: ReleaseType;
     artistType: ArtistType;
+    answerType: AnswerType;
     shuffleType: ShuffleType;
     groups: MatchedArtist[];
     excludes: MatchedArtist[];
@@ -53,6 +55,7 @@ type GameOptionValue =
     GuessModeType |
     ReleaseType |
     ArtistType |
+    AnswerType |
     ShuffleType |
     MatchedArtist[] |
     LanguageType |
@@ -71,6 +74,7 @@ const enum GameOptionInternal {
     GUESS_MODE_TYPE = "guessModeType",
     RELEASE_TYPE = "releaseType",
     ARTIST_TYPE = "artistType",
+    ANSWER_TYPE = "answerType",
     SHUFFLE_TYPE = "shuffleType",
     GROUPS = "groups",
     EXCLUDES = "excludes",
@@ -121,6 +125,7 @@ export default class GuildPreference {
         guessTimeout: null,
         duration: null,
         artistType: DEFAULT_ARTIST_TYPE,
+        answerType: DEFAULT_ANSWER_TYPE,
         languageType: DEFAULT_LANGUAGE,
         multiGuessType: DEFAULT_MULTIGUESS_TYPE,
         subunitPreference: DEFAULT_SUBUNIT_PREFERENCE,
@@ -556,6 +561,30 @@ export default class GuildPreference {
     async setArtistType(artistType: ArtistType) {
         this.gameOptions.artistType = artistType;
         await this.updateGuildPreferences([{ name: GameOptionInternal.ARTIST_TYPE, value: artistType }]);
+    }
+
+    /** @returns the current answer type option value */
+    getAnswerType(): AnswerType {
+        return this.gameOptions.answerType;
+    }
+
+    /** Resets the answer type option to the default value */
+    async resetAnswerType() {
+        await this.setAnswerType(DEFAULT_ANSWER_TYPE);
+    }
+
+    /**
+     * Sets the answer type option value
+     * @param answerType - The AnswerType
+     */
+    async setAnswerType(answerType: AnswerType) {
+        this.gameOptions.answerType = answerType;
+        await this.updateGuildPreferences([{ name: GameOptionInternal.ANSWER_TYPE, value: answerType }]);
+    }
+
+    /** @returns if multiple choice mode is active */
+    isMultipleChoiceMode(): boolean {
+        return this.getAnswerType() !== AnswerType.TYPING;
     }
 
     /**

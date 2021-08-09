@@ -58,8 +58,8 @@ export default class PlayCommand implements BaseCommand {
 
     help = {
         name: "play",
-        description: "Starts a game of KMQ. Pick between classic (default), elimination mode, teams mode, and multiple choice (`mc`) mode",
-        usage: ",play {classic | elimination | teams}\n,play elimination [lives]\n,play mc [easy | medium | hard]",
+        description: "Starts a game of KMQ. Pick between classic (default), elimination mode, and teams mode.",
+        usage: ",play {classic | elimination | teams}\n,play elimination [lives]",
         priority: 1050,
         examples: [
             {
@@ -77,10 +77,6 @@ export default class PlayCommand implements BaseCommand {
             {
                 example: "`,play teams`",
                 explanation: "Split up into as many teams as you want and see who you can depend on to help you win!",
-            },
-            {
-                example: "`,play mc medium`",
-                explanation: "Start a multiple choice game where the choices are medium difficulty.",
             },
         ],
     };
@@ -110,7 +106,6 @@ export default class PlayCommand implements BaseCommand {
 
         const isEliminationMode = parsedMessage.components.length >= 1 && parsedMessage.components[0].toLowerCase() === "elimination";
         const isTeamsMode = parsedMessage.components.length >= 1 && parsedMessage.components[0].toLowerCase() === "teams";
-        const isMcMode = parsedMessage.components.length >= 1 && parsedMessage.components[0].toLowerCase() === "mc";
 
         if (gameSessions[message.guildID] && !gameSessions[message.guildID].sessionInitialized && (isEliminationMode || isTeamsMode)) {
             // User sent ,play elimination or ,play teams twice, reset the GameSession
@@ -127,31 +122,12 @@ export default class PlayCommand implements BaseCommand {
             const gameOwner = KmqMember.fromUser(message.author);
             let gameSession: GameSession;
 
-            if (isMcMode) {
-                // (1) MC game creation
-                let difficulty: GameType.MC_EASY | GameType.MC_MEDIUM | GameType.MC_HARD;
-                const difficultyString = parsedMessage.components[1]?.toLowerCase();
-                if (parsedMessage.components.length === 1 || difficultyString === "easy") {
-                    difficulty = GameType.MC_EASY;
-                } else if (difficultyString === "medium") {
-                    difficulty = GameType.MC_MEDIUM;
-                } else if (difficultyString === "hard") {
-                    difficulty = GameType.MC_HARD;
-                } else {
-                    sendErrorMessage(messageContext, { title: "Unknown difficulty", description: `Please use one of \`easy\`, \`medium\`, or \`hard\` with \`${prefix}play mc\`.`, thumbnailUrl: KmqImages.DEAD });
-                    return;
-                }
-
-                gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, difficulty);
-                await sendBeginGameMessage(textChannel.name, voiceChannel.name, message, getCurrentVoiceMembers(voiceChannel.id));
-                gameSession.startRound(guildPreference, messageContext);
-                logger.info(`${getDebugLogHeader(message)} | Game session starting`);
-            } else if (isEliminationMode) {
+            if (isEliminationMode) {
                 // (1) ELIMINATION game creation
                 const lives = (parsedMessage.components.length > 1
-                               && Number.isInteger(parseInt(parsedMessage.components[1]))
-                               && parseInt(parsedMessage.components[1]) > 0
-                               && parseInt(parsedMessage.components[1]) <= 10000)
+                    && Number.isInteger(parseInt(parsedMessage.components[1]))
+                    && parseInt(parsedMessage.components[1]) > 0
+                    && parseInt(parsedMessage.components[1]) <= 10000)
                     ? parseInt(parsedMessage.components[1]) : DEFAULT_LIVES;
 
                 const startTitle = `\`${prefix}join\` the game and start it with \`${prefix}begin\`!`;

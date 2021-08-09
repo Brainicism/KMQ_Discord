@@ -177,7 +177,7 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
 
     return sendMessage(messageContext.textChannelID, messageContext.author.id, {
         embeds: [embed],
-        messageReference: reply ? { messageID: messageContext.referencedMessageID, failIfNotExists: false } : null,
+        messageReference: reply && messageContext.referencedMessageID ? { messageID: messageContext.referencedMessageID, failIfNotExists: false } : null,
         components: embedPayload.components,
     });
 }
@@ -195,6 +195,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     gameRound: GameRound,
     guessModeType: GuessModeType,
     playerRoundResults: Array<PlayerRoundResult>,
+    isMultipleChoiceMode: boolean,
     timeRemaining?: number,
     uniqueSongCounter?: UniqueSongCounter) {
     const footer: Eris.EmbedFooterOptions = {
@@ -271,8 +272,6 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         color = EMBED_ERROR_COLOR;
     }
 
-    const gameSession = state.gameSessions[messageContext.guildID];
-
     await sendInfoMessage(messageContext, {
         color,
         title: `"${gameRound.songName}" (${gameRound.songYear}) - ${gameRound.artistName}`,
@@ -280,7 +279,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         thumbnailUrl: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,
         fields,
         footerText: footer ? footer.text : "",
-    }, correctGuess && !gameSession.isMultipleChoiceMode());
+    }, correctGuess && !isMultipleChoiceMode);
 }
 
 /**
@@ -312,6 +311,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     optionStrings[GameOption.GENDER] = guildPreference.getGender().join(", ");
     optionStrings[GameOption.CUTOFF] = `${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
     optionStrings[GameOption.ARTIST_TYPE] = guildPreference.getArtistType();
+    optionStrings[GameOption.ANSWER_TYPE] = guildPreference.getAnswerType();
     optionStrings[GameOption.RELEASE_TYPE] = guildPreference.getReleaseType();
     optionStrings[GameOption.LANGUAGE_TYPE] = guildPreference.getLanguageType();
     optionStrings[GameOption.SUBUNIT_PREFERENCE] = guildPreference.getSubunitPreference();
@@ -672,7 +672,8 @@ export function sendDebugAlertWebhook(title: string, description: string, color:
 }
 
 export async function interactionMarkAnswers(interaction: Eris.ComponentInteraction, gameRound: GameRound) {
-    await interaction.editParent({
+    if (!interaction.acknowledged) await interaction.acknowledge();
+    await interaction.editOriginalMessage({
         components: gameRound.interactionComponents.map((x) => ({
             type: 1,
             components: x.components.map((y) => {
