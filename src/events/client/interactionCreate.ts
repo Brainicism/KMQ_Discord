@@ -82,7 +82,6 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
         }
 
         await interaction.acknowledge();
-        gameSession.gameRound.interactionCorrectAnswerUUID[1]++;
         const guildPreference = await getGuildPreference(messageContext.guildID);
         await gameSession.guessSong(messageContext, guildPreference.getGuessModeType() !== GuessModeType.ARTIST ? gameSession.gameRound.songName : gameSession.gameRound.artistName, true);
     }
