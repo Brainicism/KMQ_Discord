@@ -20,7 +20,11 @@ function isHintMajority(message: GuildTextableMessage, gameSession: GameSession)
         return gameSession.gameRound.getHintRequests() >= Math.floor(eliminationScoreboard.getAlivePlayersCount() * 0.5) + 1;
     }
 
-    return gameSession.gameRound.getHintRequests() >= getMajorityCount(message.guildID) - gameSession.gameRound.incorrectMCGuessers.size;
+    if (gameSession.isMultipleChoiceMode()) {
+        return gameSession.gameRound.getNumSkippers() >= getMajorityCount(message.guildID) - gameSession.gameRound.incorrectMCGuessers.size;
+    }
+
+    return gameSession.gameRound.getHintRequests() >= getMajorityCount(message.guildID);
 }
 
 function isHintAvailable(message: GuildTextableMessage, gameSession: GameSession) {

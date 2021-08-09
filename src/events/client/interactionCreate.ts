@@ -22,12 +22,36 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
         );
 
         if (gameSession.gameRound.incorrectMCGuessers.has(interaction.member.id)) {
-            await interaction.acknowledge();
+            await interaction.createMessage({
+                embeds: [{
+                    color: EMBED_ERROR_COLOR,
+                    author: {
+                        name: messageContext.author.username,
+                        icon_url: messageContext.author.avatarUrl,
+                    },
+                    title: bold("Invalid guess"),
+                    description: "You've already been eliminated for this round.",
+                    thumbnail: { url: KmqImages.DEAD },
+                }],
+                flags: 64,
+            });
             return;
         }
 
         if (!gameSession.isValidInteractionGuess(interaction.data.custom_id)) {
-            await interaction.acknowledge();
+            await interaction.createMessage({
+                embeds: [{
+                    color: EMBED_ERROR_COLOR,
+                    author: {
+                        name: messageContext.author.username,
+                        icon_url: messageContext.author.avatarUrl,
+                    },
+                    title: bold("Invalid guess"),
+                    description: "You are attempting to pick an option from an already completed round.",
+                    thumbnail: { url: KmqImages.DEAD },
+                }],
+                flags: 64,
+            });
             return;
         }
 
@@ -50,7 +74,6 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
             return;
         }
 
-        await interaction.acknowledge();
         const guildPreference = await getGuildPreference(messageContext.guildID);
         await gameSession.guessSong(messageContext, guildPreference.getGuessModeType() !== GuessModeType.ARTIST ? gameSession.gameRound.songName : gameSession.gameRound.artistName);
     }

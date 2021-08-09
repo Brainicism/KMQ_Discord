@@ -73,7 +73,7 @@ export default class SkipCommand extends InGameCommand {
             return;
         }
 
-        if ([GameType.MC_EASY, GameType.MC_MEDIUM, GameType.MC_HARD].includes(gameSession.gameType)) {
+        if (gameSession.isMultipleChoiceMode()) {
             if (gameSession.gameRound.incorrectMCGuessers.has(message.author.id)) {
                 sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid skip request", description: "Eliminated players cannot request to skip.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
                 return;

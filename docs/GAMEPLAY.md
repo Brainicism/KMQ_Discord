@@ -207,6 +207,9 @@ To keep things fair, switching teams mid-game forfeits your current points and E
 
 ![teams](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/teams.png)
 
+## ,play mc [easy | medium | hard]
+Getting tired of typing? Try multiple choice mode! Pick the right answer from the given options. Increasing the difficulty increases the number of choices as well as how hard the choices are. You can only guess once per round so pick wisely!
+
 
 # Full Command List
 Use `,help [command_name]` for more details for any of the following commands:

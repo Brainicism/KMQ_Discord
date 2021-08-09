@@ -51,20 +51,14 @@ export default class PlayCommand implements BaseCommand {
     validations = {
         minArgCount: 0,
         maxArgCount: 2,
-        arguments: [
-            // {
-            //     name: "gameType",
-            //     type: "enum" as const,
-            //     enums: Object.values(GameType),
-            // },
-        ],
+        arguments: [],
     };
 
     aliases = ["random", "start", "p"];
 
     help = {
         name: "play",
-        description: "Starts a game of KMQ. Pick between classic (default), elimination mode, and teams mode",
+        description: "Starts a game of KMQ. Pick between classic (default), elimination mode, teams mode, and multiple choice (`mc`) mode",
         usage: ",play {classic | elimination | teams}\n,play elimination [lives]\n,play mc [easy | medium | hard]",
         priority: 1050,
         examples: [
@@ -136,7 +130,7 @@ export default class PlayCommand implements BaseCommand {
             if (isMcMode) {
                 // (1) MC game creation
                 let difficulty: GameType.MC_EASY | GameType.MC_MEDIUM | GameType.MC_HARD;
-                const difficultyString = parsedMessage.components[1].toLowerCase();
+                const difficultyString = parsedMessage.components[1]?.toLowerCase();
                 if (parsedMessage.components.length === 1 || difficultyString === "easy") {
                     difficulty = GameType.MC_EASY;
                 } else if (difficultyString === "medium") {

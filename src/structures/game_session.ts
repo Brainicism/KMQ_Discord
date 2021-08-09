@@ -540,7 +540,7 @@ export default class GameSession {
             }
 
             sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: "Choose your guess!",
+                title: `Guess the ${guildPreference.getGuessModeType()}!`,
                 components,
                 thumbnailUrl: KmqImages.LISTENING,
             });
