@@ -125,6 +125,9 @@ export default class GameRound {
     /** List of players who incorrectly guessed in the multiple choice */
     public interactionComponents: Array<Eris.ActionRow>;
 
+    /** List of players who incorrectly guessed in the multiple choice */
+    public interactionMessage: Eris.Message<Eris.TextableChannel>;
+
     /** The base EXP for this GameRound */
     private baseExp: number;
 
@@ -153,6 +156,7 @@ export default class GameRound {
         this.interactionIncorrectAnswerUUIDs = [];
         this.incorrectMCGuessers = new Set();
         this.interactionComponents = [];
+        this.interactionMessage = null;
     }
 
     /**

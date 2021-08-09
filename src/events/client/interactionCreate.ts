@@ -63,11 +63,6 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
 
         if (!gameSession.isCorrectInteractionAnswer(interaction.data.custom_id)) {
             gameSession.gameRound.incorrectMCGuessers.add(interaction.member.id);
-            await gameSession.guessSong(messageContext, "", interaction);
-            if (interaction.acknowledged) {
-                return;
-            }
-
             await interaction.createMessage({
                 embeds: [{
                     color: EMBED_ERROR_COLOR,
@@ -81,10 +76,12 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
                 }],
                 flags: 64,
             });
+            await gameSession.guessSong(messageContext, "", true);
             return;
         }
 
+        await interaction.acknowledge();
         const guildPreference = await getGuildPreference(messageContext.guildID);
-        await gameSession.guessSong(messageContext, guildPreference.getGuessModeType() !== GuessModeType.ARTIST ? gameSession.gameRound.songName : gameSession.gameRound.artistName, interaction);
+        await gameSession.guessSong(messageContext, guildPreference.getGuessModeType() !== GuessModeType.ARTIST ? gameSession.gameRound.songName : gameSession.gameRound.artistName, true);
     }
 }

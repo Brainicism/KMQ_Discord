@@ -671,8 +671,8 @@ export function sendDebugAlertWebhook(title: string, description: string, color:
     });
 }
 
-export async function interactionMarkAnswers(interaction: Eris.ComponentInteraction, gameRound: GameRound) {
-    await interaction.editParent({
+export async function interactionMarkAnswers(gameRound: GameRound) {
+    await gameRound.interactionMessage.edit({
         components: gameRound.interactionComponents.map((x) => ({
             type: 1,
             components: x.components.map((y) => {

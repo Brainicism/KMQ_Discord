@@ -358,15 +358,15 @@ export default class GameSession {
      * @param messageContext - The context of the message to check
      * @param guess - the content of the message to check
      */
-    async guessSong(messageContext: MessageContext, guess: string, interaction?: Eris.ComponentInteraction) {
+    async guessSong(messageContext: MessageContext, guess: string, interaction = false) {
         if (!this.connection) return;
         if (this.connection.listenerCount("end") === 0) return;
         const guildPreference = await getGuildPreference(messageContext.guildID);
         if (!this.gameRound) return;
 
-        if (!this.guessEligible(messageContext, guildPreference)) return;
+        if (!this.guessEligible(messageContext)) return;
 
-        const pointsEarned = this.checkGuess(messageContext.author.id, guess, guildPreference.getGuessModeType());
+        const pointsEarned = this.checkGuess(messageContext.author.id, guess, guildPreference.getGuessModeType(), guildPreference.isMultipleChoiceMode());
         if (pointsEarned > 0) {
             if (this.gameRound.finished) {
                 return;
@@ -376,7 +376,7 @@ export default class GameSession {
             await delay(this.multiguessDelayIsActive(guildPreference) ? MULTIGUESS_DELAY : 0);
             if (!this.gameRound) return;
             if (interaction) {
-                await interactionMarkAnswers(interaction, this.gameRound);
+                await interactionMarkAnswers(this.gameRound);
             }
 
             // mark round as complete, so no more guesses can go through
@@ -397,7 +397,7 @@ export default class GameSession {
         } else if (guildPreference.isMultipleChoiceMode()) {
             if (setDifference([...new Set(getCurrentVoiceMembers(this.voiceChannelID).map((x) => x.id))], [...this.gameRound.incorrectMCGuessers]).size === 0) {
                 if (interaction) {
-                    await interactionMarkAnswers(interaction, this.gameRound);
+                    await interactionMarkAnswers(this.gameRound);
                 }
 
                 await this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));
@@ -554,7 +554,7 @@ export default class GameSession {
 
             this.gameRound.interactionComponents = components;
 
-            sendInfoMessage(new MessageContext(this.textChannelID), {
+            this.gameRound.interactionMessage = await sendInfoMessage(new MessageContext(this.textChannelID), {
                 title: `Guess the ${guildPreference.getGuessModeType() === GuessModeType.BOTH ? "song" : guildPreference.getGuessModeType()}!`,
                 components,
                 thumbnailUrl: KmqImages.LISTENING,
@@ -755,10 +755,12 @@ export default class GameSession {
      * @param userID - The user ID of the user guessing
      * @param guess - The user's guess
      * @param guessModeType - The guessing mode type to evaluate the guess against
+     * @param multipleChoiceMode - Whether the answer type is set to multiple choice
      * @returns The number of points achieved for the guess
      */
-    private checkGuess(userID: string, guess: string, guessModeType: GuessModeType): number {
+    private checkGuess(userID: string, guess: string, guessModeType: GuessModeType, multipleChoiceMode: boolean): number {
         if (!this.gameRound) return 0;
+        if (multipleChoiceMode && this.gameRound.incorrectMCGuessers.has(userID)) return 0;
         if (this.gameType !== GameType.ELIMINATION) {
             this.participants.add(userID);
         }
@@ -776,7 +778,7 @@ export default class GameSession {
      * current game session
      * @param messageContext - The context of the message to check for guess eligibility
      */
-    private guessEligible(messageContext: MessageContext, guildPreference: GuildPreference): boolean {
+    private guessEligible(messageContext: MessageContext): boolean {
         const userVoiceChannel = getUserVoiceChannel(messageContext);
         // if user isn't in the same voice channel
         if (!userVoiceChannel || (userVoiceChannel.id !== this.voiceChannelID)) {
@@ -797,12 +799,6 @@ export default class GameSession {
         } else if (this.gameType === GameType.TEAMS) {
             const teamScoreboard = this.scoreboard as TeamScoreboard;
             if (!teamScoreboard.getPlayer(messageContext.author.id)) {
-                return false;
-            }
-        }
-
-        if (guildPreference.isMultipleChoiceMode()) {
-            if (this.gameRound.incorrectMCGuessers.has(messageContext.author.id)) {
                 return false;
             }
         }
