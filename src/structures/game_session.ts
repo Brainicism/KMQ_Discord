@@ -361,7 +361,7 @@ export default class GameSession {
         const guildPreference = await getGuildPreference(messageContext.guildID);
         if (!this.gameRound) return;
 
-        if (!this.guessEligible(messageContext)) return;
+        if (!this.guessEligible(messageContext, guildPreference)) return;
 
         const pointsEarned = this.checkGuess(messageContext.author.id, guess, guildPreference.getGuessModeType());
         if (pointsEarned > 0) {
@@ -370,7 +370,6 @@ export default class GameSession {
             }
 
             this.gameRound.finished = true;
-
             await delay(this.multiguessDelayIsActive(guildPreference) ? MULTIGUESS_DELAY : 0);
             if (!this.gameRound) return;
             if (interaction) {
@@ -774,7 +773,7 @@ export default class GameSession {
      * current game session
      * @param messageContext - The context of the message to check for guess eligibility
      */
-    private guessEligible(messageContext: MessageContext): boolean {
+    private guessEligible(messageContext: MessageContext, guildPreference: GuildPreference): boolean {
         const userVoiceChannel = getUserVoiceChannel(messageContext);
         // if user isn't in the same voice channel
         if (!userVoiceChannel || (userVoiceChannel.id !== this.voiceChannelID)) {
@@ -795,6 +794,12 @@ export default class GameSession {
         } else if (this.gameType === GameType.TEAMS) {
             const teamScoreboard = this.scoreboard as TeamScoreboard;
             if (!teamScoreboard.getPlayer(messageContext.author.id)) {
+                return false;
+            }
+        }
+
+        if (guildPreference.isMultipleChoiceMode()) {
+            if (this.gameRound.incorrectMCGuessers.has(messageContext.author.id)) {
                 return false;
             }
         }

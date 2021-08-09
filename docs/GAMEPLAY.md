@@ -208,6 +208,7 @@ To keep things fair, switching teams mid-game forfeits your current points and E
 
 ![teams](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/teams.png)
 
+
 # Full Command List
 Use `,help [command_name]` for more details for any of the following commands:
 
