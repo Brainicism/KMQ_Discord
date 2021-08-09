@@ -376,6 +376,7 @@ export default class GameSession {
             await delay(this.multiguessDelayIsActive(guildPreference) ? MULTIGUESS_DELAY : 0);
             if (!this.gameRound) return;
             if (interaction) {
+                this.gameRound.interactionCorrectAnswerUUID[1]++;
                 await interactionMarkAnswers(this.gameRound.interactionMessage,
                     this.gameRound.interactionComponents,
                     this.gameRound.interactionCorrectAnswerUUID,
