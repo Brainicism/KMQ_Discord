@@ -1,3 +1,4 @@
+import _ from "lodash";
 import dbContext from "../database_context";
 import { state } from "../kmq";
 import { IPCLogger } from "../logger";
@@ -11,7 +12,10 @@ import { FOREIGN_LANGUAGE_TAGS, LanguageType } from "../commands/game_options/la
 import { SubunitsPreference } from "../commands/game_options/subunits";
 import { OstPreference } from "../commands/game_options/ost";
 import { NON_OFFICIAL_VIDEO_TAGS, ReleaseType } from "../commands/game_options/release";
+import { GuessModeType } from "../commands/game_options/guessmode";
 import { cleanArtistName } from "../structures/game_round";
+import { setDifference } from "./utils";
+import { AnswerType } from "../commands/game_options/answer";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -280,4 +284,95 @@ export async function getMatchingGroupNames(rawGroupNames: Array<string>, aliasA
     }
 
     return result;
+}
+
+/**
+ * @param answerType - The answer type
+ * @param guessMode - The guess mode
+ * @param gender - The correct answer's group's gender
+ * @param answer - The correct answer
+ * @param artistID - The correct answer's group's ID
+ * @returns unshuffled incorrect choices based on difficulty
+ */
+export async function getMultipleChoiceOptions(answerType: AnswerType, guessMode: GuessModeType, gender: Gender, answer: string, artistID: number): Promise<string[]> {
+    let easyNames: Set<string>;
+    let names: Set<string>;
+    let result: Set<string>;
+
+    const EASY_CHOICES = 3;
+    const MEDIUM_CHOICES = 5;
+    const MEDIUM_SAME_ARIST_CHOICES = 2;
+    const HARD_CHOICES = 7;
+
+    if (guessMode === GuessModeType.SONG_NAME || guessMode === GuessModeType.BOTH) {
+        easyNames = new Set((await dbContext.kmq("available_songs").select("song_name")
+            .where("members", gender)
+            .andWhereNot("id_artist", artistID)).map((x) => x["song_name"]));
+        switch (answerType) {
+            case AnswerType.MULTIPLE_CHOICE_EASY:
+                // Easy: EASY_CHOICES from same gender as chosen artist
+                result = new Set(_.sampleSize([...easyNames], EASY_CHOICES));
+                break;
+            case AnswerType.MULTIPLE_CHOICE_MED:
+            {
+                // Medium: MEDIUM_CHOICES - MEDIUM_SAME_ARIST_CHOICES from same gender as chosen artist, MEDIUM_SAME_ARIST_CHOICES from chosen artist
+                const sameArtistSongs = _.sampleSize((await dbContext.kmq("available_songs").select("song_name")
+                    .where("id_artist", artistID)
+                    .andWhereNot("song_name", answer)).map((x) => x["song_name"]), MEDIUM_SAME_ARIST_CHOICES);
+
+                const sameGenderSongs = _.sampleSize((await dbContext.kmq("available_songs").select("song_name")
+                    .whereNotIn("song_name", [...sameArtistSongs, answer])
+                    .where("members", gender)
+                    .andWhereNot("id_artist", artistID)).map((x) => x["song_name"]), MEDIUM_CHOICES - MEDIUM_SAME_ARIST_CHOICES);
+
+                result = new Set([...sameArtistSongs, ...sameGenderSongs]);
+                easyNames = setDifference([...easyNames], [...result]);
+                break;
+            }
+
+            case AnswerType.MULTIPLE_CHOICE_HARD:
+                // Hard: HARD_CHOICES from chosen artist
+                names = new Set((await dbContext.kmq("available_songs").select("song_name")
+                    .where("id_artist", artistID)
+                    .andWhereNot("song_name", answer)).map((x) => x["song_name"]));
+                result = new Set(_.sampleSize([...names], HARD_CHOICES));
+                break;
+            default:
+                break;
+        }
+
+        const CHOICES_BY_DIFFICULTY = {
+            [AnswerType.MULTIPLE_CHOICE_EASY]: EASY_CHOICES,
+            [AnswerType.MULTIPLE_CHOICE_MED]: MEDIUM_CHOICES,
+            [AnswerType.MULTIPLE_CHOICE_HARD]: HARD_CHOICES,
+        };
+
+        if (result.size < CHOICES_BY_DIFFICULTY[answerType]) {
+            for (const choice of _.sampleSize([...easyNames], CHOICES_BY_DIFFICULTY[answerType] - result.size)) {
+                result.add(choice);
+            }
+        }
+    } else {
+        easyNames = new Set((await dbContext.kmq("available_songs").select("artist_name")
+            .whereNot("artist_name", answer)).map((x) => x["artist_name"]));
+        switch (answerType) {
+            case AnswerType.MULTIPLE_CHOICE_EASY:
+                // Easy: EASY_CHOICES from any artist
+                result = new Set(_.sampleSize([...easyNames], EASY_CHOICES));
+                break;
+            case AnswerType.MULTIPLE_CHOICE_MED:
+            case AnswerType.MULTIPLE_CHOICE_HARD:
+                // Medium: MEDIUM_CHOICES from same gender
+                // Hard: HARD_CHOICES from same gender
+                names = new Set((await dbContext.kmq("available_songs").select("artist_name")
+                    .where("members", gender)
+                    .andWhereNot("artist_name", answer)).map((x) => x["artist_name"]));
+                result = new Set(_.sampleSize([...names], answerType === AnswerType.MULTIPLE_CHOICE_MED ? MEDIUM_CHOICES : HARD_CHOICES));
+                break;
+            default:
+                break;
+        }
+    }
+
+    return [...result];
 }

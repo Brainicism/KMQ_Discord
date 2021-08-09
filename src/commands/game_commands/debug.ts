@@ -39,7 +39,7 @@ export default class DebugCommand implements BaseCommand {
             inline: false,
         });
 
-        const voiceChannel = getUserVoiceChannel(message);
+        const voiceChannel = getUserVoiceChannel(MessageContext.fromMessage(message));
         if (voiceChannel) {
             fields.push({
                 name: "Voice Permissions",

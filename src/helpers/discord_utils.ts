@@ -177,7 +177,7 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
 
     return sendMessage(messageContext.textChannelID, messageContext.author.id, {
         embeds: [embed],
-        messageReference: reply ? { messageID: messageContext.referencedMessageID, failIfNotExists: false } : null,
+        messageReference: reply && messageContext.referencedMessageID ? { messageID: messageContext.referencedMessageID, failIfNotExists: false } : null,
         components: embedPayload.components,
     });
 }
@@ -195,6 +195,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     gameRound: GameRound,
     guessModeType: GuessModeType,
     playerRoundResults: Array<PlayerRoundResult>,
+    isMultipleChoiceMode: boolean,
     timeRemaining?: number,
     uniqueSongCounter?: UniqueSongCounter) {
     const footer: Eris.EmbedFooterOptions = {
@@ -278,7 +279,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         thumbnailUrl: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,
         fields,
         footerText: footer ? footer.text : "",
-    }, correctGuess);
+    }, correctGuess && !isMultipleChoiceMode);
 }
 
 /**
@@ -310,6 +311,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     optionStrings[GameOption.GENDER] = guildPreference.getGender().join(", ");
     optionStrings[GameOption.CUTOFF] = `${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
     optionStrings[GameOption.ARTIST_TYPE] = guildPreference.getArtistType();
+    optionStrings[GameOption.ANSWER_TYPE] = guildPreference.getAnswerType();
     optionStrings[GameOption.RELEASE_TYPE] = guildPreference.getReleaseType();
     optionStrings[GameOption.LANGUAGE_TYPE] = guildPreference.getLanguageType();
     optionStrings[GameOption.SUBUNIT_PREFERENCE] = guildPreference.getSubunitPreference();
@@ -534,11 +536,12 @@ export function areUserAndBotInSameVoiceChannel(message: Eris.Message): boolean 
 }
 
 /**
- * @param message - The Message object
+ * @param messageContext - The messageContext object
  * @returns the voice channel that the message's author is in
  */
-export function getUserVoiceChannel(message: GuildTextableMessage): Eris.VoiceChannel {
-    const voiceChannelID = message.member.voiceState.channelID;
+export function getUserVoiceChannel(messageContext: MessageContext): Eris.VoiceChannel {
+    const member = state.client.guilds.get(messageContext.guildID).members.get(messageContext.author.id);
+    const voiceChannelID = member.voiceState.channelID;
     if (!voiceChannelID) return null;
     return state.client.getChannel(voiceChannelID) as Eris.VoiceChannel;
 }
@@ -573,7 +576,7 @@ export function getNumParticipants(voiceChannelID: string): number {
  * @returns whether the bot has permissions to join the message author's currently active voice channel
  */
 export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
-    const voiceChannel = getUserVoiceChannel(message);
+    const voiceChannel = getUserVoiceChannel(MessageContext.fromMessage(message));
     const messageContext = MessageContext.fromMessage(message);
     const missingPermissions = REQUIRED_VOICE_PERMISSIONS.filter((permission) => !voiceChannel.permissionsOf(state.client.user.id).has(permission));
     if (missingPermissions.length > 0) {
@@ -665,5 +668,42 @@ export function sendDebugAlertWebhook(title: string, description: string, color:
         }],
         username: "Kimiqo",
         avatar_url: avatarUrl,
+    });
+}
+
+export async function interactionMarkAnswers(message: Eris.Message<Eris.TextableChannel>,
+    components: Array<Eris.ActionRow>,
+    correctAnswerUUID: [string, number],
+    incorrectAnswerUUIDs: { [uuid: string]: number }) {
+    await message.edit({
+        components: components.map((x) => ({
+            type: 1,
+            components: x.components.map((y) => {
+                const z = y as Eris.InteractionButton;
+                const noGuesses = incorrectAnswerUUIDs[z.custom_id] === 0;
+                let label = z.label;
+                let style: 2 | 1 | 4 | 3;
+                if (correctAnswerUUID[0] === z.custom_id) {
+                    if (correctAnswerUUID[1] > 0) {
+                        label += ` (${correctAnswerUUID[1]})`;
+                    }
+
+                    style = 3;
+                } else if (noGuesses) {
+                    style = 1;
+                } else {
+                    label += ` (${incorrectAnswerUUIDs[z.custom_id]})`;
+                    style = 4;
+                }
+
+                return {
+                    label,
+                    custom_id: z.custom_id,
+                    style,
+                    type: 2,
+                    disabled: true,
+                };
+            }),
+        })),
     });
 }

@@ -28,6 +28,7 @@ import guildCreateHandler from "../events/client/guildCreate";
 import guildDeleteHandler from "../events/client/guildDelete";
 import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
 import guildAvailableHandler from "../events/client/guildAvailable";
+import interactionCreateHandler from "../events/client/interactionCreate";
 import { userVoted } from "./bot_listing_manager";
 import backupKmqDatabase from "../scripts/backup-kmq-database";
 import { chooseRandom } from "./utils";
@@ -56,7 +57,8 @@ export function registerClientEvents() {
         .on("guildCreate", guildCreateHandler)
         .on("guildDelete", guildDeleteHandler)
         .on("unavailableGuildCreate", unavailableGuildCreateHandler)
-        .on("guildAvailable", guildAvailableHandler);
+        .on("guildAvailable", guildAvailableHandler)
+        .on("interactionCreate", interactionCreateHandler);
 }
 
 /** Registers listeners on process events */

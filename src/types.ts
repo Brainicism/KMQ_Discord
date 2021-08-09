@@ -66,6 +66,7 @@ export enum GameOption {
     GENDER = "Gender",
     CUTOFF = "Cutoff",
     ARTIST_TYPE = "Artist Type",
+    ANSWER_TYPE = "Answer Type",
     RELEASE_TYPE = "Release Type",
     LANGUAGE_TYPE = "Language Type",
     SUBUNIT_PREFERENCE = "Subunit Preference",
@@ -89,6 +90,7 @@ export const GameOptionCommand: { [option: string]: string } = {
     [GameOption.GENDER]: "gender",
     [GameOption.CUTOFF]: "cutoff",
     [GameOption.ARTIST_TYPE]: "artisttype",
+    [GameOption.ANSWER_TYPE]: "answer",
     [GameOption.RELEASE_TYPE]: "release",
     [GameOption.LANGUAGE_TYPE]: "language",
     [GameOption.SUBUNIT_PREFERENCE]: "subunit",
@@ -109,6 +111,7 @@ export const PriorityGameOption: Array<GameOption> = [
     GameOption.LIMIT,
     GameOption.GROUPS,
     GameOption.GENDER,
+    GameOption.ANSWER_TYPE,
     GameOption.CUTOFF,
 ];
 

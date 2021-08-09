@@ -1,4 +1,5 @@
 import _ from "lodash";
+import Eris from "eris";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { state } from "../kmq";
 import KmqMember from "./kmq_member";
@@ -112,6 +113,21 @@ export default class GameRound {
     /** Song/artist name hints */
     public readonly hints: { songHint: string, artistHint: string };
 
+    /** UUID associated with right guess interaction custom_id */
+    public interactionCorrectAnswerUUID: [string, number];
+
+    /** UUID associated with wrong guesses in multiple choice */
+    public interactionIncorrectAnswerUUIDs: { [uuid: string]: number };
+
+    /** List of players who incorrectly guessed in the multiple choice */
+    public incorrectMCGuessers: Set<string>;
+
+    /** List of players who incorrectly guessed in the multiple choice */
+    public interactionComponents: Array<Eris.ActionRow>;
+
+    /** List of players who incorrectly guessed in the multiple choice */
+    public interactionMessage: Eris.Message<Eris.TextableChannel>;
+
     /** The base EXP for this GameRound */
     private baseExp: number;
 
@@ -136,6 +152,11 @@ export default class GameRound {
             songHint: generateHint(this.songName),
             artistHint: generateHint(this.artistName),
         };
+        this.interactionCorrectAnswerUUID = null;
+        this.interactionIncorrectAnswerUUIDs = {};
+        this.incorrectMCGuessers = new Set();
+        this.interactionComponents = [];
+        this.interactionMessage = null;
     }
 
     /**

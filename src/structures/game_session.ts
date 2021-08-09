@@ -1,17 +1,20 @@
 import Eris from "eris";
 import fs from "fs";
+import _ from "lodash";
+import * as uuid from "uuid";
 import { SeekType } from "../commands/game_options/seek";
 import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
-    getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, getUserVoiceChannel, sendEndGameMessage,
+    getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, getUserVoiceChannel, sendEndGameMessage, getCurrentVoiceMembers,
+    interactionMarkAnswers,
 } from "../helpers/discord_utils";
-import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, userBonusIsActive } from "../helpers/game_utils";
-import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference, bold, codeLine } from "../helpers/utils";
+import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, userBonusIsActive, getMultipleChoiceOptions } from "../helpers/game_utils";
+import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference, bold, codeLine, chunkArray } from "../helpers/utils";
 import { state } from "../kmq";
 import { IPCLogger } from "../logger";
-import { QueriedSong, GuildTextableMessage, PlayerRoundResult, GameType } from "../types";
+import { QueriedSong, PlayerRoundResult, GameType } from "../types";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
 import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
@@ -27,6 +30,7 @@ import MessageContext from "./message_context";
 import KmqMember from "./kmq_member";
 import { MultiGuessType } from "../commands/game_options/multiguess";
 import { specialFfmpegArgs } from "../commands/game_options/special";
+import { AnswerType } from "../commands/game_options/answer";
 
 const MULTIGUESS_DELAY = 1500;
 const logger = new IPCLogger("game_session");
@@ -236,7 +240,8 @@ export default class GameSession {
                 };
             }
 
-            sendEndRoundMessage(messageContext, this.scoreboard, gameRound, guildPreference.getGuessModeType(), playerRoundResults, remainingDuration, uniqueSongCounter);
+            sendEndRoundMessage(messageContext, this.scoreboard, gameRound, guildPreference.getGuessModeType(),
+                playerRoundResults, guildPreference.isMultipleChoiceMode(), remainingDuration, uniqueSongCounter);
         }
 
         this.incrementSongCount(gameRound.videoID, guessResult.correct);
@@ -330,7 +335,10 @@ export default class GameSession {
             });
 
         // commit session's song plays and correct guesses
-        await this.storeSongCounts();
+        const guildPreference = await getGuildPreference(this.guildID);
+        if (guildPreference.isMultipleChoiceMode()) {
+            await this.storeSongCounts();
+        }
 
         logger.info(`gid: ${this.guildID} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}. gameType = ${this.gameType}`);
     };
@@ -347,29 +355,35 @@ export default class GameSession {
 
     /**
      * Process a message to see if it is a valid and correct guess
-     * @param message - The message to check
+     * @param messageContext - The context of the message to check
+     * @param guess - the content of the message to check
      */
-    async guessSong(message: GuildTextableMessage) {
+    async guessSong(messageContext: MessageContext, guess: string, interaction = false) {
         if (!this.connection) return;
         if (this.connection.listenerCount("end") === 0) return;
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await getGuildPreference(messageContext.guildID);
         if (!this.gameRound) return;
 
-        if (!this.guessEligible(message)) return;
+        if (!this.guessEligible(messageContext)) return;
 
-        const pointsEarned = this.checkGuess(message.author.id, message.content, guildPreference.getGuessModeType());
+        const pointsEarned = this.checkGuess(messageContext.author.id, guess, guildPreference.getGuessModeType(), guildPreference.isMultipleChoiceMode());
         if (pointsEarned > 0) {
             if (this.gameRound.finished) {
                 return;
             }
 
             this.gameRound.finished = true;
-
             await delay(this.multiguessDelayIsActive(guildPreference) ? MULTIGUESS_DELAY : 0);
-
             if (!this.gameRound) return;
+            if (interaction) {
+                await interactionMarkAnswers(this.gameRound.interactionMessage,
+                    this.gameRound.interactionComponents,
+                    this.gameRound.interactionCorrectAnswerUUID,
+                    this.gameRound.interactionIncorrectAnswerUUIDs);
+            }
+
             // mark round as complete, so no more guesses can go through
-            await this.endRound({ correct: true, correctGuessers: this.gameRound.correctGuessers }, guildPreference, MessageContext.fromMessage(message));
+            await this.endRound({ correct: true, correctGuessers: this.gameRound.correctGuessers }, guildPreference, messageContext);
             this.correctGuesses++;
 
             // update game session's lastActive
@@ -382,7 +396,19 @@ export default class GameSession {
                 .where("guild_id", this.guildID)
                 .increment("songs_guessed", 1);
 
-            this.startRound(guildPreference, MessageContext.fromMessage(message));
+            this.startRound(guildPreference, messageContext);
+        } else if (guildPreference.isMultipleChoiceMode()) {
+            if (setDifference([...new Set(getCurrentVoiceMembers(this.voiceChannelID).map((x) => x.id))], [...this.gameRound.incorrectMCGuessers]).size === 0) {
+                if (interaction) {
+                    await interactionMarkAnswers(this.gameRound.interactionMessage,
+                        this.gameRound.interactionComponents,
+                        this.gameRound.interactionCorrectAnswerUUID,
+                        this.gameRound.interactionIncorrectAnswerUUIDs);
+                }
+
+                await this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));
+                this.startRound(await getGuildPreference(this.guildID), messageContext);
+            }
         }
     }
 
@@ -492,6 +518,55 @@ export default class GameSession {
         }
 
         this.playSong(guildPreference, messageContext);
+
+        if (guildPreference.isMultipleChoiceMode()) {
+            const correctChoice = guildPreference.getGuessModeType() === GuessModeType.ARTIST ? this.gameRound.artistName : this.gameRound.songName;
+            const wrongChoices = await getMultipleChoiceOptions(guildPreference.getAnswerType(),
+                guildPreference.getGuessModeType(),
+                randomSong.members,
+                correctChoice,
+                randomSong.artistID);
+
+            let buttons: Array<Eris.InteractionButton> = [];
+            for (const choice of wrongChoices) {
+                const id = uuid.v4();
+                this.gameRound.interactionIncorrectAnswerUUIDs[id] = 0;
+                buttons.push({ type: 2, style: 1, label: choice, custom_id: id });
+            }
+
+            this.gameRound.interactionCorrectAnswerUUID = [uuid.v4(), 0];
+            buttons.push({ type: 2, style: 1, label: correctChoice, custom_id: this.gameRound.interactionCorrectAnswerUUID[0] });
+
+            buttons = _.shuffle(buttons);
+
+            let components: Array<Eris.ActionRow>;
+            switch (guildPreference.getAnswerType()) {
+                case AnswerType.MULTIPLE_CHOICE_EASY:
+                    components = [
+                        {
+                            type: 1,
+                            components: buttons,
+                        },
+                    ];
+                    break;
+                case AnswerType.MULTIPLE_CHOICE_MED:
+                    components = chunkArray(buttons, 3).map((x) => ({ type: 1, components: x }));
+                    break;
+                case AnswerType.MULTIPLE_CHOICE_HARD:
+                    components = chunkArray(buttons, 4).map((x) => ({ type: 1, components: x }));
+                    break;
+                default:
+                    break;
+            }
+
+            this.gameRound.interactionComponents = components;
+
+            this.gameRound.interactionMessage = await sendInfoMessage(new MessageContext(this.textChannelID), {
+                title: `Guess the ${guildPreference.getGuessModeType() === GuessModeType.BOTH ? "song" : guildPreference.getGuessModeType()}!`,
+                components,
+                thumbnailUrl: KmqImages.LISTENING,
+            });
+        }
     }
 
     /**
@@ -550,6 +625,23 @@ export default class GameSession {
 
     async updateFilteredSongs(guildPreference: GuildPreference) {
         this.filteredSongs = await getFilteredSongList(guildPreference);
+    }
+
+    /**
+     * @param interactionUUID - the UUID of an interaction
+     * @returns true if the given UUID is one of the guesses of the current game round
+     */
+    isValidInteractionGuess(interactionUUID: string): boolean {
+        return interactionUUID === this.gameRound?.interactionCorrectAnswerUUID[0] || Object.keys(this.gameRound?.interactionIncorrectAnswerUUIDs)?.includes(interactionUUID);
+    }
+
+    /**
+     * @param interactionUUID - the UUID of an interaction
+     * @returns true if the given UUID is associated with the interaction corresponding to
+     * the correct guess
+     */
+    isCorrectInteractionAnswer(interactionUUID: string): boolean {
+        return this.gameRound?.interactionCorrectAnswerUUID[0] === interactionUUID;
     }
 
     /**
@@ -670,10 +762,12 @@ export default class GameSession {
      * @param userID - The user ID of the user guessing
      * @param guess - The user's guess
      * @param guessModeType - The guessing mode type to evaluate the guess against
+     * @param multipleChoiceMode - Whether the answer type is set to multiple choice
      * @returns The number of points achieved for the guess
      */
-    private checkGuess(userID: string, guess: string, guessModeType: GuessModeType): number {
+    private checkGuess(userID: string, guess: string, guessModeType: GuessModeType, multipleChoiceMode: boolean): number {
         if (!this.gameRound) return 0;
+        if (multipleChoiceMode && this.gameRound.incorrectMCGuessers.has(userID)) return 0;
         if (this.gameType !== GameType.ELIMINATION) {
             this.participants.add(userID);
         }
@@ -689,29 +783,29 @@ export default class GameSession {
     /**
      * Checks whether the author of the message is eligible to guess in the
      * current game session
-     * @param message - The message to check for guess eligibility
+     * @param messageContext - The context of the message to check for guess eligibility
      */
-    private guessEligible(message: GuildTextableMessage): boolean {
-        const userVoiceChannel = getUserVoiceChannel(message);
+    private guessEligible(messageContext: MessageContext): boolean {
+        const userVoiceChannel = getUserVoiceChannel(messageContext);
         // if user isn't in the same voice channel
         if (!userVoiceChannel || (userVoiceChannel.id !== this.voiceChannelID)) {
             return false;
         }
 
         // if message isn't in the active game session's text channel
-        if (message.channel.id !== this.textChannelID) {
+        if (messageContext.textChannelID !== this.textChannelID) {
             return false;
         }
 
         // check elimination mode constraints
         if (this.gameType === GameType.ELIMINATION) {
             const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
-            if (!this.participants.has(message.author.id) || eliminationScoreboard.isPlayerEliminated(message.author.id)) {
+            if (!this.participants.has(messageContext.author.id) || eliminationScoreboard.isPlayerEliminated(messageContext.author.id)) {
                 return false;
             }
         } else if (this.gameType === GameType.TEAMS) {
             const teamScoreboard = this.scoreboard as TeamScoreboard;
-            if (!teamScoreboard.getPlayer(message.author.id)) {
+            if (!teamScoreboard.getPlayer(messageContext.author.id)) {
                 return false;
             }
         }
@@ -886,6 +980,23 @@ export default class GameSession {
         // bonus for voting
         if (voteBonusExp) {
             expModifier *= 2;
+        }
+
+        if (guildPreference.isMultipleChoiceMode()) {
+            const difficulty = guildPreference.getAnswerType();
+            switch (difficulty) {
+                case AnswerType.MULTIPLE_CHOICE_EASY:
+                    expModifier *= 0.25;
+                    break;
+                case AnswerType.MULTIPLE_CHOICE_MED:
+                    expModifier *= 0.5;
+                    break;
+                case AnswerType.MULTIPLE_CHOICE_HARD:
+                    expModifier *= 0.75;
+                    break;
+                default:
+                    break;
+            }
         }
 
         return Math.floor((expModifier * baseExp) / place);
