@@ -8,7 +8,6 @@ import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
     getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, getUserVoiceChannel, sendEndGameMessage, getCurrentVoiceMembers,
-    interactionMarkAnswers,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, userBonusIsActive, getMultipleChoiceOptions } from "../helpers/game_utils";
 import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference, bold, codeLine, chunkArray } from "../helpers/utils";
@@ -184,6 +183,9 @@ export default class GameSession {
 
         const gameRound = this.gameRound;
         this.gameRound = null;
+
+        gameRound.interactionMarkAnswers();
+
         let playerRoundResults: Array<PlayerRoundResult> = [];
         if (guessResult.correct) {
             // update guessing streaks
@@ -358,7 +360,7 @@ export default class GameSession {
      * @param messageContext - The context of the message to check
      * @param guess - the content of the message to check
      */
-    async guessSong(messageContext: MessageContext, guess: string, interaction = false) {
+    async guessSong(messageContext: MessageContext, guess: string) {
         if (!this.connection) return;
         if (this.connection.listenerCount("end") === 0) return;
         const guildPreference = await getGuildPreference(messageContext.guildID);
@@ -375,13 +377,6 @@ export default class GameSession {
             this.gameRound.finished = true;
             await delay(this.multiguessDelayIsActive(guildPreference) ? MULTIGUESS_DELAY : 0);
             if (!this.gameRound) return;
-            if (interaction) {
-                this.gameRound.interactionCorrectAnswerUUID[1]++;
-                await interactionMarkAnswers(this.gameRound.interactionMessage,
-                    this.gameRound.interactionComponents,
-                    this.gameRound.interactionCorrectAnswerUUID,
-                    this.gameRound.interactionIncorrectAnswerUUIDs);
-            }
 
             // mark round as complete, so no more guesses can go through
             await this.endRound({ correct: true, correctGuessers: this.gameRound.correctGuessers }, guildPreference, messageContext);
@@ -400,13 +395,6 @@ export default class GameSession {
             this.startRound(guildPreference, messageContext);
         } else if (guildPreference.isMultipleChoiceMode()) {
             if (setDifference([...new Set(getCurrentVoiceMembers(this.voiceChannelID).map((x) => x.id))], [...this.gameRound.incorrectMCGuessers]).size === 0) {
-                if (interaction) {
-                    await interactionMarkAnswers(this.gameRound.interactionMessage,
-                        this.gameRound.interactionComponents,
-                        this.gameRound.interactionCorrectAnswerUUID,
-                        this.gameRound.interactionIncorrectAnswerUUIDs);
-                }
-
                 await this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));
                 this.startRound(await getGuildPreference(this.guildID), messageContext);
             }

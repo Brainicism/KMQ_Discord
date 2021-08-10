@@ -77,12 +77,12 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
                 }],
                 flags: 64,
             });
-            await gameSession.guessSong(messageContext, "", true);
+            await gameSession.guessSong(messageContext, "");
             return;
         }
 
         await interaction.acknowledge();
         const guildPreference = await getGuildPreference(messageContext.guildID);
-        await gameSession.guessSong(messageContext, guildPreference.getGuessModeType() !== GuessModeType.ARTIST ? gameSession.gameRound.songName : gameSession.gameRound.artistName, true);
+        await gameSession.guessSong(messageContext, guildPreference.getGuessModeType() !== GuessModeType.ARTIST ? gameSession.gameRound.songName : gameSession.gameRound.artistName);
     }
 }
