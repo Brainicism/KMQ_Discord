@@ -234,6 +234,44 @@ export default class GameRound {
     }
 
     /**
+     * Marks button guesses as correct or incorrect in a multiple choice game
+     */
+    async interactionMarkAnswers() {
+        if (!this.interactionMessage) return;
+        await this.interactionMessage.edit({
+            components: this.interactionComponents.map((x) => ({
+                type: 1,
+                components: x.components.map((y) => {
+                    const z = y as Eris.InteractionButton;
+                    const noGuesses = this.interactionIncorrectAnswerUUIDs[z.custom_id] === 0;
+                    let label = z.label;
+                    let style: 2 | 1 | 4 | 3;
+                    if (this.interactionCorrectAnswerUUID[0] === z.custom_id) {
+                        if (this.interactionCorrectAnswerUUID[1] > 0) {
+                            label += ` (${this.interactionCorrectAnswerUUID[1]})`;
+                        }
+
+                        style = 3;
+                    } else if (noGuesses) {
+                        style = 1;
+                    } else {
+                        label += ` (${this.interactionIncorrectAnswerUUIDs[z.custom_id]})`;
+                        style = 4;
+                    }
+
+                    return {
+                        label,
+                        custom_id: z.custom_id,
+                        style,
+                        type: 2,
+                        disabled: true,
+                    };
+                }),
+            })),
+        });
+    }
+
+    /**
      * Checks whether the song guess matches the GameRound's song
      * @param message - The Message that contains the guess
      * @returns whether or not the guess was correct
