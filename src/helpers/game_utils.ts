@@ -35,12 +35,13 @@ export async function getFilteredSongList(guildPreference: GuildPreference): Pro
     const fields = ["song_name as name", "artist_name as artist", "link as youtubeLink",
         "publishedon as publishDate", "members", "id_artist as artistID", "issolo as isSolo", "members", "tags"];
 
+    const gameOptions = guildPreference.gameOptions;
     let queryBuilder = dbContext.kmq("available_songs")
         .select(fields)
         .where(function artistFilter() {
             this.where(function includesInnerArtistFilter() {
                 if (!guildPreference.isGroupsMode()) {
-                    if (guildPreference.getSubunitPreference() === SubunitsPreference.EXCLUDE) {
+                    if (gameOptions.subunitPreference === SubunitsPreference.EXCLUDE) {
                         this.whereIn("id_artist", guildPreference.getIncludesGroupIDs());
                     } else {
                         this.andWhere(function () {
@@ -52,15 +53,15 @@ export async function getFilteredSongList(guildPreference: GuildPreference): Pro
             }).orWhere(function mainInnerArtistFilter() {
                 this.whereNotIn("id_artist", guildPreference.getExcludesGroupIDs());
                 if (!guildPreference.isGroupsMode()) {
-                    const gender = guildPreference.isGenderAlternating() ? [Gender.MALE, Gender.FEMALE, Gender.COED] : guildPreference.getGender();
+                    const gender = guildPreference.isGenderAlternating() ? [Gender.MALE, Gender.FEMALE, Gender.COED] : gameOptions.gender;
                     this.whereIn("members", gender);
 
                     // filter by artist type only in non-groups
-                    if (guildPreference.getArtistType() !== ArtistType.BOTH) {
-                        this.andWhere("issolo", "=", guildPreference.getArtistType() === ArtistType.SOLOIST ? "y" : "n");
+                    if (gameOptions.artistType !== ArtistType.BOTH) {
+                        this.andWhere("issolo", "=", gameOptions.artistType === ArtistType.SOLOIST ? "y" : "n");
                     }
                 } else {
-                    if (guildPreference.getSubunitPreference() === SubunitsPreference.EXCLUDE) {
+                    if (gameOptions.subunitPreference === SubunitsPreference.EXCLUDE) {
                         this.whereIn("id_artist", guildPreference.getGroupIDs());
                     } else {
                         const subunits = dbContext.kmq("kpop_groups").select("id").whereIn("id_parentgroup", guildPreference.getGroupIDs());
@@ -80,22 +81,22 @@ export async function getFilteredSongList(guildPreference: GuildPreference): Pro
             });
         });
 
-    if (guildPreference.getLanguageType() === LanguageType.KOREAN) {
+    if (gameOptions.languageType === LanguageType.KOREAN) {
         for (const tag of FOREIGN_LANGUAGE_TAGS) {
             queryBuilder = queryBuilder
                 .where("tags", "NOT LIKE", `%${tag}%`);
         }
     }
 
-    if (guildPreference.getOstPreference() === OstPreference.EXCLUDE) {
+    if (gameOptions.ostPreference === OstPreference.EXCLUDE) {
         queryBuilder = queryBuilder
             .where("tags", "NOT LIKE", "%o%");
-    } else if (guildPreference.getOstPreference() === OstPreference.EXCLUSIVE) {
+    } else if (gameOptions.ostPreference === OstPreference.EXCLUSIVE) {
         queryBuilder = queryBuilder
             .where("tags", "LIKE", "%o%");
     }
 
-    if (guildPreference.getReleaseType() === ReleaseType.OFFICIAL) {
+    if (gameOptions.releaseType === ReleaseType.OFFICIAL) {
         queryBuilder = queryBuilder.where("vtype", "=", "main");
         for (const tag of NON_OFFICIAL_VIDEO_TAGS) {
             queryBuilder = queryBuilder
@@ -104,14 +105,14 @@ export async function getFilteredSongList(guildPreference: GuildPreference): Pro
     }
 
     queryBuilder = queryBuilder
-        .andWhere("publishedon", ">=", `${guildPreference.getBeginningCutoffYear()}-01-01`)
-        .andWhere("publishedon", "<=", `${guildPreference.getEndCutoffYear()}-12-31`)
+        .andWhere("publishedon", ">=", `${gameOptions.beginningYear}-01-01`)
+        .andWhere("publishedon", "<=", `${gameOptions.endYear}-12-31`)
         .orderBy("views", "DESC");
 
     let result: Array<QueriedSong> = await queryBuilder;
 
     const count = result.length;
-    result = result.slice(guildPreference.getLimitStart(), guildPreference.getLimitEnd());
+    result = result.slice(gameOptions.limitStart, gameOptions.limitEnd);
     return {
         songs: new Set(result),
         countBeforeLimit: count,

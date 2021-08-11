@@ -173,7 +173,7 @@ export default class Scoreboard {
      * @returns whether the game has completed
      * */
     gameFinished(guildPreference: GuildPreference): boolean {
-        return guildPreference.isGoalSet() && !this.isEmpty() && this.firstPlace[0].getScore() >= guildPreference.getGoal();
+        return guildPreference.isGoalSet() && !this.isEmpty() && this.firstPlace[0].getScore() >= guildPreference.gameOptions.goal;
     }
 
     /** @returns a list of tags of the player participating in the game */

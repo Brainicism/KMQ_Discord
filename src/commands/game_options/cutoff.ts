@@ -56,7 +56,7 @@ export default class CutoffCommand implements BaseCommand {
             await guildPreference.setBeginningCutoffYear(DEFAULT_BEGINNING_SEARCH_YEAR);
             await guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
             await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.CUTOFF, reset: true });
-            logger.info(`${getDebugLogHeader(message)} | Cutoff set to ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`);
+            logger.info(`${getDebugLogHeader(message)} | Cutoff set to ${guildPreference.gameOptions.beginningYear} - ${guildPreference.gameOptions.endYear}`);
             return;
         }
 
@@ -77,6 +77,6 @@ export default class CutoffCommand implements BaseCommand {
         }
 
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.CUTOFF, reset: false });
-        logger.info(`${getDebugLogHeader(message)} | Cutoff set to ${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`);
+        logger.info(`${getDebugLogHeader(message)} | Cutoff set to ${guildPreference.gameOptions.beginningYear} - ${guildPreference.gameOptions.endYear}`);
     };
 }

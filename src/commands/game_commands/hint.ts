@@ -97,7 +97,7 @@ export default class HintCommand extends InGameCommand {
         if (isHintAvailable(message, gameSession)) {
             logger.info(`${getDebugLogHeader(message)} | Hint majority received.`);
             gameRound.hintUsed = true;
-            sendInfoMessage(MessageContext.fromMessage(message), { title: "Hint", description: generateHint(guildPreference.getGuessModeType(), gameRound), thumbnailUrl: KmqImages.READING_BOOK });
+            sendInfoMessage(MessageContext.fromMessage(message), { title: "Hint", description: generateHint(guildPreference.gameOptions.guessModeType, gameRound), thumbnailUrl: KmqImages.READING_BOOK });
         } else {
             logger.info(`${getDebugLogHeader(message)} | Hint request received.`);
             sendHintNotification(message, gameSession);

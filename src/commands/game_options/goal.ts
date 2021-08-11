@@ -64,6 +64,6 @@ export default class GoalCommand implements BaseCommand {
 
         await guildPreference.setGoal(userGoal);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GOAL, reset: false });
-        logger.info(`${getDebugLogHeader(message)} | Goal set to ${guildPreference.getGoal()}`);
+        logger.info(`${getDebugLogHeader(message)} | Goal set to ${guildPreference.gameOptions.goal}`);
     };
 }

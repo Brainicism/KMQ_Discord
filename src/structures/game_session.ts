@@ -230,7 +230,7 @@ export default class GameSession {
 
         // calculate remaining game duration if applicable
         const currGameLength = (Date.now() - this.startedAt) / 60000;
-        const remainingDuration = guildPreference.isDurationSet() ? (guildPreference.getDuration() - currGameLength) : null;
+        const remainingDuration = guildPreference.isDurationSet() ? (guildPreference.gameOptions.duration - currGameLength) : null;
 
         if (messageContext) {
             let uniqueSongCounter: UniqueSongCounter;
@@ -238,11 +238,11 @@ export default class GameSession {
                 const filteredSongs = new Set([...this.filteredSongs.songs].map((x) => x.youtubeLink));
                 uniqueSongCounter = {
                     uniqueSongsPlayed: this.uniqueSongsPlayed.size - setDifference([...this.uniqueSongsPlayed], [...filteredSongs]).size,
-                    totalSongs: Math.min(this.filteredSongs.countBeforeLimit, guildPreference.getLimitEnd() - guildPreference.getLimitStart()),
+                    totalSongs: Math.min(this.filteredSongs.countBeforeLimit, guildPreference.gameOptions.limitEnd - guildPreference.gameOptions.limitStart),
                 };
             }
 
-            sendEndRoundMessage(messageContext, this.scoreboard, gameRound, guildPreference.getGuessModeType(),
+            sendEndRoundMessage(messageContext, this.scoreboard, gameRound, guildPreference.gameOptions.guessModeType,
                 playerRoundResults, guildPreference.isMultipleChoiceMode(), remainingDuration, uniqueSongCounter);
         }
 
@@ -368,7 +368,7 @@ export default class GameSession {
 
         if (!this.guessEligible(messageContext)) return;
 
-        const pointsEarned = this.checkGuess(messageContext.author.id, guess, guildPreference.getGuessModeType(), guildPreference.isMultipleChoiceMode());
+        const pointsEarned = this.checkGuess(messageContext.author.id, guess, guildPreference.gameOptions.guessModeType, guildPreference.isMultipleChoiceMode());
         if (pointsEarned > 0) {
             if (this.gameRound.finished) {
                 return;
@@ -427,7 +427,7 @@ export default class GameSession {
         const totalSongsCount = this.filteredSongs.songs.size;
 
         // manage unique songs
-        if (guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
+        if (guildPreference.gameOptions.shuffleType === ShuffleType.UNIQUE) {
             const filteredSongs = new Set([...this.filteredSongs.songs].map((x) => x.youtubeLink));
             if (setDifference([...filteredSongs], [...this.uniqueSongsPlayed]).size === 0) {
                 logger.info(`${getDebugLogHeader(messageContext)} | Resetting uniqueSongsPlayed (all ${totalSongsCount} unique songs played)`);
@@ -482,7 +482,7 @@ export default class GameSession {
             this.lastPlayedSongs.push(randomSong.youtubeLink);
         }
 
-        if (guildPreference.getShuffleType() === ShuffleType.UNIQUE) {
+        if (guildPreference.gameOptions.shuffleType === ShuffleType.UNIQUE) {
             this.uniqueSongsPlayed.add(randomSong.youtubeLink);
         }
 
@@ -509,9 +509,9 @@ export default class GameSession {
         this.playSong(guildPreference, messageContext);
 
         if (guildPreference.isMultipleChoiceMode()) {
-            const correctChoice = guildPreference.getGuessModeType() === GuessModeType.ARTIST ? this.gameRound.artistName : this.gameRound.songName;
-            const wrongChoices = await getMultipleChoiceOptions(guildPreference.getAnswerType(),
-                guildPreference.getGuessModeType(),
+            const correctChoice = guildPreference.gameOptions.guessModeType === GuessModeType.ARTIST ? this.gameRound.artistName : this.gameRound.songName;
+            const wrongChoices = await getMultipleChoiceOptions(guildPreference.gameOptions.answerType,
+                guildPreference.gameOptions.guessModeType,
                 randomSong.members,
                 correctChoice,
                 randomSong.artistID);
@@ -529,7 +529,7 @@ export default class GameSession {
             buttons = _.shuffle(buttons);
 
             let components: Array<Eris.ActionRow>;
-            switch (guildPreference.getAnswerType()) {
+            switch (guildPreference.gameOptions.answerType) {
                 case AnswerType.MULTIPLE_CHOICE_EASY:
                     components = [
                         {
@@ -551,7 +551,7 @@ export default class GameSession {
             this.gameRound.interactionComponents = components;
 
             this.gameRound.interactionMessage = await sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: `Guess the ${guildPreference.getGuessModeType() === GuessModeType.BOTH ? "song" : guildPreference.getGuessModeType()}!`,
+                title: `Guess the ${guildPreference.gameOptions.guessModeType === GuessModeType.BOTH ? "song" : guildPreference.gameOptions.guessModeType}!`,
                 components,
                 thumbnailUrl: KmqImages.LISTENING,
             });
@@ -566,7 +566,7 @@ export default class GameSession {
     startGuessTimeout(messageContext: MessageContext, guildPreference: GuildPreference) {
         if (!guildPreference.isGuessTimeoutSet()) return;
 
-        const time = guildPreference.getGuessTimeout();
+        const time = guildPreference.gameOptions.guessTimeout;
         this.guessTimeoutFunc = setTimeout(async () => {
             if (this.finished || this.gameRound.finished) return;
             logger.info(`${getDebugLogHeader(messageContext)} | Song finished without being guessed, timer of: ${time} seconds.`);
@@ -652,7 +652,7 @@ export default class GameSession {
         const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${gameRound.videoID}.ogg`;
 
         let seekLocation: number;
-        const seekType = guildPreference.getSeekType();
+        const seekType = guildPreference.gameOptions.seekType;
         if (seekType === SeekType.BEGINNING) {
             seekLocation = 0;
         } else {
@@ -661,22 +661,22 @@ export default class GameSession {
                 .where("vlink", "=", gameRound.videoID)
                 .first()).duration;
 
-            if (guildPreference.getSeekType() === SeekType.RANDOM) {
+            if (seekType === SeekType.RANDOM) {
                 seekLocation = songDuration * (0.6 * Math.random());
-            } else if (guildPreference.getSeekType() === SeekType.MIDDLE) {
+            } else if (seekType === SeekType.MIDDLE) {
                 seekLocation = songDuration * (0.4 + 0.2 * Math.random());
             }
         }
 
         const stream = fs.createReadStream(songLocation);
 
-        logger.info(`${getDebugLogHeader(messageContext)} | Playing song in voice connection. seek = ${guildPreference.getSeekType()}. song = ${this.getDebugSongDetails()}. guess mode = ${guildPreference.getGuessModeType()}`);
+        logger.info(`${getDebugLogHeader(messageContext)} | Playing song in voice connection. seek = ${seekType}. song = ${this.getDebugSongDetails()}. guess mode = ${guildPreference.gameOptions.guessModeType}`);
         this.connection.removeAllListeners();
         this.connection.stopPlaying();
         try {
             let inputArgs = ["-ss", seekLocation.toString()];
             let encoderArgs = [];
-            const specialType = guildPreference.getSpecialType();
+            const specialType = guildPreference.gameOptions.specialType;
             if (specialType) {
                 const ffmpegArgs = specialFfmpegArgs[specialType](seekLocation);
                 inputArgs = ffmpegArgs.inputArgs;
@@ -951,7 +951,7 @@ export default class GameSession {
         expModifier *= numParticipants === 1 ? 0.75 : (0.0625 * (Math.min(numParticipants, 6)) + 0.875);
 
         // penalize for using artist guess modes
-        if (guildPreference.getGuessModeType() === GuessModeType.ARTIST || guildPreference.getGuessModeType() === GuessModeType.BOTH) {
+        if (guildPreference.gameOptions.guessModeType === GuessModeType.ARTIST || guildPreference.gameOptions.guessModeType === GuessModeType.BOTH) {
             if (guildPreference.isGroupsMode()) return 0;
             expModifier *= 0.3;
         }
@@ -972,7 +972,7 @@ export default class GameSession {
         }
 
         if (guildPreference.isMultipleChoiceMode()) {
-            const difficulty = guildPreference.getAnswerType();
+            const difficulty = guildPreference.gameOptions.answerType;
             switch (difficulty) {
                 case AnswerType.MULTIPLE_CHOICE_EASY:
                     expModifier *= 0.25;
@@ -1011,7 +1011,7 @@ export default class GameSession {
 
     private multiguessDelayIsActive(guildPreference: GuildPreference) {
         const playerIsAlone = getNumParticipants(this.voiceChannelID) === 1;
-        return (guildPreference.getMultiGuessType() === MultiGuessType.ON) && !playerIsAlone;
+        return (guildPreference.gameOptions.multiGuessType === MultiGuessType.ON) && !playerIsAlone;
     }
 
     private getSongCount() {

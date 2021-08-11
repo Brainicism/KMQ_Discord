@@ -69,7 +69,7 @@ export default class DurationCommand implements BaseCommand {
         const durationDelta = parseInt(parsedMessage.components[0]);
         if (parsedMessage.components[1]) {
             const action = parsedMessage.components[1] as DurationAction;
-            const currentDuration = guildPreference.getDuration();
+            const currentDuration = guildPreference.gameOptions.duration;
             if (action === DurationAction.ADD) {
                 if (!guildPreference.isDurationSet()) {
                     duration = durationDelta;
@@ -94,6 +94,6 @@ export default class DurationCommand implements BaseCommand {
 
         await guildPreference.setDuration(duration);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.DURATION, reset: false });
-        logger.info(`${getDebugLogHeader(message)} | Duration set to ${guildPreference.getDuration()}`);
+        logger.info(`${getDebugLogHeader(message)} | Duration set to ${guildPreference.gameOptions.duration}`);
     };
 }
