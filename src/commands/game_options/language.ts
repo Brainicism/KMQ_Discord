@@ -52,7 +52,7 @@ export default class LanguageCommand implements BaseCommand {
     call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            await guildPreference.resetLanguageType();
+            await guildPreference.reset(GameOption.LANGUAGE_TYPE);
             await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.LANGUAGE_TYPE, reset: true });
             logger.info(`${getDebugLogHeader(message)} | Language type reset.`);
             return;

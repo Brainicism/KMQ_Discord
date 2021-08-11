@@ -58,7 +58,7 @@ export default class OstCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
 
         if (parsedMessage.components.length === 0) {
-            await guildPreference.resetOstPreference();
+            await guildPreference.reset(GameOption.OST_PREFERENCE);
             await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.OST_PREFERENCE, reset: true });
             logger.info(`${getDebugLogHeader(message)} | OST preference reset.`);
             return;

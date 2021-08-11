@@ -35,7 +35,7 @@ export default class ExcludeCommand implements BaseCommand {
     call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            await guildPreference.resetExcludes();
+            await guildPreference.reset(GameOption.EXCLUDE);
             await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.EXCLUDE, reset: true });
             logger.info(`${getDebugLogHeader(message)} | Excludes reset.`);
             return;

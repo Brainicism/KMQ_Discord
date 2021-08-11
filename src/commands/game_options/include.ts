@@ -34,7 +34,7 @@ export default class IncludeCommand implements BaseCommand {
     call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            await guildPreference.resetIncludes();
+            await guildPreference.reset(GameOption.INCLUDE);
             await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.INCLUDE, reset: true });
             logger.info(`${getDebugLogHeader(message)} | Includes reset.`);
             return;

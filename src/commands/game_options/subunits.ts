@@ -54,7 +54,7 @@ export default class SubunitsCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
 
         if (parsedMessage.components.length === 0) {
-            await guildPreference.resetSubunitPreference();
+            await guildPreference.reset(GameOption.SUBUNIT_PREFERENCE);
             await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SUBUNIT_PREFERENCE, reset: true });
             logger.info(`${getDebugLogHeader(message)} | Subunit preference reset.`);
             return;

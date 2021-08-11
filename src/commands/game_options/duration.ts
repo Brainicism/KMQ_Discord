@@ -59,7 +59,7 @@ export default class DurationCommand implements BaseCommand {
     call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            await guildPreference.resetDuration();
+            await guildPreference.reset(GameOption.DURATION);
             await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.DURATION, reset: true });
             logger.info(`${getDebugLogHeader(message)} | Duration disabled.`);
             return;

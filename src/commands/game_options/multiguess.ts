@@ -51,7 +51,7 @@ export default class MultiGuessCommand implements BaseCommand {
     call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            await guildPreference.resetMultiGuessType();
+            await guildPreference.reset(GameOption.MULTIGUESS);
             await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.MULTIGUESS, reset: true });
             logger.info(`${getDebugLogHeader(message)} | Multiguess type reset.`);
             return;
