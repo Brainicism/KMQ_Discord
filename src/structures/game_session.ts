@@ -184,7 +184,7 @@ export default class GameSession {
         const gameRound = this.gameRound;
         this.gameRound = null;
 
-        gameRound.interactionMarkAnswers();
+        gameRound.interactionMarkAnswers(guessResult.correctGuessers?.length);
 
         let playerRoundResults: Array<PlayerRoundResult> = [];
         if (guessResult.correct) {
@@ -523,8 +523,8 @@ export default class GameSession {
                 buttons.push({ type: 2, style: 1, label: choice, custom_id: id });
             }
 
-            this.gameRound.interactionCorrectAnswerUUID = [uuid.v4(), 0];
-            buttons.push({ type: 2, style: 1, label: correctChoice, custom_id: this.gameRound.interactionCorrectAnswerUUID[0] });
+            this.gameRound.interactionCorrectAnswerUUID = uuid.v4();
+            buttons.push({ type: 2, style: 1, label: correctChoice, custom_id: this.gameRound.interactionCorrectAnswerUUID });
 
             buttons = _.shuffle(buttons);
 
@@ -621,7 +621,7 @@ export default class GameSession {
      * @returns true if the given UUID is one of the guesses of the current game round
      */
     isValidInteractionGuess(interactionUUID: string): boolean {
-        return interactionUUID === this.gameRound?.interactionCorrectAnswerUUID[0] || Object.keys(this.gameRound?.interactionIncorrectAnswerUUIDs)?.includes(interactionUUID);
+        return interactionUUID === this.gameRound?.interactionCorrectAnswerUUID || Object.keys(this.gameRound?.interactionIncorrectAnswerUUIDs)?.includes(interactionUUID);
     }
 
     /**
@@ -630,7 +630,7 @@ export default class GameSession {
      * the correct guess
      */
     isCorrectInteractionAnswer(interactionUUID: string): boolean {
-        return this.gameRound?.interactionCorrectAnswerUUID[0] === interactionUUID;
+        return this.gameRound?.interactionCorrectAnswerUUID === interactionUUID;
     }
 
     /**
