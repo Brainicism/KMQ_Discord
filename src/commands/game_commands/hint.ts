@@ -15,34 +15,25 @@ import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("hint");
 
-function isHintMajority(message: GuildTextableMessage, gameSession: GameSession, guildPreference: GuildPreference): boolean {
+function isHintMajority(message: GuildTextableMessage, gameSession: GameSession): boolean {
     if (gameSession.gameType === GameType.ELIMINATION) {
         const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
         return gameSession.gameRound.getHintRequests() >= Math.floor(eliminationScoreboard.getAlivePlayersCount() * 0.5) + 1;
     }
 
-    if (guildPreference.isMultipleChoiceMode()) {
-        return gameSession.gameRound.getHintRequests() >= getMajorityCount(message.guildID) - gameSession.gameRound.incorrectMCGuessers.size;
-    }
-
     return gameSession.gameRound.getHintRequests() >= getMajorityCount(message.guildID);
 }
 
-function isHintAvailable(message: GuildTextableMessage, gameSession: GameSession, guildPreference: GuildPreference) {
-    return gameSession.gameRound.hintUsed || isHintMajority(message, gameSession, guildPreference);
+function isHintAvailable(message: GuildTextableMessage, gameSession: GameSession) {
+    return gameSession.gameRound.hintUsed || isHintMajority(message, gameSession);
 }
 
-async function sendHintNotification(message: GuildTextableMessage, gameSession: GameSession, guildPreference: GuildPreference) {
+async function sendHintNotification(message: GuildTextableMessage, gameSession: GameSession) {
     if (gameSession.gameType === GameType.ELIMINATION) {
         const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
         await sendInfoMessage(MessageContext.fromMessage(message), {
             title: "**Hint Request**",
             description: `${gameSession.gameRound.getHintRequests()}/${Math.floor(eliminationScoreboard.getAlivePlayersCount() * 0.5) + 1} hint requests received.`,
-        }, true);
-    } else if (guildPreference.isMultipleChoiceMode()) {
-        await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: "**Hint Request**",
-            description: `${gameSession.gameRound.getHintRequests()}/${Math.max(getMajorityCount(message.guildID) - gameSession.gameRound.incorrectMCGuessers.size, 1)} hint requests received.`,
         }, true);
     } else {
         await sendInfoMessage(MessageContext.fromMessage(message), {
@@ -103,13 +94,13 @@ export default class HintCommand extends InGameCommand {
 
         gameRound.hintRequested(message.author.id);
 
-        if (isHintAvailable(message, gameSession, guildPreference)) {
+        if (isHintAvailable(message, gameSession)) {
             logger.info(`${getDebugLogHeader(message)} | Hint majority received.`);
             gameRound.hintUsed = true;
             sendInfoMessage(MessageContext.fromMessage(message), { title: "Hint", description: generateHint(guildPreference.getGuessModeType(), gameRound), thumbnailUrl: KmqImages.READING_BOOK });
         } else {
             logger.info(`${getDebugLogHeader(message)} | Hint request received.`);
-            sendHintNotification(message, gameSession, guildPreference);
+            sendHintNotification(message, gameSession);
         }
     };
 }
