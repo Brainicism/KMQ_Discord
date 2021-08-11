@@ -299,30 +299,31 @@ export async function sendOptionsMessage(messageContext: MessageContext,
         return;
     }
 
-    const visibleLimitEnd = Math.min(totalSongs.countBeforeLimit, guildPreference.getLimitEnd());
-    const visibleLimitStart = Math.min(totalSongs.countBeforeLimit, guildPreference.getLimitStart());
-    const limit = guildPreference.getLimitStart() === 0 ? `${friendlyFormattedNumber(visibleLimitEnd)}` : `${getOrdinalNum(visibleLimitStart)} to ${getOrdinalNum(visibleLimitEnd)} (${friendlyFormattedNumber(totalSongs.count)} songs)`;
+    const gameOptions = guildPreference.gameOptions;
+    const visibleLimitEnd = Math.min(totalSongs.countBeforeLimit, gameOptions.limitEnd);
+    const visibleLimitStart = Math.min(totalSongs.countBeforeLimit, gameOptions.limitStart);
+    const limit = gameOptions.limitStart === 0 ? `${friendlyFormattedNumber(visibleLimitEnd)}` : `${getOrdinalNum(visibleLimitStart)} to ${getOrdinalNum(visibleLimitEnd)} (${friendlyFormattedNumber(totalSongs.count)} songs)`;
 
     // Store the VALUE of ,[option]: [VALUE] into optionStrings
     // Null optionStrings values are set to "Not set" below
     const optionStrings = {};
     optionStrings[GameOption.LIMIT] = `${limit} / ${friendlyFormattedNumber(totalSongs.countBeforeLimit)}`;
     optionStrings[GameOption.GROUPS] = guildPreference.isGroupsMode() ? guildPreference.getDisplayedGroupNames() : null;
-    optionStrings[GameOption.GENDER] = guildPreference.getGender().join(", ");
-    optionStrings[GameOption.CUTOFF] = `${guildPreference.getBeginningCutoffYear()} - ${guildPreference.getEndCutoffYear()}`;
-    optionStrings[GameOption.ARTIST_TYPE] = guildPreference.getArtistType();
-    optionStrings[GameOption.ANSWER_TYPE] = guildPreference.getAnswerType();
-    optionStrings[GameOption.RELEASE_TYPE] = guildPreference.getReleaseType();
-    optionStrings[GameOption.LANGUAGE_TYPE] = guildPreference.getLanguageType();
-    optionStrings[GameOption.SUBUNIT_PREFERENCE] = guildPreference.getSubunitPreference();
-    optionStrings[GameOption.OST_PREFERENCE] = guildPreference.getOstPreference();
-    optionStrings[GameOption.MULTIGUESS] = guildPreference.getMultiGuessType();
-    optionStrings[GameOption.SHUFFLE_TYPE] = guildPreference.getShuffleType();
-    optionStrings[GameOption.SEEK_TYPE] = guildPreference.getSeekType();
-    optionStrings[GameOption.GUESS_MODE_TYPE] = guildPreference.getGuessModeType();
-    optionStrings[GameOption.SPECIAL_TYPE] = guildPreference.getSpecialType();
-    optionStrings[GameOption.TIMER] = guildPreference.isGuessTimeoutSet() ? `${guildPreference.getGuessTimeout()} sec` : null;
-    optionStrings[GameOption.DURATION] = guildPreference.isDurationSet() ? `${guildPreference.getDuration()} mins` : null;
+    optionStrings[GameOption.GENDER] = gameOptions.gender.join(", ");
+    optionStrings[GameOption.CUTOFF] = `${gameOptions.beginningYear} - ${gameOptions.endYear}`;
+    optionStrings[GameOption.ARTIST_TYPE] = gameOptions.artistType;
+    optionStrings[GameOption.ANSWER_TYPE] = gameOptions.answerType;
+    optionStrings[GameOption.RELEASE_TYPE] = gameOptions.releaseType;
+    optionStrings[GameOption.LANGUAGE_TYPE] = gameOptions.languageType;
+    optionStrings[GameOption.SUBUNIT_PREFERENCE] = gameOptions.subunitPreference;
+    optionStrings[GameOption.OST_PREFERENCE] = gameOptions.ostPreference;
+    optionStrings[GameOption.MULTIGUESS] = gameOptions.multiGuessType;
+    optionStrings[GameOption.SHUFFLE_TYPE] = gameOptions.shuffleType;
+    optionStrings[GameOption.SEEK_TYPE] = gameOptions.seekType;
+    optionStrings[GameOption.GUESS_MODE_TYPE] = gameOptions.guessModeType;
+    optionStrings[GameOption.SPECIAL_TYPE] = gameOptions.specialType;
+    optionStrings[GameOption.TIMER] = guildPreference.isGuessTimeoutSet() ? `${gameOptions.guessTimeout} sec` : null;
+    optionStrings[GameOption.DURATION] = guildPreference.isDurationSet() ? `${gameOptions.duration} mins` : null;
     optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode() ? guildPreference.getDisplayedExcludesGroupNames() : null;
     optionStrings[GameOption.INCLUDE] = guildPreference.isIncludesMode() ? guildPreference.getDisplayedIncludesGroupNames() : null;
 
@@ -333,7 +334,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
 
     // Special case: ,goal is conflicting only when current game is elimination
     if (guildPreference.isGoalSet()) {
-        optionStrings[GameOption.GOAL] = String(guildPreference.getGoal());
+        optionStrings[GameOption.GOAL] = String(gameOptions.goal);
         if (isEliminationMode) {
             optionStrings[GameOption.GOAL] = generateConflictingCommandEntry(optionStrings[GameOption.GOAL], `play ${GameType.ELIMINATION}`);
         }

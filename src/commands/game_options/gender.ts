@@ -98,6 +98,6 @@ export default class GenderCommand implements BaseCommand {
         }
 
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GENDER, reset: false });
-        logger.info(`${getDebugLogHeader(message)} | Genders set to ${guildPreference.getGender().join(", ")}`);
+        logger.info(`${getDebugLogHeader(message)} | Genders set to ${guildPreference.gameOptions.gender.join(", ")}`);
     };
 }

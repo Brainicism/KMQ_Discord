@@ -63,6 +63,6 @@ export default class GuessTimeoutCommand implements BaseCommand {
         }
 
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.TIMER, reset: false });
-        logger.info(`${getDebugLogHeader(message)} | Guess timeout set to ${guildPreference.getGuessTimeout()}`);
+        logger.info(`${getDebugLogHeader(message)} | Guess timeout set to ${guildPreference.gameOptions.guessTimeout}`);
     };
 }

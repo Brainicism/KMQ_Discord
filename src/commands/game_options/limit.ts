@@ -78,6 +78,6 @@ export default class LimitCommand implements BaseCommand {
 
         await guildPreference.setLimit(limitStart, limitEnd);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.LIMIT, reset: false });
-        logger.info(`${getDebugLogHeader(message)} | Limit set to ${guildPreference.getLimitStart()} - ${guildPreference.getLimitEnd()}`);
+        logger.info(`${getDebugLogHeader(message)} | Limit set to ${guildPreference.gameOptions.limitStart} - ${guildPreference.gameOptions.limitEnd}`);
     };
 }
