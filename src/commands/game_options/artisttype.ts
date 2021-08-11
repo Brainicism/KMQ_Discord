@@ -55,7 +55,7 @@ export default class ArtistTypeCommand implements BaseCommand {
     call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            await guildPreference.resetArtistType();
+            await guildPreference.reset(GameOption.ARTIST_TYPE);
             await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.ARTIST_TYPE, reset: true });
             logger.info(`${getDebugLogHeader(message)} | Artist type reset.`);
             return;

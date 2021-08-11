@@ -40,7 +40,7 @@ export default class GoalCommand implements BaseCommand {
     call = async ({ message, parsedMessage, gameSessions }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            await guildPreference.resetGoal();
+            await guildPreference.reset(GameOption.GOAL);
             await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GOAL, reset: true });
             logger.info(`${getDebugLogHeader(message)} | Goal disabled.`);
             return;

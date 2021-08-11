@@ -56,7 +56,7 @@ export default class AnswerCommand implements BaseCommand {
     call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            await guildPreference.resetAnswerType();
+            await guildPreference.reset(GameOption.ANSWER_TYPE);
             await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.ANSWER_TYPE, reset: true });
             logger.info(`${getDebugLogHeader(message)} | Answer type reset.`);
             return;

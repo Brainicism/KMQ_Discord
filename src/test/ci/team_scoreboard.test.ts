@@ -3,6 +3,7 @@ import GuildPreference from "../../structures/guild_preference";
 import Team from "../../structures/team";
 import TeamScoreboard from "../../structures/team_scoreboard";
 import Player from "../../structures/player";
+import { GameOption } from "../../types";
 
 const FIRST_TEAM_NAME = "kmq team";
 const SECOND_TEAM_NAME = "not kmqer";
@@ -254,7 +255,7 @@ describe("game finished", () => {
 
     describe("goal is not set", () => {
         it("should return false", () => {
-            guildPreference.resetGoal();
+            guildPreference.reset(GameOption.GOAL);
             assert.strictEqual(scoreboard.gameFinished(guildPreference), false);
         });
     });

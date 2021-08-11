@@ -72,7 +72,7 @@ export default class GenderCommand implements BaseCommand {
         const selectedGenders = parsedMessage.components as Array<Gender>;
 
         if (selectedGenders.length === 0) {
-            await guildPreference.resetGender();
+            await guildPreference.reset(GameOption.GENDER);
             await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GENDER, reset: true });
             logger.info(`${getDebugLogHeader(message)} | Gender reset.`);
             return;

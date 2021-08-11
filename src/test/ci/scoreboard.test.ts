@@ -1,6 +1,7 @@
 import assert from "assert";
 import GuildPreference from "../../structures/guild_preference";
 import Scoreboard from "../../structures/scoreboard";
+import { GameOption } from "../../types";
 
 let scoreboard: Scoreboard;
 beforeEach(() => {
@@ -117,7 +118,7 @@ describe("game finished", () => {
 
     describe("goal is not set", () => {
         it("should return false", () => {
-            guildPreference.resetGoal();
+            guildPreference.reset(GameOption.GOAL);
             assert.strictEqual(scoreboard.gameFinished(guildPreference), false);
         });
     });

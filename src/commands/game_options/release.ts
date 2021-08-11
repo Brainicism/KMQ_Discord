@@ -54,7 +54,7 @@ export default class ReleaseCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
 
         if (parsedMessage.components.length === 0) {
-            await guildPreference.resetReleaseType();
+            await guildPreference.reset(GameOption.RELEASE_TYPE);
             await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.RELEASE_TYPE, reset: true });
             logger.info(`${getDebugLogHeader(message)} | Video type reset.`);
             return;

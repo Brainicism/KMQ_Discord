@@ -82,7 +82,7 @@ export default class SpecialCommand implements BaseCommand {
 
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            await guildPreference.resetSpecialType();
+            await guildPreference.reset(GameOption.SPECIAL_TYPE);
             await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SPECIAL_TYPE, reset: true });
             logger.info(`${getDebugLogHeader(message)} | Special reset.`);
             return;
