@@ -114,7 +114,7 @@ export default class GameRound {
     public readonly hints: { songHint: string, artistHint: string };
 
     /** UUID associated with right guess interaction custom_id */
-    public interactionCorrectAnswerUUID: [string, number];
+    public interactionCorrectAnswerUUID: string;
 
     /** UUID associated with wrong guesses in multiple choice */
     public interactionIncorrectAnswerUUIDs: { [uuid: string]: number };
@@ -236,7 +236,7 @@ export default class GameRound {
     /**
      * Marks button guesses as correct or incorrect in a multiple choice game
      */
-    async interactionMarkAnswers() {
+    async interactionMarkAnswers(correctGuesses: number) {
         if (!this.interactionMessage) return;
         await this.interactionMessage.edit({
             components: this.interactionComponents.map((x) => ({
@@ -246,9 +246,9 @@ export default class GameRound {
                     const noGuesses = this.interactionIncorrectAnswerUUIDs[z.custom_id] === 0;
                     let label = z.label;
                     let style: 2 | 1 | 4 | 3;
-                    if (this.interactionCorrectAnswerUUID[0] === z.custom_id) {
-                        if (this.interactionCorrectAnswerUUID[1] > 0) {
-                            label += ` (${this.interactionCorrectAnswerUUID[1]})`;
+                    if (this.interactionCorrectAnswerUUID === z.custom_id) {
+                        if (correctGuesses) {
+                            label += ` (${correctGuesses})`;
                         }
 
                         style = 3;
