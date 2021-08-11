@@ -247,7 +247,7 @@ export default class GameRound {
                     let label = z.label;
                     let style: 2 | 1 | 4 | 3;
                     if (this.interactionCorrectAnswerUUID === z.custom_id) {
-                        if (correctGuesses > 0) {
+                        if (correctGuesses) {
                             label += ` (${correctGuesses})`;
                         }
 
