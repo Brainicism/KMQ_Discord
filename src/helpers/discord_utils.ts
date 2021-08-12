@@ -19,10 +19,10 @@ import MessageContext from "../structures/message_context";
 import { GuessModeType } from "../commands/game_options/guessmode";
 
 const logger = new IPCLogger("utils");
-export const EMBED_INFO_COLOR = 0x000000; // BLACK
-export const EMBED_ERROR_COLOR = 0xE74C3C; // RED
-export const EMBED_SUCCESS_COLOR = 0x00FF00; // GREEN
-export const EMBED_SUCCESS_BONUS_COLOR = 0xFFD700; // GOLD
+export const EMBED_INFO_COLOR = 0x000000; // Black
+export const EMBED_ERROR_COLOR = 0xED4245; // Red
+export const EMBED_SUCCESS_COLOR = 0x57F287; // Green
+export const EMBED_SUCCESS_BONUS_COLOR = 0xFEE75C; // Gold
 const EMBED_FIELDS_PER_PAGE = 20;
 const REQUIRED_TEXT_PERMISSIONS = ["addReactions" as const, "embedLinks" as const];
 const REQUIRED_VOICE_PERMISSIONS = ["viewChannel" as const, "voiceConnect" as const, "voiceSpeak" as const];
