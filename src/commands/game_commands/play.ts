@@ -1,13 +1,15 @@
+import Eris from "eris";
 import GameSession from "../../structures/game_session";
 import {
     sendErrorMessage, getDebugLogHeader, sendInfoMessage, voicePermissionsCheck, getUserVoiceChannel, getUserTag, getCurrentVoiceMembers,
 } from "../../helpers/discord_utils";
 import { deleteGameSession, getTimeUntilRestart } from "../../helpers/management_utils";
 import { activeBonusUsers, getGuildPreference } from "../../helpers/game_utils";
-import { bold, isPowerHour, isWeekend } from "../../helpers/utils";
+import { bold, chooseWeightedRandom, isPowerHour, isWeekend } from "../../helpers/utils";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import dbContext from "../../database_context";
 import { IPCLogger } from "../../logger";
-import { GameType, GuildTextableMessage } from "../../types";
+import { GameInfoMessage, GameType, GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
@@ -39,11 +41,24 @@ export async function sendBeginGameMessage(textChannelName: string,
     }
 
     const startTitle = `Game starting in #${textChannelName} in 🔊 ${voiceChannelName}`;
+    const gameInfoMessage: GameInfoMessage = chooseWeightedRandom(await dbContext.kmq("game_messages"));
+    const fields: Eris.EmbedField[] = [];
+    if (gameInfoMessage) {
+        fields.push(
+            {
+                name: gameInfoMessage.title,
+                value: gameInfoMessage.message,
+                inline: false,
+            },
+        );
+    }
+
     await sendInfoMessage(MessageContext.fromMessage(message), {
         title: startTitle,
         description: gameInstructions,
         footerText: bonusUserParticipants.length === 0 && Math.random() < 0.5 ? "Psst. Earn more EXP by voting (see ,vote)" : null,
         thumbnailUrl: KmqImages.HAPPY,
+        fields,
     });
 }
 
