@@ -99,10 +99,6 @@ export default class RemoveCommand implements BaseCommand {
             await sendErrorMessage(MessageContext.fromMessage(message), { title: "Unknown Group Name", description: `One or more of the specified group names was not recognized. Those groups that matched are removed. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\`. \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} ` });
         }
 
-        if (matchedGroups.length === 0) {
-            return;
-        }
-
         switch (optionListed) {
             case RemoveType.GROUPS:
             case RemoveType.GROUP:
@@ -110,19 +106,19 @@ export default class RemoveCommand implements BaseCommand {
             case RemoveType.ARTISTS:
                 await guildPreference.setGroups(matchedGroups);
                 await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GROUPS, reset: false });
-                logger.info(`${getDebugLogHeader(message)} | Group removed: ${guildPreference.getDisplayedGroupNames()}`);
+                logger.info(`${getDebugLogHeader(message)} | Group removed: ${parsedMessage.argument}`);
                 break;
             case RemoveType.INCLUDE:
             case RemoveType.INCLUDES:
                 await guildPreference.setIncludes(matchedGroups);
                 await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.INCLUDE, reset: false });
-                logger.info(`${getDebugLogHeader(message)} | Include removed: ${guildPreference.getDisplayedIncludesGroupNames()}`);
+                logger.info(`${getDebugLogHeader(message)} | Include removed: ${parsedMessage.argument}`);
                 break;
             case RemoveType.EXCLUDE:
             case RemoveType.EXCLUDES:
                 await guildPreference.setExcludes(matchedGroups);
                 await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.EXCLUDE, reset: false });
-                logger.info(`${getDebugLogHeader(message)} | Exclude removed: ${guildPreference.getDisplayedExcludesGroupNames()}`);
+                logger.info(`${getDebugLogHeader(message)} | Exclude removed: ${parsedMessage.argument}`);
                 break;
             default:
         }
