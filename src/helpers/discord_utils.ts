@@ -6,7 +6,7 @@ import GameSession, { UniqueSongCounter } from "../structures/game_session";
 import { IPCLogger } from "../logger";
 import { getSongCount, userBonusIsActive } from "./game_utils";
 import { getFact } from "../fact_generator";
-import { EmbedPayload, GameOption, GameOptionCommand, PriorityGameOption, ConflictingGameOptions, GuildTextableMessage, PlayerRoundResult, EndGameMessage, GameType } from "../types";
+import { EmbedPayload, GameOption, GameOptionCommand, PriorityGameOption, ConflictingGameOptions, GuildTextableMessage, PlayerRoundResult, GameInfoMessage, GameType } from "../types";
 import { chunkArray, codeLine, bold, underline, italicize, strikethrough, chooseWeightedRandom, getOrdinalNum, friendlyFormattedNumber } from "./utils";
 import { state } from "../kmq";
 import Scoreboard from "../structures/scoreboard";
@@ -431,7 +431,7 @@ export async function sendEndGameMessage(gameSession: GameSession) {
             fields = gameSession.scoreboard.getScoreboardEmbedFields();
         }
 
-        const endGameMessage: EndGameMessage = chooseWeightedRandom(await dbContext.kmq("end_game_messages").where("category", "=", Math.random() < 0.5 ? "kmq" : "game"));
+        const endGameMessage: GameInfoMessage = chooseWeightedRandom(await dbContext.kmq("game_messages"));
         if (endGameMessage) {
             fields.push(
                 {

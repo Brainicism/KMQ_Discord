@@ -44,7 +44,7 @@ export interface EmbedPayload {
     components?: Eris.ActionRow[];
 }
 
-export interface EndGameMessage {
+export interface GameInfoMessage {
     title: string;
     message: string;
     weight: number;
