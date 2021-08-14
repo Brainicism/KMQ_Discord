@@ -2,7 +2,7 @@ import { getDebugLogHeader, sendErrorMessage, sendOptionsMessage } from "../../h
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getGuildPreference, getMatchingGroupNames } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
+import { GameOption, MatchedArtist } from "../../types";
 import MessageContext from "../../structures/message_context";
 import { GROUP_LIST_URL } from "./groups";
 
@@ -61,39 +61,36 @@ export default class RemoveCommand implements BaseCommand {
     call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         const optionListed = parsedMessage.components[0] as RemoveType;
-        let groupNamesString: string;
+        let currentMatchedArtists: MatchedArtist[];
         switch (optionListed) {
             case RemoveType.GROUPS:
             case RemoveType.GROUP:
             case RemoveType.ARTIST:
             case RemoveType.ARTISTS:
-                groupNamesString = guildPreference.getDisplayedGroupNames(true);
+                currentMatchedArtists = guildPreference.gameOptions.groups;
                 break;
             case RemoveType.INCLUDE:
             case RemoveType.INCLUDES:
-                groupNamesString = guildPreference.getDisplayedIncludesGroupNames(true);
+                currentMatchedArtists = guildPreference.gameOptions.includes;
                 break;
             case RemoveType.EXCLUDE:
             case RemoveType.EXCLUDES:
-                groupNamesString = guildPreference.getDisplayedExcludesGroupNames(true);
+                currentMatchedArtists = guildPreference.gameOptions.excludes;
                 break;
             default:
         }
 
-        const currentGroupNames = !groupNamesString ? [] : groupNamesString.split(",");
-
-        if (currentGroupNames.length === 0) {
+        if (currentMatchedArtists.length === 0) {
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Remove failed", description: "There are no groups currently selected" });
             return;
         }
 
-        const newGroupNames = parsedMessage.argument.split(" ").slice(1).join(" ")
+        const rawGroupsToRemove = parsedMessage.argument.split(" ").slice(1).join(" ")
             .split(",")
             .map((groupName) => groupName.trim().toLowerCase());
 
-        const remainingGroups = currentGroupNames.filter((group) => !newGroupNames.includes(group.toLowerCase()));
-
-        const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(remainingGroups);
+        const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(rawGroupsToRemove);
+        const remainingGroups = currentMatchedArtists.filter((group) => !matchedGroups.some((x) => x.id === group.id));
         if (unmatchedGroups.length) {
             logger.info(`${getDebugLogHeader(message)} | Attempted to set unknown groups. groups =  ${unmatchedGroups.join(", ")}`);
             await sendErrorMessage(MessageContext.fromMessage(message), { title: "Unknown Group Name", description: `One or more of the specified group names was not recognized. Those groups that matched are removed. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\`. \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} ` });
@@ -104,21 +101,21 @@ export default class RemoveCommand implements BaseCommand {
             case RemoveType.GROUP:
             case RemoveType.ARTIST:
             case RemoveType.ARTISTS:
-                await guildPreference.setGroups(matchedGroups);
+                await guildPreference.setGroups(remainingGroups);
                 await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GROUPS, reset: false });
-                logger.info(`${getDebugLogHeader(message)} | Group removed: ${parsedMessage.argument}`);
+                logger.info(`${getDebugLogHeader(message)} | Group removed: ${rawGroupsToRemove}`);
                 break;
             case RemoveType.INCLUDE:
             case RemoveType.INCLUDES:
-                await guildPreference.setIncludes(matchedGroups);
+                await guildPreference.setIncludes(remainingGroups);
                 await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.INCLUDE, reset: false });
-                logger.info(`${getDebugLogHeader(message)} | Include removed: ${parsedMessage.argument}`);
+                logger.info(`${getDebugLogHeader(message)} | Include removed: ${rawGroupsToRemove}`);
                 break;
             case RemoveType.EXCLUDE:
             case RemoveType.EXCLUDES:
-                await guildPreference.setExcludes(matchedGroups);
+                await guildPreference.setExcludes(remainingGroups);
                 await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.EXCLUDE, reset: false });
-                logger.info(`${getDebugLogHeader(message)} | Exclude removed: ${parsedMessage.argument}`);
+                logger.info(`${getDebugLogHeader(message)} | Exclude removed: ${rawGroupsToRemove}`);
                 break;
             default:
         }
