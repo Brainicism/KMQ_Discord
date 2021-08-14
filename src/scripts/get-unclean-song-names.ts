@@ -9,9 +9,9 @@ const logger = new IPCLogger("get-unclean-song-names");
         .select(["song_name as name", "artist_name as artist", "link as youtubeLink"]);
 
     // eslint-disable-next-line no-control-regex
-    const nonAsciiSongs = songs.filter((x) => !/^[\x00-\x7F’]*$/.test(x.name.split("(")[0].trim()));
+    const nonAsciiSongs = songs.filter((x) => !/^[\x00-\x7F’]*$/.test(x.songName.split("(")[0].trim()));
     if (nonAsciiSongs.length) {
-        logger.info(nonAsciiSongs.map(((x) => `${x.youtubeLink}, ${x.name}`)).join("\n"));
+        logger.info(nonAsciiSongs.map(((x) => `${x.youtubeLink}, ${x.songName}`)).join("\n"));
     } else {
         logger.info("Nothing found");
     }

@@ -19,7 +19,8 @@ export interface ParsedMessage {
 }
 
 export interface QueriedSong {
-    name: string;
+    songName: string;
+    originalSongName: string;
     artist: string;
     youtubeLink: string;
     publishDate?: Date;

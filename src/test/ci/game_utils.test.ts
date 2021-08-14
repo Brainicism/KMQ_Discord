@@ -24,6 +24,7 @@ async function setup() {
     await dbContext.kmq.raw("DROP TABLE IF EXISTS kpop_groups");
     await dbContext.kmq.raw(`CREATE TABLE available_songs (
         song_name VARCHAR(255),
+        clean_song_name VARCHAR(255),
         link VARCHAR(255),
         artist_name VARCHAR(255),
         members ENUM('male', 'female', 'coed'),
