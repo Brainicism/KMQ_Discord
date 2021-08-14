@@ -8,6 +8,7 @@ BEGIN
 	DROP TABLE IF EXISTS available_songs_temp;
 	CREATE TABLE available_songs_temp (
 		song_name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+		clean_song_name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
 		song_aliases VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
 		artist_aliases VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
 		link VARCHAR(255) NOT NULL,
@@ -29,6 +30,7 @@ BEGIN
 	INSERT INTO available_songs_temp
 	SELECT
 		TRIM(app_kpop.name) AS song_name,
+		TRIM(SUBSTRING_INDEX(app_kpop.name, '(', 1)) AS clean_song_name,
 		name_aka AS song_aliases,
 		kpop_videos.app_kpop_group.alias AS artist_aliases,
 		vlink AS link,
@@ -55,6 +57,7 @@ BEGIN
 	FROM (
 		SELECT
 			TRIM(app_kpop_audio.name) AS song_name,
+			TRIM(SUBSTRING_INDEX(app_kpop_audio.name, '(', 1)) AS clean_song_name,
 			name_aka AS song_aliases,
 			kpop_videos.app_kpop_group.alias AS artist_aliases,
 			vlink AS link,

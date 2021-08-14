@@ -8,7 +8,7 @@ let gameRound: GameRound;
 describe("constructor defaults", () => {
     describe("artist/song names without aliases", () => {
         it("adds the corresponding name as a correct answer", () => {
-            gameRound = new GameRound("Song1", "Jisoo", "abcde", 2021);
+            gameRound = new GameRound("Song1", "Song1", "Jisoo", "abcde", 2021);
             assert.deepStrictEqual(gameRound.acceptedArtistAnswers, ["Jisoo"]);
             assert.deepStrictEqual(gameRound.acceptedSongAnswers, ["Song1"]);
         });
@@ -16,14 +16,14 @@ describe("constructor defaults", () => {
 
     describe("artist collabs", () => {
         it("should record them as two separate artists", () => {
-            gameRound = new GameRound("Poggers Song", "IU + Blackpink", "abcde", 2021);
+            gameRound = new GameRound("Poggers Song", "Poggers Song", "IU + Blackpink", "abcde", 2021);
             assert.deepStrictEqual(gameRound.acceptedArtistAnswers, ["IU", "Blackpink"]);
         });
     });
 
     describe("artist name has trailing or leading spaces", () => {
         it("should remove them", () => {
-            gameRound = new GameRound("Lovesick Girls", " Blackpink + IU             ", "abcde", 2021);
+            gameRound = new GameRound("Lovesick Girls", "Lovesick Girls", " Blackpink + IU             ", "abcde", 2021);
             assert.deepStrictEqual(gameRound.acceptedArtistAnswers, ["Blackpink", "IU"]);
         });
     });
@@ -38,7 +38,7 @@ describe("constructor defaults", () => {
             describe("song has an alias", () => {
                 it("records the aliases as an accepted answer", () => {
                     state.aliases.song["abcde"] = ["An epic song", "A good song"];
-                    gameRound = new GameRound("A really epic song", "A really epic person", "abcde", 2021);
+                    gameRound = new GameRound("A really epic song", "A really epic song", "A really epic person", "abcde", 2021);
                     assert.deepStrictEqual(gameRound.acceptedSongAnswers, ["A really epic song", "An epic song", "A good song"]);
                 });
             });
@@ -48,7 +48,7 @@ describe("constructor defaults", () => {
             describe("artist has an alias", () => {
                 it("records the aliases as an accepted answer", () => {
                     state.aliases.artist["Person2"] = ["Person Two", "Person Too"];
-                    gameRound = new GameRound("A really epic song", "Person2", "abcde", 2021);
+                    gameRound = new GameRound("A really epic song", "A really epic song", "Person2", "abcde", 2021);
                     assert.deepStrictEqual(gameRound.acceptedArtistAnswers, ["Person2", "Person Two", "Person Too"]);
                 });
             });
@@ -86,12 +86,6 @@ describe("clean song/artist name", () => {
     });
 
     describe("has brackets in them", () => {
-        describe("song names", () => {
-            it("removes the sections in the brackets", () => {
-                assert.strictEqual(cleanSongName("blahblah (123)"), "blahblah");
-            });
-        });
-
         describe("artist names", () => {
             it("does not ignore the sections in the brackets", () => {
                 assert.strictEqual(cleanArtistName("cla(hclah)"), "clahclah");
@@ -102,7 +96,7 @@ describe("clean song/artist name", () => {
 
 describe("skipping", () => {
     beforeEach(() => {
-        gameRound = new GameRound("1", "2", "3", 2015);
+        gameRound = new GameRound("1", "1", "2", "3", 2015);
     });
 
     describe("unique skippers", () => {
@@ -145,7 +139,7 @@ describe("skipping", () => {
 
 describe("check guess", () => {
     beforeEach(() => {
-        gameRound = new GameRound("song", "artist", "a1b2c3", 2015);
+        gameRound = new GameRound("song", "song", "artist", "a1b2c3", 2015);
     });
 
     describe("incorrect guess", () => {
@@ -195,7 +189,7 @@ describe("check guess", () => {
 describe("getExpReward", () => {
     const exp = 500;
     beforeEach(() => {
-        gameRound = new GameRound("song", "artist", "a1b2c3", 2015);
+        gameRound = new GameRound("song", "song", "artist", "a1b2c3", 2015);
     });
 
     describe("no hint used", () => {

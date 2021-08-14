@@ -32,7 +32,7 @@ interface GroupMatchResults {
  * @returns a list of songs, as well as the number of songs before the filter option was applied
  */
 export async function getFilteredSongList(guildPreference: GuildPreference): Promise<{ songs: Set<QueriedSong>, countBeforeLimit: number }> {
-    const fields = ["song_name as name", "artist_name as artist", "link as youtubeLink",
+    const fields = ["clean_song_name as songName", "song_name as originalSongName", "artist_name as artist", "link as youtubeLink",
         "publishedon as publishDate", "members", "id_artist as artistID", "issolo as isSolo", "members", "tags"];
 
     const gameOptions = guildPreference.gameOptions;
@@ -141,7 +141,7 @@ export async function ensureVoiceConnection(gameSession: GameSession): Promise<v
 export async function selectRandomSong(filteredSongs: Set<QueriedSong>, ignoredSongs?: Set<string>, alternatingGender?: Gender): Promise<QueriedSong> {
     if (isDebugMode() && isForcedSongActive()) {
         const forcePlayedQueriedSong = await getForcePlaySong();
-        logger.info(`Force playing ${forcePlayedQueriedSong.name} by ${forcePlayedQueriedSong.artist} | ${forcePlayedQueriedSong.youtubeLink}`);
+        logger.info(`Force playing ${forcePlayedQueriedSong.songName} by ${forcePlayedQueriedSong.artist} | ${forcePlayedQueriedSong.youtubeLink}`);
         return forcePlayedQueriedSong;
     }
 
@@ -306,38 +306,41 @@ export async function getMultipleChoiceOptions(answerType: AnswerType, guessMode
     const HARD_CHOICES = 7;
 
     if (guessMode === GuessModeType.SONG_NAME || guessMode === GuessModeType.BOTH) {
-        easyNames = new Set((await dbContext.kmq("available_songs").select("song_name")
+        easyNames = new Set((await dbContext.kmq("available_songs").select("clean_song_name")
             .where("members", gender)
-            .andWhereNot("id_artist", artistID)).map((x) => x["song_name"]));
+            .andWhereNot("id_artist", artistID)).map((x) => x["clean_song_name"]));
         switch (answerType) {
-            case AnswerType.MULTIPLE_CHOICE_EASY:
+            case AnswerType.MULTIPLE_CHOICE_EASY: {
                 // Easy: EASY_CHOICES from same gender as chosen artist
                 result = new Set(_.sampleSize([...easyNames], EASY_CHOICES));
                 break;
-            case AnswerType.MULTIPLE_CHOICE_MED:
-            {
-                // Medium: MEDIUM_CHOICES - MEDIUM_SAME_ARIST_CHOICES from same gender as chosen artist, MEDIUM_SAME_ARIST_CHOICES from chosen artist
-                const sameArtistSongs = _.sampleSize((await dbContext.kmq("available_songs").select("song_name")
-                    .where("id_artist", artistID)
-                    .andWhereNot("song_name", answer)).map((x) => x["song_name"]), MEDIUM_SAME_ARIST_CHOICES);
+            }
 
-                const sameGenderSongs = _.sampleSize((await dbContext.kmq("available_songs").select("song_name")
-                    .whereNotIn("song_name", [...sameArtistSongs, answer])
+            case AnswerType.MULTIPLE_CHOICE_MED: {
+                // Medium: MEDIUM_CHOICES - MEDIUM_SAME_ARIST_CHOICES from same gender as chosen artist, MEDIUM_SAME_ARIST_CHOICES from chosen artist
+                const sameArtistSongs = _.sampleSize((await dbContext.kmq("available_songs").select("clean_song_name")
+                    .where("id_artist", artistID)
+                    .andWhereNot("clean_song_name", answer)).map((x) => x["clean_song_name"]), MEDIUM_SAME_ARIST_CHOICES);
+
+                const sameGenderSongs = _.sampleSize((await dbContext.kmq("available_songs").select("clean_song_name")
+                    .whereNotIn("clean_song_name", [...sameArtistSongs, answer])
                     .where("members", gender)
-                    .andWhereNot("id_artist", artistID)).map((x) => x["song_name"]), MEDIUM_CHOICES - MEDIUM_SAME_ARIST_CHOICES);
+                    .andWhereNot("id_artist", artistID)).map((x) => x["clean_song_name"]), MEDIUM_CHOICES - MEDIUM_SAME_ARIST_CHOICES);
 
                 result = new Set([...sameArtistSongs, ...sameGenderSongs]);
                 easyNames = setDifference([...easyNames], [...result]);
                 break;
             }
 
-            case AnswerType.MULTIPLE_CHOICE_HARD:
+            case AnswerType.MULTIPLE_CHOICE_HARD: {
                 // Hard: HARD_CHOICES from chosen artist
-                names = new Set((await dbContext.kmq("available_songs").select("song_name")
+                names = new Set((await dbContext.kmq("available_songs").select("clean_song_name")
                     .where("id_artist", artistID)
-                    .andWhereNot("song_name", answer)).map((x) => x["song_name"]));
+                    .andWhereNot("clean_song_name", answer)).map((x) => x["clean_song_name"]));
                 result = new Set(_.sampleSize([...names], HARD_CHOICES));
                 break;
+            }
+
             default:
                 break;
         }

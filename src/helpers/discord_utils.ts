@@ -274,7 +274,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
 
     await sendInfoMessage(messageContext, {
         color,
-        title: `"${gameRound.songName}" (${gameRound.songYear}) - ${gameRound.artistName}`,
+        title: `"${gameRound.originalSongName}" (${gameRound.songYear}) - ${gameRound.artistName}`,
         description,
         thumbnailUrl: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,
         fields,

@@ -487,7 +487,7 @@ export default class GameSession {
         }
 
         // create a new round with randomly chosen song
-        this.prepareRound(randomSong.name, randomSong.artist, randomSong.youtubeLink, randomSong.publishDate.getFullYear());
+        this.prepareRound(randomSong.songName, randomSong.originalSongName, randomSong.artist, randomSong.youtubeLink, randomSong.publishDate.getFullYear());
         this.gameRound.setBaseExpReward(await this.calculateBaseExp());
 
         const voiceChannel = state.client.getChannel(this.voiceChannelID) as Eris.VoiceChannel;
@@ -742,8 +742,8 @@ export default class GameSession {
      * @param videoID - The song's corresponding YouTube ID
      * @param year - The song's release year
      */
-    private prepareRound(song: string, artist: string, videoID: string, year: number) {
-        this.gameRound = new GameRound(song, artist, videoID, year);
+    private prepareRound(cleanSongName: string, originalSongName: string, artist: string, videoID: string, year: number) {
+        this.gameRound = new GameRound(cleanSongName, originalSongName, artist, videoID, year);
     }
 
     /**

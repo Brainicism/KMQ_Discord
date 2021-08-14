@@ -190,7 +190,7 @@ const downloadNewSongs = async (db: DatabaseContext, limit?: number): Promise<nu
     await updateNotDownloaded(db, allSongs);
 
     for (const song of songsToDownload) {
-        logger.info(`Downloading song: '${song.name}' by ${song.artist} | ${song.youtubeLink} (${downloadCount + 1}/${songsToDownload.length})`);
+        logger.info(`Downloading song: '${song.songName}' by ${song.artist} | ${song.youtubeLink} (${downloadCount + 1}/${songsToDownload.length})`);
         try {
             await retryJob(downloadSong, [db, song.youtubeLink], 1, true, 5000);
         } catch (err) {
@@ -205,7 +205,7 @@ const downloadNewSongs = async (db: DatabaseContext, limit?: number): Promise<nu
             continue;
         }
 
-        logger.info(`Encoding song: '${song.name}' by ${song.artist} | ${song.youtubeLink}`);
+        logger.info(`Encoding song: '${song.songName}' by ${song.artist} | ${song.youtubeLink}`);
         try {
             await retryJob(ffmpegOpusJob, [song.youtubeLink], 1, true, 5000);
         } catch (err) {

@@ -19,10 +19,7 @@ const CHARACTER_REPLACEMENTS = [
  * @returns The cleaned song name
  */
 export function cleanSongName(name: string): string {
-    let cleanName = name.toLowerCase()
-        .split("(")[0]
-        .trim();
-
+    let cleanName = name.toLowerCase();
     for (const characterReplacement of CHARACTER_REPLACEMENTS) {
         cleanName = cleanName.replace(characterReplacement.pattern, characterReplacement.replacement);
     }
@@ -49,7 +46,6 @@ export function cleanArtistName(name: string): string {
 /** Generate the round hints */
 function generateHint(name: string): string {
     const HIDDEN_CHARACTER_PERCENTAGE = 0.75;
-    name = name.toLowerCase().split("(")[0];
     const nameLength = name.length;
     const eligibleCharacterIndicesToHide = _.range(0, nameLength).filter((x) => !name[x].match(REMOVED_CHARACTERS));
     const hideMask = _.sampleSize(eligibleCharacterIndicesToHide, Math.max(Math.floor(eligibleCharacterIndicesToHide.length * HIDDEN_CHARACTER_PERCENTAGE), 1));
@@ -62,8 +58,11 @@ function generateHint(name: string): string {
 }
 
 export default class GameRound {
-    /** The song name */
+    /** The song name with brackets removed */
     public readonly songName: string;
+
+    /** The original song name */
+    public readonly originalSongName: string;
 
     /** The potential song aliases */
     public readonly songAliases: string[];
@@ -131,10 +130,11 @@ export default class GameRound {
     /** The base EXP for this GameRound */
     private baseExp: number;
 
-    constructor(song: string, artist: string, videoID: string, year: number) {
-        this.songName = song;
+    constructor(cleanedSongName: string, originalSongName: string, artist: string, videoID: string, year: number) {
+        this.songName = cleanedSongName;
+        this.originalSongName = originalSongName;
         this.songAliases = state.aliases.song[videoID] || [];
-        this.acceptedSongAnswers = [song, ...this.songAliases];
+        this.acceptedSongAnswers = [cleanedSongName, ...this.songAliases];
         const artistNames = artist.split("+").map((x) => x.trim());
         this.artistAliases = artistNames.flatMap((x) => state.aliases.artist[x] || []);
         this.acceptedArtistAnswers = [...artistNames, ...this.artistAliases];
