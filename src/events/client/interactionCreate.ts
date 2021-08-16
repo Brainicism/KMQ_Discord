@@ -44,7 +44,7 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
             return;
         }
 
-        if (!gameSession.isValidInteractionGuess(interaction.data.custom_id)) {
+        if (!gameSession.gameRound.isValidInteractionGuess(interaction.data.custom_id)) {
             await interaction.createMessage({
                 embeds: [{
                     color: EMBED_ERROR_COLOR,
@@ -61,7 +61,7 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
             return;
         }
 
-        if (!gameSession.isCorrectInteractionAnswer(interaction.data.custom_id)) {
+        if (!gameSession.gameRound.isCorrectInteractionAnswer(interaction.data.custom_id)) {
             gameSession.gameRound.incorrectMCGuessers.add(interaction.member.id);
             gameSession.gameRound.interactionIncorrectAnswerUUIDs[interaction.data.custom_id]++;
             await interaction.createMessage({

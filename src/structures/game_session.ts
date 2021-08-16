@@ -621,23 +621,6 @@ export default class GameSession {
     }
 
     /**
-     * @param interactionUUID - the UUID of an interaction
-     * @returns true if the given UUID is one of the guesses of the current game round
-     */
-    isValidInteractionGuess(interactionUUID: string): boolean {
-        return interactionUUID === this.gameRound?.interactionCorrectAnswerUUID || Object.keys(this.gameRound?.interactionIncorrectAnswerUUIDs)?.includes(interactionUUID);
-    }
-
-    /**
-     * @param interactionUUID - the UUID of an interaction
-     * @returns true if the given UUID is associated with the interaction corresponding to
-     * the correct guess
-     */
-    isCorrectInteractionAnswer(interactionUUID: string): boolean {
-        return this.gameRound?.interactionCorrectAnswerUUID === interactionUUID;
-    }
-
-    /**
      * Begin playing the GameRound's song in the VoiceChannel, listen on VoiceConnection events
      * @param guildPreference - The guild's GuildPreference
      * @param messageContext - An object containing relevant parts of Eris.Message

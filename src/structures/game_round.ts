@@ -272,6 +272,23 @@ export default class GameRound {
     }
 
     /**
+     * @param interactionUUID - the UUID of an interaction
+     * @returns true if the given UUID is one of the guesses of the current game round
+     */
+    isValidInteractionGuess(interactionUUID: string): boolean {
+        return interactionUUID === this.interactionCorrectAnswerUUID || Object.keys(this.interactionIncorrectAnswerUUIDs)?.includes(interactionUUID);
+    }
+
+    /**
+     * @param interactionUUID - the UUID of an interaction
+     * @returns true if the given UUID is associated with the interaction corresponding to
+     * the correct guess
+     */
+    isCorrectInteractionAnswer(interactionUUID: string): boolean {
+        return this.interactionCorrectAnswerUUID === interactionUUID;
+    }
+
+    /**
      * Checks whether the song guess matches the GameRound's song
      * @param message - The Message that contains the guess
      * @returns whether or not the guess was correct
