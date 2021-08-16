@@ -4,6 +4,7 @@ import path from "path";
 import schedule from "node-schedule";
 import fastify from "fastify";
 import fastifyStatic from "fastify-static";
+import fs from "fs";
 import { IPCLogger } from "../logger";
 import { state } from "../kmq";
 import { EMBED_INFO_COLOR, sendInfoMessage } from "./discord_utils";
@@ -70,12 +71,17 @@ export function registerProcessEvents() {
 
 /** Starts web server */
 export async function startWebServer() {
-    const httpServer = fastify({}).register(fastifyStatic, {
+    const httpsServer = fastify({
+        https: {
+            key: fs.readFileSync(process.env.HTTPS_SERVER_KEY),
+            cert: fs.readFileSync(process.env.HTTPS_SERVER_CERT),
+        },
+    }).register(fastifyStatic, {
         root: path.join(__dirname, "../../images/kmq"),
         prefix: "/public/",
     });
 
-    httpServer.post("/voted", {}, async (request, reply) => {
+    httpsServer.post("/voted", {}, async (request, reply) => {
         const requestAuthorizationToken = request.headers["authorization"];
         if (requestAuthorizationToken !== process.env.TOP_GG_WEBHOOK_AUTH) {
             logger.warn("Webhook received with non-matching authorization token");
@@ -88,12 +94,12 @@ export async function startWebServer() {
         reply.code(200).send();
     });
 
-    httpServer.get("/groups", async (_request, reply) => {
+    httpsServer.get("/groups", async (_request, reply) => {
         reply.sendFile("group_list.txt", path.join(__dirname, "../../data"));
     });
 
     try {
-        await httpServer.listen(process.env.WEB_SERVER_PORT, "0.0.0.0");
+        await httpsServer.listen(process.env.WEB_SERVER_PORT, "0.0.0.0");
     } catch (err) {
         logger.error(`Erroring starting HTTP server: ${err}`);
     }
