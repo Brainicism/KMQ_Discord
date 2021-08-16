@@ -16,6 +16,8 @@ declare namespace NodeJS {
         NODE_ENV: string,
         WEB_SERVER_IP: string,
         WEB_SERVER_PORT: string,
+        HTTPS_SERVER_KEY: string,
+        HTTPS_SERVER_CERT: string,
         ALERT_WEBHOOK_URL?: string,
         AUDIO_SONGS_PER_ARTIST: number,
         PREMIUM_AUDIO_SONGS_PER_ARTIST: number,
