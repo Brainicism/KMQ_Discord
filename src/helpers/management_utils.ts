@@ -1,9 +1,7 @@
 /* eslint-disable global-require */
 /* eslint-disable import/no-dynamic-require */
-import path from "path";
 import schedule from "node-schedule";
 import fastify from "fastify";
-import fastifyStatic from "fastify-static";
 import { IPCLogger } from "../logger";
 import { state } from "../kmq";
 import { EMBED_INFO_COLOR, sendInfoMessage } from "./discord_utils";
@@ -70,11 +68,7 @@ export function registerProcessEvents() {
 
 /** Starts web server */
 export async function startWebServer() {
-    const httpServer = fastify({}).register(fastifyStatic, {
-        root: path.join(__dirname, "../../images/kmq"),
-        prefix: "/public/",
-    });
-
+    const httpServer = fastify({});
     httpServer.post("/voted", {}, async (request, reply) => {
         const requestAuthorizationToken = request.headers["authorization"];
         if (requestAuthorizationToken !== process.env.TOP_GG_WEBHOOK_AUTH) {
@@ -86,10 +80,6 @@ export async function startWebServer() {
         const userID = request.body["user"];
         await userVoted(userID);
         reply.code(200).send();
-    });
-
-    httpServer.get("/groups", async (_request, reply) => {
-        reply.sendFile("group_list.txt", path.join(__dirname, "../../data"));
     });
 
     try {

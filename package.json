@@ -40,7 +40,6 @@
     "eris-pagination": "https://github.com/brainicism/eris-pagination#86ab739",
     "erlpack": "https://github.com/abalabahaha/erlpack.git#5d0064f",
     "fastify": "^3.17.0",
-    "fastify-static": "^4.2.3",
     "fluent-ffmpeg": "^2.1.2",
     "knex": "^0.95.6",
     "lodash": "^4.17.21",
