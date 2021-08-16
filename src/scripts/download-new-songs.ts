@@ -148,7 +148,7 @@ async function getSongsFromDb(db: DatabaseContext) {
             .join("app_kpop_group", "kpop_videos.app_kpop_audio.id_artist", "=", "kpop_videos.app_kpop_group.id")
             .whereNotIn("vlink", function () { this.select("vlink").from("kmq.dead_links"); })
             .andWhere("tags", "NOT LIKE", "%c%"))
-        .select("name", "artist", "youtubeLink", "views")
+        .select("name as songName", "artist", "youtubeLink", "views")
         .from("rankedAudioSongs")
         .where("rank", "<=", process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST)
         .union(function () {
