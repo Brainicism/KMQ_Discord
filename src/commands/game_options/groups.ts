@@ -7,7 +7,7 @@ import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
 
 const logger = new IPCLogger("groups");
-export const GROUP_LIST_URL = `http://${process.env.WEB_SERVER_IP}:${process.env.WEB_SERVER_PORT}/groups`;
+export const GROUP_LIST_URL = "https://static.kpop.gg/data/group_list.txt";
 export default class GroupsCommand implements BaseCommand {
     help = {
         name: "groups",
