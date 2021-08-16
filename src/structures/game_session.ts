@@ -305,9 +305,13 @@ export default class GameSession {
 
         // send level up message
         if (leveledUpPlayers.length > 0) {
-            let levelUpMessages = leveledUpPlayers.map((leveledUpPlayer) => `${bold(this.scoreboard.getPlayerName(leveledUpPlayer.userID))} has leveled from ${codeLine(String(leveledUpPlayer.startLevel))} to ${codeLine(String(leveledUpPlayer.endLevel))} (${codeLine(getRankNameByLevel(leveledUpPlayer.endLevel))})`);
-            if (levelUpMessages.length > 10) {
-                levelUpMessages = levelUpMessages.slice(0, 10);
+            const levelUpMessages = leveledUpPlayers
+                .sort((a, b) => b.endLevel - a.endLevel)
+                .sort((a, b) => (b.endLevel - b.startLevel) - (a.endLevel - a.startLevel))
+                .map((leveledUpPlayer) => `${bold(this.scoreboard.getPlayerName(leveledUpPlayer.userID))} has leveled from ${codeLine(String(leveledUpPlayer.startLevel))} to ${codeLine(String(leveledUpPlayer.endLevel))} (${codeLine(getRankNameByLevel(leveledUpPlayer.endLevel))})`)
+                .slice(0, 10);
+
+            if (leveledUpPlayers.length > 10) {
                 levelUpMessages.push("and many others...");
             }
 
