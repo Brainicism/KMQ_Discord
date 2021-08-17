@@ -206,12 +206,12 @@ export async function reloadAliases() {
 
     const newSongAliases = {};
     for (const mapping of songAliasMapping) {
-        newSongAliases[mapping["link"]] = mapping["song_aliases"].split(";");
+        newSongAliases[mapping["link"]] = mapping["song_aliases"].split(";").filter((x) => x);
     }
 
     const newArtistAliases = {};
     for (const mapping of artistAliasMapping) {
-        newArtistAliases[mapping["artist_name"]] = mapping["artist_aliases"].split(";");
+        newArtistAliases[mapping["artist_name"]] = mapping["artist_aliases"].split(";").filter((x) => x);
     }
 
     state.aliases.artist = newArtistAliases;
