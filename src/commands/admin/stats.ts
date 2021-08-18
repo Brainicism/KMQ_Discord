@@ -9,7 +9,7 @@ import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import { state } from "../../kmq";
-import { friendlyFormattedNumber, measureExecutionTime } from "../../helpers/utils";
+import { friendlyFormattedDate, friendlyFormattedNumber, measureExecutionTime } from "../../helpers/utils";
 
 const logger = new IPCLogger("stats");
 
@@ -65,6 +65,11 @@ export default class SkipCommand implements BaseCommand {
             .where("exp", ">", "0")
             .first()).count;
 
+        const latestAvailableSong = new Date((await dbContext.kmq("available_songs")
+            .select("publishedon")
+            .orderBy("publishedon", "DESC")
+            .first()).publishedon);
+
         const mysqlLatency = await measureExecutionTime(dbContext.kmq.raw("SELECT 1;"));
         const gameStatistics = {
             "Active Game Sessions": activeGameSessions,
@@ -72,6 +77,7 @@ export default class SkipCommand implements BaseCommand {
             "(Recent) Game Sessions": `${friendlyFormattedNumber(Number(recentGameSessions))} | ${friendlyFormattedNumber(Number(totalGameSessions))}`,
             "(Recent) Game Rounds": `${friendlyFormattedNumber(recentGameRounds)} | ${friendlyFormattedNumber(totalGameRounds)}`,
             "(Recent) Players": `${friendlyFormattedNumber(Number(recentPlayers))} | ${friendlyFormattedNumber(Number(totalPlayers))}`,
+            "Latest Song Update": friendlyFormattedDate(latestAvailableSong),
         };
 
         const systemStatistics = {

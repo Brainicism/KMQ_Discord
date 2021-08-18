@@ -2,9 +2,7 @@ import fs from "fs";
 import path from "path";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
-import dbContext from "../../database_context";
 import { EMBED_INFO_COLOR, getDebugLogHeader, sendInfoMessage } from "../../helpers/discord_utils";
-import { friendlyFormattedDate } from "../../helpers/utils";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 
@@ -22,19 +20,6 @@ export default class NewsCommand implements BaseCommand {
     aliases = ["updates"];
 
     call = async ({ message }: CommandArgs) => {
-        let latestSongDate: Date;
-        try {
-            const data = await dbContext.kmq("available_songs")
-                .select("publishedon")
-                .orderBy("publishedon", "DESC")
-                .limit(1);
-
-            latestSongDate = new Date(data[0].publishedon);
-        } catch (e) {
-            logger.error(`${getDebugLogHeader(message)} | Error retrieving latest song date`);
-            latestSongDate = null;
-        }
-
         const newsFilePath = path.resolve(__dirname, "../../../data/news.md");
         if (!fs.existsSync(newsFilePath)) {
             logger.error("News file does not exist");
@@ -49,7 +34,6 @@ export default class NewsCommand implements BaseCommand {
             title: "Updates",
             description: news,
             thumbnailUrl: KmqImages.READING_BOOK,
-            footerText: `Latest Song Update: ${friendlyFormattedDate(latestSongDate)}`,
         });
     };
 }
