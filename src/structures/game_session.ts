@@ -226,6 +226,10 @@ export default class GameSession {
             this.scoreboard.updateScoreboard(scoreboardUpdatePayload);
         } else {
             this.lastGuesser = null;
+            if (this.gameType === GameType.ELIMINATION) {
+                const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
+                eliminationScoreboard.decrementAllLives();
+            }
         }
 
         // calculate remaining game duration if applicable
@@ -259,6 +263,11 @@ export default class GameSession {
             this.endSession();
         } else if (this.scoreboard.gameFinished(guildPreference)) {
             this.endSession();
+        } else if (this.gameType === GameType.ELIMINATION) {
+            const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
+            if (eliminationScoreboard.gameFinished()) {
+                this.endSession();
+            }
         }
     }
 
@@ -574,11 +583,6 @@ export default class GameSession {
         this.guessTimeoutFunc = setTimeout(async () => {
             if (this.finished || this.gameRound.finished) return;
             logger.info(`${getDebugLogHeader(messageContext)} | Song finished without being guessed, timer of: ${time} seconds.`);
-            if (this.gameType === GameType.ELIMINATION) {
-                const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
-                eliminationScoreboard.decrementAllLives();
-            }
-
             await this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));
             this.startRound(await getGuildPreference(this.guildID), messageContext);
         }, time * 1000);
@@ -687,10 +691,6 @@ export default class GameSession {
         this.connection.once("end", async () => {
             logger.info(`${getDebugLogHeader(messageContext)} | Song finished without being guessed.`);
             this.stopGuessTimeout();
-            if (this.gameType === GameType.ELIMINATION) {
-                const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
-                eliminationScoreboard.decrementAllLives();
-            }
 
             await this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));
             this.startRound(await getGuildPreference(this.guildID), messageContext);
