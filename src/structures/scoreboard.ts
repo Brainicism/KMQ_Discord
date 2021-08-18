@@ -1,5 +1,5 @@
 import Player from "./player";
-import { bold } from "../helpers/utils";
+import { bold, friendlyFormattedNumber } from "../helpers/utils";
 import { IPCLogger } from "../logger";
 import GuildPreference from "./guild_preference";
 
@@ -56,13 +56,13 @@ export default class Scoreboard {
      * @param roundWinnerIDs - The IDs of all players that won the current round, if any
      * @returns An array of DiscordEmbed fields representing each participant's score
      */
-    getScoreboardEmbedFields(roundWinnerIDs?: Set<string>): Array<{ name: string, value: string, inline: boolean }> {
+    getScoreboardEmbedFields(showExp: boolean, roundWinnerIDs?: Set<string>): Array<{ name: string, value: string, inline: boolean }> {
         return Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
             .map((x, index) => (
                 {
                     name: `${index + 1}. ${x.getDisplayedName(roundWinnerIDs?.has(x.getID()), true)}`,
-                    value: x.getDisplayedScore(),
+                    value: `${x.getDisplayedScore()}${showExp ? ` (+${friendlyFormattedNumber(x.getExpGain())} EXP)` : ""}`,
                     inline: true,
                 }));
     }
@@ -72,14 +72,14 @@ export default class Scoreboard {
      * @param cutoff - How many players to include before truncating the scoreboard
      * @returns An array of 3 DiscordEmbed fields containing each player and their score, separated by newline
      */
-    getScoreboardEmbedThreeFields(cutoff: number, roundResultIDs?: Set<string>): Array<{ name: string, value: string, inline: boolean }> {
+    getScoreboardEmbedThreeFields(cutoff: number, showExp: boolean, roundResultIDs?: Set<string>): Array<{ name: string, value: string, inline: boolean }> {
         const ZERO_WIDTH_SPACE = "​";
         const players = Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
             .slice(0, cutoff)
             .map((x, index, arr) => {
                 const duplicateName = arr.filter((y) => y.getName().slice(0, -5) === x.getName().slice(0, -5)).length > 1;
-                return `${bold(String(index + 1))}. ${x.getDisplayedName(roundResultIDs?.has(x.getID()), duplicateName)}: ${x.getDisplayedScore()}`;
+                return `${bold(String(index + 1))}. ${x.getDisplayedName(roundResultIDs?.has(x.getID()), duplicateName)}: ${x.getDisplayedScore()}${showExp ? ` (+${friendlyFormattedNumber(x.getExpGain())} EXP)` : ""}`;
             });
 
         if (this.getNumPlayers() > cutoff) {
