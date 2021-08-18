@@ -14,7 +14,6 @@ import { OstPreference } from "../commands/game_options/ost";
 import { NON_OFFICIAL_VIDEO_TAGS, ReleaseType } from "../commands/game_options/release";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { cleanArtistName } from "../structures/game_round";
-import { setDifference } from "./utils";
 import { AnswerType } from "../commands/game_options/answer";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
@@ -296,48 +295,58 @@ export async function getMatchingGroupNames(rawGroupNames: Array<string>, aliasA
  * @returns unshuffled incorrect choices based on difficulty
  */
 export async function getMultipleChoiceOptions(answerType: AnswerType, guessMode: GuessModeType, gender: Gender, answer: string, artistID: number): Promise<string[]> {
-    let easyNames: Set<string>;
-    let names: Set<string>;
-    let result: Set<string>;
+    let easyNames: string[];
+    let names: string[];
+    let result: string[];
 
     const EASY_CHOICES = 3;
     const MEDIUM_CHOICES = 5;
     const MEDIUM_SAME_ARIST_CHOICES = 2;
     const HARD_CHOICES = 7;
 
+    const CHOICES_BY_DIFFICULTY = {
+        [AnswerType.MULTIPLE_CHOICE_EASY]: EASY_CHOICES,
+        [AnswerType.MULTIPLE_CHOICE_MED]: MEDIUM_CHOICES,
+        [AnswerType.MULTIPLE_CHOICE_HARD]: HARD_CHOICES,
+    };
+
     if (guessMode === GuessModeType.SONG_NAME || guessMode === GuessModeType.BOTH) {
-        easyNames = new Set((await dbContext.kmq("available_songs").select("clean_song_name")
+        easyNames = (await dbContext.kmq("available_songs").select("clean_song_name")
+            .groupByRaw("UPPER(clean_song_name)")
             .where("members", gender)
-            .andWhereNot("id_artist", artistID)).map((x) => x["clean_song_name"]));
+            .andWhereRaw("NOT UPPER(clean_song_name) = ?", answer.toUpperCase())
+            .andWhereNot("id_artist", artistID)).map((x) => x["clean_song_name"]);
         switch (answerType) {
             case AnswerType.MULTIPLE_CHOICE_EASY: {
                 // Easy: EASY_CHOICES from same gender as chosen artist
-                result = new Set(_.sampleSize([...easyNames], EASY_CHOICES));
+                result = _.sampleSize(easyNames, EASY_CHOICES);
                 break;
             }
 
             case AnswerType.MULTIPLE_CHOICE_MED: {
                 // Medium: MEDIUM_CHOICES - MEDIUM_SAME_ARIST_CHOICES from same gender as chosen artist, MEDIUM_SAME_ARIST_CHOICES from chosen artist
                 const sameArtistSongs = _.sampleSize((await dbContext.kmq("available_songs").select("clean_song_name")
+                    .groupByRaw("UPPER(clean_song_name)")
                     .where("id_artist", artistID)
-                    .andWhereNot("clean_song_name", answer)).map((x) => x["clean_song_name"]), MEDIUM_SAME_ARIST_CHOICES);
+                    .andWhereRaw("NOT UPPER(clean_song_name) = ?", answer.toUpperCase())).map((x) => x["clean_song_name"]), MEDIUM_SAME_ARIST_CHOICES);
 
                 const sameGenderSongs = _.sampleSize((await dbContext.kmq("available_songs").select("clean_song_name")
-                    .whereNotIn("clean_song_name", [...sameArtistSongs, answer])
+                    .groupByRaw("UPPER(clean_song_name)")
                     .where("members", gender)
+                    .andWhereRaw("UPPER(clean_song_name) NOT IN (?)", [[...sameArtistSongs, answer].map((x) => x.toUpperCase())])
                     .andWhereNot("id_artist", artistID)).map((x) => x["clean_song_name"]), MEDIUM_CHOICES - MEDIUM_SAME_ARIST_CHOICES);
 
-                result = new Set([...sameArtistSongs, ...sameGenderSongs]);
-                easyNames = setDifference([...easyNames], [...result]);
+                result = [...sameArtistSongs, ...sameGenderSongs];
                 break;
             }
 
             case AnswerType.MULTIPLE_CHOICE_HARD: {
                 // Hard: HARD_CHOICES from chosen artist
-                names = new Set((await dbContext.kmq("available_songs").select("clean_song_name")
+                names = (await dbContext.kmq("available_songs").select("clean_song_name")
+                    .groupByRaw("UPPER(clean_song_name)")
                     .where("id_artist", artistID)
-                    .andWhereNot("clean_song_name", answer)).map((x) => x["clean_song_name"]));
-                result = new Set(_.sampleSize([...names], HARD_CHOICES));
+                    .andWhereRaw("NOT UPPER(clean_song_name) = ?", answer.toUpperCase())).map((x) => x["clean_song_name"]);
+                result = _.sampleSize(names, HARD_CHOICES);
                 break;
             }
 
@@ -345,38 +354,33 @@ export async function getMultipleChoiceOptions(answerType: AnswerType, guessMode
                 break;
         }
 
-        const CHOICES_BY_DIFFICULTY = {
-            [AnswerType.MULTIPLE_CHOICE_EASY]: EASY_CHOICES,
-            [AnswerType.MULTIPLE_CHOICE_MED]: MEDIUM_CHOICES,
-            [AnswerType.MULTIPLE_CHOICE_HARD]: HARD_CHOICES,
-        };
-
-        if (result.size < CHOICES_BY_DIFFICULTY[answerType]) {
-            for (const choice of _.sampleSize([...easyNames], CHOICES_BY_DIFFICULTY[answerType] - result.size)) {
-                result.add(choice);
+        if (result.length < CHOICES_BY_DIFFICULTY[answerType]) {
+            easyNames = _.difference(easyNames, result);
+            for (const choice of _.sampleSize(easyNames, CHOICES_BY_DIFFICULTY[answerType] - result.length)) {
+                result.push(choice);
             }
         }
     } else {
-        easyNames = new Set((await dbContext.kmq("available_songs").select("artist_name")
-            .whereNot("artist_name", answer)).map((x) => x["artist_name"]));
+        easyNames = (await dbContext.kmq("available_songs").select("artist_name")
+            .whereNot("artist_name", answer)).map((x) => x["artist_name"]);
         switch (answerType) {
             case AnswerType.MULTIPLE_CHOICE_EASY:
                 // Easy: EASY_CHOICES from any artist
-                result = new Set(_.sampleSize([...easyNames], EASY_CHOICES));
+                result = _.sampleSize(easyNames, EASY_CHOICES);
                 break;
             case AnswerType.MULTIPLE_CHOICE_MED:
             case AnswerType.MULTIPLE_CHOICE_HARD:
                 // Medium: MEDIUM_CHOICES from same gender
                 // Hard: HARD_CHOICES from same gender
-                names = new Set((await dbContext.kmq("available_songs").select("artist_name")
+                names = (await dbContext.kmq("available_songs").select("artist_name")
                     .where("members", gender)
-                    .andWhereNot("artist_name", answer)).map((x) => x["artist_name"]));
-                result = new Set(_.sampleSize([...names], answerType === AnswerType.MULTIPLE_CHOICE_MED ? MEDIUM_CHOICES : HARD_CHOICES));
+                    .andWhereNot("artist_name", answer)).map((x) => x["artist_name"]);
+                result = _.sampleSize(names, CHOICES_BY_DIFFICULTY[answerType]);
                 break;
             default:
                 break;
         }
     }
 
-    return [...result];
+    return result;
 }
