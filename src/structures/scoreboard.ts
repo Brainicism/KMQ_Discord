@@ -53,6 +53,7 @@ export default class Scoreboard {
         return winnerStr;
     }
     /**
+     * @param showExp - Whether to display the EXP gained in the game for each player
      * @param roundWinnerIDs - The IDs of all players that won the current round, if any
      * @returns An array of DiscordEmbed fields representing each participant's score
      */
@@ -70,6 +71,7 @@ export default class Scoreboard {
     /**
      * Separates scoreboard players into two fields for large games
      * @param cutoff - How many players to include before truncating the scoreboard
+     * @param showExp - Whether to display the EXP gained in the game for each player
      * @returns An array of 3 DiscordEmbed fields containing each player and their score, separated by newline
      */
     getScoreboardEmbedThreeFields(cutoff: number, showExp: boolean, roundResultIDs?: Set<string>): Array<{ name: string, value: string, inline: boolean }> {
