@@ -250,9 +250,9 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     }
 
     if (useLargerScoreboard) {
-        fields = scoreboard.getScoreboardEmbedThreeFields(MAX_SCOREBOARD_PLAYERS, roundResultIDs);
+        fields = scoreboard.getScoreboardEmbedThreeFields(MAX_SCOREBOARD_PLAYERS, false, roundResultIDs);
     } else {
-        fields = scoreboard.getScoreboardEmbedFields(roundResultIDs);
+        fields = scoreboard.getScoreboardEmbedFields(false, roundResultIDs);
     }
 
     if (fact) {
@@ -426,9 +426,9 @@ export async function sendEndGameMessage(gameSession: GameSession) {
         let fields: Array<{ name: string, value: string, inline: boolean }>;
         const useLargerScoreboard = gameSession.scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
         if (useLargerScoreboard) {
-            fields = gameSession.scoreboard.getScoreboardEmbedThreeFields(MAX_SCOREBOARD_PLAYERS);
+            fields = gameSession.scoreboard.getScoreboardEmbedThreeFields(MAX_SCOREBOARD_PLAYERS, true);
         } else {
-            fields = gameSession.scoreboard.getScoreboardEmbedFields();
+            fields = gameSession.scoreboard.getScoreboardEmbedFields(true);
         }
 
         const endGameMessage: GameInfoMessage = chooseWeightedRandom(await dbContext.kmq("game_messages"));
@@ -484,7 +484,7 @@ export async function sendScoreboardMessage(message: GuildTextableMessage, gameS
         });
     }
 
-    const winnersFieldSubsets = chunkArray(gameSession.scoreboard.getScoreboardEmbedFields(), EMBED_FIELDS_PER_PAGE);
+    const winnersFieldSubsets = chunkArray(gameSession.scoreboard.getScoreboardEmbedFields(true), EMBED_FIELDS_PER_PAGE);
     let footerText = `Your score is ${gameSession.scoreboard.getPlayerScore(message.author.id)}.`;
     if (gameSession.gameType === GameType.ELIMINATION) {
         const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
