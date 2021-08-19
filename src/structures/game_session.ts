@@ -263,11 +263,6 @@ export default class GameSession {
             this.endSession();
         } else if (this.scoreboard.gameFinished(guildPreference)) {
             this.endSession();
-        } else if (this.gameType === GameType.ELIMINATION) {
-            const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
-            if (eliminationScoreboard.gameFinished()) {
-                this.endSession();
-            }
         }
     }
 
