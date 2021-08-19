@@ -272,7 +272,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         color = EMBED_ERROR_COLOR;
     }
 
-    return await sendInfoMessage(messageContext, {
+    return sendInfoMessage(messageContext, {
         color,
         title: `"${gameRound.originalSongName}" (${gameRound.songYear}) - ${gameRound.artistName}`,
         description,
