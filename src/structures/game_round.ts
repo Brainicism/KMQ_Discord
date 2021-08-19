@@ -239,6 +239,7 @@ export default class GameRound {
     async interactionMarkAnswers(correctGuesses: number) {
         if (!this.interactionMessage) return;
         await this.interactionMessage.edit({
+            embeds: this.interactionMessage.embeds,
             components: this.interactionComponents.map((x) => ({
                 type: 1,
                 components: x.components.map((y) => {

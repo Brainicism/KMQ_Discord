@@ -8,6 +8,7 @@ import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
     getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, getUserVoiceChannel, sendEndGameMessage, getCurrentVoiceMembers,
+    sendBookmarkedSongs,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, userBonusIsActive, getMultipleChoiceOptions } from "../helpers/game_utils";
 import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference, bold, codeLine, chunkArray } from "../helpers/utils";
@@ -42,6 +43,7 @@ const EXP_TABLE = [...Array(1000).keys()].map((level) => {
 
 // eslint-disable-next-line no-return-assign
 export const CUM_EXP_TABLE = EXP_TABLE.map(((sum) => (value) => sum += value)(0));
+export const BOOKMARK_MESSAGE_SIZE = 10;
 
 interface LevelUpResult {
     userID: string;
@@ -134,6 +136,12 @@ export default class GameSession {
     /** The most recent Guesser, including their current streak */
     private lastGuesser: LastGuesser;
 
+    /** Array of previous songs by messageID for bookmarking songs */
+    private songMessageIDs: { messageID: string, song: QueriedSong }[];
+
+    /** Mapping of user ID to bookmarked songs, uses Map since Set doesn't remove QueriedSong duplicates */
+    private bookmarkedSongs: { [userID: string]: Map<string, QueriedSong> };
+
     constructor(textChannelID: string, voiceChannelID: string, guildID: string, gameSessionCreator: KmqMember, gameType: GameType, eliminationLives?: number) {
         this.gameType = gameType;
         this.guildID = guildID;
@@ -164,6 +172,8 @@ export default class GameSession {
         this.playCount = {};
         this.lastAlternatingGender = null;
         this.lastGuesser = null;
+        this.songMessageIDs = [];
+        this.bookmarkedSongs = {};
     }
 
     /**
@@ -246,8 +256,23 @@ export default class GameSession {
                 };
             }
 
-            sendEndRoundMessage(messageContext, this.scoreboard, gameRound, guildPreference.gameOptions.guessModeType,
+            const { id } = await sendEndRoundMessage(messageContext, this.scoreboard, gameRound, guildPreference.gameOptions.guessModeType,
                 playerRoundResults, guildPreference.isMultipleChoiceMode(), remainingDuration, uniqueSongCounter);
+
+            if (Object.keys(this.songMessageIDs).length === BOOKMARK_MESSAGE_SIZE) {
+                this.songMessageIDs.shift();
+            }
+
+            this.songMessageIDs.push({
+                messageID: id,
+                song: {
+                    songName: gameRound.songName,
+                    originalSongName: gameRound.originalSongName,
+                    artist: gameRound.artistName,
+                    youtubeLink: gameRound.videoID,
+                    publishDate: new Date(gameRound.songYear, 0),
+                },
+            });
         }
 
         this.incrementSongCount(gameRound.videoID, guessResult.correct);
@@ -349,6 +374,34 @@ export default class GameSession {
         if (guildPreference.isMultipleChoiceMode()) {
             await this.storeSongCounts();
         }
+
+        // DM bookmarked songs
+        const bookmarkedSongsPlayerCount = Object.keys(this.bookmarkedSongs).length;
+        if (bookmarkedSongsPlayerCount > 0) {
+            const bookmarkedSongCount = Object.values(this.bookmarkedSongs).reduce((total, x) => total + x.size, 0);
+            await sendInfoMessage(new MessageContext(this.textChannelID), {
+                title: "Sending bookmarked songs...",
+                description: `Sending ${bookmarkedSongCount} song(s) to ${bookmarkedSongsPlayerCount} player(s).\n\nBookmark songs during the game by right-clicking the song message and selecting \`Apps > Bookmark Song\`.`,
+                thumbnailUrl: KmqImages.READING_BOOK,
+            });
+            await sendBookmarkedSongs(this.bookmarkedSongs);
+        }
+
+        // Store bookmarked songs
+        await dbContext.kmq.transaction(async (trx) => {
+            const idLinkPairs: { user_id: string, vlink: string }[] = [];
+            for (const entry of Object.entries(this.bookmarkedSongs)) {
+                for (const song of entry[1]) {
+                    idLinkPairs.push({ user_id: entry[0], vlink: song[0] });
+                }
+            }
+
+            await dbContext.kmq("bookmarked_songs")
+                .insert(idLinkPairs)
+                .onConflict(["user_id", "vlink"])
+                .ignore()
+                .transacting(trx);
+        });
 
         logger.info(`gid: ${this.guildID} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}. gameType = ${this.gameType}`);
     };
@@ -617,6 +670,35 @@ export default class GameSession {
 
     async updateFilteredSongs(guildPreference: GuildPreference) {
         this.filteredSongs = await getFilteredSongList(guildPreference);
+    }
+
+    /**
+     * Finds the song associated with the endRoundMessage via messageID, if it exists
+     * @param messageID - The Discord message ID used to locate the song
+     */
+    getSongFromMessageID(messageID: string): QueriedSong {
+        if (!this.songMessageIDs.map((x) => x.messageID).includes(messageID)) {
+            return null;
+        }
+
+        return this.songMessageIDs.find((x) => x.messageID === messageID).song;
+    }
+
+    /**
+     * Stores a song with a user so they can receive it later
+     * @param userID - The user that wants to bookmark the song
+     * @param song - The song to store
+     */
+    addBookmarkedSong(userID: string, song: QueriedSong) {
+        if (!userID || !song) {
+            return;
+        }
+
+        if (!this.bookmarkedSongs[userID]) {
+            this.bookmarkedSongs[userID] = new Map();
+        }
+
+        this.bookmarkedSongs[userID].set(song.youtubeLink, song);
     }
 
     /**
