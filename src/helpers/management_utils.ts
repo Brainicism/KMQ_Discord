@@ -2,6 +2,7 @@
 /* eslint-disable import/no-dynamic-require */
 import schedule from "node-schedule";
 import fastify from "fastify";
+import _ from "lodash";
 import { IPCLogger } from "../logger";
 import { state } from "../kmq";
 import { EMBED_INFO_COLOR, sendInfoMessage } from "./discord_utils";
@@ -164,6 +165,38 @@ export async function clearClusterActivityStats() {
         .del();
 }
 
+/* Updates system statistics */
+async function updateSystemStats(clusterID: number) {
+    const { client } = state;
+    const latencies = client.shards.map((x) => x.latency);
+    const meanLatency = _.mean(latencies);
+    const maxLatency = _.max(latencies);
+    const minLatency = _.min(latencies);
+    await dbContext.kmq("system_stats")
+        .insert({
+            cluster_id: clusterID,
+            stat_name: "mean_latency",
+            stat_value: meanLatency,
+            date: new Date(),
+        });
+
+    await dbContext.kmq("system_stats")
+        .insert({
+            cluster_id: clusterID,
+            stat_name: "min_latency",
+            stat_value: minLatency,
+            date: new Date(),
+        });
+
+    await dbContext.kmq("system_stats")
+        .insert({
+            cluster_id: clusterID,
+            stat_name: "max_latency",
+            stat_value: maxLatency,
+            date: new Date(),
+        });
+}
+
 /** Updates the bot's song listening status */
 export async function updateBotStatus() {
     const { client } = state;
@@ -262,6 +295,7 @@ export function registerIntervals(clusterID: number) {
     schedule.scheduleJob("*/5 * * * *", async () => {
         reloadAliases();
         clearInactiveVoiceConnections();
+        await updateSystemStats(clusterID);
     });
 
     // every 1 minutes
