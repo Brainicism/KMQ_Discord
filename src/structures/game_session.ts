@@ -379,9 +379,26 @@ export default class GameSession {
         const bookmarkedSongsPlayerCount = Object.keys(this.bookmarkedSongs).length;
         if (bookmarkedSongsPlayerCount > 0) {
             const bookmarkedSongCount = Object.values(this.bookmarkedSongs).reduce((total, x) => total + x.size, 0);
-            await sendInfoMessage(new MessageContext(this.textChannelID), { title: "Sending bookmarked songs...", description: `Sending ${bookmarkedSongCount} song${bookmarkedSongCount > 1 ? "s" : ""} to ${bookmarkedSongsPlayerCount} player${bookmarkedSongsPlayerCount > 1 ? "s" : ""}.\n\nBookmark songs during the game by right-clicking the song message and selecting \`Apps > Bookmark Song\`.`, thumbnailUrl: KmqImages.THUMBS_UP });
+            await sendInfoMessage(new MessageContext(this.textChannelID), {
+                title: "Sending bookmarked songs...",
+                description: `Sending ${bookmarkedSongCount} song${bookmarkedSongCount > 1 ? "s" : ""} to ${bookmarkedSongsPlayerCount} player${bookmarkedSongsPlayerCount > 1 ? "s" : ""}.\n\nBookmark songs during the game by right-clicking the song message and selecting \`Apps > Bookmark Song\`.`,
+                thumbnailUrl: KmqImages.READING_BOOK,
+            });
             await sendBookmarkedSongs(this.bookmarkedSongs);
         }
+
+        // Store bookmarked songs
+        await dbContext.kmq.transaction(async (trx) => {
+            for (const entry of Object.entries(this.bookmarkedSongs)) {
+                for (const song of entry[1]) {
+                    await dbContext.kmq("bookmarked_songs")
+                        .insert({ user_id: entry[0], vlink: song[0] })
+                        .onConflict(["user_id", "vlink"])
+                        .ignore()
+                        .transacting(trx);
+                }
+            }
+        });
 
         logger.info(`gid: ${this.guildID} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}. gameType = ${this.gameType}`);
     };
