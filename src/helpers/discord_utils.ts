@@ -672,8 +672,8 @@ export function sendDebugAlertWebhook(title: string, description: string, color:
     });
 }
 
-export async function sendBookmarkedSongs(likedSongs: { [userID: string]: Map<string, QueriedSong> }) {
-    for (const [userID, songs] of Object.entries(likedSongs)) {
+export async function sendBookmarkedSongs(bookmarkedSongs: { [userID: string]: Map<string, QueriedSong> }) {
+    for (const [userID, songs] of Object.entries(bookmarkedSongs)) {
         const allEmbedFields: Array<{ name: string, value: string, inline: boolean }> = [...songs].map((song) => ({
             name: `"${song[1].originalSongName}" (${song[1].publishDate.getFullYear()}) - ${song[1].artist}`,
             value: `https://youtu.be/${song[1].youtubeLink}`,
@@ -685,9 +685,9 @@ export async function sendBookmarkedSongs(likedSongs: { [userID: string]: Map<st
             const embed: Eris.EmbedOptions = {
                 author: {
                     name: "Kimiqo",
-                    icon_url: "https://static.kpop.gg/thumbnails/happy_bg.png",
+                    icon_url: KmqImages.READING_BOOK,
                 },
-                title: bold("Liked Songs"),
+                title: bold("Bookmarked Songs"),
                 fields,
                 footer: { text: `Played on ${friendlyFormattedDate(new Date())}` },
             };

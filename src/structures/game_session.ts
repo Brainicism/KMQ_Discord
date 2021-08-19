@@ -139,8 +139,8 @@ export default class GameSession {
     /** Array of previous songs by messageID for bookmarking songs */
     private songMessageIDs: { messageID: string, song: QueriedSong }[];
 
-    /** Mapping of user ID to liked songs, uses Map since Set doesn't remove QueriedSong duplicates */
-    private likedSongs: { [userID: string]: Map<string, QueriedSong> };
+    /** Mapping of user ID to bookmarked songs, uses Map since Set doesn't remove QueriedSong duplicates */
+    private bookmarkedSongs: { [userID: string]: Map<string, QueriedSong> };
 
     constructor(textChannelID: string, voiceChannelID: string, guildID: string, gameSessionCreator: KmqMember, gameType: GameType, eliminationLives?: number) {
         this.gameType = gameType;
@@ -173,7 +173,7 @@ export default class GameSession {
         this.lastAlternatingGender = null;
         this.lastGuesser = null;
         this.songMessageIDs = [];
-        this.likedSongs = {};
+        this.bookmarkedSongs = {};
     }
 
     /**
@@ -376,11 +376,11 @@ export default class GameSession {
         }
 
         // DM bookmarked songs
-        const likedSongsPlayerCount = Object.keys(this.likedSongs).length;
-        if (likedSongsPlayerCount > 0) {
-            const bookmarkedSongCount = Object.values(this.likedSongs).reduce((total, x) => total + x.size, 0);
-            await sendInfoMessage(new MessageContext(this.textChannelID), { title: "Sending bookmarked songs...", description: `Sending ${bookmarkedSongCount} song${bookmarkedSongCount > 1 ? "s" : ""} to ${likedSongsPlayerCount} player${likedSongsPlayerCount > 1 ? "s" : ""}.\n\nBookmark songs during the game by right-clicking the song message and selecting \`Apps > Bookmark Song\`.`, thumbnailUrl: KmqImages.THUMBS_UP });
-            await sendBookmarkedSongs(this.likedSongs);
+        const bookmarkedSongsPlayerCount = Object.keys(this.bookmarkedSongs).length;
+        if (bookmarkedSongsPlayerCount > 0) {
+            const bookmarkedSongCount = Object.values(this.bookmarkedSongs).reduce((total, x) => total + x.size, 0);
+            await sendInfoMessage(new MessageContext(this.textChannelID), { title: "Sending bookmarked songs...", description: `Sending ${bookmarkedSongCount} song${bookmarkedSongCount > 1 ? "s" : ""} to ${bookmarkedSongsPlayerCount} player${bookmarkedSongsPlayerCount > 1 ? "s" : ""}.\n\nBookmark songs during the game by right-clicking the song message and selecting \`Apps > Bookmark Song\`.`, thumbnailUrl: KmqImages.THUMBS_UP });
+            await sendBookmarkedSongs(this.bookmarkedSongs);
         }
 
         logger.info(`gid: ${this.guildID} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}. gameType = ${this.gameType}`);
@@ -674,11 +674,11 @@ export default class GameSession {
             return;
         }
 
-        if (!this.likedSongs[userID]) {
-            this.likedSongs[userID] = new Map();
+        if (!this.bookmarkedSongs[userID]) {
+            this.bookmarkedSongs[userID] = new Map();
         }
 
-        this.likedSongs[userID].set(song.youtubeLink, song);
+        this.bookmarkedSongs[userID].set(song.youtubeLink, song);
     }
 
     /**
