@@ -23,7 +23,7 @@ export default class DebugCommand implements BaseCommand {
         const fields: Array<Eris.EmbedField> = [];
         fields.push({
             name: "Guild Preference",
-            value: JSON.stringify(guildPreference),
+            value: JSON.stringify(guildPreference.gameOptions),
             inline: false,
         });
 
