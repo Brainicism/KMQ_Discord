@@ -8,10 +8,9 @@ import {
     getMajorityCount,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import EliminationScoreboard from "../../structures/elimination_scoreboard";
 import { IPCLogger } from "../../logger";
 import GameRound from "../../structures/game_round";
-import { GuildTextableMessage, GameType } from "../../types";
+import { GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import InGameCommand from "../interfaces/ingame_command";
@@ -65,11 +64,6 @@ export default class SkipCommand extends InGameCommand {
 
         if (isSkipMajority(message, gameSession)) {
             gameSession.gameRound.skipAchieved = true;
-            if (gameSession.gameType === GameType.ELIMINATION) {
-                const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
-                eliminationScoreboard.decrementAllLives();
-            }
-
             sendSkipMessage(message, gameSession.gameRound);
             gameSession.endRound({ correct: false }, guildPreference, MessageContext.fromMessage(message));
             gameSession.startRound(guildPreference, MessageContext.fromMessage(message));
