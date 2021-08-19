@@ -101,7 +101,7 @@ export default class SkipCommand implements BaseCommand {
         sendInfoMessage(MessageContext.fromMessage(message), {
             title: "Bot Stats",
             fields,
-            footerText: "'Recent' statistics represent data from last 24 hours.",
+            footerText: "\"Recent\" statistics represent data from last 24 hours.",
             timestamp: new Date(),
             thumbnailUrl: KmqImages.READING_BOOK,
         });
