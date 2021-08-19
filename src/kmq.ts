@@ -1,3 +1,4 @@
+import Eris from "eris";
 import { config } from "dotenv";
 import path from "path";
 import { BaseClusterWorker } from "eris-fleet";
@@ -65,5 +66,10 @@ export class BotWorker extends BaseClusterWorker {
         logger.info("Updating bot's status..");
         updateBotStatus();
         logger.info(`Logged in as ${state.client.user.username}#${state.client.user.discriminator}! in '${process.env.NODE_ENV}' mode (${(Date.now() - state.processStartTime) / 1000}s)`);
+
+        state.client.createCommand({
+            name: "Bookmark Song",
+            type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
+        });
     }
 }

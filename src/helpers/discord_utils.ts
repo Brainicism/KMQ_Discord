@@ -6,8 +6,8 @@ import GameSession, { UniqueSongCounter } from "../structures/game_session";
 import { IPCLogger } from "../logger";
 import { getSongCount, userBonusIsActive } from "./game_utils";
 import { getFact } from "../fact_generator";
-import { EmbedPayload, GameOption, GameOptionCommand, PriorityGameOption, ConflictingGameOptions, GuildTextableMessage, PlayerRoundResult, GameInfoMessage, GameType } from "../types";
-import { chunkArray, codeLine, bold, underline, italicize, strikethrough, chooseWeightedRandom, getOrdinalNum, friendlyFormattedNumber } from "./utils";
+import { EmbedPayload, GameOption, GameOptionCommand, PriorityGameOption, ConflictingGameOptions, GuildTextableMessage, PlayerRoundResult, GameInfoMessage, GameType, QueriedSong } from "../types";
+import { chunkArray, codeLine, bold, underline, italicize, strikethrough, chooseWeightedRandom, getOrdinalNum, friendlyFormattedNumber, friendlyFormattedDate, delay } from "./utils";
 import { state } from "../kmq";
 import Scoreboard from "../structures/scoreboard";
 import GameRound from "../structures/game_round";
@@ -197,7 +197,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     playerRoundResults: Array<PlayerRoundResult>,
     isMultipleChoiceMode: boolean,
     timeRemaining?: number,
-    uniqueSongCounter?: UniqueSongCounter) {
+    uniqueSongCounter?: UniqueSongCounter): Promise<Eris.Message<TextableChannel>> {
     const footer: Eris.EmbedFooterOptions = {
         text: "",
     };
@@ -272,7 +272,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         color = EMBED_ERROR_COLOR;
     }
 
-    await sendInfoMessage(messageContext, {
+    return await sendInfoMessage(messageContext, {
         color,
         title: `"${gameRound.originalSongName}" (${gameRound.songYear}) - ${gameRound.artistName}`,
         description,
@@ -670,4 +670,30 @@ export function sendDebugAlertWebhook(title: string, description: string, color:
         username: "Kimiqo",
         avatar_url: avatarUrl,
     });
+}
+
+export async function sendBookmarkedSongs(likedSongs: { [userID: string]: Map<string, QueriedSong> }) {
+    for (const [userID, songs] of Object.entries(likedSongs)) {
+        const allEmbedFields: Array<{ name: string, value: string, inline: boolean }> = [...songs].map((song) => ({
+            name: `"${song[1].originalSongName}" (${song[1].publishDate.getFullYear()}) - ${song[1].artist}`,
+            value: `https://youtu.be/${song[1].youtubeLink}`,
+            inline: false,
+        }));
+
+        const dmChannel = await state.client.getDMChannel(userID);
+        for (const fields of chunkArray(allEmbedFields, 25)) {
+            const embed: Eris.EmbedOptions = {
+                author: {
+                    name: "Kimiqo",
+                    icon_url: "https://static.kpop.gg/thumbnails/happy_bg.png",
+                },
+                title: bold("Liked Songs"),
+                fields,
+                footer: { text: `Played on ${friendlyFormattedDate(new Date())}` },
+            };
+
+            await state.client.createMessage(dmChannel.id, { embeds: [embed] });
+            await delay(1000);
+        }
+    }
 }
