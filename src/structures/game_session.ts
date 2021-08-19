@@ -1052,6 +1052,10 @@ export default class GameSession {
             }
         }
 
+        if (guildPreference.gameOptions.specialType) {
+            expModifier *= 1.05;
+        }
+
         return Math.floor((expModifier * baseExp) / place);
     }
 
