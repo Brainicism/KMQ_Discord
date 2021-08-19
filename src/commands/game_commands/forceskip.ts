@@ -8,8 +8,6 @@ import {
 } from "../../helpers/discord_utils";
 import { bold } from "../../helpers/utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { GameType } from "../../types";
-import EliminationScoreboard from "../../structures/elimination_scoreboard";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
@@ -47,11 +45,6 @@ export default class ForceSkipCommand extends InGameCommand {
         }
 
         gameSession.gameRound.skipAchieved = true;
-        if (gameSession.gameType === GameType.ELIMINATION) {
-            const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
-            eliminationScoreboard.decrementAllLives();
-        }
-
         sendInfoMessage(MessageContext.fromMessage(message), {
             color: EMBED_SUCCESS_COLOR,
             title: "**Skip**",
