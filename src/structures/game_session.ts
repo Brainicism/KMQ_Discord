@@ -385,23 +385,23 @@ export default class GameSession {
                 thumbnailUrl: KmqImages.READING_BOOK,
             });
             await sendBookmarkedSongs(this.bookmarkedSongs);
-        }
 
-        // Store bookmarked songs
-        await dbContext.kmq.transaction(async (trx) => {
-            const idLinkPairs: { user_id: string, vlink: string }[] = [];
-            for (const entry of Object.entries(this.bookmarkedSongs)) {
-                for (const song of entry[1]) {
-                    idLinkPairs.push({ user_id: entry[0], vlink: song[0] });
+            // Store bookmarked songs
+            await dbContext.kmq.transaction(async (trx) => {
+                const idLinkPairs: { user_id: string, vlink: string }[] = [];
+                for (const entry of Object.entries(this.bookmarkedSongs)) {
+                    for (const song of entry[1]) {
+                        idLinkPairs.push({ user_id: entry[0], vlink: song[0] });
+                    }
                 }
-            }
 
-            await dbContext.kmq("bookmarked_songs")
-                .insert(idLinkPairs)
-                .onConflict(["user_id", "vlink"])
-                .ignore()
-                .transacting(trx);
-        });
+                await dbContext.kmq("bookmarked_songs")
+                    .insert(idLinkPairs)
+                    .onConflict(["user_id", "vlink"])
+                    .ignore()
+                    .transacting(trx);
+            });
+        }
 
         logger.info(`gid: ${this.guildID} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}. gameType = ${this.gameType}`);
     };
