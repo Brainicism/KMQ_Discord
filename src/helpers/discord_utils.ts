@@ -19,7 +19,6 @@ import MessageContext from "../structures/message_context";
 import { GuessModeType } from "../commands/game_options/guessmode";
 
 const logger = new IPCLogger("utils");
-export const EMBED_INFO_COLOR = 0x000000; // Black
 export const EMBED_ERROR_COLOR = 0xED4245; // Red
 export const EMBED_SUCCESS_COLOR = 0x57F287; // Green
 export const EMBED_SUCCESS_BONUS_COLOR = 0xFEE75C; // Gold
@@ -69,7 +68,6 @@ export async function textPermissionsCheck(textChannelID: string, guildID: strin
     if (!channel.permissionsOf(client.user.id).has("sendMessages")) {
         logger.warn(`${getDebugLogHeader(messageContext)} | Missing SEND_MESSAGES permissions`);
         const embed = {
-            color: EMBED_INFO_COLOR,
             title: "Missing Permissions",
             description: `Hi! I'm unable to message in ${channel.guild.name}'s #${channel.name} channel. Please make sure the bot has permissions to message in this channel.`,
         };
@@ -160,7 +158,7 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
 
     const author = (embedPayload.author == null || embedPayload.author) ? embedPayload.author : messageContext.author;
     const embed: EmbedOptions = {
-        color: embedPayload.color || EMBED_INFO_COLOR,
+        color: embedPayload.color,
         author: author ? {
             name: author.username,
             icon_url: author.avatarUrl,
@@ -416,7 +414,6 @@ export async function sendEndGameMessage(gameSession: GameSession) {
     const footerText = `${gameSession.getCorrectGuesses()}/${gameSession.getRoundsPlayed()} songs correctly guessed!`;
     if (gameSession.scoreboard.isEmpty()) {
         await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
-            color: EMBED_INFO_COLOR,
             title: "Nobody won",
             footerText,
             thumbnailUrl: KmqImages.NOT_IMPRESSED,

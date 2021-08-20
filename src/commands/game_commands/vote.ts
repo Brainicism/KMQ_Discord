@@ -1,6 +1,6 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
-import { getDebugLogHeader, sendInfoMessage, EMBED_SUCCESS_BONUS_COLOR, EMBED_INFO_COLOR } from "../../helpers/discord_utils";
+import { getDebugLogHeader, sendInfoMessage, EMBED_SUCCESS_BONUS_COLOR } from "../../helpers/discord_utils";
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
 import dbContext from "../../database_context";
@@ -57,7 +57,7 @@ export default class VoteCommand implements BaseCommand {
         }
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            color: boostActive ? EMBED_SUCCESS_BONUS_COLOR : EMBED_INFO_COLOR,
+            color: boostActive ? EMBED_SUCCESS_BONUS_COLOR : null,
             title: boostActive ? "Boost active!" : "Boost inactive",
             description: `${voteStatusString}\n\nVote for KMQ on [top.gg](${VOTE_LINK}) and you'll receive 2x EXP for an hour! You can vote once every ${VOTE_RESET_DURATION} hours.\n\nWe'd appreciate it if you could also leave a [review](${REVIEW_LINK}).`,
             thumbnailUrl: KmqImages.THUMBS_UP,
