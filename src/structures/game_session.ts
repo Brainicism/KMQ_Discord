@@ -70,9 +70,6 @@ export default class GameSession {
     /** The GameType that the GameSession started in */
     public readonly gameType: GameType;
 
-    /** The user who initiated the GameSession */
-    public readonly owner: KmqMember;
-
     /** The Scoreboard object keeping track of players and scoring */
     public readonly scoreboard: Scoreboard;
 
@@ -84,6 +81,9 @@ export default class GameSession {
 
     /** The Discord Guild ID */
     public readonly guildID: string;
+
+    /** Initially the user who started the GameSession, transferred to current VC member */
+    public owner: KmqMember;
 
     /** Whether the GameSession is active yet */
     public sessionInitialized: boolean;
@@ -699,6 +699,18 @@ export default class GameSession {
         }
 
         this.bookmarkedSongs[userID].set(song.youtubeLink, song);
+    }
+
+    /** Updates owner to the first player to join the game that didn't leave VC */
+    updateOwner() {
+        const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID);
+        const voiceMemberIDs = new Set(voiceMembers.map((x) => x.id));
+        const ownerID = ([...this.participants].filter((p) => voiceMemberIDs.has(p)))[0];
+        const owner = KmqMember.fromUser(voiceMembers.find((x) => x.id === ownerID));
+        if (owner.id !== this.owner.id) {
+            this.owner = owner;
+            sendInfoMessage(new MessageContext(this.textChannelID), { title: "Game owner changed", description: `The new game owner is ${bold(this.owner.tag)}. They are in charge of \`,forcehint\` and \`,forceskip\`.`, thumbnailUrl: KmqImages.LISTENING });
+        }
     }
 
     /**
