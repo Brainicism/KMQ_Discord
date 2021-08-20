@@ -29,7 +29,7 @@ import { KmqImages } from "../constants";
 import MessageContext from "./message_context";
 import KmqMember from "./kmq_member";
 import { MultiGuessType } from "../commands/game_options/multiguess";
-import { specialFfmpegArgs } from "../commands/game_options/special";
+import { specialFfmpegArgs, SpecialType } from "../commands/game_options/special";
 import { AnswerType } from "../commands/game_options/answer";
 
 const MULTIGUESS_DELAY = 1500;
@@ -1052,8 +1052,21 @@ export default class GameSession {
             }
         }
 
-        if (guildPreference.gameOptions.specialType) {
-            expModifier *= 1.05;
+        switch (guildPreference.gameOptions.specialType) {
+            case SpecialType.SLOW:
+                expModifier *= 1.05;
+                break;
+            case SpecialType.FAST:
+                expModifier *= 1.1;
+                break;
+            case SpecialType.FASTER:
+                expModifier *= 1.15;
+                break;
+            case SpecialType.REVERSE:
+                expModifier *= 1.2;
+                break;
+            default:
+                break;
         }
 
         return Math.floor((expModifier * baseExp) / place);
