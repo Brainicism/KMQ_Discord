@@ -5,7 +5,7 @@ import fastify from "fastify";
 import _ from "lodash";
 import { IPCLogger } from "../logger";
 import { state } from "../kmq";
-import { EMBED_INFO_COLOR, sendInfoMessage } from "./discord_utils";
+import { sendInfoMessage } from "./discord_utils";
 import messageCreateHandler from "../events/client/messageCreate";
 import voiceChannelLeaveHandler from "../events/client/voiceChannelLeave";
 import voiceChannelSwitchHandler from "../events/client/voiceChannelSwitch";
@@ -110,7 +110,6 @@ export const checkRestartNotification = async (timeUntilRestart: number): Promis
         for (const gameSession of Object.values(state.gameSessions)) {
             if (gameSession.finished) continue;
             await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
-                color: EMBED_INFO_COLOR,
                 title: `Upcoming bot restart in ${timeUntilRestart} minutes.`,
                 description: "Downtime will be approximately 2 minutes. Please end the current game to ensure your progress is saved!",
             });

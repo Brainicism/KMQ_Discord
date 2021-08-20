@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
-import { EMBED_INFO_COLOR, getDebugLogHeader, sendInfoMessage } from "../../helpers/discord_utils";
+import { getDebugLogHeader, sendInfoMessage } from "../../helpers/discord_utils";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 
@@ -30,7 +30,6 @@ export default class NewsCommand implements BaseCommand {
 
         logger.info(`${getDebugLogHeader(message)} | News retrieved.`);
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            color: EMBED_INFO_COLOR,
             title: "Updates",
             description: news,
             thumbnailUrl: KmqImages.READING_BOOK,

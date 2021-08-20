@@ -1,7 +1,7 @@
 import Eris, { EmbedOptions } from "eris";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import {
-    EMBED_INFO_COLOR, sendErrorMessage, getDebugLogHeader, sendPaginationedEmbed, sendInfoMessage,
+    sendErrorMessage, getDebugLogHeader, sendPaginationedEmbed, sendInfoMessage,
 } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
 import { chunkArray } from "../../helpers/utils";
@@ -89,7 +89,6 @@ See your current game options with \`${process.env.BOT_PREFIX}options\`. Use \`$
         const embedFieldSubsets = chunkArray(embedFields, FIELDS_PER_EMBED);
         const embeds: Array<EmbedOptions> = embedFieldSubsets.map((embedFieldsSubset) => ({
             title: embedTitle,
-            color: EMBED_INFO_COLOR,
             description: embedDesc,
             fields: embedFieldsSubset,
             footer: embedFooter,
