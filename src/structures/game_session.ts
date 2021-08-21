@@ -11,7 +11,7 @@ import {
     sendBookmarkedSongs,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, userBonusIsActive, getMultipleChoiceOptions } from "../helpers/game_utils";
-import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference, bold, codeLine, chunkArray } from "../helpers/utils";
+import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference, bold, codeLine, chunkArray, chooseRandom } from "../helpers/utils";
 import { state } from "../kmq";
 import { IPCLogger } from "../logger";
 import { QueriedSong, PlayerRoundResult, GameType } from "../types";
@@ -705,7 +705,16 @@ export default class GameSession {
     updateOwner() {
         const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID);
         const voiceMemberIDs = new Set(voiceMembers.map((x) => x.id));
-        const newOwnerID = ([...this.participants].filter((p) => voiceMemberIDs.has(p)))[0];
+        const participantsInVC = [...this.participants].filter((p) => voiceMemberIDs.has(p));
+        let newOwnerID: string;
+        if (participantsInVC.length > 0) {
+            // Pick the first participant still in VC
+            newOwnerID = participantsInVC[0];
+        } else {
+            // The VC only contains members who haven't participated yet
+            newOwnerID = chooseRandom(voiceMembers).id;
+        }
+
         const newOwner = KmqMember.fromUser(voiceMembers.find((x) => x.id === newOwnerID));
         if (newOwner.id !== this.owner.id) {
             this.owner = newOwner;
