@@ -13,7 +13,7 @@ import { SubunitsPreference } from "../commands/game_options/subunits";
 import { OstPreference } from "../commands/game_options/ost";
 import { NON_OFFICIAL_VIDEO_TAGS, ReleaseType } from "../commands/game_options/release";
 import { GuessModeType } from "../commands/game_options/guessmode";
-import { cleanArtistName } from "../structures/game_round";
+import { cleanArtistName, cleanSongName } from "../structures/game_round";
 import { AnswerType } from "../commands/game_options/answer";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
@@ -354,8 +354,21 @@ export async function getMultipleChoiceOptions(answerType: AnswerType, guessMode
                 break;
         }
 
+        const uniqueResult = new Map();
+        const removedResults = [];
+        for (const song of result) {
+            if (uniqueResult.has(cleanSongName(song))) {
+                removedResults.push(song);
+                continue;
+            }
+
+            uniqueResult.set(cleanSongName(song), song);
+        }
+
+        result = [...uniqueResult.values()];
+
         if (result.length < CHOICES_BY_DIFFICULTY[answerType]) {
-            easyNames = _.difference(easyNames, result);
+            easyNames = _.difference(easyNames, result, removedResults);
             for (const choice of _.sampleSize(easyNames, CHOICES_BY_DIFFICULTY[answerType] - result.length)) {
                 result.push(choice);
             }
