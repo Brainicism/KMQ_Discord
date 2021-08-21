@@ -602,7 +602,7 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
 
 /**
  * @param guildID - The guild ID
- * @returns whether the bot is alone 😔 ends the gameSession if it does
+ * @returns whether the bot is alone 😔
  */
 export function checkBotIsAlone(guildID: string): boolean {
     const voiceConnection = state.client.voiceConnections.get(guildID);

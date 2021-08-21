@@ -11,7 +11,7 @@ import {
     sendBookmarkedSongs,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, userBonusIsActive, getMultipleChoiceOptions } from "../helpers/game_utils";
-import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference, bold, codeLine, chunkArray } from "../helpers/utils";
+import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference, bold, codeLine, chunkArray, chooseRandom } from "../helpers/utils";
 import { state } from "../kmq";
 import { IPCLogger } from "../logger";
 import { QueriedSong, PlayerRoundResult, GameType } from "../types";
@@ -70,9 +70,6 @@ export default class GameSession {
     /** The GameType that the GameSession started in */
     public readonly gameType: GameType;
 
-    /** The user who initiated the GameSession */
-    public readonly owner: KmqMember;
-
     /** The Scoreboard object keeping track of players and scoring */
     public readonly scoreboard: Scoreboard;
 
@@ -84,6 +81,9 @@ export default class GameSession {
 
     /** The Discord Guild ID */
     public readonly guildID: string;
+
+    /** Initially the user who started the GameSession, transferred to current VC member */
+    public owner: KmqMember;
 
     /** Whether the GameSession is active yet */
     public sessionInitialized: boolean;
@@ -698,6 +698,27 @@ export default class GameSession {
         }
 
         this.bookmarkedSongs[userID].set(song.youtubeLink, song);
+    }
+
+    /** Updates owner to the first player to join the game that didn't leave VC */
+    updateOwner() {
+        const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID);
+        const voiceMemberIDs = new Set(voiceMembers.map((x) => x.id));
+        const participantsInVC = [...this.participants].filter((p) => voiceMemberIDs.has(p));
+        let newOwnerID: string;
+        if (participantsInVC.length > 0) {
+            // Pick the first participant still in VC
+            newOwnerID = participantsInVC[0];
+        } else {
+            // The VC only contains members who haven't participated yet
+            newOwnerID = chooseRandom(voiceMembers).id;
+        }
+
+        const newOwner = KmqMember.fromUser(voiceMembers.find((x) => x.id === newOwnerID));
+        if (newOwner.id !== this.owner.id) {
+            this.owner = newOwner;
+            sendInfoMessage(new MessageContext(this.textChannelID), { title: "Game owner changed", description: `The new game owner is ${bold(this.owner.tag)}. They are in charge of \`,forcehint\` and \`,forceskip\`.`, thumbnailUrl: KmqImages.LISTENING });
+        }
     }
 
     /**
