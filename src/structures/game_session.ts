@@ -424,11 +424,10 @@ export default class GameSession {
     async guessSong(messageContext: MessageContext, guess: string) {
         if (!this.connection) return;
         if (this.connection.listenerCount("end") === 0) return;
-        const guildPreference = await getGuildPreference(messageContext.guildID);
         if (!this.gameRound) return;
-
         if (!this.guessEligible(messageContext)) return;
 
+        const guildPreference = await getGuildPreference(messageContext.guildID);
         const pointsEarned = this.checkGuess(messageContext.author.id, guess, guildPreference.gameOptions.guessModeType, guildPreference.isMultipleChoiceMode());
         if (pointsEarned > 0) {
             if (this.gameRound.finished) {

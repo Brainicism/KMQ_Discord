@@ -1,6 +1,6 @@
 import Eris from "eris";
 import { IPCLogger } from "../../logger";
-import { sendOptionsMessage, areUserAndBotInSameVoiceChannel } from "../../helpers/discord_utils";
+import { sendOptionsMessage } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { state } from "../../kmq";
 import validate from "../../helpers/validate";
@@ -60,9 +60,7 @@ export default async function messageCreateHandler(message: Eris.Message) {
             });
         }
     } else if (state.gameSessions[message.guildID]?.gameRound) {
-        if (areUserAndBotInSameVoiceChannel(message)) {
-            const gameSession = state.gameSessions[message.guildID];
-            gameSession.guessSong(MessageContext.fromMessage(message), message.content);
-        }
+        const gameSession = state.gameSessions[message.guildID];
+        gameSession.guessSong(MessageContext.fromMessage(message), message.content);
     }
 }
