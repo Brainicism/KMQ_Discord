@@ -74,7 +74,7 @@ export default class PlayCommand implements BaseCommand {
     help = {
         name: "play",
         description: "Starts a game of KMQ. Pick between classic (default), elimination mode, and teams mode.",
-        usage: ",play {classic | elimination | teams}\n,play elimination [lives]",
+        usage: ",play {classic | elimination | teams}\n,play elimination {lives}",
         priority: 1050,
         examples: [
             {

@@ -27,7 +27,7 @@ We update our songs frequently! Expect to see songs on the bot the same day they
 
 
 # EXP System
-Think you have what it takes to be a KMQ master? Rise through the ranks, gaining EXP and leveling up by playing KMQ. Every correct guess will net you some EXP, increasing based on your game options. The higher the number of songs selected by your game options, the more EXP you will get! 
+Think you have what it takes to be a KMQ master? Rise through the ranks, gaining EXP and leveling up by playing KMQ. Every correct guess will net you some EXP, increasing based on your game options. The higher the number of songs selected by your game options, the more EXP you will get!
 
 Everyone starts off as a `Novice` and works their way up as a `Trainee` (Level 10), `Pre-debut` (Level 20), `Nugu` (Level 30), and many more! Check out `,profile` and `,scoreboard` to see where you and other players stand!
 
@@ -96,14 +96,14 @@ Setting a gender specifies the gender of the groups you'd like to hear from.
 
 `male`, `female`, and `coed` can all be used at once (`,gender male female coed`), but `alternating` must be used on its own.
 
-Note that `,groups` and `,gender` are incompatible with each other. If you wish to continue using `,gender`, reset `,groups` first. 
+Note that `,groups` and `,gender` are incompatible with each other. If you wish to continue using `,gender`, reset `,groups` first.
 
 Want to control whether groups or soloists are exclusively played? Check out `,help artisttype`.
 
 ![gender](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/gender.png)
 
 ## ,cutoff [beginning_year] {end_year}
-Setting a cutoff limits songs based on which year they were released. Using `,cutoff 2015` will play songs from 2015 onwards, while `,cutoff 2015 2017` will play songs released between 2015 and 2017. 
+Setting a cutoff limits songs based on which year they were released. Using `,cutoff 2015` will play songs from 2015 onwards, while `,cutoff 2015 2017` will play songs released between 2015 and 2017.
 
 ![cutoff](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/cutoff.png)
 
@@ -194,7 +194,7 @@ List all of the server's presets.
 # Game Modes
 Getting tired of classic KMQ? Try out elimination and teams mode!
 
-## ,play elimination x
+## ,play elimination {lives}
 See who can survive the longest into a KMQ game with elimination mode. Using `,play elimination x`, everyone starts with `x` lives; the last one alive wins! Guessing correctly will save your life while everyone else loses one.
 
 Use elimination mode in conjunction with `,timer` to raise the pressure!
@@ -212,7 +212,7 @@ To keep things fair, switching teams mid-game forfeits your current points and E
 # Full Command List
 Use `,help [command_name]` for more details for any of the following commands:
 
-## General Commands 
+## General Commands
 - `,play`: Begin a game of KMQ. The bot will play a random song based on the currently chosen filters
 - `,end`: Stop the current game of KMQ. The bot will display the winner of the game
 - `,hint`: Show a hint for the current song playing
@@ -228,13 +228,13 @@ Use `,help [command_name]` for more details for any of the following commands:
 - `,preset`: Quickly save, load, and export game options as presets (even across servers!)
 - `,vote`: Show your current 2x bonus EXP modifier status from voting for the bot on [top.gg](https://top.gg/bot/508759831755096074/vote). Thanks for supporting KMQ!
 
-## Game Option Commands 
+## Game Option Commands
 - `,limit`: Set a maximum number of results in the song query. This effectively sets the "top `x` number of songs" based on the selected filters
 - `,groups`: Specify which groups/artists to exclusively play from
 - `,gender`: Choose the gender of the artists to exclusively play from
 - `,answer`: Choose whether to type in your answer, or to pick from multiple choices on buttons
 - `,cutoff`: Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen
-- `,artisttype`: Choose whether to hear from soloists, groups, or both. 
+- `,artisttype`: Choose whether to hear from soloists, groups, or both.
 - `,release`: Specify whether only official releases are played, or include b-sides + dance practices + acoustic versions + remixes
 - `,language`: Choose whether to include Japanese/English/Chinese songs, or only Korean songs
 - `,subunits`: Choose whether to automatically include a group's subunits when using `,groups`
@@ -243,7 +243,7 @@ Use `,help [command_name]` for more details for any of the following commands:
 - `,shuffle`: Choose whether songs should play in "true" random order or in uniquely random order.
 - `,seek`: Choose whether each song starts from the beginning, middle, or a random point
 - `,guessmode`: Choose whether to guess based on song name, artist name, or both
-- `,goal`: Specify a number of points to be reached before a winner is selected and the game ends 
+- `,goal`: Specify a number of points to be reached before a winner is selected and the game ends
 - `,timer`: Specify how many songs each songs played before it's automatically skipped
 - `,duration`: Set the maximum length of a KMQ game in minutes
 - `,exclude`: Specify which artists to exclude
