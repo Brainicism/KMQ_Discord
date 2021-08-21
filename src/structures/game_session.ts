@@ -705,10 +705,10 @@ export default class GameSession {
     updateOwner() {
         const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID);
         const voiceMemberIDs = new Set(voiceMembers.map((x) => x.id));
-        const ownerID = ([...this.participants].filter((p) => voiceMemberIDs.has(p)))[0];
-        const owner = KmqMember.fromUser(voiceMembers.find((x) => x.id === ownerID));
-        if (owner.id !== this.owner.id) {
-            this.owner = owner;
+        const newOwnerID = ([...this.participants].filter((p) => voiceMemberIDs.has(p)))[0];
+        const newOwner = KmqMember.fromUser(voiceMembers.find((x) => x.id === newOwnerID));
+        if (newOwner.id !== this.owner.id) {
+            this.owner = newOwner;
             sendInfoMessage(new MessageContext(this.textChannelID), { title: "Game owner changed", description: `The new game owner is ${bold(this.owner.tag)}. They are in charge of \`,forcehint\` and \`,forceskip\`.`, thumbnailUrl: KmqImages.LISTENING });
         }
     }

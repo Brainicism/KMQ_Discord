@@ -14,5 +14,7 @@ export default async function voiceChannelLeaveHandler(member: Eris.Member, oldC
         return;
     }
 
-    gameSession.updateOwner();
+    if (!gameSession.finished) {
+        gameSession.updateOwner();
+    }
 }
