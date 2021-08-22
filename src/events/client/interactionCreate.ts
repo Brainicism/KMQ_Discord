@@ -19,56 +19,62 @@ const getDebugLogHeader = ((interaction: Eris.ComponentInteraction | Eris.Comman
 const withinInteractionInterval = ((interaction: Eris.ComponentInteraction | Eris.CommandInteraction) => new Date().getTime() - interaction.createdAt <= MAX_INTERACTION_RESPONSE_TIME);
 
 const tryAcknowledge = (async (interaction: Eris.ComponentInteraction | Eris.CommandInteraction) => {
-    if (withinInteractionInterval(interaction)) {
-        try {
-            await interaction.acknowledge();
-        } catch (err) {
-            logger.error(`${getDebugLogHeader(interaction)} | Interaction acknowledge failed. err = ${err.stack}`);
-        }
+    if (!withinInteractionInterval(interaction)) {
+        return;
+    }
+
+    try {
+        await interaction.acknowledge();
+    } catch (err) {
+        logger.error(`${getDebugLogHeader(interaction)} | Interaction acknowledge failed. err = ${err.stack}`);
     }
 });
 
 const tryCreateSuccessMessage = (async (interaction: Eris.ComponentInteraction | Eris.CommandInteraction, title: string, description: string) => {
-    if (withinInteractionInterval(interaction)) {
-        try {
-            await interaction.createMessage({
-                embeds: [{
-                    color: await userBonusIsActive(interaction.member?.id) ? EMBED_SUCCESS_BONUS_COLOR : EMBED_SUCCESS_COLOR,
-                    author: {
-                        name: interaction.member?.username,
-                        icon_url: interaction.member?.avatarURL,
-                    },
-                    title: bold(title),
-                    description,
-                    thumbnail: { url: KmqImages.THUMBS_UP },
-                }],
-                flags: 64,
-            });
-        } catch (err) {
-            logger.error(`${getDebugLogHeader(interaction)} | Interaction acknowledge (success message) via createMessage failed. err = ${err.stack}`);
-        }
+    if (!withinInteractionInterval(interaction)) {
+        return;
+    }
+
+    try {
+        await interaction.createMessage({
+            embeds: [{
+                color: await userBonusIsActive(interaction.member?.id) ? EMBED_SUCCESS_BONUS_COLOR : EMBED_SUCCESS_COLOR,
+                author: {
+                    name: interaction.member?.username,
+                    icon_url: interaction.member?.avatarURL,
+                },
+                title: bold(title),
+                description,
+                thumbnail: { url: KmqImages.THUMBS_UP },
+            }],
+            flags: 64,
+        });
+    } catch (err) {
+        logger.error(`${getDebugLogHeader(interaction)} | Interaction acknowledge (success message) via createMessage failed. err = ${err.stack}`);
     }
 });
 
 const tryCreateErrorMessage = (async (interaction: Eris.ComponentInteraction | Eris.CommandInteraction, description: string) => {
-    if (withinInteractionInterval(interaction)) {
-        try {
-            await interaction.createMessage({
-                embeds: [{
-                    color: EMBED_ERROR_COLOR,
-                    author: {
-                        name: interaction.member?.username,
-                        icon_url: interaction.member?.avatarURL,
-                    },
-                    title: bold("Uh-oh"),
-                    description,
-                    thumbnail: { url: KmqImages.DEAD },
-                }],
-                flags: 64,
-            });
-        } catch (err) {
-            logger.error(`${getDebugLogHeader(interaction)} | Interaction acknowledge (failure message) via createMessage failed. err = ${err.stack}`);
-        }
+    if (!withinInteractionInterval(interaction)) {
+        return;
+    }
+
+    try {
+        await interaction.createMessage({
+            embeds: [{
+                color: EMBED_ERROR_COLOR,
+                author: {
+                    name: interaction.member?.username,
+                    icon_url: interaction.member?.avatarURL,
+                },
+                title: bold("Uh-oh"),
+                description,
+                thumbnail: { url: KmqImages.DEAD },
+            }],
+            flags: 64,
+        });
+    } catch (err) {
+        logger.error(`${getDebugLogHeader(interaction)} | Interaction acknowledge (failure message) via createMessage failed. err = ${err.stack}`);
     }
 });
 
