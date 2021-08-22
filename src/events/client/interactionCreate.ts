@@ -12,9 +12,11 @@ import { BOOKMARK_MESSAGE_SIZE } from "../../structures/game_session";
 
 const logger = new IPCLogger("interactionCreate");
 
+const MAX_INTERACTION_RESPONSE_TIME = 3 * 1000;
+
 const getDebugLogHeader = ((interaction: Eris.ComponentInteraction | Eris.CommandInteraction) => `gid: ${interaction.guildID}, uid: ${interaction.user?.id}`);
 
-const withinInteractionInterval = ((interaction: Eris.ComponentInteraction | Eris.CommandInteraction) => new Date().getTime() - interaction.createdAt <= 3);
+const withinInteractionInterval = ((interaction: Eris.ComponentInteraction | Eris.CommandInteraction) => new Date().getTime() - interaction.createdAt <= MAX_INTERACTION_RESPONSE_TIME);
 
 const tryAcknowledge = (async (interaction: Eris.ComponentInteraction | Eris.CommandInteraction, interactionContext?: string) => {
     if (withinInteractionInterval(interaction)) {
