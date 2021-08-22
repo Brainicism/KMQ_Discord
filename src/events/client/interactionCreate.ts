@@ -14,11 +14,15 @@ const logger = new IPCLogger("interactionCreate");
 
 const getDebugLogHeader = ((interaction: Eris.ComponentInteraction | Eris.CommandInteraction) => `gid: ${interaction.guildID}, uid: ${interaction.user?.id}`);
 
-const tryAcknowledge = (async (interaction: Eris.ComponentInteraction | Eris.CommandInteraction, errorContext?: string) => {
-    try {
-        await interaction.acknowledge();
-    } catch (err) {
-        logger.error(`${getDebugLogHeader(interaction)} | Interaction failed: ${errorContext}. err = ${err}`);
+const withinInteractionInterval = ((interaction: Eris.ComponentInteraction | Eris.CommandInteraction) => new Date().getTime() - interaction.createdAt <= 3);
+
+const tryAcknowledge = (async (interaction: Eris.ComponentInteraction | Eris.CommandInteraction, interactionContext?: string) => {
+    if (withinInteractionInterval(interaction)) {
+        try {
+            await interaction.acknowledge();
+        } catch (err) {
+            logger.error(`${getDebugLogHeader(interaction)} | Interaction failed: ${interactionContext}. err = ${err.stack}`);
+        }
     }
 });
 
@@ -42,7 +46,7 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
             return;
         }
 
-        if (gameSession.gameRound.incorrectMCGuessers.has(interaction.member.id)) {
+        if (gameSession.gameRound.incorrectMCGuessers.has(interaction.member.id) && withinInteractionInterval(interaction)) {
             try {
                 await interaction.createMessage({
                     embeds: [{
@@ -58,13 +62,13 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
                     flags: 64,
                 });
             } catch (err) {
-                logger.error(`${getDebugLogHeader(interaction)} | Interaction failed: createMessage ack failed on user that has already been eliminated. err = ${err}`);
+                logger.error(`${getDebugLogHeader(interaction)} | Interaction failed: createMessage ack failed on user that has already been eliminated. err = ${err.stack}`);
             }
 
             return;
         }
 
-        if (!gameSession.gameRound.isValidInteractionGuess(interaction.data.custom_id)) {
+        if (!gameSession.gameRound.isValidInteractionGuess(interaction.data.custom_id) && withinInteractionInterval(interaction)) {
             try {
                 await interaction.createMessage({
                     embeds: [{
@@ -80,29 +84,31 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
                     flags: 64,
                 });
             } catch (err) {
-                logger.error(`${getDebugLogHeader(interaction)} | Interaction failed: createMessage ack failed on interaction from previous round. err = ${err}`);
+                logger.error(`${getDebugLogHeader(interaction)} | Interaction failed: createMessage ack failed on interaction from previous round. err = ${err.stack}`);
             }
 
             return;
         }
 
         if (!gameSession.gameRound.isCorrectInteractionAnswer(interaction.data.custom_id)) {
-            try {
-                await interaction.createMessage({
-                    embeds: [{
-                        color: EMBED_ERROR_COLOR,
-                        author: {
-                            name: messageContext.author.username,
-                            icon_url: messageContext.author.avatarUrl,
-                        },
-                        title: bold("Incorrect guess"),
-                        description: "You've been eliminated this round.",
-                        thumbnail: { url: KmqImages.DEAD },
-                    }],
-                    flags: 64,
-                });
-            } catch (err) {
-                logger.error(`${getDebugLogHeader(interaction)} | Interaction failed: createMessage ack failed on elimination message. err = ${err}`);
+            if (withinInteractionInterval(interaction)) {
+                try {
+                    await interaction.createMessage({
+                        embeds: [{
+                            color: EMBED_ERROR_COLOR,
+                            author: {
+                                name: messageContext.author.username,
+                                icon_url: messageContext.author.avatarUrl,
+                            },
+                            title: bold("Incorrect guess"),
+                            description: "You've been eliminated this round.",
+                            thumbnail: { url: KmqImages.DEAD },
+                        }],
+                        flags: 64,
+                    });
+                } catch (err) {
+                    logger.error(`${getDebugLogHeader(interaction)} | Interaction failed: createMessage ack failed on elimination message. err = ${err.stack}`);
+                }
             }
 
             if (!gameSession.gameRound) {
@@ -126,7 +132,7 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
         // Bookmarking songs
         const gameSession = state.gameSessions[interaction.guildID];
         const song = gameSession?.getSongFromMessageID(interaction.data.target_id);
-        if (!gameSession || !song) {
+        if ((!gameSession || !song) && withinInteractionInterval(interaction)) {
             const description = !gameSession ? "You can only bookmark songs during a game." : `You can only bookmark songs recently played in the last ${BOOKMARK_MESSAGE_SIZE} rounds. You must bookmark the message sent by the bot containing the song.`;
             try {
                 interaction.createMessage({
@@ -143,28 +149,30 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
                     flags: 64,
                 });
             } catch (err) {
-                logger.error(`${getDebugLogHeader(interaction)} | Interaction failed: createMessage ack failed on bookmarking old song. !gameSession = ${!gameSession}. If false, then !song = true. err = ${err}`);
+                logger.error(`${getDebugLogHeader(interaction)} | Interaction failed: createMessage ack failed on bookmarking old song. !gameSession = ${!gameSession}. If false, then !song = true. err = ${err.stack}`);
             }
 
             return;
         }
 
-        try {
-            interaction.createMessage({
-                embeds: [{
-                    color: await userBonusIsActive(interaction.member.id) ? EMBED_SUCCESS_BONUS_COLOR : EMBED_SUCCESS_COLOR,
-                    author: interaction.member ? {
-                        name: interaction.member.username,
-                        icon_url: interaction.member.avatarURL,
-                    } : null,
-                    title: bold("Song Bookmarked"),
-                    description: `You'll receive a direct message with a link to ${bold(song.originalSongName)} at the end of the game.`,
-                    thumbnail: { url: KmqImages.THUMBS_UP },
-                }],
-                flags: 64,
-            });
-        } catch (err) {
-            logger.error(`${getDebugLogHeader(interaction)} | Interaction failed: createMessage ack failed on successful bookmark. err = ${err}`);
+        if (withinInteractionInterval(interaction)) {
+            try {
+                interaction.createMessage({
+                    embeds: [{
+                        color: await userBonusIsActive(interaction.member.id) ? EMBED_SUCCESS_BONUS_COLOR : EMBED_SUCCESS_COLOR,
+                        author: interaction.member ? {
+                            name: interaction.member.username,
+                            icon_url: interaction.member.avatarURL,
+                        } : null,
+                        title: bold("Song Bookmarked"),
+                        description: `You'll receive a direct message with a link to ${bold(song.originalSongName)} at the end of the game.`,
+                        thumbnail: { url: KmqImages.THUMBS_UP },
+                    }],
+                    flags: 64,
+                });
+            } catch (err) {
+                logger.error(`${getDebugLogHeader(interaction)} | Interaction failed: createMessage ack failed on successful bookmark. err = ${err.stack}`);
+            }
         }
 
         gameSession.addBookmarkedSong(interaction.member?.id, song);
