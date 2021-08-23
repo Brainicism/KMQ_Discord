@@ -10,7 +10,7 @@ import {
     getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, getUserVoiceChannel, sendEndGameMessage, getCurrentVoiceMembers,
     sendBookmarkedSongs, tryInteractionAcknowledge, tryCreateInteractionSuccessAcknowledgement, tryCreateInteractionErrorAcknowledgement,
 } from "../helpers/discord_utils";
-import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, userBonusIsActive, getMultipleChoiceOptions } from "../helpers/game_utils";
+import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, userBonusIsActive, getMultipleChoiceOptions, isUserPremium } from "../helpers/game_utils";
 import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference, bold, codeLine, chunkArray, chooseRandom } from "../helpers/utils";
 import { state } from "../kmq";
 import { IPCLogger } from "../logger";
@@ -125,7 +125,7 @@ export default class GameSession {
     private lastPlayedSongs: Array<string>;
 
     /** List of songs played with ,shuffle unique enabled */
-    private uniqueSongsPlayed: Set<string>;
+    private uniqueSongsPlayed: Set<{ youtubeLink: string, rank: number }>;
 
     /** Map of song's YouTube ID to correctGuesses and roundsPlayed */
     private playCount: { [vlink: string]: { correctGuesses: number, roundsPlayed: number } };
@@ -141,6 +141,9 @@ export default class GameSession {
 
     /** Mapping of user ID to bookmarked songs, uses Map since Set doesn't remove QueriedSong duplicates */
     private bookmarkedSongs: { [userID: string]: Map<string, QueriedSong> };
+
+    /** List of premium participants in the GameSession */
+    private premiumParticipants: Set<string>;
 
     constructor(textChannelID: string, voiceChannelID: string, guildID: string, gameSessionCreator: KmqMember, gameType: GameType, eliminationLives?: number) {
         this.gameType = gameType;
@@ -174,6 +177,7 @@ export default class GameSession {
         this.lastGuesser = null;
         this.songMessageIDs = [];
         this.bookmarkedSongs = {};
+        this.premiumParticipants = new Set();
     }
 
     /**
@@ -251,7 +255,7 @@ export default class GameSession {
             if (guildPreference.isShuffleUnique()) {
                 const filteredSongs = new Set([...this.filteredSongs.songs].map((x) => x.youtubeLink));
                 uniqueSongCounter = {
-                    uniqueSongsPlayed: this.uniqueSongsPlayed.size - setDifference([...this.uniqueSongsPlayed], [...filteredSongs]).size,
+                    uniqueSongsPlayed: this.uniqueSongsPlayed.size - setDifference([...this.uniqueSongsPlayed].map((x) => x.youtubeLink), [...filteredSongs]).size,
                     totalSongs: Math.min(this.filteredSongs.countBeforeLimit, guildPreference.gameOptions.limitEnd - guildPreference.gameOptions.limitStart),
                 };
             }
@@ -428,7 +432,7 @@ export default class GameSession {
         if (!this.guessEligible(messageContext)) return;
 
         const guildPreference = await getGuildPreference(messageContext.guildID);
-        const pointsEarned = this.checkGuess(messageContext.author.id, guess, guildPreference.gameOptions.guessModeType, guildPreference.isMultipleChoiceMode());
+        const pointsEarned = await this.checkGuess(messageContext.author.id, guess, guildPreference.gameOptions.guessModeType, guildPreference.isMultipleChoiceMode());
         if (pointsEarned > 0) {
             if (this.gameRound.finished) {
                 return;
@@ -467,6 +471,12 @@ export default class GameSession {
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
     async startRound(guildPreference: GuildPreference, messageContext: MessageContext) {
+        if (!this.sessionInitialized) {
+            if (await isUserPremium(this.owner.id)) {
+                this.addPremiumParticipant(this.owner.id);
+            }
+        }
+
         this.sessionInitialized = true;
         await delay(this.multiguessDelayIsActive(guildPreference) ? 3000 - MULTIGUESS_DELAY : 3000);
         if (this.finished || this.gameRound) {
@@ -489,7 +499,7 @@ export default class GameSession {
         // manage unique songs
         if (guildPreference.gameOptions.shuffleType === ShuffleType.UNIQUE) {
             const filteredSongs = new Set([...this.filteredSongs.songs].map((x) => x.youtubeLink));
-            if (setDifference([...filteredSongs], [...this.uniqueSongsPlayed]).size === 0) {
+            if (setDifference([...filteredSongs], [...this.uniqueSongsPlayed].map((x) => x.youtubeLink)).size === 0) {
                 logger.info(`${getDebugLogHeader(messageContext)} | Resetting uniqueSongsPlayed (all ${totalSongsCount} unique songs played)`);
                 // In updateSongCount, songs already played are added to songCount when options change. On unique reset, remove them
                 await sendInfoMessage(messageContext, { title: "Resetting unique songs", description: `All songs have been played. ${totalSongsCount} songs will be reshuffled.`, thumbnailUrl: KmqImages.LISTENING });
@@ -525,11 +535,12 @@ export default class GameSession {
 
         // query for random song
         let randomSong: QueriedSong;
-        const ignoredSongs = new Set([...this.lastPlayedSongs, ...this.uniqueSongsPlayed]);
+        const songs = this.isPremiumGame() ? this.filteredSongs.songs : new Set([...this.filteredSongs.songs].filter((x) => x.rank <= process.env.AUDIO_SONGS_PER_ARTIST));
+        const ignoredSongs = new Set([...this.lastPlayedSongs, ...[...this.uniqueSongsPlayed].map((x) => x.youtubeLink)]);
         if (this.lastAlternatingGender) {
-            randomSong = await selectRandomSong(this.filteredSongs.songs, ignoredSongs, this.lastAlternatingGender);
+            randomSong = await selectRandomSong(songs, ignoredSongs, this.lastAlternatingGender);
         } else {
-            randomSong = await selectRandomSong(this.filteredSongs.songs, ignoredSongs);
+            randomSong = await selectRandomSong(songs, ignoredSongs);
         }
 
         if (randomSong === null) {
@@ -543,7 +554,7 @@ export default class GameSession {
         }
 
         if (guildPreference.gameOptions.shuffleType === ShuffleType.UNIQUE) {
-            this.uniqueSongsPlayed.add(randomSong.youtubeLink);
+            this.uniqueSongsPlayed.add({ youtubeLink: randomSong.youtubeLink, rank: randomSong.rank });
         }
 
         // create a new round with randomly chosen song
@@ -769,6 +780,27 @@ export default class GameSession {
 
         tryCreateInteractionSuccessAcknowledgement(interaction, "Song Bookmarked", `You'll receive a direct message with a link to ${bold(song.originalSongName)} at the end of the game.`);
         this.addBookmarkedSong(interaction.member?.id, song);
+    }
+
+    /**
+     * Adds the given user as a premium participant for tracking premium features
+     * @param userID - The premium user that joined the game
+     */
+    addPremiumParticipant(userID: string) {
+        this.premiumParticipants.add(userID);
+    }
+
+    /**
+     * Removes the given user as a premium participant, if they are one
+     * @param userID - The user to remove from premium participants, if they are in it
+     */
+    removeIfPremiumParticipant(userID: string) {
+        this.premiumParticipants.delete(userID);
+    }
+
+    /** Whether the current game has premium features */
+    isPremiumGame(): boolean {
+        return this.premiumParticipants.size > 0;
     }
 
     /**

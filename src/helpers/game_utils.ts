@@ -32,7 +32,7 @@ interface GroupMatchResults {
  */
 export async function getFilteredSongList(guildPreference: GuildPreference): Promise<{ songs: Set<QueriedSong>, countBeforeLimit: number }> {
     const fields = ["clean_song_name as songName", "song_name as originalSongName", "artist_name as artist", "link as youtubeLink",
-        "publishedon as publishDate", "members", "id_artist as artistID", "issolo as isSolo", "members", "tags"];
+        "publishedon as publishDate", "members", "id_artist as artistID", "issolo as isSolo", "members", "tags", "rank"];
 
     const gameOptions = guildPreference.gameOptions;
     let queryBuilder = dbContext.kmq("available_songs")
@@ -396,4 +396,14 @@ export async function getMultipleChoiceOptions(answerType: AnswerType, guessMode
     }
 
     return result;
+}
+
+/**
+ * @param userID - The user ID
+ * @returns whether the player has premium status
+ */
+export async function isUserPremium(userID: string): Promise<boolean> {
+    return !!(await dbContext.kmq("premium_users")
+        .where("user_id", "=", userID)
+        .first());
 }
