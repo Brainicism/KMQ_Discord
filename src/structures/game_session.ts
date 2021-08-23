@@ -704,6 +704,10 @@ export default class GameSession {
     updateOwner() {
         const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID);
         const voiceMemberIDs = new Set(voiceMembers.map((x) => x.id));
+        if (voiceMemberIDs.has(this.owner.id)) {
+            return;
+        }
+
         const participantsInVC = [...this.participants].filter((p) => voiceMemberIDs.has(p));
         let newOwnerID: string;
         if (participantsInVC.length > 0) {
