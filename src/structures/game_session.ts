@@ -719,10 +719,8 @@ export default class GameSession {
         }
 
         const newOwner = KmqMember.fromUser(voiceMembers.find((x) => x.id === newOwnerID));
-        if (newOwner.id !== this.owner.id) {
-            this.owner = newOwner;
-            sendInfoMessage(new MessageContext(this.textChannelID), { title: "Game owner changed", description: `The new game owner is ${bold(this.owner.tag)}. They are in charge of \`,forcehint\` and \`,forceskip\`.`, thumbnailUrl: KmqImages.LISTENING });
-        }
+        this.owner = newOwner;
+        sendInfoMessage(new MessageContext(this.textChannelID), { title: "Game owner changed", description: `The new game owner is ${bold(this.owner.tag)}. They are in charge of \`,forcehint\` and \`,forceskip\`.`, thumbnailUrl: KmqImages.LISTENING });
     }
 
     /**
