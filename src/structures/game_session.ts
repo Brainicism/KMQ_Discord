@@ -718,8 +718,7 @@ export default class GameSession {
             newOwnerID = chooseRandom(voiceMembers).id;
         }
 
-        const newOwner = KmqMember.fromUser(voiceMembers.find((x) => x.id === newOwnerID));
-        this.owner = newOwner;
+        this.owner = KmqMember.fromUser(voiceMembers.find((x) => x.id === newOwnerID));
         sendInfoMessage(new MessageContext(this.textChannelID), { title: "Game owner changed", description: `The new game owner is ${bold(this.owner.tag)}. They are in charge of \`,forcehint\` and \`,forceskip\`.`, thumbnailUrl: KmqImages.LISTENING });
     }
 
