@@ -704,6 +704,10 @@ export default class GameSession {
     updateOwner() {
         const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID);
         const voiceMemberIDs = new Set(voiceMembers.map((x) => x.id));
+        if (voiceMemberIDs.has(this.owner.id)) {
+            return;
+        }
+
         const participantsInVC = [...this.participants].filter((p) => voiceMemberIDs.has(p));
         let newOwnerID: string;
         if (participantsInVC.length > 0) {
@@ -714,11 +718,8 @@ export default class GameSession {
             newOwnerID = chooseRandom(voiceMembers).id;
         }
 
-        const newOwner = KmqMember.fromUser(voiceMembers.find((x) => x.id === newOwnerID));
-        if (newOwner.id !== this.owner.id) {
-            this.owner = newOwner;
-            sendInfoMessage(new MessageContext(this.textChannelID), { title: "Game owner changed", description: `The new game owner is ${bold(this.owner.tag)}. They are in charge of \`,forcehint\` and \`,forceskip\`.`, thumbnailUrl: KmqImages.LISTENING });
-        }
+        this.owner = KmqMember.fromUser(voiceMembers.find((x) => x.id === newOwnerID));
+        sendInfoMessage(new MessageContext(this.textChannelID), { title: "Game owner changed", description: `The new game owner is ${bold(this.owner.tag)}. They are in charge of \`,forcehint\` and \`,forceskip\`.`, thumbnailUrl: KmqImages.LISTENING });
     }
 
     /**
