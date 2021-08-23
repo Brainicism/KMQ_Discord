@@ -71,6 +71,7 @@ export default class SkipCommand implements BaseCommand {
             .first()).publishedon);
 
         const mysqlLatency = await measureExecutionTime(dbContext.kmq.raw("SELECT 1;"));
+        const requestLatency = state.client.requestHandler.latencyRef.latency;
         const gameStatistics = {
             "Active Game Sessions": activeGameSessions,
             "Active Players": activeUsers,
@@ -84,6 +85,7 @@ export default class SkipCommand implements BaseCommand {
             "System Load Average": os.loadavg().map((x) => x.toFixed(2)).toString(),
             "Process Memory Usage": `${(fleetStats.totalRam).toFixed(2)} MB`,
             "API Latency": `${channel.guild.shard.latency} ms`,
+            "Request Latency": `${requestLatency} ms`,
             "Database Latency": `${mysqlLatency.toFixed(2)} ms`,
             "Uptime": `${(process.uptime() / (60 * 60)).toFixed(2)} hours`,
         };

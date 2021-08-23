@@ -171,6 +171,7 @@ async function updateSystemStats(clusterID: number) {
     const meanLatency = _.mean(latencies);
     const maxLatency = _.max(latencies);
     const minLatency = _.min(latencies);
+    const requestLatency = client.requestHandler.latencyRef.latency;
     await dbContext.kmq("system_stats")
         .insert({
             cluster_id: clusterID,
@@ -192,6 +193,14 @@ async function updateSystemStats(clusterID: number) {
             cluster_id: clusterID,
             stat_name: "max_latency",
             stat_value: maxLatency,
+            date: new Date(),
+        });
+
+    await dbContext.kmq("system_stats")
+        .insert({
+            cluster_id: clusterID,
+            stat_name: "request_latency",
+            stat_value: requestLatency,
             date: new Date(),
         });
 }
