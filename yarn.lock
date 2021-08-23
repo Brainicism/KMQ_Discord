@@ -785,10 +785,9 @@ enquirer@^2.3.5:
   dependencies:
     ansi-colors "^4.1.1"
 
-eris-fleet@^0.3.9:
-  version "0.3.9"
-  resolved "https://registry.yarnpkg.com/eris-fleet/-/eris-fleet-0.3.9.tgz#f0737aedc9a1696d003e2b32a5df1ffced4e3fcf"
-  integrity sha512-qV4pPIsz+/lJo1QfJH7DtfrWrqCu1rvN2jXq26bTetUhPG/TRyorqwoGBIJrYmEScGeJFGKuTlITHXkCE4SSAg==
+"eris-fleet@https://github.com/danclay/eris-fleet.git#dev":
+  version "0.3.9-dev"
+  resolved "https://github.com/danclay/eris-fleet.git#23bdd206c09076129c390144da463750ce4c4e8a"
 
 "eris-pagination@https://github.com/brainicism/eris-pagination#86ab739":
   version "0.5.2"

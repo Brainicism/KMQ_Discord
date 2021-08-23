@@ -46,6 +46,7 @@ const options: Options = {
         intents: ERIS_INTENTS.guilds ^ ERIS_INTENTS.guildVoiceStates ^ ERIS_INTENTS.guildMessages ^ ERIS_INTENTS.guildMessageReactions,
     },
     customClient: KmqClient,
+    useCentralRequestHandler: true,
 };
 
 function registerGlobalIntervals(fleet: Fleet) {
