@@ -405,5 +405,6 @@ export async function getMultipleChoiceOptions(answerType: AnswerType, guessMode
 export async function isUserPremium(userID: string): Promise<boolean> {
     return !!(await dbContext.kmq("premium_users")
         .where("user_id", "=", userID)
+        .where("premium_expiry_date", ">", new Date())
         .first());
 }
