@@ -21,7 +21,6 @@ import uncaughtExceptionHandler from "../events/process/uncaughtException";
 import SIGINTHandler from "../events/process/SIGINT";
 import { cleanupInactiveGameSessions } from "./game_utils";
 import dbContext from "../database_context";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import debugHandler from "../events/client/debug";
 import guildCreateHandler from "../events/client/guildCreate";
 import guildDeleteHandler from "../events/client/guildDelete";
@@ -52,7 +51,7 @@ export function registerClientEvents() {
         .on("shardReady", shardReadyHandler)
         .on("shardResume", shardResumeHandler)
         .on("disconnect", disconnectHandler)
-        // .on("debug", debugHandler)
+        .on("debug", debugHandler)
         .on("guildCreate", guildCreateHandler)
         .on("guildDelete", guildDeleteHandler)
         .on("unavailableGuildCreate", unavailableGuildCreateHandler)
