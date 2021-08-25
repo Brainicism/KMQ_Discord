@@ -71,6 +71,15 @@ function registerGlobalIntervals(fleet: Fleet) {
             sendDebugAlertWebhook("Download and seed failure", e.toString(), EMBED_ERROR_COLOR, KmqImages.NOT_IMPRESSED);
         }
     });
+
+    schedule.scheduleJob("*/1 * * * *", async () => {
+        await dbContext.kmq("system_stats")
+            .insert({
+                stat_name: "request_latency",
+                stat_value: fleet.getCentralRequestHandlerLatency(),
+                date: new Date(),
+            });
+    });
 }
 
 function registerProcessEvents(fleet: Fleet) {

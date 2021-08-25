@@ -71,7 +71,12 @@ export default class SkipCommand implements BaseCommand {
             .first()).publishedon);
 
         const mysqlLatency = await measureExecutionTime(dbContext.kmq.raw("SELECT 1;"));
-        const requestLatency = state.client.requestHandler.latencyRef.latency;
+        const requestLatency = (await dbContext.kmq("system_stats")
+            .select("stat_value")
+            .where("stat_name", "=", "request_latency")
+            .orderBy("date", "DESC")
+            .first())["stat_value"];
+
         const gameStatistics = {
             "Active Game Sessions": activeGameSessions,
             "Active Players": activeUsers,
