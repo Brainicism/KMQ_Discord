@@ -109,6 +109,7 @@ function registerProcessEvents(fleet: Fleet) {
     if (isMaster) {
         fleet.on("log", (m) => logger.info(m));
         fleet.on("debug", (m) => logger.debug(m));
+        fleet.eris.on("debug", (m) => logger.error(m));
         fleet.on("warn", (m) => logger.warn(m));
         fleet.on("error", (m) => logger.error(m));
         fleet.on("abort", () => {
