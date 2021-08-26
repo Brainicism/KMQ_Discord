@@ -310,7 +310,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     optionStrings[GameOption.GENDER] = gameOptions.gender.join(", ");
     optionStrings[GameOption.CUTOFF] = `${gameOptions.beginningYear} - ${gameOptions.endYear}`;
     optionStrings[GameOption.ARTIST_TYPE] = gameOptions.artistType;
-    optionStrings[GameOption.ANSWER_TYPE] = `${strikethrough(gameOptions.answerType)} (${italicize("temporarily disabled")})`;
+    optionStrings[GameOption.ANSWER_TYPE] = gameOptions.answerType;
     optionStrings[GameOption.RELEASE_TYPE] = gameOptions.releaseType;
     optionStrings[GameOption.LANGUAGE_TYPE] = gameOptions.languageType;
     optionStrings[GameOption.SUBUNIT_PREFERENCE] = gameOptions.subunitPreference;
