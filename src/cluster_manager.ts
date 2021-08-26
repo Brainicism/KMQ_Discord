@@ -76,7 +76,7 @@ function registerGlobalIntervals(fleet: Fleet) {
         await dbContext.kmq("system_stats")
             .insert({
                 stat_name: "request_latency",
-                stat_value: fleet.getCentralRequestHandlerLatency(),
+                stat_value: fleet.eris.requestHandler.latencyRef.latency,
                 date: new Date(),
             });
     });
