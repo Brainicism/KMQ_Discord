@@ -76,7 +76,7 @@ function registerGlobalIntervals(fleet: Fleet) {
         await dbContext.kmq("system_stats")
             .insert({
                 stat_name: "request_latency",
-                stat_value: fleet.getCentralRequestHandlerLatency(),
+                stat_value: fleet.eris.requestHandler.latencyRef.latency,
                 date: new Date(),
             });
     });
@@ -109,6 +109,7 @@ function registerProcessEvents(fleet: Fleet) {
     if (isMaster) {
         fleet.on("log", (m) => logger.info(m));
         fleet.on("debug", (m) => logger.debug(m));
+        fleet.eris.on("debug", (m) => logger.error(m));
         fleet.on("warn", (m) => logger.warn(m));
         fleet.on("error", (m) => logger.error(m));
         fleet.on("abort", () => {
