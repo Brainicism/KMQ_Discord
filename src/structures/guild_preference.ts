@@ -513,7 +513,8 @@ export default class GuildPreference {
 
     /** @returns if multiple choice mode is active */
     isMultipleChoiceMode(): boolean {
-        return this.gameOptions.answerType !== AnswerType.TYPING;
+        return false;
+        // return this.gameOptions.answerType !== AnswerType.TYPING;
     }
 
     /**

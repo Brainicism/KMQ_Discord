@@ -1,11 +1,12 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
-import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
+import { sendErrorMessage } from "../../helpers/discord_utils";
+// import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
+// import { getGuildPreference } from "../../helpers/game_utils";
+// import { IPCLogger } from "../../logger";
+// import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 
-const logger = new IPCLogger("answer");
+// const logger = new IPCLogger("answer");
 export enum AnswerType {
     TYPING = "typing",
     MULTIPLE_CHOICE_EASY = "easy",
@@ -53,18 +54,22 @@ export default class AnswerCommand implements BaseCommand {
         priority: 150,
     };
 
-    call = async ({ message, parsedMessage }: CommandArgs) => {
-        const guildPreference = await getGuildPreference(message.guildID);
-        if (parsedMessage.components.length === 0) {
-            await guildPreference.reset(GameOption.ANSWER_TYPE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.ANSWER_TYPE, reset: true });
-            logger.info(`${getDebugLogHeader(message)} | Answer type reset.`);
-            return;
-        }
-
-        const answerType = parsedMessage.components[0] as AnswerType;
-        await guildPreference.setAnswerType(answerType);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.ANSWER_TYPE, reset: false });
-        logger.info(`${getDebugLogHeader(message)} | Answer type set to ${answerType}`);
+    call = async ({ message }: CommandArgs) => {
+        sendErrorMessage(MessageContext.fromMessage(message), { title: "Temporarily Disabled Option", description: "In an effort to debug abnormally high message response times by the bot, we are temporarily disabling multiple choice. We apologize for any inconvenience." });
     };
+
+    // call = async ({ message, parsedMessage }: CommandArgs) => {
+    // const guildPreference = await getGuildPreference(message.guildID);
+    // if (parsedMessage.components.length === 0) {
+    //     await guildPreference.reset(GameOption.ANSWER_TYPE);
+    //     await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.ANSWER_TYPE, reset: true });
+    //     logger.info(`${getDebugLogHeader(message)} | Answer type reset.`);
+    //     return;
+    // }
+
+    // const answerType = parsedMessage.components[0] as AnswerType;
+    // await guildPreference.setAnswerType(answerType);
+    // await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.ANSWER_TYPE, reset: false });
+    // logger.info(`${getDebugLogHeader(message)} | Answer type set to ${answerType}`);
+    // };
 }
