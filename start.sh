@@ -27,5 +27,5 @@ elif [ "${NODE_ENV}" == "development" ]; then
     exec node --inspect=9229 cluster_manager.js
 elif [ "${NODE_ENV}" == "production" ]; then
     git log -n 1 --pretty=format:"%H" > ../version
-    exec node --max-old-space-size=2048 cluster_manager.js
+    exec node cluster_manager.js
 fi
