@@ -436,7 +436,7 @@ export default class GameSession {
         if (!this.guessEligible(messageContext)) return;
 
         const guildPreference = await getGuildPreference(messageContext.guildID);
-        const pointsEarned = await this.checkGuess(messageContext.author.id, guess, guildPreference.gameOptions.guessModeType, guildPreference.isMultipleChoiceMode());
+        const pointsEarned = this.checkGuess(messageContext.author.id, guess, guildPreference.gameOptions.guessModeType, guildPreference.isMultipleChoiceMode());
         if (pointsEarned > 0) {
             if (this.gameRound.finished) {
                 return;
