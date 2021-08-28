@@ -125,7 +125,7 @@ export default class GameSession {
     private lastPlayedSongs: Array<string>;
 
     /** List of songs played with ,shuffle unique enabled */
-    private uniqueSongsPlayed: Set<{ youtubeLink: string, rank: number }>;
+    private uniqueSongsPlayed: Set<string>;
 
     /** Map of song's YouTube ID to correctGuesses and roundsPlayed */
     private playCount: { [vlink: string]: { correctGuesses: number, roundsPlayed: number } };
@@ -259,7 +259,7 @@ export default class GameSession {
             if (guildPreference.isShuffleUnique()) {
                 const filteredSongs = new Set([...this.filteredSongs.songs].map((x) => x.youtubeLink));
                 uniqueSongCounter = {
-                    uniqueSongsPlayed: this.uniqueSongsPlayed.size - setDifference([...this.uniqueSongsPlayed].map((x) => x.youtubeLink), [...filteredSongs]).size,
+                    uniqueSongsPlayed: this.uniqueSongsPlayed.size - setDifference([...this.uniqueSongsPlayed], [...filteredSongs]).size,
                     totalSongs: Math.min(this.filteredSongs.countBeforeLimit, guildPreference.gameOptions.limitEnd - guildPreference.gameOptions.limitStart),
                 };
             }
@@ -506,7 +506,7 @@ export default class GameSession {
         // manage unique songs
         if (guildPreference.gameOptions.shuffleType === ShuffleType.UNIQUE) {
             const filteredSongs = new Set([...this.filteredSongs.songs].map((x) => x.youtubeLink));
-            if (setDifference([...filteredSongs], [...this.uniqueSongsPlayed].map((x) => x.youtubeLink)).size === 0) {
+            if (setDifference([...filteredSongs], [...this.uniqueSongsPlayed]).size === 0) {
                 logger.info(`${getDebugLogHeader(messageContext)} | Resetting uniqueSongsPlayed (all ${totalSongsCount} unique songs played)`);
                 // In updateSongCount, songs already played are added to songCount when options change. On unique reset, remove them
                 await sendInfoMessage(messageContext, { title: "Resetting unique songs", description: `All songs have been played. ${totalSongsCount} songs will be reshuffled.`, thumbnailUrl: KmqImages.LISTENING });
@@ -541,7 +541,7 @@ export default class GameSession {
         }
 
         // query for random song
-        const ignoredSongs = new Set([...this.lastPlayedSongs, ...[...this.uniqueSongsPlayed].map((x) => x.youtubeLink)]);
+        const ignoredSongs = new Set([...this.lastPlayedSongs, ...this.uniqueSongsPlayed]);
         const randomSong = await selectRandomSong(this.filteredSongs.songs, ignoredSongs, this.lastAlternatingGender);
 
         if (randomSong === null) {
@@ -555,7 +555,7 @@ export default class GameSession {
         }
 
         if (guildPreference.gameOptions.shuffleType === ShuffleType.UNIQUE) {
-            this.uniqueSongsPlayed.add({ youtubeLink: randomSong.youtubeLink, rank: randomSong.rank });
+            this.uniqueSongsPlayed.add(randomSong.youtubeLink);
         }
 
         // create a new round with randomly chosen song
