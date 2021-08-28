@@ -84,7 +84,7 @@ const mockSongs = [...Array(MOCK_SONG_COUNT).keys()].map((i) => {
         id_parent_artist: artist.id_parentgroup || 0,
         vtype: Math.random() < 0.25 ? "audio" : "main",
         tags: ["", "", "o", "c", "e", "drv", "ax", "ps"][md5Hash(i, 8) % 8],
-        rank: i < MOCK_SONG_COUNT / 2 ? Number(process.env.AUDIO_SONGS_PER_ARTIST) : Number(process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST),
+        rank: i < MOCK_SONG_COUNT / 2 ? process.env.AUDIO_SONGS_PER_ARTIST : process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST,
     };
 });
 
