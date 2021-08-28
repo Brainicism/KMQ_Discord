@@ -371,7 +371,7 @@ export default class GameSession {
 
         // commit session's song plays and correct guesses
         const guildPreference = await getGuildPreference(this.guildID);
-        if (guildPreference.isMultipleChoiceMode()) {
+        if (!guildPreference.isMultipleChoiceMode()) {
             await this.storeSongCounts();
         }
 
