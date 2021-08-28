@@ -9,6 +9,7 @@ import { GuessModeType } from "../../commands/game_options/guessmode";
 import { bold } from "../../helpers/utils";
 import { KmqImages } from "../../constants";
 import { BOOKMARK_MESSAGE_SIZE } from "../../structures/game_session";
+import { getProfileFields } from "../../commands/game_commands/profile";
 
 const logger = new IPCLogger("interactionCreate");
 
@@ -131,18 +132,51 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
         if (!gameSession.gameRound) return;
         await gameSession.guessSong(messageContext, guildPreference.gameOptions.guessModeType !== GuessModeType.ARTIST ? gameSession.gameRound.songName : gameSession.gameRound.artistName);
     } else if (interaction instanceof Eris.CommandInteraction) {
-        // Bookmarking songs
-        const gameSession = state.gameSessions[interaction.guildID];
-        const song = gameSession?.getSongFromMessageID(interaction.data.target_id);
-        if ((!gameSession || !song) && withinInteractionInterval(interaction)) {
-            await tryCreateErrorMessage(interaction, !gameSession ? "You can only bookmark songs during a game." : `You can only bookmark songs recently played in the last ${BOOKMARK_MESSAGE_SIZE} rounds. You must bookmark the message sent by the bot containing the song.`);
-            return;
-        }
+        if (interaction.data.type === Eris.Constants.ApplicationCommandTypes.USER) {
+            // Profile
+            const userID = interaction.data.target_id;
+            const user = await state.ipc.fetchUser(userID);
+            if (!user) {
+                tryCreateErrorMessage(interaction, `I can't access that user right now. Try using \`${process.env.BOT_PREFIX}profile ${interaction.data.target_id}\` instead.`);
+                logger.info(`${getDebugLogHeader(interaction)} | Failed retrieving profile on inaccessible player via interaction`);
+                return;
+            }
 
-        if (withinInteractionInterval(interaction)) {
-            await tryCreateSuccessMessage(interaction, "Song Bookmarked", `You'll receive a direct message with a link to ${bold(song.originalSongName)} at the end of the game.`);
-        }
+            const fields = await getProfileFields(user);
+            if (fields.length === 0) {
+                tryCreateErrorMessage(interaction, "This user needs to play their first game before their stats are tracked.");
+                logger.info(`${getDebugLogHeader(interaction)} | Empty profile retrieved via interaction`);
+                return;
+            }
 
-        gameSession.addBookmarkedSong(interaction.member?.id, song);
+            try {
+                await interaction.createMessage({
+                    embeds: [{
+                        title: getUserTag(user),
+                        fields,
+                        timestamp: new Date(),
+                    }],
+                    flags: 64,
+                });
+
+                logger.info(`${getDebugLogHeader(interaction)} | Profile retrieved via interaction`);
+            } catch (err) {
+                logger.error(`${getDebugLogHeader(interaction)} | Interaction acknowledge failed. err = ${err.stack}`);
+            }
+        } else if (interaction.data.type === Eris.Constants.ApplicationCommandTypes.MESSAGE) {
+            // Bookmarking songs
+            const gameSession = state.gameSessions[interaction.guildID];
+            const song = gameSession?.getSongFromMessageID(interaction.data.target_id);
+            if ((!gameSession || !song) && withinInteractionInterval(interaction)) {
+                await tryCreateErrorMessage(interaction, !gameSession ? "You can only bookmark songs during a game." : `You can only bookmark songs recently played in the last ${BOOKMARK_MESSAGE_SIZE} rounds. You must bookmark the message sent by the bot containing the song.`);
+                return;
+            }
+
+            if (withinInteractionInterval(interaction)) {
+                await tryCreateSuccessMessage(interaction, "Song Bookmarked", `You'll receive a direct message with a link to ${bold(song.originalSongName)} at the end of the game.`);
+            }
+
+            gameSession.addBookmarkedSong(interaction.member?.id, song);
+        }
     }
 }

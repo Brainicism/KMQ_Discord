@@ -50,6 +50,115 @@ export function getRankNameByLevel(level: number): string {
     return RANK_TITLES[0].title;
 }
 
+export async function getProfileFields(requestedPlayer: Eris.User): Promise<Array<Eris.EmbedField>> {
+    const playerStats = await dbContext.kmq("player_stats")
+        .select("songs_guessed", "games_played", "first_play", "last_active")
+        .where("player_id", "=", requestedPlayer.id)
+        .first();
+
+    if (!playerStats) {
+        return [];
+    }
+
+    const songsGuessed = playerStats["songs_guessed"];
+    const gamesPlayed = playerStats["games_played"];
+    const firstPlayDateString = friendlyFormattedDate(new Date(playerStats["first_play"]));
+    const lastActiveDateString = friendlyFormattedDate(new Date(playerStats["last_active"]));
+
+    const totalPlayers = (await dbContext.kmq("player_stats")
+        .count("* as count")
+        .where("exp", ">", "0")
+        .first())["count"] as number;
+
+    const { exp, level } = (await dbContext.kmq("player_stats")
+        .select(["exp", "level"])
+        .where("player_id", "=", requestedPlayer.id)
+        .first());
+
+    const relativeSongRank = Math.min(((await dbContext.kmq("player_stats")
+        .count("* as count")
+        .where("songs_guessed", ">", songsGuessed)
+        .where("exp", ">", "0")
+        .first())["count"] as number) + 1, totalPlayers);
+
+    const relativeGamesPlayedRank = Math.min(((await dbContext.kmq("player_stats")
+        .count("* as count")
+        .where("games_played", ">", gamesPlayed)
+        .where("exp", ">", "0")
+        .first())["count"] as number) + 1, totalPlayers);
+
+    const relativeLevelRank = Math.min(((await dbContext.kmq("player_stats")
+        .count("* as count")
+        .where("exp", ">", exp)
+        .first())["count"] as number) + 1, totalPlayers);
+
+    const timesVotedData = (await dbContext.kmq("top_gg_user_votes")
+        .select(["total_votes"])
+        .where("user_id", "=", requestedPlayer.id)
+        .first());
+
+    const timesVoted = timesVotedData ? timesVotedData["total_votes"] : 0;
+
+    const fields: Array<Eris.EmbedField> = [
+        {
+            name: "Level",
+            value: `${friendlyFormattedNumber(level)} (${getRankNameByLevel(level)})`,
+            inline: true,
+        },
+        {
+            name: "Experience",
+            value: `${friendlyFormattedNumber(exp)}/${friendlyFormattedNumber(CUM_EXP_TABLE[level + 1])}`,
+            inline: true,
+        },
+        {
+            name: "Overall Rank",
+            value: `#${friendlyFormattedNumber(relativeLevelRank)}/${friendlyFormattedNumber(totalPlayers)}`,
+            inline: true,
+        },
+        {
+            name: "Songs Guessed",
+            value: `${friendlyFormattedNumber(songsGuessed)} | #${friendlyFormattedNumber(relativeSongRank)}/${friendlyFormattedNumber(totalPlayers)} `,
+            inline: true,
+        },
+        {
+            name: "Games Played",
+            value: `${friendlyFormattedNumber(gamesPlayed)} | #${friendlyFormattedNumber(relativeGamesPlayedRank)}/${friendlyFormattedNumber(totalPlayers)} `,
+            inline: true,
+        },
+        {
+            name: "First Played",
+            value: firstPlayDateString,
+            inline: true,
+        },
+        {
+            name: "Last Active",
+            value: lastActiveDateString,
+            inline: true,
+        },
+        {
+            name: "Times Voted",
+            value: friendlyFormattedNumber(timesVoted),
+            inline: true,
+        }];
+
+    // Optional fields
+    const badges = (await dbContext.kmq("badges")
+        .select(["badge_name"])
+        .where("user_id", "=", requestedPlayer.id))
+        .map((x) => x["badge_name"])
+        .join("\n");
+
+    if (badges) {
+        fields.push({
+            name: "Badges",
+            value: badges,
+            inline: false,
+        });
+    }
+
+    return fields;
+}
+
 export default class ProfileCommand implements BaseCommand {
     help = {
         name: "profile",
@@ -94,113 +203,14 @@ export default class ProfileCommand implements BaseCommand {
             return;
         }
 
-        const playerStats = await dbContext.kmq("player_stats")
-            .select("songs_guessed", "games_played", "first_play", "last_active")
-            .where("player_id", "=", requestedPlayer.id)
-            .first();
+        const fields = await getProfileFields(requestedPlayer);
 
-        logger.info(`${getDebugLogHeader(message)} | Profile retrieved`);
-
-        if (!playerStats) {
-            sendInfoMessage(MessageContext.fromMessage(message), { title: "No profile found", description: "Play your first game to begin tracking your stats!" });
+        if (fields.length === 0) {
+            sendInfoMessage(MessageContext.fromMessage(message), { title: "No profile found", description: "This user needs to play their first game before their stats are tracked." });
             return;
         }
 
-        const songsGuessed = playerStats["songs_guessed"];
-        const gamesPlayed = playerStats["games_played"];
-        const firstPlayDateString = friendlyFormattedDate(new Date(playerStats["first_play"]));
-        const lastActiveDateString = friendlyFormattedDate(new Date(playerStats["last_active"]));
-
-        const totalPlayers = (await dbContext.kmq("player_stats")
-            .count("* as count")
-            .where("exp", ">", "0")
-            .first())["count"] as number;
-
-        const { exp, level } = (await dbContext.kmq("player_stats")
-            .select(["exp", "level"])
-            .where("player_id", "=", requestedPlayer.id)
-            .first());
-
-        const relativeSongRank = Math.min(((await dbContext.kmq("player_stats")
-            .count("* as count")
-            .where("songs_guessed", ">", songsGuessed)
-            .where("exp", ">", "0")
-            .first())["count"] as number) + 1, totalPlayers);
-
-        const relativeGamesPlayedRank = Math.min(((await dbContext.kmq("player_stats")
-            .count("* as count")
-            .where("games_played", ">", gamesPlayed)
-            .where("exp", ">", "0")
-            .first())["count"] as number) + 1, totalPlayers);
-
-        const relativeLevelRank = Math.min(((await dbContext.kmq("player_stats")
-            .count("* as count")
-            .where("exp", ">", exp)
-            .first())["count"] as number) + 1, totalPlayers);
-
-        const timesVotedData = (await dbContext.kmq("top_gg_user_votes")
-            .select(["total_votes"])
-            .where("user_id", "=", requestedPlayer.id)
-            .first());
-
-        const timesVoted = timesVotedData ? timesVotedData["total_votes"] : 0;
-
-        const fields: Array<Eris.EmbedField> = [
-            {
-                name: "Level",
-                value: `${friendlyFormattedNumber(level)} (${getRankNameByLevel(level)})`,
-                inline: true,
-            },
-            {
-                name: "Experience",
-                value: `${friendlyFormattedNumber(exp)}/${friendlyFormattedNumber(CUM_EXP_TABLE[level + 1])}`,
-                inline: true,
-            },
-            {
-                name: "Overall Rank",
-                value: `#${friendlyFormattedNumber(relativeLevelRank)}/${friendlyFormattedNumber(totalPlayers)}`,
-                inline: true,
-            },
-            {
-                name: "Songs Guessed",
-                value: `${friendlyFormattedNumber(songsGuessed)} | #${friendlyFormattedNumber(relativeSongRank)}/${friendlyFormattedNumber(totalPlayers)} `,
-                inline: true,
-            },
-            {
-                name: "Games Played",
-                value: `${friendlyFormattedNumber(gamesPlayed)} | #${friendlyFormattedNumber(relativeGamesPlayedRank)}/${friendlyFormattedNumber(totalPlayers)} `,
-                inline: true,
-            },
-            {
-                name: "First Played",
-                value: firstPlayDateString,
-                inline: true,
-            },
-            {
-                name: "Last Active",
-                value: lastActiveDateString,
-                inline: true,
-            },
-            {
-                name: "Times Voted",
-                value: friendlyFormattedNumber(timesVoted),
-                inline: true,
-            }];
-
-        // Optional fields
-        const badges = (await dbContext.kmq("badges")
-            .select(["badge_name"])
-            .where("user_id", "=", requestedPlayer.id))
-            .map((x) => x["badge_name"])
-            .join("\n");
-
-        if (badges) {
-            fields.push({
-                name: "Badges",
-                value: badges,
-                inline: false,
-            });
-        }
+        logger.info(`${getDebugLogHeader(MessageContext.fromMessage(message))} | Profile retrieved`);
 
         sendInfoMessage(MessageContext.fromMessage(message), {
             title: getUserTag(requestedPlayer),

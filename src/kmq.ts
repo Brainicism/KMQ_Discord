@@ -71,5 +71,10 @@ export class BotWorker extends BaseClusterWorker {
             name: "Bookmark Song",
             type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
         });
+
+        state.client.createCommand({
+            name: "Profile",
+            type: Eris.Constants.ApplicationCommandTypes.USER,
+        });
     }
 }
