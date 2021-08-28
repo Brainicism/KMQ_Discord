@@ -10,6 +10,6 @@ export default async function voiceChannelJoinHandler(member: Eris.Member, newCh
     }
 
     if (newChannel.id === gameSession.voiceChannelID && await isUserPremium(member.id)) {
-        await gameSession.addPremiumParticipant(member.id, await getGuildPreference(guildID));
+        gameSession.addPremiumParticipant(member.id, await getGuildPreference(guildID));
     }
 }

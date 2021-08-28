@@ -796,17 +796,23 @@ export default class GameSession {
         }
 
         this.premiumGame = true;
-        this.filteredSongs = await getFilteredSongList(guildPreference, true);
+        this.updateFilteredSongs(guildPreference);
     }
 
     /**
      * Removes the given user as a premium participant, if they are one
      * @param userID - The user to remove from premium participants, if they are in it
+     * @param guildPreference - The preferences to use when updating song list if the game becomes non-premium
      */
-    removeIfPremiumParticipant(userID: string) {
+    async removeIfPremiumParticipant(userID: string, guildPreference: GuildPreference) {
         this.premiumParticipants.delete(userID);
+        if (!this.premiumGame) {
+            return;
+        }
+
         if (this.premiumParticipants.size === 0) {
             this.premiumGame = false;
+            this.updateFilteredSongs(guildPreference);
         }
     }
 

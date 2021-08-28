@@ -1,6 +1,7 @@
 import Eris from "eris";
 import { state } from "../../kmq";
 import { checkBotIsAlone } from "../../helpers/discord_utils";
+import { getGuildPreference } from "../../helpers/game_utils";
 
 export default async function voiceChannelLeaveHandler(member: Eris.Member, oldChannel: Eris.VoiceChannel) {
     const guildID = oldChannel.guild.id;
@@ -23,5 +24,5 @@ export default async function voiceChannelLeaveHandler(member: Eris.Member, oldC
     }
 
     gameSession.updateOwner();
-    gameSession.removeIfPremiumParticipant(member.id);
+    gameSession.removeIfPremiumParticipant(member.id, await getGuildPreference(guildID));
 }

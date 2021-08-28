@@ -21,7 +21,7 @@ export default async function voiceChannelSwitchHandler(member: Eris.Member, new
 
     gameSession.updateOwner();
     if (newChannel.id !== gameSession.voiceChannelID) {
-        gameSession.removeIfPremiumParticipant(member.id);
+        gameSession.removeIfPremiumParticipant(member.id, await getGuildPreference(guildID));
     } else if (newChannel.id === gameSession.voiceChannelID && await isUserPremium(member.id)) {
         gameSession.addPremiumParticipant(member.id, await getGuildPreference(guildID));
     }
