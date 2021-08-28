@@ -298,7 +298,7 @@ export function registerIntervals(clusterID: number) {
         await updateSystemStats(clusterID);
     });
 
-    // every 1 minutes
+    // every minute
     schedule.scheduleJob("*/1 * * * *", async () => {
         await updateClusterActivityStats(clusterID);
     });

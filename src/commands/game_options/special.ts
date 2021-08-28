@@ -76,7 +76,7 @@ export default class SpecialCommand implements BaseCommand {
 
     call = async ({ message, parsedMessage }: CommandArgs) => {
         if (process.env.DEBUG_SERVER_ID !== message.guildID) {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Error", description: "This is an unreleased game option, and can only be used on the official KMQ server" });
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "Unreleased Option", description: "This option can only be used on the official KMQ server." });
             return;
         }
 

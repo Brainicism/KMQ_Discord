@@ -30,7 +30,7 @@ interface GroupMatchResults {
  * @param guildPreference - The GuildPreference
  * @returns a list of songs, as well as the number of songs before the filter option was applied
  */
-export async function getFilteredSongList(guildPreference: GuildPreference): Promise<{ songs: Set<QueriedSong>, countBeforeLimit: number }> {
+export async function getFilteredSongList(guildPreference: GuildPreference, premium: boolean): Promise<{ songs: Set<QueriedSong>, countBeforeLimit: number }> {
     const fields = ["clean_song_name as songName", "song_name as originalSongName", "artist_name as artist", "link as youtubeLink",
         "publishedon as publishDate", "members", "id_artist as artistID", "issolo as isSolo", "members", "tags", "rank"];
 
@@ -108,6 +108,9 @@ export async function getFilteredSongList(guildPreference: GuildPreference): Pro
         .andWhere("publishedon", "<=", `${gameOptions.endYear}-12-31`)
         .orderBy("views", "DESC");
 
+    queryBuilder = queryBuilder
+        .andWhere("rank", "<=", premium ? process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST : process.env.AUDIO_SONGS_PER_ARTIST);
+
     let result: Array<QueriedSong> = await queryBuilder;
 
     const count = result.length;
@@ -164,9 +167,9 @@ export async function selectRandomSong(filteredSongs: Set<QueriedSong>, ignoredS
  * @param guildPreference - The GuildPreference
  * @returns an object containing the total number of available songs before and after limit based on the GameOptions
  */
-export async function getSongCount(guildPreference: GuildPreference): Promise<{ count: number; countBeforeLimit: number }> {
+export async function getSongCount(guildPreference: GuildPreference, premium: boolean): Promise<{ count: number; countBeforeLimit: number }> {
     try {
-        const { songs, countBeforeLimit } = await getFilteredSongList(guildPreference);
+        const { songs, countBeforeLimit } = await getFilteredSongList(guildPreference, premium);
         return {
             count: songs.size,
             countBeforeLimit,
@@ -405,6 +408,42 @@ export async function getMultipleChoiceOptions(answerType: AnswerType, guessMode
 export async function isUserPremium(userID: string): Promise<boolean> {
     return !!(await dbContext.kmq("premium_users")
         .where("user_id", "=", userID)
-        .where("premium_expiry_date", ">", new Date())
         .first());
+}
+
+/**
+ * @param userIDs - The users to grant premium membership
+ */
+export async function addPremium(userIDs: string[]) {
+    dbContext.kmq.transaction(async (trx) => {
+        await dbContext.kmq("premium_users")
+            .insert(userIDs.map((x) => ({ user_id: x })))
+            .onConflict("user_id")
+            .ignore()
+            .transacting(trx);
+
+        await dbContext.kmq("badges")
+            .insert(userIDs.map((x) => ({ user_id: x, badge_name: "🎧 Premium Supporter" })))
+            .onConflict(["user_id", "badge_name"])
+            .ignore()
+            .transacting(trx);
+    });
+}
+
+/**
+ * @param userIDs - The users to revoke premium membership from
+ */
+export async function removePremium(userIDs: string[]) {
+    dbContext.kmq.transaction(async (trx) => {
+        await dbContext.kmq("premium_users")
+            .whereIn("user_id", userIDs)
+            .del()
+            .transacting(trx);
+
+        await dbContext.kmq("badges")
+            .whereIn("user_id", userIDs)
+            .andWhere("badge_name", "=", "🎧 Premium Supporter")
+            .del()
+            .transacting(trx);
+    });
 }

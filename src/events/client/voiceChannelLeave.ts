@@ -9,6 +9,10 @@ export default async function voiceChannelLeaveHandler(member: Eris.Member, oldC
         return;
     }
 
+    if (oldChannel.id !== gameSession.voiceChannelID) {
+        return;
+    }
+
     if (checkBotIsAlone(guildID)) {
         gameSession.endSession();
         return;
@@ -18,6 +22,6 @@ export default async function voiceChannelLeaveHandler(member: Eris.Member, oldC
         return;
     }
 
-    await gameSession.updateOwner();
+    gameSession.updateOwner();
     gameSession.removeIfPremiumParticipant(member.id);
 }

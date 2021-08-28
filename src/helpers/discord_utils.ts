@@ -4,7 +4,7 @@ import axios from "axios";
 import GuildPreference from "../structures/guild_preference";
 import GameSession, { UniqueSongCounter } from "../structures/game_session";
 import { IPCLogger } from "../logger";
-import { getSongCount, userBonusIsActive } from "./game_utils";
+import { getSongCount, userBonusIsActive, isUserPremium } from "./game_utils";
 import { getFact } from "../fact_generator";
 import { EmbedPayload, GameOption, GameOptionCommand, PriorityGameOption, ConflictingGameOptions, GuildTextableMessage, PlayerRoundResult, GameInfoMessage, GameType, QueriedSong } from "../types";
 import { chunkArray, codeLine, bold, underline, italicize, strikethrough, chooseWeightedRandom, getOrdinalNum, friendlyFormattedNumber, friendlyFormattedDate, delay } from "./utils";
@@ -296,7 +296,9 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     guildPreference: GuildPreference,
     updatedOption?: { option: GameOption, reset: boolean },
     footerText?: string) {
-    const totalSongs = await getSongCount(guildPreference);
+    const gameSession = state.gameSessions[messageContext.guildID];
+    const premiumRequest = gameSession ? gameSession.isPremiumGame() : await isUserPremium(messageContext.author.id);
+    const totalSongs = await getSongCount(guildPreference, premiumRequest);
     if (totalSongs === null) {
         sendErrorMessage(messageContext, { title: "Error retrieving song data", description: `Try again in a bit, or report this error to the official KMQ server found in \`${process.env.BOT_PREFIX}help\`.` });
         return;
@@ -407,6 +409,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
             fields,
             footerText,
             thumbnailUrl: KmqImages.LISTENING,
+            color: premiumRequest ? EMBED_SUCCESS_BONUS_COLOR : null,
         }, true);
 }
 

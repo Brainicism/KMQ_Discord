@@ -15,6 +15,7 @@ import { seedAndDownloadNewSongs } from "./seed/seed_db";
 import { EMBED_ERROR_COLOR, EMBED_SUCCESS_COLOR, sendDebugAlertWebhook } from "./helpers/discord_utils";
 import { KmqImages } from "./constants";
 import KmqClient from "./kmq_client";
+import updatePremiumUsers from "./helpers/patreon_manager";
 
 const logger = getInternalLogger();
 
@@ -80,6 +81,12 @@ function registerGlobalIntervals(fleet: Fleet) {
                 date: new Date(),
             });
     });
+
+    if (process.env.PATREON_CREATOR_ACCESS_TOKEN && process.env.PATREON_CAMPAIGN_ID) {
+        schedule.scheduleJob("*/5 * * * *", async () => {
+            await updatePremiumUsers();
+        });
+    }
 }
 
 function registerProcessEvents(fleet: Fleet) {

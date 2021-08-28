@@ -145,6 +145,9 @@ export default class GameSession {
     /** List of premium participants in the GameSession */
     private premiumParticipants: Set<string>;
 
+    /** Whether the current game is premium */
+    private premiumGame: boolean;
+
     constructor(textChannelID: string, voiceChannelID: string, guildID: string, gameSessionCreator: KmqMember, gameType: GameType, eliminationLives?: number) {
         this.gameType = gameType;
         this.guildID = guildID;
@@ -178,6 +181,7 @@ export default class GameSession {
         this.songMessageIDs = [];
         this.bookmarkedSongs = {};
         this.premiumParticipants = new Set();
+        this.premiumGame = false;
     }
 
     /**
@@ -472,8 +476,11 @@ export default class GameSession {
      */
     async startRound(guildPreference: GuildPreference, messageContext: MessageContext) {
         if (!this.sessionInitialized) {
-            if (await isUserPremium(this.owner.id)) {
-                this.addPremiumParticipant(this.owner.id);
+            const voiceMemberIDs = getCurrentVoiceMembers(this.voiceChannelID).map((x) => x.id);
+            for (const memberID of voiceMemberIDs) {
+                if (await isUserPremium(memberID)) {
+                    await this.addPremiumParticipant(memberID, guildPreference);
+                }
             }
         }
 
@@ -485,7 +492,7 @@ export default class GameSession {
 
         if (this.filteredSongs === null) {
             try {
-                this.filteredSongs = await getFilteredSongList(guildPreference);
+                await this.updateFilteredSongs(guildPreference);
             } catch (err) {
                 await sendErrorMessage(messageContext, { title: "Error selecting song", description: "Please try starting the round again. If the issue persists, report it in our official KMQ server." });
                 logger.error(`${getDebugLogHeader(messageContext)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
@@ -534,14 +541,8 @@ export default class GameSession {
         }
 
         // query for random song
-        let randomSong: QueriedSong;
-        const songs = this.isPremiumGame() ? this.filteredSongs.songs : new Set([...this.filteredSongs.songs].filter((x) => x.rank <= process.env.AUDIO_SONGS_PER_ARTIST));
         const ignoredSongs = new Set([...this.lastPlayedSongs, ...[...this.uniqueSongsPlayed].map((x) => x.youtubeLink)]);
-        if (this.lastAlternatingGender) {
-            randomSong = await selectRandomSong(songs, ignoredSongs, this.lastAlternatingGender);
-        } else {
-            randomSong = await selectRandomSong(songs, ignoredSongs);
-        }
+        const randomSong = await selectRandomSong(this.filteredSongs.songs, ignoredSongs, this.lastAlternatingGender);
 
         if (randomSong === null) {
             sendErrorMessage(messageContext, { title: "Song Query Error", description: "Failed to find songs matching this criteria. Try to broaden your search." });
@@ -679,7 +680,7 @@ export default class GameSession {
     }
 
     async updateFilteredSongs(guildPreference: GuildPreference) {
-        this.filteredSongs = await getFilteredSongList(guildPreference);
+        this.filteredSongs = await getFilteredSongList(guildPreference, this.isPremiumGame());
     }
 
     /**
@@ -784,10 +785,18 @@ export default class GameSession {
 
     /**
      * Adds the given user as a premium participant for tracking premium features
+     * Called when a user joins the voice channel and at the start of the game
      * @param userID - The premium user that joined the game
+     * @param guildPreference - The preferences to use when updating song list if the game becomes premium
      */
-    addPremiumParticipant(userID: string) {
+    async addPremiumParticipant(userID: string, guildPreference: GuildPreference) {
         this.premiumParticipants.add(userID);
+        if (this.premiumGame) {
+            return;
+        }
+
+        this.premiumGame = true;
+        this.filteredSongs = await getFilteredSongList(guildPreference, true);
     }
 
     /**
@@ -796,11 +805,14 @@ export default class GameSession {
      */
     removeIfPremiumParticipant(userID: string) {
         this.premiumParticipants.delete(userID);
+        if (this.premiumParticipants.size === 0) {
+            this.premiumGame = false;
+        }
     }
 
     /** Whether the current game has premium features */
     isPremiumGame(): boolean {
-        return this.premiumParticipants.size > 0;
+        return this.premiumGame;
     }
 
     /**
