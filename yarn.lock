@@ -2294,10 +2294,9 @@ path-type@^4.0.0:
   resolved "https://registry.yarnpkg.com/path-type/-/path-type-4.0.0.tgz#84ed01c0a7ba380afe09d90a8c180dcd9d03043b"
   integrity sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==
 
-patreon-discord@^0.0.5:
+"patreon-discord@https://github.com/taahamahdi/patreon-discord":
   version "0.0.5"
-  resolved "https://registry.yarnpkg.com/patreon-discord/-/patreon-discord-0.0.5.tgz#c8d85750171103879a14868acbda14dfcccfb261"
-  integrity sha512-AWq7/HLsbAFmMg38gcxs0SE/PNaB8LNz7vQEURC2CxpwZFBbVKwev4/gqL0WPoqycV/pRraIXS//7BgifdaTKw==
+  resolved "https://github.com/taahamahdi/patreon-discord#3bbebd03a4c6e804f53d6918dd0cd0f93fcf8fb9"
   dependencies:
     node-fetch "^2.6.1"
 
