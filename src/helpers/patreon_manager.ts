@@ -18,6 +18,6 @@ export default async function updatePremiumUsers() {
         .map((x: Patron) => ({ discordID: x.discord_user_id, activePatron: x.patron_status === "active_patron" }));
 
     const activePatronIDs: string[] = patrons.filter((x) => x.activePatron).map((x) => x.discordID);
-    await removePremium((await dbContext.kmq("premium_users").select("user_id").whereNotIn("user_id", activePatronIDs)).map((x) => x.user_id));
-    await addPremium(activePatronIDs);
+    removePremium((await dbContext.kmq("premium_users").select("user_id").whereNotIn("user_id", activePatronIDs)).map((x) => x.user_id));
+    addPremium(activePatronIDs);
 }

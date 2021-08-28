@@ -84,7 +84,7 @@ function registerGlobalIntervals(fleet: Fleet) {
 
     if (process.env.PATREON_CREATOR_ACCESS_TOKEN && process.env.PATREON_CAMPAIGN_ID) {
         schedule.scheduleJob("*/5 * * * *", async () => {
-            await updatePremiumUsers();
+            updatePremiumUsers();
         });
     }
 }
