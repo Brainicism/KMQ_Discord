@@ -9,6 +9,7 @@ import {
 } from "./helpers/management_utils";
 import BotListingManager from "./helpers/bot_listing_manager";
 import KmqClient from "./kmq_client";
+import { PROFILE_COMMAND_NAME, BOOKMARK_COMMAND_NAME } from "./events/client/interactionCreate";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("kmq");
@@ -68,8 +69,13 @@ export class BotWorker extends BaseClusterWorker {
         logger.info(`Logged in as ${state.client.user.username}#${state.client.user.discriminator}! in '${process.env.NODE_ENV}' mode (${(Date.now() - state.processStartTime) / 1000}s)`);
 
         state.client.createCommand({
-            name: "Bookmark Song",
+            name: BOOKMARK_COMMAND_NAME,
             type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
+        });
+
+        state.client.createCommand({
+            name: PROFILE_COMMAND_NAME,
+            type: Eris.Constants.ApplicationCommandTypes.USER,
         });
     }
 }
