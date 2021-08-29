@@ -8,7 +8,7 @@ import dbContext from "../database_context";
 import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
     getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, getUserVoiceChannel, sendEndGameMessage, getCurrentVoiceMembers,
-    sendBookmarkedSongs,
+    sendBookmarkedSongs, tryInteractionAcknowledge, tryCreateInteractionSuccessAcknowledgement, tryCreateInteractionErrorAcknowledgement,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, userBonusIsActive, getMultipleChoiceOptions } from "../helpers/game_utils";
 import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference, bold, codeLine, chunkArray, chooseRandom } from "../helpers/utils";
@@ -221,10 +221,10 @@ export default class GameSession {
                 let streak = 0;
                 if (idx === 0) {
                     streak = this.lastGuesser.streak;
-                    logger.info(`${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed. song = ${gameRound.songName}. Gained ${expGain} EXP`);
+                    logger.info(`${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed. song = ${gameRound.songName}. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`);
                 } else {
                     streak = 0;
-                    logger.info(`${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed ${getOrdinalNum(guessPosition)}. song = ${gameRound.songName}. Gained ${expGain} EXP`);
+                    logger.info(`${getDebugLogHeader(messageContext)}, uid: ${correctGuesser.id} | Song correctly guessed ${getOrdinalNum(guessPosition)}. song = ${gameRound.songName}. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`);
                 }
 
                 return {
@@ -720,6 +720,55 @@ export default class GameSession {
 
         this.owner = KmqMember.fromUser(voiceMembers.find((x) => x.id === newOwnerID));
         sendInfoMessage(new MessageContext(this.textChannelID), { title: "Game owner changed", description: `The new game owner is ${bold(this.owner.tag)}. They are in charge of \`,forcehint\` and \`,forceskip\`.`, thumbnailUrl: KmqImages.LISTENING });
+    }
+
+    async handleMultipleChoiceInteraction(interaction: Eris.ComponentInteraction, messageContext: MessageContext) {
+        if (!getCurrentVoiceMembers(this.voiceChannelID).map((x) => x.id).includes(interaction.member.id)) {
+            tryInteractionAcknowledge(interaction);
+            return;
+        }
+
+        if (this.gameRound.incorrectMCGuessers.has(interaction.member.id)) {
+            tryCreateInteractionErrorAcknowledgement(interaction, "You've already been eliminated this round.");
+            return;
+        }
+
+        if (!this.gameRound.isValidInteractionGuess(interaction.data.custom_id)) {
+            tryCreateInteractionErrorAcknowledgement(interaction, "You are attempting to pick an option from an already completed round.");
+            return;
+        }
+
+        if (!this.gameRound.isCorrectInteractionAnswer(interaction.data.custom_id)) {
+            tryCreateInteractionErrorAcknowledgement(interaction, "You've been eliminated this round.");
+
+            if (!this.gameRound) {
+                return;
+            }
+
+            this.gameRound.incorrectMCGuessers.add(interaction.member.id);
+            this.gameRound.interactionIncorrectAnswerUUIDs[interaction.data.custom_id]++;
+
+            // Add the user as a participant
+            this.guessSong(messageContext, "");
+            return;
+        }
+
+        tryInteractionAcknowledge(interaction);
+
+        const guildPreference = await getGuildPreference(messageContext.guildID);
+        if (!this.gameRound) return;
+        this.guessSong(messageContext, guildPreference.gameOptions.guessModeType !== GuessModeType.ARTIST ? this.gameRound.songName : this.gameRound.artistName);
+    }
+
+    async handleBookmarkInteraction(interaction: Eris.CommandInteraction) {
+        const song = this.getSongFromMessageID(interaction.data.target_id);
+        if (!song) {
+            tryCreateInteractionErrorAcknowledgement(interaction, `You can only bookmark songs recently played in the last ${BOOKMARK_MESSAGE_SIZE} rounds. You must bookmark the message sent by the bot containing the song.`);
+            return;
+        }
+
+        tryCreateInteractionSuccessAcknowledgement(interaction, "Song Bookmarked", `You'll receive a direct message with a link to ${bold(song.originalSongName)} at the end of the game.`);
+        this.addBookmarkedSong(interaction.member?.id, song);
     }
 
     /**

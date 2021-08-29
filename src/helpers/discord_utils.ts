@@ -27,6 +27,7 @@ const REQUIRED_TEXT_PERMISSIONS = ["addReactions" as const, "embedLinks" as cons
 const REQUIRED_VOICE_PERMISSIONS = ["viewChannel" as const, "voiceConnect" as const, "voiceSpeak" as const];
 const SCOREBOARD_FIELD_CUTOFF = 9;
 const MAX_SCOREBOARD_PLAYERS = 30;
+const MAX_INTERACTION_RESPONSE_TIME = 3 * 1000;
 
 /**
  * @param user - The user (must be some object with username and discriminator fields)
@@ -37,15 +38,19 @@ export function getUserTag(user: { username: string, discriminator: string }): s
 }
 
 /**
- * @param messageContext - The Message or context of the Message that initiated the workflow
+ * @param context - The object that initiated the workflow
  * @returns a string containing basic debug information
  */
-export function getDebugLogHeader(messageContext: MessageContext | Eris.Message): string {
-    if (messageContext instanceof Eris.Message) {
-        return `gid: ${messageContext.guildID}, uid: ${messageContext.author.id}`;
+export function getDebugLogHeader(context: MessageContext | Eris.Message | Eris.ComponentInteraction | Eris.CommandInteraction): string {
+    if (context instanceof Eris.Message) {
+        return `gid: ${context.guildID}, uid: ${context.author.id}`;
     }
 
-    return `gid: ${messageContext.guildID}`;
+    if (context instanceof Eris.ComponentInteraction || context instanceof Eris.CommandInteraction) {
+        return `gid: ${context.guildID}, uid: ${context.member?.id}`;
+    }
+
+    return `gid: ${context.guildID}`;
 }
 
 /**
@@ -692,5 +697,69 @@ export async function sendBookmarkedSongs(bookmarkedSongs: { [userID: string]: M
             await state.client.createMessage(dmChannel.id, { embeds: [embed] });
             await delay(1000);
         }
+    }
+}
+
+function withinInteractionInterval(interaction: Eris.ComponentInteraction | Eris.CommandInteraction): boolean {
+    return new Date().getTime() - interaction.createdAt <= MAX_INTERACTION_RESPONSE_TIME;
+}
+
+export async function tryInteractionAcknowledge(interaction: Eris.ComponentInteraction | Eris.CommandInteraction) {
+    if (!withinInteractionInterval(interaction)) {
+        return;
+    }
+
+    try {
+        await interaction.acknowledge();
+    } catch (err) {
+        logger.error(`${getDebugLogHeader(interaction)} | Interaction acknowledge failed. err = ${err.stack}`);
+    }
+}
+
+export async function tryCreateInteractionSuccessAcknowledgement(interaction: Eris.ComponentInteraction | Eris.CommandInteraction, title: string, description: string) {
+    if (!withinInteractionInterval(interaction)) {
+        return;
+    }
+
+    try {
+        await interaction.createMessage({
+            embeds: [{
+                color: await userBonusIsActive(interaction.member?.id) ? EMBED_SUCCESS_BONUS_COLOR : EMBED_SUCCESS_COLOR,
+                author: {
+                    name: interaction.member?.username,
+                    icon_url: interaction.member?.avatarURL,
+                },
+                title: bold(title),
+                description,
+                thumbnail: { url: KmqImages.THUMBS_UP },
+            }],
+            flags: 64,
+        });
+    } catch (err) {
+        logger.error(`${getDebugLogHeader(interaction)} | Interaction acknowledge (success message) via createMessage failed. err = ${err.stack}`);
+    }
+}
+
+export async function tryCreateInteractionErrorAcknowledgement(interaction: Eris.ComponentInteraction | Eris.CommandInteraction, description: string) {
+    if (!withinInteractionInterval(interaction)) {
+        return;
+    }
+
+    try {
+        await interaction.createMessage({
+            embeds: [{
+                color: EMBED_ERROR_COLOR,
+                author: {
+                    name: interaction.member?.username,
+                    icon_url: interaction.member?.avatarURL,
+                },
+                title: bold("Uh-oh"),
+                description,
+                thumbnail: { url: KmqImages.DEAD },
+            }],
+            flags: 64,
+        });
+    } catch (err) {
+        logger.error(`${getDebugLogHeader(interaction)} | Interaction acknowledge (failure message) via createMessage failed. err = ${err.stack}`);
     }
 }

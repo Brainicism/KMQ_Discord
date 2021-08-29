@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import Eris from "eris";
 import dbContext from "../../database_context";
-import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
+import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage, tryCreateInteractionErrorAcknowledgement } from "../../helpers/discord_utils";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import { friendlyFormattedDate, romanize, friendlyFormattedNumber } from "../../helpers/utils";
@@ -50,9 +50,9 @@ export function getRankNameByLevel(level: number): string {
     return RANK_TITLES[0].title;
 }
 
-export async function getProfileFields(requestedPlayer: Eris.User): Promise<Array<Eris.EmbedField>> {
+async function getProfileFields(requestedPlayer: Eris.User): Promise<Array<Eris.EmbedField>> {
     const playerStats = await dbContext.kmq("player_stats")
-        .select("songs_guessed", "games_played", "first_play", "last_active")
+        .select("songs_guessed", "games_played", "first_play", "last_active", "exp", "level")
         .where("player_id", "=", requestedPlayer.id)
         .first();
 
@@ -64,16 +64,13 @@ export async function getProfileFields(requestedPlayer: Eris.User): Promise<Arra
     const gamesPlayed = playerStats["games_played"];
     const firstPlayDateString = friendlyFormattedDate(new Date(playerStats["first_play"]));
     const lastActiveDateString = friendlyFormattedDate(new Date(playerStats["last_active"]));
+    const exp = playerStats["exp"];
+    const level = playerStats["level"];
 
     const totalPlayers = (await dbContext.kmq("player_stats")
         .count("* as count")
         .where("exp", ">", "0")
         .first())["count"] as number;
-
-    const { exp, level } = (await dbContext.kmq("player_stats")
-        .select(["exp", "level"])
-        .where("player_id", "=", requestedPlayer.id)
-        .first());
 
     const relativeSongRank = Math.min(((await dbContext.kmq("player_stats")
         .count("* as count")
@@ -222,4 +219,34 @@ export default class ProfileCommand implements BaseCommand {
             timestamp: new Date(),
         });
     };
+}
+
+export async function handleProfileInteraction(interaction: Eris.CommandInteraction, user: Eris.User) {
+    if (!user) {
+        tryCreateInteractionErrorAcknowledgement(interaction, `I can't access that user right now. Try using \`${process.env.BOT_PREFIX}profile ${interaction.data.target_id}\` instead.`);
+        logger.info(`${getDebugLogHeader(interaction)} | Failed retrieving profile on inaccessible player via interaction`);
+        return;
+    }
+
+    const fields = await getProfileFields(user);
+    if (fields.length === 0) {
+        tryCreateInteractionErrorAcknowledgement(interaction, "This user needs to play their first game before their stats are tracked.");
+        logger.info(`${getDebugLogHeader(interaction)} | Empty profile retrieved via interaction`);
+        return;
+    }
+
+    try {
+        await interaction.createMessage({
+            embeds: [{
+                title: getUserTag(user),
+                fields,
+                timestamp: new Date(),
+            }],
+            flags: 64,
+        });
+
+        logger.info(`${getDebugLogHeader(interaction)} | Profile retrieved via interaction`);
+    } catch (err) {
+        logger.error(`${getDebugLogHeader(interaction)} | Interaction acknowledge failed. err = ${err.stack}`);
+    }
 }
