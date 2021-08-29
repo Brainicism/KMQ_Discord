@@ -3,7 +3,7 @@ import GameSession from "../../structures/game_session";
 import TeamScoreboard from "../../structures/team_scoreboard";
 import Player from "../../structures/player";
 import { GuildTextableMessage, ParsedMessage, GameType } from "../../types";
-import { getUserTag, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
+import { getUserTag, sendErrorMessage, sendInfoMessage, getMention } from "../../helpers/discord_utils";
 import { KmqImages } from "../../constants";
 import { bold } from "../../helpers/utils";
 import { state } from "../../kmq";
@@ -29,23 +29,23 @@ export default class JoinCommand implements BaseCommand {
     joinEliminationGame(message: GuildTextableMessage, gameSession: GameSession) {
         const kmqMember = KmqMember.fromUser(message.author);
         if (gameSession.participants.has(message.author.id)) {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Player already joined", description: `${bold(getUserTag(message.author))} is already in the game.` });
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "Player already joined", description: `${getMention(message.author)} is already in the game.` });
             return;
         }
 
         if (gameSession.sessionInitialized) {
             const newPlayer = gameSession.addEliminationParticipant(kmqMember, true);
-            sendInfoMessage(MessageContext.fromMessage(message), { title: "Joined Elimination Midgame", description: `\`${getUserTag(message.author)}\` has spawned with \`${newPlayer.getLives()}\` lives` });
+            sendInfoMessage(MessageContext.fromMessage(message), { title: "Joined Elimination Midgame", description: `\`${getMention(message.author)}\` has spawned with \`${newPlayer.getLives()}\` lives` });
             return;
         }
 
-        let previouslyJoinedPlayers = gameSession.scoreboard.getPlayerNames().reverse();
+        let previouslyJoinedPlayers = gameSession.scoreboard.getPlayerMentions().reverse();
         if (previouslyJoinedPlayers.length > 10) {
             previouslyJoinedPlayers = previouslyJoinedPlayers.slice(0, 10);
             previouslyJoinedPlayers.push("and many others...");
         }
 
-        const players = `${bold(kmqMember.tag)}, ${previouslyJoinedPlayers.join(", ")}`;
+        const players = `${getMention(kmqMember)}, ${previouslyJoinedPlayers.join(", ")}`;
         sendInfoMessage(MessageContext.fromMessage(message), { title: "Player joined", description: players });
         gameSession.addEliminationParticipant(kmqMember);
     }
@@ -87,7 +87,7 @@ export default class JoinCommand implements BaseCommand {
             const teamNameWithCleanEmojis = teamName.replace(/(<a?)(:[a-zA-Z0-9]+:)([0-9]+>)/gm, (p1, p2, p3) => p3);
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: "New team created",
-                description: `To join ${bold(teamName)} alongside ${bold(getUserTag(message.author))}, enter \`,join ${teamNameWithCleanEmojis}\`.${!gameSession.sessionInitialized ? " Start the game with `,begin`." : ""}`,
+                description: `To join ${bold(teamName)} alongside ${getMention(message.author)}, enter \`,join ${teamNameWithCleanEmojis}\`.${!gameSession.sessionInitialized ? " Start the game with `,begin`." : ""}`,
                 thumbnailUrl: KmqImages.READING_BOOK,
             });
         } else {
@@ -101,7 +101,7 @@ export default class JoinCommand implements BaseCommand {
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: `${getUserTag(message.author)} joined ${team.name}`,
                 description: !gameSession.sessionInitialized ? "When everyone has joined a team, `,begin` the game!"
-                    : `${bold(getUserTag(message.author))} thinks they have what it takes to lead ${bold(team.name)} to victory!`,
+                    : `${getMention(message.author)} thinks they have what it takes to lead ${bold(team.name)} to victory!`,
                 thumbnailUrl: KmqImages.LISTENING,
             });
         }

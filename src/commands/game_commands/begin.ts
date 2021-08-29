@@ -3,8 +3,7 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import { sendBeginGameMessage } from "./play";
 import { GameType } from "../../types";
 import TeamScoreboard from "../../structures/team_scoreboard";
-import { getDebugLogHeader, sendErrorMessage, getUserVoiceChannel } from "../../helpers/discord_utils";
-import { bold } from "../../helpers/utils";
+import { getDebugLogHeader, sendErrorMessage, getUserVoiceChannel, getMention } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import GameSession from "../../structures/game_session";
@@ -20,7 +19,7 @@ export default class BeginCommand implements BaseCommand {
 
         if (gameSession.gameType === GameType.ELIMINATION) {
             if (gameSession.owner.id !== authorID) {
-                sendErrorMessage(messageContext, { title: "Begin ignored", description: `Only the person who did \`${process.env.BOT_PREFIX}play elimination\` (${bold(gameSession.owner.tag)}) can start the game.` });
+                sendErrorMessage(messageContext, { title: "Begin ignored", description: `Only the person who did \`${process.env.BOT_PREFIX}play elimination\` (${getMention(gameSession.owner)}) can start the game.` });
                 return false;
             }
         } else if (gameSession.gameType === GameType.TEAMS) {

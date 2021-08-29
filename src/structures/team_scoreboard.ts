@@ -1,6 +1,7 @@
 import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
 import Player from "./player";
 import Team from "./team";
+import { getMention } from "../helpers/discord_utils";
 import { IPCLogger } from "../logger";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -172,9 +173,18 @@ export default class TeamScoreboard extends Scoreboard {
 
     /**
      * @returns the name of the player associated with the given userID
+     *  @returns the player's tag
      */
     getPlayerName(userID: string): string {
         return this.getPlayer(userID).getName();
+    }
+
+    /**
+     *  @param userID - The Discord user ID of the Player
+     *  @returns a clickable mention of the given player
+     */
+    getPlayerMention(userID: string): string {
+        return getMention(this.getPlayer(userID));
     }
 
     /**

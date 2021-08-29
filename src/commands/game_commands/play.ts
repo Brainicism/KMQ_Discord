@@ -1,11 +1,11 @@
 import Eris from "eris";
 import GameSession from "../../structures/game_session";
 import {
-    sendErrorMessage, getDebugLogHeader, sendInfoMessage, voicePermissionsCheck, getUserVoiceChannel, getUserTag, getCurrentVoiceMembers,
+    sendErrorMessage, getDebugLogHeader, sendInfoMessage, voicePermissionsCheck, getUserVoiceChannel, getUserTag, getCurrentVoiceMembers, getMention,
 } from "../../helpers/discord_utils";
 import { deleteGameSession, getTimeUntilRestart } from "../../helpers/management_utils";
 import { activeBonusUsers, getGuildPreference } from "../../helpers/game_utils";
-import { bold, chooseWeightedRandom, isPowerHour, isWeekend } from "../../helpers/utils";
+import { chooseWeightedRandom, isPowerHour, isWeekend } from "../../helpers/utils";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import dbContext from "../../database_context";
 import { IPCLogger } from "../../logger";
@@ -146,7 +146,7 @@ export default class PlayCommand implements BaseCommand {
                     ? parseInt(parsedMessage.components[1]) : DEFAULT_LIVES;
 
                 const startTitle = `\`${prefix}join\` the game and start it with \`${prefix}begin\`!`;
-                const gameInstructions = `Type \`${prefix}join\` to play in the upcoming elimination game. Once all have joined, ${bold(gameOwner.tag)} must send \`${prefix}begin\` to start the game. Everyone begins with \`${lives}\` lives.`;
+                const gameInstructions = `Type \`${prefix}join\` to play in the upcoming elimination game. Once all have joined, ${getMention(gameOwner)} must send \`${prefix}begin\` to start the game. Everyone begins with \`${lives}\` lives.`;
 
                 gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, GameType.ELIMINATION, lives);
                 gameSession.addEliminationParticipant(gameOwner);

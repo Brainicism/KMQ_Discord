@@ -5,8 +5,8 @@ import {
     getDebugLogHeader,
     EMBED_SUCCESS_COLOR,
     sendInfoMessage,
+    getMention,
 } from "../../helpers/discord_utils";
-import { bold } from "../../helpers/utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
@@ -40,7 +40,7 @@ export default class ForceSkipCommand extends InGameCommand {
         }
 
         if (message.author.id !== gameSession.owner.id) {
-            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Force skip ignored", description: `Only the person who started the game (${bold(gameSession.owner.tag)}) can force-skip.` });
+            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Force skip ignored", description: `Only the person who started the game (${getMention(gameSession.owner)}) can force-skip.` });
             return;
         }
 
