@@ -19,5 +19,6 @@ declare namespace NodeJS {
         ALERT_WEBHOOK_URL?: string,
         AUDIO_SONGS_PER_ARTIST: number,
         PREMIUM_AUDIO_SONGS_PER_ARTIST: number,
+        DEBUG_LOGGING: boolean,
     }
 }

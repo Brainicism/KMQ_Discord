@@ -1,31 +1,36 @@
 /* eslint-disable quote-props */
-import log4js from "log4js";
 import { config } from "dotenv";
 import { resolve } from "path";
 import { isMaster } from "cluster";
-import fs from "fs";
+import winston from "winston";
+import DailyRotateFile from "winston-daily-rotate-file";
 
 config({ path: resolve(__dirname, "../.env") });
-export function getInternalLogger(name): log4js.Logger {
-    const LOG_DIR = resolve(__dirname, "../logs");
-    if (!fs.existsSync(LOG_DIR)) {
-        fs.mkdirSync(LOG_DIR);
-    }
-
-    log4js.configure({
-        "appenders": {
-            "log": { "type": "dateFile", "filename": `${LOG_DIR}/log.log`, "daysToKeep": 10 },
-            "error": { "type": "dateFile", "filename": `${LOG_DIR}/error.log`, "daysToKeep": 10 },
-            "error-filtered": { "type": "logLevelFilter", "appender": "error", "level": "error" },
-            "info-filtered": { "type": "logLevelFilter", "appender": "log", "level": "info" },
-            "console": { "type": "console" },
-        },
-        "categories": {
-            "default": { "appenders": ["error-filtered", "console", "info-filtered"], "level": "info" },
-            "debug": { "appenders": ["error"], "level": "debug" },
-        },
+export function getInternalLogger(): winston.Logger {
+    const format = winston.format;
+    const consoleFormat = format.printf(({ level, message, timestamp }) => {
+        const header = format.colorize().colorize(level, `${timestamp} [${level.toUpperCase()}] -`);
+        return `${header} ${message}`;
     });
-    return log4js.getLogger(name);
+
+    const logFormat = format.printf(({ level, message, timestamp }) => `${timestamp} [${level.toUpperCase()}] - ${message}`);
+    return winston.createLogger({
+        level: process.env.DEBUG_LOGGING ? "debug" : "info",
+        format: format.combine(
+            format.timestamp(),
+            logFormat,
+        ),
+        transports: [
+            new winston.transports.Console({
+                format: format.combine(
+                    format.timestamp(),
+                    consoleFormat,
+                ),
+            }),
+            new (DailyRotateFile)({ filename: "../logs/error.log", level: "error", maxFiles: "14d" }),
+            new (DailyRotateFile)({ filename: "../logs/combined.log", maxFiles: "14d" }),
+        ],
+    });
 }
 
 /**
@@ -33,10 +38,10 @@ export function getInternalLogger(name): log4js.Logger {
  */
 export class IPCLogger {
     private category: string;
-    private logger: log4js.Logger;
+    private logger: winston.Logger;
     constructor(category: string) {
         this.category = category;
-        this.logger = getInternalLogger("kmq");
+        this.logger = getInternalLogger();
     }
 
     getCategorizedMessage(msg: string) {

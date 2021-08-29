@@ -1,6 +1,5 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import sinon from "sinon";
-import log4js from "log4js";
 import * as discordUtils from "../helpers/discord_utils";
 import kmqKnexConfig from "../config/knexfile_kmq";
 import dbContext from "../database_context";
@@ -13,7 +12,6 @@ before(async function () {
     sandbox.stub(discordUtils, "sendErrorMessage");
     sandbox.stub(discordUtils, "sendInfoMessage");
     sandbox.stub(Player, "fromUserID").callsFake((id) => (new Player("", id, "", 0)));
-    log4js.getLogger().level = "off";
     await dbContext.kmq.migrate.latest({
         directory: kmqKnexConfig.migrations.directory,
     });

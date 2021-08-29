@@ -16,7 +16,7 @@ import { EMBED_ERROR_COLOR, EMBED_SUCCESS_COLOR, sendDebugAlertWebhook } from ".
 import { KmqImages } from "./constants";
 import KmqClient from "./kmq_client";
 
-const logger = getInternalLogger("cluster_manager");
+const logger = getInternalLogger();
 
 config({ path: path.resolve(__dirname, "../.env") });
 const ERIS_INTENTS = Eris.Constants.Intents;
@@ -109,6 +109,7 @@ function registerProcessEvents(fleet: Fleet) {
     if (isMaster) {
         fleet.on("log", (m) => logger.info(m));
         fleet.on("debug", (m) => logger.debug(m));
+        fleet.eris.on("debug", (m) => logger.debug(m));
         fleet.on("warn", (m) => logger.warn(m));
         fleet.on("error", (m) => logger.error(m));
         fleet.on("abort", () => {
