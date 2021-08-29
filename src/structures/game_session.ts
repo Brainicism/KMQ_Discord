@@ -142,9 +142,6 @@ export default class GameSession {
     /** Mapping of user ID to bookmarked songs, uses Map since Set doesn't remove QueriedSong duplicates */
     private bookmarkedSongs: { [userID: string]: Map<string, QueriedSong> };
 
-    /** List of premium participants in the GameSession */
-    private premiumParticipants: Set<string>;
-
     /** Whether the current game is premium */
     private premiumGame: boolean;
 
@@ -180,7 +177,6 @@ export default class GameSession {
         this.lastGuesser = null;
         this.songMessageIDs = [];
         this.bookmarkedSongs = {};
-        this.premiumParticipants = new Set();
         this.premiumGame = false;
     }
 
@@ -476,12 +472,7 @@ export default class GameSession {
      */
     async startRound(guildPreference: GuildPreference, messageContext: MessageContext) {
         if (!this.sessionInitialized) {
-            const voiceMemberIDs = getCurrentVoiceMembers(this.voiceChannelID).map((x) => x.id);
-            for (const memberID of voiceMemberIDs) {
-                if (await isUserPremium(memberID)) {
-                    await this.addPremiumParticipant(memberID, guildPreference);
-                }
-            }
+            await this.updatePremiumStatus();
         }
 
         this.sessionInitialized = true;
@@ -783,36 +774,26 @@ export default class GameSession {
         this.addBookmarkedSong(interaction.member?.id, song);
     }
 
-    /**
-     * Adds the given user as a premium participant for tracking premium features
-     * Called when a user joins the voice channel and at the start of the game
-     * @param userID - The premium user that joined the game
-     * @param guildPreference - The preferences to use when updating song list if the game becomes premium
-     */
-    async addPremiumParticipant(userID: string, guildPreference: GuildPreference) {
-        this.premiumParticipants.add(userID);
-        if (this.premiumGame) {
-            return;
+    /** If the game changes its premium state, update filtered songs */
+    async updatePremiumStatus() {
+        const premiumBefore = this.premiumGame;
+        const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID);
+        for (const member of voiceMembers) {
+            if (await isUserPremium(member.id)) {
+                this.premiumGame = true;
+                if (this.premiumGame !== premiumBefore) {
+                    const guildPreference = await getGuildPreference(this.guildID);
+                    await this.updateFilteredSongs(guildPreference);
+                }
+
+                return;
+            }
         }
 
-        this.premiumGame = true;
-        this.updateFilteredSongs(guildPreference);
-    }
-
-    /**
-     * Removes the given user as a premium participant, if they are one
-     * @param userID - The user to remove from premium participants, if they are in it
-     * @param guildPreference - The preferences to use when updating song list if the game becomes non-premium
-     */
-    async removeIfPremiumParticipant(userID: string, guildPreference: GuildPreference) {
-        this.premiumParticipants.delete(userID);
-        if (!this.premiumGame) {
-            return;
-        }
-
-        if (this.premiumParticipants.size === 0) {
-            this.premiumGame = false;
-            this.updateFilteredSongs(guildPreference);
+        this.premiumGame = false;
+        if (this.premiumGame !== premiumBefore) {
+            const guildPreference = await getGuildPreference(this.guildID);
+            await this.updateFilteredSongs(guildPreference);
         }
     }
 

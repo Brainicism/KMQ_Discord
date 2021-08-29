@@ -1,6 +1,9 @@
 import { Campaign } from "patreon-discord";
 import dbContext from "../database_context";
+import { IPCLogger } from "../logger";
 import { addPremium, removePremium } from "./game_utils";
+
+const logger = new IPCLogger("patreon_manager");
 
 const campaign = new Campaign({
     patreonToken: process.env.PATREON_CREATOR_ACCESS_TOKEN,
@@ -13,7 +16,15 @@ interface Patron {
 }
 
 export default async function updatePremiumUsers() {
-    const patrons: { discordID: string, activePatron: boolean }[] = (await campaign.fetchPatrons(["active_patron", "declined_patron"]))
+    let fetchedPatrons: Array<Patron>;
+    try {
+        fetchedPatrons = await campaign.fetchPatrons(["active_patron", "declined_patron"]);
+    } catch (err) {
+        logger.error(`Failed fetching patrons. err = ${err}`);
+        return;
+    }
+
+    const patrons: { discordID: string, activePatron: boolean }[] = fetchedPatrons
         .filter((x: Patron) => !!x.discord_user_id)
         .map((x: Patron) => ({ discordID: x.discord_user_id, activePatron: x.patron_status === "active_patron" }));
 
