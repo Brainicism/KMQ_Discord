@@ -5,7 +5,7 @@ import { checkBotIsAlone } from "../../helpers/discord_utils";
 export default async function voiceChannelLeaveHandler(member: Eris.Member, oldChannel: Eris.VoiceChannel) {
     const guildID = oldChannel.guild.id;
     const gameSession = state.gameSessions[guildID];
-    if (!gameSession) {
+    if (!gameSession || gameSession.finished) {
         return;
     }
 
@@ -15,10 +15,6 @@ export default async function voiceChannelLeaveHandler(member: Eris.Member, oldC
 
     if (checkBotIsAlone(guildID)) {
         gameSession.endSession();
-        return;
-    }
-
-    if (gameSession.finished) {
         return;
     }
 

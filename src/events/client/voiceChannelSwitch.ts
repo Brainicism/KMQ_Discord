@@ -6,16 +6,12 @@ import { isUserPremium } from "../../helpers/game_utils";
 export default async function voiceChannelSwitchHandler(member: Eris.Member, newChannel: Eris.VoiceChannel, oldChannel: Eris.VoiceChannel) {
     const guildID = oldChannel.guild.id;
     const gameSession = state.gameSessions[guildID];
-    if (!gameSession) {
+    if (!gameSession || gameSession.finished) {
         return;
     }
 
     if (checkBotIsAlone(guildID)) {
         gameSession.endSession();
-        return;
-    }
-
-    if (gameSession.finished) {
         return;
     }
 

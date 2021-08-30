@@ -15,6 +15,7 @@ import { NON_OFFICIAL_VIDEO_TAGS, ReleaseType } from "../commands/game_options/r
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { cleanArtistName, cleanSongName } from "../structures/game_round";
 import { AnswerType } from "../commands/game_options/answer";
+import { Patron, PATREON_SUPPORTER_BADGE } from "./patreon_manager";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -408,22 +409,28 @@ export async function getMultipleChoiceOptions(answerType: AnswerType, guessMode
 export async function isUserPremium(userID: string): Promise<boolean> {
     return !!(await dbContext.kmq("premium_users")
         .where("user_id", "=", userID)
+        .andWhere("active", "=", true)
         .first());
 }
 
 /**
  * @param userIDs - The users to grant premium membership
  */
-export async function addPremium(userIDs: string[]) {
+export async function addPremium(patrons: Array<Patron>) {
     dbContext.kmq.transaction(async (trx) => {
-        await dbContext.kmq("premium_users")
-            .insert(userIDs.map((x) => ({ user_id: x })))
+        dbContext.kmq("premium_users")
+            .insert(patrons.map((x) => ({
+                user_id: x.discordID,
+                active: x.activePatron,
+                pledge_relationship_start: x.relationshipStartDate,
+                last_charge_date: x.lastChargeDate,
+            })))
             .onConflict("user_id")
-            .ignore()
+            .merge()
             .transacting(trx);
 
-        await dbContext.kmq("badges")
-            .insert(userIDs.map((x) => ({ user_id: x, badge_name: "🎧 Premium Supporter" })))
+        dbContext.kmq("badges")
+            .insert(patrons.map((x) => ({ user_id: x.discordID, badge_name: PATREON_SUPPORTER_BADGE })))
             .onConflict(["user_id", "badge_name"])
             .ignore()
             .transacting(trx);
@@ -435,14 +442,14 @@ export async function addPremium(userIDs: string[]) {
  */
 export async function removePremium(userIDs: string[]) {
     dbContext.kmq.transaction(async (trx) => {
-        await dbContext.kmq("premium_users")
+        dbContext.kmq("premium_users")
             .whereIn("user_id", userIDs)
-            .del()
+            .update({ active: false })
             .transacting(trx);
 
-        await dbContext.kmq("badges")
+        dbContext.kmq("badges")
             .whereIn("user_id", userIDs)
-            .andWhere("badge_name", "=", "🎧 Premium Supporter")
+            .andWhere("badge_name", "=", PATREON_SUPPORTER_BADGE)
             .del()
             .transacting(trx);
     });
