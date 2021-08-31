@@ -429,7 +429,8 @@ async function closeBirthdays(): Promise<Array<string>> {
 async function longestGame(): Promise<string[]> {
     const result = await dbContext.kmq("game_sessions")
         .select(["rounds_played", "session_length", "num_participants", "avg_guess_time"])
-        .orderBy("session_length", "DESC");
+        .orderBy("session_length", "DESC")
+        .limit(1);
 
     if (result.length === 0) return [];
     const longestKmqGame = result[0];
@@ -439,7 +440,8 @@ async function longestGame(): Promise<string[]> {
 async function mostGames(): Promise<string[]> {
     const result = await dbContext.kmq("guild_preferences")
         .select("games_played", "songs_guessed")
-        .orderBy("games_played", "DESC");
+        .orderBy("games_played", "DESC")
+        .limit(1);
 
     if (result.length === 0) return [];
     const mostGamesPlayed = result[0];
@@ -449,7 +451,8 @@ async function mostGames(): Promise<string[]> {
 async function mostCorrectGuessed(): Promise<string[]> {
     const result = await dbContext.kmq("guild_preferences")
         .select("games_played", "songs_guessed")
-        .orderBy("songs_guessed", "DESC");
+        .orderBy("songs_guessed", "DESC")
+        .limit(1);
 
     if (result.length === 0) return [];
     const mostGamesPlayed = result[0];
