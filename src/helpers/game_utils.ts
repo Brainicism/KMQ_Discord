@@ -422,8 +422,7 @@ export async function addPremium(patrons: Array<Patron>) {
             .insert(patrons.map((x) => ({
                 user_id: x.discordID,
                 active: x.activePatron,
-                pledge_relationship_start: x.relationshipStartDate,
-                last_charge_date: x.lastChargeDate,
+                first_subscribed: x.firstSubscribed,
             })))
             .onConflict("user_id")
             .merge()

@@ -15,15 +15,13 @@ const campaign = new Campaign({
 interface PatronResponse {
     patron_status: string,
     discord_user_id: string,
-    last_charge_date?: Date,
     pledge_relationship_start?: Date,
 }
 
 export interface Patron {
     discordID: string,
     activePatron: boolean,
-    lastChargeDate?: Date,
-    relationshipStartDate?: Date,
+    firstSubscribed?: Date,
 }
 
 export default async function updatePremiumUsers() {
@@ -40,8 +38,7 @@ export default async function updatePremiumUsers() {
         .map((x: PatronResponse) => ({
             discordID: x.discord_user_id,
             activePatron: x.patron_status === "active_patron",
-            lastChargeDate: x.last_charge_date,
-            relationshipStartDate: x.pledge_relationship_start,
+            firstSubscribed: x.pledge_relationship_start,
         }));
 
     const activePatronIDs: string[] = patrons.filter((x) => x.activePatron).map((x) => x.discordID);
