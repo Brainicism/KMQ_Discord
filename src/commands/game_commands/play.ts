@@ -146,7 +146,7 @@ export default class PlayCommand implements BaseCommand {
                     ? parseInt(parsedMessage.components[1]) : DEFAULT_LIVES;
 
                 const startTitle = `\`${prefix}join\` the game and start it with \`${prefix}begin\`!`;
-                const gameInstructions = `Type \`${prefix}join\` to play in the upcoming elimination game. Once all have joined, ${getMention(gameOwner)} must send \`${prefix}begin\` to start the game. Everyone begins with \`${lives}\` lives.`;
+                const gameInstructions = `Type \`${prefix}join\` to play in the upcoming elimination game. Once all have joined, ${getMention(gameOwner.id)} must send \`${prefix}begin\` to start the game. Everyone begins with \`${lives}\` lives.`;
 
                 gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, GameType.ELIMINATION, lives);
                 gameSession.addEliminationParticipant(gameOwner);

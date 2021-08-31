@@ -41,8 +41,8 @@ export function getUserTag(user: { username: string, discriminator: string }): s
  * @param user - The user (must be some object with id field)
  * @returns a clickable mention to user
  */
-export function getMention(user: { id: string }): string {
-    return `<@${user.id}>`;
+export function getMention(userID: string): string {
+    return `<@${userID}>`;
 }
 
 /**
@@ -232,11 +232,11 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     const correctGuess = playerRoundResults.length > 0;
     let correctDescription = "";
     if (correctGuess) {
-        correctDescription += `${getMention(playerRoundResults[0].player)} ${playerRoundResults[0].streak >= 5 ? `(🔥 ${friendlyFormattedNumber(playerRoundResults[0].streak)}) ` : ""}guessed correctly (+${friendlyFormattedNumber(playerRoundResults[0].expGain)} EXP)`;
+        correctDescription += `${getMention(playerRoundResults[0].player.id)} ${playerRoundResults[0].streak >= 5 ? `(🔥 ${friendlyFormattedNumber(playerRoundResults[0].streak)}) ` : ""}guessed correctly (+${friendlyFormattedNumber(playerRoundResults[0].expGain)} EXP)`;
         if (playerRoundResults.length > 1) {
             const runnersUp = playerRoundResults.slice(1);
             let runnersUpDescription = runnersUp
-                .map((x) => `${getMention(x.player)} (+${friendlyFormattedNumber(x.expGain)} EXP)`)
+                .map((x) => `${getMention(x.player.id)} (+${friendlyFormattedNumber(x.expGain)} EXP)`)
                 .slice(0, 10)
                 .join("\n");
 

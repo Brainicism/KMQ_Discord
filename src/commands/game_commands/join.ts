@@ -29,13 +29,13 @@ export default class JoinCommand implements BaseCommand {
     joinEliminationGame(message: GuildTextableMessage, gameSession: GameSession) {
         const kmqMember = KmqMember.fromUser(message.author);
         if (gameSession.participants.has(message.author.id)) {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Player already joined", description: `${getMention(message.author)} is already in the game.` });
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "Player already joined", description: `${getMention(message.author.id)} is already in the game.` });
             return;
         }
 
         if (gameSession.sessionInitialized) {
             const newPlayer = gameSession.addEliminationParticipant(kmqMember, true);
-            sendInfoMessage(MessageContext.fromMessage(message), { title: "Joined Elimination Midgame", description: `\`${getMention(message.author)}\` has spawned with \`${newPlayer.getLives()}\` lives` });
+            sendInfoMessage(MessageContext.fromMessage(message), { title: "Joined Elimination Midgame", description: `\`${getMention(message.author.id)}\` has spawned with \`${newPlayer.getLives()}\` lives` });
             return;
         }
 
@@ -45,7 +45,7 @@ export default class JoinCommand implements BaseCommand {
             previouslyJoinedPlayers.push("and many others...");
         }
 
-        const players = `${getMention(kmqMember)}, ${previouslyJoinedPlayers.join(", ")}`;
+        const players = `${getMention(kmqMember.id)}, ${previouslyJoinedPlayers.join(", ")}`;
         sendInfoMessage(MessageContext.fromMessage(message), { title: "Player joined", description: players });
         gameSession.addEliminationParticipant(kmqMember);
     }
@@ -87,7 +87,7 @@ export default class JoinCommand implements BaseCommand {
             const teamNameWithCleanEmojis = teamName.replace(/(<a?)(:[a-zA-Z0-9]+:)([0-9]+>)/gm, (p1, p2, p3) => p3);
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: "New team created",
-                description: `To join ${bold(teamName)} alongside ${getMention(message.author)}, enter \`,join ${teamNameWithCleanEmojis}\`.${!gameSession.sessionInitialized ? " Start the game with `,begin`." : ""}`,
+                description: `To join ${bold(teamName)} alongside ${getMention(message.author.id)}, enter \`,join ${teamNameWithCleanEmojis}\`.${!gameSession.sessionInitialized ? " Start the game with `,begin`." : ""}`,
                 thumbnailUrl: KmqImages.READING_BOOK,
             });
         } else {
@@ -101,7 +101,7 @@ export default class JoinCommand implements BaseCommand {
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: `${getUserTag(message.author)} joined ${team.name}`,
                 description: !gameSession.sessionInitialized ? "When everyone has joined a team, `,begin` the game!"
-                    : `${getMention(message.author)} thinks they have what it takes to lead ${bold(team.name)} to victory!`,
+                    : `${getMention(message.author.id)} thinks they have what it takes to lead ${bold(team.name)} to victory!`,
                 thumbnailUrl: KmqImages.LISTENING,
             });
         }

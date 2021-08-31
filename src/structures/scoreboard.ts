@@ -183,7 +183,7 @@ export default class Scoreboard {
 
     /** @returns a list of clickable mentions of the players participating in the game */
     getPlayerMentions(): Array<string> {
-        return Object.values(this.players).map((player) => getMention(player));
+        return Object.values(this.players).map((player) => getMention(player.id));
     }
 
     /**
@@ -192,14 +192,6 @@ export default class Scoreboard {
      * */
     getPlayerName(userID: string): string {
         return this.players[userID].getName();
-    }
-
-    /**
-     *  @param userID - The Discord user ID of the Player
-     *  @returns a clickable mention of the given player
-     * */
-    getPlayerMention(userID: string): string {
-        return getMention(this.players[userID]);
     }
 
     /**

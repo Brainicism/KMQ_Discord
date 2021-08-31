@@ -32,7 +32,7 @@ export default class ForceHintCommand extends InGameCommand {
 
         if (!validHintCheck(gameSession, guildPreference, gameRound, message)) return;
         if (message.author.id !== gameSession.owner.id) {
-            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Force hint ignored", description: `Only the person who started the game (${getMention(gameSession.owner)}) can force-hint.` });
+            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Force hint ignored", description: `Only the person who started the game (${getMention(gameSession.owner.id)}) can force-hint.` });
             return;
         }
 

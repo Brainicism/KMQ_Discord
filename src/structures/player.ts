@@ -45,7 +45,7 @@ export default class Player {
     getDisplayedName(wonRound: boolean, mention: boolean): string {
         let name = this.name;
         if (mention) {
-            name = getMention(this);
+            name = getMention(this.getID());
         }
 
         if (wonRound) {

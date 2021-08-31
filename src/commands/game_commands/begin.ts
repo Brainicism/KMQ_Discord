@@ -19,7 +19,7 @@ export default class BeginCommand implements BaseCommand {
 
         if (gameSession.gameType === GameType.ELIMINATION) {
             if (gameSession.owner.id !== authorID) {
-                sendErrorMessage(messageContext, { title: "Begin ignored", description: `Only the person who did \`${process.env.BOT_PREFIX}play elimination\` (${getMention(gameSession.owner)}) can start the game.` });
+                sendErrorMessage(messageContext, { title: "Begin ignored", description: `Only the person who did \`${process.env.BOT_PREFIX}play elimination\` (${getMention(gameSession.owner.id)}) can start the game.` });
                 return false;
             }
         } else if (gameSession.gameType === GameType.TEAMS) {
