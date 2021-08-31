@@ -68,14 +68,16 @@ export class BotWorker extends BaseClusterWorker {
         updateBotStatus();
         logger.info(`Logged in as ${state.client.user.username}#${state.client.user.discriminator}! in '${process.env.NODE_ENV}' mode (${(Date.now() - state.processStartTime) / 1000}s)`);
 
-        state.client.createCommand({
-            name: BOOKMARK_COMMAND_NAME,
-            type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
-        });
+        if (process.env.NODE_ENV === EnvType.PROD) {
+            state.client.createCommand({
+                name: BOOKMARK_COMMAND_NAME,
+                type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
+            });
 
-        state.client.createCommand({
-            name: PROFILE_COMMAND_NAME,
-            type: Eris.Constants.ApplicationCommandTypes.USER,
-        });
+            state.client.createCommand({
+                name: PROFILE_COMMAND_NAME,
+                type: Eris.Constants.ApplicationCommandTypes.USER,
+            });
+        }
     }
 }
