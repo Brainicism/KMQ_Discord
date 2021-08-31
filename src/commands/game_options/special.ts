@@ -1,9 +1,10 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { sendOptionsMessage, getDebugLogHeader, sendErrorMessage } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
+import { getGuildPreference, isUserPremium } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
+import { GameOption, GuildTextableMessage } from "../../types";
 import MessageContext from "../../structures/message_context";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("special");
 export enum SpecialType {
@@ -32,6 +33,12 @@ export const specialFfmpegArgs = {
     }),
 };
 
+export async function resetSpecial(guildPreference: GuildPreference, messageContext: MessageContext, premiumEnded: boolean) {
+    await guildPreference.reset(GameOption.SPECIAL_TYPE);
+    sendOptionsMessage(messageContext, guildPreference, { option: GameOption.SPECIAL_TYPE, reset: true });
+    logger.info(`${getDebugLogHeader(messageContext)} | Special reset. Reset caused by premium ending = ${premiumEnded}`);
+}
+
 export default class SpecialCommand implements BaseCommand {
     validations = {
         minArgCount: 0,
@@ -47,7 +54,7 @@ export default class SpecialCommand implements BaseCommand {
 
     help = {
         name: "special",
-        description: "Hey. This hasn't been announced yet, but check out the KMQ server to try it out! Play a special mode with modified audio.",
+        description: "Modify the song playback speed. Only premium players (see `,premium`) can use this command outside of the official KMQ server.",
         usage: ",special [reverse | slow | fast | faster]",
         examples: [
             {
@@ -75,16 +82,14 @@ export default class SpecialCommand implements BaseCommand {
     };
 
     call = async ({ message, parsedMessage }: CommandArgs) => {
-        if (process.env.DEBUG_SERVER_ID !== message.guildID) {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Unreleased Option", description: "This option can only be used on the official KMQ server." });
+        if (process.env.DEBUG_SERVER_ID !== message.guildID || !(await isUserPremium(message.author.id))) {
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "Premium Option", description: "This option can only be used by premium KMQ supporters, or in the official KMQ server." });
             return;
         }
 
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            await guildPreference.reset(GameOption.SPECIAL_TYPE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SPECIAL_TYPE, reset: true });
-            logger.info(`${getDebugLogHeader(message)} | Special reset.`);
+            resetSpecial(guildPreference, MessageContext.fromMessage(message), false);
             return;
         }
 

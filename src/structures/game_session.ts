@@ -14,7 +14,7 @@ import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFiltere
 import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference, bold, codeLine, chunkArray, chooseRandom } from "../helpers/utils";
 import { state } from "../kmq";
 import { IPCLogger } from "../logger";
-import { QueriedSong, PlayerRoundResult, GameType } from "../types";
+import { QueriedSong, PlayerRoundResult, GameType, GameOption } from "../types";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
 import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
@@ -29,7 +29,7 @@ import { KmqImages } from "../constants";
 import MessageContext from "./message_context";
 import KmqMember from "./kmq_member";
 import { MultiGuessType } from "../commands/game_options/multiguess";
-import { specialFfmpegArgs } from "../commands/game_options/special";
+import { specialFfmpegArgs, resetSpecial } from "../commands/game_options/special";
 import { AnswerType } from "../commands/game_options/answer";
 
 const MULTIGUESS_DELAY = 1500;
@@ -794,6 +794,12 @@ export default class GameSession {
         if (this.premiumGame !== premiumBefore) {
             const guildPreference = await getGuildPreference(this.guildID);
             await this.updateFilteredSongs(guildPreference);
+        }
+
+        if (this.guildID !== process.env.DEBUG_SERVER_ID) {
+            const guildPreference = await getGuildPreference(this.guildID);
+            const messageContext = new MessageContext(this.textChannelID);
+            await resetSpecial(guildPreference, messageContext, true);
         }
     }
 
