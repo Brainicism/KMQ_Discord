@@ -472,7 +472,7 @@ export default class GameSession {
      */
     async startRound(guildPreference: GuildPreference, messageContext: MessageContext) {
         if (!this.sessionInitialized) {
-            await this.updatePremiumStatus();
+            await this.updatePremiumStatus(await isUserPremium(this.owner.id));
         }
 
         this.sessionInitialized = true;
@@ -774,8 +774,16 @@ export default class GameSession {
         this.addBookmarkedSong(interaction.member?.id, song);
     }
 
-    /** If the game changes its premium state, update filtered songs */
-    async updatePremiumStatus() {
+    /**
+    * If the game changes its premium state, update filtered songs
+    * @param premiumJoined - true if a premium member joined VC
+    */
+    async updatePremiumStatus(premiumJoined: boolean) {
+        if (premiumJoined) {
+            this.premiumGame = true;
+            return;
+        }
+
         const premiumBefore = this.premiumGame;
         const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID);
         for (const member of voiceMembers) {

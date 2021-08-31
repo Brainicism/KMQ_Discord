@@ -16,9 +16,12 @@ export default async function voiceChannelSwitchHandler(member: Eris.Member, new
     }
 
     gameSession.updateOwner();
-    if (oldChannel.id === gameSession.voiceChannelID && newChannel.id !== gameSession.voiceChannelID) {
-        gameSession.updatePremiumStatus();
-    } else if (newChannel.id === gameSession.voiceChannelID && await isUserPremium(member.id)) {
-        gameSession.updatePremiumStatus();
+
+    if (await isUserPremium(member.id)) {
+        const premiumMemberSwitchedOut = oldChannel.id === gameSession.voiceChannelID && newChannel.id !== gameSession.voiceChannelID;
+        const premiumMemberSwitchedIn = newChannel.id === gameSession.voiceChannelID;
+        if (premiumMemberSwitchedIn || premiumMemberSwitchedOut) {
+            gameSession.updatePremiumStatus(premiumMemberSwitchedIn);
+        }
     }
 }
