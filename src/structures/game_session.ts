@@ -14,7 +14,7 @@ import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFiltere
 import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference, bold, codeLine, chunkArray, chooseRandom } from "../helpers/utils";
 import { state } from "../kmq";
 import { IPCLogger } from "../logger";
-import { QueriedSong, PlayerRoundResult, GameType, GameOption } from "../types";
+import { QueriedSong, PlayerRoundResult, GameType } from "../types";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
 import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";

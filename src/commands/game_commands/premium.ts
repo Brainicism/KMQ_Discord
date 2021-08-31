@@ -28,7 +28,7 @@ export default class PremiumCommand implements BaseCommand {
         const premiumMember = await isUserPremium(message.author.id);
         sendInfoMessage(MessageContext.fromMessage(message), {
             title: premiumMember ? "Thanks for supporting KMQ!" : "Subscribe to Premium KMQ!",
-            description: `${premiumMember? "You have [Premium KMQ](https://www.patreon.com/kmq)." : "Subscribe to [Premium KMQ](https://www.patreon.com/kmq) here."}\n\nMake sure to connect your Discord account [here](https://www.patreon.com/settings/apps) to receive your perks.`,
+            description: `${premiumMember ? "You have [Premium KMQ](https://www.patreon.com/kmq)." : "Subscribe to [Premium KMQ](https://www.patreon.com/kmq) here."}\n\nMake sure to connect your Discord account [here](https://www.patreon.com/settings/apps) to receive your perks.`,
             fields: [
                 {
                     name: "More songs!",

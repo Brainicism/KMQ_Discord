@@ -2,7 +2,7 @@ import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { sendOptionsMessage, getDebugLogHeader, sendErrorMessage } from "../../helpers/discord_utils";
 import { getGuildPreference, isUserPremium } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
-import { GameOption, GuildTextableMessage } from "../../types";
+import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import GuildPreference from "../../structures/guild_preference";
 
