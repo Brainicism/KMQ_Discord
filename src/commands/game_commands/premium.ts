@@ -35,7 +35,7 @@ export default class PremiumCommand implements BaseCommand {
                     value: "Gain access to the top 25 b-sides songs per-artist (up from 10)",
                 },
                 {
-                    name: "`special` in every server!",
+                    name: "`,special` in every server!",
                     value: "Change song playback speed anywhere you play!",
                 },
                 {
