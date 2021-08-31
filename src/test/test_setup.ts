@@ -12,12 +12,18 @@ before(async function () {
     sandbox.stub(discordUtils, "sendErrorMessage");
     sandbox.stub(discordUtils, "sendInfoMessage");
     sandbox.stub(Player, "fromUserID").callsFake((id) => (new Player("", id, "", 0)));
+    console.log("Performing migrations...");
     await dbContext.kmq.migrate.latest({
         directory: kmqKnexConfig.migrations.directory,
     });
     return false;
 });
 
-after(() => {
+after(async () => {
     sandbox.restore();
+    console.log("Rolling back migrations...");
+    await dbContext.kmq.migrate.rollback({
+        directory: kmqKnexConfig.migrations.directory,
+    }, true);
+    dbContext.destroy();
 });

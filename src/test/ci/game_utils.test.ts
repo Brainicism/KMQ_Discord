@@ -623,7 +623,3 @@ describe("song query", () => {
         });
     });
 });
-
-after(async () => {
-    await dbContext.destroy();
-});
