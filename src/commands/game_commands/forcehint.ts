@@ -3,8 +3,8 @@ import {
     sendErrorMessage,
     getDebugLogHeader,
     sendInfoMessage,
+    getMention,
 } from "../../helpers/discord_utils";
-import { bold } from "../../helpers/utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
@@ -32,7 +32,7 @@ export default class ForceHintCommand extends InGameCommand {
 
         if (!validHintCheck(gameSession, guildPreference, gameRound, message)) return;
         if (message.author.id !== gameSession.owner.id) {
-            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Force hint ignored", description: `Only the person who started the game (${bold(gameSession.owner.tag)}) can force-hint.` });
+            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Force hint ignored", description: `Only the person who started the game (${getMention(gameSession.owner.id)}) can force-hint.` });
             return;
         }
 

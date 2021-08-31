@@ -38,6 +38,14 @@ export function getUserTag(user: { username: string, discriminator: string }): s
 }
 
 /**
+ * @param user - The user (must be some object with id field)
+ * @returns a clickable mention to user
+ */
+export function getMention(userID: string): string {
+    return `<@${userID}>`;
+}
+
+/**
  * @param context - The object that initiated the workflow
  * @returns a string containing basic debug information
  */
@@ -224,11 +232,11 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     const correctGuess = playerRoundResults.length > 0;
     let correctDescription = "";
     if (correctGuess) {
-        correctDescription += `**${playerRoundResults[0].player.tag}** ${playerRoundResults[0].streak >= 5 ? `(🔥 ${friendlyFormattedNumber(playerRoundResults[0].streak)}) ` : ""}guessed correctly (+${friendlyFormattedNumber(playerRoundResults[0].expGain)} EXP)`;
+        correctDescription += `${getMention(playerRoundResults[0].player.id)} ${playerRoundResults[0].streak >= 5 ? `(🔥 ${friendlyFormattedNumber(playerRoundResults[0].streak)}) ` : ""}guessed correctly (+${friendlyFormattedNumber(playerRoundResults[0].expGain)} EXP)`;
         if (playerRoundResults.length > 1) {
             const runnersUp = playerRoundResults.slice(1);
             let runnersUpDescription = runnersUp
-                .map((x) => `${x.player.tag} (+${friendlyFormattedNumber(x.expGain)} EXP)`)
+                .map((x) => `${getMention(x.player.id)} (+${friendlyFormattedNumber(x.expGain)} EXP)`)
                 .slice(0, 10)
                 .join("\n");
 
@@ -428,9 +436,9 @@ export async function sendEndGameMessage(gameSession: GameSession) {
         let fields: Array<{ name: string, value: string, inline: boolean }>;
         const useLargerScoreboard = gameSession.scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
         if (useLargerScoreboard) {
-            fields = gameSession.scoreboard.getScoreboardEmbedThreeFields(MAX_SCOREBOARD_PLAYERS, true);
+            fields = gameSession.scoreboard.getScoreboardEmbedThreeFields(MAX_SCOREBOARD_PLAYERS, gameSession.gameType !== GameType.TEAMS);
         } else {
-            fields = gameSession.scoreboard.getScoreboardEmbedFields(true);
+            fields = gameSession.scoreboard.getScoreboardEmbedFields(gameSession.gameType !== GameType.TEAMS);
         }
 
         const endGameMessage: GameInfoMessage = chooseWeightedRandom(await dbContext.kmq("game_messages"));

@@ -1,4 +1,4 @@
-import { getUserTag } from "../helpers/discord_utils";
+import { getUserTag, getMention } from "../helpers/discord_utils";
 import { roundDecimal, bold } from "../helpers/utils";
 import { state } from "../kmq";
 
@@ -39,17 +39,21 @@ export default class Player {
      * Prints the tag (including the discriminator) in the smaller scoreboard, but only
      * the username in the larger scoreboard
      * @param wonRound - Whether the player won the previous round
-     * @param keepDiscriminator - Whether the displayed name should include the Discord discriminator
+     * @param mention - Whether the displayed name should be a clickable mention
      * @returns what to display as the name of the player in the scoreboard
      */
-    getDisplayedName(wonRound: boolean, keepDiscriminator: boolean): string {
+    getDisplayedName(wonRound: boolean, mention: boolean): string {
         let name = this.name;
-        if (!keepDiscriminator) {
-            name = this.name.slice(0, -5);
+        if (mention) {
+            name = getMention(this.getID());
         }
 
         if (wonRound) {
-            name = `🎵 ${bold(name)}`;
+            if (!mention) {
+                name = bold(name);
+            }
+
+            name = `🎵 ${name}`;
         }
 
         return name;

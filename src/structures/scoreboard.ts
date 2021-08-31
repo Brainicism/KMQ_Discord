@@ -1,5 +1,6 @@
 import Player from "./player";
 import { bold, friendlyFormattedNumber } from "../helpers/utils";
+import { getMention } from "../helpers/discord_utils";
 import { IPCLogger } from "../logger";
 import GuildPreference from "./guild_preference";
 
@@ -62,7 +63,7 @@ export default class Scoreboard {
             .sort((a, b) => b.getScore() - a.getScore())
             .map((x, index) => (
                 {
-                    name: `${index + 1}. ${x.getDisplayedName(roundWinnerIDs?.has(x.getID()), true)}`,
+                    name: `${index + 1}. ${x.getDisplayedName(roundWinnerIDs?.has(x.getID()), false)}`,
                     value: `${x.getDisplayedScore()}${showExp ? ` (+${friendlyFormattedNumber(x.getExpGain())} EXP)` : ""}`,
                     inline: true,
                 }));
@@ -79,10 +80,7 @@ export default class Scoreboard {
         const players = Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
             .slice(0, cutoff)
-            .map((x, index, arr) => {
-                const duplicateName = arr.filter((y) => y.getName().slice(0, -5) === x.getName().slice(0, -5)).length > 1;
-                return `${bold(String(index + 1))}. ${x.getDisplayedName(roundResultIDs?.has(x.getID()), duplicateName)}: ${x.getDisplayedScore()}${showExp ? ` (+${friendlyFormattedNumber(x.getExpGain())} EXP)` : ""}`;
-            });
+            .map((x, index) => `${bold(String(index + 1))}. ${x.getDisplayedName(roundResultIDs?.has(x.getID()), true)}: ${x.getDisplayedScore()}${showExp ? ` (+${friendlyFormattedNumber(x.getExpGain())} EXP)` : ""}`);
 
         if (this.getNumPlayers() > cutoff) {
             players.push("\nand many others...");
@@ -178,14 +176,19 @@ export default class Scoreboard {
         return guildPreference.isGoalSet() && !this.isEmpty() && this.firstPlace[0].getScore() >= guildPreference.gameOptions.goal;
     }
 
-    /** @returns a list of tags of the player participating in the game */
+    /** @returns a list of tags of the players participating in the game */
     getPlayerNames(): Array<string> {
         return Object.values(this.players).map((player) => player.getName());
     }
 
+    /** @returns a list of clickable mentions of the players participating in the game */
+    getPlayerMentions(): Array<string> {
+        return Object.values(this.players).map((player) => getMention(player.id));
+    }
+
     /**
      *  @param userID - The Discord user ID of the Player
-     *  @returns a Player object for the corresponding user ID
+     *  @returns the player's tag
      * */
     getPlayerName(userID: string): string {
         return this.players[userID].getName();

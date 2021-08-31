@@ -172,6 +172,7 @@ export default class TeamScoreboard extends Scoreboard {
 
     /**
      * @returns the name of the player associated with the given userID
+     *  @returns the player's tag
      */
     getPlayerName(userID: string): string {
         return this.getPlayer(userID).getName();

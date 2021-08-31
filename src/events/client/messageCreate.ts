@@ -39,7 +39,7 @@ export default async function messageCreateHandler(message: Eris.Message) {
     if (message.mentions.includes(state.client.user) && message.content.split(" ").length === 1) {
         // Any message that mentions the bot sends the current options
         const guildPreference = await getGuildPreference(message.guildID);
-        sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, null, `Psst. The bot prefix is ${process.env.BOT_PREFIX}`);
+        sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, null);
         return;
     }
 
