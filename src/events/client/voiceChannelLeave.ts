@@ -1,11 +1,16 @@
 import Eris from "eris";
 import { state } from "../../kmq";
 import { checkBotIsAlone } from "../../helpers/discord_utils";
+import { isUserPremium } from "../../helpers/game_utils";
 
 export default async function voiceChannelLeaveHandler(member: Eris.Member, oldChannel: Eris.VoiceChannel) {
     const guildID = oldChannel.guild.id;
     const gameSession = state.gameSessions[guildID];
-    if (!gameSession) {
+    if (!gameSession || gameSession.finished) {
+        return;
+    }
+
+    if (oldChannel.id !== gameSession.voiceChannelID) {
         return;
     }
 
@@ -14,7 +19,8 @@ export default async function voiceChannelLeaveHandler(member: Eris.Member, oldC
         return;
     }
 
-    if (!gameSession.finished) {
-        gameSession.updateOwner();
+    gameSession.updateOwner();
+    if (await isUserPremium(member.id)) {
+        gameSession.updatePremiumStatus(false);
     }
 }

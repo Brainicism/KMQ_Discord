@@ -20,5 +20,7 @@ declare namespace NodeJS {
         AUDIO_SONGS_PER_ARTIST: number,
         PREMIUM_AUDIO_SONGS_PER_ARTIST: number,
         DEBUG_LOGGING: boolean,
+        PATREON_CREATOR_ACCESS_TOKEN?: string,
+        PATREON_CAMPAIGN_ID?: string,
     }
 }

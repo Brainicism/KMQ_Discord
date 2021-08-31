@@ -2294,6 +2294,12 @@ path-type@^4.0.0:
   resolved "https://registry.yarnpkg.com/path-type/-/path-type-4.0.0.tgz#84ed01c0a7ba380afe09d90a8c180dcd9d03043b"
   integrity sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==
 
+"patreon-discord@https://github.com/taahamahdi/patreon-discord":
+  version "0.0.5"
+  resolved "https://github.com/taahamahdi/patreon-discord#3bbebd03a4c6e804f53d6918dd0cd0f93fcf8fb9"
+  dependencies:
+    node-fetch "^2.6.1"
+
 pg-connection-string@2.4.0:
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/pg-connection-string/-/pg-connection-string-2.4.0.tgz#c979922eb47832999a204da5dbe1ebf2341b6a10"
@@ -3144,10 +3150,10 @@ yocto-queue@^0.1.0:
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
 
-ytdl-core@^4.8.3:
-  version "4.8.3"
-  resolved "https://registry.yarnpkg.com/ytdl-core/-/ytdl-core-4.8.3.tgz#21570d1834db13dec7828cf87bbf4c83c0fe68d7"
-  integrity sha512-cWCBeX4FCgjcKmuVK384MT582RIAakpUSeMF/NPVmhO8cWiG+LeQLnBordvLolb0iXYzfUvalgmycYAE5Sy6Xw==
+ytdl-core@^4.9.1:
+  version "4.9.1"
+  resolved "https://registry.yarnpkg.com/ytdl-core/-/ytdl-core-4.9.1.tgz#f587e2bd8329b5133c0bac4ce5ee1f3c7a1175a9"
+  integrity sha512-6Jbp5RDhUEozlaJQAR+l8oV8AHsx3WUXxSyPxzE6wOIAaLql7Hjiy0ZM58wZoyj1YEenlEPjEqcJIjKYKxvHtQ==
   dependencies:
     m3u8stream "^0.8.3"
     miniget "^4.0.0"

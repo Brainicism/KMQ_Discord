@@ -6,7 +6,7 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-    paths-ignore: 
+    paths-ignore:
       - 'images/**'
       - 'sql/**'
       - '**.md'
@@ -19,6 +19,8 @@ jobs:
     env:
       DB_PASS_CI: kmq_ci_password
       DB_USER_CI: kmq_ci
+      AUDIO_SONGS_PER_ARTIST: 10
+      PREMIUM_AUDIO_SONGS_PER_ARTIST: 25
     steps:
       - name: Checkout KMQ_Discord
         uses: actions/checkout@v2
@@ -46,12 +48,14 @@ jobs:
           echo "DB_PASS=$DB_PASS_CI" >> .env
           echo "DB_HOST=127.0.0.1" >> .env
           echo "BOT_TOKEN=$BOT_TOKEN" >> .env
+          echo "AUDIO_SONGS_PER_ARTIST=$AUDIO_SONGS_PER_ARTIST" >> .env
+          echo "PREMIUM_AUDIO_SONGS_PER_ARTIST=$PREMIUM_AUDIO_SONGS_PER_ARTIST" >> .env
         shell: bash
       - name: Setup MySQL server
         uses: mirromutth/mysql-action@v1.1
         with:
           mysql database: 'kmq_test'
-          mysql version: '5.7' 
+          mysql version: '5.7'
           mysql user: '$DB_USER_CI'
           mysql password: '$DB_PASS_CI'
       - name: Wait for MySQL server to start

@@ -48,13 +48,14 @@
     "mysql2": "^2.2.5",
     "mysqldump": "^3.2.0",
     "node-schedule": "^2.0.0",
+    "patreon-discord": "https://github.com/taahamahdi/patreon-discord",
     "sinon": "^11.1.1",
     "sodium-native": "^3.2.1",
     "ts-node": "^10.0.0",
     "uuid": "^8.3.2",
     "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.5.5",
-    "ytdl-core": "^4.8.3",
+    "ytdl-core": "^4.9.1",
     "zlib-sync": "^0.1.7"
   },
   "devDependencies": {

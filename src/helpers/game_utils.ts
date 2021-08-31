@@ -14,6 +14,7 @@ import { NON_OFFICIAL_VIDEO_TAGS, ReleaseType } from "../commands/game_options/r
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { cleanArtistName, cleanSongName } from "../structures/game_round";
 import { AnswerType } from "../commands/game_options/answer";
+import { Patron, PATREON_SUPPORTER_BADGE } from "./patreon_manager";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -29,9 +30,9 @@ interface GroupMatchResults {
  * @param guildPreference - The GuildPreference
  * @returns a list of songs, as well as the number of songs before the filter option was applied
  */
-export async function getFilteredSongList(guildPreference: GuildPreference): Promise<{ songs: Set<QueriedSong>, countBeforeLimit: number }> {
+export async function getFilteredSongList(guildPreference: GuildPreference, premium: boolean): Promise<{ songs: Set<QueriedSong>, countBeforeLimit: number }> {
     const fields = ["clean_song_name as songName", "song_name as originalSongName", "artist_name as artist", "link as youtubeLink",
-        "publishedon as publishDate", "members", "id_artist as artistID", "issolo as isSolo", "members", "tags"];
+        "publishedon as publishDate", "members", "id_artist as artistID", "issolo as isSolo", "members", "tags", "rank"];
 
     let queryBuilder = dbContext.kmq("available_songs")
         .select(fields);
@@ -118,6 +119,9 @@ export async function getFilteredSongList(guildPreference: GuildPreference): Pro
         .andWhere("publishedon", "<=", `${gameOptions.endYear}-12-31`)
         .orderBy("views", "DESC");
 
+    queryBuilder = queryBuilder
+        .andWhere("rank", "<=", premium ? process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST : process.env.AUDIO_SONGS_PER_ARTIST);
+
     let result: Array<QueriedSong> = await queryBuilder;
 
     const count = result.length;
@@ -166,9 +170,9 @@ export async function selectRandomSong(filteredSongs: Set<QueriedSong>, ignoredS
  * @param guildPreference - The GuildPreference
  * @returns an object containing the total number of available songs before and after limit based on the GameOptions
  */
-export async function getSongCount(guildPreference: GuildPreference): Promise<{ count: number; countBeforeLimit: number }> {
+export async function getSongCount(guildPreference: GuildPreference, premium: boolean): Promise<{ count: number; countBeforeLimit: number }> {
     try {
-        const { songs, countBeforeLimit } = await getFilteredSongList(guildPreference);
+        const { songs, countBeforeLimit } = await getFilteredSongList(guildPreference, premium);
         return {
             count: songs.size,
             countBeforeLimit,
@@ -398,4 +402,56 @@ export async function getMultipleChoiceOptions(answerType: AnswerType, guessMode
     }
 
     return result;
+}
+
+/**
+ * @param userID - The user ID
+ * @returns whether the player has premium status
+ */
+export async function isUserPremium(userID: string): Promise<boolean> {
+    return !!(await dbContext.kmq("premium_users")
+        .where("user_id", "=", userID)
+        .andWhere("active", "=", true)
+        .first());
+}
+
+/**
+ * @param userIDs - The users to grant premium membership
+ */
+export async function addPremium(patrons: Array<Patron>) {
+    dbContext.kmq.transaction(async (trx) => {
+        dbContext.kmq("premium_users")
+            .insert(patrons.map((x) => ({
+                user_id: x.discordID,
+                active: x.activePatron,
+                first_subscribed: x.firstSubscribed,
+            })))
+            .onConflict("user_id")
+            .merge()
+            .transacting(trx);
+
+        dbContext.kmq("badges")
+            .insert(patrons.map((x) => ({ user_id: x.discordID, badge_name: PATREON_SUPPORTER_BADGE })))
+            .onConflict(["user_id", "badge_name"])
+            .ignore()
+            .transacting(trx);
+    });
+}
+
+/**
+ * @param userIDs - The users to revoke premium membership from
+ */
+export async function removePremium(userIDs: string[]) {
+    dbContext.kmq.transaction(async (trx) => {
+        dbContext.kmq("premium_users")
+            .whereIn("user_id", userIDs)
+            .update({ active: false })
+            .transacting(trx);
+
+        dbContext.kmq("badges")
+            .whereIn("user_id", userIDs)
+            .andWhere("badge_name", "=", PATREON_SUPPORTER_BADGE)
+            .del()
+            .transacting(trx);
+    });
 }

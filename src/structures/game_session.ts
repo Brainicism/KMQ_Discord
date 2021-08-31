@@ -9,7 +9,7 @@ import {
     getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, getUserVoiceChannel, sendEndGameMessage, getCurrentVoiceMembers,
     sendBookmarkedSongs, tryInteractionAcknowledge, tryCreateInteractionSuccessAcknowledgement, tryCreateInteractionErrorAcknowledgement, getMention,
 } from "../helpers/discord_utils";
-import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, userBonusIsActive, getMultipleChoiceOptions } from "../helpers/game_utils";
+import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, userBonusIsActive, getMultipleChoiceOptions, isUserPremium } from "../helpers/game_utils";
 import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference, bold, codeLine, chunkArray, chooseRandom } from "../helpers/utils";
 import { state } from "../kmq";
 import { IPCLogger } from "../logger";
@@ -28,7 +28,7 @@ import { KmqImages } from "../constants";
 import MessageContext from "./message_context";
 import KmqMember from "./kmq_member";
 import { MultiGuessType } from "../commands/game_options/multiguess";
-import { specialFfmpegArgs } from "../commands/game_options/special";
+import { specialFfmpegArgs, resetSpecial } from "../commands/game_options/special";
 import { AnswerType } from "../commands/game_options/answer";
 
 const MULTIGUESS_DELAY = 1500;
@@ -141,6 +141,9 @@ export default class GameSession {
     /** Mapping of user ID to bookmarked songs, uses Map since Set doesn't remove QueriedSong duplicates */
     private bookmarkedSongs: { [userID: string]: Map<string, QueriedSong> };
 
+    /** Whether the current game is premium */
+    private premiumGame: boolean;
+
     constructor(textChannelID: string, voiceChannelID: string, guildID: string, gameSessionCreator: KmqMember, gameType: GameType, eliminationLives?: number) {
         this.gameType = gameType;
         this.guildID = guildID;
@@ -173,6 +176,7 @@ export default class GameSession {
         this.lastGuesser = null;
         this.songMessageIDs = [];
         this.bookmarkedSongs = {};
+        this.premiumGame = false;
     }
 
     /**
@@ -466,6 +470,10 @@ export default class GameSession {
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
     async startRound(guildPreference: GuildPreference, messageContext: MessageContext) {
+        if (!this.sessionInitialized) {
+            await this.updatePremiumStatus(await isUserPremium(this.owner.id));
+        }
+
         this.sessionInitialized = true;
         await delay(this.multiguessDelayIsActive(guildPreference) ? 3000 - MULTIGUESS_DELAY : 3000);
         if (this.finished || this.gameRound) {
@@ -474,7 +482,7 @@ export default class GameSession {
 
         if (this.filteredSongs === null) {
             try {
-                this.filteredSongs = await getFilteredSongList(guildPreference);
+                await this.updateFilteredSongs(guildPreference);
             } catch (err) {
                 await sendErrorMessage(messageContext, { title: "Error selecting song", description: "Please try starting the round again. If the issue persists, report it in our official KMQ server." });
                 logger.error(`${getDebugLogHeader(messageContext)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
@@ -523,13 +531,8 @@ export default class GameSession {
         }
 
         // query for random song
-        let randomSong: QueriedSong;
         const ignoredSongs = new Set([...this.lastPlayedSongs, ...this.uniqueSongsPlayed]);
-        if (this.lastAlternatingGender) {
-            randomSong = await selectRandomSong(this.filteredSongs.songs, ignoredSongs, this.lastAlternatingGender);
-        } else {
-            randomSong = await selectRandomSong(this.filteredSongs.songs, ignoredSongs);
-        }
+        const randomSong = await selectRandomSong(this.filteredSongs.songs, ignoredSongs, this.lastAlternatingGender);
 
         if (randomSong === null) {
             sendErrorMessage(messageContext, { title: "Song Query Error", description: "Failed to find songs matching this criteria. Try to broaden your search." });
@@ -667,7 +670,7 @@ export default class GameSession {
     }
 
     async updateFilteredSongs(guildPreference: GuildPreference) {
-        this.filteredSongs = await getFilteredSongList(guildPreference);
+        this.filteredSongs = await getFilteredSongList(guildPreference, this.isPremiumGame());
     }
 
     /**
@@ -768,6 +771,48 @@ export default class GameSession {
 
         tryCreateInteractionSuccessAcknowledgement(interaction, "Song Bookmarked", `You'll receive a direct message with a link to ${bold(song.originalSongName)} at the end of the game.`);
         this.addBookmarkedSong(interaction.member?.id, song);
+    }
+
+    /**
+    * If the game changes its premium state, update filtered songs
+    * @param premiumJoined - true if a premium member joined VC
+    */
+    async updatePremiumStatus(premiumJoined: boolean) {
+        if (premiumJoined) {
+            this.premiumGame = true;
+            return;
+        }
+
+        const premiumBefore = this.premiumGame;
+        const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID);
+        for (const member of voiceMembers) {
+            if (await isUserPremium(member.id)) {
+                this.premiumGame = true;
+                if (this.premiumGame !== premiumBefore) {
+                    const guildPreference = await getGuildPreference(this.guildID);
+                    await this.updateFilteredSongs(guildPreference);
+                }
+
+                return;
+            }
+        }
+
+        this.premiumGame = false;
+        if (this.premiumGame !== premiumBefore) {
+            const guildPreference = await getGuildPreference(this.guildID);
+            await this.updateFilteredSongs(guildPreference);
+        }
+
+        if (this.guildID !== process.env.DEBUG_SERVER_ID) {
+            const guildPreference = await getGuildPreference(this.guildID);
+            const messageContext = new MessageContext(this.textChannelID);
+            await resetSpecial(guildPreference, messageContext, true);
+        }
+    }
+
+    /** Whether the current game has premium features */
+    isPremiumGame(): boolean {
+        return this.premiumGame;
     }
 
     /**
