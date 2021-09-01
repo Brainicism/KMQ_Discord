@@ -15,6 +15,7 @@ import { seedAndDownloadNewSongs } from "./seed/seed_db";
 import { EMBED_ERROR_COLOR, EMBED_SUCCESS_COLOR, sendDebugAlertWebhook } from "./helpers/discord_utils";
 import { KmqImages } from "./constants";
 import KmqClient from "./kmq_client";
+import backupKmqDatabase from "./scripts/backup-kmq-database";
 
 const logger = getInternalLogger();
 
@@ -79,6 +80,13 @@ function registerGlobalIntervals(fleet: Fleet) {
                 stat_value: fleet.eris.requestHandler.latencyRef.latency,
                 date: new Date(),
             });
+    });
+
+    // every sunday at 1am UTC => 8pm saturday EST
+    schedule.scheduleJob("0 1 * * 0", async () => {
+        if (process.env.NODE_ENV !== EnvType.PROD) return;
+        logger.info("Backing up kmq database");
+        await backupKmqDatabase();
     });
 }
 

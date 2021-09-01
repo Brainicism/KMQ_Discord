@@ -28,7 +28,6 @@ import unavailableGuildCreateHandler from "../events/client/unavailableGuildCrea
 import guildAvailableHandler from "../events/client/guildAvailable";
 import interactionCreateHandler from "../events/client/interactionCreate";
 import { userVoted } from "./bot_listing_manager";
-import backupKmqDatabase from "../scripts/backup-kmq-database";
 import { chooseRandom } from "./utils";
 import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
@@ -280,13 +279,6 @@ export function registerIntervals(clusterID: number) {
     // everyday at 12am UTC => 7pm EST
     schedule.scheduleJob("0 0 * * *", async () => {
         reloadFactCache();
-    });
-
-    // every sunday at 1am UTC => 8pm saturday EST
-    schedule.scheduleJob("0 1 * * 0", async () => {
-        if (process.env.NODE_ENV !== EnvType.PROD) return;
-        logger.info("Backing up kmq database");
-        await backupKmqDatabase();
     });
 
     // every 5 minutes
