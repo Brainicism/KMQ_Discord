@@ -17,7 +17,7 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
         }
 
         const messageContext = new MessageContext(
-            interaction.channelID,
+            interaction.channel.id,
             new KmqMember(interaction.member.username, getUserTag(interaction.member), interaction.member.avatarURL, interaction.member.id),
             interaction.guildID,
         );
