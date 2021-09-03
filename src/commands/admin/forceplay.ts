@@ -27,8 +27,8 @@ export default class ForcePlayCommand implements BaseCommand {
             return;
         }
 
-        const forcePlaySongId = parsedMessage.components[0];
-        await guildPreference.setForcePlaySong(forcePlaySongId);
+        const forcePlaySongID = parsedMessage.components[0];
+        await guildPreference.setForcePlaySong(forcePlaySongID);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.FORCE_PLAY_SONG, reset: false });
         logger.info(`${getDebugLogHeader(message)} | Force play song set to ${guildPreference.gameOptions.forcePlaySongID}`);
     };

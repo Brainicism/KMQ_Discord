@@ -635,8 +635,8 @@ export default class GuildPreference {
     }
 
     /**
-     * Sets the multiguess type option value
-     * @param multiGuessType - The multiguess type
+     * Sets the force play song option value
+     * @param forcePlaySongID - The force played song's ID
      */
     async setForcePlaySong(forcePlaySongID: string) {
         this.gameOptions.forcePlaySongID = forcePlaySongID;
