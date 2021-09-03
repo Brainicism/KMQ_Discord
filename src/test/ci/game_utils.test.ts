@@ -408,6 +408,26 @@ describe("song query", () => {
                 });
             });
         });
+
+        describe("force play", async () => {
+            describe("forced song exists", () => {
+                it("should match that exact one song", async () => {
+                    const forcedSong = mockSongs[1];
+                    await guildPreference.setForcePlaySong(forcedSong.link);
+                    const { songs } = await getFilteredSongList(guildPreference);
+                    assert.strictEqual(songs.size, 1);
+                    assert.strictEqual([...songs][0].youtubeLink, forcedSong.link);
+                });
+            });
+
+            describe("forced song does not exist", () => {
+                it("should not match anything", async () => {
+                    await guildPreference.setForcePlaySong("WOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
+                    const { songs } = await getFilteredSongList(guildPreference);
+                    assert.strictEqual(songs.size, 0);
+                });
+            });
+        });
     });
 
     describe("selectRandomSong", () => {

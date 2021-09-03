@@ -45,6 +45,7 @@ interface GameOptions {
     multiGuessType: MultiGuessType;
     subunitPreference: SubunitsPreference;
     ostPreference: OstPreference;
+    forcePlaySongID: string;
 }
 
 type GameOptionValue =
@@ -61,7 +62,8 @@ type GameOptionValue =
     LanguageType |
     MultiGuessType |
     SubunitsPreference |
-    OstPreference;
+    OstPreference |
+    string;
 
 const enum GameOptionInternal {
     BEGINNING_YEAR = "beginningYear",
@@ -86,6 +88,7 @@ const enum GameOptionInternal {
     MULTI_GUESS_TYPE = "multiGuessType",
     SUBUNIT_PREFERENCE = "subunitPreference",
     OST_PREFERENCE = "ostPreference",
+    FORCE_PLAY_SONG = "forcePlaySongID",
 }
 
 /**
@@ -127,6 +130,7 @@ export default class GuildPreference {
         [GameOption.SHUFFLE_TYPE]: { default: [DEFAULT_SHUFFLE], setter: this.setShuffleType },
         [GameOption.LANGUAGE_TYPE]: { default: [DEFAULT_LANGUAGE], setter: this.setLanguageType },
         [GameOption.MULTIGUESS]: { default: [DEFAULT_MULTIGUESS_TYPE], setter: this.setMultiGuessType },
+        [GameOption.FORCE_PLAY_SONG]: { default: [null], setter: this.setForcePlaySong },
     };
 
     static DEFAULT_OPTIONS = {
@@ -152,6 +156,7 @@ export default class GuildPreference {
         multiGuessType: DEFAULT_MULTIGUESS_TYPE,
         subunitPreference: DEFAULT_SUBUNIT_PREFERENCE,
         ostPreference: DEFAULT_OST_PREFERENCE,
+        forcePlaySongID: null,
     };
 
     public gameOptions: GameOptions;
@@ -627,6 +632,15 @@ export default class GuildPreference {
     async setMultiGuessType(multiGuessType: MultiGuessType) {
         this.gameOptions.multiGuessType = multiGuessType;
         await this.updateGuildPreferences([{ name: GameOptionInternal.MULTI_GUESS_TYPE, value: multiGuessType }]);
+    }
+
+    /**
+     * Sets the force play song option value
+     * @param forcePlaySongID - The force played song's ID
+     */
+    async setForcePlaySong(forcePlaySongID: string) {
+        this.gameOptions.forcePlaySongID = forcePlaySongID;
+        await this.updateGuildPreferences([{ name: GameOptionInternal.FORCE_PLAY_SONG, value: forcePlaySongID }]);
     }
 
     /**
