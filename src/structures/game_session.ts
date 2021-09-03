@@ -5,7 +5,6 @@ import * as uuid from "uuid";
 import { SeekType } from "../commands/game_options/seek";
 import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
-import { isDebugMode, skipSongPlay } from "../helpers/debug_utils";
 import {
     getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, getUserVoiceChannel, sendEndGameMessage, getCurrentVoiceMembers,
     sendBookmarkedSongs, tryInteractionAcknowledge, tryCreateInteractionSuccessAcknowledgement, tryCreateInteractionErrorAcknowledgement, getMention,
@@ -779,11 +778,6 @@ export default class GameSession {
     private async playSong(guildPreference: GuildPreference, messageContext: MessageContext) {
         const { gameRound } = this;
         if (gameRound === null) {
-            return;
-        }
-
-        if (isDebugMode() && skipSongPlay()) {
-            logger.debug(`${getDebugLogHeader(messageContext)} | Not playing song in voice connection. song = ${this.getDebugSongDetails()}`);
             return;
         }
 

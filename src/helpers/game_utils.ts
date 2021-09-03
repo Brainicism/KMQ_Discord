@@ -5,7 +5,6 @@ import { IPCLogger } from "../logger";
 import GameSession from "../structures/game_session";
 import GuildPreference from "../structures/guild_preference";
 import { MatchedArtist, QueriedSong } from "../types";
-import { getForcePlaySong, isDebugMode, isForcedSongActive } from "./debug_utils";
 import { Gender } from "../commands/game_options/gender";
 import { ArtistType } from "../commands/game_options/artisttype";
 import { FOREIGN_LANGUAGE_TAGS, LanguageType } from "../commands/game_options/language";
@@ -34,9 +33,20 @@ export async function getFilteredSongList(guildPreference: GuildPreference): Pro
     const fields = ["clean_song_name as songName", "song_name as originalSongName", "artist_name as artist", "link as youtubeLink",
         "publishedon as publishDate", "members", "id_artist as artistID", "issolo as isSolo", "members", "tags"];
 
-    const gameOptions = guildPreference.gameOptions;
     let queryBuilder = dbContext.kmq("available_songs")
-        .select(fields)
+        .select(fields);
+
+    if (guildPreference.gameOptions.forcePlaySongID) {
+        queryBuilder = queryBuilder
+            .where("link", "=", guildPreference.gameOptions.forcePlaySongID);
+        return {
+            songs: new Set(await queryBuilder),
+            countBeforeLimit: 1,
+        };
+    }
+
+    const gameOptions = guildPreference.gameOptions;
+    queryBuilder = queryBuilder
         .where(function artistFilter() {
             this.where(function includesInnerArtistFilter() {
                 if (!guildPreference.isGroupsMode()) {
@@ -136,12 +146,6 @@ export async function ensureVoiceConnection(gameSession: GameSession): Promise<v
  * @param alternatingGender - The gender to limit selecting from if ,gender alternating
  */
 export async function selectRandomSong(filteredSongs: Set<QueriedSong>, ignoredSongs?: Set<string>, alternatingGender?: Gender): Promise<QueriedSong> {
-    if (isDebugMode() && isForcedSongActive()) {
-        const forcePlayedQueriedSong = await getForcePlaySong();
-        logger.info(`Force playing ${forcePlayedQueriedSong.songName} by ${forcePlayedQueriedSong.artist} | ${forcePlayedQueriedSong.youtubeLink}`);
-        return forcePlayedQueriedSong;
-    }
-
     let queriedSongList = [...filteredSongs];
     if (ignoredSongs) {
         queriedSongList = queriedSongList.filter((x) => !ignoredSongs.has(x.youtubeLink));

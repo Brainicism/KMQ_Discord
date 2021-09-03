@@ -304,6 +304,17 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     guildPreference: GuildPreference,
     updatedOption?: { option: GameOption, reset: boolean },
     footerText?: string) {
+    if (guildPreference.gameOptions.forcePlaySongID) {
+        await sendInfoMessage(messageContext,
+            {
+                title: "[DEBUG] Force Play Mode Active",
+                description: `Force playing video ID: ${guildPreference.gameOptions.forcePlaySongID}`,
+                footerText,
+                thumbnailUrl: KmqImages.READING_BOOK,
+            }, true);
+        return;
+    }
+
     const totalSongs = await getSongCount(guildPreference);
     if (totalSongs === null) {
         sendErrorMessage(messageContext, { title: "Error retrieving song data", description: `Try again in a bit, or report this error to the official KMQ server found in \`${process.env.BOT_PREFIX}help\`.` });

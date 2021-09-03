@@ -83,6 +83,7 @@ export enum GameOption {
     EXCLUDE = "Exclude",
     INCLUDE = "Include",
     PRESET = "Preset",
+    FORCE_PLAY_SONG = "Force Play Song",
 }
 
 export const GameOptionCommand: { [option: string]: string } = {
