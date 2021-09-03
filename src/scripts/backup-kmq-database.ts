@@ -1,8 +1,11 @@
 import fs from "fs";
 import { join } from "path";
 import mysqldump from "mysqldump";
+import { execSync } from "child_process";
 import { friendlyFormattedDate } from "../helpers/utils";
 import { IPCLogger } from "../logger";
+
+const BACKUP_TTL = 30;
 
 const databaseBackupDir = join(__dirname, "../../sql_dumps/kmq_backup");
 
@@ -12,6 +15,8 @@ async function backupKmqDatabase(): Promise<void> {
     if (!fs.existsSync(databaseBackupDir)) {
         fs.mkdirSync(databaseBackupDir);
     }
+
+    execSync(`find ${databaseBackupDir} -mindepth 1 -name "*kmq_backup_*" -mtime +${BACKUP_TTL} -delete`);
 
     try {
         await mysqldump({
