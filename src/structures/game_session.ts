@@ -801,13 +801,11 @@ export default class GameSession {
         if (this.premiumGame !== premiumBefore) {
             const guildPreference = await getGuildPreference(this.guildID);
             await this.updateFilteredSongs(guildPreference);
+            if (this.guildID !== process.env.DEBUG_SERVER_ID && guildPreference.gameOptions.specialType) {
+                await resetSpecial(guildPreference, new MessageContext(this.textChannelID), true);
+            }
         }
 
-        if (this.guildID !== process.env.DEBUG_SERVER_ID) {
-            const guildPreference = await getGuildPreference(this.guildID);
-            const messageContext = new MessageContext(this.textChannelID);
-            await resetSpecial(guildPreference, messageContext, true);
-        }
     }
 
     /** Whether the current game has premium features */
