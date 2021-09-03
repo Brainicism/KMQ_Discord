@@ -1,7 +1,6 @@
 import fs from "fs";
 import { join } from "path";
-import mysqldump from "mysqldump";
-import { execSync } from "child_process";
+import { exec, execSync } from "child_process";
 import { friendlyFormattedDate } from "../helpers/utils";
 import { IPCLogger } from "../logger";
 
@@ -18,27 +17,17 @@ async function backupKmqDatabase(): Promise<void> {
 
     execSync(`find ${databaseBackupDir} -mindepth 1 -name "*kmq_backup_*" -mtime +${BACKUP_TTL} -delete`);
 
-    try {
-        await mysqldump({
-            connection: {
-                host: process.env.DB_HOST,
-                user: process.env.DB_USER,
-                password: process.env.DB_PASS,
-                port: parseInt(process.env.DB_PORT),
-                database: "kmq",
-            },
-            dumpToFile: `${databaseBackupDir}/kmq_backup_${friendlyFormattedDate(new Date())}.sql`,
-            dump: {
-                schema: {
-                    table: {
-                        dropIfExist: true,
-                    },
-                },
-            },
+    return new Promise((resolve, reject) => {
+        exec(`mysqldump --column-statistics=0 -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} --routines kmq > ${databaseBackupDir}/kmq_backup_${friendlyFormattedDate(new Date())}.sql`, (err) => {
+            if (err) {
+                logger.error(`Error backing up kmq database, err = ${err}`);
+                reject(err);
+                return;
+            }
+
+            resolve();
         });
-    } catch (e) {
-        logger.error(`Error backing up kmq database, err = ${e}`);
-    }
+    });
 }
 
 (async () => {
