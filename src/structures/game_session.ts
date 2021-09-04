@@ -627,7 +627,7 @@ export default class GameSession {
 
         const time = guildPreference.gameOptions.guessTimeout;
         this.guessTimeoutFunc = setTimeout(async () => {
-            if (this.finished || this.gameRound.finished) return;
+            if (this.finished || this.gameRound?.finished) return;
             logger.info(`${getDebugLogHeader(messageContext)} | Song finished without being guessed, timer of: ${time} seconds.`);
             await this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));
             this.startRound(await getGuildPreference(this.guildID), messageContext);
