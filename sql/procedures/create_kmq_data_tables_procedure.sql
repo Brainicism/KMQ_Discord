@@ -22,7 +22,7 @@ BEGIN
 		vtype ENUM('main', 'audio') NOT NULL,
 		tags VARCHAR(25),
 		rank INT NOT NULL
-	);
+	) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 	CREATE TABLE IF NOT EXISTS available_songs LIKE available_songs_temp;
 
