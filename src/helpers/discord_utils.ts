@@ -127,7 +127,7 @@ async function sendMessage(textChannelID: string, authorID: string, messageConte
             return null;
         }
 
-        logger.error(`Error sending message. textChannelID = ${textChannelID}. textChannel permissions = ${channel.permissionsOf(state.client.user.id).json} err = ${e}. body = ${JSON.stringify(messageContent)}`);
+        logger.error(`Error sending message. textChannelID = ${textChannelID}. textChannel permissions = ${channel.permissionsOf(state.client.user.id).json} err = ${JSON.stringify(e)}. body = ${JSON.stringify(messageContent)}`);
         return null;
     }
 }
