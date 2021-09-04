@@ -1,6 +1,7 @@
 import fs from "fs";
 import { join } from "path";
 import { exec, execSync } from "child_process";
+import { program } from "commander";
 import { friendlyFormattedDate } from "../helpers/utils";
 import { IPCLogger } from "../logger";
 
@@ -9,6 +10,11 @@ const BACKUP_TTL = 30;
 const databaseBackupDir = join(__dirname, "../../sql_dumps/kmq_backup");
 
 const logger = new IPCLogger("backup-kmq");
+program
+    .option("-i, --import <file>", "The dump file to import");
+
+program.parse();
+const options = program.opts();
 
 async function backupKmqDatabase(): Promise<void> {
     if (!fs.existsSync(databaseBackupDir)) {
@@ -30,9 +36,24 @@ async function backupKmqDatabase(): Promise<void> {
     });
 }
 
+function importKmqDatabase(fileWithPath: string) {
+    if (!fs.existsSync(fileWithPath)) {
+        logger.error(`Dump file ${fileWithPath} doesn't exist.`);
+        return;
+    }
+
+    logger.info(`Beginning import of ${fileWithPath}`);
+    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT}  kmq < ${fileWithPath}`);
+    logger.info("Finished import");
+}
+
 (async () => {
     if (require.main === module) {
-        backupKmqDatabase();
+        if (options.import) {
+            importKmqDatabase(options.import);
+        } else {
+            backupKmqDatabase();
+        }
     }
 })();
 

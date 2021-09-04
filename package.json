@@ -19,6 +19,7 @@
     "docker-dryrun": "cd docker/ && NODE_ENV=dry-run docker-compose up --exit-code-from kmq --build kmq",
     "docker-prod": "cd docker/ && NODE_ENV=production docker-compose up --exit-code-from kmq --build kmq",
     "backup": "ts-node src/scripts/backup-kmq-database",
+    "import": "ts-node src/scripts/backup-kmq-database --import",
     "test": "NODE_ENV=test mocha -r ts-node/register 'src/test/**/*.ts'",
     "test_ci": "NODE_ENV=test mocha -- --forbid-only -r ts-node/register 'src/test/**/*.ts'"
   },
