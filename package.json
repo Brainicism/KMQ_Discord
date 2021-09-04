@@ -37,7 +37,7 @@
     "dotenv": "^10.0.0",
     "eris": "https://github.com/Brainicism/eris.git#alpha-09-02-21",
     "eris-fleet": "https://github.com/danclay/eris-fleet#dev",
-    "eris-pagination": "https://github.com/brainicism/eris-pagination#86ab739",
+    "eris-pagination": "https://github.com/brainicism/eris-pagination#7abb37e",
     "erlpack": "https://github.com/abalabahaha/erlpack.git#5d0064f",
     "fastify": "^3.17.0",
     "fluent-ffmpeg": "^2.1.2",
