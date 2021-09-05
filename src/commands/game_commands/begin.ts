@@ -13,7 +13,7 @@ const logger = new IPCLogger("begin");
 
 export default class BeginCommand implements BaseCommand {
     canStart(gameSession: GameSession, authorID: string, messageContext: MessageContext): boolean {
-        if (!gameSession || gameSession.gameType === GameType.CLASSIC) {
+        if (!gameSession || [GameType.CLASSIC, GameType.COMPETITION].includes(gameSession.gameType)) {
             return false;
         }
 

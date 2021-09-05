@@ -4,7 +4,7 @@ import { sendOptionsMessage, sendErrorMessage } from "../../helpers/discord_util
 import { getGuildPreference } from "../../helpers/game_utils";
 import { state } from "../../kmq";
 import validate from "../../helpers/validate";
-import { GuildTextableMessage, ParsedMessage } from "../../types";
+import { GameType, GuildTextableMessage, ParsedMessage } from "../../types";
 import MessageContext from "../../structures/message_context";
 import { COMPETITION_MODERATOR_IDS } from "../../commands/game_commands/play";
 
@@ -54,7 +54,7 @@ export default async function messageCreateHandler(message: Eris.Message) {
             }
 
             const gameSession = gameSessions[message.guildID];
-            if (gameSession && gameSession.competitionMode) {
+            if (gameSession && gameSession.gameType === GameType.COMPETITION) {
                 if (!COMPETITION_MODERATOR_IDS.includes(message.author.id) && !["skip", "score", "scoreboard", "options", "help", "news", "stats", "s", "profile", "leaderboard"].includes(parsedMessage.action)) {
                     sendErrorMessage(MessageContext.fromMessage(message), { title: "Disabled command", description: "This command has been disabled for use by regular users in the competition." });
                     return;
