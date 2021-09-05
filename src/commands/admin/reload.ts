@@ -1,9 +1,10 @@
 import { execSync } from "child_process";
 import { IPCLogger } from "../../logger";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { getDebugChannel, getDebugLogHeader, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
+import { sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import MessageContext from "../../structures/message_context";
 import { state } from "../../kmq";
+import { debugChannelPrecheck } from "../../command_prechecks";
 
 const logger = new IPCLogger("reload");
 
@@ -13,6 +14,8 @@ export enum ReloadType {
 }
 
 export default class ReloadCommand implements BaseCommand {
+    preRunChecks = [debugChannelPrecheck];
+
     validations = {
         minArgCount: 1,
         maxArgCount: 1,
@@ -26,13 +29,6 @@ export default class ReloadCommand implements BaseCommand {
     };
 
     call = async ({ message, parsedMessage }: CommandArgs) => {
-        const kmqDebugChannel = getDebugChannel();
-        if (!kmqDebugChannel || message.channel.id !== kmqDebugChannel.id) {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Error", description: "You are not allowed to reload in this channel" });
-            logger.warn(`${getDebugLogHeader(message)} | Attempted to reload in non-debug channel`);
-            return;
-        }
-
         try {
             execSync("npx tsc");
         } catch (e) {
