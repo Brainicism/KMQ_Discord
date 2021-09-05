@@ -17,7 +17,7 @@ import KmqMember from "../../structures/kmq_member";
 const logger = new IPCLogger("play");
 const DEFAULT_LIVES = 10;
 
-export const COMPETITION_MODERATOR_IDS = process.env.COMPETITION_MODERATOR_IDS.split(",");
+export const COMPETITION_MODERATOR_IDS = process.env.COMPETITION_MODERATOR_IDS?.split(",") ?? [];
 
 export async function sendBeginGameMessage(textChannelName: string,
     voiceChannelName: string,
