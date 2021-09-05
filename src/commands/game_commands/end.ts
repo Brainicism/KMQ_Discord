@@ -1,7 +1,7 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getDebugLogHeader } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
-import { inGameCommandPrecheck } from "../../command_prechecks"
+import { inGameCommandPrecheck } from "../../command_prechecks";
 
 const logger = new IPCLogger("end");
 
@@ -24,6 +24,7 @@ export default class EndCommand implements BaseCommand {
             logger.warn(`${getDebugLogHeader(message)} | No active game session`);
             return;
         }
+
         logger.info(`${getDebugLogHeader(message)} | Game session ended`);
         gameSession.endSession();
     };

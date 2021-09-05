@@ -6,7 +6,7 @@ import { IPCLogger } from "./logger";
 
 const logger = new IPCLogger("command_prechecks");
 
-export function inGameCommandPrecheck(message: GuildTextableMessage, gameSession: GameSession) {
+export function inGameCommandPrecheck(message: GuildTextableMessage, gameSession: GameSession): boolean {
     if (!gameSession) {
         return false;
     }
@@ -28,6 +28,22 @@ export function inGameCommandPrecheck(message: GuildTextableMessage, gameSession
     return true;
 }
 
-export function debugChannelPrecheck(message: GuildTextableMessage, _gameSession: GameSession) {
-    return process.env.DEBUG_SERVER_ID === message.guildID;
+export function debugServerPrecheck(message: GuildTextableMessage, _gameSession: GameSession): boolean {
+    const res = process.env.DEBUG_SERVER_ID === message.guildID;
+    if (!res) {
+        logger.warn(`${getDebugLogHeader(message)} | User attempted to use a command only usable in the debug channel`);
+        sendErrorMessage(MessageContext.fromMessage(message), { title: "Wait...", description: "You can't do that in this server." });
+    }
+
+    return res;
+}
+
+export function debugChannelPrecheck(message: GuildTextableMessage, _gameSession: GameSession): boolean {
+    const res = process.env.DEBUG_TEXT_CHANNEL_ID === message.channel.id;
+    if (!res) {
+        logger.warn(`${getDebugLogHeader(message)} | User attempted to use a command only usable in the debug channel`);
+        sendErrorMessage(MessageContext.fromMessage(message), { title: "Wait...", description: "You can't do that in this channel." });
+    }
+
+    return res;
 }
