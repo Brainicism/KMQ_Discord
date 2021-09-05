@@ -1,4 +1,4 @@
-import { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getDebugLogHeader, getMajorityCount, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
@@ -9,9 +9,9 @@ import { codeLine } from "../../helpers/utils";
 import { GuildTextableMessage, GameType } from "../../types";
 import GameSession from "../../structures/game_session";
 import EliminationScoreboard from "../../structures/elimination_scoreboard";
-import InGameCommand from "../interfaces/ingame_command";
 import GameRound from "../../structures/game_round";
 import GuildPreference from "../../structures/guild_preference";
+import { inGameCommandPrecheck } from "../../command_prechecks";
 
 const logger = new IPCLogger("hint");
 
@@ -75,7 +75,9 @@ export function generateHint(guessMode: GuessModeType, gameRound: GameRound): st
     }
 }
 
-export default class HintCommand extends InGameCommand {
+export default class HintCommand implements BaseCommand {
+    preRunChecks = [inGameCommandPrecheck];
+
     help = {
         name: "hint",
         description: "Gives a hint to the currently playing song",

@@ -1,4 +1,4 @@
-import { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import GameSession from "../../structures/game_session";
 import {
     areUserAndBotInSameVoiceChannel,
@@ -13,7 +13,7 @@ import GameRound from "../../structures/game_round";
 import { GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
-import InGameCommand from "../interfaces/ingame_command";
+import { inGameCommandPrecheck } from "../../command_prechecks";
 
 const logger = new IPCLogger("skip");
 
@@ -37,7 +37,9 @@ function isSkipMajority(message: GuildTextableMessage, gameSession: GameSession)
     return gameSession.gameRound.getNumSkippers() >= getMajorityCount(message.guildID);
 }
 
-export default class SkipCommand extends InGameCommand {
+export default class SkipCommand implements BaseCommand {
+    preRunChecks = [inGameCommandPrecheck];
+
     help = {
         name: "skip",
         description: "Vote to skip the current song. A song is skipped when majority of participants vote to skip it.",

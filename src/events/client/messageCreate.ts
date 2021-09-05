@@ -47,8 +47,8 @@ export default async function messageCreateHandler(message: Eris.Message) {
     if (invokedCommand) {
         if (validate(message, parsedMessage, invokedCommand.validations, invokedCommand.help?.usage)) {
             const { gameSessions } = state;
-            if (invokedCommand.preRunCheck) {
-                const preCheckResult = await invokedCommand.preRunCheck(message, gameSessions[message.guildID]);
+            if (invokedCommand.preRunChecks) {
+                const preCheckResult = invokedCommand.preRunChecks.every((precheck) => precheck(message, gameSessions[message.guildID]));
                 if (!preCheckResult) return;
             }
 

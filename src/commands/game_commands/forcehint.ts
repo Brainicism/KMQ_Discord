@@ -1,4 +1,4 @@
-import { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import {
     sendErrorMessage,
     getDebugLogHeader,
@@ -10,11 +10,13 @@ import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
 import { generateHint, validHintCheck } from "./hint";
-import InGameCommand from "../interfaces/ingame_command";
+import { inGameCommandPrecheck } from "../../command_prechecks";
 
 const logger = new IPCLogger("forcehint");
 
-export default class ForceHintCommand extends InGameCommand {
+export default class ForceHintCommand implements BaseCommand {
+    preRunChecks = [inGameCommandPrecheck];
+
     help = {
         name: "forcehint",
         description: "The person that started the game can force-hint the current song, no majority necessary.",
