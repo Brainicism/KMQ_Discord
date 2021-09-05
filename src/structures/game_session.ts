@@ -81,6 +81,9 @@ export default class GameSession {
     /** The Discord Guild ID */
     public readonly guildID: string;
 
+    /** Whether the game is a competition */
+    public readonly competitionMode: boolean;
+
     /** Initially the user who started the GameSession, transferred to current VC member */
     public owner: KmqMember;
 
@@ -141,7 +144,7 @@ export default class GameSession {
     /** Mapping of user ID to bookmarked songs, uses Map since Set doesn't remove QueriedSong duplicates */
     private bookmarkedSongs: { [userID: string]: Map<string, QueriedSong> };
 
-    constructor(textChannelID: string, voiceChannelID: string, guildID: string, gameSessionCreator: KmqMember, gameType: GameType, eliminationLives?: number) {
+    constructor(textChannelID: string, voiceChannelID: string, guildID: string, gameSessionCreator: KmqMember, gameType: GameType, competitionMode: boolean, eliminationLives?: number) {
         this.gameType = gameType;
         this.guildID = guildID;
         if (this.gameType === GameType.ELIMINATION) {
@@ -173,6 +176,7 @@ export default class GameSession {
         this.lastGuesser = null;
         this.songMessageIDs = [];
         this.bookmarkedSongs = {};
+        this.competitionMode = competitionMode;
     }
 
     /**
@@ -302,6 +306,19 @@ export default class GameSession {
         deleteGameSession(this.guildID);
         await this.endRound({ correct: false }, await getGuildPreference(this.guildID));
         const voiceConnection = state.client.voiceConnections.get(this.guildID);
+
+        if (this.competitionMode) {
+            // log scoreboard
+            logger.info("Scoreboard:");
+            logger.info(JSON.stringify(this.scoreboard.getPlayers()
+                .sort((a, b) => b.getScore() - a.getScore())
+                .map((x) => (
+                    {
+                        name: x.getName(),
+                        id: x.getID(),
+                        score: x.getDisplayedScore(),
+                    }))));
+        }
 
         // leave voice channel
         if (voiceConnection && voiceConnection.channelID) {

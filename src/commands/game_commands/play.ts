@@ -17,6 +17,11 @@ import KmqMember from "../../structures/kmq_member";
 const logger = new IPCLogger("play");
 const DEFAULT_LIVES = 10;
 
+export const COMPETITION_MODERATOR_IDS = [
+    "141734249702096896", // ohmi#7183
+    "156971607057760256", // Cool#0001
+];
+
 export async function sendBeginGameMessage(textChannelName: string,
     voiceChannelName: string,
     message: GuildTextableMessage,
@@ -121,6 +126,7 @@ export default class PlayCommand implements BaseCommand {
 
         const isEliminationMode = parsedMessage.components.length >= 1 && parsedMessage.components[0].toLowerCase() === "elimination";
         const isTeamsMode = parsedMessage.components.length >= 1 && parsedMessage.components[0].toLowerCase() === "teams";
+        const isCompetitionMode = parsedMessage.components.length >= 1 && parsedMessage.components[0].toLowerCase() === "competition";
 
         if (gameSessions[message.guildID] && !gameSessions[message.guildID].sessionInitialized && (isEliminationMode || isTeamsMode)) {
             // User sent ,play elimination or ,play teams twice, reset the GameSession
@@ -148,7 +154,7 @@ export default class PlayCommand implements BaseCommand {
                 const startTitle = `\`${prefix}join\` the game and start it with \`${prefix}begin\`!`;
                 const gameInstructions = `Type \`${prefix}join\` to play in the upcoming elimination game. Once all have joined, ${getMention(gameOwner.id)} must send \`${prefix}begin\` to start the game. Everyone begins with \`${lives}\` lives.`;
 
-                gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, GameType.ELIMINATION, lives);
+                gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, GameType.ELIMINATION, isCompetitionMode, lives);
                 gameSession.addEliminationParticipant(gameOwner);
                 await sendInfoMessage(messageContext, { title: startTitle, description: gameInstructions, thumbnailUrl: KmqImages.HAPPY });
             } else if (isTeamsMode) {
@@ -157,7 +163,7 @@ export default class PlayCommand implements BaseCommand {
                 const gameInstructions = `Team leaders, type \`${prefix}join [team name]\` to form a new team. Remember, switching teams mid-game will forfeit all your current score and EXP.`;
 
                 await sendInfoMessage(messageContext, { title: startTitle, description: gameInstructions, thumbnailUrl: KmqImages.HAPPY });
-                gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, GameType.TEAMS);
+                gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, GameType.TEAMS, isCompetitionMode);
             } else {
                 // (1 and 2) CLASSIC game creation
                 if (gameSessions[message.guildID]) {
@@ -170,7 +176,12 @@ export default class PlayCommand implements BaseCommand {
                     sendErrorMessage(messageContext, { title: ignoringOldGameTypeTitle, description: oldGameTypeInstructions, thumbnailUrl: KmqImages.DEAD });
                 }
 
-                gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, GameType.CLASSIC);
+                if (isCompetitionMode && !COMPETITION_MODERATOR_IDS.includes(message.author.id)) {
+                    sendErrorMessage(messageContext, { title: "Hidden game mode", description: "You do not have permission to use this command.", thumbnailUrl: KmqImages.DEAD });
+                    return;
+                }
+
+                gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, GameType.CLASSIC, isCompetitionMode);
                 await sendBeginGameMessage(textChannel.name, voiceChannel.name, message, getCurrentVoiceMembers(voiceChannel.id));
                 gameSession.startRound(guildPreference, messageContext);
                 logger.info(`${getDebugLogHeader(message)} | Game session starting`);

@@ -1,11 +1,12 @@
 import Eris from "eris";
 import { IPCLogger } from "../../logger";
-import { sendOptionsMessage } from "../../helpers/discord_utils";
+import { sendOptionsMessage, sendErrorMessage } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { state } from "../../kmq";
 import validate from "../../helpers/validate";
 import { GuildTextableMessage, ParsedMessage } from "../../types";
 import MessageContext from "../../structures/message_context";
+import { COMPETITION_MODERATOR_IDS } from "../../commands/game_commands/play";
 
 const logger = new IPCLogger("messageCreate");
 
@@ -50,6 +51,14 @@ export default async function messageCreateHandler(message: Eris.Message) {
             if (invokedCommand.preRunChecks) {
                 const preCheckResult = invokedCommand.preRunChecks.every((precheck) => precheck.checkFn(message, gameSessions[message.guildID], precheck.errorMessage));
                 if (!preCheckResult) return;
+            }
+
+            const gameSession = gameSessions[message.guildID];
+            if (gameSession && gameSession.competitionMode) {
+                if (!COMPETITION_MODERATOR_IDS.includes(message.author.id) && !["skip", "score", "scoreboard", "options", "help", "news", "stats", "s", "profile", "leaderboard"].includes(parsedMessage.action)) {
+                    sendErrorMessage(MessageContext.fromMessage(message), { title: "Disabled command", description: "This command has been disabled for use by regular users in the competition." });
+                    return;
+                }
             }
 
             invokedCommand.call({

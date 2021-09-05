@@ -615,7 +615,7 @@ describe("song query", () => {
 
     describe("cleanupInactiveGameSessions", () => {
         const guildId = "123";
-        const gameSession = new GameSession(null, null, guildId, null, null);
+        const gameSession = new GameSession(null, null, guildId, null, null, false);
         const sandbox = sinon.createSandbox();
         const endSessionStub = sandbox.stub(gameSession, "endSession");
         after(() => {

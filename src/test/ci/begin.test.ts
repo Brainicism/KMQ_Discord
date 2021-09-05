@@ -22,7 +22,7 @@ describe("begin command", () => {
         });
 
         describe("classic game session", () => {
-            const gameSession = new GameSession(null, null, null, gameStarter, GameType.CLASSIC);
+            const gameSession = new GameSession(null, null, null, gameStarter, GameType.CLASSIC, false);
             it("should return false (classic games are not started using ,begin)", () => {
                 assert.strictEqual(command.canStart(gameSession, "123", null), false);
                 assert.strictEqual(command.canStart(gameSession, "567", null), false);
@@ -30,7 +30,7 @@ describe("begin command", () => {
         });
 
         describe("elimination game session", () => {
-            const gameSession = new GameSession(null, null, null, gameStarter, GameType.ELIMINATION);
+            const gameSession = new GameSession(null, null, null, gameStarter, GameType.ELIMINATION, false);
             describe("invoker is the game session's author", () => {
                 it("should return true", () => {
                     assert.strictEqual(command.canStart(gameSession, "123", null), true);
@@ -45,7 +45,7 @@ describe("begin command", () => {
         });
 
         describe("teams game session", () => {
-            const gameSession = new GameSession(null, null, null, gameStarter, GameType.TEAMS);
+            const gameSession = new GameSession(null, null, null, gameStarter, GameType.TEAMS, false);
             describe("no teams have been added yet", () => {
                 it("should return false", () => {
                     assert.strictEqual(command.canStart(gameSession, "1231", null), false);
