@@ -16,7 +16,7 @@ import { inGameCommandPrecheck } from "../../command_prechecks";
 const logger = new IPCLogger("forceskip");
 
 export default class ForceSkipCommand implements BaseCommand {
-    preRunChecks = [inGameCommandPrecheck];
+    preRunChecks = [{ checkFn: inGameCommandPrecheck }];
 
     help = {
         name: "forceskip",

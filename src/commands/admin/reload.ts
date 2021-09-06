@@ -14,7 +14,7 @@ export enum ReloadType {
 }
 
 export default class ReloadCommand implements BaseCommand {
-    preRunChecks = [debugChannelPrecheck];
+    preRunChecks = [{ checkFn: debugChannelPrecheck }];
 
     validations = {
         minArgCount: 1,

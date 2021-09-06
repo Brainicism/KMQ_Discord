@@ -1,9 +1,10 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { sendOptionsMessage, getDebugLogHeader, sendErrorMessage } from "../../helpers/discord_utils";
+import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
+import { debugServerPrecheck } from "../../command_prechecks";
 
 const logger = new IPCLogger("special");
 export enum SpecialType {
@@ -33,6 +34,7 @@ export const specialFfmpegArgs = {
 };
 
 export default class SpecialCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: debugServerPrecheck, errorMessage: "This is an unreleased game option, and can only be used on the official KMQ server" }];
     validations = {
         minArgCount: 0,
         maxArgCount: 1,
@@ -75,11 +77,6 @@ export default class SpecialCommand implements BaseCommand {
     };
 
     call = async ({ message, parsedMessage }: CommandArgs) => {
-        if (process.env.DEBUG_SERVER_ID !== message.guildID) {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Error", description: "This is an unreleased game option, and can only be used on the official KMQ server" });
-            return;
-        }
-
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.SPECIAL_TYPE);

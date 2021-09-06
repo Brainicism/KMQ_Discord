@@ -15,7 +15,7 @@ import { inGameCommandPrecheck } from "../../command_prechecks";
 const logger = new IPCLogger("forcehint");
 
 export default class ForceHintCommand implements BaseCommand {
-    preRunChecks = [inGameCommandPrecheck];
+    preRunChecks = [{ checkFn: inGameCommandPrecheck }];
 
     help = {
         name: "forcehint",
