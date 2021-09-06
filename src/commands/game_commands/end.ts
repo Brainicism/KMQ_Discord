@@ -6,7 +6,7 @@ import { inGameCommandPrecheck } from "../../command_prechecks";
 const logger = new IPCLogger("end");
 
 export default class EndCommand implements BaseCommand {
-    preRunChecks = [inGameCommandPrecheck];
+    preRunChecks = [{ checkFn: inGameCommandPrecheck }];
 
     help = {
         name: "end",

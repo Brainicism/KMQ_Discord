@@ -76,7 +76,7 @@ export function generateHint(guessMode: GuessModeType, gameRound: GameRound): st
 }
 
 export default class HintCommand implements BaseCommand {
-    preRunChecks = [inGameCommandPrecheck];
+    preRunChecks = [{ checkFn: inGameCommandPrecheck }];
 
     help = {
         name: "hint",

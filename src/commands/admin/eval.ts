@@ -10,7 +10,7 @@ import { debugChannelPrecheck } from "../../command_prechecks";
 const logger = new IPCLogger("eval");
 
 export default class EvalCommand implements BaseCommand {
-    preRunChecks = [debugChannelPrecheck];
+    preRunChecks = [{ checkFn: debugChannelPrecheck }];
 
     call = async ({ message, parsedMessage }: CommandArgs) => {
         const evalString = parsedMessage.argument;

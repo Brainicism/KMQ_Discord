@@ -38,7 +38,7 @@ function isSkipMajority(message: GuildTextableMessage, gameSession: GameSession)
 }
 
 export default class SkipCommand implements BaseCommand {
-    preRunChecks = [inGameCommandPrecheck];
+    preRunChecks = [{ checkFn: inGameCommandPrecheck }];
 
     help = {
         name: "skip",
