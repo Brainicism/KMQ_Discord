@@ -13,11 +13,10 @@ import { GameInfoMessage, GameType, GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
+import { competitionPrecheck } from "../../command_prechecks";
 
 const logger = new IPCLogger("play");
 const DEFAULT_LIVES = 10;
-
-export const COMPETITION_MODERATOR_IDS = process.env.COMPETITION_MODERATOR_IDS?.split(",") ?? [];
 
 export async function sendBeginGameMessage(textChannelName: string,
     voiceChannelName: string,
@@ -65,6 +64,8 @@ export async function sendBeginGameMessage(textChannelName: string,
 }
 
 export default class PlayCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: competitionPrecheck }];
+
     validations = {
         minArgCount: 0,
         maxArgCount: 2,
@@ -173,7 +174,12 @@ export default class PlayCommand implements BaseCommand {
                 }
 
                 const isCompetitionMode = parsedMessage.components.length >= 1 && parsedMessage.components[0].toLowerCase() === "competition";
-                if (isCompetitionMode && !COMPETITION_MODERATOR_IDS.includes(message.author.id)) {
+                const isModerator = (await dbContext.kmq("competition_moderators").select("user_id")
+                    .where("guild_id", "=", message.guildID)
+                    .andWhere("user_id", "=", message.author.id)
+                    .first()) ?? false;
+
+                if (isCompetitionMode && !isModerator) {
                     sendErrorMessage(messageContext, { title: "Hidden game mode", description: "You do not have permission to use this command.", thumbnailUrl: KmqImages.DEAD });
                     return;
                 }

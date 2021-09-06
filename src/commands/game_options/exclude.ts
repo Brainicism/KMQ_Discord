@@ -5,10 +5,13 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
+import { competitionPrecheck } from "../../command_prechecks";
 
 const logger = new IPCLogger("excludes");
 
 export default class ExcludeCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: competitionPrecheck }];
+
     help = {
         name: "exclude",
         description: `Select as many groups that you would like to ignore, separated by commas. A list of group names can be found [here](http://${process.env.WEB_SERVER_IP}:${process.env.WEB_SERVER_PORT}/groups)`,

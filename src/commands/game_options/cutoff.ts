@@ -4,12 +4,15 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
+import { competitionPrecheck } from "../../command_prechecks";
 
 const logger = new IPCLogger("cutoff");
 export const DEFAULT_BEGINNING_SEARCH_YEAR = 1990;
 export const DEFAULT_ENDING_SEARCH_YEAR = (new Date()).getFullYear();
 
 export default class CutoffCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: competitionPrecheck }];
+
     validations = {
         minArgCount: 0,
         maxArgCount: 2,

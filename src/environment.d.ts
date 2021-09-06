@@ -20,6 +20,5 @@ declare namespace NodeJS {
         AUDIO_SONGS_PER_ARTIST: number,
         PREMIUM_AUDIO_SONGS_PER_ARTIST: number,
         DEBUG_LOGGING: boolean,
-        COMPETITION_MODERATOR_IDS?: string,
     }
 }

@@ -3,10 +3,13 @@ import { IPCLogger } from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { getDebugLogHeader, sendOptionsMessage } from "../../helpers/discord_utils";
 import MessageContext from "../../structures/message_context";
+import { competitionPrecheck } from "../../command_prechecks";
 
 const logger = new IPCLogger("reset");
 
 export default class ResetCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: competitionPrecheck }];
+
     validations = {
         minArgCount: 0,
         maxArgCount: 0,
@@ -25,6 +28,7 @@ export default class ResetCommand implements BaseCommand {
         ],
         priority: 130,
     };
+
     call = async ({ message }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
         await guildPreference.resetToDefault();

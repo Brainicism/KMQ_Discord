@@ -5,10 +5,13 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
+import { competitionPrecheck } from "../../command_prechecks";
 
 const logger = new IPCLogger("groups");
 export const GROUP_LIST_URL = "https://static.kpop.gg/data/group_list.txt";
 export default class GroupsCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: competitionPrecheck }];
+
     help = {
         name: "groups",
         description: `Select as many groups that you would like to hear from, separated by commas. A list of group names can be found [here](${GROUP_LIST_URL}).`,

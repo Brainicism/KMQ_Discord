@@ -4,6 +4,7 @@ import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
+import { competitionPrecheck } from "../../command_prechecks";
 
 const logger = new IPCLogger("ost");
 export enum OstPreference {
@@ -15,6 +16,8 @@ export enum OstPreference {
 export const DEFAULT_OST_PREFERENCE = OstPreference.EXCLUDE;
 
 export default class OstCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: competitionPrecheck }];
+
     aliases = ["osts"];
 
     validations = {

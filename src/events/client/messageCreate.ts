@@ -1,12 +1,11 @@
 import Eris from "eris";
 import { IPCLogger } from "../../logger";
-import { sendOptionsMessage, sendErrorMessage } from "../../helpers/discord_utils";
+import { sendOptionsMessage } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { state } from "../../kmq";
 import validate from "../../helpers/validate";
-import { GameType, GuildTextableMessage, ParsedMessage } from "../../types";
+import { GuildTextableMessage, ParsedMessage } from "../../types";
 import MessageContext from "../../structures/message_context";
-import { COMPETITION_MODERATOR_IDS } from "../../commands/game_commands/play";
 
 const logger = new IPCLogger("messageCreate");
 
@@ -48,16 +47,12 @@ export default async function messageCreateHandler(message: Eris.Message) {
     if (invokedCommand) {
         if (validate(message, parsedMessage, invokedCommand.validations, invokedCommand.help?.usage)) {
             const { gameSessions } = state;
-            if (invokedCommand.preRunChecks) {
-                const preCheckResult = invokedCommand.preRunChecks.every((precheck) => precheck.checkFn(message, gameSessions[message.guildID], precheck.errorMessage));
-                if (!preCheckResult) return;
-            }
-
             const gameSession = gameSessions[message.guildID];
-            if (gameSession && gameSession.gameType === GameType.COMPETITION) {
-                if (!COMPETITION_MODERATOR_IDS.includes(message.author.id) && !["skip", "score", "scoreboard", "options", "help", "news", "stats", "s", "profile", "leaderboard"].includes(parsedMessage.action)) {
-                    sendErrorMessage(MessageContext.fromMessage(message), { title: "Disabled command", description: "This command has been disabled for use by regular users in the competition." });
-                    return;
+            if (invokedCommand.preRunChecks) {
+                for (const precheck of invokedCommand.preRunChecks) {
+                    if (!(await precheck.checkFn(message, gameSession, precheck.errorMessage))) {
+                        return;
+                    }
                 }
             }
 

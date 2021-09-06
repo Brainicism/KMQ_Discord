@@ -4,7 +4,7 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
-import { debugServerPrecheck } from "../../command_prechecks";
+import { debugServerPrecheck, competitionPrecheck } from "../../command_prechecks";
 
 const logger = new IPCLogger("special");
 export enum SpecialType {
@@ -34,7 +34,8 @@ export const specialFfmpegArgs = {
 };
 
 export default class SpecialCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: debugServerPrecheck, errorMessage: "This is an unreleased game option, and can only be used on the official KMQ server" }];
+    preRunChecks = [{ checkFn: debugServerPrecheck, errorMessage: "This is an unreleased game option, and can only be used on the official KMQ server" }, { checkFn: competitionPrecheck }];
+
     validations = {
         minArgCount: 0,
         maxArgCount: 1,
