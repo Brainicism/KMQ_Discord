@@ -303,6 +303,19 @@ export default class GameSession {
         await this.endRound({ correct: false }, await getGuildPreference(this.guildID));
         const voiceConnection = state.client.voiceConnections.get(this.guildID);
 
+        if (this.gameType === GameType.COMPETITION) {
+            // log scoreboard
+            logger.info("Scoreboard:");
+            logger.info(JSON.stringify(this.scoreboard.getPlayers()
+                .sort((a, b) => b.getScore() - a.getScore())
+                .map((x) => (
+                    {
+                        name: x.getName(),
+                        id: x.getID(),
+                        score: x.getDisplayedScore(),
+                    }))));
+        }
+
         // leave voice channel
         if (voiceConnection && voiceConnection.channelID) {
             voiceConnection.stopPlaying();

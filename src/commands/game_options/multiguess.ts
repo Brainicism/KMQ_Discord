@@ -4,6 +4,7 @@ import { IPCLogger } from "../../logger";
 import { getDebugLogHeader, sendOptionsMessage } from "../../helpers/discord_utils";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
+import { competitionPrecheck } from "../../command_prechecks";
 
 const logger = new IPCLogger("multiguess");
 export enum MultiGuessType {
@@ -14,6 +15,8 @@ export enum MultiGuessType {
 export const DEFAULT_MULTIGUESS_TYPE = MultiGuessType.ON;
 
 export default class MultiGuessCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: competitionPrecheck }];
+
     validations = {
         minArgCount: 0,
         maxArgCount: 1,

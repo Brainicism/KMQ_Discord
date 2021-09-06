@@ -4,10 +4,13 @@ import { getGuildPreference, getMatchingGroupNames } from "../../helpers/game_ut
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
+import { competitionPrecheck } from "../../command_prechecks";
 
 const logger = new IPCLogger("includes");
 
 export default class IncludeCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: competitionPrecheck }];
+
     help = {
         name: "include",
         description: `Select as many groups that you would like to forcefully include, ignoring other filters (\`gender\`, \`artisttype\`, etc), separated by commas. A list of group names can be found [here](http://${process.env.WEB_SERVER_IP}:${process.env.WEB_SERVER_PORT}/groups)`,

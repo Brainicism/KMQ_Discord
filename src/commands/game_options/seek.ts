@@ -4,6 +4,7 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
+import { competitionPrecheck } from "../../command_prechecks";
 
 const logger = new IPCLogger("seek");
 export enum SeekType {
@@ -15,6 +16,8 @@ export enum SeekType {
 export const DEFAULT_SEEK = SeekType.RANDOM;
 
 export default class SeekCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: competitionPrecheck }];
+
     validations = {
         minArgCount: 0,
         maxArgCount: 1,

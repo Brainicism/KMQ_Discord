@@ -11,12 +11,12 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
-import { inGameCommandPrecheck } from "../../command_prechecks";
+import { inGameCommandPrecheck, competitionPrecheck } from "../../command_prechecks";
 
 const logger = new IPCLogger("forceskip");
 
 export default class ForceSkipCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: inGameCommandPrecheck }];
+    preRunChecks = [{ checkFn: inGameCommandPrecheck }, { checkFn: competitionPrecheck }];
 
     help = {
         name: "forceskip",

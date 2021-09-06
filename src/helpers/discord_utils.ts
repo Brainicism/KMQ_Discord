@@ -27,6 +27,7 @@ const REQUIRED_TEXT_PERMISSIONS = ["addReactions" as const, "embedLinks" as cons
 const REQUIRED_VOICE_PERMISSIONS = ["viewChannel" as const, "voiceConnect" as const, "voiceSpeak" as const];
 const SCOREBOARD_FIELD_CUTOFF = 9;
 const MAX_SCOREBOARD_PLAYERS = 30;
+const MAX_RUNNERS_UP = 30;
 const MAX_INTERACTION_RESPONSE_TIME = 3 * 1000;
 
 /**
@@ -237,10 +238,10 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
             const runnersUp = playerRoundResults.slice(1);
             let runnersUpDescription = runnersUp
                 .map((x) => `${getMention(x.player.id)} (+${friendlyFormattedNumber(x.expGain)} EXP)`)
-                .slice(0, 10)
+                .slice(0, MAX_RUNNERS_UP)
                 .join("\n");
 
-            if (runnersUp.length >= 10) {
+            if (runnersUp.length >= MAX_RUNNERS_UP) {
                 runnersUpDescription += "\nand many others...";
             }
 

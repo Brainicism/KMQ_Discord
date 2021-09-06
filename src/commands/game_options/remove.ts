@@ -5,6 +5,7 @@ import { IPCLogger } from "../../logger";
 import { GameOption, MatchedArtist } from "../../types";
 import MessageContext from "../../structures/message_context";
 import { GROUP_LIST_URL } from "./groups";
+import { competitionPrecheck } from "../../command_prechecks";
 
 const logger = new IPCLogger("remove");
 
@@ -25,6 +26,8 @@ enum RemoveType {
 }
 
 export default class RemoveCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: competitionPrecheck }];
+
     validations = {
         minArgCount: 2,
         arguments: [

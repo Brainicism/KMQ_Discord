@@ -4,6 +4,7 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
+import { competitionPrecheck } from "../../command_prechecks";
 
 const logger = new IPCLogger("subunits");
 
@@ -15,6 +16,8 @@ export enum SubunitsPreference {
 export const DEFAULT_SUBUNIT_PREFERENCE = SubunitsPreference.INCLUDE;
 
 export default class SubunitsCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: competitionPrecheck }];
+
     aliases = ["subunit", "su"];
 
     validations = {

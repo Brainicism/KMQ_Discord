@@ -200,4 +200,9 @@ export default class Scoreboard {
     getNumPlayers(): number {
         return Object.keys(this.players).length;
     }
+
+    /** @returns a list of tags of the player participating in the game */
+    getPlayers(): Array<Player> {
+        return Object.values(this.players);
+    }
 }

@@ -6,6 +6,7 @@ import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
 import { GROUP_LIST_URL } from "./groups";
+import { competitionPrecheck } from "../../command_prechecks";
 
 const logger = new IPCLogger("add");
 
@@ -26,6 +27,8 @@ enum AddType {
 }
 
 export default class AddCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: competitionPrecheck }];
+
     validations = {
         minArgCount: 2,
         arguments: [

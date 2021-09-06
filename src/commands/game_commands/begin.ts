@@ -8,12 +8,15 @@ import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import GameSession from "../../structures/game_session";
 import { state } from "../../kmq";
+import { competitionPrecheck } from "../../command_prechecks";
 
 const logger = new IPCLogger("begin");
 
 export default class BeginCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: competitionPrecheck }];
+
     canStart(gameSession: GameSession, authorID: string, messageContext: MessageContext): boolean {
-        if (!gameSession || gameSession.gameType === GameType.CLASSIC) {
+        if (!gameSession || (gameSession.gameType !== GameType.ELIMINATION && gameSession.gameType !== GameType.TEAMS)) {
             return false;
         }
 
@@ -32,6 +35,7 @@ export default class BeginCommand implements BaseCommand {
 
         return true;
     }
+
     call = async ({ message, gameSessions, channel }: CommandArgs) => {
         const { guildID, author } = message;
         const gameSession = gameSessions[guildID];
