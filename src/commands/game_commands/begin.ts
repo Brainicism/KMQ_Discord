@@ -16,7 +16,7 @@ export default class BeginCommand implements BaseCommand {
     preRunChecks = [{ checkFn: competitionPrecheck }];
 
     canStart(gameSession: GameSession, authorID: string, messageContext: MessageContext): boolean {
-        if (!gameSession || [GameType.CLASSIC, GameType.COMPETITION].includes(gameSession.gameType)) {
+        if (!gameSession || (gameSession.gameType !== GameType.ELIMINATION && gameSession.gameType !== GameType.TEAMS)) {
             return false;
         }
 

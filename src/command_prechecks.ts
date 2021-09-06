@@ -53,10 +53,10 @@ export async function competitionPrecheck(message: GuildTextableMessage, gameSes
         return true;
     }
 
-    const isModerator = (await dbContext.kmq("competition_moderators").select("user_id")
+    const isModerator = await dbContext.kmq("competition_moderators").select("user_id")
         .where("guild_id", "=", gameSession.guildID)
         .andWhere("user_id", "=", message.author.id)
-        .first()) ?? false;
+        .first();
 
     if (!isModerator) {
         logger.warn(`${getDebugLogHeader(message)} | User attempted to use a command only available to moderators in a competition`);

@@ -134,7 +134,7 @@ export default class PlayCommand implements BaseCommand {
         const prefix = process.env.BOT_PREFIX;
 
         if (!gameSessions[message.guildID] || !gameSessions[message.guildID].sessionInitialized) {
-            // (1) No game session exists yet (create MC, ELIMINATION, TEAMS, CLASSIC, or COMPETITION game), or
+            // (1) No game session exists yet (create ELIMINATION, TEAMS, CLASSIC, or COMPETITION game), or
             // (2) User attempting to ,play after a ,play elimination/teams that didn't start, start CLASSIC game
             const textChannel = channel;
             const gameOwner = KmqMember.fromUser(message.author);
@@ -174,14 +174,16 @@ export default class PlayCommand implements BaseCommand {
                 }
 
                 const isCompetitionMode = parsedMessage.components.length >= 1 && parsedMessage.components[0].toLowerCase() === "competition";
-                const isModerator = (await dbContext.kmq("competition_moderators").select("user_id")
-                    .where("guild_id", "=", message.guildID)
-                    .andWhere("user_id", "=", message.author.id)
-                    .first()) ?? false;
+                if (isCompetitionMode) {
+                    const isModerator = await dbContext.kmq("competition_moderators").select("user_id")
+                        .where("guild_id", "=", message.guildID)
+                        .andWhere("user_id", "=", message.author.id)
+                        .first();
 
-                if (isCompetitionMode && !isModerator) {
-                    sendErrorMessage(messageContext, { title: "Hidden game mode", description: "You do not have permission to use this command.", thumbnailUrl: KmqImages.DEAD });
-                    return;
+                    if (!isModerator) {
+                        sendErrorMessage(messageContext, { title: "Hidden game mode", description: "You do not have permission to use this command.", thumbnailUrl: KmqImages.DEAD });
+                        return;
+                    }
                 }
 
                 gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, isCompetitionMode ? GameType.COMPETITION : GameType.CLASSIC);

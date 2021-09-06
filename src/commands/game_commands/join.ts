@@ -18,7 +18,7 @@ export default class JoinCommand implements BaseCommand {
 
     call = async ({ message, gameSessions, parsedMessage }: CommandArgs) => {
         const gameSession = gameSessions[message.guildID];
-        if (!gameSession || [GameType.CLASSIC, GameType.COMPETITION].includes(gameSession.gameType)) {
+        if (!gameSession || (gameSession.gameType !== GameType.ELIMINATION && gameSession.gameType !== GameType.TEAMS)) {
             return;
         }
 
