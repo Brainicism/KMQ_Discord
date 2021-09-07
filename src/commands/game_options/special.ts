@@ -12,8 +12,8 @@ export enum SpecialType {
     SLOW = "slow",
     FAST = "fast",
     FASTER = "faster",
-    LOW_PITCH = "low",
-    HIGH_PITCH = "high",
+    LOW_PITCH = "low_pitch",
+    HIGH_PITCH = "high_pitch",
     NIGHTCORE = "nightcore",
 }
 
@@ -68,7 +68,7 @@ export default class SpecialCommand implements BaseCommand {
     help = {
         name: "special",
         description: "Hey. This hasn't been announced yet, but check out the KMQ server to try it out! Play a special mode with modified audio.",
-        usage: ",special [reverse | slow | fast | faster | low | high | nightcore]",
+        usage: ",special [reverse | slow | fast | faster | low_pitch | high_pitch | nightcore]",
         examples: [
             {
                 example: "`,special reverse`",
@@ -87,11 +87,11 @@ export default class SpecialCommand implements BaseCommand {
                 explanation: "Plays the song at a faster speed",
             },
             {
-                example: "`,special low`",
+                example: "`,special low_pitch`",
                 explanation: "Plays the song at a low pitch",
             },
             {
-                example: "`,special high`",
+                example: "`,special high_pitch`",
                 explanation: "Plays the song at a high pitch",
             },
             {
