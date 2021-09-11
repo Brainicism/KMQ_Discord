@@ -30,6 +30,8 @@ const MAX_SCOREBOARD_PLAYERS = 30;
 const MAX_RUNNERS_UP = 30;
 const MAX_INTERACTION_RESPONSE_TIME = 3 * 1000;
 
+export type EmbedGenerator = (() => Promise<Eris.EmbedOptions>);
+
 /**
  * @param user - The user (must be some object with username and discriminator fields)
  * @returns the user's Discord tag
@@ -480,16 +482,23 @@ export async function sendEndGameMessage(gameSession: GameSession) {
  * @param message - The Message object
  * @param embeds - A list of embeds to paginate over
  */
-export async function sendPaginationedEmbed(message: GuildTextableMessage, embeds: Array<Eris.EmbedOptions>, components?: Array<Eris.ActionRow>) {
+export async function sendPaginationedEmbed(message: GuildTextableMessage, embeds: Array<Eris.EmbedOptions> | Array<EmbedGenerator>, components?: Array<Eris.ActionRow>, startPage = 1) {
     if (embeds.length > 1) {
         if ((await textPermissionsCheck(message.channel.id, message.guildID, message.author.id))) {
-            return EmbedPaginator.createPaginationEmbed(message, embeds, { timeout: 60000 }, components);
+            return EmbedPaginator.createPaginationEmbed(message, embeds, { timeout: 60000, startPage }, components);
         }
 
         return null;
     }
 
-    return sendMessage(message.channel.id, message.author.id, { embeds: [embeds[0]], components });
+    let embed: Eris.EmbedOptions;
+    if (typeof embeds[0] === "function") {
+        embed = await embeds[0]();
+    } else {
+        embed = embeds[0];
+    }
+
+    return sendMessage(message.channel.id, message.author.id, { embeds: [embed], components });
 }
 
 /**

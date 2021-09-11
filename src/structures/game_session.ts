@@ -960,6 +960,11 @@ export default class GameSession {
             .onConflict("player_id")
             .ignore();
 
+        await dbContext.kmq("daily_player_stats")
+            .insert({ player_id: userID })
+            .onConflict("player_id")
+            .ignore();
+
         await dbContext.kmq("player_servers")
             .insert({
                 player_id: userID,
@@ -981,6 +986,10 @@ export default class GameSession {
             .update({
                 last_active: getSqlDateString(),
             });
+
+        await dbContext.kmq("daily_player_stats")
+            .where("player_id", "=", userID)
+            .increment("songs_guessed", score);
     }
 
     /**
@@ -989,6 +998,10 @@ export default class GameSession {
      */
     private async incrementPlayerGamesPlayed(userID: string) {
         await dbContext.kmq("player_stats")
+            .where("player_id", "=", userID)
+            .increment("games_played", 1);
+
+        await dbContext.kmq("daily_player_stats")
             .where("player_id", "=", userID)
             .increment("games_played", 1);
     }
@@ -1015,6 +1028,14 @@ export default class GameSession {
         await dbContext.kmq("player_stats")
             .update({ exp: newExp, level: newLevel })
             .where("player_id", "=", userID);
+
+        await dbContext.kmq("daily_player_stats")
+            .where("player_id", "=", userID)
+            .increment("exp_gained", expGain);
+
+        await dbContext.kmq("daily_player_stats")
+            .where("player_id", "=", userID)
+            .increment("levels_gained", newLevel - level);
 
         if (level !== newLevel) {
             logger.info(`${userID} has leveled from ${level} to ${newLevel}`);
