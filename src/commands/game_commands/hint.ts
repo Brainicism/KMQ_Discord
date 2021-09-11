@@ -11,7 +11,7 @@ import GameSession from "../../structures/game_session";
 import EliminationScoreboard from "../../structures/elimination_scoreboard";
 import GameRound from "../../structures/game_round";
 import GuildPreference from "../../structures/guild_preference";
-import { inGameCommandPrecheck, competitionPrecheck } from "../../command_prechecks";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("hint");
 
@@ -76,7 +76,7 @@ export function generateHint(guessMode: GuessModeType, gameRound: GameRound): st
 }
 
 export default class HintCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: inGameCommandPrecheck }, { checkFn: competitionPrecheck }];
+    preRunChecks = [{ checkFn: CommandPrechecks.inGameCommandPrecheck }, { checkFn: CommandPrechecks.competitionPrecheck }];
 
     help = {
         name: "hint",

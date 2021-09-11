@@ -5,12 +5,12 @@ import {
 import { IPCLogger } from "../../logger";
 import { state } from "../../kmq";
 import MessageContext from "../../structures/message_context";
-import { debugChannelPrecheck } from "../../command_prechecks";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("eval");
 
 export default class EvalCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: debugChannelPrecheck }];
+    preRunChecks = [{ checkFn: CommandPrechecks.debugChannelPrecheck }];
 
     call = async ({ message, parsedMessage }: CommandArgs) => {
         const evalString = parsedMessage.argument;

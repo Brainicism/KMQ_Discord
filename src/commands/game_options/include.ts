@@ -4,12 +4,12 @@ import { getGuildPreference, getMatchingGroupNames } from "../../helpers/game_ut
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
-import { competitionPrecheck } from "../../command_prechecks";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("includes");
 
 export default class IncludeCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: competitionPrecheck }];
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     help = {
         name: "include",

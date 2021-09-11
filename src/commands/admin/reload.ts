@@ -4,7 +4,7 @@ import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import MessageContext from "../../structures/message_context";
 import { state } from "../../kmq";
-import { debugChannelPrecheck } from "../../command_prechecks";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("reload");
 
@@ -14,7 +14,7 @@ export enum ReloadType {
 }
 
 export default class ReloadCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: debugChannelPrecheck }];
+    preRunChecks = [{ checkFn: CommandPrechecks.debugChannelPrecheck }];
 
     validations = {
         minArgCount: 1,

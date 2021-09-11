@@ -9,10 +9,10 @@ import { bold } from "../../helpers/utils";
 import { state } from "../../kmq";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
-import { competitionPrecheck } from "../../command_prechecks";
+import CommandPrechecks from "../../command_prechecks";
 
 export default class JoinCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: competitionPrecheck }];
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     aliases = ["j"];
 

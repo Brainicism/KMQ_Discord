@@ -3,12 +3,12 @@ import { IPCLogger } from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { getDebugLogHeader, sendOptionsMessage } from "../../helpers/discord_utils";
 import MessageContext from "../../structures/message_context";
-import { competitionPrecheck } from "../../command_prechecks";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("reset");
 
 export default class ResetCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: competitionPrecheck }];
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
         minArgCount: 0,
