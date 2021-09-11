@@ -49,7 +49,7 @@ async function awardBadges() {
     const badgeName = await getBadgeName();
 
     const playerIDsWithBadgeAlready = new Set((await dbContext.kmq("badges")
-        .select(["user_id"])
+        .select("user_id")
         .where("badge_name", "=", badgeName))
         .map((x) => x["user_id"]));
 
@@ -57,11 +57,11 @@ async function awardBadges() {
         .filter((player) => playerIDsWithBadgeAlready.has(player.id))
         .map((player) => player.id);
 
-    if (playerIDsWithBadgeAlready.size > 0) {
-        logger.info(`Players ${[...playerNamesWithBadgeAlready].join(", ")} already have the badge.`);
+    if (playerNamesWithBadgeAlready.length > 0) {
+        logger.info(`Players ${playerNamesWithBadgeAlready.join(", ")} already have the badge.`);
     }
 
-    if (playerIDsWithBadgeAlready.size === badgesObj.length) {
+    if (badgesObj.every((x) => playerIDsWithBadgeAlready.has(x.id))) {
         logger.info("All players already have this badge.");
         return;
     }
