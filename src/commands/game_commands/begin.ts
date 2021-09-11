@@ -8,12 +8,12 @@ import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import GameSession from "../../structures/game_session";
 import { state } from "../../kmq";
-import { competitionPrecheck } from "../../command_prechecks";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("begin");
 
 export default class BeginCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: competitionPrecheck }];
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     canStart(gameSession: GameSession, authorID: string, messageContext: MessageContext): boolean {
         if (!gameSession || (gameSession.gameType !== GameType.ELIMINATION && gameSession.gameType !== GameType.TEAMS)) {

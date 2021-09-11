@@ -10,12 +10,12 @@ import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
 import { generateHint, validHintCheck } from "./hint";
-import { inGameCommandPrecheck, competitionPrecheck } from "../../command_prechecks";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("forcehint");
 
 export default class ForceHintCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: inGameCommandPrecheck }, { checkFn: competitionPrecheck }];
+    preRunChecks = [{ checkFn: CommandPrechecks.inGameCommandPrecheck }, { checkFn: CommandPrechecks.competitionPrecheck }];
 
     help = {
         name: "forcehint",

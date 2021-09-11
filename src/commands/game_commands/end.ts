@@ -1,12 +1,12 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getDebugLogHeader } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
-import { inGameCommandPrecheck, competitionPrecheck } from "../../command_prechecks";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("end");
 
 export default class EndCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: inGameCommandPrecheck }, { checkFn: competitionPrecheck }];
+    preRunChecks = [{ checkFn: CommandPrechecks.inGameCommandPrecheck }, { checkFn: CommandPrechecks.competitionPrecheck }];
 
     help = {
         name: "end",

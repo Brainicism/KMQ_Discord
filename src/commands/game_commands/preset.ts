@@ -8,7 +8,7 @@ import GuildPreference from "../../structures/guild_preference";
 import { KmqImages } from "../../constants";
 import { GameOption } from "../../types";
 import dbContext from "../../database_context";
-import { competitionPrecheck } from "../../command_prechecks";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("preset");
 const PRESET_NAME_MAX_LENGTH = 25;
@@ -76,7 +76,7 @@ export default class PresetCommand implements BaseCommand {
         priority: 200,
     };
 
-    preRunChecks = [{ checkFn: competitionPrecheck }];
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);

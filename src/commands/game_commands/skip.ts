@@ -13,7 +13,7 @@ import GameRound from "../../structures/game_round";
 import { GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
-import { inGameCommandPrecheck, competitionPrecheck } from "../../command_prechecks";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("skip");
 
@@ -38,7 +38,7 @@ function isSkipMajority(message: GuildTextableMessage, gameSession: GameSession)
 }
 
 export default class SkipCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: inGameCommandPrecheck }, { checkFn: competitionPrecheck }];
+    preRunChecks = [{ checkFn: CommandPrechecks.inGameCommandPrecheck }, { checkFn: CommandPrechecks.competitionPrecheck }];
 
     help = {
         name: "skip",
