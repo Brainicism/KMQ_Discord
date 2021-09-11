@@ -4,7 +4,7 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
-import { competitionPrecheck } from "../../command_prechecks";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("artisttype");
 export enum ArtistType {
@@ -16,7 +16,7 @@ export enum ArtistType {
 export const DEFAULT_ARTIST_TYPE = ArtistType.BOTH;
 
 export default class ArtistTypeCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: competitionPrecheck }];
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
         minArgCount: 0,

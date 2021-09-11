@@ -6,12 +6,12 @@ import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { GameOption } from "../../types";
-import { debugChannelPrecheck } from "../../command_prechecks";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("forceplay");
 
 export default class ForcePlayCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: debugChannelPrecheck }];
+    preRunChecks = [{ checkFn: CommandPrechecks.debugChannelPrecheck }];
 
     call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
