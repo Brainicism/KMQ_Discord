@@ -6,8 +6,15 @@ import { IPCLogger } from "./logger";
 import dbContext from "./database_context";
 
 const logger = new IPCLogger("command_prechecks");
+export interface PrecheckArgs {
+    message: GuildTextableMessage;
+    gameSession: GameSession;
+    errorMessage?: string;
+}
+
 export default class CommandPrechecks {
-    static inGameCommandPrecheck(message: GuildTextableMessage, gameSession: GameSession, errorMessage?: string): boolean {
+    static inGameCommandPrecheck(precheckArgs: PrecheckArgs): boolean {
+        const { message, gameSession, errorMessage } = precheckArgs;
         if (!gameSession) {
             return false;
         }
@@ -29,7 +36,8 @@ export default class CommandPrechecks {
         return true;
     }
 
-    static debugServerPrecheck(message: GuildTextableMessage, _gameSession: GameSession, errorMessage?: string): boolean {
+    static debugServerPrecheck(precheckArgs: PrecheckArgs): boolean {
+        const { message, errorMessage } = precheckArgs;
         const isDebugServer = process.env.DEBUG_SERVER_ID === message.guildID;
         if (!isDebugServer) {
             logger.warn(`${getDebugLogHeader(message)} | User attempted to use a command only usable in the debug server`);
@@ -39,7 +47,8 @@ export default class CommandPrechecks {
         return isDebugServer;
     }
 
-    static debugChannelPrecheck(message: GuildTextableMessage, _gameSession: GameSession, errorMessage?: string): boolean {
+    static debugChannelPrecheck(precheckArgs: PrecheckArgs): boolean {
+        const { message, errorMessage } = precheckArgs;
         const isDebugChannel = process.env.DEBUG_TEXT_CHANNEL_ID === message.channel.id;
         if (!isDebugChannel) {
             logger.warn(`${getDebugLogHeader(message)} | User attempted to use a command only usable in the debug channel`);
@@ -49,7 +58,8 @@ export default class CommandPrechecks {
         return isDebugChannel;
     }
 
-    static async competitionPrecheck(message: GuildTextableMessage, gameSession: GameSession, errorMessage?: string): Promise<boolean> {
+    static async competitionPrecheck(precheckArgs: PrecheckArgs): Promise<boolean> {
+        const { message, gameSession, errorMessage } = precheckArgs;
         if (!gameSession || gameSession.gameType !== GameType.COMPETITION) {
             return true;
         }

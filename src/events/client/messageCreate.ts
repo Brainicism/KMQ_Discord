@@ -50,7 +50,7 @@ export default async function messageCreateHandler(message: Eris.Message) {
             const gameSession = gameSessions[message.guildID];
             if (invokedCommand.preRunChecks) {
                 for (const precheck of invokedCommand.preRunChecks) {
-                    if (!(await precheck.checkFn(message, gameSession, precheck.errorMessage))) {
+                    if (!(await precheck.checkFn({ message, gameSession, errorMessage: precheck.errorMessage }))) {
                         return;
                     }
                 }
