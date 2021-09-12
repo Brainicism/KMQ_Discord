@@ -18,7 +18,7 @@ export default class KmqClient extends Eris.Client {
     }
 
     /** @returns a mapping of command name to command source file */
-    public getCommandFiles(shouldReload: boolean): { [commandName: string]: BaseCommand } {
+    public static getCommandFiles(shouldReload: boolean): { [commandName: string]: BaseCommand } {
         const commandMap = {};
         try {
             let files: Array<string> = [];
@@ -64,7 +64,7 @@ export default class KmqClient extends Eris.Client {
     private registerCommands(initialLoad: boolean) {
         // load commands
         this.commands = {};
-        const commandFiles = this.getCommandFiles(!initialLoad);
+        const commandFiles = KmqClient.getCommandFiles(!initialLoad);
         let successfulCommands = 0;
         for (const [commandName, command] of Object.entries(commandFiles)) {
             if (this.registerCommand(command, commandName)) successfulCommands++;

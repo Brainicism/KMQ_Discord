@@ -15,7 +15,7 @@ const logger = new IPCLogger("begin");
 export default class BeginCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
-    canStart(gameSession: GameSession, authorID: string, messageContext: MessageContext): boolean {
+    static canStart(gameSession: GameSession, authorID: string, messageContext: MessageContext): boolean {
         if (!gameSession || (gameSession.gameType !== GameType.ELIMINATION && gameSession.gameType !== GameType.TEAMS)) {
             return false;
         }
@@ -40,7 +40,7 @@ export default class BeginCommand implements BaseCommand {
         const { guildID, author } = message;
         const gameSession = gameSessions[guildID];
 
-        if (!this.canStart(gameSession, author.id, MessageContext.fromMessage(message))) return;
+        if (!BeginCommand.canStart(gameSession, author.id, MessageContext.fromMessage(message))) return;
         const guildPreference = await getGuildPreference(guildID);
         if (!gameSession.sessionInitialized) {
             let participants: Array<{ id: string, username: string, discriminator: string }>;
