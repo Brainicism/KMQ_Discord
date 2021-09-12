@@ -485,7 +485,7 @@ export async function sendEndGameMessage(gameSession: GameSession) {
 export async function sendPaginationedEmbed(message: GuildTextableMessage, embeds: Array<Eris.EmbedOptions> | Array<EmbedGenerator>, components?: Array<Eris.ActionRow>, startPage = 1) {
     if (embeds.length > 1) {
         if ((await textPermissionsCheck(message.channel.id, message.guildID, message.author.id))) {
-            return EmbedPaginator.createPaginationEmbed(message, embeds, { timeout: 60000, startPage }, components);
+            return EmbedPaginator.createPaginationEmbed(message, embeds, { timeout: 60000, startPage, cycling: true }, components);
         }
 
         return null;

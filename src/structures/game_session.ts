@@ -965,6 +965,16 @@ export default class GameSession {
             .onConflict("player_id")
             .ignore();
 
+        await dbContext.kmq("weekly_player_stats")
+            .insert({ player_id: userID })
+            .onConflict("player_id")
+            .ignore();
+
+        await dbContext.kmq("monthly_player_stats")
+            .insert({ player_id: userID })
+            .onConflict("player_id")
+            .ignore();
+
         await dbContext.kmq("player_servers")
             .insert({
                 player_id: userID,
@@ -990,6 +1000,14 @@ export default class GameSession {
         await dbContext.kmq("daily_player_stats")
             .where("player_id", "=", userID)
             .increment("songs_guessed", score);
+
+        await dbContext.kmq("weekly_player_stats")
+            .where("player_id", "=", userID)
+            .increment("songs_guessed", score);
+
+        await dbContext.kmq("monthly_player_stats")
+            .where("player_id", "=", userID)
+            .increment("songs_guessed", score);
     }
 
     /**
@@ -1002,6 +1020,14 @@ export default class GameSession {
             .increment("games_played", 1);
 
         await dbContext.kmq("daily_player_stats")
+            .where("player_id", "=", userID)
+            .increment("games_played", 1);
+
+        await dbContext.kmq("weekly_player_stats")
+            .where("player_id", "=", userID)
+            .increment("games_played", 1);
+
+        await dbContext.kmq("monthly_player_stats")
             .where("player_id", "=", userID)
             .increment("games_played", 1);
     }
@@ -1031,11 +1057,27 @@ export default class GameSession {
 
         await dbContext.kmq("daily_player_stats")
             .where("player_id", "=", userID)
-            .increment("exp_gained", expGain);
+            .increment("exp", expGain);
 
         await dbContext.kmq("daily_player_stats")
             .where("player_id", "=", userID)
-            .increment("levels_gained", newLevel - level);
+            .increment("level", newLevel - level);
+
+        await dbContext.kmq("weekly_player_stats")
+            .where("player_id", "=", userID)
+            .increment("exp", expGain);
+
+        await dbContext.kmq("weekly_player_stats")
+            .where("player_id", "=", userID)
+            .increment("level", newLevel - level);
+
+        await dbContext.kmq("monthly_player_stats")
+            .where("player_id", "=", userID)
+            .increment("exp", expGain);
+
+        await dbContext.kmq("monthly_player_stats")
+            .where("player_id", "=", userID)
+            .increment("level", newLevel - level);
 
         if (level !== newLevel) {
             logger.info(`${userID} has leveled from ${level} to ${newLevel}`);
