@@ -94,22 +94,22 @@ export default class LeaderboardCommand implements BaseCommand {
 
     call = async ({ message, parsedMessage }: CommandArgs) => {
         if (parsedMessage.components.length === 0) {
-            this.showLeaderboard(message, 0, LeaderboardType.GLOBAL);
+            LeaderboardCommand.showLeaderboard(message, 0, LeaderboardType.GLOBAL);
             return;
         }
 
         const action = parsedMessage.components[0] as LeaderboardAction;
         if (parsedMessage.components.length === 1) {
             if (action === LeaderboardAction.ENROLL) {
-                this.enrollLeaderboard(message);
+                LeaderboardCommand.enrollLeaderboard(message);
             } else if (action === LeaderboardAction.UNEROLL) {
-                this.unenrollLeaderboard(message);
+                LeaderboardCommand.unenrollLeaderboard(message);
             } else if (action === LeaderboardAction.PAGE) {
-                this.showLeaderboard(message, 0, LeaderboardType.GLOBAL);
+                LeaderboardCommand.showLeaderboard(message, 0, LeaderboardType.GLOBAL);
             } else if (action === LeaderboardAction.SERVER) {
-                this.showLeaderboard(message, 0, LeaderboardType.SERVER);
+                LeaderboardCommand.showLeaderboard(message, 0, LeaderboardType.SERVER);
             } else if (action === LeaderboardAction.GAME) {
-                this.showLeaderboard(message, 0, LeaderboardType.GAME);
+                LeaderboardCommand.showLeaderboard(message, 0, LeaderboardType.GAME);
             }
 
             return;
@@ -118,18 +118,18 @@ export default class LeaderboardCommand implements BaseCommand {
         if (parsedMessage.components.length === 2) {
             const pageOffset = parseInt(parsedMessage.components[1]) - 1;
             if (action === LeaderboardAction.PAGE) {
-                this.showLeaderboard(message, pageOffset, LeaderboardType.GLOBAL);
+                LeaderboardCommand.showLeaderboard(message, pageOffset, LeaderboardType.GLOBAL);
             } else if (action === LeaderboardAction.SERVER) {
-                this.showLeaderboard(message, pageOffset, LeaderboardType.SERVER);
+                LeaderboardCommand.showLeaderboard(message, pageOffset, LeaderboardType.SERVER);
             } else if (action === LeaderboardAction.GAME) {
-                this.showLeaderboard(message, pageOffset, LeaderboardType.GAME);
+                LeaderboardCommand.showLeaderboard(message, pageOffset, LeaderboardType.GAME);
             } else {
                 sendErrorMessage(MessageContext.fromMessage(message), { title: "Incorrect Leaderboard Usage", description: `See \`${process.env.BOT_PREFIX}help leaderboard\` for more details` });
             }
         }
     };
 
-    private async enrollLeaderboard(message: GuildTextableMessage) {
+    private static async enrollLeaderboard(message: GuildTextableMessage) {
         const alreadyEnrolled = !!(await dbContext.kmq("leaderboard_enrollment")
             .where("player_id", "=", message.author.id)
             .first());
@@ -147,14 +147,14 @@ export default class LeaderboardCommand implements BaseCommand {
         sendInfoMessage(MessageContext.fromMessage(message), { title: "Leaderboard Enrollment Complete", description: "Your name is now visible on the leaderboard" });
     }
 
-    private async unenrollLeaderboard(message: GuildTextableMessage) {
+    private static async unenrollLeaderboard(message: GuildTextableMessage) {
         await dbContext.kmq("leaderboard_enrollment")
             .where("player_id", "=", message.author.id)
             .del();
         sendInfoMessage(MessageContext.fromMessage(message), { title: "Leaderboard Unenrollment Complete", description: "You are no longer visible on the leaderboard" });
     }
 
-    private async showLeaderboard(message: GuildTextableMessage, pageOffset: number, type: LeaderboardType) {
+    private static async showLeaderboard(message: GuildTextableMessage, pageOffset: number, type: LeaderboardType) {
         const offset = 10 * pageOffset;
         let topPlayersQuery = dbContext.kmq("player_stats")
             .select(["exp", "level", "player_id"])
