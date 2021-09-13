@@ -328,7 +328,7 @@ export default class GameSession {
         const leveledUpPlayers: Array<LevelUpResult> = [];
         // commit player stats
         for (const participant of this.participants) {
-            await this.ensurePlayerStat(participant);
+            this.ensurePlayerStat(participant);
             await GameSession.incrementPlayerGamesPlayed(participant);
             const playerScore = this.scoreboard.getPlayerScore(participant);
             if (playerScore > 0) {
@@ -947,41 +947,41 @@ export default class GameSession {
      * Creates/updates a user's activity in the data store
      * @param userID - The player's Discord user ID
      */
-    private async ensurePlayerStat(userID: string) {
-        const currentDateString = getSqlDateString();
-        await dbContext.kmq("player_stats")
-            .insert(
-                {
+    private ensurePlayerStat(userID: string) {
+        dbContext.kmq.transaction(async (trx) => {
+            const currentDateString = getSqlDateString();
+            await dbContext.kmq("player_stats")
+                .insert(
+                    {
+                        player_id: userID,
+                        first_play: currentDateString,
+                        last_active: currentDateString,
+                    },
+                )
+                .onConflict("player_id")
+                .ignore()
+                .transacting(trx);
+
+            await dbContext.kmq("temporary_player_stats")
+                .insert(
+                    {
+                        player_id: userID,
+                        date: currentDateString,
+                    },
+                )
+                .onConflict(["player_id", "date"])
+                .ignore()
+                .transacting(trx);
+
+            await dbContext.kmq("player_servers")
+                .insert({
                     player_id: userID,
-                    first_play: currentDateString,
-                    last_active: currentDateString,
-                },
-            )
-            .onConflict("player_id")
-            .ignore();
-
-        await dbContext.kmq("daily_player_stats")
-            .insert({ player_id: userID })
-            .onConflict("player_id")
-            .ignore();
-
-        await dbContext.kmq("weekly_player_stats")
-            .insert({ player_id: userID })
-            .onConflict("player_id")
-            .ignore();
-
-        await dbContext.kmq("monthly_player_stats")
-            .insert({ player_id: userID })
-            .onConflict("player_id")
-            .ignore();
-
-        await dbContext.kmq("player_servers")
-            .insert({
-                player_id: userID,
-                server_id: this.guildID,
-            })
-            .onConflict(["player_id", "server_id"])
-            .ignore();
+                    server_id: this.guildID,
+                })
+                .onConflict(["player_id", "server_id"])
+                .ignore()
+                .transacting(trx);
+        });
     }
 
     /**
@@ -989,25 +989,23 @@ export default class GameSession {
      * @param userID - The player's Discord user ID
      * @param score - The player's score in the current GameSession
      */
-    private static async incrementPlayerSongsGuessed(userID: string, score: number) {
-        await dbContext.kmq("player_stats")
-            .where("player_id", "=", userID)
-            .increment("songs_guessed", score)
-            .update({
-                last_active: getSqlDateString(),
-            });
+    private static incrementPlayerSongsGuessed(userID: string, score: number) {
+        dbContext.kmq.transaction(async (trx) => {
+            await dbContext.kmq("player_stats")
+                .where("player_id", "=", userID)
+                .increment("songs_guessed", score)
+                .update({
+                    last_active: getSqlDateString(),
+                })
+                .transacting(trx);
 
-        await dbContext.kmq("daily_player_stats")
-            .where("player_id", "=", userID)
-            .increment("songs_guessed", score);
-
-        await dbContext.kmq("weekly_player_stats")
-            .where("player_id", "=", userID)
-            .increment("songs_guessed", score);
-
-        await dbContext.kmq("monthly_player_stats")
-            .where("player_id", "=", userID)
-            .increment("songs_guessed", score);
+            const currentDateString = getSqlDateString();
+            await dbContext.kmq("temporary_player_stats")
+                .where("player_id", "=", userID)
+                .andWhere("date", "=", currentDateString)
+                .increment("songs_guessed", score)
+                .transacting(trx);
+        });
     }
 
     /**
@@ -1016,18 +1014,6 @@ export default class GameSession {
      */
     private static async incrementPlayerGamesPlayed(userID: string) {
         await dbContext.kmq("player_stats")
-            .where("player_id", "=", userID)
-            .increment("games_played", 1);
-
-        await dbContext.kmq("daily_player_stats")
-            .where("player_id", "=", userID)
-            .increment("games_played", 1);
-
-        await dbContext.kmq("weekly_player_stats")
-            .where("player_id", "=", userID)
-            .increment("games_played", 1);
-
-        await dbContext.kmq("monthly_player_stats")
             .where("player_id", "=", userID)
             .increment("games_played", 1);
     }
@@ -1050,34 +1036,26 @@ export default class GameSession {
             newLevel++;
         }
 
-        // persist exp and level to data store
-        await dbContext.kmq("player_stats")
-            .update({ exp: newExp, level: newLevel })
-            .where("player_id", "=", userID);
+        await dbContext.kmq.transaction(async (trx) => {
+            // persist exp and level to data store
+            await dbContext.kmq("player_stats")
+                .update({ exp: newExp, level: newLevel })
+                .where("player_id", "=", userID)
+                .transacting(trx);
 
-        await dbContext.kmq("daily_player_stats")
-            .where("player_id", "=", userID)
-            .increment("exp", expGain);
+            const currentDateString = getSqlDateString();
+            await dbContext.kmq("temporary_player_stats")
+                .where("player_id", "=", userID)
+                .andWhere("date", "=", currentDateString)
+                .increment("exp_gained", expGain)
+                .transacting(trx);
 
-        await dbContext.kmq("daily_player_stats")
-            .where("player_id", "=", userID)
-            .increment("level", newLevel - level);
-
-        await dbContext.kmq("weekly_player_stats")
-            .where("player_id", "=", userID)
-            .increment("exp", expGain);
-
-        await dbContext.kmq("weekly_player_stats")
-            .where("player_id", "=", userID)
-            .increment("level", newLevel - level);
-
-        await dbContext.kmq("monthly_player_stats")
-            .where("player_id", "=", userID)
-            .increment("exp", expGain);
-
-        await dbContext.kmq("monthly_player_stats")
-            .where("player_id", "=", userID)
-            .increment("level", newLevel - level);
+            await dbContext.kmq("temporary_player_stats")
+                .where("player_id", "=", userID)
+                .andWhere("date", "=", currentDateString)
+                .increment("levels_gained", newLevel - level)
+                .transacting(trx);
+        });
 
         if (level !== newLevel) {
             logger.info(`${userID} has leveled from ${level} to ${newLevel}`);

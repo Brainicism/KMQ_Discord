@@ -2,7 +2,7 @@ import Eris from "eris";
 import dbContext from "../../database_context";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
-import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage, sendPaginationedEmbed, EmbedGenerator } from "../../helpers/discord_utils";
+import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage, sendPaginationedEmbed, EmbedGenerator, getSqlDateString } from "../../helpers/discord_utils";
 import { getRankNameByLevel } from "./profile";
 import { chooseRandom, friendlyFormattedNumber, bold, arrayToString } from "../../helpers/utils";
 import { state } from "../../kmq";
@@ -20,7 +20,7 @@ export enum LeaderboardType {
 }
 
 export enum LeaderboardDuration {
-    INDEFINITE = "indefinite",
+    PERMANENT = "permanent",
     DAILY = "daily",
     WEEKLY = "weekly",
     MONTHLY = "monthly",
@@ -30,13 +30,6 @@ enum LeaderboardAction {
     ENROLL = "enroll",
     UNENROLL = "unenroll",
 }
-
-export const TABLE_BY_DURATION = {
-    [LeaderboardDuration.INDEFINITE]: "player_stats",
-    [LeaderboardDuration.DAILY]: "daily_player_stats",
-    [LeaderboardDuration.WEEKLY]: "weekly_player_stats",
-    [LeaderboardDuration.MONTHLY]: "monthly_player_stats",
-};
 
 const leaderboardQuotes = [
     `Want your name to show up on the leaderboard? See ${process.env.BOT_PREFIX}help leaderboard`,
@@ -62,7 +55,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 explanation: "Shows the server-wide leaderboard",
             },
             {
-                example: "`,leaderboard 3 server`",
+                example: "`,leaderboard server 3`",
                 explanation: "Shows the 3rd page of the server-wide leaderboard",
             },
             {
@@ -95,12 +88,12 @@ export default class LeaderboardCommand implements BaseCommand {
 
     call = async ({ message, parsedMessage }: CommandArgs) => {
         if (parsedMessage.components.length === 0) {
-            LeaderboardCommand.showLeaderboard(message, 0, LeaderboardType.GLOBAL, LeaderboardDuration.INDEFINITE);
+            LeaderboardCommand.showLeaderboard(message, 0, LeaderboardType.GLOBAL, LeaderboardDuration.PERMANENT);
             return;
         }
 
         let type = LeaderboardType.GLOBAL;
-        let duration = LeaderboardDuration.INDEFINITE;
+        let duration = LeaderboardDuration.PERMANENT;
         let pageOffset = 0;
 
         for (const arg of parsedMessage.components) {
@@ -147,7 +140,7 @@ export default class LeaderboardCommand implements BaseCommand {
         }
 
         const embeds: Array<EmbedGenerator> = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, type, duration);
-        if (pageOffset + 1 > await LeaderboardCommand.getPageCount(messageContext, type, TABLE_BY_DURATION[duration])) {
+        if (pageOffset + 1 > await LeaderboardCommand.getPageCount(messageContext, type, duration)) {
             sendErrorMessage(messageContext, { title: "😐", description: "The leaderboard doesn't go this far.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
             return;
         }
@@ -188,11 +181,37 @@ export default class LeaderboardCommand implements BaseCommand {
 
     private static async getLeaderboardEmbeds(messageContext: MessageContext, type: LeaderboardType, duration: LeaderboardDuration): Promise<Array<EmbedGenerator>> {
         const embedsFns: Array<EmbedGenerator> = [];
-        const dbTable = TABLE_BY_DURATION[duration];
+        const permanentLb = duration === LeaderboardDuration.PERMANENT;
+        const dbTable = permanentLb ? "player_stats" : "temporary_player_stats";
 
         let topPlayersQuery = dbContext.kmq(dbTable)
-            .select(["exp", "level", "player_id"])
-            .where("exp", ">", 0);
+            .select(permanentLb ? ["exp", "level", "player_id"] : ["player_id"])
+            .where(permanentLb ? "exp" : "exp_gained", ">", 0)
+            .groupBy("player_id");
+
+        if (!permanentLb) {
+            topPlayersQuery = topPlayersQuery
+                .sum("exp_gained as exp")
+                .sum("levels_gained as level");
+        }
+
+        const d = new Date();
+        switch (duration) {
+            case LeaderboardDuration.DAILY:
+                topPlayersQuery = topPlayersQuery
+                    .where("date", ">", getSqlDateString(new Date().setHours(0, 0, 0, 0)));
+                break;
+            case LeaderboardDuration.WEEKLY:
+                topPlayersQuery = topPlayersQuery
+                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay()).getTime()));
+                break;
+            case LeaderboardDuration.MONTHLY:
+                topPlayersQuery = topPlayersQuery
+                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth()).getTime()));
+                break;
+            default:
+                break;
+        }
 
         if (type === LeaderboardType.SERVER) {
             const serverPlayers = (await dbContext.kmq("player_servers")
@@ -209,7 +228,7 @@ export default class LeaderboardCommand implements BaseCommand {
             topPlayersQuery = topPlayersQuery.whereIn("player_id", gamePlayers);
         }
 
-        const pages = await LeaderboardCommand.getPageCount(messageContext, type, dbTable);
+        const pages = await LeaderboardCommand.getPageCount(messageContext, type, duration);
         for (let i = 0; i < pages; i++) {
             const offset = i * 10;
             embedsFns.push(() => new Promise(async (resolve) => {
@@ -226,10 +245,10 @@ export default class LeaderboardCommand implements BaseCommand {
 
                     const medalIcon = ["🥇", "🥈", "🥉"][rank] || "";
                     const displayName = enrolledPlayer ? enrolledPlayer.display_name : `Rank #${(rank) + 1}`;
-                    const rankOrLevelsGained = duration === LeaderboardDuration.INDEFINITE ? `${getRankNameByLevel(player.level)}` : "levels gained";
+                    const rankOrLevelsGained = permanentLb ? `${getRankNameByLevel(player.level)}` : "levels gained";
                     return {
                         name: `${medalIcon} ${displayName}`,
-                        value: `${duration !== LeaderboardDuration.INDEFINITE ? "+" : ""}${friendlyFormattedNumber(player.exp)} EXP | ${duration === LeaderboardDuration.INDEFINITE ? "Level" : ""} ${friendlyFormattedNumber(player.level)} ${rankOrLevelsGained}`,
+                        value: `${duration !== LeaderboardDuration.PERMANENT ? "+" : ""}${friendlyFormattedNumber(player.exp)} EXP | ${permanentLb ? "Level" : ""} ${friendlyFormattedNumber(player.level)} ${rankOrLevelsGained}`,
                     };
                 }));
 
@@ -247,7 +266,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     default:
                 }
 
-                const durationString = duration !== LeaderboardDuration.INDEFINITE ? ` ${duration[0].toUpperCase()}${duration.slice(1)} ` : " ";
+                const durationString = !permanentLb ? ` ${duration[0].toUpperCase()}${duration.slice(1)} ` : " ";
 
                 resolve({
                     title: bold(`${leaderboardType}${durationString}Leaderboard`),
@@ -262,8 +281,31 @@ export default class LeaderboardCommand implements BaseCommand {
         return embedsFns;
     }
 
-    private static async getPageCount(messageContext: MessageContext, type: LeaderboardType, dbTable: string): Promise<number> {
-        let playerCount: number;
+    private static async getPageCount(messageContext: MessageContext, type: LeaderboardType, duration: LeaderboardDuration): Promise<number> {
+        const dbTable = duration === LeaderboardDuration.PERMANENT ? "player_stats" : "temporary_player_stats";
+        let playerCountQuery = dbContext.kmq(dbTable)
+            .count("* as count")
+            .where(duration === LeaderboardDuration.PERMANENT ? "exp" : "exp_gained", ">", 0)
+            .distinct("player_id");
+
+        const d = new Date();
+        switch (duration) {
+            case LeaderboardDuration.DAILY:
+                playerCountQuery = playerCountQuery
+                    .where("date", ">", getSqlDateString(new Date().setHours(0, 0, 0, 0)));
+                break;
+            case LeaderboardDuration.WEEKLY:
+                playerCountQuery = playerCountQuery
+                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay()).getTime()));
+                break;
+            case LeaderboardDuration.MONTHLY:
+                playerCountQuery = playerCountQuery
+                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth()).getTime()));
+                break;
+            default:
+                break;
+        }
+
         switch (type) {
             case LeaderboardType.SERVER:
             {
@@ -271,7 +313,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     .select("player_id")
                     .where("server_id", "=", messageContext.guildID)).map((x) => x.player_id);
 
-                playerCount = serverPlayers.length;
+                playerCountQuery = playerCountQuery.whereIn("player_id", serverPlayers);
                 break;
             }
 
@@ -282,17 +324,15 @@ export default class LeaderboardCommand implements BaseCommand {
                     .select("player_id")
                     .whereIn("player_id", [...participantIDs])).map((x) => x.player_id);
 
-                playerCount = gamePlayers.length;
+                playerCountQuery = playerCountQuery.whereIn("player_id", gamePlayers);
                 break;
             }
 
             default:
-                playerCount = ((await dbContext.kmq(dbTable).count("player_id as count")
-                    .where("exp", ">", 0)
-                    .first())["count"] as number);
                 break;
         }
 
+        const playerCount = (await playerCountQuery.first())["count"] as number;
         return Math.ceil(playerCount / 10);
     }
 }

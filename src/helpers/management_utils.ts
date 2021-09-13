@@ -32,8 +32,6 @@ import { chooseRandom } from "./utils";
 import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
 import { EnvType } from "../types";
-import LeaderboardCommand, { LeaderboardDuration, LeaderboardType, TABLE_BY_DURATION } from "../commands/game_commands/leaderboard";
-import KmqMember from "../structures/kmq_member";
 
 const logger = new IPCLogger("management_utils");
 
@@ -259,17 +257,6 @@ export async function clearRestartNotification() {
         .update({ restart_time: null });
 }
 
-/**
- * Clears the given temporary scoreboard on cronjob timer
- * Sends scoreboard before deletion in debug channel
- */
-async function clearTemporaryLeaderboard(duration: LeaderboardDuration.DAILY | LeaderboardDuration.WEEKLY | LeaderboardDuration.MONTHLY) {
-    await LeaderboardCommand.showLeaderboard(
-        new MessageContext(process.env.DEBUG_TEXT_CHANNEL_ID, KmqMember.fromUser(state.client.user), process.env.DEBUG_SERVER_ID), 0, LeaderboardType.GLOBAL, duration,
-    );
-    await dbContext.kmq(TABLE_BY_DURATION[duration]).del();
-}
-
 /** Sets up recurring cron-based tasks */
 export function registerIntervals(clusterID: number) {
     // set up cleanup for inactive game sessions
@@ -304,17 +291,6 @@ export function registerIntervals(clusterID: number) {
     // everyday at 12am UTC => 7pm EST
     schedule.scheduleJob("0 0 * * *", async () => {
         reloadFactCache();
-        clearTemporaryLeaderboard(LeaderboardDuration.DAILY);
-    });
-
-    // every sunday at 12am UTC => monday 7pm EST
-    schedule.scheduleJob("0 0 1 * *", async () => {
-        clearTemporaryLeaderboard(LeaderboardDuration.WEEKLY);
-    });
-
-    // every first of the month
-    schedule.scheduleJob("0 0 1 * *", async () => {
-        clearTemporaryLeaderboard(LeaderboardDuration.MONTHLY);
     });
 }
 
