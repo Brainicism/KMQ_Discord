@@ -32,6 +32,7 @@ import { chooseRandom } from "./utils";
 import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
 import { EnvType } from "../types";
+import LeaderboardCommand, { LeaderboardDuration } from "../commands/game_commands/leaderboard";
 
 const logger = new IPCLogger("management_utils");
 
@@ -276,8 +277,19 @@ export function registerIntervals(clusterID: number) {
         }
     });
 
+    // every first of the month at 12am UTC => 7pm EST
+    schedule.scheduleJob("0 0 1 * *", async () => {
+        LeaderboardCommand.sendDebugLeaderboard(LeaderboardDuration.MONTHLY);
+    });
+
+    // every sunday at 12am UTC => saturday 7pm EST
+    schedule.scheduleJob("0 0 * * SUN", async () => {
+        LeaderboardCommand.sendDebugLeaderboard(LeaderboardDuration.WEEKLY);
+    });
+
     // everyday at 12am UTC => 7pm EST
     schedule.scheduleJob("0 0 * * *", async () => {
+        LeaderboardCommand.sendDebugLeaderboard(LeaderboardDuration.DAILY);
         reloadFactCache();
     });
 
@@ -288,7 +300,7 @@ export function registerIntervals(clusterID: number) {
         await updateSystemStats(clusterID);
     });
 
-    // every 1 minute
+    // every minute
     schedule.scheduleJob("*/1 * * * *", async () => {
         await updateClusterActivityStats(clusterID);
     });

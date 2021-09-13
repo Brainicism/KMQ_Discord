@@ -10,6 +10,7 @@ import { GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import { sendValidationErrorMessage } from "../../helpers/validate";
+import KmqMember from "../../structures/kmq_member";
 
 const logger = new IPCLogger("leaderboard");
 
@@ -88,7 +89,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
     call = async ({ message, parsedMessage }: CommandArgs) => {
         if (parsedMessage.components.length === 0) {
-            LeaderboardCommand.showLeaderboard(message, 0, LeaderboardType.GLOBAL, LeaderboardDuration.PERMANENT);
+            LeaderboardCommand.showLeaderboard(message, LeaderboardType.GLOBAL, LeaderboardDuration.PERMANENT);
             return;
         }
 
@@ -123,37 +124,11 @@ export default class LeaderboardCommand implements BaseCommand {
             }
         }
 
-        LeaderboardCommand.showLeaderboard(message, pageOffset, type, duration);
+        LeaderboardCommand.showLeaderboard(message, type, duration, pageOffset);
     };
 
-    public static async showLeaderboard(message: GuildTextableMessage | MessageContext, pageOffset: number, type: LeaderboardType, duration: LeaderboardDuration) {
-        const messageContext: MessageContext = message instanceof MessageContext ? message : MessageContext.fromMessage(message);
-        if (type === LeaderboardType.GAME) {
-            if (!state.gameSessions[message.guildID]) {
-                sendErrorMessage(messageContext, { title: "No Active Game", description: "There is no game in progress.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
-                return;
-            }
-
-            const participantIDs = state.gameSessions[message.guildID].participants;
-            if (participantIDs.size === 0) {
-                sendErrorMessage(messageContext, { title: "No Participants", description: "Someone needs to score a point before this command works!", thumbnailUrl: KmqImages.NOT_IMPRESSED });
-                return;
-            }
-        }
-
-        const embeds: Array<EmbedGenerator> = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, type, duration);
-        if (pageOffset + 1 > await LeaderboardCommand.getPageCount(messageContext, type, duration)) {
-            sendErrorMessage(messageContext, { title: "😐", description: "The leaderboard doesn't go this far.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
-            return;
-        }
-
-        logger.info(`${getDebugLogHeader(message)} | Leaderboard retrieved (${type})`);
-        if (!(message instanceof MessageContext)) {
-            sendPaginationedEmbed(message, embeds, null, pageOffset + 1);
-        } else {
-            // Used only in sending leaderboard in debug channel before reset
-            state.client.createMessage(process.env.DEBUG_TEXT_CHANNEL_ID, { embeds: [await embeds[pageOffset]()] });
-        }
+    public static async sendDebugLeaderboard(duration: LeaderboardDuration) {
+        LeaderboardCommand.showLeaderboard(new MessageContext(process.env.DEBUG_TEXT_CHANNEL_ID, KmqMember.fromUser(state.client.user), process.env.DEBUG_SERVER_ID), LeaderboardType.GLOBAL, duration);
     }
 
     private static async enrollLeaderboard(message: GuildTextableMessage) {
@@ -199,17 +174,18 @@ export default class LeaderboardCommand implements BaseCommand {
 
         const d = new Date();
         switch (duration) {
+            // Give an extra second to send temporary leaderboards to debug channel
             case LeaderboardDuration.DAILY:
                 topPlayersQuery = topPlayersQuery
-                    .where("date", ">", getSqlDateString(new Date().setHours(0, 0, 0, 0)));
+                    .where("date", ">", getSqlDateString(new Date().setHours(0, 0, 1, 0)));
                 break;
             case LeaderboardDuration.WEEKLY:
                 topPlayersQuery = topPlayersQuery
-                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay()).getTime()));
+                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay(), 0, 0, 1).getTime()));
                 break;
             case LeaderboardDuration.MONTHLY:
                 topPlayersQuery = topPlayersQuery
-                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth()).getTime()));
+                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth(), 0, 0, 0, 1).getTime()));
                 break;
             default:
                 break;
@@ -336,5 +312,35 @@ export default class LeaderboardCommand implements BaseCommand {
 
         const playerCount = (await playerCountQuery.first())["count"] as number;
         return Math.ceil(playerCount / 10);
+    }
+
+    private static async showLeaderboard(message: GuildTextableMessage | MessageContext, type: LeaderboardType, duration: LeaderboardDuration, pageOffset: number = 0) {
+        const messageContext: MessageContext = message instanceof MessageContext ? message : MessageContext.fromMessage(message);
+        if (type === LeaderboardType.GAME) {
+            if (!state.gameSessions[message.guildID]) {
+                sendErrorMessage(messageContext, { title: "No Active Game", description: "There is no game in progress.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
+                return;
+            }
+
+            const participantIDs = state.gameSessions[message.guildID].participants;
+            if (participantIDs.size === 0) {
+                sendErrorMessage(messageContext, { title: "No Participants", description: "Someone needs to score a point before this command works!", thumbnailUrl: KmqImages.NOT_IMPRESSED });
+                return;
+            }
+        }
+
+        const embeds: Array<EmbedGenerator> = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, type, duration);
+        if (pageOffset + 1 > await LeaderboardCommand.getPageCount(messageContext, type, duration)) {
+            sendErrorMessage(messageContext, { title: "😐", description: "The leaderboard doesn't go this far.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
+            return;
+        }
+
+        logger.info(`${getDebugLogHeader(message)} | Leaderboard retrieved (${type})`);
+        if (!(message instanceof MessageContext)) {
+            sendPaginationedEmbed(message, embeds, null, pageOffset + 1);
+        } else {
+            // Used only in sending leaderboard in debug channel before reset
+            state.client.createMessage(process.env.DEBUG_TEXT_CHANNEL_ID, { embeds: [await embeds[pageOffset]()] });
+        }
     }
 }
