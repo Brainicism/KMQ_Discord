@@ -95,7 +95,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
     call = async ({ message, parsedMessage }: CommandArgs) => {
         if (parsedMessage.components.length === 0) {
-            this.showLeaderboard(message, 0, LeaderboardType.GLOBAL, LeaderboardDuration.INDEFINITE);
+            LeaderboardCommand.showLeaderboard(message, 0, LeaderboardType.GLOBAL, LeaderboardDuration.INDEFINITE);
             return;
         }
 
@@ -107,9 +107,9 @@ export default class LeaderboardCommand implements BaseCommand {
             if (Object.values(LeaderboardAction).includes(arg as LeaderboardAction)) {
                 const action = arg as LeaderboardAction;
                 if (action === LeaderboardAction.ENROLL) {
-                    this.enrollLeaderboard(message);
+                    LeaderboardCommand.enrollLeaderboard(message);
                 } else if (action === LeaderboardAction.UNENROLL) {
-                    this.unenrollLeaderboard(message);
+                    LeaderboardCommand.unenrollLeaderboard(message);
                 }
 
                 return;
@@ -128,10 +128,10 @@ export default class LeaderboardCommand implements BaseCommand {
             }
         }
 
-        this.showLeaderboard(message, pageOffset, type, duration);
+        LeaderboardCommand.showLeaderboard(message, pageOffset, type, duration);
     };
 
-    public async showLeaderboard(message: GuildTextableMessage | MessageContext, pageOffset: number, type: LeaderboardType, duration: LeaderboardDuration) {
+    public static async showLeaderboard(message: GuildTextableMessage | MessageContext, pageOffset: number, type: LeaderboardType, duration: LeaderboardDuration) {
         const messageContext: MessageContext = message instanceof MessageContext ? message : MessageContext.fromMessage(message);
         if (type === LeaderboardType.GAME) {
             if (!state.gameSessions[message.guildID]) {
@@ -146,8 +146,8 @@ export default class LeaderboardCommand implements BaseCommand {
             }
         }
 
-        const embeds: Array<EmbedGenerator> = await this.getLeaderboardEmbeds(messageContext, type, duration);
-        if (pageOffset + 1 > await this.getPageCount(messageContext, type, TABLE_BY_DURATION[duration])) {
+        const embeds: Array<EmbedGenerator> = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, type, duration);
+        if (pageOffset + 1 > await LeaderboardCommand.getPageCount(messageContext, type, TABLE_BY_DURATION[duration])) {
             sendErrorMessage(messageContext, { title: "😐", description: "The leaderboard doesn't go this far.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
             return;
         }
@@ -161,7 +161,7 @@ export default class LeaderboardCommand implements BaseCommand {
         }
     }
 
-    private async enrollLeaderboard(message: GuildTextableMessage) {
+    private static async enrollLeaderboard(message: GuildTextableMessage) {
         const alreadyEnrolled = !!(await dbContext.kmq("leaderboard_enrollment")
             .where("player_id", "=", message.author.id)
             .first());
@@ -179,14 +179,14 @@ export default class LeaderboardCommand implements BaseCommand {
         sendInfoMessage(MessageContext.fromMessage(message), { title: "Leaderboard Enrollment Complete", description: "Your name is now visible on the leaderboard" });
     }
 
-    private async unenrollLeaderboard(message: GuildTextableMessage) {
+    private static async unenrollLeaderboard(message: GuildTextableMessage) {
         await dbContext.kmq("leaderboard_enrollment")
             .where("player_id", "=", message.author.id)
             .del();
         sendInfoMessage(MessageContext.fromMessage(message), { title: "Leaderboard Unenrollment Complete", description: "You are no longer visible on the leaderboard" });
     }
 
-    private async getLeaderboardEmbeds(messageContext: MessageContext, type: LeaderboardType, duration: LeaderboardDuration): Promise<Array<EmbedGenerator>> {
+    private static async getLeaderboardEmbeds(messageContext: MessageContext, type: LeaderboardType, duration: LeaderboardDuration): Promise<Array<EmbedGenerator>> {
         const embedsFns: Array<EmbedGenerator> = [];
         const dbTable = TABLE_BY_DURATION[duration];
 
@@ -209,7 +209,7 @@ export default class LeaderboardCommand implements BaseCommand {
             topPlayersQuery = topPlayersQuery.whereIn("player_id", gamePlayers);
         }
 
-        const pages = await this.getPageCount(messageContext, type, dbTable);
+        const pages = await LeaderboardCommand.getPageCount(messageContext, type, dbTable);
         for (let i = 0; i < pages; i++) {
             const offset = i * 10;
             embedsFns.push(() => new Promise(async (resolve) => {
@@ -262,7 +262,7 @@ export default class LeaderboardCommand implements BaseCommand {
         return embedsFns;
     }
 
-    private async getPageCount(messageContext: MessageContext, type: LeaderboardType, dbTable: string): Promise<number> {
+    private static async getPageCount(messageContext: MessageContext, type: LeaderboardType, dbTable: string): Promise<number> {
         let playerCount: number;
         switch (type) {
             case LeaderboardType.SERVER:

@@ -23,13 +23,13 @@ export default class JoinCommand implements BaseCommand {
         }
 
         if (gameSession.gameType === GameType.ELIMINATION) {
-            this.joinEliminationGame(message, gameSession);
+            JoinCommand.joinEliminationGame(message, gameSession);
         } else if (gameSession.gameType === GameType.TEAMS) {
-            this.joinTeamsGame(message, parsedMessage, gameSession);
+            JoinCommand.joinTeamsGame(message, parsedMessage, gameSession);
         }
     };
 
-    joinEliminationGame(message: GuildTextableMessage, gameSession: GameSession) {
+    static joinEliminationGame(message: GuildTextableMessage, gameSession: GameSession) {
         const kmqMember = KmqMember.fromUser(message.author);
         if (gameSession.participants.has(message.author.id)) {
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Player already joined", description: `${getMention(message.author.id)} is already in the game.` });
@@ -53,7 +53,7 @@ export default class JoinCommand implements BaseCommand {
         gameSession.addEliminationParticipant(kmqMember);
     }
 
-    joinTeamsGame(message: GuildTextableMessage, parsedMessage: ParsedMessage, gameSession: GameSession) {
+    static joinTeamsGame(message: GuildTextableMessage, parsedMessage: ParsedMessage, gameSession: GameSession) {
         if (parsedMessage.components.length === 0) {
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: "Join error",

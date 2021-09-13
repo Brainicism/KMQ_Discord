@@ -264,7 +264,7 @@ export async function clearRestartNotification() {
  * Sends scoreboard before deletion in debug channel
  */
 async function clearTemporaryLeaderboard(duration: LeaderboardDuration.DAILY | LeaderboardDuration.WEEKLY | LeaderboardDuration.MONTHLY) {
-    await new LeaderboardCommand().showLeaderboard(
+    await LeaderboardCommand.showLeaderboard(
         new MessageContext(process.env.DEBUG_TEXT_CHANNEL_ID, KmqMember.fromUser(state.client.user), process.env.DEBUG_SERVER_ID), 0, LeaderboardType.GLOBAL, duration,
     );
     await dbContext.kmq(TABLE_BY_DURATION[duration]).del();

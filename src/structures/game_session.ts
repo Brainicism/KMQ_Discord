@@ -329,15 +329,15 @@ export default class GameSession {
         // commit player stats
         for (const participant of this.participants) {
             await this.ensurePlayerStat(participant);
-            await this.incrementPlayerGamesPlayed(participant);
+            await GameSession.incrementPlayerGamesPlayed(participant);
             const playerScore = this.scoreboard.getPlayerScore(participant);
             if (playerScore > 0) {
-                await this.incrementPlayerSongsGuessed(participant, playerScore);
+                await GameSession.incrementPlayerSongsGuessed(participant, playerScore);
             }
 
             const playerExpGain = this.scoreboard.getPlayerExpGain(participant);
             if (playerExpGain > 0) {
-                const levelUpResult = await this.incrementPlayerExp(participant, playerExpGain);
+                const levelUpResult = await GameSession.incrementPlayerExp(participant, playerExpGain);
                 if (levelUpResult) {
                     leveledUpPlayers.push(levelUpResult);
                 }
@@ -989,7 +989,7 @@ export default class GameSession {
      * @param userID - The player's Discord user ID
      * @param score - The player's score in the current GameSession
      */
-    private async incrementPlayerSongsGuessed(userID: string, score: number) {
+    private static async incrementPlayerSongsGuessed(userID: string, score: number) {
         await dbContext.kmq("player_stats")
             .where("player_id", "=", userID)
             .increment("songs_guessed", score)
@@ -1014,7 +1014,7 @@ export default class GameSession {
      * Updates a user's games played in the data store
      * @param userID - The player's Discord user ID
      */
-    private async incrementPlayerGamesPlayed(userID: string) {
+    private static async incrementPlayerGamesPlayed(userID: string) {
         await dbContext.kmq("player_stats")
             .where("player_id", "=", userID)
             .increment("games_played", 1);
@@ -1036,7 +1036,7 @@ export default class GameSession {
      * @param userID - The Discord ID of the user to exp gain
      * @param expGain - The amount of EXP gained
      */
-    private async incrementPlayerExp(userID: string, expGain: number): Promise<LevelUpResult> {
+    private static async incrementPlayerExp(userID: string, expGain: number): Promise<LevelUpResult> {
         const { exp: currentExp, level } = (await dbContext.kmq("player_stats")
             .select(["exp", "level"])
             .where("player_id", "=", userID)

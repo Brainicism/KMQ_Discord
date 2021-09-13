@@ -8,7 +8,7 @@ import { chunkArray } from "../../helpers/utils";
 import { GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
-import { state } from "../../kmq";
+import KmqClient from "../../kmq_client";
 
 const logger = new IPCLogger("help");
 export const placeholder = /,/g;
@@ -19,7 +19,7 @@ const helpMessage = async (message: GuildTextableMessage, action: string) => {
     let embedDesc = "";
     let embedFields = [];
     let embedActionRowComponents: Eris.ActionRowComponents[] = null;
-    const commandFiles = state.client.getCommandFiles(false);
+    const commandFiles = KmqClient.getCommandFiles(false);
 
     const commandFilesWithAliases: { [commandName: string]: BaseCommand } = {};
     Object.assign(commandFilesWithAliases, commandFiles);
