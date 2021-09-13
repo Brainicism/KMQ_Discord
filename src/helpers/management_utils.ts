@@ -276,9 +276,9 @@ export function registerIntervals(clusterID: number) {
         }
     });
 
-    // every minute
-    schedule.scheduleJob("*/1 * * * *", async () => {
-        await updateClusterActivityStats(clusterID);
+    // everyday at 12am UTC => 7pm EST
+    schedule.scheduleJob("0 0 * * *", async () => {
+        reloadFactCache();
     });
 
     // every 5 minutes
@@ -288,9 +288,9 @@ export function registerIntervals(clusterID: number) {
         await updateSystemStats(clusterID);
     });
 
-    // everyday at 12am UTC => 7pm EST
-    schedule.scheduleJob("0 0 * * *", async () => {
-        reloadFactCache();
+    // every 1 minute
+    schedule.scheduleJob("*/1 * * * *", async () => {
+        await updateClusterActivityStats(clusterID);
     });
 }
 
