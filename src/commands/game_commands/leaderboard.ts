@@ -114,6 +114,8 @@ export default class LeaderboardCommand implements BaseCommand {
                 duration = arg as LeaderboardDuration;
             } else if (Number.isInteger(Number(arg)) && Number(arg) > 0) {
                 pageOffset = Number(arg) - 1;
+            } else if (arg === "page") {
+                continue;
             } else {
                 const allEnums = arrayToString([...Object.values(LeaderboardType), ...Object.values(LeaderboardDuration), ...Object.values(LeaderboardAction)]);
                 sendValidationErrorMessage(message, `Expected one of the following valid values: (a positive number, ${allEnums})`, arg, this.help.usage);
