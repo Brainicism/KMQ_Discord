@@ -10,7 +10,7 @@ export default async function guildDeleteHandler(guild: Eris.Guild | { id: strin
     const kmqDebugChannel = getDebugChannel();
     if (!kmqDebugChannel) return;
     const leaveDate = new Date();
-    const title = "Server left";
+    const title = "Server Left";
     const footerText = `gid: ${guild.id} | Left at: ${leaveDate.toLocaleDateString("en-US")} ${leaveDate.toLocaleTimeString("en-US")}`;
     if (!kmqDebugChannel) return;
     if (guild instanceof Eris.Guild) {

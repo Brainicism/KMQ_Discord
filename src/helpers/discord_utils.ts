@@ -318,7 +318,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
 
     const totalSongs = await getSongCount(guildPreference);
     if (totalSongs === null) {
-        sendErrorMessage(messageContext, { title: "Error retrieving song data", description: `Try again in a bit, or report this error to the official KMQ server found in \`${process.env.BOT_PREFIX}help\`.` });
+        sendErrorMessage(messageContext, { title: "Error Retrieving Song Data", description: `Try again in a bit, or report this error to the official KMQ server found in \`${process.env.BOT_PREFIX}help\`.` });
         return;
     }
 
@@ -422,7 +422,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
 
     await sendInfoMessage(messageContext,
         {
-            title: updatedOption === null ? "Options" : `${updatedOption.option} ${updatedOption.reset ? "reset" : "updated"}`,
+            title: updatedOption === null ? "Options" : `${updatedOption.option} ${updatedOption.reset ? "Reset" : "Updated"}`,
             description: priorityOptions,
             fields,
             footerText,
@@ -439,7 +439,7 @@ export async function sendEndGameMessage(gameSession: GameSession) {
     const footerText = `${gameSession.getCorrectGuesses()}/${gameSession.getRoundsPlayed()} songs correctly guessed!`;
     if (gameSession.scoreboard.isEmpty()) {
         await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
-            title: "Nobody won",
+            title: "Nobody Won",
             footerText,
             thumbnailUrl: KmqImages.NOT_IMPRESSED,
         });

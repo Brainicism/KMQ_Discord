@@ -191,19 +191,19 @@ export default class ProfileCommand implements BaseCommand {
                 }
 
                 if (!requestedPlayer) {
-                    sendErrorMessage(MessageContext.fromMessage(message), { title: "No profile found", description: "Could not find the specified user ID. Make sure the user has been active recently. See `,help profile` for details." });
+                    sendErrorMessage(MessageContext.fromMessage(message), { title: "No Profile found", description: "Could not find the specified user ID. Make sure the user has been active recently. See `,help profile` for details." });
                     return;
                 }
             }
         } else {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "No profile found", description: "Make sure you're using this command correctly. See `,help profile` for more details." });
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "No Profile found", description: "Make sure you're using this command correctly. See `,help profile` for more details." });
             return;
         }
 
         const fields = await getProfileFields(requestedPlayer);
 
         if (fields.length === 0) {
-            sendInfoMessage(MessageContext.fromMessage(message), { title: "No profile found", description: "This user needs to play their first game before their stats are tracked." });
+            sendInfoMessage(MessageContext.fromMessage(message), { title: "No Profile Found", description: "This user needs to play their first game before their stats are tracked." });
             return;
         }
 

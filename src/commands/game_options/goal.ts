@@ -54,7 +54,7 @@ export default class GoalCommand implements BaseCommand {
         if (gameSession) {
             if (!gameSession.scoreboard.isEmpty() && userGoal <= gameSession.scoreboard.getWinners()[0].getScore()) {
                 logger.info(`${getDebugLogHeader(message)} | Goal update ignored.`);
-                sendErrorMessage(MessageContext.fromMessage(message), { title: "Error applying goal", description: "Given goal exceeds highest score. Please raise your goal, or start a new game." });
+                sendErrorMessage(MessageContext.fromMessage(message), { title: "Error Applying Goal", description: "Given goal exceeds highest score. Please raise your goal, or start a new game." });
                 return;
             }
 
