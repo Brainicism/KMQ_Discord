@@ -41,7 +41,7 @@ export default class LeaderboardCommand implements BaseCommand {
     help = {
         name: "leaderboard",
         description: "View the KMQ leaderboard.",
-        usage: ",leaderboard\n,leaderboard {server | game} {page_number} {daily | weekly | monthly}\n,leaderboard [enroll | unenroll]",
+        usage: ",leaderboard {server | game} {page_number} {daily | weekly | monthly}\n,leaderboard [enroll | unenroll]",
         examples: [
             {
                 example: "`,leaderboard`",
