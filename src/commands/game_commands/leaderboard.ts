@@ -226,7 +226,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     const rankOrLevelsGained = permanentLb ? `${getRankNameByLevel(player.level)}` : "levels gained";
                     return {
                         name: `${medalIcon} ${displayName}`,
-                        value: `${duration !== LeaderboardDuration.PERMANENT ? "+" : ""}${friendlyFormattedNumber(player.exp)} EXP | ${permanentLb ? "Level" : ""} ${friendlyFormattedNumber(player.level)} ${rankOrLevelsGained}`,
+                        value: `${!permanentLb ? "+" : ""}${friendlyFormattedNumber(player.exp)} EXP | ${permanentLb ? "Level" : ""} ${friendlyFormattedNumber(player.level)} ${rankOrLevelsGained}`,
                     };
                 }));
 
@@ -242,6 +242,7 @@ export default class LeaderboardCommand implements BaseCommand {
                         leaderboardType = "Current Game's";
                         break;
                     default:
+                        break;
                 }
 
                 const durationString = !permanentLb ? ` ${duration[0].toUpperCase()}${duration.slice(1)} ` : " ";
@@ -270,15 +271,15 @@ export default class LeaderboardCommand implements BaseCommand {
         switch (duration) {
             case LeaderboardDuration.DAILY:
                 playerCountQuery = playerCountQuery
-                    .where("date", ">", getSqlDateString(new Date().setHours(0, 0, 0, 0)));
+                    .where("date", ">", getSqlDateString(new Date().setHours(0, 0, 1, 0)));
                 break;
             case LeaderboardDuration.WEEKLY:
                 playerCountQuery = playerCountQuery
-                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay()).getTime()));
+                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay(), 0, 0, 1).getTime()));
                 break;
             case LeaderboardDuration.MONTHLY:
                 playerCountQuery = playerCountQuery
-                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth()).getTime()));
+                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth(), 0, 0, 0, 1).getTime()));
                 break;
             default:
                 break;
