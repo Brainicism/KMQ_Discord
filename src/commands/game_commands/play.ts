@@ -41,7 +41,7 @@ export async function sendBeginGameMessage(textChannelName: string,
         gameInstructions += "\n\n**⬆️ KMQ POWER HOUR ACTIVE ⬆️**";
     }
 
-    const startTitle = `Game starting in #${textChannelName} in 🔊 ${voiceChannelName}`;
+    const startTitle = `Game Starting in #${textChannelName} in 🔊 ${voiceChannelName}`;
     const gameInfoMessage: GameInfoMessage = chooseWeightedRandom(await dbContext.kmq("game_messages"));
     const fields: Eris.EmbedField[] = [];
     if (gameInfoMessage) {
@@ -104,14 +104,14 @@ export default class PlayCommand implements BaseCommand {
         const voiceChannel = getUserVoiceChannel(MessageContext.fromMessage(message));
         const timeUntilRestart = await getTimeUntilRestart();
         if (timeUntilRestart) {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Cannot start new game", description: `Bot is restarting in \`${timeUntilRestart}\` minutes, please wait until the bot is back up!` });
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "Cannot Start New Game", description: `Bot is restarting in \`${timeUntilRestart}\` minutes, please wait until the bot is back up!` });
             return;
         }
 
         if (!voiceChannel) {
             await sendErrorMessage(MessageContext.fromMessage(message),
                 {
-                    title: "Join a voice channel",
+                    title: "Join a Voice Channel",
                     description: `Send \`${process.env.BOT_PREFIX}play\` again when you are in a voice channel.`,
                 });
             logger.warn(`${getDebugLogHeader(message)} | User not in voice channel`);
@@ -181,7 +181,7 @@ export default class PlayCommand implements BaseCommand {
                         .first();
 
                     if (!isModerator) {
-                        sendErrorMessage(messageContext, { title: "Hidden game mode", description: "You do not have permission to use this command.", thumbnailUrl: KmqImages.DEAD });
+                        sendErrorMessage(messageContext, { title: "Hidden Game Mode", description: "You do not have permission to use this command.", thumbnailUrl: KmqImages.DEAD });
                         return;
                     }
                 }
@@ -194,7 +194,7 @@ export default class PlayCommand implements BaseCommand {
 
             gameSessions[message.guildID] = gameSession;
         } else {
-            await sendErrorMessage(messageContext, { title: "Game already in session" });
+            await sendErrorMessage(messageContext, { title: "Game Already in Session" });
         }
     };
 }

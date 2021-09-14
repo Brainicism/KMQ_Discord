@@ -15,7 +15,7 @@ export default async function guildCreateHandler(guild: Eris.Guild) {
             username: guild.name,
             avatarUrl: guild.iconURL,
         },
-        title: "New server joined!",
+        title: "New Server Joined!",
         fields: [
             { name: "**Member Count**:", value: guild.memberCount.toString() },
             { name: "**Language**:", value: guild.preferredLocale },

@@ -359,7 +359,7 @@ export default class GameSession {
                 levelUpMessages.push("and many others...");
             }
 
-            sendInfoMessage(new MessageContext(this.textChannelID), { title: "🚀 Power up!", description: levelUpMessages.join("\n"), thumbnailUrl: KmqImages.THUMBS_UP });
+            sendInfoMessage(new MessageContext(this.textChannelID), { title: "🚀 Power Up!", description: levelUpMessages.join("\n"), thumbnailUrl: KmqImages.THUMBS_UP });
         }
 
         await sendEndGameMessage(this);
@@ -395,7 +395,7 @@ export default class GameSession {
         if (bookmarkedSongsPlayerCount > 0) {
             const bookmarkedSongCount = Object.values(this.bookmarkedSongs).reduce((total, x) => total + x.size, 0);
             await sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: "Sending bookmarked songs...",
+                title: "Sending Bookmarked Songs...",
                 description: `Sending ${bookmarkedSongCount} song(s) to ${bookmarkedSongsPlayerCount} player(s).\n\nBookmark songs during the game by right-clicking the song message and selecting \`Apps > Bookmark Song\`.`,
                 thumbnailUrl: KmqImages.READING_BOOK,
             });
@@ -492,7 +492,7 @@ export default class GameSession {
             try {
                 this.filteredSongs = await getFilteredSongList(guildPreference);
             } catch (err) {
-                await sendErrorMessage(messageContext, { title: "Error selecting song", description: "Please try starting the round again. If the issue persists, report it in our official KMQ server." });
+                await sendErrorMessage(messageContext, { title: "Error Selecting Song", description: "Please try starting the round again. If the issue persists, report it in our official KMQ server." });
                 logger.error(`${getDebugLogHeader(messageContext)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
                 await this.endSession();
                 return;
@@ -507,7 +507,7 @@ export default class GameSession {
             if (setDifference([...filteredSongs], [...this.uniqueSongsPlayed]).size === 0) {
                 logger.info(`${getDebugLogHeader(messageContext)} | Resetting uniqueSongsPlayed (all ${totalSongsCount} unique songs played)`);
                 // In updateSongCount, songs already played are added to songCount when options change. On unique reset, remove them
-                await sendInfoMessage(messageContext, { title: "Resetting unique songs", description: `All songs have been played. ${totalSongsCount} songs will be reshuffled.`, thumbnailUrl: KmqImages.LISTENING });
+                await sendInfoMessage(messageContext, { title: "Resetting Unique Songs", description: `All songs have been played. ${totalSongsCount} songs will be reshuffled.`, thumbnailUrl: KmqImages.LISTENING });
                 this.resetUniqueSongs();
             }
         } else {
@@ -577,7 +577,7 @@ export default class GameSession {
         } catch (err) {
             await this.endSession();
             logger.error(`${getDebugLogHeader(messageContext)} | Error obtaining voice connection. err = ${err.toString()}`);
-            await sendErrorMessage(messageContext, { title: "Error joining voice channel", description: "Something went wrong, try starting the game again in a bit." });
+            await sendErrorMessage(messageContext, { title: "Error Joining Voice Channel", description: "Something went wrong, try starting the game again in a bit." });
             return;
         }
 
@@ -734,7 +734,7 @@ export default class GameSession {
         }
 
         this.owner = KmqMember.fromUser(voiceMembers.find((x) => x.id === newOwnerID));
-        sendInfoMessage(new MessageContext(this.textChannelID), { title: "Game owner changed", description: `The new game owner is ${getMention(this.owner.id)}. They are in charge of \`,forcehint\` and \`,forceskip\`.`, thumbnailUrl: KmqImages.LISTENING });
+        sendInfoMessage(new MessageContext(this.textChannelID), { title: "Game Owner Changed", description: `The new game owner is ${getMention(this.owner.id)}. They are in charge of \`,forcehint\` and \`,forceskip\`.`, thumbnailUrl: KmqImages.LISTENING });
     }
 
     async handleMultipleChoiceInteraction(interaction: Eris.ComponentInteraction, messageContext: MessageContext) {
@@ -875,7 +875,7 @@ export default class GameSession {
     private async errorRestartRound(guildPreference: GuildPreference) {
         const messageContext = new MessageContext(this.textChannelID);
         await this.endRound({ correct: false }, guildPreference);
-        await sendErrorMessage(messageContext, { title: "Error playing song", description: "Starting new round in 3 seconds..." });
+        await sendErrorMessage(messageContext, { title: "Error Playing Song", description: "Starting new round in 3 seconds..." });
         this.roundsPlayed--;
         this.startRound(guildPreference, messageContext);
     }

@@ -32,7 +32,7 @@ export default class JoinCommand implements BaseCommand {
     static joinEliminationGame(message: GuildTextableMessage, gameSession: GameSession) {
         const kmqMember = KmqMember.fromUser(message.author);
         if (gameSession.participants.has(message.author.id)) {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Player already joined", description: `${getMention(message.author.id)} is already in the game.` });
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "Player Already Joined", description: `${getMention(message.author.id)} is already in the game.` });
             return;
         }
 
@@ -49,14 +49,14 @@ export default class JoinCommand implements BaseCommand {
         }
 
         const players = `${getMention(kmqMember.id)}, ${previouslyJoinedPlayers.join(", ")}`;
-        sendInfoMessage(MessageContext.fromMessage(message), { title: "Player joined", description: players });
+        sendInfoMessage(MessageContext.fromMessage(message), { title: "Player Joined", description: players });
         gameSession.addEliminationParticipant(kmqMember);
     }
 
     static joinTeamsGame(message: GuildTextableMessage, parsedMessage: ParsedMessage, gameSession: GameSession) {
         if (parsedMessage.components.length === 0) {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Join error",
+                title: "Join Error",
                 description: "Include a team name to create a team or to join that team if it already exists (`,join [team name]`)",
             });
             return;
@@ -72,7 +72,7 @@ export default class JoinCommand implements BaseCommand {
             const emojiID = emoji.match(/(?<=<a?:[a-zA-Z0-9]+:)[0-9]+(?=>)/gm).join("");
             if (!state.client.guilds.get(message.guildID).emojis.map((e) => e.id).includes(emojiID)) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: "Invalid team name",
+                    title: "Invalid Team Name",
                     description: "You can only include emojis that are in this server.",
                 });
                 return;
@@ -80,7 +80,7 @@ export default class JoinCommand implements BaseCommand {
         }
 
         if (teamName.length === 0) {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Join error", description: "Your team name consists of only invalid characters." });
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "Join Error", description: "Your team name consists of only invalid characters." });
             return;
         }
 
@@ -89,14 +89,14 @@ export default class JoinCommand implements BaseCommand {
             teamScoreboard.addTeam(teamName, new Player(getUserTag(message.author), message.author.id, message.author.avatarURL, 0));
             const teamNameWithCleanEmojis = teamName.replace(/(<a?)(:[a-zA-Z0-9]+:)([0-9]+>)/gm, (p1, p2, p3) => p3);
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: "New team created",
+                title: "New Team Created",
                 description: `To join ${bold(teamName)} alongside ${getMention(message.author.id)}, enter \`,join ${teamNameWithCleanEmojis}\`.${!gameSession.sessionInitialized ? " Start the game with `,begin`." : ""}`,
                 thumbnailUrl: KmqImages.READING_BOOK,
             });
         } else {
             const team = teamScoreboard.getTeam(teamName);
             if (team.hasPlayer(message.author.id)) {
-                sendErrorMessage(MessageContext.fromMessage(message), { title: "Join error", description: "You're already a member of this team." });
+                sendErrorMessage(MessageContext.fromMessage(message), { title: "Join Error", description: "You're already a member of this team." });
                 return;
             }
 
