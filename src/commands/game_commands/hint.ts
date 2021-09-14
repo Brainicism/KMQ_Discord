@@ -46,18 +46,18 @@ async function sendHintNotification(message: GuildTextableMessage, gameSession: 
 export function validHintCheck(gameSession: GameSession, guildPreference: GuildPreference, gameRound: GameRound, message: GuildTextableMessage): boolean {
     if (!gameSession || !gameRound) {
         logger.warn(`${getDebugLogHeader(message)} | No active game session`);
-        sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid hint request", description: "A hint can only be requested when a song is playing.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
+        sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid Hint Request", description: "A hint can only be requested when a song is playing.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
         return false;
     }
 
     if (gameSession.gameType === GameType.ELIMINATION) {
         const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
         if (eliminationScoreboard.isPlayerEliminated(message.author.id)) {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid hint request", description: "Only alive players may request hints.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid Hint Request", description: "Only alive players may request hints.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
             return false;
         }
     } else if (guildPreference.isMultipleChoiceMode()) {
-        sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid hint request", description: "You cannot request hints while playing multiple choice.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
+        sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid Hint Request", description: "You cannot request hints while playing multiple choice.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
         return false;
     }
 

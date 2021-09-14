@@ -108,7 +108,7 @@ export const checkRestartNotification = async (timeUntilRestart: number): Promis
         for (const gameSession of Object.values(state.gameSessions)) {
             if (gameSession.finished) continue;
             await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
-                title: `Upcoming bot restart in ${timeUntilRestart} minutes.`,
+                title: `Upcoming Bot Restart in ${timeUntilRestart} Minutes.`,
                 description: "Downtime will be approximately 2 minutes. Please end the current game to ensure your progress is saved!",
             });
             serversWarned++;

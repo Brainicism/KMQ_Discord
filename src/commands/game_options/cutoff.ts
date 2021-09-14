@@ -71,7 +71,7 @@ export default class CutoffCommand implements BaseCommand {
         } else if (yearRange.length === 2) {
             const endYear = yearRange[1];
             if (endYear < startYear) {
-                await sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid end year", description: "End year must be after or equal to start year" });
+                await sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid End Year", description: "End year must be after or equal to start year" });
                 return;
             }
 
