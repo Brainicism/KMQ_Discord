@@ -191,12 +191,12 @@ export default class ProfileCommand implements BaseCommand {
                 }
 
                 if (!requestedPlayer) {
-                    sendErrorMessage(MessageContext.fromMessage(message), { title: "No Profile found", description: "Could not find the specified user ID. Make sure the user has been active recently. See `,help profile` for details." });
+                    sendErrorMessage(MessageContext.fromMessage(message), { title: "No Profile Found", description: "Could not find the specified user ID. Make sure the user has been active recently. See `,help profile` for details." });
                     return;
                 }
             }
         } else {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "No Profile found", description: "Make sure you're using this command correctly. See `,help profile` for more details." });
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "No Profile Found", description: "Make sure you're using this command correctly. See `,help profile` for more details." });
             return;
         }
 
