@@ -159,7 +159,7 @@ export default class LeaderboardCommand implements BaseCommand {
     private static async getLeaderboardEmbeds(messageContext: MessageContext, type: LeaderboardType, duration: LeaderboardDuration): Promise<Array<EmbedGenerator>> {
         const embedsFns: Array<EmbedGenerator> = [];
         const permanentLb = duration === LeaderboardDuration.PERMANENT;
-        const dbTable = permanentLb ? "player_stats" : "temporary_player_stats";
+        const dbTable = permanentLb ? "player_stats" : "player_game_session_stats";
 
         let topPlayersQuery = dbContext.kmq(dbTable)
             .select(permanentLb ? ["exp", "level", "player_id"] : ["player_id"])
@@ -261,7 +261,7 @@ export default class LeaderboardCommand implements BaseCommand {
     }
 
     private static async getPageCount(messageContext: MessageContext, type: LeaderboardType, duration: LeaderboardDuration): Promise<number> {
-        const dbTable = duration === LeaderboardDuration.PERMANENT ? "player_stats" : "temporary_player_stats";
+        const dbTable = duration === LeaderboardDuration.PERMANENT ? "player_stats" : "player_game_session_stats";
         let playerCountQuery = dbContext.kmq(dbTable)
             .count("* as count")
             .where(duration === LeaderboardDuration.PERMANENT ? "exp" : "exp_gained", ">", 0)
