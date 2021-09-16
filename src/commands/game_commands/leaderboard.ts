@@ -41,7 +41,7 @@ export default class LeaderboardCommand implements BaseCommand {
     help = {
         name: "leaderboard",
         description: "View the KMQ leaderboard.",
-        usage: ",leaderboard {page_number}\n,leaderboard {server | game | daily | weekly | monthly} {page_number}\n,leaderboard [enroll | unenroll]",
+        usage: ",leaderboard {page_number}\n,leaderboard {server | game} {daily | weekly | monthly} {page_number}\n,leaderboard [enroll | unenroll]",
         examples: [
             {
                 example: "`,leaderboard`",
@@ -60,12 +60,12 @@ export default class LeaderboardCommand implements BaseCommand {
                 explanation: "Shows the 3rd page of the server-wide leaderboard",
             },
             {
-                example: "`,leaderboard game 2`",
-                explanation: "Shows the 2nd page of the players with points in the current game",
+                example: "`,leaderboard game monthly 2`",
+                explanation: "Shows the 2nd page of the monthly scoreboard containing players with points in the current game",
             },
             {
                 example: "`,leaderboard weekly 4`",
-                explanation: "Shows the 4th page of the leaderboard, by EXP gain this week",
+                explanation: "Shows the 4th page of the leaderboard, by EXP gained this week",
             },
             {
                 example: "`,leaderboard enroll`",
@@ -93,38 +93,56 @@ export default class LeaderboardCommand implements BaseCommand {
             return;
         }
 
-        let type = LeaderboardType.GLOBAL;
-        let duration = LeaderboardDuration.ALL_TIME;
-        let pageOffset = 0;
-
-        for (const arg of parsedMessage.components) {
-            if (Object.values(LeaderboardAction).includes(arg as LeaderboardAction)) {
-                const action = arg as LeaderboardAction;
-                if (action === LeaderboardAction.ENROLL) {
-                    LeaderboardCommand.enrollLeaderboard(message);
-                } else if (action === LeaderboardAction.UNENROLL) {
-                    LeaderboardCommand.unenrollLeaderboard(message);
-                }
-
-                return;
+        let arg = parsedMessage.components[0];
+        let action: LeaderboardAction;
+        if (Object.values(LeaderboardAction).includes(arg as LeaderboardAction)) {
+            action = arg as LeaderboardAction;
+            if (action === LeaderboardAction.ENROLL) {
+                LeaderboardCommand.enrollLeaderboard(message);
+            } else if (action === LeaderboardAction.UNENROLL) {
+                LeaderboardCommand.unenrollLeaderboard(message);
             }
 
-            if (Object.values(LeaderboardType).includes(arg as LeaderboardType)) {
-                type = arg as LeaderboardType;
-            } else if (Object.values(LeaderboardDuration).includes(arg as LeaderboardDuration)) {
-                duration = arg as LeaderboardDuration;
-            } else if (Number.isInteger(Number(arg)) && Number(arg) > 0) {
-                pageOffset = Number(arg) - 1;
-            } else if (arg === "page") {
-                continue;
-            } else {
-                const allEnums = arrayToString([...Object.values(LeaderboardType), ...Object.values(LeaderboardDuration), ...Object.values(LeaderboardAction)]);
-                sendValidationErrorMessage(message, `Expected one of the following valid values: (a positive number, ${allEnums})`, arg, this.help.usage);
-                return;
-            }
+            return;
         }
 
-        LeaderboardCommand.showLeaderboard(message, type, duration, pageOffset);
+        let type: LeaderboardType;
+        let duration: LeaderboardDuration;
+        const lastArg = parsedMessage.components[parsedMessage.components.length - 1];
+        const pageOffset = Number.isInteger(Number(lastArg)) && Number(lastArg) > 0 ? Number(lastArg) : 0;
+
+        if (Object.values(LeaderboardType).includes(arg as LeaderboardType)) {
+            type = arg as LeaderboardType;
+        }
+
+        if (Object.values(LeaderboardDuration).includes(arg as LeaderboardDuration)) {
+            duration = arg as LeaderboardDuration;
+        }
+
+        if (pageOffset === 0 && !type && !duration) {
+            sendValidationErrorMessage(message, `Expected one of the following valid values for the first argument: (a positive number, ${arrayToString([...Object.values(LeaderboardType), ...Object.values(LeaderboardDuration)])})`, arg, this.help.usage);
+            return;
+        }
+
+        if (parsedMessage.components.length === 1) {
+            LeaderboardCommand.showLeaderboard(message, type ?? LeaderboardType.GLOBAL, duration ?? LeaderboardDuration.ALL_TIME, pageOffset);
+            return;
+        }
+
+        arg = parsedMessage.components[1];
+        if (Object.values(LeaderboardDuration).includes(arg as LeaderboardDuration)) {
+            duration = arg as LeaderboardDuration;
+        } else if (pageOffset === 0) {
+            sendValidationErrorMessage(message, `Expected one of the following valid values for the second argument: (a positive number, ${arrayToString(Object.values(LeaderboardDuration))})`, arg, this.help.usage);
+            return;
+        }
+
+        if (pageOffset === 0 && parsedMessage.components.length > 2) {
+            sendValidationErrorMessage(message, "Expected one of the following valid values for the third argument: (a positive number)", arg, this.help.usage);
+            return;
+        }
+
+        LeaderboardCommand.showLeaderboard(message, type ?? LeaderboardType.GLOBAL, duration ?? LeaderboardDuration.ALL_TIME, pageOffset);
     };
 
     public static async sendDebugLeaderboard(duration: LeaderboardDuration) {
@@ -156,7 +174,7 @@ export default class LeaderboardCommand implements BaseCommand {
         sendInfoMessage(MessageContext.fromMessage(message), { title: "Leaderboard Unenrollment Complete", description: "You are no longer visible on the leaderboard" });
     }
 
-    private static async getLeaderboardEmbeds(messageContext: MessageContext, type: LeaderboardType, duration: LeaderboardDuration): Promise<Array<EmbedGenerator>> {
+    private static async getLeaderboardEmbeds(messageContext: MessageContext, type: LeaderboardType, duration: LeaderboardDuration): Promise<{ embeds: Array<EmbedGenerator>, pageCount: number }> {
         const embedsFns: Array<EmbedGenerator> = [];
         const permanentLb = duration === LeaderboardDuration.ALL_TIME;
         const dbTable = permanentLb ? "player_stats" : "player_game_session_stats";
@@ -257,7 +275,7 @@ export default class LeaderboardCommand implements BaseCommand {
             }));
         }
 
-        return embedsFns;
+        return { embeds: embedsFns, pageCount: pages };
     }
 
     private static async getPageCount(messageContext: MessageContext, type: LeaderboardType, duration: LeaderboardDuration): Promise<number> {
@@ -330,13 +348,13 @@ export default class LeaderboardCommand implements BaseCommand {
             }
         }
 
-        const embeds: Array<EmbedGenerator> = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, type, duration);
-        if (embeds.length === 0) {
-            sendErrorMessage(messageContext, { title: "Empty Leaderboard", description: "No one has gotten any EXP yet. Now's your chance to go for first place!", thumbnailUrl: KmqImages.DEAD });
+        const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, type, duration);
+        if (pageCount === 0) {
+            sendErrorMessage(messageContext, { title: "Empty Leaderboard", description: "No one has earned EXP in this time interval. Now's your chance to go for first place!", thumbnailUrl: KmqImages.DEAD });
             return;
         }
 
-        if (pageOffset + 1 > embeds.length) {
+        if (pageOffset + 1 > pageCount) {
             sendErrorMessage(messageContext, { title: "😐", description: "The leaderboard doesn't go this far.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
             return;
         }
