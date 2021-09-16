@@ -21,7 +21,7 @@ export enum LeaderboardType {
 }
 
 export enum LeaderboardDuration {
-    PERMANENT = "permanent",
+    ALL_TIME = "all-time",
     DAILY = "daily",
     WEEKLY = "weekly",
     MONTHLY = "monthly",
@@ -41,7 +41,7 @@ export default class LeaderboardCommand implements BaseCommand {
     help = {
         name: "leaderboard",
         description: "View the KMQ leaderboard.",
-        usage: ",leaderboard {server | game} {page_number} {daily | weekly | monthly}\n,leaderboard [enroll | unenroll]",
+        usage: ",leaderboard {page_number}\n,leaderboard {server | game | daily | weekly | monthly} {page_number}\n,leaderboard [enroll | unenroll]",
         examples: [
             {
                 example: "`,leaderboard`",
@@ -89,12 +89,12 @@ export default class LeaderboardCommand implements BaseCommand {
 
     call = async ({ message, parsedMessage }: CommandArgs) => {
         if (parsedMessage.components.length === 0) {
-            LeaderboardCommand.showLeaderboard(message, LeaderboardType.GLOBAL, LeaderboardDuration.PERMANENT);
+            LeaderboardCommand.showLeaderboard(message, LeaderboardType.GLOBAL, LeaderboardDuration.ALL_TIME);
             return;
         }
 
         let type = LeaderboardType.GLOBAL;
-        let duration = LeaderboardDuration.PERMANENT;
+        let duration = LeaderboardDuration.ALL_TIME;
         let pageOffset = 0;
 
         for (const arg of parsedMessage.components) {
@@ -158,7 +158,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
     private static async getLeaderboardEmbeds(messageContext: MessageContext, type: LeaderboardType, duration: LeaderboardDuration): Promise<Array<EmbedGenerator>> {
         const embedsFns: Array<EmbedGenerator> = [];
-        const permanentLb = duration === LeaderboardDuration.PERMANENT;
+        const permanentLb = duration === LeaderboardDuration.ALL_TIME;
         const dbTable = permanentLb ? "player_stats" : "player_game_session_stats";
 
         let topPlayersQuery = dbContext.kmq(dbTable)
@@ -261,10 +261,10 @@ export default class LeaderboardCommand implements BaseCommand {
     }
 
     private static async getPageCount(messageContext: MessageContext, type: LeaderboardType, duration: LeaderboardDuration): Promise<number> {
-        const dbTable = duration === LeaderboardDuration.PERMANENT ? "player_stats" : "player_game_session_stats";
+        const dbTable = duration === LeaderboardDuration.ALL_TIME ? "player_stats" : "player_game_session_stats";
         let playerCountQuery = dbContext.kmq(dbTable)
             .count("* as count")
-            .where(duration === LeaderboardDuration.PERMANENT ? "exp" : "exp_gained", ">", 0)
+            .where(duration === LeaderboardDuration.ALL_TIME ? "exp" : "exp_gained", ">", 0)
             .distinct("player_id");
 
         const d = new Date();
@@ -331,7 +331,12 @@ export default class LeaderboardCommand implements BaseCommand {
         }
 
         const embeds: Array<EmbedGenerator> = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, type, duration);
-        if (pageOffset + 1 > await LeaderboardCommand.getPageCount(messageContext, type, duration)) {
+        if (embeds.length === 0) {
+            sendErrorMessage(messageContext, { title: "Empty Leaderboard", description: "No one has gotten any EXP yet. Now's your chance to go for first place!", thumbnailUrl: KmqImages.DEAD });
+            return;
+        }
+
+        if (pageOffset + 1 > embeds.length) {
             sendErrorMessage(messageContext, { title: "😐", description: "The leaderboard doesn't go this far.", thumbnailUrl: KmqImages.NOT_IMPRESSED });
             return;
         }
