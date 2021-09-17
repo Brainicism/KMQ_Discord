@@ -181,14 +181,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
         let topPlayersQuery = dbContext.kmq(dbTable)
             .select(permanentLb ? ["exp", "level", "player_id"] : ["player_id"])
-            .where(permanentLb ? "exp" : "exp_gained", ">", 0)
-            .groupBy("player_id");
-
-        if (!permanentLb) {
-            topPlayersQuery = topPlayersQuery
-                .sum("exp_gained as exp")
-                .sum("levels_gained as level");
-        }
+            .where(permanentLb ? "exp" : "exp_gained", ">", 0);
 
         const d = new Date();
         switch (duration) {
@@ -224,7 +217,14 @@ export default class LeaderboardCommand implements BaseCommand {
             topPlayersQuery = topPlayersQuery.whereIn("player_id", gamePlayers);
         }
 
-        const pages = await LeaderboardCommand.getPageCount(messageContext, type, duration);
+        const pages = Math.ceil((await topPlayersQuery.clone().distinct("player_id").count("* as count").first())["count"] as number / 10);
+        if (!permanentLb) {
+            topPlayersQuery = topPlayersQuery
+                .sum("exp_gained as exp")
+                .sum("levels_gained as level")
+                .groupBy("player_id");
+        }
+
         for (let i = 0; i < pages; i++) {
             const offset = i * 10;
             embedsFns.push(() => new Promise(async (resolve) => {
@@ -276,61 +276,6 @@ export default class LeaderboardCommand implements BaseCommand {
         }
 
         return { embeds: embedsFns, pageCount: pages };
-    }
-
-    private static async getPageCount(messageContext: MessageContext, type: LeaderboardType, duration: LeaderboardDuration): Promise<number> {
-        const dbTable = duration === LeaderboardDuration.ALL_TIME ? "player_stats" : "player_game_session_stats";
-        let playerCountQuery = dbContext.kmq(dbTable)
-            .count("* as count")
-            .where(duration === LeaderboardDuration.ALL_TIME ? "exp" : "exp_gained", ">", 0)
-            .distinct("player_id");
-
-        const d = new Date();
-        switch (duration) {
-            case LeaderboardDuration.DAILY:
-                playerCountQuery = playerCountQuery
-                    .where("date", ">", getSqlDateString(new Date().setHours(0, 0, 1, 0)));
-                break;
-            case LeaderboardDuration.WEEKLY:
-                playerCountQuery = playerCountQuery
-                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay(), 0, 0, 1).getTime()));
-                break;
-            case LeaderboardDuration.MONTHLY:
-                playerCountQuery = playerCountQuery
-                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth(), 0, 0, 0, 1).getTime()));
-                break;
-            default:
-                break;
-        }
-
-        switch (type) {
-            case LeaderboardType.SERVER:
-            {
-                const serverPlayers = (await dbContext.kmq("player_servers")
-                    .select("player_id")
-                    .where("server_id", "=", messageContext.guildID)).map((x) => x.player_id);
-
-                playerCountQuery = playerCountQuery.whereIn("player_id", serverPlayers);
-                break;
-            }
-
-            case LeaderboardType.GAME:
-            {
-                const participantIDs = state.gameSessions[messageContext.guildID].participants;
-                const gamePlayers = (await dbContext.kmq(dbTable)
-                    .select("player_id")
-                    .whereIn("player_id", [...participantIDs])).map((x) => x.player_id);
-
-                playerCountQuery = playerCountQuery.whereIn("player_id", gamePlayers);
-                break;
-            }
-
-            default:
-                break;
-        }
-
-        const playerCount = (await playerCountQuery.first())["count"] as number;
-        return Math.ceil(playerCount / 10);
     }
 
     private static async showLeaderboard(message: GuildTextableMessage | MessageContext, type: LeaderboardType, duration: LeaderboardDuration, pageOffset: number = 0) {
