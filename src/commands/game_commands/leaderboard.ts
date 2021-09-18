@@ -149,32 +149,7 @@ export default class LeaderboardCommand implements BaseCommand {
         LeaderboardCommand.showLeaderboard(new MessageContext(process.env.DEBUG_TEXT_CHANNEL_ID, KmqMember.fromUser(state.client.user), process.env.DEBUG_SERVER_ID), LeaderboardType.GLOBAL, duration);
     }
 
-    private static async enrollLeaderboard(message: GuildTextableMessage) {
-        const alreadyEnrolled = !!(await dbContext.kmq("leaderboard_enrollment")
-            .where("player_id", "=", message.author.id)
-            .first());
-
-        if (alreadyEnrolled) {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Player Already Enrolled", description: "You are already visible on the leaderboard. If you'd like to update your display name, unenroll and enroll again." });
-            return;
-        }
-
-        await dbContext.kmq("leaderboard_enrollment")
-            .insert({
-                player_id: message.author.id,
-                display_name: getUserTag(message.author),
-            });
-        sendInfoMessage(MessageContext.fromMessage(message), { title: "Leaderboard Enrollment Complete", description: "Your name is now visible on the leaderboard" });
-    }
-
-    private static async unenrollLeaderboard(message: GuildTextableMessage) {
-        await dbContext.kmq("leaderboard_enrollment")
-            .where("player_id", "=", message.author.id)
-            .del();
-        sendInfoMessage(MessageContext.fromMessage(message), { title: "Leaderboard Unenrollment Complete", description: "You are no longer visible on the leaderboard" });
-    }
-
-    private static async getLeaderboardEmbeds(messageContext: MessageContext, type: LeaderboardType, duration: LeaderboardDuration): Promise<{ embeds: Array<EmbedGenerator>, pageCount: number }> {
+    public static async getLeaderboardEmbeds(messageContext: MessageContext, type: LeaderboardType, duration: LeaderboardDuration): Promise<{ embeds: Array<EmbedGenerator>, pageCount: number }> {
         const embedsFns: Array<EmbedGenerator> = [];
         const permanentLb = duration === LeaderboardDuration.ALL_TIME;
         const dbTable = permanentLb ? "player_stats" : "player_game_session_stats";
@@ -217,7 +192,7 @@ export default class LeaderboardCommand implements BaseCommand {
             topPlayersQuery = topPlayersQuery.whereIn("player_id", gamePlayers);
         }
 
-        const pages = Math.ceil((await topPlayersQuery.clone().distinct("player_id").count("* as count").first())["count"] as number / 10);
+        const pageCount = Math.ceil((await topPlayersQuery.clone().distinct("player_id").count("* as count").first())["count"] as number / 10);
         if (!permanentLb) {
             topPlayersQuery = topPlayersQuery
                 .sum("exp_gained as exp")
@@ -225,7 +200,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 .groupBy("player_id");
         }
 
-        for (let i = 0; i < pages; i++) {
+        for (let i = 0; i < pageCount; i++) {
             const offset = i * 10;
             embedsFns.push(() => new Promise(async (resolve) => {
                 const topPlayers = await topPlayersQuery
@@ -275,7 +250,32 @@ export default class LeaderboardCommand implements BaseCommand {
             }));
         }
 
-        return { embeds: embedsFns, pageCount: pages };
+        return { embeds: embedsFns, pageCount };
+    }
+
+    private static async enrollLeaderboard(message: GuildTextableMessage) {
+        const alreadyEnrolled = !!(await dbContext.kmq("leaderboard_enrollment")
+            .where("player_id", "=", message.author.id)
+            .first());
+
+        if (alreadyEnrolled) {
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "Player Already Enrolled", description: "You are already visible on the leaderboard. If you'd like to update your display name, unenroll and enroll again." });
+            return;
+        }
+
+        await dbContext.kmq("leaderboard_enrollment")
+            .insert({
+                player_id: message.author.id,
+                display_name: getUserTag(message.author),
+            });
+        sendInfoMessage(MessageContext.fromMessage(message), { title: "Leaderboard Enrollment Complete", description: "Your name is now visible on the leaderboard" });
+    }
+
+    private static async unenrollLeaderboard(message: GuildTextableMessage) {
+        await dbContext.kmq("leaderboard_enrollment")
+            .where("player_id", "=", message.author.id)
+            .del();
+        sendInfoMessage(MessageContext.fromMessage(message), { title: "Leaderboard Unenrollment Complete", description: "You are no longer visible on the leaderboard" });
     }
 
     private static async showLeaderboard(message: GuildTextableMessage | MessageContext, type: LeaderboardType, duration: LeaderboardDuration, pageOffset: number = 0) {
