@@ -13,6 +13,7 @@ import { sendValidationErrorMessage } from "../../helpers/validate";
 import KmqMember from "../../structures/kmq_member";
 
 const logger = new IPCLogger("leaderboard");
+export const ENTRIES_PER_PAGE = 10;
 
 export enum LeaderboardType {
     GLOBAL = "global",
@@ -155,7 +156,6 @@ export default class LeaderboardCommand implements BaseCommand {
         const dbTable = permanentLb ? "player_stats" : "player_game_session_stats";
 
         let topPlayersQuery = dbContext.kmq(dbTable)
-            .select(permanentLb ? ["exp", "level", "player_id"] : ["player_id"])
             .where(permanentLb ? "exp" : "exp_gained", ">", 0);
 
         const d = new Date();
@@ -192,7 +192,10 @@ export default class LeaderboardCommand implements BaseCommand {
             topPlayersQuery = topPlayersQuery.whereIn("player_id", gamePlayers);
         }
 
-        const pageCount = Math.ceil((await topPlayersQuery.clone().distinct("player_id").count("* as count").first())["count"] as number / 10);
+        const pageCount = Math.ceil((await topPlayersQuery.clone().distinct("player_id").count("* as count").first())["count"] as number / ENTRIES_PER_PAGE);
+
+        topPlayersQuery = topPlayersQuery
+            .select(permanentLb ? ["exp", "level", "player_id"] : ["player_id"]);
         if (!permanentLb) {
             topPlayersQuery = topPlayersQuery
                 .sum("exp_gained as exp")
@@ -201,12 +204,12 @@ export default class LeaderboardCommand implements BaseCommand {
         }
 
         for (let i = 0; i < pageCount; i++) {
-            const offset = i * 10;
+            const offset = i * ENTRIES_PER_PAGE;
             embedsFns.push(() => new Promise(async (resolve) => {
                 const topPlayers = await topPlayersQuery
                     .orderBy("exp", "DESC")
                     .offset(offset)
-                    .limit(10);
+                    .limit(ENTRIES_PER_PAGE);
 
                 const fields: Array<Eris.EmbedField> = await Promise.all(topPlayers.map(async (player, relativeRank) => {
                     const rank = relativeRank + offset;
