@@ -150,7 +150,8 @@ export default class LeaderboardCommand implements BaseCommand {
         LeaderboardCommand.showLeaderboard(new MessageContext(process.env.DEBUG_TEXT_CHANNEL_ID, KmqMember.fromUser(state.client.user), process.env.DEBUG_SERVER_ID), LeaderboardType.GLOBAL, duration);
     }
 
-    public static async getLeaderboardEmbeds(messageContext: MessageContext, type: LeaderboardType, duration: LeaderboardDuration): Promise<{ embeds: Array<EmbedGenerator>, pageCount: number }> {
+    public static async getLeaderboardEmbeds(messageContext: MessageContext, type: LeaderboardType, duration: LeaderboardDuration, date?: Date):
+    Promise<{ embeds: Array<EmbedGenerator>, pageCount: number }> {
         const embedsFns: Array<EmbedGenerator> = [];
         const permanentLb = duration === LeaderboardDuration.ALL_TIME;
         const dbTable = permanentLb ? "player_stats" : "player_game_session_stats";
@@ -158,7 +159,7 @@ export default class LeaderboardCommand implements BaseCommand {
         let topPlayersQuery = dbContext.kmq(dbTable)
             .where(permanentLb ? "exp" : "exp_gained", ">", 0);
 
-        const d = new Date();
+        const d = date || new Date();
         switch (duration) {
             // Give an extra second to send temporary leaderboards to debug channel
             case LeaderboardDuration.DAILY:
@@ -192,10 +193,14 @@ export default class LeaderboardCommand implements BaseCommand {
             topPlayersQuery = topPlayersQuery.whereIn("player_id", gamePlayers);
         }
 
-        const pageCount = Math.ceil((await topPlayersQuery.clone().distinct("player_id").count("* as count").first())["count"] as number / ENTRIES_PER_PAGE);
+        const pageCount = Math.ceil((await topPlayersQuery
+            .clone()
+            .count("* as count")
+            .first())["count"] as number / ENTRIES_PER_PAGE);
 
         topPlayersQuery = topPlayersQuery
             .select(permanentLb ? ["exp", "level", "player_id"] : ["player_id"]);
+
         if (!permanentLb) {
             topPlayersQuery = topPlayersQuery
                 .sum("exp_gained as exp")
