@@ -469,6 +469,7 @@ export default class GameSession {
 
             this.startRound(guildPreference, messageContext);
         } else if (guildPreference.isMultipleChoiceMode()) {
+            if (!this.gameRound) return;
             if (setDifference([...new Set(getCurrentVoiceMembers(this.voiceChannelID).map((x) => x.id))], [...this.gameRound.incorrectMCGuessers]).size === 0) {
                 await this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));
                 this.startRound(await getGuildPreference(this.guildID), messageContext);
