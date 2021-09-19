@@ -44,10 +44,3 @@ jobs:
         run: npm run docker-dryrun
       - name: Post-bootstrap dry-run
         run: npm run docker-dryrun
-      - name: Anchore Container Scan
-        # You may pin to the exact commit or the version.
-        # uses: anchore/scan-action@3c947f31798e0e3e9fa2bf18282aeb57a1a4aaa5
-        uses: anchore/scan-action@v2.0.4
-        with:
-          image: kmq-dev-bot
-          fail-build: false
