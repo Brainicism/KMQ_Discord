@@ -79,6 +79,8 @@ BEGIN
 	) rankedAudioSongs
 	WHERE rank <= maxRank;
 
+	DELETE FROM available_songs_temp WHERE clean_song_name = '';
+
 	RENAME TABLE available_songs TO old, available_songs_temp TO available_songs;
 	DROP TABLE old;
 	
