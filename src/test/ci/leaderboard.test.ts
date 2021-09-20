@@ -26,9 +26,9 @@ const lastMonth = new Date(date).setMonth(INITIAL_MONTH - 1);
 
 const INITIAL_TOTAL_ENTRIES = ENTRIES_PER_PAGE * 5;
 
-// eslint-disable-next-line no-restricted-syntax
-([INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, INITIAL_TOTAL_ENTRIES + 1]).forEach((TOTAL_ENTRIES) => {
-    describe(`getLeaderboardEmbeds (${TOTAL_ENTRIES} entries)`, () => {
+for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, INITIAL_TOTAL_ENTRIES + 1]) {
+    // eslint-disable-next-line @typescript-eslint/no-loop-func
+    describe(`getLeaderboardEmbeds (${TOTAL_ENTRIES % ENTRIES_PER_PAGE} mod ENTRIES_PER_PAGE entries)`, () => {
         describe("all-time leaderboard", () => {
             describe("global leaderboard", () => {
                 beforeEach(async () => {
@@ -1054,4 +1054,4 @@ const INITIAL_TOTAL_ENTRIES = ENTRIES_PER_PAGE * 5;
             });
         });
     });
-});
+}
