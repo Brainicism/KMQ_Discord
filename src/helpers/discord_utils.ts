@@ -114,9 +114,12 @@ export async function textPermissionsCheck(textChannelID: string, guildID: strin
  */
 async function sendMessage(textChannelID: string, authorID: string, messageContent: Eris.AdvancedMessageContent): Promise<Eris.Message> {
     const channel = state.client.getChannel(textChannelID) as Eris.TextChannel;
+    if (!channel) {
+        logger.error(`${textChannelID} not cached for some reason. content = ${JSON.stringify(messageContent)}`);
+    }
 
     // only reply to message if has required permissions
-    if (!channel.permissionsOf(state.client.user.id).has("readMessageHistory")) {
+    if (channel && !channel.permissionsOf(state.client.user.id).has("readMessageHistory")) {
         if (messageContent.messageReference) {
             messageContent.messageReference = null;
         }
@@ -125,12 +128,16 @@ async function sendMessage(textChannelID: string, authorID: string, messageConte
     try {
         return await state.client.createMessage(textChannelID, messageContent);
     } catch (e) {
+        if (!channel) {
+            logger.error(`Error sending message, and channel not cached. textChannelID = ${textChannelID}`);
+        }
+
         // check for text permissions if sending message failed
         if (!(await textPermissionsCheck(textChannelID, channel.guild.id, authorID))) {
             return null;
         }
 
-        logger.error(`Error sending message. textChannelID = ${textChannelID}. textChannel permissions = ${channel.permissionsOf(state.client.user.id).json} err = ${JSON.stringify(e)}. body = ${JSON.stringify(messageContent)}`);
+        logger.error(`Error sending message.textChannelID = ${textChannelID}.textChannel permissions = ${channel.permissionsOf(state.client.user.id).json} err = ${JSON.stringify(e)}.body = ${JSON.stringify(messageContent)}`);
         return null;
     }
 }

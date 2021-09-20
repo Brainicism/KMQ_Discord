@@ -255,23 +255,26 @@ export default class GameSession {
                 };
             }
 
-            const { id } = await sendEndRoundMessage(messageContext, this.scoreboard, gameRound, guildPreference.gameOptions.guessModeType,
+            const { id: endRoundMessageID } = await sendEndRoundMessage(messageContext, this.scoreboard, gameRound, guildPreference.gameOptions.guessModeType,
                 playerRoundResults, guildPreference.isMultipleChoiceMode(), remainingDuration, uniqueSongCounter);
 
-            if (Object.keys(this.songMessageIDs).length === BOOKMARK_MESSAGE_SIZE) {
-                this.songMessageIDs.shift();
-            }
+            // if message fails to send, no ID is returned
+            if (endRoundMessageID) {
+                if (Object.keys(this.songMessageIDs).length === BOOKMARK_MESSAGE_SIZE) {
+                    this.songMessageIDs.shift();
+                }
 
-            this.songMessageIDs.push({
-                messageID: id,
-                song: {
-                    songName: gameRound.songName,
-                    originalSongName: gameRound.originalSongName,
-                    artist: gameRound.artistName,
-                    youtubeLink: gameRound.videoID,
-                    publishDate: new Date(gameRound.songYear, 0),
-                },
-            });
+                this.songMessageIDs.push({
+                    messageID: endRoundMessageID,
+                    song: {
+                        songName: gameRound.songName,
+                        originalSongName: gameRound.originalSongName,
+                        artist: gameRound.artistName,
+                        youtubeLink: gameRound.videoID,
+                        publishDate: new Date(gameRound.songYear, 0),
+                    },
+                });
+            }
         }
 
         this.incrementSongCount(gameRound.videoID, guessResult.correct);
@@ -469,6 +472,7 @@ export default class GameSession {
 
             this.startRound(guildPreference, messageContext);
         } else if (guildPreference.isMultipleChoiceMode()) {
+            if (!this.gameRound) return;
             if (setDifference([...new Set(getCurrentVoiceMembers(this.voiceChannelID).map((x) => x.id))], [...this.gameRound.incorrectMCGuessers]).size === 0) {
                 await this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));
                 this.startRound(await getGuildPreference(this.guildID), messageContext);
