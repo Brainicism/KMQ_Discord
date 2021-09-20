@@ -158,31 +158,6 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                         await dbContext.kmq("player_game_session_stats").del();
                     });
 
-                    it("should match the number of pages and embeds (single per-player entry)", async () => {
-                        const rows = [];
-                        for (let i = 0; i < TOTAL_ENTRIES; i++) {
-                            rows.push({
-                                player_id: String(i),
-                                date: getSqlDateString(),
-                                songs_guessed: i,
-                                exp_gained: i + 1,
-                                levels_gained: i,
-                            });
-                        }
-
-                        await dbContext.kmq("player_game_session_stats")
-                            .insert(rows);
-
-                        const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GLOBAL, LeaderboardDuration.DAILY);
-                        let fields = 0;
-                        for (const embed of embeds) {
-                            fields += (await embed()).fields.length;
-                        }
-
-                        assert.strictEqual(pageCount, Math.ceil(TOTAL_ENTRIES / ENTRIES_PER_PAGE));
-                        assert.strictEqual(fields, TOTAL_ENTRIES);
-                    });
-
                     it("should match the number of pages and embeds (multiple per-player entries)", async () => {
                         const rows = [];
                         for (let i = 0; i < TOTAL_ENTRIES; i++) {
@@ -250,49 +225,6 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                     beforeEach(async () => {
                         await dbContext.kmq("player_game_session_stats").del();
                         await dbContext.kmq("player_servers").del();
-                    });
-
-                    it("should match the number of pages and embeds (single per-player entry)", async () => {
-                        const statsRows = [];
-                        const serversRows = [];
-                        for (let i = 0; i < TOTAL_ENTRIES; i++) {
-                            statsRows.push({
-                                player_id: String(i),
-                                date: getSqlDateString(),
-                                songs_guessed: i,
-                                exp_gained: i + 1,
-                                levels_gained: i,
-                            });
-
-                            serversRows.push({
-                                player_id: String(i),
-                                server_id: SERVER_ID,
-                            });
-
-                            // invalid -- players outside of server
-                            statsRows.push({
-                                player_id: String(TOTAL_ENTRIES + i),
-                                date: getSqlDateString(),
-                                songs_guessed: i,
-                                exp_gained: i + 1,
-                                levels_gained: i,
-                            });
-                        }
-
-                        await dbContext.kmq("player_game_session_stats")
-                            .insert(statsRows);
-
-                        await dbContext.kmq("player_servers")
-                            .insert(serversRows);
-
-                        const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.SERVER, LeaderboardDuration.DAILY);
-                        let fields = 0;
-                        for (const embed of embeds) {
-                            fields += (await embed()).fields.length;
-                        }
-
-                        assert.strictEqual(pageCount, Math.ceil(TOTAL_ENTRIES / ENTRIES_PER_PAGE));
-                        assert.strictEqual(fields, TOTAL_ENTRIES);
                     });
 
                     it("should match the number of pages and embeds (multiple per-player entries)", async () => {
@@ -381,44 +313,6 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                         await dbContext.kmq("player_game_session_stats").del();
                     });
 
-                    it("should match the number of pages and embeds (single per-player entry)", async () => {
-                        const gameSession = new GameSession("", "", SERVER_ID, gameStarter, GameType.CLASSIC);
-                        state.gameSessions = { [SERVER_ID]: gameSession };
-                        const rows = [];
-                        for (let i = 0; i < TOTAL_ENTRIES; i++) {
-                            rows.push({
-                                player_id: String(i),
-                                date: getSqlDateString(),
-                                songs_guessed: i,
-                                exp_gained: i + 1,
-                                levels_gained: i,
-                            });
-
-                            gameSession.participants.add(String(i));
-
-                            // invalid -- not in game
-                            rows.push({
-                                player_id: String(TOTAL_ENTRIES + i),
-                                date: getSqlDateString(),
-                                songs_guessed: i,
-                                exp_gained: i + 1,
-                                levels_gained: i,
-                            });
-                        }
-
-                        await dbContext.kmq("player_game_session_stats")
-                            .insert(rows);
-
-                        const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GAME, LeaderboardDuration.DAILY);
-                        let fields = 0;
-                        for (const embed of embeds) {
-                            fields += (await embed()).fields.length;
-                        }
-
-                        assert.strictEqual(pageCount, Math.ceil(TOTAL_ENTRIES / ENTRIES_PER_PAGE));
-                        assert.strictEqual(fields, TOTAL_ENTRIES);
-                    });
-
                     it("should match the number of pages and embeds (multiple per-player entries)", async () => {
                         const gameSession = new GameSession("", "", SERVER_ID, gameStarter, GameType.CLASSIC);
                         state.gameSessions = { [SERVER_ID]: gameSession };
@@ -502,31 +396,6 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                         await dbContext.kmq("player_game_session_stats").del();
                     });
 
-                    it("should match the number of pages and embeds (single per-player entry)", async () => {
-                        const rows = [];
-                        for (let i = 0; i < TOTAL_ENTRIES; i++) {
-                            rows.push({
-                                player_id: String(i),
-                                date: getSqlDateString(),
-                                songs_guessed: i,
-                                exp_gained: i + 1,
-                                levels_gained: i,
-                            });
-                        }
-
-                        await dbContext.kmq("player_game_session_stats")
-                            .insert(rows);
-
-                        const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GLOBAL, LeaderboardDuration.WEEKLY);
-                        let fields = 0;
-                        for (const embed of embeds) {
-                            fields += (await embed()).fields.length;
-                        }
-
-                        assert.strictEqual(pageCount, Math.ceil(TOTAL_ENTRIES / ENTRIES_PER_PAGE));
-                        assert.strictEqual(fields, TOTAL_ENTRIES);
-                    });
-
                     it("should match the number of pages and embeds (multiple per-player entries)", async () => {
                         const rows = [];
                         for (let i = 0; i < TOTAL_ENTRIES; i++) {
@@ -594,49 +463,6 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                     beforeEach(async () => {
                         await dbContext.kmq("player_game_session_stats").del();
                         await dbContext.kmq("player_servers").del();
-                    });
-
-                    it("should match the number of pages and embeds (single per-player entry)", async () => {
-                        const statsRows = [];
-                        const serversRows = [];
-                        for (let i = 0; i < TOTAL_ENTRIES; i++) {
-                            statsRows.push({
-                                player_id: String(i),
-                                date: getSqlDateString(),
-                                songs_guessed: i,
-                                exp_gained: i + 1,
-                                levels_gained: i,
-                            });
-
-                            serversRows.push({
-                                player_id: String(i),
-                                server_id: SERVER_ID,
-                            });
-
-                            // invalid -- players outside of server
-                            statsRows.push({
-                                player_id: String(TOTAL_ENTRIES + i),
-                                date: getSqlDateString(),
-                                songs_guessed: i,
-                                exp_gained: i + 1,
-                                levels_gained: i,
-                            });
-                        }
-
-                        await dbContext.kmq("player_game_session_stats")
-                            .insert(statsRows);
-
-                        await dbContext.kmq("player_servers")
-                            .insert(serversRows);
-
-                        const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.SERVER, LeaderboardDuration.WEEKLY);
-                        let fields = 0;
-                        for (const embed of embeds) {
-                            fields += (await embed()).fields.length;
-                        }
-
-                        assert.strictEqual(pageCount, Math.ceil(TOTAL_ENTRIES / ENTRIES_PER_PAGE));
-                        assert.strictEqual(fields, TOTAL_ENTRIES);
                     });
 
                     it("should match the number of pages and embeds (multiple per-player entries)", async () => {
@@ -725,44 +551,6 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                         await dbContext.kmq("player_game_session_stats").del();
                     });
 
-                    it("should match the number of pages and embeds (single per-player entry)", async () => {
-                        const gameSession = new GameSession("", "", SERVER_ID, gameStarter, GameType.CLASSIC);
-                        state.gameSessions = { [SERVER_ID]: gameSession };
-                        const rows = [];
-                        for (let i = 0; i < TOTAL_ENTRIES; i++) {
-                            rows.push({
-                                player_id: String(i),
-                                date: getSqlDateString(),
-                                songs_guessed: i,
-                                exp_gained: i + 1,
-                                levels_gained: i,
-                            });
-
-                            gameSession.participants.add(String(i));
-
-                            // invalid -- not in game
-                            rows.push({
-                                player_id: String(TOTAL_ENTRIES + i),
-                                date: getSqlDateString(),
-                                songs_guessed: i,
-                                exp_gained: i + 1,
-                                levels_gained: i,
-                            });
-                        }
-
-                        await dbContext.kmq("player_game_session_stats")
-                            .insert(rows);
-
-                        const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GAME, LeaderboardDuration.WEEKLY);
-                        let fields = 0;
-                        for (const embed of embeds) {
-                            fields += (await embed()).fields.length;
-                        }
-
-                        assert.strictEqual(pageCount, Math.ceil(TOTAL_ENTRIES / ENTRIES_PER_PAGE));
-                        assert.strictEqual(fields, TOTAL_ENTRIES);
-                    });
-
                     it("should match the number of pages and embeds (multiple per-player entries)", async () => {
                         const gameSession = new GameSession("", "", SERVER_ID, gameStarter, GameType.CLASSIC);
                         state.gameSessions = { [SERVER_ID]: gameSession };
@@ -846,31 +634,6 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                         await dbContext.kmq("player_game_session_stats").del();
                     });
 
-                    it("should match the number of pages and embeds (single per-player entry)", async () => {
-                        const rows = [];
-                        for (let i = 0; i < TOTAL_ENTRIES; i++) {
-                            rows.push({
-                                player_id: String(i),
-                                date: getSqlDateString(),
-                                songs_guessed: i,
-                                exp_gained: i + 1,
-                                levels_gained: i,
-                            });
-                        }
-
-                        await dbContext.kmq("player_game_session_stats")
-                            .insert(rows);
-
-                        const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GLOBAL, LeaderboardDuration.MONTHLY);
-                        let fields = 0;
-                        for (const embed of embeds) {
-                            fields += (await embed()).fields.length;
-                        }
-
-                        assert.strictEqual(pageCount, Math.ceil(TOTAL_ENTRIES / ENTRIES_PER_PAGE));
-                        assert.strictEqual(fields, TOTAL_ENTRIES);
-                    });
-
                     it("should match the number of pages and embeds (multiple per-player entries)", async () => {
                         const rows = [];
                         for (let i = 0; i < TOTAL_ENTRIES; i++) {
@@ -938,49 +701,6 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                     beforeEach(async () => {
                         await dbContext.kmq("player_game_session_stats").del();
                         await dbContext.kmq("player_servers").del();
-                    });
-
-                    it("should match the number of pages and embeds (single per-player entry)", async () => {
-                        const statsRows = [];
-                        const serversRows = [];
-                        for (let i = 0; i < TOTAL_ENTRIES; i++) {
-                            statsRows.push({
-                                player_id: String(i),
-                                date: getSqlDateString(),
-                                songs_guessed: i,
-                                exp_gained: i + 1,
-                                levels_gained: i,
-                            });
-
-                            serversRows.push({
-                                player_id: String(i),
-                                server_id: SERVER_ID,
-                            });
-
-                            // invalid -- players outside of server
-                            statsRows.push({
-                                player_id: String(TOTAL_ENTRIES + i),
-                                date: getSqlDateString(),
-                                songs_guessed: i,
-                                exp_gained: i + 1,
-                                levels_gained: i,
-                            });
-                        }
-
-                        await dbContext.kmq("player_game_session_stats")
-                            .insert(statsRows);
-
-                        await dbContext.kmq("player_servers")
-                            .insert(serversRows);
-
-                        const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.SERVER, LeaderboardDuration.MONTHLY);
-                        let fields = 0;
-                        for (const embed of embeds) {
-                            fields += (await embed()).fields.length;
-                        }
-
-                        assert.strictEqual(pageCount, Math.ceil(TOTAL_ENTRIES / ENTRIES_PER_PAGE));
-                        assert.strictEqual(fields, TOTAL_ENTRIES);
                     });
 
                     it("should match the number of pages and embeds (multiple per-player entries)", async () => {
@@ -1067,44 +787,6 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                 describe("game leaderboard", () => {
                     beforeEach(async () => {
                         await dbContext.kmq("player_game_session_stats").del();
-                    });
-
-                    it("should match the number of pages and embeds (single per-player entry)", async () => {
-                        const gameSession = new GameSession("", "", SERVER_ID, gameStarter, GameType.CLASSIC);
-                        state.gameSessions = { [SERVER_ID]: gameSession };
-                        const rows = [];
-                        for (let i = 0; i < TOTAL_ENTRIES; i++) {
-                            rows.push({
-                                player_id: String(i),
-                                date: getSqlDateString(),
-                                songs_guessed: i,
-                                exp_gained: i + 1,
-                                levels_gained: i,
-                            });
-
-                            gameSession.participants.add(String(i));
-
-                            // invalid -- not in game
-                            rows.push({
-                                player_id: String(TOTAL_ENTRIES + i),
-                                date: getSqlDateString(),
-                                songs_guessed: i,
-                                exp_gained: i + 1,
-                                levels_gained: i,
-                            });
-                        }
-
-                        await dbContext.kmq("player_game_session_stats")
-                            .insert(rows);
-
-                        const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GAME, LeaderboardDuration.MONTHLY);
-                        let fields = 0;
-                        for (const embed of embeds) {
-                            fields += (await embed()).fields.length;
-                        }
-
-                        assert.strictEqual(pageCount, Math.ceil(TOTAL_ENTRIES / ENTRIES_PER_PAGE));
-                        assert.strictEqual(fields, TOTAL_ENTRIES);
                     });
 
                     it("should match the number of pages and embeds (multiple per-player entries)", async () => {
