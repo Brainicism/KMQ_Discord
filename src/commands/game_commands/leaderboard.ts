@@ -244,6 +244,7 @@ export default class LeaderboardCommand implements BaseCommand {
                         } else {
                             leaderboardType = "Server's";
                         }
+
                         break;
                     case LeaderboardType.GAME:
                         leaderboardType = "Current Game's";

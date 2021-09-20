@@ -25,7 +25,9 @@ const lastWeek = new Date(date).setDate(INITIAL_DAY - 7);
 const lastMonth = new Date(date).setMonth(INITIAL_MONTH - 1);
 
 const INITIAL_TOTAL_ENTRIES = ENTRIES_PER_PAGE * 5;
-[INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, INITIAL_TOTAL_ENTRIES + 1].map((TOTAL_ENTRIES) => {
+
+// eslint-disable-next-line no-restricted-syntax
+([INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, INITIAL_TOTAL_ENTRIES + 1]).forEach((TOTAL_ENTRIES) => {
     describe(`getLeaderboardEmbeds (${TOTAL_ENTRIES} entries)`, () => {
         describe("all-time leaderboard", () => {
             describe("global leaderboard", () => {
