@@ -6,7 +6,7 @@ import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage, sendP
 import { getRankNameByLevel } from "./profile";
 import { chooseRandom, friendlyFormattedNumber, bold, arrayToString } from "../../helpers/utils";
 import { state } from "../../kmq";
-import { GuildTextableMessage } from "../../types";
+import { GuildTextableMessage, EnvType } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import { sendValidationErrorMessage } from "../../helpers/validate";
@@ -164,7 +164,7 @@ export default class LeaderboardCommand implements BaseCommand {
             // Give an extra second to send temporary leaderboards to debug channel
             case LeaderboardDuration.DAILY:
                 topPlayersQuery = topPlayersQuery
-                    .where("date", ">", getSqlDateString(new Date().setHours(0, 0, 1, 0)));
+                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 1).getTime()));
                 break;
             case LeaderboardDuration.WEEKLY:
                 topPlayersQuery = topPlayersQuery
@@ -183,19 +183,21 @@ export default class LeaderboardCommand implements BaseCommand {
                 .select("player_id")
                 .where("server_id", "=", messageContext.guildID)).map((x) => x.player_id);
 
-            topPlayersQuery = topPlayersQuery.whereIn("player_id", serverPlayers);
+            topPlayersQuery = topPlayersQuery
+                .whereIn("player_id", serverPlayers);
         } else if (type === LeaderboardType.GAME) {
             const participantIDs = state.gameSessions[messageContext.guildID].participants;
             const gamePlayers = (await dbContext.kmq(dbTable)
                 .select("player_id")
                 .whereIn("player_id", [...participantIDs])).map((x) => x.player_id);
 
-            topPlayersQuery = topPlayersQuery.whereIn("player_id", gamePlayers);
+            topPlayersQuery = topPlayersQuery
+                .whereIn("player_id", gamePlayers);
         }
 
         const pageCount = Math.ceil((await topPlayersQuery
             .clone()
-            .count("* as count")
+            .countDistinct("player_id as count")
             .first())["count"] as number / ENTRIES_PER_PAGE);
 
         topPlayersQuery = topPlayersQuery
@@ -237,7 +239,11 @@ export default class LeaderboardCommand implements BaseCommand {
                         leaderboardType = "Global";
                         break;
                     case LeaderboardType.SERVER:
-                        leaderboardType = `${state.client.guilds.get(messageContext.guildID).name}'s`;
+                        if (process.env.NODE_ENV !== EnvType.TEST) {
+                            leaderboardType = `${state.client.guilds.get(messageContext.guildID).name}'s`;
+                        } else {
+                            leaderboardType = "Server's";
+                        }
                         break;
                     case LeaderboardType.GAME:
                         leaderboardType = "Current Game's";
