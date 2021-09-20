@@ -61,20 +61,20 @@ export default class LeaderboardCommand implements BaseCommand {
                 explanation: "Shows the 3rd page of the server-wide leaderboard",
             },
             {
-                example: "`,leaderboard game monthly 2`",
-                explanation: "Shows the 2nd page of the monthly scoreboard containing players with points in the current game",
-            },
-            {
-                example: "`,leaderboard weekly 4`",
-                explanation: "Shows the 4th page of the leaderboard, by EXP gained this week",
-            },
-            {
                 example: "`,leaderboard enroll`",
                 explanation: "Allows your name to be displayed on the leaderboard",
             },
             {
                 example: "`,leaderboard unenroll`",
                 explanation: "Hides your name from the leaderboard",
+            },
+            {
+                example: "`,leaderboard game monthly 2`",
+                explanation: "Shows the 2nd page of the monthly scoreboard containing players with points in the current game",
+            },
+            {
+                example: "`,leaderboard weekly 4`",
+                explanation: "Shows the 4th page of the leaderboard, by EXP gained this week",
             },
         ],
         priority: 50,
