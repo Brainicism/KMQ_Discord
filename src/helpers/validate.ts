@@ -12,7 +12,7 @@ const logger = new IPCLogger("validate");
  * @param warning - the warning text
  * @param arg - The incorrect argument
  */
-async function sendValidationErrorMessage(message: GuildTextableMessage, warning: string, arg: string | Array<string>, usage?: string) {
+export async function sendValidationErrorMessage(message: GuildTextableMessage, warning: string, arg: string | Array<string>, usage?: string) {
     await sendErrorMessage(MessageContext.fromMessage(message), { title: "Input validation error", description: warning, footerText: usage });
     logger.warn(`${getDebugLogHeader(message)} | ${warning}. val = ${arg}`);
 }

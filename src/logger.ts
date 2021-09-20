@@ -47,11 +47,11 @@ export class IPCLogger {
     getCategorizedMessage(msg: string) {
         return `${this.category} | ${msg}`;
     }
-    info(msg: string) {
+    info(msg: string | number) {
         if (!isMaster) {
-            console.log(this.getCategorizedMessage(msg));
+            console.log(this.getCategorizedMessage(msg as string));
         } else {
-            this.logger.info(this.getCategorizedMessage(msg));
+            this.logger.info(this.getCategorizedMessage(msg as string));
         }
     }
 

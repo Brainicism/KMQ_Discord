@@ -339,12 +339,15 @@ export default class GameSession {
             }
 
             const playerExpGain = this.scoreboard.getPlayerExpGain(participant);
+            let levelUpResult: LevelUpResult;
             if (playerExpGain > 0) {
-                const levelUpResult = await GameSession.incrementPlayerExp(participant, playerExpGain);
+                levelUpResult = await GameSession.incrementPlayerExp(participant, playerExpGain);
                 if (levelUpResult) {
                     leveledUpPlayers.push(levelUpResult);
                 }
             }
+
+            await GameSession.insertPerSessionStats(participant, playerScore, playerExpGain, levelUpResult ? levelUpResult.endLevel - levelUpResult.startLevel : 0);
         }
 
         // send level up message
@@ -1030,6 +1033,24 @@ export default class GameSession {
         }
 
         return null;
+    }
+
+    /**
+     * Store per-session stats for temporary leaderboard
+     * @param userID - The user the data belongs to
+     * @param score - The score gained in the game
+     * @param expGain - The EXP gained in the game
+     * @param levelsGained - The levels gained in the game
+     */
+    private static async insertPerSessionStats(userID: string, score: number, expGain: number, levelsGained: number) {
+        await dbContext.kmq("player_game_session_stats")
+            .insert({
+                player_id: userID,
+                date: getSqlDateString(),
+                songs_guessed: score,
+                exp_gained: expGain,
+                levels_gained: levelsGained,
+            });
     }
 
     /**
