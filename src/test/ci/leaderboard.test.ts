@@ -81,6 +81,14 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                             player_id: String(i),
                             server_id: SERVER_ID,
                         });
+
+                        // invalid -- players outside of server
+                        statsRows.push({
+                            player_id: String(TOTAL_ENTRIES + i),
+                            songs_guessed: i,
+                            exp: i + 1,
+                            level: i,
+                        });
                     }
 
                     await dbContext.kmq("player_stats")
@@ -110,13 +118,22 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                     state.gameSessions = { [SERVER_ID]: gameSession };
                     const rows = [];
                     for (let i = 0; i < TOTAL_ENTRIES; i++) {
-                        rows.push({ player_id: String(i),
+                        rows.push({
+                            player_id: String(i),
                             songs_guessed: i,
                             exp: i + 1,
                             level: i,
                         });
 
                         gameSession.participants.add(String(i));
+
+                        // invalid -- not in game
+                        rows.push({
+                            player_id: String(TOTAL_ENTRIES + i),
+                            songs_guessed: i,
+                            exp: i + 1,
+                            level: i,
+                        });
                     }
 
                     await dbContext.kmq("player_stats")
@@ -239,7 +256,8 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                         const statsRows = [];
                         const serversRows = [];
                         for (let i = 0; i < TOTAL_ENTRIES; i++) {
-                            statsRows.push({ player_id: String(i),
+                            statsRows.push({
+                                player_id: String(i),
                                 date: getSqlDateString(),
                                 songs_guessed: i,
                                 exp_gained: i + 1,
@@ -249,6 +267,15 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                             serversRows.push({
                                 player_id: String(i),
                                 server_id: SERVER_ID,
+                            });
+
+                            // invalid -- players outside of server
+                            statsRows.push({
+                                player_id: String(TOTAL_ENTRIES + i),
+                                date: getSqlDateString(),
+                                songs_guessed: i,
+                                exp_gained: i + 1,
+                                levels_gained: i,
                             });
                         }
 
@@ -321,6 +348,15 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                                 player_id: String(i),
                                 server_id: SERVER_ID,
                             });
+
+                            // invalid -- players outside of server
+                            statsRows.push({
+                                player_id: String(TOTAL_ENTRIES + i),
+                                date: getSqlDateString(),
+                                songs_guessed: i,
+                                exp_gained: i + 1,
+                                levels_gained: i,
+                            });
                         }
 
                         await dbContext.kmq("player_game_session_stats")
@@ -350,7 +386,8 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                         state.gameSessions = { [SERVER_ID]: gameSession };
                         const rows = [];
                         for (let i = 0; i < TOTAL_ENTRIES; i++) {
-                            rows.push({ player_id: String(i),
+                            rows.push({
+                                player_id: String(i),
                                 date: getSqlDateString(),
                                 songs_guessed: i,
                                 exp_gained: i + 1,
@@ -358,6 +395,15 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                             });
 
                             gameSession.participants.add(String(i));
+
+                            // invalid -- not in game
+                            rows.push({
+                                player_id: String(TOTAL_ENTRIES + i),
+                                date: getSqlDateString(),
+                                songs_guessed: i,
+                                exp_gained: i + 1,
+                                levels_gained: i,
+                            });
                         }
 
                         await dbContext.kmq("player_game_session_stats")
@@ -424,6 +470,15 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                             });
 
                             gameSession.participants.add(String(i));
+
+                            // invalid -- not in game
+                            rows.push({
+                                player_id: String(TOTAL_ENTRIES + i),
+                                date: getSqlDateString(),
+                                songs_guessed: i,
+                                exp_gained: i + 1,
+                                levels_gained: i,
+                            });
                         }
 
                         await dbContext.kmq("player_game_session_stats")
@@ -545,7 +600,8 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                         const statsRows = [];
                         const serversRows = [];
                         for (let i = 0; i < TOTAL_ENTRIES; i++) {
-                            statsRows.push({ player_id: String(i),
+                            statsRows.push({
+                                player_id: String(i),
                                 date: getSqlDateString(),
                                 songs_guessed: i,
                                 exp_gained: i + 1,
@@ -555,6 +611,15 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                             serversRows.push({
                                 player_id: String(i),
                                 server_id: SERVER_ID,
+                            });
+
+                            // invalid -- players outside of server
+                            statsRows.push({
+                                player_id: String(TOTAL_ENTRIES + i),
+                                date: getSqlDateString(),
+                                songs_guessed: i,
+                                exp_gained: i + 1,
+                                levels_gained: i,
                             });
                         }
 
@@ -627,6 +692,15 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                                 player_id: String(i),
                                 server_id: SERVER_ID,
                             });
+
+                            // invalid -- players outside of server
+                            statsRows.push({
+                                player_id: String(TOTAL_ENTRIES + i),
+                                date: getSqlDateString(),
+                                songs_guessed: i,
+                                exp_gained: i + 1,
+                                levels_gained: i,
+                            });
                         }
 
                         await dbContext.kmq("player_game_session_stats")
@@ -656,7 +730,8 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                         state.gameSessions = { [SERVER_ID]: gameSession };
                         const rows = [];
                         for (let i = 0; i < TOTAL_ENTRIES; i++) {
-                            rows.push({ player_id: String(i),
+                            rows.push({
+                                player_id: String(i),
                                 date: getSqlDateString(),
                                 songs_guessed: i,
                                 exp_gained: i + 1,
@@ -664,6 +739,15 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                             });
 
                             gameSession.participants.add(String(i));
+
+                            // invalid -- not in game
+                            rows.push({
+                                player_id: String(TOTAL_ENTRIES + i),
+                                date: getSqlDateString(),
+                                songs_guessed: i,
+                                exp_gained: i + 1,
+                                levels_gained: i,
+                            });
                         }
 
                         await dbContext.kmq("player_game_session_stats")
@@ -730,6 +814,15 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                             });
 
                             gameSession.participants.add(String(i));
+
+                            // invalid -- not in game
+                            rows.push({
+                                player_id: String(TOTAL_ENTRIES + i),
+                                date: getSqlDateString(),
+                                songs_guessed: i,
+                                exp_gained: i + 1,
+                                levels_gained: i,
+                            });
                         }
 
                         await dbContext.kmq("player_game_session_stats")
@@ -851,7 +944,8 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                         const statsRows = [];
                         const serversRows = [];
                         for (let i = 0; i < TOTAL_ENTRIES; i++) {
-                            statsRows.push({ player_id: String(i),
+                            statsRows.push({
+                                player_id: String(i),
                                 date: getSqlDateString(),
                                 songs_guessed: i,
                                 exp_gained: i + 1,
@@ -861,6 +955,15 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                             serversRows.push({
                                 player_id: String(i),
                                 server_id: SERVER_ID,
+                            });
+
+                            // invalid -- players outside of server
+                            statsRows.push({
+                                player_id: String(TOTAL_ENTRIES + i),
+                                date: getSqlDateString(),
+                                songs_guessed: i,
+                                exp_gained: i + 1,
+                                levels_gained: i,
                             });
                         }
 
@@ -933,6 +1036,15 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                                 player_id: String(i),
                                 server_id: SERVER_ID,
                             });
+
+                            // invalid -- players outside of server
+                            statsRows.push({
+                                player_id: String(TOTAL_ENTRIES + i),
+                                date: getSqlDateString(),
+                                songs_guessed: i,
+                                exp_gained: i + 1,
+                                levels_gained: i,
+                            });
                         }
 
                         await dbContext.kmq("player_game_session_stats")
@@ -962,7 +1074,8 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                         state.gameSessions = { [SERVER_ID]: gameSession };
                         const rows = [];
                         for (let i = 0; i < TOTAL_ENTRIES; i++) {
-                            rows.push({ player_id: String(i),
+                            rows.push({
+                                player_id: String(i),
                                 date: getSqlDateString(),
                                 songs_guessed: i,
                                 exp_gained: i + 1,
@@ -970,6 +1083,15 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                             });
 
                             gameSession.participants.add(String(i));
+
+                            // invalid -- not in game
+                            rows.push({
+                                player_id: String(TOTAL_ENTRIES + i),
+                                date: getSqlDateString(),
+                                songs_guessed: i,
+                                exp_gained: i + 1,
+                                levels_gained: i,
+                            });
                         }
 
                         await dbContext.kmq("player_game_session_stats")
@@ -1036,6 +1158,15 @@ for (const TOTAL_ENTRIES of [INITIAL_TOTAL_ENTRIES - 1, INITIAL_TOTAL_ENTRIES, I
                             });
 
                             gameSession.participants.add(String(i));
+
+                            // invalid -- not in game
+                            rows.push({
+                                player_id: String(TOTAL_ENTRIES + i),
+                                date: getSqlDateString(),
+                                songs_guessed: i,
+                                exp_gained: i + 1,
+                                levels_gained: i,
+                            });
                         }
 
                         await dbContext.kmq("player_game_session_stats")
