@@ -71,7 +71,7 @@ export default class CommandPrechecks {
 
         if (!isModerator) {
             logger.warn(`${getDebugLogHeader(message)} | User attempted to use a command only available to moderators in a competition`);
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Wait...", description: errorMessage ?? "This command has been disabled for use by regular users in the competition." });
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "Wait...", description: errorMessage ?? "This command has been disabled for regular users in the competition." });
         }
 
         return isModerator;
