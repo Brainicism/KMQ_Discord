@@ -161,18 +161,18 @@ export default class LeaderboardCommand implements BaseCommand {
 
         const d = date || new Date();
         switch (duration) {
-            // Give an extra 5 seconds to send temporary leaderboards to debug channel
+            // Give an extra 10 seconds to send temporary leaderboards to debug channel
             case LeaderboardDuration.DAILY:
                 topPlayersQuery = topPlayersQuery
-                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 5).getTime()));
+                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 10).getTime()));
                 break;
             case LeaderboardDuration.WEEKLY:
                 topPlayersQuery = topPlayersQuery
-                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay(), 0, 0, 5).getTime()));
+                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay(), 0, 0, 10).getTime()));
                 break;
             case LeaderboardDuration.MONTHLY:
                 topPlayersQuery = topPlayersQuery
-                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth(), 0, 0, 0, 5).getTime()));
+                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth(), 0, 0, 0, 10).getTime()));
                 break;
             default:
                 break;
