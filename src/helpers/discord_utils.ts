@@ -73,6 +73,26 @@ function missingPermissionsText(missingPermissions: string[]): string {
 }
 
 /**
+ * Sends a message to a user's DM channel
+ * @param userID - the user's ID
+ * @param messageContent - the message content
+ */
+async function sendDmMessage(userID: string, messageContent: Eris.AdvancedMessageContent) {
+    const { client } = state;
+    const dmChannel = await client.getDMChannel(userID);
+    try {
+        await client.createMessage(dmChannel.id, messageContent);
+    } catch (e) {
+        if (e.code === 50007) {
+            logger.warn(`Attempted to message user ${userID}, user does not allow DMs or has blocked me.`);
+            return;
+        }
+
+        logger.error(`Unexpected error messaging user ${userID}. err = ${JSON.stringify(e)}`);
+    }
+}
+
+/**
  * @param textChannelID - the text channel's ID
  * @param authorID - the sender's ID
  * @returns whether the bot has permissions to message's originating text channel
@@ -88,8 +108,7 @@ export async function textPermissionsCheck(textChannelID: string, guildID: strin
             description: `Hi! I'm unable to message in ${channel.guild.name}'s #${channel.name} channel. Please make sure the bot has permissions to message in this channel.`,
         };
 
-        const dmChannel = await client.getDMChannel(authorID);
-        await client.createMessage(dmChannel.id, { embed });
+        await sendDmMessage(authorID, { embeds: [embed] });
         return false;
     }
 
@@ -718,7 +737,6 @@ export async function sendBookmarkedSongs(bookmarkedSongs: { [userID: string]: M
             inline: false,
         }));
 
-        const dmChannel = await state.client.getDMChannel(userID);
         for (const fields of chunkArray(allEmbedFields, 25)) {
             const embed: Eris.EmbedOptions = {
                 author: {
@@ -730,7 +748,7 @@ export async function sendBookmarkedSongs(bookmarkedSongs: { [userID: string]: M
                 footer: { text: `Played on ${friendlyFormattedDate(new Date())}` },
             };
 
-            await state.client.createMessage(dmChannel.id, { embeds: [embed] });
+            await sendDmMessage(userID, { embeds: [embed] });
             await delay(1000);
         }
     }
