@@ -1,6 +1,6 @@
 import assert from "assert";
 import { describe } from "mocha";
-import _ from "lodash";
+import { EmbedGenerator } from "eris-pagination";
 import LeaderboardCommand, { LeaderboardType, LeaderboardDuration, ENTRIES_PER_PAGE } from "../../commands/game_commands/leaderboard";
 import { getSqlDateString } from "../../helpers/discord_utils";
 import dbContext from "../../database_context";
@@ -27,379 +27,361 @@ const lastMonth = new Date(date).setMonth(INITIAL_MONTH - 1);
 
 const INITIAL_TOTAL_ENTRIES = ENTRIES_PER_PAGE * 5;
 
-for (const TOTAL_ENTRIES of _.range(INITIAL_TOTAL_ENTRIES, INITIAL_TOTAL_ENTRIES + ENTRIES_PER_PAGE)) {
-    // eslint-disable-next-line @typescript-eslint/no-loop-func
-    describe(`getLeaderboardEmbeds (${TOTAL_ENTRIES % ENTRIES_PER_PAGE} mod ENTRIES_PER_PAGE entries)`, () => {
-        describe("all-time leaderboard", () => {
-            describe("global leaderboard", () => {
-                beforeEach(async () => {
-                    await dbContext.kmq("player_stats").del();
-                });
+function generatePlayerStats(numberPlayers: number, offset = 0) {
+    return [...Array(numberPlayers).keys()].map((i) => ({
+        player_id: String(i + offset),
+        songs_guessed: i,
+        exp: i + 1,
+        level: i,
+    }));
+}
 
-                it("should match the number of pages and embeds", async () => {
-                    const rows = [];
-                    for (let i = 0; i < TOTAL_ENTRIES; i++) {
-                        rows.push({
-                            player_id: String(i),
-                            songs_guessed: i,
-                            exp: i + 1,
-                            level: i,
-                        });
-                    }
+function generatePlayerServers(numberPlayers: number, serverID: string) {
+    return [...Array(numberPlayers).keys()].map((i) => ({
+        player_id: String(i),
+        server_id: serverID,
+    }));
+}
 
-                    await dbContext.kmq("player_stats")
-                        .insert(rows);
+async function getNumberOfFields(embedGenerators: EmbedGenerator[]): Promise<number> {
+    return embedGenerators.reduce(async (prev, curr) => await prev + (await curr()).fields.length, Promise.resolve(0));
+}
 
-                    const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GLOBAL, LeaderboardDuration.ALL_TIME);
-                    let fields = 0;
-                    for (const embed of embeds) {
-                        fields += (await embed()).fields.length;
-                    }
+describe("getLeaderboardEmbeds", () => {
+    describe("off by one errors", () => {
+        beforeEach(async () => {
+            await dbContext.kmq("player_stats").del();
+        });
 
-                    assert.strictEqual(pageCount, Math.ceil(TOTAL_ENTRIES / ENTRIES_PER_PAGE));
-                    assert.strictEqual(fields, TOTAL_ENTRIES);
-                });
-            });
+        describe("fits a page perfectly", () => {
+            it("should match the number of pages and embeds", async () => {
+                const totalEntries = ENTRIES_PER_PAGE;
+                await dbContext.kmq("player_stats")
+                    .insert(generatePlayerStats(totalEntries));
 
-            describe("server leaderboard", () => {
-                beforeEach(async () => {
-                    await dbContext.kmq("player_stats").del();
-                    await dbContext.kmq("player_servers").del();
-                });
-
-                it("should match the number of pages and embeds", async () => {
-                    const statsRows = [];
-                    const serversRows = [];
-                    for (let i = 0; i < TOTAL_ENTRIES; i++) {
-                        statsRows.push({
-                            player_id: String(i),
-                            songs_guessed: i,
-                            exp: i + 1,
-                            level: i,
-                        });
-
-                        serversRows.push({
-                            player_id: String(i),
-                            server_id: SERVER_ID,
-                        });
-
-                        // invalid -- players outside of server
-                        statsRows.push({
-                            player_id: String(TOTAL_ENTRIES + i),
-                            songs_guessed: i,
-                            exp: i + 1,
-                            level: i,
-                        });
-                    }
-
-                    await dbContext.kmq("player_stats")
-                        .insert(statsRows);
-
-                    await dbContext.kmq("player_servers")
-                        .insert(serversRows);
-
-                    const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.SERVER, LeaderboardDuration.ALL_TIME);
-                    let fields = 0;
-                    for (const embed of embeds) {
-                        fields += (await embed()).fields.length;
-                    }
-
-                    assert.strictEqual(pageCount, Math.ceil(TOTAL_ENTRIES / ENTRIES_PER_PAGE));
-                    assert.strictEqual(fields, TOTAL_ENTRIES);
-                });
-            });
-
-            describe("game leaderboard", () => {
-                beforeEach(async () => {
-                    await dbContext.kmq("player_stats").del();
-                });
-
-                it("should match the number of pages and embeds", async () => {
-                    const gameSession = new GameSession("", "", SERVER_ID, gameStarter, GameType.CLASSIC);
-                    state.gameSessions = { [SERVER_ID]: gameSession };
-                    const rows = [];
-                    for (let i = 0; i < TOTAL_ENTRIES; i++) {
-                        rows.push({
-                            player_id: String(i),
-                            songs_guessed: i,
-                            exp: i + 1,
-                            level: i,
-                        });
-
-                        gameSession.participants.add(String(i));
-
-                        // invalid -- not in game
-                        rows.push({
-                            player_id: String(TOTAL_ENTRIES + i),
-                            songs_guessed: i,
-                            exp: i + 1,
-                            level: i,
-                        });
-                    }
-
-                    await dbContext.kmq("player_stats")
-                        .insert(rows);
-
-                    const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GAME, LeaderboardDuration.ALL_TIME);
-                    let fields = 0;
-                    for (const embed of embeds) {
-                        fields += (await embed()).fields.length;
-                    }
-
-                    assert.strictEqual(pageCount, Math.ceil(TOTAL_ENTRIES / ENTRIES_PER_PAGE));
-                    assert.strictEqual(fields, TOTAL_ENTRIES);
-                });
+                const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GLOBAL, LeaderboardDuration.ALL_TIME);
+                const fields = await getNumberOfFields(embeds);
+                assert.strictEqual(pageCount, Math.ceil(totalEntries / ENTRIES_PER_PAGE));
+                assert.strictEqual(fields, totalEntries);
             });
         });
 
-        describe("temporary leaderboard", () => {
-            beforeEach(async () => {
-                await dbContext.kmq("player_game_session_stats").del();
+        describe("one full page + 1 field", () => {
+            it("should match the number of pages and embeds", async () => {
+                const totalEntries = ENTRIES_PER_PAGE + 1;
+                await dbContext.kmq("player_stats")
+                    .insert(generatePlayerStats(totalEntries));
 
-                const rows = [];
+                const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GLOBAL, LeaderboardDuration.ALL_TIME);
+                const fields = await getNumberOfFields(embeds);
+                assert.strictEqual(pageCount, Math.ceil(totalEntries / ENTRIES_PER_PAGE));
+                assert.strictEqual(fields, totalEntries);
+            });
+        });
+
+        describe("one field short of a full page", () => {
+            it("should match the number of pages and embeds", async () => {
+                const totalEntries = ENTRIES_PER_PAGE - 1;
+                await dbContext.kmq("player_stats")
+                    .insert(generatePlayerStats(totalEntries));
+
+                const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GLOBAL, LeaderboardDuration.ALL_TIME);
+                const fields = await getNumberOfFields(embeds);
+
+                assert.strictEqual(pageCount, Math.ceil(totalEntries / ENTRIES_PER_PAGE));
+                assert.strictEqual(fields, totalEntries);
+            });
+        });
+    });
+
+    describe("all-time leaderboard", () => {
+        describe("global leaderboard", () => {
+            beforeEach(async () => {
+                await dbContext.kmq("player_stats").del();
+            });
+
+            it("should match the number of pages and embeds", async () => {
+                await dbContext.kmq("player_stats")
+                    .insert(generatePlayerStats(INITIAL_TOTAL_ENTRIES));
+
+                const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GLOBAL, LeaderboardDuration.ALL_TIME);
+                const fields = await getNumberOfFields(embeds);
+
+                assert.strictEqual(pageCount, Math.ceil(INITIAL_TOTAL_ENTRIES / ENTRIES_PER_PAGE));
+                assert.strictEqual(fields, INITIAL_TOTAL_ENTRIES);
+            });
+        });
+
+        describe("server leaderboard", () => {
+            beforeEach(async () => {
+                await dbContext.kmq("player_stats").del();
+                await dbContext.kmq("player_servers").del();
+            });
+
+            it("should match the number of pages and embeds", async () => {
+                const statsRows = [];
+                const serversRows = [];
+
+                statsRows.push(...generatePlayerStats(INITIAL_TOTAL_ENTRIES));
+                serversRows.push(...generatePlayerServers(INITIAL_TOTAL_ENTRIES, SERVER_ID));
+
+                // invalid -- players outside of server
+                statsRows.push(...generatePlayerStats(5, INITIAL_TOTAL_ENTRIES));
+
+                await dbContext.kmq("player_stats")
+                    .insert(statsRows);
+
+                await dbContext.kmq("player_servers")
+                    .insert(serversRows);
+
+                const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.SERVER, LeaderboardDuration.ALL_TIME);
+                const fields = await getNumberOfFields(embeds);
+
+                assert.strictEqual(pageCount, Math.ceil(INITIAL_TOTAL_ENTRIES / ENTRIES_PER_PAGE));
+                assert.strictEqual(fields, INITIAL_TOTAL_ENTRIES);
+            });
+        });
+
+        describe("game leaderboard", () => {
+            beforeEach(async () => {
+                await dbContext.kmq("player_stats").del();
+            });
+
+            it("should match the number of pages and embeds", async () => {
+                const gameSession = new GameSession("", "", SERVER_ID, gameStarter, GameType.CLASSIC);
+                state.gameSessions = { [SERVER_ID]: gameSession };
+                const statsRows = [];
+
+                statsRows.push(...generatePlayerStats(INITIAL_TOTAL_ENTRIES));
+                gameSession.participants = new Set([...Array(INITIAL_TOTAL_ENTRIES).keys()].map((i) => String(i)));
+
+                // invalid -- not in game
+                statsRows.push(...generatePlayerStats(5, INITIAL_TOTAL_ENTRIES));
+
+                await dbContext.kmq("player_stats")
+                    .insert(statsRows);
+
+                const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GAME, LeaderboardDuration.ALL_TIME);
+                const fields = await getNumberOfFields(embeds);
+
+                assert.strictEqual(pageCount, Math.ceil(INITIAL_TOTAL_ENTRIES / ENTRIES_PER_PAGE));
+                assert.strictEqual(fields, INITIAL_TOTAL_ENTRIES);
+            });
+        });
+    });
+
+    describe("temporary leaderboard", () => {
+        beforeEach(async () => {
+            await dbContext.kmq("player_game_session_stats").del();
+
+            const rows = [{
+                player_id: "0",
+                date: getSqlDateString(date.getTime()),
+                songs_guessed: 1,
+                exp_gained: 1,
+                levels_gained: 1,
+            }, {
+                player_id: "0",
+                date: getSqlDateString(secondAgo),
+                songs_guessed: 1,
+                exp_gained: 1,
+                levels_gained: 1,
+            }, {
+                player_id: "1",
+                date: getSqlDateString(secondAgo),
+                songs_guessed: 1,
+                exp_gained: 1,
+                levels_gained: 1,
+            },
+            {
+                player_id: "2",
+                date: getSqlDateString(yesterday),
+                songs_guessed: 1,
+                exp_gained: 1,
+                levels_gained: 1,
+            },
+            {
+                player_id: "3",
+                date: getSqlDateString(lastWeek),
+                songs_guessed: 1,
+                exp_gained: 1,
+                levels_gained: 1,
+            },
+            {
+                player_id: "4",
+                date: getSqlDateString(lastMonth),
+                songs_guessed: 1,
+                exp_gained: 1,
+                levels_gained: 1,
+            }];
+
+            for (let i = 5; i < INITIAL_TOTAL_ENTRIES; i++) {
                 rows.push({
-                    player_id: "0",
+                    player_id: String(i),
                     date: getSqlDateString(date.getTime()),
                     songs_guessed: 1,
                     exp_gained: 1,
                     levels_gained: 1,
                 });
+            }
 
-                rows.push({
-                    player_id: "0",
-                    date: getSqlDateString(secondAgo),
-                    songs_guessed: 1,
-                    exp_gained: 1,
-                    levels_gained: 1,
+            await dbContext.kmq("player_game_session_stats")
+                .insert(rows);
+        });
+
+        describe("global leaderboard", () => {
+            describe("daily leaderboard", () => {
+                it("should match the number of pages and embeds", async () => {
+                    // Ignoring entry yesterday
+                    // Ignoring entry last week
+                    // Ignoring entry last month
+                    const validEntryCount = INITIAL_TOTAL_ENTRIES - 3;
+                    const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GLOBAL, LeaderboardDuration.DAILY, date);
+                    const fields = await getNumberOfFields(embeds);
+
+                    assert.strictEqual(pageCount, Math.ceil(validEntryCount / ENTRIES_PER_PAGE));
+                    assert.strictEqual(fields, validEntryCount);
                 });
+            });
 
-                rows.push({
-                    player_id: "1",
-                    date: getSqlDateString(secondAgo),
-                    songs_guessed: 1,
-                    exp_gained: 1,
-                    levels_gained: 1,
+            describe("weekly leaderboard", () => {
+                it("should match the number of pages and embeds", async () => {
+                    // Ignoring entry last week
+                    // Ignoring entry last month
+                    const validEntryCount = INITIAL_TOTAL_ENTRIES - 2;
+                    const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GLOBAL, LeaderboardDuration.WEEKLY, date);
+                    const fields = await getNumberOfFields(embeds);
+
+                    assert.strictEqual(pageCount, Math.ceil(validEntryCount / ENTRIES_PER_PAGE));
+                    assert.strictEqual(fields, validEntryCount);
                 });
+            });
 
-                rows.push({
-                    player_id: "2",
-                    date: getSqlDateString(yesterday),
-                    songs_guessed: 1,
-                    exp_gained: 1,
-                    levels_gained: 1,
+            describe("monthly leaderboard", () => {
+                it("should match the number of pages and embeds", async () => {
+                    // Ignoring last month
+                    const validEntryCount = INITIAL_TOTAL_ENTRIES - 1;
+                    const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GLOBAL, LeaderboardDuration.MONTHLY, date);
+                    const fields = await getNumberOfFields(embeds);
+
+                    assert.strictEqual(pageCount, Math.ceil(validEntryCount / ENTRIES_PER_PAGE));
+                    assert.strictEqual(fields, validEntryCount);
                 });
+            });
+        });
 
-                rows.push({
-                    player_id: "3",
-                    date: getSqlDateString(lastWeek),
-                    songs_guessed: 1,
-                    exp_gained: 1,
-                    levels_gained: 1,
-                });
+        describe("server leaderboard", () => {
+            beforeEach(async () => {
+                await dbContext.kmq("player_servers").del();
 
-                rows.push({
-                    player_id: "4",
-                    date: getSqlDateString(lastMonth),
-                    songs_guessed: 1,
-                    exp_gained: 1,
-                    levels_gained: 1,
-                });
-
-                for (let i = 5; i < TOTAL_ENTRIES; i++) {
-                    rows.push({
+                const serversRows = [];
+                // Player with id 0 is outside server
+                for (let i = 1; i <= INITIAL_TOTAL_ENTRIES; i++) {
+                    serversRows.push({
                         player_id: String(i),
-                        date: getSqlDateString(date.getTime()),
-                        songs_guessed: 1,
-                        exp_gained: 1,
-                        levels_gained: 1,
+                        server_id: SERVER_ID,
                     });
                 }
 
-                await dbContext.kmq("player_game_session_stats")
-                    .insert(rows);
+                await dbContext.kmq("player_servers")
+                    .insert(serversRows);
             });
 
-            describe("global leaderboard", () => {
-                describe("daily leaderboard", () => {
-                    it("should match the number of pages and embeds", async () => {
-                        // Ignoring entry yesterday
-                        // Ignoring entry last week
-                        // Ignoring entry last month
-                        const validEntryCount = TOTAL_ENTRIES - 3;
-                        const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GLOBAL, LeaderboardDuration.DAILY, date);
-                        let fields = 0;
-                        for (const embed of embeds) {
-                            fields += (await embed()).fields.length;
-                        }
+            describe("daily leaderboard", () => {
+                it("should match the number of pages and embeds", async () => {
+                    // Ignoring entry of player outside server
+                    // Ignoring entry yesterday
+                    // Ignoring entry last week
+                    // Ignoring entry last month
+                    const validEntryCount = INITIAL_TOTAL_ENTRIES - 4;
+                    const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.SERVER, LeaderboardDuration.DAILY, date);
+                    const fields = await getNumberOfFields(embeds);
 
-                        assert.strictEqual(pageCount, Math.ceil(validEntryCount / ENTRIES_PER_PAGE));
-                        assert.strictEqual(fields, validEntryCount);
-                    });
-                });
-
-                describe("weekly leaderboard", () => {
-                    it("should match the number of pages and embeds", async () => {
-                        // Ignoring entry last week
-                        // Ignoring entry last month
-                        const validEntryCount = TOTAL_ENTRIES - 2;
-                        const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GLOBAL, LeaderboardDuration.WEEKLY, date);
-                        let fields = 0;
-                        for (const embed of embeds) {
-                            fields += (await embed()).fields.length;
-                        }
-
-                        assert.strictEqual(pageCount, Math.ceil(validEntryCount / ENTRIES_PER_PAGE));
-                        assert.strictEqual(fields, validEntryCount);
-                    });
-                });
-
-                describe("monthly leaderboard", () => {
-                    it("should match the number of pages and embeds", async () => {
-                        // Ignoring last month
-                        const validEntryCount = TOTAL_ENTRIES - 1;
-                        const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GLOBAL, LeaderboardDuration.MONTHLY, date);
-                        let fields = 0;
-                        for (const embed of embeds) {
-                            fields += (await embed()).fields.length;
-                        }
-
-                        assert.strictEqual(pageCount, Math.ceil(validEntryCount / ENTRIES_PER_PAGE));
-                        assert.strictEqual(fields, validEntryCount);
-                    });
+                    assert.strictEqual(pageCount, Math.ceil(validEntryCount / ENTRIES_PER_PAGE));
+                    assert.strictEqual(fields, validEntryCount);
                 });
             });
 
-            describe("server leaderboard", () => {
-                beforeEach(async () => {
-                    await dbContext.kmq("player_servers").del();
+            describe("weekly leaderboard", () => {
+                it("should match the number of pages and embeds", async () => {
+                    // Ignoring entry of player outside server
+                    // Ignoring entry last week
+                    // Ignoring entry last month
+                    const validEntryCount = INITIAL_TOTAL_ENTRIES - 3;
+                    const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.SERVER, LeaderboardDuration.WEEKLY, date);
+                    const fields = await getNumberOfFields(embeds);
 
-                    const serversRows = [];
-                    // Player with id 0 is outside server
-                    for (let i = 1; i <= TOTAL_ENTRIES; i++) {
-                        serversRows.push({
-                            player_id: String(i),
-                            server_id: SERVER_ID,
-                        });
-                    }
-
-                    await dbContext.kmq("player_servers")
-                        .insert(serversRows);
-                });
-
-                describe("daily leaderboard", () => {
-                    it("should match the number of pages and embeds", async () => {
-                        // Ignoring entry of player outside server
-                        // Ignoring entry yesterday
-                        // Ignoring entry last week
-                        // Ignoring entry last month
-                        const validEntryCount = TOTAL_ENTRIES - 4;
-                        const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.SERVER, LeaderboardDuration.DAILY, date);
-                        let fields = 0;
-                        for (const embed of embeds) {
-                            fields += (await embed()).fields.length;
-                        }
-
-                        assert.strictEqual(pageCount, Math.ceil(validEntryCount / ENTRIES_PER_PAGE));
-                        assert.strictEqual(fields, validEntryCount);
-                    });
-                });
-
-                describe("weekly leaderboard", () => {
-                    it("should match the number of pages and embeds", async () => {
-                        // Ignoring entry of player outside server
-                        // Ignoring entry last week
-                        // Ignoring entry last month
-                        const validEntryCount = TOTAL_ENTRIES - 3;
-                        const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.SERVER, LeaderboardDuration.WEEKLY, date);
-                        let fields = 0;
-                        for (const embed of embeds) {
-                            fields += (await embed()).fields.length;
-                        }
-
-                        assert.strictEqual(pageCount, Math.ceil(validEntryCount / ENTRIES_PER_PAGE));
-                        assert.strictEqual(fields, validEntryCount);
-                    });
-                });
-
-                describe("monthly leaderboard", () => {
-                    it("should match the number of pages and embeds", async () => {
-                        // Ignoring entry of player outside server
-                        // Ignoring entry last month
-                        const validEntryCount = TOTAL_ENTRIES - 2;
-                        const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.SERVER, LeaderboardDuration.MONTHLY, date);
-                        let fields = 0;
-                        for (const embed of embeds) {
-                            fields += (await embed()).fields.length;
-                        }
-
-                        assert.strictEqual(pageCount, Math.ceil(validEntryCount / ENTRIES_PER_PAGE));
-                        assert.strictEqual(fields, validEntryCount);
-                    });
+                    assert.strictEqual(pageCount, Math.ceil(validEntryCount / ENTRIES_PER_PAGE));
+                    assert.strictEqual(fields, validEntryCount);
                 });
             });
 
-            describe("game leaderboard", () => {
-                beforeEach(async () => {
-                    const gameSession = new GameSession("", "", SERVER_ID, gameStarter, GameType.CLASSIC);
-                    state.gameSessions = { [SERVER_ID]: gameSession };
+            describe("monthly leaderboard", () => {
+                it("should match the number of pages and embeds", async () => {
+                    // Ignoring entry of player outside server
+                    // Ignoring entry last month
+                    const validEntryCount = INITIAL_TOTAL_ENTRIES - 2;
+                    const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.SERVER, LeaderboardDuration.MONTHLY, date);
+                    const fields = await getNumberOfFields(embeds);
 
-                    // Player with id 0 is not in game
-                    for (let i = 1; i < TOTAL_ENTRIES; i++) {
-                        gameSession.participants.add(String(i));
-                    }
+                    assert.strictEqual(pageCount, Math.ceil(validEntryCount / ENTRIES_PER_PAGE));
+                    assert.strictEqual(fields, validEntryCount);
                 });
+            });
+        });
 
-                describe("daily leaderboard", () => {
-                    it("should match the number of pages and embeds", async () => {
-                        // Ignoring entry of player outside game
-                        // Ignoring entry yesterday
-                        // Ignoring entry last week
-                        // Ignoring entry last month
-                        const validEntryCount = TOTAL_ENTRIES - 4;
-                        const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GAME, LeaderboardDuration.DAILY, date);
-                        let fields = 0;
-                        for (const embed of embeds) {
-                            fields += (await embed()).fields.length;
-                        }
+        describe("game leaderboard", () => {
+            beforeEach(async () => {
+                const gameSession = new GameSession("", "", SERVER_ID, gameStarter, GameType.CLASSIC);
+                state.gameSessions = { [SERVER_ID]: gameSession };
 
-                        assert.strictEqual(pageCount, Math.ceil(validEntryCount / ENTRIES_PER_PAGE));
-                        assert.strictEqual(fields, validEntryCount);
-                    });
+                // Player with id 0 is not in game
+                for (let i = 1; i < INITIAL_TOTAL_ENTRIES; i++) {
+                    gameSession.participants.add(String(i));
+                }
+            });
+
+            describe("daily leaderboard", () => {
+                it("should match the number of pages and embeds", async () => {
+                    // Ignoring entry of player outside game
+                    // Ignoring entry yesterday
+                    // Ignoring entry last week
+                    // Ignoring entry last month
+                    const validEntryCount = INITIAL_TOTAL_ENTRIES - 4;
+                    const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GAME, LeaderboardDuration.DAILY, date);
+                    const fields = await getNumberOfFields(embeds);
+
+                    assert.strictEqual(pageCount, Math.ceil(validEntryCount / ENTRIES_PER_PAGE));
+                    assert.strictEqual(fields, validEntryCount);
                 });
+            });
 
-                describe("weekly leaderboard", () => {
-                    it("should match the number of pages and embeds", async () => {
-                        // Ignoring entry of player outside game
-                        // Ignoring entry last week
-                        // Ignoring entry last month
-                        const validEntryCount = TOTAL_ENTRIES - 3;
-                        const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GAME, LeaderboardDuration.WEEKLY, date);
-                        let fields = 0;
-                        for (const embed of embeds) {
-                            fields += (await embed()).fields.length;
-                        }
+            describe("weekly leaderboard", () => {
+                it("should match the number of pages and embeds", async () => {
+                    // Ignoring entry of player outside game
+                    // Ignoring entry last week
+                    // Ignoring entry last month
+                    const validEntryCount = INITIAL_TOTAL_ENTRIES - 3;
+                    const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GAME, LeaderboardDuration.WEEKLY, date);
+                    const fields = await getNumberOfFields(embeds);
 
-                        assert.strictEqual(pageCount, Math.ceil(validEntryCount / ENTRIES_PER_PAGE));
-                        assert.strictEqual(fields, validEntryCount);
-                    });
+                    assert.strictEqual(pageCount, Math.ceil(validEntryCount / ENTRIES_PER_PAGE));
+                    assert.strictEqual(fields, validEntryCount);
                 });
+            });
 
-                describe("monthly leaderboard", () => {
-                    it("should match the number of pages and embeds", async () => {
-                        // Ignoring entry of player outside game
-                        // Ignoring entry last month
-                        const validEntryCount = TOTAL_ENTRIES - 2;
-                        const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GAME, LeaderboardDuration.MONTHLY, date);
-                        let fields = 0;
-                        for (const embed of embeds) {
-                            fields += (await embed()).fields.length;
-                        }
+            describe("monthly leaderboard", () => {
+                it("should match the number of pages and embeds", async () => {
+                    // Ignoring entry of player outside game
+                    // Ignoring entry last month
+                    const validEntryCount = INITIAL_TOTAL_ENTRIES - 2;
+                    const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GAME, LeaderboardDuration.MONTHLY, date);
+                    const fields = await getNumberOfFields(embeds);
 
-                        assert.strictEqual(pageCount, Math.ceil(validEntryCount / ENTRIES_PER_PAGE));
-                        assert.strictEqual(fields, validEntryCount);
-                    });
+                    assert.strictEqual(pageCount, Math.ceil(validEntryCount / ENTRIES_PER_PAGE));
+                    assert.strictEqual(fields, validEntryCount);
                 });
             });
         });
     });
-}
+});
