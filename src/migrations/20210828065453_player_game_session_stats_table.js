@@ -1,5 +1,5 @@
 exports.up = function (knex) {
-    return knex.schema.createTableIfNotExists("player_game_session_stats", function (table) {
+    return knex.schema.createTable("player_game_session_stats", function (table) {
         table.string("player_id").notNullable();
         table.datetime("date").notNullable();
         table.integer("songs_guessed").defaultTo(0);
