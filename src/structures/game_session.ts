@@ -255,17 +255,17 @@ export default class GameSession {
                 };
             }
 
-            const { id: endRoundMessageID } = await sendEndRoundMessage(messageContext, this.scoreboard, gameRound, guildPreference.gameOptions.guessModeType,
+            const endRoundMessage = await sendEndRoundMessage(messageContext, this.scoreboard, gameRound, guildPreference.gameOptions.guessModeType,
                 playerRoundResults, guildPreference.isMultipleChoiceMode(), remainingDuration, uniqueSongCounter);
 
             // if message fails to send, no ID is returned
-            if (endRoundMessageID) {
+            if (endRoundMessage) {
                 if (Object.keys(this.songMessageIDs).length === BOOKMARK_MESSAGE_SIZE) {
                     this.songMessageIDs.shift();
                 }
 
                 this.songMessageIDs.push({
-                    messageID: endRoundMessageID,
+                    messageID: endRoundMessage.id,
                     song: {
                         songName: gameRound.songName,
                         originalSongName: gameRound.originalSongName,
