@@ -3,6 +3,7 @@
 import schedule from "node-schedule";
 import fastify from "fastify";
 import _ from "lodash";
+import { isMaster } from "cluster";
 import { IPCLogger } from "../logger";
 import { state } from "../kmq";
 import { sendInfoMessage } from "./discord_utils";
@@ -279,17 +280,24 @@ export function registerIntervals(clusterID: number) {
 
     // every first of the month at 12am UTC => 7pm EST
     schedule.scheduleJob("0 0 1 * *", async () => {
-        LeaderboardCommand.sendDebugLeaderboard(LeaderboardDuration.MONTHLY);
+        if (isMaster) {
+            LeaderboardCommand.sendDebugLeaderboard(LeaderboardDuration.MONTHLY);
+        }
     });
 
     // every sunday at 12am UTC => saturday 7pm EST
     schedule.scheduleJob("0 0 * * SUN", async () => {
-        LeaderboardCommand.sendDebugLeaderboard(LeaderboardDuration.WEEKLY);
+        if (isMaster) {
+            LeaderboardCommand.sendDebugLeaderboard(LeaderboardDuration.WEEKLY);
+        }
     });
 
     // everyday at 12am UTC => 7pm EST
     schedule.scheduleJob("0 0 * * *", async () => {
-        LeaderboardCommand.sendDebugLeaderboard(LeaderboardDuration.DAILY);
+        if (isMaster) {
+            LeaderboardCommand.sendDebugLeaderboard(LeaderboardDuration.DAILY);
+        }
+
         reloadFactCache();
     });
 
