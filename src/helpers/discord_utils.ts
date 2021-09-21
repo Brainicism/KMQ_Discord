@@ -758,6 +758,14 @@ function withinInteractionInterval(interaction: Eris.ComponentInteraction | Eris
     return new Date().getTime() - interaction.createdAt <= MAX_INTERACTION_RESPONSE_TIME;
 }
 
+function interactionRejectionHandler(interaction: Eris.ComponentInteraction | Eris.CommandInteraction, err) {
+    if (err.code === 10062) {
+        logger.warn(`${getDebugLogHeader(interaction)} | Interaction acknowledge (unknown interaction)`);
+    } else {
+        logger.error(`${getDebugLogHeader(interaction)} | Interaction acknowledge (failure message) failed. err = ${err.stack}`);
+    }
+}
+
 export async function tryInteractionAcknowledge(interaction: Eris.ComponentInteraction | Eris.CommandInteraction) {
     if (!withinInteractionInterval(interaction)) {
         return;
@@ -766,7 +774,7 @@ export async function tryInteractionAcknowledge(interaction: Eris.ComponentInter
     try {
         await interaction.acknowledge();
     } catch (err) {
-        logger.error(`${getDebugLogHeader(interaction)} | Interaction acknowledge failed. err = ${err.stack}`);
+        interactionRejectionHandler(interaction, err);
     }
 }
 
@@ -790,7 +798,7 @@ export async function tryCreateInteractionSuccessAcknowledgement(interaction: Er
             flags: 64,
         });
     } catch (err) {
-        logger.error(`${getDebugLogHeader(interaction)} | Interaction acknowledge (success message) via createMessage failed. err = ${err.stack}`);
+        interactionRejectionHandler(interaction, err);
     }
 }
 
@@ -814,6 +822,6 @@ export async function tryCreateInteractionErrorAcknowledgement(interaction: Eris
             flags: 64,
         });
     } catch (err) {
-        logger.error(`${getDebugLogHeader(interaction)} | Interaction acknowledge (failure message) via createMessage failed. err = ${err.stack}`);
+        interactionRejectionHandler(interaction, err);
     }
 }
