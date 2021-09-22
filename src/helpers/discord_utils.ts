@@ -1,4 +1,4 @@
-import Eris, { EmbedOptions, TextableChannel, TextChannel } from "eris";
+import Eris, { EmbedOptions, TextableChannel } from "eris";
 import EmbedPaginator from "eris-pagination";
 import axios from "axios";
 import GuildPreference from "../structures/guild_preference";
@@ -93,6 +93,32 @@ async function sendDmMessage(userID: string, messageContent: Eris.AdvancedMessag
 }
 
 /**
+ * Fetches TextChannel from cache, or via REST and update cache
+ * @param textChannelID - the text channel's ID
+ * @returns an instance of the TextChannel
+ */
+async function fetchChannel(textChannelID: string): Promise<Eris.TextChannel> {
+    let channel: Eris.TextChannel;
+    const { client } = state;
+    channel = client.getChannel(textChannelID) as Eris.TextChannel;
+    if (!channel) {
+        logger.debug(`Text channel not in cache, attempting to fetch: ${textChannelID}`);
+        try {
+            channel = await client.getRESTChannel(textChannelID) as Eris.TextChannel;
+            // update cache
+            const guild = client.guilds.get(channel.guild.id);
+            guild.channels.add(channel);
+            client.channelGuildMap[channel.id] = guild.id;
+        } catch (err) {
+            logger.error(`Could not fetch text channel: ${textChannelID}. err: ${err.code}. msg: ${err.message}`);
+            return null;
+        }
+    }
+
+    return channel;
+}
+
+/**
  * @param textChannelID - the text channel's ID
  * @param authorID - the sender's ID
  * @returns whether the bot has permissions to message's originating text channel
@@ -100,7 +126,7 @@ async function sendDmMessage(userID: string, messageContent: Eris.AdvancedMessag
 export async function textPermissionsCheck(textChannelID: string, guildID: string, authorID: string): Promise<boolean> {
     const { client } = state;
     const messageContext = new MessageContext(textChannelID, null, guildID);
-    const channel = client.getChannel(textChannelID) as TextChannel;
+    const channel = await fetchChannel(textChannelID);
     if (!channel) return false;
     if (!channel.permissionsOf(client.user.id).has("sendMessages")) {
         logger.warn(`${getDebugLogHeader(messageContext)} | Missing SEND_MESSAGES permissions`);
@@ -133,10 +159,7 @@ export async function textPermissionsCheck(textChannelID: string, guildID: strin
  * @param messageContent - The MessageContent to send
  */
 async function sendMessage(textChannelID: string, authorID: string, messageContent: Eris.AdvancedMessageContent): Promise<Eris.Message> {
-    const channel = state.client.getChannel(textChannelID) as Eris.TextChannel;
-    if (!channel) {
-        logger.error(`${textChannelID} not cached for some reason. content = ${JSON.stringify(messageContent)}`);
-    }
+    const channel = await fetchChannel(textChannelID);
 
     // only reply to message if has required permissions
     if (channel && !channel.permissionsOf(state.client.user.id).has("readMessageHistory")) {
@@ -679,11 +702,11 @@ export function checkBotIsAlone(guildID: string): boolean {
 }
 
 /** @returns the debug TextChannel */
-export function getDebugChannel(): Eris.TextChannel {
+export function getDebugChannel(): Promise<Eris.TextChannel> {
     if (!process.env.DEBUG_SERVER_ID || !process.env.DEBUG_TEXT_CHANNEL_ID) return null;
     const debugGuild = state.client.guilds.get(process.env.DEBUG_SERVER_ID);
     if (!debugGuild) return null;
-    return <Eris.TextChannel>debugGuild.channels.get(process.env.DEBUG_TEXT_CHANNEL_ID);
+    return fetchChannel(process.env.DEBUG_TEXT_CHANNEL_ID);
 }
 
 /**
