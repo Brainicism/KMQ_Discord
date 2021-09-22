@@ -12,7 +12,7 @@ const logger = new IPCLogger("debug");
 
 export default class DebugCommand implements BaseCommand {
     call = async ({ message, channel }: CommandArgs) => {
-        const debugChannel = getDebugChannel();
+        const debugChannel = await getDebugChannel();
         if (!debugChannel) {
             logger.warn("No debug text channel specified");
             return;
