@@ -42,6 +42,11 @@ const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
 /** Registers listeners on client events */
 export function registerClientEvents() {
     const { client } = state;
+    // remove listeners registered by eris-fleet, handle on cluster instead
+    client.removeAllListeners("warn");
+    client.removeAllListeners("error");
+
+    // register listeners
     client.on("messageCreate", messageCreateHandler)
         .on("voiceChannelLeave", voiceChannelLeaveHandler)
         .on("voiceChannelSwitch", voiceChannelSwitchHandler)
