@@ -101,6 +101,7 @@ export async function textPermissionsCheck(textChannelID: string, guildID: strin
     const { client } = state;
     const messageContext = new MessageContext(textChannelID, null, guildID);
     const channel = client.getChannel(textChannelID) as TextChannel;
+    if (!channel) return false;
     if (!channel.permissionsOf(client.user.id).has("sendMessages")) {
         logger.warn(`${getDebugLogHeader(messageContext)} | Missing SEND_MESSAGES permissions`);
         const embed = {
@@ -149,6 +150,7 @@ async function sendMessage(textChannelID: string, authorID: string, messageConte
     } catch (e) {
         if (!channel) {
             logger.error(`Error sending message, and channel not cached. textChannelID = ${textChannelID}`);
+            return null;
         }
 
         // check for text permissions if sending message failed
