@@ -83,7 +83,7 @@ export default class RemoveCommand implements BaseCommand {
             default:
         }
 
-        if (currentMatchedArtists.length === 0) {
+        if (!currentMatchedArtists) {
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Remove failed", description: "There are no groups currently selected" });
             return;
         }
