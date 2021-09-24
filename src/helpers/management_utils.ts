@@ -65,6 +65,10 @@ export function registerClientEvents() {
 
 /** Registers listeners on process events */
 export function registerProcessEvents() {
+    // remove listeners registered by eris-fleet, handle on cluster instead
+    process.removeAllListeners("unhandledRejection");
+    process.removeAllListeners("uncaughtException");
+
     process.on("unhandledRejection", unhandledRejectionHandler)
         .on("uncaughtException", uncaughtExceptionHandler)
         .on("SIGINT", SIGINTHandler);
