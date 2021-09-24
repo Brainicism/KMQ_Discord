@@ -3,7 +3,6 @@
 import schedule from "node-schedule";
 import fastify from "fastify";
 import _ from "lodash";
-import { isMaster } from "cluster";
 import { IPCLogger } from "../logger";
 import { state } from "../kmq";
 import { sendInfoMessage } from "./discord_utils";
@@ -33,7 +32,6 @@ import { chooseRandom } from "./utils";
 import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
 import { EnvType } from "../types";
-import LeaderboardCommand, { LeaderboardDuration } from "../commands/game_commands/leaderboard";
 
 const logger = new IPCLogger("management_utils");
 
@@ -67,6 +65,10 @@ export function registerClientEvents() {
 
 /** Registers listeners on process events */
 export function registerProcessEvents() {
+    // remove listeners registered by eris-fleet, handle on cluster instead
+    process.removeAllListeners("unhandledRejection");
+    process.removeAllListeners("uncaughtException");
+
     process.on("unhandledRejection", unhandledRejectionHandler)
         .on("uncaughtException", uncaughtExceptionHandler)
         .on("SIGINT", SIGINTHandler);
@@ -285,26 +287,8 @@ export function registerIntervals(clusterID: number) {
         }
     });
 
-    // every first of the month at 12am UTC => 7pm EST
-    schedule.scheduleJob("0 0 1 * *", async () => {
-        if (isMaster) {
-            LeaderboardCommand.sendDebugLeaderboard(LeaderboardDuration.MONTHLY);
-        }
-    });
-
-    // every sunday at 12am UTC => saturday 7pm EST
-    schedule.scheduleJob("0 0 * * SUN", async () => {
-        if (isMaster) {
-            LeaderboardCommand.sendDebugLeaderboard(LeaderboardDuration.WEEKLY);
-        }
-    });
-
     // everyday at 12am UTC => 7pm EST
     schedule.scheduleJob("0 0 * * *", async () => {
-        if (isMaster) {
-            LeaderboardCommand.sendDebugLeaderboard(LeaderboardDuration.DAILY);
-        }
-
         reloadFactCache();
     });
 
