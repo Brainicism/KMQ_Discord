@@ -4,6 +4,7 @@ import GameSession from "./structures/game_session";
 import { Gender } from "./commands/game_options/gender";
 import KmqMember from "./structures/kmq_member";
 import KmqClient from "./kmq_client";
+import RateLimiter from "./ratelimiter";
 
 export type GuildTextableMessage = Eris.Message<GuildTextableChannel>;
 
@@ -59,6 +60,7 @@ export interface State {
     };
     processStartTime: number;
     ipc: IPC;
+    rateLimiter: RateLimiter;
 }
 
 export enum GameOption {

@@ -45,6 +45,11 @@ export default async function messageCreateHandler(message: Eris.Message) {
 
     const invokedCommand = parsedMessage ? state.client.commands[parsedMessage.action] : null;
     if (invokedCommand) {
+        if (!state.rateLimiter.check(message.author.id)) {
+            logger.error(`User ${message.author.id} is being rate limited. ${state.rateLimiter.timeRemaining(message.author.id)}ms remaining.`);
+            return;
+        }
+
         if (validate(message, parsedMessage, invokedCommand.validations, invokedCommand.help?.usage)) {
             const { gameSessions } = state;
             const gameSession = gameSessions[message.guildID];
