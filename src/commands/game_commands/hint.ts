@@ -24,11 +24,13 @@ function isHintMajority(message: GuildTextableMessage, gameSession: GameSession)
     return gameSession.gameRound.getHintRequests() >= getMajorityCount(message.guildID);
 }
 
-function isHintAvailable(message: GuildTextableMessage, gameSession: GameSession) {
+function isHintAvailable(message: GuildTextableMessage, gameSession: GameSession): boolean {
+    if (!gameSession.gameRound) return false;
     return gameSession.gameRound.hintUsed || isHintMajority(message, gameSession);
 }
 
 async function sendHintNotification(message: GuildTextableMessage, gameSession: GameSession) {
+    if (!gameSession.gameRound) return;
     if (gameSession.gameType === GameType.ELIMINATION) {
         const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
         await sendInfoMessage(MessageContext.fromMessage(message), {
