@@ -1,6 +1,6 @@
 import assert from "assert";
 import { delay } from "../../helpers/utils";
-import RateLimiter from "../../ratelimiter";
+import RateLimiter from "../../rate_limiter";
 
 let rateLimiter: RateLimiter;
 const queueCapacity = 10;

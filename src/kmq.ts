@@ -10,7 +10,7 @@ import {
 import BotListingManager from "./helpers/bot_listing_manager";
 import KmqClient from "./kmq_client";
 import { PROFILE_COMMAND_NAME, BOOKMARK_COMMAND_NAME } from "./events/client/interactionCreate";
-import RateLimiter from "./ratelimiter";
+import RateLimiter from "./rate_limiter";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("kmq");

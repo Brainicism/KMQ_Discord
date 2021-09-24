@@ -4,7 +4,7 @@ import GameSession from "./structures/game_session";
 import { Gender } from "./commands/game_options/gender";
 import KmqMember from "./structures/kmq_member";
 import KmqClient from "./kmq_client";
-import RateLimiter from "./ratelimiter";
+import RateLimiter from "./rate_limiter";
 
 export type GuildTextableMessage = Eris.Message<GuildTextableChannel>;
 
