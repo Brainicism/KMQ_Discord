@@ -16,6 +16,7 @@ import { EMBED_ERROR_COLOR, EMBED_SUCCESS_COLOR, sendDebugAlertWebhook } from ".
 import { KmqImages } from "./constants";
 import KmqClient from "./kmq_client";
 import backupKmqDatabase from "./scripts/backup-kmq-database";
+import LeaderboardCommand, { LeaderboardDuration } from "./commands/game_commands/leaderboard";
 
 const logger = getInternalLogger();
 
@@ -51,8 +52,26 @@ const options: Options = {
 };
 
 function registerGlobalIntervals(fleet: Fleet) {
+    // every first of the month at 12am UTC => 7pm EST
+    schedule.scheduleJob("0 0 1 * *", async () => {
+        LeaderboardCommand.sendDebugLeaderboard(LeaderboardDuration.MONTHLY);
+    });
+
+    // every sunday at 1am UTC => 8pm saturday EST
+    schedule.scheduleJob("0 1 * * 0", async () => {
+        if (process.env.NODE_ENV !== EnvType.PROD) return;
+        logger.info("Backing up kmq database");
+        await backupKmqDatabase();
+    });
+
+    // every sunday at 12am UTC => saturday 7pm EST
+    schedule.scheduleJob("0 0 * * SUN", async () => {
+        LeaderboardCommand.sendDebugLeaderboard(LeaderboardDuration.WEEKLY);
+    });
+
     // everyday at 12am UTC => 7pm EST
     schedule.scheduleJob("0 0 * * *", async () => {
+        LeaderboardCommand.sendDebugLeaderboard(LeaderboardDuration.DAILY);
         storeDailyStats(fleet.stats?.guilds);
         reloadFactCache();
     });
@@ -73,20 +92,14 @@ function registerGlobalIntervals(fleet: Fleet) {
         }
     });
 
-    schedule.scheduleJob("*/1 * * * *", async () => {
+    // every minute
+    schedule.scheduleJob("* * * * *", async () => {
         await dbContext.kmq("system_stats")
             .insert({
                 stat_name: "request_latency",
                 stat_value: fleet.eris.requestHandler.latencyRef.latency,
                 date: new Date(),
             });
-    });
-
-    // every sunday at 1am UTC => 8pm saturday EST
-    schedule.scheduleJob("0 1 * * 0", async () => {
-        if (process.env.NODE_ENV !== EnvType.PROD) return;
-        logger.info("Backing up kmq database");
-        await backupKmqDatabase();
     });
 }
 
