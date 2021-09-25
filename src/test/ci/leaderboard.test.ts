@@ -15,10 +15,10 @@ const messageContext = new MessageContext("", gameStarter, SERVER_ID, "");
 
 const INITIAL_MONTH = 5;
 const INITIAL_DAY = 14;
-const HOUR = 6;
-const MINUTE = 5;
+const INITIAL_HOUR = 6;
+const INITIAL_MINUTE = 5;
 const INITIAL_SECONDS = 3;
-const date = new Date(new Date().getFullYear(), INITIAL_MONTH, INITIAL_DAY, HOUR, MINUTE, INITIAL_SECONDS);
+const date = new Date(new Date().getFullYear(), INITIAL_MONTH, INITIAL_DAY, INITIAL_HOUR, INITIAL_MINUTE, INITIAL_SECONDS);
 const secondAgo = new Date(new Date(new Date(date).setSeconds(INITIAL_SECONDS - 1)));
 const yesterday = new Date(new Date(date).setDate(INITIAL_DAY - 1));
 const lastWeek = new Date(new Date(date).setDate(INITIAL_DAY - 7));

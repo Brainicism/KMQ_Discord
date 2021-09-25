@@ -170,7 +170,7 @@ export function chooseWeightedRandom(list: Array<any>) {
 
 /**
  * @param date - the date Object
- * @returns the date in yyyy-mm-dd format
+ * @returns the date in (minutes/hours ago) or yyyy-mm-dd format
  */
 export function friendlyFormattedDate(date: Date): string {
     const timeDiffSeconds = (Date.now() - date.getTime()) / 1000;
