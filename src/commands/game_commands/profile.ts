@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import Eris from "eris";
 import dbContext from "../../database_context";
-import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage, tryCreateInteractionErrorAcknowledgement } from "../../helpers/discord_utils";
+import { fetchUser, getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage, tryCreateInteractionErrorAcknowledgement } from "../../helpers/discord_utils";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import { friendlyFormattedDate, romanize, friendlyFormattedNumber } from "../../helpers/utils";
 import { CUM_EXP_TABLE } from "../../structures/game_session";
 import MessageContext from "../../structures/message_context";
-import { state } from "../../kmq";
 
 const logger = new IPCLogger("profile");
 
@@ -184,14 +183,9 @@ export default class ProfileCommand implements BaseCommand {
             if (message.mentions.length === 1) {
                 requestedPlayer = message.mentions[0];
             } else {
-                requestedPlayer = state.client.users.get(parsedMessage.argument);
+                requestedPlayer = await fetchUser(parsedMessage.argument);
                 if (!requestedPlayer) {
-                    // check in other clusters
-                    requestedPlayer = await state.ipc.fetchUser(parsedMessage.argument);
-                }
-
-                if (!requestedPlayer) {
-                    sendErrorMessage(MessageContext.fromMessage(message), { title: "No Profile Found", description: "Could not find the specified user ID. Make sure the user has been active recently. See `,help profile` for details." });
+                    sendErrorMessage(MessageContext.fromMessage(message), { title: "No Profile Found", description: "Could not find the specified user ID. See `,help profile` for details." });
                     return;
                 }
             }
