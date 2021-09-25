@@ -2,7 +2,6 @@ import assert from "assert";
 import { describe } from "mocha";
 import { EmbedGenerator } from "eris-pagination";
 import LeaderboardCommand, { LeaderboardType, LeaderboardDuration, ENTRIES_PER_PAGE } from "../../commands/game_commands/leaderboard";
-import { getSqlDateString } from "../../helpers/discord_utils";
 import dbContext from "../../database_context";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
@@ -20,10 +19,10 @@ const HOUR = 6;
 const MINUTE = 5;
 const INITIAL_SECONDS = 3;
 const date = new Date(new Date().getFullYear(), INITIAL_MONTH, INITIAL_DAY, HOUR, MINUTE, INITIAL_SECONDS);
-const secondAgo = new Date(date).setSeconds(INITIAL_SECONDS - 1);
-const yesterday = new Date(date).setDate(INITIAL_DAY - 1);
-const lastWeek = new Date(date).setDate(INITIAL_DAY - 7);
-const lastMonth = new Date(date).setMonth(INITIAL_MONTH - 1);
+const secondAgo = new Date(new Date(new Date(date).setSeconds(INITIAL_SECONDS - 1)));
+const yesterday = new Date(new Date(date).setDate(INITIAL_DAY - 1));
+const lastWeek = new Date(new Date(date).setDate(INITIAL_DAY - 7));
+const lastMonth = new Date(new Date(date).setMonth(INITIAL_MONTH - 1));
 
 const INITIAL_TOTAL_ENTRIES = ENTRIES_PER_PAGE * 5;
 
@@ -176,40 +175,40 @@ describe("getLeaderboardEmbeds", () => {
 
             const rows = [{
                 player_id: "0",
-                date: getSqlDateString(date.getTime()),
+                date,
                 songs_guessed: 1,
                 exp_gained: 1,
                 levels_gained: 1,
             }, {
                 player_id: "0",
-                date: getSqlDateString(secondAgo),
+                date: secondAgo,
                 songs_guessed: 1,
                 exp_gained: 1,
                 levels_gained: 1,
             }, {
                 player_id: "1",
-                date: getSqlDateString(secondAgo),
+                date: secondAgo,
                 songs_guessed: 1,
                 exp_gained: 1,
                 levels_gained: 1,
             },
             {
                 player_id: "2",
-                date: getSqlDateString(yesterday),
+                date: yesterday,
                 songs_guessed: 1,
                 exp_gained: 1,
                 levels_gained: 1,
             },
             {
                 player_id: "3",
-                date: getSqlDateString(lastWeek),
+                date: lastWeek,
                 songs_guessed: 1,
                 exp_gained: 1,
                 levels_gained: 1,
             },
             {
                 player_id: "4",
-                date: getSqlDateString(lastMonth),
+                date: lastMonth,
                 songs_guessed: 1,
                 exp_gained: 1,
                 levels_gained: 1,
@@ -218,7 +217,7 @@ describe("getLeaderboardEmbeds", () => {
             for (let i = 5; i < INITIAL_TOTAL_ENTRIES; i++) {
                 rows.push({
                     player_id: String(i),
-                    date: getSqlDateString(date.getTime()),
+                    date,
                     songs_guessed: 1,
                     exp_gained: 1,
                     levels_gained: 1,
@@ -238,7 +237,6 @@ describe("getLeaderboardEmbeds", () => {
                     const validEntryCount = INITIAL_TOTAL_ENTRIES - 3;
                     const { embeds, pageCount } = await LeaderboardCommand.getLeaderboardEmbeds(messageContext, LeaderboardType.GLOBAL, LeaderboardDuration.DAILY, date);
                     const fields = await getNumberOfFields(embeds);
-
                     assert.strictEqual(pageCount, Math.ceil(validEntryCount / ENTRIES_PER_PAGE));
                     assert.strictEqual(fields, validEntryCount);
                 });
