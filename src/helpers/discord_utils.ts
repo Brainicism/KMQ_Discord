@@ -54,14 +54,14 @@ export function getMention(userID: string): string {
  */
 export function getDebugLogHeader(context: MessageContext | Eris.Message | Eris.ComponentInteraction | Eris.CommandInteraction): string {
     if (context instanceof Eris.Message) {
-        return `gid: ${context.guildID}, uid: ${context.author.id}`;
+        return `gid: ${context.guildID}, uid: ${context.author.id}, tid: ${context.channel.id}`;
     }
 
     if (context instanceof Eris.ComponentInteraction || context instanceof Eris.CommandInteraction) {
-        return `gid: ${context.guildID}, uid: ${context.member?.id}`;
+        return `gid: ${context.guildID}, uid: ${context.member?.id}, tid: ${context.channel.id}`;
     }
 
-    return `gid: ${context.guildID}`;
+    return `gid: ${context.guildID}, tid: ${context.textChannelID}`;
 }
 
 /**
@@ -643,7 +643,13 @@ export function getVoiceChannel(voiceChannelID: string): Eris.VoiceChannel {
  * @returns the users in the voice channel, excluding bots
  */
 export function getCurrentVoiceMembers(voiceChannelID: string): Array<Eris.Member> {
-    return getVoiceChannel(voiceChannelID).voiceMembers.filter((x) => !x.bot);
+    const voiceChannel = getVoiceChannel(voiceChannelID);
+    if (!voiceChannel) {
+        logger.error(`Voice channel not in cache: ${voiceChannel.id}`);
+        return [];
+    }
+
+    return voiceChannel.voiceMembers.filter((x) => !x.bot);
 }
 
 /**
