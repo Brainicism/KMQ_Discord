@@ -93,27 +93,84 @@ async function sendDmMessage(userID: string, messageContent: Eris.AdvancedMessag
 }
 
 /**
- * Fetches TextChannel from cache, or via REST and update cache
+ * Fetches Users from cache, IPC, or via REST and update cache
+ * @param userID - the user's ID
+ * @returns an instance of the User
+ */
+export async function fetchUser(userID: string): Promise<Eris.User> {
+    let user: Eris.User = null;
+    const { client, ipc } = state;
+
+    // fetch via cache
+    user = (client.users.get(userID));
+
+    // fetch via IPC from other clusters
+    if (!user) {
+        user = await ipc.fetchUser(userID);
+        if (user) {
+            logger.debug(`User not in cache, fetched via IPC: ${userID}`);
+        }
+    }
+
+    // fetch via REST
+    if (!user) {
+        try {
+            user = await client.getRESTUser(userID);
+            logger.debug(`User not in cache, fetched via REST: ${userID}`);
+        } catch (err) {
+            logger.error(`Could not fetch user: ${userID}. err: ${err.code}. msg: ${err.message}`);
+            return null;
+        }
+    }
+
+    if (!user) {
+        logger.error(`Could not fetch user: ${userID}`);
+        return null;
+    }
+
+    // update cache
+    client.users.update(user);
+    return user;
+}
+
+/**
+ * Fetches TextChannel from cache, IPC, or via REST and update cache
  * @param textChannelID - the text channel's ID
  * @returns an instance of the TextChannel
  */
 async function fetchChannel(textChannelID: string): Promise<Eris.TextChannel> {
-    let channel: Eris.TextChannel;
-    const { client } = state;
-    channel = client.getChannel(textChannelID) as Eris.TextChannel;
+    let channel: Eris.TextChannel = null;
+    const { client, ipc } = state;
+
+    // fetch via cache
+    channel = (client.getChannel(textChannelID)) as Eris.TextChannel;
+
+    // fetch via IPC from other clusters
     if (!channel) {
-        logger.debug(`Text channel not in cache, attempting to fetch: ${textChannelID}`);
+        logger.debug(`Text channel not in cache, attempting to fetch via IPC: ${textChannelID}`);
+        channel = await ipc.fetchChannel(textChannelID);
+    }
+
+    // fetch via REST
+    if (!channel) {
         try {
             channel = await client.getRESTChannel(textChannelID) as Eris.TextChannel;
-            // update cache
-            const guild = client.guilds.get(channel.guild.id);
-            guild.channels.add(channel);
-            client.channelGuildMap[channel.id] = guild.id;
+            logger.debug(`Text channel not in cache, fetched via REST: ${textChannelID}`);
         } catch (err) {
             logger.error(`Could not fetch text channel: ${textChannelID}. err: ${err.code}. msg: ${err.message}`);
             return null;
         }
     }
+
+    if (!channel) {
+        logger.error(`Could not fetch channel: ${textChannelID}`);
+        return null;
+    }
+
+    // update cache
+    const guild = client.guilds.get(channel.guild.id);
+    guild.channels.update(channel);
+    client.channelGuildMap[channel.id] = guild.id;
 
     return channel;
 }
