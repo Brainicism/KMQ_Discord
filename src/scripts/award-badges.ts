@@ -48,7 +48,7 @@ async function awardBadges() {
     const badgesObj = await getObjects();
     const badgeName = await getBadgeName();
 
-    const playerIDsWithBadgeAlready = new Set((await dbContext.kmq("badges")
+    const playerIDsWithBadgeAlready = new Set((await dbContext.kmq("badges_players")
         .select("user_id")
         .where("badge_name", "=", badgeName))
         .map((x) => x["user_id"]));
@@ -71,7 +71,7 @@ async function awardBadges() {
         .map((player) => ({ user_id: player.id, badge_name: badgeName }));
 
     await dbContext.kmq.transaction(async (tx) => {
-        await dbContext.kmq("badges")
+        await dbContext.kmq("badges_players")
             .insert(playersToGiveBadge)
             .transacting(tx);
     });
