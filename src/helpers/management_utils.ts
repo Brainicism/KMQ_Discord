@@ -32,6 +32,7 @@ import { chooseRandom } from "./utils";
 import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
 import { EnvType } from "../types";
+import channelDeleteHandler from "../events/client/channelDelete";
 
 const logger = new IPCLogger("management_utils");
 
@@ -48,6 +49,7 @@ export function registerClientEvents() {
     client.on("messageCreate", messageCreateHandler)
         .on("voiceChannelLeave", voiceChannelLeaveHandler)
         .on("voiceChannelSwitch", voiceChannelSwitchHandler)
+        .on("channelDelete", channelDeleteHandler)
         .on("connect", connectHandler)
         .on("error", errorHandler)
         .on("warn", warnHandler)
