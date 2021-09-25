@@ -2,7 +2,7 @@ import Eris from "eris";
 import dbContext from "../../database_context";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
-import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage, sendPaginationedEmbed, EmbedGenerator, getSqlDateString } from "../../helpers/discord_utils";
+import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage, sendPaginationedEmbed, EmbedGenerator } from "../../helpers/discord_utils";
 import { getRankNameByLevel } from "./profile";
 import { chooseRandom, friendlyFormattedNumber, bold, arrayToString } from "../../helpers/utils";
 import { state } from "../../kmq";
@@ -164,15 +164,15 @@ export default class LeaderboardCommand implements BaseCommand {
             // Give an extra 10 seconds to send temporary leaderboards to debug channel
             case LeaderboardDuration.DAILY:
                 topPlayersQuery = topPlayersQuery
-                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 10).getTime()));
+                    .where("date", ">", new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 10));
                 break;
             case LeaderboardDuration.WEEKLY:
                 topPlayersQuery = topPlayersQuery
-                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay(), 0, 0, 10).getTime()));
+                    .where("date", ">", new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay(), 0, 0, 10));
                 break;
             case LeaderboardDuration.MONTHLY:
                 topPlayersQuery = topPlayersQuery
-                    .where("date", ">", getSqlDateString(new Date(d.getFullYear(), d.getMonth(), 0, 0, 0, 10).getTime()));
+                    .where("date", ">", new Date(d.getFullYear(), d.getMonth(), 0, 0, 0, 10));
                 break;
             default:
                 break;

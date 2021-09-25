@@ -773,18 +773,6 @@ export function getDebugChannel(): Promise<Eris.TextChannel> {
 }
 
 /**
- * @param timeInMs - A date in epoch milliseconds
- * @returns a SQL ISO-friendly timestamp
- */
-export function getSqlDateString(timeInMs?: number): string {
-    if (timeInMs) {
-        return new Date(timeInMs).toISOString().slice(0, 19).replace("T", " ");
-    }
-
-    return new Date().toISOString().slice(0, 19).replace("T", " ");
-}
-
-/**
  * @param message - The message
  * @returns the number of users required for a majority
  */
