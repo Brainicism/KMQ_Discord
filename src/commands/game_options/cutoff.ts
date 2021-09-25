@@ -4,12 +4,15 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("cutoff");
 export const DEFAULT_BEGINNING_SEARCH_YEAR = 1990;
 export const DEFAULT_ENDING_SEARCH_YEAR = (new Date()).getFullYear();
 
 export default class CutoffCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+
     validations = {
         minArgCount: 0,
         maxArgCount: 2,
@@ -68,7 +71,7 @@ export default class CutoffCommand implements BaseCommand {
         } else if (yearRange.length === 2) {
             const endYear = yearRange[1];
             if (endYear < startYear) {
-                await sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid end year", description: "End year must be after or equal to start year" });
+                await sendErrorMessage(MessageContext.fromMessage(message), { title: "Invalid End Year", description: "End year must be after or equal to start year" });
                 return;
             }
 

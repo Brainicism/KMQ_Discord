@@ -1,4 +1,4 @@
-import { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import {
     sendErrorMessage,
     getDebugLogHeader,
@@ -10,11 +10,13 @@ import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
 import { generateHint, validHintCheck } from "./hint";
-import InGameCommand from "../interfaces/ingame_command";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("forcehint");
 
-export default class ForceHintCommand extends InGameCommand {
+export default class ForceHintCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: CommandPrechecks.inGameCommandPrecheck }, { checkFn: CommandPrechecks.competitionPrecheck }];
+
     help = {
         name: "forcehint",
         description: "The person that started the game can force-hint the current song, no majority necessary.",
@@ -32,7 +34,7 @@ export default class ForceHintCommand extends InGameCommand {
 
         if (!validHintCheck(gameSession, guildPreference, gameRound, message)) return;
         if (message.author.id !== gameSession.owner.id) {
-            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Force hint ignored", description: `Only the person who started the game (${getMention(gameSession.owner.id)}) can force-hint.` });
+            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Force Hint Ignored", description: `Only the person who started the game (${getMention(gameSession.owner.id)}) can force-hint.` });
             return;
         }
 

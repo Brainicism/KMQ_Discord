@@ -1,4 +1,5 @@
 import Eris from "eris";
+import { PrecheckArgs } from "../../command_prechecks";
 import GameSession from "../../structures/game_session";
 import { GuildTextableMessage, ParsedMessage } from "../../types";
 
@@ -37,5 +38,5 @@ export default interface BaseCommand {
     };
     aliases?: Array<string>;
     validations?: CommandValidations;
-    preRunCheck?: (message: GuildTextableMessage, gameSession: GameSession) => Promise<boolean>;
+    preRunChecks?: Array<{ checkFn: (precheckArgs: PrecheckArgs) => boolean | Promise<boolean>, errorMessage?: string }>;
 }

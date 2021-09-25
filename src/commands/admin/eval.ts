@@ -1,22 +1,18 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import {
-    getDebugChannel, getDebugLogHeader, sendErrorMessage, sendInfoMessage,
+    sendErrorMessage, sendInfoMessage,
 } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
 import { state } from "../../kmq";
 import MessageContext from "../../structures/message_context";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("eval");
 
 export default class EvalCommand implements BaseCommand {
-    call = async ({ message, parsedMessage }: CommandArgs) => {
-        const kmqDebugChannel = getDebugChannel();
-        if (!kmqDebugChannel || message.channel.id !== kmqDebugChannel.id) {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Error", description: "You are not allowed to eval in this channel" });
-            logger.warn(`${getDebugLogHeader(message)} | Attempted to eval in non-debug channel`);
-            return;
-        }
+    preRunChecks = [{ checkFn: CommandPrechecks.debugChannelPrecheck }];
 
+    call = async ({ message, parsedMessage }: CommandArgs) => {
         const evalString = parsedMessage.argument;
         logger.info(`Executing command: ${evalString}`);
 

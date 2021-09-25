@@ -19,6 +19,7 @@
     "docker-dryrun": "cd docker/ && NODE_ENV=dry-run docker-compose up --exit-code-from kmq --build kmq",
     "docker-prod": "cd docker/ && NODE_ENV=production docker-compose up --exit-code-from kmq --build kmq",
     "backup": "ts-node src/scripts/backup-kmq-database",
+    "import": "ts-node src/scripts/backup-kmq-database --import",
     "test": "NODE_ENV=test mocha -r ts-node/register 'src/test/**/*.ts'",
     "test_ci": "NODE_ENV=test mocha -- --forbid-only -r ts-node/register 'src/test/**/*.ts'"
   },
@@ -30,14 +31,14 @@
     "@types/mocha": "^8.2.1",
     "@types/node-schedule": "^1.3.1",
     "@types/sinon": "^10.0.2",
-    "axios": "^0.21.1",
+    "axios": "^0.21.3",
     "bufferutil": "^4.0.3",
     "commander": "^7.0.0",
     "cron-parser": "^3.1.0",
     "dotenv": "^10.0.0",
     "eris": "https://github.com/Brainicism/eris.git#alpha-09-02-21",
     "eris-fleet": "https://github.com/danclay/eris-fleet#dev",
-    "eris-pagination": "https://github.com/brainicism/eris-pagination#86ab739",
+    "eris-pagination": "https://github.com/brainicism/eris-pagination#81aa2f0",
     "erlpack": "https://github.com/abalabahaha/erlpack.git#5d0064f",
     "fastify": "^3.17.0",
     "fluent-ffmpeg": "^2.1.2",
@@ -46,7 +47,6 @@
     "mocha": "^9.0.0",
     "moment-timezone": "^0.5.32",
     "mysql2": "^2.2.5",
-    "mysqldump": "^3.2.0",
     "node-schedule": "^2.0.0",
     "patreon-discord": "https://github.com/taahamahdi/patreon-discord",
     "sinon": "^11.1.1",
@@ -67,7 +67,7 @@
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-only-warn": "^1.0.2",
     "eslint-plugin-tsdoc": "^0.2.11",
-    "typescript": "~4.3.2"
+    "typescript": "~4.4.2"
   },
   "description": "K-pop guessing game over Discord"
 }

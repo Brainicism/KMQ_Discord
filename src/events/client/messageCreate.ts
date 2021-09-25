@@ -45,11 +45,20 @@ export default async function messageCreateHandler(message: Eris.Message) {
 
     const invokedCommand = parsedMessage ? state.client.commands[parsedMessage.action] : null;
     if (invokedCommand) {
+        if (!state.rateLimiter.check(message.author.id)) {
+            logger.error(`User ${message.author.id} is being rate limited. ${state.rateLimiter.timeRemaining(message.author.id)}ms remaining.`);
+            return;
+        }
+
         if (validate(message, parsedMessage, invokedCommand.validations, invokedCommand.help?.usage)) {
             const { gameSessions } = state;
-            if (invokedCommand.preRunCheck) {
-                const preCheckResult = await invokedCommand.preRunCheck(message, gameSessions[message.guildID]);
-                if (!preCheckResult) return;
+            const gameSession = gameSessions[message.guildID];
+            if (invokedCommand.preRunChecks) {
+                for (const precheck of invokedCommand.preRunChecks) {
+                    if (!(await precheck.checkFn({ message, gameSession, errorMessage: precheck.errorMessage }))) {
+                        return;
+                    }
+                }
             }
 
             invokedCommand.call({

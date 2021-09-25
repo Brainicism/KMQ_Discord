@@ -4,6 +4,7 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("duration");
 
@@ -13,6 +14,8 @@ enum DurationAction {
 }
 
 export default class DurationCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+
     validations = {
         minArgCount: 0,
         maxArgCount: 2,
@@ -78,13 +81,13 @@ export default class DurationCommand implements BaseCommand {
                 }
             } else if (action === DurationAction.REMOVE) {
                 if (!guildPreference.isDurationSet()) {
-                    sendErrorMessage(MessageContext.fromMessage(message), { title: "Error adding/remove duration", description: "The duration is not currently set." });
+                    sendErrorMessage(MessageContext.fromMessage(message), { title: "Error Adding/Removing Duration", description: "The duration is not currently set." });
                     return;
                 }
 
                 duration = currentDuration - durationDelta;
                 if (duration < 2) {
-                    sendErrorMessage(MessageContext.fromMessage(message), { title: "Error removing duration", description: "Duration cannot be less than 2 minutes." });
+                    sendErrorMessage(MessageContext.fromMessage(message), { title: "Error Removing Duration", description: "Duration cannot be less than 2 minutes." });
                     return;
                 }
             }

@@ -4,10 +4,13 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption, GameType } from "../../types";
 import MessageContext from "../../structures/message_context";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("goal");
 
 export default class GoalCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+
     validations = {
         minArgCount: 0,
         maxArgCount: 1,
@@ -51,7 +54,7 @@ export default class GoalCommand implements BaseCommand {
         if (gameSession) {
             if (!gameSession.scoreboard.isEmpty() && userGoal <= gameSession.scoreboard.getWinners()[0].getScore()) {
                 logger.info(`${getDebugLogHeader(message)} | Goal update ignored.`);
-                sendErrorMessage(MessageContext.fromMessage(message), { title: "Error applying goal", description: "Given goal exceeds highest score. Please raise your goal, or start a new game." });
+                sendErrorMessage(MessageContext.fromMessage(message), { title: "Error Applying Goal", description: "Given goal exceeds highest score. Please raise your goal, or start a new game." });
                 return;
             }
 

@@ -7,7 +7,7 @@ const logger = new IPCLogger("guildCreate");
 
 export default async function guildCreateHandler(guild: Eris.Guild) {
     logger.info(`New server joined: ${guild.id} with ${guild.memberCount} users`);
-    const kmqDebugChannel = getDebugChannel();
+    const kmqDebugChannel = await getDebugChannel();
     if (!kmqDebugChannel) return;
     const joinDate: Date = new Date(guild.joinedAt);
     await sendInfoMessage(new MessageContext(kmqDebugChannel.id), {
@@ -15,7 +15,7 @@ export default async function guildCreateHandler(guild: Eris.Guild) {
             username: guild.name,
             avatarUrl: guild.iconURL,
         },
-        title: "New server joined!",
+        title: "New Server Joined!",
         fields: [
             { name: "**Member Count**:", value: guild.memberCount.toString() },
             { name: "**Language**:", value: guild.preferredLocale },

@@ -1,23 +1,19 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import {
-    getDebugChannel, getDebugLogHeader, sendErrorMessage, sendOptionsMessage,
+    getDebugLogHeader, sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { GameOption } from "../../types";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("forceplay");
 
 export default class ForcePlayCommand implements BaseCommand {
-    call = async ({ message, parsedMessage }: CommandArgs) => {
-        const kmqDebugChannel = getDebugChannel();
-        if (!kmqDebugChannel || message.channel.id !== kmqDebugChannel.id) {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Error", description: "You are not allowed to forceplay in this channel" });
-            logger.warn(`${getDebugLogHeader(message)} | Attempted to forceplay in non-debug channel`);
-            return;
-        }
+    preRunChecks = [{ checkFn: CommandPrechecks.debugChannelPrecheck }];
 
+    call = async ({ message, parsedMessage }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
 
         if (parsedMessage.components.length === 0) {

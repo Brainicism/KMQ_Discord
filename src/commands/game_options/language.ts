@@ -4,6 +4,7 @@ import { IPCLogger } from "../../logger";
 import { getDebugLogHeader, sendOptionsMessage } from "../../helpers/discord_utils";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("language");
 export enum LanguageType {
@@ -16,6 +17,8 @@ export const DEFAULT_LANGUAGE = LanguageType.ALL;
 // z = chinese, j = japanese, e = english, s = spanish
 export const FOREIGN_LANGUAGE_TAGS = ["z", "j", "e", "s"];
 export default class LanguageCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+
     validations = {
         minArgCount: 0,
         maxArgCount: 1,

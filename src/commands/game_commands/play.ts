@@ -13,6 +13,7 @@ import { GameInfoMessage, GameType, GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("play");
 const DEFAULT_LIVES = 10;
@@ -40,7 +41,7 @@ export async function sendBeginGameMessage(textChannelName: string,
         gameInstructions += "\n\n**⬆️ KMQ POWER HOUR ACTIVE ⬆️**";
     }
 
-    const startTitle = `Game starting in #${textChannelName} in 🔊 ${voiceChannelName}`;
+    const startTitle = `Game Starting in #${textChannelName} in 🔊 ${voiceChannelName}`;
     const gameInfoMessage: GameInfoMessage = chooseWeightedRandom(await dbContext.kmq("game_messages"));
     const fields: Eris.EmbedField[] = [];
     if (gameInfoMessage) {
@@ -63,6 +64,8 @@ export async function sendBeginGameMessage(textChannelName: string,
 }
 
 export default class PlayCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+
     validations = {
         minArgCount: 0,
         maxArgCount: 2,
@@ -101,14 +104,14 @@ export default class PlayCommand implements BaseCommand {
         const voiceChannel = getUserVoiceChannel(MessageContext.fromMessage(message));
         const timeUntilRestart = await getTimeUntilRestart();
         if (timeUntilRestart) {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Cannot start new game", description: `Bot is restarting in \`${timeUntilRestart}\` minutes, please wait until the bot is back up!` });
+            sendErrorMessage(MessageContext.fromMessage(message), { title: "Cannot Start New Game", description: `Bot is restarting in \`${timeUntilRestart}\` minutes, please wait until the bot is back up!` });
             return;
         }
 
         if (!voiceChannel) {
             await sendErrorMessage(MessageContext.fromMessage(message),
                 {
-                    title: "Join a voice channel",
+                    title: "Join a Voice Channel",
                     description: `Send \`${process.env.BOT_PREFIX}play\` again when you are in a voice channel.`,
                 });
             logger.warn(`${getDebugLogHeader(message)} | User not in voice channel`);
@@ -131,7 +134,7 @@ export default class PlayCommand implements BaseCommand {
         const prefix = process.env.BOT_PREFIX;
 
         if (!gameSessions[message.guildID] || !gameSessions[message.guildID].sessionInitialized) {
-            // (1) No game session exists yet (create MC, ELIMINATION, TEAMS, or CLASSIC game), or
+            // (1) No game session exists yet (create ELIMINATION, TEAMS, CLASSIC, or COMPETITION game), or
             // (2) User attempting to ,play after a ,play elimination/teams that didn't start, start CLASSIC game
             const textChannel = channel;
             const gameOwner = KmqMember.fromUser(message.author);
@@ -159,7 +162,7 @@ export default class PlayCommand implements BaseCommand {
                 await sendInfoMessage(messageContext, { title: startTitle, description: gameInstructions, thumbnailUrl: KmqImages.HAPPY });
                 gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, GameType.TEAMS);
             } else {
-                // (1 and 2) CLASSIC game creation
+                // (1 and 2) CLASSIC and COMPETITION game creation
                 if (gameSessions[message.guildID]) {
                     // (2) Let the user know they're starting a non-elimination/teams game
                     const oldGameType = gameSessions[message.guildID].gameType;
@@ -170,7 +173,20 @@ export default class PlayCommand implements BaseCommand {
                     sendErrorMessage(messageContext, { title: ignoringOldGameTypeTitle, description: oldGameTypeInstructions, thumbnailUrl: KmqImages.DEAD });
                 }
 
-                gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, GameType.CLASSIC);
+                const isCompetitionMode = parsedMessage.components.length >= 1 && parsedMessage.components[0].toLowerCase() === "competition";
+                if (isCompetitionMode) {
+                    const isModerator = await dbContext.kmq("competition_moderators").select("user_id")
+                        .where("guild_id", "=", message.guildID)
+                        .andWhere("user_id", "=", message.author.id)
+                        .first();
+
+                    if (!isModerator) {
+                        sendErrorMessage(messageContext, { title: "Hidden Game Mode", description: "You do not have permission to use this command.", thumbnailUrl: KmqImages.DEAD });
+                        return;
+                    }
+                }
+
+                gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, isCompetitionMode ? GameType.COMPETITION : GameType.CLASSIC);
                 await sendBeginGameMessage(textChannel.name, voiceChannel.name, message, getCurrentVoiceMembers(voiceChannel.id));
                 gameSession.startRound(guildPreference, messageContext);
                 logger.info(`${getDebugLogHeader(message)} | Game session starting`);
@@ -178,7 +194,7 @@ export default class PlayCommand implements BaseCommand {
 
             gameSessions[message.guildID] = gameSession;
         } else {
-            await sendErrorMessage(messageContext, { title: "Game already in session" });
+            await sendErrorMessage(messageContext, { title: "Game Already in Session" });
         }
     };
 }

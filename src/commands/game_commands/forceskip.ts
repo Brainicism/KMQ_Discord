@@ -1,4 +1,4 @@
-import { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import {
     sendErrorMessage,
     areUserAndBotInSameVoiceChannel,
@@ -11,11 +11,13 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
-import InGameCommand from "../interfaces/ingame_command";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("forceskip");
 
-export default class ForceSkipCommand extends InGameCommand {
+export default class ForceSkipCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: CommandPrechecks.inGameCommandPrecheck }, { checkFn: CommandPrechecks.competitionPrecheck }];
+
     help = {
         name: "forceskip",
         description: "The person that started the game can force-skip the current song, no majority necessary.",
@@ -40,7 +42,7 @@ export default class ForceSkipCommand extends InGameCommand {
         }
 
         if (message.author.id !== gameSession.owner.id) {
-            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Force skip ignored", description: `Only the person who started the game (${getMention(gameSession.owner.id)}) can force-skip.` });
+            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Force Skip Ignored", description: `Only the person who started the game (${getMention(gameSession.owner.id)}) can force-skip.` });
             return;
         }
 

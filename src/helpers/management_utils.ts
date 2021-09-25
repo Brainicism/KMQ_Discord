@@ -33,6 +33,7 @@ import { chooseRandom } from "./utils";
 import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
 import { EnvType } from "../types";
+import channelDeleteHandler from "../events/client/channelDelete";
 
 const logger = new IPCLogger("management_utils");
 
@@ -41,10 +42,16 @@ const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
 /** Registers listeners on client events */
 export function registerClientEvents() {
     const { client } = state;
+    // remove listeners registered by eris-fleet, handle on cluster instead
+    client.removeAllListeners("warn");
+    client.removeAllListeners("error");
+
+    // register listeners
     client.on("messageCreate", messageCreateHandler)
         .on("voiceChannelLeave", voiceChannelLeaveHandler)
         .on("voiceChannelSwitch", voiceChannelSwitchHandler)
         .on("voiceChannelJoin", voiceChannelJoinHandler)
+        .on("channelDelete", channelDeleteHandler)
         .on("connect", connectHandler)
         .on("error", errorHandler)
         .on("warn", warnHandler)
@@ -62,6 +69,10 @@ export function registerClientEvents() {
 
 /** Registers listeners on process events */
 export function registerProcessEvents() {
+    // remove listeners registered by eris-fleet, handle on cluster instead
+    process.removeAllListeners("unhandledRejection");
+    process.removeAllListeners("uncaughtException");
+
     process.on("unhandledRejection", unhandledRejectionHandler)
         .on("uncaughtException", uncaughtExceptionHandler)
         .on("SIGINT", SIGINTHandler);
@@ -110,7 +121,7 @@ export const checkRestartNotification = async (timeUntilRestart: number): Promis
         for (const gameSession of Object.values(state.gameSessions)) {
             if (gameSession.finished) continue;
             await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
-                title: `Upcoming bot restart in ${timeUntilRestart} minutes.`,
+                title: `Upcoming Bot Restart in ${timeUntilRestart} Minutes.`,
                 description: "Downtime will be approximately 2 minutes. Please end the current game to ensure your progress is saved!",
             });
             serversWarned++;
@@ -171,6 +182,8 @@ async function updateSystemStats(clusterID: number) {
     const meanLatency = _.mean(latencies);
     const maxLatency = _.max(latencies);
     const minLatency = _.min(latencies);
+    if ([meanLatency, maxLatency, minLatency].some((x) => x === Infinity)) return;
+
     await dbContext.kmq("system_stats")
         .insert({
             cluster_id: clusterID,

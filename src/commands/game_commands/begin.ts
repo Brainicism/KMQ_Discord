@@ -8,35 +8,39 @@ import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import GameSession from "../../structures/game_session";
 import { state } from "../../kmq";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("begin");
 
 export default class BeginCommand implements BaseCommand {
-    canStart(gameSession: GameSession, authorID: string, messageContext: MessageContext): boolean {
-        if (!gameSession || gameSession.gameType === GameType.CLASSIC) {
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+
+    static canStart(gameSession: GameSession, authorID: string, messageContext: MessageContext): boolean {
+        if (!gameSession || (gameSession.gameType !== GameType.ELIMINATION && gameSession.gameType !== GameType.TEAMS)) {
             return false;
         }
 
         if (gameSession.gameType === GameType.ELIMINATION) {
             if (gameSession.owner.id !== authorID) {
-                sendErrorMessage(messageContext, { title: "Begin ignored", description: `Only the person who did \`${process.env.BOT_PREFIX}play elimination\` (${getMention(gameSession.owner.id)}) can start the game.` });
+                sendErrorMessage(messageContext, { title: "Begin Ignored", description: `Only the person who did \`${process.env.BOT_PREFIX}play elimination\` (${getMention(gameSession.owner.id)}) can start the game.` });
                 return false;
             }
         } else if (gameSession.gameType === GameType.TEAMS) {
             const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
             if (teamScoreboard.getNumTeams() === 0) {
-                sendErrorMessage(messageContext, { title: "Begin ignored", description: "Create a team using `,join [team name]` before you can start the game." });
+                sendErrorMessage(messageContext, { title: "Begin Ignored", description: "Create a team using `,join [team name]` before you can start the game." });
                 return false;
             }
         }
 
         return true;
     }
+
     call = async ({ message, gameSessions, channel }: CommandArgs) => {
         const { guildID, author } = message;
         const gameSession = gameSessions[guildID];
 
-        if (!this.canStart(gameSession, author.id, MessageContext.fromMessage(message))) return;
+        if (!BeginCommand.canStart(gameSession, author.id, MessageContext.fromMessage(message))) return;
         const guildPreference = await getGuildPreference(guildID);
         if (!gameSession.sessionInitialized) {
             let participants: Array<{ id: string, username: string, discriminator: string }>;

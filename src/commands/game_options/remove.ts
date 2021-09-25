@@ -5,6 +5,7 @@ import { IPCLogger } from "../../logger";
 import { GameOption, MatchedArtist } from "../../types";
 import MessageContext from "../../structures/message_context";
 import { GROUP_LIST_URL } from "./groups";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("remove");
 
@@ -25,6 +26,8 @@ enum RemoveType {
 }
 
 export default class RemoveCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+
     validations = {
         minArgCount: 2,
         arguments: [
@@ -80,7 +83,7 @@ export default class RemoveCommand implements BaseCommand {
             default:
         }
 
-        if (currentMatchedArtists.length === 0) {
+        if (!currentMatchedArtists) {
             sendErrorMessage(MessageContext.fromMessage(message), { title: "Remove failed", description: "There are no groups currently selected" });
             return;
         }

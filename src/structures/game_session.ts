@@ -259,23 +259,26 @@ export default class GameSession {
                 };
             }
 
-            const { id } = await sendEndRoundMessage(messageContext, this.scoreboard, gameRound, guildPreference.gameOptions.guessModeType,
+            const endRoundMessage = await sendEndRoundMessage(messageContext, this.scoreboard, gameRound, guildPreference.gameOptions.guessModeType,
                 playerRoundResults, guildPreference.isMultipleChoiceMode(), remainingDuration, uniqueSongCounter);
 
-            if (Object.keys(this.songMessageIDs).length === BOOKMARK_MESSAGE_SIZE) {
-                this.songMessageIDs.shift();
-            }
+            // if message fails to send, no ID is returned
+            if (endRoundMessage) {
+                if (Object.keys(this.songMessageIDs).length === BOOKMARK_MESSAGE_SIZE) {
+                    this.songMessageIDs.shift();
+                }
 
-            this.songMessageIDs.push({
-                messageID: id,
-                song: {
-                    songName: gameRound.songName,
-                    originalSongName: gameRound.originalSongName,
-                    artist: gameRound.artistName,
-                    youtubeLink: gameRound.videoID,
-                    publishDate: new Date(gameRound.songYear, 0),
-                },
-            });
+                this.songMessageIDs.push({
+                    messageID: endRoundMessage.id,
+                    song: {
+                        songName: gameRound.songName,
+                        originalSongName: gameRound.originalSongName,
+                        artist: gameRound.artistName,
+                        youtubeLink: gameRound.videoID,
+                        publishDate: new Date(gameRound.songYear, 0),
+                    },
+                });
+            }
         }
 
         this.incrementSongCount(gameRound.videoID, guessResult.correct);
@@ -307,6 +310,19 @@ export default class GameSession {
         await this.endRound({ correct: false }, await getGuildPreference(this.guildID));
         const voiceConnection = state.client.voiceConnections.get(this.guildID);
 
+        if (this.gameType === GameType.COMPETITION) {
+            // log scoreboard
+            logger.info("Scoreboard:");
+            logger.info(JSON.stringify(this.scoreboard.getPlayers()
+                .sort((a, b) => b.getScore() - a.getScore())
+                .map((x) => (
+                    {
+                        name: x.getName(),
+                        id: x.getID(),
+                        score: x.getDisplayedScore(),
+                    }))));
+        }
+
         // leave voice channel
         if (voiceConnection && voiceConnection.channelID) {
             voiceConnection.stopPlaying();
@@ -320,19 +336,22 @@ export default class GameSession {
         // commit player stats
         for (const participant of this.participants) {
             await this.ensurePlayerStat(participant);
-            await this.incrementPlayerGamesPlayed(participant);
+            await GameSession.incrementPlayerGamesPlayed(participant);
             const playerScore = this.scoreboard.getPlayerScore(participant);
             if (playerScore > 0) {
-                await this.incrementPlayerSongsGuessed(participant, playerScore);
+                await GameSession.incrementPlayerSongsGuessed(participant, playerScore);
             }
 
             const playerExpGain = this.scoreboard.getPlayerExpGain(participant);
+            let levelUpResult: LevelUpResult;
             if (playerExpGain > 0) {
-                const levelUpResult = await this.incrementPlayerExp(participant, playerExpGain);
+                levelUpResult = await GameSession.incrementPlayerExp(participant, playerExpGain);
                 if (levelUpResult) {
                     leveledUpPlayers.push(levelUpResult);
                 }
             }
+
+            await GameSession.insertPerSessionStats(participant, playerScore, playerExpGain, levelUpResult ? levelUpResult.endLevel - levelUpResult.startLevel : 0);
         }
 
         // send level up message
@@ -347,7 +366,7 @@ export default class GameSession {
                 levelUpMessages.push("and many others...");
             }
 
-            sendInfoMessage(new MessageContext(this.textChannelID), { title: "🚀 Power up!", description: levelUpMessages.join("\n"), thumbnailUrl: KmqImages.THUMBS_UP });
+            sendInfoMessage(new MessageContext(this.textChannelID), { title: "🚀 Power Up!", description: levelUpMessages.join("\n"), thumbnailUrl: KmqImages.THUMBS_UP });
         }
 
         await sendEndGameMessage(this);
@@ -383,7 +402,7 @@ export default class GameSession {
         if (bookmarkedSongsPlayerCount > 0) {
             const bookmarkedSongCount = Object.values(this.bookmarkedSongs).reduce((total, x) => total + x.size, 0);
             await sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: "Sending bookmarked songs...",
+                title: "Sending Bookmarked Songs...",
                 description: `Sending ${bookmarkedSongCount} song(s) to ${bookmarkedSongsPlayerCount} player(s).\n\nBookmark songs during the game by right-clicking the song message and selecting \`Apps > Bookmark Song\`.`,
                 thumbnailUrl: KmqImages.READING_BOOK,
             });
@@ -457,6 +476,7 @@ export default class GameSession {
 
             this.startRound(guildPreference, messageContext);
         } else if (guildPreference.isMultipleChoiceMode()) {
+            if (!this.gameRound) return;
             if (setDifference([...new Set(getCurrentVoiceMembers(this.voiceChannelID).map((x) => x.id))], [...this.gameRound.incorrectMCGuessers]).size === 0) {
                 await this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));
                 this.startRound(await getGuildPreference(this.guildID), messageContext);
@@ -484,7 +504,7 @@ export default class GameSession {
             try {
                 await this.updateFilteredSongs(guildPreference);
             } catch (err) {
-                await sendErrorMessage(messageContext, { title: "Error selecting song", description: "Please try starting the round again. If the issue persists, report it in our official KMQ server." });
+                await sendErrorMessage(messageContext, { title: "Error Selecting Song", description: "Please try starting the round again. If the issue persists, report it in our official KMQ server." });
                 logger.error(`${getDebugLogHeader(messageContext)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
                 await this.endSession();
                 return;
@@ -499,7 +519,7 @@ export default class GameSession {
             if (setDifference([...filteredSongs], [...this.uniqueSongsPlayed]).size === 0) {
                 logger.info(`${getDebugLogHeader(messageContext)} | Resetting uniqueSongsPlayed (all ${totalSongsCount} unique songs played)`);
                 // In updateSongCount, songs already played are added to songCount when options change. On unique reset, remove them
-                await sendInfoMessage(messageContext, { title: "Resetting unique songs", description: `All songs have been played. ${totalSongsCount} songs will be reshuffled.`, thumbnailUrl: KmqImages.LISTENING });
+                await sendInfoMessage(messageContext, { title: "Resetting Unique Songs", description: `All songs have been played. ${totalSongsCount} songs will be reshuffled.`, thumbnailUrl: KmqImages.LISTENING });
                 this.resetUniqueSongs();
             }
         } else {
@@ -564,7 +584,7 @@ export default class GameSession {
         } catch (err) {
             await this.endSession();
             logger.error(`${getDebugLogHeader(messageContext)} | Error obtaining voice connection. err = ${err.toString()}`);
-            await sendErrorMessage(messageContext, { title: "Error joining voice channel", description: "Something went wrong, try starting the game again in a bit." });
+            await sendErrorMessage(messageContext, { title: "Error Joining Voice Channel", description: "Something went wrong, try starting the game again in a bit." });
             return;
         }
 
@@ -630,7 +650,7 @@ export default class GameSession {
 
         const time = guildPreference.gameOptions.guessTimeout;
         this.guessTimeoutFunc = setTimeout(async () => {
-            if (this.finished || this.gameRound.finished) return;
+            if (this.finished || !this.gameRound || this.gameRound.finished) return;
             logger.info(`${getDebugLogHeader(messageContext)} | Song finished without being guessed, timer of: ${time} seconds.`);
             await this.endRound({ correct: false }, guildPreference, new MessageContext(this.textChannelID));
             this.startRound(await getGuildPreference(this.guildID), messageContext);
@@ -721,7 +741,7 @@ export default class GameSession {
         }
 
         this.owner = KmqMember.fromUser(voiceMembers.find((x) => x.id === newOwnerID));
-        sendInfoMessage(new MessageContext(this.textChannelID), { title: "Game owner changed", description: `The new game owner is ${getMention(this.owner.id)}. They are in charge of \`,forcehint\` and \`,forceskip\`.`, thumbnailUrl: KmqImages.LISTENING });
+        sendInfoMessage(new MessageContext(this.textChannelID), { title: "Game Owner Changed", description: `The new game owner is ${getMention(this.owner.id)}. They are in charge of \`,forcehint\` and \`,forceskip\`.`, thumbnailUrl: KmqImages.LISTENING });
     }
 
     async handleMultipleChoiceInteraction(interaction: Eris.ComponentInteraction, messageContext: MessageContext) {
@@ -805,7 +825,6 @@ export default class GameSession {
                 await resetSpecial(guildPreference, new MessageContext(this.textChannelID), true);
             }
         }
-
     }
 
     /** Whether the current game has premium features */
@@ -902,7 +921,7 @@ export default class GameSession {
     private async errorRestartRound(guildPreference: GuildPreference) {
         const messageContext = new MessageContext(this.textChannelID);
         await this.endRound({ correct: false }, guildPreference);
-        await sendErrorMessage(messageContext, { title: "Error playing song", description: "Starting new round in 3 seconds..." });
+        await sendErrorMessage(messageContext, { title: "Error Playing Song", description: "Starting new round in 3 seconds..." });
         this.roundsPlayed--;
         this.startRound(guildPreference, messageContext);
     }
@@ -1004,7 +1023,7 @@ export default class GameSession {
      * @param userID - The player's Discord user ID
      * @param score - The player's score in the current GameSession
      */
-    private async incrementPlayerSongsGuessed(userID: string, score: number) {
+    private static async incrementPlayerSongsGuessed(userID: string, score: number) {
         await dbContext.kmq("player_stats")
             .where("player_id", "=", userID)
             .increment("songs_guessed", score)
@@ -1017,7 +1036,7 @@ export default class GameSession {
      * Updates a user's games played in the data store
      * @param userID - The player's Discord user ID
      */
-    private async incrementPlayerGamesPlayed(userID: string) {
+    private static async incrementPlayerGamesPlayed(userID: string) {
         await dbContext.kmq("player_stats")
             .where("player_id", "=", userID)
             .increment("games_played", 1);
@@ -1027,7 +1046,7 @@ export default class GameSession {
      * @param userID - The Discord ID of the user to exp gain
      * @param expGain - The amount of EXP gained
      */
-    private async incrementPlayerExp(userID: string, expGain: number): Promise<LevelUpResult> {
+    private static async incrementPlayerExp(userID: string, expGain: number): Promise<LevelUpResult> {
         const { exp: currentExp, level } = (await dbContext.kmq("player_stats")
             .select(["exp", "level"])
             .where("player_id", "=", userID)
@@ -1056,6 +1075,24 @@ export default class GameSession {
         }
 
         return null;
+    }
+
+    /**
+     * Store per-session stats for temporary leaderboard
+     * @param userID - The user the data belongs to
+     * @param score - The score gained in the game
+     * @param expGain - The EXP gained in the game
+     * @param levelsGained - The levels gained in the game
+     */
+    private static async insertPerSessionStats(userID: string, score: number, expGain: number, levelsGained: number) {
+        await dbContext.kmq("player_game_session_stats")
+            .insert({
+                player_id: userID,
+                date: getSqlDateString(),
+                songs_guessed: score,
+                exp_gained: expGain,
+                levels_gained: levelsGained,
+            });
     }
 
     /**

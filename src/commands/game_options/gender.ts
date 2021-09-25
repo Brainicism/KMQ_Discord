@@ -4,6 +4,7 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("gender");
 export enum Gender {
@@ -16,6 +17,8 @@ export enum Gender {
 export const DEFAULT_GENDER = [Gender.FEMALE, Gender.MALE, Gender.COED];
 
 export default class GenderCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+
     validations = {
         minArgCount: 0,
         maxArgCount: 3,

@@ -472,12 +472,12 @@ avvio@^7.1.2:
     fastq "^1.6.1"
     queue-microtask "^1.1.2"
 
-axios@^0.21.1:
-  version "0.21.1"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.1.tgz#22563481962f4d6bde9a76d516ef0e5d3c09b2b8"
-  integrity sha512-dKQiRHxGD9PPRIUNIWvZhPTPpl1rf/OxTYKsqKUDjBwYylTvV7SjSHJb9ratfyzM6wCdLCOYLzs73qpg5c4iGA==
+axios@^0.21.3:
+  version "0.21.3"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.3.tgz#f85d9b747f9b66d59ca463605cedf1844872b82e"
+  integrity sha512-JtoZ3Ndke/+Iwt5n+BgSli/3idTvpt5OjKyoCmz4LX5+lPiY5l7C1colYezhlxThjNa/NhngCUWZSZFypIFuaA==
   dependencies:
-    follow-redirects "^1.10.0"
+    follow-redirects "^1.14.0"
 
 balanced-match@^1.0.0:
   version "1.0.2"
@@ -738,11 +738,6 @@ deep-is@^0.1.3:
   resolved "https://registry.yarnpkg.com/deep-is/-/deep-is-0.1.3.tgz#b369d6fb5dbc13eecf524f91b070feedc357cf34"
   integrity sha1-s2nW+128E+7PUk+RsHD+7cNXzzQ=
 
-deepmerge@^3.2.0:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/deepmerge/-/deepmerge-3.3.0.tgz#d3c47fd6f3a93d517b14426b0628a17b0125f5f7"
-  integrity sha512-GRQOafGHwMHpjPx9iCvTgpu9NojZ49q794EEL94JVEw6VaeA8XTUyBKvAkOOjBX9oJNiV6G3P+T+tihFjo2TqA==
-
 deepmerge@^4.2.2:
   version "4.2.2"
   resolved "https://registry.yarnpkg.com/deepmerge/-/deepmerge-4.2.2.tgz#44d2ea3679b8f4d4ffba33f03d865fc1e7bf4955"
@@ -827,9 +822,9 @@ enquirer@^2.3.5:
   version "0.3.9-dev"
   resolved "https://github.com/danclay/eris-fleet#564e41b064ef0c73047a66b6b28181bf3fcacfe2"
 
-"eris-pagination@https://github.com/brainicism/eris-pagination#86ab739":
+"eris-pagination@https://github.com/brainicism/eris-pagination#81aa2f0":
   version "0.5.2"
-  resolved "https://github.com/brainicism/eris-pagination#86ab7396b2098bab5b957fdc360013b4a883fe64"
+  resolved "https://github.com/brainicism/eris-pagination#81aa2f0a574aabc7fea3e95162abf1d51ccc6224"
   dependencies:
     eris-reactions "^0.1.4"
 
@@ -1297,10 +1292,10 @@ fn.name@1.x.x:
   resolved "https://registry.yarnpkg.com/fn.name/-/fn.name-1.1.0.tgz#26cad8017967aea8731bc42961d04a3d5988accc"
   integrity sha512-GRnmB5gPyJpAhTQdSZTSp9uaPSvl09KoYcMQtsB9rQoOmzs9dH6ffeccH+Z+cv6P68Hu5bC6JjRh4Ah/mHSNRw==
 
-follow-redirects@^1.10.0:
-  version "1.14.1"
-  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.1.tgz#d9114ded0a1cfdd334e164e6662ad02bfd91ff43"
-  integrity sha512-HWqDgT7ZEkqRzBvc2s64vSZ/hfOceEol3ac/7tKwzuvEyWx3/4UegXh5oBOIotkGsObyk3xznnSRVADBgWSQVg==
+follow-redirects@^1.14.0:
+  version "1.14.3"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.3.tgz#6ada78118d8d24caee595595accdc0ac6abd022e"
+  integrity sha512-3MkHxknWMUtb23apkgz/83fDoe+y+qr0TdgacGIA7bew+QLBo3vdgEN2xEsuXNivpFy4CyDhBBZnNZOtalmenw==
 
 fs-minipass@^2.0.0:
   version "2.1.0"
@@ -1823,7 +1818,7 @@ lodash.truncate@^4.4.2:
   resolved "https://registry.yarnpkg.com/lodash.truncate/-/lodash.truncate-4.4.2.tgz#5a350da0b1113b837ecfffd5812cbe58d6eae193"
   integrity sha1-WjUNoLERO4N+z//VgSy+WNbq4ZM=
 
-lodash@^4.17.20, lodash@^4.17.21:
+lodash@^4.17.21:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
@@ -2005,7 +2000,7 @@ ms@2.1.3, ms@^2.1.1:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
   integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
-mysql2@^2.1.0, mysql2@^2.2.5:
+mysql2@^2.2.5:
   version "2.2.5"
   resolved "https://registry.yarnpkg.com/mysql2/-/mysql2-2.2.5.tgz#72624ffb4816f80f96b9c97fedd8c00935f9f340"
   integrity sha512-XRqPNxcZTpmFdXbJqb+/CtYVLCx14x1RTeNMD4954L331APu75IC74GDqnZMEt1kwaXy6TySo55rF2F3YJS78g==
@@ -2018,16 +2013,6 @@ mysql2@^2.1.0, mysql2@^2.2.5:
     named-placeholders "^1.1.2"
     seq-queue "^0.0.5"
     sqlstring "^2.3.2"
-
-mysqldump@^3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/mysqldump/-/mysqldump-3.2.0.tgz#780abaf82f5c3f216d4e16db585092389d2a5497"
-  integrity sha512-hS4jUk23BT+qZEwp668eGwyFhmsDFHkIDYANLFeNXlvPK1AhOMLV+SGoKpAk8290sUhtUAIG16R3YrNhHmZ+zQ==
-  dependencies:
-    deepmerge "^3.2.0"
-    mysql2 "^2.1.0"
-    sql-formatter "^2.3.2"
-    sqlstring "^2.3.1"
 
 named-placeholders@^1.1.2:
   version "1.1.2"
@@ -2702,14 +2687,7 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw=
 
-sql-formatter@^2.3.2:
-  version "2.3.4"
-  resolved "https://registry.yarnpkg.com/sql-formatter/-/sql-formatter-2.3.4.tgz#85ff9a946d8157e3917c0b1db514ca8184a1b6f1"
-  integrity sha512-CajWtvzYoBJbD5PQeVe3E7AOHAIYvRQEPOKgF9kfKNeY8jtjBiiA6pDzkMuAID8jJMluoPvyKveLigSaA5tKQQ==
-  dependencies:
-    lodash "^4.17.20"
-
-sqlstring@^2.3.1, sqlstring@^2.3.2:
+sqlstring@^2.3.2:
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/sqlstring/-/sqlstring-2.3.2.tgz#cdae7169389a1375b18e885f2e60b3e460809514"
   integrity sha512-vF4ZbYdKS8OnoJAWBmMxCQDkiEBkGQYU7UZPtL8flbDRSNkhaXvRJ279ZtI6M+zDaQovVU4tuRgzK5fVhvFAhg==
@@ -2953,10 +2931,10 @@ type-fest@^0.20.2:
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.20.2.tgz#1bf207f4b28f91583666cb5fbd327887301cd5f4"
   integrity sha512-Ne+eE4r0/iWnpAxD852z3A+N0Bt5RN//NjJwRd2VFHEmrywxf5vsZlh4R6lixl6B+wz/8d+maTSAkN1FIkI3LQ==
 
-typescript@~4.3.2:
-  version "4.3.2"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.3.2.tgz#399ab18aac45802d6f2498de5054fcbbe716a805"
-  integrity sha512-zZ4hShnmnoVnAHpVHWpTcxdv7dWP60S2FsydQLV8V5PbS3FifjWFFRiHSWpDJahly88PRyV5teTSLoq4eG7mKw==
+typescript@~4.4.2:
+  version "4.4.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.4.2.tgz#6d618640d430e3569a1dfb44f7d7e600ced3ee86"
+  integrity sha512-gzP+t5W4hdy4c+68bfcv0t400HVJMMd2+H9B7gae1nQlBzCqvrXX+6GL/b3GAgyTH966pzrZ70/fRjwAtZksSQ==
 
 unbox-primitive@^1.0.1:
   version "1.0.1"

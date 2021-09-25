@@ -57,9 +57,6 @@
         "no-param-reassign": [
             "off"
         ],
-        "class-methods-use-this": [
-            "off"
-        ],
         "object-curly-newline": [
             "off"
         ],

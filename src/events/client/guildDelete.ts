@@ -7,10 +7,10 @@ const logger = new IPCLogger("guildDelete");
 
 export default async function guildDeleteHandler(guild: Eris.Guild | { id: string }) {
     logger.info(`Server left: ${guild.id}`);
-    const kmqDebugChannel = getDebugChannel();
+    const kmqDebugChannel = await getDebugChannel();
     if (!kmqDebugChannel) return;
     const leaveDate = new Date();
-    const title = "Server left";
+    const title = "Server Left";
     const footerText = `gid: ${guild.id} | Left at: ${leaveDate.toLocaleDateString("en-US")} ${leaveDate.toLocaleTimeString("en-US")}`;
     if (!kmqDebugChannel) return;
     if (guild instanceof Eris.Guild) {

@@ -5,6 +5,7 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import GuildPreference from "../../structures/guild_preference";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("special");
 export enum SpecialType {
@@ -12,24 +13,41 @@ export enum SpecialType {
     SLOW = "slow",
     FAST = "fast",
     FASTER = "faster",
+    LOW_PITCH = "low_pitch",
+    HIGH_PITCH = "high_pitch",
+    NIGHTCORE = "nightcore",
 }
 
 export const specialFfmpegArgs = {
     [SpecialType.REVERSE]: (seek: number) => ({
-        inputArgs: [],
-        encoderArgs: ["-af", "areverse", "-ss", seek.toString()],
+        inputArgs: ["-ss", seek.toString()],
+        encoderArgs: ["-af", "areverse"],
     }),
     [SpecialType.SLOW]: (seek: number) => ({
-        inputArgs: [],
-        encoderArgs: ["-filter:a", "atempo=0.5", "-ss", (seek * 2).toString()],
+        inputArgs: ["-ss", seek.toString()],
+        encoderArgs: ["-af", "rubberband=tempo=0.5"],
     }),
     [SpecialType.FAST]: (seek: number) => ({
-        inputArgs: [],
-        encoderArgs: ["-filter:a", "atempo=1.5", "-ss", (seek / 1.5).toString()],
+        inputArgs: ["-ss", seek.toString()],
+        encoderArgs: ["-af", "rubberband=tempo=1.5"],
     }),
     [SpecialType.FASTER]: (seek: number) => ({
-        inputArgs: [],
-        encoderArgs: ["-filter:a", "atempo=2", "-ss", (seek / 2).toString()],
+        inputArgs: ["-ss", seek.toString()],
+        encoderArgs: ["-af", "rubberband=tempo=2"],
+    }),
+    [SpecialType.LOW_PITCH]: (seek: number) => ({
+        // 3 semitones lower
+        inputArgs: ["-ss", seek.toString()],
+        encoderArgs: ["-af", "rubberband=pitch=0.840896"],
+    }),
+    [SpecialType.HIGH_PITCH]: (seek: number) => ({
+        // 4 semitones higher
+        inputArgs: ["-ss", seek.toString()],
+        encoderArgs: ["-af", "rubberband=pitch=1.25992"],
+    }),
+    [SpecialType.NIGHTCORE]: (seek: number) => ({
+        inputArgs: ["-ss", seek.toString()],
+        encoderArgs: ["-af", "rubberband=pitch=1.25992:tempo=1.25"],
     }),
 };
 
@@ -40,6 +58,8 @@ export async function resetSpecial(guildPreference: GuildPreference, messageCont
 }
 
 export default class SpecialCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: CommandPrechecks.debugServerPrecheck, errorMessage: "This is an unreleased game option, and can only be used on the official KMQ server" }, { checkFn: CommandPrechecks.competitionPrecheck }];
+
     validations = {
         minArgCount: 0,
         maxArgCount: 1,
@@ -55,7 +75,7 @@ export default class SpecialCommand implements BaseCommand {
     help = {
         name: "special",
         description: "Modify the song playback speed. Only premium players (see `,premium`) can use this command outside of the official KMQ server.",
-        usage: ",special [reverse | slow | fast | faster]",
+        usage: ",special [reverse | slow | fast | faster | low_pitch | high_pitch | nightcore]",
         examples: [
             {
                 example: "`,special reverse`",
@@ -72,6 +92,18 @@ export default class SpecialCommand implements BaseCommand {
             {
                 example: "`,special faster`",
                 explanation: "Plays the song at a faster speed",
+            },
+            {
+                example: "`,special low_pitch`",
+                explanation: "Plays the song at a low pitch",
+            },
+            {
+                example: "`,special high_pitch`",
+                explanation: "Plays the song at a high pitch",
+            },
+            {
+                example: "`,special nightcore`",
+                explanation: "Plays a nightcore edit of the song",
             },
             {
                 example: "`,special`",

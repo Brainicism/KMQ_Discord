@@ -22,7 +22,7 @@ BEGIN
 		vtype ENUM('main', 'audio') NOT NULL,
 		tags VARCHAR(25),
 		rank INT NOT NULL
-	);
+	) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 	CREATE TABLE IF NOT EXISTS available_songs LIKE available_songs_temp;
 
@@ -78,6 +78,8 @@ BEGIN
 		AND tags NOT LIKE "%c%"
 	) rankedAudioSongs
 	WHERE rank <= maxRank;
+
+	DELETE FROM available_songs_temp WHERE clean_song_name = '';
 
 	RENAME TABLE available_songs TO old, available_songs_temp TO available_songs;
 	DROP TABLE old;
