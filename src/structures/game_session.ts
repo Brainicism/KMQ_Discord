@@ -6,7 +6,7 @@ import { SeekType } from "../commands/game_options/seek";
 import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import {
-    getDebugLogHeader, getSqlDateString, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, getUserVoiceChannel, sendEndGameMessage, getCurrentVoiceMembers,
+    getDebugLogHeader, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, getUserVoiceChannel, sendEndGameMessage, getCurrentVoiceMembers,
     sendBookmarkedSongs, tryInteractionAcknowledge, tryCreateInteractionSuccessAcknowledgement, tryCreateInteractionErrorAcknowledgement, getMention,
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, userBonusIsActive, getMultipleChoiceOptions } from "../helpers/game_utils";
@@ -378,7 +378,7 @@ export default class GameSession {
 
         await dbContext.kmq("game_sessions")
             .insert({
-                start_date: getSqlDateString(this.startedAt),
+                start_date: new Date(this.startedAt),
                 guild_id: this.guildID,
                 num_participants: this.participants.size,
                 avg_guess_time: averageGuessTime,
@@ -955,7 +955,7 @@ export default class GameSession {
      * @param userID - The player's Discord user ID
      */
     private async ensurePlayerStat(userID: string) {
-        const currentDateString = getSqlDateString();
+        const currentDateString = new Date();
         await dbContext.kmq("player_stats")
             .insert(
                 {
@@ -986,7 +986,7 @@ export default class GameSession {
             .where("player_id", "=", userID)
             .increment("songs_guessed", score)
             .update({
-                last_active: getSqlDateString(),
+                last_active: new Date(),
             });
     }
 
@@ -1046,7 +1046,7 @@ export default class GameSession {
         await dbContext.kmq("player_game_session_stats")
             .insert({
                 player_id: userID,
-                date: getSqlDateString(),
+                date: new Date(),
                 songs_guessed: score,
                 exp_gained: expGain,
                 levels_gained: levelsGained,
