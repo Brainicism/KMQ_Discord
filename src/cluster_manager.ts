@@ -5,8 +5,11 @@ import { Fleet, Options } from "eris-fleet";
 import fs from "fs";
 import Eris from "eris";
 import schedule from "node-schedule";
+import fastify from "fastify";
+import pointOfView from "point-of-view";
+import ejs from "ejs";
 import { getInternalLogger } from "./logger";
-import { clearClusterActivityStats, clearRestartNotification, startWebServer } from "./helpers/management_utils";
+import { clearClusterActivityStats, clearRestartNotification } from "./helpers/management_utils";
 import storeDailyStats from "./scripts/store-daily-stats";
 import dbContext from "./database_context";
 import { reloadFactCache } from "./fact_generator";
@@ -17,6 +20,7 @@ import { KmqImages } from "./constants";
 import KmqClient from "./kmq_client";
 import backupKmqDatabase from "./scripts/backup-kmq-database";
 import LeaderboardCommand, { LeaderboardDuration } from "./commands/game_commands/leaderboard";
+import { userVoted } from "./helpers/bot_listing_manager";
 
 const logger = getInternalLogger();
 
@@ -118,6 +122,53 @@ function registerProcessEvents(fleet: Fleet) {
     });
 }
 
+/** Starts web server */
+async function startWebServer(fleet: Fleet) {
+    const httpServer = fastify({});
+    httpServer.register(pointOfView, {
+        engine: {
+            ejs,
+        },
+    });
+
+    httpServer.post("/voted", {}, async (request, reply) => {
+        const requestAuthorizationToken = request.headers["authorization"];
+        if (requestAuthorizationToken !== process.env.TOP_GG_WEBHOOK_AUTH) {
+            logger.warn("Webhook received with non-matching authorization token");
+            reply.code(401).send();
+            return;
+        }
+
+        const userID = request.body["user"];
+        await userVoted(userID);
+        reply.code(200).send();
+    });
+
+    httpServer.get("/stats", async (request, reply) => {
+        const fleetStats = (await fleet.collectStats());
+        let shardStats = [];
+        for (const cluster of fleetStats.clusters) {
+            shardStats = shardStats.concat(cluster.shards);
+        }
+
+        for (const shardStat of shardStats) {
+            let healthIndicator = 0;
+            if (shardStat.ready === false) healthIndicator = 2;
+            else if (shardStat.latency > 300) healthIndicator = 1;
+            else healthIndicator = 0;
+            shardStat.healthIndicator = healthIndicator;
+        }
+
+        return reply.view("../templates/index.ejs", { shardStats });
+    });
+
+    try {
+        await httpServer.listen(process.env.WEB_SERVER_PORT, "0.0.0.0");
+    } catch (err) {
+        logger.error(`Erroring starting HTTP server: ${err}`);
+    }
+}
+
 (async () => {
     let fleet: Fleet;
     try {
@@ -145,7 +196,7 @@ function registerProcessEvents(fleet: Fleet) {
 
         if (process.env.NODE_ENV === EnvType.CI) return;
         logger.info("Starting web servers...");
-        await startWebServer();
+        await startWebServer(fleet);
 
         logger.info("Registering process event handlers...");
         registerProcessEvents(fleet);
