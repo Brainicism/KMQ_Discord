@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { isMaster } from "cluster";
 import { config } from "dotenv";
 import path from "path";
@@ -5,8 +6,11 @@ import { Fleet, Options } from "eris-fleet";
 import fs from "fs";
 import Eris from "eris";
 import schedule from "node-schedule";
+import fastify from "fastify";
+import pointOfView from "point-of-view";
+import ejs from "ejs";
 import { getInternalLogger } from "./logger";
-import { clearClusterActivityStats, clearRestartNotification, startWebServer } from "./helpers/management_utils";
+import { clearClusterActivityStats, clearRestartNotification } from "./helpers/management_utils";
 import storeDailyStats from "./scripts/store-daily-stats";
 import dbContext from "./database_context";
 import { reloadFactCache } from "./fact_generator";
@@ -17,10 +21,19 @@ import { KmqImages } from "./constants";
 import KmqClient from "./kmq_client";
 import backupKmqDatabase from "./scripts/backup-kmq-database";
 import LeaderboardCommand, { LeaderboardDuration } from "./commands/game_commands/leaderboard";
+import { userVoted } from "./helpers/bot_listing_manager";
+import { friendlyFormattedDate } from "./helpers/utils";
 
 const logger = getInternalLogger();
 
 config({ path: path.resolve(__dirname, "../.env") });
+
+enum HealthIndicator {
+    HEALTHY = 0,
+    WARNING = 1,
+    UNHEALTHY = 2,
+}
+
 const ERIS_INTENTS = Eris.Constants.Intents;
 const options: Options = {
     whatToLog: {
@@ -118,6 +131,82 @@ function registerProcessEvents(fleet: Fleet) {
     });
 }
 
+/** Starts web server */
+async function startWebServer(fleet: Fleet) {
+    const httpServer = fastify({});
+    httpServer.register(pointOfView, {
+        engine: {
+            ejs,
+        },
+    });
+
+    httpServer.post("/voted", {}, async (request, reply) => {
+        const requestAuthorizationToken = request.headers["authorization"];
+        if (requestAuthorizationToken !== process.env.TOP_GG_WEBHOOK_AUTH) {
+            logger.warn("Webhook received with non-matching authorization token");
+            reply.code(401).send();
+            return;
+        }
+
+        const userID = request.body["user"];
+        await userVoted(userID);
+        reply.code(200).send();
+    });
+
+    httpServer.get("/stats", async (request, reply) => {
+        const fleetStats = (await fleet.collectStats());
+        const clusterData = [];
+        for (const cluster of fleetStats.clusters) {
+            const shardData = cluster.shards.map((rawShardData) => {
+                let healthIndicator: HealthIndicator;
+                if (rawShardData.ready === false) healthIndicator = HealthIndicator.UNHEALTHY;
+                else if (rawShardData.latency > 300) healthIndicator = HealthIndicator.WARNING;
+                else healthIndicator = HealthIndicator.HEALTHY;
+                return {
+                    latency: rawShardData.latency,
+                    status: rawShardData.status,
+                    members: rawShardData.members,
+                    id: rawShardData.id,
+                    guilds: rawShardData.guilds,
+                    healthIndicator,
+                };
+            });
+
+            clusterData.push({
+                id: cluster.id,
+                ipcLatency: cluster.ipcLatency,
+                apiLatency: _.mean(cluster.shards.map((x) => x.latency)),
+                uptime: friendlyFormattedDate(new Date(Date.now() - cluster.uptime)),
+                voiceConnections: cluster.voice,
+                shardData,
+            });
+        }
+
+        const requestLatency = fleetStats.centralRequestHandlerLatencyRef.latency;
+        let requestLatencyHealthIndicator: HealthIndicator;
+        if (requestLatency < 500) requestLatencyHealthIndicator = HealthIndicator.HEALTHY;
+        else if (requestLatency < 1000) requestLatencyHealthIndicator = HealthIndicator.WARNING;
+        else requestLatencyHealthIndicator = HealthIndicator.UNHEALTHY;
+        const overallStatsData = {
+            requestLatency: {
+                latency: requestLatency,
+                healthIndicator: requestLatencyHealthIndicator,
+            },
+            totalUsers: fleetStats.users,
+            totalVoiceConnections: fleetStats.voice,
+            totalRAM: Math.ceil(fleetStats.totalRam),
+        };
+
+        return reply.view("../templates/index.ejs", { clusterData, overallStatsData });
+    });
+
+    try {
+        await httpServer.listen(process.env.WEB_SERVER_PORT, "0.0.0.0");
+    } catch (err) {
+        logger.error(`Erroring starting HTTP server: ${err}`);
+    }
+}
+
 (async () => {
     let fleet: Fleet;
     try {
@@ -145,7 +234,7 @@ function registerProcessEvents(fleet: Fleet) {
 
         if (process.env.NODE_ENV === EnvType.CI) return;
         logger.info("Starting web servers...");
-        await startWebServer();
+        await startWebServer(fleet);
 
         logger.info("Registering process event handlers...");
         registerProcessEvents(fleet);
