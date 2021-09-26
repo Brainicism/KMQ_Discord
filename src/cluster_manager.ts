@@ -168,6 +168,7 @@ async function startWebServer(fleet: Fleet) {
             clusterData.push({
                 id: cluster.id,
                 ipcLatency: cluster.ipcLatency,
+                apiLatency: _.mean(cluster.shards.map((x) => x.latency)),
                 uptime: friendlyFormattedDate(new Date(Date.now() - cluster.uptime)),
                 voiceConnections: cluster.voice,
                 shardData,
