@@ -27,6 +27,13 @@ import { friendlyFormattedDate } from "./helpers/utils";
 const logger = getInternalLogger();
 
 config({ path: path.resolve(__dirname, "../.env") });
+
+enum HealthIndicator {
+    HEALTHY = 0,
+    WARNING = 1,
+    UNHEALTHY = 2,
+}
+
 const ERIS_INTENTS = Eris.Constants.Intents;
 const options: Options = {
     whatToLog: {
@@ -151,10 +158,10 @@ async function startWebServer(fleet: Fleet) {
         const clusterData = [];
         for (const cluster of fleetStats.clusters) {
             const shardData = cluster.shards.map((rawShardData) => {
-                let healthIndicator = 0;
-                if (rawShardData.ready === false) healthIndicator = 2;
-                else if (rawShardData.latency > 300) healthIndicator = 1;
-                else healthIndicator = 0;
+                let healthIndicator: HealthIndicator;
+                if (rawShardData.ready === false) healthIndicator = HealthIndicator.UNHEALTHY;
+                else if (rawShardData.latency > 300) healthIndicator = HealthIndicator.WARNING;
+                else healthIndicator = HealthIndicator.HEALTHY;
                 return {
                     latency: rawShardData.latency,
                     status: rawShardData.status,
@@ -176,10 +183,10 @@ async function startWebServer(fleet: Fleet) {
         }
 
         const requestLatency = fleetStats.centralRequestHandlerLatencyRef.latency;
-        let requestLatencyHealthIndicator = 0;
-        if (requestLatency < 500) requestLatencyHealthIndicator = 0;
-        else if (requestLatency < 1000) requestLatencyHealthIndicator = 1;
-        else requestLatencyHealthIndicator = 2;
+        let requestLatencyHealthIndicator: HealthIndicator;
+        if (requestLatency < 500) requestLatencyHealthIndicator = HealthIndicator.HEALTHY;
+        else if (requestLatency < 1000) requestLatencyHealthIndicator = HealthIndicator.WARNING;
+        else requestLatencyHealthIndicator = HealthIndicator.UNHEALTHY;
         const overallStatsData = {
             requestLatency: {
                 latency: requestLatency,
