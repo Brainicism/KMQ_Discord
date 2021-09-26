@@ -1,3 +1,4 @@
+// required between 20210925060749_badges_refactor.js and 20210926083508_badges_migrate_table.js
 import dbContext from "../database_context";
 import { IPCLogger } from "../logger";
 

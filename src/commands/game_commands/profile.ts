@@ -139,8 +139,12 @@ async function getProfileFields(requestedPlayer: Eris.User): Promise<Array<Eris.
 
     // Optional fields
     const badges = (await dbContext.kmq("badges_players")
-        .select(["badge_name"])
-        .where("user_id", "=", requestedPlayer.id))
+        .select(["badges.name as badge_name"])
+        .where("user_id", "=", requestedPlayer.id)
+        .join("badges", function join() {
+            this.on("badges_players.badge_id", "=", "badges.id");
+        })
+        .orderBy("badges.priority", "desc"))
         .map((x) => x["badge_name"])
         .join("\n");
 

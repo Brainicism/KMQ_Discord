@@ -13,6 +13,8 @@ before(async function () {
     sandbox.stub(discordUtils, "sendInfoMessage");
     sandbox.stub(Player, "fromUserID").callsFake((id) => (new Player("", id, "", 0)));
     console.log("Performing migrations...");
+    await dbContext.agnostic.raw("DROP DATABASE IF EXISTS kmq_test;");
+    await dbContext.agnostic.raw("CREATE DATABASE kmq_test;");
     await dbContext.kmq.migrate.latest({
         directory: kmqKnexConfig.migrations.directory,
     });
