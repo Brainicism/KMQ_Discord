@@ -170,6 +170,14 @@ export function chooseWeightedRandom(list: Array<any>) {
 
 /**
  * @param date - the date Object
+ * @returns the date in yyyy-mm-dd format
+ */
+export function standardDateFormat(date: Date): string {
+    return date.toISOString().split("T")[0];
+}
+
+/**
+ * @param date - the date Object
  * @returns the date in (minutes/hours ago) or yyyy-mm-dd format
  */
 export function friendlyFormattedDate(date: Date): string {
@@ -184,7 +192,7 @@ export function friendlyFormattedDate(date: Date): string {
         return `${Math.ceil(timeDiffHours)} hour(s) ago`;
     }
 
-    return date.toISOString().split("T")[0];
+    return standardDateFormat(date);
 }
 
 /**
