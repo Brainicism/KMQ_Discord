@@ -87,7 +87,7 @@ async function awardBadges() {
             .insert(playersToGiveBadge)
             .transacting(tx);
     });
-    logger.info(`Awarded badge '${badgeName}'' to ${playersToGiveBadge.length} players.`);
+    logger.info(`Awarded badge '${badgeName}' to ${playersToGiveBadge.length} players.`);
 }
 
 (async () => {
