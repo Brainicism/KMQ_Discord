@@ -385,50 +385,57 @@
         </div>
         <div class="mdl-layout__tab-bar mdl-js-ripple-effect kmq-primary-dark">
           <a href="#overview" class="mdl-layout__tab is-active">Overview</a>
-          <a href="#features" class="mdl-layout__tab">Features</a>
+          <!-- <a href="#features" class="mdl-layout__tab">Features</a> -->
         </div>
       </header>
       <main class="mdl-layout__content">
         <div class="mdl-layout__tab-panel is-active" id="overview">
-          <!-- <section class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
-            <header class="section__play-btn mdl-cell mdl-cell--3-col-desktop mdl-cell--2-col-tablet mdl-cell--4-col-phone mdl-color--teal-100 mdl-color-text--white">
-              <i class="material-icons">play_circle_filled</i>
-            </header>
-            <div class="mdl-card mdl-cell mdl-cell--9-col-desktop mdl-cell--6-col-tablet mdl-cell--4-col-phone">
-              <div class="mdl-card__supporting-text">
-                <h4>Features</h4>
-                Dolore ex deserunt aute fugiat aute nulla ea sunt aliqua nisi cupidatat eu. Nostrud in laboris labore nisi amet do dolor eu fugiat consectetur elit cillum esse.
-              </div>
-              <div class="mdl-card__actions">
-                <a href="#" class="mdl-button">Read our features</a>
-              </div>
-            </div>
-            <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" id="btn1">
-              <i class="material-icons">more_vert</i>
-            </button>
-            <ul class="mdl-menu mdl-js-menu mdl-menu--bottom-right" for="btn1">
-              <li class="mdl-menu__item">Lorem</li>
-              <li class="mdl-menu__item" disabled>Ipsum</li>
-              <li class="mdl-menu__item">Dolor</li>
-            </ul>
-          </section> -->
           <section class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
             <div class="mdl-card mdl-cell mdl-cell--12-col">
               <div class="mdl-card__supporting-text mdl-grid mdl-grid-no-spacing">
-                <h4 class="mdl-cell mdl-cell--12-col">Shard Status</h4>
-                <% for(let i = 0; i< shardStats.length; i++){ %>
+                <h4 class="mdl-cell mdl-cell--12-col">Overall</h4>
+                <div class="section__circle-container mdl-cell mdl-cell--2-col mdl-cell--1-col-phone">
+                  <div class="section__circle-container__circle <%= ['color-healthy', 'color-warning', 'color-down'][overallStatsData.requestLatency.healthIndicator] %>"></div>
+                </div>
+                <div class="section__text mdl-cell mdl-cell--10-col-desktop mdl-cell--6-col-tablet mdl-cell--3-col-phone">
+                  <h5> Request Latency  </h5>
+                  <%= overallStatsData.requestLatency.latency %> ms
+                </div>
+              </div>
+              <div class="mdl-card__actions" style="padding-top:10px; padding-bottom: 10px;">
+                Total Users: <%= overallStatsData.totalUsers %>
+                | Total Voice Connections: <%= overallStatsData.totalVoiceConnections %>
+                | Total Memory Usage: <%= overallStatsData.totalRAM %> MB
+              </div>
+            </div>
+          </section>
+
+        </div>
+        <% for(let i = 0; i< clusterData.length; i++){ %>
+        <div class="mdl-layout__tab-panel is-active" id="overview">
+          <section class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
+            <div class="mdl-card mdl-cell mdl-cell--12-col">
+              <div class="mdl-card__supporting-text mdl-grid mdl-grid-no-spacing">
+                <h4 class="mdl-cell mdl-cell--12-col">Cluster #<%= i %></h4>
+                <% for(let j = 0; j< clusterData[i].shardData.length; j++){ %>
                   <div class="section__circle-container mdl-cell mdl-cell--2-col mdl-cell--1-col-phone">
-                    <div class="section__circle-container__circle <%= ['color-healthy', 'color-warning', 'color-down'][shardStats[i].healthIndicator] %>"></div>
+                    <div class="section__circle-container__circle <%= ['color-healthy', 'color-warning', 'color-down'][clusterData[i].shardData[j].healthIndicator] %>"></div>
                   </div>
                   <div class="section__text mdl-cell mdl-cell--10-col-desktop mdl-cell--6-col-tablet mdl-cell--3-col-phone">
-                    <h5> Shard <%= i %> </h5>
-                    Status: '<%= shardStats[i].status %>'
-                    | Latency: <%= shardStats[i].latency %> ms
-                    | Guilds: <%= shardStats[i].guilds %>
-                    | Users: <%= shardStats[i].users %>
+                    <h5> Shard <%= clusterData[i].shardData[j].id %> </h5>
+                    Status: '<%= clusterData[i].shardData[j].status %>'
+                    | Latency: <%= clusterData[i].shardData[j].latency %> ms
+                    | Guilds: <%= clusterData[i].shardData[j].guilds %>
+                    | Users: <%= clusterData[i].shardData[j].members %>
                   </div>
-                <% } %>
+                  <% } %>
               </div>
+            </div>
+            <div class="mdl-card__actions" style="padding-top:10px; padding-bottom: 10px;">
+              IPC Latency: <%= clusterData[i].ipcLatency %> ms
+              | API Latency: <%= clusterData[i].requestLatency %> ms
+              | Uptime: <%= clusterData[i].uptime %>
+              | Voice Connections: <%= clusterData[i].voiceConnections %>
             </div>
           </section>
           <!-- <section class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
@@ -446,7 +453,9 @@
           </section> -->
 
         </div>
-        <div class="mdl-layout__tab-panel" id="features">
+        <% } %>
+
+        <!-- <div class="mdl-layout__tab-panel" id="features">
           <section class="section--center mdl-grid mdl-grid--no-spacing">
             <div class="mdl-cell mdl-cell--12-col">
               <h4>Features</h4>
@@ -500,7 +509,7 @@
               </p>
             </div>
           </section>
-        </div>
+        </div> -->
 
       </main>
     </div>

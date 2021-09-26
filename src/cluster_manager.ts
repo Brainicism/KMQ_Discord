@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { isMaster } from "cluster";
 import { config } from "dotenv";
 import path from "path";
@@ -21,6 +22,7 @@ import KmqClient from "./kmq_client";
 import backupKmqDatabase from "./scripts/backup-kmq-database";
 import LeaderboardCommand, { LeaderboardDuration } from "./commands/game_commands/leaderboard";
 import { userVoted } from "./helpers/bot_listing_manager";
+import { friendlyFormattedDate } from "./helpers/utils";
 
 const logger = getInternalLogger();
 
@@ -146,20 +148,48 @@ async function startWebServer(fleet: Fleet) {
 
     httpServer.get("/stats", async (request, reply) => {
         const fleetStats = (await fleet.collectStats());
-        let shardStats = [];
+        const clusterData = [];
         for (const cluster of fleetStats.clusters) {
-            shardStats = shardStats.concat(cluster.shards);
+            const shardData = cluster.shards.map((rawShardData) => {
+                let healthIndicator = 0;
+                if (rawShardData.ready === false) healthIndicator = 2;
+                else if (rawShardData.latency > 300) healthIndicator = 1;
+                else healthIndicator = 0;
+                return {
+                    latency: rawShardData.latency,
+                    status: rawShardData.status,
+                    members: rawShardData.members,
+                    id: rawShardData.id,
+                    guilds: rawShardData.guilds,
+                    healthIndicator,
+                };
+            });
+
+            clusterData.push({
+                id: cluster.id,
+                ipcLatency: cluster.ipcLatency,
+                uptime: friendlyFormattedDate(new Date(Date.now() - cluster.uptime)),
+                voiceConnections: cluster.voice,
+                shardData,
+            });
         }
 
-        for (const shardStat of shardStats) {
-            let healthIndicator = 0;
-            if (shardStat.ready === false) healthIndicator = 2;
-            else if (shardStat.latency > 300) healthIndicator = 1;
-            else healthIndicator = 0;
-            shardStat.healthIndicator = healthIndicator;
-        }
+        const requestLatency = fleetStats.centralRequestHandlerLatencyRef.latency;
+        let requestLatencyHealthIndicator = 0;
+        if (requestLatency < 500) requestLatencyHealthIndicator = 0;
+        else if (requestLatency < 1000) requestLatencyHealthIndicator = 1;
+        else requestLatencyHealthIndicator = 2;
+        const overallStatsData = {
+            requestLatency: {
+                latency: requestLatency,
+                healthIndicator: requestLatencyHealthIndicator,
+            },
+            totalUsers: fleetStats.users,
+            totalVoiceConnections: fleetStats.voice,
+            totalRAM: Math.ceil(fleetStats.totalRam),
+        };
 
-        return reply.view("../templates/index.ejs", { shardStats });
+        return reply.view("../templates/index.ejs", { clusterData, overallStatsData });
     });
 
     try {
