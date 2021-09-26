@@ -599,11 +599,11 @@ export default class GameSession {
             for (const choice of wrongChoices) {
                 const id = uuid.v4();
                 this.gameRound.interactionIncorrectAnswerUUIDs[id] = 0;
-                buttons.push({ type: 2, style: 1, label: choice, custom_id: id });
+                buttons.push({ type: 2, style: 1, label: choice.substring(0, 80), custom_id: id });
             }
 
             this.gameRound.interactionCorrectAnswerUUID = uuid.v4();
-            buttons.push({ type: 2, style: 1, label: correctChoice, custom_id: this.gameRound.interactionCorrectAnswerUUID });
+            buttons.push({ type: 2, style: 1, label: correctChoice.substring(0, 80), custom_id: this.gameRound.interactionCorrectAnswerUUID });
 
             buttons = _.shuffle(buttons);
 
