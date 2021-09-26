@@ -21,11 +21,17 @@ before(async function () {
     return false;
 });
 
-after(async () => {
+after(async function () {
+    this.timeout(10000);
     sandbox.restore();
     console.log("Rolling back migrations...");
     await dbContext.kmq.migrate.rollback({
         directory: kmqKnexConfig.migrations.directory,
     }, true);
+
+    console.log("Test re-applying migrations...");
+    await dbContext.kmq.migrate.latest({
+        directory: kmqKnexConfig.migrations.directory,
+    });
     dbContext.destroy();
 });
