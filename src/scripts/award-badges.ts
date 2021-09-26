@@ -30,14 +30,14 @@ async function getObjects(): Promise<[{ id: string }]> {
     });
 }
 
-async function getBadgeName(): Promise<string> {
+async function getBadgeID(): Promise<string> {
     const rl = createInterface({
         input: process.stdin,
         output: process.stdout,
     });
 
     return new Promise((resolve) => {
-        rl.question("Enter badge name: ", (badgeName) => {
+        rl.question("Enter badge ID: ", (badgeName) => {
             rl.close();
             resolve(badgeName);
         });
@@ -46,11 +46,23 @@ async function getBadgeName(): Promise<string> {
 
 async function awardBadges() {
     const badgesObj = await getObjects();
-    const badgeName = await getBadgeName();
+    const badgeID = await getBadgeID();
+
+    const badge = (await dbContext.kmq("badges")
+        .where("id", "=", badgeID)
+        .first());
+
+    if (!badge) {
+        logger.error(`Badge ID ${badgeID} doesn't exist`);
+        return;
+    }
+
+    const badgeName = badge["name"];
+    logger.info(`Attempting to add badge: '${badgeName}'`);
 
     const playerIDsWithBadgeAlready = new Set((await dbContext.kmq("badges_players")
         .select("user_id")
-        .where("badge_name", "=", badgeName))
+        .where("badge_id", "=", badgeID))
         .map((x) => x["user_id"]));
 
     const playerNamesWithBadgeAlready = badgesObj
@@ -68,14 +80,14 @@ async function awardBadges() {
 
     const playersToGiveBadge = badgesObj
         .filter((player) => !playerIDsWithBadgeAlready.has(player.id))
-        .map((player) => ({ user_id: player.id, badge_name: badgeName }));
+        .map((player) => ({ user_id: player.id, badge_id: badgeID }));
 
     await dbContext.kmq.transaction(async (tx) => {
         await dbContext.kmq("badges_players")
             .insert(playersToGiveBadge)
             .transacting(tx);
     });
-    logger.info(`Awarded badge ${badgeName} to ${playersToGiveBadge.length} players.`);
+    logger.info(`Awarded badge '${badgeName}' to ${playersToGiveBadge.length} players.`);
 }
 
 (async () => {
