@@ -153,7 +153,7 @@ async function startWebServer(fleet: Fleet) {
         reply.code(200).send();
     });
 
-    httpServer.get("/stats", async (request, reply) => {
+    httpServer.get("/status", async (request, reply) => {
         const fleetStats = (await fleet.collectStats());
         const clusterData = [];
         for (const cluster of fleetStats.clusters) {
@@ -165,17 +165,17 @@ async function startWebServer(fleet: Fleet) {
                 return {
                     latency: rawShardData.latency,
                     status: rawShardData.status,
-                    members: rawShardData.members,
+                    members: rawShardData.members.toLocaleString(),
                     id: rawShardData.id,
-                    guilds: rawShardData.guilds,
+                    guilds: rawShardData.guilds.toLocaleString(),
                     healthIndicator,
                 };
             });
 
             clusterData.push({
                 id: cluster.id,
-                ipcLatency: cluster.ipcLatency,
-                apiLatency: _.mean(cluster.shards.map((x) => x.latency)),
+                ram: Math.ceil(cluster.ram).toLocaleString(),
+                apiLatency: _.mean(cluster.shards.map((x) => x.latency)).toLocaleString(),
                 uptime: friendlyFormattedDate(new Date(Date.now() - cluster.uptime)),
                 voiceConnections: cluster.voice,
                 shardData,
@@ -192,9 +192,10 @@ async function startWebServer(fleet: Fleet) {
                 latency: requestLatency,
                 healthIndicator: requestLatencyHealthIndicator,
             },
-            totalUsers: fleetStats.users,
+            cachedUsers: fleetStats.users.toLocaleString(),
+            totalMembers: fleetStats.members.toLocaleString(),
             totalVoiceConnections: fleetStats.voice,
-            totalRAM: Math.ceil(fleetStats.totalRam),
+            totalRAM: Math.ceil(fleetStats.totalRam).toLocaleString(),
         };
 
         return reply.view("../templates/index.ejs", { clusterData, overallStatsData });
