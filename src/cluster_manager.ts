@@ -165,17 +165,17 @@ async function startWebServer(fleet: Fleet) {
                 return {
                     latency: rawShardData.latency,
                     status: rawShardData.status,
-                    members: rawShardData.members,
+                    members: rawShardData.members.toLocaleString(),
                     id: rawShardData.id,
-                    guilds: rawShardData.guilds,
+                    guilds: rawShardData.guilds.toLocaleString(),
                     healthIndicator,
                 };
             });
 
             clusterData.push({
                 id: cluster.id,
-                ram: Math.ceil(cluster.ram),
-                apiLatency: _.mean(cluster.shards.map((x) => x.latency)),
+                ram: Math.ceil(cluster.ram).toLocaleString(),
+                apiLatency: _.mean(cluster.shards.map((x) => x.latency)).toLocaleString(),
                 uptime: friendlyFormattedDate(new Date(Date.now() - cluster.uptime)),
                 voiceConnections: cluster.voice,
                 shardData,
@@ -192,10 +192,10 @@ async function startWebServer(fleet: Fleet) {
                 latency: requestLatency,
                 healthIndicator: requestLatencyHealthIndicator,
             },
-            cachedUsers: fleetStats.users,
-            totalMembers: fleetStats.members,
+            cachedUsers: fleetStats.users.toLocaleString(),
+            totalMembers: fleetStats.members.toLocaleString(),
             totalVoiceConnections: fleetStats.voice,
-            totalRAM: Math.ceil(fleetStats.totalRam),
+            totalRAM: Math.ceil(fleetStats.totalRam).toLocaleString(),
         };
 
         return reply.view("../templates/index.ejs", { clusterData, overallStatsData });
