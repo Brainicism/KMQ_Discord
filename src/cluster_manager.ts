@@ -153,7 +153,7 @@ async function startWebServer(fleet: Fleet) {
         reply.code(200).send();
     });
 
-    httpServer.get("/stats", async (request, reply) => {
+    httpServer.get("/status", async (request, reply) => {
         const fleetStats = (await fleet.collectStats());
         const clusterData = [];
         for (const cluster of fleetStats.clusters) {
@@ -174,7 +174,7 @@ async function startWebServer(fleet: Fleet) {
 
             clusterData.push({
                 id: cluster.id,
-                ipcLatency: cluster.ipcLatency,
+                ram: Math.ceil(cluster.ram),
                 apiLatency: _.mean(cluster.shards.map((x) => x.latency)),
                 uptime: friendlyFormattedDate(new Date(Date.now() - cluster.uptime)),
                 voiceConnections: cluster.voice,
@@ -192,7 +192,8 @@ async function startWebServer(fleet: Fleet) {
                 latency: requestLatency,
                 healthIndicator: requestLatencyHealthIndicator,
             },
-            totalUsers: fleetStats.users,
+            cachedUsers: fleetStats.users,
+            totalMembers: fleetStats.members,
             totalVoiceConnections: fleetStats.voice,
             totalRAM: Math.ceil(fleetStats.totalRam),
         };

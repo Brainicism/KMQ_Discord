@@ -332,7 +332,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description" content="A front-end template that helps you build fast, modern mobile web apps.">
+    <meta name="description" content="K-pop Music Quiz Server Status.">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
     <title>KMQ Status</title>
 
@@ -389,7 +389,8 @@
                 </div>
               </div>
               <div class="mdl-card__actions" style="padding-top:10px; padding-bottom: 10px;">
-                Total Users: <%= overallStatsData.totalUsers %>
+                Total Cached Users: <%= overallStatsData.cachedUsers %>
+                | Total Members: <%= overallStatsData.totalMembers %>
                 | Total Voice Connections: <%= overallStatsData.totalVoiceConnections %>
                 | Total Memory Usage: <%= overallStatsData.totalRAM %> MB
               </div>
@@ -412,14 +413,14 @@
                     Status: '<%= clusterData[i].shardData[j].status %>'
                     | Latency: <%= clusterData[i].shardData[j].latency %> ms
                     | Guilds: <%= clusterData[i].shardData[j].guilds %>
-                    | Users: <%= clusterData[i].shardData[j].members %>
+                    | Members: <%= clusterData[i].shardData[j].members %>
                   </div>
                   <% } %>
               </div>
             </div>
             <div class="mdl-card__actions" style="padding-top:10px; padding-bottom: 10px;">
               API Latency: <%= clusterData[i].apiLatency %> ms
-              | IPC Latency: <%= clusterData[i].ipcLatency %> ms
+              | Memory Usage: <%= clusterData[i].ram %> MB
               | Voice Connections: <%= clusterData[i].voiceConnections %>
               | Uptime: <%= clusterData[i].uptime %>
             </div>
