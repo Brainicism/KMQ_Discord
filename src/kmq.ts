@@ -2,15 +2,17 @@ import Eris from "eris";
 import { config } from "dotenv";
 import path from "path";
 import { BaseClusterWorker } from "eris-fleet";
+import schedule from "node-schedule";
 import { IPCLogger } from "./logger";
 import { EnvType, State } from "./types";
 import {
     registerClientEvents, registerIntervals, registerProcessEvents, reloadCaches, updateBotStatus,
 } from "./helpers/management_utils";
 import BotListingManager from "./helpers/bot_listing_manager";
-import KmqClient from "./kmq_client";
 import { PROFILE_COMMAND_NAME, BOOKMARK_COMMAND_NAME } from "./events/client/interactionCreate";
 import RateLimiter from "./rate_limiter";
+import dbContext from "./database_context";
+import KmqClient from "./kmq_client";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("kmq");
@@ -31,6 +33,25 @@ const state: State = {
 export { state };
 
 export class BotWorker extends BaseClusterWorker {
+    shutdown = async (done) => {
+        logger.debug("SHUTDOWN received, cleaning up...");
+
+        const endSessionPromises = Object.keys(state.gameSessions).map(async (guildID) => {
+            const gameSession = state.gameSessions[guildID];
+            logger.debug(`gid: ${guildID} | Forcing game session end`);
+            await gameSession.endSession();
+        });
+
+        await Promise.allSettled(endSessionPromises);
+
+        for (const job of Object.entries(schedule.scheduledJobs)) {
+            job[1].cancel();
+        }
+
+        await dbContext.destroy();
+        done();
+    };
+
     constructor(setup) {
         super(setup);
         state.ipc = this.ipc;
