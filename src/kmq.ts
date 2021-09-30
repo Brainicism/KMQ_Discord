@@ -14,6 +14,7 @@ import RateLimiter from "./rate_limiter";
 import dbContext from "./database_context";
 import KmqClient from "./kmq_client";
 import ReloadCommand from "./commands/admin/reload";
+import EvalCommand from "./commands/admin/eval";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("kmq");
@@ -34,14 +35,20 @@ const state: State = {
 export { state };
 
 export class BotWorker extends BaseClusterWorker {
-    handleCommand = (commandName) => {
+    handleCommand = async (commandName: string) => {
         logger.info(`Received cluster command: ${commandName}`);
+        if (commandName.startsWith("eval")) {
+            const evalString = commandName.substr(commandName.indexOf("|") + 1);
+            const evalResult = await EvalCommand.eval(evalString);
+            return evalResult;
+        }
+
         switch (commandName) {
             case "reload_commands":
                 ReloadCommand.reloadCommands();
-                break;
+                return null;
             default:
-                break;
+                return null;
         }
     };
 
