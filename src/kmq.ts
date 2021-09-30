@@ -13,6 +13,7 @@ import { PROFILE_COMMAND_NAME, BOOKMARK_COMMAND_NAME } from "./events/client/int
 import RateLimiter from "./rate_limiter";
 import dbContext from "./database_context";
 import KmqClient from "./kmq_client";
+import ReloadCommand from "./commands/admin/reload";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("kmq");
@@ -33,6 +34,17 @@ const state: State = {
 export { state };
 
 export class BotWorker extends BaseClusterWorker {
+    handleCommand = (commandName) => {
+        logger.info(`Received cluster command: ${commandName}`);
+        switch (commandName) {
+            case "reload_commands":
+                ReloadCommand.reloadCommands();
+                break;
+            default:
+                break;
+        }
+    };
+
     shutdown = async (done) => {
         logger.debug("SHUTDOWN received, cleaning up...");
 
@@ -67,11 +79,6 @@ export class BotWorker extends BaseClusterWorker {
         logger.info("Registering process event handlers...");
         registerProcessEvents();
 
-        this.ipc.register("reload_commands", async () => {
-            logger.info("Received 'reload_commands' IPC message");
-            state.client.reloadCommands();
-        });
-
         if (process.env.NODE_ENV === EnvType.PROD && this.clusterID === 0) {
             logger.info("Initializing bot stats poster...");
             const botListingManager = new BotListingManager();
@@ -102,12 +109,14 @@ export class BotWorker extends BaseClusterWorker {
                 type: Eris.Constants.ApplicationCommandTypes.USER,
             });
         } else if (process.env.NODE_ENV === EnvType.DEV) {
-            state.client.guilds.get(process.env.DEBUG_SERVER_ID).createCommand({
+            const debugServer = state.client.guilds.get(process.env.DEBUG_SERVER_ID);
+            if (!debugServer) return;
+            debugServer.createCommand({
                 name: BOOKMARK_COMMAND_NAME,
                 type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
             });
 
-            state.client.guilds.get(process.env.DEBUG_SERVER_ID).createCommand({
+            debugServer.createCommand({
                 name: PROFILE_COMMAND_NAME,
                 type: Eris.Constants.ApplicationCommandTypes.USER,
             });

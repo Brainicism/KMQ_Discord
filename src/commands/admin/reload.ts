@@ -39,12 +39,17 @@ export default class ReloadCommand implements BaseCommand {
 
         const reloadType = parsedMessage.components[0] as ReloadType;
         if (reloadType === ReloadType.ALL) {
-            state.ipc.broadcast("reload_commands");
+            state.ipc.allClustersCommand("reload_commands");
             sendInfoMessage(MessageContext.fromMessage(message), { title: "Reloading All Clusters", description: "See logs for completion status" });
             return;
         }
 
-        state.client.reloadCommands();
+        ReloadCommand.reloadCommands();
         sendInfoMessage(MessageContext.fromMessage(message), { title: "Cluster Reload Complete", description: "All changes should now be applied" });
     };
+
+    static reloadCommands() {
+        logger.info("Reloading all commands");
+        state.client.reloadCommands();
+    }
 }
