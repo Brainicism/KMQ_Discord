@@ -15,6 +15,7 @@ import dbContext from "./database_context";
 import KmqClient from "./kmq_client";
 import ReloadCommand from "./commands/admin/reload";
 import EvalCommand from "./commands/admin/eval";
+import LeaderboardCommand, { LeaderboardDuration } from "./commands/game_commands/leaderboard";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("kmq");
@@ -95,7 +96,7 @@ export class BotWorker extends BaseClusterWorker {
         state.client = this.bot as KmqClient;
         logger.info(`Started worker ID: ${this.workerID} on cluster ID: ${this.clusterID}`);
 
-        logger.info("Registering event loops...");
+        logger.info("Registering cron tasks...");
         registerIntervals(this.clusterID);
 
         logger.info("Registering client event handlers...");
@@ -108,6 +109,22 @@ export class BotWorker extends BaseClusterWorker {
             logger.info("Initializing bot stats poster...");
             const botListingManager = new BotListingManager();
             botListingManager.start();
+
+            logger.info("Registering master cron tasks...");
+            // every first of the month at 12am UTC => 7pm EST
+            schedule.scheduleJob("0 0 1 * *", async () => {
+                LeaderboardCommand.sendDebugLeaderboard(LeaderboardDuration.MONTHLY);
+            });
+
+            // every sunday at 12am UTC => saturday 7pm EST
+            schedule.scheduleJob("0 0 * * SUN", async () => {
+                LeaderboardCommand.sendDebugLeaderboard(LeaderboardDuration.WEEKLY);
+            });
+
+            // everyday at 12am UTC => 7pm EST
+            schedule.scheduleJob("0 0 * * *", async () => {
+                LeaderboardCommand.sendDebugLeaderboard(LeaderboardDuration.DAILY);
+            });
         }
 
         if ([EnvType.CI, EnvType.DRY_RUN].includes(process.env.NODE_ENV as EnvType)) {
