@@ -43,10 +43,28 @@ export class BotWorker extends BaseClusterWorker {
             return evalResult;
         }
 
+        if (commandName.startsWith("find_shard")) {
+            const guildID = commandName.substr(commandName.indexOf("|") + 1);
+            const guild = state.client.guilds.get(guildID);
+            if (!guild) return null;
+            return {
+                clusterID: this.clusterID,
+                shardID: guild.shard.id,
+            };
+        }
+
         switch (commandName) {
             case "reload_commands":
                 ReloadCommand.reloadCommands();
                 return null;
+            case "game_session_stats": {
+                const activePlayers = Object.values(state.gameSessions).reduce((total, curr) => total + curr.participants.size, 0);
+                const activeGameSessions = Object.keys(state.gameSessions).length;
+                return {
+                    activePlayers, activeGameSessions,
+                };
+            }
+
             default:
                 return null;
         }

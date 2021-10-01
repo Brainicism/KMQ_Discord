@@ -1,5 +1,4 @@
 <style>
-
   /**
  * Copyright 2015 Google Inc. All Rights Reserved.
  *
@@ -285,17 +284,19 @@
     z-index: 99;
   }
 
-  .color-healthy { 
-    background-color:rgb(19,199,6)
+  .color-healthy {
+    background-color: rgb(19, 199, 6)
   }
 
-  .color-warning { 
-    background-color:rgb(235,232,52)
+  .color-warning {
+    background-color: rgb(235, 232, 52)
   }
 
-  .color-down { 
-    background-color:rgb(255,0,0)
-  }/*  */
+  .color-down {
+    background-color: rgb(255, 0, 0)
+  }
+
+  /*  */
 
   .kmq-primary {
     background-color: rgb(232, 82, 83) !important;
@@ -310,7 +311,20 @@
   }
 </style>
 
+<script>
+  async function displayClusterInfo() {
+    const guildID = prompt("What's your server ID?");
+    if (!guildID) return;
+    const res = await fetch(`/clusterinfo?guild=${guildID}`);
+    if (res.status !== 200) {
+      alert("Couldn't find your server");
+      return;
+    }
 
+    const clusterInfo = await res.json();
+    alert(`Your server is on cluster: ${clusterInfo.clusterID}, shard: ${clusterInfo.shardID}`);
+  }
+</script>
 <!doctype html>
 <!--
   Material Design Lite
@@ -329,25 +343,27 @@
   limitations under the License
 -->
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description" content="K-pop Music Quiz Server Status.">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title>KMQ Status</title>
 
-    <link rel="shortcut icon" href="https://static.kpop.gg/thumbnails/logo.png">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="K-pop Music Quiz Server Status.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <title>KMQ Status</title>
 
-    <!-- SEO: If your mobile URL is different from the desktop URL, add a canonical link to the desktop page https://developers.google.com/webmasters/smartphone-sites/feature-phones -->
-    <!--
+  <link rel="shortcut icon" href="https://static.kpop.gg/thumbnails/logo.png">
+
+  <!-- SEO: If your mobile URL is different from the desktop URL, add a canonical link to the desktop page https://developers.google.com/webmasters/smartphone-sites/feature-phones -->
+  <!--
     <link rel="canonical" href="http://www.example.com/">
     -->
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.deep_purple-pink.min.css">
-    <link rel="stylesheet" href="styles.css">
-    <style>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.deep_purple-pink.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <style>
     #view-source {
       position: fixed;
       display: block;
@@ -357,72 +373,84 @@
       margin-bottom: 40px;
       z-index: 900;
     }
-    </style>
-  </head>
-  <body class="mdl-demo mdl-color--grey-100 mdl-color-text--grey-700 mdl-base">
-    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-      <header class="mdl-layout__header mdl-layout__header--scroll kmq-primary">
-        <div class="mdl-layout--large-screen-only mdl-layout__header-row">
-        </div>
-        <div class="mdl-layout--large-screen-only mdl-layout__header-row">
-          <h3>KMQ Status</h3>
-        </div>
-        <div class="mdl-layout--large-screen-only mdl-layout__header-row">
-        </div>
-        <div class="mdl-layout__tab-bar mdl-js-ripple-effect kmq-primary-dark">
-          <a href="#overview" class="mdl-layout__tab is-active">Overview</a>
-          <!-- <a href="#features" class="mdl-layout__tab">Features</a> -->
-        </div>
-      </header>
-      <main class="mdl-layout__content">
-        <div class="mdl-layout__tab-panel is-active" id="overview">
-          <section class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
-            <div class="mdl-card mdl-cell mdl-cell--12-col">
-              <div class="mdl-card__supporting-text mdl-grid mdl-grid-no-spacing">
-                <h4 class="mdl-cell mdl-cell--12-col">Overall</h4>
-                <div class="section__circle-container mdl-cell mdl-cell--2-col mdl-cell--1-col-phone">
-                  <div class="section__circle-container__circle <%= ['color-healthy', 'color-warning', 'color-down'][overallStatsData.requestLatency.healthIndicator] %>"></div>
-                </div>
-                <div class="section__text mdl-cell mdl-cell--10-col-desktop mdl-cell--6-col-tablet mdl-cell--3-col-phone">
-                  <h5> Request Latency </h5>
-                  <%= overallStatsData.requestLatency.latency %> ms
+  </style>
+</head>
+
+<body class="mdl-demo mdl-color--grey-100 mdl-color-text--grey-700 mdl-base">
+  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+    <header class="mdl-layout__header mdl-layout__header--scroll kmq-primary">
+      <div class="mdl-layout--large-screen-only mdl-layout__header-row">
+      </div>
+      <div class="mdl-layout--large-screen-only mdl-layout__header-row">
+        <h3>KMQ Status</h3>
+      </div>
+      <div class="mdl-layout--large-screen-only mdl-layout__header-row">
+      </div>
+      <div class="mdl-layout__tab-bar mdl-js-ripple-effect kmq-primary-dark">
+        <a onclick="displayClusterInfo()" class="mdl-layout__tab is-active">What shard am I on?</a>
+        <!-- <a href="#features" class="mdl-layout__tab">Features</a> -->
+      </div>
+    </header>
+    <main class="mdl-layout__content">
+      <div class="mdl-layout__tab-panel is-active" id="overview">
+        <section class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
+          <div class="mdl-card mdl-cell mdl-cell--12-col">
+            <div class="mdl-card__supporting-text mdl-grid mdl-grid-no-spacing">
+              <h4 class="mdl-cell mdl-cell--12-col">Overall</h4>
+              <div class="section__circle-container mdl-cell mdl-cell--2-col mdl-cell--1-col-phone">
+                <div
+                  class="section__circle-container__circle <%= ['color-healthy', 'color-warning', 'color-down'][overallStatsData.requestLatency.healthIndicator] %>">
                 </div>
               </div>
-              <div class="mdl-card__actions" style="padding-top:10px; padding-bottom: 10px;">
-                Total Cached Users: <%= overallStatsData.cachedUsers %>
-                | Total Members: <%= overallStatsData.totalMembers %>
-                | Total Voice Connections: <%= overallStatsData.totalVoiceConnections %>
-                | Total Memory Usage: <%= overallStatsData.totalRAM %> MB
+              <div class="section__text mdl-cell mdl-cell--10-col-desktop mdl-cell--6-col-tablet mdl-cell--3-col-phone">
+                <h5> Request Latency </h5>
+                <%= overallStatsData.requestLatency.latency %> ms
               </div>
             </div>
-          </section>
+            <div class="mdl-card__actions" style="padding-top:10px; padding-bottom: 10px;">
+              Total Cached Users: <%= overallStatsData.cachedUsers %>
+                | Total Members: <%= overallStatsData.totalMembers %>
+                  | Total Voice Connections: <%= overallStatsData.totalVoiceConnections %>
+                    | Total Memory Usage: <%= overallStatsData.totalRAM %> MB
+            </div>
+          </div>
+        </section>
 
-        </div>
-        <% for(let i = 0; i< clusterData.length; i++){ %>
+      </div>
+      <% for(let i=0; i< clusterData.length; i++){ %>
         <div class="mdl-layout__tab-panel is-active" id="overview">
           <section class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
             <div class="mdl-card mdl-cell mdl-cell--12-col">
               <div class="mdl-card__supporting-text mdl-grid mdl-grid-no-spacing">
-                <h4 class="mdl-cell mdl-cell--12-col">Cluster #<%= i %></h4>
-                <% for(let j = 0; j< clusterData[i].shardData.length; j++){ %>
+                <h4 class="mdl-cell mdl-cell--12-col">Cluster #<%= i %>
+                </h4>
+                <% for(let j=0; j< clusterData[i].shardData.length; j++){ %>
                   <div class="section__circle-container mdl-cell mdl-cell--2-col mdl-cell--1-col-phone">
-                    <div class="section__circle-container__circle <%= ['color-healthy', 'color-warning', 'color-down'][clusterData[i].shardData[j].healthIndicator] %>"></div>
+                    <div
+                      class="section__circle-container__circle <%= ['color-healthy', 'color-warning', 'color-down'][clusterData[i].shardData[j].healthIndicator] %>">
+                    </div>
                   </div>
-                  <div class="section__text mdl-cell mdl-cell--10-col-desktop mdl-cell--6-col-tablet mdl-cell--3-col-phone">
-                    <h5> Shard <%= clusterData[i].shardData[j].id %> </h5>
+                  <div
+                    class="section__text mdl-cell mdl-cell--10-col-desktop mdl-cell--6-col-tablet mdl-cell--3-col-phone">
+                    <h5> Shard <%= clusterData[i].shardData[j].id %>
+                    </h5>
                     Status: '<%= clusterData[i].shardData[j].status %>'
-                    | Latency: <%= clusterData[i].shardData[j].latency %> ms
-                    | Guilds: <%= clusterData[i].shardData[j].guilds %>
-                    | Members: <%= clusterData[i].shardData[j].members %>
+                      | Latency: <%= clusterData[i].shardData[j].latency %> ms
+                        | Guilds: <%= clusterData[i].shardData[j].guilds %>
+                          | Members: <%= clusterData[i].shardData[j].members %>
                   </div>
                   <% } %>
               </div>
             </div>
             <div class="mdl-card__actions" style="padding-top:10px; padding-bottom: 10px;">
               API Latency: <%= clusterData[i].apiLatency %> ms
-              | Memory Usage: <%= clusterData[i].ram %> MB
-              | Voice Connections: <%= clusterData[i].voiceConnections %>
-              | Uptime: <%= clusterData[i].uptime %>
+                | Memory Usage: <%= clusterData[i].ram %> MB
+                  | Voice Connections: <%= clusterData[i].voiceConnections %>
+                    | Uptime: <%= clusterData[i].uptime %>
+            </div>
+            <div class="mdl-card__actions" style="padding-top:10px; padding-bottom: 10px;">
+              Active Game Sessions: <%= clusterData[i].activeGameSessions %>
+                | Active Players: <%= clusterData[i].activePlayers %>
             </div>
           </section>
           <!-- <section class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
@@ -442,7 +470,7 @@
         </div>
         <% } %>
 
-        <!-- <div class="mdl-layout__tab-panel" id="features">
+          <!-- <div class="mdl-layout__tab-panel" id="features">
           <section class="section--center mdl-grid mdl-grid--no-spacing">
             <div class="mdl-cell mdl-cell--12-col">
               <h4>Features</h4>
@@ -498,8 +526,9 @@
           </section>
         </div> -->
 
-      </main>
-    </div>
-    <script src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-  </body>
+    </main>
+  </div>
+  <script src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+</body>
+
 </html>
