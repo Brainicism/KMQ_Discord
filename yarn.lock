@@ -832,7 +832,7 @@ enquirer@^2.3.5:
 
 "eris-fleet@https://github.com/danclay/eris-fleet#dev":
   version "0.3.9-dev"
-  resolved "https://github.com/danclay/eris-fleet#8a04537061efa2918a84149c9c7c7f1a571c53e6"
+  resolved "https://github.com/danclay/eris-fleet#9ae0d0e6c8fca7d3a94a41c9bc9bf1bb7d5f77fe"
 
 "eris-pagination@https://github.com/brainicism/eris-pagination#81aa2f0":
   version "0.5.2"
