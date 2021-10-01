@@ -9,6 +9,7 @@ import schedule from "node-schedule";
 import fastify from "fastify";
 import pointOfView from "point-of-view";
 import ejs from "ejs";
+import fastifyResponseCaching from "fastify-response-caching";
 import { getInternalLogger } from "./logger";
 import { clearClusterActivityStats, clearRestartNotification } from "./helpers/management_utils";
 import storeDailyStats from "./scripts/store-daily-stats";
@@ -140,6 +141,8 @@ async function startWebServer(fleet: Fleet) {
         },
     });
 
+    httpServer.register(fastifyResponseCaching, { ttl: 5000 });
+
     httpServer.post("/voted", {}, async (request, reply) => {
         const requestAuthorizationToken = request.headers["authorization"];
         if (requestAuthorizationToken !== process.env.TOP_GG_WEBHOOK_AUTH) {
@@ -216,6 +219,7 @@ async function startWebServer(fleet: Fleet) {
             totalMembers: fleetStats.members.toLocaleString(),
             totalVoiceConnections: fleetStats.voice,
             totalRAM: Math.ceil(fleetStats.totalRam).toLocaleString(),
+            lastUpdated: new Date(),
         };
 
         return reply.view("../templates/index.ejs", { clusterData, overallStatsData });
