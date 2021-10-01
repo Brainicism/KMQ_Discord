@@ -153,10 +153,28 @@ async function startWebServer(fleet: Fleet) {
         reply.code(200).send();
     });
 
+    httpServer.get("/clusterinfo", async (request, reply) => {
+        const guildID = request.query["guild"];
+        const commandResult = (await fleet.ipc.allClustersCommand(`find_shard|${guildID}`, true) as Map<number, any>);
+        const clusterInfo = Array.from(commandResult.values()).filter((x) => x !== null)[0];
+        if (!clusterInfo) {
+            reply.code(404).send("Couldn't find that guild.");
+            return;
+        }
+
+        reply.send(clusterInfo);
+    });
+
     httpServer.get("/status", async (request, reply) => {
+        if (fleet.stats.guilds === 0) {
+            return "KMQ is still starting up. Check back in a few minutes!";
+        }
+
+        const gameplayStats = await fleet.ipc.allClustersCommand("game_session_stats", true) as Map<number, any>;
         const fleetStats = (await fleet.collectStats());
         const clusterData = [];
-        for (const cluster of fleetStats.clusters) {
+        for (let i = 0; i < fleetStats.clusters.length; i++) {
+            const cluster = fleetStats.clusters[i];
             const shardData = cluster.shards.map((rawShardData) => {
                 let healthIndicator: HealthIndicator;
                 if (rawShardData.ready === false) healthIndicator = HealthIndicator.UNHEALTHY;
@@ -178,6 +196,8 @@ async function startWebServer(fleet: Fleet) {
                 apiLatency: _.mean(cluster.shards.map((x) => x.latency)).toLocaleString(),
                 uptime: friendlyFormattedDate(new Date(Date.now() - cluster.uptime)),
                 voiceConnections: cluster.voice,
+                activeGameSessions: gameplayStats.get(i).activeGameSessions,
+                activePlayers: gameplayStats.get(i).activePlayers,
                 shardData,
             });
         }
