@@ -702,7 +702,7 @@ export function getVoiceChannel(voiceChannelID: string): Eris.VoiceChannel {
 export function getCurrentVoiceMembers(voiceChannelID: string): Array<Eris.Member> {
     const voiceChannel = getVoiceChannel(voiceChannelID);
     if (!voiceChannel) {
-        logger.error(`Voice channel not in cache: ${voiceChannel.id}`);
+        logger.error(`Voice channel not in cache: ${voiceChannelID}`);
         return [];
     }
 
