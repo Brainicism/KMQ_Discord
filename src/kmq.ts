@@ -37,21 +37,11 @@ export { state };
 
 export class BotWorker extends BaseClusterWorker {
     handleCommand = async (commandName: string) => {
-        logger.info(`Received cluster command: ${commandName}`);
+        logger.debug(`Received cluster command: ${commandName}`);
         if (commandName.startsWith("eval")) {
             const evalString = commandName.substr(commandName.indexOf("|") + 1);
             const evalResult = await EvalCommand.eval(evalString);
             return evalResult;
-        }
-
-        if (commandName.startsWith("find_shard")) {
-            const guildID = commandName.substr(commandName.indexOf("|") + 1);
-            const guild = state.client.guilds.get(guildID);
-            if (!guild) return null;
-            return {
-                clusterID: this.clusterID,
-                shardID: guild.shard.id,
-            };
         }
 
         switch (commandName) {

@@ -5,7 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Attach to KMQ Dev",
+            "name": "Attach to KMQ Cluster Manager",
+            "port": 9229,
+            "request": "attach",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "pwa-node"
+        },
+        {
+            "name": "Attach to KMQ First Shard",
             "port": 9230,
             "request": "attach",
             "skipFiles": [

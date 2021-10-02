@@ -144,18 +144,6 @@ async function startWebServer(fleet: Fleet) {
         reply.code(200).send();
     });
 
-    httpServer.get("/clusterinfo", async (request, reply) => {
-        const guildID = request.query["guild"];
-        const commandResult = (await fleet.ipc.allClustersCommand(`find_shard|${guildID}`, true) as Map<number, any>);
-        const clusterInfo = Array.from(commandResult.values()).filter((x) => x !== null)[0];
-        if (!clusterInfo) {
-            reply.code(404).send("Couldn't find that guild.");
-            return;
-        }
-
-        reply.send(clusterInfo);
-    });
-
     httpServer.get("/status", async (request, reply) => {
         if (fleet.stats.guilds === 0) {
             return "KMQ is still starting up. Check back in a few minutes!";
@@ -208,6 +196,9 @@ async function startWebServer(fleet: Fleet) {
             totalVoiceConnections: fleetStats.voice,
             totalRAM: Math.ceil(fleetStats.totalRam).toLocaleString(),
             lastUpdated: new Date(),
+            shardCount: fleetStats.shardCount,
+            totalActiveGameSessions: clusterData.reduce((x, y) => x + y.activeGameSessions, 0),
+            totalActivePlayers: clusterData.reduce((x, y) => x + y.activePlayers, 0),
         };
 
         return reply.view("../templates/index.ejs", { clusterData, overallStatsData });
