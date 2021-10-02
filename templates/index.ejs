@@ -315,14 +315,13 @@
   async function displayClusterInfo() {
     const guildID = prompt("What's your server ID?");
     if (!guildID) return;
-    const res = await fetch(`/clusterinfo?guild=${guildID}`);
-    if (res.status !== 200) {
-      alert("Couldn't find your server");
-      return;
-    }
+    if (isNaN(guildID)) return;
 
-    const clusterInfo = await res.json();
-    alert(`Your server is on cluster: ${clusterInfo.clusterID}, shard: ${clusterInfo.shardID}`);
+    const shardCount = <%= overallStatsData.shardCount %>;
+
+    // https://discord.com/developers/docs/topics/gateway#sharding
+    const allocatedShard = parseInt(BigInt(guildID) >> BigInt(22)) % shardCount;
+    alert(`Your server is on shard: ${allocatedShard}`);
   }
 </script>
 <!doctype html>
@@ -453,14 +452,14 @@
                 | Active Players: <%= clusterData[i].activePlayers %>
             </div>
           </section>
-          <section class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
-              <div class="mdl-card__supporting-text">
-                Last Updated: <%= overallStatsData.lastUpdated %>
-              </div>
-          </section>
-
         </div>
         <% } %>
+
+          <section class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
+            <div class="mdl-card__supporting-text">
+              Last Updated: <%= overallStatsData.lastUpdated %>
+            </div>
+          </section>
 
           <!-- <div class="mdl-layout__tab-panel" id="features">
           <section class="section--center mdl-grid mdl-grid--no-spacing">
