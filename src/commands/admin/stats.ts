@@ -25,15 +25,9 @@ export default class SkipCommand implements BaseCommand {
     call = async ({ message, channel }: CommandArgs) => {
         const fleetStats = await state.ipc.getStats();
 
-        const activeGameSessions = friendlyFormattedNumber((await dbContext.kmq("cluster_stats")
-            .where("stat_name", "=", "active_sessions")
-            .sum("stat_value as count")
-            .first()).count) ?? "Loading...";
-
-        const activeUsers = friendlyFormattedNumber((await dbContext.kmq("cluster_stats")
-            .where("stat_name", "=", "active_players")
-            .sum("stat_value as count")
-            .first()).count) ?? "Loading...";
+        const gameSessionStats = Array.from((await state.ipc.allClustersCommand("game_session_stats", true) as Map<number, any>).values());
+        const activeGameSessions = gameSessionStats.reduce((x, y) => x + y.activeGameSessions, 0);
+        const activePlayers = gameSessionStats.reduce((x, y) => x + y.activePlayers, 0);
 
         const dateThreshold = new Date();
         dateThreshold.setHours(dateThreshold.getHours() - 24);
@@ -79,7 +73,7 @@ export default class SkipCommand implements BaseCommand {
 
         const gameStatistics = {
             "Active Game Sessions": activeGameSessions,
-            "Active Players": activeUsers,
+            "Active Players": activePlayers,
             "(Recent) Game Sessions": `${friendlyFormattedNumber(Number(recentGameSessions))} | ${friendlyFormattedNumber(Number(totalGameSessions))}`,
             "(Recent) Game Rounds": `${friendlyFormattedNumber(recentGameRounds)} | ${friendlyFormattedNumber(totalGameRounds)}`,
             "(Recent) Players": `${friendlyFormattedNumber(Number(recentPlayers))} | ${friendlyFormattedNumber(Number(totalPlayers))}`,

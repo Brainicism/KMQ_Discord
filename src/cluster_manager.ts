@@ -11,7 +11,7 @@ import pointOfView from "point-of-view";
 import ejs from "ejs";
 import fastifyResponseCaching from "fastify-response-caching";
 import { getInternalLogger } from "./logger";
-import { clearClusterActivityStats, clearRestartNotification } from "./helpers/management_utils";
+import { clearRestartNotification } from "./helpers/management_utils";
 import storeDailyStats from "./scripts/store-daily-stats";
 import dbContext from "./database_context";
 import { reloadFactCache } from "./fact_generator";
@@ -245,7 +245,6 @@ async function startWebServer(fleet: Fleet) {
 
         logger.info("Clearing existing restart notifications...");
         await clearRestartNotification();
-        await clearClusterActivityStats();
 
         logger.info("Registering global intervals");
         registerGlobalIntervals(fleet);
