@@ -197,6 +197,8 @@ async function startWebServer(fleet: Fleet) {
             totalRAM: Math.ceil(fleetStats.totalRam).toLocaleString(),
             lastUpdated: new Date(),
             shardCount: fleetStats.shardCount,
+            totalActiveGameSessions: clusterData.reduce((x, y) => x + y.activeGameSessions, 0),
+            totalActivePlayers: clusterData.reduce((x, y) => x + y.activePlayers, 0),
         };
 
         return reply.view("../templates/index.ejs", { clusterData, overallStatsData });
