@@ -117,37 +117,6 @@ function clearInactiveVoiceConnections() {
     }
 }
 
-/* Updates each cluster's current game activity info */
-async function updateClusterActivityStats(clusterID: number) {
-    const activeGameSessions = Object.keys(state.gameSessions).length;
-    const activeUsers = Object.values(state.gameSessions).reduce((total, curr) => total + curr.participants.size, 0);
-    await dbContext.kmq("cluster_stats")
-        .insert({
-            cluster_id: clusterID,
-            stat_name: "active_players",
-            stat_value: activeUsers,
-            last_updated: new Date(),
-        })
-        .onConflict(["cluster_id", "stat_name"])
-        .merge();
-
-    await dbContext.kmq("cluster_stats")
-        .insert({
-            cluster_id: clusterID,
-            stat_name: "active_sessions",
-            stat_value: activeGameSessions,
-            last_updated: new Date(),
-        })
-        .onConflict(["cluster_id", "stat_name"])
-        .merge();
-}
-
-/* Clears cluster activity info */
-export async function clearClusterActivityStats() {
-    await dbContext.kmq("cluster_stats")
-        .del();
-}
-
 /* Updates system statistics */
 async function updateSystemStats(clusterID: number) {
     const { client } = state;
@@ -274,11 +243,6 @@ export function registerIntervals(clusterID: number) {
         reloadAliases();
         clearInactiveVoiceConnections();
         await updateSystemStats(clusterID);
-    });
-
-    // every minute
-    schedule.scheduleJob("*/1 * * * *", async () => {
-        await updateClusterActivityStats(clusterID);
     });
 }
 
