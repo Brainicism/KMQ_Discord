@@ -570,7 +570,7 @@ export default class GameSession {
         this.gameRound.setBaseExpReward(await this.calculateBaseExp());
 
         const voiceChannel = state.client.getChannel(this.voiceChannelID) as Eris.VoiceChannel;
-        if (voiceChannel.voiceMembers.size === 0) {
+        if (!voiceChannel || voiceChannel.voiceMembers.size === 0) {
             await this.endSession();
             return;
         }
