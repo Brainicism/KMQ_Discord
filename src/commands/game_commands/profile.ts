@@ -187,7 +187,12 @@ export default class ProfileCommand implements BaseCommand {
             if (message.mentions.length === 1) {
                 requestedPlayer = message.mentions[0];
             } else {
-                requestedPlayer = await fetchUser(parsedMessage.argument);
+                try {
+                    requestedPlayer = await fetchUser(parsedMessage.argument, true);
+                } catch (e) {
+                    requestedPlayer = null;
+                }
+
                 if (!requestedPlayer) {
                     sendErrorMessage(MessageContext.fromMessage(message), { title: "No Profile Found", description: "Could not find the specified user ID. See `,help profile` for details." });
                     return;
