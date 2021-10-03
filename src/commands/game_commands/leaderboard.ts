@@ -2,7 +2,7 @@ import Eris from "eris";
 import dbContext from "../../database_context";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
-import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage, sendPaginationedEmbed, EmbedGenerator } from "../../helpers/discord_utils";
+import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage, sendPaginationedEmbed, EmbedGenerator, sendMessage } from "../../helpers/discord_utils";
 import { getRankNameByLevel } from "./profile";
 import { chooseRandom, friendlyFormattedNumber, bold, arrayToString } from "../../helpers/utils";
 import { state } from "../../kmq";
@@ -324,7 +324,7 @@ export default class LeaderboardCommand implements BaseCommand {
             sendPaginationedEmbed(message, embeds, null, pageOffset + 1);
         } else {
             // Used only in sending leaderboard in debug channel before reset
-            state.client.createMessage(process.env.DEBUG_TEXT_CHANNEL_ID, { embeds: [await embeds[pageOffset]()] });
+            sendMessage(process.env.DEBUG_TEXT_CHANNEL_ID, { embeds: [await embeds[pageOffset]()] });
         }
     }
 }
