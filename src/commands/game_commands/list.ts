@@ -1,4 +1,4 @@
-import { getDebugLogHeader, sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
+import { getDebugLogHeader, sendErrorMessage, sendInfoMessage, sendMessage } from "../../helpers/discord_utils";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
@@ -68,11 +68,12 @@ export default class ListCommand implements BaseCommand {
 
         if (optionValue.length > 2000) {
             try {
-                await channel.createMessage({
+                sendMessage(channel.id, {
                     content: "Too many groups to list in a Discord message, see the attached file",
-                }, {
-                    name: "groups.txt",
-                    file: Buffer.from(`${optionValue}\n`),
+                    file: {
+                        name: "groups.txt",
+                        file: Buffer.from(`${optionValue}\n`),
+                    },
                 });
             } catch (e) {
                 logger.warn(`${getDebugLogHeader(message)} | Missing ATTACH_FILE permissions`);

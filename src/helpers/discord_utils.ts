@@ -1,4 +1,5 @@
-import Eris, { EmbedOptions, TextableChannel } from "eris";
+/* eslint-disable @typescript-eslint/no-use-before-define */
+import Eris, { AdvancedMessageContent, EmbedOptions, TextableChannel } from "eris";
 import EmbedPaginator from "eris-pagination";
 import axios from "axios";
 import GuildPreference from "../structures/guild_preference";
@@ -70,26 +71,6 @@ export function getDebugLogHeader(context: MessageContext | Eris.Message | Eris.
  */
 function missingPermissionsText(missingPermissions: string[]): string {
     return `Ensure that the bot has the following permissions: \`${missingPermissions.join(", ")}\`\n\nSee the following link for details: https://support.discord.com/hc/en-us/articles/206029707-How-do-I-set-up-Permissions-. If you are still having issues, join the official KMQ server found in \`${process.env.BOT_PREFIX}help\``;
-}
-
-/**
- * Sends a message to a user's DM channel
- * @param userID - the user's ID
- * @param messageContent - the message content
- */
-async function sendDmMessage(userID: string, messageContent: Eris.AdvancedMessageContent) {
-    const { client } = state;
-    const dmChannel = await client.getDMChannel(userID);
-    try {
-        await client.createMessage(dmChannel.id, messageContent);
-    } catch (e) {
-        if (e.code === 50007) {
-            logger.warn(`Attempted to message user ${userID}, user does not allow DMs or has blocked me.`);
-            return;
-        }
-
-        logger.error(`Unexpected error messaging user ${userID}. err = ${JSON.stringify(e)}`);
-    }
 }
 
 /**
@@ -199,13 +180,70 @@ export async function textPermissionsCheck(textChannelID: string, guildID: strin
     const missingPermissions = REQUIRED_TEXT_PERMISSIONS.filter((permission) => !channel.permissionsOf(client.user.id).has(permission));
     if (missingPermissions.length > 0) {
         logger.warn(`${getDebugLogHeader(messageContext)} | Missing Text Channel [${missingPermissions.join(", ")}] permissions`);
-        client.createMessage(channel.id, {
+        sendMessage(channel.id, {
             content: missingPermissionsText(missingPermissions),
         });
         return false;
     }
 
     return true;
+}
+
+async function sendMessageExceptionHandler(e: any, channelID: string, guildID: string, authorID: string, messageContent: AdvancedMessageContent) {
+    if (typeof e === "string") {
+        if (e.startsWith("Request timed out")) {
+            // Request Timeout
+            logger.error(`Error sending message. Request timed out. textChannelID = ${channelID}.`);
+        }
+    } else if (e.code) {
+        const errCode = e.code;
+        switch (errCode) {
+            case 500: {
+                // Internal Server Error
+                logger.error(`Error sending message. 500 Internal Server Error. textChannelID = ${channelID}.`);
+                break;
+            }
+
+            case 50035: {
+                // Invalid Form Body
+                logger.error(`Error sending message. Invalid form body. textChannelID = ${channelID}. msg_content = ${JSON.stringify(messageContent)}`);
+                break;
+            }
+
+            case 50001: {
+                // Missing Access
+                logger.error(`Error sending message. Missing Access. textChannelID = ${channelID}`);
+                break;
+            }
+
+            case 50013: {
+                // Missing Permissions
+                logger.error(`Error sending message. Missing text permissions. textChannelID = ${channelID}.`);
+                await textPermissionsCheck(channelID, guildID, authorID);
+                break;
+            }
+
+            case 10003: {
+                // Unknown channel
+                logger.error(`Error sending message. Unknown channel. textChannelID = ${channelID}.`);
+                break;
+            }
+
+            case 50007: {
+                // Cannot send messages to this user
+                logger.error(`Error sending message. Cannot send messages to this user. userID = ${channelID}.`);
+                break;
+            }
+
+            default: {
+                // Unknown error code
+                logger.error(`Error sending message. Unknown error code ${errCode}. textChannelID = ${channelID}. msg = ${e.message}.`);
+                break;
+            }
+        }
+    } else {
+        logger.error(`Error sending message. Unknown error. textChannelID = ${channelID}. err = ${JSON.stringify(e)}.body = ${JSON.stringify(messageContent)}`);
+    }
 }
 
 /**
@@ -215,7 +253,7 @@ export async function textPermissionsCheck(textChannelID: string, guildID: strin
  * @param authorID - the author's ID
  * @param messageContent - The MessageContent to send
  */
-async function sendMessage(textChannelID: string, authorID: string, messageContent: Eris.AdvancedMessageContent): Promise<Eris.Message> {
+export async function sendMessage(textChannelID: string, messageContent: Eris.AdvancedMessageContent, authorID?: string): Promise<Eris.Message> {
     const channel = await fetchChannel(textChannelID);
 
     // only reply to message if has required permissions
@@ -230,15 +268,33 @@ async function sendMessage(textChannelID: string, authorID: string, messageConte
     } catch (e) {
         if (!channel) {
             logger.error(`Error sending message, and channel not cached. textChannelID = ${textChannelID}`);
-            return null;
+        } else {
+            await sendMessageExceptionHandler(e, channel.id, channel.guild.id, authorID, messageContent);
         }
 
-        // check for text permissions if sending message failed
-        if (!(await textPermissionsCheck(textChannelID, channel.guild.id, authorID))) {
-            return null;
-        }
+        return null;
+    }
+}
 
-        logger.error(`Error sending message.textChannelID = ${textChannelID}.textChannel permissions = ${channel.permissionsOf(state.client.user.id).json} err = ${JSON.stringify(e)}.body = ${JSON.stringify(messageContent)}`);
+/**
+ * Sends a message to a user's DM channel
+ * @param userID - the user's ID
+ * @param messageContent - the message content
+ */
+async function sendDmMessage(userID: string, messageContent: Eris.AdvancedMessageContent): Promise<Eris.Message> {
+    const { client } = state;
+    let dmChannel;
+    try {
+        dmChannel = await client.getDMChannel(userID);
+    } catch (e) {
+        logger.error(`Error sending message. Could not get DM channel. userID = ${userID}`);
+        return null;
+    }
+
+    try {
+        return await client.createMessage(dmChannel.id, messageContent);
+    } catch (e) {
+        await sendMessageExceptionHandler(e, dmChannel.id, null, userID, messageContent);
         return null;
     }
 }
@@ -251,7 +307,7 @@ async function sendMessage(textChannelID: string, authorID: string, messageConte
  */
 export async function sendErrorMessage(messageContext: MessageContext, embedPayload: EmbedPayload): Promise<Eris.Message<TextableChannel>> {
     const author = (embedPayload.author == null || embedPayload.author) ? embedPayload.author : messageContext.author;
-    return sendMessage(messageContext.textChannelID, messageContext.author.id, {
+    return sendMessage(messageContext.textChannelID, {
         embeds: [{
             color: embedPayload.color || EMBED_ERROR_COLOR,
             author: author ? {
@@ -266,7 +322,7 @@ export async function sendErrorMessage(messageContext: MessageContext, embedPayl
             thumbnail: embedPayload.thumbnailUrl ? { url: embedPayload.thumbnailUrl } : { url: KmqImages.DEAD },
         }],
         components: embedPayload.components,
-    });
+    }, messageContext.author.id);
 }
 
 /**
@@ -297,11 +353,11 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
         timestamp: embedPayload.timestamp,
     };
 
-    return sendMessage(messageContext.textChannelID, messageContext.author.id, {
+    return sendMessage(messageContext.textChannelID, {
         embeds: [embed],
         messageReference: reply && messageContext.referencedMessageID ? { messageID: messageContext.referencedMessageID, failIfNotExists: false } : null,
         components: embedPayload.components,
-    });
+    }, messageContext.author.id);
 }
 
 /**
@@ -606,7 +662,7 @@ export async function sendPaginationedEmbed(message: GuildTextableMessage, embed
         embed = embeds[0];
     }
 
-    return sendMessage(message.channel.id, message.author.id, { embeds: [embed], components });
+    return sendMessage(message.channel.id, { embeds: [embed], components }, message.author.id);
 }
 
 /**
