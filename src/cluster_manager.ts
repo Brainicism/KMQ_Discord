@@ -1,5 +1,6 @@
 import _ from "lodash";
 import { isMaster } from "cluster";
+import os from "os";
 import { config } from "dotenv";
 import path from "path";
 import { Fleet, Options } from "eris-fleet";
@@ -186,10 +187,21 @@ async function startWebServer(fleet: Fleet) {
         if (requestLatency < 500) requestLatencyHealthIndicator = HealthIndicator.HEALTHY;
         else if (requestLatency < 1000) requestLatencyHealthIndicator = HealthIndicator.WARNING;
         else requestLatencyHealthIndicator = HealthIndicator.UNHEALTHY;
+
+        const loadAvg = os.loadavg();
+        let loadAvgHealthIndicator: HealthIndicator;
+        if (loadAvg.some((x) => x > 1)) loadAvgHealthIndicator = HealthIndicator.UNHEALTHY;
+        else if (loadAvg.some((x) => x > 0.5)) loadAvgHealthIndicator = HealthIndicator.WARNING;
+        else loadAvgHealthIndicator = HealthIndicator.HEALTHY;
+
         const overallStatsData = {
             requestLatency: {
                 latency: requestLatency,
                 healthIndicator: requestLatencyHealthIndicator,
+            },
+            loadAverage: {
+                loadAverage: loadAvg.map((x) => x.toFixed(2)).join(", "),
+                healthIndicator: loadAvgHealthIndicator,
             },
             cachedUsers: fleetStats.users.toLocaleString(),
             totalMembers: fleetStats.members.toLocaleString(),
