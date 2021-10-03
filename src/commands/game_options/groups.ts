@@ -8,7 +8,7 @@ import { setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("groups");
-export const GROUP_LIST_URL = "https://static.kpop.gg/data/group_list.txt";
+export const GROUP_LIST_URL = "https://kmq.kpop.gg/static/data/group_list.txt";
 export default class GroupsCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 

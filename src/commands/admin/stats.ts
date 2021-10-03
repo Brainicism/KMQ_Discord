@@ -101,6 +101,7 @@ export default class SkipCommand implements BaseCommand {
         logger.info(`${getDebugLogHeader(message)} | Stats retrieved`);
         sendInfoMessage(MessageContext.fromMessage(message), {
             title: "Bot Stats",
+            description: "Detailed bot status: https://kmq.kpop.gg/status",
             fields,
             footerText: "\"Recent\" statistics represent data from last 24 hours.",
             timestamp: new Date(),
