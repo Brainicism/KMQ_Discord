@@ -78,7 +78,7 @@ function missingPermissionsText(missingPermissions: string[]): string {
  * @param userID - the user's ID
  * @returns an instance of the User
  */
-export async function fetchUser(userID: string): Promise<Eris.User> {
+export async function fetchUser(userID: string, silentErrors = false): Promise<Eris.User> {
     let user: Eris.User = null;
     const { client, ipc } = state;
 
@@ -99,13 +99,13 @@ export async function fetchUser(userID: string): Promise<Eris.User> {
             user = await client.getRESTUser(userID);
             logger.debug(`User not in cache, fetched via REST: ${userID}`);
         } catch (err) {
-            logger.error(`Could not fetch user: ${userID}. err: ${err.code}. msg: ${err.message}`);
+            if (!silentErrors) logger.error(`Could not fetch user: ${userID}. err: ${err.code}. msg: ${err.message}`);
             return null;
         }
     }
 
     if (!user) {
-        logger.error(`Could not fetch user: ${userID}`);
+        if (!silentErrors) logger.error(`Could not fetch user: ${userID}`);
         return null;
     }
 
