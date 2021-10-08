@@ -7,12 +7,12 @@ BEGIN
 	/* update available_songs table */
 	DROP TABLE IF EXISTS available_songs_temp;
 	CREATE TABLE available_songs_temp (
-		song_name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-		clean_song_name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-		song_aliases VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-		artist_aliases VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+		song_name VARCHAR(255) NOT NULL,
+		clean_song_name VARCHAR(255) NOT NULL,
+		song_aliases VARCHAR(255) NOT NULL,
+		artist_aliases VARCHAR(255) NOT NULL,
 		link VARCHAR(255) NOT NULL,
-		artist_name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+		artist_name VARCHAR(255) NOT NULL,
 		members ENUM('female','male','coed') NOT NULL,
 		views BIGINT NOT NULL,
 		publishedon DATE NOT NULL,
@@ -88,6 +88,7 @@ BEGIN
 	DROP TABLE IF EXISTS kmq.kpop_groups_temp;
 	CREATE TABLE kmq.kpop_groups_temp LIKE kpop_videos.app_kpop_group;
 	INSERT kmq.kpop_groups_temp	SELECT	* FROM kpop_videos.app_kpop_group;
+	ALTER TABLE kmq.kpop_groups_temp MODIFY name VARCHAR(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 	CREATE TABLE IF NOT EXISTS kmq.kpop_groups LIKE kpop_videos.app_kpop_group;
 	RENAME TABLE kmq.kpop_groups TO old, kmq.kpop_groups_temp TO kmq.kpop_groups;
