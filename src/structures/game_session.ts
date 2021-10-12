@@ -567,7 +567,7 @@ export default class GameSession {
 
         // create a new round with randomly chosen song
         this.prepareRound(randomSong.songName, randomSong.originalSongName, randomSong.artist, randomSong.youtubeLink, randomSong.publishDate.getFullYear());
-        this.gameRound.setBaseExpReward(await this.calculateBaseExp());
+        this.gameRound.setBaseExpReward(this.calculateBaseExp());
 
         const voiceChannel = state.client.getChannel(this.voiceChannelID) as Eris.VoiceChannel;
         if (!voiceChannel || voiceChannel.voiceMembers.size === 0) {
@@ -1158,15 +1158,14 @@ export default class GameSession {
     }
 
     /**
-     * https://www.desmos.com/calculator/zxvbuq0bch
-     * @param guildPreference - The GuildPreference
+     * https://www.desmos.com/calculator/9x3dkrmt84
      * @returns the base EXP reward for the gameround
      */
-    private async calculateBaseExp(): Promise<number> {
+    private calculateBaseExp(): number {
         const songCount = this.getSongCount();
         // minimum amount of songs for exp gain
         if (songCount.count < 10) return 0;
-        const expBase = 1000 / (1 + (Math.exp(1 - (0.00125 * songCount.count))));
+        const expBase = 2000 / (1 + (Math.exp(1 - (0.0005 * (songCount.count - 1500)))));
         let expJitter = expBase * (0.05 * Math.random());
         expJitter *= Math.round(Math.random()) ? 1 : -1;
 
