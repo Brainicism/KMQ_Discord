@@ -1113,8 +1113,8 @@ export default class GameSession {
      */
     private calculateExpGain(guildPreference: GuildPreference, baseExp: number, numParticipants: number, guessSpeed: number, place: number, voteBonusExp: boolean): number {
         let expModifier = 1;
-        // penalize/incentivize for number of participants from 0.75x to 1.25x
-        expModifier *= numParticipants === 1 ? 0.75 : (0.0625 * (Math.min(numParticipants, 6)) + 0.875);
+        // incentivize for number of participants from 1x to 1.5x
+        expModifier *= (0.1 * (Math.min(numParticipants, 6) - 1) + 1);
 
         // penalize for using artist guess modes
         if (guildPreference.gameOptions.guessModeType === GuessModeType.ARTIST || guildPreference.gameOptions.guessModeType === GuessModeType.BOTH) {
