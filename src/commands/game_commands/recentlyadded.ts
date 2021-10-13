@@ -50,7 +50,6 @@ export default class RecentlyAddedCommand implements BaseCommand {
             title: "Recently Added Songs",
             description: "The following songs were added to KMQ in the past two weeks:",
             fields: embedFieldsSubset,
-            footer: null,
         }));
 
         await sendPaginationedEmbed(message, embeds, null);
