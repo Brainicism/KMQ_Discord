@@ -82,6 +82,9 @@ export default class GameRound {
     /** The song release year */
     public readonly songYear: number;
 
+    /** Whether round will grant bonus EXP */
+    public readonly isBonus: boolean;
+
     /** List of players who have opted to skip the current GameRound */
     public skippers: Set<string>;
 
@@ -157,6 +160,7 @@ export default class GameRound {
         this.incorrectMCGuessers = new Set();
         this.interactionComponents = [];
         this.interactionMessage = null;
+        this.isBonus = Math.random() < 0.01;
     }
 
     /**
