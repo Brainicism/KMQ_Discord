@@ -228,6 +228,7 @@ Use `,help [command_name]` for more details for any of the following commands:
 - `,list`: Show the currently selected groups for `,groups`, `,include`, or `,exclude`
 - `,preset`: Quickly save, load, and export game options as presets (even across servers!)
 - `,vote`: Show your current 2x bonus EXP modifier status from voting for the bot on [top.gg](https://top.gg/bot/508759831755096074/vote). Thanks for supporting KMQ!
+- `,recentlyadded`: See a list of songs added to KMQ in the past 2 weeks
 
 ## Game Option Commands
 - `,limit`: Set a maximum number of results in the song query. This effectively sets the "top `x` number of songs" based on the selected filters
