@@ -28,6 +28,7 @@ export interface QueriedSong {
     members?: Gender;
     artistID?: number;
     isSolo?: string;
+    views?: number;
 }
 
 export interface EmbedPayload {

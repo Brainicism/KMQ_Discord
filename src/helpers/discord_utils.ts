@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import Eris, { AdvancedMessageContent, EmbedOptions, TextableChannel } from "eris";
+import Eris from "eris";
 import EmbedPaginator from "eris-pagination";
 import axios from "axios";
 import GuildPreference from "../structures/guild_preference";
@@ -191,7 +191,7 @@ export async function textPermissionsCheck(textChannelID: string, guildID: strin
     return true;
 }
 
-async function sendMessageExceptionHandler(e: any, channelID: string, guildID: string, authorID: string, messageContent: AdvancedMessageContent) {
+async function sendMessageExceptionHandler(e: any, channelID: string, guildID: string, authorID: string, messageContent: Eris.AdvancedMessageContent) {
     if (typeof e === "string") {
         if (e.startsWith("Request timed out")) {
             // Request Timeout
@@ -307,7 +307,7 @@ async function sendDmMessage(userID: string, messageContent: Eris.AdvancedMessag
  * @param title - The title of the embed
  * @param description - The description of the embed
  */
-export async function sendErrorMessage(messageContext: MessageContext, embedPayload: EmbedPayload): Promise<Eris.Message<TextableChannel>> {
+export async function sendErrorMessage(messageContext: MessageContext, embedPayload: EmbedPayload): Promise<Eris.Message<Eris.TextableChannel>> {
     const author = (embedPayload.author == null || embedPayload.author) ? embedPayload.author : messageContext.author;
     return sendMessage(messageContext.textChannelID, {
         embeds: [{
@@ -333,13 +333,13 @@ export async function sendErrorMessage(messageContext: MessageContext, embedPayl
  * @param embedPayload - What to include in the message
  * @param reply - Whether to reply to the given message
  */
-export async function sendInfoMessage(messageContext: MessageContext, embedPayload: EmbedPayload, reply = false): Promise<Eris.Message<TextableChannel>> {
+export async function sendInfoMessage(messageContext: MessageContext, embedPayload: EmbedPayload, reply = false): Promise<Eris.Message<Eris.TextableChannel>> {
     if (embedPayload.description && embedPayload.description.length > 2048) {
         return sendErrorMessage(messageContext, { title: "Error", description: "Response message was too long, report this error to the KMQ help server" });
     }
 
     const author = (embedPayload.author == null || embedPayload.author) ? embedPayload.author : messageContext.author;
-    const embed: EmbedOptions = {
+    const embed: Eris.EmbedOptions = {
         color: embedPayload.color,
         author: author ? {
             name: author.username,
@@ -377,7 +377,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     playerRoundResults: Array<PlayerRoundResult>,
     isMultipleChoiceMode: boolean,
     timeRemaining?: number,
-    uniqueSongCounter?: UniqueSongCounter): Promise<Eris.Message<TextableChannel>> {
+    uniqueSongCounter?: UniqueSongCounter): Promise<Eris.Message<Eris.TextableChannel>> {
     const footer: Eris.EmbedFooterOptions = {
         text: "",
     };
