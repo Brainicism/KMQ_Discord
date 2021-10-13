@@ -211,7 +211,7 @@ export default class GameSession {
             playerRoundResults = await Promise.all(guessResult.correctGuessers.map(async (correctGuesser, idx) => {
                 const guessPosition = idx + 1;
                 const expGain = this.calculateExpGain(guildPreference,
-                    gameRound.getExpReward(),
+                    gameRound,
                     getNumParticipants(this.voiceChannelID),
                     guessSpeed,
                     guessPosition,
@@ -1111,7 +1111,7 @@ export default class GameSession {
      * @param guessSpeed - The time taken to guess correctly
      * @returns The amount of EXP gained based on the current game options
      */
-    private calculateExpGain(guildPreference: GuildPreference, baseExp: number, numParticipants: number, guessSpeed: number, place: number, voteBonusExp: boolean): number {
+    private calculateExpGain(guildPreference: GuildPreference, gameRound: GameRound, numParticipants: number, guessSpeed: number, place: number, voteBonusExp: boolean): number {
         let expModifier = 1;
         // incentivize for number of participants from 1x to 1.5x
         expModifier *= (0.1 * (Math.min(numParticipants, 6) - 1) + 1);
@@ -1154,7 +1154,12 @@ export default class GameSession {
             }
         }
 
-        return Math.floor((expModifier * baseExp) / place);
+        // random game round bonus
+        if (gameRound.isBonus) {
+            expModifier *= _.sample([2, 5, 10, 50]);
+        }
+
+        return Math.floor((expModifier * gameRound.getExpReward()) / place);
     }
 
     /**

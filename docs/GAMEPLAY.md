@@ -42,6 +42,7 @@ Everyone starts off as a `Novice` and works their way up as a `Trainee` (Level 1
 - Using a hint reduces EXP by 0.5x
 - All EXP bonuses stack on one another
 - Playing on multiple choice mode reduces EXP by (0.25x, 0.5x, 0.75x) based on difficulty
+- Rounds will randomly have rare EXP bonuses of 2x, 5x, 10x, and 50x!
 
 ## Requirements
 You will only gain EXP if:

@@ -400,6 +400,10 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
 
     const correctGuess = playerRoundResults.length > 0;
     let correctDescription = "";
+    if (gameRound.isBonus) {
+        correctDescription += "⭐__**BONUS EXP ROUND**__⭐\n";
+    }
+
     if (correctGuess) {
         correctDescription += `${getMention(playerRoundResults[0].player.id)} ${playerRoundResults[0].streak >= 5 ? `(🔥 ${friendlyFormattedNumber(playerRoundResults[0].streak)}) ` : ""}guessed correctly (+${friendlyFormattedNumber(playerRoundResults[0].expGain)} EXP)`;
         if (playerRoundResults.length > 1) {
