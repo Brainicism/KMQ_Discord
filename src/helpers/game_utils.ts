@@ -31,7 +31,7 @@ interface GroupMatchResults {
  */
 export async function getFilteredSongList(guildPreference: GuildPreference): Promise<{ songs: Set<QueriedSong>, countBeforeLimit: number }> {
     const fields = ["clean_song_name as songName", "song_name as originalSongName", "artist_name as artist", "link as youtubeLink",
-        "publishedon as publishDate", "members", "id_artist as artistID", "issolo as isSolo", "members", "tags"];
+        "publishedon as publishDate", "members", "id_artist as artistID", "issolo as isSolo", "members", "tags", "views"];
 
     let queryBuilder = dbContext.kmq("available_songs")
         .select(fields);

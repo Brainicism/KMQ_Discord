@@ -8,7 +8,7 @@ import { IPCLogger } from "../logger";
 import { getSongCount, userBonusIsActive } from "./game_utils";
 import { getFact } from "../fact_generator";
 import { EmbedPayload, GameOption, GameOptionCommand, PriorityGameOption, ConflictingGameOptions, GuildTextableMessage, PlayerRoundResult, GameInfoMessage, GameType, QueriedSong } from "../types";
-import { chunkArray, codeLine, bold, underline, italicize, strikethrough, chooseWeightedRandom, getOrdinalNum, friendlyFormattedNumber, friendlyFormattedDate, delay } from "./utils";
+import { chunkArray, codeLine, bold, underline, italicize, strikethrough, chooseWeightedRandom, getOrdinalNum, friendlyFormattedNumber, delay, standardDateFormat } from "./utils";
 import { state } from "../kmq";
 import Scoreboard from "../structures/scoreboard";
 import GameRound from "../structures/game_round";
@@ -333,7 +333,7 @@ export async function sendErrorMessage(messageContext: MessageContext, embedPayl
  * @param embedPayload - What to include in the message
  * @param reply - Whether to reply to the given message
  */
-export async function sendInfoMessage(messageContext: MessageContext, embedPayload: EmbedPayload, reply = false): Promise<Eris.Message<Eris.TextableChannel>> {
+export async function sendInfoMessage(messageContext: MessageContext, embedPayload: EmbedPayload, reply = false, boldTitle = true): Promise<Eris.Message<Eris.TextableChannel>> {
     if (embedPayload.description && embedPayload.description.length > 2048) {
         return sendErrorMessage(messageContext, { title: "Error", description: "Response message was too long, report this error to the KMQ help server" });
     }
@@ -345,7 +345,7 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
             name: author.username,
             icon_url: author.avatarUrl,
         } : null,
-        title: bold(embedPayload.title),
+        title: boldTitle ? bold(embedPayload.title) : embedPayload.title,
         description: embedPayload.description,
         fields: embedPayload.fields,
         footer: embedPayload.footerText ? {
@@ -423,14 +423,14 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
 
     const uniqueSongMessage = (uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0) ? `\n${codeLine(`${friendlyFormattedNumber(uniqueSongCounter.uniqueSongsPlayed)}/${friendlyFormattedNumber(uniqueSongCounter.totalSongs)}`)} unique songs played.` : "";
     const useLargerScoreboard = scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
-    const description = `${correctGuess ? correctDescription : "Nobody got it."}\n\nhttps://youtu.be/${gameRound.videoID}${uniqueSongMessage} ${!scoreboard.isEmpty() && !useLargerScoreboard ? "\n\n**Scoreboard**" : ""}`;
+    const description = `${correctGuess ? correctDescription : "Nobody got it."}\n\n[${friendlyFormattedNumber(gameRound.views)} views](https://youtu.be/${gameRound.videoID}).\n${uniqueSongMessage} ${!scoreboard.isEmpty() && !useLargerScoreboard ? "\n\n**Scoreboard**" : ""}`;
     let fields: Array<{ name: string, value: string, inline: boolean }>;
-    let roundResultIDs: Set<string>;
+    let roundResultIDs: Array<string>;
     if (scoreboard instanceof TeamScoreboard) {
         const teamScoreboard = scoreboard as TeamScoreboard;
-        roundResultIDs = new Set(playerRoundResults.map((x) => teamScoreboard.getTeamOfPlayer(x.player.id).getID()));
+        roundResultIDs = playerRoundResults.map((x) => teamScoreboard.getTeamOfPlayer(x.player.id).getID());
     } else {
-        roundResultIDs = new Set(playerRoundResults.map((x) => x.player.id));
+        roundResultIDs = playerRoundResults.map((x) => x.player.id);
     }
 
     if (useLargerScoreboard) {
@@ -456,14 +456,16 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         color = EMBED_ERROR_COLOR;
     }
 
+    const songAndArtist = bold(`"${gameRound.originalSongName}" - ${gameRound.artistName}`);
     return sendInfoMessage(messageContext, {
         color,
-        title: `"${gameRound.originalSongName}" (${gameRound.songYear}) - ${gameRound.artistName}`,
+        title: `${songAndArtist} (${standardDateFormat(gameRound.publishDate)})`,
         description,
         thumbnailUrl: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,
         fields,
         footerText: footer ? footer.text : "",
-    }, correctGuess && !isMultipleChoiceMode);
+    }, correctGuess && !isMultipleChoiceMode,
+    false);
 }
 
 /**
@@ -870,8 +872,8 @@ export function sendDebugAlertWebhook(title: string, description: string, color:
 export async function sendBookmarkedSongs(bookmarkedSongs: { [userID: string]: Map<string, QueriedSong> }) {
     for (const [userID, songs] of Object.entries(bookmarkedSongs)) {
         const allEmbedFields: Array<{ name: string, value: string, inline: boolean }> = [...songs].map((song) => ({
-            name: `"${song[1].originalSongName}" (${song[1].publishDate.getFullYear()}) - ${song[1].artist}`,
-            value: `https://youtu.be/${song[1].youtubeLink}`,
+            name: `${bold(`"${song[1].originalSongName}" - ${song[1].artist}`)} (${standardDateFormat(song[1].publishDate)})`,
+            value: `[${friendlyFormattedNumber(song[1].views)} views](https://youtu.be/${song[1].youtubeLink})`,
             inline: false,
         }));
 
@@ -883,7 +885,7 @@ export async function sendBookmarkedSongs(bookmarkedSongs: { [userID: string]: M
                 },
                 title: bold("Bookmarked Songs"),
                 fields,
-                footer: { text: `Played on ${friendlyFormattedDate(new Date())}` },
+                footer: { text: `Played on ${standardDateFormat(new Date())}` },
             };
 
             await sendDmMessage(userID, { embeds: [embed] });

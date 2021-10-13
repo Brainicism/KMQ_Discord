@@ -271,7 +271,8 @@ export default class GameSession {
                         originalSongName: gameRound.originalSongName,
                         artist: gameRound.artistName,
                         youtubeLink: gameRound.videoID,
-                        publishDate: new Date(gameRound.songYear, 0),
+                        publishDate: gameRound.publishDate,
+                        views: gameRound.views,
                     },
                 });
             }
@@ -566,7 +567,7 @@ export default class GameSession {
         }
 
         // create a new round with randomly chosen song
-        this.prepareRound(randomSong.songName, randomSong.originalSongName, randomSong.artist, randomSong.youtubeLink, randomSong.publishDate.getFullYear());
+        this.prepareRound(randomSong.songName, randomSong.originalSongName, randomSong.artist, randomSong.youtubeLink, randomSong.publishDate, randomSong.views);
         this.gameRound.setBaseExpReward(this.calculateBaseExp());
 
         const voiceChannel = state.client.getChannel(this.voiceChannelID) as Eris.VoiceChannel;
@@ -888,10 +889,10 @@ export default class GameSession {
      * @param song - The name of the song
      * @param artist - The name of the artist
      * @param videoID - The song's corresponding YouTube ID
-     * @param year - The song's release year
+     * @param publishDate - The day the song was added to YouTube
      */
-    private prepareRound(cleanSongName: string, originalSongName: string, artist: string, videoID: string, year: number) {
-        this.gameRound = new GameRound(cleanSongName, originalSongName, artist, videoID, year);
+    private prepareRound(cleanSongName: string, originalSongName: string, artist: string, videoID: string, publishDate: Date, views: number) {
+        this.gameRound = new GameRound(cleanSongName, originalSongName, artist, videoID, publishDate, views);
     }
 
     /**
