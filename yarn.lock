@@ -834,9 +834,9 @@ enquirer@^2.3.5:
   version "0.3.9-dev"
   resolved "https://github.com/danclay/eris-fleet#02636f44509619ac87e5de4276d9d295d79309d8"
 
-"eris-pagination@https://github.com/brainicism/eris-pagination#81aa2f0":
+"eris-pagination@https://github.com/brainicism/eris-pagination#a30b37b":
   version "0.5.2"
-  resolved "https://github.com/brainicism/eris-pagination#81aa2f0a574aabc7fea3e95162abf1d51ccc6224"
+  resolved "https://github.com/brainicism/eris-pagination#a30b37b51ab1d876297b56b49f3454baf3983fb1"
   dependencies:
     eris-reactions "^0.1.4"
 
