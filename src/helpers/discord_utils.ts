@@ -423,7 +423,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
 
     const uniqueSongMessage = (uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0) ? `\n${codeLine(`${friendlyFormattedNumber(uniqueSongCounter.uniqueSongsPlayed)}/${friendlyFormattedNumber(uniqueSongCounter.totalSongs)}`)} unique songs played.` : "";
     const useLargerScoreboard = scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
-    const description = `${correctGuess ? correctDescription : "Nobody got it."}\n\n[${friendlyFormattedNumber(gameRound.views)} views](https://youtu.be/${gameRound.videoID}).\n${uniqueSongMessage} ${!scoreboard.isEmpty() && !useLargerScoreboard ? "\n\n**Scoreboard**" : ""}`;
+    const description = `${correctGuess ? correctDescription : "Nobody got it."}\n\n[Watch on YouTube](https://youtu.be/${gameRound.videoID}) (${friendlyFormattedNumber(gameRound.views)} views)\n${uniqueSongMessage} ${!scoreboard.isEmpty() && !useLargerScoreboard ? "\n\n**Scoreboard**" : ""}`;
     let fields: Array<{ name: string, value: string, inline: boolean }>;
     let roundResultIDs: Array<string>;
     if (scoreboard instanceof TeamScoreboard) {
@@ -459,7 +459,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     const songAndArtist = bold(`"${gameRound.originalSongName}" - ${gameRound.artistName}`);
     return sendInfoMessage(messageContext, {
         color,
-        title: `${songAndArtist} (${standardDateFormat(gameRound.publishDate)})`,
+        title: `${songAndArtist} (${gameRound.publishDate.getFullYear()})`,
         description,
         thumbnailUrl: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,
         fields,
