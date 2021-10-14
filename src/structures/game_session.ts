@@ -1123,7 +1123,7 @@ export default class GameSession {
         }
 
         // bonus for quick guess
-        if (guessSpeed < 1000) {
+        if (guessSpeed < 3500) {
             expModifier *= 1.1;
         }
 
