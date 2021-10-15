@@ -21,13 +21,13 @@ export default class Team extends Player {
     }
 
     /**
-     * @param wonRound - Whether the team won the previous round
+     * @param first - Whether the player won the previous round
      * @returns what to display as the name of the team in the scoreboard
      */
-    getDisplayedName(wonRound: boolean, _duplicateName: boolean): string {
+    getDisplayedName(first: boolean, _wonRound: boolean, _duplicateName: boolean): string {
         let name = `Team ${this.getName()}`;
-        if (wonRound) {
-            name = `🎵 ${bold(name)}`;
+        if (first) {
+            name = `🎶 ${bold(name)}`;
         }
 
         return name;

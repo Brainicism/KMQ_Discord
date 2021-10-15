@@ -38,11 +38,12 @@ export default class Player {
     /**
      * Prints the tag (including the discriminator) in the smaller scoreboard, but only
      * the username in the larger scoreboard
-     * @param wonRound - Whether the player won the previous round
+     * @param first - Whether the player won the previous round
+     * @param wonRound - Whether the player guessed correctly in the previous round
      * @param mention - Whether the displayed name should be a clickable mention
      * @returns what to display as the name of the player in the scoreboard
      */
-    getDisplayedName(wonRound: boolean, mention: boolean): string {
+    getDisplayedName(first: boolean, wonRound: boolean, mention: boolean): string {
         let name = this.name;
         if (mention) {
             name = getMention(this.getID());
@@ -53,7 +54,11 @@ export default class Player {
                 name = bold(name);
             }
 
-            name = `🎵 ${name}`;
+            if (first) {
+                name = `🎶 ${name}`;
+            } else {
+                name = `🎵 ${name}`;
+            }
         }
 
         return name;

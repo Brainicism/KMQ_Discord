@@ -79,8 +79,11 @@ export default class GameRound {
     /** Timestamp of the creation of the GameRound in epoch milliseconds */
     public readonly startedAt: number;
 
-    /** The song release year */
-    public readonly songYear: number;
+    /** The song publish date on YouTube */
+    public readonly publishDate: Date;
+
+    /** The song's views on YouTube */
+    public readonly views: number;
 
     /** Round bonus modifier */
     public readonly bonusModifier: number;
@@ -133,7 +136,7 @@ export default class GameRound {
     /** The base EXP for this GameRound */
     private baseExp: number;
 
-    constructor(cleanedSongName: string, originalSongName: string, artist: string, videoID: string, year: number) {
+    constructor(cleanedSongName: string, originalSongName: string, artist: string, videoID: string, publishDate: Date, views: number) {
         this.songName = cleanedSongName;
         this.originalSongName = originalSongName;
         this.songAliases = state.aliases.song[videoID] || [];
@@ -145,7 +148,8 @@ export default class GameRound {
         this.videoID = videoID;
         this.skipAchieved = false;
         this.startedAt = Date.now();
-        this.songYear = year;
+        this.publishDate = publishDate;
+        this.views = views;
         this.skippers = new Set();
         this.hintUsed = false;
         this.hintRequesters = new Set();

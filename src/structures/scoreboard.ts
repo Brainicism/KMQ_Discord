@@ -58,12 +58,12 @@ export default class Scoreboard {
      * @param roundWinnerIDs - The IDs of all players that won the current round, if any
      * @returns An array of DiscordEmbed fields representing each participant's score
      */
-    getScoreboardEmbedFields(showExp: boolean, roundWinnerIDs?: Set<string>): Array<{ name: string, value: string, inline: boolean }> {
+    getScoreboardEmbedFields(showExp: boolean, roundWinnerIDs?: Array<string>): Array<{ name: string, value: string, inline: boolean }> {
         return Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
             .map((x, index) => (
                 {
-                    name: `${index + 1}. ${x.getDisplayedName(roundWinnerIDs?.has(x.getID()), false)}`,
+                    name: `${index + 1}. ${x.getDisplayedName(roundWinnerIDs && roundWinnerIDs[0] === x.getID(), roundWinnerIDs?.includes(x.getID()), false)}`,
                     value: `${x.getDisplayedScore()}${showExp ? ` (+${friendlyFormattedNumber(x.getExpGain())} EXP)` : ""}`,
                     inline: true,
                 }));
@@ -73,14 +73,15 @@ export default class Scoreboard {
      * Separates scoreboard players into two fields for large games
      * @param cutoff - How many players to include before truncating the scoreboard
      * @param showExp - Whether to display the EXP gained in the game for each player
+     * @param roundWinnerIDs - The IDs of all players that won the current round, if any
      * @returns An array of 3 DiscordEmbed fields containing each player and their score, separated by newline
      */
-    getScoreboardEmbedThreeFields(cutoff: number, showExp: boolean, roundResultIDs?: Set<string>): Array<{ name: string, value: string, inline: boolean }> {
+    getScoreboardEmbedThreeFields(cutoff: number, showExp: boolean, roundWinnerIDs?: Array<string>): Array<{ name: string, value: string, inline: boolean }> {
         const ZERO_WIDTH_SPACE = "​";
         const players = Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
             .slice(0, cutoff)
-            .map((x, index) => `${bold(String(index + 1))}. ${x.getDisplayedName(roundResultIDs?.has(x.getID()), true)}: ${x.getDisplayedScore()}${showExp ? ` (+${friendlyFormattedNumber(x.getExpGain())} EXP)` : ""}`);
+            .map((x, index) => `${bold(String(index + 1))}. ${x.getDisplayedName(roundWinnerIDs && roundWinnerIDs[0] === x.getID(), roundWinnerIDs?.includes(x.getID()), true)}: ${x.getDisplayedScore()}${showExp ? ` (+${friendlyFormattedNumber(x.getExpGain())} EXP)` : ""}`);
 
         if (this.getNumPlayers() > cutoff) {
             players.push("\nand many others...");
