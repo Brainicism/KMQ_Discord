@@ -1124,7 +1124,7 @@ export default class GameSession {
         }
 
         // bonus for quick guess
-        if (guessSpeed < 1000) {
+        if (guessSpeed < 3500) {
             expModifier *= 1.1;
         }
 
@@ -1156,9 +1156,7 @@ export default class GameSession {
         }
 
         // random game round bonus
-        if (gameRound.isBonus) {
-            expModifier *= _.sample([2, 5, 10, 50]);
-        }
+        expModifier *= gameRound.bonusModifier;
 
         return Math.floor((expModifier * gameRound.getExpReward()) / place);
     }

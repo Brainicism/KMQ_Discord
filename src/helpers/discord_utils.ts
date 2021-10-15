@@ -401,7 +401,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
 
     const correctGuess = playerRoundResults.length > 0;
     let correctDescription = "";
-    if (gameRound.isBonus) {
+    if (gameRound.bonusModifier > 1) {
         correctDescription += "⭐__**BONUS EXP ROUND**__⭐\n";
     }
 
