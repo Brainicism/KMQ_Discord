@@ -2,6 +2,7 @@ import Eris from "eris";
 import fs from "fs";
 import _ from "lodash";
 import * as uuid from "uuid";
+import pluralize from "pluralize";
 import { SeekType } from "../commands/game_options/seek";
 import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
@@ -400,7 +401,7 @@ export default class GameSession {
             const bookmarkedSongCount = Object.values(this.bookmarkedSongs).reduce((total, x) => total + x.size, 0);
             await sendInfoMessage(new MessageContext(this.textChannelID), {
                 title: "Sending Bookmarked Songs...",
-                description: `Sending ${bookmarkedSongCount} song(s) to ${bookmarkedSongsPlayerCount} player(s).\n\nBookmark songs during the game by right-clicking the song message and selecting \`Apps > Bookmark Song\`.`,
+                description: `Sending ${pluralize("song", bookmarkedSongCount, true)} to ${pluralize("player", bookmarkedSongsPlayerCount, true)}.\n\nBookmark songs during the game by right-clicking the song message and selecting \`Apps > Bookmark Song\`.`,
                 thumbnailUrl: KmqImages.READING_BOOK,
             });
             await sendBookmarkedSongs(this.bookmarkedSongs);
