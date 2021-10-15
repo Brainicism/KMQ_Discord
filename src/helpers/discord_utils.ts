@@ -346,6 +346,7 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
             icon_url: author.avatarUrl,
         } : null,
         title: boldTitle ? bold(embedPayload.title) : embedPayload.title,
+        url: embedPayload.url,
         description: embedPayload.description,
         fields: embedPayload.fields,
         footer: embedPayload.footerText ? {
@@ -423,7 +424,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
 
     const uniqueSongMessage = (uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0) ? `\n${codeLine(`${friendlyFormattedNumber(uniqueSongCounter.uniqueSongsPlayed)}/${friendlyFormattedNumber(uniqueSongCounter.totalSongs)}`)} unique songs played.` : "";
     const useLargerScoreboard = scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
-    const description = `${correctGuess ? correctDescription : "Nobody got it."}\n\n[Watch on YouTube](https://youtu.be/${gameRound.videoID}) (${friendlyFormattedNumber(gameRound.views)} views)\n${uniqueSongMessage} ${!scoreboard.isEmpty() && !useLargerScoreboard ? "\n\n**Scoreboard**" : ""}`;
+    const description = `${correctGuess ? correctDescription : "Nobody got it."}\n${uniqueSongMessage} ${!scoreboard.isEmpty() && !useLargerScoreboard ? "\n\n**Scoreboard**" : ""}`;
     let fields: Array<{ name: string, value: string, inline: boolean }>;
     let roundResultIDs: Array<string>;
     if (scoreboard instanceof TeamScoreboard) {
@@ -460,10 +461,11 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     return sendInfoMessage(messageContext, {
         color,
         title: `${songAndArtist} (${gameRound.publishDate.getFullYear()})`,
+        url: `https://youtu.be/${gameRound.videoID}`,
         description,
         thumbnailUrl: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,
         fields,
-        footerText: footer ? footer.text : "",
+        footerText: footer.text ? `${footer.text} | ${friendlyFormattedNumber(gameRound.views)} views` : `${friendlyFormattedNumber(gameRound.views)} views`,
     }, correctGuess && !isMultipleChoiceMode,
     false);
 }

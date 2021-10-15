@@ -33,6 +33,7 @@ export interface QueriedSong {
 
 export interface EmbedPayload {
     title: string;
+    url?: string;
     description?: string;
     footerText?: string;
     thumbnailUrl?: string;
