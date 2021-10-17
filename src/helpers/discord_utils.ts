@@ -2,6 +2,7 @@
 import Eris from "eris";
 import EmbedPaginator from "eris-pagination";
 import axios from "axios";
+import pluralize from "pluralize";
 import GuildPreference from "../structures/guild_preference";
 import GameSession, { UniqueSongCounter } from "../structures/game_session";
 import { IPCLogger } from "../logger";
@@ -398,7 +399,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
             footer.text += "\n";
         }
 
-        footer.text += timeRemaining > 0 ? `⏰ ${Math.ceil(timeRemaining)} minute(s) remaining` : "⏰ Time's up!";
+        footer.text += timeRemaining > 0 ? `⏰ ${pluralize("minute", Math.ceil(timeRemaining), true)} remaining` : "⏰ Time's up!";
     }
 
     const fact = Math.random() <= 0.05 ? getFact() : null;

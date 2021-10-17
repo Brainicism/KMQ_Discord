@@ -3,6 +3,7 @@ import { exec } from "child_process";
 import moment from "moment-timezone";
 import crypto from "crypto";
 import _ from "lodash";
+import pluralize from "pluralize";
 import { IPCLogger } from "../logger";
 
 const logger = new IPCLogger("utils");
@@ -184,12 +185,12 @@ export function friendlyFormattedDate(date: Date): string {
     const timeDiffSeconds = (Date.now() - date.getTime()) / 1000;
     const timeDiffMinutes = timeDiffSeconds / (60.0);
     if (timeDiffMinutes <= 60) {
-        return `${Math.ceil(timeDiffMinutes)} minute(s) ago`;
+        return `${pluralize("minute", Math.ceil(timeDiffMinutes), true)} ago`;
     }
 
     const timeDiffHours = timeDiffMinutes / (60.0);
     if (timeDiffHours <= 24) {
-        return `${Math.ceil(timeDiffHours)} hour(s) ago`;
+        return `${pluralize("hour", Math.ceil(timeDiffHours), true)} ago`;
     }
 
     return standardDateFormat(date);

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { URL } from "url";
+import pluralize from "pluralize";
 import dbContext from "./database_context";
 import { chooseRandom, getOrdinalNum, weekOfYear, friendlyFormattedNumber } from "./helpers/utils";
 import { IPCLogger } from "./logger";
@@ -504,7 +505,7 @@ async function recentUniquePlayers(): Promise<string[]> {
 
         if (result.length === 0) return [];
         const recentActivePlayers = result[0].count as number;
-        output.push(`KMQ Fact: ${friendlyFormattedNumber(recentActivePlayers)} unique players have played KMQ in the past ${interval} day(s)!`);
+        output.push(`KMQ Fact: ${friendlyFormattedNumber(recentActivePlayers)} unique players have played KMQ in the past ${pluralize("day", interval, true)}!`);
     }
 
     return output;
