@@ -386,15 +386,19 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
 
     if (guessModeType === GuessModeType.ARTIST) {
         if (gameRound.artistAliases.length > 0) {
-            footer.text += `Aliases: ${Array.from(gameRound.artistAliases).join(", ")}\n`;
+            footer.text = `Aliases: ${Array.from(gameRound.artistAliases).join(", ")}`;
         }
     } else {
         if (gameRound.songAliases.length > 0) {
-            footer.text += `Aliases: ${Array.from(gameRound.songAliases).join(", ")}\n`;
+            footer.text = `Aliases: ${Array.from(gameRound.songAliases).join(", ")}`;
         }
     }
 
     if (timeRemaining) {
+        if (footer.text) {
+            footer.text += "\n";
+        }
+
         footer.text += timeRemaining > 0 ? `⏰ ${pluralize("minute", Math.ceil(timeRemaining), true)} remaining` : "⏰ Time's up!";
     }
 
@@ -466,7 +470,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         description,
         thumbnailUrl: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,
         fields,
-        footerText: footer.text ? `${footer.text} | ${friendlyFormattedNumber(gameRound.views)} views` : `${friendlyFormattedNumber(gameRound.views)} views`,
+        footerText: `${friendlyFormattedNumber(gameRound.views)} views${footer.text ? `\n${footer.text}` : ""}`,
     }, correctGuess && !isMultipleChoiceMode,
     false);
 }
