@@ -15,6 +15,7 @@ const SQL_DUMP_EXPIRY = 10;
 const mvFileUrl = "http://kpop.daisuki.com.br/download.php?file=full";
 const audioFileUrl = "http://kpop.daisuki.com.br/download.php?file=audio";
 const logger = new IPCLogger("seed_db");
+const overridesFilePath = path.join(__dirname, "../../sql/kpop_videos_overrides.sql");
 const databaseDownloadDir = path.join(__dirname, "../../sql_dumps/daisuki");
 if (!fs.existsSync(databaseDownloadDir)) {
     fs.mkdirSync(databaseDownloadDir);
@@ -74,6 +75,9 @@ async function validateSqlDump(db: DatabaseContext, mvSeedFilePath: string, audi
             throw new Error("SQL dump valid, but potentially missing data.");
         }
 
+        logger.info("Validating overrides");
+        await db.kpopVideosValidation.raw(fs.readFileSync(overridesFilePath).toString().replace(/kpop_videos/g, "kpop_videos_validation"));
+
         if (!bootstrap) {
             logger.info("Validating creation of data tables");
             const originalCreateKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/procedures/create_kmq_data_tables_procedure.sql");
@@ -106,6 +110,8 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean) {
     logger.info("Seeding K-Pop video database");
     execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${mvSeedFilePath}`);
     execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${audioSeedFilePath}`);
+    logger.info("Performing data overrides");
+    await db.kpopVideos.raw(fs.readFileSync(overridesFilePath).toString());
     logger.info("Imported database dump successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing");
 }
 
@@ -176,15 +182,12 @@ async function seedAndDownloadNewSongs(db: DatabaseContext) {
         songsDownloaded = await downloadAndConvertSongs(options.limit);
     }
 
-    if (songsDownloaded) {
-        await generateKmqDataTables(db);
-    }
-
+    await generateKmqDataTables(db);
     if (process.env.NODE_ENV === EnvType.PROD) {
         await updateGroupList(db);
     }
 
-    logger.info("Finishing seeding and downloading new songs");
+    logger.info(`Finishing seeding and downloading ${songsDownloaded} new songs`);
 }
 
 (async () => {
