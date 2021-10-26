@@ -24,6 +24,9 @@ Gameplay is initiated via `,play`, which invites the bot to a voice channel. The
 # Development
 If you are interested in contributing to KMQ, [instructions on setup and development can be found here.](docs/DEVELOPER.md)
 
+# Privacy Policy
+Our privacy policy can be found [here]( https://brainicism.github.io/KMQ_Discord/PRIVACY). 
+
 # Credits
 - [Caio Vianna Lima Netto](http://kpop.daisuki.com.br/index.html) - Maintaining his wonderful Korean music database that we would not exist without  
 - [Taaha Mahdi](https://github.com/taahamahdi/) - Lead Developer
