@@ -58,6 +58,7 @@ interface LastGuesser {
 
 export interface GuessResult {
     correct: boolean;
+    error?: boolean;
     correctGuessers?: Array<KmqMember>;
 }
 
@@ -235,10 +236,12 @@ export default class GameSession {
             const scoreboardUpdatePayload: SuccessfulGuessResult[] = playerRoundResults.map((x) => ({ userID: x.player.id, expGain: x.expGain, pointsEarned: x.pointsEarned }));
             this.scoreboard.updateScoreboard(scoreboardUpdatePayload);
         } else {
-            this.lastGuesser = null;
-            if (this.gameType === GameType.ELIMINATION) {
-                const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
-                eliminationScoreboard.decrementAllLives();
+            if (!guessResult.error) {
+                this.lastGuesser = null;
+                if (this.gameType === GameType.ELIMINATION) {
+                    const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
+                    eliminationScoreboard.decrementAllLives();
+                }
             }
         }
 
@@ -880,7 +883,7 @@ export default class GameSession {
      */
     private async errorRestartRound(guildPreference: GuildPreference) {
         const messageContext = new MessageContext(this.textChannelID);
-        await this.endRound({ correct: false }, guildPreference);
+        await this.endRound({ correct: false, error: true }, guildPreference);
         await sendErrorMessage(messageContext, { title: "Error Playing Song", description: "Starting new round in 3 seconds..." });
         this.roundsPlayed--;
         this.startRound(guildPreference, messageContext);
