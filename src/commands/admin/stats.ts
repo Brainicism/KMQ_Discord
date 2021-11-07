@@ -2,7 +2,7 @@ import Eris from "eris";
 import os from "os";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import {
-    getDebugLogHeader, sendInfoMessage,
+    getDebugLogHeader, sendErrorMessage, sendInfoMessage,
 } from "../../helpers/discord_utils";
 import dbContext from "../../database_context";
 import { IPCLogger } from "../../logger";
@@ -24,8 +24,18 @@ export default class SkipCommand implements BaseCommand {
 
     call = async ({ message, channel }: CommandArgs) => {
         const fleetStats = await state.ipc.getStats();
+        let gameSessionStats;
+        try {
+            gameSessionStats = Array.from((await state.ipc.allClustersCommand("game_session_stats", true, 5000) as Map<number, any>).values());
+        } catch (e) {
+            logger.error(`Error retrieving stats via IPC. err = ${e}`);
+            sendErrorMessage(MessageContext.fromMessage(message), {
+                title: "Error Retrieving Stats",
+                description: "Please try again later",
+            });
+            return;
+        }
 
-        const gameSessionStats = Array.from((await state.ipc.allClustersCommand("game_session_stats", true) as Map<number, any>).values());
         const activeGameSessions = gameSessionStats.reduce((x, y) => x + y.activeGameSessions, 0);
         const activePlayers = gameSessionStats.reduce((x, y) => x + y.activePlayers, 0);
 
