@@ -3,7 +3,7 @@ import { isMaster } from "cluster";
 import os from "os";
 import { config } from "dotenv";
 import path from "path";
-import { Fleet, Options } from "eris-fleet";
+import { Fleet, Options, Stats } from "eris-fleet";
 import fs from "fs";
 import Eris from "eris";
 import schedule from "node-schedule";
@@ -61,6 +61,7 @@ const options: Options = {
         messageLimit: 0,
         intents: ERIS_INTENTS.guilds ^ ERIS_INTENTS.guildVoiceStates ^ ERIS_INTENTS.guildMessages ^ ERIS_INTENTS.guildMessageReactions,
     },
+    fetchTimeout: 5000,
     customClient: KmqClient,
     useCentralRequestHandler: true,
 };
@@ -150,8 +151,16 @@ async function startWebServer(fleet: Fleet) {
             return "KMQ is still starting up. Check back in a few minutes!";
         }
 
-        const gameplayStats = await fleet.ipc.allClustersCommand("game_session_stats", true) as Map<number, any>;
-        const fleetStats = (await fleet.collectStats());
+        let gameplayStats: Map<number, any>;
+        let fleetStats: Stats;
+        try {
+            gameplayStats = await fleet.ipc.allClustersCommand("game_session_stats", true) as Map<number, any>;
+            fleetStats = await fleet.collectStats();
+        } catch (e) {
+            logger.error(`Error fetching stats for status page. err = ${e}`);
+            return "Couldn't retrieve status information. Please try again later.";
+        }
+
         const clusterData = [];
         for (let i = 0; i < fleetStats.clusters.length; i++) {
             const cluster = fleetStats.clusters[i];
