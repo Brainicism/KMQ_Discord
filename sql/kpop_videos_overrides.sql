@@ -40,7 +40,3 @@ UPDATE app_kpop SET vtype = 'main' WHERE vlink = 'USPd8yM_jHk';
 /* BTS - Dionysus, swap with better quality version */
 UPDATE app_kpop SET vtype = 'alternate' WHERE vlink = 'QmgcyLozkbQ';
 UPDATE app_kpop SET vtype = 'main' WHERE vlink = 'bccr1BwNI0Y';
-
-/* H.O.T - Warrior's descendent, swap with better quality version */
-UPDATE app_kpop SET vtype = 'alternate' WHERE vlink = 'B031nR4GUF4';
-UPDATE app_kpop SET vtype = 'main' WHERE vlink = '7ggXa28ADLE';
