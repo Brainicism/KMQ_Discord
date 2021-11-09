@@ -109,7 +109,10 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
             const { playabilityStatus }: any = infoResponse.player_response;
             if (playabilityStatus.status !== "OK") {
                 await db.kmq("dead_links")
-                    .insert({ vlink: id, reason: `Failed to load video: error = ${playabilityStatus.reason}` });
+                    .insert({ vlink: id, reason: `Failed to load video: error = ${playabilityStatus.reason}` })
+                    .onConflict("vlink")
+                    .ignore();
+
                 reject(new Error(`Failed to load video: error = ${playabilityStatus.reason}`));
                 return;
             }
@@ -119,7 +122,10 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
                 .pipe(cacheStream);
         } catch (e) {
             await db.kmq("dead_links")
-                .insert({ vlink: id, reason: `Failed to retrieve video metadata. error = ${e}` });
+                .insert({ vlink: id, reason: `Failed to retrieve video metadata. error = ${e}` })
+                .onConflict("vlink")
+                .ignore();
+
             reject(new Error(`Failed to retrieve video metadata. error = ${e}`));
             return;
         }
