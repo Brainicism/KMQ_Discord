@@ -15,7 +15,6 @@ const SQL_DUMP_EXPIRY = 10;
 const mvFileUrl = "http://kpop.daisuki.com.br/download.php?file=full";
 const audioFileUrl = "http://kpop.daisuki.com.br/download.php?file=audio";
 const logger = new IPCLogger("seed_db");
-const overridesFilePath = path.join(__dirname, "../../sql/kpop_videos_overrides.sql");
 const databaseDownloadDir = path.join(__dirname, "../../sql_dumps/daisuki");
 if (!fs.existsSync(databaseDownloadDir)) {
     fs.mkdirSync(databaseDownloadDir);
@@ -29,6 +28,11 @@ program
 
 program.parse();
 const options = program.opts();
+
+async function getOverrideQueries(db: DatabaseContext): Promise<Array<string>> {
+    return (await db.kmq("kpop_videos_sql_overrides")
+        .select(["query"])).map((x) => x.query);
+}
 
 const downloadDb = async () => {
     const mvOutput = `${databaseDownloadDir}/mv-download.zip`;
@@ -76,7 +80,11 @@ async function validateSqlDump(db: DatabaseContext, mvSeedFilePath: string, audi
         }
 
         logger.info("Validating overrides");
-        await db.kpopVideosValidation.raw(fs.readFileSync(overridesFilePath).toString().replace(/kpop_videos/g, "kpop_videos_validation"));
+        const overrideQueries = await getOverrideQueries(db);
+
+        for (const overrideQuery of overrideQueries) {
+            await db.kpopVideosValidation.raw(overrideQuery);
+        }
 
         if (!bootstrap) {
             logger.info("Validating creation of data tables");
@@ -111,7 +119,12 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean) {
     execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${mvSeedFilePath}`);
     execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${audioSeedFilePath}`);
     logger.info("Performing data overrides");
-    await db.kpopVideos.raw(fs.readFileSync(overridesFilePath).toString());
+
+    const overrideQueries = await getOverrideQueries(db);
+    for (const overrideQuery of overrideQueries) {
+        await db.kpopVideos.raw(overrideQuery);
+    }
+
     logger.info("Imported database dump successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing");
 }
 
