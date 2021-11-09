@@ -72,7 +72,7 @@ function performMigrations() {
 async function bootstrapDatabases() {
     const startTime = Date.now();
     const db = getNewConnection();
-
+    performMigrations();
     if (!(await kpopDataDatabaseExists(db))) {
         logger.info("Seeding K-pop data database");
         await updateKpopDatabase(db, true);
@@ -84,7 +84,6 @@ async function bootstrapDatabases() {
         await db.agnostic.raw("CREATE DATABASE IF NOT EXISTS kmq_test");
     }
 
-    performMigrations();
     loadStoredProcedures();
 
     if (!(await songThresholdReached(db))) {
