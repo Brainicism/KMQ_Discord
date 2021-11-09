@@ -61,12 +61,12 @@ export default class AppCommandsCommand implements BaseCommand {
 
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: "Application Commands Reloaded",
-                description: "Both guild and global commands reloaded.",
+                description: "Yay.",
             });
         } else {
             const commands = await state.client.getCommands();
             for (const command of commands) {
-                logger.info(`Deleting global application command: ${command.id} `);
+                logger.info(`Deleting global application command: ${command.id}`);
                 await state.client.deleteCommand(command.id);
             }
 
@@ -80,7 +80,7 @@ export default class AppCommandsCommand implements BaseCommand {
 
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: "Commands Deleted",
-                description: "Both guild and global commands deleted.",
+                description: "No!!",
             });
         }
     };
