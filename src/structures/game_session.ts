@@ -184,10 +184,6 @@ export default class GameSession {
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
     async endRound(guessResult: GuessResult, guildPreference: GuildPreference, messageContext?: MessageContext) {
-        if (this.connection) {
-            this.connection.removeAllListeners();
-        }
-
         if (this.gameRound === null) {
             return;
         }
@@ -855,6 +851,9 @@ export default class GameSession {
 
         // song finished without being guessed
         this.connection.once("end", async () => {
+            // replace listener with no-op to catch any exceptions thrown after this event
+            this.connection.removeAllListeners("end");
+            this.connection.on("end", () => { });
             logger.info(`${getDebugLogHeader(messageContext)} | Song finished without being guessed.`);
             this.stopGuessTimeout();
 
@@ -864,6 +863,9 @@ export default class GameSession {
 
         // admin manually 'disconnected' bot from voice channel or misc error
         this.connection.once("error", async (err) => {
+            // replace listener with no-op to catch any exceptions thrown after this event
+            this.connection.removeAllListeners("error");
+            this.connection.on("error", () => { });
             if (!this.connection.channelID) {
                 logger.info(`${getDebugLogHeader(messageContext)} | Bot was kicked from voice channel`);
                 this.stopGuessTimeout();
