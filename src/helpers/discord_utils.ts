@@ -150,10 +150,12 @@ async function fetchChannel(textChannelID: string): Promise<Eris.TextChannel> {
     }
 
     // update cache
-    const guild = client.guilds.get(channel.guild.id);
-    if (guild) {
-        guild.channels.update(channel);
-        client.channelGuildMap[channel.id] = guild.id;
+    if (channel.guild) {
+        const guild = client.guilds.get(channel.guild.id);
+        if (guild) {
+            guild.channels.update(channel);
+            client.channelGuildMap[channel.id] = guild.id;
+        }
     }
 
     return channel;
