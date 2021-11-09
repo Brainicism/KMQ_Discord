@@ -73,11 +73,6 @@ async function bootstrapDatabases() {
     const startTime = Date.now();
     const db = getNewConnection();
 
-    if (!(await kpopDataDatabaseExists(db))) {
-        logger.info("Seeding K-pop data database");
-        await updateKpopDatabase(db, true);
-    }
-
     if (!(await kmqDatabaseExists(db))) {
         logger.info("Performing migrations on KMQ database");
         await db.agnostic.raw("CREATE DATABASE IF NOT EXISTS kmq");
@@ -85,6 +80,12 @@ async function bootstrapDatabases() {
     }
 
     performMigrations();
+
+    if (!(await kpopDataDatabaseExists(db))) {
+        logger.info("Seeding K-pop data database");
+        await updateKpopDatabase(db, true);
+    }
+
     loadStoredProcedures();
 
     if (!(await songThresholdReached(db))) {
