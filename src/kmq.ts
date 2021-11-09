@@ -1,4 +1,3 @@
-import Eris from "eris";
 import { config } from "dotenv";
 import path from "path";
 import { BaseClusterWorker } from "eris-fleet";
@@ -9,7 +8,6 @@ import {
     registerClientEvents, registerIntervals, registerProcessEvents, reloadCaches, updateBotStatus,
 } from "./helpers/management_utils";
 import BotListingManager from "./helpers/bot_listing_manager";
-import { PROFILE_COMMAND_NAME, BOOKMARK_COMMAND_NAME } from "./events/client/interactionCreate";
 import RateLimiter from "./rate_limiter";
 import dbContext from "./database_context";
 import KmqClient from "./kmq_client";
@@ -129,29 +127,5 @@ export class BotWorker extends BaseClusterWorker {
         logger.info("Updating bot's status..");
         updateBotStatus();
         logger.info(`Logged in as ${state.client.user.username}#${state.client.user.discriminator}! in '${process.env.NODE_ENV}' mode (${(Date.now() - state.processStartTime) / 1000}s)`);
-
-        if (process.env.NODE_ENV === EnvType.PROD) {
-            state.client.createCommand({
-                name: BOOKMARK_COMMAND_NAME,
-                type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
-            });
-
-            state.client.createCommand({
-                name: PROFILE_COMMAND_NAME,
-                type: Eris.Constants.ApplicationCommandTypes.USER,
-            });
-        } else if (process.env.NODE_ENV === EnvType.DEV) {
-            const debugServer = state.client.guilds.get(process.env.DEBUG_SERVER_ID);
-            if (!debugServer) return;
-            debugServer.createCommand({
-                name: BOOKMARK_COMMAND_NAME,
-                type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
-            });
-
-            debugServer.createCommand({
-                name: PROFILE_COMMAND_NAME,
-                type: Eris.Constants.ApplicationCommandTypes.USER,
-            });
-        }
     }
 }
