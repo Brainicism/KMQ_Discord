@@ -861,18 +861,10 @@ export default class GameSession {
             this.startRound(await getGuildPreference(this.guildID), messageContext);
         });
 
-        // admin manually 'disconnected' bot from voice channel or misc error
         this.connection.once("error", async (err) => {
             // replace listener with no-op to catch any exceptions thrown after this event
             this.connection.removeAllListeners("error");
             this.connection.on("error", () => { });
-            if (!this.connection.channelID) {
-                logger.info(`${getDebugLogHeader(messageContext)} | Bot was kicked from voice channel`);
-                this.stopGuessTimeout();
-                await this.endSession();
-                return;
-            }
-
             logger.error(`${getDebugLogHeader(messageContext)} | Unknown error with stream dispatcher. song = ${this.getDebugSongDetails()}. err = ${err}`);
             this.errorRestartRound(guildPreference);
         });
