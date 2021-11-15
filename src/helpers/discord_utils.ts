@@ -258,7 +258,7 @@ async function sendMessageExceptionHandler(e: any, channelID: string, guildID: s
  * @param authorID - the author's ID
  * @param messageContent - The MessageContent to send
  */
-export async function sendMessage(textChannelID: string, messageContent: Eris.AdvancedMessageContent, authorID?: string): Promise<Eris.Message> {
+export async function sendMessage(textChannelID: string, messageContent: Eris.AdvancedMessageContent, file?: Eris.FileContent, authorID?: string): Promise<Eris.Message> {
     const channel = await fetchChannel(textChannelID);
 
     // only reply to message if has required permissions
@@ -269,7 +269,7 @@ export async function sendMessage(textChannelID: string, messageContent: Eris.Ad
     }
 
     try {
-        return await state.client.createMessage(textChannelID, messageContent);
+        return await state.client.createMessage(textChannelID, messageContent, file);
     } catch (e) {
         if (!channel) {
             logger.error(`Error sending message, and channel not cached. textChannelID = ${textChannelID}`);
@@ -327,7 +327,7 @@ export async function sendErrorMessage(messageContext: MessageContext, embedPayl
             thumbnail: embedPayload.thumbnailUrl ? { url: embedPayload.thumbnailUrl } : { url: KmqImages.DEAD },
         }],
         components: embedPayload.components,
-    }, messageContext.author.id);
+    }, null, messageContext.author.id);
 }
 
 /**
@@ -363,7 +363,7 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
         embeds: [embed],
         messageReference: reply && messageContext.referencedMessageID ? { messageID: messageContext.referencedMessageID, failIfNotExists: false } : null,
         components: embedPayload.components,
-    }, messageContext.author.id);
+    }, null, messageContext.author.id);
 }
 
 /**
@@ -679,7 +679,7 @@ export async function sendPaginationedEmbed(message: GuildTextableMessage, embed
         embed = embeds[0];
     }
 
-    return sendMessage(message.channel.id, { embeds: [embed], components }, message.author.id);
+    return sendMessage(message.channel.id, { embeds: [embed], components }, null, message.author.id);
 }
 
 /**

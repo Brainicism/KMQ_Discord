@@ -70,10 +70,9 @@ export default class ListCommand implements BaseCommand {
             try {
                 sendMessage(channel.id, {
                     content: "Too many groups to list in a Discord message, see the attached file",
-                    file: {
-                        name: "groups.txt",
-                        file: Buffer.from(`${optionValue}\n`),
-                    },
+                }, {
+                    name: "groups.txt",
+                    file: Buffer.from(`${optionValue}\n`),
                 });
             } catch (e) {
                 logger.warn(`${getDebugLogHeader(message)} | Missing ATTACH_FILE permissions`);
