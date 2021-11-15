@@ -321,7 +321,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
         logger.info(`${getDebugLogHeader(message)} | Leaderboard retrieved (${type})`);
         if (!(message instanceof MessageContext)) {
-            sendPaginationedEmbed(message, embeds, null, pageOffset + 1);
+            sendPaginationedEmbed(message, embeds, null, pageOffset);
         } else {
             // Used only in sending leaderboard in debug channel before reset
             sendMessage(process.env.DEBUG_TEXT_CHANNEL_ID, { embeds: [await embeds[pageOffset]()] });
