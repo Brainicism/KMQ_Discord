@@ -186,6 +186,10 @@ export async function reloadAliases() {
         .select(["link", "song_aliases"])
         .where("song_aliases", "<>", "");
 
+    const hangulAliasMapping = await dbContext.kmq("available_songs")
+        .select(["link", "hangul_aliases"])
+        .where("hangul_aliases", "<>", "");
+
     const artistAliasMapping = await dbContext.kmq("available_songs")
         .distinct(["artist_name", "artist_aliases"])
         .select(["artist_name", "artist_aliases"])
@@ -194,6 +198,14 @@ export async function reloadAliases() {
     const newSongAliases = {};
     for (const mapping of songAliasMapping) {
         newSongAliases[mapping["link"]] = mapping["song_aliases"].split(";").filter((x) => x);
+    }
+
+    for (const mapping of hangulAliasMapping) {
+        if (!newSongAliases[mapping["link"]]) {
+            newSongAliases[mapping["link"]] = [];
+        }
+        newSongAliases[mapping["link"]].push(...mapping["hangul_aliases"].split(";").filter((x) => x))
+        console.log(mapping["link"], newSongAliases[mapping["link"]])
     }
 
     const newArtistAliases = {};
