@@ -1,4 +1,4 @@
-name: E2E
+name: GCI
 
 on:
   schedule:
@@ -8,13 +8,12 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-    paths: 
-      - 'docker/**'
-      - .github/workflows/e2e.yml
-      - src/seed/seed_db.ts
-      - src/scripts/download-new-songs.ts
-      - src/seed/bootstrap.ts
-      - start.sh
+    paths-ignore: 
+      - 'images/**'
+      - 'sql/**'
+      - '**.md'
+      - 'docs/**'
+
 
 jobs:
   build:
