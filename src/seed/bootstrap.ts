@@ -43,7 +43,7 @@ async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
         .first()).count >= SONG_DOWNLOAD_THRESHOLD;
 }
 
-function loadStoredProcedures() {
+export function loadStoredProcedures() {
     const storedProcedureDefinitions = fs.readdirSync(path.join(__dirname, "../../sql/procedures"))
         .map((x) => path.join(__dirname, "../../sql/procedures", x));
 

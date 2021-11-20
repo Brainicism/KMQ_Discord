@@ -7,7 +7,7 @@ import path from "path";
 import { IPCLogger } from "../logger";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import { DatabaseContext, getNewConnection } from "../database_context";
-import { generateKmqDataTables } from "./bootstrap";
+import { generateKmqDataTables, loadStoredProcedures } from "./bootstrap";
 import { EnvType } from "../types";
 
 config({ path: path.resolve(__dirname, "../../.env") });
@@ -207,6 +207,7 @@ async function seedAndDownloadNewSongs(db: DatabaseContext) {
     if (require.main === module) {
         const db = getNewConnection();
         try {
+            loadStoredProcedures();
             await seedAndDownloadNewSongs(db);
         } catch (e) {
             logger.error(e);
