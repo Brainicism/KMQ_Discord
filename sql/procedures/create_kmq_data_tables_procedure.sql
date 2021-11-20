@@ -46,7 +46,9 @@ BEGIN
 		0 AS rank
 	FROM kpop_videos.app_kpop
 	JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
-	WHERE vlink NOT IN (SELECT vlink FROM kmq.not_downloaded)
+	INNER JOIN kmq.cached_song_duration USING (vlink)
+	LEFT JOIN kmq.not_downloaded USING (vlink)
+	WHERE kmq.not_downloaded.vlink IS NULL
 	AND vtype = 'main'
 	AND tags NOT LIKE "%c%"
 	AND vlink IN (SELECT vlink FROM kmq.cached_song_duration);
@@ -54,30 +56,31 @@ BEGIN
 	/* audio-only videos */
 	INSERT INTO available_songs_temp
 	SELECT *
-	FROM (
-		SELECT
-			TRIM(app_kpop_audio.name) AS song_name,
-			TRIM(SUBSTRING_INDEX(app_kpop_audio.name, '(', 1)) AS clean_song_name,
-			name_aka AS song_aliases,
-			kpop_videos.app_kpop_group.alias AS artist_aliases,
-			vlink AS link,
-			TRIM(kpop_videos.app_kpop_group.name) AS artist_name,
-			kpop_videos.app_kpop_group.members AS members,
-			kpop_videos.app_kpop_audio.views AS views,
-			releasedate as publishedon,
-			kpop_videos.app_kpop_group.id AS id_artist,
-			issolo,
-			id_parentgroup,
-			'audio' AS vtype,
-			tags,
-			RANK() OVER(PARTITION BY app_kpop_audio.id_artist ORDER BY views DESC) AS rank
-		FROM kpop_videos.app_kpop_audio
-		JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop_audio.id_artist = kpop_videos.app_kpop_group.id
-		WHERE vlink NOT IN (SELECT vlink FROM kmq.not_downloaded)
-		AND vlink IN (SELECT vlink FROM kmq.cached_song_duration)
-		AND tags NOT LIKE "%c%"
-	) rankedAudioSongs
-	WHERE rank <= maxRank;
+		FROM (
+			SELECT
+				TRIM(app_kpop_audio.name) AS song_name,
+				TRIM(SUBSTRING_INDEX(app_kpop_audio.name, '(', 1)) AS clean_song_name,
+				name_aka AS song_aliases,
+				kpop_videos.app_kpop_group.alias AS artist_aliases,
+				vlink AS link,
+				TRIM(kpop_videos.app_kpop_group.name) AS artist_name,
+				kpop_videos.app_kpop_group.members AS members,
+				kpop_videos.app_kpop_audio.views AS views,
+				releasedate as publishedon,
+				kpop_videos.app_kpop_group.id AS id_artist,
+				issolo,
+				id_parentgroup,
+				'audio' AS vtype,
+				tags,
+				RANK() OVER(PARTITION BY app_kpop_audio.id_artist ORDER BY views DESC) AS rank
+			FROM kpop_videos.app_kpop_audio
+			JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop_audio.id_artist = kpop_videos.app_kpop_group.id
+			INNER JOIN kmq.cached_song_duration USING (vlink)
+			LEFT JOIN kmq.not_downloaded USING (vlink)
+			WHERE kmq.not_downloaded.vlink IS NULL
+			AND tags NOT LIKE "%c%"
+		) rankedAudioSongs
+		WHERE rank <= maxRank;
 
 	DELETE FROM available_songs_temp WHERE clean_song_name = '';
 
