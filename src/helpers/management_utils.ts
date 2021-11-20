@@ -206,7 +206,6 @@ export async function reloadAliases() {
         }
 
         newSongAliases[mapping["link"]].push(...mapping["hangul_aliases"].split(";").filter((x) => x));
-        console.log(mapping["link"], newSongAliases[mapping["link"]]);
     }
 
     const newArtistAliases = {};
