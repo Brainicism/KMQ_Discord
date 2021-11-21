@@ -474,7 +474,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         color = EMBED_ERROR_COLOR;
     }
 
-    const songAndArtist = bold(`"${gameRound.originalSongName}" - ${gameRound.artistName}`);
+    const songAndArtist = bold(`"${gameRound.originalSongName}" - ${gameRound.artistName}`.split("*").join("\\*"));
     return sendInfoMessage(messageContext, {
         color,
         title: `${songAndArtist} (${gameRound.publishDate.getFullYear()})`,
