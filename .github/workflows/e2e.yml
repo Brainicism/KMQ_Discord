@@ -13,12 +13,15 @@ on:
       - 'sql/analytics/**'
       - '**.md'
       - 'docs/**'
+  pull_request_target:
+    types: [labeled]
 
 
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    if: contains(github.event.pull_request.labels.*.name, 'safe to test')
     env:
       DB_PASS_CI: kmq_ci_password
       DB_USER_CI: root
