@@ -31,6 +31,7 @@ import KmqMember from "./kmq_member";
 import { MultiGuessType } from "../commands/game_options/multiguess";
 import { specialFfmpegArgs } from "../commands/game_options/special";
 import { AnswerType } from "../commands/game_options/answer";
+import { ExpBonusModifiers } from "../commands/game_commands/exp";
 
 const MULTIGUESS_DELAY = 1500;
 const logger = new IPCLogger("game_session");
@@ -1118,39 +1119,44 @@ export default class GameSession {
         // penalize for using artist guess modes
         if (guildPreference.gameOptions.guessModeType === GuessModeType.ARTIST || guildPreference.gameOptions.guessModeType === GuessModeType.BOTH) {
             if (guildPreference.isGroupsMode()) return 0;
-            expModifier *= 0.3;
+            expModifier *= ExpBonusModifiers.ARTIST_GUESS;
         }
 
         // bonus for quick guess
         if (guessSpeed < 3500) {
-            expModifier *= 1.1;
+            expModifier *= ExpBonusModifiers.QUICK_GUESS;
         }
 
         // bonus for guess streaks
         if (this.lastGuesser.streak >= 5) {
-            expModifier *= 1.2;
+            expModifier *= ExpBonusModifiers.GUESS_STREAK;
         }
 
         // bonus for voting
         if (voteBonusExp) {
-            expModifier *= 2;
+            expModifier *= ExpBonusModifiers.VOTE;
         }
 
         if (guildPreference.isMultipleChoiceMode()) {
             const difficulty = guildPreference.gameOptions.answerType;
             switch (difficulty) {
                 case AnswerType.MULTIPLE_CHOICE_EASY:
-                    expModifier *= 0.25;
+                    expModifier *= ExpBonusModifiers.MC_GUESS_EASY;
                     break;
                 case AnswerType.MULTIPLE_CHOICE_MED:
-                    expModifier *= 0.5;
+                    expModifier *= ExpBonusModifiers.MC_GUESS_MEDIUM;
                     break;
                 case AnswerType.MULTIPLE_CHOICE_HARD:
-                    expModifier *= 0.75;
+                    expModifier *= ExpBonusModifiers.MC_GUESS_HARD;
                     break;
                 default:
                     break;
             }
+        }
+
+        // for guessing a bonus group
+        if (gameRound.isBonusArtist()) {
+            expModifier *= ExpBonusModifiers.BONUS_ARTIST;
         }
 
         // random game round bonus
@@ -1172,7 +1178,7 @@ export default class GameSession {
         expJitter *= Math.round(Math.random()) ? 1 : -1;
 
         // double exp weekend multiplier
-        const multiplier = (isWeekend() || isPowerHour()) ? 2 : 1;
+        const multiplier = (isWeekend() || isPowerHour()) ? ExpBonusModifiers.POWER_HOUR : 1;
         return (expBase + expJitter) * multiplier;
     }
 

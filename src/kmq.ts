@@ -29,6 +29,7 @@ const state: State = {
     processStartTime: Date.now(),
     ipc: null,
     rateLimiter: new RateLimiter(15, 30),
+    bonusArtists: new Set<string>(),
 };
 
 export { state };

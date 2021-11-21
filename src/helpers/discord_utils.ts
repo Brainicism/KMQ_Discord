@@ -408,8 +408,17 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
 
     const correctGuess = playerRoundResults.length > 0;
     let correctDescription = "";
-    if (gameRound.bonusModifier > 1) {
-        correctDescription += "⭐__**BONUS EXP ROUND**__⭐\n";
+    if (gameRound.bonusModifier > 1 || gameRound.isBonusArtist()) {
+        let bonusType: string;
+        if (gameRound.isBonusArtist() && gameRound.bonusModifier > 1) {
+            bonusType = "EXP AND ARTIST";
+        } else if (gameRound.bonusModifier > 1) {
+            bonusType = "EXP";
+        } else {
+            bonusType = "ARTIST";
+        }
+
+        correctDescription += `⭐__**BONUS ${bonusType} ROUND**__⭐\n`;
     }
 
     if (correctGuess) {
