@@ -19,6 +19,7 @@ import TeamScoreboard from "../structures/team_scoreboard";
 import { KmqImages } from "../constants";
 import MessageContext from "../structures/message_context";
 import { GuessModeType } from "../commands/game_options/guessmode";
+import { REVIEW_LINK, VOTE_LINK } from "../commands/game_commands/vote";
 
 const logger = new IPCLogger("utils");
 export const EMBED_ERROR_COLOR = 0xED4245; // Red
@@ -482,8 +483,7 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         thumbnailUrl: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,
         fields,
         footerText: `${friendlyFormattedNumber(gameRound.views)} views${footer.text ? `\n${footer.text}` : ""}`,
-    }, correctGuess && !isMultipleChoiceMode,
-    false);
+    }, correctGuess && !isMultipleChoiceMode, false);
 }
 
 /**
@@ -663,6 +663,15 @@ export async function sendEndGameMessage(gameSession: GameSession) {
             title: `🎉 ${gameSession.scoreboard.getWinnerMessage()} 🎉`,
             fields,
             footerText,
+            components: [
+                {
+                    type: 1,
+                    components: [
+                        { style: 5, url: VOTE_LINK, type: 2 as const, emoji: { name: "✅" }, label: "Vote!" },
+                        { style: 5, url: REVIEW_LINK, type: 2 as const, emoji: { name: "📖" }, label: "Leave a review!" },
+                        { style: 5, url: "https://discord.gg/RCuzwYV", type: 2, emoji: { name: "🎵" }, label: "Official KMQ Server" }],
+                },
+            ],
         });
     }
 }
