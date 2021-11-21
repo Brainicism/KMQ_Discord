@@ -5,7 +5,7 @@ import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { isPowerHour, isWeekend } from "../../helpers/utils";
-import { getGuildPreference, userBonusIsActive } from "../../helpers/game_utils";
+import { getGuildPreference, getSongCount, userBonusIsActive } from "../../helpers/game_utils";
 import { AnswerType } from "../game_options/answer";
 import { GuessModeType } from "../game_options/guessmode";
 import { KmqImages } from "../../constants";
@@ -26,6 +26,7 @@ export enum ExpBonusModifiers {
     RANDOM_GUESS_BONUS_RARE = 5,
     RANDOM_GUESS_BONUS_EPIC = 10,
     RANDOM_GUESS_BONUS_LEGENDARY = 50,
+    BELOW_SONG_COUNT_THRESHOLD = 0,
 }
 
 export default class ExpCommand implements BaseCommand {
@@ -42,6 +43,7 @@ export default class ExpCommand implements BaseCommand {
         const weekendBonusActive = isWeekend();
         const voteBonusActive = await userBonusIsActive(message.author.id);
         const guildPreference = await getGuildPreference(message.guildID);
+        const totalSongs = (await getSongCount(guildPreference)).count;
         const fields: Array<Eris.EmbedField> = [];
 
         let totalModifier = 1.0;
@@ -80,6 +82,12 @@ export default class ExpCommand implements BaseCommand {
             const artistModeMultiplier = guildPreference.isGroupsMode() ? 0 : ExpBonusModifiers.ARTIST_GUESS;
             totalModifier *= artistModeMultiplier;
             modifierText.push(`\`Artist/Group Guess Mode Penalty:\` ${artistModeMultiplier.toFixed(2)}x 📉`);
+        }
+
+        if (totalSongs < 10) {
+            const songCountPenalty = ExpBonusModifiers.BELOW_SONG_COUNT_THRESHOLD;
+            totalModifier *= songCountPenalty;
+            modifierText.push(`\`Low Song Count Penalty:\` ${songCountPenalty.toFixed(2)}x 📉`);
         }
 
         modifierText.push(`\`Total Modifier:\` **__${totalModifier.toFixed(2)}x__**`);
