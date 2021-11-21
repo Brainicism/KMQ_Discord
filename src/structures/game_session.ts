@@ -1153,6 +1153,11 @@ export default class GameSession {
             }
         }
 
+        // for guessing a bonus group
+        if (gameRound.isBonusArtist()) {
+            expModifier *= 2;
+        }
+
         // random game round bonus
         expModifier *= gameRound.bonusModifier;
 

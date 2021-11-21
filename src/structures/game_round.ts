@@ -297,6 +297,10 @@ export default class GameRound {
         return this.interactionCorrectAnswerUUID === interactionUUID;
     }
 
+    isBonusArtist(): boolean {
+        return state.bonusArtists.has(this.artistName);
+    }
+
     /**
      * Checks whether the song guess matches the GameRound's song
      * @param message - The Message that contains the guess
