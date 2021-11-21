@@ -254,7 +254,7 @@ export default class GameRound {
                     const z = y as Eris.InteractionButton;
                     const noGuesses = this.interactionIncorrectAnswerUUIDs[z.custom_id] === 0;
                     let label = z.label;
-                    let style: 2 | 1 | 4 | 3;
+                    let style: 1 | 3 | 4;
                     if (this.interactionCorrectAnswerUUID === z.custom_id) {
                         if (correctGuesses) {
                             label += ` (${correctGuesses})`;
