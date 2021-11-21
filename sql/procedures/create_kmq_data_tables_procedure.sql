@@ -48,7 +48,9 @@ BEGIN
 		0 AS rank
 	FROM kpop_videos.app_kpop
 	JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
-	WHERE vlink NOT IN (SELECT vlink FROM kmq.not_downloaded)
+	INNER JOIN kmq.cached_song_duration USING (vlink)
+	LEFT JOIN kmq.not_downloaded USING (vlink)
+	WHERE kmq.not_downloaded.vlink IS NULL
 	AND vtype = 'main'
 	AND tags NOT LIKE "%c%"
 	AND vlink IN (SELECT vlink FROM kmq.cached_song_duration);
@@ -76,8 +78,9 @@ BEGIN
 			RANK() OVER(PARTITION BY app_kpop_audio.id_artist ORDER BY views DESC) AS rank
 		FROM kpop_videos.app_kpop_audio
 		JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop_audio.id_artist = kpop_videos.app_kpop_group.id
-		WHERE vlink NOT IN (SELECT vlink FROM kmq.not_downloaded)
-		AND vlink IN (SELECT vlink FROM kmq.cached_song_duration)
+		INNER JOIN kmq.cached_song_duration USING (vlink)
+		LEFT JOIN kmq.not_downloaded USING (vlink)
+		WHERE kmq.not_downloaded.vlink IS NULL
 		AND tags NOT LIKE "%c%"
 	) rankedAudioSongs
 	WHERE rank <= maxRank;

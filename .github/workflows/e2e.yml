@@ -10,7 +10,7 @@ on:
     branches: [ master ]
     paths-ignore: 
       - 'images/**'
-      - 'sql/**'
+      - 'sql/analytics/**'
       - '**.md'
       - 'docs/**'
 
