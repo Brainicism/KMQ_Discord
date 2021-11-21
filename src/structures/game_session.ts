@@ -1156,7 +1156,7 @@ export default class GameSession {
 
         // for guessing a bonus group
         if (gameRound.isBonusArtist()) {
-            expModifier *= 2;
+            expModifier *= ExpBonusModifiers.BONUS_ARTIST;
         }
 
         // random game round bonus

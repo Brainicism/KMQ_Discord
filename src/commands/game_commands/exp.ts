@@ -9,10 +9,12 @@ import { getGuildPreference, userBonusIsActive } from "../../helpers/game_utils"
 import { AnswerType } from "../game_options/answer";
 import { GuessModeType } from "../game_options/guessmode";
 import { KmqImages } from "../../constants";
+import { state } from "../../kmq";
 
 const logger = new IPCLogger("exp");
 export enum ExpBonusModifiers {
     POWER_HOUR = 2,
+    BONUS_ARTIST = 2,
     VOTE = 2,
     GUESS_STREAK = 1.2,
     QUICK_GUESS = 1.1,
@@ -29,7 +31,7 @@ export enum ExpBonusModifiers {
 export default class ExpCommand implements BaseCommand {
     help = {
         name: "exp",
-        description: "Shows your current EXP modifier.",
+        description: "Shows your current EXP modifier, and the list of current bonus EXP artists.",
         usage: ",exp",
         examples: [],
         priority: 50,
@@ -89,8 +91,14 @@ export default class ExpCommand implements BaseCommand {
         });
 
         fields.push({
-            name: "Other EXP Bonuses 📈",
-            value: `You can get bonus EXP for the following:\n- \`Having a guess streak of over 5:\` ${ExpBonusModifiers.GUESS_STREAK}x \n- \`Guessing quickly:\` ${ExpBonusModifiers.QUICK_GUESS}x \n- \`Rare correct guesses bonus\`: 2x up to 50x!`,
+            name: "🎤 Current Bonus Artists 🎤",
+            value: `\`Guessing songs by the daily bonus artists:\`  ${ExpBonusModifiers.BONUS_ARTIST.toFixed(2)}x 📈 \n\`\`\`${[...state.bonusArtists].filter((x) => !x.includes("+")).join(", ")}\`\`\``,
+            inline: false,
+        });
+
+        fields.push({
+            name: "Other EXP Bonuses",
+            value: `You can get bonus EXP for the following:\n- \`Having a guess streak of over 5:\` ${ExpBonusModifiers.GUESS_STREAK.toFixed(2)}x 📈 \n- \`Guessing quickly:\` ${ExpBonusModifiers.QUICK_GUESS.toFixed(2)}x 📈 \n- \`Rare correct guesses bonus\`: 2.00x up to 50.00x 📈`,
             inline: false,
         });
 
