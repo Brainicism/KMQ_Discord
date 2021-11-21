@@ -491,11 +491,15 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
  * @param message - The Message object
  * @param guildPreference - The corresponding GuildPreference
  * @param updatedOption - Specifies which GameOption was modified
+ * @param preset - Specifies whether the GameOptions were modified by a preset
+ * @param allReset - Specifies whether all GameOptions were reset
  * @param footerText - The footer text
  */
 export async function sendOptionsMessage(messageContext: MessageContext,
     guildPreference: GuildPreference,
-    updatedOption?: { option: GameOption, reset: boolean },
+    updatedOptions?: { option: GameOption, reset: boolean }[],
+    preset = false,
+    allReset = false,
     footerText?: string) {
     if (guildPreference.gameOptions.forcePlaySongID) {
         await sendInfoMessage(messageContext,
@@ -576,8 +580,10 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     }
 
     // Underline changed option
-    if (updatedOption) {
-        optionStrings[updatedOption.option] = underline(optionStrings[updatedOption.option]);
+    if (updatedOptions) {
+        for (const updatedOption of updatedOptions) {
+            optionStrings[updatedOption.option as GameOption] = underline(optionStrings[updatedOption.option]);
+        }
     }
 
     // Options excluded from embed fields since they are of higher importance (shown above them as part of the embed description)
@@ -608,13 +614,13 @@ export async function sendOptionsMessage(messageContext: MessageContext,
         },
     ];
 
-    if (updatedOption && updatedOption.reset) {
+    if (updatedOptions && !allReset && updatedOptions[0] && updatedOptions[0].reset) {
         footerText = `Looking for information on how to use a command? Check out '${process.env.BOT_PREFIX}help [command]' to learn more.`;
     }
 
     await sendInfoMessage(messageContext,
         {
-            title: updatedOption === null ? "Options" : `${updatedOption.option} ${updatedOption.reset ? "Reset" : "Updated"}`,
+            title: updatedOptions === null || allReset ? "Options" : `${preset ? GameOption.PRESET : updatedOptions[0].option} ${updatedOptions[0].reset ? "Reset" : "Updated"}`,
             description: priorityOptions,
             fields,
             footerText,

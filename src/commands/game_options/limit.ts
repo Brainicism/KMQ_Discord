@@ -56,7 +56,7 @@ export default class LimitCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.LIMIT);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.LIMIT, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.LIMIT, reset: true }]);
             logger.info(`${getDebugLogHeader(message)} | Limit reset.`);
             return;
         }
@@ -80,7 +80,7 @@ export default class LimitCommand implements BaseCommand {
         }
 
         await guildPreference.setLimit(limitStart, limitEnd);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.LIMIT, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.LIMIT, reset: false }]);
         logger.info(`${getDebugLogHeader(message)} | Limit set to ${guildPreference.gameOptions.limitStart} - ${guildPreference.gameOptions.limitEnd}`);
     };
 }

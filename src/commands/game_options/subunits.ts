@@ -58,14 +58,14 @@ export default class SubunitsCommand implements BaseCommand {
 
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.SUBUNIT_PREFERENCE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SUBUNIT_PREFERENCE, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.SUBUNIT_PREFERENCE, reset: true }]);
             logger.info(`${getDebugLogHeader(message)} | Subunit preference reset.`);
             return;
         }
 
         const subunitPreference = parsedMessage.components[0].toLowerCase() as SubunitsPreference;
         await guildPreference.setSubunitPreference(subunitPreference);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SUBUNIT_PREFERENCE, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.SUBUNIT_PREFERENCE, reset: false }]);
         logger.info(`${getDebugLogHeader(message)} | Subunit preference set to ${subunitPreference}`);
     };
 }
