@@ -12,8 +12,8 @@ const logger = new IPCLogger("vote");
 export const VOTE_BONUS_DURATION = 1;
 const VOTE_RESET_DURATION = 12;
 
-const VOTE_LINK = "https://top.gg/bot/508759831755096074/vote";
-const REVIEW_LINK = "https://top.gg/bot/508759831755096074#reviews";
+export const VOTE_LINK = "https://top.gg/bot/508759831755096074/vote";
+export const REVIEW_LINK = "https://top.gg/bot/508759831755096074#reviews";
 
 export default class VoteCommand implements BaseCommand {
     aliases = ["v", "voted"];
