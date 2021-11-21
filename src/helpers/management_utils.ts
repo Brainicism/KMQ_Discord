@@ -18,7 +18,7 @@ import disconnectHandler from "../events/client/disconnect";
 import unhandledRejectionHandler from "../events/process/unhandledRejection";
 import uncaughtExceptionHandler from "../events/process/uncaughtException";
 import SIGINTHandler from "../events/process/SIGINT";
-import { cleanupInactiveGameSessions } from "./game_utils";
+import { cleanupInactiveGameSessions, getMatchingGroupNames } from "./game_utils";
 import dbContext from "../database_context";
 import debugHandler from "../events/client/debug";
 import guildCreateHandler from "../events/client/guildCreate";
@@ -218,6 +218,20 @@ export async function reloadAliases() {
     logger.info("Reloaded alias data");
 }
 
+/** Reload bonus groups (same groups chosen on the same day) */
+export async function reloadBonusGroups() {
+    const bonusGroupCount = 10;
+    const date = new Date();
+    const artistNameQuery: string[] = (await dbContext.kmq("kpop_groups")
+        .select(["name"])
+        .where("is_collab", "=", "n")
+        .orderByRaw(`RAND(${date.getFullYear() + date.getMonth() * 997 + date.getDate() * 37})`)
+        .limit(bonusGroupCount))
+        .map((x) => x.name);
+
+    state.bonusArtists = new Set((await getMatchingGroupNames(artistNameQuery)).matchedGroups.map((x) => x.name));
+}
+
 /**
  * Clears any existing restart timers
  */
@@ -248,6 +262,7 @@ export function registerIntervals(clusterID: number) {
     // everyday at 12am UTC => 7pm EST
     schedule.scheduleJob("0 0 * * *", async () => {
         reloadFactCache();
+        reloadBonusGroups();
     });
 
     // every 5 minutes
@@ -262,6 +277,7 @@ export function registerIntervals(clusterID: number) {
 export async function reloadCaches() {
     reloadAliases();
     reloadFactCache();
+    reloadBonusGroups();
 }
 
 /**
