@@ -7,6 +7,7 @@ import { IPCLogger } from "../../logger";
 import { friendlyFormattedDate, romanize, friendlyFormattedNumber } from "../../helpers/utils";
 import { CUM_EXP_TABLE } from "../../structures/game_session";
 import MessageContext from "../../structures/message_context";
+import { state } from "../../kmq";
 
 const logger = new IPCLogger("profile");
 
@@ -224,9 +225,10 @@ export default class ProfileCommand implements BaseCommand {
     };
 }
 
-export async function handleProfileInteraction(interaction: Eris.CommandInteraction, user: Eris.User) {
+export async function handleProfileInteraction(interaction: Eris.CommandInteraction, userId: string) {
+    const user = await state.ipc.fetchUser(userId);
     if (!user) {
-        tryCreateInteractionErrorAcknowledgement(interaction, `I can't access that user right now. Try using \`${process.env.BOT_PREFIX}profile ${interaction.data.target_id}\` instead.`);
+        tryCreateInteractionErrorAcknowledgement(interaction, `I can't access that user right now. Try using \`${process.env.BOT_PREFIX}profile ${userId}\` instead.`);
         logger.info(`${getDebugLogHeader(interaction)} | Failed retrieving profile on inaccessible player via interaction`);
         return;
     }
