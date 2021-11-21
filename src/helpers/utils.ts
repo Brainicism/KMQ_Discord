@@ -21,7 +21,7 @@ export function delay(delayDuration: number): Promise<void> {
  * @returns bolded text
  */
 export function bold(text: string): string {
-    return `**${text}**`;
+    return `**${text.split("*").join("\\*")}**`;
 }
 
 /**
@@ -29,7 +29,7 @@ export function bold(text: string): string {
  * @returns italicized text
  */
 export function italicize(text: string): string {
-    return `*${text}*`;
+    return `*${text.split("*").join("\\*")}*`;
 }
 
 /**
@@ -37,7 +37,7 @@ export function italicize(text: string): string {
  * @returns codified text
  */
 export function codeLine(text: string): string {
-    return `\`${text}\``;
+    return `\`${text.split("`").join("\\`")}\``;
 }
 
 /**
@@ -45,7 +45,7 @@ export function codeLine(text: string): string {
  * @returns underlined text
  */
 export function underline(text: string): string {
-    return `__${text}__`;
+    return `__${text.split("_").join("\\_")}__`;
 }
 
 /**
@@ -53,7 +53,7 @@ export function underline(text: string): string {
  * @returns struckthrough text
  */
 export function strikethrough(text: string): string {
-    return `~~${text}~~`;
+    return `~~${text.split("~").join("\\~")}~~`;
 }
 
 /**
