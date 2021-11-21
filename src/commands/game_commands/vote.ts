@@ -49,7 +49,7 @@ export default class VoteCommand implements BaseCommand {
                     const secondsLeft = new Date(nextVoteTime.getTime() - Date.now()).getSeconds();
                     voteStatusString = `You can vote in ${bold(String(secondsLeft))} seconds.`;
                 } else {
-                    voteStatusString = `You can vote in ${hoursLeft > 0 ? `${bold(String(hoursLeft))} hours and ` : ""} ${bold(String(minutesLeft))} minutes.`;
+                    voteStatusString = `You can vote in ${hoursLeft > 0 ? `${bold(String(hoursLeft))} hours and ` : ""}${bold(String(minutesLeft))} minutes.`;
                 }
             }
         } else {
