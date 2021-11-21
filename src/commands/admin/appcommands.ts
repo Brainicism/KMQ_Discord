@@ -42,6 +42,11 @@ export default class AppCommandsCommand implements BaseCommand {
 
                 await state.client.createCommand({
                     name: PROFILE_COMMAND_NAME,
+                    type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
+                });
+
+                await state.client.createCommand({
+                    name: PROFILE_COMMAND_NAME,
                     type: Eris.Constants.ApplicationCommandTypes.USER,
                 });
             } else if (process.env.NODE_ENV === EnvType.DEV) {
@@ -50,6 +55,11 @@ export default class AppCommandsCommand implements BaseCommand {
                 if (!debugServer) return;
                 await debugServer.createCommand({
                     name: BOOKMARK_COMMAND_NAME,
+                    type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
+                });
+
+                await debugServer.createCommand({
+                    name: PROFILE_COMMAND_NAME,
                     type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
                 });
 

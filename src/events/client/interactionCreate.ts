@@ -26,8 +26,7 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
     } else if (interaction instanceof Eris.CommandInteraction) {
         if (interaction.data.type === Eris.Constants.ApplicationCommandTypes.USER) {
             if (interaction.data.name === PROFILE_COMMAND_NAME) {
-                const user = await state.ipc.fetchUser(interaction.data.target_id);
-                handleProfileInteraction(interaction, user);
+                handleProfileInteraction(interaction, interaction.member.id);
             }
         } else if (interaction.data.type === Eris.Constants.ApplicationCommandTypes.MESSAGE) {
             if (interaction.data.name === BOOKMARK_COMMAND_NAME) {
@@ -38,6 +37,8 @@ export default async function interactionCreateHandler(interaction: Eris.PingInt
                 }
 
                 gameSession.handleBookmarkInteraction(interaction);
+            } else if (interaction.data.name === PROFILE_COMMAND_NAME) {
+                handleProfileInteraction(interaction, interaction.member.id);
             }
         }
     }
