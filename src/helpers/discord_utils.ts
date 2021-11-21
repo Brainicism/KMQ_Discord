@@ -620,7 +620,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
 
     await sendInfoMessage(messageContext,
         {
-            title: updatedOptions === null || allReset ? "Options" : `${preset ? GameOption.PRESET : updatedOptions[0].option} ${updatedOptions[0].reset ? "Reset" : "Updated"}`,
+            title: updatedOptions === null || allReset ? "Options" : `${preset ? "Preset" : updatedOptions[0].option} ${updatedOptions[0].reset ? "Reset" : "Updated"}`,
             description: priorityOptions,
             fields,
             footerText,
