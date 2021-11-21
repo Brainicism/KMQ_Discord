@@ -10,10 +10,11 @@ import {
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import GameRound from "../../structures/game_round";
-import { GuildTextableMessage, GameType} from "../../types";
+import { GuildTextableMessage, GameType } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import EliminationScoreboard from "../../structures/elimination_scoreboard";
 
 const logger = new IPCLogger("skip");
 
@@ -34,9 +35,9 @@ async function sendSkipMessage(message: GuildTextableMessage, gameRound: GameRou
 }
 
 function isSkipMajority(message: GuildTextableMessage, gameSession: GameSession): boolean {
-    return (gameSession.gameType === GameType.ELIMINATION) ?
-        gameSession.gameRound.getNumSkippers() >= Math.floor(gameSession.scoreboard.getAlivePlayersCount() * 0.5) + 1 :
-        gameSession.gameRound.getNumSkippers() >= getMajorityCount(message.guildID);
+    return (gameSession.gameType === GameType.ELIMINATION)
+        ? gameSession.gameRound.getNumSkippers() >= Math.floor((gameSession.scoreboard as EliminationScoreboard).getAlivePlayersCount() * 0.5) + 1
+        : gameSession.gameRound.getNumSkippers() >= getMajorityCount(message.guildID);
 }
 
 export default class SkipCommand implements BaseCommand {
@@ -61,7 +62,7 @@ export default class SkipCommand implements BaseCommand {
         }
 
         if (gameSession.gameType === GameType.ELIMINATION) {
-            if (!gameSession.scoreboard.isPlayerEliminated(message.author.id)) {
+            if (!(gameSession.scoreboard as EliminationScoreboard).isPlayerEliminated(message.author.id)) {
                 gameSession.gameRound.userSkipped(message.author.id);
             }
         } else {
