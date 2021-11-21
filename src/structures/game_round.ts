@@ -3,6 +3,7 @@ import Eris from "eris";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { state } from "../kmq";
 import KmqMember from "./kmq_member";
+import { ExpBonusModifiers } from "../commands/game_commands/exp";
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
 const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\ \(\)\+\u200B]/g;
@@ -164,7 +165,13 @@ export default class GameRound {
         this.incorrectMCGuessers = new Set();
         this.interactionComponents = [];
         this.interactionMessage = null;
-        this.bonusModifier = (Math.random() < 0.01) ? _.sample([2, 5, 10, 50]) : 1;
+        this.bonusModifier = (Math.random() < 0.01) ? _.sample(
+            [
+                ExpBonusModifiers.RANDOM_GUESS_BONUS_COMMON,
+                ExpBonusModifiers.RANDOM_GUESS_BONUS_RARE,
+                ExpBonusModifiers.RANDOM_GUESS_BONUS_EPIC,
+                ExpBonusModifiers.RANDOM_GUESS_BONUS_LEGENDARY],
+        ) : 1;
     }
 
     /**
