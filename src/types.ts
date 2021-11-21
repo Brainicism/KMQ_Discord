@@ -63,6 +63,7 @@ export interface State {
     processStartTime: number;
     ipc: IPC;
     rateLimiter: RateLimiter;
+    bonusArtists: Set<string>;
 }
 
 export enum GameOption {
