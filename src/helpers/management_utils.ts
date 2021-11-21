@@ -224,6 +224,7 @@ export async function reloadBonusGroups() {
     const date = new Date();
     const artistNameQuery: string[] = (await dbContext.kmq("kpop_groups")
         .select(["name"])
+        .where("is_collab", "=", "n")
         .orderByRaw(`RAND(${date.getFullYear() + date.getMonth() * 997 + date.getDate() * 37})`)
         .limit(bonusGroupCount))
         .map((x) => x.name);
