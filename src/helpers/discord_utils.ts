@@ -475,6 +475,22 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     }
 
     const songAndArtist = bold(`"${gameRound.originalSongName}" - ${gameRound.artistName}`);
+    if (isMultipleChoiceMode) {
+        await gameRound.interactionMessage.edit({
+            embeds: [{
+                color,
+                title: `${songAndArtist} (${gameRound.publishDate.getFullYear()})`,
+                url: `https://youtu.be/${gameRound.videoID}`,
+                description,
+                thumbnail: { url: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg` },
+                fields,
+                footer: { text: `${friendlyFormattedNumber(gameRound.views)} views${footer.text ? `\n${footer.text}` : ""}` },
+            }],
+        });
+
+        return gameRound.interactionMessage;
+    }
+
     return sendInfoMessage(messageContext, {
         color,
         title: `${songAndArtist} (${gameRound.publishDate.getFullYear()})`,

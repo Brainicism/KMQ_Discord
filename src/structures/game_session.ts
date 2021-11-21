@@ -305,7 +305,7 @@ export default class GameSession {
 
         this.finished = true;
         deleteGameSession(this.guildID);
-        await this.endRound({ correct: false }, await getGuildPreference(this.guildID));
+        await this.endRound({ correct: false }, await getGuildPreference(this.guildID), new MessageContext(this.textChannelID));
         const voiceConnection = state.client.voiceConnections.get(this.guildID);
 
         if (this.gameType === GameType.COMPETITION) {
