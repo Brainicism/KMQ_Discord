@@ -257,12 +257,7 @@ export default class GameRound {
                     let style: 1 | 3 | 4;
                     if (this.interactionCorrectAnswerUUID === z.custom_id) {
                         if (correctGuesses) {
-                            const guesses = ` (${correctGuesses})`;
-                            if (label.length + guesses.length > 80) {
-                                label = `${label.slice(0, 80 - guesses.length - 3)}...${guesses}`;
-                            } else {
-                                label += guesses;
-                            }
+                            label += ` (${correctGuesses})`;
                         }
 
                         style = 3;
