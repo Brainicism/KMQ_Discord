@@ -34,10 +34,9 @@ async function sendSkipMessage(message: GuildTextableMessage, gameRound: GameRou
 }
 
 function isSkipMajority(message: GuildTextableMessage, gameSession: GameSession): boolean {
-    if (gameSession.gameType === GameType.ELIMINATION) {
-        return gameSession.gameRound.getNumSkippers() >= Math.floor(gameSession.scoreboard.getAlivePlayersCount() * 0.5) + 1;
-    }
-    return gameSession.gameRound.getNumSkippers() >= getMajorityCount(message.guildID);
+    return (gameSession.gameType === GameType.ELIMINATION) ?
+        gameSession.gameRound.getNumSkippers() >= Math.floor(gameSession.scoreboard.getAlivePlayersCount() * 0.5) + 1 :
+        gameSession.gameRound.getNumSkippers() >= getMajorityCount(message.guildID);
 }
 
 export default class SkipCommand implements BaseCommand {
