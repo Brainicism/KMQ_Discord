@@ -87,7 +87,6 @@ export enum GameOption {
     DURATION = "Duration",
     EXCLUDE = "Exclude",
     INCLUDE = "Include",
-    PRESET = "Preset",
     FORCE_PLAY_SONG = "Force Play Song",
 }
 

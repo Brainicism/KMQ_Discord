@@ -118,7 +118,7 @@ export default class AddCommand implements BaseCommand {
                 }
 
                 await guildPreference.setGroups(matchedGroups);
-                await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GROUPS, reset: false });
+                await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.GROUPS, reset: false }]);
                 logger.info(`${getDebugLogHeader(message)} | Group added: ${guildPreference.getDisplayedGroupNames()}`);
                 break;
             }
@@ -126,7 +126,7 @@ export default class AddCommand implements BaseCommand {
             case AddType.INCLUDE:
             case AddType.INCLUDES:
                 await guildPreference.setIncludes(matchedGroups);
-                await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.INCLUDE, reset: false });
+                await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.INCLUDE, reset: false }]);
                 logger.info(`${getDebugLogHeader(message)} | Include added: ${guildPreference.getDisplayedIncludesGroupNames()}`);
                 break;
             case AddType.EXCLUDE:
@@ -143,7 +143,7 @@ export default class AddCommand implements BaseCommand {
                 }
 
                 await guildPreference.setExcludes(matchedGroups);
-                await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.EXCLUDE, reset: false });
+                await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.EXCLUDE, reset: false }]);
                 logger.info(`${getDebugLogHeader(message)} | Exclude added: ${guildPreference.getDisplayedExcludesGroupNames()}`);
                 break;
             }

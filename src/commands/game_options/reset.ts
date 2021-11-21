@@ -4,6 +4,8 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import { getDebugLogHeader, sendOptionsMessage } from "../../helpers/discord_utils";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { GameOptionInternalToGameOption } from "../../structures/guild_preference";
+import { GameOption } from "../../types";
 
 const logger = new IPCLogger("reset");
 
@@ -31,8 +33,12 @@ export default class ResetCommand implements BaseCommand {
 
     call = async ({ message }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
-        await guildPreference.resetToDefault();
+        const resetOptions = await guildPreference.resetToDefault();
         logger.info(`${getDebugLogHeader(message)} | Reset to default guild preferences`);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, null);
+        await sendOptionsMessage(MessageContext.fromMessage(message),
+            guildPreference,
+            resetOptions.map((x) => ({ option: GameOptionInternalToGameOption[x] as GameOption, reset: true })),
+            false,
+            true);
     };
 }

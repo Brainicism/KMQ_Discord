@@ -55,14 +55,14 @@ export default class MultiGuessCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.MULTIGUESS);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.MULTIGUESS, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.MULTIGUESS, reset: true }]);
             logger.info(`${getDebugLogHeader(message)} | Multiguess type reset.`);
             return;
         }
 
         const multiGuessType = parsedMessage.components[0] as MultiGuessType;
         await guildPreference.setMultiGuessType(multiGuessType);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.MULTIGUESS, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.MULTIGUESS, reset: false }]);
         logger.info(`${getDebugLogHeader(message)} | Multiguess type set to ${multiGuessType}`);
     };
 }
