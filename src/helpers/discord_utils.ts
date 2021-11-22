@@ -728,7 +728,7 @@ export async function sendScoreboardMessage(message: GuildTextableMessage, gameS
         return sendInfoMessage(MessageContext.fromMessage(message), {
             color: EMBED_SUCCESS_COLOR,
             description: "(╯°□°）╯︵ ┻━┻",
-            title: "**Scoreboard**",
+            title: "Scoreboard",
         });
     }
 
@@ -744,7 +744,7 @@ export async function sendScoreboardMessage(message: GuildTextableMessage, gameS
 
     const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map((winnersFieldSubset) => ({
         color: EMBED_SUCCESS_COLOR,
-        title: "**Scoreboard**",
+        title: "Scoreboard",
         fields: winnersFieldSubset,
         footer: {
             text: footerText,
