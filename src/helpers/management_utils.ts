@@ -3,7 +3,7 @@
 import schedule from "node-schedule";
 import _ from "lodash";
 import { IPCLogger } from "../logger";
-import { state } from "../kmq";
+import { state } from "../kmq_worker";
 import { sendInfoMessage } from "./discord_utils";
 import messageCreateHandler from "../events/client/messageCreate";
 import voiceChannelLeaveHandler from "../events/client/voiceChannelLeave";

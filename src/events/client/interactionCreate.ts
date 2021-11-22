@@ -2,7 +2,7 @@ import Eris from "eris";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
 import { getUserTag, tryInteractionAcknowledge, tryCreateInteractionErrorAcknowledgement } from "../../helpers/discord_utils";
-import { state } from "../../kmq";
+import { state } from "../../kmq_worker";
 import { handleProfileInteraction } from "../../commands/game_commands/profile";
 
 export const BOOKMARK_COMMAND_NAME = "Bookmark Song";
