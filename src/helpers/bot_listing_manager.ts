@@ -1,6 +1,6 @@
 import Axios from "axios";
 import { IPCLogger } from "../logger";
-import { state } from "../kmq";
+import { state } from "../kmq_worker";
 import dbContext from "../database_context";
 import { EnvType } from "../types";
 import { VOTE_BONUS_DURATION } from "../commands/game_commands/vote";

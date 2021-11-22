@@ -1,4 +1,4 @@
-import { state } from "../../kmq";
+import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
 import { EnvType } from "../../types";
 

@@ -12,7 +12,7 @@ import {
 } from "../helpers/discord_utils";
 import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, getMultipleChoiceOptions, userBonusIsActive } from "../helpers/game_utils";
 import { delay, getOrdinalNum, setDifference, bold, codeLine, chunkArray, chooseRandom } from "../helpers/utils";
-import { state } from "../kmq";
+import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
 import { QueriedSong, PlayerRoundResult, GameType } from "../types";
 import GameRound from "./game_round";

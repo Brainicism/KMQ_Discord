@@ -12,7 +12,7 @@ import { IPCLogger } from "../../logger";
 import { ArtistType } from "../../commands/game_options/artisttype";
 import { SubunitsPreference } from "../../commands/game_options/subunits";
 import { FOREIGN_LANGUAGE_TAGS, LanguageType } from "../../commands/game_options/language";
-import { state } from "../../kmq";
+import { state } from "../../kmq_worker";
 import GameSession from "../../structures/game_session";
 import { OstPreference } from "../../commands/game_options/ost";
 import { NON_OFFICIAL_VIDEO_TAGS, ReleaseType } from "../../commands/game_options/release";

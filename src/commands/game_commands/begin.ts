@@ -7,7 +7,7 @@ import { getDebugLogHeader, sendErrorMessage, getUserVoiceChannel, getMention } 
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import GameSession from "../../structures/game_session";
-import { state } from "../../kmq";
+import { state } from "../../kmq_worker";
 import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("begin");

@@ -2,7 +2,7 @@ import Eris from "eris";
 import CommandPrechecks from "../../command_prechecks";
 import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../events/client/interactionCreate";
 import { sendInfoMessage } from "../../helpers/discord_utils";
-import { state } from "../../kmq";
+import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { EnvType } from "../../types";

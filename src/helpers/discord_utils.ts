@@ -10,7 +10,7 @@ import { getSongCount, userBonusIsActive } from "./game_utils";
 import { getFact } from "../fact_generator";
 import { EmbedPayload, GameOption, GameOptionCommand, PriorityGameOption, ConflictingGameOptions, GuildTextableMessage, PlayerRoundResult, GameInfoMessage, GameType, QueriedSong } from "../types";
 import { chunkArray, codeLine, bold, underline, italicize, strikethrough, chooseWeightedRandom, getOrdinalNum, friendlyFormattedNumber, delay, standardDateFormat } from "./utils";
-import { state } from "../kmq";
+import { state } from "../kmq_worker";
 import Scoreboard from "../structures/scoreboard";
 import GameRound from "../structures/game_round";
 import dbContext from "../database_context";

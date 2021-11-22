@@ -8,7 +8,7 @@ import dbContext from "../../database_context";
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
-import { state } from "../../kmq";
+import { state } from "../../kmq_worker";
 import { friendlyFormattedDate, friendlyFormattedNumber, measureExecutionTime } from "../../helpers/utils";
 
 const logger = new IPCLogger("stats");

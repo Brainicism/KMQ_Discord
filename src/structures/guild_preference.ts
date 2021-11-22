@@ -15,7 +15,7 @@ import { GameOption, MatchedArtist } from "../types";
 import { DEFAULT_OST_PREFERENCE, OstPreference } from "../commands/game_options/ost";
 import { DEFAULT_RELEASE_TYPE, ReleaseType } from "../commands/game_options/release";
 import { DEFAULT_MULTIGUESS_TYPE, MultiGuessType } from "../commands/game_options/multiguess";
-import { state } from "../kmq";
+import { state } from "../kmq_worker";
 import { SpecialType } from "../commands/game_options/special";
 import { AnswerType, DEFAULT_ANSWER_TYPE } from "../commands/game_options/answer";
 
