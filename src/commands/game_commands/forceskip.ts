@@ -49,7 +49,7 @@ export default class ForceSkipCommand implements BaseCommand {
         gameSession.gameRound.skipAchieved = true;
         sendInfoMessage(MessageContext.fromMessage(message), {
             color: EMBED_SUCCESS_COLOR,
-            title: "**Skip**",
+            title: "Skip",
             description: "Owner has forceskipped the round...",
             thumbnailUrl: KmqImages.NOT_IMPRESSED,
         }, true);
