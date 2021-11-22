@@ -40,7 +40,7 @@ export default class GroupsCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.GROUPS);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GROUPS, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.GROUPS, reset: true }]);
             logger.info(`${getDebugLogHeader(message)} | Groups reset.`);
             return;
         }
@@ -79,7 +79,7 @@ export default class GroupsCommand implements BaseCommand {
         }
 
         await guildPreference.setGroups(matchedGroups);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GROUPS, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.GROUPS, reset: false }]);
         logger.info(`${getDebugLogHeader(message)} | Groups set to ${guildPreference.getDisplayedGroupNames()}`);
     };
 }

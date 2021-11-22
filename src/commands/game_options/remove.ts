@@ -105,19 +105,19 @@ export default class RemoveCommand implements BaseCommand {
             case RemoveType.ARTIST:
             case RemoveType.ARTISTS:
                 await guildPreference.setGroups(remainingGroups);
-                await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.GROUPS, reset: false });
+                await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.GROUPS, reset: false }]);
                 logger.info(`${getDebugLogHeader(message)} | Group removed: ${rawGroupsToRemove}`);
                 break;
             case RemoveType.INCLUDE:
             case RemoveType.INCLUDES:
                 await guildPreference.setIncludes(remainingGroups);
-                await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.INCLUDE, reset: false });
+                await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.INCLUDE, reset: false }]);
                 logger.info(`${getDebugLogHeader(message)} | Include removed: ${rawGroupsToRemove}`);
                 break;
             case RemoveType.EXCLUDE:
             case RemoveType.EXCLUDES:
                 await guildPreference.setExcludes(remainingGroups);
-                await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.EXCLUDE, reset: false });
+                await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.EXCLUDE, reset: false }]);
                 logger.info(`${getDebugLogHeader(message)} | Exclude removed: ${rawGroupsToRemove}`);
                 break;
             default:

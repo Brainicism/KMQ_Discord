@@ -56,14 +56,14 @@ export default class LanguageCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.LANGUAGE_TYPE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.LANGUAGE_TYPE, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.LANGUAGE_TYPE, reset: true }]);
             logger.info(`${getDebugLogHeader(message)} | Language type reset.`);
             return;
         }
 
         const languageType = parsedMessage.components[0] as LanguageType;
         await guildPreference.setLanguageType(languageType);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.LANGUAGE_TYPE, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.LANGUAGE_TYPE, reset: false }]);
         logger.info(`${getDebugLogHeader(message)} | Language type set to ${languageType}`);
     };
 }
