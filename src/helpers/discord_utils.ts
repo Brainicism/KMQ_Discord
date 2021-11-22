@@ -475,31 +475,27 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     }
 
     const songAndArtist = bold(`"${gameRound.originalSongName}" - ${gameRound.artistName}`);
-    if (isMultipleChoiceMode) {
-        await gameRound.interactionMessage.edit({
-            embeds: [{
-                color,
-                title: `${songAndArtist} (${gameRound.publishDate.getFullYear()})`,
-                url: `https://youtu.be/${gameRound.videoID}`,
-                description,
-                thumbnail: { url: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg` },
-                fields,
-                footer: { text: `${friendlyFormattedNumber(gameRound.views)} views${footer.text ? `\n${footer.text}` : ""}` },
-            }],
-        });
-
-        return gameRound.interactionMessage;
-    }
-
-    return sendInfoMessage(messageContext, {
+    const embed = {
         color,
         title: `${songAndArtist} (${gameRound.publishDate.getFullYear()})`,
         url: `https://youtu.be/${gameRound.videoID}`,
         description,
-        thumbnailUrl: `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`,
         fields,
-        footerText: `${friendlyFormattedNumber(gameRound.views)} views${footer.text ? `\n${footer.text}` : ""}`,
-    }, correctGuess && !isMultipleChoiceMode, false);
+    };
+
+    const thumbnailUrl = `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`;
+    const footerText = `${friendlyFormattedNumber(gameRound.views)} views${footer.text ? `\n${footer.text}` : ""}`;
+
+    if (isMultipleChoiceMode && gameRound.interactionMessage) {
+        embed["thumbnail"] = { url: thumbnailUrl };
+        embed["footer"] = { text: footerText };
+        await gameRound.interactionMessage.edit({ embeds: [embed] });
+        return gameRound.interactionMessage;
+    }
+
+    embed["thumbnailUrl"] = thumbnailUrl;
+    embed["footerText"] = footerText;
+    return sendInfoMessage(messageContext, embed, correctGuess && !isMultipleChoiceMode, false);
 }
 
 /**
