@@ -91,6 +91,32 @@ const enum GameOptionInternal {
     FORCE_PLAY_SONG = "forcePlaySongID",
 }
 
+export const GameOptionInternalToGameOption: { [option: string]: string } = {
+    [GameOptionInternal.BEGINNING_YEAR]: GameOption.CUTOFF,
+    [GameOptionInternal.END_YEAR]: GameOption.CUTOFF,
+    [GameOptionInternal.GENDER]: GameOption.GENDER,
+    [GameOptionInternal.LIMIT_START]: GameOption.LIMIT,
+    [GameOptionInternal.LIMIT_END]: GameOption.LIMIT,
+    [GameOptionInternal.SEEK_TYPE]: GameOption.SEEK_TYPE,
+    [GameOptionInternal.SPECIAL_TYPE]: GameOption.SPECIAL_TYPE,
+    [GameOptionInternal.GUESS_MODE_TYPE]: GameOption.GUESS_MODE_TYPE,
+    [GameOptionInternal.RELEASE_TYPE]: GameOption.RELEASE_TYPE,
+    [GameOptionInternal.ARTIST_TYPE]: GameOption.ARTIST_TYPE,
+    [GameOptionInternal.ANSWER_TYPE]: GameOption.ANSWER_TYPE,
+    [GameOptionInternal.SHUFFLE_TYPE]: GameOption.SHUFFLE_TYPE,
+    [GameOptionInternal.GROUPS]: GameOption.GROUPS,
+    [GameOptionInternal.EXCLUDES]: GameOption.EXCLUDE,
+    [GameOptionInternal.INCLUDES]: GameOption.INCLUDE,
+    [GameOptionInternal.GOAL]: GameOption.GOAL,
+    [GameOptionInternal.GUESS_TIMEOUT]: GameOption.TIMER,
+    [GameOptionInternal.DURATION]: GameOption.DURATION,
+    [GameOptionInternal.LANGUAGE_TYPE]: GameOption.LANGUAGE_TYPE,
+    [GameOptionInternal.MULTI_GUESS_TYPE]: GameOption.MULTIGUESS,
+    [GameOptionInternal.SUBUNIT_PREFERENCE]: GameOption.SUBUNIT_PREFERENCE,
+    [GameOptionInternal.OST_PREFERENCE]: GameOption.OST_PREFERENCE,
+    [GameOptionInternal.FORCE_PLAY_SONG]: GameOption.FORCE_PLAY_SONG,
+};
+
 /**
  * @param text - The text to truncate
  * @param length - The number of characters to truncate to
@@ -272,7 +298,7 @@ export default class GuildPreference {
      * @param guildID - The guildID of the guild containing presetName
      * @returns whether the preset was loaded
      */
-    async loadPreset(presetName: string, guildID: string): Promise<boolean> {
+    async loadPreset(presetName: string, guildID: string): Promise<[boolean, Array<GameOption>]> {
         const preset: { [x: string]: any } = (await dbContext.kmq("game_option_presets")
             .select(["option_name", "option_value"])
             .where("guild_id", "=", guildID)
@@ -281,7 +307,7 @@ export default class GuildPreference {
             .reduce(((total, curr) => Object.assign(total, curr)), {});
 
         if (!preset || Object.keys(preset).length === 0) {
-            return false;
+            return [false, []];
         }
 
         const oldOptions = this.gameOptions;
@@ -289,7 +315,7 @@ export default class GuildPreference {
         const updatedOptions = Object.entries(this.gameOptions).filter((option) => !_.isEqual(oldOptions[option[0]], option[1]));
         if (updatedOptions.length === 0) {
             // User loads a preset with the exact same options as what is currently set
-            return true;
+            return [true, []];
         }
 
         const updatedOptionsObj = updatedOptions.map((x) => {
@@ -299,7 +325,7 @@ export default class GuildPreference {
         });
 
         await this.updateGuildPreferences(updatedOptionsObj);
-        return true;
+        return [true, updatedOptions.map((x) => x[0] as GameOption)];
     }
 
     /**
@@ -668,7 +694,8 @@ export default class GuildPreference {
     }
 
     /** Resets all options to the default value */
-    async resetToDefault() {
+    async resetToDefault(): Promise<Array<GameOption>> {
+        const oldOptions = this.gameOptions;
         this.gameOptions = { ...GuildPreference.DEFAULT_OPTIONS };
         const options = Object.entries(this.gameOptions).map((x) => {
             const optionName = x[0];
@@ -677,5 +704,8 @@ export default class GuildPreference {
         });
 
         await this.updateGuildPreferences(options);
+
+        const updatedOptions = Object.entries(this.gameOptions).filter((option) => !_.isEqual(oldOptions[option[0]], option[1]));
+        return updatedOptions.map((x) => x[0] as GameOption);
     }
 }

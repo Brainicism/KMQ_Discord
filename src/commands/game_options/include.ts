@@ -38,7 +38,7 @@ export default class IncludeCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.INCLUDE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.INCLUDE, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.INCLUDE, reset: true }]);
             logger.info(`${getDebugLogHeader(message)} | Includes reset.`);
             return;
         }
@@ -70,7 +70,7 @@ export default class IncludeCommand implements BaseCommand {
         }
 
         await guildPreference.setIncludes(matchedGroups);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.INCLUDE, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.INCLUDE, reset: false }]);
         logger.info(`${getDebugLogHeader(message)} | Includes set to ${guildPreference.getDisplayedIncludesGroupNames()}`);
     };
 }

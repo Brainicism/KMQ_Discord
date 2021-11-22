@@ -20,7 +20,7 @@ const logger = new IPCLogger("skip");
 
 async function sendSkipNotification(message: GuildTextableMessage, gameSession: GameSession) {
     await sendInfoMessage(MessageContext.fromMessage(message), {
-        title: "**Skip**",
+        title: "Skip",
         description: `${gameSession.gameRound.getNumSkippers()}/${getMajorityCount(message.guildID)} skips received.`,
     }, true);
 }
@@ -28,7 +28,7 @@ async function sendSkipNotification(message: GuildTextableMessage, gameSession: 
 async function sendSkipMessage(message: GuildTextableMessage, gameRound: GameRound) {
     await sendInfoMessage(MessageContext.fromMessage(message), {
         color: EMBED_SUCCESS_COLOR,
-        title: "**Skip**",
+        title: "Skip",
         description: `${gameRound.getNumSkippers()}/${getMajorityCount(message.guildID)} skips achieved, skipping...`,
         thumbnailUrl: KmqImages.NOT_IMPRESSED,
     });

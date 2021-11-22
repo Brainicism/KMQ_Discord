@@ -10,8 +10,8 @@ import {
     getDebugLogHeader, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, getUserVoiceChannel, sendEndGameMessage, getCurrentVoiceMembers,
     sendBookmarkedSongs, tryInteractionAcknowledge, tryCreateInteractionSuccessAcknowledgement, tryCreateInteractionErrorAcknowledgement, getMention,
 } from "../helpers/discord_utils";
-import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, userBonusIsActive, getMultipleChoiceOptions } from "../helpers/game_utils";
-import { delay, getOrdinalNum, isPowerHour, isWeekend, setDifference, bold, codeLine, chunkArray, chooseRandom } from "../helpers/utils";
+import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, getMultipleChoiceOptions, userBonusIsActive } from "../helpers/game_utils";
+import { delay, getOrdinalNum, setDifference, bold, codeLine, chunkArray, chooseRandom } from "../helpers/utils";
 import { state } from "../kmq";
 import { IPCLogger } from "../logger";
 import { QueriedSong, PlayerRoundResult, GameType } from "../types";
@@ -31,7 +31,7 @@ import KmqMember from "./kmq_member";
 import { MultiGuessType } from "../commands/game_options/multiguess";
 import { specialFfmpegArgs } from "../commands/game_options/special";
 import { AnswerType } from "../commands/game_options/answer";
-import { ExpBonusModifiers } from "../commands/game_commands/exp";
+import { calculateTotalRoundExp } from "../commands/game_commands/exp";
 
 const MULTIGUESS_DELAY = 1500;
 const logger = new IPCLogger("game_session");
@@ -209,9 +209,10 @@ export default class GameSession {
             // update scoreboard
             playerRoundResults = await Promise.all(guessResult.correctGuessers.map(async (correctGuesser, idx) => {
                 const guessPosition = idx + 1;
-                const expGain = this.calculateExpGain(guildPreference,
+                const expGain = await calculateTotalRoundExp(guildPreference,
                     gameRound,
                     getNumParticipants(this.voiceChannelID),
+                    this.lastGuesser.streak,
                     guessSpeed,
                     guessPosition,
                     await userBonusIsActive(correctGuesser.id));
@@ -305,7 +306,7 @@ export default class GameSession {
 
         this.finished = true;
         deleteGameSession(this.guildID);
-        await this.endRound({ correct: false }, await getGuildPreference(this.guildID));
+        await this.endRound({ correct: false }, await getGuildPreference(this.guildID), new MessageContext(this.textChannelID));
         const voiceConnection = state.client.voiceConnections.get(this.guildID);
 
         if (this.gameType === GameType.COMPETITION) {
@@ -1103,68 +1104,6 @@ export default class GameSession {
         if (!this.gameRound) return "No active game round";
         return `${this.gameRound.songName}:${this.gameRound.artistName}:${this.gameRound.videoID}`;
     }
-
-    /**
-     * @param guildPreference - The guild preference
-     * @param baseExp - The base amount of EXP the GameRound provides
-     * @param numParticipants - The number of participants in the voice channel at the time of guess
-     * @param guessSpeed - The time taken to guess correctly
-     * @returns The amount of EXP gained based on the current game options
-     */
-    private calculateExpGain(guildPreference: GuildPreference, gameRound: GameRound, numParticipants: number, guessSpeed: number, place: number, voteBonusExp: boolean): number {
-        let expModifier = 1;
-        // incentivize for number of participants from 1x to 1.5x
-        expModifier *= (0.1 * (Math.min(numParticipants, 6) - 1) + 1);
-
-        // penalize for using artist guess modes
-        if (guildPreference.gameOptions.guessModeType === GuessModeType.ARTIST || guildPreference.gameOptions.guessModeType === GuessModeType.BOTH) {
-            if (guildPreference.isGroupsMode()) return 0;
-            expModifier *= ExpBonusModifiers.ARTIST_GUESS;
-        }
-
-        // bonus for quick guess
-        if (guessSpeed < 3500) {
-            expModifier *= ExpBonusModifiers.QUICK_GUESS;
-        }
-
-        // bonus for guess streaks
-        if (this.lastGuesser.streak >= 5) {
-            expModifier *= ExpBonusModifiers.GUESS_STREAK;
-        }
-
-        // bonus for voting
-        if (voteBonusExp) {
-            expModifier *= ExpBonusModifiers.VOTE;
-        }
-
-        if (guildPreference.isMultipleChoiceMode()) {
-            const difficulty = guildPreference.gameOptions.answerType;
-            switch (difficulty) {
-                case AnswerType.MULTIPLE_CHOICE_EASY:
-                    expModifier *= ExpBonusModifiers.MC_GUESS_EASY;
-                    break;
-                case AnswerType.MULTIPLE_CHOICE_MED:
-                    expModifier *= ExpBonusModifiers.MC_GUESS_MEDIUM;
-                    break;
-                case AnswerType.MULTIPLE_CHOICE_HARD:
-                    expModifier *= ExpBonusModifiers.MC_GUESS_HARD;
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        // for guessing a bonus group
-        if (gameRound.isBonusArtist()) {
-            expModifier *= ExpBonusModifiers.BONUS_ARTIST;
-        }
-
-        // random game round bonus
-        expModifier *= gameRound.bonusModifier;
-
-        return Math.floor((expModifier * gameRound.getExpReward()) / place);
-    }
-
     /**
      * https://www.desmos.com/calculator/9x3dkrmt84
      * @returns the base EXP reward for the gameround
@@ -1172,14 +1111,12 @@ export default class GameSession {
     private calculateBaseExp(): number {
         const songCount = this.getSongCount();
         // minimum amount of songs for exp gain
-        if (songCount.count < 10) return 0;
         const expBase = 2000 / (1 + (Math.exp(1 - (0.0005 * (songCount.count - 1500)))));
         let expJitter = expBase * (0.05 * Math.random());
         expJitter *= Math.round(Math.random()) ? 1 : -1;
 
         // double exp weekend multiplier
-        const multiplier = (isWeekend() || isPowerHour()) ? ExpBonusModifiers.POWER_HOUR : 1;
-        return (expBase + expJitter) * multiplier;
+        return expBase + expJitter;
     }
 
     private multiguessDelayIsActive(guildPreference: GuildPreference) {

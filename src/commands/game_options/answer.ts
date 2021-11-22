@@ -60,14 +60,14 @@ export default class AnswerCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.ANSWER_TYPE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.ANSWER_TYPE, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.ANSWER_TYPE, reset: true }]);
             logger.info(`${getDebugLogHeader(message)} | Answer type reset.`);
             return;
         }
 
         const answerType = parsedMessage.components[0] as AnswerType;
         await guildPreference.setAnswerType(answerType);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.ANSWER_TYPE, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.ANSWER_TYPE, reset: false }]);
         logger.info(`${getDebugLogHeader(message)} | Answer type set to ${answerType}`);
     };
 }

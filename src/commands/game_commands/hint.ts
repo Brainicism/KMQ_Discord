@@ -34,12 +34,12 @@ async function sendHintNotification(message: GuildTextableMessage, gameSession: 
     if (gameSession.gameType === GameType.ELIMINATION) {
         const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: "**Hint Request**",
+            title: "Hint Request",
             description: `${gameSession.gameRound.getHintRequests()}/${Math.floor(eliminationScoreboard.getAlivePlayersCount() * 0.5) + 1} hint requests received.`,
         }, true);
     } else {
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: "**Hint Request**",
+            title: "Hint Request",
             description: `${gameSession.gameRound.getHintRequests()}/${getMajorityCount(message.guildID)} hint requests received.`,
         }, true);
     }
