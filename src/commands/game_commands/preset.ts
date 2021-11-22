@@ -4,11 +4,11 @@ import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import GuildPreference from "../../structures/guild_preference";
+import GuildPreference, { GameOptionInternalToGameOption } from "../../structures/guild_preference";
 import { KmqImages } from "../../constants";
-import { GameOption } from "../../types";
 import dbContext from "../../database_context";
 import CommandPrechecks from "../../command_prechecks";
+import { GameOption } from "../../types";
 
 const logger = new IPCLogger("preset");
 const PRESET_NAME_MAX_LENGTH = 25;
@@ -170,8 +170,8 @@ export default class PresetCommand implements BaseCommand {
         }
 
         const loadResult = await guildPreference.loadPreset(presetName, guildID);
-        if (loadResult) {
-            sendOptionsMessage(messageContext, guildPreference, { option: GameOption.PRESET, reset: false });
+        if (loadResult[0]) {
+            sendOptionsMessage(messageContext, guildPreference, loadResult[1].map((x) => ({ option: GameOptionInternalToGameOption[x] as GameOption, reset: false })), true);
             logger.info(`${getDebugLogHeader(messageContext)} | Preset '${presetName}' successfully loaded`);
         } else {
             logger.warn(`${getDebugLogHeader(messageContext)} | Tried to load non-existent preset '${presetName}'`);

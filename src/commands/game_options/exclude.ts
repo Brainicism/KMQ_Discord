@@ -39,7 +39,7 @@ export default class ExcludeCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.EXCLUDE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.EXCLUDE, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.EXCLUDE, reset: true }]);
             logger.info(`${getDebugLogHeader(message)} | Excludes reset.`);
             return;
         }
@@ -75,7 +75,7 @@ export default class ExcludeCommand implements BaseCommand {
         }
 
         await guildPreference.setExcludes(matchedGroups);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.EXCLUDE, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.EXCLUDE, reset: false }]);
         logger.info(`${getDebugLogHeader(message)} | Excludes set to ${guildPreference.getDisplayedExcludesGroupNames()}`);
     };
 }

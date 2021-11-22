@@ -55,14 +55,14 @@ export default class ShuffleCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.SHUFFLE_TYPE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SHUFFLE_TYPE, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.SHUFFLE_TYPE, reset: true }]);
             logger.info(`${getDebugLogHeader(message)} | Shuffle type reset.`);
             return;
         }
 
         const shuffleType = parsedMessage.components[0].toLowerCase() as ShuffleType;
         await guildPreference.setShuffleType(shuffleType);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SHUFFLE_TYPE, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.SHUFFLE_TYPE, reset: false }]);
         logger.info(`${getDebugLogHeader(message)} | Shuffle set to ${shuffleType}`);
     };
 }

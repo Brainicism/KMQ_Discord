@@ -110,14 +110,14 @@ export default class SpecialCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.SPECIAL_TYPE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SPECIAL_TYPE, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.SPECIAL_TYPE, reset: true }]);
             logger.info(`${getDebugLogHeader(message)} | Special reset.`);
             return;
         }
 
         const specialType = parsedMessage.components[0] as SpecialType;
         await guildPreference.setSpecialType(specialType);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SPECIAL_TYPE, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.SPECIAL_TYPE, reset: false }]);
         logger.info(`${getDebugLogHeader(message)} | Special type set to ${specialType}`);
     };
 }

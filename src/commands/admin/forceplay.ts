@@ -18,14 +18,14 @@ export default class ForcePlayCommand implements BaseCommand {
 
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.FORCE_PLAY_SONG);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.FORCE_PLAY_SONG, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.FORCE_PLAY_SONG, reset: true }]);
             logger.info(`${getDebugLogHeader(message)} | Force play song reset.`);
             return;
         }
 
         const forcePlaySongID = parsedMessage.components[0];
         await guildPreference.setForcePlaySong(forcePlaySongID);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.FORCE_PLAY_SONG, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.FORCE_PLAY_SONG, reset: false }]);
         logger.info(`${getDebugLogHeader(message)} | Force play song set to ${guildPreference.gameOptions.forcePlaySongID}`);
     };
 }

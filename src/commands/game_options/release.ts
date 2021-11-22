@@ -58,14 +58,14 @@ export default class ReleaseCommand implements BaseCommand {
 
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.RELEASE_TYPE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.RELEASE_TYPE, reset: true });
+            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.RELEASE_TYPE, reset: true }]);
             logger.info(`${getDebugLogHeader(message)} | Video type reset.`);
             return;
         }
 
         const releaseType = parsedMessage.components[0].toLowerCase() as ReleaseType;
         await guildPreference.setReleaseType(releaseType);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.RELEASE_TYPE, reset: false });
+        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.RELEASE_TYPE, reset: false }]);
         logger.info(`${getDebugLogHeader(message)} | Video type set to ${releaseType}`);
     };
 }
