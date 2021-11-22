@@ -80,16 +80,16 @@ export async function calculateOptionsExpMultiplierInternal(guildPreference: Gui
 
     if (guildPreference.isMultipleChoiceMode()) {
         const difficulty = guildPreference.gameOptions.answerType;
-        let multipleChoicePenality: ExpBonusModifier;
+        let multipleChoicePenalty: ExpBonusModifier;
         switch (difficulty) {
             case AnswerType.MULTIPLE_CHOICE_EASY:
-                multipleChoicePenality = ExpBonusModifier.MC_GUESS_EASY;
+                multipleChoicePenalty = ExpBonusModifier.MC_GUESS_EASY;
                 break;
             case AnswerType.MULTIPLE_CHOICE_MED:
-                multipleChoicePenality = ExpBonusModifier.MC_GUESS_MEDIUM;
+                multipleChoicePenalty = ExpBonusModifier.MC_GUESS_MEDIUM;
                 break;
             case AnswerType.MULTIPLE_CHOICE_HARD:
-                multipleChoicePenality = ExpBonusModifier.MC_GUESS_HARD;
+                multipleChoicePenalty = ExpBonusModifier.MC_GUESS_HARD;
                 break;
             default:
                 break;
@@ -97,7 +97,7 @@ export async function calculateOptionsExpMultiplierInternal(guildPreference: Gui
 
         modifiers.push({
             displayName: "Multiple Choice Penalty",
-            name: multipleChoicePenality,
+            name: multipleChoicePenalty,
             isPenalty: true,
         });
     }
@@ -136,7 +136,7 @@ async function calculateOptionsExpMultiplier(guildPreference: GuildPreference, v
 }
 
 export function participantExpScalingModifier(numParticipants: number) {
-    return (0.1 * (Math.min(numParticipants, PARTICIPANT_MODIFIER_MAX_PARTICIPANTS) - 1) + 1);
+    return (1 + 0.1 * (Math.min(numParticipants, PARTICIPANT_MODIFIER_MAX_PARTICIPANTS) - 1));
 }
 
 export function calculateRoundExpMultiplier(gameRound: GameRound, numParticipants: number, streak: number, guessSpeed: number, place: number): number {
