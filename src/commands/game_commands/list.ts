@@ -83,6 +83,6 @@ export default class ListCommand implements BaseCommand {
             await sendInfoMessage(MessageContext.fromMessage(message), { title: `Current \`${optionListed}\` Value`, description: optionValue });
         }
 
-        logger.info(`${getDebugLogHeader(message)} | List '${optionListed}' Retrieved`);
+        logger.info(`${getDebugLogHeader(message)} | List '${optionListed}' retrieved`);
     };
 }

@@ -104,7 +104,8 @@ export default class PlayCommand implements BaseCommand {
         const voiceChannel = getUserVoiceChannel(MessageContext.fromMessage(message));
         const timeUntilRestart = await getTimeUntilRestart();
         if (timeUntilRestart) {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Cannot Start New Game", description: `Bot is restarting in \`${timeUntilRestart}\` minutes, please wait until the bot is back up!` });
+            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Cannot Start New Game", description: `Bot is restarting in \`${timeUntilRestart}\` minutes, please wait until the bot is back up!` });
+            logger.warn(`${getDebugLogHeader(message)} | Attempted to start game before restart.`);
             return;
         }
 
@@ -128,6 +129,7 @@ export default class PlayCommand implements BaseCommand {
         if (gameSessions[message.guildID] && !gameSessions[message.guildID].sessionInitialized && (isEliminationMode || isTeamsMode)) {
             // User sent ,play elimination or ,play teams twice, reset the GameSession
             deleteGameSession(message.guildID);
+            logger.info(`${getDebugLogHeader(message)} | Teams game session was in progress, has been reset.`);
         }
 
         const messageContext = MessageContext.fromMessage(message);
@@ -153,14 +155,16 @@ export default class PlayCommand implements BaseCommand {
 
                 gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, GameType.ELIMINATION, lives);
                 gameSession.addEliminationParticipant(gameOwner);
+                logger.info(`${getDebugLogHeader(message)} | Elimination game session created.`);
                 await sendInfoMessage(messageContext, { title: startTitle, description: gameInstructions, thumbnailUrl: KmqImages.HAPPY });
             } else if (isTeamsMode) {
                 // (1) TEAMS game creation
                 const startTitle = `\`${prefix}join\` a team!`;
                 const gameInstructions = `Team leaders, type \`${prefix}join [team name]\` to form a new team. Remember, switching teams mid-game will forfeit all your current score and EXP.`;
 
-                await sendInfoMessage(messageContext, { title: startTitle, description: gameInstructions, thumbnailUrl: KmqImages.HAPPY });
                 gameSession = new GameSession(textChannel.id, voiceChannel.id, textChannel.guild.id, gameOwner, GameType.TEAMS);
+                logger.info(`${getDebugLogHeader(message)} | Team game session created.`);
+                await sendInfoMessage(messageContext, { title: startTitle, description: gameInstructions, thumbnailUrl: KmqImages.HAPPY });
             } else {
                 // (1 and 2) CLASSIC and COMPETITION game creation
                 if (gameSessions[message.guildID]) {
@@ -170,6 +174,7 @@ export default class PlayCommand implements BaseCommand {
                     const gameSpecificInstructions = oldGameType === GameType.ELIMINATION ? `\`${prefix}join\` the game` : `\`${prefix}join [team name]\` a team`;
                     const oldGameTypeInstructions = `If you meant to start a \`${oldGameType}\` game, \`${prefix}end\` this game, call \`${prefix}play ${oldGameType}\`, ${gameSpecificInstructions}, and then call \`${prefix}begin\`.`;
 
+                    logger.warn(`${getDebugLogHeader(message)} | User attempted ,play on a mode that requires player joins.`);
                     sendErrorMessage(messageContext, { title: ignoringOldGameTypeTitle, description: oldGameTypeInstructions, thumbnailUrl: KmqImages.DEAD });
                 }
 
@@ -194,6 +199,7 @@ export default class PlayCommand implements BaseCommand {
 
             gameSessions[message.guildID] = gameSession;
         } else {
+            logger.warn(`${getDebugLogHeader(message)} | Attempted to start a game while one is already in progress.`);
             await sendErrorMessage(messageContext, { title: "Game Already in Session" });
         }
     };

@@ -221,12 +221,12 @@ export default class ExpCommand implements BaseCommand {
             inline: false,
         });
 
-        logger.info(`${getDebugLogHeader(message)} | User requested EXP modifier info.`);
-
-        sendInfoMessage(MessageContext.fromMessage(message), {
+        await sendInfoMessage(MessageContext.fromMessage(message), {
             title: "EXP Bonuses",
             fields,
             thumbnailUrl: KmqImages.THUMBS_UP,
         });
+
+        logger.info(`${getDebugLogHeader(message)} | EXP modifier info retrieved.`);
     };
 }

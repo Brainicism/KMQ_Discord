@@ -129,5 +129,6 @@ export default class HelpCommand implements BaseCommand {
 
     call = async ({ parsedMessage, message }: CommandArgs) => {
         await helpMessage(message, parsedMessage.argument);
+        logger.info(`${getDebugLogHeader(message)} | Help documentation retrieved.`);
     };
 }

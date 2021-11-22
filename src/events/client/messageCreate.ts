@@ -1,6 +1,6 @@
 import Eris from "eris";
 import { IPCLogger } from "../../logger";
-import { sendOptionsMessage } from "../../helpers/discord_utils";
+import { getDebugLogHeader, sendOptionsMessage } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { state } from "../../kmq";
 import validate from "../../helpers/validate";
@@ -61,6 +61,7 @@ export default async function messageCreateHandler(message: Eris.Message) {
                 }
             }
 
+            logger.info(`${getDebugLogHeader(message)} | Invoked command '${parsedMessage.action}'.`);
             invokedCommand.call({
                 gameSessions,
                 channel: textChannel,

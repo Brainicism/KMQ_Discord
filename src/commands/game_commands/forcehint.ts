@@ -39,8 +39,8 @@ export default class ForceHintCommand implements BaseCommand {
         }
 
         gameRound.hintRequested(message.author.id);
-        logger.info(`${getDebugLogHeader(message)} | Owner force-hinted.`);
         gameRound.hintUsed = true;
-        sendInfoMessage(MessageContext.fromMessage(message), { title: "Hint", description: generateHint(guildPreference.gameOptions.guessModeType, gameRound), thumbnailUrl: KmqImages.READING_BOOK });
+        await sendInfoMessage(MessageContext.fromMessage(message), { title: "Hint", description: generateHint(guildPreference.gameOptions.guessModeType, gameRound), thumbnailUrl: KmqImages.READING_BOOK });
+        logger.info(`${getDebugLogHeader(message)} | Owner force-hinted.`);
     };
 }

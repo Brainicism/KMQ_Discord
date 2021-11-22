@@ -19,12 +19,12 @@ export default class ScoreCommand implements BaseCommand {
     call = async ({ message, gameSessions }: CommandArgs) => {
         const gameSession = gameSessions[message.guildID];
         if (!gameSession) {
-            sendInfoMessage(MessageContext.fromMessage(message), { title: "No Active Game", description: `There is no currently active game of KMQ. Start a new game with \`${process.env.BOT_PREFIX}play\`!` });
+            await sendInfoMessage(MessageContext.fromMessage(message), { title: "No Active Game", description: `There is no currently active game of KMQ. Start a new game with \`${process.env.BOT_PREFIX}play\`!` });
             logger.warn(`${getDebugLogHeader(message)} | No active game session.`);
             return;
         }
 
-        logger.info(`${getDebugLogHeader(message)} | Score retrieved`);
         await sendScoreboardMessage(message, gameSession);
+        logger.info(`${getDebugLogHeader(message)} | Score retrieved`);
     };
 }

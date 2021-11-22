@@ -17,7 +17,7 @@ export default class OptionsCommand implements BaseCommand {
 
     call = async ({ message }: CommandArgs) => {
         const guildPreference = await getGuildPreference(message.guildID);
-        logger.info(`${getDebugLogHeader(message)} | Options retrieved`);
         await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, null);
+        logger.info(`${getDebugLogHeader(message)} | Options retrieved`);
     };
 }

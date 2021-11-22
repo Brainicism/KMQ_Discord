@@ -25,7 +25,7 @@ export default class EndCommand implements BaseCommand {
             return;
         }
 
+        await gameSession.endSession();
         logger.info(`${getDebugLogHeader(message)} | Game session ended`);
-        gameSession.endSession();
     };
 }

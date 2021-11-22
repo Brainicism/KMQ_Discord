@@ -144,8 +144,8 @@ export default class PresetCommand implements BaseCommand {
             return;
         }
 
-        await sendInfoMessage(messageContext, { title: "Preset Deleted", description: `Preset \`${presetName}\` successfully deleted.`, thumbnailUrl: KmqImages.NOT_IMPRESSED });
         logger.info(`${getDebugLogHeader(messageContext)} | Preset '${presetName}' successfully deleted.`);
+        await sendInfoMessage(messageContext, { title: "Preset Deleted", description: `Preset \`${presetName}\` successfully deleted.`, thumbnailUrl: KmqImages.NOT_IMPRESSED });
     }
 
     static async loadPreset(presetName: string, guildPreference: GuildPreference, messageContext: MessageContext) {
@@ -171,8 +171,8 @@ export default class PresetCommand implements BaseCommand {
 
         const loadResult = await guildPreference.loadPreset(presetName, guildID);
         if (loadResult[0]) {
-            sendOptionsMessage(messageContext, guildPreference, loadResult[1].map((x) => ({ option: GameOptionInternalToGameOption[x] as GameOption, reset: false })), true);
             logger.info(`${getDebugLogHeader(messageContext)} | Preset '${presetName}' successfully loaded`);
+            sendOptionsMessage(messageContext, guildPreference, loadResult[1].map((x) => ({ option: GameOptionInternalToGameOption[x] as GameOption, reset: false })), true);
         } else {
             logger.warn(`${getDebugLogHeader(messageContext)} | Tried to load non-existent preset '${presetName}'`);
             await sendErrorMessage(messageContext, { title: "Preset Error", description: `Preset \`${presetName}\` doesn't exist.` });
@@ -182,16 +182,19 @@ export default class PresetCommand implements BaseCommand {
     static async savePreset(presetName: string, guildPreference: GuildPreference, messageContext: MessageContext) {
         const presets = await guildPreference.listPresets();
         if (presets.length >= MAX_NUM_PRESETS) {
+            logger.warn(`${getDebugLogHeader(messageContext)} | Can't add present, maximum reached.`);
             await sendErrorMessage(messageContext, { title: "Preset Error", description: `Each guild may only have up to ${MAX_NUM_PRESETS} presets. Please delete some before adding more.` });
             return;
         }
 
         if (presetName.length > PRESET_NAME_MAX_LENGTH) {
+            logger.warn(`${getDebugLogHeader(messageContext)} | Can't add preset, character limit reached.`);
             await sendErrorMessage(messageContext, { title: "Preset Error", description: `Preset name must be at most ${PRESET_NAME_MAX_LENGTH} characters.` });
             return;
         }
 
         if (presetName.startsWith("KMQ-")) {
+            logger.warn(`${getDebugLogHeader(messageContext)} | Can't add preset, illegal prefix.`);
             await sendErrorMessage(messageContext, { title: "Preset Error", description: "Preset name cannot begin with `KMQ-`." });
             return;
         }
@@ -220,19 +223,19 @@ export default class PresetCommand implements BaseCommand {
     static async exportPreset(presetName: string, guildPreference: GuildPreference, messageContext: MessageContext) {
         const presetUUID = await guildPreference.getPresetUUID(presetName);
         if (!presetUUID) {
-            await sendInfoMessage(messageContext, { title: "Preset Export Failed", description: `The given preset \`${presetName}\` does not exist.`, thumbnailUrl: KmqImages.DEAD });
             logger.warn(`${getDebugLogHeader(messageContext)} | Preset export failed; '${presetName}' does not exist`);
+            await sendInfoMessage(messageContext, { title: "Preset Export Failed", description: `The given preset \`${presetName}\` does not exist.`, thumbnailUrl: KmqImages.DEAD });
             return;
         }
 
-        await sendInfoMessage(messageContext, { title: "Preset Exported Successfully", description: `Import \`${presetName}\` as a new preset in other servers using:\n\`${process.env.BOT_PREFIX}preset import ${presetUUID} [preset_name]\`\n\nAlternatively, load the preset's options directly using:\n\`${process.env.BOT_PREFIX}preset load ${presetUUID}\``, thumbnailUrl: KmqImages.THUMBS_UP });
         logger.info(`${getDebugLogHeader(messageContext)} | Preset '${presetName}' successfully exported as ${presetUUID}`);
+        await sendInfoMessage(messageContext, { title: "Preset Exported Successfully", description: `Import \`${presetName}\` as a new preset in other servers using:\n\`${process.env.BOT_PREFIX}preset import ${presetUUID} [preset_name]\`\n\nAlternatively, load the preset's options directly using:\n\`${process.env.BOT_PREFIX}preset load ${presetUUID}\``, thumbnailUrl: KmqImages.THUMBS_UP });
     }
 
     static async importPreset(presetUUID: string, presetName: string, guildPreference: GuildPreference, messageContext: MessageContext) {
         if ((await guildPreference.listPresets()).includes(presetName)) {
-            sendErrorMessage(messageContext, { title: "Preset Import Failed", description: `Preset \`${presetName}\` already exists. You can delete the old one with \`${process.env.BOT_PREFIX}preset delete ${presetName}\`.`, thumbnailUrl: KmqImages.DEAD });
             logger.warn(`${getDebugLogHeader(messageContext)} | Preset import failed; '${presetName}' already exists`);
+            sendErrorMessage(messageContext, { title: "Preset Import Failed", description: `Preset \`${presetName}\` already exists. You can delete the old one with \`${process.env.BOT_PREFIX}preset delete ${presetName}\`.`, thumbnailUrl: KmqImages.DEAD });
             return;
         }
 
@@ -277,6 +280,7 @@ export default class PresetCommand implements BaseCommand {
                 .transacting(trx);
         });
 
+        logger.info(`${getDebugLogHeader(messageContext)} | Preset '${presetName}' imported`);
         sendInfoMessage(messageContext, { title: "Preset Imported Successfully", description: `Load the newly imported preset using \`${process.env.BOT_PREFIX}preset load ${presetName}\`.`, thumbnailUrl: KmqImages.THUMBS_UP });
     }
 

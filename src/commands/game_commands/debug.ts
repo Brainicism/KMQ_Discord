@@ -1,7 +1,7 @@
 import Eris from "eris";
 import * as uuid from "uuid";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { getDebugChannel, sendInfoMessage, getUserVoiceChannel } from "../../helpers/discord_utils";
+import { getDebugChannel, sendInfoMessage, getUserVoiceChannel, getDebugLogHeader } from "../../helpers/discord_utils";
 import { getGuildPreference, getSongCount } from "../../helpers/game_utils";
 import { state } from "../../kmq";
 import { IPCLogger } from "../../logger";
@@ -49,17 +49,19 @@ export default class DebugCommand implements BaseCommand {
         }
 
         const debugID = uuid.v4();
-        sendInfoMessage(MessageContext.fromMessage(message), {
+        await sendInfoMessage(MessageContext.fromMessage(message), {
             title: "Debug Details Sent!",
             description: `If you were asked by a bot developer to do this, give them this:\n\`${debugID}\``,
             thumbnailUrl: KmqImages.READING_BOOK,
         });
 
-        sendInfoMessage(new MessageContext(debugChannel.id), {
+        await sendInfoMessage(new MessageContext(debugChannel.id), {
             title: `Debug Details for User: ${message.author.id}, Guild: ${message.guildID}`,
             footerText: debugID,
             fields,
             timestamp: new Date(),
         });
+
+        logger.info(`${getDebugLogHeader(message)} | Debug info retrieved.`);
     };
 }

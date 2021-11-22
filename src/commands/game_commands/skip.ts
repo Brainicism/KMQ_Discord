@@ -63,10 +63,12 @@ export default class SkipCommand implements BaseCommand {
 
         if (gameSession.gameType === GameType.ELIMINATION) {
             if (!(gameSession.scoreboard as EliminationScoreboard).isPlayerEliminated(message.author.id)) {
+                logger.info(`${getDebugLogHeader(message)} | User skipped, elimination mode`);
                 gameSession.gameRound.userSkipped(message.author.id);
             }
         } else {
             gameSession.gameRound.userSkipped(message.author.id);
+            logger.info(`${getDebugLogHeader(message)} | User skipped`);
         }
 
         if (gameSession.gameRound.skipAchieved || !gameSession.gameRound) {
@@ -81,8 +83,8 @@ export default class SkipCommand implements BaseCommand {
             gameSession.startRound(guildPreference, MessageContext.fromMessage(message));
             logger.info(`${getDebugLogHeader(message)} | Skip majority achieved.`);
         } else {
-            await sendSkipNotification(message, gameSession);
             logger.info(`${getDebugLogHeader(message)} | Skip vote received.`);
+            await sendSkipNotification(message, gameSession);
         }
 
         gameSession.lastActiveNow();
