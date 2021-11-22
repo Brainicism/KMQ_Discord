@@ -1,6 +1,6 @@
 import { getUserTag, getMention } from "../helpers/discord_utils";
 import { roundDecimal, bold } from "../helpers/utils";
-import { state } from "../kmq";
+import { state } from "../kmq_worker";
 
 export default class Player {
     /** The Discord tag of the player, of the format "Player#1234" */

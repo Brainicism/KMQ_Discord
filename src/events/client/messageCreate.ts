@@ -2,7 +2,7 @@ import Eris from "eris";
 import { IPCLogger } from "../../logger";
 import { getDebugLogHeader, sendOptionsMessage } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { state } from "../../kmq";
+import { state } from "../../kmq_worker";
 import validate from "../../helpers/validate";
 import { GuildTextableMessage, ParsedMessage } from "../../types";
 import MessageContext from "../../structures/message_context";

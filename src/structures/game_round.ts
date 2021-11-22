@@ -1,7 +1,7 @@
 import _ from "lodash";
 import Eris from "eris";
 import { GuessModeType } from "../commands/game_options/guessmode";
-import { state } from "../kmq";
+import { state } from "../kmq_worker";
 import KmqMember from "./kmq_member";
 import { ExpBonusModifier, ExpBonusModifierValues } from "../commands/game_commands/exp";
 /** List of characters to remove from song/artist names/guesses */

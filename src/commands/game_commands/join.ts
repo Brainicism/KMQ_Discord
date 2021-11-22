@@ -6,7 +6,7 @@ import { GuildTextableMessage, ParsedMessage, GameType } from "../../types";
 import { getUserTag, sendErrorMessage, sendInfoMessage, getMention, getDebugLogHeader } from "../../helpers/discord_utils";
 import { KmqImages } from "../../constants";
 import { bold } from "../../helpers/utils";
-import { state } from "../../kmq";
+import { state } from "../../kmq_worker";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
 import CommandPrechecks from "../../command_prechecks";

@@ -3,7 +3,7 @@ import * as uuid from "uuid";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getDebugChannel, sendInfoMessage, getUserVoiceChannel, getDebugLogHeader } from "../../helpers/discord_utils";
 import { getGuildPreference, getSongCount } from "../../helpers/game_utils";
-import { state } from "../../kmq";
+import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";

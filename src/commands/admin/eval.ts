@@ -4,7 +4,7 @@ import {
     sendInfoMessage,
 } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
-import { state } from "../../kmq";
+import { state } from "../../kmq_worker";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 
