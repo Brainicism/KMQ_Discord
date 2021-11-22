@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   kmq:
-    image: kmq-dev-bot
+    image: kmq
     build:
       context: ../
       dockerfile: docker/kmq/Dockerfile
@@ -13,7 +13,6 @@ services:
       SONG_DOWNLOAD_DIR: /songs
     volumes:
       - songs:/songs
-      - dump:/dump
     depends_on:
       db:
         condition: service_healthy
@@ -39,5 +38,4 @@ services:
 
 volumes:
   songs:
-  dump:
   mysql:
