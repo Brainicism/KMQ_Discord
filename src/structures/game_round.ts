@@ -3,7 +3,7 @@ import Eris from "eris";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { state } from "../kmq";
 import KmqMember from "./kmq_member";
-import { ExpBonusModifiers } from "../commands/game_commands/exp";
+import { ExpBonusModifier, ExpBonusModifierValues } from "../commands/game_commands/exp";
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
 const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\ \(\)\+\u200B]/g;
@@ -87,7 +87,7 @@ export default class GameRound {
     public readonly views: number;
 
     /** Round bonus modifier */
-    public readonly bonusModifier: number;
+    public bonusModifier: number;
 
     /** List of players who have opted to skip the current GameRound */
     public skippers: Set<string>;
@@ -167,10 +167,10 @@ export default class GameRound {
         this.interactionMessage = null;
         this.bonusModifier = (Math.random() < 0.01) ? _.sample(
             [
-                ExpBonusModifiers.RANDOM_GUESS_BONUS_COMMON,
-                ExpBonusModifiers.RANDOM_GUESS_BONUS_RARE,
-                ExpBonusModifiers.RANDOM_GUESS_BONUS_EPIC,
-                ExpBonusModifiers.RANDOM_GUESS_BONUS_LEGENDARY],
+                ExpBonusModifierValues[ExpBonusModifier.RANDOM_GUESS_BONUS_COMMON],
+                ExpBonusModifierValues[ExpBonusModifier.RANDOM_GUESS_BONUS_RARE],
+                ExpBonusModifierValues[ExpBonusModifier.RANDOM_GUESS_BONUS_EPIC],
+                ExpBonusModifierValues[ExpBonusModifier.RANDOM_GUESS_BONUS_LEGENDARY]],
         ) : 1;
     }
 
