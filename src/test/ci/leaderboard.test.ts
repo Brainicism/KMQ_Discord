@@ -7,7 +7,7 @@ import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
 import GameSession from "../../structures/game_session";
 import { GameType } from "../../types";
-import { state } from "../../kmq";
+import { state } from "../../kmq_worker";
 
 const SERVER_ID = "0";
 const gameStarter = new KmqMember("jisoo", "jisoo#4747", "url", "123");

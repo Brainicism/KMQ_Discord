@@ -1,6 +1,6 @@
 import _ from "lodash";
 import dbContext from "../database_context";
-import { state } from "../kmq";
+import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
 import GameSession from "../structures/game_session";
 import GuildPreference from "../structures/guild_preference";

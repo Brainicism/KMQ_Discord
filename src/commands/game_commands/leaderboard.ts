@@ -5,7 +5,7 @@ import { IPCLogger } from "../../logger";
 import { getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage, sendPaginationedEmbed, EmbedGenerator, sendMessage } from "../../helpers/discord_utils";
 import { getRankNameByLevel } from "./profile";
 import { chooseRandom, friendlyFormattedNumber, bold, arrayToString } from "../../helpers/utils";
-import { state } from "../../kmq";
+import { state } from "../../kmq_worker";
 import { GuildTextableMessage, EnvType } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";

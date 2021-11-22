@@ -9,7 +9,7 @@ import { getGuildPreference, getSongCount, userBonusIsActive } from "../../helpe
 import { AnswerType } from "../game_options/answer";
 import { GuessModeType } from "../game_options/guessmode";
 import { KmqImages } from "../../constants";
-import { state } from "../../kmq";
+import { state } from "../../kmq_worker";
 import GuildPreference from "../../structures/guild_preference";
 import GameRound from "../../structures/game_round";
 

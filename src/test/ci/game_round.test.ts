@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import assert from "assert";
 import { GuessModeType } from "../../commands/game_options/guessmode";
-import { state } from "../../kmq";
+import { state } from "../../kmq_worker";
 import GameRound, { cleanArtistName, cleanSongName } from "../../structures/game_round";
 
 let gameRound: GameRound;

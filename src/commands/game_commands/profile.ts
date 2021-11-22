@@ -7,7 +7,7 @@ import { IPCLogger } from "../../logger";
 import { friendlyFormattedDate, romanize, friendlyFormattedNumber } from "../../helpers/utils";
 import { CUM_EXP_TABLE } from "../../structures/game_session";
 import MessageContext from "../../structures/message_context";
-import { state } from "../../kmq";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("profile");
 
