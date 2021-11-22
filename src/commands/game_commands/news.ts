@@ -28,11 +28,12 @@ export default class NewsCommand implements BaseCommand {
 
         const news = fs.readFileSync(newsFilePath).toString();
 
-        logger.info(`${getDebugLogHeader(message)} | News retrieved.`);
         await sendInfoMessage(MessageContext.fromMessage(message), {
             title: "Updates",
             description: news,
             thumbnailUrl: KmqImages.READING_BOOK,
         });
+
+        logger.info(`${getDebugLogHeader(message)} | News retrieved.`);
     };
 }

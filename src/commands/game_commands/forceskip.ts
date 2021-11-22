@@ -54,9 +54,9 @@ export default class ForceSkipCommand implements BaseCommand {
             thumbnailUrl: KmqImages.NOT_IMPRESSED,
         }, true);
 
-        gameSession.endRound({ correct: false }, guildPreference, MessageContext.fromMessage(message));
-        gameSession.startRound(guildPreference, MessageContext.fromMessage(message));
-        logger.info(`${getDebugLogHeader(message)} | Owner force-skipped.`);
+        await gameSession.endRound({ correct: false }, guildPreference, MessageContext.fromMessage(message));
+        await gameSession.startRound(guildPreference, MessageContext.fromMessage(message));
         gameSession.lastActiveNow();
+        logger.info(`${getDebugLogHeader(message)} | Owner force-skipped.`);
     };
 }

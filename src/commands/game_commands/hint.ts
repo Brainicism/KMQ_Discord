@@ -99,12 +99,12 @@ export default class HintCommand implements BaseCommand {
         gameRound.hintRequested(message.author.id);
 
         if (isHintAvailable(message, gameSession)) {
-            logger.info(`${getDebugLogHeader(message)} | Hint majority received.`);
             gameRound.hintUsed = true;
-            sendInfoMessage(MessageContext.fromMessage(message), { title: "Hint", description: generateHint(guildPreference.gameOptions.guessModeType, gameRound), thumbnailUrl: KmqImages.READING_BOOK });
+            await sendInfoMessage(MessageContext.fromMessage(message), { title: "Hint", description: generateHint(guildPreference.gameOptions.guessModeType, gameRound), thumbnailUrl: KmqImages.READING_BOOK });
+            logger.info(`${getDebugLogHeader(message)} | Hint majority received.`);
         } else {
+            await sendHintNotification(message, gameSession);
             logger.info(`${getDebugLogHeader(message)} | Hint request received.`);
-            sendHintNotification(message, gameSession);
         }
     };
 }
