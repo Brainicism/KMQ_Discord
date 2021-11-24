@@ -1,0 +1,20 @@
+name: deploy-prod
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout KMQ_Discord
+        uses: actions/checkout@v2
+      - uses: webfactory/ssh-agent@v0.5.4
+        with:
+            ssh-private-key: ${{ secrets.SSH_DEPLOY_PRIVATE_KEY }}
+      - name: Install node dependencies
+        run: ssh ${{ secrets.PROD_SSH_CONNECTION_STRING }} "touch ok"
+
+
+     
