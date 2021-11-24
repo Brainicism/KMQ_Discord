@@ -64,7 +64,6 @@ export default class SongSelector {
     checkLastPlayedSongs(): void {
         const selectedSongs = this.getSongs().songs;
         const selectedSongsCount = selectedSongs.size;
-        // manage last played songs
         if (selectedSongsCount <= LAST_PLAYED_SONG_QUEUE_SIZE) {
             this.lastPlayedSongs = [];
         } else if (this.lastPlayedSongs.length === LAST_PLAYED_SONG_QUEUE_SIZE) {
@@ -79,7 +78,6 @@ export default class SongSelector {
     }
 
     checkAlternatingGender(guildPreference: GuildPreference): void {
-        // manage alternating gender
         if (guildPreference.isGenderAlternating()) {
             if (this.lastAlternatingGender === null) {
                 this.lastAlternatingGender = Math.random() < 0.5 ? Gender.MALE : Gender.FEMALE;
@@ -94,7 +92,6 @@ export default class SongSelector {
     async queryRandomSong(guildPreference: GuildPreference): Promise<QueriedSong> {
         const selectedSongs = this.getSongs().songs;
         const selectedSongsCount = selectedSongs.size;
-        // query for random song
         let randomSong: QueriedSong;
         const ignoredSongs = new Set([...this.lastPlayedSongs, ...this.uniqueSongsPlayed]);
         if (this.lastAlternatingGender) {

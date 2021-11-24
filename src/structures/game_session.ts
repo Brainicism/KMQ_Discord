@@ -468,7 +468,7 @@ export default class GameSession {
 
         if (this.songSelector.getSongs() === null) {
             try {
-                await this.songSelector.reloadSongs(guildPreference);
+                await this.reloadSongs(guildPreference);
             } catch (err) {
                 await sendErrorMessage(messageContext, { title: "Error Selecting Song", description: "Please try starting the round again. If the issue persists, report it in our official KMQ server." });
                 logger.error(`${getDebugLogHeader(messageContext)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
@@ -605,7 +605,7 @@ export default class GameSession {
         return this.correctGuesses;
     }
 
-    async updateFilteredSongs(guildPreference: GuildPreference) {
+    async reloadSongs(guildPreference: GuildPreference) {
         await this.songSelector.reloadSongs(guildPreference);
     }
 
