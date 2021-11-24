@@ -24,6 +24,9 @@
                 "allowExpressions": true
             }
         ],
+        "@typescript-eslint/type-annotation-spacing": [
+            "warn"
+        ],
         "import/no-cycle": [
             "off"
         ],
