@@ -689,7 +689,7 @@ export default class GuildPreference {
         });
         const gameSession = state.gameSessions[this.guildID];
         if (gameSession) {
-            await gameSession.updateFilteredSongs(this);
+            await gameSession.reloadSongs(this);
         }
     }
 
