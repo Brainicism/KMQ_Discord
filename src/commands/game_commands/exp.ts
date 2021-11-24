@@ -5,7 +5,7 @@ import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { isPowerHour, isWeekend } from "../../helpers/utils";
-import { getGuildPreference, getSongCount, userBonusIsActive } from "../../helpers/game_utils";
+import { getGuildPreference, getAvailableSongCount, userBonusIsActive } from "../../helpers/game_utils";
 import { AnswerType } from "../game_options/answer";
 import { GuessModeType } from "../game_options/guessmode";
 import { KmqImages } from "../../constants";
@@ -102,7 +102,7 @@ export async function calculateOptionsExpMultiplierInternal(guildPreference: Gui
         });
     }
 
-    const totalSongs = (await getSongCount(guildPreference)).count;
+    const totalSongs = (await getAvailableSongCount(guildPreference)).count;
     if (totalSongs < 10) {
         modifiers.push({
             displayName: "Low Song Count Penalty",

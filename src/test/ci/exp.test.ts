@@ -31,7 +31,7 @@ describe("calculateOptionsMultiplier", () => {
 
         describe("insufficient song count", () => {
             beforeEach(() => {
-                sandbox.stub(game_utils, "getSongCount").callsFake(() => (Promise.resolve({ count: 1, countBeforeLimit: 200 })));
+                sandbox.stub(game_utils, "getAvailableSongCount").callsFake(() => (Promise.resolve({ count: 1, countBeforeLimit: 200 })));
             });
 
             it("should return insufficient song count penalty", async () => {
@@ -44,7 +44,7 @@ describe("calculateOptionsMultiplier", () => {
         describe("sufficient song count", () => {
             beforeEach(() => {
                 // above song threshold
-                sandbox.stub(game_utils, "getSongCount").callsFake(() => (Promise.resolve({ count: 200, countBeforeLimit: 200 })));
+                sandbox.stub(game_utils, "getAvailableSongCount").callsFake(() => (Promise.resolve({ count: 200, countBeforeLimit: 200 })));
             });
 
             describe("no active modifiers", () => {
@@ -114,7 +114,7 @@ describe("calculateOptionsMultiplier", () => {
 
     describe("powerhour", () => {
         beforeEach(() => {
-            sandbox.stub(game_utils, "getSongCount").callsFake(() => (Promise.resolve({ count: 200, countBeforeLimit: 200 })));
+            sandbox.stub(game_utils, "getAvailableSongCount").callsFake(() => (Promise.resolve({ count: 200, countBeforeLimit: 200 })));
         });
 
         describe("is weekend", () => {
@@ -140,7 +140,7 @@ describe("calculateOptionsMultiplier", () => {
         it("should return all bonuses/penalties", async () => {
             sandbox.stub(utils, "isPowerHour").callsFake(() => true);
             sandbox.stub(utils, "isWeekend").callsFake(() => true);
-            sandbox.stub(game_utils, "getSongCount").callsFake(() => (Promise.resolve({ count: 1, countBeforeLimit: 200 })));
+            sandbox.stub(game_utils, "getAvailableSongCount").callsFake(() => (Promise.resolve({ count: 1, countBeforeLimit: 200 })));
             guildPreference.setAnswerType(AnswerType.MULTIPLE_CHOICE_HARD);
             await guildPreference.setGuessModeType(GuessModeType.BOTH);
             const modifiers = await calculateOptionsExpMultiplierInternal(guildPreference, true);

@@ -4,16 +4,12 @@ import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
 import GameSession from "../structures/game_session";
 import GuildPreference from "../structures/guild_preference";
-import { MatchedArtist, QueriedSong } from "../types";
+import { MatchedArtist } from "../types";
 import { Gender } from "../commands/game_options/gender";
-import { ArtistType } from "../commands/game_options/artisttype";
-import { FOREIGN_LANGUAGE_TAGS, LanguageType } from "../commands/game_options/language";
-import { SubunitsPreference } from "../commands/game_options/subunits";
-import { OstPreference } from "../commands/game_options/ost";
-import { NON_OFFICIAL_VIDEO_TAGS, ReleaseType } from "../commands/game_options/release";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { cleanArtistName, cleanSongName } from "../structures/game_round";
 import { AnswerType } from "../commands/game_options/answer";
+import SongSelector from "../structures/song_selector";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -22,110 +18,6 @@ const logger = new IPCLogger("game_utils");
 interface GroupMatchResults {
     unmatchedGroups: Array<string>;
     matchedGroups?: Array<MatchedArtist>;
-}
-
-/**
- * Returns a list of songs from the data store, narrowed down by the specified game options
- * @param guildPreference - The GuildPreference
- * @returns a list of songs, as well as the number of songs before the filter option was applied
- */
-export async function getFilteredSongList(guildPreference: GuildPreference): Promise<{ songs: Set<QueriedSong>, countBeforeLimit: number }> {
-    const fields = ["clean_song_name as songName", "song_name as originalSongName", "artist_name as artist", "link as youtubeLink",
-        "publishedon as publishDate", "members", "id_artist as artistID", "issolo as isSolo", "members", "tags", "views"];
-
-    let queryBuilder = dbContext.kmq("available_songs")
-        .select(fields);
-
-    if (guildPreference.gameOptions.forcePlaySongID) {
-        queryBuilder = queryBuilder
-            .where("link", "=", guildPreference.gameOptions.forcePlaySongID);
-        return {
-            songs: new Set(await queryBuilder),
-            countBeforeLimit: 1,
-        };
-    }
-
-    const gameOptions = guildPreference.gameOptions;
-    queryBuilder = queryBuilder
-        .where(function artistFilter() {
-            this.where(function includesInnerArtistFilter() {
-                if (!guildPreference.isGroupsMode()) {
-                    if (gameOptions.subunitPreference === SubunitsPreference.EXCLUDE) {
-                        this.whereIn("id_artist", guildPreference.getIncludesGroupIDs());
-                    } else {
-                        this.andWhere(function () {
-                            this.whereIn("id_artist", guildPreference.getIncludesGroupIDs())
-                                .orWhereIn("id_parent_artist", guildPreference.getIncludesGroupIDs());
-                        });
-                    }
-                }
-            }).orWhere(function mainInnerArtistFilter() {
-                this.whereNotIn("id_artist", guildPreference.getExcludesGroupIDs());
-                if (!guildPreference.isGroupsMode()) {
-                    const gender = guildPreference.isGenderAlternating() ? [Gender.MALE, Gender.FEMALE, Gender.COED] : gameOptions.gender;
-                    this.whereIn("members", gender);
-
-                    // filter by artist type only in non-groups
-                    if (gameOptions.artistType !== ArtistType.BOTH) {
-                        this.andWhere("issolo", "=", gameOptions.artistType === ArtistType.SOLOIST ? "y" : "n");
-                    }
-                } else {
-                    if (gameOptions.subunitPreference === SubunitsPreference.EXCLUDE) {
-                        this.whereIn("id_artist", guildPreference.getGroupIDs());
-                    } else {
-                        const subunits = dbContext.kmq("kpop_groups").select("id").whereIn("id_parentgroup", guildPreference.getGroupIDs());
-                        const collabGroupContainingSubunit = dbContext.kmq("kpop_groups").select("id")
-                            .whereIn("id_artist1", subunits)
-                            .orWhereIn("id_artist2", subunits)
-                            .orWhereIn("id_artist3", subunits)
-                            .orWhereIn("id_artist4", subunits);
-
-                        this.andWhere(function () {
-                            this.whereIn("id_artist", guildPreference.getGroupIDs())
-                                .orWhereIn("id_parent_artist", guildPreference.getGroupIDs())
-                                .orWhereIn("id_artist", collabGroupContainingSubunit);
-                        });
-                    }
-                }
-            });
-        });
-
-    if (gameOptions.languageType === LanguageType.KOREAN) {
-        for (const tag of FOREIGN_LANGUAGE_TAGS) {
-            queryBuilder = queryBuilder
-                .where("tags", "NOT LIKE", `%${tag}%`);
-        }
-    }
-
-    if (gameOptions.ostPreference === OstPreference.EXCLUDE) {
-        queryBuilder = queryBuilder
-            .where("tags", "NOT LIKE", "%o%");
-    } else if (gameOptions.ostPreference === OstPreference.EXCLUSIVE) {
-        queryBuilder = queryBuilder
-            .where("tags", "LIKE", "%o%");
-    }
-
-    if (gameOptions.releaseType === ReleaseType.OFFICIAL) {
-        queryBuilder = queryBuilder.where("vtype", "=", "main");
-        for (const tag of NON_OFFICIAL_VIDEO_TAGS) {
-            queryBuilder = queryBuilder
-                .where("tags", "NOT LIKE", `%${tag}%`);
-        }
-    }
-
-    queryBuilder = queryBuilder
-        .andWhere("publishedon", ">=", `${gameOptions.beginningYear}-01-01`)
-        .andWhere("publishedon", "<=", `${gameOptions.endYear}-12-31`)
-        .orderBy("views", "DESC");
-
-    let result: Array<QueriedSong> = await queryBuilder;
-
-    const count = result.length;
-    result = result.slice(gameOptions.limitStart, gameOptions.limitEnd);
-    return {
-        songs: new Set(result),
-        countBeforeLimit: count,
-    };
 }
 
 /**
@@ -140,35 +32,12 @@ export async function ensureVoiceConnection(gameSession: GameSession): Promise<v
 }
 
 /**
- * Selects a random song based on the GameOptions, avoiding recently played songs
- * @param guildPreference - The GuildPreference
- * @param ignoredSongs - The union of last played songs and unique songs to not select from
- * @param alternatingGender - The gender to limit selecting from if ,gender alternating
- */
-export async function selectRandomSong(filteredSongs: Set<QueriedSong>, ignoredSongs?: Set<string>, alternatingGender?: Gender): Promise<QueriedSong> {
-    let queriedSongList = [...filteredSongs];
-    if (ignoredSongs) {
-        queriedSongList = queriedSongList.filter((x) => !ignoredSongs.has(x.youtubeLink));
-    }
-
-    if (alternatingGender && queriedSongList.some((y) => y.members === alternatingGender || y.members === Gender.COED)) {
-        queriedSongList = queriedSongList.filter((song) => song.members === alternatingGender || song.members === Gender.COED);
-    }
-
-    if (queriedSongList.length === 0) {
-        return null;
-    }
-
-    return queriedSongList[Math.floor(Math.random() * queriedSongList.length)];
-}
-
-/**
  * @param guildPreference - The GuildPreference
  * @returns an object containing the total number of available songs before and after limit based on the GameOptions
  */
-export async function getSongCount(guildPreference: GuildPreference): Promise<{ count: number; countBeforeLimit: number }> {
+export async function getAvailableSongCount(guildPreference: GuildPreference): Promise<{ count: number; countBeforeLimit: number }> {
     try {
-        const { songs, countBeforeLimit } = await getFilteredSongList(guildPreference);
+        const { songs, countBeforeLimit } = await SongSelector.getFilteredSongList(guildPreference);
         return {
             count: songs.size,
             countBeforeLimit,

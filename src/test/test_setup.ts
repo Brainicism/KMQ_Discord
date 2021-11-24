@@ -1,11 +1,91 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import sinon from "sinon";
+import crypto from "crypto";
 import * as discordUtils from "../helpers/discord_utils";
 import kmqKnexConfig from "../config/knexfile_kmq";
 import dbContext from "../database_context";
 import Player from "../structures/player";
+import { EnvType } from "../types";
+import { IPCLogger } from "../logger";
+import { md5Hash } from "../helpers/utils";
 
+const logger = new IPCLogger("test_setup");
 const sandbox = sinon.createSandbox();
+
+async function setup(): Promise<void> {
+    await dbContext.kmq.raw("DROP TABLE IF EXISTS available_songs");
+    await dbContext.kmq.raw("DROP TABLE IF EXISTS kpop_groups");
+    await dbContext.kmq.raw(`CREATE TABLE available_songs (
+        song_name VARCHAR(255),
+        clean_song_name VARCHAR(255),
+        link VARCHAR(255),
+        artist_name VARCHAR(255),
+        members ENUM('male', 'female', 'coed'),
+        views BIGINT(19),
+        id_artist INT(10),
+        issolo ENUM('y', 'n'),
+        publishedon DATE,
+        id_parent_artist INT(10),
+        vtype ENUM('main', 'audio'),
+        tags VARCHAR(255)
+    )`);
+
+    await dbContext.kmq.raw(`CREATE TABLE kpop_groups(
+        id INT(10),
+        name VARCHAR(255),
+        members ENUM('male', 'female', 'coed'),
+        issolo ENUM('y', 'n'),
+        id_parentgroup INT(10),
+        id_artist1 INT(10),
+        id_artist2 INT(10),
+        id_artist3 INT(10),
+        id_artist4 INT(10)
+    )`);
+}
+
+export const mockArtists = [
+    { id: 1, name: "A", members: "male", issolo: "n" },
+    { id: 2, name: "B", members: "male", issolo: "n" },
+    { id: 3, name: "C", members: "male", issolo: "n" },
+    { id: 4, name: "D", members: "male", issolo: "y" },
+    { id: 5, name: "E", members: "female", issolo: "n" },
+    { id: 6, name: "F", members: "female", issolo: "n", id_parentgroup: 5 },
+    { id: 7, name: "G", members: "female", issolo: "n" },
+    { id: 8, name: "H", members: "female", issolo: "y" },
+    { id: 9, name: "I", members: "female", issolo: "y", id_parentgroup: 8 },
+    { id: 10, name: "J", members: "coed", issolo: "n" },
+    { id: 11, name: "K", members: "coed", issolo: "n" },
+    { id: 12, name: "J + K", members: "coed", issolo: "n", id_artist1: 10, id_artist2: 11 },
+    { id: 13, name: "F + G", members: "female", issolo: "n", id_artist1: 6, id_artist2: 7 },
+    { id: 14, name: "E + H", members: "female", issolo: "n", id_artist1: 5, id_artist2: 8 },
+    { id: 15, name: "conflictingName", members: "coed", issolo: "n" },
+];
+
+export const mockSongs = [...Array(1000).keys()].map((i) => {
+    const artist = mockArtists[md5Hash(i, 8) % mockArtists.length];
+    return {
+        song_name: `${crypto.randomBytes(8).toString("hex")}`,
+        link: crypto.randomBytes(4).toString("hex"),
+        artist_name: artist.name,
+        members: artist.members,
+        views: md5Hash(i, 16),
+        id_artist: artist.id,
+        issolo: artist.issolo,
+        publishedon: new Date(`${["2008", "2009", "2016", "2017", "2018"][md5Hash(i, 8) % 5]}-06-01`),
+        id_parent_artist: artist.id_parentgroup || 0,
+        vtype: Math.random() < 0.25 ? "audio" : "main",
+        tags: ["", "", "o", "c", "e", "drv", "ax", "ps"][md5Hash(i, 8) % 8],
+    };
+});
+
+async function insertMockData(): Promise<void> {
+    await dbContext.kmq("available_songs").insert(mockSongs);
+
+    logger.info("Done inserting mock songs");
+    await dbContext.kmq("kpop_groups").insert(mockArtists);
+
+    logger.info("Done inserting mock artists");
+}
 
 before(async function () {
     this.timeout(10000);
@@ -18,6 +98,16 @@ before(async function () {
     await dbContext.kmq.migrate.latest({
         directory: kmqKnexConfig.migrations.directory,
     });
+
+    if (process.env.NODE_ENV !== EnvType.TEST) {
+        logger.error("Must be running with NODE_ENV=EnvType.TEST");
+        process.exit(1);
+    }
+
+    this.timeout(10000);
+    logger.info("Setting up test database...");
+    await setup();
+    await insertMockData();
     return false;
 });
 

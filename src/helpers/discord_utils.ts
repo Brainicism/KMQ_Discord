@@ -4,9 +4,9 @@ import EmbedPaginator from "eris-pagination";
 import axios from "axios";
 import pluralize from "pluralize";
 import GuildPreference from "../structures/guild_preference";
-import GameSession, { UniqueSongCounter } from "../structures/game_session";
+import GameSession from "../structures/game_session";
 import { IPCLogger } from "../logger";
-import { getSongCount, userBonusIsActive } from "./game_utils";
+import { getAvailableSongCount, userBonusIsActive } from "./game_utils";
 import { getFact } from "../fact_generator";
 import { EmbedPayload, GameOption, GameOptionCommand, PriorityGameOption, ConflictingGameOptions, GuildTextableMessage, PlayerRoundResult, GameInfoMessage, GameType, QueriedSong } from "../types";
 import { chunkArray, codeLine, bold, underline, italicize, strikethrough, chooseWeightedRandom, getOrdinalNum, friendlyFormattedNumber, delay, standardDateFormat } from "./utils";
@@ -20,6 +20,7 @@ import { KmqImages } from "../constants";
 import MessageContext from "../structures/message_context";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { REVIEW_LINK, VOTE_LINK } from "../commands/game_commands/vote";
+import { UniqueSongCounter } from "../structures/song_selector";
 
 const logger = new IPCLogger("utils");
 export const EMBED_ERROR_COLOR = 0xED4245; // Red
@@ -524,7 +525,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
         return;
     }
 
-    const totalSongs = await getSongCount(guildPreference);
+    const totalSongs = await getAvailableSongCount(guildPreference);
     if (totalSongs === null) {
         sendErrorMessage(messageContext, { title: "Error Retrieving Song Data", description: `Try again in a bit, or report this error to the official KMQ server found in \`${process.env.BOT_PREFIX}help\`.` });
         return;
