@@ -36,7 +36,7 @@ export default class BeginCommand implements BaseCommand {
         return true;
     }
 
-    call = async ({ message, gameSessions, channel }: CommandArgs) => {
+    call = async ({ message, gameSessions, channel }: CommandArgs): Promise<void> => {
         const { guildID, author } = message;
         const gameSession = gameSessions[guildID];
 

@@ -16,7 +16,7 @@ export default class ScoreCommand implements BaseCommand {
 
     aliases = ["scoreboard", "sb"];
 
-    call = async ({ message, gameSessions }: CommandArgs) => {
+    call = async ({ message, gameSessions }: CommandArgs): Promise<void> => {
         const gameSession = gameSessions[message.guildID];
         if (!gameSession) {
             await sendInfoMessage(MessageContext.fromMessage(message), { title: "No Active Game", description: `There is no currently active game of KMQ. Start a new game with \`${process.env.BOT_PREFIX}play\`!` });

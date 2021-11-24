@@ -37,7 +37,7 @@ const logger = new IPCLogger("management_utils");
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
 
 /** Registers listeners on client events */
-export function registerClientEvents() {
+export function registerClientEvents(): void {
     const { client } = state;
     // remove listeners registered by eris-fleet, handle on cluster instead
     client.removeAllListeners("warn");
@@ -64,7 +64,7 @@ export function registerClientEvents() {
 }
 
 /** Registers listeners on process events */
-export function registerProcessEvents() {
+export function registerProcessEvents(): void {
     // remove listeners registered by eris-fleet, handle on cluster instead
     process.removeAllListeners("unhandledRejection");
     process.removeAllListeners("uncaughtException");
@@ -105,7 +105,7 @@ export const checkRestartNotification = async (timeUntilRestart: number): Promis
 };
 
 /** Clear inactive voice connections */
-function clearInactiveVoiceConnections() {
+function clearInactiveVoiceConnections(): void {
     const existingVoiceChannelGuildIDs = Array.from(state.client.voiceConnections.keys()) as Array<string>;
     const activeVoiceChannelGuildIDs = Object.values(state.gameSessions).map((x) => x.guildID);
     for (const existingVoiceChannelGuildID of existingVoiceChannelGuildIDs) {
@@ -118,7 +118,7 @@ function clearInactiveVoiceConnections() {
 }
 
 /* Updates system statistics */
-async function updateSystemStats(clusterID: number) {
+async function updateSystemStats(clusterID: number): Promise<void> {
     const { client } = state;
     const latencies = client.shards.map((x) => x.latency);
     const meanLatency = _.mean(latencies);
@@ -152,7 +152,7 @@ async function updateSystemStats(clusterID: number) {
 }
 
 /** Updates the bot's song listening status */
-export async function updateBotStatus() {
+export async function updateBotStatus(): Promise<void> {
     const { client } = state;
     const timeUntilRestart = await getTimeUntilRestart();
     if (timeUntilRestart) {
@@ -181,7 +181,7 @@ export async function updateBotStatus() {
 }
 
 /** Reload song/artist aliases */
-export async function reloadAliases() {
+export async function reloadAliases(): Promise<void> {
     const songAliasMapping = await dbContext.kmq("available_songs")
         .select(["link", "song_aliases"])
         .where("song_aliases", "<>", "");
@@ -219,7 +219,7 @@ export async function reloadAliases() {
 }
 
 /** Reload bonus groups (same groups chosen on the same day) */
-export async function reloadBonusGroups() {
+export async function reloadBonusGroups(): Promise<void> {
     const bonusGroupCount = 10;
     const date = new Date();
     const artistNameQuery: string[] = (await dbContext.kmq("kpop_groups")
@@ -235,13 +235,13 @@ export async function reloadBonusGroups() {
 /**
  * Clears any existing restart timers
  */
-export async function clearRestartNotification() {
+export async function clearRestartNotification(): Promise<void> {
     await dbContext.kmq("restart_notifications").where("id", "=", "1")
         .update({ restart_time: null });
 }
 
 /** Sets up recurring cron-based tasks */
-export function registerIntervals(clusterID: number) {
+export function registerIntervals(clusterID: number): void {
     // set up cleanup for inactive game sessions
     schedule.scheduleJob("*/10 * * * *", () => {
         cleanupInactiveGameSessions();
@@ -274,7 +274,7 @@ export function registerIntervals(clusterID: number) {
 }
 
 /** Reloads caches */
-export async function reloadCaches() {
+export async function reloadCaches(): Promise<void> {
     reloadAliases();
     reloadFactCache();
     reloadBonusGroups();
@@ -284,7 +284,7 @@ export async function reloadCaches() {
  * Deletes the GameSession corresponding to a given guild ID
  * @param guildID - The guild ID
  */
-export function deleteGameSession(guildID: string) {
+export function deleteGameSession(guildID: string): void {
     if (!(guildID in state.gameSessions)) {
         logger.debug(`gid: ${guildID} | GameSession already ended`);
         return;

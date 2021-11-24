@@ -19,7 +19,7 @@ import { NON_OFFICIAL_VIDEO_TAGS, ReleaseType } from "../../commands/game_option
 
 const logger = new IPCLogger("test");
 
-async function setup() {
+async function setup(): Promise<void> {
     await dbContext.kmq.raw("DROP TABLE IF EXISTS available_songs");
     await dbContext.kmq.raw("DROP TABLE IF EXISTS kpop_groups");
     await dbContext.kmq.raw(`CREATE TABLE available_songs (

@@ -35,7 +35,7 @@ export default class ExcludeCommand implements BaseCommand {
 
     aliases = ["excludes", "ignore", "ignores"];
 
-    call = async ({ message, parsedMessage }: CommandArgs) => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.EXCLUDE);
@@ -57,9 +57,11 @@ export default class ExcludeCommand implements BaseCommand {
         const { unmatchedGroups } = groups;
         if (unmatchedGroups.length) {
             logger.info(`${getDebugLogHeader(message)} | Attempted to set unknown excludes. excludes =  ${unmatchedGroups.join(", ")}`);
-            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Unknown Group Name",
+            await sendErrorMessage(MessageContext.fromMessage(message), {
+                title: "Unknown Group Name",
                 description: `One or more of the specified group names was not recognized. Those groups that matched are excluded. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\`. \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} \nUse \`${process.env.BOT_PREFIX}add\` to add the unmatched groups.`,
-                footerText: excludeWarning });
+                footerText: excludeWarning,
+            });
         }
 
         if (guildPreference.isGroupsMode()) {

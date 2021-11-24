@@ -37,14 +37,14 @@ export default class Team extends Player {
      * @param player - The player to add
      * Adds player to this team
      */
-    addPlayer(player: Player) {
+    addPlayer(player: Player): void {
         this.players[player.id] = player;
     }
 
     /**
      * Removes the given player from this team
      */
-    removePlayer(userID: string) {
+    removePlayer(userID: string): void {
         delete this.players[userID];
     }
 

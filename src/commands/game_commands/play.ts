@@ -21,7 +21,7 @@ const DEFAULT_LIVES = 10;
 export async function sendBeginGameMessage(textChannelName: string,
     voiceChannelName: string,
     message: GuildTextableMessage,
-    participants: Array<{ id: string, username: string, discriminator: string }>) {
+    participants: Array<{ id: string, username: string, discriminator: string }>): Promise<void> {
     let gameInstructions = "Listen to the song and type your guess!";
     const bonusUsers = await activeBonusUsers();
     const bonusUserParticipants = participants.filter((x) => bonusUsers.has(x.id));
@@ -99,7 +99,7 @@ export default class PlayCommand implements BaseCommand {
         ],
     };
 
-    call = async ({ message, gameSessions, parsedMessage, channel }: CommandArgs) => {
+    call = async ({ message, gameSessions, parsedMessage, channel }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         const voiceChannel = getUserVoiceChannel(MessageContext.fromMessage(message));
         const timeUntilRestart = await getTimeUntilRestart();

@@ -14,7 +14,7 @@ const logger = new IPCLogger("help");
 export const placeholder = /,/g;
 const FIELDS_PER_EMBED = 6;
 
-const helpMessage = async (message: GuildTextableMessage, action: string) => {
+const helpMessage = async (message: GuildTextableMessage, action: string): Promise<void> => {
     let embedTitle = "";
     let embedDesc = "";
     let embedFields = [];
@@ -127,7 +127,7 @@ export default class HelpCommand implements BaseCommand {
         priority: 1000,
     };
 
-    call = async ({ parsedMessage, message }: CommandArgs) => {
+    call = async ({ parsedMessage, message }: CommandArgs): Promise<void> => {
         await helpMessage(message, parsedMessage.argument);
         logger.info(`${getDebugLogHeader(message)} | Help documentation retrieved.`);
     };

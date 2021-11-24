@@ -135,7 +135,7 @@ async function calculateOptionsExpMultiplier(guildPreference: GuildPreference, v
     return (await calculateOptionsExpMultiplierInternal(guildPreference, voteBonusExp)).reduce((a, b) => ExpBonusModifierValues[b.name] * a, 1);
 }
 
-export function participantExpScalingModifier(numParticipants: number) {
+export function participantExpScalingModifier(numParticipants: number): number {
     return (1 + 0.1 * (Math.min(numParticipants, PARTICIPANT_MODIFIER_MAX_PARTICIPANTS) - 1));
 }
 
@@ -184,7 +184,7 @@ export default class ExpCommand implements BaseCommand {
         priority: 50,
     };
 
-    call = async ({ message }: CommandArgs) => {
+    call = async ({ message }: CommandArgs): Promise<void> => {
         const voteBonusActive = await userBonusIsActive(message.author.id);
         const guildPreference = await getGuildPreference(message.guildID);
         const fields: Array<Eris.EmbedField> = [];

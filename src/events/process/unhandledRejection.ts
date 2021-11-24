@@ -4,7 +4,7 @@ import { EnvType } from "../../types";
 
 const logger = new IPCLogger("unhandledRejection");
 
-export default function unhandledRejectionHandler(reason: Error) {
+export default function unhandledRejectionHandler(reason: Error): void {
     logger.error(`Cluster Unhandled Rejection at: Reason: ${reason}. Trace: ${reason.stack}`);
     if (process.env.NODE_ENV === EnvType.CI) {
         state.ipc.admiralBroadcast("abort");

@@ -46,7 +46,7 @@ export default class ListCommand implements BaseCommand {
         priority: 200,
     };
 
-    call = async ({ message, parsedMessage, channel }: CommandArgs) => {
+    call = async ({ message, parsedMessage, channel }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         const optionListed = parsedMessage.components[0] as ListType;
         let optionValue: string;

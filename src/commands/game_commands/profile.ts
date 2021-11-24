@@ -180,7 +180,7 @@ export default class ProfileCommand implements BaseCommand {
         priority: 50,
     };
 
-    call = async ({ message, parsedMessage }: CommandArgs) => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         let requestedPlayer: Eris.User;
         if (parsedMessage.components.length === 0) {
             requestedPlayer = message.author;
@@ -225,7 +225,7 @@ export default class ProfileCommand implements BaseCommand {
     };
 }
 
-export async function handleProfileInteraction(interaction: Eris.CommandInteraction, userId: string) {
+export async function handleProfileInteraction(interaction: Eris.CommandInteraction, userId: string): Promise<void> {
     const user = await state.ipc.fetchUser(userId);
     if (!user) {
         tryCreateInteractionErrorAcknowledgement(interaction, `I can't access that user right now. Try using \`${process.env.BOT_PREFIX}profile ${userId}\` instead.`);

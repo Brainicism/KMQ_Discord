@@ -46,10 +46,10 @@ export class IPCLogger {
         this.logger = getInternalLogger();
     }
 
-    getCategorizedMessage(msg: string) {
+    getCategorizedMessage(msg: string): string {
         return `${this.category} | ${msg}`;
     }
-    info(msg: string | number) {
+    info(msg: string | number): void {
         if (!isMaster) {
             console.log(this.getCategorizedMessage(msg as string));
         } else {
@@ -57,7 +57,7 @@ export class IPCLogger {
         }
     }
 
-    error(msg: string) {
+    error(msg: string): void {
         if (!isMaster) {
             console.error(this.getCategorizedMessage(msg));
         } else {
@@ -65,7 +65,7 @@ export class IPCLogger {
         }
     }
 
-    debug(msg: string) {
+    debug(msg: string): void {
         if (!isMaster) {
             console.debug(this.getCategorizedMessage(msg));
         } else {
@@ -73,7 +73,7 @@ export class IPCLogger {
         }
     }
 
-    warn(msg: string) {
+    warn(msg: string): void {
         if (!isMaster) {
             console.warn(this.getCategorizedMessage(msg));
         } else {

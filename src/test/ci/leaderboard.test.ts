@@ -26,7 +26,7 @@ const lastMonth = new Date(new Date(date).setMonth(INITIAL_MONTH - 1));
 
 const INITIAL_TOTAL_ENTRIES = ENTRIES_PER_PAGE * 5;
 
-function generatePlayerStats(numberPlayers: number, offset = 0) {
+function generatePlayerStats(numberPlayers: number, offset = 0): any {
     return [...Array(numberPlayers).keys()].map((i) => ({
         player_id: String(i + offset),
         songs_guessed: i,
@@ -35,7 +35,7 @@ function generatePlayerStats(numberPlayers: number, offset = 0) {
     }));
 }
 
-function generatePlayerServers(numberPlayers: number, serverID: string) {
+function generatePlayerServers(numberPlayers: number, serverID: string): any {
     return [...Array(numberPlayers).keys()].map((i) => ({
         player_id: String(i),
         server_id: serverID,

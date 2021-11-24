@@ -4,7 +4,7 @@ import { IPCLogger } from "../logger";
 
 const logger = new IPCLogger("generate_preset_uuids");
 
-async function generatePresetUUIDs() {
+async function generatePresetUUIDs(): Promise<void> {
     const db = getNewConnection();
     const presetsWithUUID = db.kmq("game_option_presets")
         .distinct("guild_id", "preset_name")

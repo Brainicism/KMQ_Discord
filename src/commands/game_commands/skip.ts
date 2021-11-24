@@ -18,14 +18,14 @@ import EliminationScoreboard from "../../structures/elimination_scoreboard";
 
 const logger = new IPCLogger("skip");
 
-async function sendSkipNotification(message: GuildTextableMessage, gameSession: GameSession) {
+async function sendSkipNotification(message: GuildTextableMessage, gameSession: GameSession): Promise<void> {
     await sendInfoMessage(MessageContext.fromMessage(message), {
         title: "Skip",
         description: `${gameSession.gameRound.getNumSkippers()}/${getMajorityCount(message.guildID)} skips received.`,
     }, true);
 }
 
-async function sendSkipMessage(message: GuildTextableMessage, gameRound: GameRound) {
+async function sendSkipMessage(message: GuildTextableMessage, gameRound: GameRound): Promise<void> {
     await sendInfoMessage(MessageContext.fromMessage(message), {
         color: EMBED_SUCCESS_COLOR,
         title: "Skip",
@@ -53,7 +53,7 @@ export default class SkipCommand implements BaseCommand {
 
     aliases = ["s"];
 
-    call = async ({ gameSessions, message }: CommandArgs) => {
+    call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         const gameSession = gameSessions[message.guildID];
         if (!gameSession || !gameSession.gameRound || gameSession.gameRound.finished || !areUserAndBotInSameVoiceChannel(message)) {

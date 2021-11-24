@@ -88,7 +88,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
     aliases = ["lb"];
 
-    call = async ({ message, parsedMessage }: CommandArgs) => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         if (parsedMessage.components.length === 0) {
             LeaderboardCommand.showLeaderboard(message, LeaderboardType.GLOBAL, LeaderboardDuration.ALL_TIME);
             return;
@@ -146,7 +146,7 @@ export default class LeaderboardCommand implements BaseCommand {
         LeaderboardCommand.showLeaderboard(message, type ?? LeaderboardType.GLOBAL, duration ?? LeaderboardDuration.ALL_TIME, pageOffset);
     };
 
-    public static async sendDebugLeaderboard(duration: LeaderboardDuration) {
+    public static async sendDebugLeaderboard(duration: LeaderboardDuration): Promise<void> {
         LeaderboardCommand.showLeaderboard(new MessageContext(process.env.DEBUG_TEXT_CHANNEL_ID, KmqMember.fromUser(state.client.user), process.env.DEBUG_SERVER_ID), LeaderboardType.GLOBAL, duration);
     }
 
@@ -268,7 +268,7 @@ export default class LeaderboardCommand implements BaseCommand {
         return { embeds: embedsFns, pageCount };
     }
 
-    private static async enrollLeaderboard(message: GuildTextableMessage) {
+    private static async enrollLeaderboard(message: GuildTextableMessage): Promise<void> {
         const alreadyEnrolled = !!(await dbContext.kmq("leaderboard_enrollment")
             .where("player_id", "=", message.author.id)
             .first());
@@ -286,14 +286,14 @@ export default class LeaderboardCommand implements BaseCommand {
         sendInfoMessage(MessageContext.fromMessage(message), { title: "Leaderboard Enrollment Complete", description: "Your name is now visible on the leaderboard" });
     }
 
-    private static async unenrollLeaderboard(message: GuildTextableMessage) {
+    private static async unenrollLeaderboard(message: GuildTextableMessage): Promise<void> {
         await dbContext.kmq("leaderboard_enrollment")
             .where("player_id", "=", message.author.id)
             .del();
         sendInfoMessage(MessageContext.fromMessage(message), { title: "Leaderboard Unenrollment Complete", description: "You are no longer visible on the leaderboard" });
     }
 
-    private static async showLeaderboard(message: GuildTextableMessage | MessageContext, type: LeaderboardType, duration: LeaderboardDuration, pageOffset: number = 0) {
+    private static async showLeaderboard(message: GuildTextableMessage | MessageContext, type: LeaderboardType, duration: LeaderboardDuration, pageOffset: number = 0): Promise<void> {
         const messageContext: MessageContext = message instanceof MessageContext ? message : MessageContext.fromMessage(message);
         if (type === LeaderboardType.GAME) {
             if (!state.gameSessions[message.guildID]) {

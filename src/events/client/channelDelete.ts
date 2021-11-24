@@ -3,6 +3,6 @@ import { IPCLogger } from "../../logger";
 
 const logger = new IPCLogger("channelDelete");
 
-export default async function channelDeleteHandler(channel: Eris.Channel) {
+export default function channelDeleteHandler(channel: Eris.Channel): void {
     logger.info(`Channel deleted. id = ${channel.id}`);
 }

@@ -14,7 +14,7 @@ const SONG_DOWNLOAD_THRESHOLD = 5;
 
 config({ path: path.resolve(__dirname, "../../.env") });
 
-async function tableExists(db: DatabaseContext, tableName: string) {
+async function tableExists(db: DatabaseContext, tableName: string): Promise<boolean> {
     return (await db.agnostic("information_schema.schemata").where("schema_name", "=", tableName)).length === 1;
 }
 
@@ -43,7 +43,7 @@ async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
         .first()).count >= SONG_DOWNLOAD_THRESHOLD;
 }
 
-export function loadStoredProcedures() {
+export function loadStoredProcedures(): void {
     const storedProcedureDefinitions = fs.readdirSync(path.join(__dirname, "../../sql/procedures"))
         .map((x) => path.join(__dirname, "../../sql/procedures", x));
 
@@ -53,12 +53,12 @@ export function loadStoredProcedures() {
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export async function generateKmqDataTables(db: DatabaseContext) {
+export async function generateKmqDataTables(db: DatabaseContext): Promise<void> {
     logger.info("Re-creating KMQ data tables view...");
     await db.kmq.raw(`CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`);
 }
 
-function performMigrations() {
+function performMigrations(): void {
     logger.info("Performing migrations...");
     const migrationsPath = path.join(__dirname, "../config/knexfile_kmq.js");
     try {
@@ -69,7 +69,7 @@ function performMigrations() {
     }
 }
 
-async function bootstrapDatabases() {
+async function bootstrapDatabases(): Promise<void> {
     const startTime = Date.now();
     const db = getNewConnection();
 

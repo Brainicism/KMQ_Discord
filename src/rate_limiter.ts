@@ -49,7 +49,7 @@ export default class RateLimiter {
         return false;
     }
 
-    private hasExpired(requestTime: number, currTime: number) {
+    private hasExpired(requestTime: number, currTime: number): boolean {
         return (currTime - requestTime) > (this.queueExpiryTime * 1000);
     }
 }

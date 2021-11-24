@@ -28,7 +28,7 @@ export default class RecentlyAddedCommand implements BaseCommand {
 
     aliases = ["recent"];
 
-    call = async ({ message }: CommandArgs) => {
+    call = async ({ message }: CommandArgs): Promise<void> => {
         const newSongs: Array<QueriedSong> = await dbContext.kmq("available_songs")
             .select(["clean_song_name AS songName", "song_name AS originalSongName", "artist_name AS artist", "link AS youtubeLink", "publishedon AS publishDate", "views"])
             .orderBy("publishedon", "DESC")

@@ -25,7 +25,7 @@ export default class KmqMember {
         this.pointsAwarded = pointsAwarded;
     }
 
-    static fromUser(user: Eris.User | Eris.Member, pointsAwarded = 0) {
+    static fromUser(user: Eris.User | Eris.Member, pointsAwarded = 0): KmqMember {
         return new KmqMember(user.username, getUserTag(user), user.avatarURL, user.id, pointsAwarded);
     }
 }

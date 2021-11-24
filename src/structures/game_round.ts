@@ -178,7 +178,7 @@ export default class GameRound {
      * Adds a skip vote for the specified user
      * @param userID - the Discord user ID of the player skipping
      */
-    userSkipped(userID: string) {
+    userSkipped(userID: string): void {
         this.skippers.add(userID);
     }
 
@@ -194,7 +194,7 @@ export default class GameRound {
      * Adds a skip vote for the specified user
      * @param userID - the Discord user ID of the player skipping
      */
-    hintRequested(userID: string) {
+    hintRequested(userID: string): void {
         this.hintRequesters.add(userID);
     }
 
@@ -210,7 +210,7 @@ export default class GameRound {
      * Marks a user as having guessed correctly
      * @param userID - The user ID of the correct guesser
      */
-    userCorrect(userID: string, pointsAwarded: number) {
+    userCorrect(userID: string, pointsAwarded: number): void {
         if (!this.correctGuessers.some((x) => x.id === userID)) {
             this.correctGuessers.push(KmqMember.fromUser(state.client.users.get(userID), pointsAwarded));
         }
@@ -244,14 +244,14 @@ export default class GameRound {
      * Sets the base exp
      * @param baseExp - The base exp
      */
-    setBaseExpReward(baseExp: number) {
+    setBaseExpReward(baseExp: number): void {
         this.baseExp = baseExp;
     }
 
     /**
      * Marks button guesses as correct or incorrect in a multiple choice game
      */
-    async interactionMarkAnswers(correctGuesses: number) {
+    async interactionMarkAnswers(correctGuesses: number): Promise<void> {
         if (!this.interactionMessage) return;
         await this.interactionMessage.edit({
             embeds: this.interactionMessage.embeds,

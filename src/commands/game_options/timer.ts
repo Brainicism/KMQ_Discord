@@ -42,7 +42,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
     };
     aliases = ["time", "timeout", "t"];
 
-    call = async ({ message, parsedMessage, gameSessions }: CommandArgs) => {
+    call = async ({ message, parsedMessage, gameSessions }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         const gameSession = gameSessions[message.guildID];
         if (parsedMessage.components.length === 0) {

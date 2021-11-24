@@ -32,7 +32,7 @@ export default class MessageContext {
      * @param message - The Message object
      * @returns a MessageContext
      */
-    static fromMessage(message: Eris.Message) {
+    static fromMessage(message: Eris.Message): MessageContext {
         return new MessageContext(message.channel.id, new KmqMember(message.author.username, getUserTag(message.author), message.author.avatarURL, message.author.id), message.guildID, message.id);
     }
 }

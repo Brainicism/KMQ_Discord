@@ -18,6 +18,12 @@
             "warn",
             "double"
         ],
+        "@typescript-eslint/explicit-function-return-type": [
+            "warn",
+            {
+                "allowExpressions": true
+            }
+        ],
         "import/no-cycle": [
             "off"
         ],

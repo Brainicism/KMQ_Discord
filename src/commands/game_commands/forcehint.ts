@@ -27,7 +27,7 @@ export default class ForceHintCommand implements BaseCommand {
 
     aliases = ["fhint", "fh"];
 
-    call = async ({ gameSessions, message }: CommandArgs) => {
+    call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
         const gameSession = gameSessions[message.guildID];
         const gameRound = gameSession?.gameRound;
         const guildPreference = await getGuildPreference(message.guildID);

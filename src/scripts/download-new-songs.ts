@@ -147,7 +147,7 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
     });
 };
 
-async function getSongsFromDb(db: DatabaseContext) {
+async function getSongsFromDb(db: DatabaseContext): Promise<any> {
     return db.kpopVideos.with("rankedAudioSongs",
         db.kpopVideos.select(["app_kpop_audio.name", "app_kpop_group.name AS artist", "vlink AS youtubeLink", "app_kpop_audio.views AS views", "app_kpop_audio.tags AS tags", db.kpopVideos.raw("RANK() OVER(PARTITION BY app_kpop_audio.id_artist ORDER BY views DESC) AS rank")])
             .from("app_kpop_audio")
@@ -167,7 +167,7 @@ async function getSongsFromDb(db: DatabaseContext) {
         .orderBy("views", "DESC");
 }
 
-async function updateNotDownloaded(db: DatabaseContext, songs: Array<QueriedSong>) {
+async function updateNotDownloaded(db: DatabaseContext, songs: Array<QueriedSong>): Promise<void> {
     // update list of non-downloaded songs
     const currentlyDownloadedFiles = new Set(fs.readdirSync(process.env.SONG_DOWNLOAD_DIR));
     const songIDsNotDownloaded = songs.filter((x) => !currentlyDownloadedFiles.has(`${x.youtubeLink}.ogg`)).map((x) => ({ vlink: x.youtubeLink }));
