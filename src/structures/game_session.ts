@@ -4,13 +4,12 @@ import _ from "lodash";
 import * as uuid from "uuid";
 import pluralize from "pluralize";
 import { SeekType } from "../commands/game_options/seek";
-import { ShuffleType } from "../commands/game_options/shuffle";
 import dbContext from "../database_context";
 import {
     getDebugLogHeader, sendErrorMessage, sendEndRoundMessage, sendInfoMessage, getNumParticipants, getUserVoiceChannel, sendEndGameMessage, getCurrentVoiceMembers,
     sendBookmarkedSongs, tryInteractionAcknowledge, tryCreateInteractionSuccessAcknowledgement, tryCreateInteractionErrorAcknowledgement, getMention,
 } from "../helpers/discord_utils";
-import { ensureVoiceConnection, getGuildPreference, selectRandomSong, getFilteredSongList, getMultipleChoiceOptions, userBonusIsActive } from "../helpers/game_utils";
+import { ensureVoiceConnection, getGuildPreference, getMultipleChoiceOptions, userBonusIsActive } from "../helpers/game_utils";
 import { delay, getOrdinalNum, setDifference, bold, codeLine, chunkArray, chooseRandom } from "../helpers/utils";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
@@ -23,7 +22,6 @@ import TeamScoreboard from "./team_scoreboard";
 import { deleteGameSession } from "../helpers/management_utils";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { getRankNameByLevel } from "../commands/game_commands/profile";
-import { Gender } from "../commands/game_options/gender";
 import EliminationPlayer from "./elimination_player";
 import { KmqImages } from "../constants";
 import MessageContext from "./message_context";
@@ -32,10 +30,10 @@ import { MultiGuessType } from "../commands/game_options/multiguess";
 import { specialFfmpegArgs } from "../commands/game_options/special";
 import { AnswerType } from "../commands/game_options/answer";
 import { calculateTotalRoundExp } from "../commands/game_commands/exp";
+import SongSelector from "./song_selector";
 
 const MULTIGUESS_DELAY = 1500;
 const logger = new IPCLogger("game_session");
-const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
 
 const EXP_TABLE = [...Array(1000).keys()].map((level) => {
     if (level === 0 || level === 1) return 0;
@@ -61,11 +59,6 @@ export interface GuessResult {
     correct: boolean;
     error?: boolean;
     correctGuessers?: Array<KmqMember>;
-}
-
-export interface UniqueSongCounter {
-    uniqueSongsPlayed: number;
-    totalSongs: number;
 }
 
 export default class GameSession {
@@ -120,20 +113,8 @@ export default class GameSession {
     /** Timer function used to for ,timer command */
     private guessTimeoutFunc: NodeJS.Timer;
 
-    /** List of songs matching the user's game options */
-    private filteredSongs: { songs: Set<QueriedSong>, countBeforeLimit: number };
-
-    /** List of recently played songs used to prevent frequent repeats */
-    private lastPlayedSongs: Array<string>;
-
-    /** List of songs played with ,shuffle unique enabled */
-    private uniqueSongsPlayed: Set<string>;
-
     /** Map of song's YouTube ID to correctGuesses and roundsPlayed */
     private playCount: { [vlink: string]: { correctGuesses: number, roundsPlayed: number } };
-
-    /** The last gender played when gender is set to alternating, can be null (in not alternating mode), GENDER.MALE, or GENDER.FEMALE */
-    private lastAlternatingGender: Gender;
 
     /** The most recent Guesser, including their current streak */
     private lastGuesser: LastGuesser;
@@ -143,6 +124,8 @@ export default class GameSession {
 
     /** Mapping of user ID to bookmarked songs, uses Map since Set doesn't remove QueriedSong duplicates */
     private bookmarkedSongs: { [userID: string]: Map<string, QueriedSong> };
+
+    private songSelector: SongSelector;
 
     constructor(textChannelID: string, voiceChannelID: string, guildID: string, gameSessionCreator: KmqMember, gameType: GameType, eliminationLives?: number) {
         this.gameType = gameType;
@@ -168,14 +151,11 @@ export default class GameSession {
         this.textChannelID = textChannelID;
         this.gameRound = null;
         this.owner = gameSessionCreator;
-        this.filteredSongs = null;
-        this.lastPlayedSongs = [];
-        this.uniqueSongsPlayed = new Set();
         this.playCount = {};
-        this.lastAlternatingGender = null;
         this.lastGuesser = null;
         this.songMessageIDs = [];
         this.bookmarkedSongs = {};
+        this.songSelector = new SongSelector();
     }
 
     /**
@@ -248,17 +228,8 @@ export default class GameSession {
         const remainingDuration = guildPreference.isDurationSet() ? (guildPreference.gameOptions.duration - currGameLength) : null;
 
         if (messageContext) {
-            let uniqueSongCounter: UniqueSongCounter;
-            if (guildPreference.isShuffleUnique()) {
-                const filteredSongs = new Set([...this.filteredSongs.songs].map((x) => x.youtubeLink));
-                uniqueSongCounter = {
-                    uniqueSongsPlayed: this.uniqueSongsPlayed.size - setDifference([...this.uniqueSongsPlayed], [...filteredSongs]).size,
-                    totalSongs: Math.min(this.filteredSongs.countBeforeLimit, guildPreference.gameOptions.limitEnd - guildPreference.gameOptions.limitStart),
-                };
-            }
-
             const endRoundMessage = await sendEndRoundMessage(messageContext, this.scoreboard, gameRound, guildPreference.gameOptions.guessModeType,
-                playerRoundResults, guildPreference.isMultipleChoiceMode(), remainingDuration, uniqueSongCounter);
+                playerRoundResults, guildPreference.isMultipleChoiceMode(), remainingDuration, this.songSelector.getUniqueSongCounter(guildPreference));
 
             // if message fails to send, no ID is returned
             if (endRoundMessage) {
@@ -495,9 +466,9 @@ export default class GameSession {
             return;
         }
 
-        if (this.filteredSongs === null) {
+        if (this.songSelector.getSongs() === null) {
             try {
-                this.filteredSongs = await getFilteredSongList(guildPreference);
+                await this.songSelector.reloadSongs(guildPreference);
             } catch (err) {
                 await sendErrorMessage(messageContext, { title: "Error Selecting Song", description: "Please try starting the round again. If the issue persists, report it in our official KMQ server." });
                 logger.error(`${getDebugLogHeader(messageContext)} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(guildPreference)}`);
@@ -506,66 +477,18 @@ export default class GameSession {
             }
         }
 
-        const totalSongsCount = this.filteredSongs.songs.size;
-
-        // manage unique songs
-        if (guildPreference.gameOptions.shuffleType === ShuffleType.UNIQUE) {
-            const filteredSongs = new Set([...this.filteredSongs.songs].map((x) => x.youtubeLink));
-            if (setDifference([...filteredSongs], [...this.uniqueSongsPlayed]).size === 0) {
-                logger.info(`${getDebugLogHeader(messageContext)} | Resetting uniqueSongsPlayed (all ${totalSongsCount} unique songs played)`);
-                // In updateSongCount, songs already played are added to songCount when options change. On unique reset, remove them
-                await sendInfoMessage(messageContext, { title: "Resetting Unique Songs", description: `All songs have been played. ${totalSongsCount} songs will be reshuffled.`, thumbnailUrl: KmqImages.LISTENING });
-                this.resetUniqueSongs();
-            }
-        } else {
-            this.resetUniqueSongs();
+        if (this.songSelector.checkUniqueSongQueue(guildPreference)) {
+            const totalSongCount = this.songSelector.getCurrentSongCount();
+            logger.info(`${getDebugLogHeader(messageContext)} | Resetting uniqueSongsPlayed (all ${totalSongCount} unique songs played)`);
+            await sendInfoMessage(messageContext, { title: "Resetting Unique Songs", description: `All songs have been played. ${totalSongCount} songs will be reshuffled.`, thumbnailUrl: KmqImages.LISTENING });
         }
 
-        // manage last played songs
-        if (totalSongsCount <= LAST_PLAYED_SONG_QUEUE_SIZE) {
-            this.lastPlayedSongs = [];
-        } else if (this.lastPlayedSongs.length === LAST_PLAYED_SONG_QUEUE_SIZE) {
-            this.lastPlayedSongs.shift();
-
-            // Randomize songs from oldest LAST_PLAYED_SONG_QUEUE_SIZE / 2 songs
-            // when lastPlayedSongs is in use but totalSongsCount small
-            if (totalSongsCount <= LAST_PLAYED_SONG_QUEUE_SIZE * 2) {
-                this.lastPlayedSongs.splice(0, LAST_PLAYED_SONG_QUEUE_SIZE / 2);
-            }
-        }
-
-        // manage alternating gender
-        if (guildPreference.isGenderAlternating()) {
-            if (this.lastAlternatingGender === null) {
-                this.lastAlternatingGender = Math.random() < 0.5 ? Gender.MALE : Gender.FEMALE;
-            } else {
-                this.lastAlternatingGender = this.lastAlternatingGender === Gender.MALE ? Gender.FEMALE : Gender.MALE;
-            }
-        } else {
-            this.lastAlternatingGender = null;
-        }
-
-        // query for random song
-        let randomSong: QueriedSong;
-        const ignoredSongs = new Set([...this.lastPlayedSongs, ...this.uniqueSongsPlayed]);
-        if (this.lastAlternatingGender) {
-            randomSong = await selectRandomSong(this.filteredSongs.songs, ignoredSongs, this.lastAlternatingGender);
-        } else {
-            randomSong = await selectRandomSong(this.filteredSongs.songs, ignoredSongs);
-        }
-
+        this.songSelector.checkAlternatingGender(guildPreference);
+        const randomSong = await this.songSelector.queryRandomSong(guildPreference);
         if (randomSong === null) {
             sendErrorMessage(messageContext, { title: "Song Query Error", description: "Failed to find songs matching this criteria. Try to broaden your search." });
             await this.endSession();
             return;
-        }
-
-        if (totalSongsCount > LAST_PLAYED_SONG_QUEUE_SIZE) {
-            this.lastPlayedSongs.push(randomSong.youtubeLink);
-        }
-
-        if (guildPreference.gameOptions.shuffleType === ShuffleType.UNIQUE) {
-            this.uniqueSongsPlayed.add(randomSong.youtubeLink);
         }
 
         // create a new round with randomly chosen song
@@ -665,13 +588,6 @@ export default class GameSession {
     }
 
     /**
-     * Resets the unique songs set
-     */
-    resetUniqueSongs() {
-        this.uniqueSongsPlayed.clear();
-    }
-
-    /**
      * Adds a participant for elimination mode
      * @param user - The user to add
      */
@@ -690,7 +606,7 @@ export default class GameSession {
     }
 
     async updateFilteredSongs(guildPreference: GuildPreference) {
-        this.filteredSongs = await getFilteredSongList(guildPreference);
+        await this.songSelector.reloadSongs(guildPreference);
     }
 
     /**
@@ -1125,9 +1041,10 @@ export default class GameSession {
     }
 
     private getSongCount() {
+        const selectedSongs = this.songSelector.getSongs();
         return {
-            count: this.filteredSongs.songs.size,
-            countBeforeLimit: this.filteredSongs.countBeforeLimit,
+            count: selectedSongs.songs.size,
+            countBeforeLimit: selectedSongs.countBeforeLimit,
         };
     }
 }
