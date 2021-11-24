@@ -19,7 +19,7 @@ export default class NewsCommand implements BaseCommand {
 
     aliases = ["updates"];
 
-    call = async ({ message }: CommandArgs) : Promise<void> => {
+    call = async ({ message }: CommandArgs): Promise<void> => {
         const newsFilePath = path.resolve(__dirname, "../../../data/news.md");
         if (!fs.existsSync(newsFilePath)) {
             logger.error("News file does not exist");
