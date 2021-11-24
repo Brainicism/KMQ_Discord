@@ -61,7 +61,7 @@ export function strikethrough(text: string): string {
  * @param places - The number of places to round
  * @returns the rounded number
  */
-export function roundDecimal(num: number, places: number) {
+export function roundDecimal(num: number, places: number): number {
     return Math.round(num * (10 ** places)) / (10 ** places);
 }
 
@@ -102,7 +102,7 @@ export function getAudioDurationInSeconds(songPath: string): Promise<number> {
  * @param filePath - the file path of the JSON file
  * @returns a Javascript object representation of the file
  */
-export function parseJsonFile(filePath: string) {
+export function parseJsonFile(filePath: string): any {
     return JSON.parse(fs.readFileSync(filePath).toString());
 }
 
@@ -137,7 +137,7 @@ export function weekOfYear(dateObj?: Date): number {
  * @param list - List of arbitrary elements
  * @returns the randomly selected element
  */
-export function chooseRandom(list: Array<any>) {
+export function chooseRandom(list: Array<any>): any {
     return list[Math.floor(Math.random() * list.length)] || null;
 }
 
@@ -148,7 +148,7 @@ export function chooseRandom(list: Array<any>) {
  * @param list - List of arbitrary elements
  * @returns the randomly selected element
  */
-export function chooseWeightedRandom(list: Array<any>) {
+export function chooseWeightedRandom(list: Array<any>): any {
     const weights = [];
     for (let i = 0; i < list.length; i++) {
         const previousWeight = weights[i - 1] || 0;
@@ -229,7 +229,7 @@ export function isWeekend(): boolean {
  * @param bits - The number of bits wanted in the output
  * @returns the output hash as a number
  */
-export function md5Hash(input: string | number, bits: number) {
+export function md5Hash(input: string | number, bits: number): number {
     if (bits > 128) {
         logger.warn("Maximum bit length is 128");
     }
@@ -269,7 +269,7 @@ export function getOrdinalNum(n: number): string {
  * @param num - The decimal number to be converted
  * @returns the roman numeral representation
  */
-export function romanize(num: number) {
+export function romanize(num: number): string | number {
     if (Number.isNaN(num)) {
         return NaN;
     }

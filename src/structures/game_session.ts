@@ -164,7 +164,7 @@ export default class GameSession {
      * @param guildPreference - The GuildPreference
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
-    async endRound(guessResult: GuessResult, guildPreference: GuildPreference, messageContext?: MessageContext) {
+    async endRound(guessResult: GuessResult, guildPreference: GuildPreference, messageContext?: MessageContext): Promise<void> {
         if (this.gameRound === null) {
             return;
         }
@@ -413,7 +413,7 @@ export default class GameSession {
      * @param messageContext - The context of the message to check
      * @param guess - the content of the message to check
      */
-    async guessSong(messageContext: MessageContext, guess: string) {
+    async guessSong(messageContext: MessageContext, guess: string): Promise<void> {
         if (!this.connection) return;
         if (this.connection.listenerCount("end") === 0) return;
         if (!this.gameRound) return;
@@ -459,7 +459,7 @@ export default class GameSession {
      * @param guildPreference - The guild's GuildPreference
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
-    async startRound(guildPreference: GuildPreference, messageContext: MessageContext) {
+    async startRound(guildPreference: GuildPreference, messageContext: MessageContext): Promise<void> {
         this.sessionInitialized = true;
         await delay(this.multiguessDelayIsActive(guildPreference) ? 3000 - MULTIGUESS_DELAY : 3000);
         if (this.finished || this.gameRound) {
@@ -568,7 +568,7 @@ export default class GameSession {
      * @param messageContext - An object containing relevant parts of Eris.Message
      * @param guildPreference - The GuildPreference
      */
-    startGuessTimeout(messageContext: MessageContext, guildPreference: GuildPreference) {
+    startGuessTimeout(messageContext: MessageContext, guildPreference: GuildPreference): Promise<void> {
         if (!guildPreference.isGuessTimeoutSet()) return;
 
         const time = guildPreference.gameOptions.guessTimeout;
@@ -583,7 +583,7 @@ export default class GameSession {
     /**
      * Stops the timer set in timer mode
      */
-    stopGuessTimeout() {
+    stopGuessTimeout(): void {
         clearTimeout(this.guessTimeoutFunc);
     }
 
@@ -597,15 +597,15 @@ export default class GameSession {
         return eliminationScoreboard.addPlayer(user.id, user.tag, user.avatarUrl, midgame ? eliminationScoreboard.getLivesOfWeakestPlayer() : null);
     }
 
-    getRoundsPlayed() {
+    getRoundsPlayed(): number {
         return this.roundsPlayed;
     }
 
-    getCorrectGuesses() {
+    getCorrectGuesses(): number {
         return this.correctGuesses;
     }
 
-    async reloadSongs(guildPreference: GuildPreference) {
+    async reloadSongs(guildPreference: GuildPreference): Promise<void> {
         await this.songSelector.reloadSongs(guildPreference);
     }
 
@@ -626,7 +626,7 @@ export default class GameSession {
      * @param userID - The user that wants to bookmark the song
      * @param song - The song to store
      */
-    addBookmarkedSong(userID: string, song: QueriedSong) {
+    addBookmarkedSong(userID: string, song: QueriedSong): void {
         if (!userID || !song) {
             return;
         }
@@ -639,7 +639,7 @@ export default class GameSession {
     }
 
     /** Updates owner to the first player to join the game that didn't leave VC */
-    updateOwner() {
+    updateOwner(): Promise<void> {
         const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID);
         const voiceMemberIDs = new Set(voiceMembers.map((x) => x.id));
         if (voiceMemberIDs.has(this.owner.id) || voiceMemberIDs.size === 0) {
@@ -660,7 +660,7 @@ export default class GameSession {
         sendInfoMessage(new MessageContext(this.textChannelID), { title: "Game Owner Changed", description: `The new game owner is ${getMention(this.owner.id)}. They are in charge of \`,forcehint\` and \`,forceskip\`.`, thumbnailUrl: KmqImages.LISTENING });
     }
 
-    async handleMultipleChoiceInteraction(interaction: Eris.ComponentInteraction, messageContext: MessageContext) {
+    async handleMultipleChoiceInteraction(interaction: Eris.ComponentInteraction, messageContext: MessageContext): Promise<void> {
         if (!getCurrentVoiceMembers(this.voiceChannelID).map((x) => x.id).includes(interaction.member.id)) {
             tryInteractionAcknowledge(interaction);
             return;
@@ -698,7 +698,7 @@ export default class GameSession {
         this.guessSong(messageContext, guildPreference.gameOptions.guessModeType !== GuessModeType.ARTIST ? this.gameRound.songName : this.gameRound.artistName);
     }
 
-    async handleBookmarkInteraction(interaction: Eris.CommandInteraction) {
+    async handleBookmarkInteraction(interaction: Eris.CommandInteraction): Promise<void> {
         const song = this.getSongFromMessageID(interaction.data.target_id);
         if (!song) {
             tryCreateInteractionErrorAcknowledgement(interaction, `You can only bookmark songs recently played in the last ${BOOKMARK_MESSAGE_SIZE} rounds. You must bookmark the message sent by the bot containing the song.`);
@@ -714,7 +714,7 @@ export default class GameSession {
      * @param guildPreference - The guild's GuildPreference
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
-    private async playSong(guildPreference: GuildPreference, messageContext: MessageContext) {
+    private async playSong(guildPreference: GuildPreference, messageContext: MessageContext): Promise<void> {
         const { gameRound } = this;
         if (gameRound === null) {
             return;
@@ -793,7 +793,7 @@ export default class GameSession {
      * @param messageContext - The MessageContext
      * @param guildPreference - The GuildPreference
      */
-    private async errorRestartRound(guildPreference: GuildPreference) {
+    private async errorRestartRound(guildPreference: GuildPreference): Promise<void> {
         const messageContext = new MessageContext(this.textChannelID);
         await this.endRound({ correct: false, error: true }, guildPreference);
         await sendErrorMessage(messageContext, { title: "Error Playing Song", description: "Starting new round in 3 seconds..." });
@@ -807,7 +807,7 @@ export default class GameSession {
      * @param videoID - The song's corresponding YouTube ID
      * @param publishDate - The day the song was added to YouTube
      */
-    private prepareRound(cleanSongName: string, originalSongName: string, artist: string, videoID: string, publishDate: Date, views: number) {
+    private prepareRound(cleanSongName: string, originalSongName: string, artist: string, videoID: string, publishDate: Date, views: number): void {
         this.gameRound = new GameRound(cleanSongName, originalSongName, artist, videoID, publishDate, views);
     }
 
@@ -871,7 +871,7 @@ export default class GameSession {
      * Creates/updates a user's activity in the data store
      * @param userID - The player's Discord user ID
      */
-    private async ensurePlayerStat(userID: string) {
+    private async ensurePlayerStat(userID: string): Promise<void> {
         const currentDateString = new Date();
         await dbContext.kmq("player_stats")
             .insert(
@@ -898,7 +898,7 @@ export default class GameSession {
      * @param userID - The player's Discord user ID
      * @param score - The player's score in the current GameSession
      */
-    private static async incrementPlayerSongsGuessed(userID: string, score: number) {
+    private static async incrementPlayerSongsGuessed(userID: string, score: number): Promise<void> {
         await dbContext.kmq("player_stats")
             .where("player_id", "=", userID)
             .increment("songs_guessed", score)
@@ -911,7 +911,7 @@ export default class GameSession {
      * Updates a user's games played in the data store
      * @param userID - The player's Discord user ID
      */
-    private static async incrementPlayerGamesPlayed(userID: string) {
+    private static async incrementPlayerGamesPlayed(userID: string): Promise<void> {
         await dbContext.kmq("player_stats")
             .where("player_id", "=", userID)
             .increment("games_played", 1);
@@ -959,7 +959,7 @@ export default class GameSession {
      * @param expGain - The EXP gained in the game
      * @param levelsGained - The levels gained in the game
      */
-    private static async insertPerSessionStats(userID: string, score: number, expGain: number, levelsGained: number) {
+    private static async insertPerSessionStats(userID: string, score: number, expGain: number, levelsGained: number): Promise<void> {
         await dbContext.kmq("player_game_session_stats")
             .insert({
                 player_id: userID,
@@ -975,7 +975,7 @@ export default class GameSession {
      * @param vlink - The song's YouTube ID
      * @param correct - Whether the guess was correct
      */
-    private async incrementSongCount(vlink: string, correct: boolean) {
+    private async incrementSongCount(vlink: string, correct: boolean): Promise<void> {
         if (!(vlink in this.playCount)) {
             this.playCount[vlink] = {
                 correctGuesses: 0,
@@ -993,7 +993,7 @@ export default class GameSession {
     /**
      * Stores song play count and correct guess count in data store
      */
-    private async storeSongCounts() {
+    private async storeSongCounts(): Promise<void> {
         for (const vlink of Object.keys(this.playCount)) {
             await dbContext.kmq("song_guess_count")
                 .insert(
@@ -1035,12 +1035,12 @@ export default class GameSession {
         return expBase + expJitter;
     }
 
-    private multiguessDelayIsActive(guildPreference: GuildPreference) {
+    private multiguessDelayIsActive(guildPreference: GuildPreference): boolean {
         const playerIsAlone = getNumParticipants(this.voiceChannelID) === 1;
         return (guildPreference.gameOptions.multiGuessType === MultiGuessType.ON) && !playerIsAlone;
     }
 
-    private getSongCount() {
+    private getSongCount(): { count: number, countBeforeLimit: number } {
         const selectedSongs = this.songSelector.getSongs();
         return {
             count: selectedSongs.songs.size,

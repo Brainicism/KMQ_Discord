@@ -35,7 +35,7 @@ const state: State = {
 export { state };
 
 export class BotWorker extends BaseClusterWorker {
-    handleCommand = async (commandName: string) => {
+    handleCommand = async (commandName: string): Promise<any> => {
         logger.debug(`Received cluster command: ${commandName}`);
         if (commandName.startsWith("eval")) {
             const evalString = commandName.substr(commandName.indexOf("|") + 1);
@@ -60,7 +60,7 @@ export class BotWorker extends BaseClusterWorker {
         }
     };
 
-    shutdown = async (done) => {
+    shutdown = async (done): Promise<void> => {
         logger.debug("SHUTDOWN received, cleaning up...");
 
         const endSessionPromises = Object.keys(state.gameSessions).map(async (guildID) => {

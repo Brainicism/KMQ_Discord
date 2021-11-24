@@ -33,7 +33,7 @@ const BOT_LISTING_SITES: { [siteName: string]: BotListing } = {
 /**
  * @param userID - The user's Discord ID
  */
-export async function userVoted(userID: string) {
+export async function userVoted(userID: string): Promise<void> {
     const userVoterStatus = await dbContext.kmq("top_gg_user_votes")
         .where("user_id", "=", userID)
         .first();
@@ -52,20 +52,20 @@ export async function userVoted(userID: string) {
 }
 
 export default class BotListingManager {
-    async start() {
+    async start(): Promise<void> {
         if (process.env.NODE_ENV === EnvType.PROD) {
             setInterval(() => { this.postStats(); }, 1800000);
         }
     }
 
-    private async postStats() {
+    private async postStats(): Promise<void> {
         for (const siteConfigKeyName of Object.keys(BOT_LISTING_SITES).filter((x) => x in process.env)) {
             this.postStat(siteConfigKeyName);
         }
     }
 
     // eslint-disable-next-line class-methods-use-this
-    private async postStat(siteConfigKeyName: string) {
+    private async postStat(siteConfigKeyName: string): Promise<void> {
         const botListing = BOT_LISTING_SITES[siteConfigKeyName];
         const { ipc, client } = state;
         try {

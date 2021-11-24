@@ -18,7 +18,7 @@ export default class EndCommand implements BaseCommand {
 
     aliases = ["stop", "e"];
 
-    call = async ({ gameSessions, message }: CommandArgs) => {
+    call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
         const gameSession = gameSessions[message.guildID];
         if (!gameSession) {
             logger.warn(`${getDebugLogHeader(message)} | No active game session`);

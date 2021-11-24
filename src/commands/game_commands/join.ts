@@ -19,7 +19,7 @@ export default class JoinCommand implements BaseCommand {
 
     aliases = ["j"];
 
-    call = async ({ message, gameSessions, parsedMessage }: CommandArgs) => {
+    call = async ({ message, gameSessions, parsedMessage }: CommandArgs): Promise<void> => {
         const gameSession = gameSessions[message.guildID];
         if (!gameSession || (gameSession.gameType !== GameType.ELIMINATION && gameSession.gameType !== GameType.TEAMS)) {
             return;
@@ -32,7 +32,7 @@ export default class JoinCommand implements BaseCommand {
         }
     };
 
-    static joinEliminationGame(message: GuildTextableMessage, gameSession: GameSession) {
+    static joinEliminationGame(message: GuildTextableMessage, gameSession: GameSession): void {
         const kmqMember = KmqMember.fromUser(message.author);
         if (gameSession.participants.has(message.author.id)) {
             logger.info(`${getDebugLogHeader(message)} | Player already in game.`);
@@ -59,7 +59,7 @@ export default class JoinCommand implements BaseCommand {
         gameSession.addEliminationParticipant(kmqMember);
     }
 
-    static joinTeamsGame(message: GuildTextableMessage, parsedMessage: ParsedMessage, gameSession: GameSession) {
+    static joinTeamsGame(message: GuildTextableMessage, parsedMessage: ParsedMessage, gameSession: GameSession): void {
         if (parsedMessage.components.length === 0) {
             logger.warn(`${getDebugLogHeader(message)} | Missing team name.`);
             sendErrorMessage(MessageContext.fromMessage(message), {

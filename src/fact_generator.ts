@@ -41,7 +41,7 @@ interface GaonWeeklyEntry {
     year: string;
 }
 
-export async function reloadFactCache() {
+export async function reloadFactCache(): Promise<void> {
     logger.info("Regenerating fact cache...");
     await generateFacts();
 }
@@ -57,7 +57,7 @@ async function resolveFactPromises(promises: Promise<string[]>[]): Promise<strin
     return resolvedPromises.map((x) => x["value"]);
 }
 
-async function generateFacts() {
+async function generateFacts(): Promise<void> {
     const funFactPromises = funFactFunctions.map((x) => x());
     const kmqFactPromises = kmqFactFunctions.map((x) => x());
     const funFacts = await resolveFactPromises(funFactPromises);

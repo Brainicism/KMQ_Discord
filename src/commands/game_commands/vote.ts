@@ -26,7 +26,7 @@ export default class VoteCommand implements BaseCommand {
         priority: 60,
     };
 
-    call = async ({ message }: CommandArgs) => {
+    call = async ({ message }: CommandArgs): Promise<void> => {
         let voteStatusString = "";
         const boostActive = await userBonusIsActive(message.author.id);
         const userVoterStatus = await dbContext.kmq("top_gg_user_votes")

@@ -5,7 +5,7 @@ import { EnvType } from "./types";
 
 config({ path: resolve(__dirname, "../.env") });
 
-function generateKnexContext(databaseName: string, minPoolSize = 0, maxPoolSize: number) {
+function generateKnexContext(databaseName: string, minPoolSize = 0, maxPoolSize: number): any {
     return {
         client: "mysql2",
         connection: {
@@ -37,7 +37,7 @@ export class DatabaseContext {
         this.kpopVideosValidation = knex(generateKnexContext("kpop_videos_validation", 0, 1));
     }
 
-    async destroy() {
+    async destroy(): Promise<void> {
         if (this.kmq) {
             await this.kmq.destroy();
         }

@@ -22,7 +22,7 @@ export default class SkipCommand implements BaseCommand {
         priority: 1,
     };
 
-    call = async ({ message, channel }: CommandArgs) => {
+    call = async ({ message, channel }: CommandArgs): Promise<void> => {
         const fleetStats = await state.ipc.getStats();
         let gameSessionStats;
         try {

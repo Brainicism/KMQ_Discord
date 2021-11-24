@@ -21,7 +21,7 @@ export default class TeamScoreboard extends Scoreboard {
      * Updates the scoreboard with information about correct guessers
      * @param guessResults - Objects containing the user ID, points earned, and EXP gain
      */
-    updateScoreboard(guessResults: Array<SuccessfulGuessResult>) {
+    updateScoreboard(guessResults: Array<SuccessfulGuessResult>): void {
         // give everybody EXP
         for (const guessResult of guessResults) {
             const correctGuesser = this.getPlayer(guessResult.userID);
@@ -110,7 +110,7 @@ export default class TeamScoreboard extends Scoreboard {
     * @param teamName - The name of the team to add the player to
     * @param player - The player to add to the team
     */
-    addPlayer(teamName: string, player: Player) {
+    addPlayer(teamName: string, player: Player): void {
         // If the user is switching teams, remove them from their existing team first
         this.removePlayer(player.id);
         this.players[teamName].addPlayer(player);
@@ -121,7 +121,7 @@ export default class TeamScoreboard extends Scoreboard {
      * If removing this player causes the team to have 0 members, destroy the team
      * @param userID - The unique identifier of the player to be deleted
      */
-    removePlayer(userID: string) {
+    removePlayer(userID: string): void {
         const team = this.getTeamOfPlayer(userID);
         if (!team) return;
         team.removePlayer(userID);

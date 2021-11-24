@@ -141,7 +141,7 @@ export default class SongSelector {
     /**
      * Resets the unique songs set
      */
-    resetUniqueSongs() {
+    resetUniqueSongs(): void {
         this.uniqueSongsPlayed.clear();
     }
 

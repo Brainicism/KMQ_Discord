@@ -40,7 +40,7 @@ export default class GoalCommand implements BaseCommand {
         priority: 120,
     };
 
-    call = async ({ message, parsedMessage, gameSessions }: CommandArgs) => {
+    call = async ({ message, parsedMessage, gameSessions }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.GOAL);

@@ -61,7 +61,7 @@ export default class RemoveCommand implements BaseCommand {
         actionRowComponents: [{ style: 5 as const, url: GROUP_LIST_URL, type: 2 as const, label: "Full List of Groups" }],
     };
 
-    call = async ({ message, parsedMessage }: CommandArgs) => {
+    call = async ({ message, parsedMessage }: CommandArgs) : Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         const optionListed = parsedMessage.components[0] as RemoveType;
         let currentMatchedArtists: MatchedArtist[];

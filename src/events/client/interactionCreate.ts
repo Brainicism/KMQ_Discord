@@ -8,7 +8,7 @@ import { handleProfileInteraction } from "../../commands/game_commands/profile";
 export const BOOKMARK_COMMAND_NAME = "Bookmark Song";
 export const PROFILE_COMMAND_NAME = "Profile";
 
-export default async function interactionCreateHandler(interaction: Eris.PingInteraction | Eris.CommandInteraction | Eris.ComponentInteraction | Eris.UnknownInteraction) {
+export default async function interactionCreateHandler(interaction: Eris.PingInteraction | Eris.CommandInteraction | Eris.ComponentInteraction | Eris.UnknownInteraction): Promise<void> {
     if (interaction instanceof Eris.ComponentInteraction) {
         const gameSession = state.gameSessions[interaction.guildID];
         if (!gameSession || !gameSession.gameRound) {

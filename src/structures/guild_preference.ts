@@ -351,7 +351,7 @@ export default class GuildPreference {
      * Sets the limit option value
      * @param limit - The limit range value
      */
-    async setLimit(limitStart: number, limitEnd: number) {
+    async setLimit(limitStart: number, limitEnd: number): Promise<void> {
         this.gameOptions.limitStart = limitStart;
         this.gameOptions.limitEnd = limitEnd;
         await this.updateGuildPreferences(
@@ -362,7 +362,7 @@ export default class GuildPreference {
         );
     }
 
-    async reset(gameOption: GameOption) {
+    async reset(gameOption: GameOption): Promise<void> {
         if (gameOption in this.resetArgs) {
             const resetArg = this.resetArgs[gameOption];
             resetArg.setter.bind(this)(...resetArg.default);
@@ -373,7 +373,7 @@ export default class GuildPreference {
      * Sets the beginning cutoff year option value
      * @param year - The beginning cutoff year
      */
-    async setBeginningCutoffYear(year: number) {
+    async setBeginningCutoffYear(year: number): Promise<void> {
         this.gameOptions.beginningYear = year;
         await this.updateGuildPreferences([{ name: GameOptionInternal.BEGINNING_YEAR, value: year }]);
     }
@@ -382,7 +382,7 @@ export default class GuildPreference {
      * Sets the end cutoff year option value
      * @param year - The end cutoff year
      */
-    async setEndCutoffYear(year: number) {
+    async setEndCutoffYear(year: number): Promise<void> {
         this.gameOptions.endYear = year;
         await this.updateGuildPreferences([{ name: GameOptionInternal.END_YEAR, value: year }]);
     }
@@ -396,7 +396,7 @@ export default class GuildPreference {
      * Sets the groups option value
      * @param groupIDs - A list of kpop groups (ID and name)
      */
-    async setGroups(groups: MatchedArtist[]) {
+    async setGroups(groups: MatchedArtist[]): Promise<void> {
         this.gameOptions.groups = groups;
         await this.updateGuildPreferences([{ name: GameOptionInternal.GROUPS, value: groups }]);
     }
@@ -433,7 +433,7 @@ export default class GuildPreference {
      * Sets the exclude option value
      * @param groups - A list of kpop groups (ID and name)
      */
-    async setExcludes(groups: MatchedArtist[]) {
+    async setExcludes(groups: MatchedArtist[]): Promise<void> {
         this.gameOptions.excludes = groups;
         await this.updateGuildPreferences([{ name: GameOptionInternal.EXCLUDES, value: groups }]);
     }
@@ -470,7 +470,7 @@ export default class GuildPreference {
      * Sets the include option value
      * @param groupIDs - A list of kpop groups (ID and name)
      */
-    async setIncludes(groups: MatchedArtist[]) {
+    async setIncludes(groups: MatchedArtist[]): Promise<void> {
         this.gameOptions.includes = groups;
         await this.updateGuildPreferences([{ name: GameOptionInternal.INCLUDES, value: groups }]);
     }
@@ -496,7 +496,7 @@ export default class GuildPreference {
      * Sets the gender option value
      * @param genderArr - A list of GENDER enums
      */
-    async setGender(genderArr: Array<Gender>) {
+    async setGender(genderArr: Array<Gender>): Promise<void> {
         this.gameOptions.gender = [...new Set(genderArr)];
         await this.updateGuildPreferences([{ name: GameOptionInternal.GENDER, value: this.gameOptions.gender }]);
     }
@@ -510,7 +510,7 @@ export default class GuildPreference {
      * Sets the seek type option value
      * @param seekType - The SeekType
      */
-    async setSeekType(seekType: SeekType) {
+    async setSeekType(seekType: SeekType): Promise<void> {
         this.gameOptions.seekType = seekType;
         await this.updateGuildPreferences([{ name: GameOptionInternal.SEEK_TYPE, value: seekType }]);
     }
@@ -519,7 +519,7 @@ export default class GuildPreference {
      * Sets the special type option value
      * @param specialType - The SpecialType
      */
-    async setSpecialType(specialType: SpecialType) {
+    async setSpecialType(specialType: SpecialType): Promise<void> {
         this.gameOptions.specialType = specialType;
         await this.updateGuildPreferences([{ name: GameOptionInternal.SPECIAL_TYPE, value: specialType }]);
     }
@@ -528,7 +528,7 @@ export default class GuildPreference {
      * Sets the artist type option value
      * @param artistType - The ArtistType
      */
-    async setArtistType(artistType: ArtistType) {
+    async setArtistType(artistType: ArtistType): Promise<void> {
         this.gameOptions.artistType = artistType;
         await this.updateGuildPreferences([{ name: GameOptionInternal.ARTIST_TYPE, value: artistType }]);
     }
@@ -537,7 +537,7 @@ export default class GuildPreference {
      * Sets the answer type option value
      * @param answerType - The AnswerType
      */
-    async setAnswerType(answerType: AnswerType) {
+    async setAnswerType(answerType: AnswerType): Promise<void> {
         this.gameOptions.answerType = answerType;
         await this.updateGuildPreferences([{ name: GameOptionInternal.ANSWER_TYPE, value: answerType }]);
     }
@@ -551,7 +551,7 @@ export default class GuildPreference {
      * Sets the subunit preference option value
      * @param subunitPreference - The SubunitsPreference
      */
-    async setSubunitPreference(subunitPreference: SubunitsPreference) {
+    async setSubunitPreference(subunitPreference: SubunitsPreference): Promise<void> {
         this.gameOptions.subunitPreference = subunitPreference;
         await this.updateGuildPreferences([{ name: GameOptionInternal.SUBUNIT_PREFERENCE, value: subunitPreference }]);
     }
@@ -560,7 +560,7 @@ export default class GuildPreference {
      * Sets the OST preference option value
      * @param ostPreference - The OstPreference
      */
-    async setOstPreference(ostPreference: OstPreference) {
+    async setOstPreference(ostPreference: OstPreference): Promise<void> {
         this.gameOptions.ostPreference = ostPreference;
         await this.updateGuildPreferences([{ name: GameOptionInternal.OST_PREFERENCE, value: ostPreference }]);
     }
@@ -569,7 +569,7 @@ export default class GuildPreference {
      * Sets the mode type option value
      * @param guessModeType - The GuessModeType
      */
-    async setGuessModeType(guessModeType: GuessModeType) {
+    async setGuessModeType(guessModeType: GuessModeType): Promise<void> {
         this.gameOptions.guessModeType = guessModeType;
         await this.updateGuildPreferences([{ name: GameOptionInternal.GUESS_MODE_TYPE, value: guessModeType }]);
     }
@@ -578,7 +578,7 @@ export default class GuildPreference {
      * Sets the release type option value
      * @param releaseType - The ReleaseType
      */
-    async setReleaseType(releaseType: ReleaseType) {
+    async setReleaseType(releaseType: ReleaseType): Promise<void> {
         this.gameOptions.releaseType = releaseType;
         await this.updateGuildPreferences([{ name: GameOptionInternal.RELEASE_TYPE, value: releaseType }]);
     }
@@ -587,7 +587,7 @@ export default class GuildPreference {
      * Sets the goal option value
      * @param goal - The goal option
      */
-    async setGoal(goal: number) {
+    async setGoal(goal: number): Promise<void> {
         this.gameOptions.goal = goal;
         await this.updateGuildPreferences([{ name: GameOptionInternal.GOAL, value: goal }]);
     }
@@ -601,7 +601,7 @@ export default class GuildPreference {
      * Sets the duration option value
      * @param duration - The game session duration in minutes
      */
-    async setDuration(duration: number) {
+    async setDuration(duration: number): Promise<void> {
         this.gameOptions.duration = duration;
         await this.updateGuildPreferences([{ name: GameOptionInternal.DURATION, value: duration }]);
     }
@@ -615,7 +615,7 @@ export default class GuildPreference {
      * Sets the timer option value
      * @param guessTimeout - The timer option
      */
-    async setGuessTimeout(guessTimeout: number) {
+    async setGuessTimeout(guessTimeout: number): Promise<void> {
         this.gameOptions.guessTimeout = guessTimeout;
         await this.updateGuildPreferences([{ name: GameOptionInternal.GUESS_TIMEOUT, value: guessTimeout }]);
     }
@@ -629,7 +629,7 @@ export default class GuildPreference {
      * Sets the shuffle type option value
      * @param shuffleType - The shuffle type
      */
-    async setShuffleType(shuffleType: ShuffleType) {
+    async setShuffleType(shuffleType: ShuffleType): Promise<void> {
         this.gameOptions.shuffleType = shuffleType;
 
         // Doesn't actually modify list of available_songs, but we need to
@@ -646,7 +646,7 @@ export default class GuildPreference {
      * Sets the language type option value
      * @param languageType - The language type
      */
-    async setLanguageType(languageType: LanguageType) {
+    async setLanguageType(languageType: LanguageType): Promise<void> {
         this.gameOptions.languageType = languageType;
         await this.updateGuildPreferences([{ name: GameOptionInternal.LANGUAGE_TYPE, value: languageType }]);
     }
@@ -655,7 +655,7 @@ export default class GuildPreference {
      * Sets the multiguess type option value
      * @param multiGuessType - The multiguess type
      */
-    async setMultiGuessType(multiGuessType: MultiGuessType) {
+    async setMultiGuessType(multiGuessType: MultiGuessType): Promise<void> {
         this.gameOptions.multiGuessType = multiGuessType;
         await this.updateGuildPreferences([{ name: GameOptionInternal.MULTI_GUESS_TYPE, value: multiGuessType }]);
     }
@@ -664,7 +664,7 @@ export default class GuildPreference {
      * Sets the force play song option value
      * @param forcePlaySongID - The force played song's ID
      */
-    async setForcePlaySong(forcePlaySongID: string) {
+    async setForcePlaySong(forcePlaySongID: string): Promise<void> {
         this.gameOptions.forcePlaySongID = forcePlaySongID;
         await this.updateGuildPreferences([{ name: GameOptionInternal.FORCE_PLAY_SONG, value: forcePlaySongID }]);
     }
@@ -673,7 +673,7 @@ export default class GuildPreference {
      * Persists the current guild preference to the data store
      * @param updatedOptionsObjects - An array of objects containing the names and values of updated options
      */
-    async updateGuildPreferences(updatedOptionsObjects: Array<{ name: string, value: GameOptionValue }>) {
+    async updateGuildPreferences(updatedOptionsObjects: Array<{ name: string, value: GameOptionValue }>): Promise<void> {
         const updatedOptions = Object.values(updatedOptionsObjects).map((option) => ({
             guild_id: this.guildID,
             option_name: option.name,

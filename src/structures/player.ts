@@ -26,7 +26,7 @@ export default class Player {
         this.expGain = 0;
     }
 
-    static fromUserID(userID: string) {
+    static fromUserID(userID: string): Player {
         const user = state.client.users.get(userID);
         return new Player(getUserTag(user), user.id, user.avatarURL, 0);
     }
@@ -93,7 +93,7 @@ export default class Player {
      * Increments the player's score by the specified amount
      * @param pointsEarned - The number of points earned by the correct guess
      */
-    incrementScore(pointsEarned: number) {
+    incrementScore(pointsEarned: number): void {
         this.score += pointsEarned;
     }
 
@@ -102,7 +102,7 @@ export default class Player {
      * @param expGain - The amount of EXP that was gained
      */
 
-    incrementExp(expGain: number) {
+    incrementExp(expGain: number): void {
         this.expGain += expGain;
     }
 }

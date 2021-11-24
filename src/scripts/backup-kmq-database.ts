@@ -36,7 +36,7 @@ async function backupKmqDatabase(): Promise<void> {
     });
 }
 
-function importKmqDatabase(fileWithPath: string) {
+function importKmqDatabase(fileWithPath: string): void {
     if (!fs.existsSync(fileWithPath)) {
         logger.error(`Dump file ${fileWithPath} doesn't exist.`);
         return;

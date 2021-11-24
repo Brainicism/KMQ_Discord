@@ -53,7 +53,7 @@ export default class SubunitsCommand implements BaseCommand {
         priority: 130,
     };
 
-    call = async ({ message, parsedMessage }: CommandArgs) => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
 
         if (parsedMessage.components.length === 0) {

@@ -52,7 +52,7 @@ export default class LanguageCommand implements BaseCommand {
         priority: 150,
     };
 
-    call = async ({ message, parsedMessage }: CommandArgs) => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.LANGUAGE_TYPE);

@@ -32,7 +32,7 @@ export default class EliminationScoreboard extends Scoreboard {
      * Updates the scoreboard with information about correct guessers
      * @param guessResults - Objects containing the user ID, points earned, and EXP gain
      */
-    updateScoreboard(guessResults: Array<SuccessfulGuessResult>) {
+    updateScoreboard(guessResults: Array<SuccessfulGuessResult>): void {
         // give everybody EXP
         for (const guessResult of guessResults) {
             const correctGuesser = this.players[guessResult.userID];
@@ -65,7 +65,7 @@ export default class EliminationScoreboard extends Scoreboard {
     }
 
     /** Decrements the lives of all current players */
-    decrementAllLives() {
+    decrementAllLives(): void {
         for (const player of Object.values(this.players)) {
             player.decrementLives();
         }

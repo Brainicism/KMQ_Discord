@@ -34,7 +34,7 @@ async function getOverrideQueries(db: DatabaseContext): Promise<Array<string>> {
         .select(["query"])).map((x) => x.query);
 }
 
-const downloadDb = async () => {
+const downloadDb = async (): Promise<void> => {
     const mvOutput = `${databaseDownloadDir}/mv-download.zip`;
     const audioOutput = `${databaseDownloadDir}/audio-download.zip`;
     const mvResp = await Axios.get(mvFileUrl, {
@@ -63,7 +63,7 @@ async function extractDb(): Promise<void> {
     logger.info("Extracted Daisuki database");
 }
 
-async function validateSqlDump(db: DatabaseContext, mvSeedFilePath: string, audioSeedFilePath: string, bootstrap = false) {
+async function validateSqlDump(db: DatabaseContext, mvSeedFilePath: string, audioSeedFilePath: string, bootstrap = false): Promise<void> {
     try {
         await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_validation;");
         await db.agnostic.raw("CREATE DATABASE kpop_videos_validation;");
@@ -103,7 +103,7 @@ async function validateSqlDump(db: DatabaseContext, mvSeedFilePath: string, audi
     }
 }
 
-async function seedDb(db: DatabaseContext, bootstrap: boolean) {
+async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
     const sqlFiles = (await fs.promises.readdir(`${databaseDownloadDir}`)).filter((x) => x.endsWith(".sql"));
     const mvSeedFile = sqlFiles.filter((x) => x.endsWith(".sql") && x.startsWith("mainbackup_")).slice(-1)[0];
     const audioSeedFile = sqlFiles.filter((x) => x.endsWith(".sql") && x.startsWith("audiobackup_")).slice(-1)[0];
@@ -148,7 +148,7 @@ async function hasRecentDump(): Promise<boolean> {
     return daysDiff < 6;
 }
 
-async function pruneSqlDumps() {
+function pruneSqlDumps(): void {
     try {
         execSync(`find ${databaseDownloadDir} -mindepth 1 -name "*backup_*" -mtime +${SQL_DUMP_EXPIRY} -delete`);
         logger.info("Finished pruning old SQL dumps");
@@ -157,7 +157,7 @@ async function pruneSqlDumps() {
     }
 }
 
-async function updateKpopDatabase(db: DatabaseContext, bootstrap = false) {
+async function updateKpopDatabase(db: DatabaseContext, bootstrap = false): Promise<void> {
     if (!options.skipPull && !bootstrap) {
         await downloadDb();
         await extractDb();
@@ -172,7 +172,7 @@ async function updateKpopDatabase(db: DatabaseContext, bootstrap = false) {
     }
 }
 
-export async function updateGroupList(db: DatabaseContext) {
+export async function updateGroupList(db: DatabaseContext): Promise<void> {
     const result = await db.kmq("kpop_groups")
         .select(["name", "members as gender"])
         .where("is_collab", "=", "n")
@@ -181,7 +181,7 @@ export async function updateGroupList(db: DatabaseContext) {
     fs.writeFileSync(path.resolve(__dirname, "../../data/group_list.txt"), result.map((x) => x.name).join("\n"));
 }
 
-async function seedAndDownloadNewSongs(db: DatabaseContext) {
+async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
     pruneSqlDumps();
     try {
         await updateKpopDatabase(db);

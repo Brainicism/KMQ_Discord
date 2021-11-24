@@ -30,7 +30,7 @@ export default class AppCommandsCommand implements BaseCommand {
 
     preRunChecks = [{ checkFn: CommandPrechecks.debugChannelPrecheck }];
 
-    call = async ({ message, parsedMessage }: CommandArgs) => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const artistType = parsedMessage.components[0] as AppCommandsAction;
         if (artistType === AppCommandsAction.RELOAD) {
             if (process.env.NODE_ENV === EnvType.PROD) {

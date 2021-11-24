@@ -110,7 +110,7 @@ export default class Scoreboard {
      * Updates the scoreboard with information about correct guessers
      * @param guessResults - Objects containing the user ID, points earned, and EXP gain
      */
-    updateScoreboard(guessResults: Array<SuccessfulGuessResult>) {
+    updateScoreboard(guessResults: Array<SuccessfulGuessResult>): void {
         for (const guessResult of guessResults) {
             if (!this.players[guessResult.userID]) {
                 this.players[guessResult.userID] = Player.fromUserID(guessResult.userID);

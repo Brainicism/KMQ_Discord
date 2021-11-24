@@ -12,7 +12,7 @@ import { md5Hash } from "../helpers/utils";
 const logger = new IPCLogger("test_setup");
 const sandbox = sinon.createSandbox();
 
-async function setup() {
+async function setup(): Promise<void> {
     await dbContext.kmq.raw("DROP TABLE IF EXISTS available_songs");
     await dbContext.kmq.raw("DROP TABLE IF EXISTS kpop_groups");
     await dbContext.kmq.raw(`CREATE TABLE available_songs (

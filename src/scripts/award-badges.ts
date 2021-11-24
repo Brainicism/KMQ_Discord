@@ -44,7 +44,7 @@ async function getBadgeID(): Promise<string> {
     });
 }
 
-async function awardBadges() {
+async function awardBadges(): Promise<void> {
     const badgesObj = await getObjects();
     const badgeID = await getBadgeID();
 

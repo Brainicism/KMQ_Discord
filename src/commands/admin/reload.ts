@@ -28,7 +28,7 @@ export default class ReloadCommand implements BaseCommand {
         ],
     };
 
-    call = async ({ message, parsedMessage }: CommandArgs) => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         try {
             execSync("npx tsc");
         } catch (e) {
@@ -48,7 +48,7 @@ export default class ReloadCommand implements BaseCommand {
         sendInfoMessage(MessageContext.fromMessage(message), { title: "Cluster Reload Complete", description: "All changes should now be applied" });
     };
 
-    static reloadCommands() {
+    static reloadCommands(): void {
         logger.info("Reloading all commands");
         state.client.reloadCommands();
     }

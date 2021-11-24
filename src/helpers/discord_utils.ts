@@ -196,7 +196,7 @@ export async function textPermissionsCheck(textChannelID: string, guildID: strin
     return true;
 }
 
-async function sendMessageExceptionHandler(e: any, channelID: string, guildID: string, authorID: string, messageContent: Eris.AdvancedMessageContent) {
+async function sendMessageExceptionHandler(e: any, channelID: string, guildID: string, authorID: string, messageContent: Eris.AdvancedMessageContent): Promise<void> {
     if (typeof e === "string") {
         if (e.startsWith("Request timed out")) {
             // Request Timeout
@@ -513,7 +513,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     updatedOptions?: { option: GameOption, reset: boolean }[],
     preset = false,
     allReset = false,
-    footerText?: string) {
+    footerText?: string): Promise<void> {
     if (guildPreference.gameOptions.forcePlaySongID) {
         await sendInfoMessage(messageContext,
             {
@@ -559,7 +559,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode() ? guildPreference.getDisplayedExcludesGroupNames() : null;
     optionStrings[GameOption.INCLUDE] = guildPreference.isIncludesMode() ? guildPreference.getDisplayedIncludesGroupNames() : null;
 
-    const generateConflictingCommandEntry = ((commandValue: string, conflictingOption: string) => `${strikethrough(commandValue)} (\`${process.env.BOT_PREFIX}${conflictingOption}\` ${italicize("conflict")})`);
+    const generateConflictingCommandEntry = ((commandValue: string, conflictingOption: string): string => `${strikethrough(commandValue)} (\`${process.env.BOT_PREFIX}${conflictingOption}\` ${italicize("conflict")})`);
 
     const { gameSessions } = state;
     const isEliminationMode = gameSessions[messageContext.guildID] && gameSessions[messageContext.guildID].gameType === GameType.ELIMINATION;
@@ -646,7 +646,7 @@ export async function sendOptionsMessage(messageContext: MessageContext,
  * @param textChannel - The channel where the message should be delivered
  * @param gameSession - The GameSession that has ended
  */
-export async function sendEndGameMessage(gameSession: GameSession) {
+export async function sendEndGameMessage(gameSession: GameSession): Promise<void> {
     const footerText = `${gameSession.getCorrectGuesses()}/${gameSession.getRoundsPlayed()} songs correctly guessed!`;
     if (gameSession.scoreboard.isEmpty()) {
         await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
@@ -700,7 +700,8 @@ export async function sendEndGameMessage(gameSession: GameSession) {
  * @param message - The Message object
  * @param embeds - A list of embeds to paginate over
  */
-export async function sendPaginationedEmbed(message: GuildTextableMessage, embeds: Array<Eris.EmbedOptions> | Array<EmbedGenerator>, components?: Array<Eris.ActionRow>, startPage = 1) {
+export async function sendPaginationedEmbed(message: GuildTextableMessage, embeds: Array<Eris.EmbedOptions> | Array<EmbedGenerator>,
+    components?: Array<Eris.ActionRow>, startPage = 1): Promise<Eris.Message> {
     if (embeds.length > 1) {
         if ((await textPermissionsCheck(message.channel.id, message.guildID, message.author.id))) {
             return EmbedPaginator.createPaginationEmbed(message, embeds, { timeout: 60000, startPage, cycling: true }, components);
@@ -724,7 +725,7 @@ export async function sendPaginationedEmbed(message: GuildTextableMessage, embed
  * @param message - The Message object
  * @param gameSession - The GameSession
  */
-export async function sendScoreboardMessage(message: GuildTextableMessage, gameSession: GameSession) {
+export async function sendScoreboardMessage(message: GuildTextableMessage, gameSession: GameSession): Promise<Eris.Message> {
     if (gameSession.scoreboard.isEmpty() && gameSession.gameType !== GameType.ELIMINATION) {
         return sendInfoMessage(MessageContext.fromMessage(message), {
             color: EMBED_SUCCESS_COLOR,
@@ -759,7 +760,7 @@ export async function sendScoreboardMessage(message: GuildTextableMessage, gameS
  * Disconnects the bot from the voice channel of the  message's originating guild
  * @param message - The Message object
  */
-export function disconnectVoiceConnection(message: GuildTextableMessage) {
+export function disconnectVoiceConnection(message: GuildTextableMessage): void {
     state.client.closeVoiceConnection(message.guildID);
 }
 
@@ -902,7 +903,7 @@ export function getMajorityCount(guildID: string): number {
  * @param color - The embed color
  * @param avatarUrl - The avatar URl to show on the embed
  */
-export function sendDebugAlertWebhook(title: string, description: string, color: number, avatarUrl: string) {
+export function sendDebugAlertWebhook(title: string, description: string, color: number, avatarUrl: string): void {
     if (!process.env.ALERT_WEBHOOK_URL) return;
     axios.post(process.env.ALERT_WEBHOOK_URL, {
         embeds: [{
@@ -915,7 +916,7 @@ export function sendDebugAlertWebhook(title: string, description: string, color:
     });
 }
 
-export async function sendBookmarkedSongs(bookmarkedSongs: { [userID: string]: Map<string, QueriedSong> }) {
+export async function sendBookmarkedSongs(bookmarkedSongs: { [userID: string]: Map<string, QueriedSong> }): Promise<void> {
     for (const [userID, songs] of Object.entries(bookmarkedSongs)) {
         const allEmbedFields: Array<{ name: string, value: string, inline: boolean }> = [...songs].map((song) => ({
             name: `${bold(`"${song[1].originalSongName}" - ${song[1].artist}`)} (${standardDateFormat(song[1].publishDate)})`,
@@ -944,7 +945,7 @@ function withinInteractionInterval(interaction: Eris.ComponentInteraction | Eris
     return new Date().getTime() - interaction.createdAt <= MAX_INTERACTION_RESPONSE_TIME;
 }
 
-function interactionRejectionHandler(interaction: Eris.ComponentInteraction | Eris.CommandInteraction, err) {
+function interactionRejectionHandler(interaction: Eris.ComponentInteraction | Eris.CommandInteraction, err): void {
     if (err.code === 10062) {
         logger.warn(`${getDebugLogHeader(interaction)} | Interaction acknowledge (unknown interaction)`);
     } else {
@@ -952,7 +953,7 @@ function interactionRejectionHandler(interaction: Eris.ComponentInteraction | Er
     }
 }
 
-export async function tryInteractionAcknowledge(interaction: Eris.ComponentInteraction | Eris.CommandInteraction) {
+export async function tryInteractionAcknowledge(interaction: Eris.ComponentInteraction | Eris.CommandInteraction): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
         return;
     }
@@ -964,7 +965,7 @@ export async function tryInteractionAcknowledge(interaction: Eris.ComponentInter
     }
 }
 
-export async function tryCreateInteractionSuccessAcknowledgement(interaction: Eris.ComponentInteraction | Eris.CommandInteraction, title: string, description: string) {
+export async function tryCreateInteractionSuccessAcknowledgement(interaction: Eris.ComponentInteraction | Eris.CommandInteraction, title: string, description: string): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
         return;
     }
@@ -988,7 +989,7 @@ export async function tryCreateInteractionSuccessAcknowledgement(interaction: Er
     }
 }
 
-export async function tryCreateInteractionErrorAcknowledgement(interaction: Eris.ComponentInteraction | Eris.CommandInteraction, description: string) {
+export async function tryCreateInteractionErrorAcknowledgement(interaction: Eris.ComponentInteraction | Eris.CommandInteraction, description: string): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
         return;
     }

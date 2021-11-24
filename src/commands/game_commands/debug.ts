@@ -11,7 +11,7 @@ import MessageContext from "../../structures/message_context";
 const logger = new IPCLogger("debug");
 
 export default class DebugCommand implements BaseCommand {
-    call = async ({ message, channel }: CommandArgs) => {
+    call = async ({ message, channel }: CommandArgs): Promise<void> => {
         const debugChannel = await getDebugChannel();
         if (!debugChannel) {
             logger.warn("No debug text channel specified");

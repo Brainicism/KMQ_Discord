@@ -26,7 +26,7 @@ const parseMessage = (message: string): ParsedMessage => {
     };
 };
 
-export default async function messageCreateHandler(message: Eris.Message) {
+export default async function messageCreateHandler(message: Eris.Message): Promise<void> {
     if (message.author.id === state.client.user.id || message.author.bot) return;
     if (!isGuildMessage(message)) return;
     if (state.client.unavailableGuilds.has(message.guildID)) {

@@ -29,7 +29,7 @@ function isHintAvailable(message: GuildTextableMessage, gameSession: GameSession
     return gameSession.gameRound.hintUsed || isHintMajority(message, gameSession);
 }
 
-async function sendHintNotification(message: GuildTextableMessage, gameSession: GameSession) {
+async function sendHintNotification(message: GuildTextableMessage, gameSession: GameSession): Promise<void> {
     if (!gameSession.gameRound) return;
     if (gameSession.gameType === GameType.ELIMINATION) {
         const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
@@ -90,7 +90,7 @@ export default class HintCommand implements BaseCommand {
 
     aliases = ["h"];
 
-    call = async ({ gameSessions, message }: CommandArgs) => {
+    call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
         const gameSession = gameSessions[message.guildID];
         const gameRound = gameSession?.gameRound;
         const guildPreference = await getGuildPreference(message.guildID);

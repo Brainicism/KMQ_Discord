@@ -66,7 +66,7 @@ const options: Options = {
     useCentralRequestHandler: true,
 };
 
-function registerGlobalIntervals(fleet: Fleet) {
+function registerGlobalIntervals(fleet: Fleet): void {
     // every sunday at 1am UTC => 8pm saturday EST
     schedule.scheduleJob("0 1 * * 0", async () => {
         if (process.env.NODE_ENV !== EnvType.PROD) return;
@@ -107,7 +107,7 @@ function registerGlobalIntervals(fleet: Fleet) {
     });
 }
 
-function registerProcessEvents(fleet: Fleet) {
+function registerProcessEvents(fleet: Fleet): void {
     process.on("unhandledRejection", (error: Error) => {
         logger.error(`Admiral Unhandled Rejection at: Reason: ${error.message}. Trace: ${error.stack}`);
     });
@@ -123,7 +123,7 @@ function registerProcessEvents(fleet: Fleet) {
 }
 
 /** Starts web server */
-async function startWebServer(fleet: Fleet) {
+async function startWebServer(fleet: Fleet): Promise<void> {
     const httpServer = fastify({});
     httpServer.register(pointOfView, {
         engine: {

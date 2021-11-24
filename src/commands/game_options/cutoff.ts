@@ -53,7 +53,7 @@ export default class CutoffCommand implements BaseCommand {
         priority: 140,
     };
 
-    call = async ({ message, parsedMessage }: CommandArgs) => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.setBeginningCutoffYear(DEFAULT_BEGINNING_SEARCH_YEAR);

@@ -28,7 +28,7 @@ export default class ForceSkipCommand implements BaseCommand {
 
     aliases = ["fskip", "fs"];
 
-    call = async ({ gameSessions, message }: CommandArgs) => {
+    call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         const gameSession = gameSessions[message.guildID];
         if (!gameSession || !gameSession.gameRound || !areUserAndBotInSameVoiceChannel(message)) {

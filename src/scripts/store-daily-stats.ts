@@ -3,7 +3,7 @@ import { IPCLogger } from "../logger";
 
 const logger = new IPCLogger("daily_stats");
 
-const storeDailyStats = async (serverCount: number) => {
+const storeDailyStats = async (serverCount: number): Promise<void> => {
     const dateThreshold = new Date();
     dateThreshold.setHours(dateThreshold.getHours() - 24);
 

@@ -54,14 +54,14 @@ export default class KmqClient extends Eris.Client {
     }
 
     /** Reloads commands */
-    public reloadCommands() {
+    public reloadCommands(): void {
         logger.info("Reloading KMQ commands");
         this.registerCommands(false);
         logger.info("Reload KMQ commands complete");
     }
 
     /** Registers commands */
-    private registerCommands(initialLoad: boolean) {
+    private registerCommands(initialLoad: boolean): void {
         // load commands
         this.commands = {};
         const commandFiles = KmqClient.getCommandFiles(!initialLoad);
