@@ -41,6 +41,9 @@ interface GaonWeeklyEntry {
     year: string;
 }
 
+/**
+ * Reloads the fact fcache
+ */
 export async function reloadFactCache(): Promise<void> {
     logger.info("Regenerating fact cache...");
     await generateFacts();
@@ -85,6 +88,9 @@ function parseGaonWeeklyRankList(ranklist: string, year: string): Array<GaonWeek
     });
 }
 
+/**
+ * @returns a random cached fact
+ */
 export function getFact(): string {
     const randomVal = Math.random();
     const factGroup = randomVal < 0.85 ? factCache.funFacts : factCache.kmqFacts;

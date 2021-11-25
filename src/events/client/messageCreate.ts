@@ -26,6 +26,10 @@ const parseMessage = (message: string): ParsedMessage => {
     };
 };
 
+/**
+ * Handles the 'messageCreate' event
+ * @param message - The original message
+ */
 export default async function messageCreateHandler(message: Eris.Message): Promise<void> {
     if (message.author.id === state.client.user.id || message.author.bot) return;
     if (!isGuildMessage(message)) return;

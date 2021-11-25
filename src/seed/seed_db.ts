@@ -157,6 +157,10 @@ function pruneSqlDumps(): void {
     }
 }
 
+/**
+ * @param db - The database context
+ * @param bootstrap - Whether or not this is a bootstrap run
+ */
 async function updateKpopDatabase(db: DatabaseContext, bootstrap = false): Promise<void> {
     if (!options.skipPull && !bootstrap) {
         await downloadDb();
@@ -172,6 +176,10 @@ async function updateKpopDatabase(db: DatabaseContext, bootstrap = false): Promi
     }
 }
 
+/**
+ * Regenerates the available group list
+ * @param db - Database context
+ */
 export async function updateGroupList(db: DatabaseContext): Promise<void> {
     const result = await db.kmq("kpop_groups")
         .select(["name", "members as gender"])
@@ -181,6 +189,9 @@ export async function updateGroupList(db: DatabaseContext): Promise<void> {
     fs.writeFileSync(path.resolve(__dirname, "../../data/group_list.txt"), result.map((x) => x.name).join("\n"));
 }
 
+/**
+ * @param db - The database context
+ */
 async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
     pruneSqlDumps();
     try {

@@ -17,7 +17,10 @@ export default class KmqClient extends Eris.Client {
         this.registerCommands(true);
     }
 
-    /** @returns a mapping of command name to command source file */
+    /**
+     * @param shouldReload - Whether to reload the commands
+     * @returns a mapping of command name to command source file
+     * */
     public static getCommandFiles(shouldReload: boolean): { [commandName: string]: BaseCommand } {
         const commandMap = {};
         try {
@@ -60,7 +63,10 @@ export default class KmqClient extends Eris.Client {
         logger.info("Reload KMQ commands complete");
     }
 
-    /** Registers commands */
+    /**
+     *  Registers commands
+     * @param initialLoad - Whether this is the initial load
+     * */
     private registerCommands(initialLoad: boolean): void {
         // load commands
         this.commands = {};

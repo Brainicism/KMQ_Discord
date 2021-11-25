@@ -7,6 +7,10 @@ import DailyRotateFile from "winston-daily-rotate-file";
 import { EnvType } from "./types";
 
 config({ path: resolve(__dirname, "../.env") });
+
+/**
+ * @returns a logger
+ */
 export function getInternalLogger(): winston.Logger {
     const format = winston.format;
     const consoleFormat = format.printf(({ level, message, timestamp }) => {

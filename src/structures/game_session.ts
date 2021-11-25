@@ -590,6 +590,8 @@ export default class GameSession {
     /**
      * Adds a participant for elimination mode
      * @param user - The user to add
+     * @param midgame - Whether or not the user is being added mid-game
+     * @returns the added elimination participant
      */
     addEliminationParticipant(user: KmqMember, midgame = false): EliminationPlayer {
         this.participants.add(user.id);
@@ -612,6 +614,7 @@ export default class GameSession {
     /**
      * Finds the song associated with the endRoundMessage via messageID, if it exists
      * @param messageID - The Discord message ID used to locate the song
+     * @returns the queried song, or null if it doesn't exist
      */
     getSongFromMessageID(messageID: string): QueriedSong {
         if (!this.songMessageIDs.map((x) => x.messageID).includes(messageID)) {
@@ -790,7 +793,6 @@ export default class GameSession {
 
     /**
      * Attempt to restart game with different song
-     * @param messageContext - The MessageContext
      * @param guildPreference - The GuildPreference
      */
     private async errorRestartRound(guildPreference: GuildPreference): Promise<void> {
@@ -802,10 +804,12 @@ export default class GameSession {
     }
     /**
      * Prepares a new GameRound
-     * @param song - The name of the song
-     * @param artist - The name of the artist
-     * @param videoID - The song's corresponding YouTube ID
-     * @param publishDate - The day the song was added to YouTube
+     * @param cleanSongName - The name of the song
+     * @param originalSongName - The cleaned name of the song
+     * @param artist - The song's artist
+     * @param videoID - The youtube video ID
+     * @param publishDate - The date the song was added to youtube
+     * @param views - The number of views the song has
      */
     private prepareRound(cleanSongName: string, originalSongName: string, artist: string, videoID: string, publishDate: Date, views: number): void {
         this.gameRound = new GameRound(cleanSongName, originalSongName, artist, videoID, publishDate, views);
@@ -838,6 +842,7 @@ export default class GameSession {
      * Checks whether the author of the message is eligible to guess in the
      * current game session
      * @param messageContext - The context of the message to check for guess eligibility
+     * @returns whether the user's guess is eligible
      */
     private guessEligible(messageContext: MessageContext): boolean {
         const userVoiceChannel = getUserVoiceChannel(messageContext);

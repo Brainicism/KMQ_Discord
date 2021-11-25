@@ -5,6 +5,10 @@ import MessageContext from "../../structures/message_context";
 
 const logger = new IPCLogger("guildDelete");
 
+/**
+ * Handles the 'guildDelete' event
+ * @param guild - The Guild object
+ */
 export default async function guildDeleteHandler(guild: Eris.Guild | { id: string }): Promise<void> {
     logger.info(`Server left: ${guild.id}`);
     const kmqDebugChannel = await getDebugChannel();

@@ -22,6 +22,8 @@ export default class Team extends Player {
 
     /**
      * @param first - Whether the player won the previous round
+     * @param _wonRound - unused
+     * @param _duplicateName - unused
      * @returns what to display as the name of the team in the scoreboard
      */
     getDisplayedName(first: boolean, _wonRound: boolean, _duplicateName: boolean): string {
@@ -42,6 +44,7 @@ export default class Team extends Player {
     }
 
     /**
+     * @param userID - The userID of the player to remove
      * Removes the given player from this team
      */
     removePlayer(userID: string): void {
@@ -49,6 +52,7 @@ export default class Team extends Player {
     }
 
     /**
+     * @param userID - The userID of the player to get
      * @returns the player associated with the given userID
      */
     getPlayer(userID: string): Player {
@@ -56,6 +60,7 @@ export default class Team extends Player {
     }
 
     /**
+     * @param userID - The userID of the player to check
      * @returns whether the player is on this team
      */
     hasPlayer(userID: string): boolean {

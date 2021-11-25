@@ -45,6 +45,13 @@ async function sendHintNotification(message: GuildTextableMessage, gameSession: 
     }
 }
 
+/**
+ * @param gameSession - The game session
+ * @param guildPreference - The guild preference
+ * @param gameRound - The game round
+ * @param message - The originiating messages
+ * @returns whether the hint request was valid
+ */
 export function validHintCheck(gameSession: GameSession, guildPreference: GuildPreference, gameRound: GameRound, message: GuildTextableMessage): boolean {
     if (!gameSession || !gameRound) {
         logger.warn(`${getDebugLogHeader(message)} | No active game session`);
@@ -66,6 +73,11 @@ export function validHintCheck(gameSession: GameSession, guildPreference: GuildP
     return true;
 }
 
+/**
+ * @param guessMode - The guess mode
+ * @param gameRound - The game round
+ * @returns the hint corresponding to the current game round
+ */
 export function generateHint(guessMode: GuessModeType, gameRound: GameRound): string {
     switch (guessMode) {
         case GuessModeType.ARTIST:

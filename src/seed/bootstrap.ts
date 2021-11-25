@@ -43,6 +43,9 @@ async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
         .first()).count >= SONG_DOWNLOAD_THRESHOLD;
 }
 
+/**
+ * Reloads all existing stored procedures
+ */
 export function loadStoredProcedures(): void {
     const storedProcedureDefinitions = fs.readdirSync(path.join(__dirname, "../../sql/procedures"))
         .map((x) => path.join(__dirname, "../../sql/procedures", x));
@@ -53,6 +56,10 @@ export function loadStoredProcedures(): void {
 }
 
 // eslint-disable-next-line import/prefer-default-export
+/**
+ * Re-creates the KMQ data tables
+ * @param db - The database context
+ */
 export async function generateKmqDataTables(db: DatabaseContext): Promise<void> {
     logger.info("Re-creating KMQ data tables view...");
     await db.kmq.raw(`CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`);

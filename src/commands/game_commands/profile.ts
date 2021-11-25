@@ -33,6 +33,10 @@ const RANK_TITLES = [
     { title: "Omniscient Ruler of the Multiverse", req: 180 },
 ];
 
+/**
+ * @param level - The user's level
+ * @returns a string describing the user's rank corresponding with their level
+ */
 export function getRankNameByLevel(level: number): string {
     const highestRankTitle = RANK_TITLES[RANK_TITLES.length - 1];
     const levelsPastMaxRank = level - (highestRankTitle.req + 10);
@@ -225,6 +229,11 @@ export default class ProfileCommand implements BaseCommand {
     };
 }
 
+/**
+ * Responds to the profile interaction
+ * @param interaction - The originating interaction
+ * @param userId - The ID of the user retrieve profile information from
+ */
 export async function handleProfileInteraction(interaction: Eris.CommandInteraction, userId: string): Promise<void> {
     const user = await state.ipc.fetchUser(userId);
     if (!user) {

@@ -16,6 +16,9 @@ program
 program.parse();
 const options = program.opts();
 
+/**
+ *
+ */
 async function backupKmqDatabase(): Promise<void> {
     if (!fs.existsSync(databaseBackupDir)) {
         fs.mkdirSync(databaseBackupDir);

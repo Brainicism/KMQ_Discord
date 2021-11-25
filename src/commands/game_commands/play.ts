@@ -18,6 +18,13 @@ import CommandPrechecks from "../../command_prechecks";
 const logger = new IPCLogger("play");
 const DEFAULT_LIVES = 10;
 
+/**
+ * Sends the beginning of game session message
+ * @param textChannelName - The name of the text channel to send the message to
+ * @param voiceChannelName - The name of the voice channel to join
+ * @param message - The original message that triggered the command
+ * @param participants - The list of participants
+ */
 export async function sendBeginGameMessage(textChannelName: string,
     voiceChannelName: string,
     message: GuildTextableMessage,

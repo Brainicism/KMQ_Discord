@@ -45,7 +45,7 @@ export function getUserTag(user: { username: string, discriminator: string }): s
 }
 
 /**
- * @param user - The user (must be some object with id field)
+ * @param userID - The user ID
  * @returns a clickable mention to user
  */
 export function getMention(userID: string): string {
@@ -79,6 +79,7 @@ function missingPermissionsText(missingPermissions: string[]): string {
 /**
  * Fetches Users from cache, IPC, or via REST and update cache
  * @param userID - the user's ID
+ * @param silentErrors - whether to log errors
  * @returns an instance of the User
  */
 export async function fetchUser(userID: string, silentErrors = false): Promise<Eris.User> {
@@ -165,6 +166,7 @@ async function fetchChannel(textChannelID: string): Promise<Eris.TextChannel> {
 
 /**
  * @param textChannelID - the text channel's ID
+ * @param guildID - the guild's ID
  * @param authorID - the sender's ID
  * @returns whether the bot has permissions to message's originating text channel
  */
@@ -257,8 +259,9 @@ async function sendMessageExceptionHandler(e: any, channelID: string, guildID: s
  * A lower level message sending utility
  * and when a Eris Message object isn't available in the context
  * @param textChannelID - The channel ID where the message should be delivered
- * @param authorID - the author's ID
  * @param messageContent - The MessageContent to send
+ * @param file - The file to send
+ * @param authorID - The author's ID
  */
 export async function sendMessage(textChannelID: string, messageContent: Eris.AdvancedMessageContent, file?: Eris.FileContent, authorID?: string): Promise<Eris.Message> {
     const channel = await fetchChannel(textChannelID);
@@ -309,8 +312,7 @@ async function sendDmMessage(userID: string, messageContent: Eris.AdvancedMessag
 /**
  * Sends an error embed with the specified title/description
  * @param messageContext - An object containing relevant parts of Eris.Message
- * @param title - The title of the embed
- * @param description - The description of the embed
+ * @param embedPayload - The embed payload
  */
 export async function sendErrorMessage(messageContext: MessageContext, embedPayload: EmbedPayload): Promise<Eris.Message<Eris.TextableChannel>> {
     const author = (embedPayload.author == null || embedPayload.author) ? embedPayload.author : messageContext.author;
@@ -337,6 +339,7 @@ export async function sendErrorMessage(messageContext: MessageContext, embedPayl
  * @param messageContext - An object containing relevant parts of Eris.Message
  * @param embedPayload - What to include in the message
  * @param reply - Whether to reply to the given message
+ * @param boldTitle - Whether to bold the title
  */
 export async function sendInfoMessage(messageContext: MessageContext, embedPayload: EmbedPayload, reply = false, boldTitle = true): Promise<Eris.Message<Eris.TextableChannel>> {
     if (embedPayload.description && embedPayload.description.length > 2048) {
@@ -374,7 +377,11 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
  * @param messageContext - An object to pass along relevant parts of Eris.Message
  * @param scoreboard - The GameSession's corresponding Scoreboard
  * @param gameRound - The GameSession's corresponding GameRound
- * @param songGuessed - Whether the song was guessed
+ * @param guessModeType - The type of guess mode
+ * @param playerRoundResults - The player round results
+ * @param isMultipleChoiceMode  - Whether the game is in multiple choice mode
+ * @param timeRemaining - The time remaining for the timer option
+ * @param uniqueSongCounter - The unique song counter
  */
 export async function sendEndRoundMessage(messageContext: MessageContext,
     scoreboard: Scoreboard,
@@ -501,9 +508,9 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
 
 /**
  * Sends an embed displaying the currently selected GameOptions
- * @param message - The Message object
+ * @param messageContext - The Message Context
  * @param guildPreference - The corresponding GuildPreference
- * @param updatedOption - Specifies which GameOption was modified
+ * @param updatedOptions - The GameOptions which were modified
  * @param preset - Specifies whether the GameOptions were modified by a preset
  * @param allReset - Specifies whether all GameOptions were reset
  * @param footerText - The footer text
@@ -643,7 +650,6 @@ export async function sendOptionsMessage(messageContext: MessageContext,
 
 /**
  * Sends an embed displaying the winner of the session as well as the scoreboard
- * @param textChannel - The channel where the message should be delivered
  * @param gameSession - The GameSession that has ended
  */
 export async function sendEndGameMessage(gameSession: GameSession): Promise<void> {
@@ -699,6 +705,8 @@ export async function sendEndGameMessage(gameSession: GameSession): Promise<void
  * Sends a paginated embed
  * @param message - The Message object
  * @param embeds - A list of embeds to paginate over
+ * @param components - A list of components to add to the embed
+ * @param startPage - The page to start on
  */
 export async function sendPaginationedEmbed(message: GuildTextableMessage, embeds: Array<Eris.EmbedOptions> | Array<EmbedGenerator>,
     components?: Array<Eris.ActionRow>, startPage = 1): Promise<Eris.Message> {
@@ -798,7 +806,7 @@ export function getUserVoiceChannel(messageContext: MessageContext): Eris.VoiceC
 }
 
 /**
- * @param message - The Message object
+ * @param voiceChannelID - The voice channel ID
  * @returns the voice channel that the message's author is in
  */
 export function getVoiceChannel(voiceChannelID: string): Eris.VoiceChannel {
@@ -884,7 +892,7 @@ export function getDebugChannel(): Promise<Eris.TextChannel> {
 }
 
 /**
- * @param message - The message
+ * @param guildID - The guild ID
  * @returns the number of users required for a majority
  */
 export function getMajorityCount(guildID: string): number {
@@ -916,6 +924,10 @@ export function sendDebugAlertWebhook(title: string, description: string, color:
     });
 }
 
+/**
+ * Send the bookmarked songs to the corresponding users
+ * @param bookmarkedSongs - The bookmarked songs
+ */
 export async function sendBookmarkedSongs(bookmarkedSongs: { [userID: string]: Map<string, QueriedSong> }): Promise<void> {
     for (const [userID, songs] of Object.entries(bookmarkedSongs)) {
         const allEmbedFields: Array<{ name: string, value: string, inline: boolean }> = [...songs].map((song) => ({
@@ -953,6 +965,10 @@ function interactionRejectionHandler(interaction: Eris.ComponentInteraction | Er
     }
 }
 
+/**
+ * Attempts to acknowledge an interaction
+ * @param interaction - The originating interaction
+ */
 export async function tryInteractionAcknowledge(interaction: Eris.ComponentInteraction | Eris.CommandInteraction): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
         return;
@@ -965,6 +981,12 @@ export async function tryInteractionAcknowledge(interaction: Eris.ComponentInter
     }
 }
 
+/**
+ * Attempts to send a success response to an interaction
+ * @param interaction - The originating interaction
+ * @param title - The embed title
+ * @param description - The embed description
+ */
 export async function tryCreateInteractionSuccessAcknowledgement(interaction: Eris.ComponentInteraction | Eris.CommandInteraction, title: string, description: string): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
         return;
@@ -989,6 +1011,11 @@ export async function tryCreateInteractionSuccessAcknowledgement(interaction: Er
     }
 }
 
+/**
+ * Attempts to send a error message to an interaction
+ * @param interaction - The originating interaction
+ * @param description - The embed description
+ */
 export async function tryCreateInteractionErrorAcknowledgement(interaction: Eris.ComponentInteraction | Eris.CommandInteraction, description: string): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
         return;

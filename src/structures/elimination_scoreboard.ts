@@ -22,6 +22,8 @@ export default class EliminationScoreboard extends Scoreboard {
      * @param userID - The player's Discord user ID
      * @param tag - The player's Discord tag
      * @param avatarUrl - The player's Discord avatar URL
+     * @param lives - The number of lives the player starts with
+     * @returns the EliminationPlayer added
      */
     addPlayer(userID: string, tag: string, avatarUrl: string, lives?: number): EliminationPlayer {
         this.players[userID] = new EliminationPlayer(tag, userID, avatarUrl, lives ?? this.startingLives);
@@ -74,6 +76,7 @@ export default class EliminationScoreboard extends Scoreboard {
     /**
      * Checks whether the game has finished depending on whether
      * it is a solo or multiplayer game
+     * @returns whether or not the game has finished
      */
     gameFinished(): boolean {
         // Game ends if

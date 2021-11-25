@@ -160,6 +160,7 @@ export default class TeamScoreboard extends Scoreboard {
 
     /**
      * @returns the score of the player associated with the given userID
+     * @param userID - The unique identifier of the player whose score is being accessed
      */
     getPlayerScore(userID: string): number {
         const player = this.getPlayer(userID);
@@ -171,8 +172,8 @@ export default class TeamScoreboard extends Scoreboard {
     }
 
     /**
-     * @returns the name of the player associated with the given userID
-     *  @returns the player's tag
+     * @param userID - The unique identifier of the player whose score is being incremented
+     * @returns the player's tag
      */
     getPlayerName(userID: string): string {
         return this.getPlayer(userID).getName();

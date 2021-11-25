@@ -122,7 +122,10 @@ function registerProcessEvents(fleet: Fleet): void {
     });
 }
 
-/** Starts web server */
+/**
+ * @param fleet - The fleet instance
+ * Starts web server
+ * */
 async function startWebServer(fleet: Fleet): Promise<void> {
     const httpServer = fastify({});
     httpServer.register(pointOfView, {
