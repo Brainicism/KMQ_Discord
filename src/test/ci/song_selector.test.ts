@@ -11,7 +11,6 @@ import { ArtistType } from "../../commands/game_options/artisttype";
 import { getMatchingGroupNames } from "../../helpers/game_utils";
 import { FOREIGN_LANGUAGE_TAGS, LanguageType } from "../../commands/game_options/language";
 import { ShuffleType } from "../../commands/game_options/shuffle";
-import Sinon from "sinon";
 
 async function getMockGuildPreference(): Promise<GuildPreference> {
     const guildPreference = new GuildPreference("test");
@@ -392,7 +391,7 @@ describe("selectRandomSong", () => {
 describe("checkUniqueSongQueue", () => {
     let songSelector: SongSelector;
     const sandbox = sinon.createSandbox();
-    let resetSpy: Sinon.SinonSpy;
+    let resetSpy: sinon.SinonSpy;
 
     beforeEach(async () => {
         songSelector = new SongSelector();
@@ -512,7 +511,7 @@ describe("checkUniqueSongQueue", () => {
                     songSelector.uniqueSongsPlayed = new Set(songs.slice(0, -1));
                     assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), false);
 
-                    // update to superset song set 
+                    // update to superset song set
                     await guildPreference.setLimit(0, newNumberSongs);
                     await songSelector.reloadSongs(guildPreference);
                     assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), false);
@@ -618,6 +617,52 @@ describe("checkLastPlayedSongs", () => {
                     songSelector.checkLastPlayedSongs();
                     assert.strictEqual(songSelector.lastPlayedSongs.length, LAST_PLAYED_SONG_QUEUE_SIZE / 2 - 1);
                     assert.strictEqual(songSelector.lastPlayedSongs[0], songs[LAST_PLAYED_SONG_QUEUE_SIZE / 2 + 1]);
+                });
+            });
+        });
+    });
+});
+
+describe("checkAlternatingGender", () => {
+    let songSelector: SongSelector;
+
+    beforeEach(async () => {
+        songSelector = new SongSelector();
+    });
+
+    describe("alternating gender is not set", () => {
+        it("should set lastAlternatingGender to null", async () => {
+            await guildPreference.setGender([Gender.MALE]);
+        });
+    });
+
+    describe("alternating gender is set", () => {
+        beforeEach(async () => {
+            await guildPreference.setGender([Gender.ALTERNATING]);
+        });
+
+        describe("lastAlternatingGender is null", () => {
+            it("should assign a value", () => {
+                songSelector.lastAlternatingGender = null;
+                songSelector.checkAlternatingGender(guildPreference);
+                assert(songSelector.lastAlternatingGender);
+            });
+        });
+
+        describe("lastAlternatingGender is not null", () => {
+            describe("lastAlternatingGender is male", () => {
+                it("should set lastAlternating Gender to female", () => {
+                    songSelector.lastAlternatingGender = Gender.MALE;
+                    songSelector.checkAlternatingGender(guildPreference);
+                    assert.strictEqual(songSelector.lastAlternatingGender, Gender.FEMALE);
+                });
+            });
+
+            describe("lastAlternatingGender is female", () => {
+                it("should set lastAlternating Gender to male", () => {
+                    songSelector.lastAlternatingGender = Gender.FEMALE;
+                    songSelector.checkAlternatingGender(guildPreference);
+                    assert.strictEqual(songSelector.lastAlternatingGender, Gender.MALE);
                 });
             });
         });
