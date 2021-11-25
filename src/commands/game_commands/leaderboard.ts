@@ -10,7 +10,6 @@ import { GuildTextableMessage, EnvType } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import { sendValidationErrorMessage } from "../../helpers/validate";
-import KmqMember from "../../structures/kmq_member";
 
 const logger = new IPCLogger("leaderboard");
 export const ENTRIES_PER_PAGE = 10;
@@ -145,10 +144,6 @@ export default class LeaderboardCommand implements BaseCommand {
 
         LeaderboardCommand.showLeaderboard(message, type ?? LeaderboardType.GLOBAL, duration ?? LeaderboardDuration.ALL_TIME, pageOffset);
     };
-
-    public static async sendDebugLeaderboard(duration: LeaderboardDuration): Promise<void> {
-        LeaderboardCommand.showLeaderboard(new MessageContext(process.env.DEBUG_TEXT_CHANNEL_ID, KmqMember.fromUser(state.client.user), process.env.DEBUG_SERVER_ID), LeaderboardType.GLOBAL, duration);
-    }
 
     public static async getLeaderboardEmbeds(messageContext: MessageContext, type: LeaderboardType, duration: LeaderboardDuration, date?: Date):
     Promise<{ embeds: Array<EmbedGenerator>, pageCount: number }> {
