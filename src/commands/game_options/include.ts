@@ -1,6 +1,13 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { sendOptionsMessage, getDebugLogHeader, sendErrorMessage } from "../../helpers/discord_utils";
-import { getGuildPreference, getMatchingGroupNames } from "../../helpers/game_utils";
+import {
+    sendOptionsMessage,
+    getDebugLogHeader,
+    sendErrorMessage,
+} from "../../helpers/discord_utils";
+import {
+    getGuildPreference,
+    getMatchingGroupNames,
+} from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
@@ -22,7 +29,8 @@ export default class IncludeCommand implements BaseCommand {
             },
             {
                 example: "`,include blackpink, bts, red velvet`",
-                explanation: "Forcefully include songs from Blackpink, BTS, and Red Velvet",
+                explanation:
+                    "Forcefully include songs from Blackpink, BTS, and Red Velvet",
             },
             {
                 example: "`,include`",
@@ -38,7 +46,11 @@ export default class IncludeCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.INCLUDE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.INCLUDE, reset: true }]);
+            await sendOptionsMessage(
+                MessageContext.fromMessage(message),
+                guildPreference,
+                [{ option: GameOption.INCLUDE, reset: true }]
+            );
             logger.info(`${getDebugLogHeader(message)} | Includes reset.`);
             return;
         }
@@ -51,18 +63,47 @@ export default class IncludeCommand implements BaseCommand {
         }
 
         if (guildPreference.isGroupsMode()) {
-            logger.warn(`${getDebugLogHeader(message)} | Game option conflict between include and groups.`);
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Game Option Conflict", description: `\`groups\` game option is currently set. \`include\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed.` });
+            logger.warn(
+                `${getDebugLogHeader(
+                    message
+                )} | Game option conflict between include and groups.`
+            );
+
+            sendErrorMessage(MessageContext.fromMessage(message), {
+                title: "Game Option Conflict",
+                description: `\`groups\` game option is currently set. \`include\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed.`,
+            });
             return;
         }
 
-        const groupNames = parsedMessage.argument.split(",").map((groupName) => groupName.trim());
-        const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(groupNames);
+        const groupNames = parsedMessage.argument
+            .split(",")
+            .map((groupName) => groupName.trim());
+
+        const { matchedGroups, unmatchedGroups } = await getMatchingGroupNames(
+            groupNames
+        );
+
         if (unmatchedGroups.length) {
-            logger.info(`${getDebugLogHeader(message)} | Attempted to set unknown includes. includes =  ${unmatchedGroups.join(", ")}`);
-            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Unknown Group Name",
-                description: `One or more of the specified group names was not recognized. Those groups that matched are included. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\`. \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} \nUse \`${process.env.BOT_PREFIX}add\` to add the unmatched groups.`,
-                footerText: includeWarning });
+            logger.info(
+                `${getDebugLogHeader(
+                    message
+                )} | Attempted to set unknown includes. includes =  ${unmatchedGroups.join(
+                    ", "
+                )}`
+            );
+
+            await sendErrorMessage(MessageContext.fromMessage(message), {
+                title: "Unknown Group Name",
+                description: `One or more of the specified group names was not recognized. Those groups that matched are included. Please ensure that the group name matches exactly with the list provided by \`${
+                    process.env.BOT_PREFIX
+                }help groups\`. \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(
+                    ", "
+                )} \nUse \`${
+                    process.env.BOT_PREFIX
+                }add\` to add the unmatched groups.`,
+                footerText: includeWarning,
+            });
         }
 
         if (matchedGroups.length === 0) {
@@ -70,7 +111,16 @@ export default class IncludeCommand implements BaseCommand {
         }
 
         await guildPreference.setIncludes(matchedGroups);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.INCLUDE, reset: false }]);
-        logger.info(`${getDebugLogHeader(message)} | Includes set to ${guildPreference.getDisplayedIncludesGroupNames()}`);
+        await sendOptionsMessage(
+            MessageContext.fromMessage(message),
+            guildPreference,
+            [{ option: GameOption.INCLUDE, reset: false }]
+        );
+
+        logger.info(
+            `${getDebugLogHeader(
+                message
+            )} | Includes set to ${guildPreference.getDisplayedIncludesGroupNames()}`
+        );
     };
 }

@@ -1,5 +1,4 @@
-
-exports.up = function(knex) {
+exports.up = function (knex) {
     return knex.schema.createTable("competition_moderators", function (table) {
         table.string("guild_id").notNullable();
         table.string("user_id").notNullable();
@@ -7,6 +6,6 @@ exports.up = function(knex) {
     });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
     return knex.schema.dropTable("competition_moderators");
 };

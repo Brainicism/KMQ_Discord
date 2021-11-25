@@ -1,4 +1,3 @@
-
 exports.up = function (knex) {
     return knex.schema.createTable("game_option_presets", function (table) {
         table.string("guild_id").notNullable();

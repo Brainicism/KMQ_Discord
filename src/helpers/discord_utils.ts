@@ -8,8 +8,31 @@ import GameSession from "../structures/game_session";
 import { IPCLogger } from "../logger";
 import { getAvailableSongCount, userBonusIsActive } from "./game_utils";
 import { getFact } from "../fact_generator";
-import { EmbedPayload, GameOption, GameOptionCommand, PriorityGameOption, ConflictingGameOptions, GuildTextableMessage, PlayerRoundResult, GameInfoMessage, GameType, QueriedSong } from "../types";
-import { chunkArray, codeLine, bold, underline, italicize, strikethrough, chooseWeightedRandom, getOrdinalNum, friendlyFormattedNumber, delay, standardDateFormat } from "./utils";
+import {
+    EmbedPayload,
+    GameOption,
+    GameOptionCommand,
+    PriorityGameOption,
+    ConflictingGameOptions,
+    GuildTextableMessage,
+    PlayerRoundResult,
+    GameInfoMessage,
+    GameType,
+    QueriedSong,
+} from "../types";
+import {
+    chunkArray,
+    codeLine,
+    bold,
+    underline,
+    italicize,
+    strikethrough,
+    chooseWeightedRandom,
+    getOrdinalNum,
+    friendlyFormattedNumber,
+    delay,
+    standardDateFormat,
+} from "./utils";
 import { state } from "../kmq_worker";
 import Scoreboard from "../structures/scoreboard";
 import GameRound from "../structures/game_round";
@@ -23,24 +46,36 @@ import { REVIEW_LINK, VOTE_LINK } from "../commands/game_commands/vote";
 import { UniqueSongCounter } from "../structures/song_selector";
 
 const logger = new IPCLogger("utils");
-export const EMBED_ERROR_COLOR = 0xED4245; // Red
-export const EMBED_SUCCESS_COLOR = 0x57F287; // Green
-export const EMBED_SUCCESS_BONUS_COLOR = 0xFEE75C; // Gold
+export const EMBED_ERROR_COLOR = 0xed4245; // Red
+export const EMBED_SUCCESS_COLOR = 0x57f287; // Green
+export const EMBED_SUCCESS_BONUS_COLOR = 0xfee75c; // Gold
 const EMBED_FIELDS_PER_PAGE = 20;
-const REQUIRED_TEXT_PERMISSIONS = ["addReactions" as const, "embedLinks" as const];
-const REQUIRED_VOICE_PERMISSIONS = ["viewChannel" as const, "voiceConnect" as const, "voiceSpeak" as const];
+const REQUIRED_TEXT_PERMISSIONS = [
+    "addReactions" as const,
+    "embedLinks" as const,
+];
+
+const REQUIRED_VOICE_PERMISSIONS = [
+    "viewChannel" as const,
+    "voiceConnect" as const,
+    "voiceSpeak" as const,
+];
+
 const SCOREBOARD_FIELD_CUTOFF = 9;
 const MAX_SCOREBOARD_PLAYERS = 30;
 const MAX_RUNNERS_UP = 30;
 const MAX_INTERACTION_RESPONSE_TIME = 3 * 1000;
 
-export type EmbedGenerator = (() => Promise<Eris.EmbedOptions>);
+export type EmbedGenerator = () => Promise<Eris.EmbedOptions>;
 
 /**
  * @param user - The user (must be some object with username and discriminator fields)
  * @returns the user's Discord tag
  */
-export function getUserTag(user: { username: string, discriminator: string }): string {
+export function getUserTag(user: {
+    username: string;
+    discriminator: string;
+}): string {
     return `${user.username}#${user.discriminator}`;
 }
 
@@ -56,12 +91,21 @@ export function getMention(userID: string): string {
  * @param context - The object that initiated the workflow
  * @returns a string containing basic debug information
  */
-export function getDebugLogHeader(context: MessageContext | Eris.Message | Eris.ComponentInteraction | Eris.CommandInteraction): string {
+export function getDebugLogHeader(
+    context:
+        | MessageContext
+        | Eris.Message
+        | Eris.ComponentInteraction
+        | Eris.CommandInteraction
+): string {
     if (context instanceof Eris.Message) {
         return `gid: ${context.guildID}, uid: ${context.author.id}, tid: ${context.channel.id}`;
     }
 
-    if (context instanceof Eris.ComponentInteraction || context instanceof Eris.CommandInteraction) {
+    if (
+        context instanceof Eris.ComponentInteraction ||
+        context instanceof Eris.CommandInteraction
+    ) {
         return `gid: ${context.guildID}, uid: ${context.member?.id}, tid: ${context.channel.id}`;
     }
 
@@ -73,7 +117,11 @@ export function getDebugLogHeader(context: MessageContext | Eris.Message | Eris.
  * @returns a friendly string describing the missing text permissions
  */
 function missingPermissionsText(missingPermissions: string[]): string {
-    return `Ensure that the bot has the following permissions: \`${missingPermissions.join(", ")}\`\n\nSee the following link for details: https://support.discord.com/hc/en-us/articles/206029707-How-do-I-set-up-Permissions-. If you are still having issues, join the official KMQ server found in \`${process.env.BOT_PREFIX}help\``;
+    return `Ensure that the bot has the following permissions: \`${missingPermissions.join(
+        ", "
+    )}\`\n\nSee the following link for details: https://support.discord.com/hc/en-us/articles/206029707-How-do-I-set-up-Permissions-. If you are still having issues, join the official KMQ server found in \`${
+        process.env.BOT_PREFIX
+    }help\``;
 }
 
 /**
@@ -81,12 +129,15 @@ function missingPermissionsText(missingPermissions: string[]): string {
  * @param userID - the user's ID
  * @returns an instance of the User
  */
-export async function fetchUser(userID: string, silentErrors = false): Promise<Eris.User> {
+export async function fetchUser(
+    userID: string,
+    silentErrors = false
+): Promise<Eris.User> {
     let user: Eris.User = null;
     const { client, ipc } = state;
 
     // fetch via cache
-    user = (client.users.get(userID));
+    user = client.users.get(userID);
 
     // fetch via IPC from other clusters
     if (!user) {
@@ -102,7 +153,10 @@ export async function fetchUser(userID: string, silentErrors = false): Promise<E
             user = await client.getRESTUser(userID);
             logger.debug(`User not in cache, fetched via REST: ${userID}`);
         } catch (err) {
-            if (!silentErrors) logger.error(`Could not fetch user: ${userID}. err: ${err.code}. msg: ${err.message}`);
+            if (!silentErrors)
+                logger.error(
+                    `Could not fetch user: ${userID}. err: ${err.code}. msg: ${err.message}`
+                );
             return null;
         }
     }
@@ -127,21 +181,30 @@ async function fetchChannel(textChannelID: string): Promise<Eris.TextChannel> {
     const { client, ipc } = state;
 
     // fetch via cache
-    channel = (client.getChannel(textChannelID)) as Eris.TextChannel;
+    channel = client.getChannel(textChannelID) as Eris.TextChannel;
 
     // fetch via IPC from other clusters
     if (!channel) {
-        logger.debug(`Text channel not in cache, attempting to fetch via IPC: ${textChannelID}`);
+        logger.debug(
+            `Text channel not in cache, attempting to fetch via IPC: ${textChannelID}`
+        );
         channel = await ipc.fetchChannel(textChannelID);
     }
 
     // fetch via REST
     if (!channel) {
         try {
-            channel = await client.getRESTChannel(textChannelID) as Eris.TextChannel;
-            logger.debug(`Text channel not in cache, fetched via REST: ${textChannelID}`);
+            channel = (await client.getRESTChannel(
+                textChannelID
+            )) as Eris.TextChannel;
+
+            logger.debug(
+                `Text channel not in cache, fetched via REST: ${textChannelID}`
+            );
         } catch (err) {
-            logger.error(`Could not fetch text channel: ${textChannelID}. err: ${err.code}. msg: ${err.message}`);
+            logger.error(
+                `Could not fetch text channel: ${textChannelID}. err: ${err.code}. msg: ${err.message}`
+            );
             return null;
         }
     }
@@ -168,13 +231,21 @@ async function fetchChannel(textChannelID: string): Promise<Eris.TextChannel> {
  * @param authorID - the sender's ID
  * @returns whether the bot has permissions to message's originating text channel
  */
-export async function textPermissionsCheck(textChannelID: string, guildID: string, authorID: string): Promise<boolean> {
+export async function textPermissionsCheck(
+    textChannelID: string,
+    guildID: string,
+    authorID: string
+): Promise<boolean> {
     const { client } = state;
     const messageContext = new MessageContext(textChannelID, null, guildID);
     const channel = await fetchChannel(textChannelID);
     if (!channel) return false;
     if (!channel.permissionsOf(client.user.id).has("sendMessages")) {
-        logger.warn(`${getDebugLogHeader(messageContext)} | Missing SEND_MESSAGES permissions`);
+        logger.warn(
+            `${getDebugLogHeader(
+                messageContext
+            )} | Missing SEND_MESSAGES permissions`
+        );
         const embed = {
             title: "Missing Permissions",
             description: `Hi! I'm unable to message in ${channel.guild.name}'s #${channel.name} channel. Please make sure the bot has permissions to message in this channel.`,
@@ -184,9 +255,19 @@ export async function textPermissionsCheck(textChannelID: string, guildID: strin
         return false;
     }
 
-    const missingPermissions = REQUIRED_TEXT_PERMISSIONS.filter((permission) => !channel.permissionsOf(client.user.id).has(permission));
+    const missingPermissions = REQUIRED_TEXT_PERMISSIONS.filter(
+        (permission) => !channel.permissionsOf(client.user.id).has(permission)
+    );
+
     if (missingPermissions.length > 0) {
-        logger.warn(`${getDebugLogHeader(messageContext)} | Missing Text Channel [${missingPermissions.join(", ")}] permissions`);
+        logger.warn(
+            `${getDebugLogHeader(
+                messageContext
+            )} | Missing Text Channel [${missingPermissions.join(
+                ", "
+            )}] permissions`
+        );
+
         sendMessage(channel.id, {
             content: missingPermissionsText(missingPermissions),
         });
@@ -196,60 +277,88 @@ export async function textPermissionsCheck(textChannelID: string, guildID: strin
     return true;
 }
 
-async function sendMessageExceptionHandler(e: any, channelID: string, guildID: string, authorID: string, messageContent: Eris.AdvancedMessageContent): Promise<void> {
+async function sendMessageExceptionHandler(
+    e: any,
+    channelID: string,
+    guildID: string,
+    authorID: string,
+    messageContent: Eris.AdvancedMessageContent
+): Promise<void> {
     if (typeof e === "string") {
         if (e.startsWith("Request timed out")) {
             // Request Timeout
-            logger.error(`Error sending message. Request timed out. textChannelID = ${channelID}.`);
+            logger.error(
+                `Error sending message. Request timed out. textChannelID = ${channelID}.`
+            );
         }
     } else if (e.code) {
         const errCode = e.code;
         switch (errCode) {
             case 500: {
                 // Internal Server Error
-                logger.error(`Error sending message. 500 Internal Server Error. textChannelID = ${channelID}.`);
+                logger.error(
+                    `Error sending message. 500 Internal Server Error. textChannelID = ${channelID}.`
+                );
                 break;
             }
 
             case 50035: {
                 // Invalid Form Body
-                logger.error(`Error sending message. Invalid form body. textChannelID = ${channelID}. msg_content = ${JSON.stringify(messageContent)}`);
+                logger.error(
+                    `Error sending message. Invalid form body. textChannelID = ${channelID}. msg_content = ${JSON.stringify(
+                        messageContent
+                    )}`
+                );
                 break;
             }
 
             case 50001: {
                 // Missing Access
-                logger.error(`Error sending message. Missing Access. textChannelID = ${channelID}`);
+                logger.error(
+                    `Error sending message. Missing Access. textChannelID = ${channelID}`
+                );
                 break;
             }
 
             case 50013: {
                 // Missing Permissions
-                logger.error(`Error sending message. Missing text permissions. textChannelID = ${channelID}.`);
+                logger.error(
+                    `Error sending message. Missing text permissions. textChannelID = ${channelID}.`
+                );
                 await textPermissionsCheck(channelID, guildID, authorID);
                 break;
             }
 
             case 10003: {
                 // Unknown channel
-                logger.error(`Error sending message. Unknown channel. textChannelID = ${channelID}.`);
+                logger.error(
+                    `Error sending message. Unknown channel. textChannelID = ${channelID}.`
+                );
                 break;
             }
 
             case 50007: {
                 // Cannot send messages to this user
-                logger.error(`Error sending message. Cannot send messages to this user. userID = ${channelID}.`);
+                logger.error(
+                    `Error sending message. Cannot send messages to this user. userID = ${channelID}.`
+                );
                 break;
             }
 
             default: {
                 // Unknown error code
-                logger.error(`Error sending message. Unknown error code ${errCode}. textChannelID = ${channelID}. msg = ${e.message}.`);
+                logger.error(
+                    `Error sending message. Unknown error code ${errCode}. textChannelID = ${channelID}. msg = ${e.message}.`
+                );
                 break;
             }
         }
     } else {
-        logger.error(`Error sending message. Unknown error. textChannelID = ${channelID}. err = ${JSON.stringify(e)}.body = ${JSON.stringify(messageContent)}`);
+        logger.error(
+            `Error sending message. Unknown error. textChannelID = ${channelID}. err = ${JSON.stringify(
+                e
+            )}.body = ${JSON.stringify(messageContent)}`
+        );
     }
 }
 
@@ -260,23 +369,43 @@ async function sendMessageExceptionHandler(e: any, channelID: string, guildID: s
  * @param authorID - the author's ID
  * @param messageContent - The MessageContent to send
  */
-export async function sendMessage(textChannelID: string, messageContent: Eris.AdvancedMessageContent, file?: Eris.FileContent, authorID?: string): Promise<Eris.Message> {
+export async function sendMessage(
+    textChannelID: string,
+    messageContent: Eris.AdvancedMessageContent,
+    file?: Eris.FileContent,
+    authorID?: string
+): Promise<Eris.Message> {
     const channel = await fetchChannel(textChannelID);
 
     // only reply to message if has required permissions
-    if (channel && !channel.permissionsOf(state.client.user.id).has("readMessageHistory")) {
+    if (
+        channel &&
+        !channel.permissionsOf(state.client.user.id).has("readMessageHistory")
+    ) {
         if (messageContent.messageReference) {
             messageContent.messageReference = null;
         }
     }
 
     try {
-        return await state.client.createMessage(textChannelID, messageContent, file);
+        return await state.client.createMessage(
+            textChannelID,
+            messageContent,
+            file
+        );
     } catch (e) {
         if (!channel) {
-            logger.error(`Error sending message, and channel not cached. textChannelID = ${textChannelID}`);
+            logger.error(
+                `Error sending message, and channel not cached. textChannelID = ${textChannelID}`
+            );
         } else {
-            await sendMessageExceptionHandler(e, channel.id, channel.guild.id, authorID, messageContent);
+            await sendMessageExceptionHandler(
+                e,
+                channel.id,
+                channel.guild.id,
+                authorID,
+                messageContent
+            );
         }
 
         return null;
@@ -288,20 +417,31 @@ export async function sendMessage(textChannelID: string, messageContent: Eris.Ad
  * @param userID - the user's ID
  * @param messageContent - the message content
  */
-async function sendDmMessage(userID: string, messageContent: Eris.AdvancedMessageContent): Promise<Eris.Message> {
+async function sendDmMessage(
+    userID: string,
+    messageContent: Eris.AdvancedMessageContent
+): Promise<Eris.Message> {
     const { client } = state;
     let dmChannel;
     try {
         dmChannel = await client.getDMChannel(userID);
     } catch (e) {
-        logger.error(`Error sending message. Could not get DM channel. userID = ${userID}`);
+        logger.error(
+            `Error sending message. Could not get DM channel. userID = ${userID}`
+        );
         return null;
     }
 
     try {
         return await client.createMessage(dmChannel.id, messageContent);
     } catch (e) {
-        await sendMessageExceptionHandler(e, dmChannel.id, null, userID, messageContent);
+        await sendMessageExceptionHandler(
+            e,
+            dmChannel.id,
+            null,
+            userID,
+            messageContent
+        );
         return null;
     }
 }
@@ -312,24 +452,44 @@ async function sendDmMessage(userID: string, messageContent: Eris.AdvancedMessag
  * @param title - The title of the embed
  * @param description - The description of the embed
  */
-export async function sendErrorMessage(messageContext: MessageContext, embedPayload: EmbedPayload): Promise<Eris.Message<Eris.TextableChannel>> {
-    const author = (embedPayload.author == null || embedPayload.author) ? embedPayload.author : messageContext.author;
-    return sendMessage(messageContext.textChannelID, {
-        embeds: [{
-            color: embedPayload.color || EMBED_ERROR_COLOR,
-            author: author ? {
-                name: author.username,
-                icon_url: author.avatarUrl,
-            } : null,
-            title: bold(embedPayload.title),
-            description: embedPayload.description,
-            footer: embedPayload.footerText ? {
-                text: embedPayload.footerText,
-            } : null,
-            thumbnail: embedPayload.thumbnailUrl ? { url: embedPayload.thumbnailUrl } : { url: KmqImages.DEAD },
-        }],
-        components: embedPayload.components,
-    }, null, messageContext.author.id);
+export async function sendErrorMessage(
+    messageContext: MessageContext,
+    embedPayload: EmbedPayload
+): Promise<Eris.Message<Eris.TextableChannel>> {
+    const author =
+        embedPayload.author == null || embedPayload.author
+            ? embedPayload.author
+            : messageContext.author;
+
+    return sendMessage(
+        messageContext.textChannelID,
+        {
+            embeds: [
+                {
+                    color: embedPayload.color || EMBED_ERROR_COLOR,
+                    author: author
+                        ? {
+                              name: author.username,
+                              icon_url: author.avatarUrl,
+                          }
+                        : null,
+                    title: bold(embedPayload.title),
+                    description: embedPayload.description,
+                    footer: embedPayload.footerText
+                        ? {
+                              text: embedPayload.footerText,
+                          }
+                        : null,
+                    thumbnail: embedPayload.thumbnailUrl
+                        ? { url: embedPayload.thumbnailUrl }
+                        : { url: KmqImages.DEAD },
+                },
+            ],
+            components: embedPayload.components,
+        },
+        null,
+        messageContext.author.id
+    );
 }
 
 /**
@@ -338,34 +498,64 @@ export async function sendErrorMessage(messageContext: MessageContext, embedPayl
  * @param embedPayload - What to include in the message
  * @param reply - Whether to reply to the given message
  */
-export async function sendInfoMessage(messageContext: MessageContext, embedPayload: EmbedPayload, reply = false, boldTitle = true): Promise<Eris.Message<Eris.TextableChannel>> {
+export async function sendInfoMessage(
+    messageContext: MessageContext,
+    embedPayload: EmbedPayload,
+    reply = false,
+    boldTitle = true
+): Promise<Eris.Message<Eris.TextableChannel>> {
     if (embedPayload.description && embedPayload.description.length > 2048) {
-        return sendErrorMessage(messageContext, { title: "Error", description: "Response message was too long, report this error to the KMQ help server" });
+        return sendErrorMessage(messageContext, {
+            title: "Error",
+            description:
+                "Response message was too long, report this error to the KMQ help server",
+        });
     }
 
-    const author = (embedPayload.author == null || embedPayload.author) ? embedPayload.author : messageContext.author;
+    const author =
+        embedPayload.author == null || embedPayload.author
+            ? embedPayload.author
+            : messageContext.author;
+
     const embed: Eris.EmbedOptions = {
         color: embedPayload.color,
-        author: author ? {
-            name: author.username,
-            icon_url: author.avatarUrl,
-        } : null,
+        author: author
+            ? {
+                  name: author.username,
+                  icon_url: author.avatarUrl,
+              }
+            : null,
         title: boldTitle ? bold(embedPayload.title) : embedPayload.title,
         url: embedPayload.url,
         description: embedPayload.description,
         fields: embedPayload.fields,
-        footer: embedPayload.footerText ? {
-            text: embedPayload.footerText,
-        } : null,
-        thumbnail: embedPayload.thumbnailUrl ? { url: embedPayload.thumbnailUrl } : null,
+        footer: embedPayload.footerText
+            ? {
+                  text: embedPayload.footerText,
+              }
+            : null,
+        thumbnail: embedPayload.thumbnailUrl
+            ? { url: embedPayload.thumbnailUrl }
+            : null,
         timestamp: embedPayload.timestamp,
     };
 
-    return sendMessage(messageContext.textChannelID, {
-        embeds: [embed],
-        messageReference: reply && messageContext.referencedMessageID ? { messageID: messageContext.referencedMessageID, failIfNotExists: false } : null,
-        components: embedPayload.components,
-    }, null, messageContext.author.id);
+    return sendMessage(
+        messageContext.textChannelID,
+        {
+            embeds: [embed],
+            messageReference:
+                reply && messageContext.referencedMessageID
+                    ? {
+                          messageID: messageContext.referencedMessageID,
+                          failIfNotExists: false,
+                      }
+                    : null,
+            components: embedPayload.components,
+        },
+        null,
+        messageContext.author.id
+    );
 }
 
 /**
@@ -376,25 +566,31 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
  * @param gameRound - The GameSession's corresponding GameRound
  * @param songGuessed - Whether the song was guessed
  */
-export async function sendEndRoundMessage(messageContext: MessageContext,
+export async function sendEndRoundMessage(
+    messageContext: MessageContext,
     scoreboard: Scoreboard,
     gameRound: GameRound,
     guessModeType: GuessModeType,
     playerRoundResults: Array<PlayerRoundResult>,
     isMultipleChoiceMode: boolean,
     timeRemaining?: number,
-    uniqueSongCounter?: UniqueSongCounter): Promise<Eris.Message<Eris.TextableChannel>> {
+    uniqueSongCounter?: UniqueSongCounter
+): Promise<Eris.Message<Eris.TextableChannel>> {
     const footer: Eris.EmbedFooterOptions = {
         text: "",
     };
 
     if (guessModeType === GuessModeType.ARTIST) {
         if (gameRound.artistAliases.length > 0) {
-            footer.text = `Aliases: ${Array.from(gameRound.artistAliases).join(", ")}`;
+            footer.text = `Aliases: ${Array.from(gameRound.artistAliases).join(
+                ", "
+            )}`;
         }
     } else {
         if (gameRound.songAliases.length > 0) {
-            footer.text = `Aliases: ${Array.from(gameRound.songAliases).join(", ")}`;
+            footer.text = `Aliases: ${Array.from(gameRound.songAliases).join(
+                ", "
+            )}`;
         }
     }
 
@@ -403,7 +599,14 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
             footer.text += "\n";
         }
 
-        footer.text += timeRemaining > 0 ? `⏰ ${pluralize("minute", Math.ceil(timeRemaining), true)} remaining` : "⏰ Time's up!";
+        footer.text +=
+            timeRemaining > 0
+                ? `⏰ ${pluralize(
+                      "minute",
+                      Math.ceil(timeRemaining),
+                      true
+                  )} remaining`
+                : "⏰ Time's up!";
     }
 
     const fact = Math.random() <= 0.05 ? getFact() : null;
@@ -424,11 +627,24 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     }
 
     if (correctGuess) {
-        correctDescription += `${getMention(playerRoundResults[0].player.id)} ${playerRoundResults[0].streak >= 5 ? `(🔥 ${friendlyFormattedNumber(playerRoundResults[0].streak)}) ` : ""}guessed correctly (+${friendlyFormattedNumber(playerRoundResults[0].expGain)} EXP)`;
+        correctDescription += `${getMention(playerRoundResults[0].player.id)} ${
+            playerRoundResults[0].streak >= 5
+                ? `(🔥 ${friendlyFormattedNumber(
+                      playerRoundResults[0].streak
+                  )}) `
+                : ""
+        }guessed correctly (+${friendlyFormattedNumber(
+            playerRoundResults[0].expGain
+        )} EXP)`;
         if (playerRoundResults.length > 1) {
             const runnersUp = playerRoundResults.slice(1);
             let runnersUpDescription = runnersUp
-                .map((x) => `${getMention(x.player.id)} (+${friendlyFormattedNumber(x.expGain)} EXP)`)
+                .map(
+                    (x) =>
+                        `${getMention(x.player.id)} (+${friendlyFormattedNumber(
+                            x.expGain
+                        )} EXP)`
+                )
                 .slice(0, MAX_RUNNERS_UP)
                 .join("\n");
 
@@ -440,27 +656,52 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         }
     }
 
-    const uniqueSongMessage = (uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0) ? `\n${codeLine(`${friendlyFormattedNumber(uniqueSongCounter.uniqueSongsPlayed)}/${friendlyFormattedNumber(uniqueSongCounter.totalSongs)}`)} unique songs played.` : "";
-    const useLargerScoreboard = scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
-    const description = `${correctGuess ? correctDescription : "Nobody got it."}\n${uniqueSongMessage} ${!scoreboard.isEmpty() && !useLargerScoreboard ? "\n\n**Scoreboard**" : ""}`;
-    let fields: Array<{ name: string, value: string, inline: boolean }>;
+    const uniqueSongMessage =
+        uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0
+            ? `\n${codeLine(
+                  `${friendlyFormattedNumber(
+                      uniqueSongCounter.uniqueSongsPlayed
+                  )}/${friendlyFormattedNumber(uniqueSongCounter.totalSongs)}`
+              )} unique songs played.`
+            : "";
+
+    const useLargerScoreboard =
+        scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
+
+    const description = `${
+        correctGuess ? correctDescription : "Nobody got it."
+    }\n${uniqueSongMessage} ${
+        !scoreboard.isEmpty() && !useLargerScoreboard
+            ? "\n\n**Scoreboard**"
+            : ""
+    }`;
+
+    let fields: Array<{ name: string; value: string; inline: boolean }>;
     let roundResultIDs: Array<string>;
     if (scoreboard instanceof TeamScoreboard) {
         const teamScoreboard = scoreboard as TeamScoreboard;
-        roundResultIDs = playerRoundResults.map((x) => teamScoreboard.getTeamOfPlayer(x.player.id).getID());
+        roundResultIDs = playerRoundResults.map((x) =>
+            teamScoreboard.getTeamOfPlayer(x.player.id).getID()
+        );
     } else {
         roundResultIDs = playerRoundResults.map((x) => x.player.id);
     }
 
     if (useLargerScoreboard) {
-        fields = scoreboard.getScoreboardEmbedThreeFields(MAX_SCOREBOARD_PLAYERS, false, roundResultIDs);
+        fields = scoreboard.getScoreboardEmbedThreeFields(
+            MAX_SCOREBOARD_PLAYERS,
+            false,
+            roundResultIDs
+        );
     } else {
         fields = scoreboard.getScoreboardEmbedFields(false, roundResultIDs);
     }
 
     if (fact) {
         fields.push({
-            name: "__Did you know?__", value: fact, inline: false,
+            name: "__Did you know?__",
+            value: fact,
+            inline: false,
         });
     }
 
@@ -475,7 +716,10 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
         color = EMBED_ERROR_COLOR;
     }
 
-    const songAndArtist = bold(`"${gameRound.originalSongName}" - ${gameRound.artistName}`);
+    const songAndArtist = bold(
+        `"${gameRound.originalSongName}" - ${gameRound.artistName}`
+    );
+
     const embed = {
         color,
         title: `${songAndArtist} (${gameRound.publishDate.getFullYear()})`,
@@ -485,7 +729,9 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
     };
 
     const thumbnailUrl = `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`;
-    const footerText = `${friendlyFormattedNumber(gameRound.views)} views${footer.text ? `\n${footer.text}` : ""}`;
+    const footerText = `${friendlyFormattedNumber(gameRound.views)} views${
+        footer.text ? `\n${footer.text}` : ""
+    }`;
 
     if (isMultipleChoiceMode && gameRound.interactionMessage) {
         embed["thumbnail"] = { url: thumbnailUrl };
@@ -496,7 +742,12 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
 
     embed["thumbnailUrl"] = thumbnailUrl;
     embed["footerText"] = footerText;
-    return sendInfoMessage(messageContext, embed, correctGuess && !isMultipleChoiceMode, false);
+    return sendInfoMessage(
+        messageContext,
+        embed,
+        correctGuess && !isMultipleChoiceMode,
+        false
+    );
 }
 
 /**
@@ -508,81 +759,140 @@ export async function sendEndRoundMessage(messageContext: MessageContext,
  * @param allReset - Specifies whether all GameOptions were reset
  * @param footerText - The footer text
  */
-export async function sendOptionsMessage(messageContext: MessageContext,
+export async function sendOptionsMessage(
+    messageContext: MessageContext,
     guildPreference: GuildPreference,
-    updatedOptions?: { option: GameOption, reset: boolean }[],
+    updatedOptions?: { option: GameOption; reset: boolean }[],
     preset = false,
     allReset = false,
-    footerText?: string): Promise<void> {
+    footerText?: string
+): Promise<void> {
     if (guildPreference.gameOptions.forcePlaySongID) {
-        await sendInfoMessage(messageContext,
+        await sendInfoMessage(
+            messageContext,
             {
                 title: "[DEBUG] Force Play Mode Active",
                 description: `Force playing video ID: ${guildPreference.gameOptions.forcePlaySongID}`,
                 footerText,
                 thumbnailUrl: KmqImages.READING_BOOK,
-            }, true);
+            },
+            true
+        );
         return;
     }
 
     const totalSongs = await getAvailableSongCount(guildPreference);
     if (totalSongs === null) {
-        sendErrorMessage(messageContext, { title: "Error Retrieving Song Data", description: `Try again in a bit, or report this error to the official KMQ server found in \`${process.env.BOT_PREFIX}help\`.` });
+        sendErrorMessage(messageContext, {
+            title: "Error Retrieving Song Data",
+            description: `Try again in a bit, or report this error to the official KMQ server found in \`${process.env.BOT_PREFIX}help\`.`,
+        });
         return;
     }
 
     const gameOptions = guildPreference.gameOptions;
-    const visibleLimitEnd = Math.min(totalSongs.countBeforeLimit, gameOptions.limitEnd);
-    const visibleLimitStart = Math.min(totalSongs.countBeforeLimit, gameOptions.limitStart);
-    const limit = gameOptions.limitStart === 0 ? `${friendlyFormattedNumber(visibleLimitEnd)}` : `${getOrdinalNum(visibleLimitStart)} to ${getOrdinalNum(visibleLimitEnd)} (${friendlyFormattedNumber(totalSongs.count)} songs)`;
+    const visibleLimitEnd = Math.min(
+        totalSongs.countBeforeLimit,
+        gameOptions.limitEnd
+    );
+
+    const visibleLimitStart = Math.min(
+        totalSongs.countBeforeLimit,
+        gameOptions.limitStart
+    );
+
+    const limit =
+        gameOptions.limitStart === 0
+            ? `${friendlyFormattedNumber(visibleLimitEnd)}`
+            : `${getOrdinalNum(visibleLimitStart)} to ${getOrdinalNum(
+                  visibleLimitEnd
+              )} (${friendlyFormattedNumber(totalSongs.count)} songs)`;
 
     // Store the VALUE of ,[option]: [VALUE] into optionStrings
     // Null optionStrings values are set to "Not set" below
     const optionStrings = {};
-    optionStrings[GameOption.LIMIT] = `${limit} / ${friendlyFormattedNumber(totalSongs.countBeforeLimit)}`;
-    optionStrings[GameOption.GROUPS] = guildPreference.isGroupsMode() ? guildPreference.getDisplayedGroupNames() : null;
+    optionStrings[GameOption.LIMIT] = `${limit} / ${friendlyFormattedNumber(
+        totalSongs.countBeforeLimit
+    )}`;
+
+    optionStrings[GameOption.GROUPS] = guildPreference.isGroupsMode()
+        ? guildPreference.getDisplayedGroupNames()
+        : null;
     optionStrings[GameOption.GENDER] = gameOptions.gender.join(", ");
-    optionStrings[GameOption.CUTOFF] = `${gameOptions.beginningYear} - ${gameOptions.endYear}`;
+    optionStrings[
+        GameOption.CUTOFF
+    ] = `${gameOptions.beginningYear} - ${gameOptions.endYear}`;
     optionStrings[GameOption.ARTIST_TYPE] = gameOptions.artistType;
     optionStrings[GameOption.ANSWER_TYPE] = gameOptions.answerType;
     optionStrings[GameOption.RELEASE_TYPE] = gameOptions.releaseType;
     optionStrings[GameOption.LANGUAGE_TYPE] = gameOptions.languageType;
-    optionStrings[GameOption.SUBUNIT_PREFERENCE] = gameOptions.subunitPreference;
+    optionStrings[GameOption.SUBUNIT_PREFERENCE] =
+        gameOptions.subunitPreference;
     optionStrings[GameOption.OST_PREFERENCE] = gameOptions.ostPreference;
     optionStrings[GameOption.MULTIGUESS] = gameOptions.multiGuessType;
     optionStrings[GameOption.SHUFFLE_TYPE] = gameOptions.shuffleType;
     optionStrings[GameOption.SEEK_TYPE] = gameOptions.seekType;
     optionStrings[GameOption.GUESS_MODE_TYPE] = gameOptions.guessModeType;
     optionStrings[GameOption.SPECIAL_TYPE] = gameOptions.specialType;
-    optionStrings[GameOption.TIMER] = guildPreference.isGuessTimeoutSet() ? `${gameOptions.guessTimeout} sec` : null;
-    optionStrings[GameOption.DURATION] = guildPreference.isDurationSet() ? `${gameOptions.duration} mins` : null;
-    optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode() ? guildPreference.getDisplayedExcludesGroupNames() : null;
-    optionStrings[GameOption.INCLUDE] = guildPreference.isIncludesMode() ? guildPreference.getDisplayedIncludesGroupNames() : null;
+    optionStrings[GameOption.TIMER] = guildPreference.isGuessTimeoutSet()
+        ? `${gameOptions.guessTimeout} sec`
+        : null;
 
-    const generateConflictingCommandEntry = ((commandValue: string, conflictingOption: string): string => `${strikethrough(commandValue)} (\`${process.env.BOT_PREFIX}${conflictingOption}\` ${italicize("conflict")})`);
+    optionStrings[GameOption.DURATION] = guildPreference.isDurationSet()
+        ? `${gameOptions.duration} mins`
+        : null;
+
+    optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode()
+        ? guildPreference.getDisplayedExcludesGroupNames()
+        : null;
+
+    optionStrings[GameOption.INCLUDE] = guildPreference.isIncludesMode()
+        ? guildPreference.getDisplayedIncludesGroupNames()
+        : null;
+
+    const generateConflictingCommandEntry = (
+        commandValue: string,
+        conflictingOption: string
+    ): string =>
+        `${strikethrough(commandValue)} (\`${
+            process.env.BOT_PREFIX
+        }${conflictingOption}\` ${italicize("conflict")})`;
 
     const { gameSessions } = state;
-    const isEliminationMode = gameSessions[messageContext.guildID] && gameSessions[messageContext.guildID].gameType === GameType.ELIMINATION;
+    const isEliminationMode =
+        gameSessions[messageContext.guildID] &&
+        gameSessions[messageContext.guildID].gameType === GameType.ELIMINATION;
 
     // Special case: ,goal is conflicting only when current game is elimination
     if (guildPreference.isGoalSet()) {
         optionStrings[GameOption.GOAL] = String(gameOptions.goal);
         if (isEliminationMode) {
-            optionStrings[GameOption.GOAL] = generateConflictingCommandEntry(optionStrings[GameOption.GOAL], `play ${GameType.ELIMINATION}`);
+            optionStrings[GameOption.GOAL] = generateConflictingCommandEntry(
+                optionStrings[GameOption.GOAL],
+                `play ${GameType.ELIMINATION}`
+            );
         }
     }
 
     const gameOptionConflictCheckMap = [
-        { conflictCheck: guildPreference.isGroupsMode.bind(guildPreference), gameOption: GameOption.GROUPS },
+        {
+            conflictCheck: guildPreference.isGroupsMode.bind(guildPreference),
+            gameOption: GameOption.GROUPS,
+        },
     ];
 
     // When an option is set that conflicts with others, visually show a conflict on those other options
     for (const gameOptionConflictCheck of gameOptionConflictCheckMap) {
         const doesConflict = gameOptionConflictCheck.conflictCheck();
         if (doesConflict) {
-            for (const option of ConflictingGameOptions[gameOptionConflictCheck.gameOption]) {
+            for (const option of ConflictingGameOptions[
+                gameOptionConflictCheck.gameOption
+            ]) {
                 if (optionStrings[option]) {
-                    optionStrings[option] = generateConflictingCommandEntry(optionStrings[option], GameOptionCommand[gameOptionConflictCheck.gameOption]);
+                    optionStrings[option] = generateConflictingCommandEntry(
+                        optionStrings[option],
+                        GameOptionCommand[gameOptionConflictCheck.gameOption]
+                    );
                 }
             }
         }
@@ -595,50 +905,100 @@ export async function sendOptionsMessage(messageContext: MessageContext,
     // Underline changed option
     if (updatedOptions) {
         for (const updatedOption of updatedOptions) {
-            optionStrings[updatedOption.option as GameOption] = underline(optionStrings[updatedOption.option]);
+            optionStrings[updatedOption.option as GameOption] = underline(
+                optionStrings[updatedOption.option]
+            );
         }
     }
 
     // Options excluded from embed fields since they are of higher importance (shown above them as part of the embed description)
-    let priorityOptions = PriorityGameOption
-        .map((option) => `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${optionStrings[option]}`)
-        .join("\n");
+    let priorityOptions = PriorityGameOption.map(
+        (option) =>
+            `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${
+                optionStrings[option]
+            }`
+    ).join("\n");
 
-    priorityOptions = `Now playing the top ${bold(limit)} out of ${bold(String(friendlyFormattedNumber(totalSongs.countBeforeLimit)))} available songs from the following game options:\n\n${priorityOptions}`;
+    priorityOptions = `Now playing the top ${bold(limit)} out of ${bold(
+        String(friendlyFormattedNumber(totalSongs.countBeforeLimit))
+    )} available songs from the following game options:\n\n${priorityOptions}`;
 
-    const fieldOptions = Object.keys(GameOptionCommand).filter((option) => !PriorityGameOption.includes(option as GameOption));
+    const fieldOptions = Object.keys(GameOptionCommand).filter(
+        (option) => !PriorityGameOption.includes(option as GameOption)
+    );
+
     const ZERO_WIDTH_SPACE = "​";
     // Split non-priority options into three fields
     const fields = [
         {
             name: ZERO_WIDTH_SPACE,
-            value: fieldOptions.slice(0, Math.ceil(fieldOptions.length / 3)).map((option) => `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${optionStrings[option]}`).join("\n"),
+            value: fieldOptions
+                .slice(0, Math.ceil(fieldOptions.length / 3))
+                .map(
+                    (option) =>
+                        `${bold(
+                            process.env.BOT_PREFIX + GameOptionCommand[option]
+                        )}: ${optionStrings[option]}`
+                )
+                .join("\n"),
             inline: true,
         },
         {
             name: ZERO_WIDTH_SPACE,
-            value: fieldOptions.slice(Math.ceil(fieldOptions.length / 3), Math.ceil((2 * fieldOptions.length) / 3)).map((option) => `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${optionStrings[option]}`).join("\n"),
+            value: fieldOptions
+                .slice(
+                    Math.ceil(fieldOptions.length / 3),
+                    Math.ceil((2 * fieldOptions.length) / 3)
+                )
+                .map(
+                    (option) =>
+                        `${bold(
+                            process.env.BOT_PREFIX + GameOptionCommand[option]
+                        )}: ${optionStrings[option]}`
+                )
+                .join("\n"),
             inline: true,
         },
         {
             name: ZERO_WIDTH_SPACE,
-            value: fieldOptions.slice(Math.ceil((2 * fieldOptions.length) / 3)).map((option) => `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${optionStrings[option]}`).join("\n"),
+            value: fieldOptions
+                .slice(Math.ceil((2 * fieldOptions.length) / 3))
+                .map(
+                    (option) =>
+                        `${bold(
+                            process.env.BOT_PREFIX + GameOptionCommand[option]
+                        )}: ${optionStrings[option]}`
+                )
+                .join("\n"),
             inline: true,
         },
     ];
 
-    if (updatedOptions && !allReset && updatedOptions[0] && updatedOptions[0].reset) {
+    if (
+        updatedOptions &&
+        !allReset &&
+        updatedOptions[0] &&
+        updatedOptions[0].reset
+    ) {
         footerText = `Looking for information on how to use a command? Check out '${process.env.BOT_PREFIX}help [command]' to learn more.`;
     }
 
-    await sendInfoMessage(messageContext,
+    await sendInfoMessage(
+        messageContext,
         {
-            title: updatedOptions === null || allReset ? "Options" : `${preset ? "Preset" : updatedOptions[0].option} ${updatedOptions[0].reset ? "Reset" : "Updated"}`,
+            title:
+                updatedOptions === null || allReset
+                    ? "Options"
+                    : `${preset ? "Preset" : updatedOptions[0].option} ${
+                          updatedOptions[0].reset ? "Reset" : "Updated"
+                      }`,
             description: priorityOptions,
             fields,
             footerText,
             thumbnailUrl: KmqImages.LISTENING,
-        }, true);
+        },
+        true
+    );
 }
 
 /**
@@ -646,7 +1006,9 @@ export async function sendOptionsMessage(messageContext: MessageContext,
  * @param textChannel - The channel where the message should be delivered
  * @param gameSession - The GameSession that has ended
  */
-export async function sendEndGameMessage(gameSession: GameSession): Promise<void> {
+export async function sendEndGameMessage(
+    gameSession: GameSession
+): Promise<void> {
     const footerText = `${gameSession.getCorrectGuesses()}/${gameSession.getRoundsPlayed()} songs correctly guessed!`;
     if (gameSession.scoreboard.isEmpty()) {
         await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
@@ -656,27 +1018,39 @@ export async function sendEndGameMessage(gameSession: GameSession): Promise<void
         });
     } else {
         const winners = gameSession.scoreboard.getWinners();
-        let fields: Array<{ name: string, value: string, inline: boolean }>;
-        const useLargerScoreboard = gameSession.scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
-        if (useLargerScoreboard) {
-            fields = gameSession.scoreboard.getScoreboardEmbedThreeFields(MAX_SCOREBOARD_PLAYERS, gameSession.gameType !== GameType.TEAMS);
-        } else {
-            fields = gameSession.scoreboard.getScoreboardEmbedFields(gameSession.gameType !== GameType.TEAMS);
-        }
+        let fields: Array<{ name: string; value: string; inline: boolean }>;
+        const useLargerScoreboard =
+            gameSession.scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
 
-        const endGameMessage: GameInfoMessage = chooseWeightedRandom(await dbContext.kmq("game_messages"));
-        if (endGameMessage) {
-            fields.push(
-                {
-                    name: endGameMessage.title,
-                    value: endGameMessage.message,
-                    inline: false,
-                },
+        if (useLargerScoreboard) {
+            fields = gameSession.scoreboard.getScoreboardEmbedThreeFields(
+                MAX_SCOREBOARD_PLAYERS,
+                gameSession.gameType !== GameType.TEAMS
+            );
+        } else {
+            fields = gameSession.scoreboard.getScoreboardEmbedFields(
+                gameSession.gameType !== GameType.TEAMS
             );
         }
 
+        const endGameMessage: GameInfoMessage = chooseWeightedRandom(
+            await dbContext.kmq("game_messages")
+        );
+
+        if (endGameMessage) {
+            fields.push({
+                name: endGameMessage.title,
+                value: endGameMessage.message,
+                inline: false,
+            });
+        }
+
         await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
-            color: gameSession.gameType !== GameType.TEAMS && await userBonusIsActive(winners[0].id) ? EMBED_SUCCESS_BONUS_COLOR : EMBED_SUCCESS_COLOR,
+            color:
+                gameSession.gameType !== GameType.TEAMS &&
+                (await userBonusIsActive(winners[0].id))
+                    ? EMBED_SUCCESS_BONUS_COLOR
+                    : EMBED_SUCCESS_COLOR,
             description: !useLargerScoreboard ? "**Scoreboard**" : null,
             thumbnailUrl: winners[0].getAvatarURL(),
             title: `🎉 ${gameSession.scoreboard.getWinnerMessage()} 🎉`,
@@ -686,9 +1060,28 @@ export async function sendEndGameMessage(gameSession: GameSession): Promise<void
                 {
                     type: 1,
                     components: [
-                        { style: 5, url: VOTE_LINK, type: 2 as const, emoji: { name: "✅" }, label: "Vote!" },
-                        { style: 5, url: REVIEW_LINK, type: 2 as const, emoji: { name: "📖" }, label: "Leave a review!" },
-                        { style: 5, url: "https://discord.gg/RCuzwYV", type: 2, emoji: { name: "🎵" }, label: "Official KMQ Server" }],
+                        {
+                            style: 5,
+                            url: VOTE_LINK,
+                            type: 2 as const,
+                            emoji: { name: "✅" },
+                            label: "Vote!",
+                        },
+                        {
+                            style: 5,
+                            url: REVIEW_LINK,
+                            type: 2 as const,
+                            emoji: { name: "📖" },
+                            label: "Leave a review!",
+                        },
+                        {
+                            style: 5,
+                            url: "https://discord.gg/RCuzwYV",
+                            type: 2,
+                            emoji: { name: "🎵" },
+                            label: "Official KMQ Server",
+                        },
+                    ],
                 },
             ],
         });
@@ -700,11 +1093,26 @@ export async function sendEndGameMessage(gameSession: GameSession): Promise<void
  * @param message - The Message object
  * @param embeds - A list of embeds to paginate over
  */
-export async function sendPaginationedEmbed(message: GuildTextableMessage, embeds: Array<Eris.EmbedOptions> | Array<EmbedGenerator>,
-    components?: Array<Eris.ActionRow>, startPage = 1): Promise<Eris.Message> {
+export async function sendPaginationedEmbed(
+    message: GuildTextableMessage,
+    embeds: Array<Eris.EmbedOptions> | Array<EmbedGenerator>,
+    components?: Array<Eris.ActionRow>,
+    startPage = 1
+): Promise<Eris.Message> {
     if (embeds.length > 1) {
-        if ((await textPermissionsCheck(message.channel.id, message.guildID, message.author.id))) {
-            return EmbedPaginator.createPaginationEmbed(message, embeds, { timeout: 60000, startPage, cycling: true }, components);
+        if (
+            await textPermissionsCheck(
+                message.channel.id,
+                message.guildID,
+                message.author.id
+            )
+        ) {
+            return EmbedPaginator.createPaginationEmbed(
+                message,
+                embeds,
+                { timeout: 60000, startPage, cycling: true },
+                components
+            );
         }
 
         return null;
@@ -717,7 +1125,12 @@ export async function sendPaginationedEmbed(message: GuildTextableMessage, embed
         embed = embeds[0];
     }
 
-    return sendMessage(message.channel.id, { embeds: [embed], components }, null, message.author.id);
+    return sendMessage(
+        message.channel.id,
+        { embeds: [embed], components },
+        null,
+        message.author.id
+    );
 }
 
 /**
@@ -725,8 +1138,14 @@ export async function sendPaginationedEmbed(message: GuildTextableMessage, embed
  * @param message - The Message object
  * @param gameSession - The GameSession
  */
-export async function sendScoreboardMessage(message: GuildTextableMessage, gameSession: GameSession): Promise<Eris.Message> {
-    if (gameSession.scoreboard.isEmpty() && gameSession.gameType !== GameType.ELIMINATION) {
+export async function sendScoreboardMessage(
+    message: GuildTextableMessage,
+    gameSession: GameSession
+): Promise<Eris.Message> {
+    if (
+        gameSession.scoreboard.isEmpty() &&
+        gameSession.gameType !== GameType.ELIMINATION
+    ) {
         return sendInfoMessage(MessageContext.fromMessage(message), {
             color: EMBED_SUCCESS_COLOR,
             description: "(╯°□°）╯︵ ┻━┻",
@@ -734,24 +1153,41 @@ export async function sendScoreboardMessage(message: GuildTextableMessage, gameS
         });
     }
 
-    const winnersFieldSubsets = chunkArray(gameSession.scoreboard.getScoreboardEmbedFields(true), EMBED_FIELDS_PER_PAGE);
-    let footerText = `Your score is ${gameSession.scoreboard.getPlayerScore(message.author.id)}.`;
+    const winnersFieldSubsets = chunkArray(
+        gameSession.scoreboard.getScoreboardEmbedFields(true),
+        EMBED_FIELDS_PER_PAGE
+    );
+
+    let footerText = `Your score is ${gameSession.scoreboard.getPlayerScore(
+        message.author.id
+    )}.`;
+
     if (gameSession.gameType === GameType.ELIMINATION) {
-        const eliminationScoreboard = gameSession.scoreboard as EliminationScoreboard;
-        footerText = `You have ${eliminationScoreboard.getPlayerLives(message.author.id)} lives.`;
+        const eliminationScoreboard =
+            gameSession.scoreboard as EliminationScoreboard;
+
+        footerText = `You have ${eliminationScoreboard.getPlayerLives(
+            message.author.id
+        )} lives.`;
     } else if (gameSession.gameType === GameType.TEAMS) {
         const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
-        footerText = `Your team's score: ${teamScoreboard.getTeamOfPlayer(message.author.id).getScore()}\nYour score: ${teamScoreboard.getPlayerScore(message.author.id)}`;
+        footerText = `Your team's score: ${teamScoreboard
+            .getTeamOfPlayer(message.author.id)
+            .getScore()}\nYour score: ${teamScoreboard.getPlayerScore(
+            message.author.id
+        )}`;
     }
 
-    const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map((winnersFieldSubset) => ({
-        color: EMBED_SUCCESS_COLOR,
-        title: "Scoreboard",
-        fields: winnersFieldSubset,
-        footer: {
-            text: footerText,
-        },
-    }));
+    const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map(
+        (winnersFieldSubset) => ({
+            color: EMBED_SUCCESS_COLOR,
+            title: "Scoreboard",
+            fields: winnersFieldSubset,
+            footer: {
+                text: footerText,
+            },
+        })
+    );
 
     return sendPaginationedEmbed(message, embeds);
 }
@@ -768,7 +1204,9 @@ export function disconnectVoiceConnection(message: GuildTextableMessage): void {
  * @param message - The Message object
  * @returns the bot's voice connection in the message's originating guild
  */
-export function getVoiceConnection(message: Eris.Message): Eris.VoiceConnection {
+export function getVoiceConnection(
+    message: Eris.Message
+): Eris.VoiceConnection {
     const voiceConnection = state.client.voiceConnections.get(message.guildID);
     return voiceConnection;
 }
@@ -777,8 +1215,13 @@ export function getVoiceConnection(message: Eris.Message): Eris.VoiceConnection 
  * @param message - The Message
  * @returns whether the message's author and the bot are in the same voice channel
  */
-export function areUserAndBotInSameVoiceChannel(message: Eris.Message): boolean {
-    const botVoiceConnection = state.client.voiceConnections.get(message.guildID);
+export function areUserAndBotInSameVoiceChannel(
+    message: Eris.Message
+): boolean {
+    const botVoiceConnection = state.client.voiceConnections.get(
+        message.guildID
+    );
+
     if (!message.member.voiceState || !botVoiceConnection) {
         return false;
     }
@@ -790,8 +1233,13 @@ export function areUserAndBotInSameVoiceChannel(message: Eris.Message): boolean 
  * @param messageContext - The messageContext object
  * @returns the voice channel that the message's author is in
  */
-export function getUserVoiceChannel(messageContext: MessageContext): Eris.VoiceChannel {
-    const member = state.client.guilds.get(messageContext.guildID).members.get(messageContext.author.id);
+export function getUserVoiceChannel(
+    messageContext: MessageContext
+): Eris.VoiceChannel {
+    const member = state.client.guilds
+        .get(messageContext.guildID)
+        .members.get(messageContext.author.id);
+
     const voiceChannelID = member.voiceState.channelID;
     if (!voiceChannelID) return null;
     return state.client.getChannel(voiceChannelID) as Eris.VoiceChannel;
@@ -802,7 +1250,10 @@ export function getUserVoiceChannel(messageContext: MessageContext): Eris.VoiceC
  * @returns the voice channel that the message's author is in
  */
 export function getVoiceChannel(voiceChannelID: string): Eris.VoiceChannel {
-    const voiceChannel = state.client.getChannel(voiceChannelID) as Eris.VoiceChannel;
+    const voiceChannel = state.client.getChannel(
+        voiceChannelID
+    ) as Eris.VoiceChannel;
+
     return voiceChannel;
 }
 
@@ -810,7 +1261,9 @@ export function getVoiceChannel(voiceChannelID: string): Eris.VoiceChannel {
  * @param voiceChannelID - The voice channel to check
  * @returns the users in the voice channel, excluding bots
  */
-export function getCurrentVoiceMembers(voiceChannelID: string): Array<Eris.Member> {
+export function getCurrentVoiceMembers(
+    voiceChannelID: string
+): Array<Eris.Member> {
     const voiceChannel = getVoiceChannel(voiceChannelID);
     if (!voiceChannel) {
         logger.error(`Voice channel not in cache: ${voiceChannelID}`);
@@ -833,26 +1286,59 @@ export function getNumParticipants(voiceChannelID: string): number {
  * @returns whether the bot has permissions to join the message author's currently active voice channel
  */
 export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
-    const voiceChannel = getUserVoiceChannel(MessageContext.fromMessage(message));
+    const voiceChannel = getUserVoiceChannel(
+        MessageContext.fromMessage(message)
+    );
+
     const messageContext = MessageContext.fromMessage(message);
-    const missingPermissions = REQUIRED_VOICE_PERMISSIONS.filter((permission) => !voiceChannel.permissionsOf(state.client.user.id).has(permission));
+    const missingPermissions = REQUIRED_VOICE_PERMISSIONS.filter(
+        (permission) =>
+            !voiceChannel.permissionsOf(state.client.user.id).has(permission)
+    );
+
     if (missingPermissions.length > 0) {
-        logger.warn(`${getDebugLogHeader(messageContext)} | Missing Voice Channel [${missingPermissions.join(", ")}] permissions`);
-        sendErrorMessage(MessageContext.fromMessage(message), { title: "Missing Permissions", description: missingPermissionsText(missingPermissions) });
+        logger.warn(
+            `${getDebugLogHeader(
+                messageContext
+            )} | Missing Voice Channel [${missingPermissions.join(
+                ", "
+            )}] permissions`
+        );
+
+        sendErrorMessage(MessageContext.fromMessage(message), {
+            title: "Missing Permissions",
+            description: missingPermissionsText(missingPermissions),
+        });
         return false;
     }
 
-    const channelFull = voiceChannel.userLimit && (voiceChannel.voiceMembers.size >= voiceChannel.userLimit);
+    const channelFull =
+        voiceChannel.userLimit &&
+        voiceChannel.voiceMembers.size >= voiceChannel.userLimit;
+
     if (channelFull) {
         logger.warn(`${getDebugLogHeader(messageContext)} | Channel full`);
-        sendInfoMessage(MessageContext.fromMessage(message), { title: "Voice Channel Full", description: "Ensure that there's enough room in the voice channel for me to join" });
+        sendInfoMessage(MessageContext.fromMessage(message), {
+            title: "Voice Channel Full",
+            description:
+                "Ensure that there's enough room in the voice channel for me to join",
+        });
         return false;
     }
 
     const afkChannel = voiceChannel.id === voiceChannel.guild.afkChannelID;
     if (afkChannel) {
-        logger.warn(`${getDebugLogHeader(messageContext)} | Attempted to start game in AFK voice channel`);
-        sendInfoMessage(MessageContext.fromMessage(message), { title: "AFK Voice Channel", description: "Ensure you're not in the inactive voice channel so that you can hear me!" });
+        logger.warn(
+            `${getDebugLogHeader(
+                messageContext
+            )} | Attempted to start game in AFK voice channel`
+        );
+
+        sendInfoMessage(MessageContext.fromMessage(message), {
+            title: "AFK Voice Channel",
+            description:
+                "Ensure you're not in the inactive voice channel so that you can hear me!",
+        });
         return false;
     }
 
@@ -866,9 +1352,15 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
 export function checkBotIsAlone(guildID: string): boolean {
     const voiceConnection = state.client.voiceConnections.get(guildID);
     if (!voiceConnection || !voiceConnection.channelID) return true;
-    const channel = state.client.getChannel(voiceConnection.channelID) as Eris.VoiceChannel;
+    const channel = state.client.getChannel(
+        voiceConnection.channelID
+    ) as Eris.VoiceChannel;
+
     if (channel.voiceMembers.size === 0) return true;
-    if (channel.voiceMembers.size === 1 && channel.voiceMembers.has(state.client.user.id)) {
+    if (
+        channel.voiceMembers.size === 1 &&
+        channel.voiceMembers.has(state.client.user.id)
+    ) {
         return true;
     }
 
@@ -877,7 +1369,8 @@ export function checkBotIsAlone(guildID: string): boolean {
 
 /** @returns the debug TextChannel */
 export function getDebugChannel(): Promise<Eris.TextChannel> {
-    if (!process.env.DEBUG_SERVER_ID || !process.env.DEBUG_TEXT_CHANNEL_ID) return null;
+    if (!process.env.DEBUG_SERVER_ID || !process.env.DEBUG_TEXT_CHANNEL_ID)
+        return null;
     const debugGuild = state.client.guilds.get(process.env.DEBUG_SERVER_ID);
     if (!debugGuild) return null;
     return fetchChannel(process.env.DEBUG_TEXT_CHANNEL_ID);
@@ -888,7 +1381,9 @@ export function getDebugChannel(): Promise<Eris.TextChannel> {
  * @returns the number of users required for a majority
  */
 export function getMajorityCount(guildID: string): number {
-    const voiceChannelID = state.client.voiceConnections.get(guildID)?.channelID;
+    const voiceChannelID =
+        state.client.voiceConnections.get(guildID)?.channelID;
+
     if (voiceChannelID) {
         return Math.floor(getNumParticipants(voiceChannelID) * 0.5) + 1;
     }
@@ -903,24 +1398,41 @@ export function getMajorityCount(guildID: string): number {
  * @param color - The embed color
  * @param avatarUrl - The avatar URl to show on the embed
  */
-export function sendDebugAlertWebhook(title: string, description: string, color: number, avatarUrl: string): void {
+export function sendDebugAlertWebhook(
+    title: string,
+    description: string,
+    color: number,
+    avatarUrl: string
+): void {
     if (!process.env.ALERT_WEBHOOK_URL) return;
     axios.post(process.env.ALERT_WEBHOOK_URL, {
-        embeds: [{
-            title,
-            description,
-            color,
-        }],
+        embeds: [
+            {
+                title,
+                description,
+                color,
+            },
+        ],
         username: "Kimiqo",
         avatar_url: avatarUrl,
     });
 }
 
-export async function sendBookmarkedSongs(bookmarkedSongs: { [userID: string]: Map<string, QueriedSong> }): Promise<void> {
+export async function sendBookmarkedSongs(bookmarkedSongs: {
+    [userID: string]: Map<string, QueriedSong>;
+}): Promise<void> {
     for (const [userID, songs] of Object.entries(bookmarkedSongs)) {
-        const allEmbedFields: Array<{ name: string, value: string, inline: boolean }> = [...songs].map((song) => ({
-            name: `${bold(`"${song[1].originalSongName}" - ${song[1].artist}`)} (${standardDateFormat(song[1].publishDate)})`,
-            value: `[${friendlyFormattedNumber(song[1].views)} views](https://youtu.be/${song[1].youtubeLink})`,
+        const allEmbedFields: Array<{
+            name: string;
+            value: string;
+            inline: boolean;
+        }> = [...songs].map((song) => ({
+            name: `${bold(
+                `"${song[1].originalSongName}" - ${song[1].artist}`
+            )} (${standardDateFormat(song[1].publishDate)})`,
+            value: `[${friendlyFormattedNumber(
+                song[1].views
+            )} views](https://youtu.be/${song[1].youtubeLink})`,
             inline: false,
         }));
 
@@ -941,19 +1453,39 @@ export async function sendBookmarkedSongs(bookmarkedSongs: { [userID: string]: M
     }
 }
 
-function withinInteractionInterval(interaction: Eris.ComponentInteraction | Eris.CommandInteraction): boolean {
-    return new Date().getTime() - interaction.createdAt <= MAX_INTERACTION_RESPONSE_TIME;
+function withinInteractionInterval(
+    interaction: Eris.ComponentInteraction | Eris.CommandInteraction
+): boolean {
+    return (
+        new Date().getTime() - interaction.createdAt <=
+        MAX_INTERACTION_RESPONSE_TIME
+    );
 }
 
-function interactionRejectionHandler(interaction: Eris.ComponentInteraction | Eris.CommandInteraction, err): void {
+function interactionRejectionHandler(
+    interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
+    err
+): void {
     if (err.code === 10062) {
-        logger.warn(`${getDebugLogHeader(interaction)} | Interaction acknowledge (unknown interaction)`);
+        logger.warn(
+            `${getDebugLogHeader(
+                interaction
+            )} | Interaction acknowledge (unknown interaction)`
+        );
     } else {
-        logger.error(`${getDebugLogHeader(interaction)} | Interaction acknowledge (failure message) failed. err = ${err.stack}`);
+        logger.error(
+            `${getDebugLogHeader(
+                interaction
+            )} | Interaction acknowledge (failure message) failed. err = ${
+                err.stack
+            }`
+        );
     }
 }
 
-export async function tryInteractionAcknowledge(interaction: Eris.ComponentInteraction | Eris.CommandInteraction): Promise<void> {
+export async function tryInteractionAcknowledge(
+    interaction: Eris.ComponentInteraction | Eris.CommandInteraction
+): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
         return;
     }
@@ -965,23 +1497,31 @@ export async function tryInteractionAcknowledge(interaction: Eris.ComponentInter
     }
 }
 
-export async function tryCreateInteractionSuccessAcknowledgement(interaction: Eris.ComponentInteraction | Eris.CommandInteraction, title: string, description: string): Promise<void> {
+export async function tryCreateInteractionSuccessAcknowledgement(
+    interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
+    title: string,
+    description: string
+): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
         return;
     }
 
     try {
         await interaction.createMessage({
-            embeds: [{
-                color: await userBonusIsActive(interaction.member?.id) ? EMBED_SUCCESS_BONUS_COLOR : EMBED_SUCCESS_COLOR,
-                author: {
-                    name: interaction.member?.username,
-                    icon_url: interaction.member?.avatarURL,
+            embeds: [
+                {
+                    color: (await userBonusIsActive(interaction.member?.id))
+                        ? EMBED_SUCCESS_BONUS_COLOR
+                        : EMBED_SUCCESS_COLOR,
+                    author: {
+                        name: interaction.member?.username,
+                        icon_url: interaction.member?.avatarURL,
+                    },
+                    title: bold(title),
+                    description,
+                    thumbnail: { url: KmqImages.THUMBS_UP },
                 },
-                title: bold(title),
-                description,
-                thumbnail: { url: KmqImages.THUMBS_UP },
-            }],
+            ],
             flags: 64,
         });
     } catch (err) {
@@ -989,23 +1529,28 @@ export async function tryCreateInteractionSuccessAcknowledgement(interaction: Er
     }
 }
 
-export async function tryCreateInteractionErrorAcknowledgement(interaction: Eris.ComponentInteraction | Eris.CommandInteraction, description: string): Promise<void> {
+export async function tryCreateInteractionErrorAcknowledgement(
+    interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
+    description: string
+): Promise<void> {
     if (!withinInteractionInterval(interaction)) {
         return;
     }
 
     try {
         await interaction.createMessage({
-            embeds: [{
-                color: EMBED_ERROR_COLOR,
-                author: {
-                    name: interaction.member?.username,
-                    icon_url: interaction.member?.avatarURL,
+            embeds: [
+                {
+                    color: EMBED_ERROR_COLOR,
+                    author: {
+                        name: interaction.member?.username,
+                        icon_url: interaction.member?.avatarURL,
+                    },
+                    title: bold("Uh-oh"),
+                    description,
+                    thumbnail: { url: KmqImages.DEAD },
                 },
-                title: bold("Uh-oh"),
-                description,
-                thumbnail: { url: KmqImages.DEAD },
-            }],
+            ],
             flags: 64,
         });
     } catch (err) {

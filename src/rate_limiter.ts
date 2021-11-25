@@ -16,7 +16,10 @@ export default class RateLimiter {
     public timeRemaining(userID: string): number {
         if (!(userID in this.limitMap)) return 0;
         const previousRequestDates = this.limitMap[userID];
-        return Math.max((previousRequestDates[0] + (this.queueExpiryTime * 1000)) - Date.now(), 0);
+        return Math.max(
+            previousRequestDates[0] + this.queueExpiryTime * 1000 - Date.now(),
+            0
+        );
     }
 
     /**
@@ -50,6 +53,6 @@ export default class RateLimiter {
     }
 
     private hasExpired(requestTime: number, currTime: number): boolean {
-        return (currTime - requestTime) > (this.queueExpiryTime * 1000);
+        return currTime - requestTime > this.queueExpiryTime * 1000;
     }
 }

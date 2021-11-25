@@ -1,5 +1,8 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
+import {
+    sendOptionsMessage,
+    getDebugLogHeader,
+} from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
@@ -33,7 +36,8 @@ export default class AnswerCommand implements BaseCommand {
 
     help = {
         name: "answer",
-        description: "Choose how to answer: by typing your answer, or via multiple choice. Options are the following, `typing`, `easy`, `medium`, and `hard`. Playing on multiple choice mode reduces EXP by (0.25x, 0.5x, 0.75x) based on difficulty",
+        description:
+            "Choose how to answer: by typing your answer, or via multiple choice. Options are the following, `typing`, `easy`, `medium`, and `hard`. Playing on multiple choice mode reduces EXP by (0.25x, 0.5x, 0.75x) based on difficulty",
         usage: ",answer [answerType]",
         examples: [
             {
@@ -42,15 +46,18 @@ export default class AnswerCommand implements BaseCommand {
             },
             {
                 example: "`,answer easy`",
-                explanation: "Click on the button from 4 multiple choice options to guess",
+                explanation:
+                    "Click on the button from 4 multiple choice options to guess",
             },
             {
                 example: "`,answer medium`",
-                explanation: "Click on the button from 6 multiple choice options to guess",
+                explanation:
+                    "Click on the button from 6 multiple choice options to guess",
             },
             {
                 example: "`,answer hard`",
-                explanation: "Click on the button from 8 multiple choice options to guess",
+                explanation:
+                    "Click on the button from 8 multiple choice options to guess",
             },
         ],
         priority: 150,
@@ -60,14 +67,25 @@ export default class AnswerCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.ANSWER_TYPE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.ANSWER_TYPE, reset: true }]);
+            await sendOptionsMessage(
+                MessageContext.fromMessage(message),
+                guildPreference,
+                [{ option: GameOption.ANSWER_TYPE, reset: true }]
+            );
             logger.info(`${getDebugLogHeader(message)} | Answer type reset.`);
             return;
         }
 
         const answerType = parsedMessage.components[0] as AnswerType;
         await guildPreference.setAnswerType(answerType);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.ANSWER_TYPE, reset: false }]);
-        logger.info(`${getDebugLogHeader(message)} | Answer type set to ${answerType}`);
+        await sendOptionsMessage(
+            MessageContext.fromMessage(message),
+            guildPreference,
+            [{ option: GameOption.ANSWER_TYPE, reset: false }]
+        );
+
+        logger.info(
+            `${getDebugLogHeader(message)} | Answer type set to ${answerType}`
+        );
     };
 }

@@ -55,9 +55,30 @@ export const mockArtists = [
     { id: 9, name: "I", members: "female", issolo: "y", id_parentgroup: 8 },
     { id: 10, name: "J", members: "coed", issolo: "n" },
     { id: 11, name: "K", members: "coed", issolo: "n" },
-    { id: 12, name: "J + K", members: "coed", issolo: "n", id_artist1: 10, id_artist2: 11 },
-    { id: 13, name: "F + G", members: "female", issolo: "n", id_artist1: 6, id_artist2: 7 },
-    { id: 14, name: "E + H", members: "female", issolo: "n", id_artist1: 5, id_artist2: 8 },
+    {
+        id: 12,
+        name: "J + K",
+        members: "coed",
+        issolo: "n",
+        id_artist1: 10,
+        id_artist2: 11,
+    },
+    {
+        id: 13,
+        name: "F + G",
+        members: "female",
+        issolo: "n",
+        id_artist1: 6,
+        id_artist2: 7,
+    },
+    {
+        id: 14,
+        name: "E + H",
+        members: "female",
+        issolo: "n",
+        id_artist1: 5,
+        id_artist2: 8,
+    },
     { id: 15, name: "conflictingName", members: "coed", issolo: "n" },
 ];
 
@@ -71,7 +92,11 @@ export const mockSongs = [...Array(1000).keys()].map((i) => {
         views: md5Hash(i, 16),
         id_artist: artist.id,
         issolo: artist.issolo,
-        publishedon: new Date(`${["2008", "2009", "2016", "2017", "2018"][md5Hash(i, 8) % 5]}-06-01`),
+        publishedon: new Date(
+            `${
+                ["2008", "2009", "2016", "2017", "2018"][md5Hash(i, 8) % 5]
+            }-06-01`
+        ),
         id_parent_artist: artist.id_parentgroup || 0,
         vtype: Math.random() < 0.25 ? "audio" : "main",
         tags: ["", "", "o", "c", "e", "drv", "ax", "ps"][md5Hash(i, 8) % 8],
@@ -91,7 +116,9 @@ before(async function () {
     this.timeout(10000);
     sandbox.stub(discordUtils, "sendErrorMessage");
     sandbox.stub(discordUtils, "sendInfoMessage");
-    sandbox.stub(Player, "fromUserID").callsFake((id) => (new Player("", id, "", 0)));
+    sandbox
+        .stub(Player, "fromUserID")
+        .callsFake((id) => new Player("", id, "", 0));
     console.log("Performing migrations...");
     await dbContext.agnostic.raw("DROP DATABASE IF EXISTS kmq_test;");
     await dbContext.agnostic.raw("CREATE DATABASE kmq_test;");
@@ -115,9 +142,12 @@ after(async function () {
     this.timeout(10000);
     sandbox.restore();
     console.log("Rolling back migrations...");
-    await dbContext.kmq.migrate.rollback({
-        directory: kmqKnexConfig.migrations.directory,
-    }, true);
+    await dbContext.kmq.migrate.rollback(
+        {
+            directory: kmqKnexConfig.migrations.directory,
+        },
+        true
+    );
 
     console.log("Test re-applying migrations...");
     await dbContext.kmq.migrate.latest({

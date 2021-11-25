@@ -3,7 +3,12 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import { sendBeginGameMessage } from "./play";
 import { GameType } from "../../types";
 import TeamScoreboard from "../../structures/team_scoreboard";
-import { getDebugLogHeader, sendErrorMessage, getUserVoiceChannel, getMention } from "../../helpers/discord_utils";
+import {
+    getDebugLogHeader,
+    sendErrorMessage,
+    getUserVoiceChannel,
+    getMention,
+} from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import GameSession from "../../structures/game_session";
@@ -15,20 +20,39 @@ const logger = new IPCLogger("begin");
 export default class BeginCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
-    static canStart(gameSession: GameSession, authorID: string, messageContext: MessageContext): boolean {
-        if (!gameSession || (gameSession.gameType !== GameType.ELIMINATION && gameSession.gameType !== GameType.TEAMS)) {
+    static canStart(
+        gameSession: GameSession,
+        authorID: string,
+        messageContext: MessageContext
+    ): boolean {
+        if (
+            !gameSession ||
+            (gameSession.gameType !== GameType.ELIMINATION &&
+                gameSession.gameType !== GameType.TEAMS)
+        ) {
             return false;
         }
 
         if (gameSession.gameType === GameType.ELIMINATION) {
             if (gameSession.owner.id !== authorID) {
-                sendErrorMessage(messageContext, { title: "Begin Ignored", description: `Only the person who did \`${process.env.BOT_PREFIX}play elimination\` (${getMention(gameSession.owner.id)}) can start the game.` });
+                sendErrorMessage(messageContext, {
+                    title: "Begin Ignored",
+                    description: `Only the person who did \`${
+                        process.env.BOT_PREFIX
+                    }play elimination\` (${getMention(
+                        gameSession.owner.id
+                    )}) can start the game.`,
+                });
                 return false;
             }
         } else if (gameSession.gameType === GameType.TEAMS) {
             const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
             if (teamScoreboard.getNumTeams() === 0) {
-                sendErrorMessage(messageContext, { title: "Begin Ignored", description: "Create a team using `,join [team name]` before you can start the game." });
+                sendErrorMessage(messageContext, {
+                    title: "Begin Ignored",
+                    description:
+                        "Create a team using `,join [team name]` before you can start the game.",
+                });
                 return false;
             }
         }
@@ -36,24 +60,60 @@ export default class BeginCommand implements BaseCommand {
         return true;
     }
 
-    call = async ({ message, gameSessions, channel }: CommandArgs): Promise<void> => {
+    call = async ({
+        message,
+        gameSessions,
+        channel,
+    }: CommandArgs): Promise<void> => {
         const { guildID, author } = message;
         const gameSession = gameSessions[guildID];
 
-        if (!BeginCommand.canStart(gameSession, author.id, MessageContext.fromMessage(message))) return;
+        if (
+            !BeginCommand.canStart(
+                gameSession,
+                author.id,
+                MessageContext.fromMessage(message)
+            )
+        )
+            return;
         const guildPreference = await getGuildPreference(guildID);
         if (!gameSession.sessionInitialized) {
-            let participants: Array<{ id: string, username: string, discriminator: string }>;
+            let participants: Array<{
+                id: string;
+                username: string;
+                discriminator: string;
+            }>;
+
             if (gameSession.gameType === GameType.ELIMINATION) {
-                participants = [...gameSession.participants].map((x) => state.client.users.get(x));
+                participants = [...gameSession.participants].map((x) =>
+                    state.client.users.get(x)
+                );
             } else if (gameSession.gameType === GameType.TEAMS) {
                 const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
-                participants = teamScoreboard.getPlayers().map((player) => ({ id: player.id, username: player.name.split("#")[0], discriminator: player.name.split("#")[1] }));
+                participants = teamScoreboard.getPlayers().map((player) => ({
+                    id: player.id,
+                    username: player.name.split("#")[0],
+                    discriminator: player.name.split("#")[1],
+                }));
             }
 
-            sendBeginGameMessage(channel.name, getUserVoiceChannel(MessageContext.fromMessage(message)).name, message, participants);
-            gameSession.startRound(guildPreference, MessageContext.fromMessage(message));
-            logger.info(`${getDebugLogHeader(message)} | Game session starting (${gameSession.gameType} gameType)`);
+            sendBeginGameMessage(
+                channel.name,
+                getUserVoiceChannel(MessageContext.fromMessage(message)).name,
+                message,
+                participants
+            );
+
+            gameSession.startRound(
+                guildPreference,
+                MessageContext.fromMessage(message)
+            );
+
+            logger.info(
+                `${getDebugLogHeader(message)} | Game session starting (${
+                    gameSession.gameType
+                } gameType)`
+            );
         }
     };
 }

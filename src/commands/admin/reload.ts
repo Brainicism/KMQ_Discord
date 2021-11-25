@@ -33,19 +33,28 @@ export default class ReloadCommand implements BaseCommand {
             execSync("npx tsc");
         } catch (e) {
             logger.error("Error transpiling KMQ commands");
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Error Reloading", description: `Uh oh.\n${e}` });
+            sendErrorMessage(MessageContext.fromMessage(message), {
+                title: "Error Reloading",
+                description: `Uh oh.\n${e}`,
+            });
             return;
         }
 
         const reloadType = parsedMessage.components[0] as ReloadType;
         if (reloadType === ReloadType.ALL) {
             state.ipc.allClustersCommand("reload_commands");
-            sendInfoMessage(MessageContext.fromMessage(message), { title: "Reloading All Clusters", description: "See logs for completion status" });
+            sendInfoMessage(MessageContext.fromMessage(message), {
+                title: "Reloading All Clusters",
+                description: "See logs for completion status",
+            });
             return;
         }
 
         ReloadCommand.reloadCommands();
-        sendInfoMessage(MessageContext.fromMessage(message), { title: "Cluster Reload Complete", description: "All changes should now be applied" });
+        sendInfoMessage(MessageContext.fromMessage(message), {
+            title: "Cluster Reload Complete",
+            description: "All changes should now be applied",
+        });
     };
 
     static reloadCommands(): void {

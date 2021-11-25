@@ -10,27 +10,35 @@ config({ path: resolve(__dirname, "../.env") });
 export function getInternalLogger(): winston.Logger {
     const format = winston.format;
     const consoleFormat = format.printf(({ level, message, timestamp }) => {
-        const header = format.colorize().colorize(level, `${timestamp} [${level.toUpperCase()}] -`);
+        const header = format
+            .colorize()
+            .colorize(level, `${timestamp} [${level.toUpperCase()}] -`);
+
         return `${header} ${message}`;
     });
 
-    const logFormat = format.printf(({ level, message, timestamp }) => `${timestamp} [${level.toUpperCase()}] - ${message}`);
+    const logFormat = format.printf(
+        ({ level, message, timestamp }) =>
+            `${timestamp} [${level.toUpperCase()}] - ${message}`
+    );
+
     return winston.createLogger({
         level: process.env.DEBUG_LOGGING ? "debug" : "info",
-        format: format.combine(
-            format.timestamp(),
-            logFormat,
-        ),
+        format: format.combine(format.timestamp(), logFormat),
         transports: [
             new winston.transports.Console({
-                format: format.combine(
-                    format.timestamp(),
-                    consoleFormat,
-                ),
+                format: format.combine(format.timestamp(), consoleFormat),
                 silent: process.env.NODE_ENV === EnvType.TEST,
             }),
-            new (DailyRotateFile)({ filename: "../logs/error.log", level: "error", maxFiles: "14d" }),
-            new (DailyRotateFile)({ filename: "../logs/combined.log", maxFiles: "14d" }),
+            new DailyRotateFile({
+                filename: "../logs/error.log",
+                level: "error",
+                maxFiles: "14d",
+            }),
+            new DailyRotateFile({
+                filename: "../logs/combined.log",
+                maxFiles: "14d",
+            }),
         ],
     });
 }

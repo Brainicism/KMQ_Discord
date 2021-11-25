@@ -1,5 +1,4 @@
-
-exports.up = function(knex) {
+exports.up = function (knex) {
     return knex.schema.createTable("cluster_stats", (table) => {
         table.integer("cluster_id").notNullable();
         table.string("stat_name").notNullable();
@@ -9,6 +8,6 @@ exports.up = function(knex) {
     });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
     return knex.schema.dropTableIfExists("cluster_stats");
 };

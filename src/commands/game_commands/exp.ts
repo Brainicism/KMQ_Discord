@@ -1,11 +1,18 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import Eris from "eris";
-import { getDebugLogHeader, sendInfoMessage } from "../../helpers/discord_utils";
+import {
+    getDebugLogHeader,
+    sendInfoMessage,
+} from "../../helpers/discord_utils";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { isPowerHour, isWeekend } from "../../helpers/utils";
-import { getGuildPreference, getAvailableSongCount, userBonusIsActive } from "../../helpers/game_utils";
+import {
+    getGuildPreference,
+    getAvailableSongCount,
+    userBonusIsActive,
+} from "../../helpers/game_utils";
 import { AnswerType } from "../game_options/answer";
 import { GuessModeType } from "../game_options/guessmode";
 import { KmqImages } from "../../constants";
@@ -58,7 +65,10 @@ interface ExpModifier {
     isPenalty: boolean;
 }
 
-export async function calculateOptionsExpMultiplierInternal(guildPreference: GuildPreference, voteBonusExp: boolean): Promise<Array<ExpModifier>> {
+export async function calculateOptionsExpMultiplierInternal(
+    guildPreference: GuildPreference,
+    voteBonusExp: boolean
+): Promise<Array<ExpModifier>> {
     const modifiers: Array<ExpModifier> = [];
     // bonus for voting
     if (voteBonusExp) {
@@ -112,7 +122,10 @@ export async function calculateOptionsExpMultiplierInternal(guildPreference: Gui
     }
 
     // penalize for using artist guess modes
-    if (guildPreference.gameOptions.guessModeType === GuessModeType.ARTIST || guildPreference.gameOptions.guessModeType === GuessModeType.BOTH) {
+    if (
+        guildPreference.gameOptions.guessModeType === GuessModeType.ARTIST ||
+        guildPreference.gameOptions.guessModeType === GuessModeType.BOTH
+    ) {
         if (guildPreference.isGroupsMode()) {
             modifiers.push({
                 displayName: "Artist/Group Guess Mode Penalty",
@@ -131,15 +144,34 @@ export async function calculateOptionsExpMultiplierInternal(guildPreference: Gui
     return modifiers;
 }
 
-async function calculateOptionsExpMultiplier(guildPreference: GuildPreference, voteBonusExp: boolean): Promise<number> {
-    return (await calculateOptionsExpMultiplierInternal(guildPreference, voteBonusExp)).reduce((a, b) => ExpBonusModifierValues[b.name] * a, 1);
+async function calculateOptionsExpMultiplier(
+    guildPreference: GuildPreference,
+    voteBonusExp: boolean
+): Promise<number> {
+    return (
+        await calculateOptionsExpMultiplierInternal(
+            guildPreference,
+            voteBonusExp
+        )
+    ).reduce((a, b) => ExpBonusModifierValues[b.name] * a, 1);
 }
 
 export function participantExpScalingModifier(numParticipants: number): number {
-    return (1 + 0.1 * (Math.min(numParticipants, PARTICIPANT_MODIFIER_MAX_PARTICIPANTS) - 1));
+    return (
+        1 +
+        0.1 *
+            (Math.min(numParticipants, PARTICIPANT_MODIFIER_MAX_PARTICIPANTS) -
+                1)
+    );
 }
 
-export function calculateRoundExpMultiplier(gameRound: GameRound, numParticipants: number, streak: number, guessSpeed: number, place: number): number {
+export function calculateRoundExpMultiplier(
+    gameRound: GameRound,
+    numParticipants: number,
+    streak: number,
+    guessSpeed: number,
+    place: number
+): number {
     let expModifier = 1;
 
     // incentivize for number of participants from 1x to 1.5x
@@ -168,17 +200,38 @@ export function calculateRoundExpMultiplier(gameRound: GameRound, numParticipant
     return expModifier;
 }
 
-export async function calculateTotalRoundExp(guildPreference: GuildPreference, gameRound: GameRound,
-    numParticipants: number, streak: number, guessSpeed: number, place: number, voteBonusExp: boolean): Promise<number> {
-    const optionsMultiplier = await calculateOptionsExpMultiplier(guildPreference, voteBonusExp);
-    const roundMultipler = calculateRoundExpMultiplier(gameRound, numParticipants, streak, guessSpeed, place);
-    return Math.floor((optionsMultiplier * roundMultipler * gameRound.getExpReward()));
+export async function calculateTotalRoundExp(
+    guildPreference: GuildPreference,
+    gameRound: GameRound,
+    numParticipants: number,
+    streak: number,
+    guessSpeed: number,
+    place: number,
+    voteBonusExp: boolean
+): Promise<number> {
+    const optionsMultiplier = await calculateOptionsExpMultiplier(
+        guildPreference,
+        voteBonusExp
+    );
+
+    const roundMultipler = calculateRoundExpMultiplier(
+        gameRound,
+        numParticipants,
+        streak,
+        guessSpeed,
+        place
+    );
+
+    return Math.floor(
+        optionsMultiplier * roundMultipler * gameRound.getExpReward()
+    );
 }
 
 export default class ExpCommand implements BaseCommand {
     help = {
         name: "exp",
-        description: "Shows your current EXP modifier, and the list of current bonus EXP artists.",
+        description:
+            "Shows your current EXP modifier, and the list of current bonus EXP artists.",
         usage: ",exp",
         examples: [],
         priority: 50,
@@ -189,10 +242,26 @@ export default class ExpCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         const fields: Array<Eris.EmbedField> = [];
 
-        const activeModifiers = await calculateOptionsExpMultiplierInternal(guildPreference, voteBonusActive);
-        const totalModifier = await calculateOptionsExpMultiplier(guildPreference, voteBonusActive);
-        const modifierText: Array<string> = activeModifiers.map((x) => `\`${x.displayName}:\` ${ExpBonusModifierValues[x.name].toFixed(2)}x ${x.isPenalty ? "📉" : "📈"}`);
-        modifierText.push(`\`Total Modifier:\` **__${totalModifier.toFixed(2)}x__**`);
+        const activeModifiers = await calculateOptionsExpMultiplierInternal(
+            guildPreference,
+            voteBonusActive
+        );
+
+        const totalModifier = await calculateOptionsExpMultiplier(
+            guildPreference,
+            voteBonusActive
+        );
+
+        const modifierText: Array<string> = activeModifiers.map(
+            (x) =>
+                `\`${x.displayName}:\` ${ExpBonusModifierValues[x.name].toFixed(
+                    2
+                )}x ${x.isPenalty ? "📉" : "📈"}`
+        );
+
+        modifierText.push(
+            `\`Total Modifier:\` **__${totalModifier.toFixed(2)}x__**`
+        );
 
         fields.push({
             name: "🚀 Active Modifiers 🚀",
@@ -202,22 +271,38 @@ export default class ExpCommand implements BaseCommand {
 
         fields.push({
             name: "🎤 Current Bonus Artists 🎤",
-            value: `\`Guessing songs by the daily bonus artists:\`  ${ExpBonusModifierValues[ExpBonusModifier.BONUS_ARTIST].toFixed(2)}x 📈 \n\`\`\`${[...state.bonusArtists].filter((x) => !x.includes("+")).join(", ")}\`\`\``,
+            value: `\`Guessing songs by the daily bonus artists:\`  ${ExpBonusModifierValues[
+                ExpBonusModifier.BONUS_ARTIST
+            ].toFixed(2)}x 📈 \n\`\`\`${[...state.bonusArtists]
+                .filter((x) => !x.includes("+"))
+                .join(", ")}\`\`\``,
             inline: false,
         });
 
         const bonusExpExplanations = [
-            `\`Playing during a KMQ Power Hour or Weekend:\` ${ExpBonusModifierValues[ExpBonusModifier.POWER_HOUR].toFixed(2)}x 📈`,
-            `\`Voting!:\` ${ExpBonusModifierValues[ExpBonusModifier.VOTE].toFixed(2)}x 📈`,
-            `\`Having a guess streak of over 5:\` ${ExpBonusModifierValues[ExpBonusModifier.GUESS_STREAK].toFixed(2)}x 📈`,
-            `\`Guessing quickly:\` ${ExpBonusModifierValues[ExpBonusModifier.QUICK_GUESS].toFixed(2)}x 📈 `,
-            `\`Guessing correctly for a bonus artist:\` ${ExpBonusModifierValues[ExpBonusModifier.BONUS_ARTIST].toFixed(2)}x 📈 `,
+            `\`Playing during a KMQ Power Hour or Weekend:\` ${ExpBonusModifierValues[
+                ExpBonusModifier.POWER_HOUR
+            ].toFixed(2)}x 📈`,
+            `\`Voting!:\` ${ExpBonusModifierValues[
+                ExpBonusModifier.VOTE
+            ].toFixed(2)}x 📈`,
+            `\`Having a guess streak of over 5:\` ${ExpBonusModifierValues[
+                ExpBonusModifier.GUESS_STREAK
+            ].toFixed(2)}x 📈`,
+            `\`Guessing quickly:\` ${ExpBonusModifierValues[
+                ExpBonusModifier.QUICK_GUESS
+            ].toFixed(2)}x 📈 `,
+            `\`Guessing correctly for a bonus artist:\` ${ExpBonusModifierValues[
+                ExpBonusModifier.BONUS_ARTIST
+            ].toFixed(2)}x 📈 `,
             "`Rare correct guesses bonus:` 2.00x up to 50.00x 📈",
         ];
 
         fields.push({
             name: "Ways to get EXP Bonuses",
-            value: `You can get bonus EXP for the following:\n ${bonusExpExplanations.map((x) => `- ${x}`).join("\n")}`,
+            value: `You can get bonus EXP for the following:\n ${bonusExpExplanations
+                .map((x) => `- ${x}`)
+                .join("\n")}`,
             inline: false,
         });
 
@@ -227,6 +312,8 @@ export default class ExpCommand implements BaseCommand {
             thumbnailUrl: KmqImages.THUMBS_UP,
         });
 
-        logger.info(`${getDebugLogHeader(message)} | EXP modifier info retrieved.`);
+        logger.info(
+            `${getDebugLogHeader(message)} | EXP modifier info retrieved.`
+        );
     };
 }

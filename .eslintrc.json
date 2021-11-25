@@ -1,6 +1,6 @@
 {
     "extends": [
-        "airbnb-typescript/base"
+        "airbnb-typescript/base", "prettier"
     ],
     "plugins": [
         "eslint-plugin-tsdoc",
@@ -11,8 +11,7 @@
     },
     "rules": {
         "@typescript-eslint/indent": [
-            "warn",
-            4
+            "off"
         ],
         "@typescript-eslint/quotes": [
             "warn",

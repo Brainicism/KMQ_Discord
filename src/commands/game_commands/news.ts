@@ -2,7 +2,10 @@ import fs from "fs";
 import path from "path";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
-import { getDebugLogHeader, sendInfoMessage } from "../../helpers/discord_utils";
+import {
+    getDebugLogHeader,
+    sendInfoMessage,
+} from "../../helpers/discord_utils";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 

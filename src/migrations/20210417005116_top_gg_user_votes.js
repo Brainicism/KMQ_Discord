@@ -1,4 +1,3 @@
-
 exports.up = function (knex) {
     return knex.schema.createTable("top_gg_user_votes", function (table) {
         table.string("user_id").notNullable();

@@ -6,7 +6,7 @@ exports.up = function (knex) {
         table.datetime("first_play");
         table.datetime("last_active");
         table.unique(["player_id"]);
-    })
+    });
 };
 
 exports.down = function (knex) {

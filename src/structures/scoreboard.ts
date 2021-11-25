@@ -58,15 +58,25 @@ export default class Scoreboard {
      * @param roundWinnerIDs - The IDs of all players that won the current round, if any
      * @returns An array of DiscordEmbed fields representing each participant's score
      */
-    getScoreboardEmbedFields(showExp: boolean, roundWinnerIDs?: Array<string>): Array<{ name: string, value: string, inline: boolean }> {
+    getScoreboardEmbedFields(
+        showExp: boolean,
+        roundWinnerIDs?: Array<string>
+    ): Array<{ name: string; value: string; inline: boolean }> {
         return Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
-            .map((x, index) => (
-                {
-                    name: `${index + 1}. ${x.getDisplayedName(roundWinnerIDs && roundWinnerIDs[0] === x.getID(), roundWinnerIDs?.includes(x.getID()), false)}`,
-                    value: `${x.getDisplayedScore()}${showExp ? ` (+${friendlyFormattedNumber(x.getExpGain())} EXP)` : ""}`,
-                    inline: true,
-                }));
+            .map((x, index) => ({
+                name: `${index + 1}. ${x.getDisplayedName(
+                    roundWinnerIDs && roundWinnerIDs[0] === x.getID(),
+                    roundWinnerIDs?.includes(x.getID()),
+                    false
+                )}`,
+                value: `${x.getDisplayedScore()}${
+                    showExp
+                        ? ` (+${friendlyFormattedNumber(x.getExpGain())} EXP)`
+                        : ""
+                }`,
+                inline: true,
+            }));
     }
 
     /**
@@ -76,12 +86,29 @@ export default class Scoreboard {
      * @param roundWinnerIDs - The IDs of all players that won the current round, if any
      * @returns An array of 3 DiscordEmbed fields containing each player and their score, separated by newline
      */
-    getScoreboardEmbedThreeFields(cutoff: number, showExp: boolean, roundWinnerIDs?: Array<string>): Array<{ name: string, value: string, inline: boolean }> {
+    getScoreboardEmbedThreeFields(
+        cutoff: number,
+        showExp: boolean,
+        roundWinnerIDs?: Array<string>
+    ): Array<{ name: string; value: string; inline: boolean }> {
         const ZERO_WIDTH_SPACE = "​";
         const players = Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
             .slice(0, cutoff)
-            .map((x, index) => `${bold(String(index + 1))}. ${x.getDisplayedName(roundWinnerIDs && roundWinnerIDs[0] === x.getID(), roundWinnerIDs?.includes(x.getID()), true)}: ${x.getDisplayedScore()}${showExp ? ` (+${friendlyFormattedNumber(x.getExpGain())} EXP)` : ""}`);
+            .map(
+                (x, index) =>
+                    `${bold(String(index + 1))}. ${x.getDisplayedName(
+                        roundWinnerIDs && roundWinnerIDs[0] === x.getID(),
+                        roundWinnerIDs?.includes(x.getID()),
+                        true
+                    )}: ${x.getDisplayedScore()}${
+                        showExp
+                            ? ` (+${friendlyFormattedNumber(
+                                  x.getExpGain()
+                              )} EXP)`
+                            : ""
+                    }`
+            );
 
         if (this.getNumPlayers() > cutoff) {
             players.push("\nand many others...");
@@ -90,17 +117,26 @@ export default class Scoreboard {
         return [
             {
                 name: "**Scoreboard**",
-                value: players.slice(0, Math.ceil(players.length / 3)).join("\n"),
+                value: players
+                    .slice(0, Math.ceil(players.length / 3))
+                    .join("\n"),
                 inline: false,
             },
             {
                 name: ZERO_WIDTH_SPACE,
-                value: players.slice(Math.ceil(players.length / 3), Math.ceil((2 * players.length) / 3)).join("\n"),
+                value: players
+                    .slice(
+                        Math.ceil(players.length / 3),
+                        Math.ceil((2 * players.length) / 3)
+                    )
+                    .join("\n"),
                 inline: true,
             },
             {
                 name: ZERO_WIDTH_SPACE,
-                value: players.slice(Math.ceil((2 * players.length) / 3)).join("\n"),
+                value: players
+                    .slice(Math.ceil((2 * players.length) / 3))
+                    .join("\n"),
                 inline: true,
             },
         ];
@@ -113,10 +149,14 @@ export default class Scoreboard {
     updateScoreboard(guessResults: Array<SuccessfulGuessResult>): void {
         for (const guessResult of guessResults) {
             if (!this.players[guessResult.userID]) {
-                this.players[guessResult.userID] = Player.fromUserID(guessResult.userID);
+                this.players[guessResult.userID] = Player.fromUserID(
+                    guessResult.userID
+                );
             }
 
-            this.players[guessResult.userID].incrementScore(guessResult.pointsEarned);
+            this.players[guessResult.userID].incrementScore(
+                guessResult.pointsEarned
+            );
 
             this.players[guessResult.userID].incrementExp(guessResult.expGain);
             const winnerScore = this.players[guessResult.userID].getScore();
@@ -174,7 +214,11 @@ export default class Scoreboard {
      * @returns whether the game has completed
      * */
     gameFinished(guildPreference: GuildPreference): boolean {
-        return guildPreference.isGoalSet() && !this.isEmpty() && this.firstPlace[0].getScore() >= guildPreference.gameOptions.goal;
+        return (
+            guildPreference.isGoalSet() &&
+            !this.isEmpty() &&
+            this.firstPlace[0].getScore() >= guildPreference.gameOptions.goal
+        );
     }
 
     /** @returns a list of tags of the players participating in the game */
@@ -184,7 +228,9 @@ export default class Scoreboard {
 
     /** @returns a list of clickable mentions of the players participating in the game */
     getPlayerMentions(): Array<string> {
-        return Object.values(this.players).map((player) => getMention(player.id));
+        return Object.values(this.players).map((player) =>
+            getMention(player.id)
+        );
     }
 
     /**
