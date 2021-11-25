@@ -19,16 +19,16 @@ export interface UniqueSongCounter {
 
 export default class SongSelector {
     /** List of songs matching the user's game options */
-    private filteredSongs: { songs: Set<QueriedSong>, countBeforeLimit: number };
+    public filteredSongs: { songs: Set<QueriedSong>, countBeforeLimit: number };
 
     /** List of songs played with ,shuffle unique enabled */
-    private uniqueSongsPlayed: Set<string>;
+    public uniqueSongsPlayed: Set<string>;
 
     /** List of recently played songs used to prevent frequent repeats */
-    private lastPlayedSongs: Array<string>;
+    public lastPlayedSongs: Array<string>;
 
     /** The last gender played when gender is set to alternating, can be null (in not alternating mode), GENDER.MALE, or GENDER.FEMALE */
-    private lastAlternatingGender: Gender;
+    public lastAlternatingGender: Gender;
 
     constructor() {
         this.filteredSongs = null;

@@ -10,6 +10,8 @@ import SongSelector from "../../structures/song_selector";
 import { ArtistType } from "../../commands/game_options/artisttype";
 import { getMatchingGroupNames } from "../../helpers/game_utils";
 import { FOREIGN_LANGUAGE_TAGS, LanguageType } from "../../commands/game_options/language";
+import { ShuffleType } from "../../commands/game_options/shuffle";
+import Sinon from "sinon";
 
 async function getMockGuildPreference(): Promise<GuildPreference> {
     const guildPreference = new GuildPreference("test");
@@ -382,6 +384,168 @@ describe("selectRandomSong", () => {
 
                 assert.ok(selectedSongs.length === filteredSongs.size - numIgnored);
                 assert.ok(selectedSongs.every((song) => !ignoredSongs.has(song.youtubeLink)));
+            });
+        });
+    });
+});
+
+describe("checkUniqueSongQueue", () => {
+    let songSelector: SongSelector;
+    const sandbox = sinon.createSandbox();
+    let resetSpy: Sinon.SinonSpy;
+
+    beforeEach(async () => {
+        songSelector = new SongSelector();
+        resetSpy = sandbox.spy(songSelector, "resetUniqueSongs");
+    });
+
+    afterEach(() => {
+        sandbox.restore();
+    });
+
+    describe("non-unique shuffle mode", () => {
+        it("should return false", async () => {
+            await guildPreference.setShuffleType(ShuffleType.RANDOM);
+            await songSelector.reloadSongs(guildPreference);
+            assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), false);
+            // assert.strictEqual(resetSpy.notCalled, true);
+        });
+    });
+
+    describe("unique shiffle mode", () => {
+        describe("selected songs doesn't change midway", () => {
+            describe("not all songs have been played yet", () => {
+                it("should not reset the unique song queue", async () => {
+                    const numberSongs = 5;
+                    await guildPreference.setShuffleType(ShuffleType.UNIQUE);
+                    await guildPreference.setLimit(0, numberSongs);
+                    await songSelector.reloadSongs(guildPreference);
+
+                    // play all songs but one
+                    for (let i = 0; i < numberSongs - 1; i++) {
+                        await songSelector.queryRandomSong(guildPreference);
+                        assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), false);
+                    }
+
+                    assert.strictEqual(resetSpy.notCalled, true);
+                });
+            });
+
+            describe("all songs have been played", () => {
+                it("should reset the unique song queue", async () => {
+                    const numberSongs = 5;
+                    await guildPreference.setShuffleType(ShuffleType.UNIQUE);
+                    await guildPreference.setLimit(0, numberSongs);
+                    await songSelector.reloadSongs(guildPreference);
+
+                    // play all songs but one
+                    for (let i = 0; i < numberSongs - 1; i++) {
+                        await songSelector.queryRandomSong(guildPreference);
+                        assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), false);
+                    }
+
+                    // play the last song
+                    await songSelector.queryRandomSong(guildPreference);
+                    assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), true);
+                    assert.strictEqual(resetSpy.called, true);
+                });
+            });
+
+            describe("all songs have been played, multiple times", () => {
+                it("should reset the unique song queue several times", async () => {
+                    const numberSongs = 5;
+                    const numberOfResets = 50;
+                    await guildPreference.setShuffleType(ShuffleType.UNIQUE);
+                    await guildPreference.setLimit(0, numberSongs);
+                    await songSelector.reloadSongs(guildPreference);
+
+                    // play all songs but one
+                    for (let i = 0; i < numberSongs * numberOfResets; i++) {
+                        await songSelector.queryRandomSong(guildPreference);
+                        if (i > 0 && ((i + 1) % numberSongs === 0)) {
+                            assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), true);
+                            assert.strictEqual(resetSpy.called, true);
+                        } else {
+                            assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), false);
+                        }
+                    }
+
+                    assert.strictEqual(resetSpy.callCount, numberOfResets);
+                });
+            });
+        });
+
+        describe("selected songs changes midway", () => {
+            describe("new selected song set is a subset of the original, new selected song set has already been played", () => {
+                it("should reset the unique song queue", async () => {
+                    const numberSongs = 10;
+                    const newNumberSongs = numberSongs / 2;
+                    await guildPreference.setShuffleType(ShuffleType.UNIQUE);
+                    await guildPreference.setLimit(0, numberSongs);
+                    await songSelector.reloadSongs(guildPreference);
+
+                    // play more than enough songs for the new selected song set, but not enough for current
+                    const songs = [...songSelector.getSongs().songs].map((x) => x.youtubeLink).slice(0, newNumberSongs + 1);
+                    songSelector.uniqueSongsPlayed = new Set(songs);
+                    assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), false);
+
+                    // reload for new selected song set
+                    await guildPreference.setLimit(0, newNumberSongs);
+                    await songSelector.reloadSongs(guildPreference);
+
+                    // expect unique song queue to have been reset
+                    assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), true);
+                    assert.strictEqual(resetSpy.called, true);
+                });
+            });
+
+            describe("new selected song set is a superset of the original, new selected song set has already been played", () => {
+                it("should reset the unique song queue", async () => {
+                    const numberSongs = 10;
+                    const newNumberSongs = numberSongs + 1;
+                    await guildPreference.setShuffleType(ShuffleType.UNIQUE);
+                    await guildPreference.setLimit(0, numberSongs);
+                    await songSelector.reloadSongs(guildPreference);
+                    let songs = [...songSelector.getSongs().songs].map((x) => x.youtubeLink);
+
+                    // play all but one of the songs
+                    songSelector.uniqueSongsPlayed = new Set(songs.slice(0, -1));
+                    assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), false);
+
+                    // update to superset song set 
+                    await guildPreference.setLimit(0, newNumberSongs);
+                    await songSelector.reloadSongs(guildPreference);
+                    assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), false);
+
+                    // play remaining two songs
+                    songs = [...songSelector.getSongs().songs].map((x) => x.youtubeLink);
+                    songSelector.uniqueSongsPlayed = new Set(songs);
+
+                    // expect unique song queue to have been reset
+                    assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), true);
+                    assert.strictEqual(resetSpy.called, true);
+                });
+            });
+
+            describe("unique song history has songs not in the current selected song set", () => {
+                it("should reset the unique song queue", async () => {
+                    const numberSongs = 10;
+                    await guildPreference.setShuffleType(ShuffleType.UNIQUE);
+                    await guildPreference.setLimit(0, numberSongs);
+                    await songSelector.reloadSongs(guildPreference);
+                    const songs = [...songSelector.getSongs().songs].map((x) => x.youtubeLink);
+                    const songsNotInSet = ["AAAAAAA", "BBBBBB", "CCCCCCCC"];
+
+                    // play songs in set (not enough to reset), with some songs not in set
+                    songSelector.uniqueSongsPlayed = new Set(songs.slice(0, numberSongs - songsNotInSet.length).concat(songsNotInSet));
+                    assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), false);
+                    assert.strictEqual(resetSpy.called, false);
+
+                    // play songs in set (enough to reset)
+                    songSelector.uniqueSongsPlayed = new Set(songs.slice(0, numberSongs).concat(songsNotInSet));
+                    assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), true);
+                    assert.strictEqual(resetSpy.called, true);
+                });
             });
         });
     });
