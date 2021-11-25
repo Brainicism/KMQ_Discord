@@ -1,7 +1,10 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
+import {
+    sendOptionsMessage,
+    getDebugLogHeader,
+} from "../../helpers/discord_utils";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
@@ -58,14 +61,32 @@ export default class SubunitsCommand implements BaseCommand {
 
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.SUBUNIT_PREFERENCE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.SUBUNIT_PREFERENCE, reset: true }]);
-            logger.info(`${getDebugLogHeader(message)} | Subunit preference reset.`);
+            await sendOptionsMessage(
+                MessageContext.fromMessage(message),
+                guildPreference,
+                [{ option: GameOption.SUBUNIT_PREFERENCE, reset: true }]
+            );
+
+            logger.info(
+                `${getDebugLogHeader(message)} | Subunit preference reset.`
+            );
             return;
         }
 
-        const subunitPreference = parsedMessage.components[0].toLowerCase() as SubunitsPreference;
+        const subunitPreference =
+            parsedMessage.components[0].toLowerCase() as SubunitsPreference;
+
         await guildPreference.setSubunitPreference(subunitPreference);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.SUBUNIT_PREFERENCE, reset: false }]);
-        logger.info(`${getDebugLogHeader(message)} | Subunit preference set to ${subunitPreference}`);
+        await sendOptionsMessage(
+            MessageContext.fromMessage(message),
+            guildPreference,
+            [{ option: GameOption.SUBUNIT_PREFERENCE, reset: false }]
+        );
+
+        logger.info(
+            `${getDebugLogHeader(
+                message
+            )} | Subunit preference set to ${subunitPreference}`
+        );
     };
 }

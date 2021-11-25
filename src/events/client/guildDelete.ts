@@ -9,13 +9,20 @@ const logger = new IPCLogger("guildDelete");
  * Handles the 'guildDelete' event
  * @param guild - The Guild object
  */
-export default async function guildDeleteHandler(guild: Eris.Guild | { id: string }): Promise<void> {
+export default async function guildDeleteHandler(
+    guild: Eris.Guild | { id: string }
+): Promise<void> {
     logger.info(`Server left: ${guild.id}`);
     const kmqDebugChannel = await getDebugChannel();
     if (!kmqDebugChannel) return;
     const leaveDate = new Date();
     const title = "Server Left";
-    const footerText = `gid: ${guild.id} | Left at: ${leaveDate.toLocaleDateString("en-US")} ${leaveDate.toLocaleTimeString("en-US")}`;
+    const footerText = `gid: ${
+        guild.id
+    } | Left at: ${leaveDate.toLocaleDateString(
+        "en-US"
+    )} ${leaveDate.toLocaleTimeString("en-US")}`;
+
     if (!kmqDebugChannel) return;
     if (guild instanceof Eris.Guild) {
         await sendInfoMessage(new MessageContext(kmqDebugChannel.id), {
@@ -25,9 +32,15 @@ export default async function guildDeleteHandler(guild: Eris.Guild | { id: strin
             },
             title,
             fields: [
-                { name: "**Member Count**:", value: guild.memberCount.toString() },
+                {
+                    name: "**Member Count**:",
+                    value: guild.memberCount.toString(),
+                },
                 { name: "**Language**:", value: guild.preferredLocale },
-                { name: "**Nitro Boosts**:", value: guild.premiumSubscriptionCount.toString() },
+                {
+                    name: "**Nitro Boosts**:",
+                    value: guild.premiumSubscriptionCount.toString(),
+                },
             ],
             footerText,
         });

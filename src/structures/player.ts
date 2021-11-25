@@ -43,7 +43,11 @@ export default class Player {
      * @param mention - Whether the displayed name should be a clickable mention
      * @returns what to display as the name of the player in the scoreboard
      */
-    getDisplayedName(first: boolean, wonRound: boolean, mention: boolean): string {
+    getDisplayedName(
+        first: boolean,
+        wonRound: boolean,
+        mention: boolean
+    ): string {
         let name = this.name;
         if (mention) {
             name = getMention(this.getID());
@@ -71,7 +75,9 @@ export default class Player {
 
     /** @returns what to display as the score in the scoreboard for the player */
     getDisplayedScore(): string {
-        return Number.isInteger(roundDecimal(this.getScore(), 1)) ? roundDecimal(this.getScore(), 1).toString() : this.getScore().toFixed(1);
+        return Number.isInteger(roundDecimal(this.getScore(), 1))
+            ? roundDecimal(this.getScore(), 1).toString()
+            : this.getScore().toFixed(1);
     }
 
     /** @returns the player's EXP gain */

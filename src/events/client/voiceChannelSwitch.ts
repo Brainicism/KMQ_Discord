@@ -8,7 +8,11 @@ import { checkBotIsAlone } from "../../helpers/discord_utils";
  * @param newChannel - The voice channel the member joined
  * @param oldChannel - The voice channel the member left
  */
-export default async function voiceChannelSwitchHandler(member: Eris.Member, newChannel: Eris.VoiceChannel, oldChannel: Eris.VoiceChannel): Promise<void> {
+export default async function voiceChannelSwitchHandler(
+    member: Eris.Member,
+    newChannel: Eris.VoiceChannel,
+    oldChannel: Eris.VoiceChannel
+): Promise<void> {
     const guildID = oldChannel.guild.id;
     const gameSession = state.gameSessions[guildID];
     if (!gameSession) {

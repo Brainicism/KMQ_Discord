@@ -22,16 +22,27 @@ if (!fs.existsSync(databaseDownloadDir)) {
 
 program
     .option("-p, --skip-pull", "Skip re-pull of Daisuki database dump", false)
-    .option("-r, --skip-reseed", "Force skip drop/create of kpop_videos database", false)
-    .option("-d, --skip-download", "Skip download/encode of videos in database", false)
-    .option("--limit <limit>", "Limit the number of songs to download", (x) => parseInt(x));
+    .option(
+        "-r, --skip-reseed",
+        "Force skip drop/create of kpop_videos database",
+        false
+    )
+    .option(
+        "-d, --skip-download",
+        "Skip download/encode of videos in database",
+        false
+    )
+    .option("--limit <limit>", "Limit the number of songs to download", (x) =>
+        parseInt(x)
+    );
 
 program.parse();
 const options = program.opts();
 
 async function getOverrideQueries(db: DatabaseContext): Promise<Array<string>> {
-    return (await db.kmq("kpop_videos_sql_overrides")
-        .select(["query"])).map((x) => x.query);
+    return (await db.kmq("kpop_videos_sql_overrides").select(["query"])).map(
+        (x) => x.query
+    );
 }
 
 const downloadDb = async (): Promise<void> => {
@@ -52,30 +63,71 @@ const downloadDb = async (): Promise<void> => {
     });
 
     await fs.promises.writeFile(mvOutput, mvResp.data, { encoding: null });
-    await fs.promises.writeFile(audioOutput, audioResp.data, { encoding: null });
+    await fs.promises.writeFile(audioOutput, audioResp.data, {
+        encoding: null,
+    });
     logger.info("Downloaded Daisuki database archive");
 };
 
 async function extractDb(): Promise<void> {
     await fs.promises.mkdir(`${databaseDownloadDir}/`, { recursive: true });
-    execSync(`unzip -oq ${databaseDownloadDir}/mv-download.zip -d ${databaseDownloadDir}/`);
-    execSync(`unzip -oq ${databaseDownloadDir}/audio-download.zip -d ${databaseDownloadDir}/`);
+    execSync(
+        `unzip -oq ${databaseDownloadDir}/mv-download.zip -d ${databaseDownloadDir}/`
+    );
+
+    execSync(
+        `unzip -oq ${databaseDownloadDir}/audio-download.zip -d ${databaseDownloadDir}/`
+    );
     logger.info("Extracted Daisuki database");
 }
 
-async function validateSqlDump(db: DatabaseContext, mvSeedFilePath: string, audioSeedFilePath: string, bootstrap = false): Promise<void> {
+async function validateSqlDump(
+    db: DatabaseContext,
+    mvSeedFilePath: string,
+    audioSeedFilePath: string,
+    bootstrap = false
+): Promise<void> {
     try {
-        await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_validation;");
+        await db.agnostic.raw(
+            "DROP DATABASE IF EXISTS kpop_videos_validation;"
+        );
         await db.agnostic.raw("CREATE DATABASE kpop_videos_validation;");
-        execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${mvSeedFilePath}`);
-        execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${audioSeedFilePath}`);
+        execSync(
+            `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${mvSeedFilePath}`
+        );
+
+        execSync(
+            `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${audioSeedFilePath}`
+        );
         logger.info("Validating MV song count");
-        const mvSongCount = (await db.kpopVideosValidation("app_kpop").count("* as count").first()).count;
+        const mvSongCount = (
+            await db
+                .kpopVideosValidation("app_kpop")
+                .count("* as count")
+                .first()
+        ).count;
+
         logger.info("Validating audio-only song count");
-        const audioSongCount = (await db.kpopVideosValidation("app_kpop_audio").count("* as count").first()).count;
+        const audioSongCount = (
+            await db
+                .kpopVideosValidation("app_kpop_audio")
+                .count("* as count")
+                .first()
+        ).count;
+
         logger.info("Validating group count");
-        const artistCount = (await db.kpopVideosValidation("app_kpop_group").count("* as count").first()).count;
-        if (mvSongCount < 10000 || audioSongCount < 1000 || artistCount < 1000) {
+        const artistCount = (
+            await db
+                .kpopVideosValidation("app_kpop_group")
+                .count("* as count")
+                .first()
+        ).count;
+
+        if (
+            mvSongCount < 10000 ||
+            audioSongCount < 1000 ||
+            artistCount < 1000
+        ) {
             throw new Error("SQL dump valid, but potentially missing data.");
         }
 
@@ -88,36 +140,78 @@ async function validateSqlDump(db: DatabaseContext, mvSeedFilePath: string, audi
 
         if (!bootstrap) {
             logger.info("Validating creation of data tables");
-            const originalCreateKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/procedures/create_kmq_data_tables_procedure.sql");
-            const validationCreateKmqTablesProcedureSqlPath = path.join(__dirname, "../../sql/create_kmq_data_tables_procedure.validation.sql");
-            execSync(`sed 's/kpop_videos/kpop_videos_validation/g' ${originalCreateKmqTablesProcedureSqlPath} > ${validationCreateKmqTablesProcedureSqlPath}`);
-            execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${validationCreateKmqTablesProcedureSqlPath}`);
-            await db.kpopVideosValidation.raw(`CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`);
+            const originalCreateKmqTablesProcedureSqlPath = path.join(
+                __dirname,
+                "../../sql/procedures/create_kmq_data_tables_procedure.sql"
+            );
+
+            const validationCreateKmqTablesProcedureSqlPath = path.join(
+                __dirname,
+                "../../sql/create_kmq_data_tables_procedure.validation.sql"
+            );
+
+            execSync(
+                `sed 's/kpop_videos/kpop_videos_validation/g' ${originalCreateKmqTablesProcedureSqlPath} > ${validationCreateKmqTablesProcedureSqlPath}`
+            );
+
+            execSync(
+                `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${validationCreateKmqTablesProcedureSqlPath}`
+            );
+
+            await db.kpopVideosValidation.raw(
+                `CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`
+            );
         }
 
         logger.info("SQL dump validated successfully");
     } catch (e) {
         throw new Error(`SQL dump validation failed. ${e.sqlMessage}`);
     } finally {
-        await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_validation;");
+        await db.agnostic.raw(
+            "DROP DATABASE IF EXISTS kpop_videos_validation;"
+        );
     }
 }
 
 async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
-    const sqlFiles = (await fs.promises.readdir(`${databaseDownloadDir}`)).filter((x) => x.endsWith(".sql"));
-    const mvSeedFile = sqlFiles.filter((x) => x.endsWith(".sql") && x.startsWith("mainbackup_")).slice(-1)[0];
-    const audioSeedFile = sqlFiles.filter((x) => x.endsWith(".sql") && x.startsWith("audiobackup_")).slice(-1)[0];
-    const mvSeedFilePath = bootstrap ? `${databaseDownloadDir}/bootstrap.sql` : `${databaseDownloadDir}/${mvSeedFile}`;
-    const audioSeedFilePath = bootstrap ? `${databaseDownloadDir}/bootstrap-audio.sql` : `${databaseDownloadDir}/${audioSeedFile}`;
-    logger.info(`Validating SQL dump (${path.basename(mvSeedFilePath)} and ${path.basename(audioSeedFilePath)})`);
+    const sqlFiles = (
+        await fs.promises.readdir(`${databaseDownloadDir}`)
+    ).filter((x) => x.endsWith(".sql"));
+
+    const mvSeedFile = sqlFiles
+        .filter((x) => x.endsWith(".sql") && x.startsWith("mainbackup_"))
+        .slice(-1)[0];
+
+    const audioSeedFile = sqlFiles
+        .filter((x) => x.endsWith(".sql") && x.startsWith("audiobackup_"))
+        .slice(-1)[0];
+
+    const mvSeedFilePath = bootstrap
+        ? `${databaseDownloadDir}/bootstrap.sql`
+        : `${databaseDownloadDir}/${mvSeedFile}`;
+
+    const audioSeedFilePath = bootstrap
+        ? `${databaseDownloadDir}/bootstrap-audio.sql`
+        : `${databaseDownloadDir}/${audioSeedFile}`;
+
+    logger.info(
+        `Validating SQL dump (${path.basename(
+            mvSeedFilePath
+        )} and ${path.basename(audioSeedFilePath)})`
+    );
     await validateSqlDump(db, mvSeedFilePath, audioSeedFilePath, bootstrap);
     logger.info("Dropping K-Pop video database");
     await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos;");
     logger.info("Creating K-Pop video database");
     await db.agnostic.raw("CREATE DATABASE kpop_videos;");
     logger.info("Seeding K-Pop video database");
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${mvSeedFilePath}`);
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${audioSeedFilePath}`);
+    execSync(
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${mvSeedFilePath}`
+    );
+
+    execSync(
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${audioSeedFilePath}`
+    );
     logger.info("Performing data overrides");
 
     const overrideQueries = await getOverrideQueries(db);
@@ -125,7 +219,9 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
         await db.kpopVideos.raw(overrideQuery);
     }
 
-    logger.info("Imported database dump successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing");
+    logger.info(
+        "Imported database dump successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing"
+    );
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -142,15 +238,22 @@ async function hasRecentDump(): Promise<boolean> {
     }
 
     if (files.length === 0) return false;
-    const seedFileDateString = files[files.length - 1].match(/mainbackup_([0-9]{4}-[0-9]{2}-[0-9]{2}).sql/)[1];
+    const seedFileDateString = files[files.length - 1].match(
+        /mainbackup_([0-9]{4}-[0-9]{2}-[0-9]{2}).sql/
+    )[1];
+
     logger.info(`Most recent seed file has date: ${seedFileDateString}`);
-    const daysDiff = ((new Date()).getTime() - Date.parse(seedFileDateString)) / 86400000;
+    const daysDiff =
+        (new Date().getTime() - Date.parse(seedFileDateString)) / 86400000;
+
     return daysDiff < 6;
 }
 
 function pruneSqlDumps(): void {
     try {
-        execSync(`find ${databaseDownloadDir} -mindepth 1 -name "*backup_*" -mtime +${SQL_DUMP_EXPIRY} -delete`);
+        execSync(
+            `find ${databaseDownloadDir} -mindepth 1 -name "*backup_*" -mtime +${SQL_DUMP_EXPIRY} -delete`
+        );
         logger.info("Finished pruning old SQL dumps");
     } catch (err) {
         logger.error(`Error attempting to prune SQL dumps directory, ${err}`);
@@ -161,7 +264,10 @@ function pruneSqlDumps(): void {
  * @param db - The database context
  * @param bootstrap - Whether or not this is a bootstrap run
  */
-async function updateKpopDatabase(db: DatabaseContext, bootstrap = false): Promise<void> {
+async function updateKpopDatabase(
+    db: DatabaseContext,
+    bootstrap = false
+): Promise<void> {
     if (!options.skipPull && !bootstrap) {
         await downloadDb();
         await extractDb();
@@ -181,12 +287,16 @@ async function updateKpopDatabase(db: DatabaseContext, bootstrap = false): Promi
  * @param db - Database context
  */
 export async function updateGroupList(db: DatabaseContext): Promise<void> {
-    const result = await db.kmq("kpop_groups")
+    const result = await db
+        .kmq("kpop_groups")
         .select(["name", "members as gender"])
         .where("is_collab", "=", "n")
         .orderBy("name", "ASC");
 
-    fs.writeFileSync(path.resolve(__dirname, "../../data/group_list.txt"), result.map((x) => x.name).join("\n"));
+    fs.writeFileSync(
+        path.resolve(__dirname, "../../data/group_list.txt"),
+        result.map((x) => x.name).join("\n")
+    );
 }
 
 /**
@@ -211,7 +321,9 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
         await updateGroupList(db);
     }
 
-    logger.info(`Finishing seeding and downloading ${songsDownloaded} new songs`);
+    logger.info(
+        `Finishing seeding and downloading ${songsDownloaded} new songs`
+    );
 }
 
 (async () => {

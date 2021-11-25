@@ -3,7 +3,10 @@ import Eris from "eris";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { state } from "../kmq_worker";
 import KmqMember from "./kmq_member";
-import { ExpBonusModifier, ExpBonusModifierValues } from "../commands/game_commands/exp";
+import {
+    ExpBonusModifier,
+    ExpBonusModifierValues,
+} from "../commands/game_commands/exp";
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
 const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\ \(\)\+\u200B]/g;
@@ -22,7 +25,10 @@ const CHARACTER_REPLACEMENTS = [
 export function cleanSongName(name: string): string {
     let cleanName = name.toLowerCase();
     for (const characterReplacement of CHARACTER_REPLACEMENTS) {
-        cleanName = cleanName.replace(characterReplacement.pattern, characterReplacement.replacement);
+        cleanName = cleanName.replace(
+            characterReplacement.pattern,
+            characterReplacement.replacement
+        );
     }
 
     return cleanName;
@@ -34,11 +40,13 @@ export function cleanSongName(name: string): string {
  * @returns The cleaned artist name
  */
 export function cleanArtistName(name: string): string {
-    let cleanName = name.toLowerCase()
-        .trim();
+    let cleanName = name.toLowerCase().trim();
 
     for (const characterReplacement of CHARACTER_REPLACEMENTS) {
-        cleanName = cleanName.replace(characterReplacement.pattern, characterReplacement.replacement);
+        cleanName = cleanName.replace(
+            characterReplacement.pattern,
+            characterReplacement.replacement
+        );
     }
 
     return cleanName;
@@ -51,12 +59,28 @@ export function cleanArtistName(name: string): string {
 function generateHint(name: string): string {
     const HIDDEN_CHARACTER_PERCENTAGE = 0.75;
     const nameLength = name.length;
-    const eligibleCharacterIndicesToHide = _.range(0, nameLength).filter((x) => !name[x].match(REMOVED_CHARACTERS));
-    const hideMask = _.sampleSize(eligibleCharacterIndicesToHide, Math.max(Math.floor(eligibleCharacterIndicesToHide.length * HIDDEN_CHARACTER_PERCENTAGE), 1));
-    const hiddenName = name.split("").map((char, idx) => {
-        if (hideMask.includes(idx)) return "_";
-        return char;
-    }).join(" ");
+    const eligibleCharacterIndicesToHide = _.range(0, nameLength).filter(
+        (x) => !name[x].match(REMOVED_CHARACTERS)
+    );
+
+    const hideMask = _.sampleSize(
+        eligibleCharacterIndicesToHide,
+        Math.max(
+            Math.floor(
+                eligibleCharacterIndicesToHide.length *
+                    HIDDEN_CHARACTER_PERCENTAGE
+            ),
+            1
+        )
+    );
+
+    const hiddenName = name
+        .split("")
+        .map((char, idx) => {
+            if (hideMask.includes(idx)) return "_";
+            return char;
+        })
+        .join(" ");
 
     return hiddenName;
 }
@@ -120,7 +144,7 @@ export default class GameRound {
     public readonly acceptedArtistAnswers: Array<string>;
 
     /** Song/artist name hints */
-    public readonly hints: { songHint: string, artistHint: string };
+    public readonly hints: { songHint: string; artistHint: string };
 
     /** UUID associated with right guess interaction custom_id */
     public interactionCorrectAnswerUUID: string;
@@ -140,13 +164,22 @@ export default class GameRound {
     /** The base EXP for this GameRound */
     private baseExp: number;
 
-    constructor(cleanedSongName: string, originalSongName: string, artist: string, videoID: string, publishDate: Date, views: number) {
+    constructor(
+        cleanedSongName: string,
+        originalSongName: string,
+        artist: string,
+        videoID: string,
+        publishDate: Date,
+        views: number
+    ) {
         this.songName = cleanedSongName;
         this.originalSongName = originalSongName;
         this.songAliases = state.aliases.song[videoID] || [];
         this.acceptedSongAnswers = [cleanedSongName, ...this.songAliases];
         const artistNames = artist.split("+").map((x) => x.trim());
-        this.artistAliases = artistNames.flatMap((x) => state.aliases.artist[x] || []);
+        this.artistAliases = artistNames.flatMap(
+            (x) => state.aliases.artist[x] || []
+        );
         this.acceptedArtistAnswers = [...artistNames, ...this.artistAliases];
         this.artistName = artist;
         this.videoID = videoID;
@@ -168,13 +201,23 @@ export default class GameRound {
         this.incorrectMCGuessers = new Set();
         this.interactionComponents = [];
         this.interactionMessage = null;
-        this.bonusModifier = (Math.random() < 0.01) ? _.sample(
-            [
-                ExpBonusModifierValues[ExpBonusModifier.RANDOM_GUESS_BONUS_COMMON],
-                ExpBonusModifierValues[ExpBonusModifier.RANDOM_GUESS_BONUS_RARE],
-                ExpBonusModifierValues[ExpBonusModifier.RANDOM_GUESS_BONUS_EPIC],
-                ExpBonusModifierValues[ExpBonusModifier.RANDOM_GUESS_BONUS_LEGENDARY]],
-        ) : 1;
+        this.bonusModifier =
+            Math.random() < 0.01
+                ? _.sample([
+                      ExpBonusModifierValues[
+                          ExpBonusModifier.RANDOM_GUESS_BONUS_COMMON
+                      ],
+                      ExpBonusModifierValues[
+                          ExpBonusModifier.RANDOM_GUESS_BONUS_RARE
+                      ],
+                      ExpBonusModifierValues[
+                          ExpBonusModifier.RANDOM_GUESS_BONUS_EPIC
+                      ],
+                      ExpBonusModifierValues[
+                          ExpBonusModifier.RANDOM_GUESS_BONUS_LEGENDARY
+                      ],
+                  ])
+                : 1;
     }
 
     /**
@@ -216,7 +259,12 @@ export default class GameRound {
      */
     userCorrect(userID: string, pointsAwarded: number): void {
         if (!this.correctGuessers.some((x) => x.id === userID)) {
-            this.correctGuessers.push(KmqMember.fromUser(state.client.users.get(userID), pointsAwarded));
+            this.correctGuessers.push(
+                KmqMember.fromUser(
+                    state.client.users.get(userID),
+                    pointsAwarded
+                )
+            );
         }
     }
 
@@ -264,7 +312,9 @@ export default class GameRound {
                 type: 1,
                 components: x.components.map((y) => {
                     const z = y as Eris.InteractionButton;
-                    const noGuesses = this.interactionIncorrectAnswerUUIDs[z.custom_id] === 0;
+                    const noGuesses =
+                        this.interactionIncorrectAnswerUUIDs[z.custom_id] === 0;
+
                     let label = z.label;
                     let style: 1 | 3 | 4;
                     if (this.interactionCorrectAnswerUUID === z.custom_id) {
@@ -276,7 +326,9 @@ export default class GameRound {
                     } else if (noGuesses) {
                         style = 1;
                     } else {
-                        label += ` (${this.interactionIncorrectAnswerUUIDs[z.custom_id]})`;
+                        label += ` (${
+                            this.interactionIncorrectAnswerUUIDs[z.custom_id]
+                        })`;
                         style = 4;
                     }
 
@@ -297,7 +349,12 @@ export default class GameRound {
      * @returns true if the given UUID is one of the guesses of the current game round
      */
     isValidInteractionGuess(interactionUUID: string): boolean {
-        return interactionUUID === this.interactionCorrectAnswerUUID || Object.keys(this.interactionIncorrectAnswerUUIDs)?.includes(interactionUUID);
+        return (
+            interactionUUID === this.interactionCorrectAnswerUUID ||
+            Object.keys(this.interactionIncorrectAnswerUUIDs)?.includes(
+                interactionUUID
+            )
+        );
     }
 
     /**
@@ -320,7 +377,10 @@ export default class GameRound {
      */
     private checkSongGuess(message: string): boolean {
         const guess = cleanSongName(message);
-        const cleanedSongAliases = this.acceptedSongAnswers.map((x) => cleanSongName(x));
+        const cleanedSongAliases = this.acceptedSongAnswers.map((x) =>
+            cleanSongName(x)
+        );
+
         return this.songName && cleanedSongAliases.includes(guess);
     }
 
@@ -331,7 +391,10 @@ export default class GameRound {
      */
     private checkArtistGuess(message: string): boolean {
         const guess = cleanArtistName(message);
-        const cleanedArtistAliases = this.acceptedArtistAnswers.map((x) => cleanArtistName(x));
+        const cleanedArtistAliases = this.acceptedArtistAnswers.map((x) =>
+            cleanArtistName(x)
+        );
+
         return this.songName && cleanedArtistAliases.includes(guess);
     }
 }

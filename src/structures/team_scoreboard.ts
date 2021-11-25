@@ -12,9 +12,9 @@ interface TeamMap {
 
 export default class TeamScoreboard extends Scoreboard {
     /**
-    * Mapping of team ID to Team
-    * Note: Each "player" in this.players represents a team
-    */
+     * Mapping of team ID to Team
+     * Note: Each "player" in this.players represents a team
+     */
     protected players: TeamMap;
 
     /**
@@ -33,7 +33,10 @@ export default class TeamScoreboard extends Scoreboard {
         const firstCorrectGuesser = this.getPlayer(firstGuessResult.userID);
 
         firstCorrectGuesser.incrementScore(firstGuessResult.pointsEarned);
-        const correctGuesserTeam = this.getTeamOfPlayer(firstGuessResult.userID);
+        const correctGuesserTeam = this.getTeamOfPlayer(
+            firstGuessResult.userID
+        );
+
         const correctGuesserTeamScore = correctGuesserTeam.getScore();
         if (correctGuesserTeamScore === this.highestScore) {
             this.firstPlace.push(correctGuesserTeam);
@@ -44,11 +47,11 @@ export default class TeamScoreboard extends Scoreboard {
     }
 
     /**
-    * Create a new team with containing the player who created it
-    * @param name - The name of the team
-    * @param player - The player that created the team
-    * @returns the newly created team
-    */
+     * Create a new team with containing the player who created it
+     * @param name - The name of the team
+     * @param player - The player that created the team
+     * @returns the newly created team
+     */
     addTeam(name: string, player: Player): Team {
         // If the user is switching teams, remove them from their existing team first
         if (this.getPlayer(player.id)) {
@@ -102,14 +105,18 @@ export default class TeamScoreboard extends Scoreboard {
      * @returns the team containing the given player
      */
     getTeamOfPlayer(userID: string): Team {
-        return Object.values(this.players).find((t: Team) => t.hasPlayer(userID)) || null;
+        return (
+            Object.values(this.players).find((t: Team) =>
+                t.hasPlayer(userID)
+            ) || null
+        );
     }
 
     /**
-    * Adds a player to an existing team
-    * @param teamName - The name of the team to add the player to
-    * @param player - The player to add to the team
-    */
+     * Adds a player to an existing team
+     * @param teamName - The name of the team to add the player to
+     * @param player - The player to add to the team
+     */
     addPlayer(teamName: string, player: Player): void {
         // If the user is switching teams, remove them from their existing team first
         this.removePlayer(player.id);
@@ -130,9 +137,17 @@ export default class TeamScoreboard extends Scoreboard {
             delete this.players[team.name];
             // If the removed team was the only team in first, first place is now second place
             if (this.firstPlace.length === 0) {
-                const highestScore = Math.max(...Object.values(this.players).map((x: Team) => x.getScore(), 0));
+                const highestScore = Math.max(
+                    ...Object.values(this.players).map(
+                        (x: Team) => x.getScore(),
+                        0
+                    )
+                );
+
                 if (highestScore === 0) return;
-                this.firstPlace = Object.values(this.players).filter((t: Team) => t.getScore() === highestScore);
+                this.firstPlace = Object.values(this.players).filter(
+                    (t: Team) => t.getScore() === highestScore
+                );
             }
         }
     }
@@ -151,7 +166,11 @@ export default class TeamScoreboard extends Scoreboard {
      * @returns the exp gained by the player (with a 10% bonus to the winning team if there are multiple teams)
      */
     getPlayerExpGain(userID: string): number {
-        if (this.isTeamFirstPlace(this.getTeamOfPlayer(userID).name) && Object.keys(this.getTeams()).length > 1 && this.firstPlace.length === 1) {
+        if (
+            this.isTeamFirstPlace(this.getTeamOfPlayer(userID).name) &&
+            Object.keys(this.getTeams()).length > 1 &&
+            this.firstPlace.length === 1
+        ) {
             return this.getPlayer(userID).getExpGain() * 1.1;
         }
 

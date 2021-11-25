@@ -1,4 +1,7 @@
-import { getDebugLogHeader, sendOptionsMessage } from "../../helpers/discord_utils";
+import {
+    getDebugLogHeader,
+    sendOptionsMessage,
+} from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
@@ -62,14 +65,32 @@ export default class OstCommand implements BaseCommand {
 
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.OST_PREFERENCE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.OST_PREFERENCE, reset: true }]);
-            logger.info(`${getDebugLogHeader(message)} | OST preference reset.`);
+            await sendOptionsMessage(
+                MessageContext.fromMessage(message),
+                guildPreference,
+                [{ option: GameOption.OST_PREFERENCE, reset: true }]
+            );
+
+            logger.info(
+                `${getDebugLogHeader(message)} | OST preference reset.`
+            );
             return;
         }
 
-        const ostPreference = parsedMessage.components[0].toLowerCase() as OstPreference;
+        const ostPreference =
+            parsedMessage.components[0].toLowerCase() as OstPreference;
+
         await guildPreference.setOstPreference(ostPreference);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.OST_PREFERENCE, reset: false }]);
-        logger.info(`${getDebugLogHeader(message)} | OST preference set to ${ostPreference}`);
+        await sendOptionsMessage(
+            MessageContext.fromMessage(message),
+            guildPreference,
+            [{ option: GameOption.OST_PREFERENCE, reset: false }]
+        );
+
+        logger.info(
+            `${getDebugLogHeader(
+                message
+            )} | OST preference set to ${ostPreference}`
+        );
     };
 }

@@ -1,5 +1,8 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
+import {
+    sendOptionsMessage,
+    getDebugLogHeader,
+} from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
@@ -32,20 +35,24 @@ export default class SeekCommand implements BaseCommand {
 
     help = {
         name: "seek",
-        description: "Choose whether each song is played from the beginning, middle, or at a random point",
+        description:
+            "Choose whether each song is played from the beginning, middle, or at a random point",
         usage: ",seek [beginning | middle | random]",
         examples: [
             {
                 example: "`,seek random`",
-                explanation: "Songs will be played starting from a random point in the middle",
+                explanation:
+                    "Songs will be played starting from a random point in the middle",
             },
             {
                 example: "`,seek middle`",
-                explanation: "Songs will be played starting from the middle point",
+                explanation:
+                    "Songs will be played starting from the middle point",
             },
             {
                 example: "`,seek beginning`",
-                explanation: "Song will be played starting from the very beginning",
+                explanation:
+                    "Song will be played starting from the very beginning",
             },
             {
                 example: "`,seek`",
@@ -59,14 +66,25 @@ export default class SeekCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.SEEK_TYPE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.SEEK_TYPE, reset: true }]);
+            await sendOptionsMessage(
+                MessageContext.fromMessage(message),
+                guildPreference,
+                [{ option: GameOption.SEEK_TYPE, reset: true }]
+            );
             logger.info(`${getDebugLogHeader(message)} | Seek reset.`);
             return;
         }
 
         const seekType = parsedMessage.components[0] as SeekType;
         await guildPreference.setSeekType(seekType);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.SEEK_TYPE, reset: false }]);
-        logger.info(`${getDebugLogHeader(message)} | Seek type set to ${seekType}`);
+        await sendOptionsMessage(
+            MessageContext.fromMessage(message),
+            guildPreference,
+            [{ option: GameOption.SEEK_TYPE, reset: false }]
+        );
+
+        logger.info(
+            `${getDebugLogHeader(message)} | Seek type set to ${seekType}`
+        );
     };
 }

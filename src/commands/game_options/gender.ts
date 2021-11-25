@@ -1,5 +1,9 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { sendOptionsMessage, getDebugLogHeader, sendErrorMessage } from "../../helpers/discord_utils";
+import {
+    sendOptionsMessage,
+    getDebugLogHeader,
+    sendErrorMessage,
+} from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
@@ -56,15 +60,18 @@ export default class GenderCommand implements BaseCommand {
             },
             {
                 example: "`,gender coed`",
-                explanation: "Play songs only from `coed` groups (groups with both male and female members)",
+                explanation:
+                    "Play songs only from `coed` groups (groups with both male and female members)",
             },
             {
                 example: "`,gender`",
-                explanation: "Reset to the default genders of `male`, `female`, and `coed`",
+                explanation:
+                    "Reset to the default genders of `male`, `female`, and `coed`",
             },
             {
                 example: "`,gender alternating`",
-                explanation: "Alternate between `male` and `female` artists every round",
+                explanation:
+                    "Alternate between `male` and `female` artists every round",
             },
         ],
         priority: 150,
@@ -76,7 +83,11 @@ export default class GenderCommand implements BaseCommand {
 
         if (selectedGenders.length === 0) {
             await guildPreference.reset(GameOption.GENDER);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.GENDER, reset: true }]);
+            await sendOptionsMessage(
+                MessageContext.fromMessage(message),
+                guildPreference,
+                [{ option: GameOption.GENDER, reset: true }]
+            );
             logger.info(`${getDebugLogHeader(message)} | Gender reset.`);
             return;
         }
@@ -84,15 +95,29 @@ export default class GenderCommand implements BaseCommand {
         if (guildPreference.isGroupsMode() && selectedGenders.length >= 1) {
             // Incompatibility between groups and gender doesn't exist in GENDER.ALTERNATING
             if (selectedGenders[0] !== Gender.ALTERNATING) {
-                logger.warn(`${getDebugLogHeader(message)} | Game option conflict between gender and groups.`);
-                sendErrorMessage(MessageContext.fromMessage(message), { title: "Game Option Conflict", description: `\`groups\` game option is currently set. \`gender\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed` });
+                logger.warn(
+                    `${getDebugLogHeader(
+                        message
+                    )} | Game option conflict between gender and groups.`
+                );
+
+                sendErrorMessage(MessageContext.fromMessage(message), {
+                    title: "Game Option Conflict",
+                    description: `\`groups\` game option is currently set. \`gender\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed`,
+                });
                 return;
             }
         }
 
         if (selectedGenders[0] === Gender.ALTERNATING) {
-            if (guildPreference.isGroupsMode() && guildPreference.getGroupIDs().length === 1) {
-                sendErrorMessage(MessageContext.fromMessage(message), { title: "Game Option Warning", description: `With only one group chosen, \`${process.env.BOT_PREFIX}gender alternating\` may not behave as expected. Consider including more groups to correctly alternate genders.` });
+            if (
+                guildPreference.isGroupsMode() &&
+                guildPreference.getGroupIDs().length === 1
+            ) {
+                sendErrorMessage(MessageContext.fromMessage(message), {
+                    title: "Game Option Warning",
+                    description: `With only one group chosen, \`${process.env.BOT_PREFIX}gender alternating\` may not behave as expected. Consider including more groups to correctly alternate genders.`,
+                });
             }
 
             await guildPreference.setGender([selectedGenders[0]]);
@@ -100,7 +125,18 @@ export default class GenderCommand implements BaseCommand {
             await guildPreference.setGender(selectedGenders);
         }
 
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.GENDER, reset: false }]);
-        logger.info(`${getDebugLogHeader(message)} | Genders set to ${guildPreference.gameOptions.gender.join(", ")}`);
+        await sendOptionsMessage(
+            MessageContext.fromMessage(message),
+            guildPreference,
+            [{ option: GameOption.GENDER, reset: false }]
+        );
+
+        logger.info(
+            `${getDebugLogHeader(
+                message
+            )} | Genders set to ${guildPreference.gameOptions.gender.join(
+                ", "
+            )}`
+        );
     };
 }

@@ -39,6 +39,8 @@ jobs:
           node-version: 14.2.0
       - name: Install node dependencies
         run: yarn install --frozen-lockfile
+      - name: Prettier
+        run: npm run prettier_ci
       - name: npm run lint
         run: npm run lint_ci
       - name: Copy .env for CI

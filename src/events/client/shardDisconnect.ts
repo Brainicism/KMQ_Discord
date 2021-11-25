@@ -7,7 +7,10 @@ const logger = new IPCLogger("shardDisconnect");
  * @param err - The error that caused the disconnect.
  * @param shardID - The shard ID that disconnected.
  */
-export default function shardDisconnectHandler(err: Error, shardID: number): void {
+export default function shardDisconnectHandler(
+    err: Error,
+    shardID: number
+): void {
     if (err) {
         logger.warn(`Shard #${shardID} disconnected. err = ${err.message}`);
     } else {

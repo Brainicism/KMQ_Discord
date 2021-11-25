@@ -1,6 +1,13 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { sendOptionsMessage, getDebugLogHeader, sendErrorMessage } from "../../helpers/discord_utils";
-import { getGuildPreference, getMatchingGroupNames } from "../../helpers/game_utils";
+import {
+    sendOptionsMessage,
+    getDebugLogHeader,
+    sendErrorMessage,
+} from "../../helpers/discord_utils";
+import {
+    getGuildPreference,
+    getMatchingGroupNames,
+} from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
@@ -39,7 +46,11 @@ export default class ExcludeCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.EXCLUDE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.EXCLUDE, reset: true }]);
+            await sendOptionsMessage(
+                MessageContext.fromMessage(message),
+                guildPreference,
+                [{ option: GameOption.EXCLUDE, reset: true }]
+            );
             logger.info(`${getDebugLogHeader(message)} | Excludes reset.`);
             return;
         }
@@ -51,24 +62,57 @@ export default class ExcludeCommand implements BaseCommand {
             }
         }
 
-        const groupNames = parsedMessage.argument.split(",").map((groupName) => groupName.trim());
+        const groupNames = parsedMessage.argument
+            .split(",")
+            .map((groupName) => groupName.trim());
+
         const groups = await getMatchingGroupNames(groupNames);
         let { matchedGroups } = groups;
         const { unmatchedGroups } = groups;
         if (unmatchedGroups.length) {
-            logger.info(`${getDebugLogHeader(message)} | Attempted to set unknown excludes. excludes =  ${unmatchedGroups.join(", ")}`);
+            logger.info(
+                `${getDebugLogHeader(
+                    message
+                )} | Attempted to set unknown excludes. excludes =  ${unmatchedGroups.join(
+                    ", "
+                )}`
+            );
+
             await sendErrorMessage(MessageContext.fromMessage(message), {
                 title: "Unknown Group Name",
-                description: `One or more of the specified group names was not recognized. Those groups that matched are excluded. Please ensure that the group name matches exactly with the list provided by \`${process.env.BOT_PREFIX}help groups\`. \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(", ")} \nUse \`${process.env.BOT_PREFIX}add\` to add the unmatched groups.`,
+                description: `One or more of the specified group names was not recognized. Those groups that matched are excluded. Please ensure that the group name matches exactly with the list provided by \`${
+                    process.env.BOT_PREFIX
+                }help groups\`. \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(
+                    ", "
+                )} \nUse \`${
+                    process.env.BOT_PREFIX
+                }add\` to add the unmatched groups.`,
                 footerText: excludeWarning,
             });
         }
 
         if (guildPreference.isGroupsMode()) {
-            const intersection = setIntersection(matchedGroups.map((x) => x.name), guildPreference.getGroupNames());
-            matchedGroups = matchedGroups.filter((x) => !intersection.has(x.name));
+            const intersection = setIntersection(
+                matchedGroups.map((x) => x.name),
+                guildPreference.getGroupNames()
+            );
+
+            matchedGroups = matchedGroups.filter(
+                (x) => !intersection.has(x.name)
+            );
             if (intersection.size > 0) {
-                sendErrorMessage(MessageContext.fromMessage(message), { title: "Groups and Exclude Conflict", description: `One or more of the given \`exclude\` groups is already included in \`groups\`. \nThe following groups were **not** added to \`exclude\`:\n ${[...intersection].filter((x) => !x.includes("+")).join(", ")} \nUse \`${process.env.BOT_PREFIX}remove groups\` and then \`${process.env.BOT_PREFIX}exclude\` these groups to prevent them from playing.` });
+                sendErrorMessage(MessageContext.fromMessage(message), {
+                    title: "Groups and Exclude Conflict",
+                    description: `One or more of the given \`exclude\` groups is already included in \`groups\`. \nThe following groups were **not** added to \`exclude\`:\n ${[
+                        ...intersection,
+                    ]
+                        .filter((x) => !x.includes("+"))
+                        .join(", ")} \nUse \`${
+                        process.env.BOT_PREFIX
+                    }remove groups\` and then \`${
+                        process.env.BOT_PREFIX
+                    }exclude\` these groups to prevent them from playing.`,
+                });
             }
         }
 
@@ -77,7 +121,16 @@ export default class ExcludeCommand implements BaseCommand {
         }
 
         await guildPreference.setExcludes(matchedGroups);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.EXCLUDE, reset: false }]);
-        logger.info(`${getDebugLogHeader(message)} | Excludes set to ${guildPreference.getDisplayedExcludesGroupNames()}`);
+        await sendOptionsMessage(
+            MessageContext.fromMessage(message),
+            guildPreference,
+            [{ option: GameOption.EXCLUDE, reset: false }]
+        );
+
+        logger.info(
+            `${getDebugLogHeader(
+                message
+            )} | Excludes set to ${guildPreference.getDisplayedExcludesGroupNames()}`
+        );
     };
 }

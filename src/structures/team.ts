@@ -12,7 +12,10 @@ export default class Team extends Player {
 
     /** @returns the score of all the players on this team */
     getScore(): number {
-        return this.getPlayers().reduce((totalScore, player) => totalScore + player.getScore(), 0);
+        return this.getPlayers().reduce(
+            (totalScore, player) => totalScore + player.getScore(),
+            0
+        );
     }
 
     /** @returns the name of the team */
@@ -26,7 +29,11 @@ export default class Team extends Player {
      * @param _duplicateName - unused
      * @returns what to display as the name of the team in the scoreboard
      */
-    getDisplayedName(first: boolean, _wonRound: boolean, _duplicateName: boolean): string {
+    getDisplayedName(
+        first: boolean,
+        _wonRound: boolean,
+        _duplicateName: boolean
+    ): string {
         let name = `Team ${this.getName()}`;
         if (first) {
             name = `🎶 ${bold(name)}`;

@@ -7,7 +7,10 @@ import { checkBotIsAlone } from "../../helpers/discord_utils";
  * @param member - The member that left the voice channel
  * @param oldChannel - The voice channel the member left
  */
-export default function voiceChannelLeaveHandler(member: Eris.Member, oldChannel: Eris.VoiceChannel): void {
+export default function voiceChannelLeaveHandler(
+    member: Eris.Member,
+    oldChannel: Eris.VoiceChannel
+): void {
     const guildID = oldChannel.guild.id;
     const gameSession = state.gameSessions[guildID];
     if (!gameSession) {

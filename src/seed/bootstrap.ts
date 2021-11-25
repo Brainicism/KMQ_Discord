@@ -14,8 +14,17 @@ const SONG_DOWNLOAD_THRESHOLD = 5;
 
 config({ path: path.resolve(__dirname, "../../.env") });
 
-async function tableExists(db: DatabaseContext, tableName: string): Promise<boolean> {
-    return (await db.agnostic("information_schema.schemata").where("schema_name", "=", tableName)).length === 1;
+async function tableExists(
+    db: DatabaseContext,
+    tableName: string
+): Promise<boolean> {
+    return (
+        (
+            await db
+                .agnostic("information_schema.schemata")
+                .where("schema_name", "=", tableName)
+        ).length === 1
+    );
 }
 
 async function kmqDatabaseExists(db: DatabaseContext): Promise<boolean> {
@@ -30,28 +39,36 @@ async function kpopDataDatabaseExists(db: DatabaseContext): Promise<boolean> {
 }
 
 async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
-    const availableSongsTableExists = (await db.agnostic("information_schema.tables")
-        .where("table_schema", "=", "kmq")
-        .where("table_name", "=", "available_songs")
-        .count("* as count")
-        .first()).count === 1;
+    const availableSongsTableExists =
+        (
+            await db
+                .agnostic("information_schema.tables")
+                .where("table_schema", "=", "kmq")
+                .where("table_name", "=", "available_songs")
+                .count("* as count")
+                .first()
+        ).count === 1;
 
     if (!availableSongsTableExists) return false;
 
-    return (await db.kmq("available_songs")
-        .count("* as count")
-        .first()).count >= SONG_DOWNLOAD_THRESHOLD;
+    return (
+        (await db.kmq("available_songs").count("* as count").first()).count >=
+        SONG_DOWNLOAD_THRESHOLD
+    );
 }
 
 /**
  * Reloads all existing stored procedures
  */
 export function loadStoredProcedures(): void {
-    const storedProcedureDefinitions = fs.readdirSync(path.join(__dirname, "../../sql/procedures"))
+    const storedProcedureDefinitions = fs
+        .readdirSync(path.join(__dirname, "../../sql/procedures"))
         .map((x) => path.join(__dirname, "../../sql/procedures", x));
 
     for (const storedProcedureDefinition of storedProcedureDefinitions) {
-        execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq < ${storedProcedureDefinition}`);
+        execSync(
+            `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq < ${storedProcedureDefinition}`
+        );
     }
 }
 
@@ -60,9 +77,13 @@ export function loadStoredProcedures(): void {
  * Re-creates the KMQ data tables
  * @param db - The database context
  */
-export async function generateKmqDataTables(db: DatabaseContext): Promise<void> {
+export async function generateKmqDataTables(
+    db: DatabaseContext
+): Promise<void> {
     logger.info("Re-creating KMQ data tables view...");
-    await db.kmq.raw(`CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`);
+    await db.kmq.raw(
+        `CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`
+    );
 }
 
 function performMigrations(): void {
@@ -96,7 +117,9 @@ async function bootstrapDatabases(): Promise<void> {
     loadStoredProcedures();
 
     if (!(await songThresholdReached(db))) {
-        logger.info(`Downloading minimum threshold (${SONG_DOWNLOAD_THRESHOLD}) songs`);
+        logger.info(
+            `Downloading minimum threshold (${SONG_DOWNLOAD_THRESHOLD}) songs`
+        );
         await downloadAndConvertSongs(SONG_DOWNLOAD_THRESHOLD);
         await generateKmqDataTables(db);
     }

@@ -1,5 +1,9 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { getDebugLogHeader, sendErrorMessage, sendOptionsMessage } from "../../helpers/discord_utils";
+import {
+    getDebugLogHeader,
+    sendErrorMessage,
+    sendOptionsMessage,
+} from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
@@ -41,11 +45,13 @@ export default class DurationCommand implements BaseCommand {
         examples: [
             {
                 example: "`,duration 15`",
-                explanation: "The game will automatically end after 15 minutes.",
+                explanation:
+                    "The game will automatically end after 15 minutes.",
             },
             {
                 example: "`,duration 5 add`",
-                explanation: "Remove 5 minutes from the current game's duration",
+                explanation:
+                    "Remove 5 minutes from the current game's duration",
             },
             {
                 example: "`,duration 5 remove`",
@@ -63,7 +69,11 @@ export default class DurationCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.DURATION);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.DURATION, reset: true }]);
+            await sendOptionsMessage(
+                MessageContext.fromMessage(message),
+                guildPreference,
+                [{ option: GameOption.DURATION, reset: true }]
+            );
             logger.info(`${getDebugLogHeader(message)} | Duration disabled.`);
             return;
         }
@@ -81,13 +91,19 @@ export default class DurationCommand implements BaseCommand {
                 }
             } else if (action === DurationAction.REMOVE) {
                 if (!guildPreference.isDurationSet()) {
-                    sendErrorMessage(MessageContext.fromMessage(message), { title: "Error Adding/Removing Duration", description: "The duration is not currently set." });
+                    sendErrorMessage(MessageContext.fromMessage(message), {
+                        title: "Error Adding/Removing Duration",
+                        description: "The duration is not currently set.",
+                    });
                     return;
                 }
 
                 duration = currentDuration - durationDelta;
                 if (duration < 2) {
-                    sendErrorMessage(MessageContext.fromMessage(message), { title: "Error Removing Duration", description: "Duration cannot be less than 2 minutes." });
+                    sendErrorMessage(MessageContext.fromMessage(message), {
+                        title: "Error Removing Duration",
+                        description: "Duration cannot be less than 2 minutes.",
+                    });
                     return;
                 }
             }
@@ -96,7 +112,16 @@ export default class DurationCommand implements BaseCommand {
         }
 
         await guildPreference.setDuration(duration);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.DURATION, reset: false }]);
-        logger.info(`${getDebugLogHeader(message)} | Duration set to ${guildPreference.gameOptions.duration}`);
+        await sendOptionsMessage(
+            MessageContext.fromMessage(message),
+            guildPreference,
+            [{ option: GameOption.DURATION, reset: false }]
+        );
+
+        logger.info(
+            `${getDebugLogHeader(message)} | Duration set to ${
+                guildPreference.gameOptions.duration
+            }`
+        );
     };
 }

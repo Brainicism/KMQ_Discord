@@ -1,6 +1,9 @@
 import Eris from "eris";
 import CommandPrechecks from "../../command_prechecks";
-import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../events/client/interactionCreate";
+import {
+    BOOKMARK_COMMAND_NAME,
+    PROFILE_COMMAND_NAME,
+} from "../../events/client/interactionCreate";
 import { sendInfoMessage } from "../../helpers/discord_utils";
 import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
@@ -51,7 +54,10 @@ export default class AppCommandsCommand implements BaseCommand {
                 });
             } else if (process.env.NODE_ENV === EnvType.DEV) {
                 logger.info("Creating guild application commands...");
-                const debugServer = state.client.guilds.get(process.env.DEBUG_SERVER_ID);
+                const debugServer = state.client.guilds.get(
+                    process.env.DEBUG_SERVER_ID
+                );
+
                 if (!debugServer) return;
                 await debugServer.createCommand({
                     name: BOOKMARK_COMMAND_NAME,
@@ -76,16 +82,30 @@ export default class AppCommandsCommand implements BaseCommand {
         } else {
             const commands = await state.client.getCommands();
             for (const command of commands) {
-                logger.info(`Deleting global application command: ${command.id}`);
+                logger.info(
+                    `Deleting global application command: ${command.id}`
+                );
                 await state.client.deleteCommand(command.id);
             }
 
-            const debugServer = state.client.guilds.get(process.env.DEBUG_SERVER_ID);
+            const debugServer = state.client.guilds.get(
+                process.env.DEBUG_SERVER_ID
+            );
+
             if (!debugServer) return;
-            const guildCommands = await state.client.getGuildCommands(debugServer.id);
+            const guildCommands = await state.client.getGuildCommands(
+                debugServer.id
+            );
+
             for (const command of guildCommands) {
-                logger.info(`Deleting guild application command: ${command.id}`);
-                await state.client.deleteGuildCommand(debugServer.id, command.id);
+                logger.info(
+                    `Deleting guild application command: ${command.id}`
+                );
+
+                await state.client.deleteGuildCommand(
+                    debugServer.id,
+                    command.id
+                );
             }
 
             sendInfoMessage(MessageContext.fromMessage(message), {

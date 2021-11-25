@@ -1,10 +1,21 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import Eris from "eris";
 import dbContext from "../../database_context";
-import { fetchUser, getDebugLogHeader, getUserTag, sendErrorMessage, sendInfoMessage, tryCreateInteractionErrorAcknowledgement } from "../../helpers/discord_utils";
+import {
+    fetchUser,
+    getDebugLogHeader,
+    getUserTag,
+    sendErrorMessage,
+    sendInfoMessage,
+    tryCreateInteractionErrorAcknowledgement,
+} from "../../helpers/discord_utils";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
-import { friendlyFormattedDate, romanize, friendlyFormattedNumber } from "../../helpers/utils";
+import {
+    friendlyFormattedDate,
+    romanize,
+    friendlyFormattedNumber,
+} from "../../helpers/utils";
 import { CUM_EXP_TABLE } from "../../structures/game_session";
 import MessageContext from "../../structures/message_context";
 import { state } from "../../kmq_worker";
@@ -54,9 +65,19 @@ export function getRankNameByLevel(level: number): string {
     return RANK_TITLES[0].title;
 }
 
-async function getProfileFields(requestedPlayer: Eris.User): Promise<Array<Eris.EmbedField>> {
-    const playerStats = await dbContext.kmq("player_stats")
-        .select("songs_guessed", "games_played", "first_play", "last_active", "exp", "level")
+async function getProfileFields(
+    requestedPlayer: Eris.User
+): Promise<Array<Eris.EmbedField>> {
+    const playerStats = await dbContext
+        .kmq("player_stats")
+        .select(
+            "songs_guessed",
+            "games_played",
+            "first_play",
+            "last_active",
+            "exp",
+            "level"
+        )
         .where("player_id", "=", requestedPlayer.id)
         .first();
 
@@ -66,64 +87,106 @@ async function getProfileFields(requestedPlayer: Eris.User): Promise<Array<Eris.
 
     const songsGuessed = playerStats["songs_guessed"];
     const gamesPlayed = playerStats["games_played"];
-    const firstPlayDateString = friendlyFormattedDate(new Date(playerStats["first_play"]));
-    const lastActiveDateString = friendlyFormattedDate(new Date(playerStats["last_active"]));
+    const firstPlayDateString = friendlyFormattedDate(
+        new Date(playerStats["first_play"])
+    );
+
+    const lastActiveDateString = friendlyFormattedDate(
+        new Date(playerStats["last_active"])
+    );
+
     const exp = playerStats["exp"];
     const level = playerStats["level"];
 
-    const totalPlayers = (await dbContext.kmq("player_stats")
-        .count("* as count")
-        .where("exp", ">", "0")
-        .first())["count"] as number;
+    const totalPlayers = (
+        await dbContext
+            .kmq("player_stats")
+            .count("* as count")
+            .where("exp", ">", "0")
+            .first()
+    )["count"] as number;
 
-    const relativeSongRank = Math.min(((await dbContext.kmq("player_stats")
-        .count("* as count")
-        .where("songs_guessed", ">", songsGuessed)
-        .where("exp", ">", "0")
-        .first())["count"] as number) + 1, totalPlayers);
+    const relativeSongRank = Math.min(
+        ((
+            await dbContext
+                .kmq("player_stats")
+                .count("* as count")
+                .where("songs_guessed", ">", songsGuessed)
+                .where("exp", ">", "0")
+                .first()
+        )["count"] as number) + 1,
+        totalPlayers
+    );
 
-    const relativeGamesPlayedRank = Math.min(((await dbContext.kmq("player_stats")
-        .count("* as count")
-        .where("games_played", ">", gamesPlayed)
-        .where("exp", ">", "0")
-        .first())["count"] as number) + 1, totalPlayers);
+    const relativeGamesPlayedRank = Math.min(
+        ((
+            await dbContext
+                .kmq("player_stats")
+                .count("* as count")
+                .where("games_played", ">", gamesPlayed)
+                .where("exp", ">", "0")
+                .first()
+        )["count"] as number) + 1,
+        totalPlayers
+    );
 
-    const relativeLevelRank = Math.min(((await dbContext.kmq("player_stats")
-        .count("* as count")
-        .where("exp", ">", exp)
-        .first())["count"] as number) + 1, totalPlayers);
+    const relativeLevelRank = Math.min(
+        ((
+            await dbContext
+                .kmq("player_stats")
+                .count("* as count")
+                .where("exp", ">", exp)
+                .first()
+        )["count"] as number) + 1,
+        totalPlayers
+    );
 
-    const timesVotedData = (await dbContext.kmq("top_gg_user_votes")
+    const timesVotedData = await dbContext
+        .kmq("top_gg_user_votes")
         .select(["total_votes"])
         .where("user_id", "=", requestedPlayer.id)
-        .first());
+        .first();
 
     const timesVoted = timesVotedData ? timesVotedData["total_votes"] : 0;
 
     const fields: Array<Eris.EmbedField> = [
         {
             name: "Level",
-            value: `${friendlyFormattedNumber(level)} (${getRankNameByLevel(level)})`,
+            value: `${friendlyFormattedNumber(level)} (${getRankNameByLevel(
+                level
+            )})`,
             inline: true,
         },
         {
             name: "Experience",
-            value: `${friendlyFormattedNumber(exp)}/${friendlyFormattedNumber(CUM_EXP_TABLE[level + 1])}`,
+            value: `${friendlyFormattedNumber(exp)}/${friendlyFormattedNumber(
+                CUM_EXP_TABLE[level + 1]
+            )}`,
             inline: true,
         },
         {
             name: "Overall Rank",
-            value: `#${friendlyFormattedNumber(relativeLevelRank)}/${friendlyFormattedNumber(totalPlayers)}`,
+            value: `#${friendlyFormattedNumber(
+                relativeLevelRank
+            )}/${friendlyFormattedNumber(totalPlayers)}`,
             inline: true,
         },
         {
             name: "Songs Guessed",
-            value: `${friendlyFormattedNumber(songsGuessed)} | #${friendlyFormattedNumber(relativeSongRank)}/${friendlyFormattedNumber(totalPlayers)} `,
+            value: `${friendlyFormattedNumber(
+                songsGuessed
+            )} | #${friendlyFormattedNumber(
+                relativeSongRank
+            )}/${friendlyFormattedNumber(totalPlayers)} `,
             inline: true,
         },
         {
             name: "Games Played",
-            value: `${friendlyFormattedNumber(gamesPlayed)} | #${friendlyFormattedNumber(relativeGamesPlayedRank)}/${friendlyFormattedNumber(totalPlayers)} `,
+            value: `${friendlyFormattedNumber(
+                gamesPlayed
+            )} | #${friendlyFormattedNumber(
+                relativeGamesPlayedRank
+            )}/${friendlyFormattedNumber(totalPlayers)} `,
             inline: true,
         },
         {
@@ -140,16 +203,20 @@ async function getProfileFields(requestedPlayer: Eris.User): Promise<Array<Eris.
             name: "Times Voted",
             value: friendlyFormattedNumber(timesVoted),
             inline: true,
-        }];
+        },
+    ];
 
     // Optional fields
-    const badges = (await dbContext.kmq("badges_players")
-        .select(["badges.name as badge_name"])
-        .where("user_id", "=", requestedPlayer.id)
-        .join("badges", function join() {
-            this.on("badges_players.badge_id", "=", "badges.id");
-        })
-        .orderBy("badges.priority", "desc"))
+    const badges = (
+        await dbContext
+            .kmq("badges_players")
+            .select(["badges.name as badge_name"])
+            .where("user_id", "=", requestedPlayer.id)
+            .join("badges", function join() {
+                this.on("badges_players.badge_id", "=", "badges.id");
+            })
+            .orderBy("badges.priority", "desc")
+    )
         .map((x) => x["badge_name"])
         .join("\n");
 
@@ -169,18 +236,21 @@ export default class ProfileCommand implements BaseCommand {
         name: "profile",
         description: "Shows your game stats.",
         usage: ",profile { @mention }",
-        examples: [{
-            example: "`,profile`",
-            explanation: "View your own player profile.",
-        },
-        {
-            example: "`,profile @FortnitePlayer`",
-            explanation: "Views FortnitePlayer's player profile.",
-        },
-        {
-            example: "`,profile 141734249702096896`",
-            explanation: "Views a player profile based on their Discord ID.",
-        }],
+        examples: [
+            {
+                example: "`,profile`",
+                explanation: "View your own player profile.",
+            },
+            {
+                example: "`,profile @FortnitePlayer`",
+                explanation: "Views FortnitePlayer's player profile.",
+            },
+            {
+                example: "`,profile 141734249702096896`",
+                explanation:
+                    "Views a player profile based on their Discord ID.",
+            },
+        ],
         priority: 50,
     };
 
@@ -193,29 +263,48 @@ export default class ProfileCommand implements BaseCommand {
                 requestedPlayer = message.mentions[0];
             } else {
                 try {
-                    requestedPlayer = await fetchUser(parsedMessage.argument, true);
+                    requestedPlayer = await fetchUser(
+                        parsedMessage.argument,
+                        true
+                    );
                 } catch (e) {
                     requestedPlayer = null;
                 }
 
                 if (!requestedPlayer) {
-                    sendErrorMessage(MessageContext.fromMessage(message), { title: "No Profile Found", description: "Could not find the specified user ID. See `,help profile` for details." });
+                    sendErrorMessage(MessageContext.fromMessage(message), {
+                        title: "No Profile Found",
+                        description:
+                            "Could not find the specified user ID. See `,help profile` for details.",
+                    });
                     return;
                 }
             }
         } else {
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "No Profile Found", description: "Make sure you're using this command correctly. See `,help profile` for more details." });
+            sendErrorMessage(MessageContext.fromMessage(message), {
+                title: "No Profile Found",
+                description:
+                    "Make sure you're using this command correctly. See `,help profile` for more details.",
+            });
             return;
         }
 
         const fields = await getProfileFields(requestedPlayer);
 
         if (fields.length === 0) {
-            sendInfoMessage(MessageContext.fromMessage(message), { title: "No Profile Found", description: "This user needs to play their first game before their stats are tracked." });
+            sendInfoMessage(MessageContext.fromMessage(message), {
+                title: "No Profile Found",
+                description:
+                    "This user needs to play their first game before their stats are tracked.",
+            });
             return;
         }
 
-        logger.info(`${getDebugLogHeader(MessageContext.fromMessage(message))} | Profile retrieved`);
+        logger.info(
+            `${getDebugLogHeader(
+                MessageContext.fromMessage(message)
+            )} | Profile retrieved`
+        );
 
         sendInfoMessage(MessageContext.fromMessage(message), {
             title: getUserTag(requestedPlayer),
@@ -234,33 +323,62 @@ export default class ProfileCommand implements BaseCommand {
  * @param interaction - The originating interaction
  * @param userId - The ID of the user retrieve profile information from
  */
-export async function handleProfileInteraction(interaction: Eris.CommandInteraction, userId: string): Promise<void> {
+export async function handleProfileInteraction(
+    interaction: Eris.CommandInteraction,
+    userId: string
+): Promise<void> {
     const user = await state.ipc.fetchUser(userId);
     if (!user) {
-        tryCreateInteractionErrorAcknowledgement(interaction, `I can't access that user right now. Try using \`${process.env.BOT_PREFIX}profile ${userId}\` instead.`);
-        logger.info(`${getDebugLogHeader(interaction)} | Failed retrieving profile on inaccessible player via interaction`);
+        tryCreateInteractionErrorAcknowledgement(
+            interaction,
+            `I can't access that user right now. Try using \`${process.env.BOT_PREFIX}profile ${userId}\` instead.`
+        );
+
+        logger.info(
+            `${getDebugLogHeader(
+                interaction
+            )} | Failed retrieving profile on inaccessible player via interaction`
+        );
         return;
     }
 
     const fields = await getProfileFields(user);
     if (fields.length === 0) {
-        tryCreateInteractionErrorAcknowledgement(interaction, "This user needs to play their first game before their stats are tracked.");
-        logger.info(`${getDebugLogHeader(interaction)} | Empty profile retrieved via interaction`);
+        tryCreateInteractionErrorAcknowledgement(
+            interaction,
+            "This user needs to play their first game before their stats are tracked."
+        );
+
+        logger.info(
+            `${getDebugLogHeader(
+                interaction
+            )} | Empty profile retrieved via interaction`
+        );
         return;
     }
 
     try {
         await interaction.createMessage({
-            embeds: [{
-                title: getUserTag(user),
-                fields,
-                timestamp: new Date(),
-            }],
+            embeds: [
+                {
+                    title: getUserTag(user),
+                    fields,
+                    timestamp: new Date(),
+                },
+            ],
             flags: 64,
         });
 
-        logger.info(`${getDebugLogHeader(interaction)} | Profile retrieved via interaction`);
+        logger.info(
+            `${getDebugLogHeader(
+                interaction
+            )} | Profile retrieved via interaction`
+        );
     } catch (err) {
-        logger.error(`${getDebugLogHeader(interaction)} | Interaction acknowledge failed. err = ${err.stack}`);
+        logger.error(
+            `${getDebugLogHeader(
+                interaction
+            )} | Interaction acknowledge failed. err = ${err.stack}`
+        );
     }
 }

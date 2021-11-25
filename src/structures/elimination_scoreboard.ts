@@ -25,8 +25,18 @@ export default class EliminationScoreboard extends Scoreboard {
      * @param lives - The number of lives the player starts with
      * @returns the EliminationPlayer added
      */
-    addPlayer(userID: string, tag: string, avatarUrl: string, lives?: number): EliminationPlayer {
-        this.players[userID] = new EliminationPlayer(tag, userID, avatarUrl, lives ?? this.startingLives);
+    addPlayer(
+        userID: string,
+        tag: string,
+        avatarUrl: string,
+        lives?: number
+    ): EliminationPlayer {
+        this.players[userID] = new EliminationPlayer(
+            tag,
+            userID,
+            avatarUrl,
+            lives ?? this.startingLives
+        );
         return this.players[userID];
     }
 
@@ -81,10 +91,16 @@ export default class EliminationScoreboard extends Scoreboard {
     gameFinished(): boolean {
         // Game ends if
         // (1) all players are eliminated that round or
-        const allEliminated = Object.values(this.players).every((player) => player.isEliminated());
+        const allEliminated = Object.values(this.players).every((player) =>
+            player.isEliminated()
+        );
+
         // (2) there is one player left in a game that started with multiple players
-        const oneLeft = Object.values(this.players).length > 1
-            && Object.values(this.players).filter((player) => !player.isEliminated()).length === 1;
+        const oneLeft =
+            Object.values(this.players).length > 1 &&
+            Object.values(this.players).filter(
+                (player) => !player.isEliminated()
+            ).length === 1;
 
         return allEliminated || oneLeft;
     }
@@ -101,7 +117,9 @@ export default class EliminationScoreboard extends Scoreboard {
     getLivesOfWeakestPlayer(): number {
         const minimumLives = Object.values(this.players)
             .filter((x) => x.getLives() > 0)
-            .reduce((prev, curr) => (prev.getLives() < curr.getLives() ? prev : curr))
+            .reduce((prev, curr) =>
+                prev.getLives() < curr.getLives() ? prev : curr
+            )
             .getLives();
 
         return minimumLives;
@@ -109,6 +127,8 @@ export default class EliminationScoreboard extends Scoreboard {
 
     /** @returns the number of players that are alive */
     getAlivePlayersCount(): number {
-        return Object.values(this.players).filter((player) => !player.isEliminated()).length;
+        return Object.values(this.players).filter(
+            (player) => !player.isEliminated()
+        ).length;
     }
 }

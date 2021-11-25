@@ -16,11 +16,15 @@ import CommandPrechecks from "../../command_prechecks";
 const logger = new IPCLogger("forceskip");
 
 export default class ForceSkipCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.inGameCommandPrecheck }, { checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.inGameCommandPrecheck },
+        { checkFn: CommandPrechecks.competitionPrecheck },
+    ];
 
     help = {
         name: "forceskip",
-        description: "The person that started the game can force-skip the current song, no majority necessary.",
+        description:
+            "The person that started the game can force-skip the current song, no majority necessary.",
         usage: ",forceskip",
         examples: [],
         priority: 1009,
@@ -31,8 +35,20 @@ export default class ForceSkipCommand implements BaseCommand {
     call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         const gameSession = gameSessions[message.guildID];
-        if (!gameSession || !gameSession.gameRound || !areUserAndBotInSameVoiceChannel(message)) {
-            logger.warn(`${getDebugLogHeader(message)} | Invalid force-skip. !gameSession: ${!gameSession}. !gameSession.gameRound: ${gameSession && !gameSession.gameRound}. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(message)}`);
+        if (
+            !gameSession ||
+            !gameSession.gameRound ||
+            !areUserAndBotInSameVoiceChannel(message)
+        ) {
+            logger.warn(
+                `${getDebugLogHeader(
+                    message
+                )} | Invalid force-skip. !gameSession: ${!gameSession}. !gameSession.gameRound: ${
+                    gameSession && !gameSession.gameRound
+                }. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(
+                    message
+                )}`
+            );
             return;
         }
 
@@ -42,20 +58,37 @@ export default class ForceSkipCommand implements BaseCommand {
         }
 
         if (message.author.id !== gameSession.owner.id) {
-            await sendErrorMessage(MessageContext.fromMessage(message), { title: "Force Skip Ignored", description: `Only the person who started the game (${getMention(gameSession.owner.id)}) can force-skip.` });
+            await sendErrorMessage(MessageContext.fromMessage(message), {
+                title: "Force Skip Ignored",
+                description: `Only the person who started the game (${getMention(
+                    gameSession.owner.id
+                )}) can force-skip.`,
+            });
             return;
         }
 
         gameSession.gameRound.skipAchieved = true;
-        sendInfoMessage(MessageContext.fromMessage(message), {
-            color: EMBED_SUCCESS_COLOR,
-            title: "Skip",
-            description: "Owner has forceskipped the round...",
-            thumbnailUrl: KmqImages.NOT_IMPRESSED,
-        }, true);
+        sendInfoMessage(
+            MessageContext.fromMessage(message),
+            {
+                color: EMBED_SUCCESS_COLOR,
+                title: "Skip",
+                description: "Owner has forceskipped the round...",
+                thumbnailUrl: KmqImages.NOT_IMPRESSED,
+            },
+            true
+        );
 
-        await gameSession.endRound({ correct: false }, guildPreference, MessageContext.fromMessage(message));
-        await gameSession.startRound(guildPreference, MessageContext.fromMessage(message));
+        await gameSession.endRound(
+            { correct: false },
+            guildPreference,
+            MessageContext.fromMessage(message)
+        );
+
+        await gameSession.startRound(
+            guildPreference,
+            MessageContext.fromMessage(message)
+        );
         gameSession.lastActiveNow();
         logger.info(`${getDebugLogHeader(message)} | Owner force-skipped.`);
     };

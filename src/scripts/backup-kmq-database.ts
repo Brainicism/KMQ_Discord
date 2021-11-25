@@ -10,8 +10,7 @@ const BACKUP_TTL = 30;
 const databaseBackupDir = join(__dirname, "../../sql_dumps/kmq_backup");
 
 const logger = new IPCLogger("backup-kmq");
-program
-    .option("-i, --import <file>", "The dump file to import");
+program.option("-i, --import <file>", "The dump file to import");
 
 program.parse();
 const options = program.opts();
@@ -24,18 +23,29 @@ async function backupKmqDatabase(): Promise<void> {
         fs.mkdirSync(databaseBackupDir);
     }
 
-    execSync(`find ${databaseBackupDir} -mindepth 1 -name "*kmq_backup_*" -mtime +${BACKUP_TTL} -delete`);
+    execSync(
+        `find ${databaseBackupDir} -mindepth 1 -name "*kmq_backup_*" -mtime +${BACKUP_TTL} -delete`
+    );
 
     return new Promise((resolve, reject) => {
-        exec(`mysqldump -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} --routines kmq > ${databaseBackupDir}/kmq_backup_${standardDateFormat(new Date())}.sql`, (err) => {
-            if (err) {
-                logger.error(`Error backing up kmq database, err = ${err}`);
-                reject(err);
-                return;
-            }
+        exec(
+            `mysqldump -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${
+                process.env.DB_HOST
+            } --port ${
+                process.env.DB_PORT
+            } --routines kmq > ${databaseBackupDir}/kmq_backup_${standardDateFormat(
+                new Date()
+            )}.sql`,
+            (err) => {
+                if (err) {
+                    logger.error(`Error backing up kmq database, err = ${err}`);
+                    reject(err);
+                    return;
+                }
 
-            resolve();
-        });
+                resolve();
+            }
+        );
     });
 }
 
@@ -46,7 +56,9 @@ function importKmqDatabase(fileWithPath: string): void {
     }
 
     logger.info(`Beginning import of ${fileWithPath}`);
-    execSync(`mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT}  kmq < ${fileWithPath}`);
+    execSync(
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT}  kmq < ${fileWithPath}`
+    );
     logger.info("Finished import");
 }
 

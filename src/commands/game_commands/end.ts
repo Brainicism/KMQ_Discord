@@ -6,7 +6,10 @@ import CommandPrechecks from "../../command_prechecks";
 const logger = new IPCLogger("end");
 
 export default class EndCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.inGameCommandPrecheck }, { checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.inGameCommandPrecheck },
+        { checkFn: CommandPrechecks.competitionPrecheck },
+    ];
 
     help = {
         name: "end",
@@ -21,7 +24,9 @@ export default class EndCommand implements BaseCommand {
     call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
         const gameSession = gameSessions[message.guildID];
         if (!gameSession) {
-            logger.warn(`${getDebugLogHeader(message)} | No active game session`);
+            logger.warn(
+                `${getDebugLogHeader(message)} | No active game session`
+            );
             return;
         }
 

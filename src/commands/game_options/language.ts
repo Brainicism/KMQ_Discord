@@ -1,7 +1,10 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
-import { getDebugLogHeader, sendOptionsMessage } from "../../helpers/discord_utils";
+import {
+    getDebugLogHeader,
+    sendOptionsMessage,
+} from "../../helpers/discord_utils";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
@@ -38,7 +41,8 @@ export default class LanguageCommand implements BaseCommand {
         examples: [
             {
                 example: "`,language korean`",
-                explanation: "Plays only korean songs. Ignores songs that are in foreign languages: english, japanese, chinese.",
+                explanation:
+                    "Plays only korean songs. Ignores songs that are in foreign languages: english, japanese, chinese.",
             },
             {
                 example: "`,language all`",
@@ -56,14 +60,27 @@ export default class LanguageCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.LANGUAGE_TYPE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.LANGUAGE_TYPE, reset: true }]);
+            await sendOptionsMessage(
+                MessageContext.fromMessage(message),
+                guildPreference,
+                [{ option: GameOption.LANGUAGE_TYPE, reset: true }]
+            );
             logger.info(`${getDebugLogHeader(message)} | Language type reset.`);
             return;
         }
 
         const languageType = parsedMessage.components[0] as LanguageType;
         await guildPreference.setLanguageType(languageType);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.LANGUAGE_TYPE, reset: false }]);
-        logger.info(`${getDebugLogHeader(message)} | Language type set to ${languageType}`);
+        await sendOptionsMessage(
+            MessageContext.fromMessage(message),
+            guildPreference,
+            [{ option: GameOption.LANGUAGE_TYPE, reset: false }]
+        );
+
+        logger.info(
+            `${getDebugLogHeader(
+                message
+            )} | Language type set to ${languageType}`
+        );
     };
 }

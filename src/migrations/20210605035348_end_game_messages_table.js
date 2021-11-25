@@ -1,5 +1,4 @@
-
-exports.up = function(knex) {
+exports.up = function (knex) {
     return knex.schema.createTable("end_game_messages", (table) => {
         table.string("category").notNullable();
         table.string("title").notNullable();
@@ -9,6 +8,6 @@ exports.up = function(knex) {
     });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
     return knex.schema.dropTableIfExists("end_game_messages");
 };

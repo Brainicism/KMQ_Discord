@@ -1,5 +1,8 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
+import {
+    sendOptionsMessage,
+    getDebugLogHeader,
+} from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
@@ -51,7 +54,14 @@ export const specialFfmpegArgs = {
 };
 
 export default class SpecialCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.debugServerPrecheck, errorMessage: "This is an unreleased game option, and can only be used on the official KMQ server" }, { checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        {
+            checkFn: CommandPrechecks.debugServerPrecheck,
+            errorMessage:
+                "This is an unreleased game option, and can only be used on the official KMQ server",
+        },
+        { checkFn: CommandPrechecks.competitionPrecheck },
+    ];
 
     validations = {
         minArgCount: 0,
@@ -67,7 +77,8 @@ export default class SpecialCommand implements BaseCommand {
 
     help = {
         name: "special",
-        description: "Hey. This hasn't been announced yet, but check out the KMQ server to try it out! Play a special mode with modified audio.",
+        description:
+            "Hey. This hasn't been announced yet, but check out the KMQ server to try it out! Play a special mode with modified audio.",
         usage: ",special [reverse | slow | fast | faster | low_pitch | high_pitch | nightcore]",
         examples: [
             {
@@ -110,14 +121,25 @@ export default class SpecialCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.SPECIAL_TYPE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.SPECIAL_TYPE, reset: true }]);
+            await sendOptionsMessage(
+                MessageContext.fromMessage(message),
+                guildPreference,
+                [{ option: GameOption.SPECIAL_TYPE, reset: true }]
+            );
             logger.info(`${getDebugLogHeader(message)} | Special reset.`);
             return;
         }
 
         const specialType = parsedMessage.components[0] as SpecialType;
         await guildPreference.setSpecialType(specialType);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.SPECIAL_TYPE, reset: false }]);
-        logger.info(`${getDebugLogHeader(message)} | Special type set to ${specialType}`);
+        await sendOptionsMessage(
+            MessageContext.fromMessage(message),
+            guildPreference,
+            [{ option: GameOption.SPECIAL_TYPE, reset: false }]
+        );
+
+        logger.info(
+            `${getDebugLogHeader(message)} | Special type set to ${specialType}`
+        );
     };
 }
