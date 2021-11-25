@@ -1,6 +1,6 @@
 {
     "extends": [
-        "airbnb-typescript/base"
+        "airbnb-typescript/base", "prettier"
     ],
     "plugins": [
         "eslint-plugin-tsdoc",
