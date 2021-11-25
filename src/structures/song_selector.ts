@@ -10,7 +10,7 @@ import { ReleaseType, NON_OFFICIAL_VIDEO_TAGS } from "../commands/game_options/r
 import { setDifference } from "../helpers/utils";
 import { ShuffleType } from "../commands/game_options/shuffle";
 
-const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
+export const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
 
 export interface UniqueSongCounter {
     uniqueSongsPlayed: number;

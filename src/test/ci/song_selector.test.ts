@@ -6,7 +6,7 @@ import { NON_OFFICIAL_VIDEO_TAGS, ReleaseType } from "../../commands/game_option
 import { SubunitsPreference } from "../../commands/game_options/subunits";
 import GuildPreference from "../../structures/guild_preference";
 import { mockArtists, mockSongs } from "../test_setup";
-import SongSelector from "../../structures/song_selector";
+import SongSelector, { LAST_PLAYED_SONG_QUEUE_SIZE } from "../../structures/song_selector";
 import { ArtistType } from "../../commands/game_options/artisttype";
 import { getMatchingGroupNames } from "../../helpers/game_utils";
 import { FOREIGN_LANGUAGE_TAGS, LanguageType } from "../../commands/game_options/language";
@@ -545,6 +545,79 @@ describe("checkUniqueSongQueue", () => {
                     songSelector.uniqueSongsPlayed = new Set(songs.slice(0, numberSongs).concat(songsNotInSet));
                     assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), true);
                     assert.strictEqual(resetSpy.called, true);
+                });
+            });
+        });
+    });
+});
+
+describe("checkLastPlayedSongs", () => {
+    let songSelector: SongSelector;
+
+    beforeEach(async () => {
+        songSelector = new SongSelector();
+    });
+
+    describe("empty last played history", () => {
+        it("should not change", async () => {
+            await songSelector.reloadSongs(guildPreference);
+            songSelector.lastPlayedSongs = [];
+            songSelector.checkLastPlayedSongs();
+            assert.strictEqual(songSelector.lastPlayedSongs.length, 0);
+        });
+    });
+
+    describe("selected song set smaller than last played history threshold", () => {
+        it("should reset to zero", async () => {
+            const numSongs = LAST_PLAYED_SONG_QUEUE_SIZE - 1;
+            await guildPreference.setLimit(0, numSongs);
+            await songSelector.reloadSongs(guildPreference);
+            const songs = [...songSelector.getSongs().songs].map((x) => x.youtubeLink);
+            const songsPlayed = songs.slice(0, numSongs / 2);
+            songSelector.lastPlayedSongs = songsPlayed;
+            songSelector.checkLastPlayedSongs();
+            assert.strictEqual(songSelector.lastPlayedSongs.length, 0);
+        });
+    });
+
+    describe("selected song set larger than last played history threshold", () => {
+        describe("last played history smaller than threshold", () => {
+            it("should not change", async () => {
+                const numSongs = LAST_PLAYED_SONG_QUEUE_SIZE + 5;
+                await guildPreference.setLimit(0, numSongs);
+                await songSelector.reloadSongs(guildPreference);
+                const songs = [...songSelector.getSongs().songs].map((x) => x.youtubeLink);
+                const songsPlayed = songs.slice(0, LAST_PLAYED_SONG_QUEUE_SIZE - 1);
+                songSelector.lastPlayedSongs = songsPlayed;
+                songSelector.checkLastPlayedSongs();
+                assert.strictEqual(songSelector.lastPlayedSongs.length, songsPlayed.length);
+            });
+        });
+
+        describe("last played history equal to threshold", () => {
+            describe("selected song set is large", () => {
+                it("should shift the queue", async () => {
+                    const numSongs = 100;
+                    await guildPreference.setLimit(0, numSongs);
+                    await songSelector.reloadSongs(guildPreference);
+                    const songs = [...songSelector.getSongs().songs].map((x) => x.youtubeLink);
+                    songSelector.lastPlayedSongs = songs.slice(0, LAST_PLAYED_SONG_QUEUE_SIZE);
+                    songSelector.checkLastPlayedSongs();
+                    assert.strictEqual(songSelector.lastPlayedSongs.length, LAST_PLAYED_SONG_QUEUE_SIZE - 1);
+                    assert.strictEqual(songSelector.lastPlayedSongs[0], songs[1]);
+                });
+            });
+
+            describe("selected song set is small", () => {
+                it("should purge only half of the queue", async () => {
+                    const numSongs = LAST_PLAYED_SONG_QUEUE_SIZE * 1.5;
+                    await guildPreference.setLimit(0, numSongs);
+                    await songSelector.reloadSongs(guildPreference);
+                    const songs = [...songSelector.getSongs().songs].map((x) => x.youtubeLink);
+                    songSelector.lastPlayedSongs = songs.slice(0, LAST_PLAYED_SONG_QUEUE_SIZE);
+                    songSelector.checkLastPlayedSongs();
+                    assert.strictEqual(songSelector.lastPlayedSongs.length, LAST_PLAYED_SONG_QUEUE_SIZE / 2 - 1);
+                    assert.strictEqual(songSelector.lastPlayedSongs[0], songs[LAST_PLAYED_SONG_QUEUE_SIZE / 2 + 1]);
                 });
             });
         });
