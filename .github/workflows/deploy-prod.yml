@@ -10,11 +10,21 @@ jobs:
     steps:
       - name: Checkout KMQ_Discord
         uses: actions/checkout@v2
-      - uses: webfactory/ssh-agent@v0.5.4
-        with:
-            ssh-private-key: ${{ secrets.SSH_DEPLOY_PRIVATE_KEY }}
-      - name: Install node dependencies
-        run: ssh ${{ secrets.PROD_SSH_CONNECTION_STRING }} "touch ok"
-
-
-     
+      - name: Snap prod branch
+        run: |
+          git checkout prod
+          echo "Checking out 'prod', latest commit:"
+          git log -n 1 --pretty
+          git pull --rebase origin master
+          echo "Rebasing off 'master', latest commit:"
+          git log -n 1 --pretty
+          git push
+          echo "Pushing new prod branch"
+      - name: Install SSH Keys
+        run: |
+          echo "Installing SSH keys"
+          install -m 600 -D /dev/null ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_DEPLOY_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+      - name: Deploy over SSH
+        run: ssh ${{ secrets.PROD_SSH_CONNECTION_STRING }} -m .github/workflows/redeploy_prod.sh
