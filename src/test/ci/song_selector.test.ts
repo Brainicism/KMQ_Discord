@@ -468,7 +468,7 @@ describe("checkUniqueSongQueue", () => {
                         assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), false);
                     }
 
-                    assert.strictEqual(resetSpy.notCalled, true);
+                    assert.strictEqual(resetSpy.called, false);
                 });
             });
 
@@ -485,6 +485,7 @@ describe("checkUniqueSongQueue", () => {
                         assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), false);
                     }
 
+                    assert.strictEqual(resetSpy.called, false);
                     // play the last song
                     await songSelector.queryRandomSong(guildPreference);
                     assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), true);
@@ -505,7 +506,6 @@ describe("checkUniqueSongQueue", () => {
                         await songSelector.queryRandomSong(guildPreference);
                         if (i > 0 && ((i + 1) % numberSongs === 0)) {
                             assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), true);
-                            assert.strictEqual(resetSpy.called, true);
                         } else {
                             assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), false);
                         }
@@ -529,6 +529,7 @@ describe("checkUniqueSongQueue", () => {
                     const songs = [...songSelector.getSongs().songs].map((x) => x.youtubeLink).slice(0, newNumberSongs + 1);
                     songSelector.uniqueSongsPlayed = new Set(songs);
                     assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), false);
+                    assert.strictEqual(resetSpy.called, false);
 
                     // reload for new selected song set
                     await guildPreference.setLimit(0, newNumberSongs);
@@ -557,6 +558,7 @@ describe("checkUniqueSongQueue", () => {
                     await guildPreference.setLimit(0, newNumberSongs);
                     await songSelector.reloadSongs(guildPreference);
                     assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), false);
+                    assert.strictEqual(resetSpy.called, false);
 
                     // play remaining two songs
                     songs = [...songSelector.getSongs().songs].map((x) => x.youtubeLink);
@@ -675,6 +677,7 @@ describe("checkAlternatingGender", () => {
     describe("alternating gender is not set", () => {
         it("should set lastAlternatingGender to null", async () => {
             await guildPreference.setGender([Gender.MALE]);
+            assert.strictEqual(songSelector.lastAlternatingGender, null);
         });
     });
 
