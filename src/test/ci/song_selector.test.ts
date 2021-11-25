@@ -388,6 +388,48 @@ describe("selectRandomSong", () => {
     });
 });
 
+describe("queryRandomSong", () => {
+    let songSelector: SongSelector;
+
+    beforeEach(async () => {
+        songSelector = new SongSelector();
+    });
+
+    describe("normal case", () => {
+        it("should return the random song, and add to last played history", async () => {
+            await songSelector.reloadSongs(guildPreference);
+            const song = await songSelector.queryRandomSong(guildPreference);
+            assert(song);
+            assert.strictEqual(songSelector.lastPlayedSongs.length, 1);
+            assert.strictEqual(songSelector.lastPlayedSongs[0], song.youtubeLink);
+        });
+    });
+
+    describe("selected song set smaller than last played history threshold", () => {
+        it("should return null, and NOT add to last played history", async () => {
+            await guildPreference.setLimit(0, 0);
+            await songSelector.reloadSongs(guildPreference);
+            const song = await songSelector.queryRandomSong(guildPreference);
+            assert.strictEqual(song, null);
+            assert.strictEqual(songSelector.lastPlayedSongs.length, 0);
+        });
+    });
+
+    describe("unique shuffle mode", () => {
+        it("should return the random song, and add to last played history, and unique song history", async () => {
+            await guildPreference.setShuffleType(ShuffleType.UNIQUE);
+            await songSelector.reloadSongs(guildPreference);
+            const song = await songSelector.queryRandomSong(guildPreference);
+            assert(song);
+            assert.strictEqual(songSelector.lastPlayedSongs.length, 1);
+            assert.strictEqual(songSelector.lastPlayedSongs[0], song.youtubeLink);
+
+            assert.strictEqual(songSelector.uniqueSongsPlayed.size, 1);
+            assert.strictEqual([...songSelector.uniqueSongsPlayed][0], song.youtubeLink);
+        });
+    });
+});
+
 describe("checkUniqueSongQueue", () => {
     let songSelector: SongSelector;
     const sandbox = sinon.createSandbox();
@@ -407,7 +449,7 @@ describe("checkUniqueSongQueue", () => {
             await guildPreference.setShuffleType(ShuffleType.RANDOM);
             await songSelector.reloadSongs(guildPreference);
             assert.strictEqual(songSelector.checkUniqueSongQueue(guildPreference), false);
-            // assert.strictEqual(resetSpy.notCalled, true);
+            assert.strictEqual(resetSpy.called, true);
         });
     });
 
