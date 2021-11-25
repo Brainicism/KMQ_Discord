@@ -17,7 +17,7 @@ program.parse();
 const options = program.opts();
 
 /**
- *
+ * Backups the current KMQ database
  */
 async function backupKmqDatabase(): Promise<void> {
     if (!fs.existsSync(databaseBackupDir)) {

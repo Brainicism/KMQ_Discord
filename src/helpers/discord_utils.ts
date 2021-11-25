@@ -380,7 +380,7 @@ export async function sendInfoMessage(messageContext: MessageContext, embedPaylo
  * @param guessModeType - The type of guess mode
  * @param playerRoundResults - The player round results
  * @param isMultipleChoiceMode  - Whether the game is in multiple choice mode
- * @param timeRemaining - The time remaining for the timer option
+ * @param timeRemaining - The time remaining for the duration option
  * @param uniqueSongCounter - The unique song counter
  */
 export async function sendEndRoundMessage(messageContext: MessageContext,

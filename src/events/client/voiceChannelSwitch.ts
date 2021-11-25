@@ -3,7 +3,7 @@ import { state } from "../../kmq_worker";
 import { checkBotIsAlone } from "../../helpers/discord_utils";
 
 /**
- * Handles teh 'voiceChannelSwitch' event
+ * Handles the 'voiceChannelSwitch' event
  * @param member - The member that left the voice channel
  * @param newChannel - The voice channel the member joined
  * @param oldChannel - The voice channel the member left

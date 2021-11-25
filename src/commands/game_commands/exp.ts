@@ -61,8 +61,8 @@ interface ExpModifier {
 /**
  * Calculates the exp multiplier based on the round options
  * @param guildPreference - The guild preference
- * @param voteBonusExp - Whetther bonus EXP should be applied to the modifier
- * @returns an array describing the EXP modifiers activated and their numierical value
+ * @param voteBonusExp - Whether bonus EXP should be applied to the modifier
+ * @returns an array describing the EXP modifiers activated and their numerical value
  */
 export async function calculateOptionsExpMultiplierInternal(guildPreference: GuildPreference, voteBonusExp: boolean): Promise<Array<ExpModifier>> {
     const modifiers: Array<ExpModifier> = [];
@@ -143,7 +143,7 @@ async function calculateOptionsExpMultiplier(guildPreference: GuildPreference, v
 
 /**
  * @param numParticipants - The number of participants
- * @returns the EXP modifiered based onthe number of participants
+ * @returns the EXP modifier based on the number of participants
  */
 export function participantExpScalingModifier(numParticipants: number): number {
     return (1 + 0.1 * (Math.min(numParticipants, PARTICIPANT_MODIFIER_MAX_PARTICIPANTS) - 1));
@@ -193,7 +193,7 @@ export function calculateRoundExpMultiplier(gameRound: GameRound, numParticipant
  * @param streak - The current guessing streak
  * @param guessSpeed - The guess speed
  * @param place - The place of the guess
- * @param voteBonusExp - Whetther bonus EXP should be applied to the modifier
+ * @param voteBonusExp - Whether bonus EXP should be applied to the modifier
  * @returns the round's total EXP based on the EXP modifiers
  */
 export async function calculateTotalRoundExp(guildPreference: GuildPreference, gameRound: GameRound,

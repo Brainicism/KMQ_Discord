@@ -172,7 +172,7 @@ export default class TeamScoreboard extends Scoreboard {
     }
 
     /**
-     * @param userID - The unique identifier of the player whose score is being incremented
+     * @param userID - The unique identifier of the player to get
      * @returns the player's tag
      */
     getPlayerName(userID: string): string {

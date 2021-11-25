@@ -49,7 +49,7 @@ async function sendHintNotification(message: GuildTextableMessage, gameSession: 
  * @param gameSession - The game session
  * @param guildPreference - The guild preference
  * @param gameRound - The game round
- * @param message - The originiating messages
+ * @param message - The originating message
  * @returns whether the hint request was valid
  */
 export function validHintCheck(gameSession: GameSession, guildPreference: GuildPreference, gameRound: GameRound, message: GuildTextableMessage): boolean {

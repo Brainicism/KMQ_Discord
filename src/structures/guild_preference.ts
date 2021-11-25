@@ -120,7 +120,7 @@ export const GameOptionInternalToGameOption: { [option: string]: string } = {
 /**
  * @param groups - The artists to combine into a string
  * @param truncate - Whether to truncuate the final result
- * @param spaceDelimiter - Wheter to space delimit the final result
+ * @param spaceDelimiter - Whether to space delimit the final result
  * @returns the truncated string
  */
 function getGroupNamesString(groups: MatchedArtist[], truncate = true, spaceDelimiter = true): string {
