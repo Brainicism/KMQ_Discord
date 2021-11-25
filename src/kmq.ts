@@ -18,7 +18,11 @@ import dbContext from "./database_context";
 import { reloadFactCache } from "./fact_generator";
 import { EnvType } from "./types";
 import { seedAndDownloadNewSongs } from "./seed/seed_db";
-import { EMBED_ERROR_COLOR, EMBED_SUCCESS_COLOR, sendDebugAlertWebhook } from "./helpers/discord_utils";
+import {
+    EMBED_ERROR_COLOR,
+    EMBED_SUCCESS_COLOR,
+    sendDebugAlertWebhook,
+} from "./helpers/discord_utils";
 import { KmqImages } from "./constants";
 import KmqClient from "./kmq_client";
 import backupKmqDatabase from "./scripts/backup-kmq-database";
@@ -59,7 +63,11 @@ const options: Options = {
         restMode: true,
         maxShards: "auto" as const,
         messageLimit: 0,
-        intents: ERIS_INTENTS.guilds ^ ERIS_INTENTS.guildVoiceStates ^ ERIS_INTENTS.guildMessages ^ ERIS_INTENTS.guildMessageReactions,
+        intents:
+            ERIS_INTENTS.guilds ^
+            ERIS_INTENTS.guildVoiceStates ^
+            ERIS_INTENTS.guildMessages ^
+            ERIS_INTENTS.guildMessageReactions,
     },
     fetchTimeout: 5000,
     customClient: KmqClient,
@@ -84,7 +92,10 @@ function registerGlobalIntervals(fleet: Fleet): void {
     schedule.scheduleJob("15 * * * *", async () => {
         if (process.env.NODE_ENV !== EnvType.PROD) return;
         logger.info("Performing regularly scheduled Daisuki database seed");
-        const overrideFileExists = fs.existsSync(path.join(__dirname, "../../data/skip_seed"));
+        const overrideFileExists = fs.existsSync(
+            path.join(__dirname, "../../data/skip_seed")
+        );
+
         if (overrideFileExists) {
             return;
         }
@@ -92,28 +103,36 @@ function registerGlobalIntervals(fleet: Fleet): void {
         try {
             await seedAndDownloadNewSongs(dbContext);
         } catch (e) {
-            sendDebugAlertWebhook("Download and seed failure", e.toString(), EMBED_ERROR_COLOR, KmqImages.NOT_IMPRESSED);
+            sendDebugAlertWebhook(
+                "Download and seed failure",
+                e.toString(),
+                EMBED_ERROR_COLOR,
+                KmqImages.NOT_IMPRESSED
+            );
         }
     });
 
     // every minute
     schedule.scheduleJob("* * * * *", async () => {
-        await dbContext.kmq("system_stats")
-            .insert({
-                stat_name: "request_latency",
-                stat_value: fleet.eris.requestHandler.latencyRef.latency,
-                date: new Date(),
-            });
+        await dbContext.kmq("system_stats").insert({
+            stat_name: "request_latency",
+            stat_value: fleet.eris.requestHandler.latencyRef.latency,
+            date: new Date(),
+        });
     });
 }
 
 function registerProcessEvents(fleet: Fleet): void {
     process.on("unhandledRejection", (error: Error) => {
-        logger.error(`Admiral Unhandled Rejection at: Reason: ${error.message}. Trace: ${error.stack}`);
+        logger.error(
+            `Admiral Unhandled Rejection at: Reason: ${error.message}. Trace: ${error.stack}`
+        );
     });
 
     process.on("uncaughtException", (err: Error) => {
-        logger.error(`Admiral Uncaught Exception. Reason: ${err}. Trace: ${err.stack}`);
+        logger.error(
+            `Admiral Uncaught Exception. Reason: ${err}. Trace: ${err.stack}`
+        );
     });
 
     process.on("SIGINT", () => {
@@ -136,7 +155,9 @@ async function startWebServer(fleet: Fleet): Promise<void> {
     httpServer.post("/voted", {}, async (request, reply) => {
         const requestAuthorizationToken = request.headers["authorization"];
         if (requestAuthorizationToken !== process.env.TOP_GG_WEBHOOK_AUTH) {
-            logger.warn("Webhook received with non-matching authorization token");
+            logger.warn(
+                "Webhook received with non-matching authorization token"
+            );
             reply.code(401).send();
             return;
         }
@@ -154,7 +175,10 @@ async function startWebServer(fleet: Fleet): Promise<void> {
         let gameplayStats: Map<number, any>;
         let fleetStats: Stats;
         try {
-            gameplayStats = await fleet.ipc.allClustersCommand("game_session_stats", true) as Map<number, any>;
+            gameplayStats = (await fleet.ipc.allClustersCommand(
+                "game_session_stats",
+                true
+            )) as Map<number, any>;
             fleetStats = await fleet.collectStats();
         } catch (e) {
             logger.error(`Error fetching stats for status page. err = ${e}`);
@@ -166,8 +190,10 @@ async function startWebServer(fleet: Fleet): Promise<void> {
             const cluster = fleetStats.clusters[i];
             const shardData = cluster.shards.map((rawShardData) => {
                 let healthIndicator: HealthIndicator;
-                if (rawShardData.ready === false) healthIndicator = HealthIndicator.UNHEALTHY;
-                else if (rawShardData.latency > 300) healthIndicator = HealthIndicator.WARNING;
+                if (rawShardData.ready === false)
+                    healthIndicator = HealthIndicator.UNHEALTHY;
+                else if (rawShardData.latency > 300)
+                    healthIndicator = HealthIndicator.WARNING;
                 else healthIndicator = HealthIndicator.HEALTHY;
                 return {
                     latency: rawShardData.latency,
@@ -182,8 +208,12 @@ async function startWebServer(fleet: Fleet): Promise<void> {
             clusterData.push({
                 id: cluster.id,
                 ram: Math.ceil(cluster.ram).toLocaleString(),
-                apiLatency: _.mean(cluster.shards.map((x) => x.latency)).toLocaleString(),
-                uptime: friendlyFormattedDate(new Date(Date.now() - cluster.uptime)),
+                apiLatency: _.mean(
+                    cluster.shards.map((x) => x.latency)
+                ).toLocaleString(),
+                uptime: friendlyFormattedDate(
+                    new Date(Date.now() - cluster.uptime)
+                ),
                 voiceConnections: cluster.voice,
                 activeGameSessions: gameplayStats.get(i).activeGameSessions,
                 activePlayers: gameplayStats.get(i).activePlayers,
@@ -191,16 +221,22 @@ async function startWebServer(fleet: Fleet): Promise<void> {
             });
         }
 
-        const requestLatency = fleetStats.centralRequestHandlerLatencyRef.latency;
+        const requestLatency =
+            fleetStats.centralRequestHandlerLatencyRef.latency;
+
         let requestLatencyHealthIndicator: HealthIndicator;
-        if (requestLatency < 500) requestLatencyHealthIndicator = HealthIndicator.HEALTHY;
-        else if (requestLatency < 1000) requestLatencyHealthIndicator = HealthIndicator.WARNING;
+        if (requestLatency < 500)
+            requestLatencyHealthIndicator = HealthIndicator.HEALTHY;
+        else if (requestLatency < 1000)
+            requestLatencyHealthIndicator = HealthIndicator.WARNING;
         else requestLatencyHealthIndicator = HealthIndicator.UNHEALTHY;
 
         const loadAvg = os.loadavg();
         let loadAvgHealthIndicator: HealthIndicator;
-        if (loadAvg.some((x) => x > 1)) loadAvgHealthIndicator = HealthIndicator.UNHEALTHY;
-        else if (loadAvg.some((x) => x > 0.5)) loadAvgHealthIndicator = HealthIndicator.WARNING;
+        if (loadAvg.some((x) => x > 1))
+            loadAvgHealthIndicator = HealthIndicator.UNHEALTHY;
+        else if (loadAvg.some((x) => x > 0.5))
+            loadAvgHealthIndicator = HealthIndicator.WARNING;
         else loadAvgHealthIndicator = HealthIndicator.HEALTHY;
 
         const overallStatsData = {
@@ -218,11 +254,20 @@ async function startWebServer(fleet: Fleet): Promise<void> {
             totalRAM: Math.ceil(fleetStats.totalRam).toLocaleString(),
             lastUpdated: new Date(),
             shardCount: fleetStats.shardCount,
-            totalActiveGameSessions: clusterData.reduce((x, y) => x + y.activeGameSessions, 0),
-            totalActivePlayers: clusterData.reduce((x, y) => x + y.activePlayers, 0),
+            totalActiveGameSessions: clusterData.reduce(
+                (x, y) => x + y.activeGameSessions,
+                0
+            ),
+            totalActivePlayers: clusterData.reduce(
+                (x, y) => x + y.activePlayers,
+                0
+            ),
         };
 
-        return reply.view("../templates/index.ejs", { clusterData, overallStatsData });
+        return reply.view("../templates/index.ejs", {
+            clusterData,
+            overallStatsData,
+        });
     });
 
     try {
@@ -254,7 +299,12 @@ async function startWebServer(fleet: Fleet): Promise<void> {
 
         fleet.on("ready", () => {
             logger.info("All shards have connected.");
-            sendDebugAlertWebhook("Bot started successfully", "Shards have connected!", EMBED_SUCCESS_COLOR, KmqImages.HAPPY);
+            sendDebugAlertWebhook(
+                "Bot started successfully",
+                "Shards have connected!",
+                EMBED_SUCCESS_COLOR,
+                KmqImages.HAPPY
+            );
         });
 
         if (process.env.NODE_ENV === EnvType.CI) return;

@@ -1,4 +1,9 @@
-import { getDebugLogHeader, sendErrorMessage, sendInfoMessage, sendMessage } from "../../helpers/discord_utils";
+import {
+    getDebugLogHeader,
+    sendErrorMessage,
+    sendInfoMessage,
+    sendMessage,
+} from "../../helpers/discord_utils";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
@@ -27,7 +32,8 @@ export default class ListCommand implements BaseCommand {
 
     help = {
         name: "list",
-        description: "Displays the currently selected groups for a given game option.",
+        description:
+            "Displays the currently selected groups for a given game option.",
         usage: ",list [groups | excludes | includes]",
         examples: [
             {
@@ -46,7 +52,11 @@ export default class ListCommand implements BaseCommand {
         priority: 200,
     };
 
-    call = async ({ message, parsedMessage, channel }: CommandArgs): Promise<void> => {
+    call = async ({
+        message,
+        parsedMessage,
+        channel,
+    }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         const optionListed = parsedMessage.components[0] as ListType;
         let optionValue: string;
@@ -55,10 +65,12 @@ export default class ListCommand implements BaseCommand {
                 optionValue = guildPreference.getDisplayedGroupNames(true);
                 break;
             case ListType.INCLUDES:
-                optionValue = guildPreference.getDisplayedIncludesGroupNames(true);
+                optionValue =
+                    guildPreference.getDisplayedIncludesGroupNames(true);
                 break;
             case ListType.EXCLUDES:
-                optionValue = guildPreference.getDisplayedExcludesGroupNames(true);
+                optionValue =
+                    guildPreference.getDisplayedExcludesGroupNames(true);
                 break;
             default:
                 optionValue = null;
@@ -68,21 +80,40 @@ export default class ListCommand implements BaseCommand {
 
         if (optionValue.length > 2000) {
             try {
-                sendMessage(channel.id, {
-                    content: "Too many groups to list in a Discord message, see the attached file",
-                }, {
-                    name: "groups.txt",
-                    file: Buffer.from(`${optionValue}\n`),
-                });
+                sendMessage(
+                    channel.id,
+                    {
+                        content:
+                            "Too many groups to list in a Discord message, see the attached file",
+                    },
+                    {
+                        name: "groups.txt",
+                        file: Buffer.from(`${optionValue}\n`),
+                    }
+                );
             } catch (e) {
-                logger.warn(`${getDebugLogHeader(message)} | Missing ATTACH_FILE permissions`);
-                await sendErrorMessage(MessageContext.fromMessage(message), { title: "Error Sending File", description: "Too many groups to list in a Discord message, see the attached file. Make sure that the bot has ATTACH_FILE permissions" });
+                logger.warn(
+                    `${getDebugLogHeader(
+                        message
+                    )} | Missing ATTACH_FILE permissions`
+                );
+
+                await sendErrorMessage(MessageContext.fromMessage(message), {
+                    title: "Error Sending File",
+                    description:
+                        "Too many groups to list in a Discord message, see the attached file. Make sure that the bot has ATTACH_FILE permissions",
+                });
                 return;
             }
         } else {
-            await sendInfoMessage(MessageContext.fromMessage(message), { title: `Current \`${optionListed}\` Value`, description: optionValue });
+            await sendInfoMessage(MessageContext.fromMessage(message), {
+                title: `Current \`${optionListed}\` Value`,
+                description: optionValue,
+            });
         }
 
-        logger.info(`${getDebugLogHeader(message)} | List '${optionListed}' retrieved`);
+        logger.info(
+            `${getDebugLogHeader(message)} | List '${optionListed}' retrieved`
+        );
     };
 }

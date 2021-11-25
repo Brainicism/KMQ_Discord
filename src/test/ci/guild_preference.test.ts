@@ -6,7 +6,10 @@ describe("fromGuild", () => {
     describe("no guild preference provided", () => {
         it("should return a guild preference with default options", () => {
             const guildPreference = GuildPreference.fromGuild("123");
-            assert.deepStrictEqual(GuildPreference.DEFAULT_OPTIONS, guildPreference.gameOptions);
+            assert.deepStrictEqual(
+                GuildPreference.DEFAULT_OPTIONS,
+                guildPreference.gameOptions
+            );
         });
     });
 
@@ -16,27 +19,54 @@ describe("fromGuild", () => {
             filledGameOptions.endYear = 2025;
 
             it("should return a guild preference with the missing game options as their default values", () => {
-                const guildPreference = GuildPreference.fromGuild("123", filledGameOptions);
-                assert.deepStrictEqual(filledGameOptions, guildPreference.gameOptions);
+                const guildPreference = GuildPreference.fromGuild(
+                    "123",
+                    filledGameOptions
+                );
+
+                assert.deepStrictEqual(
+                    filledGameOptions,
+                    guildPreference.gameOptions
+                );
             });
         });
 
         describe("it has missing game options", () => {
             it("should return a guild preference with the missing game options as their default values", () => {
-                const gameOptionsWithMissingLanguageType = { ...GuildPreference.DEFAULT_OPTIONS };
+                const gameOptionsWithMissingLanguageType = {
+                    ...GuildPreference.DEFAULT_OPTIONS,
+                };
+
                 delete gameOptionsWithMissingLanguageType["languageType"];
-                const guildPreference = GuildPreference.fromGuild("123", gameOptionsWithMissingLanguageType);
-                assert.deepStrictEqual(GuildPreference.DEFAULT_OPTIONS, guildPreference.gameOptions);
+                const guildPreference = GuildPreference.fromGuild(
+                    "123",
+                    gameOptionsWithMissingLanguageType
+                );
+
+                assert.deepStrictEqual(
+                    GuildPreference.DEFAULT_OPTIONS,
+                    guildPreference.gameOptions
+                );
             });
         });
 
         describe("it has extraneous game options", () => {
             it("should return a guild preference without the extraneous values", () => {
-                const gameOptionsWithExtraValues = { ...GuildPreference.DEFAULT_OPTIONS };
+                const gameOptionsWithExtraValues = {
+                    ...GuildPreference.DEFAULT_OPTIONS,
+                };
+
                 const nonExistentOption = "option_that_doesnt_exist";
                 gameOptionsWithExtraValues[nonExistentOption] = 58;
-                const guildPreference = GuildPreference.fromGuild("123", gameOptionsWithExtraValues);
-                assert.strictEqual(nonExistentOption in guildPreference.gameOptions, false);
+                const guildPreference = GuildPreference.fromGuild(
+                    "123",
+                    gameOptionsWithExtraValues
+                );
+
+                assert.strictEqual(
+                    nonExistentOption in guildPreference.gameOptions,
+                    false
+                );
             });
         });
     });

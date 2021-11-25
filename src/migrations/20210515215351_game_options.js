@@ -1,5 +1,4 @@
-
-exports.up = function(knex) {
+exports.up = function (knex) {
     return knex.schema.createTable("game_options", (table) => {
         table.string("guild_id").notNullable();
         table.string("option_name").notNullable();
@@ -8,6 +7,6 @@ exports.up = function(knex) {
     });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
     return knex.schema.dropTableIfExists("game_options");
 };

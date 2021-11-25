@@ -1,8 +1,16 @@
 import Eris from "eris";
 import * as uuid from "uuid";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { getDebugChannel, sendInfoMessage, getUserVoiceChannel, getDebugLogHeader } from "../../helpers/discord_utils";
-import { getGuildPreference, getAvailableSongCount } from "../../helpers/game_utils";
+import {
+    getDebugChannel,
+    sendInfoMessage,
+    getUserVoiceChannel,
+    getDebugLogHeader,
+} from "../../helpers/discord_utils";
+import {
+    getGuildPreference,
+    getAvailableSongCount,
+} from "../../helpers/game_utils";
 import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
@@ -35,15 +43,22 @@ export default class DebugCommand implements BaseCommand {
 
         fields.push({
             name: "Text Permissions",
-            value: JSON.stringify(channel.permissionsOf(state.client.user.id).json),
+            value: JSON.stringify(
+                channel.permissionsOf(state.client.user.id).json
+            ),
             inline: false,
         });
 
-        const voiceChannel = getUserVoiceChannel(MessageContext.fromMessage(message));
+        const voiceChannel = getUserVoiceChannel(
+            MessageContext.fromMessage(message)
+        );
+
         if (voiceChannel) {
             fields.push({
                 name: "Voice Permissions",
-                value: JSON.stringify(voiceChannel.permissionsOf(state.client.user.id).json),
+                value: JSON.stringify(
+                    voiceChannel.permissionsOf(state.client.user.id).json
+                ),
                 inline: false,
             });
         }

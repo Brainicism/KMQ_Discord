@@ -5,7 +5,11 @@ import schedule from "node-schedule";
 import { IPCLogger } from "./logger";
 import { EnvType, State } from "./types";
 import {
-    registerClientEvents, registerIntervals, registerProcessEvents, reloadCaches, updateBotStatus,
+    registerClientEvents,
+    registerIntervals,
+    registerProcessEvents,
+    reloadCaches,
+    updateBotStatus,
 } from "./helpers/management_utils";
 import BotListingManager from "./helpers/bot_listing_manager";
 import RateLimiter from "./rate_limiter";
@@ -47,10 +51,18 @@ export class BotWorker extends BaseClusterWorker {
                 ReloadCommand.reloadCommands();
                 return null;
             case "game_session_stats": {
-                const activePlayers = Object.values(state.gameSessions).reduce((total, curr) => total + curr.participants.size, 0);
-                const activeGameSessions = Object.keys(state.gameSessions).length;
+                const activePlayers = Object.values(state.gameSessions).reduce(
+                    (total, curr) => total + curr.participants.size,
+                    0
+                );
+
+                const activeGameSessions = Object.keys(
+                    state.gameSessions
+                ).length;
+
                 return {
-                    activePlayers, activeGameSessions,
+                    activePlayers,
+                    activeGameSessions,
                 };
             }
 
@@ -62,11 +74,13 @@ export class BotWorker extends BaseClusterWorker {
     shutdown = async (done): Promise<void> => {
         logger.debug("SHUTDOWN received, cleaning up...");
 
-        const endSessionPromises = Object.keys(state.gameSessions).map(async (guildID) => {
-            const gameSession = state.gameSessions[guildID];
-            logger.debug(`gid: ${guildID} | Forcing game session end`);
-            await gameSession.endSession();
-        });
+        const endSessionPromises = Object.keys(state.gameSessions).map(
+            async (guildID) => {
+                const gameSession = state.gameSessions[guildID];
+                logger.debug(`gid: ${guildID} | Forcing game session end`);
+                await gameSession.endSession();
+            }
+        );
 
         await Promise.allSettled(endSessionPromises);
 
@@ -82,7 +96,9 @@ export class BotWorker extends BaseClusterWorker {
         super(setup);
         state.ipc = this.ipc;
         state.client = this.bot as KmqClient;
-        logger.info(`Started worker ID: ${this.workerID} on cluster ID: ${this.clusterID}`);
+        logger.info(
+            `Started worker ID: ${this.workerID} on cluster ID: ${this.clusterID}`
+        );
 
         logger.info("Registering cron tasks...");
         registerIntervals(this.clusterID);
@@ -99,7 +115,11 @@ export class BotWorker extends BaseClusterWorker {
             botListingManager.start();
         }
 
-        if ([EnvType.CI, EnvType.DRY_RUN].includes(process.env.NODE_ENV as EnvType)) {
+        if (
+            [EnvType.CI, EnvType.DRY_RUN].includes(
+                process.env.NODE_ENV as EnvType
+            )
+        ) {
             logger.info("Dry run finished successfully.");
             state.ipc.totalShutdown();
             return;
@@ -110,6 +130,12 @@ export class BotWorker extends BaseClusterWorker {
 
         logger.info("Updating bot's status..");
         updateBotStatus();
-        logger.info(`Logged in as ${state.client.user.username}#${state.client.user.discriminator}! in '${process.env.NODE_ENV}' mode (${(Date.now() - state.processStartTime) / 1000}s)`);
+        logger.info(
+            `Logged in as ${state.client.user.username}#${
+                state.client.user.discriminator
+            }! in '${process.env.NODE_ENV}' mode (${
+                (Date.now() - state.processStartTime) / 1000
+            }s)`
+        );
     }
 }

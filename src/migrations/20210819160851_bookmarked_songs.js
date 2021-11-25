@@ -1,5 +1,4 @@
-
-exports.up = function(knex) {
+exports.up = function (knex) {
     return knex.schema.createTable("bookmarked_songs", (table) => {
         table.string("user_id").notNullable();
         table.string("vlink").notNullable();
@@ -7,6 +6,6 @@ exports.up = function(knex) {
     });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
     return knex.schema.dropTableIfExists("bookmarked_songs");
 };

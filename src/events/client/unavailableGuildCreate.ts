@@ -3,6 +3,8 @@ import { IPCLogger } from "../../logger";
 
 const logger = new IPCLogger("unavailableGuildCreate");
 
-export default async function unavailableGuildCreateHandler(guild: Eris.UnavailableGuild): Promise<void> {
+export default async function unavailableGuildCreateHandler(
+    guild: Eris.UnavailableGuild
+): Promise<void> {
     logger.info(`Guild now unavailable. gid = ${guild.id}`);
 }

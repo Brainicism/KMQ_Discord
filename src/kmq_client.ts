@@ -18,18 +18,32 @@ export default class KmqClient extends Eris.Client {
     }
 
     /** @returns a mapping of command name to command source file */
-    public static getCommandFiles(shouldReload: boolean): { [commandName: string]: BaseCommand } {
+    public static getCommandFiles(shouldReload: boolean): {
+        [commandName: string]: BaseCommand;
+    } {
         const commandMap = {};
         try {
             let files: Array<string> = [];
             for (const category of ["admin", "game_options", "game_commands"]) {
-                files = files.concat(fs.readdirSync(path.resolve(__dirname, "./commands", category))
-                    .filter((x) => x.endsWith(".js"))
-                    .map((x) => path.resolve(__dirname, "./commands", category, x)));
+                files = files.concat(
+                    fs
+                        .readdirSync(
+                            path.resolve(__dirname, "./commands", category)
+                        )
+                        .filter((x) => x.endsWith(".js"))
+                        .map((x) =>
+                            path.resolve(__dirname, "./commands", category, x)
+                        )
+                );
             }
 
             for (const commandFile of files) {
-                const commandFilePath = path.resolve(__dirname, "./commands", commandFile);
+                const commandFilePath = path.resolve(
+                    __dirname,
+                    "./commands",
+                    commandFile
+                );
+
                 if (shouldReload) {
                     // invalidate require cache
                     delete require.cache[require.resolve(commandFilePath)];
@@ -67,7 +81,8 @@ export default class KmqClient extends Eris.Client {
         const commandFiles = KmqClient.getCommandFiles(!initialLoad);
         let successfulCommands = 0;
         for (const [commandName, command] of Object.entries(commandFiles)) {
-            if (this.registerCommand(command, commandName)) successfulCommands++;
+            if (this.registerCommand(command, commandName))
+                successfulCommands++;
             if (command.aliases) {
                 for (const alias of command.aliases) {
                     this.registerCommand(command, alias);
@@ -75,7 +90,11 @@ export default class KmqClient extends Eris.Client {
             }
         }
 
-        logger.info(`Registered ${successfulCommands}/${Object.keys(commandFiles).length} commands.`);
+        logger.info(
+            `Registered ${successfulCommands}/${
+                Object.keys(commandFiles).length
+            } commands.`
+        );
     }
 
     /**
@@ -84,9 +103,14 @@ export default class KmqClient extends Eris.Client {
      * @param commandName - The name/alias of the command
      * @returns whether the command was registered
      */
-    private registerCommand(command: BaseCommand, commandName: string): boolean {
+    private registerCommand(
+        command: BaseCommand,
+        commandName: string
+    ): boolean {
         if (commandName in this.commands) {
-            logger.error(`Command \`${commandName}\` already exists. Possible conflict?`);
+            logger.error(
+                `Command \`${commandName}\` already exists. Possible conflict?`
+            );
             return false;
         }
 

@@ -1,5 +1,9 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { sendOptionsMessage, getDebugLogHeader, sendErrorMessage } from "../../helpers/discord_utils";
+import {
+    sendOptionsMessage,
+    getDebugLogHeader,
+    sendErrorMessage,
+} from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
@@ -32,7 +36,8 @@ export default class ArtistTypeCommand implements BaseCommand {
 
     help = {
         name: "artisttype",
-        description: "Choose whether you'd like to hear from soloists, groups, or both. Options are the following, `soloists`, `groups`, and `both`.",
+        description:
+            "Choose whether you'd like to hear from soloists, groups, or both. Options are the following, `soloists`, `groups`, and `both`.",
         usage: ",artisttype [artisttype]",
         examples: [
             {
@@ -59,20 +64,39 @@ export default class ArtistTypeCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.ARTIST_TYPE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.ARTIST_TYPE, reset: true }]);
+            await sendOptionsMessage(
+                MessageContext.fromMessage(message),
+                guildPreference,
+                [{ option: GameOption.ARTIST_TYPE, reset: true }]
+            );
             logger.info(`${getDebugLogHeader(message)} | Artist type reset.`);
             return;
         }
 
         if (guildPreference.isGroupsMode()) {
-            logger.warn(`${getDebugLogHeader(message)} | Game option conflict between artist type and groups.`);
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Game Option Conflict", description: `\`groups\` game option is currently set. \`artisttype\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed` });
+            logger.warn(
+                `${getDebugLogHeader(
+                    message
+                )} | Game option conflict between artist type and groups.`
+            );
+
+            sendErrorMessage(MessageContext.fromMessage(message), {
+                title: "Game Option Conflict",
+                description: `\`groups\` game option is currently set. \`artisttype\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed`,
+            });
             return;
         }
 
         const artistType = parsedMessage.components[0] as ArtistType;
         await guildPreference.setArtistType(artistType);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.ARTIST_TYPE, reset: false }]);
-        logger.info(`${getDebugLogHeader(message)} | Artist type set to ${artistType}`);
+        await sendOptionsMessage(
+            MessageContext.fromMessage(message),
+            guildPreference,
+            [{ option: GameOption.ARTIST_TYPE, reset: false }]
+        );
+
+        logger.info(
+            `${getDebugLogHeader(message)} | Artist type set to ${artistType}`
+        );
     };
 }

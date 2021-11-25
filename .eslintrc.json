@@ -11,8 +11,7 @@
     },
     "rules": {
         "@typescript-eslint/indent": [
-            "warn",
-            4
+            "off"
         ],
         "@typescript-eslint/quotes": [
             "warn",

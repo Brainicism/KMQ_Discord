@@ -1,6 +1,7 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import {
-    getDebugLogHeader, sendOptionsMessage,
+    getDebugLogHeader,
+    sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
@@ -18,14 +19,30 @@ export default class ForcePlayCommand implements BaseCommand {
 
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.FORCE_PLAY_SONG);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.FORCE_PLAY_SONG, reset: true }]);
-            logger.info(`${getDebugLogHeader(message)} | Force play song reset.`);
+            await sendOptionsMessage(
+                MessageContext.fromMessage(message),
+                guildPreference,
+                [{ option: GameOption.FORCE_PLAY_SONG, reset: true }]
+            );
+
+            logger.info(
+                `${getDebugLogHeader(message)} | Force play song reset.`
+            );
             return;
         }
 
         const forcePlaySongID = parsedMessage.components[0];
         await guildPreference.setForcePlaySong(forcePlaySongID);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, [{ option: GameOption.FORCE_PLAY_SONG, reset: false }]);
-        logger.info(`${getDebugLogHeader(message)} | Force play song set to ${guildPreference.gameOptions.forcePlaySongID}`);
+        await sendOptionsMessage(
+            MessageContext.fromMessage(message),
+            guildPreference,
+            [{ option: GameOption.FORCE_PLAY_SONG, reset: false }]
+        );
+
+        logger.info(
+            `${getDebugLogHeader(message)} | Force play song set to ${
+                guildPreference.gameOptions.forcePlaySongID
+            }`
+        );
     };
 }

@@ -4,7 +4,7 @@ import GameSession from "../../structures/game_session";
 import { GuildTextableMessage, ParsedMessage } from "../../types";
 
 export interface CommandArgs {
-    gameSessions: { [guildID: string]: GameSession }
+    gameSessions: { [guildID: string]: GameSession };
     message: GuildTextableMessage;
     channel: Eris.TextChannel;
     parsedMessage: ParsedMessage;
@@ -19,7 +19,7 @@ export interface CommandValidations {
         minValue?: number;
         maxValue?: number;
         enums?: Array<string>;
-    }>
+    }>;
 }
 
 export interface CallFunc {
@@ -32,11 +32,14 @@ export default interface BaseCommand {
         name: string;
         description: string;
         usage: string;
-        examples: Array<{ example: string, explanation: string }>;
+        examples: Array<{ example: string; explanation: string }>;
         priority: number;
         actionRowComponents?: Eris.ActionRowComponents[];
     };
     aliases?: Array<string>;
     validations?: CommandValidations;
-    preRunChecks?: Array<{ checkFn: (precheckArgs: PrecheckArgs) => boolean | Promise<boolean>, errorMessage?: string }>;
+    preRunChecks?: Array<{
+        checkFn: (precheckArgs: PrecheckArgs) => boolean | Promise<boolean>;
+        errorMessage?: string;
+    }>;
 }
