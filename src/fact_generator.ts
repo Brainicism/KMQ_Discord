@@ -80,6 +80,9 @@ interface GaonWeeklyEntry {
     year: string;
 }
 
+/**
+ * Reloads the fact fcache
+ */
 export async function reloadFactCache(): Promise<void> {
     logger.info("Regenerating fact cache...");
     await generateFacts();
@@ -135,6 +138,9 @@ function parseGaonWeeklyRankList(
     });
 }
 
+/**
+ * @returns a random cached fact
+ */
 export function getFact(): string {
     const randomVal = Math.random();
     const factGroup =

@@ -85,6 +85,13 @@ async function sendHintNotification(
     }
 }
 
+/**
+ * @param gameSession - The game session
+ * @param guildPreference - The guild preference
+ * @param gameRound - The game round
+ * @param message - The originating message
+ * @returns whether the hint request was valid
+ */
 export function validHintCheck(
     gameSession: GameSession,
     guildPreference: GuildPreference,
@@ -126,6 +133,11 @@ export function validHintCheck(
     return true;
 }
 
+/**
+ * @param guessMode - The guess mode
+ * @param gameRound - The game round
+ * @returns the hint corresponding to the current game round
+ */
 export function generateHint(
     guessMode: GuessModeType,
     gameRound: GameRound

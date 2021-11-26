@@ -143,6 +143,7 @@ export async function activeBonusUsers(): Promise<Set<string>> {
 
 /**
  * @param rawGroupNames - List of user-inputted group names
+ * @param aliasApplied - Whether aliases have been applied
  * @returns a list of recognized/unrecognized groups
  */
 export async function getMatchingGroupNames(

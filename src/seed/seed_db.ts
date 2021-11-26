@@ -260,6 +260,10 @@ function pruneSqlDumps(): void {
     }
 }
 
+/**
+ * @param db - The database context
+ * @param bootstrap - Whether or not this is a bootstrap run
+ */
 async function updateKpopDatabase(
     db: DatabaseContext,
     bootstrap = false
@@ -278,6 +282,10 @@ async function updateKpopDatabase(
     }
 }
 
+/**
+ * Regenerates the available group list
+ * @param db - Database context
+ */
 export async function updateGroupList(db: DatabaseContext): Promise<void> {
     const result = await db
         .kmq("kpop_groups")
@@ -291,6 +299,9 @@ export async function updateGroupList(db: DatabaseContext): Promise<void> {
     );
 }
 
+/**
+ * @param db - The database context
+ */
 async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
     pruneSqlDumps();
     try {

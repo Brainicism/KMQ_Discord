@@ -96,7 +96,7 @@ export async function getTimeUntilRestart(): Promise<number> {
 
 /**
  * Sends a warning message to all active GameSessions for impending restarts at predefined intervals
- * @param restartNotification - The date of the impending restart
+ * @param timeUntilRestart - time until the restart
  */
 export const checkRestartNotification = async (
     timeUntilRestart: number
@@ -291,7 +291,10 @@ export async function clearRestartNotification(): Promise<void> {
         .update({ restart_time: null });
 }
 
-/** Sets up recurring cron-based tasks */
+/**
+ * @param clusterID - The cluster ID
+ *  Sets up recurring cron-based tasks
+ * */
 export function registerIntervals(clusterID: number): void {
     // set up cleanup for inactive game sessions
     schedule.scheduleJob("*/10 * * * *", () => {

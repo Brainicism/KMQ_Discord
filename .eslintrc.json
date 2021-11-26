@@ -4,6 +4,7 @@
     ],
     "plugins": [
         "eslint-plugin-tsdoc",
+        "jsdoc",
         "only-warn"
     ],
     "parserOptions": {
@@ -28,6 +29,23 @@
         ],
         "import/no-cycle": [
             "off"
+        ],
+        "jsdoc/require-jsdoc": [
+            "warn",
+            {
+                "publicOnly": true
+            }
+        ],
+        "valid-jsdoc": [
+            "warn",
+            {
+                "requireReturnType": false,
+                "requireParamType": false,
+                "requireReturn": false
+            }
+        ],
+        "tsdoc/syntax": [
+            "warn"
         ],
         "lines-between-class-members": [
             "off"

@@ -10,7 +10,8 @@ import { retryJob, getAudioDurationInSeconds } from "../helpers/utils";
 
 const logger = new IPCLogger("download-new-songs");
 const TARGET_AVERAGE_VOLUME = -30;
-export async function clearPartiallyCachedSongs(): Promise<void> {
+
+async function clearPartiallyCachedSongs(): Promise<void> {
     logger.info("Clearing partially cached songs");
     if (!fs.existsSync(process.env.SONG_DOWNLOAD_DIR)) {
         logger.error("Song cache directory doesn't exist.");
@@ -347,6 +348,11 @@ const downloadNewSongs = async (
     return downloadCount;
 };
 
+/**
+ * @param limit - The limit specified for downloading songs
+ * @returns - the number of songs downloaded
+ */
+// eslint-disable-next-line import/prefer-default-export
 export async function downloadAndConvertSongs(limit?: number): Promise<number> {
     const db = getNewConnection();
     try {

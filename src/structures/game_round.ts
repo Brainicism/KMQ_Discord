@@ -52,7 +52,10 @@ export function cleanArtistName(name: string): string {
     return cleanName;
 }
 
-/** Generate the round hints */
+/**
+ * @param name - the name of the song/artist
+ * @returns The hint for the round
+ * */
 function generateHint(name: string): string {
     const HIDDEN_CHARACTER_PERCENTAGE = 0.75;
     const nameLength = name.length;
@@ -252,6 +255,7 @@ export default class GameRound {
     /**
      * Marks a user as having guessed correctly
      * @param userID - The user ID of the correct guesser
+     * @param pointsAwarded - The number of points awarded to the correct guesser
      */
     userCorrect(userID: string, pointsAwarded: number): void {
         if (!this.correctGuessers.some((x) => x.id === userID)) {
@@ -270,7 +274,7 @@ export default class GameRound {
 
     /**
      * Checks whether a user's guess is correct given a guesing mode type
-     * @param message - The Message that contains the guess
+     * @param guess - The user's guess
      * @param guessModeType - The guessing mode
      * @returns the number of points as defined by the mode type and correctness of the guess
      */
@@ -297,6 +301,7 @@ export default class GameRound {
     }
 
     /**
+     * @param correctGuesses - The number of correct guesses
      * Marks button guesses as correct or incorrect in a multiple choice game
      */
     async interactionMarkAnswers(correctGuesses: number): Promise<void> {

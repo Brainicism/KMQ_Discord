@@ -80,7 +80,7 @@ export function getUserTag(user: {
 }
 
 /**
- * @param user - The user (must be some object with id field)
+ * @param userID - The user ID
  * @returns a clickable mention to user
  */
 export function getMention(userID: string): string {
@@ -127,6 +127,7 @@ function missingPermissionsText(missingPermissions: string[]): string {
 /**
  * Fetches Users from cache, IPC, or via REST and update cache
  * @param userID - the user's ID
+ * @param silentErrors - whether to log errors
  * @returns an instance of the User
  */
 export async function fetchUser(
@@ -228,6 +229,7 @@ async function fetchChannel(textChannelID: string): Promise<Eris.TextChannel> {
 
 /**
  * @param textChannelID - the text channel's ID
+ * @param guildID - the guild's ID
  * @param authorID - the sender's ID
  * @returns whether the bot has permissions to message's originating text channel
  */
@@ -366,8 +368,9 @@ async function sendMessageExceptionHandler(
  * A lower level message sending utility
  * and when a Eris Message object isn't available in the context
  * @param textChannelID - The channel ID where the message should be delivered
- * @param authorID - the author's ID
  * @param messageContent - The MessageContent to send
+ * @param file - The file to send
+ * @param authorID - The author's ID
  */
 export async function sendMessage(
     textChannelID: string,
@@ -449,8 +452,7 @@ async function sendDmMessage(
 /**
  * Sends an error embed with the specified title/description
  * @param messageContext - An object containing relevant parts of Eris.Message
- * @param title - The title of the embed
- * @param description - The description of the embed
+ * @param embedPayload - The embed payload
  */
 export async function sendErrorMessage(
     messageContext: MessageContext,
@@ -497,6 +499,7 @@ export async function sendErrorMessage(
  * @param messageContext - An object containing relevant parts of Eris.Message
  * @param embedPayload - What to include in the message
  * @param reply - Whether to reply to the given message
+ * @param boldTitle - Whether to bold the title
  */
 export async function sendInfoMessage(
     messageContext: MessageContext,
@@ -564,7 +567,11 @@ export async function sendInfoMessage(
  * @param messageContext - An object to pass along relevant parts of Eris.Message
  * @param scoreboard - The GameSession's corresponding Scoreboard
  * @param gameRound - The GameSession's corresponding GameRound
- * @param songGuessed - Whether the song was guessed
+ * @param guessModeType - The type of guess mode
+ * @param playerRoundResults - The player round results
+ * @param isMultipleChoiceMode  - Whether the game is in multiple choice mode
+ * @param timeRemaining - The time remaining for the duration option
+ * @param uniqueSongCounter - The unique song counter
  */
 export async function sendEndRoundMessage(
     messageContext: MessageContext,
@@ -752,9 +759,9 @@ export async function sendEndRoundMessage(
 
 /**
  * Sends an embed displaying the currently selected GameOptions
- * @param message - The Message object
+ * @param messageContext - The Message Context
  * @param guildPreference - The corresponding GuildPreference
- * @param updatedOption - Specifies which GameOption was modified
+ * @param updatedOptions - The GameOptions which were modified
  * @param preset - Specifies whether the GameOptions were modified by a preset
  * @param allReset - Specifies whether all GameOptions were reset
  * @param footerText - The footer text
@@ -1003,7 +1010,6 @@ export async function sendOptionsMessage(
 
 /**
  * Sends an embed displaying the winner of the session as well as the scoreboard
- * @param textChannel - The channel where the message should be delivered
  * @param gameSession - The GameSession that has ended
  */
 export async function sendEndGameMessage(
@@ -1092,6 +1098,8 @@ export async function sendEndGameMessage(
  * Sends a paginated embed
  * @param message - The Message object
  * @param embeds - A list of embeds to paginate over
+ * @param components - A list of components to add to the embed
+ * @param startPage - The page to start on
  */
 export async function sendPaginationedEmbed(
     message: GuildTextableMessage,
@@ -1246,7 +1254,7 @@ export function getUserVoiceChannel(
 }
 
 /**
- * @param message - The Message object
+ * @param voiceChannelID - The voice channel ID
  * @returns the voice channel that the message's author is in
  */
 export function getVoiceChannel(voiceChannelID: string): Eris.VoiceChannel {
@@ -1377,7 +1385,7 @@ export function getDebugChannel(): Promise<Eris.TextChannel> {
 }
 
 /**
- * @param message - The message
+ * @param guildID - The guild ID
  * @returns the number of users required for a majority
  */
 export function getMajorityCount(guildID: string): number {
@@ -1418,6 +1426,10 @@ export function sendDebugAlertWebhook(
     });
 }
 
+/**
+ * Send the bookmarked songs to the corresponding users
+ * @param bookmarkedSongs - The bookmarked songs
+ */
 export async function sendBookmarkedSongs(bookmarkedSongs: {
     [userID: string]: Map<string, QueriedSong>;
 }): Promise<void> {
@@ -1483,6 +1495,10 @@ function interactionRejectionHandler(
     }
 }
 
+/**
+ * Attempts to acknowledge an interaction
+ * @param interaction - The originating interaction
+ */
 export async function tryInteractionAcknowledge(
     interaction: Eris.ComponentInteraction | Eris.CommandInteraction
 ): Promise<void> {
@@ -1497,6 +1513,12 @@ export async function tryInteractionAcknowledge(
     }
 }
 
+/**
+ * Attempts to send a success response to an interaction
+ * @param interaction - The originating interaction
+ * @param title - The embed title
+ * @param description - The embed description
+ */
 export async function tryCreateInteractionSuccessAcknowledgement(
     interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
     title: string,
@@ -1529,6 +1551,11 @@ export async function tryCreateInteractionSuccessAcknowledgement(
     }
 }
 
+/**
+ * Attempts to send a error message to an interaction
+ * @param interaction - The originating interaction
+ * @param description - The embed description
+ */
 export async function tryCreateInteractionErrorAcknowledgement(
     interaction: Eris.ComponentInteraction | Eris.CommandInteraction,
     description: string

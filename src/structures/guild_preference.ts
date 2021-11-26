@@ -145,8 +145,9 @@ export const GameOptionInternalToGameOption: { [option: string]: string } = {
 };
 
 /**
- * @param text - The text to truncate
- * @param length - The number of characters to truncate to
+ * @param groups - The artists to combine into a string
+ * @param truncate - Whether to truncuate the final result
+ * @param spaceDelimiter - Whether to space delimit the final result
  * @returns the truncated string
  */
 function getGroupNamesString(
@@ -457,7 +458,8 @@ export default class GuildPreference {
 
     /**
      * Sets the limit option value
-     * @param limit - The limit range value
+     * @param limitStart - The limit range start
+     * @param limitEnd - The limit range end
      */
     async setLimit(limitStart: number, limitEnd: number): Promise<void> {
         this.gameOptions.limitStart = limitStart;
@@ -504,7 +506,7 @@ export default class GuildPreference {
 
     /**
      * Sets the groups option value
-     * @param groupIDs - A list of kpop groups (ID and name)
+     * @param groups - A list of MatchedArtist
      */
     async setGroups(groups: MatchedArtist[]): Promise<void> {
         this.gameOptions.groups = groups;
@@ -525,7 +527,10 @@ export default class GuildPreference {
         return this.gameOptions.groups.map((x) => x.name);
     }
 
-    /** @returns a friendly, potentially truncated, string displaying the currently selected groups option */
+    /**
+     * @param original - Whether to include collabs or not
+     * @returns a friendly, potentially truncated, string displaying the currently selected groups option
+     * */
     getDisplayedGroupNames(original = false): string {
         if (this.gameOptions.groups === null) return null;
         if (original) {
@@ -573,7 +578,10 @@ export default class GuildPreference {
         return this.gameOptions.excludes.map((x) => x.name);
     }
 
-    /** @returns a friendly, potentially truncated, string displaying the currently selected exclude option */
+    /**
+     * @param original - Whether to include collabs or not
+     * @returns a friendly, potentially truncated, string displaying the currently selected exclude option
+     * */
     getDisplayedExcludesGroupNames(original = false): string {
         if (this.gameOptions.excludes === null) return null;
         if (original) {
@@ -600,7 +608,7 @@ export default class GuildPreference {
 
     /**
      * Sets the include option value
-     * @param groupIDs - A list of kpop groups (ID and name)
+     * @param groups - A list of MatchedArtist
      */
     async setIncludes(groups: MatchedArtist[]): Promise<void> {
         this.gameOptions.includes = groups;
@@ -615,7 +623,10 @@ export default class GuildPreference {
         return this.gameOptions.includes.map((x) => x.id);
     }
 
-    /** @returns a friendly, potentially truncated, string displaying the currently selected include option */
+    /**
+     * @param original - Whether to include collabs or not
+     * @returns a friendly, potentially truncated, string displaying the currently selected include option
+     * */
     getDisplayedIncludesGroupNames(original = false): string {
         if (this.gameOptions.includes === null) return null;
         if (original) {

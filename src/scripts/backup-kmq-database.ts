@@ -15,6 +15,9 @@ program.option("-i, --import <file>", "The dump file to import");
 program.parse();
 const options = program.opts();
 
+/**
+ * Backups the current KMQ database
+ */
 async function backupKmqDatabase(): Promise<void> {
     if (!fs.existsSync(databaseBackupDir)) {
         fs.mkdirSync(databaseBackupDir);

@@ -158,7 +158,7 @@ export default class SongSelector {
 
     /**
      * Selects a random song based on the GameOptions, avoiding recently played songs
-     * @param guildPreference - The GuildPreference
+     * @param filteredSongs - The filtered songs to select from
      * @param ignoredSongs - The union of last played songs and unique songs to not select from
      * @param alternatingGender - The gender to limit selecting from if ,gender alternating
      */

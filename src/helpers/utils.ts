@@ -1,3 +1,4 @@
+/* eslint-disable tsdoc/syntax */
 import fs from "fs";
 import { exec } from "child_process";
 import moment from "moment-timezone";
@@ -11,6 +12,7 @@ const logger = new IPCLogger("utils");
 /**
  * Promise-based delay function
  * @param delayDuration - Delay in milliseconds
+ * @returns Promise
  */
 export function delay(delayDuration: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, delayDuration));
@@ -69,6 +71,7 @@ export function roundDecimal(num: number, places: number): number {
  * Chunks in an array in subarrays of specified size
  * @param array - The input array
  * @param chunkSize - The size of each chunked array
+ * @returns The chunked array
  */
 export function chunkArray<T>(
     array: Array<T>,
@@ -131,6 +134,7 @@ export function arrayToString(arr: Array<string>): string {
 
 /**
  * Stolen from https://weeknumber.net/how-to/javascript
+ * @param dateObj - The input date object
  * @returns the current ISO week number in the year, ranges from 1-52 (53 on certain years)
  */
 export function weekOfYear(dateObj?: Date): number {
@@ -220,6 +224,7 @@ export function friendlyFormattedDate(date: Date): string {
  * @param job - the function to retry
  * @param jobArgs - arguments to pass to job
  * @param maxRetries - retries of job before throwing
+ * @param firstTry - whether this is the first try
  * @param delayDuration - time (in ms) before attempting job retry
  * @returns the result of job
  */

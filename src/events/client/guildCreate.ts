@@ -5,6 +5,10 @@ import MessageContext from "../../structures/message_context";
 
 const logger = new IPCLogger("guildCreate");
 
+/**
+ * Handles the 'guildCreate' event
+ * @param guild - The Guild object
+ */
 export default async function guildCreateHandler(
     guild: Eris.Guild
 ): Promise<void> {

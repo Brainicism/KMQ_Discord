@@ -57,6 +57,9 @@ async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
     );
 }
 
+/**
+ * Reloads all existing stored procedures
+ */
 export function loadStoredProcedures(): void {
     const storedProcedureDefinitions = fs
         .readdirSync(path.join(__dirname, "../../sql/procedures"))
@@ -70,6 +73,10 @@ export function loadStoredProcedures(): void {
 }
 
 // eslint-disable-next-line import/prefer-default-export
+/**
+ * Re-creates the KMQ data tables
+ * @param db - The database context
+ */
 export async function generateKmqDataTables(
     db: DatabaseContext
 ): Promise<void> {

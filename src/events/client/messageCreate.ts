@@ -31,6 +31,10 @@ const parseMessage = (message: string): ParsedMessage => {
     };
 };
 
+/**
+ * Handles the 'messageCreate' event
+ * @param message - The original message
+ */
 export default async function messageCreateHandler(
     message: Eris.Message
 ): Promise<void> {

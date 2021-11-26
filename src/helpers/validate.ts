@@ -11,6 +11,7 @@ const logger = new IPCLogger("validate");
  * @param message - the Message object
  * @param warning - the warning text
  * @param arg - The incorrect argument
+ * @param usage - The usage instructions
  */
 export async function sendValidationErrorMessage(
     message: GuildTextableMessage,

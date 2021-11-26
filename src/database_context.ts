@@ -69,6 +69,9 @@ export class DatabaseContext {
     }
 }
 
+/**
+ * @returns a new database connection
+ */
 export function getNewConnection(): DatabaseContext {
     return new DatabaseContext();
 }
