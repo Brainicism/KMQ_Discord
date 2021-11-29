@@ -51,7 +51,10 @@ export default async function interactionCreateHandler(
             Eris.Constants.ApplicationCommandTypes.USER
         ) {
             if (interaction.data.name === PROFILE_COMMAND_NAME) {
-                handleProfileInteraction(interaction, interaction.member.id);
+                handleProfileInteraction(
+                    interaction,
+                    interaction.data.target_id
+                );
             }
         } else if (
             interaction.data.type ===
@@ -69,7 +72,12 @@ export default async function interactionCreateHandler(
 
                 gameSession.handleBookmarkInteraction(interaction);
             } else if (interaction.data.name === PROFILE_COMMAND_NAME) {
-                handleProfileInteraction(interaction, interaction.member.id);
+                const messageId = interaction.data.target_id;
+                const authorId =
+                    interaction.data.resolved["messages"].get(messageId).author
+                        .id;
+
+                handleProfileInteraction(interaction, authorId);
             }
         }
     }
