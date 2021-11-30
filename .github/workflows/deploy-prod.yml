@@ -29,4 +29,4 @@ jobs:
           echo "${{ secrets.SSH_DEPLOY_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           echo "${{ secrets.SSH_DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
       - name: Deploy over SSH
-        run: ssh ${{ secrets.PROD_SSH_CONNECTION_STRING }} "bash --login -s" < ./.github/workflows/redeploy_prod.sh
+        run: ssh ${{ secrets.PROD_SSH_CONNECTION_STRING }} '/home/kmq/prod/.github/workflows/redeploy_prod.sh'
