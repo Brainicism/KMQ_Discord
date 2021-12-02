@@ -155,7 +155,7 @@ export async function fetchUser(
             logger.debug(`User not in cache, fetched via REST: ${userID}`);
         } catch (err) {
             if (!silentErrors)
-                logger.error(
+                logger.warn(
                     `Could not fetch user: ${userID}. err: ${err.code}. msg: ${err.message}`
                 );
             return null;
@@ -163,7 +163,7 @@ export async function fetchUser(
     }
 
     if (!user) {
-        if (!silentErrors) logger.error(`Could not fetch user: ${userID}`);
+        if (!silentErrors) logger.warn(`Could not fetch user: ${userID}`);
         return null;
     }
 
@@ -203,7 +203,7 @@ async function fetchChannel(textChannelID: string): Promise<Eris.TextChannel> {
                 `Text channel not in cache, fetched via REST: ${textChannelID}`
             );
         } catch (err) {
-            logger.error(
+            logger.warn(
                 `Could not fetch text channel: ${textChannelID}. err: ${err.code}. msg: ${err.message}`
             );
             return null;
@@ -211,7 +211,7 @@ async function fetchChannel(textChannelID: string): Promise<Eris.TextChannel> {
     }
 
     if (!channel) {
-        logger.error(`Could not fetch channel: ${textChannelID}`);
+        logger.warn(`Could not fetch channel: ${textChannelID}`);
         return null;
     }
 
@@ -316,7 +316,7 @@ async function sendMessageExceptionHandler(
 
             case 50001: {
                 // Missing Access
-                logger.error(
+                logger.warn(
                     `Error sending message. Missing Access. textChannelID = ${channelID}`
                 );
                 break;
@@ -324,7 +324,7 @@ async function sendMessageExceptionHandler(
 
             case 50013: {
                 // Missing Permissions
-                logger.error(
+                logger.warn(
                     `Error sending message. Missing text permissions. textChannelID = ${channelID}.`
                 );
                 await textPermissionsCheck(channelID, guildID, authorID);
@@ -341,7 +341,7 @@ async function sendMessageExceptionHandler(
 
             case 50007: {
                 // Cannot send messages to this user
-                logger.error(
+                logger.warn(
                     `Error sending message. Cannot send messages to this user. userID = ${channelID}.`
                 );
                 break;
@@ -1274,7 +1274,7 @@ export function getCurrentVoiceMembers(
 ): Array<Eris.Member> {
     const voiceChannel = getVoiceChannel(voiceChannelID);
     if (!voiceChannel) {
-        logger.error(`Voice channel not in cache: ${voiceChannelID}`);
+        logger.warn(`Voice channel not in cache: ${voiceChannelID}`);
         return [];
     }
 
