@@ -3,4 +3,4 @@ cd /home/kmq/prod
 git fetch
 git checkout prod
 git pull
-npx ts-node src/scripts/announce-restart.ts
+/home/kmq/.nvm/versions/node/v14.2.0/bin/npx ts-node src/scripts/announce-restart.ts
