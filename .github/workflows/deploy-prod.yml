@@ -22,6 +22,8 @@ jobs:
           fetch-depth: 0
       - name: Snap prod branch
         run: |
+          git config --global user.name 'KMQ GH ACtion Committer'
+          git config --global user.email '<>'
           git checkout master
           npm version ${{ github.event.inputs.semver-type }}
           git push
