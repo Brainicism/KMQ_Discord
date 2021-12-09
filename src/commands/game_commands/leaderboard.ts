@@ -231,7 +231,6 @@ export default class LeaderboardCommand implements BaseCommand {
 
         const d = date || new Date();
         switch (duration) {
-            // Give an extra 10 seconds to send temporary leaderboards to debug channel
             case LeaderboardDuration.DAILY:
                 topPlayersQuery = topPlayersQuery.where(
                     "date",
@@ -240,9 +239,6 @@ export default class LeaderboardCommand implements BaseCommand {
                         d.getFullYear(),
                         d.getMonth(),
                         d.getDate(),
-                        0,
-                        0,
-                        10
                     )
                 );
                 break;
@@ -254,9 +250,6 @@ export default class LeaderboardCommand implements BaseCommand {
                         d.getFullYear(),
                         d.getMonth(),
                         d.getDate() - d.getDay(),
-                        0,
-                        0,
-                        10
                     )
                 );
                 break;
@@ -264,7 +257,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 topPlayersQuery = topPlayersQuery.where(
                     "date",
                     ">",
-                    new Date(d.getFullYear(), d.getMonth(), 0, 0, 0, 10)
+                    new Date(d.getFullYear(), d.getMonth())
                 );
                 break;
             default:
