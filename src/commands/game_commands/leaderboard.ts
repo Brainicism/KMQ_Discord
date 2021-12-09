@@ -27,6 +27,12 @@ import { sendValidationErrorMessage } from "../../helpers/validate";
 const logger = new IPCLogger("leaderboard");
 export const ENTRIES_PER_PAGE = 10;
 
+export enum LeaderboardType {
+    EXP = "exp",
+    GAMES_PLAYED = "games_played",
+    SONGS_GUESSED = "songs_guessed",
+}
+
 export enum LeaderboardScope {
     GLOBAL = "global",
     SERVER = "server",
@@ -54,7 +60,7 @@ export default class LeaderboardCommand implements BaseCommand {
     help = {
         name: "leaderboard",
         description: "View the KMQ leaderboard.",
-        usage: ",leaderboard {page_number}\n,leaderboard {server | game} {daily | weekly | monthly} {page_number}\n,leaderboard [enroll | unenroll]",
+        usage: ",leaderboard {page_number}\n,leaderboard {games_played | songs_guessed} {server | game} {daily | weekly | monthly} {page_number}\n,leaderboard [enroll | unenroll]",
         examples: [
             {
                 example: "`,leaderboard`",
@@ -65,13 +71,13 @@ export default class LeaderboardCommand implements BaseCommand {
                 explanation: "Shows the 3rd page of the global leaderboard",
             },
             {
-                example: "`,leaderboard server`",
-                explanation: "Shows the server-wide leaderboard",
+                example: "`,leaderboard game monthly 2`",
+                explanation:
+                    "Shows the 2nd page of the monthly scoreboard containing players with points in the current game",
             },
             {
-                example: "`,leaderboard server 3`",
-                explanation:
-                    "Shows the 3rd page of the server-wide leaderboard",
+                example: "`,leaderboard server`",
+                explanation: "Shows the server-wide leaderboard",
             },
             {
                 example: "`,leaderboard enroll`",
@@ -83,9 +89,9 @@ export default class LeaderboardCommand implements BaseCommand {
                 explanation: "Hides your name from the leaderboard",
             },
             {
-                example: "`,leaderboard game monthly 2`",
+                example: "`,leaderboard songs_guessed server 3`",
                 explanation:
-                    "Shows the 2nd page of the monthly scoreboard containing players with points in the current game",
+                    "Shows the 3rd page of the server-wide leaderboard by total songs guessed",
             },
             {
                 example: "`,leaderboard weekly 4`",
@@ -108,6 +114,7 @@ export default class LeaderboardCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             LeaderboardCommand.showLeaderboard(
                 message,
+                LeaderboardType.EXP,
                 LeaderboardScope.GLOBAL,
                 LeaderboardDuration.ALL_TIME
             );
@@ -129,6 +136,7 @@ export default class LeaderboardCommand implements BaseCommand {
             return;
         }
 
+        let type: LeaderboardType;
         let scope: LeaderboardScope;
         let duration: LeaderboardDuration;
         const lastArg =
@@ -138,6 +146,10 @@ export default class LeaderboardCommand implements BaseCommand {
             Number.isInteger(Number(lastArg)) && Number(lastArg) > 0
                 ? Number(lastArg)
                 : 0;
+
+        if (Object.values(LeaderboardType).includes(arg as LeaderboardType)) {
+            type = arg as LeaderboardType;
+        }
 
         if (Object.values(LeaderboardScope).includes(arg as LeaderboardScope)) {
             scope = arg as LeaderboardScope;
@@ -151,11 +163,12 @@ export default class LeaderboardCommand implements BaseCommand {
             duration = arg as LeaderboardDuration;
         }
 
-        if (pageOffset === 0 && !scope && !duration) {
+        if (pageOffset === 0 && !type && !scope && !duration) {
             sendValidationErrorMessage(
                 message,
                 `Expected one of the following valid values for the first argument: (a positive number, ${arrayToString(
                     [
+                        ...Object.values(LeaderboardType),
                         ...Object.values(LeaderboardScope),
                         ...Object.values(LeaderboardDuration),
                     ]
@@ -169,6 +182,7 @@ export default class LeaderboardCommand implements BaseCommand {
         if (parsedMessage.components.length === 1) {
             LeaderboardCommand.showLeaderboard(
                 message,
+                type ?? LeaderboardType.EXP,
                 scope ?? LeaderboardScope.GLOBAL,
                 duration ?? LeaderboardDuration.ALL_TIME,
                 pageOffset
@@ -177,6 +191,41 @@ export default class LeaderboardCommand implements BaseCommand {
         }
 
         arg = parsedMessage.components[1];
+        if (Object.values(LeaderboardScope).includes(arg as LeaderboardScope)) {
+            scope = arg as LeaderboardScope;
+        } else if (
+            Object.values(LeaderboardDuration).includes(
+                arg as LeaderboardDuration
+            )
+        ) {
+            duration = arg as LeaderboardDuration;
+        } else if (pageOffset === 0) {
+            sendValidationErrorMessage(
+                message,
+                `Expected one of the following valid values for the second argument: (a positive number, ${arrayToString(
+                    [
+                        ...Object.values(LeaderboardScope),
+                        ...Object.values(LeaderboardDuration),
+                    ]
+                )})`,
+                arg,
+                this.help.usage
+            );
+            return;
+        }
+
+        if (parsedMessage.components.length === 2) {
+            LeaderboardCommand.showLeaderboard(
+                message,
+                type ?? LeaderboardType.EXP,
+                scope ?? LeaderboardScope.GLOBAL,
+                duration ?? LeaderboardDuration.ALL_TIME,
+                pageOffset
+            );
+            return;
+        }
+
+        arg = parsedMessage.components[2];
         if (
             Object.values(LeaderboardDuration).includes(
                 arg as LeaderboardDuration
@@ -195,7 +244,7 @@ export default class LeaderboardCommand implements BaseCommand {
             return;
         }
 
-        if (pageOffset === 0 && parsedMessage.components.length > 2) {
+        if (pageOffset === 0 && parsedMessage.components.length > 3) {
             sendValidationErrorMessage(
                 message,
                 "Expected one of the following valid values for the third argument: (a positive number)",
@@ -207,6 +256,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
         LeaderboardCommand.showLeaderboard(
             message,
+            type ?? LeaderboardType.EXP,
             scope ?? LeaderboardScope.GLOBAL,
             duration ?? LeaderboardDuration.ALL_TIME,
             pageOffset
@@ -215,6 +265,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
     public static async getLeaderboardEmbeds(
         messageContext: MessageContext,
+        type: LeaderboardType,
         scope: LeaderboardScope,
         duration: LeaderboardDuration,
         date?: Date
@@ -290,20 +341,70 @@ export default class LeaderboardCommand implements BaseCommand {
             ((
                 await topPlayersQuery
                     .clone()
-                    .countDistinct("player_id as count")
+                    .countDistinct("player_id AS count")
                     .first()
             )["count"] as number) / ENTRIES_PER_PAGE
         );
 
-        topPlayersQuery = topPlayersQuery.select(
-            permanentLb ? ["exp", "level", "player_id"] : ["player_id"]
-        );
+        switch (type) {
+            case LeaderboardType.EXP:
+                if (permanentLb) {
+                    topPlayersQuery = topPlayersQuery.select([
+                        "exp",
+                        "level",
+                        "player_id",
+                    ]);
+                } else {
+                    topPlayersQuery = topPlayersQuery.select(["player_id"]);
+                    topPlayersQuery = topPlayersQuery
+                        .sum("exp_gained AS exp")
+                        .sum("levels_gained AS level")
+                        .groupBy("player_id");
+                }
 
-        if (!permanentLb) {
-            topPlayersQuery = topPlayersQuery
-                .sum("exp_gained as exp")
-                .sum("levels_gained as level")
-                .groupBy("player_id");
+                break;
+            case LeaderboardType.GAMES_PLAYED:
+                if (permanentLb) {
+                    topPlayersQuery = topPlayersQuery.select([
+                        "player_id",
+                        "games_played AS game_count",
+                        "level",
+                    ]);
+                } else {
+                    topPlayersQuery = topPlayersQuery.count(
+                        "player_id AS game_count"
+                    );
+
+                    topPlayersQuery = topPlayersQuery.select(["player_id"]);
+                    topPlayersQuery = topPlayersQuery.sum(
+                        "levels_gained AS level"
+                    );
+
+                    topPlayersQuery = topPlayersQuery.groupBy("player_id");
+                }
+
+                break;
+            case LeaderboardType.SONGS_GUESSED:
+                if (permanentLb) {
+                    topPlayersQuery = topPlayersQuery.select([
+                        "songs_guessed",
+                        "player_id",
+                        "level",
+                    ]);
+                } else {
+                    topPlayersQuery = topPlayersQuery.select(["player_id"]);
+                    topPlayersQuery = topPlayersQuery.sum(
+                        "levels_gained AS level"
+                    );
+
+                    topPlayersQuery = topPlayersQuery
+                        .sum("songs_guessed")
+                        .groupBy("player_id");
+                }
+
+                break;
+            default:
+                break;
         }
 
         for (let i = 0; i < pageCount; i++) {
@@ -311,10 +412,29 @@ export default class LeaderboardCommand implements BaseCommand {
             embedsFns.push(
                 () =>
                     new Promise(async (resolve) => {
-                        const topPlayers = await topPlayersQuery
-                            .orderBy("exp", "DESC")
-                            .offset(offset)
-                            .limit(ENTRIES_PER_PAGE);
+                        let topPlayers;
+                        switch (type) {
+                            case LeaderboardType.EXP:
+                                topPlayers = await topPlayersQuery
+                                    .orderBy("exp", "DESC")
+                                    .offset(offset)
+                                    .limit(ENTRIES_PER_PAGE);
+                                break;
+                            case LeaderboardType.GAMES_PLAYED:
+                                topPlayers = await topPlayersQuery
+                                    .orderBy("game_count", "DESC")
+                                    .offset(offset)
+                                    .limit(ENTRIES_PER_PAGE);
+                                break;
+                            case LeaderboardType.SONGS_GUESSED:
+                                topPlayers = await topPlayersQuery
+                                    .orderBy("songs_guessed", "DESC")
+                                    .offset(offset)
+                                    .limit(ENTRIES_PER_PAGE);
+                                break;
+                            default:
+                                break;
+                        }
 
                         const fields: Array<Eris.EmbedField> =
                             await Promise.all(
@@ -336,21 +456,85 @@ export default class LeaderboardCommand implements BaseCommand {
                                         ? enrolledPlayer.display_name
                                         : `Rank #${rank + 1}`;
 
-                                    const rankOrLevelsGained = permanentLb
-                                        ? `${getRankNameByLevel(player.level)}`
-                                        : "levels gained";
+                                    let value: string;
+                                    switch (type) {
+                                        case LeaderboardType.EXP:
+                                            if (permanentLb) {
+                                                const exp = `${friendlyFormattedNumber(
+                                                    player.exp
+                                                )} EXP`;
+
+                                                const level = `Level ${friendlyFormattedNumber(
+                                                    player.level
+                                                )} (${getRankNameByLevel(
+                                                    player.level
+                                                )})`;
+
+                                                value = `${exp} | ${level}`;
+                                            } else {
+                                                const expGained = `+${friendlyFormattedNumber(
+                                                    player.exp
+                                                )} EXP`;
+
+                                                const level = `${friendlyFormattedNumber(
+                                                    player.level
+                                                )} levels gained`;
+
+                                                value = `${expGained} | ${level}`;
+                                            }
+
+                                            break;
+                                        case LeaderboardType.GAMES_PLAYED: {
+                                            const games = `${friendlyFormattedNumber(
+                                                player.game_count
+                                            )} games played`;
+
+                                            let level: string;
+                                            if (permanentLb) {
+                                                level = `Level ${friendlyFormattedNumber(
+                                                    player.level
+                                                )} (${getRankNameByLevel(
+                                                    player.level
+                                                )})`;
+                                            } else {
+                                                level = `${friendlyFormattedNumber(
+                                                    player.level
+                                                )} levels gained`;
+                                            }
+
+                                            value = `${games} | ${level}`;
+                                            break;
+                                        }
+
+                                        case LeaderboardType.SONGS_GUESSED: {
+                                            const guesses = `${friendlyFormattedNumber(
+                                                player.songs_guessed
+                                            )} songs guessed`;
+
+                                            let level: string;
+                                            if (permanentLb) {
+                                                level = `Level ${friendlyFormattedNumber(
+                                                    player.level
+                                                )} (${getRankNameByLevel(
+                                                    player.level
+                                                )})`;
+                                            } else {
+                                                level = `${friendlyFormattedNumber(
+                                                    player.level
+                                                )} levels gained`;
+                                            }
+
+                                            value = `${guesses} | ${level}`;
+                                            break;
+                                        }
+
+                                        default:
+                                            break;
+                                    }
 
                                     return {
                                         name: `${medalIcon} ${displayName}`,
-                                        value: `${
-                                            !permanentLb ? "+" : ""
-                                        }${friendlyFormattedNumber(
-                                            player.exp
-                                        )} EXP | ${
-                                            permanentLb ? "Level" : ""
-                                        } ${friendlyFormattedNumber(
-                                            player.level
-                                        )} ${rankOrLevelsGained}`,
+                                        value,
                                     };
                                 })
                             );
@@ -385,9 +569,24 @@ export default class LeaderboardCommand implements BaseCommand {
                               )} `
                             : " ";
 
+                        let leaderboardType: string;
+                        switch (type) {
+                            case LeaderboardType.EXP:
+                                leaderboardType = "";
+                                break;
+                            case LeaderboardType.GAMES_PLAYED:
+                                leaderboardType = " (by games played)";
+                                break;
+                            case LeaderboardType.SONGS_GUESSED:
+                                leaderboardType = " (by songs guessed)";
+                                break;
+                            default:
+                                break;
+                        }
+
                         resolve({
                             title: bold(
-                                `${leaderboardScope}${durationString}Leaderboard`
+                                `${leaderboardScope}${durationString}Leaderboard${leaderboardType}`
                             ),
                             fields,
                             timestamp: new Date(),
@@ -445,6 +644,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
     private static async showLeaderboard(
         message: GuildTextableMessage | MessageContext,
+        type: LeaderboardType,
         scope: LeaderboardScope,
         duration: LeaderboardDuration,
         pageOffset: number = 0
@@ -481,6 +681,7 @@ export default class LeaderboardCommand implements BaseCommand {
         const { embeds, pageCount } =
             await LeaderboardCommand.getLeaderboardEmbeds(
                 messageContext,
+                type,
                 scope,
                 duration
             );
