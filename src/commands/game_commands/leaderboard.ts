@@ -27,7 +27,7 @@ import { sendValidationErrorMessage } from "../../helpers/validate";
 const logger = new IPCLogger("leaderboard");
 export const ENTRIES_PER_PAGE = 10;
 
-export enum LeaderboardType {
+export enum LeaderboardScope {
     GLOBAL = "global",
     SERVER = "server",
     GAME = "game",
@@ -108,7 +108,7 @@ export default class LeaderboardCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             LeaderboardCommand.showLeaderboard(
                 message,
-                LeaderboardType.GLOBAL,
+                LeaderboardScope.GLOBAL,
                 LeaderboardDuration.ALL_TIME
             );
             return;
@@ -129,7 +129,7 @@ export default class LeaderboardCommand implements BaseCommand {
             return;
         }
 
-        let type: LeaderboardType;
+        let scope: LeaderboardScope;
         let duration: LeaderboardDuration;
         const lastArg =
             parsedMessage.components[parsedMessage.components.length - 1];
@@ -139,8 +139,8 @@ export default class LeaderboardCommand implements BaseCommand {
                 ? Number(lastArg)
                 : 0;
 
-        if (Object.values(LeaderboardType).includes(arg as LeaderboardType)) {
-            type = arg as LeaderboardType;
+        if (Object.values(LeaderboardScope).includes(arg as LeaderboardScope)) {
+            scope = arg as LeaderboardScope;
         }
 
         if (
@@ -151,12 +151,12 @@ export default class LeaderboardCommand implements BaseCommand {
             duration = arg as LeaderboardDuration;
         }
 
-        if (pageOffset === 0 && !type && !duration) {
+        if (pageOffset === 0 && !scope && !duration) {
             sendValidationErrorMessage(
                 message,
                 `Expected one of the following valid values for the first argument: (a positive number, ${arrayToString(
                     [
-                        ...Object.values(LeaderboardType),
+                        ...Object.values(LeaderboardScope),
                         ...Object.values(LeaderboardDuration),
                     ]
                 )})`,
@@ -169,7 +169,7 @@ export default class LeaderboardCommand implements BaseCommand {
         if (parsedMessage.components.length === 1) {
             LeaderboardCommand.showLeaderboard(
                 message,
-                type ?? LeaderboardType.GLOBAL,
+                scope ?? LeaderboardScope.GLOBAL,
                 duration ?? LeaderboardDuration.ALL_TIME,
                 pageOffset
             );
@@ -207,7 +207,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
         LeaderboardCommand.showLeaderboard(
             message,
-            type ?? LeaderboardType.GLOBAL,
+            scope ?? LeaderboardScope.GLOBAL,
             duration ?? LeaderboardDuration.ALL_TIME,
             pageOffset
         );
@@ -215,7 +215,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
     public static async getLeaderboardEmbeds(
         messageContext: MessageContext,
-        type: LeaderboardType,
+        scope: LeaderboardScope,
         duration: LeaderboardDuration,
         date?: Date
     ): Promise<{ embeds: Array<EmbedGenerator>; pageCount: number }> {
@@ -235,11 +235,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 topPlayersQuery = topPlayersQuery.where(
                     "date",
                     ">",
-                    new Date(
-                        d.getFullYear(),
-                        d.getMonth(),
-                        d.getDate(),
-                    )
+                    new Date(d.getFullYear(), d.getMonth(), d.getDate())
                 );
                 break;
             case LeaderboardDuration.WEEKLY:
@@ -249,7 +245,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     new Date(
                         d.getFullYear(),
                         d.getMonth(),
-                        d.getDate() - d.getDay(),
+                        d.getDate() - d.getDay()
                     )
                 );
                 break;
@@ -264,7 +260,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 break;
         }
 
-        if (type === LeaderboardType.SERVER) {
+        if (scope === LeaderboardScope.SERVER) {
             const serverPlayers = (
                 await dbContext
                     .kmq("player_servers")
@@ -276,7 +272,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 "player_id",
                 serverPlayers
             );
-        } else if (type === LeaderboardType.GAME) {
+        } else if (scope === LeaderboardScope.GAME) {
             const participantIDs =
                 state.gameSessions[messageContext.guildID].participants;
 
@@ -359,25 +355,25 @@ export default class LeaderboardCommand implements BaseCommand {
                                 })
                             );
 
-                        let leaderboardType: string;
-                        switch (type) {
-                            case LeaderboardType.GLOBAL:
-                                leaderboardType = "Global";
+                        let leaderboardScope: string;
+                        switch (scope) {
+                            case LeaderboardScope.GLOBAL:
+                                leaderboardScope = "Global";
                                 break;
-                            case LeaderboardType.SERVER:
+                            case LeaderboardScope.SERVER:
                                 if (process.env.NODE_ENV !== EnvType.TEST) {
-                                    leaderboardType = `${
+                                    leaderboardScope = `${
                                         state.client.guilds.get(
                                             messageContext.guildID
                                         ).name
                                     }'s`;
                                 } else {
-                                    leaderboardType = "Server's";
+                                    leaderboardScope = "Server's";
                                 }
 
                                 break;
-                            case LeaderboardType.GAME:
-                                leaderboardType = "Current Game's";
+                            case LeaderboardScope.GAME:
+                                leaderboardScope = "Current Game's";
                                 break;
                             default:
                                 break;
@@ -391,7 +387,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
                         resolve({
                             title: bold(
-                                `${leaderboardType}${durationString}Leaderboard`
+                                `${leaderboardScope}${durationString}Leaderboard`
                             ),
                             fields,
                             timestamp: new Date(),
@@ -449,7 +445,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
     private static async showLeaderboard(
         message: GuildTextableMessage | MessageContext,
-        type: LeaderboardType,
+        scope: LeaderboardScope,
         duration: LeaderboardDuration,
         pageOffset: number = 0
     ): Promise<void> {
@@ -458,7 +454,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 ? message
                 : MessageContext.fromMessage(message);
 
-        if (type === LeaderboardType.GAME) {
+        if (scope === LeaderboardScope.GAME) {
             if (!state.gameSessions[message.guildID]) {
                 sendErrorMessage(messageContext, {
                     title: "No Active Game",
@@ -485,7 +481,7 @@ export default class LeaderboardCommand implements BaseCommand {
         const { embeds, pageCount } =
             await LeaderboardCommand.getLeaderboardEmbeds(
                 messageContext,
-                type,
+                scope,
                 duration
             );
 
@@ -509,7 +505,7 @@ export default class LeaderboardCommand implements BaseCommand {
         }
 
         logger.info(
-            `${getDebugLogHeader(message)} | Leaderboard retrieved (${type})`
+            `${getDebugLogHeader(message)} | Leaderboard retrieved (${scope})`
         );
         if (!(message instanceof MessageContext)) {
             await sendPaginationedEmbed(message, embeds, null, pageOffset);

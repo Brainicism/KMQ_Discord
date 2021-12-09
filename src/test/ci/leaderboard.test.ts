@@ -2,7 +2,7 @@ import assert from "assert";
 import { describe } from "mocha";
 import { EmbedGenerator } from "eris-pagination";
 import LeaderboardCommand, {
-    LeaderboardType,
+    LeaderboardScope,
     LeaderboardDuration,
     ENTRIES_PER_PAGE,
 } from "../../commands/game_commands/leaderboard";
@@ -82,7 +82,7 @@ describe("getLeaderboardEmbeds", () => {
                 const { embeds, pageCount } =
                     await LeaderboardCommand.getLeaderboardEmbeds(
                         messageContext,
-                        LeaderboardType.GLOBAL,
+                        LeaderboardScope.GLOBAL,
                         LeaderboardDuration.ALL_TIME
                     );
 
@@ -105,7 +105,7 @@ describe("getLeaderboardEmbeds", () => {
                 const { embeds, pageCount } =
                     await LeaderboardCommand.getLeaderboardEmbeds(
                         messageContext,
-                        LeaderboardType.GLOBAL,
+                        LeaderboardScope.GLOBAL,
                         LeaderboardDuration.ALL_TIME
                     );
 
@@ -128,7 +128,7 @@ describe("getLeaderboardEmbeds", () => {
                 const { embeds, pageCount } =
                     await LeaderboardCommand.getLeaderboardEmbeds(
                         messageContext,
-                        LeaderboardType.GLOBAL,
+                        LeaderboardScope.GLOBAL,
                         LeaderboardDuration.ALL_TIME
                     );
 
@@ -157,7 +157,7 @@ describe("getLeaderboardEmbeds", () => {
                 const { embeds, pageCount } =
                     await LeaderboardCommand.getLeaderboardEmbeds(
                         messageContext,
-                        LeaderboardType.GLOBAL,
+                        LeaderboardScope.GLOBAL,
                         LeaderboardDuration.ALL_TIME
                     );
 
@@ -198,7 +198,7 @@ describe("getLeaderboardEmbeds", () => {
                 const { embeds, pageCount } =
                     await LeaderboardCommand.getLeaderboardEmbeds(
                         messageContext,
-                        LeaderboardType.SERVER,
+                        LeaderboardScope.SERVER,
                         LeaderboardDuration.ALL_TIME
                     );
 
@@ -246,7 +246,7 @@ describe("getLeaderboardEmbeds", () => {
                 const { embeds, pageCount } =
                     await LeaderboardCommand.getLeaderboardEmbeds(
                         messageContext,
-                        LeaderboardType.GAME,
+                        LeaderboardScope.GAME,
                         LeaderboardDuration.ALL_TIME
                     );
 
@@ -333,7 +333,7 @@ describe("getLeaderboardEmbeds", () => {
                     const { embeds, pageCount } =
                         await LeaderboardCommand.getLeaderboardEmbeds(
                             messageContext,
-                            LeaderboardType.GLOBAL,
+                            LeaderboardScope.GLOBAL,
                             LeaderboardDuration.DAILY,
                             date
                         );
@@ -355,7 +355,7 @@ describe("getLeaderboardEmbeds", () => {
                     const { embeds, pageCount } =
                         await LeaderboardCommand.getLeaderboardEmbeds(
                             messageContext,
-                            LeaderboardType.GLOBAL,
+                            LeaderboardScope.GLOBAL,
                             LeaderboardDuration.WEEKLY,
                             date
                         );
@@ -377,7 +377,7 @@ describe("getLeaderboardEmbeds", () => {
                     const { embeds, pageCount } =
                         await LeaderboardCommand.getLeaderboardEmbeds(
                             messageContext,
-                            LeaderboardType.GLOBAL,
+                            LeaderboardScope.GLOBAL,
                             LeaderboardDuration.MONTHLY,
                             date
                         );
@@ -419,7 +419,7 @@ describe("getLeaderboardEmbeds", () => {
                     const { embeds, pageCount } =
                         await LeaderboardCommand.getLeaderboardEmbeds(
                             messageContext,
-                            LeaderboardType.SERVER,
+                            LeaderboardScope.SERVER,
                             LeaderboardDuration.DAILY,
                             date
                         );
@@ -443,7 +443,7 @@ describe("getLeaderboardEmbeds", () => {
                     const { embeds, pageCount } =
                         await LeaderboardCommand.getLeaderboardEmbeds(
                             messageContext,
-                            LeaderboardType.SERVER,
+                            LeaderboardScope.SERVER,
                             LeaderboardDuration.WEEKLY,
                             date
                         );
@@ -466,7 +466,7 @@ describe("getLeaderboardEmbeds", () => {
                     const { embeds, pageCount } =
                         await LeaderboardCommand.getLeaderboardEmbeds(
                             messageContext,
-                            LeaderboardType.SERVER,
+                            LeaderboardScope.SERVER,
                             LeaderboardDuration.MONTHLY,
                             date
                         );
@@ -510,7 +510,7 @@ describe("getLeaderboardEmbeds", () => {
                     const { embeds, pageCount } =
                         await LeaderboardCommand.getLeaderboardEmbeds(
                             messageContext,
-                            LeaderboardType.GAME,
+                            LeaderboardScope.GAME,
                             LeaderboardDuration.DAILY,
                             date
                         );
@@ -534,7 +534,7 @@ describe("getLeaderboardEmbeds", () => {
                     const { embeds, pageCount } =
                         await LeaderboardCommand.getLeaderboardEmbeds(
                             messageContext,
-                            LeaderboardType.GAME,
+                            LeaderboardScope.GAME,
                             LeaderboardDuration.WEEKLY,
                             date
                         );
@@ -557,7 +557,7 @@ describe("getLeaderboardEmbeds", () => {
                     const { embeds, pageCount } =
                         await LeaderboardCommand.getLeaderboardEmbeds(
                             messageContext,
-                            LeaderboardType.GAME,
+                            LeaderboardScope.GAME,
                             LeaderboardDuration.MONTHLY,
                             date
                         );

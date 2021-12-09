@@ -35,6 +35,7 @@ export default class Player {
     getName(): string {
         return this.name;
     }
+
     /**
      * Prints the tag (including the discriminator) in the smaller scoreboard, but only
      * the username in the larger scoreboard
