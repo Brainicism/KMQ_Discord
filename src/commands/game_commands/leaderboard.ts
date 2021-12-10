@@ -29,8 +29,8 @@ export const ENTRIES_PER_PAGE = 10;
 
 export enum LeaderboardType {
     EXP = "exp",
-    GAMES_PLAYED = "games_played",
-    SONGS_GUESSED = "songs_guessed",
+    GAMES_PLAYED = "gamesplayed",
+    SONGS_GUESSED = "songsguessed",
 }
 
 export enum LeaderboardScope {
@@ -40,7 +40,7 @@ export enum LeaderboardScope {
 }
 
 export enum LeaderboardDuration {
-    ALL_TIME = "all-time",
+    ALL_TIME = "alltime",
     DAILY = "daily",
     WEEKLY = "weekly",
     MONTHLY = "monthly",
@@ -60,7 +60,7 @@ export default class LeaderboardCommand implements BaseCommand {
     help = {
         name: "leaderboard",
         description: "View the KMQ leaderboard.",
-        usage: ",leaderboard {page_number}\n,leaderboard {games_played | songs_guessed} {server | game} {daily | weekly | monthly} {page_number}\n,leaderboard [enroll | unenroll]",
+        usage: ",leaderboard {page_number}\n,leaderboard {gamesplayed | songsguessed} {server | game} {daily | weekly | monthly} {page_number}\n,leaderboard [enroll | unenroll]",
         examples: [
             {
                 example: "`,leaderboard`",
@@ -89,7 +89,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 explanation: "Hides your name from the leaderboard",
             },
             {
-                example: "`,leaderboard songs_guessed server 3`",
+                example: "`,leaderboard songsguessed server 3`",
                 explanation:
                     "Shows the 3rd page of the server-wide leaderboard by total songs guessed",
             },
