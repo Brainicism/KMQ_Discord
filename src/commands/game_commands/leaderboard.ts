@@ -122,11 +122,10 @@ export default class LeaderboardCommand implements BaseCommand {
         }
 
         let arg = parsedMessage.components[0];
-        let action: LeaderboardAction;
         if (
             Object.values(LeaderboardAction).includes(arg as LeaderboardAction)
         ) {
-            action = arg as LeaderboardAction;
+            const action = arg as LeaderboardAction;
             if (action === LeaderboardAction.ENROLL) {
                 LeaderboardCommand.enrollLeaderboard(message);
             } else if (action === LeaderboardAction.UNENROLL) {
@@ -182,9 +181,9 @@ export default class LeaderboardCommand implements BaseCommand {
         if (parsedMessage.components.length === 1) {
             LeaderboardCommand.showLeaderboard(
                 message,
-                type ?? LeaderboardType.EXP,
-                scope ?? LeaderboardScope.GLOBAL,
-                duration ?? LeaderboardDuration.ALL_TIME,
+                type,
+                scope,
+                duration,
                 pageOffset
             );
             return;
@@ -217,9 +216,9 @@ export default class LeaderboardCommand implements BaseCommand {
         if (parsedMessage.components.length === 2) {
             LeaderboardCommand.showLeaderboard(
                 message,
-                type ?? LeaderboardType.EXP,
-                scope ?? LeaderboardScope.GLOBAL,
-                duration ?? LeaderboardDuration.ALL_TIME,
+                type,
+                scope,
+                duration,
                 pageOffset
             );
             return;
@@ -256,9 +255,9 @@ export default class LeaderboardCommand implements BaseCommand {
 
         LeaderboardCommand.showLeaderboard(
             message,
-            type ?? LeaderboardType.EXP,
-            scope ?? LeaderboardScope.GLOBAL,
-            duration ?? LeaderboardDuration.ALL_TIME,
+            type,
+            scope,
+            duration,
             pageOffset
         );
     };
@@ -644,9 +643,9 @@ export default class LeaderboardCommand implements BaseCommand {
 
     private static async showLeaderboard(
         message: GuildTextableMessage | MessageContext,
-        type: LeaderboardType,
-        scope: LeaderboardScope,
-        duration: LeaderboardDuration,
+        type: LeaderboardType = LeaderboardType.EXP,
+        scope: LeaderboardScope = LeaderboardScope.GLOBAL,
+        duration: LeaderboardDuration = LeaderboardDuration.ALL_TIME,
         pageOffset: number = 0
     ): Promise<void> {
         const messageContext: MessageContext =
