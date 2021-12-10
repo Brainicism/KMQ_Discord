@@ -272,6 +272,7 @@ describe("calculateRoundExpMultiplier", () => {
     let gameRound: GameRound;
     beforeEach(() => {
         gameRound = new GameRound("x", "x", "x", "x", new Date(), 1);
+        gameRound.bonusModifier = 1;
         guildPreference = GuildPreference.fromGuild("123");
         sandbox.stub(guildPreference, "updateGuildPreferences");
     });
