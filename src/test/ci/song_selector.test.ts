@@ -657,8 +657,9 @@ describe("selectRandomSong", () => {
                     );
                 }
 
-                assert.ok(
-                    selectedSongs.length === filteredSongs.size - numIgnored
+                assert.strictEqual(
+                    selectedSongs.length,
+                    filteredSongs.size - numIgnored
                 );
 
                 assert.ok(

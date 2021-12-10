@@ -315,7 +315,7 @@ describe("calculateRoundExpMultiplier", () => {
                 1
             );
 
-            assert.ok(finalRoundExp === roundExp);
+            assert.strictEqual(finalRoundExp, roundExp);
         });
     });
 
@@ -337,10 +337,10 @@ describe("calculateRoundExpMultiplier", () => {
                 1
             );
 
-            assert.ok(
-                fastGuessExp ===
-                    slowGuessExp *
-                        ExpBonusModifierValues[ExpBonusModifier.QUICK_GUESS]
+            assert.strictEqual(
+                fastGuessExp,
+                slowGuessExp *
+                    ExpBonusModifierValues[ExpBonusModifier.QUICK_GUESS]
             );
         });
     });
@@ -364,7 +364,7 @@ describe("calculateRoundExpMultiplier", () => {
                     1
                 );
 
-                assert.ok(newRoundExp === roundExp);
+                assert.strictEqual(newRoundExp, roundExp);
                 roundExp = newRoundExp;
             }
 
@@ -376,10 +376,9 @@ describe("calculateRoundExpMultiplier", () => {
                 1
             );
 
-            assert.ok(
-                finalRoundExp ===
-                    roundExp *
-                        ExpBonusModifierValues[ExpBonusModifier.GUESS_STREAK]
+            assert.strictEqual(
+                finalRoundExp,
+                roundExp * ExpBonusModifierValues[ExpBonusModifier.GUESS_STREAK]
             );
         });
     });
@@ -403,10 +402,10 @@ describe("calculateRoundExpMultiplier", () => {
                 1
             );
 
-            assert.ok(
-                bonusArtistExp ===
-                    regularExp *
-                        ExpBonusModifierValues[ExpBonusModifier.BONUS_ARTIST]
+            assert.strictEqual(
+                bonusArtistExp,
+                regularExp *
+                    ExpBonusModifierValues[ExpBonusModifier.BONUS_ARTIST]
             );
         });
     });
@@ -431,7 +430,7 @@ describe("calculateRoundExpMultiplier", () => {
                 1
             );
 
-            assert.ok(bonusArtistExp === regularExp * roundBonus);
+            assert.strictEqual(bonusArtistExp, regularExp * roundBonus);
         });
     });
 
@@ -454,7 +453,7 @@ describe("calculateRoundExpMultiplier", () => {
                 place
             );
 
-            assert.ok(lowerPlacementExp === regularExp / place);
+            assert.strictEqual(lowerPlacementExp, regularExp / place);
         });
     });
 
