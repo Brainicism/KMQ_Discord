@@ -21,7 +21,7 @@ const messageContext = new MessageContext("", gameStarter, SERVER_ID, "");
 const INITIAL_MONTH = 5;
 const INITIAL_DAY = 14;
 const INITIAL_HOUR = 6;
-const INITIAL_MINUTE = 5;
+const INITIAL_MINUTE = 35;
 const INITIAL_SECONDS = 3;
 const date = new Date(
     new Date().getFullYear(),
@@ -32,9 +32,7 @@ const date = new Date(
     INITIAL_SECONDS
 );
 
-const secondAgo = new Date(
-    new Date(new Date(date).setSeconds(INITIAL_SECONDS - 1))
-);
+const secondAgo = new Date(new Date(date).setSeconds(INITIAL_SECONDS - 1));
 
 const yesterday = new Date(new Date(date).setDate(INITIAL_DAY - 1));
 const lastWeek = new Date(new Date(date).setDate(INITIAL_DAY - 7));
@@ -46,6 +44,7 @@ function generatePlayerStats(numberPlayers: number, offset = 0): any {
     return [...Array(numberPlayers).keys()].map((i) => ({
         player_id: String(i + offset),
         songs_guessed: i,
+        games_played: i,
         exp: i + 1,
         level: i,
     }));
@@ -266,6 +265,62 @@ describe("getLeaderboardEmbeds", () => {
                 assert.strictEqual(fields, INITIAL_TOTAL_ENTRIES);
             });
         });
+
+        describe("games played leaderboard", () => {
+            beforeEach(async () => {
+                await dbContext.kmq("player_stats").del();
+            });
+
+            it("should match the number of pages and embeds", async () => {
+                await dbContext
+                    .kmq("player_stats")
+                    .insert(generatePlayerStats(INITIAL_TOTAL_ENTRIES));
+
+                const { embeds, pageCount } =
+                    await LeaderboardCommand.getLeaderboardEmbeds(
+                        messageContext,
+                        LeaderboardType.GAMES_PLAYED,
+                        LeaderboardScope.GLOBAL,
+                        LeaderboardDuration.ALL_TIME
+                    );
+
+                const fields = await getNumberOfFields(embeds);
+
+                assert.strictEqual(
+                    pageCount,
+                    Math.ceil(INITIAL_TOTAL_ENTRIES / ENTRIES_PER_PAGE)
+                );
+                assert.strictEqual(fields, INITIAL_TOTAL_ENTRIES);
+            });
+        });
+
+        describe("songs guessed leaderboard", () => {
+            beforeEach(async () => {
+                await dbContext.kmq("player_stats").del();
+            });
+
+            it("should match the number of pages and embeds", async () => {
+                await dbContext
+                    .kmq("player_stats")
+                    .insert(generatePlayerStats(INITIAL_TOTAL_ENTRIES));
+
+                const { embeds, pageCount } =
+                    await LeaderboardCommand.getLeaderboardEmbeds(
+                        messageContext,
+                        LeaderboardType.SONGS_GUESSED,
+                        LeaderboardScope.GLOBAL,
+                        LeaderboardDuration.ALL_TIME
+                    );
+
+                const fields = await getNumberOfFields(embeds);
+
+                assert.strictEqual(
+                    pageCount,
+                    Math.ceil(INITIAL_TOTAL_ENTRIES / ENTRIES_PER_PAGE)
+                );
+                assert.strictEqual(fields, INITIAL_TOTAL_ENTRIES);
+            });
+        });
     });
 
     describe("temporary leaderboard", () => {
@@ -321,7 +376,7 @@ describe("getLeaderboardEmbeds", () => {
                 rows.push({
                     player_id: String(i),
                     date,
-                    songs_guessed: 1,
+                    songs_guessed: i,
                     exp_gained: 1,
                     levels_gained: 1,
                 });
@@ -586,6 +641,82 @@ describe("getLeaderboardEmbeds", () => {
                     );
                     assert.strictEqual(fields, validEntryCount);
                 });
+            });
+        });
+
+        describe("games played leaderboard", () => {
+            it("should match the number of pages and embeds", async () => {
+                const rows = [];
+                for (let i = 0; i < 10; i++) {
+                    rows.push({
+                        player_id: "1",
+                        date: new Date(
+                            new Date(date).setMinutes(INITIAL_MINUTE - i)
+                        ),
+                        songs_guessed: i,
+                        exp_gained: 1,
+                        levels_gained: 1,
+                    });
+                }
+
+                await dbContext.kmq("player_game_session_stats").insert(rows);
+
+                // Counting distinct entries only -- player "0" has two entries, player "1" has 11 entries
+                const validEntryCount = INITIAL_TOTAL_ENTRIES - 1;
+                const { embeds, pageCount } =
+                    await LeaderboardCommand.getLeaderboardEmbeds(
+                        messageContext,
+                        LeaderboardType.GAMES_PLAYED,
+                        LeaderboardScope.GLOBAL,
+                        LeaderboardDuration.MONTHLY,
+                        date
+                    );
+
+                const fields = await getNumberOfFields(embeds);
+
+                assert.strictEqual(
+                    pageCount,
+                    Math.ceil(validEntryCount / ENTRIES_PER_PAGE)
+                );
+                assert.strictEqual(fields, validEntryCount);
+            });
+        });
+
+        describe("songs guessed leaderboard", () => {
+            it("should match the number of pages and embeds", async () => {
+                const rows = [];
+                for (let i = 0; i < 10; i++) {
+                    rows.push({
+                        player_id: "1",
+                        date: new Date(
+                            new Date(date).setMinutes(INITIAL_MINUTE - i)
+                        ),
+                        songs_guessed: i,
+                        exp_gained: 1,
+                        levels_gained: 1,
+                    });
+                }
+
+                await dbContext.kmq("player_game_session_stats").insert(rows);
+
+                // Counting distinct entries only -- player "0" has two entries, player "1" has 11 entries
+                const validEntryCount = INITIAL_TOTAL_ENTRIES - 1;
+                const { embeds, pageCount } =
+                    await LeaderboardCommand.getLeaderboardEmbeds(
+                        messageContext,
+                        LeaderboardType.GAMES_PLAYED,
+                        LeaderboardScope.GLOBAL,
+                        LeaderboardDuration.MONTHLY,
+                        date
+                    );
+
+                const fields = await getNumberOfFields(embeds);
+
+                assert.strictEqual(
+                    pageCount,
+                    Math.ceil(validEntryCount / ENTRIES_PER_PAGE)
+                );
+                assert.strictEqual(fields, validEntryCount);
             });
         });
     });
