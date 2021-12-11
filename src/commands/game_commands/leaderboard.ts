@@ -455,6 +455,19 @@ export default class LeaderboardCommand implements BaseCommand {
                                         ? enrolledPlayer.display_name
                                         : `Rank #${rank + 1}`;
 
+                                    let level: string;
+                                    if (permanentLb) {
+                                        level = `Level ${friendlyFormattedNumber(
+                                            player.level
+                                        )} (${getRankNameByLevel(
+                                            player.level
+                                        )})`;
+                                    } else {
+                                        level = `${friendlyFormattedNumber(
+                                            player.level
+                                        )} levels gained`;
+                                    }
+
                                     let value: string;
                                     switch (type) {
                                         case LeaderboardType.EXP:
@@ -463,21 +476,11 @@ export default class LeaderboardCommand implements BaseCommand {
                                                     player.exp
                                                 )} EXP`;
 
-                                                const level = `Level ${friendlyFormattedNumber(
-                                                    player.level
-                                                )} (${getRankNameByLevel(
-                                                    player.level
-                                                )})`;
-
                                                 value = `${exp} | ${level}`;
                                             } else {
                                                 const expGained = `+${friendlyFormattedNumber(
                                                     player.exp
                                                 )} EXP`;
-
-                                                const level = `${friendlyFormattedNumber(
-                                                    player.level
-                                                )} levels gained`;
 
                                                 value = `${expGained} | ${level}`;
                                             }
@@ -488,19 +491,6 @@ export default class LeaderboardCommand implements BaseCommand {
                                                 player.game_count
                                             )} games played`;
 
-                                            let level: string;
-                                            if (permanentLb) {
-                                                level = `Level ${friendlyFormattedNumber(
-                                                    player.level
-                                                )} (${getRankNameByLevel(
-                                                    player.level
-                                                )})`;
-                                            } else {
-                                                level = `${friendlyFormattedNumber(
-                                                    player.level
-                                                )} levels gained`;
-                                            }
-
                                             value = `${games} | ${level}`;
                                             break;
                                         }
@@ -509,19 +499,6 @@ export default class LeaderboardCommand implements BaseCommand {
                                             const guesses = `${friendlyFormattedNumber(
                                                 player.songs_guessed
                                             )} songs guessed`;
-
-                                            let level: string;
-                                            if (permanentLb) {
-                                                level = `Level ${friendlyFormattedNumber(
-                                                    player.level
-                                                )} (${getRankNameByLevel(
-                                                    player.level
-                                                )})`;
-                                            } else {
-                                                level = `${friendlyFormattedNumber(
-                                                    player.level
-                                                )} levels gained`;
-                                            }
 
                                             value = `${guesses} | ${level}`;
                                             break;
