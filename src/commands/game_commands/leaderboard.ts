@@ -76,8 +76,9 @@ export default class LeaderboardCommand implements BaseCommand {
                     "Shows the 2nd page of the monthly scoreboard containing players with points in the current game",
             },
             {
-                example: "`,leaderboard server`",
-                explanation: "Shows the server-wide leaderboard",
+                example: "`,leaderboard songsguessed server 3`",
+                explanation:
+                    "Shows the 3rd page of the server-wide leaderboard by total songs guessed",
             },
             {
                 example: "`,leaderboard enroll`",
@@ -89,9 +90,8 @@ export default class LeaderboardCommand implements BaseCommand {
                 explanation: "Hides your name from the leaderboard",
             },
             {
-                example: "`,leaderboard songsguessed server 3`",
-                explanation:
-                    "Shows the 3rd page of the server-wide leaderboard by total songs guessed",
+                example: "`,leaderboard server`",
+                explanation: "Shows the server-wide leaderboard",
             },
             {
                 example: "`,leaderboard weekly 4`",
