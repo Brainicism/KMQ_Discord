@@ -1,4 +1,5 @@
 import Eris from "eris";
+import pluralize from "pluralize";
 import dbContext from "../../database_context";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
@@ -465,7 +466,10 @@ export default class LeaderboardCommand implements BaseCommand {
                                     } else {
                                         level = `${friendlyFormattedNumber(
                                             player.level
-                                        )} levels gained`;
+                                        )} ${pluralize(
+                                            "level",
+                                            player.level
+                                        )} gained`;
                                     }
 
                                     let value: string;
@@ -489,7 +493,10 @@ export default class LeaderboardCommand implements BaseCommand {
                                         case LeaderboardType.GAMES_PLAYED: {
                                             const games = `${friendlyFormattedNumber(
                                                 player.game_count
-                                            )} games played`;
+                                            )} ${pluralize(
+                                                "game",
+                                                player.game_count
+                                            )} played`;
 
                                             value = `${games} | ${level}`;
                                             break;
@@ -498,7 +505,10 @@ export default class LeaderboardCommand implements BaseCommand {
                                         case LeaderboardType.SONGS_GUESSED: {
                                             const guesses = `${friendlyFormattedNumber(
                                                 player.songs_guessed
-                                            )} songs guessed`;
+                                            )} ${pluralize(
+                                                "song",
+                                                player.songs_guessed
+                                            )} guessed`;
 
                                             value = `${guesses} | ${level}`;
                                             break;
