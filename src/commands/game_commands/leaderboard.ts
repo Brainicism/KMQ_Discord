@@ -397,7 +397,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     );
 
                     topPlayersQuery = topPlayersQuery
-                        .sum("songs_guessed")
+                        .sum("songs_guessed AS songs_guessed")
                         .groupBy("player_id");
                 }
 
