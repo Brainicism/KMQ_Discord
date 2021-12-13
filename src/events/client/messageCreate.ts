@@ -1,7 +1,9 @@
 import Eris from "eris";
+import * as uuid from "uuid";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
+    sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
@@ -108,12 +110,24 @@ export default async function messageCreateHandler(
                 }'.`
             );
 
-            invokedCommand.call({
-                gameSessions,
-                channel: textChannel,
-                message,
-                parsedMessage,
-            });
+            try {
+                await invokedCommand.call({
+                    gameSessions,
+                    channel: textChannel,
+                    message,
+                    parsedMessage,
+                });
+            } catch (e) {
+                const debugId = uuid.v4();
+                logger.error(
+                    `Error while invoking command (${parsedMessage.action}) | ${debugId} | ${e}`
+                );
+
+                sendErrorMessage(MessageContext.fromMessage(message), {
+                    title: "Error running command",
+                    description: `I ran into an error while running this command.\nProvide this to a developer if this happens consistently:\n\`${debugId}\``,
+                });
+            }
         }
     } else if (state.gameSessions[message.guildID]?.gameRound) {
         const gameSession = state.gameSessions[message.guildID];
