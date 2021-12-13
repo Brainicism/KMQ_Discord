@@ -726,15 +726,7 @@ export default class GameSession {
         }
 
         // create a new round with randomly chosen song
-        this.prepareRound(
-            randomSong.songName,
-            randomSong.originalSongName,
-            randomSong.artist,
-            randomSong.youtubeLink,
-            randomSong.publishDate,
-            randomSong.views
-        );
-        this.gameRound.setBaseExpReward(this.calculateBaseExp());
+        this.gameRound = this.prepareRound(randomSong);
 
         const voiceChannel = state.client.getChannel(
             this.voiceChannelID
@@ -1077,6 +1069,25 @@ export default class GameSession {
     }
 
     /**
+     * Prepares a new GameRound
+     * @param randomSong - The queried song
+     * @returns the new GameRound
+     */
+    private prepareRound(randomSong: QueriedSong): GameRound {
+        const gameRound = new GameRound(
+            randomSong.songName,
+            randomSong.originalSongName,
+            randomSong.artist,
+            randomSong.youtubeLink,
+            randomSong.publishDate,
+            randomSong.views
+        );
+
+        gameRound.setBaseExpReward(this.calculateBaseExp());
+        return gameRound;
+    }
+
+    /**
      * Begin playing the GameRound's song in the VoiceChannel, listen on VoiceConnection events
      * @param guildPreference - The guild's GuildPreference
      * @param messageContext - An object containing relevant parts of Eris.Message
@@ -1198,32 +1209,6 @@ export default class GameSession {
         });
         this.roundsPlayed--;
         this.startRound(guildPreference, messageContext);
-    }
-    /**
-     * Prepares a new GameRound
-     * @param cleanSongName - The name of the song
-     * @param originalSongName - The cleaned name of the song
-     * @param artist - The song's artist
-     * @param videoID - The youtube video ID
-     * @param publishDate - The date the song was added to youtube
-     * @param views - The number of views the song has
-     */
-    private prepareRound(
-        cleanSongName: string,
-        originalSongName: string,
-        artist: string,
-        videoID: string,
-        publishDate: Date,
-        views: number
-    ): void {
-        this.gameRound = new GameRound(
-            cleanSongName,
-            originalSongName,
-            artist,
-            videoID,
-            publishDate,
-            views
-        );
     }
 
     /**
