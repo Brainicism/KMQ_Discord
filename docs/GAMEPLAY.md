@@ -235,7 +235,7 @@ Use `,help [command_name]` for more details for any of the following commands:
 - `,limit`: Set a maximum number of results in the song query. This effectively sets the "top `x` number of songs" based on the selected filters
 - `,groups`: Specify which groups/artists to exclusively play from
 - `,gender`: Choose the gender of the artists to exclusively play from
-- `,answer`: Choose whether to type in your answer, or to pick from multiple choices on buttons
+- `,answer`: Choose whether to type in your answer (and allow typos), or to pick from multiple choices on buttons
 - `,cutoff`: Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen
 - `,artisttype`: Choose whether to hear from soloists, groups, or both.
 - `,release`: Specify whether only official releases are played, or include b-sides + dance practices + acoustic versions + remixes

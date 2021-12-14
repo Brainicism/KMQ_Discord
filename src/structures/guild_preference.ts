@@ -706,9 +706,18 @@ export default class GuildPreference {
         ]);
     }
 
+    /**
+     * @returns whether typos are allowed
+     */
+    typosAllowed(): boolean {
+        return this.gameOptions.answerType === AnswerType.TYPING_TYPOS;
+    }
+
     /** @returns if multiple choice mode is active */
     isMultipleChoiceMode(): boolean {
-        return this.gameOptions.answerType !== AnswerType.TYPING;
+        return ![AnswerType.TYPING, AnswerType.TYPING_TYPOS].includes(
+            this.gameOptions.answerType
+        );
     }
 
     /**

@@ -39,6 +39,8 @@ export enum ExpBonusModifier {
     RANDOM_GUESS_BONUS_EPIC,
     RANDOM_GUESS_BONUS_LEGENDARY,
     BELOW_SONG_COUNT_THRESHOLD,
+    TYPO,
+    HINT_USED,
 }
 
 export const ExpBonusModifierValues = {
@@ -57,6 +59,8 @@ export const ExpBonusModifierValues = {
     [ExpBonusModifier.RANDOM_GUESS_BONUS_EPIC]: 10,
     [ExpBonusModifier.RANDOM_GUESS_BONUS_LEGENDARY]: 50,
     [ExpBonusModifier.BELOW_SONG_COUNT_THRESHOLD]: 0,
+    [ExpBonusModifier.TYPO]: 0.8,
+    [ExpBonusModifier.HINT_USED]: 0.5,
 };
 
 interface ExpModifier {
@@ -91,6 +95,14 @@ export async function calculateOptionsExpMultiplierInternal(
             displayName: "Power Hour Bonus",
             name: ExpBonusModifier.POWER_HOUR,
             isPenalty: false,
+        });
+    }
+
+    if (guildPreference.typosAllowed()) {
+        modifiers.push({
+            displayName: "Typos Allowed Penalty",
+            name: ExpBonusModifier.TYPO,
+            isPenalty: true,
         });
     }
 
@@ -226,6 +238,7 @@ export function calculateRoundExpMultiplier(
  * @param guessSpeed - The guess speed
  * @param place - The place of the guess
  * @param voteBonusExp - Whether bonus EXP should be applied to the modifier
+ * @param typosAllowed - Whether typos were allowed
  * @returns the round's total EXP based on the EXP modifiers
  */
 export async function calculateTotalRoundExp(
@@ -251,7 +264,9 @@ export async function calculateTotalRoundExp(
     );
 
     return Math.floor(
-        optionsMultiplier * roundMultipler * gameRound.getExpReward()
+        optionsMultiplier *
+            roundMultipler *
+            gameRound.getExpReward(guildPreference.typosAllowed())
     );
 }
 

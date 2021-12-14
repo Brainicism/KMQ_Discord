@@ -1,5 +1,6 @@
 import _ from "lodash";
 import Eris from "eris";
+import levenshtien from "damerau-levenshtein";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { state } from "../kmq_worker";
 import KmqMember from "./kmq_member";
@@ -10,12 +11,16 @@ import {
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
 const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\ \(\)\+\u200B]/g;
-
 /** Set of characters to replace in song names/guesses */
 const CHARACTER_REPLACEMENTS = [
     { pattern: REMOVED_CHARACTERS, replacement: "" },
     { pattern: /&/g, replacement: "and" },
 ];
+
+export interface GuessCorrectness {
+    exact: boolean;
+    similar: boolean;
+}
 
 /**
  * Takes in a song name and removes the characters in the predefined list
@@ -268,25 +273,49 @@ export default class GameRound {
         }
     }
 
-    getExpReward(): number {
-        return this.hintUsed ? this.baseExp / 2 : this.baseExp;
+    getExpReward(typosAllowed = false): number {
+        let exp = this.baseExp;
+        if (this.hintUsed) {
+            exp *= ExpBonusModifierValues[ExpBonusModifier.HINT_USED];
+        }
+
+        if (typosAllowed) {
+            exp *= ExpBonusModifierValues[ExpBonusModifier.TYPO];
+        }
+
+        return exp;
     }
 
     /**
      * Checks whether a user's guess is correct given a guesing mode type
      * @param guess - The user's guess
      * @param guessModeType - The guessing mode
+     * @param typosAllowed - Whether to allow minor typos
      * @returns the number of points as defined by the mode type and correctness of the guess
      */
-    checkGuess(guess: string, guessModeType: GuessModeType): number {
+    checkGuess(
+        guess: string,
+        guessModeType: GuessModeType,
+        typosAllowed = false
+    ): number {
         let pointReward = 0;
+
+        const songGuessResult = this.checkSongGuess(guess);
+        const artistGuessResult = this.checkArtistGuess(guess);
+        const isSongGuessCorrect =
+            songGuessResult.exact || (typosAllowed && songGuessResult.similar);
+
+        const isArtistGuessCorrect =
+            artistGuessResult.exact ||
+            (typosAllowed && artistGuessResult.similar);
+
         if (guessModeType === GuessModeType.SONG_NAME) {
-            pointReward = this.checkSongGuess(guess) ? 1 : 0;
+            pointReward = isSongGuessCorrect ? 1 : 0;
         } else if (guessModeType === GuessModeType.ARTIST) {
-            pointReward = this.checkArtistGuess(guess) ? 1 : 0;
+            pointReward = isArtistGuessCorrect ? 1 : 0;
         } else if (guessModeType === GuessModeType.BOTH) {
-            if (this.checkSongGuess(guess)) pointReward = 1;
-            if (this.checkArtistGuess(guess)) pointReward = 0.2;
+            if (isSongGuessCorrect) pointReward = 1;
+            if (isArtistGuessCorrect) pointReward = 0.2;
         }
 
         return this.hintUsed ? pointReward / 2 : pointReward;
@@ -371,17 +400,45 @@ export default class GameRound {
     }
 
     /**
+     * @param guess - The guessed string
+     * @param correctChoices - The correct choices to check against
+     * @returns whether the guess complies with the similarity requirements
+     */
+    static similarityCheck(
+        guess: string,
+        correctChoices: Array<string>
+    ): boolean {
+        const distances = correctChoices.flatMap((x) => {
+            if (x.length > 4 && Math.abs(guess.length - x.length) < 2) {
+                return [levenshtien(guess, x)];
+            }
+
+            return [];
+        });
+
+        if (distances.length > 0) {
+            const sortedDistances = distances.sort((a, b) => a.steps - b.steps);
+            return sortedDistances[0].steps <= 2;
+        }
+
+        return false;
+    }
+
+    /**
      * Checks whether the song guess matches the GameRound's song
      * @param message - The Message that contains the guess
      * @returns whether or not the guess was correct
      */
-    private checkSongGuess(message: string): boolean {
+    private checkSongGuess(message: string): GuessCorrectness {
         const guess = cleanSongName(message);
         const cleanedSongAliases = this.acceptedSongAnswers.map((x) =>
             cleanSongName(x)
         );
 
-        return this.songName && cleanedSongAliases.includes(guess);
+        return {
+            exact: this.songName && cleanedSongAliases.includes(guess),
+            similar: GameRound.similarityCheck(guess, cleanedSongAliases),
+        };
     }
 
     /**
@@ -389,12 +446,15 @@ export default class GameRound {
      * @param message - The Message that contains the guess
      * @returns whether or not the guess was correct
      */
-    private checkArtistGuess(message: string): boolean {
+    private checkArtistGuess(message: string): GuessCorrectness {
         const guess = cleanArtistName(message);
         const cleanedArtistAliases = this.acceptedArtistAnswers.map((x) =>
             cleanArtistName(x)
         );
 
-        return this.songName && cleanedArtistAliases.includes(guess);
+        return {
+            exact: this.songName && cleanedArtistAliases.includes(guess),
+            similar: GameRound.similarityCheck(guess, cleanedArtistAliases),
+        };
     }
 }
