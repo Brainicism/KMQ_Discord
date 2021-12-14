@@ -244,6 +244,19 @@ describe("check guess", () => {
     });
 
     describe("correct guess", () => {
+        describe("hint used", () => {
+            it("should return half the amount of points", () => {
+                gameRound.hintUsed = true;
+                assert.strictEqual(
+                    gameRound.checkGuess(
+                        "very cool song",
+                        GuessModeType.SONG_NAME
+                    ),
+                    0.5
+                );
+            });
+        });
+
         describe("song guessing mode", () => {
             it("should return 1 point", () => {
                 assert.strictEqual(
