@@ -840,7 +840,6 @@ export async function sendOptionsMessage(
     optionStrings[GameOption.SHUFFLE_TYPE] = gameOptions.shuffleType;
     optionStrings[GameOption.SEEK_TYPE] = gameOptions.seekType;
     optionStrings[GameOption.GUESS_MODE_TYPE] = gameOptions.guessModeType;
-    optionStrings[GameOption.TYPO_TYPE] = gameOptions.typoType;
     optionStrings[GameOption.SPECIAL_TYPE] = gameOptions.specialType;
     optionStrings[GameOption.TIMER] = guildPreference.isGuessTimeoutSet()
         ? `${gameOptions.guessTimeout} sec`

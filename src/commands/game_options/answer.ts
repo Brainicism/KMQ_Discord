@@ -12,6 +12,7 @@ import CommandPrechecks from "../../command_prechecks";
 const logger = new IPCLogger("answer");
 export enum AnswerType {
     TYPING = "typing",
+    TYPING_TYPOS = "typing_typos",
     MULTIPLE_CHOICE_EASY = "easy",
     MULTIPLE_CHOICE_MED = "medium",
     MULTIPLE_CHOICE_HARD = "hard",
@@ -37,7 +38,7 @@ export default class AnswerCommand implements BaseCommand {
     help = {
         name: "answer",
         description:
-            "Choose how to answer: by typing your answer, or via multiple choice. Options are the following, `typing`, `easy`, `medium`, and `hard`. Playing on multiple choice mode reduces EXP by (0.25x, 0.5x, 0.75x) based on difficulty",
+            "Choose how to answer: by typing your answer, or via multiple choice. Options are the following, `typing`, `typing_typos`, `easy`, `medium`, and `hard`. Playing on multiple choice mode reduces EXP by (0.25x, 0.5x, 0.75x) based on difficulty",
         usage: ",answer [answerType]",
         examples: [
             {
@@ -45,19 +46,24 @@ export default class AnswerCommand implements BaseCommand {
                 explanation: "Type your answer in the chat to guess",
             },
             {
+                example: "`,answer typing_typos`",
+                explanation:
+                    "Type your answer in the chat to guess. Small typos will be marked as correct. 0.8x exp penalty will be applied.",
+            },
+            {
                 example: "`,answer easy`",
                 explanation:
-                    "Click on the button from 4 multiple choice options to guess",
+                    "Click on the button from 4 multiple choice options to guess. 0.25x exp penalty will be applied.",
             },
             {
                 example: "`,answer medium`",
                 explanation:
-                    "Click on the button from 6 multiple choice options to guess",
+                    "Click on the button from 6 multiple choice options to guess. 0.5x exp penalty will be applied.",
             },
             {
                 example: "`,answer hard`",
                 explanation:
-                    "Click on the button from 8 multiple choice options to guess",
+                    "Click on the button from 8 multiple choice options to guess. 0.75x exp penalty will be applied.",
             },
         ],
         priority: 150,
