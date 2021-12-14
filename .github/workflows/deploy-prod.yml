@@ -27,7 +27,7 @@ jobs:
           git config --global user.email '<>'
           git checkout master
           npm version ${{ github.event.inputs.semver-type }}
-          git push
+          git push --follow-tags
           git checkout prod
           echo "Checking out 'prod', latest commit:"
           git log -n 1 --pretty
