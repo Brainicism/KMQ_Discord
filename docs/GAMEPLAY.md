@@ -251,6 +251,7 @@ Use `,help [command_name]` for more details for any of the following commands:
 - `,duration`: Set the maximum length of a KMQ game in minutes
 - `,exclude`: Specify which artists to exclude
 - `,include`: Specify which artists to forcefully include, regardless of other game options
+- `,typo`: Choose whether to allow minor typos in guesses
 
 - `,reset`: Reset all options to the default settings
 - `,add`: Add groups to `,groups`, `,exclude`, or `,include`
