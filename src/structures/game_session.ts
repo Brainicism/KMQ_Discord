@@ -587,7 +587,8 @@ export default class GameSession {
             messageContext.author.id,
             guess,
             guildPreference.gameOptions.guessModeType,
-            guildPreference.isMultipleChoiceMode()
+            guildPreference.isMultipleChoiceMode(),
+            guildPreference.typosAllowed(),
         );
 
         if (pointsEarned > 0) {
@@ -1232,13 +1233,15 @@ export default class GameSession {
      * @param guess - The user's guess
      * @param guessModeType - The guessing mode type to evaluate the guess against
      * @param multipleChoiceMode - Whether the answer type is set to multiple choice
+     * @param typosAllowed - Whether minor typos are allowed
      * @returns The number of points achieved for the guess
      */
     private checkGuess(
         userID: string,
         guess: string,
         guessModeType: GuessModeType,
-        multipleChoiceMode: boolean
+        multipleChoiceMode: boolean,
+        typosAllowed = false,
     ): number {
         if (!this.gameRound) return 0;
         if (
@@ -1250,7 +1253,7 @@ export default class GameSession {
             this.participants.add(userID);
         }
 
-        const pointsAwarded = this.gameRound.checkGuess(guess, guessModeType);
+        const pointsAwarded = this.gameRound.checkGuess(guess, guessModeType, typosAllowed);
         if (pointsAwarded) {
             this.gameRound.userCorrect(userID, pointsAwarded);
         }
@@ -1487,7 +1490,6 @@ export default class GameSession {
         let expJitter = expBase * (0.05 * Math.random());
         expJitter *= Math.round(Math.random()) ? 1 : -1;
 
-        // double exp weekend multiplier
         return expBase + expJitter;
     }
 

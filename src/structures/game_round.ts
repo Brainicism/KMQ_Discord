@@ -287,7 +287,7 @@ export default class GameRound {
     checkGuess(
         guess: string,
         guessModeType: GuessModeType,
-        typosAllowed = false
+        typosAllowed = false,
     ): number {
         let pointReward = 0;
 

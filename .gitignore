@@ -13,3 +13,4 @@ data/skip_seed
 *.validation.sql
 data/group_list.txt
 .eslintcache
+.gitignore

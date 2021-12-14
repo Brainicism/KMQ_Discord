@@ -45,6 +45,7 @@ import {
     AnswerType,
     DEFAULT_ANSWER_TYPE,
 } from "../commands/game_options/answer";
+import { DEFAULT_TYPO_TYPE, TypoType } from "../commands/game_options/typo";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("guild_preference");
@@ -62,6 +63,7 @@ interface GameOptions {
     artistType: ArtistType;
     answerType: AnswerType;
     shuffleType: ShuffleType;
+    typoType: TypoType;
     groups: MatchedArtist[];
     excludes: MatchedArtist[];
     includes: MatchedArtist[];
@@ -105,6 +107,7 @@ const enum GameOptionInternal {
     ARTIST_TYPE = "artistType",
     ANSWER_TYPE = "answerType",
     SHUFFLE_TYPE = "shuffleType",
+    TYPO_TYPE = "typoType",
     GROUPS = "groups",
     EXCLUDES = "excludes",
     INCLUDES = "includes",
@@ -131,6 +134,7 @@ export const GameOptionInternalToGameOption: { [option: string]: string } = {
     [GameOptionInternal.ARTIST_TYPE]: GameOption.ARTIST_TYPE,
     [GameOptionInternal.ANSWER_TYPE]: GameOption.ANSWER_TYPE,
     [GameOptionInternal.SHUFFLE_TYPE]: GameOption.SHUFFLE_TYPE,
+    [GameOptionInternal.TYPO_TYPE]: GameOption.TYPO_TYPE,
     [GameOptionInternal.GROUPS]: GameOption.GROUPS,
     [GameOptionInternal.EXCLUDES]: GameOption.EXCLUDE,
     [GameOptionInternal.INCLUDES]: GameOption.INCLUDE,
@@ -216,6 +220,10 @@ export default class GuildPreference {
             default: [DEFAULT_GUESS_MODE],
             setter: this.setGuessModeType,
         },
+        [GameOption.TYPO_TYPE]: {
+            default: [DEFAULT_TYPO_TYPE],
+            setter: this.setTypoType,
+        },
         [GameOption.RELEASE_TYPE]: {
             default: [DEFAULT_RELEASE_TYPE],
             setter: this.setReleaseType,
@@ -252,6 +260,7 @@ export default class GuildPreference {
         guessModeType: DEFAULT_GUESS_MODE,
         releaseType: DEFAULT_RELEASE_TYPE,
         shuffleType: DEFAULT_SHUFFLE,
+        typoType: DEFAULT_TYPO_TYPE,
         groups: null,
         excludes: null,
         includes: null,
@@ -758,6 +767,25 @@ export default class GuildPreference {
         await this.updateGuildPreferences([
             { name: GameOptionInternal.RELEASE_TYPE, value: releaseType },
         ]);
+    }
+
+    /**
+     * Sets the typo type option value
+     * @param typoType - The ReleaseType
+     */
+    async setTypoType(typoType: TypoType): Promise<void> {
+        this.gameOptions.typoType = typoType;
+        await this.updateGuildPreferences([
+            { name: GameOptionInternal.TYPO_TYPE, value: typoType },
+        ]);
+    }
+
+    /**
+     * @param typoType - The ReleaseType
+     * @returns whether typos are allowed
+     */
+    typosAllowed(): boolean {
+        return this.gameOptions.typoType === TypoType.ALLOW;
     }
 
     /**
