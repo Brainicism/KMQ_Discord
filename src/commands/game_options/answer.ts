@@ -12,7 +12,7 @@ import CommandPrechecks from "../../command_prechecks";
 const logger = new IPCLogger("answer");
 export enum AnswerType {
     TYPING = "typing",
-    TYPING_TYPOS = "typing_typos",
+    TYPING_TYPOS = "typingtypos",
     MULTIPLE_CHOICE_EASY = "easy",
     MULTIPLE_CHOICE_MED = "medium",
     MULTIPLE_CHOICE_HARD = "hard",
@@ -38,7 +38,7 @@ export default class AnswerCommand implements BaseCommand {
     help = {
         name: "answer",
         description:
-            "Choose how to answer: by typing your answer, or via multiple choice. Options are the following, `typing`, `typing_typos`, `easy`, `medium`, and `hard`. Playing on multiple choice mode reduces EXP by (0.25x, 0.5x, 0.75x) based on difficulty",
+            "Choose how to answer: by typing your answer, or via multiple choice. Options are the following, `typing`, `typingtypos`, `easy`, `medium`, and `hard`. Playing on multiple choice mode reduces EXP by (0.25x, 0.5x, 0.75x) based on difficulty",
         usage: ",answer [answerType]",
         examples: [
             {
@@ -46,7 +46,7 @@ export default class AnswerCommand implements BaseCommand {
                 explanation: "Type your answer in the chat to guess",
             },
             {
-                example: "`,answer typing_typos`",
+                example: "`,answer typingtypos`",
                 explanation:
                     "Type your answer in the chat to guess. Small typos will be marked as correct. 0.8x exp penalty will be applied.",
             },
