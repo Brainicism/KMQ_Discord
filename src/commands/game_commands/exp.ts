@@ -39,6 +39,8 @@ export enum ExpBonusModifier {
     RANDOM_GUESS_BONUS_EPIC,
     RANDOM_GUESS_BONUS_LEGENDARY,
     BELOW_SONG_COUNT_THRESHOLD,
+    TYPO,
+    HINT_USED,
 }
 
 export const ExpBonusModifierValues = {
@@ -57,6 +59,8 @@ export const ExpBonusModifierValues = {
     [ExpBonusModifier.RANDOM_GUESS_BONUS_EPIC]: 10,
     [ExpBonusModifier.RANDOM_GUESS_BONUS_LEGENDARY]: 50,
     [ExpBonusModifier.BELOW_SONG_COUNT_THRESHOLD]: 0,
+    [ExpBonusModifier.TYPO]: 0.8,
+    [ExpBonusModifier.HINT_USED]: 0.5,
 };
 
 interface ExpModifier {

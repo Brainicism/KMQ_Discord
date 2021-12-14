@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import assert from "assert";
+import {
+    ExpBonusModifier,
+    ExpBonusModifierValues,
+} from "../../commands/game_commands/exp";
 import { GuessModeType } from "../../commands/game_options/guessmode";
 import { state } from "../../kmq_worker";
 import GameRound, {
@@ -211,8 +215,8 @@ describe("skipping", () => {
 describe("check guess", () => {
     beforeEach(() => {
         gameRound = new GameRound(
-            "song",
-            "song",
+            "very cool song",
+            "very cool song",
             "artist",
             "a1b2c3",
             new Date(2015, 0),
@@ -240,11 +244,48 @@ describe("check guess", () => {
     });
 
     describe("correct guess", () => {
+        describe("similarity mode enabled", () => {
+            it("should apply the appropriate multiplier", () => {
+                // exact answer
+                assert.strictEqual(
+                    gameRound.checkGuess(
+                        "very cool song",
+                        GuessModeType.SONG_NAME,
+                        true
+                    ),
+                    ExpBonusModifierValues[ExpBonusModifier.TYPO]
+                );
+
+                // similar answer
+                assert.strictEqual(
+                    gameRound.checkGuess(
+                        "very cool sogn",
+                        GuessModeType.SONG_NAME,
+                        true
+                    ),
+                    ExpBonusModifierValues[ExpBonusModifier.TYPO]
+                );
+
+                // incorrect answer
+                assert.strictEqual(
+                    gameRound.checkGuess(
+                        "very cool songggggggggggggggg",
+                        GuessModeType.SONG_NAME,
+                        true
+                    ),
+                    0
+                );
+            });
+        });
+
         describe("hint used", () => {
             it("should return half the amount of points", () => {
                 gameRound.hintUsed = true;
                 assert.strictEqual(
-                    gameRound.checkGuess("song", GuessModeType.SONG_NAME),
+                    gameRound.checkGuess(
+                        "very cool song",
+                        GuessModeType.SONG_NAME
+                    ),
                     0.5
                 );
             });
@@ -253,7 +294,10 @@ describe("check guess", () => {
         describe("song guessing mode", () => {
             it("should return 1 point", () => {
                 assert.strictEqual(
-                    gameRound.checkGuess("song", GuessModeType.SONG_NAME),
+                    gameRound.checkGuess(
+                        "very cool song",
+                        GuessModeType.SONG_NAME
+                    ),
                     1
                 );
             });
@@ -272,7 +316,10 @@ describe("check guess", () => {
             describe("guessed song", () => {
                 it("should return 1 point", () => {
                     assert.strictEqual(
-                        gameRound.checkGuess("song", GuessModeType.BOTH),
+                        gameRound.checkGuess(
+                            "very cool song",
+                            GuessModeType.BOTH
+                        ),
                         1
                     );
                 });
@@ -290,12 +337,126 @@ describe("check guess", () => {
     });
 });
 
+describe("similarityCheck", () => {
+    describe("precise match", () => {
+        it("should return true", () => {
+            assert.ok(GameRound.similarityCheck("abcefg", ["abcdefg"]));
+        });
+    });
+
+    describe("meets similarity criteria", () => {
+        it("should return true", () => {
+            // 1 transposition error
+            assert.ok(GameRound.similarityCheck("abcdegf", ["abcdefg"]));
+            // 2 transposition errors
+            assert.ok(GameRound.similarityCheck("bacdegf", ["abcdefg"]));
+            // 1 removal required
+            assert.ok(GameRound.similarityCheck("abcdefgh", ["abcdefg"]));
+            // 1 removal, one transposition error
+            assert.ok(GameRound.similarityCheck("bacdefgh", ["abcdefg"]));
+            // 1 insertion required
+            assert.ok(GameRound.similarityCheck("abcdef", ["abcdefg"]));
+            // 1 insertion required, one transposition error
+            assert.ok(GameRound.similarityCheck("bacdef", ["abcdefg"]));
+        });
+    });
+
+    describe("does not meet similarity criteria", () => {
+        it("should return false", () => {
+            // 3 transposition errors
+            assert.ok(!GameRound.similarityCheck("badcegf", ["abcdefg"]));
+            // 2 removals required
+            assert.ok(!GameRound.similarityCheck("abcdefghi", ["abcdefg"]));
+            // 2 insertions required
+            assert.ok(!GameRound.similarityCheck("abcde", ["abcdefg"]));
+            // correct choice is too short, transposition error
+            assert.ok(!GameRound.similarityCheck("bacd", ["abcd"]));
+            // correct choice is too short, insertion required
+            assert.ok(!GameRound.similarityCheck("abd", ["abcd"]));
+            // correct choice is too short, removal required
+            assert.ok(!GameRound.similarityCheck("abcde", ["abcd"]));
+        });
+    });
+
+    describe("multiple correct choices", () => {
+        describe("no choices meet criteria", () => {
+            it("should return false", () => {
+                assert.ok(
+                    !GameRound.similarityCheck("abcde", [
+                        "..........",
+                        "eleven",
+                        "12345",
+                    ])
+                );
+            });
+        });
+
+        describe("atleast one choice meets criteria", () => {
+            it("should return true", () => {
+                // 1 transposition error
+                assert.ok(
+                    GameRound.similarityCheck("abcdegf", [
+                        "1234567",
+                        "abcdefg",
+                        "5454544545",
+                    ])
+                );
+
+                // 2 transposition errors
+                assert.ok(
+                    GameRound.similarityCheck("bacdegf", [
+                        "1234567",
+                        "abcdefg",
+                        "5454544545",
+                    ])
+                );
+
+                // 1 removal required
+                assert.ok(
+                    GameRound.similarityCheck("abcdefgh", [
+                        "1234567",
+                        "abcdefg",
+                        "5454544545",
+                    ])
+                );
+
+                // 1 removal, one transposition error
+                assert.ok(
+                    GameRound.similarityCheck("bacdefgh", [
+                        "1234567",
+                        "abcdefg",
+                        "5454544545",
+                    ])
+                );
+
+                // 1 insertion required
+                assert.ok(
+                    GameRound.similarityCheck("abcdef", [
+                        "1234567",
+                        "abcdefg",
+                        "5454544545",
+                    ])
+                );
+
+                // 1 insertion required, one transposition error
+                assert.ok(
+                    GameRound.similarityCheck("bacdef", [
+                        "1234567",
+                        "abcdefg",
+                        "5454544545",
+                    ])
+                );
+            });
+        });
+    });
+});
+
 describe("getExpReward", () => {
     const exp = 500;
     beforeEach(() => {
         gameRound = new GameRound(
-            "song",
-            "song",
+            "very cool song",
+            "very cool song",
             "artist",
             "a1b2c3",
             new Date(2015),
