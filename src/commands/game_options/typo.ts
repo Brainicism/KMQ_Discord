@@ -36,8 +36,7 @@ export default class TypoCommand implements BaseCommand {
 
     help = {
         name: "typo",
-        description:
-            "Choose whether to allow minor typos in guesses",
+        description: "Choose whether to allow minor typos in guesses",
         usage: ",typo [allow | disallow]",
         examples: [
             {
@@ -71,8 +70,7 @@ export default class TypoCommand implements BaseCommand {
             return;
         }
 
-        const typoType =
-            parsedMessage.components[0].toLowerCase() as TypoType;
+        const typoType = parsedMessage.components[0].toLowerCase() as TypoType;
 
         await guildPreference.setTypoType(typoType);
         await sendOptionsMessage(

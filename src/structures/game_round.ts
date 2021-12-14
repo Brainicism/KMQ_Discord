@@ -273,8 +273,17 @@ export default class GameRound {
         }
     }
 
-    getExpReward(): number {
-        return this.hintUsed ? this.baseExp / 2 : this.baseExp;
+    getExpReward(typosAllowed = false): number {
+        let exp = this.baseExp;
+        if (this.hintUsed) {
+            exp *= ExpBonusModifierValues[ExpBonusModifier.HINT_USED];
+        }
+
+        if (typosAllowed) {
+            exp *= ExpBonusModifierValues[ExpBonusModifier.TYPO];
+        }
+
+        return exp;
     }
 
     /**
@@ -287,7 +296,7 @@ export default class GameRound {
     checkGuess(
         guess: string,
         guessModeType: GuessModeType,
-        typosAllowed = false,
+        typosAllowed = false
     ): number {
         let pointReward = 0;
 
@@ -309,13 +318,7 @@ export default class GameRound {
             if (isArtistGuessCorrect) pointReward = 0.2;
         }
 
-        return (
-            (this.hintUsed
-                ? pointReward *
-                  ExpBonusModifierValues[ExpBonusModifier.HINT_USED]
-                : pointReward) *
-            (typosAllowed ? ExpBonusModifierValues[ExpBonusModifier.TYPO] : 1)
-        );
+        return this.hintUsed ? pointReward / 2 : pointReward;
     }
 
     /**

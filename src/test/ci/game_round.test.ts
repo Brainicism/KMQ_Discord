@@ -244,53 +244,6 @@ describe("check guess", () => {
     });
 
     describe("correct guess", () => {
-        describe("similarity mode enabled", () => {
-            it("should apply the appropriate multiplier", () => {
-                // exact answer
-                assert.strictEqual(
-                    gameRound.checkGuess(
-                        "very cool song",
-                        GuessModeType.SONG_NAME,
-                        true
-                    ),
-                    ExpBonusModifierValues[ExpBonusModifier.TYPO]
-                );
-
-                // similar answer
-                assert.strictEqual(
-                    gameRound.checkGuess(
-                        "very cool sogn",
-                        GuessModeType.SONG_NAME,
-                        true
-                    ),
-                    ExpBonusModifierValues[ExpBonusModifier.TYPO]
-                );
-
-                // incorrect answer
-                assert.strictEqual(
-                    gameRound.checkGuess(
-                        "very cool songggggggggggggggg",
-                        GuessModeType.SONG_NAME,
-                        true
-                    ),
-                    0
-                );
-            });
-        });
-
-        describe("hint used", () => {
-            it("should return half the amount of points", () => {
-                gameRound.hintUsed = true;
-                assert.strictEqual(
-                    gameRound.checkGuess(
-                        "very cool song",
-                        GuessModeType.SONG_NAME
-                    ),
-                    0.5
-                );
-            });
-        });
-
         describe("song guessing mode", () => {
             it("should return 1 point", () => {
                 assert.strictEqual(
@@ -472,10 +425,23 @@ describe("getExpReward", () => {
     });
 
     describe("hint used", () => {
-        it("should return the same amount of exp", () => {
+        it("should apply the appropriate penalty", () => {
             gameRound.setBaseExpReward(exp);
             gameRound.hintUsed = true;
-            assert.strictEqual(gameRound.getExpReward(), exp / 2);
+            assert.strictEqual(
+                gameRound.getExpReward(),
+                exp * ExpBonusModifierValues[ExpBonusModifier.HINT_USED]
+            );
+        });
+    });
+
+    describe("typo allowed", () => {
+        it("should apply the appropriate penalty", () => {
+            gameRound.setBaseExpReward(exp);
+            assert.strictEqual(
+                gameRound.getExpReward(true),
+                exp * ExpBonusModifierValues[ExpBonusModifier.TYPO]
+            );
         });
     });
 });

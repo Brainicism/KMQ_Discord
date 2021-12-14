@@ -238,6 +238,7 @@ export function calculateRoundExpMultiplier(
  * @param guessSpeed - The guess speed
  * @param place - The place of the guess
  * @param voteBonusExp - Whether bonus EXP should be applied to the modifier
+ * @param typosAllowed - Whether typos were allowed
  * @returns the round's total EXP based on the EXP modifiers
  */
 export async function calculateTotalRoundExp(
@@ -263,7 +264,9 @@ export async function calculateTotalRoundExp(
     );
 
     return Math.floor(
-        optionsMultiplier * roundMultipler * gameRound.getExpReward()
+        optionsMultiplier *
+            roundMultipler *
+            gameRound.getExpReward(guildPreference.typosAllowed())
     );
 }
 

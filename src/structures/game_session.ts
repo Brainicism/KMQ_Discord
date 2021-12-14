@@ -588,7 +588,7 @@ export default class GameSession {
             guess,
             guildPreference.gameOptions.guessModeType,
             guildPreference.isMultipleChoiceMode(),
-            guildPreference.typosAllowed(),
+            guildPreference.typosAllowed()
         );
 
         if (pointsEarned > 0) {
@@ -1241,7 +1241,7 @@ export default class GameSession {
         guess: string,
         guessModeType: GuessModeType,
         multipleChoiceMode: boolean,
-        typosAllowed = false,
+        typosAllowed = false
     ): number {
         if (!this.gameRound) return 0;
         if (
@@ -1253,7 +1253,12 @@ export default class GameSession {
             this.participants.add(userID);
         }
 
-        const pointsAwarded = this.gameRound.checkGuess(guess, guessModeType, typosAllowed);
+        const pointsAwarded = this.gameRound.checkGuess(
+            guess,
+            guessModeType,
+            typosAllowed
+        );
+
         if (pointsAwarded) {
             this.gameRound.userCorrect(userID, pointsAwarded);
         }
