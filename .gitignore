@@ -14,3 +14,4 @@ data/skip_seed
 data/group_list.txt
 .eslintcache
 .gitignore
+.vscode/launch.json

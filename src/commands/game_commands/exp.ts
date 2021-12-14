@@ -98,6 +98,14 @@ export async function calculateOptionsExpMultiplierInternal(
         });
     }
 
+    if (guildPreference.typosAllowed()) {
+        modifiers.push({
+            displayName: "Typos Allowed Penalty",
+            name: ExpBonusModifier.TYPO,
+            isPenalty: true,
+        });
+    }
+
     if (guildPreference.isMultipleChoiceMode()) {
         const difficulty = guildPreference.gameOptions.answerType;
         let multipleChoicePenalty: ExpBonusModifier;
