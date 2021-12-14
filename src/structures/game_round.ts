@@ -399,6 +399,11 @@ export default class GameRound {
         return state.bonusArtists.has(this.artistName);
     }
 
+    /**
+     * @param guess - The guessed string
+     * @param correctChoices - The correct choices to check against
+     * @returns whether the guess complies with the similarity requirements
+     */
     static similarityCheck(
         guess: string,
         correctChoices: Array<string>

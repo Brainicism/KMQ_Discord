@@ -357,7 +357,7 @@ describe("similarityCheck", () => {
             });
         });
 
-        describe("atleast one choice meets criteria", () => {
+        describe("at least one choice meets criteria", () => {
             it("should return true", () => {
                 // 1 transposition error
                 assert.ok(

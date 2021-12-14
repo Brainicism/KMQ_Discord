@@ -48,22 +48,22 @@ export default class AnswerCommand implements BaseCommand {
             {
                 example: "`,answer typingtypos`",
                 explanation:
-                    "Type your answer in the chat to guess. Small typos will be marked as correct. 0.8x exp penalty will be applied.",
+                    "Type your answer in the chat to guess. Small typos will be marked as correct. 0.8x EXP penalty will be applied.",
             },
             {
                 example: "`,answer easy`",
                 explanation:
-                    "Click on the button from 4 multiple choice options to guess. 0.25x exp penalty will be applied.",
+                    "Click on the button from 4 multiple choice options to guess. 0.25x EXP penalty will be applied.",
             },
             {
                 example: "`,answer medium`",
                 explanation:
-                    "Click on the button from 6 multiple choice options to guess. 0.5x exp penalty will be applied.",
+                    "Click on the button from 6 multiple choice options to guess. 0.5x EXP penalty will be applied.",
             },
             {
                 example: "`,answer hard`",
                 explanation:
-                    "Click on the button from 8 multiple choice options to guess. 0.75x exp penalty will be applied.",
+                    "Click on the button from 8 multiple choice options to guess. 0.75x EXP penalty will be applied.",
             },
         ],
         priority: 150,
