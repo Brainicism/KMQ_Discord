@@ -51,7 +51,7 @@ jobs:
         shell: bash
       - name: Enable MySQL
         run: |
-          sudo /etc/init.d/mysql start
+          sudo systemctl start mysql.service
       - name: Wait for MySQL server to start
         run: |
           while ! mysqladmin ping --host=127.0.0.1 --password="$DB_PASS_CI" --silent; do
