@@ -45,6 +45,7 @@ export enum LeaderboardDuration {
     DAILY = "daily",
     WEEKLY = "weekly",
     MONTHLY = "monthly",
+    YEARLY = "yearly",
 }
 
 enum LeaderboardAction {
@@ -61,7 +62,7 @@ export default class LeaderboardCommand implements BaseCommand {
     help = {
         name: "leaderboard",
         description: "View the KMQ leaderboard.",
-        usage: ",leaderboard {page_number}\n,leaderboard {gamesplayed | songsguessed} {server | game} {daily | weekly | monthly} {page_number}\n,leaderboard [enroll | unenroll]",
+        usage: ",leaderboard {page_number}\n,leaderboard {gamesplayed | songsguessed} {server | game} {daily | weekly | monthly | yearly} {page_number}\n,leaderboard [enroll | unenroll]",
         examples: [
             {
                 example: "`,leaderboard`",
@@ -305,6 +306,13 @@ export default class LeaderboardCommand implements BaseCommand {
                     "date",
                     ">",
                     new Date(d.getFullYear(), d.getMonth())
+                );
+                break;
+            case LeaderboardDuration.YEARLY:
+                topPlayersQuery = topPlayersQuery.where(
+                    "date",
+                    ">",
+                    new Date(d.getFullYear(), 0)
                 );
                 break;
             default:
