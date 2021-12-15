@@ -23,8 +23,8 @@
     "import": "ts-node src/scripts/backup-kmq-database --import",
     "test": "NODE_ENV=test mocha -r ts-node/register 'src/test/**/*.ts'",
     "test_ci": "NODE_ENV=test mocha -- --forbid-only -r ts-node/register 'src/test/**/*.ts'",
-    "prettier": "prettier --write '**/*.{js,ts}'",
-    "prettier_ci": "prettier --check '**/*.{js,ts}'"
+    "prettier": "prettier --write 'src/**/*.{js,ts}'",
+    "prettier_ci": "prettier --check 'src/**/*.{js,ts}'"
   },
   "author": "Brian Le",
   "license": "GPL-3.0",
