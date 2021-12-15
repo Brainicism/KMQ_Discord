@@ -36,11 +36,5 @@ jobs:
           git log -n 1 --pretty
           git push
           echo "Pushing new prod branch"
-      - name: Install SSH Keys
-        run: |
-          echo "Installing SSH keys"
-          install -m 600 -D /dev/null ~/.ssh/id_rsa
-          echo "${{ secrets.SSH_DEPLOY_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          echo "${{ secrets.SSH_DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-      - name: Deploy over SSH
-        run: ssh ${{ secrets.PROD_SSH_CONNECTION_STRING }} "source ~/.zshrc; ./.github/workflows/redeploy_prod.sh" 
+  redeploy:
+    uses: Brainicism/KMQ_Discord/.github/workflows/restart-prod.yml@master

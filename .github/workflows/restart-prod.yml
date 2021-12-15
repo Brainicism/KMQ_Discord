@@ -1,0 +1,20 @@
+name: restart-prod
+
+on:
+  workflow_dispatch:
+  workflow_call:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout KMQ_Discord
+        uses: actions/checkout@v2
+      - name: Install SSH Keys
+        run: |
+          echo "Installing SSH keys"
+          install -m 600 -D /dev/null ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_DEPLOY_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+      - name: Redeploy over SSH
+        run: ssh ${{ secrets.PROD_SSH_CONNECTION_STRING }} "source ~/.zshrc; ./.github/workflows/redeploy_prod.sh" 
