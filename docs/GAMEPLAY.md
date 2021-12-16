@@ -1,3 +1,5 @@
+# K-pop Music Quiz
+
 ## [Click here to join our official Discord server!](https://discord.gg/R55g4CRESW)
 
 ## [You can invite the bot here](http://invite.kpop.gg).
