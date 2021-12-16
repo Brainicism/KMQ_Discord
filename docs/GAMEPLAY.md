@@ -1,6 +1,6 @@
-[Click here to join our official server!](https://discord.gg/R55g4CRESW)
+## [Click here to join our official Discord server!](https://discord.gg/R55g4CRESW)
 
-You can invite the bot [here](https://discord.com/oauth2/authorize?client_id=508759831755096074&scope=bot&permissions=3501120).
+## [You can invite the bot here](http://invite.kpop.gg).
 
 Welcome to KMQ, the K-Pop song guessing game. Type `,play` while in a voice channel to begin a game of KMQ! The bot will automatically start playing a random song, and the first person to type in the correct guess will win a point.
 
