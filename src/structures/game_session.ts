@@ -142,9 +142,15 @@ export default class GameSession {
     /** Timer function used to for ,timer command */
     private guessTimeoutFunc: NodeJS.Timer;
 
-    /** Map of song's YouTube ID to correctGuesses and roundsPlayed */
-    private playCount: {
-        [vlink: string]: { correctGuesses: number; roundsPlayed: number };
+    /** Map of song's YouTube ID to its stats for this game session */
+    private songStats: {
+        [vlink: string]: {
+            correctGuesses: number;
+            roundsPlayed: number;
+            skipCount: number;
+            hintCount: number;
+            timePlayed: number;
+        };
     };
 
     /** The most recent Guesser, including their current streak */
@@ -189,7 +195,7 @@ export default class GameSession {
         this.textChannelID = textChannelID;
         this.gameRound = null;
         this.owner = gameSessionCreator;
-        this.playCount = {};
+        this.songStats = {};
         this.lastGuesser = null;
         this.songMessageIDs = [];
         this.bookmarkedSongs = {};
@@ -215,6 +221,7 @@ export default class GameSession {
         this.gameRound = null;
 
         gameRound.interactionMarkAnswers(guessResult.correctGuessers?.length);
+        const guessSpeed = Date.now() - gameRound.startedAt;
 
         let playerRoundResults: Array<PlayerRoundResult> = [];
         if (guessResult.correct) {
@@ -231,7 +238,6 @@ export default class GameSession {
                 this.lastGuesser.streak++;
             }
 
-            const guessSpeed = Date.now() - gameRound.startedAt;
             this.guessTimes.push(guessSpeed);
 
             // update scoreboard
@@ -344,7 +350,13 @@ export default class GameSession {
             }
         }
 
-        this.incrementSongCount(gameRound.videoID, guessResult.correct);
+        this.incrementSongStats(
+            gameRound.videoID,
+            guessResult.correct,
+            gameRound.skipAchieved,
+            gameRound.hintUsed,
+            guessSpeed
+        );
 
         // cleanup
         this.stopGuessTimeout();
@@ -503,7 +515,7 @@ export default class GameSession {
         // commit session's song plays and correct guesses
         const guildPreference = await getGuildPreference(this.guildID);
         if (!guildPreference.isMultipleChoiceMode()) {
-            await this.storeSongCounts();
+            await this.storeSongStats();
         }
 
         // DM bookmarked songs
@@ -1412,51 +1424,74 @@ export default class GameSession {
     }
 
     /**
-     * Creates song entry (if it doesn't exist) and increments play count and correct guesses
+     * Creates song entry (if it doesn't exist) and increments song stats
      * @param vlink - The song's YouTube ID
      * @param correct - Whether the guess was correct
+     * @param skipped - Whether the song was skipped
+     * @param hintRequested - Whether the players received a hint
+     * @param guessSpeed - The time it took the players to guess the song
      */
-    private async incrementSongCount(
+    private async incrementSongStats(
         vlink: string,
-        correct: boolean
+        correct: boolean,
+        skipped: boolean,
+        hintRequested: boolean,
+        guessSpeed: number
     ): Promise<void> {
-        if (!(vlink in this.playCount)) {
-            this.playCount[vlink] = {
+        if (!(vlink in this.songStats)) {
+            this.songStats[vlink] = {
                 correctGuesses: 0,
                 roundsPlayed: 0,
+                skipCount: 0,
+                hintCount: 0,
+                timePlayed: 0,
             };
         }
 
+        this.songStats[vlink].timePlayed += guessSpeed;
+
         if (correct) {
-            this.playCount[vlink].correctGuesses++;
+            this.songStats[vlink].correctGuesses++;
         }
 
-        this.playCount[vlink].roundsPlayed++;
+        if (skipped) {
+            this.songStats[vlink].skipCount++;
+        }
+
+        if (hintRequested) {
+            this.songStats[vlink].hintCount++;
+        }
     }
 
     /**
-     * Stores song play count and correct guess count in data store
+     * Stores song metadata in the database
      */
-    private async storeSongCounts(): Promise<void> {
-        for (const vlink of Object.keys(this.playCount)) {
+    private async storeSongStats(): Promise<void> {
+        for (const vlink of Object.keys(this.songStats)) {
             await dbContext
-                .kmq("song_guess_count")
+                .kmq("song_metadata")
                 .insert({
                     vlink,
                     correct_guesses: 0,
                     rounds_played: 0,
+                    skip_count: 0,
+                    hint_count: 0,
+                    time_played_ms: 0,
                 })
                 .onConflict("vlink")
                 .ignore();
 
             await dbContext
-                .kmq("song_guess_count")
+                .kmq("song_metadata")
                 .where("vlink", "=", vlink)
                 .increment(
                     "correct_guesses",
-                    this.playCount[vlink].correctGuesses
+                    this.songStats[vlink].correctGuesses
                 )
-                .increment("rounds_played", this.playCount[vlink].roundsPlayed);
+                .increment("rounds_played", this.songStats[vlink].roundsPlayed)
+                .increment("skip_count", this.songStats[vlink].skipCount)
+                .increment("hint_count", this.songStats[vlink].hintCount)
+                .increment("time_played_ms", this.songStats[vlink].timePlayed);
         }
     }
 
