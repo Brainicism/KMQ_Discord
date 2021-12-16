@@ -617,7 +617,7 @@ async function songReleaseAnniversaries(): Promise<string[]> {
 
 async function songGuessRate(): Promise<string[]> {
     const result = await dbContext
-        .kmq("song_guess_count")
+        .kmq("song_metadata")
         .select(
             dbContext.kmq.raw(
                 "song_name, artist_name, ROUND(correct_guesses/rounds_played * 100, 2) as c, link, rounds_played"
@@ -625,7 +625,7 @@ async function songGuessRate(): Promise<string[]> {
         )
         .where("rounds_played", ">", 2500)
         .join("available_songs", function join() {
-            this.on("available_songs.link", "=", "song_guess_count.vlink");
+            this.on("available_songs.link", "=", "song_metadata.vlink");
         })
         .orderByRaw("RAND()")
         .limit(100);
