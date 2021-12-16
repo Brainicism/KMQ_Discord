@@ -149,6 +149,7 @@ export default class GameSession {
             roundsPlayed: number;
             skipCount: number;
             hintCount: number;
+            timeToGuess: number;
             timePlayed: number;
         };
     };
@@ -221,7 +222,7 @@ export default class GameSession {
         this.gameRound = null;
 
         gameRound.interactionMarkAnswers(guessResult.correctGuessers?.length);
-        const guessSpeed = Date.now() - gameRound.startedAt;
+        const timePlayed = Date.now() - gameRound.startedAt;
 
         let playerRoundResults: Array<PlayerRoundResult> = [];
         if (guessResult.correct) {
@@ -238,7 +239,7 @@ export default class GameSession {
                 this.lastGuesser.streak++;
             }
 
-            this.guessTimes.push(guessSpeed);
+            this.guessTimes.push(timePlayed);
 
             // update scoreboard
             playerRoundResults = await Promise.all(
@@ -249,7 +250,7 @@ export default class GameSession {
                         gameRound,
                         getNumParticipants(this.voiceChannelID),
                         this.lastGuesser.streak,
-                        guessSpeed,
+                        timePlayed,
                         guessPosition,
                         await userBonusIsActive(correctGuesser.id)
                     );
@@ -355,7 +356,7 @@ export default class GameSession {
             guessResult.correct,
             gameRound.skipAchieved,
             gameRound.hintUsed,
-            guessSpeed
+            timePlayed
         );
 
         // cleanup
@@ -1429,14 +1430,14 @@ export default class GameSession {
      * @param correct - Whether the guess was correct
      * @param skipped - Whether the song was skipped
      * @param hintRequested - Whether the players received a hint
-     * @param guessSpeed - The time it took the players to guess the song
+     * @param timePlayed - How long the song played for
      */
     private async incrementSongStats(
         vlink: string,
         correct: boolean,
         skipped: boolean,
         hintRequested: boolean,
-        guessSpeed: number
+        timePlayed: number
     ): Promise<void> {
         if (!(vlink in this.songStats)) {
             this.songStats[vlink] = {
@@ -1444,14 +1445,16 @@ export default class GameSession {
                 roundsPlayed: 0,
                 skipCount: 0,
                 hintCount: 0,
+                timeToGuess: 0,
                 timePlayed: 0,
             };
         }
 
-        this.songStats[vlink].timePlayed += guessSpeed;
+        this.songStats[vlink].timePlayed += timePlayed;
 
         if (correct) {
             this.songStats[vlink].correctGuesses++;
+            this.songStats[vlink].timeToGuess += timePlayed;
         }
 
         if (skipped) {
@@ -1476,6 +1479,7 @@ export default class GameSession {
                     rounds_played: 0,
                     skip_count: 0,
                     hint_count: 0,
+                    time_to_guess_ms: 0,
                     time_played_ms: 0,
                 })
                 .onConflict("vlink")
@@ -1491,6 +1495,10 @@ export default class GameSession {
                 .increment("rounds_played", this.songStats[vlink].roundsPlayed)
                 .increment("skip_count", this.songStats[vlink].skipCount)
                 .increment("hint_count", this.songStats[vlink].hintCount)
+                .increment(
+                    "time_to_guess_ms",
+                    this.songStats[vlink].timeToGuess
+                )
                 .increment("time_played_ms", this.songStats[vlink].timePlayed);
         }
     }
