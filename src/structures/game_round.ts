@@ -242,16 +242,16 @@ export default class GameRound {
     }
 
     /**
-     * Adds a skip vote for the specified user
-     * @param userID - the Discord user ID of the player skipping
+     * Adds a hint vote for the specified user
+     * @param userID - the Discord user ID of the player requesting a hint
      */
     hintRequested(userID: string): void {
         this.hintRequesters.add(userID);
     }
 
     /**
-     * Gets the number of players who have opted to skip the GameRound
-     * @returns the number of skippers
+     * Gets the number of players who have requested a hint
+     * @returns the number of hint requesters
      */
     getHintRequests(): number {
         return this.hintRequesters.size;
