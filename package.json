@@ -64,7 +64,7 @@
     "uuid": "^8.3.2",
     "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.5.5",
-    "ytdl-core": "fent/node-ytdl-core#pull/1022/head",
+    "ytdl-core": "^4.9.2",
     "zlib-sync": "^0.1.7"
   },
   "devDependencies": {
