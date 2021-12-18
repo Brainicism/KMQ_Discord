@@ -111,10 +111,13 @@ export async function getGuildPreference(
         .map((x) => ({ [x["option_name"]]: JSON.parse(x["option_value"]) }))
         .reduce((total, curr) => Object.assign(total, curr), {});
 
-    return GuildPreference.fromGuild(
+    const guildPreference = GuildPreference.fromGuild(
         guildPreferences[0].guild_id,
         gameOptionPairs
     );
+
+    guildPreference.checkInvalidArguments();
+    return guildPreference;
 }
 
 /**

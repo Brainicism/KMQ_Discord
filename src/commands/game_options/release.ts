@@ -8,6 +8,7 @@ import {
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { GameOptions } from "../../structures/guild_preference";
 
 const logger = new IPCLogger("release");
 
@@ -57,6 +58,9 @@ export default class ReleaseCommand implements BaseCommand {
         ],
         priority: 130,
     };
+
+    static argumentValidator = (gameOptions: GameOptions): boolean =>
+        Object.values(ReleaseType).includes(gameOptions.releaseType);
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
