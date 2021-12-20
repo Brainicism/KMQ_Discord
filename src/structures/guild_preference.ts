@@ -994,7 +994,7 @@ export default class GuildPreference {
     async checkInvalidArguments(): Promise<boolean> {
         // reset invalid option arguments to defaults
         let argsChanged = false;
-        for (const [_option, resetArg] of Object.entries(this.resetArgs)) {
+        for (const resetArg of Object.values(this.resetArgs)) {
             if (resetArg.validate) {
                 const resetFunc = (): void => {
                     if (Array.isArray(resetArg.setter)) {

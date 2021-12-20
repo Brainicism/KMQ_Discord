@@ -43,7 +43,8 @@ export default class ExcludeCommand implements BaseCommand {
 
     aliases = ["excludes", "ignore", "ignores"];
 
-    static argumentValidator = (_gameOptions: GameOptions): boolean => true;
+    static argumentValidator = (gameOptions: GameOptions): boolean =>
+        Array.isArray(gameOptions.groups);
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
