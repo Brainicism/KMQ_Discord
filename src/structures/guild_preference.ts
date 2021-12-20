@@ -4,8 +4,11 @@ import {
     DEFAULT_BEGINNING_SEARCH_YEAR,
     DEFAULT_ENDING_SEARCH_YEAR,
 } from "../commands/game_options/cutoff";
-import { DEFAULT_LIMIT } from "../commands/game_options/limit";
-import { Gender, DEFAULT_GENDER } from "../commands/game_options/gender";
+import LimitCommand, { DEFAULT_LIMIT } from "../commands/game_options/limit";
+import GenderCommand, {
+    Gender,
+    DEFAULT_GENDER,
+} from "../commands/game_options/gender";
 import SeekCommand, {
     SeekType,
     DEFAULT_SEEK,
@@ -51,6 +54,13 @@ import AnswerCommand, {
     AnswerType,
     DEFAULT_ANSWER_TYPE,
 } from "../commands/game_options/answer";
+import GroupsCommand from "../commands/game_options/groups";
+import ExcludeCommand from "../commands/game_options/exclude";
+import IncludeCommand from "../commands/game_options/include";
+import GoalCommand from "../commands/game_options/goal";
+import DurationCommand from "../commands/game_options/duration";
+import GuessTimeoutCommand from "../commands/game_options/timer";
+import ForcePlayCommand from "../commands/admin/forceplay";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("guild_preference");
@@ -181,19 +191,33 @@ export default class GuildPreference {
         [gameOption in GameOption]?: {
             default: Array<any>;
             setter: (...args) => Promise<void>;
-            validate?: (gameOption: GameOptions) => boolean;
+            validate: (gameOption: GameOptions) => boolean;
         };
     } = {
         [GameOption.LIMIT]: {
             default: [0, DEFAULT_LIMIT],
             setter: this.setLimit,
+            validate: LimitCommand.argumentValidator,
         },
-        [GameOption.GROUPS]: { default: [null], setter: this.setGroups },
-        [GameOption.EXCLUDE]: { default: [null], setter: this.setExcludes },
-        [GameOption.INCLUDE]: { default: [null], setter: this.setIncludes },
+        [GameOption.GROUPS]: {
+            default: [null],
+            setter: this.setGroups,
+            validate: GroupsCommand.argumentValidator,
+        },
+        [GameOption.EXCLUDE]: {
+            default: [null],
+            setter: this.setExcludes,
+            validate: ExcludeCommand.argumentValidator,
+        },
+        [GameOption.INCLUDE]: {
+            default: [null],
+            setter: this.setIncludes,
+            validate: IncludeCommand.argumentValidator,
+        },
         [GameOption.GENDER]: {
             default: [DEFAULT_GENDER],
             setter: this.setGender,
+            validate: GenderCommand.argumentValidator,
         },
         [GameOption.SEEK_TYPE]: {
             default: [DEFAULT_SEEK],
@@ -235,9 +259,21 @@ export default class GuildPreference {
             setter: this.setReleaseType,
             validate: ReleaseCommand.argumentValidator,
         },
-        [GameOption.GOAL]: { default: [null], setter: this.setGoal },
-        [GameOption.DURATION]: { default: [null], setter: this.setDuration },
-        [GameOption.TIMER]: { default: [null], setter: this.setGuessTimeout },
+        [GameOption.GOAL]: {
+            default: [null],
+            setter: this.setGoal,
+            validate: GoalCommand.argumentValidator,
+        },
+        [GameOption.DURATION]: {
+            default: [null],
+            setter: this.setDuration,
+            validate: DurationCommand.argumentValidator,
+        },
+        [GameOption.TIMER]: {
+            default: [null],
+            setter: this.setGuessTimeout,
+            validate: GuessTimeoutCommand.argumentValidator,
+        },
         [GameOption.SHUFFLE_TYPE]: {
             default: [DEFAULT_SHUFFLE],
             setter: this.setShuffleType,
@@ -256,6 +292,7 @@ export default class GuildPreference {
         [GameOption.FORCE_PLAY_SONG]: {
             default: [null],
             setter: this.setForcePlaySong,
+            validate: ForcePlayCommand.argumentValidator,
         },
     };
 
@@ -941,7 +978,7 @@ export default class GuildPreference {
         return updatedOptions.map((x) => x[0] as GameOption);
     }
 
-    checkInvalidArguments(): void {
+    async checkInvalidArguments(): Promise<void> {
         // reset invalid option arguments to defaults
         for (const [option, resetArg] of Object.entries(this.resetArgs)) {
             if (resetArg.validate) {

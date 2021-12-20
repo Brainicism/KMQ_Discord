@@ -13,6 +13,7 @@ import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
+import { GameOptions } from "../../structures/guild_preference";
 
 const logger = new IPCLogger("groups");
 export const GROUP_LIST_URL = "https://kmq.kpop.gg/static/data/group_list.txt";
@@ -50,6 +51,8 @@ export default class GroupsCommand implements BaseCommand {
     };
 
     aliases = ["group", "artist", "artists"];
+
+    static argumentValidator = (_gameOptions: GameOptions): boolean => true;
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

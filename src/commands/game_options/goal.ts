@@ -9,6 +9,7 @@ import { IPCLogger } from "../../logger";
 import { GameOption, GameType } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { GameOptions } from "../../structures/guild_preference";
 
 const logger = new IPCLogger("goal");
 
@@ -44,6 +45,9 @@ export default class GoalCommand implements BaseCommand {
         ],
         priority: 120,
     };
+
+    static argumentValidator = (gameOptions: GameOptions): boolean =>
+        gameOptions.goal === null || gameOptions.goal > 1;
 
     call = async ({
         message,

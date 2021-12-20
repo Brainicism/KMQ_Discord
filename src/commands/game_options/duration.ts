@@ -9,6 +9,7 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { GameOptions } from "../../structures/guild_preference";
 
 const logger = new IPCLogger("duration");
 
@@ -64,6 +65,9 @@ export default class DurationCommand implements BaseCommand {
         ],
         priority: 110,
     };
+
+    static argumentValidator = (gameOptions: GameOptions): boolean =>
+    gameOptions.duration === null ||gameOptions.duration > 2;
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

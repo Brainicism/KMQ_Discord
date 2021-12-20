@@ -9,6 +9,7 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { GameOptions } from "../../structures/guild_preference";
 
 const logger = new IPCLogger("limit");
 export const DEFAULT_LIMIT = 500;
@@ -58,6 +59,9 @@ export default class LimitCommand implements BaseCommand {
         ],
         priority: 140,
     };
+
+    static argumentValidator = (gameOptions: GameOptions): boolean =>
+        gameOptions.limitStart >= 0 && gameOptions.limitEnd >= 1;
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

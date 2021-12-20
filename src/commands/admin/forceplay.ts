@@ -8,12 +8,13 @@ import MessageContext from "../../structures/message_context";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { GameOption } from "../../types";
 import CommandPrechecks from "../../command_prechecks";
+import { GameOptions } from "../../structures/guild_preference";
 
 const logger = new IPCLogger("forceplay");
 
 export default class ForcePlayCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.debugChannelPrecheck }];
-
+    static argumentValidator = (_gameOptions: GameOptions): boolean => true;
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
 
