@@ -116,7 +116,6 @@ export async function getGuildPreference(
         gameOptionPairs
     );
 
-    guildPreference.checkInvalidArguments();
     return guildPreference;
 }
 

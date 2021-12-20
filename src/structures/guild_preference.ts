@@ -978,16 +978,32 @@ export default class GuildPreference {
         return updatedOptions.map((x) => x[0] as GameOption);
     }
 
-    async checkInvalidArguments(): Promise<void> {
+    async checkInvalidArguments(): Promise<boolean> {
         // reset invalid option arguments to defaults
+        let argsChanged = false;
         for (const [option, resetArg] of Object.entries(this.resetArgs)) {
             if (resetArg.validate) {
-                const validArgument = resetArg.validate(this.gameOptions);
-                if (!validArgument) {
-                    console.log(`Resetting ${option} to ${resetArg.default}`);
+                const resetFunc = (): void => {
+                    logger.info(
+                        `${this.guildID} | Resetting ${option} to ${resetArg.default}`
+                    );
                     resetArg.setter.bind(this)(...resetArg.default);
+                };
+
+                try {
+                    const validArgument = resetArg.validate(this.gameOptions);
+                    if (!validArgument) {
+                        resetFunc();
+                        argsChanged = true;
+                    }
+                } catch (e) {
+                    logger.warn("error validiatng, resetting");
+                    resetFunc();
+                    argsChanged = true;
                 }
             }
         }
+
+        return argsChanged;
     }
 }

@@ -7,6 +7,7 @@ import { IPCLogger } from "../logger";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import { DatabaseContext, getNewConnection } from "../database_context";
 import { EnvType } from "../types";
+import { getGuildPreference } from "../helpers/game_utils";
 
 const logger = new IPCLogger("bootstrap");
 
@@ -72,6 +73,25 @@ export function loadStoredProcedures(): void {
     }
 }
 
+async function checkInvalidGuildPreferenceValues(
+    dbContext: DatabaseContext
+): Promise<void> {
+    const guildIDs = (
+        await dbContext.kmq("guild_preferences").distinct("guild_id")
+    ).map((x) => x["guild_id"]);
+
+    let serversArgChanged = 0;
+    for (const guildID of guildIDs) {
+        const guildPreference = await getGuildPreference(guildID);
+        const argsChanged = await guildPreference.checkInvalidArguments();
+        if (argsChanged) serversArgChanged++;
+    }
+
+    if (serversArgChanged > 0) {
+        logger.info(`${serversArgChanged} servers had invalid arguments reset`);
+    }
+}
+
 // eslint-disable-next-line import/prefer-default-export
 /**
  * Re-creates the KMQ data tables
@@ -127,6 +147,9 @@ async function bootstrapDatabases(): Promise<void> {
     if (process.env.NODE_ENV === EnvType.PROD) {
         await generateKmqDataTables(db);
     }
+
+    logger.info("Checking guild preferences for invalid values");
+    await checkInvalidGuildPreferenceValues(db);
 
     logger.info(`Bootstrapped in ${(Date.now() - startTime) / 1000}s`);
     await db.destroy();
