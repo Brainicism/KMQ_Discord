@@ -81,10 +81,22 @@ async function checkInvalidGuildPreferenceValues(
     ).map((x) => x["guild_id"]);
 
     let serversArgChanged = 0;
-    for (const guildID of guildIDs) {
-        const guildPreference = await getGuildPreference(guildID);
-        const argsChanged = await guildPreference.checkInvalidArguments();
-        if (argsChanged) serversArgChanged++;
+    const results = await Promise.allSettled(
+        guildIDs.map(async (guildID) => {
+            const guildPreference = await getGuildPreference(guildID);
+            const argsChanged = await guildPreference.checkInvalidArguments();
+            if (argsChanged) serversArgChanged++;
+        })
+    );
+
+    const rejectedPromises = results.filter(
+        (x) => x["status"] === "rejected"
+    ) as PromiseRejectedResult[];
+
+    if (rejectedPromises.length > 0) {
+        logger.warn(
+            `${rejectedPromises.length} guilds failed guild preference argument validation checks`
+        );
     }
 
     if (serversArgChanged > 0) {
@@ -146,10 +158,9 @@ async function bootstrapDatabases(): Promise<void> {
 
     if (process.env.NODE_ENV === EnvType.PROD) {
         await generateKmqDataTables(db);
+        logger.info("Checking guild preferences for invalid values");
+        await checkInvalidGuildPreferenceValues(db);
     }
-
-    logger.info("Checking guild preferences for invalid values");
-    await checkInvalidGuildPreferenceValues(db);
 
     logger.info(`Bootstrapped in ${(Date.now() - startTime) / 1000}s`);
     await db.destroy();
