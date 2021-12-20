@@ -9,6 +9,7 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { GameOptions } from "../../structures/guild_preference";
 
 const logger = new IPCLogger("cutoff");
 export const DEFAULT_BEGINNING_SEARCH_YEAR = 1990;
@@ -56,6 +57,18 @@ export default class CutoffCommand implements BaseCommand {
             },
         ],
         priority: 140,
+    };
+
+    static argumentValidator = (gameOptions: GameOptions): boolean => {
+        const cutoffStart = gameOptions.beginningYear;
+        const cutoffEnd = gameOptions.endYear;
+
+        return (
+            cutoffStart >= DEFAULT_BEGINNING_SEARCH_YEAR &&
+            cutoffStart <= DEFAULT_ENDING_SEARCH_YEAR &&
+            cutoffEnd >= DEFAULT_BEGINNING_SEARCH_YEAR &&
+            cutoffEnd <= DEFAULT_ENDING_SEARCH_YEAR
+        );
     };
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
