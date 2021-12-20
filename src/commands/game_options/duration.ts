@@ -67,7 +67,7 @@ export default class DurationCommand implements BaseCommand {
     };
 
     static argumentValidator = (gameOptions: GameOptions): boolean =>
-    gameOptions.duration === null ||gameOptions.duration > 2;
+    gameOptions.duration === null ||gameOptions.duration >= 2;
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

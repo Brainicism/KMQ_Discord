@@ -49,7 +49,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
     aliases = ["time", "timeout", "t"];
 
     static argumentValidator = (gameOptions: GameOptions): boolean =>
-        gameOptions.guessTimeout === null || gameOptions.guessTimeout > 2;
+        gameOptions.guessTimeout === null || gameOptions.guessTimeout >= 2;
 
     call = async ({
         message,

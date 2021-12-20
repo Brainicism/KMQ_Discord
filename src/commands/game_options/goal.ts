@@ -47,7 +47,7 @@ export default class GoalCommand implements BaseCommand {
     };
 
     static argumentValidator = (gameOptions: GameOptions): boolean =>
-        gameOptions.goal === null || gameOptions.goal > 1;
+        gameOptions.goal === null || gameOptions.goal >= 1;
 
     call = async ({
         message,
