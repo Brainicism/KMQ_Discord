@@ -1,6 +1,6 @@
 import _ from "lodash";
 import * as uuid from "uuid";
-import {
+import CutoffCommand, {
     DEFAULT_BEGINNING_SEARCH_YEAR,
     DEFAULT_ENDING_SEARCH_YEAR,
 } from "../commands/game_options/cutoff";
@@ -190,7 +190,9 @@ export default class GuildPreference {
     resetArgs: {
         [gameOption in GameOption]?: {
             default: Array<any>;
-            setter: (...args) => Promise<void>;
+            setter:
+                | ((...args) => Promise<void>)
+                | Array<(...args) => Promise<void>>;
             validate: (gameOption: GameOptions) => boolean;
         };
     } = {
@@ -293,6 +295,11 @@ export default class GuildPreference {
             default: [null],
             setter: this.setForcePlaySong,
             validate: ForcePlayCommand.argumentValidator,
+        },
+        [GameOption.CUTOFF]: {
+            default: [null],
+            setter: [this.setBeginningCutoffYear, this.setEndCutoffYear],
+            validate: CutoffCommand.argumentValidator,
         },
     };
 
@@ -528,7 +535,13 @@ export default class GuildPreference {
     async reset(gameOption: GameOption): Promise<void> {
         if (gameOption in this.resetArgs) {
             const resetArg = this.resetArgs[gameOption];
-            resetArg.setter.bind(this)(...resetArg.default);
+            if (Array.isArray(resetArg.setter)) {
+                for (const resetter of resetArg.setter) {
+                    resetter.bind(this)(...resetArg.default);
+                }
+            } else {
+                resetArg.setter.bind(this)(...resetArg.default);
+            }
         }
     }
 
@@ -981,13 +994,16 @@ export default class GuildPreference {
     async checkInvalidArguments(): Promise<boolean> {
         // reset invalid option arguments to defaults
         let argsChanged = false;
-        for (const [option, resetArg] of Object.entries(this.resetArgs)) {
+        for (const [_option, resetArg] of Object.entries(this.resetArgs)) {
             if (resetArg.validate) {
                 const resetFunc = (): void => {
-                    logger.info(
-                        `${this.guildID} | Resetting ${option} to ${resetArg.default}`
-                    );
-                    resetArg.setter.bind(this)(...resetArg.default);
+                    if (Array.isArray(resetArg.setter)) {
+                        for (const resetter of resetArg.setter) {
+                            resetter.bind(this)(...resetArg.default);
+                        }
+                    } else {
+                        resetArg.setter.bind(this)(...resetArg.default);
+                    }
                 };
 
                 try {
@@ -997,7 +1013,6 @@ export default class GuildPreference {
                         argsChanged = true;
                     }
                 } catch (e) {
-                    logger.warn("error validiatng, resetting");
                     resetFunc();
                     argsChanged = true;
                 }
