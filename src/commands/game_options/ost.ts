@@ -8,6 +8,7 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { GameOptions } from "../../structures/guild_preference";
 
 const logger = new IPCLogger("ost");
 export enum OstPreference {
@@ -59,6 +60,9 @@ export default class OstCommand implements BaseCommand {
         ],
         priority: 130,
     };
+
+    static argumentValidator = (gameOptions: GameOptions): boolean =>
+        Object.values(OstPreference).includes(gameOptions.ostPreference);
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

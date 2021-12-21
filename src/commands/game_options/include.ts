@@ -12,6 +12,7 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { GameOptions } from "../../structures/guild_preference";
 
 const logger = new IPCLogger("includes");
 
@@ -41,6 +42,9 @@ export default class IncludeCommand implements BaseCommand {
     };
 
     aliases = ["includes"];
+
+    static argumentValidator = (gameOptions: GameOptions): boolean =>
+        Array.isArray(gameOptions.groups);
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

@@ -8,6 +8,7 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { GameOptions } from "../../structures/guild_preference";
 
 const logger = new IPCLogger("special");
 export enum SpecialType {
@@ -116,6 +117,9 @@ export default class SpecialCommand implements BaseCommand {
         ],
         priority: 130,
     };
+
+    static argumentValidator = (gameOptions: GameOptions): boolean =>
+        [...Object.values(SpecialType), null].includes(gameOptions.specialType);
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

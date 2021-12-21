@@ -8,6 +8,7 @@ import {
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { GameOptions } from "../../structures/guild_preference";
 
 const logger = new IPCLogger("language");
 export enum LanguageType {
@@ -55,6 +56,9 @@ export default class LanguageCommand implements BaseCommand {
         ],
         priority: 150,
     };
+
+    static argumentValidator = (gameOptions: GameOptions): boolean =>
+        Object.values(LanguageType).includes(gameOptions.languageType);
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

@@ -13,6 +13,7 @@ import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
+import { GameOptions } from "../../structures/guild_preference";
 
 const logger = new IPCLogger("excludes");
 
@@ -41,6 +42,9 @@ export default class ExcludeCommand implements BaseCommand {
     };
 
     aliases = ["excludes", "ignore", "ignores"];
+
+    static argumentValidator = (gameOptions: GameOptions): boolean =>
+        Array.isArray(gameOptions.groups);
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

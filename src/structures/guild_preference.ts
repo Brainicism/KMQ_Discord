@@ -1,55 +1,71 @@
 import _ from "lodash";
 import * as uuid from "uuid";
-import {
+import CutoffCommand, {
     DEFAULT_BEGINNING_SEARCH_YEAR,
     DEFAULT_ENDING_SEARCH_YEAR,
 } from "../commands/game_options/cutoff";
-import { DEFAULT_LIMIT } from "../commands/game_options/limit";
-import { Gender, DEFAULT_GENDER } from "../commands/game_options/gender";
-import { SeekType, DEFAULT_SEEK } from "../commands/game_options/seek";
-import { ShuffleType, DEFAULT_SHUFFLE } from "../commands/game_options/shuffle";
-import {
+import LimitCommand, { DEFAULT_LIMIT } from "../commands/game_options/limit";
+import GenderCommand, {
+    Gender,
+    DEFAULT_GENDER,
+} from "../commands/game_options/gender";
+import SeekCommand, {
+    SeekType,
+    DEFAULT_SEEK,
+} from "../commands/game_options/seek";
+import ShuffleCommand, {
+    ShuffleType,
+    DEFAULT_SHUFFLE,
+} from "../commands/game_options/shuffle";
+import GuessModeCommand, {
     GuessModeType,
     DEFAULT_GUESS_MODE,
 } from "../commands/game_options/guessmode";
 import { IPCLogger } from "../logger";
 import dbContext from "../database_context";
-import {
+import ArtistTypeCommand, {
     ArtistType,
     DEFAULT_ARTIST_TYPE,
 } from "../commands/game_options/artisttype";
-import {
+import LanguageCommand, {
     DEFAULT_LANGUAGE,
     LanguageType,
 } from "../commands/game_options/language";
-import {
+import SubunitsCommand, {
     DEFAULT_SUBUNIT_PREFERENCE,
     SubunitsPreference,
 } from "../commands/game_options/subunits";
 import { GameOption, MatchedArtist } from "../types";
-import {
+import OstCommand, {
     DEFAULT_OST_PREFERENCE,
     OstPreference,
 } from "../commands/game_options/ost";
-import {
+import ReleaseCommand, {
     DEFAULT_RELEASE_TYPE,
     ReleaseType,
 } from "../commands/game_options/release";
-import {
+import MultiGuessCommand, {
     DEFAULT_MULTIGUESS_TYPE,
     MultiGuessType,
 } from "../commands/game_options/multiguess";
 import { state } from "../kmq_worker";
-import { SpecialType } from "../commands/game_options/special";
-import {
+import SpecialCommand, { SpecialType } from "../commands/game_options/special";
+import AnswerCommand, {
     AnswerType,
     DEFAULT_ANSWER_TYPE,
 } from "../commands/game_options/answer";
+import GroupsCommand from "../commands/game_options/groups";
+import ExcludeCommand from "../commands/game_options/exclude";
+import IncludeCommand from "../commands/game_options/include";
+import GoalCommand from "../commands/game_options/goal";
+import DurationCommand from "../commands/game_options/duration";
+import GuessTimeoutCommand from "../commands/game_options/timer";
+import ForcePlayCommand from "../commands/admin/forceplay";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("guild_preference");
 
-interface GameOptions {
+export interface GameOptions {
     beginningYear: number;
     endYear: number;
     gender: Array<Gender>;
@@ -174,70 +190,116 @@ export default class GuildPreference {
     resetArgs: {
         [gameOption in GameOption]?: {
             default: Array<any>;
-            setter: (...args) => Promise<void>;
+            setter:
+                | ((...args) => Promise<void>)
+                | Array<(...args) => Promise<void>>;
+            validate: (gameOption: GameOptions) => boolean;
         };
     } = {
         [GameOption.LIMIT]: {
             default: [0, DEFAULT_LIMIT],
             setter: this.setLimit,
+            validate: LimitCommand.argumentValidator,
         },
-        [GameOption.GROUPS]: { default: [null], setter: this.setGroups },
-        [GameOption.EXCLUDE]: { default: [null], setter: this.setExcludes },
-        [GameOption.INCLUDE]: { default: [null], setter: this.setIncludes },
+        [GameOption.GROUPS]: {
+            default: [null],
+            setter: this.setGroups,
+            validate: GroupsCommand.argumentValidator,
+        },
+        [GameOption.EXCLUDE]: {
+            default: [null],
+            setter: this.setExcludes,
+            validate: ExcludeCommand.argumentValidator,
+        },
+        [GameOption.INCLUDE]: {
+            default: [null],
+            setter: this.setIncludes,
+            validate: IncludeCommand.argumentValidator,
+        },
         [GameOption.GENDER]: {
             default: [DEFAULT_GENDER],
             setter: this.setGender,
+            validate: GenderCommand.argumentValidator,
         },
         [GameOption.SEEK_TYPE]: {
             default: [DEFAULT_SEEK],
             setter: this.setSeekType,
+            validate: SeekCommand.argumentValidator,
         },
         [GameOption.SPECIAL_TYPE]: {
             default: [null],
             setter: this.setSpecialType,
+            validate: SpecialCommand.argumentValidator,
         },
         [GameOption.ARTIST_TYPE]: {
             default: [DEFAULT_ARTIST_TYPE],
             setter: this.setArtistType,
+            validate: ArtistTypeCommand.argumentValidator,
         },
         [GameOption.ANSWER_TYPE]: {
             default: [DEFAULT_ANSWER_TYPE],
             setter: this.setAnswerType,
+            validate: AnswerCommand.argumentValidator,
         },
         [GameOption.SUBUNIT_PREFERENCE]: {
             default: [DEFAULT_SUBUNIT_PREFERENCE],
             setter: this.setSubunitPreference,
+            validate: SubunitsCommand.argumentValidator,
         },
         [GameOption.OST_PREFERENCE]: {
             default: [DEFAULT_OST_PREFERENCE],
             setter: this.setOstPreference,
+            validate: OstCommand.argumentValidator,
         },
         [GameOption.GUESS_MODE_TYPE]: {
             default: [DEFAULT_GUESS_MODE],
             setter: this.setGuessModeType,
+            validate: GuessModeCommand.argumentValidator,
         },
         [GameOption.RELEASE_TYPE]: {
             default: [DEFAULT_RELEASE_TYPE],
             setter: this.setReleaseType,
+            validate: ReleaseCommand.argumentValidator,
         },
-        [GameOption.GOAL]: { default: [null], setter: this.setGoal },
-        [GameOption.DURATION]: { default: [null], setter: this.setDuration },
-        [GameOption.TIMER]: { default: [null], setter: this.setGuessTimeout },
+        [GameOption.GOAL]: {
+            default: [null],
+            setter: this.setGoal,
+            validate: GoalCommand.argumentValidator,
+        },
+        [GameOption.DURATION]: {
+            default: [null],
+            setter: this.setDuration,
+            validate: DurationCommand.argumentValidator,
+        },
+        [GameOption.TIMER]: {
+            default: [null],
+            setter: this.setGuessTimeout,
+            validate: GuessTimeoutCommand.argumentValidator,
+        },
         [GameOption.SHUFFLE_TYPE]: {
             default: [DEFAULT_SHUFFLE],
             setter: this.setShuffleType,
+            validate: ShuffleCommand.argumentValidator,
         },
         [GameOption.LANGUAGE_TYPE]: {
             default: [DEFAULT_LANGUAGE],
             setter: this.setLanguageType,
+            validate: LanguageCommand.argumentValidator,
         },
         [GameOption.MULTIGUESS]: {
             default: [DEFAULT_MULTIGUESS_TYPE],
             setter: this.setMultiGuessType,
+            validate: MultiGuessCommand.argumentValidator,
         },
         [GameOption.FORCE_PLAY_SONG]: {
             default: [null],
             setter: this.setForcePlaySong,
+            validate: ForcePlayCommand.argumentValidator,
+        },
+        [GameOption.CUTOFF]: {
+            default: [null],
+            setter: [this.setBeginningCutoffYear, this.setEndCutoffYear],
+            validate: CutoffCommand.argumentValidator,
         },
     };
 
@@ -473,7 +535,13 @@ export default class GuildPreference {
     async reset(gameOption: GameOption): Promise<void> {
         if (gameOption in this.resetArgs) {
             const resetArg = this.resetArgs[gameOption];
-            resetArg.setter.bind(this)(...resetArg.default);
+            if (Array.isArray(resetArg.setter)) {
+                for (const resetter of resetArg.setter) {
+                    resetter.bind(this)(...resetArg.default);
+                }
+            } else {
+                resetArg.setter.bind(this)(...resetArg.default);
+            }
         }
     }
 
@@ -921,5 +989,36 @@ export default class GuildPreference {
         );
 
         return updatedOptions.map((x) => x[0] as GameOption);
+    }
+
+    async checkInvalidArguments(): Promise<boolean> {
+        // reset invalid option arguments to defaults
+        let argsChanged = false;
+        for (const resetArg of Object.values(this.resetArgs)) {
+            if (resetArg.validate) {
+                const resetFunc = (): void => {
+                    if (Array.isArray(resetArg.setter)) {
+                        for (const resetter of resetArg.setter) {
+                            resetter.bind(this)(...resetArg.default);
+                        }
+                    } else {
+                        resetArg.setter.bind(this)(...resetArg.default);
+                    }
+                };
+
+                try {
+                    const validArgument = resetArg.validate(this.gameOptions);
+                    if (!validArgument) {
+                        resetFunc();
+                        argsChanged = true;
+                    }
+                } catch (e) {
+                    resetFunc();
+                    argsChanged = true;
+                }
+            }
+        }
+
+        return argsChanged;
     }
 }

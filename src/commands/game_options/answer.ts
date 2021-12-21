@@ -8,6 +8,7 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { GameOptions } from "../../structures/guild_preference";
 
 const logger = new IPCLogger("answer");
 export enum AnswerType {
@@ -68,6 +69,9 @@ export default class AnswerCommand implements BaseCommand {
         ],
         priority: 150,
     };
+
+    static argumentValidator = (gameOptions: GameOptions): boolean =>
+        Object.values(AnswerType).includes(gameOptions.answerType);
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
