@@ -61,10 +61,7 @@ export default class CutoffCommand implements BaseCommand {
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            await guildPreference.setBeginningCutoffYear(
-                DEFAULT_BEGINNING_SEARCH_YEAR
-            );
-            await guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
+            await guildPreference.reset(GameOption.CUTOFF);
             await sendOptionsMessage(
                 MessageContext.fromMessage(message),
                 guildPreference,
@@ -82,8 +79,10 @@ export default class CutoffCommand implements BaseCommand {
         const yearRange = parsedMessage.components;
         const startYear = yearRange[0];
         if (yearRange.length === 1) {
-            await guildPreference.setBeginningCutoffYear(parseInt(startYear));
-            await guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
+            await guildPreference.setCutoff(
+                parseInt(startYear),
+                DEFAULT_ENDING_SEARCH_YEAR
+            );
         } else if (yearRange.length === 2) {
             const endYear = yearRange[1];
             if (endYear < startYear) {
@@ -95,8 +94,10 @@ export default class CutoffCommand implements BaseCommand {
                 return;
             }
 
-            await guildPreference.setBeginningCutoffYear(parseInt(startYear));
-            await guildPreference.setEndCutoffYear(parseInt(endYear));
+            await guildPreference.setCutoff(
+                parseInt(startYear),
+                parseInt(endYear)
+            );
         }
 
         await sendOptionsMessage(

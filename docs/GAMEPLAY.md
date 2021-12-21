@@ -255,5 +255,6 @@ Use `,help [command_name]` for more details for any of the following commands:
 - `,include`: Specify which artists to forcefully include, regardless of other game options
 
 - `,reset`: Reset all options to the default settings
+- `,setdefault`: Sets the current game options as the default settings
 - `,add`: Add groups to `,groups`, `,exclude`, or `,include`
 - `,remove`: Remove groups to `,groups`, `,exclude`, or `,include`

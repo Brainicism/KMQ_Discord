@@ -181,6 +181,13 @@ export default class GuildPreference {
             default: [0, DEFAULT_LIMIT],
             setter: this.setLimit,
         },
+        [GameOption.CUTOFF]: {
+            default: [
+                DEFAULT_BEGINNING_SEARCH_YEAR,
+                DEFAULT_ENDING_SEARCH_YEAR,
+            ],
+            setter: this.setCutoff,
+        },
         [GameOption.GROUPS]: { default: [null], setter: this.setGroups },
         [GameOption.EXCLUDE]: { default: [null], setter: this.setExcludes },
         [GameOption.INCLUDE]: { default: [null], setter: this.setIncludes },
@@ -470,32 +477,51 @@ export default class GuildPreference {
         ]);
     }
 
+    /**
+     * Resets a specific game option to the default value
+     * @param gameOption - The game option to reset
+     */
     async reset(gameOption: GameOption): Promise<void> {
         if (gameOption in this.resetArgs) {
             const resetArg = this.resetArgs[gameOption];
-            resetArg.setter.bind(this)(...resetArg.default);
+            const defaultGameOptionOverride =
+                await this.getGameOptionDefaultOverrides();
+
+            if (!defaultGameOptionOverride) {
+                resetArg.setter.bind(this)(...resetArg.default);
+                return;
+            }
+
+            // get game optional internal keys to reset
+            const gameOptionsDefaultsToReset = Object.keys(
+                GameOptionInternalToGameOption
+            ).filter(
+                (key) => GameOptionInternalToGameOption[key] === gameOption
+            );
+
+            // associated override values
+            const gameOptionDefaultResets = gameOptionsDefaultsToReset.map(
+                (key) => defaultGameOptionOverride[key]
+            );
+
+            resetArg.setter.bind(this)(
+                ...(gameOptionDefaultResets || resetArg.default)
+            );
         }
     }
 
     /**
-     * Sets the beginning cutoff year option value
-     * @param year - The beginning cutoff year
+     *  Sets the cutoff option value
+     * @param beginningYear - The beginning cutoff year
+     * @param endingYear - The ending cutoff year
      */
-    async setBeginningCutoffYear(year: number): Promise<void> {
-        this.gameOptions.beginningYear = year;
-        await this.updateGuildPreferences([
-            { name: GameOptionInternal.BEGINNING_YEAR, value: year },
-        ]);
-    }
+    async setCutoff(beginningYear: number, endingYear?: number): Promise<void> {
+        this.gameOptions.beginningYear = beginningYear;
+        this.gameOptions.endYear = endingYear ?? DEFAULT_ENDING_SEARCH_YEAR;
 
-    /**
-     * Sets the end cutoff year option value
-     * @param year - The end cutoff year
-     */
-    async setEndCutoffYear(year: number): Promise<void> {
-        this.gameOptions.endYear = year;
         await this.updateGuildPreferences([
-            { name: GameOptionInternal.END_YEAR, value: year },
+            { name: GameOptionInternal.BEGINNING_YEAR, value: beginningYear },
+            { name: GameOptionInternal.END_YEAR, value: endingYear },
         ]);
     }
 
@@ -908,6 +934,17 @@ export default class GuildPreference {
     async resetToDefault(): Promise<Array<GameOption>> {
         const oldOptions = this.gameOptions;
         this.gameOptions = { ...GuildPreference.DEFAULT_OPTIONS };
+
+        // apply per-server game option default overrides
+        const gameOptionOverrides = await this.getGameOptionDefaultOverrides();
+        if (gameOptionOverrides) {
+            for (const [option, value] of Object.entries(gameOptionOverrides)) {
+                if (value) {
+                    this.gameOptions[option] = value;
+                }
+            }
+        }
+
         const options = Object.entries(this.gameOptions).map((x) => {
             const optionName = x[0];
             const optionValue = x[1];
@@ -921,5 +958,43 @@ export default class GuildPreference {
         );
 
         return updatedOptions.map((x) => x[0] as GameOption);
+    }
+
+    /** Sets the current game options as the default */
+    async setAsDefault(): Promise<void> {
+        const options = Object.entries(this.gameOptions).map((x) => ({
+            guild_id: this.guildID,
+            option_name: x[0],
+            option_value: JSON.stringify(x[1]),
+        }));
+
+        await dbContext.kmq.transaction(async (trx) => {
+            await dbContext
+                .kmq("game_option_defaults")
+                .where("guild_id", "=", this.guildID)
+                .del()
+                .transacting(trx);
+
+            await dbContext
+                .kmq("game_option_defaults")
+                .insert(options)
+                .transacting(trx);
+        });
+    }
+
+    /* Gets the per-server game option default overrides */
+    async getGameOptionDefaultOverrides(): Promise<GameOptions> {
+        const defaultOverrides = await dbContext
+            .kmq("game_option_defaults")
+            .where("guild_id", "=", this.guildID);
+
+        if (defaultOverrides.length === 0) return null;
+
+        const gameOptions = defaultOverrides.reduce((prev, curr) => {
+            prev[curr["option_name"]] = JSON.parse(curr["option_value"]);
+            return prev;
+        }, {});
+
+        return gameOptions;
     }
 }
