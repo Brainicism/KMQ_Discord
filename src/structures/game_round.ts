@@ -408,20 +408,22 @@ export default class GameRound {
         guess: string,
         correctChoices: Array<string>
     ): boolean {
-        const distances = correctChoices.flatMap((x) => {
-            if (x.length > 4 && Math.abs(guess.length - x.length) < 2) {
-                return [levenshtien(guess, x)];
+        const distanceRequired = (length: number): number => {
+            if (length <= 4) return -1;
+            if (length <= 6) return 1;
+            return 2;
+        };
+
+        return correctChoices.some((x) => {
+            if (Math.abs(guess.length - x.length) < 2) {
+                const distance = levenshtien(guess, x);
+                if (distance.steps <= distanceRequired(x.length)) {
+                    return true;
+                }
             }
 
-            return [];
+            return false;
         });
-
-        if (distances.length > 0) {
-            const sortedDistances = distances.sort((a, b) => a.steps - b.steps);
-            return sortedDistances[0].steps <= 2;
-        }
-
-        return false;
     }
 
     /**
