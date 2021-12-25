@@ -1,3 +1,7 @@
+import {
+    ExpBonusModifier,
+    ExpBonusModifierValues,
+} from "../commands/game_commands/exp";
 import { getUserTag, getMention } from "../helpers/discord_utils";
 import { roundDecimal, bold } from "../helpers/utils";
 import { state } from "../kmq_worker";
@@ -18,17 +22,33 @@ export default class Player {
     /** The player's EXP gain */
     private expGain: number;
 
-    constructor(tag: string, id: string, avatarURL: string, points: number) {
+    /** Whether it's the player's first game of the day */
+    private firstGameOfTheDay: boolean;
+
+    constructor(
+        tag: string,
+        id: string,
+        avatarURL: string,
+        points: number,
+        firstGameOfTheDay = false
+    ) {
         this.name = tag;
         this.id = id;
         this.score = points;
         this.avatarURL = avatarURL;
         this.expGain = 0;
+        this.firstGameOfTheDay = firstGameOfTheDay;
     }
 
-    static fromUserID(userID: string): Player {
+    static fromUserID(userID: string, firstGameOfDay = false): Player {
         const user = state.client.users.get(userID);
-        return new Player(getUserTag(user), user.id, user.avatarURL, 0);
+        return new Player(
+            getUserTag(user),
+            user.id,
+            user.avatarURL,
+            0,
+            firstGameOfDay
+        );
     }
 
     /** @returns the player's Discord tag  */
@@ -110,6 +130,9 @@ export default class Player {
      */
 
     incrementExp(expGain: number): void {
-        this.expGain += expGain;
+        this.expGain +=
+            (this.firstGameOfTheDay
+                ? ExpBonusModifierValues[ExpBonusModifier.FIRST_GAME_OF_DAY]
+                : 1) * expGain;
     }
 }

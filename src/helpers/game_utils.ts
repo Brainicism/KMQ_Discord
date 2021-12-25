@@ -371,3 +371,22 @@ export async function getMultipleChoiceOptions(
 
     return result;
 }
+
+/**
+ * @param userID - The user's ID
+ * @returns whether this is the user's first game played today
+ */
+export async function isFirstGameOfDay(userID: string): Promise<boolean> {
+    const player = await dbContext
+        .kmq("player_stats")
+        .select(
+            dbContext.kmq.raw(
+                "DAYOFYEAR(last_active) = DAYOFYEAR(CURDATE()) as firstGameOfDay"
+            )
+        )
+        .where("player_id", "=", userID)
+        .first();
+
+    if (!player) return true;
+    return player["firstGameOfDay"] === 0;
+}

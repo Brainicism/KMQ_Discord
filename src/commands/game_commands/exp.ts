@@ -12,6 +12,7 @@ import {
     getGuildPreference,
     getAvailableSongCount,
     userBonusIsActive,
+    isFirstGameOfDay,
 } from "../../helpers/game_utils";
 import { AnswerType } from "../game_options/answer";
 import { GuessModeType } from "../game_options/guessmode";
@@ -41,6 +42,7 @@ export enum ExpBonusModifier {
     BELOW_SONG_COUNT_THRESHOLD,
     TYPO,
     HINT_USED,
+    FIRST_GAME_OF_DAY,
 }
 
 export const ExpBonusModifierValues = {
@@ -61,6 +63,7 @@ export const ExpBonusModifierValues = {
     [ExpBonusModifier.BELOW_SONG_COUNT_THRESHOLD]: 0,
     [ExpBonusModifier.TYPO]: 0.8,
     [ExpBonusModifier.HINT_USED]: 0.5,
+    [ExpBonusModifier.FIRST_GAME_OF_DAY]: 1.5,
 };
 
 interface ExpModifier {
@@ -73,11 +76,13 @@ interface ExpModifier {
  * Calculates the exp multiplier based on the round options
  * @param guildPreference - The guild preference
  * @param voteBonusExp - Whether bonus EXP should be applied to the modifier
+ * @param playerID - the player's ID
  * @returns an array describing the EXP modifiers activated and their numerical value
  */
 export async function calculateOptionsExpMultiplierInternal(
     guildPreference: GuildPreference,
-    voteBonusExp: boolean
+    voteBonusExp: boolean,
+    playerID: string
 ): Promise<Array<ExpModifier>> {
     const modifiers: Array<ExpModifier> = [];
     // bonus for voting
@@ -94,6 +99,15 @@ export async function calculateOptionsExpMultiplierInternal(
         modifiers.push({
             displayName: "Power Hour Bonus",
             name: ExpBonusModifier.POWER_HOUR,
+            isPenalty: false,
+        });
+    }
+
+    const isPlayersFirstGame = await isFirstGameOfDay(playerID);
+    if (isPlayersFirstGame) {
+        modifiers.push({
+            displayName: "First Game of the Day Bonus",
+            name: ExpBonusModifier.FIRST_GAME_OF_DAY,
             isPenalty: false,
         });
     }
@@ -164,12 +178,14 @@ export async function calculateOptionsExpMultiplierInternal(
 
 async function calculateOptionsExpMultiplier(
     guildPreference: GuildPreference,
-    voteBonusExp: boolean
+    voteBonusExp: boolean,
+    playerID: string
 ): Promise<number> {
     return (
         await calculateOptionsExpMultiplierInternal(
             guildPreference,
-            voteBonusExp
+            voteBonusExp,
+            playerID
         )
     ).reduce((a, b) => ExpBonusModifierValues[b.name] * a, 1);
 }
@@ -238,7 +254,7 @@ export function calculateRoundExpMultiplier(
  * @param guessSpeed - The guess speed
  * @param place - The place of the guess
  * @param voteBonusExp - Whether bonus EXP should be applied to the modifier
- * @param typosAllowed - Whether typos were allowed
+ * @param playerID - the player's ID
  * @returns the round's total EXP based on the EXP modifiers
  */
 export async function calculateTotalRoundExp(
@@ -248,11 +264,13 @@ export async function calculateTotalRoundExp(
     streak: number,
     guessSpeed: number,
     place: number,
-    voteBonusExp: boolean
+    voteBonusExp: boolean,
+    playerID: string
 ): Promise<number> {
     const optionsMultiplier = await calculateOptionsExpMultiplier(
         guildPreference,
-        voteBonusExp
+        voteBonusExp,
+        playerID
     );
 
     const roundMultipler = calculateRoundExpMultiplier(
@@ -287,12 +305,14 @@ export default class ExpCommand implements BaseCommand {
 
         const activeModifiers = await calculateOptionsExpMultiplierInternal(
             guildPreference,
-            voteBonusActive
+            voteBonusActive,
+            message.author.id
         );
 
         const totalModifier = await calculateOptionsExpMultiplier(
             guildPreference,
-            voteBonusActive
+            voteBonusActive,
+            message.author.id
         );
 
         const modifierText: Array<string> = activeModifiers.map(
@@ -325,6 +345,9 @@ export default class ExpCommand implements BaseCommand {
         const bonusExpExplanations = [
             `\`Playing during a KMQ Power Hour or Weekend:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.POWER_HOUR
+            ].toFixed(2)}x 📈`,
+            `\`First game of the day:\` ${ExpBonusModifierValues[
+                ExpBonusModifier.FIRST_GAME_OF_DAY
             ].toFixed(2)}x 📈`,
             `\`Voting!:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.VOTE

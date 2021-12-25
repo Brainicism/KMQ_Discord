@@ -44,7 +44,9 @@ export default class EliminationScoreboard extends Scoreboard {
      * Updates the scoreboard with information about correct guessers
      * @param guessResults - Objects containing the user ID, points earned, and EXP gain
      */
-    updateScoreboard(guessResults: Array<SuccessfulGuessResult>): void {
+    async updateScoreboard(
+        guessResults: Array<SuccessfulGuessResult>
+    ): Promise<void> {
         // give everybody EXP
         for (const guessResult of guessResults) {
             const correctGuesser = this.players[guessResult.userID];
