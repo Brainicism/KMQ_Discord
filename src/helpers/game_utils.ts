@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { execSync } from "child_process";
 import dbContext from "../database_context";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
@@ -389,4 +390,11 @@ export async function isFirstGameOfDay(userID: string): Promise<boolean> {
 
     if (!player) return true;
     return player["firstGameOfDay"] === 0;
+}
+
+/**
+ * @returns KMQ's current version
+ */
+export function getKmqCurrentVersion(): string {
+    return execSync("git describe --tags").toString().trim();
 }

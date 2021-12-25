@@ -8,6 +8,7 @@ import {
 } from "../../helpers/discord_utils";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
+import { getKmqCurrentVersion } from "../../helpers/game_utils";
 
 const logger = new IPCLogger("news");
 
@@ -35,6 +36,7 @@ export default class NewsCommand implements BaseCommand {
             title: "Updates",
             description: news,
             thumbnailUrl: KmqImages.READING_BOOK,
+            footerText: getKmqCurrentVersion(),
         });
 
         logger.info(`${getDebugLogHeader(message)} | News retrieved.`);

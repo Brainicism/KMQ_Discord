@@ -16,6 +16,7 @@ import {
     friendlyFormattedNumber,
     measureExecutionTime,
 } from "../../helpers/utils";
+import { getKmqCurrentVersion } from "../../helpers/game_utils";
 
 const logger = new IPCLogger("stats");
 
@@ -177,8 +178,7 @@ export default class SkipCommand implements BaseCommand {
             title: "Bot Stats",
             description: "Detailed bot status: https://kmq.kpop.gg/status",
             fields,
-            footerText:
-                "'Recent' statistics represent data from last 24 hours.",
+            footerText: `${getKmqCurrentVersion()} | 'Recent' statistics represent data from last 24 hours.`,
             timestamp: new Date(),
             thumbnailUrl: KmqImages.READING_BOOK,
         });
