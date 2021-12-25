@@ -252,7 +252,8 @@ export default class GameSession {
                         this.lastGuesser.streak,
                         timePlayed,
                         guessPosition,
-                        await userBonusIsActive(correctGuesser.id)
+                        await userBonusIsActive(correctGuesser.id),
+                        correctGuesser.id
                     );
 
                     let streak = 0;
@@ -297,7 +298,7 @@ export default class GameSession {
                     pointsEarned: x.pointsEarned,
                 }));
 
-            this.scoreboard.updateScoreboard(scoreboardUpdatePayload);
+            await this.scoreboard.updateScoreboard(scoreboardUpdatePayload);
         } else {
             if (!guessResult.error) {
                 this.lastGuesser = null;

@@ -3,6 +3,7 @@ import { bold, friendlyFormattedNumber } from "../helpers/utils";
 import { getMention } from "../helpers/discord_utils";
 import { IPCLogger } from "../logger";
 import GuildPreference from "./guild_preference";
+import { isFirstGameOfDay } from "../helpers/game_utils";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("scoreboard");
@@ -146,11 +147,14 @@ export default class Scoreboard {
      * Updates the scoreboard with information about correct guessers
      * @param guessResults - Objects containing the user ID, points earned, and EXP gain
      */
-    updateScoreboard(guessResults: Array<SuccessfulGuessResult>): void {
+    async updateScoreboard(
+        guessResults: Array<SuccessfulGuessResult>
+    ): Promise<void> {
         for (const guessResult of guessResults) {
             if (!this.players[guessResult.userID]) {
                 this.players[guessResult.userID] = Player.fromUserID(
-                    guessResult.userID
+                    guessResult.userID,
+                    await isFirstGameOfDay(guessResult.userID)
                 );
             }
 
