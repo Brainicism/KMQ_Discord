@@ -3,13 +3,18 @@ name: restart-prod
 on:
   workflow_dispatch:
   workflow_call:
+    secrets:
+      SSH_DEPLOY_PRIVATE_KEY:
+        required: true
+      SSH_DEPLOY_KNOWN_HOSTS:
+        required: true
+      PROD_SSH_CONNECTION_STRING:
+        required: true
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Checkout KMQ_Discord
-        uses: actions/checkout@v2
       - name: Install SSH Keys
         run: |
           echo "Installing SSH keys"

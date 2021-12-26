@@ -38,3 +38,7 @@ jobs:
           echo "Pushing new prod branch"
   redeploy:
     uses: Brainicism/KMQ_Discord/.github/workflows/restart-prod.yml@master
+    with:
+      SSH_DEPLOY_PRIVATE_KEY: ${{ secrets.SSH_DEPLOY_PRIVATE_KEY }}
+      SSH_DEPLOY_KNOWN_HOSTS: ${{ secrets.SSH_DEPLOY_KNOWN_HOSTS }}
+      PROD_SSH_CONNECTION_STRING: ${{ secrets.PROD_SSH_CONNECTION_STRING }}
