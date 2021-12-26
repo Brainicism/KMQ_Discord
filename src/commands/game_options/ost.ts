@@ -8,8 +8,10 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("ost");
+
 export enum OstPreference {
     INCLUDE = "include",
     EXCLUDE = "exclude",
@@ -35,30 +37,34 @@ export default class OstCommand implements BaseCommand {
         ],
     };
 
-    help = {
-        name: "ost",
-        description: "Choose whether to include OST songs",
-        usage: ",ost [include | exclude | exclusive]",
-        examples: [
-            {
-                example: "`,ost include`",
-                explanation: "Include OST songs.",
-            },
-            {
-                example: "`,ost exclude`",
-                explanation: "Exclude OST songs.",
-            },
-            {
-                example: "`,ost exclusive`",
-                explanation: "Exclusively play OST songs.",
-            },
-            {
-                example: "`,ost`",
-                explanation: `Reset to the default option of \`${DEFAULT_OST_PREFERENCE}\``,
-            },
-        ],
-        priority: 130,
-    };
+    help = (guildID: string) => ({
+            name: "ost",
+            description: state.localizer.translate(guildID, "Choose whether to include OST songs."),
+            usage: ",ost [include | exclude | exclusive]",
+            examples: [
+                {
+                    example: "`,ost include`",
+                    explanation: state.localizer.translate(guildID, "Include OST songs."),
+                },
+                {
+                    example: "`,ost exclude`",
+                    explanation: state.localizer.translate(guildID, "Exclude OST songs."),
+                },
+                {
+                    example: "`,ost exclusive`",
+                    explanation: state.localizer.translate(guildID, "Exclusively play OST songs."),
+                },
+                {
+                    example: "`,ost`",
+                    explanation: state.localizer.translate(guildID,
+                        "Reset to the default option of {{{defaultOst}}}",
+                        { defaultOst: `\`${DEFAULT_OST_PREFERENCE}\`` }
+                    ),
+                },
+            ],
+        });
+
+    helpPriority = 130;
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

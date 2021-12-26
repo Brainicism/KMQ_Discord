@@ -1,7 +1,7 @@
 import Eris from "eris";
 import pluralize from "pluralize";
 import dbContext from "../../database_context";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -26,6 +26,7 @@ import MessageContext from "../../structures/message_context";
 import { sendValidationErrorMessage } from "../../helpers/validate";
 
 const logger = new IPCLogger("leaderboard");
+
 export const ENTRIES_PER_PAGE = 10;
 
 export enum LeaderboardType {
@@ -59,50 +60,61 @@ const leaderboardQuotes = [
 ];
 
 export default class LeaderboardCommand implements BaseCommand {
-    help = {
-        name: "leaderboard",
-        description: "View the KMQ leaderboard.",
-        usage: ",leaderboard {page_number}\n,leaderboard {gamesplayed | songsguessed} {server | game} {daily | weekly | monthly | yearly} {page_number}\n,leaderboard [enroll | unenroll]",
-        examples: [
-            {
-                example: "`,leaderboard`",
-                explanation: "Show the global leaderboard",
-            },
-            {
-                example: "`,leaderboard 3`",
-                explanation: "Shows the 3rd page of the global leaderboard",
-            },
-            {
-                example: "`,leaderboard game monthly 2`",
-                explanation:
-                    "Shows the 2nd page of the monthly scoreboard containing players with points in the current game",
-            },
-            {
-                example: "`,leaderboard songsguessed server 3`",
-                explanation:
-                    "Shows the 3rd page of the server-wide leaderboard by total songs guessed",
-            },
-            {
-                example: "`,leaderboard enroll`",
-                explanation:
-                    "Allows your name to be displayed on the leaderboard",
-            },
-            {
-                example: "`,leaderboard unenroll`",
-                explanation: "Hides your name from the leaderboard",
-            },
-            {
-                example: "`,leaderboard server`",
-                explanation: "Shows the server-wide leaderboard",
-            },
-            {
-                example: "`,leaderboard weekly 4`",
-                explanation:
-                    "Shows the 4th page of the leaderboard, by EXP gained this week",
-            },
-        ],
-        priority: 50,
-    };
+    help = (guildID: string): Help => ({
+            name: "leaderboard",
+            description: state.localizer.translate(guildID, "View the KMQ leaderboard."),
+            usage: ",leaderboard {page_number}\n,leaderboard {gamesplayed | songsguessed} {server | game} {daily | weekly | monthly | yearly} {page_number}\n,leaderboard [enroll | unenroll]",
+            examples: [
+                {
+                    example: "`,leaderboard`",
+                    explanation: state.localizer.translate(guildID, "Show the global leaderboard"),
+                },
+                {
+                    example: "`,leaderboard 3`",
+                    explanation: state.localizer.translate(guildID,
+                        "Shows the 3rd page of the global leaderboard"
+                    ),
+                },
+                {
+                    example: "`,leaderboard game monthly 2`",
+                    explanation: state.localizer.translate(guildID,
+                        "Shows the 2nd page of the monthly scoreboard containing players with points in the current game"
+                    ),
+                },
+                {
+                    example: "`,leaderboard songsguessed server 3`",
+                    explanation: state.localizer.translate(guildID,
+                        "Shows the 3rd page of the server-wide leaderboard by total songs guessed"
+                    ),
+                },
+                {
+                    example: "`,leaderboard enroll`",
+                    explanation: state.localizer.translate(guildID,
+                        "Allows your name to be displayed on the leaderboard"
+                    ),
+                },
+                {
+                    example: "`,leaderboard unenroll`",
+                    explanation: state.localizer.translate(guildID,
+                        "Hides your name from the leaderboard"
+                    ),
+                },
+                {
+                    example: "`,leaderboard server`",
+                    explanation: state.localizer.translate(guildID,
+                        "Shows the server-wide leaderboard"
+                    ),
+                },
+                {
+                    example: "`,leaderboard weekly 4`",
+                    explanation: state.localizer.translate(guildID,
+                        "Shows the 4th page of the leaderboard, by EXP gained this week"
+                    ),
+                },
+            ],
+        });
+
+    helpPriority = 50;
 
     validations = {
         minArgCount: 0,
@@ -112,7 +124,10 @@ export default class LeaderboardCommand implements BaseCommand {
 
     aliases = ["lb"];
 
-    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+    call = async ({
+        message,
+        parsedMessage,
+    }: CommandArgs): Promise<void> => {
         if (parsedMessage.components.length === 0) {
             LeaderboardCommand.showLeaderboard(
                 message,
@@ -175,7 +190,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     ]
                 )})`,
                 arg,
-                this.help.usage
+                this.help(message.guildID).usage
             );
             return;
         }
@@ -210,7 +225,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     ]
                 )})`,
                 arg,
-                this.help.usage
+                this.help(message.guildID).usage
             );
             return;
         }
@@ -240,7 +255,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     Object.values(LeaderboardDuration)
                 )})`,
                 arg,
-                this.help.usage
+                this.help(message.guildID).usage
             );
             return;
         }
@@ -250,7 +265,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 message,
                 "Expected one of the following valid values for the third argument: (a positive number)",
                 arg,
-                this.help.usage
+                this.help(message.guildID).usage
             );
             return;
         }
@@ -462,22 +477,35 @@ export default class LeaderboardCommand implements BaseCommand {
 
                                     const displayName = enrolledPlayer
                                         ? enrolledPlayer.display_name
-                                        : `Rank #${rank + 1}`;
+                                        : state.localizer.translate(messageContext.guildID, "Rank #{{{rank}}}", {
+                                              rank: rank + 1,
+                                          });
 
                                     let level: string;
                                     if (permanentLb) {
-                                        level = `Level ${friendlyFormattedNumber(
+                                        level = `${state.localizer.translate(messageContext.guildID,
+                                            "Level"
+                                        )} ${friendlyFormattedNumber(
                                             player.level
                                         )} (${getRankNameByLevel(
-                                            player.level
+                                            player.level, messageContext.guildID
                                         )})`;
                                     } else {
-                                        level = `${friendlyFormattedNumber(
-                                            player.level
-                                        )} ${pluralize(
+                                        const levelText = state.localizer.translate(messageContext.guildID,
                                             "level",
                                             player.level
-                                        )} gained`;
+                                        );
+
+                                        level = state.localizer.translate(messageContext.guildID,
+                                            "{{{formattedNumber}}} {{{level}}} gained",
+                                            {
+                                                formattedNumber:
+                                                    friendlyFormattedNumber(
+                                                        player.level
+                                                    ),
+                                                levelText,
+                                            }
+                                        );
                                     }
 
                                     let value: string;

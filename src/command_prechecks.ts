@@ -8,6 +8,7 @@ import MessageContext from "./structures/message_context";
 import { GameType, GuildTextableMessage } from "./types";
 import { IPCLogger } from "./logger";
 import dbContext from "./database_context";
+import { state } from "./kmq_worker";
 
 const logger = new IPCLogger("command_prechecks");
 export interface PrecheckArgs {
@@ -42,10 +43,11 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Wait...",
-                description:
+                title: state.localizer.translate(message.guildID, "Wait..."),
+                description: state.localizer.translate(message.guildID,
                     errorMessage ??
-                    "You must be in the same voice channel as the bot to use this command.",
+                        "You must be in the same voice channel as the bot to use this command."
+                ),
             });
             return false;
         }
@@ -65,8 +67,9 @@ export default class CommandPrechecks {
 
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: "Wait...",
-                description:
-                    errorMessage ?? "You can't do that in this server.",
+                description: state.localizer.translate(message.guildID,
+                    errorMessage ?? "You can't do that in this server."
+                ),
             });
         }
 
@@ -87,8 +90,9 @@ export default class CommandPrechecks {
 
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: "Wait...",
-                description:
-                    errorMessage ?? "You can't do that in this channel.",
+                description: state.localizer.translate(message.guildID,
+                    errorMessage ?? "You can't do that in this channel."
+                ),
             });
         }
 
@@ -119,9 +123,10 @@ export default class CommandPrechecks {
 
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: "Wait...",
-                description:
+                description: state.localizer.translate(message.guildID,
                     errorMessage ??
-                    "This command has been disabled for regular users in the competition.",
+                        "This command has been disabled for regular users in the competition."
+                ),
             });
         }
 

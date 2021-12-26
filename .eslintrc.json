@@ -167,6 +167,9 @@
                 "prev": "*",
                 "next": "function"
             }
+        ],
+        "no-underscore-dangle": [
+            "off"
         ]
     }
 }

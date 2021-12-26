@@ -8,8 +8,10 @@ import {
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("multiguess");
+
 export enum MultiGuessType {
     ON = "on",
     OFF = "off",
@@ -32,30 +34,38 @@ export default class MultiGuessCommand implements BaseCommand {
         ],
     };
 
-    help = {
-        name: "multiguess",
-        description:
-            "Sets whether multiple people can guess a song correctly. When `on`, players will have 1.5 seconds after the first correct answer is given, to continue to answer.\
+    help = (guildID: string) => ({
+            name: "multiguess",
+            description: state.localizer.translate(guildID,
+                "Sets whether multiple people can guess a song correctly. When {{{on}}}, players will have 1.5 seconds after the first correct answer is given, to continue to answer.\
         The first answer receives full EXP, correct answers that come after receive multiplicatively less EXP.",
-        usage: ",multiguess [on | off]",
-        examples: [
-            {
-                example: "`,multiguess on`",
-                explanation:
-                    "Allows for a 1.5 second grace period from when the first correct guess occurs. Multiple players are able to guess correctly.",
-            },
-            {
-                example: "`,multiguess off`",
-                explanation:
-                    "Only the first person who guesses correct is awarded the point.",
-            },
-            {
-                example: "`,multiguess`",
-                explanation: `Reset to the default multiguess type of \`${DEFAULT_MULTIGUESS_TYPE}\``,
-            },
-        ],
-        priority: 150,
-    };
+                { on: `\`${MultiGuessType.ON}\`` }
+            ),
+            usage: ",multiguess [on | off]",
+            examples: [
+                {
+                    example: "`,multiguess on`",
+                    explanation: state.localizer.translate(guildID,
+                        "Allows for a 1.5 second grace period from when the first correct guess occurs. Multiple players are able to guess correctly."
+                    ),
+                },
+                {
+                    example: "`,multiguess off`",
+                    explanation: state.localizer.translate(guildID,
+                        "Only the first person who guesses correct is awarded the point."
+                    ),
+                },
+                {
+                    example: "`,multiguess`",
+                    explanation: state.localizer.translate(guildID,
+                        "Reset to the default multiguess type of {{{defaultMultiguess}}}",
+                        { defaultMultiguess: `\`${DEFAULT_MULTIGUESS_TYPE}\`` }
+                    ),
+                },
+            ],
+        });
+
+    helpPriority = 150;
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

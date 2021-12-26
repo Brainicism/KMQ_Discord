@@ -9,6 +9,7 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("duration");
 
@@ -38,34 +39,53 @@ export default class DurationCommand implements BaseCommand {
         ],
     };
 
-    help = {
-        name: "duration",
-        description: "Sets a maximum length for the KMQ game in minutes.",
-        usage: ",duration [minutes]",
-        examples: [
-            {
-                example: "`,duration 15`",
-                explanation:
-                    "The game will automatically end after 15 minutes.",
-            },
-            {
-                example: "`,duration 5 add`",
-                explanation:
-                    "Remove 5 minutes from the current game's duration",
-            },
-            {
-                example: "`,duration 5 remove`",
-                explanation: "Add 5 minutes to the current game's duration.",
-            },
-            {
-                example: "`,duration`",
-                explanation: "Disables the duration",
-            },
-        ],
-        priority: 110,
-    };
+    help = (guildID: string) => ({
+            name: "duration",
+            description: state.localizer.translate(guildID,
+                "Sets a maximum length for the KMQ game in minutes."
+            ),
+            usage: ",duration [minutes]",
+            examples: [
+                {
+                    example: "`,duration 15`",
+                    explanation: state.localizer.translate(guildID,
+                        "The game will automatically end after {{{duration}}} minutes.",
+                        {
+                            duration: String(15),
+                        }
+                    ),
+                },
+                {
+                    example: "`,duration 5 add`",
+                    explanation: state.localizer.translate(guildID,
+                        "Remove {{{duration}}} minutes from the current game's duration",
+                        {
+                            duration: String(5),
+                        }
+                    ),
+                },
+                {
+                    example: "`,duration 5 remove`",
+                    explanation: state.localizer.translate(guildID,
+                        "Add {{{duration}}} minutes to the current game's duration.",
+                        {
+                            duration: String(5),
+                        }
+                    ),
+                },
+                {
+                    example: "`,duration`",
+                    explanation: state.localizer.translate(guildID, "Disables the duration"),
+                },
+            ],
+        });
 
-    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+    helpPriority = 110;
+
+    call = async ({
+        message,
+        parsedMessage,
+    }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.DURATION);
@@ -92,8 +112,10 @@ export default class DurationCommand implements BaseCommand {
             } else if (action === DurationAction.REMOVE) {
                 if (!guildPreference.isDurationSet()) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: "Error Adding/Removing Duration",
-                        description: "The duration is not currently set.",
+                        title: state.localizer.translate(message.guildID, "Error Adding/Removing Duration"),
+                        description: state.localizer.translate(message.guildID,
+                            "The duration is not currently set."
+                        ),
                     });
                     return;
                 }
@@ -101,8 +123,10 @@ export default class DurationCommand implements BaseCommand {
                 duration = currentDuration - durationDelta;
                 if (duration < 2) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: "Error Removing Duration",
-                        description: "Duration cannot be less than 2 minutes.",
+                        title: state.localizer.translate(message.guildID, "Error Removing Duration"),
+                        description: state.localizer.translate(message.guildID,
+                            "Duration cannot be less than 2 minutes."
+                        ),
                     });
                     return;
                 }

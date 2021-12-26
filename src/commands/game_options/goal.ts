@@ -9,6 +9,7 @@ import { IPCLogger } from "../../logger";
 import { GameOption, GameType } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("goal");
 
@@ -27,23 +28,28 @@ export default class GoalCommand implements BaseCommand {
         ],
     };
 
-    help = {
-        name: "goal",
-        description:
-            "Once the player with the most points reaches the goal score, the game ends. Calling it with no arguments disables the goal. If a game is in progress, the goal must exceed the highest score",
-        usage: ",goal [goal]",
-        examples: [
-            {
-                example: "`,goal 30`",
-                explanation: "The first player to 30 wins the game",
-            },
-            {
-                example: "`,goal`",
-                explanation: "Disables the goal",
-            },
-        ],
-        priority: 120,
-    };
+    help = (guildID: string) => ({
+            name: "goal",
+            description: state.localizer.translate(guildID,
+                "Once the player with the most points reaches the goal score, the game ends. Calling it with no arguments disables the goal. If a game is in progress, the goal must exceed the highest score."
+            ),
+            usage: ",goal [goal]",
+            examples: [
+                {
+                    example: "`,goal 30`",
+                    explanation: state.localizer.translate(guildID,
+                        "The first player to {{{goal}}} wins the game",
+                        { goal: String(30) }
+                    ),
+                },
+                {
+                    example: "`,goal`",
+                    explanation: state.localizer.translate(guildID, "Disables the goal"),
+                },
+            ],
+        });
+
+    helpPriority = 120;
 
     call = async ({
         message,
@@ -74,9 +80,10 @@ export default class GoalCommand implements BaseCommand {
                 );
 
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: "Error Applying Goal",
-                    description:
-                        "Given goal exceeds highest score. Please raise your goal, or start a new game.",
+                    title: state.localizer.translate(message.guildID, "Error Applying Goal"),
+                    description: state.localizer.translate(message.guildID,
+                        "Given goal exceeds highest score. Please raise your goal, or start a new game."
+                    ),
                 });
                 return;
             }
@@ -91,8 +98,16 @@ export default class GoalCommand implements BaseCommand {
                 );
 
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: "Game Option Conflict",
-                    description: `An \`${GameType.ELIMINATION}\` game is currently in progress. \`goal\` and \`${GameType.ELIMINATION}\` are incompatible. Play a \`${GameType.CLASSIC}\` or \`${GameType.TEAMS}\` game to use \`goal\`.`,
+                    title: state.localizer.translate(message.guildID, "Game Option Conflict"),
+                    description: state.localizer.translate(message.guildID,
+                        "An {{{elimination}}} game is currently in progress.  and {{{elimination}}} are incompatible. Play a {{{classic}}} or {{{teams}}} game to use {{{goal}}}.",
+                        {
+                            elimination: `\`${GameType.ELIMINATION}\``,
+                            goal: `\`${GameOption.GOAL}\``,
+                            classic: `\`${GameType.CLASSIC}\``,
+                            teams: `\`${GameType.TEAMS}\``,
+                        }
+                    ),
                 });
                 return;
             }

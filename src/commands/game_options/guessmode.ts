@@ -8,6 +8,7 @@ import {
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("guessmode");
 
@@ -36,33 +37,44 @@ export default class GuessModeCommand implements BaseCommand {
         ],
     };
 
-    help = {
-        name: "guessmode",
-        description:
-            "Choose whether to guess by song title, artist name, or both.",
-        usage: ",guessmode [song | artist | both]",
-        examples: [
-            {
-                example: "`,guessmode song`",
-                explanation: "Type the correct song name to win a game round",
-            },
-            {
-                example: "`,guessmode artist`",
-                explanation:
-                    "Type the correct name of the artist to win a game round",
-            },
-            {
-                example: "`,guessmode both`",
-                explanation:
-                    "Type the correct name of the artist (0.2 points) or the name of the song (1 point) to win a game round",
-            },
-            {
-                example: "`,guessmode`",
-                explanation: `Reset to the default guess mode of \`${DEFAULT_GUESS_MODE}\``,
-            },
-        ],
-        priority: 130,
-    };
+    help = (guildID: string) => ({
+            name: "guessmode",
+            description: state.localizer.translate(guildID,
+                "Choose whether to guess by song title, artist name, or both."
+            ),
+            usage: ",guessmode [song | artist | both]",
+            examples: [
+                {
+                    example: "`,guessmode song`",
+                    explanation: state.localizer.translate(guildID,
+                        "Type the correct song name to win a game round"
+                    ),
+                },
+                {
+                    example: "`,guessmode artist`",
+                    explanation: state.localizer.translate(guildID,
+                        "Type the correct name of the artist to win a game round"
+                    ),
+                },
+                {
+                    example: "`,guessmode both`",
+                    explanation: state.localizer.translate(guildID,
+                        "Type the correct name of the artist (0.2 points) or the name of the song (1 point) to win a game round"
+                    ),
+                },
+                {
+                    example: "`,guessmode`",
+                    explanation: state.localizer.translate(guildID,
+                        "Reset to the default guess mode of {{{defaultGuessMode}}}",
+                        {
+                            defaultGuessMode: DEFAULT_GUESS_MODE,
+                        }
+                    ),
+                },
+            ],
+        });
+
+    helpPriority = 130;
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

@@ -8,8 +8,10 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("special");
+
 export enum SpecialType {
     REVERSE = "reverse",
     SLOW = "slow",
@@ -75,47 +77,53 @@ export default class SpecialCommand implements BaseCommand {
         ],
     };
 
-    help = {
-        name: "special",
-        description:
-            "Hey. This hasn't been announced yet, but check out the KMQ server to try it out! Play a special mode with modified audio.",
-        usage: ",special [reverse | slow | fast | faster | lowpitch | highpitch | nightcore]",
-        examples: [
-            {
-                example: "`,special reverse`",
-                explanation: "Plays the song in reverse",
-            },
-            {
-                example: "`,special slow`",
-                explanation: "Plays the song at a slow speed",
-            },
-            {
-                example: "`,special fast`",
-                explanation: "Plays the song at a fast speed",
-            },
-            {
-                example: "`,special faster`",
-                explanation: "Plays the song at a faster speed",
-            },
-            {
-                example: "`,special lowpitch`",
-                explanation: "Plays the song at a low pitch",
-            },
-            {
-                example: "`,special highpitch`",
-                explanation: "Plays the song at a high pitch",
-            },
-            {
-                example: "`,special nightcore`",
-                explanation: "Plays a nightcore edit of the song",
-            },
-            {
-                example: "`,special`",
-                explanation: "Reset the special option",
-            },
-        ],
-        priority: 130,
-    };
+    help = (guildID: string) => ({
+            name: "special",
+            description: state.localizer.translate(guildID,
+                "Hey. This hasn't been announced yet, but check out the KMQ server to try it out! Play a special mode with modified audio."
+            ),
+            usage: ",special [reverse | slow | fast | faster | lowpitch | highpitch | nightcore]",
+            examples: [
+                {
+                    example: "`,special reverse`",
+                    explanation: state.localizer.translate(guildID, "Plays the song in reverse"),
+                },
+                {
+                    example: "`,special slow`",
+                    explanation: state.localizer.translate(guildID, "Plays the song at a slow speed"),
+                },
+                {
+                    example: "`,special fast`",
+                    explanation: state.localizer.translate(guildID, "Plays the song at a fast speed"),
+                },
+                {
+                    example: "`,special faster`",
+                    explanation: state.localizer.translate(guildID,
+                        "Plays the song at a faster speed"
+                    ),
+                },
+                {
+                    example: "`,special lowpitch`",
+                    explanation: state.localizer.translate(guildID, "Plays the song at a low pitch"),
+                },
+                {
+                    example: "`,special highpitch`",
+                    explanation: state.localizer.translate(guildID, "Plays the song at a high pitch"),
+                },
+                {
+                    example: "`,special nightcore`",
+                    explanation: state.localizer.translate(guildID,
+                        "Plays a nightcore edit of the song"
+                    ),
+                },
+                {
+                    example: "`,special`",
+                    explanation: state.localizer.translate(guildID, "Reset the special option"),
+                },
+            ],
+        });
+
+    helpPriority = 130;
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

@@ -15,20 +15,21 @@ import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import EliminationScoreboard from "../../structures/elimination_scoreboard";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("skip");
 
 async function sendSkipNotification(
     message: GuildTextableMessage,
-    gameSession: GameSession
+    gameSession: GameSession,
 ): Promise<void> {
     await sendInfoMessage(
         MessageContext.fromMessage(message),
         {
-            title: "Skip",
+            title: state.localizer.translate(message.guildID, "Skip"),
             description: `${gameSession.gameRound.getNumSkippers()}/${getMajorityCount(
                 message.guildID
-            )} skips received.`,
+            )} ${state.localizer.translate(message.guildID, "skips received")}.`,
         },
         true
     );
@@ -36,14 +37,14 @@ async function sendSkipNotification(
 
 async function sendSkipMessage(
     message: GuildTextableMessage,
-    gameRound: GameRound
+    gameRound: GameRound,
 ): Promise<void> {
     await sendInfoMessage(MessageContext.fromMessage(message), {
         color: EMBED_SUCCESS_COLOR,
-        title: "Skip",
+        title: state.localizer.translate(message.guildID, "Skip"),
         description: `${gameRound.getNumSkippers()}/${getMajorityCount(
             message.guildID
-        )} skips achieved, skipping...`,
+        )} ${state.localizer.translate(message.guildID, "skips achieved, skipping...")}`,
         thumbnailUrl: KmqImages.NOT_IMPRESSED,
     });
 }
@@ -70,18 +71,22 @@ export default class SkipCommand implements BaseCommand {
         { checkFn: CommandPrechecks.competitionPrecheck },
     ];
 
-    help = {
-        name: "skip",
-        description:
-            "Vote to skip the current song. A song is skipped when majority of participants vote to skip it.",
-        usage: ",skip",
-        examples: [],
-        priority: 1010,
-    };
+    help = (guildID: string) => ({
+            name: state.localizer.translate(guildID, "skip"),
+            description: state.localizer.translate(guildID,
+                "Vote to skip the current song. A song is skipped when majority of participants vote to skip it."
+            ),
+            usage: ",skip",
+            examples: [],
+        });
+    helpPriority = 1010;
 
     aliases = ["s"];
 
-    call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
+    call = async ({
+        gameSessions,
+        message,
+    }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         const gameSession = gameSessions[message.guildID];
         if (

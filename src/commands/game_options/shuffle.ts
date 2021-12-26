@@ -8,6 +8,7 @@ import {
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("shuffle");
 
@@ -33,28 +34,38 @@ export default class ShuffleCommand implements BaseCommand {
         ],
     };
 
-    help = {
-        name: "shuffle",
-        description:
-            "Choose whether songs are played in truly random order (`random`) or randomly but uniquely until all songs are played (`shuffle`).",
-        usage: ",shuffle [random | unique]",
-        examples: [
-            {
-                example: "`,shuffle random`",
-                explanation: "Songs will play randomly.",
-            },
-            {
-                example: "`,shuffle unique`",
-                explanation:
-                    "Every song will play once before any are repeated.",
-            },
-            {
-                example: "`,shuffle`",
-                explanation: `Reset to the default shuffle mode of \`${DEFAULT_SHUFFLE}\``,
-            },
-        ],
-        priority: 110,
-    };
+    help = (guildID: string) => ({
+            name: "shuffle",
+            description: state.localizer.translate(guildID,
+                "Choose whether songs are played in truly random order ({{{random}}}) or randomly but uniquely until all songs are played ({{{shuffle}}}).",
+                {
+                    random: `\`${ShuffleType.RANDOM}\``,
+                    shuffle: `\`${ShuffleType.UNIQUE}\``,
+                }
+            ),
+            usage: ",shuffle [random | unique]",
+            examples: [
+                {
+                    example: "`,shuffle random`",
+                    explanation: state.localizer.translate(guildID, "Songs will play randomly."),
+                },
+                {
+                    example: "`,shuffle unique`",
+                    explanation: state.localizer.translate(guildID,
+                        "Every song will play once before any are repeated."
+                    ),
+                },
+                {
+                    example: "`,shuffle`",
+                    explanation: state.localizer.translate(guildID,
+                        "Reset to the default shuffle mode of {{{defaultShuffle}}}",
+                        { defaultShuffle: `\`${DEFAULT_SHUFFLE}\`` }
+                    ),
+                },
+            ],
+        });
+
+    helpPriority = 110;
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

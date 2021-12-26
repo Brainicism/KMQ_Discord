@@ -13,6 +13,7 @@ import { GameOption, MatchedArtist } from "../../types";
 import MessageContext from "../../structures/message_context";
 import { GROUP_LIST_URL } from "./groups";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("remove");
 
@@ -46,39 +47,68 @@ export default class RemoveCommand implements BaseCommand {
         ],
     };
 
-    help = {
-        name: "remove",
-        description:
-            "Removes one or more groups from the current `,groups`, `,exclude`, or `,include` options",
-        usage: ",remove [groups | exclude | include] [list of groups]",
-        examples: [
-            {
-                example: "`,remove groups twice, red velvet`",
-                explanation:
-                    "Removes Twice and Red Velvet from the current `,groups` option",
-            },
-            {
-                example: "`,remove exclude BESTie, Dia, iKON`",
-                explanation:
-                    "Removes BESTie, Dia, and IKON from the current `,exclude` option",
-            },
-            {
-                example: "`,remove include exo`",
-                explanation: "Removes EXO from the current `,include` option",
-            },
-        ],
-        priority: 200,
-        actionRowComponents: [
-            {
-                style: 5 as const,
-                url: GROUP_LIST_URL,
-                type: 2 as const,
-                label: "Full List of Groups",
-            },
-        ],
-    };
+    help = (guildID: string) => ({
+            name: "remove",
+            description: state.localizer.translate(guildID,
+                "Removes one or more groups from the current {{{groups}}}, {{{exclude}}}, or {{{include}}} options.",
+                {
+                    groups: `\`${process.env.BOT_PREFIX}groups\``,
+                    exclude: `\`${process.env.BOT_PREFIX}exclude\``,
+                    include: `\`${process.env.BOT_PREFIX}include\``,
+                }
+            ),
+            usage: ",remove [groups | exclude | include] [list of groups]",
+            examples: [
+                {
+                    example: "`,remove groups twice, red velvet`",
+                    explanation: state.localizer.translate(guildID,
+                        "Removes {{{groupOne}}} and {{{groupTwo}}} from the current {{{groups}}} option",
+                        {
+                            groupOne: "Twice",
+                            groupTwo: "Red Velvet",
+                            groups: `\`${process.env.BOT_PREFIX}groups\``,
+                        }
+                    ),
+                },
+                {
+                    example: "`,remove exclude BESTie, Dia, iKON`",
+                    explanation: state.localizer.translate(guildID,
+                        "Removes {{{groupOne}}}, {{{groupTwo}}}, and {{{groupThree}}} from the current {{{exclude}}} option",
+                        {
+                            groupOne: "BESTie",
+                            groupTwo: "Dia",
+                            groupThree: "iKON",
+                            exclude: `\`${process.env.BOT_PREFIX}exclude\``,
+                        }
+                    ),
+                },
+                {
+                    example: "`,remove include exo`",
+                    explanation: state.localizer.translate(guildID,
+                        "Removes {{{group}}} from the current {{{include}}} option",
+                        {
+                            group: "exo",
+                            include: `\`${process.env.BOT_PREFIX}include\``,
+                        }
+                    ),
+                },
+            ],
+            actionRowComponents: [
+                {
+                    style: 5 as const,
+                    url: GROUP_LIST_URL,
+                    type: 2 as const,
+                    label: "Full List of Groups",
+                },
+            ],
+        });
 
-    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+    helpPriority = 200;
+
+    call = async ({
+        message,
+        parsedMessage,
+    }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         const optionListed = parsedMessage.components[0] as RemoveType;
         let currentMatchedArtists: MatchedArtist[];
@@ -102,8 +132,10 @@ export default class RemoveCommand implements BaseCommand {
 
         if (!currentMatchedArtists) {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Remove failed",
-                description: "There are no groups currently selected",
+                title: state.localizer.translate(message.guildID, "Remove Failed"),
+                description: state.localizer.translate(message.guildID,
+                    "There are no groups currently selected"
+                ),
             });
             return;
         }
@@ -133,12 +165,14 @@ export default class RemoveCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Unknown Group Name",
-                description: `One or more of the specified group names was not recognized. Those groups that matched are removed. Please ensure that the group name matches exactly with the list provided by \`${
-                    process.env.BOT_PREFIX
-                }help groups\`. \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(
-                    ", "
-                )} `,
+                title: state.localizer.translate(message.guildID, "Unknown Group Name"),
+                description: state.localizer.translate(message.guildID,
+                    "One or more of the specified group names was not recognized. Those groups that matched are removed. Please ensure that the group name matches exactly with the list provided by {{{helpGroups}}}. \nThe following groups were **not** recognized:\n {{{unmatchedGroups}}} ",
+                    {
+                        helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
+                        unmatchedGroups: unmatchedGroups.join(", "),
+                    }
+                ),
             });
         }
 

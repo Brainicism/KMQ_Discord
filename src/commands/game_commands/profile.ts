@@ -48,13 +48,18 @@ const RANK_TITLES = [
  * @param level - The user's level
  * @returns a string describing the user's rank corresponding with their level
  */
-export function getRankNameByLevel(level: number): string {
+export function getRankNameByLevel(
+    level: number,
+    guildID: string,
+): string {
     const highestRankTitle = RANK_TITLES[RANK_TITLES.length - 1];
     const levelsPastMaxRank = level - (highestRankTitle.req + 10);
     if (levelsPastMaxRank >= 0) {
         // add roman numeral suffix for every 5 levels above max rank title
         const stepsAboveMaxRank = Math.floor(levelsPastMaxRank / 5) + 1;
-        return `${highestRankTitle.title} ${romanize(stepsAboveMaxRank + 1)}`;
+        return `${state.localizer.translate(guildID, highestRankTitle.title)} ${romanize(
+            stepsAboveMaxRank + 1
+        )}`;
     }
 
     for (let i = RANK_TITLES.length - 1; i >= 0; i--) {
@@ -66,7 +71,7 @@ export function getRankNameByLevel(level: number): string {
 }
 
 async function getProfileFields(
-    requestedPlayer: Eris.User
+    requestedPlayer: Eris.User, guildID: string,
 ): Promise<Array<Eris.EmbedField>> {
     const playerStats = await dbContext
         .kmq("player_stats")
@@ -151,28 +156,29 @@ async function getProfileFields(
 
     const fields: Array<Eris.EmbedField> = [
         {
-            name: "Level",
+            name: state.localizer.translate(guildID, "Level"),
             value: `${friendlyFormattedNumber(level)} (${getRankNameByLevel(
-                level
+                level,
+                guildID
             )})`,
             inline: true,
         },
         {
-            name: "Experience",
+            name: state.localizer.translate(guildID, "Experience"),
             value: `${friendlyFormattedNumber(exp)}/${friendlyFormattedNumber(
                 CUM_EXP_TABLE[level + 1]
             )}`,
             inline: true,
         },
         {
-            name: "Overall Rank",
+            name: state.localizer.translate(guildID, "Overall Rank"),
             value: `#${friendlyFormattedNumber(
                 relativeLevelRank
             )}/${friendlyFormattedNumber(totalPlayers)}`,
             inline: true,
         },
         {
-            name: "Songs Guessed",
+            name: state.localizer.translate(guildID, "Songs Guessed"),
             value: `${friendlyFormattedNumber(
                 songsGuessed
             )} | #${friendlyFormattedNumber(
@@ -181,7 +187,7 @@ async function getProfileFields(
             inline: true,
         },
         {
-            name: "Games Played",
+            name: state.localizer.translate(guildID, "Games Played"),
             value: `${friendlyFormattedNumber(
                 gamesPlayed
             )} | #${friendlyFormattedNumber(
@@ -190,17 +196,17 @@ async function getProfileFields(
             inline: true,
         },
         {
-            name: "First Played",
+            name: state.localizer.translate(guildID, "First Played"),
             value: firstPlayDateString,
             inline: true,
         },
         {
-            name: "Last Active",
+            name: state.localizer.translate(guildID, "Last Active"),
             value: lastActiveDateString,
             inline: true,
         },
         {
-            name: "Times Voted",
+            name: state.localizer.translate(guildID, "Times Voted"),
             value: friendlyFormattedNumber(timesVoted),
             inline: true,
         },
@@ -217,12 +223,12 @@ async function getProfileFields(
             })
             .orderBy("badges.priority", "desc")
     )
-        .map((x) => x["badge_name"])
+        .map((x) => state.localizer.translate(guildID, x["badge_name"]))
         .join("\n");
 
     if (badges) {
         fields.push({
-            name: "Badges",
+            name: state.localizer.translate(guildID, "Badges"),
             value: badges,
             inline: false,
         });
@@ -232,29 +238,39 @@ async function getProfileFields(
 }
 
 export default class ProfileCommand implements BaseCommand {
-    help = {
-        name: "profile",
-        description: "Shows your game stats.",
-        usage: ",profile { @mention }",
-        examples: [
-            {
-                example: "`,profile`",
-                explanation: "View your own player profile.",
-            },
-            {
-                example: "`,profile @FortnitePlayer`",
-                explanation: "Views FortnitePlayer's player profile.",
-            },
-            {
-                example: "`,profile 141734249702096896`",
-                explanation:
-                    "Views a player profile based on their Discord ID.",
-            },
-        ],
-        priority: 50,
-    };
+    help = (guildID: string) => ({
+            name: "profile",
+            description: state.localizer.translate(guildID, "Shows your game stats."),
+            usage: ",profile { @mention }",
+            examples: [
+                {
+                    example: "`,profile`",
+                    explanation: state.localizer.translate(guildID, "View your own player profile."),
+                },
+                {
+                    example: "`,profile @FortnitePlayer`",
+                    explanation: state.localizer.translate(guildID,
+                        "Views {{{playerName}}}'s player profile.",
+                        {
+                            playerName: "FortnitePlayer",
+                        }
+                    ),
+                },
+                {
+                    example: "`,profile 141734249702096896`",
+                    explanation: state.localizer.translate(guildID,
+                        "Views a player profile based on their Discord ID."
+                    ),
+                },
+            ],
+        });
 
-    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+    helpPriority = 50;
+
+    call = async ({
+        message,
+        parsedMessage,
+    }: CommandArgs): Promise<void> => {
         let requestedPlayer: Eris.User;
         if (parsedMessage.components.length === 0) {
             requestedPlayer = message.author;
@@ -273,29 +289,34 @@ export default class ProfileCommand implements BaseCommand {
 
                 if (!requestedPlayer) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: "No Profile Found",
-                        description:
-                            "Could not find the specified user ID. See `,help profile` for details.",
+                        title: state.localizer.translate(message.guildID, "No Profile Found"),
+                        description: state.localizer.translate(message.guildID,
+                            "Could not find the specified user ID. See {{{profileHelp}}} for details.",
+                            { profileHelp: "`,help profile`" }
+                        ),
                     });
                     return;
                 }
             }
         } else {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "No Profile Found",
-                description:
-                    "Make sure you're using this command correctly. See `,help profile` for more details.",
+                title: state.localizer.translate(message.guildID, "No Profile Found"),
+                description: state.localizer.translate(message.guildID,
+                    "Make sure you're using this command correctly. See {{{profileHelp}}} for more details.",
+                    { profileHelp: "`,help profile`" }
+                ),
             });
             return;
         }
 
-        const fields = await getProfileFields(requestedPlayer);
+        const fields = await getProfileFields(requestedPlayer, message.guildID);
 
         if (fields.length === 0) {
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: "No Profile Found",
-                description:
-                    "This user needs to play their first game before their stats are tracked.",
+                title: state.localizer.translate(message.guildID, "No Profile Found"),
+                description: state.localizer.translate(message.guildID,
+                    "This user needs to play their first game before their stats are tracked."
+                ),
             });
             return;
         }
@@ -325,13 +346,18 @@ export default class ProfileCommand implements BaseCommand {
  */
 export async function handleProfileInteraction(
     interaction: Eris.CommandInteraction,
-    userId: string
+    userId: string,
 ): Promise<void> {
     const user = await state.ipc.fetchUser(userId);
     if (!user) {
         tryCreateInteractionErrorAcknowledgement(
             interaction,
-            `I can't access that user right now. Try using \`${process.env.BOT_PREFIX}profile ${userId}\` instead.`
+            state.localizer.translate(interaction.guildID,
+                "I can't access that user right now. Try using {{{profileUserID}}} instead.",
+                {
+                    profileUserID: `\`${process.env.BOT_PREFIX}profile ${userId}\``,
+                }
+            )
         );
 
         logger.info(
@@ -342,11 +368,13 @@ export async function handleProfileInteraction(
         return;
     }
 
-    const fields = await getProfileFields(user);
+    const fields = await getProfileFields(user, interaction.guildID);
     if (fields.length === 0) {
         tryCreateInteractionErrorAcknowledgement(
             interaction,
-            "This user needs to play their first game before their stats are tracked."
+            state.localizer.translate(interaction.guildID,
+                "This user needs to play their first game before their stats are tracked."
+            )
         );
 
         logger.info(

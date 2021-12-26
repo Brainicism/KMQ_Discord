@@ -7,6 +7,7 @@ import Player from "../../structures/player";
 import TeamScoreboard from "../../structures/team_scoreboard";
 
 const gameStarter = new KmqMember("jisoo", "jisoo#4747", "url", "123");
+
 describe("begin command", () => {
     describe("can start", () => {
         describe("game session is null", () => {
@@ -80,7 +81,11 @@ describe("begin command", () => {
             describe("no teams have been added yet", () => {
                 it("should return false", () => {
                     assert.strictEqual(
-                        BeginCommand.canStart(gameSession, "1231", null),
+                        BeginCommand.canStart(
+                            gameSession,
+                            "1231",
+                            null,
+                        ),
                         false
                     );
                 });
@@ -95,7 +100,11 @@ describe("begin command", () => {
                     );
 
                     assert.strictEqual(
-                        BeginCommand.canStart(gameSession, "1231", null),
+                        BeginCommand.canStart(
+                            gameSession,
+                            "1231",
+                            null,
+                        ),
                         true
                     );
 
@@ -105,7 +114,11 @@ describe("begin command", () => {
                     );
 
                     assert.strictEqual(
-                        BeginCommand.canStart(gameSession, "1231", null),
+                        BeginCommand.canStart(
+                            gameSession,
+                            "1231",
+                            null,
+                        ),
                         true
                     );
                 });

@@ -2,21 +2,23 @@ import {
     sendOptionsMessage,
     getDebugLogHeader,
 } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("options");
 
 export default class OptionsCommand implements BaseCommand {
-    help = {
-        name: "options",
-        description: "Displays the current game options.",
-        usage: ",options",
-        examples: [],
-        priority: 50,
-    };
+    help = (guildID: string): Help => ({
+            name: "options",
+            description: state.localizer.translate(guildID, "Displays the current game options."),
+            usage: ",options",
+            examples: [],
+        });
+
+    helpPriority = 50;
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

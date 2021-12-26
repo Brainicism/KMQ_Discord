@@ -8,6 +8,7 @@ import {
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("release");
 
@@ -35,29 +36,37 @@ export default class ReleaseCommand implements BaseCommand {
         ],
     };
 
-    help = {
-        name: "release",
-        description:
-            "Choose whether to include only official music videos, or all videos (b-sides, dance practices, acoustic versions, remixes, etc.)",
-        usage: ",release [official | all]",
-        examples: [
-            {
-                example: "`,release official`",
-                explanation: "Plays only `official` music videos",
-            },
-            {
-                example: "`,release all`",
-                explanation:
-                    "Plays all available videos, including dance practices, acoustic versions, remixes",
-            },
-            {
-                example: "`,release`",
-                explanation: `Reset to the default release type of \`${DEFAULT_RELEASE_TYPE}\``,
-            },
-        ],
-        priority: 130,
-    };
+    help = (guildID: string) => ({
+            name: "release",
+            description: state.localizer.translate(guildID,
+                "Choose whether to include only official music videos, or all videos (b-sides, dance practices, acoustic versions, remixes, etc.)."
+            ),
+            usage: ",release [official | all]",
+            examples: [
+                {
+                    example: "`,release official`",
+                    explanation: state.localizer.translate(guildID,
+                        "Plays only {{{official}}} music videos",
+                        { official: `\`${ReleaseType.OFFICIAL}\`` }
+                    ),
+                },
+                {
+                    example: "`,release all`",
+                    explanation: state.localizer.translate(guildID,
+                        "Plays all available videos, including dance practices, acoustic versions, remixes"
+                    ),
+                },
+                {
+                    example: "`,release`",
+                    explanation: state.localizer.translate(guildID,
+                        "Reset to the default release type of {{{defaultRelease}}}",
+                        { defaultRelease: `\`${DEFAULT_RELEASE_TYPE}\`` }
+                    ),
+                },
+            ],
+        });
 
+    helpPriority = 130;
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
 

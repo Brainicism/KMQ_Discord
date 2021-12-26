@@ -8,8 +8,10 @@ import {
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("language");
+
 export enum LanguageType {
     KOREAN = "korean",
     ALL = "all",
@@ -34,27 +36,34 @@ export default class LanguageCommand implements BaseCommand {
         ],
     };
 
-    help = {
-        name: "language",
-        description: "Sets korean-only or all available songs",
-        usage: ",language [korean | all]",
-        examples: [
-            {
-                example: "`,language korean`",
-                explanation:
-                    "Plays only korean songs. Ignores songs that are in foreign languages: english, japanese, chinese.",
-            },
-            {
-                example: "`,language all`",
-                explanation: "Play all available songs.",
-            },
-            {
-                example: "`,language`",
-                explanation: "Reset to the default language of `all`",
-            },
-        ],
-        priority: 150,
-    };
+    help = (guildID: string) => ({
+            name: "language",
+            description: state.localizer.translate(guildID,
+                "Choose whether songs played should be exclusively in Korean."
+            ),
+            usage: ",language [korean | all]",
+            examples: [
+                {
+                    example: "`,language korean`",
+                    explanation: state.localizer.translate(guildID,
+                        "Plays only Korean songs. Ignores songs that are in foreign languages: English, Japanese, Chinese."
+                    ),
+                },
+                {
+                    example: "`,language all`",
+                    explanation: state.localizer.translate(guildID, "Play all available songs."),
+                },
+                {
+                    example: "`,language`",
+                    explanation: state.localizer.translate(guildID,
+                        "Reset to the default language of {{{all}}}",
+                        { all: `\`${LanguageType.ALL}\`` }
+                    ),
+                },
+            ],
+        });
+
+    helpPriority = 150;
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

@@ -1,7 +1,8 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { getDebugLogHeader } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("end");
 
@@ -11,13 +12,16 @@ export default class EndCommand implements BaseCommand {
         { checkFn: CommandPrechecks.competitionPrecheck },
     ];
 
-    help = {
-        name: "end",
-        description: "Finishes the current game and decides on a winner.",
-        usage: ",end",
-        examples: [],
-        priority: 1020,
-    };
+    help = (guildID: string): Help => ({
+            name: "end",
+            description: state.localizer.translate(guildID,
+                "Finishes the current game and decides on a winner."
+            ),
+            usage: ",end",
+            examples: [],
+        });
+
+    helpPriority = 1020;
 
     aliases = ["stop", "e"];
 

@@ -8,6 +8,7 @@ import {
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("subunits");
 
@@ -35,26 +36,36 @@ export default class SubunitsCommand implements BaseCommand {
         ],
     };
 
-    help = {
-        name: "subunits",
-        description: `Choose whether to automatically include a group's subunits, when using \`${process.env.BOT_PREFIX}groups\``,
-        usage: ",subunits [include | exclude]",
-        examples: [
-            {
-                example: "`,subunits include`",
-                explanation: `Automatically include subunits. For example, \`${process.env.BOT_PREFIX}groups BTS\` would include songs by BTS, J-Hope, RM, etc.`,
-            },
-            {
-                example: "`,subunits exclude`",
-                explanation: "Do not include subunits.",
-            },
-            {
-                example: "`,subunits`",
-                explanation: `Reset to the default option of \`${DEFAULT_SUBUNIT_PREFERENCE}\``,
-            },
-        ],
-        priority: 130,
-    };
+    help = (guildID: string) => ({
+            name: "subunits",
+            description: state.localizer.translate(guildID,
+                "Choose whether to automatically include a group's subunits, when using {{{groups}}}.",
+                { groups: `\`${process.env.BOT_PREFIX}groups\`` }
+            ),
+            usage: ",subunits [include | exclude]",
+            examples: [
+                {
+                    example: "`,subunits include`",
+                    explanation: state.localizer.translate(guildID,
+                        "Automatically include subunits. For example, `{{{groups}}} BTS` would include songs by BTS, J-Hope, RM, etc.",
+                        { groups: `${process.env.BOT_PREFIX}groups` }
+                    ),
+                },
+                {
+                    example: "`,subunits exclude`",
+                    explanation: state.localizer.translate(guildID, "Do not include subunits."),
+                },
+                {
+                    example: "`,subunits`",
+                    explanation: state.localizer.translate(guildID,
+                        "Reset to the default option of {{{defaultSubunit}}}",
+                        { defaultSubunit: `\`${DEFAULT_SUBUNIT_PREFERENCE}\`` }
+                    ),
+                },
+            ],
+        });
+
+    helpPriority = 130;
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

@@ -8,6 +8,7 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("guessTimeout");
 
@@ -27,24 +28,28 @@ export default class GuessTimeoutCommand implements BaseCommand {
         ],
     };
 
-    help = {
-        name: "timer",
-        description:
-            "Try your best to guess correctly before the timer runs out! Enter a time in seconds, or give no arguments to disable.",
-        usage: ",timer [time]",
-        examples: [
-            {
-                example: "`,timer 15`",
-                explanation:
-                    "In 15 seconds, if no user has guessed correctly, the round ends and the next one begins automatically",
-            },
-            {
-                example: "`,timer`",
-                explanation: "Disables the timer",
-            },
-        ],
-        priority: 110,
-    };
+    help = (guildID: string) => ({
+            name: "timer",
+            description: state.localizer.translate(guildID,
+                "Try your best to guess correctly before the timer runs out! Enter a time in seconds, or give no arguments to disable."
+            ),
+            usage: ",timer [time]",
+            examples: [
+                {
+                    example: "`,timer 15`",
+                    explanation: state.localizer.translate(guildID,
+                        "In {{{timer}}} seconds, if no user has guessed correctly, the round ends and the next one begins automatically",
+                        { timer: String(15) }
+                    ),
+                },
+                {
+                    example: "`,timer`",
+                    explanation: state.localizer.translate(guildID, "Disables the timer"),
+                },
+            ],
+        });
+
+    helpPriority = 110;
     aliases = ["time", "timeout", "t"];
 
     call = async ({

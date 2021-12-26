@@ -53,7 +53,7 @@ export default async function interactionCreateHandler(
             if (interaction.data.name === PROFILE_COMMAND_NAME) {
                 handleProfileInteraction(
                     interaction,
-                    interaction.data.target_id
+                    interaction.data.target_id,
                 );
             }
         } else if (

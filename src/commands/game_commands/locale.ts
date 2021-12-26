@@ -1,0 +1,86 @@
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import {
+    getDebugLogHeader,
+    sendInfoMessage,
+} from "../../helpers/discord_utils";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import {
+    LocaleType,
+    DEFAULT_LOCALE,
+} from "../../helpers/localization_manager";
+import dbContext from "../../database_context";
+import { state } from "../../kmq_worker";
+
+const logger = new IPCLogger("locale");
+
+export default class LocaleTypeCommand implements BaseCommand {
+    help = (guildID: string): Help => ({
+            name: "locale",
+            description: state.localizer.translate(guildID, "Change the language of the bot."),
+            usage: ",locale [language]",
+            examples: [
+                {
+                    example: "`,locale en`",
+                    explanation: state.localizer.translate(guildID,
+                        "Change the bot's language to English"
+                    ),
+                },
+                {
+                    example: "`,locale kr`",
+                    explanation: state.localizer.translate(guildID,
+                        "Change the bot's language to Korean"
+                    ),
+                },
+            ],
+        });
+
+    helpPriority = 30;
+
+    aliases = ["botlanguage"];
+
+    call = async ({
+        message,
+        parsedMessage,
+    }: CommandArgs): Promise<void> => {
+        let language: LocaleType;
+        if (parsedMessage.components.length === 0) {
+            language = DEFAULT_LOCALE;
+        } else {
+            language = parsedMessage.components[0] as LocaleType;
+        }
+
+        LocaleTypeCommand.updateLocale(message.guildID, language);
+
+        sendInfoMessage(MessageContext.fromMessage(message), {
+            title: state.localizer.translate(message.guildID, "Locale Updated"),
+            description: state.localizer.translate(message.guildID,
+                "The bot's language has been updated to {{{language}}}",
+                { language }
+            ),
+        });
+
+        logger.info(
+            `${getDebugLogHeader(message)} | Changed locale to ${language}.`
+        );
+    };
+
+    static updateLocale(guildID: string, locale: LocaleType): void {
+        if (locale !== LocaleType.EN) {
+            state.locales[guildID] = locale;
+            dbContext
+                .kmq("locale")
+                .insert({ guild_id: guildID, locale })
+                .onConflict("guild_id")
+                .merge();
+        } else {
+            if (state.locales[guildID]) {
+                delete state.locales[guildID];
+                dbContext
+                    .kmq("locale")
+                    .select({ guild_id: guildID, locale })
+                    .del();
+            }
+        }
+    }
+}

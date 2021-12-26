@@ -13,36 +13,58 @@ import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("excludes");
 
 export default class ExcludeCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
-    help = {
-        name: "exclude",
-        description: `Select as many groups that you would like to ignore, separated by commas. A list of group names can be found [here](http://${process.env.WEB_SERVER_IP}:${process.env.WEB_SERVER_PORT}/groups)`,
-        usage: ",exclude [group1],{group2}",
-        examples: [
-            {
-                example: "`,exclude blackpink`",
-                explanation: "Ignore songs from Blackpink",
-            },
-            {
-                example: "`,exclude blackpink, bts, red velvet`",
-                explanation: "Ignore songs from Blackpink, BTS, and Red Velvet",
-            },
-            {
-                example: "`,exclude`",
-                explanation: "Resets the exclude option",
-            },
-        ],
-        priority: 130,
-    };
+    help = (guildID: string) => ({
+            name: "exclude",
+            description: state.localizer.translate(guildID,
+                "Select as many groups that you would like to ignore, separated by commas. A list of group names can be found [here]({{{groupsLink}}}).",
+                {
+                    groupsLink: `http://${process.env.WEB_SERVER_IP}:${process.env.WEB_SERVER_PORT}/groups`,
+                }
+            ),
+            usage: ",exclude [group1],{group2}",
+            examples: [
+                {
+                    example: "`,exclude blackpink`",
+                    explanation: state.localizer.translate(guildID,
+                        "Ignore songs from {{{artist}}}",
+                        {
+                            artist: "Blackpink",
+                        }
+                    ),
+                },
+                {
+                    example: "`,exclude blackpink, bts, red velvet`",
+                    explanation: state.localizer.translate(guildID,
+                        "Ignore songs from {{{artistOne}}}, {{{artistTwo}}}, and {{{artistThree}}}",
+                        {
+                            artistOne: "Blackpink",
+                            artistTwo: "BTS",
+                            artistThree: "Red Velvet",
+                        }
+                    ),
+                },
+                {
+                    example: "`,exclude`",
+                    explanation: state.localizer.translate(guildID, "Resets the exclude option"),
+                },
+            ],
+        });
+
+    helpPriority = 130;
 
     aliases = ["excludes", "ignore", "ignores"];
 
-    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+    call = async ({
+        message,
+        parsedMessage,
+    }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.EXCLUDE);
@@ -58,7 +80,12 @@ export default class ExcludeCommand implements BaseCommand {
         let excludeWarning = "";
         if (parsedMessage.components.length > 1) {
             if (["add", "remove"].includes(parsedMessage.components[0])) {
-                excludeWarning = `Did you mean to use ${process.env.BOT_PREFIX}${parsedMessage.components[0]} exclude?`;
+                excludeWarning = state.localizer.translate(message.guildID,
+                    "Did you mean to use {{{addOrRemove}}} exclude?",
+                    {
+                        addOrRemove: `${process.env.BOT_PREFIX}${parsedMessage.components[0]}`,
+                    }
+                );
             }
         }
 
@@ -79,14 +106,15 @@ export default class ExcludeCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Unknown Group Name",
-                description: `One or more of the specified group names was not recognized. Those groups that matched are excluded. Please ensure that the group name matches exactly with the list provided by \`${
-                    process.env.BOT_PREFIX
-                }help groups\`. \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(
-                    ", "
-                )} \nUse \`${
-                    process.env.BOT_PREFIX
-                }add\` to add the unmatched groups.`,
+                title: state.localizer.translate(message.guildID, "Unknown Group Name"),
+                description: state.localizer.translate(message.guildID,
+                    "One or more of the specified group names was not recognized. Those groups that matched are excluded. Please ensure that the group name matches exactly with the list provided by {{{helpGroups}}}. \nThe following groups were **not** recognized:\n {{{unmatchedGroups}}}\nUse {{{addExclude}}} to add the unmatched groups.",
+                    {
+                        helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
+                        unmatchedGroups: `${unmatchedGroups.join(", ")}`,
+                        addExclude: `\`${process.env.BOT_PREFIX}add exclude\``,
+                    }
+                ),
                 footerText: excludeWarning,
             });
         }
@@ -102,16 +130,22 @@ export default class ExcludeCommand implements BaseCommand {
             );
             if (intersection.size > 0) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: "Groups and Exclude Conflict",
-                    description: `One or more of the given \`exclude\` groups is already included in \`groups\`. \nThe following groups were **not** added to \`exclude\`:\n ${[
-                        ...intersection,
-                    ]
-                        .filter((x) => !x.includes("+"))
-                        .join(", ")} \nUse \`${
-                        process.env.BOT_PREFIX
-                    }remove groups\` and then \`${
-                        process.env.BOT_PREFIX
-                    }exclude\` these groups to prevent them from playing.`,
+                    title: state.localizer.translate(message.guildID, "Groups and Exclude Conflict"),
+                    description: state.localizer.translate(message.guildID,
+                        `One or more of the given {{{exclude}}} groups is already included in {{{groups}}}. \nThe following groups were **not** added to {{{exclude}}}:\n ${[
+                            ...intersection,
+                        ]
+                            .filter((x) => !x.includes("+"))
+                            .join(
+                                ", "
+                            )} \nUse {{{removeGroups}}} and then {{{excludeCommand}}} these groups to prevent them from playing.`,
+                        {
+                            exclude: `\`${GameOption.EXCLUDE}\``,
+                            groups: `\`${GameOption.GROUPS}\``,
+                            removeGroups: `\`${process.env.BOT_PREFIX}remove groups\``,
+                            excludeCommand: `\`${process.env.BOT_PREFIX}exclude\``,
+                        }
+                    ),
                 });
             }
         }

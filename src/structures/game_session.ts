@@ -56,6 +56,9 @@ import { specialFfmpegArgs } from "../commands/game_options/special";
 import { AnswerType } from "../commands/game_options/answer";
 import { calculateTotalRoundExp } from "../commands/game_commands/exp";
 import SongSelector from "./song_selector";
+import LocalizationManager, {
+    LocaleType,
+} from "../helpers/localization_manager";
 
 const MULTIGUESS_DELAY = 1500;
 const logger = new IPCLogger("game_session");
@@ -471,7 +474,9 @@ export default class GameSession {
                         )} to ${codeLine(
                             String(leveledUpPlayer.endLevel)
                         )} (${codeLine(
-                            getRankNameByLevel(leveledUpPlayer.endLevel)
+                            getRankNameByLevel(
+                                leveledUpPlayer.endLevel, this.guildID
+                            )
                         )})`
                 )
                 .slice(0, 10);

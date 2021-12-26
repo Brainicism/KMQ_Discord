@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -8,17 +8,19 @@ import {
 } from "../../helpers/discord_utils";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("news");
 
 export default class NewsCommand implements BaseCommand {
-    help = {
-        name: "news",
-        description: "Displays the latest updates to KMQ.",
-        usage: ",news",
-        examples: [],
-        priority: 10,
-    };
+    help = (guildID: string): Help => ({
+            name: "news",
+            description: state.localizer.translate(guildID, "Displays the latest updates to KMQ."),
+            usage: ",news",
+            examples: [],
+        });
+
+    helpPriority = 10;
 
     aliases = ["updates"];
 
@@ -32,7 +34,7 @@ export default class NewsCommand implements BaseCommand {
         const news = fs.readFileSync(newsFilePath).toString();
 
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: "Updates",
+            title: state.localizer.translate(message.guildID, "Updates"),
             description: news,
             thumbnailUrl: KmqImages.READING_BOOK,
         });

@@ -9,8 +9,10 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("limit");
+
 export const DEFAULT_LIMIT = 500;
 
 export default class LimitCommand implements BaseCommand {
@@ -35,31 +37,45 @@ export default class LimitCommand implements BaseCommand {
         ],
     };
 
-    help = {
-        name: "limit",
-        description:
-            "Set a maximum number of results in the song query. This effectively sets the 'Top X number of songs' based on the selected filters.",
-        usage: ",limit [limit]",
-        examples: [
-            {
-                example: "`,limit 250`",
-                explanation:
-                    "Plays the top 250 most listened songs from the currently selected options.",
-            },
-            {
-                example: "`,limit 250 500`",
-                explanation:
-                    "Plays between the 250th to 500th most listened songs from the currently selected options.",
-            },
-            {
-                example: "`,limit`",
-                explanation: `Reset to the default limit of \`${DEFAULT_LIMIT}\``,
-            },
-        ],
-        priority: 140,
-    };
+    help = (guildID: string) => ({
+            name: "limit",
+            description: state.localizer.translate(guildID,
+                "Set a maximum number of results in the song query. This effectively sets the 'Top X number of songs' based on the selected filters."
+            ),
+            usage: ",limit [limit]",
+            examples: [
+                {
+                    example: "`,limit 250`",
+                    explanation: state.localizer.translate(guildID,
+                        "Plays the top {{{limit}}} most listened songs from the currently selected options.",
+                        {
+                            limit: String(250),
+                        }
+                    ),
+                },
+                {
+                    example: "`,limit 250 500`",
+                    explanation: state.localizer.translate(guildID,
+                        "Plays between the {{{limit_1}}} to {{{limit_2}}} most listened songs from the currently selected options.",
+                        { limit_1: String(250), limit_2: String(500) }
+                    ),
+                },
+                {
+                    example: "`,limit`",
+                    explanation: state.localizer.translate(guildID,
+                        "Reset to the default limit of {{{defaultLimit}}}",
+                        { defaultLimit: `\`${DEFAULT_LIMIT}\`` }
+                    ),
+                },
+            ],
+        });
 
-    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+    helpPriority = 140;
+
+    call = async ({
+        message,
+        parsedMessage,
+    }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.LIMIT);
@@ -79,8 +95,10 @@ export default class LimitCommand implements BaseCommand {
             limitEnd = parseInt(parsedMessage.components[0]);
             if (limitEnd === 0) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: "Game Option Error",
-                    description: "End limit must be greater than 0",
+                    title: state.localizer.translate(message.guildID, "Game Option Error"),
+                    description: state.localizer.translate(message.guildID,
+                        "End limit must be greater than 0"
+                    ),
                 });
                 return;
             }
@@ -89,8 +107,10 @@ export default class LimitCommand implements BaseCommand {
             limitEnd = parseInt(parsedMessage.components[1]);
             if (limitEnd <= limitStart) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: "Game Option Error",
-                    description: "End limit must be greater than start limit",
+                    title: state.localizer.translate(message.guildID, "Game Option Error"),
+                    description: state.localizer.translate(message.guildID,
+                        "End limit must be greater than start limit"
+                    ),
                 });
                 return;
             }

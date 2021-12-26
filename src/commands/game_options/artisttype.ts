@@ -9,8 +9,10 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("artisttype");
+
 export enum ArtistType {
     SOLOIST = "soloists",
     GROUP = "groups",
@@ -34,33 +36,59 @@ export default class ArtistTypeCommand implements BaseCommand {
         ],
     };
 
-    help = {
-        name: "artisttype",
-        description:
-            "Choose whether you'd like to hear from soloists, groups, or both. Options are the following, `soloists`, `groups`, and `both`.",
-        usage: ",artisttype [artisttype]",
-        examples: [
-            {
-                example: "`,artisttype soloists`",
-                explanation: "Play songs only from `soloists`",
-            },
-            {
-                example: "`,artisttype groups`",
-                explanation: "Play songs only from `groups`",
-            },
-            {
-                example: "`,artisttype both`",
-                explanation: "Plays songs from both `soloists` and `groups`",
-            },
-            {
-                example: "`,artisttype`",
-                explanation: "Resets the artist type option",
-            },
-        ],
-        priority: 150,
-    };
+    help = (guildID: string) => ({
+            name: "artisttype",
+            description: state.localizer.translate(guildID,
+                "Choose whether you'd like to hear from soloists, groups, or both. Options are the following, {{{soloists}}}, {{{groups}}}, and {{{both}}}.",
+                {
+                    soloists: `\`${ArtistType.SOLOIST}\``,
+                    groups: `\`${ArtistType.GROUP}\``,
+                    both: `\`${ArtistType.BOTH}\``,
+                }
+            ),
+            usage: ",artisttype [artisttype]",
+            examples: [
+                {
+                    example: "`,artisttype soloists`",
+                    explanation: state.localizer.translate(guildID,
+                        "Play songs only from {{{soloists}}}",
+                        {
+                            soloists: `\`${ArtistType.SOLOIST}\``,
+                        }
+                    ),
+                },
+                {
+                    example: "`,artisttype groups`",
+                    explanation: state.localizer.translate(guildID,
+                        "Play songs only from {{{groups}}}",
+                        {
+                            groups: `\`${ArtistType.GROUP}\``,
+                        }
+                    ),
+                },
+                {
+                    example: "`,artisttype both`",
+                    explanation: state.localizer.translate(guildID,
+                        "Plays songs from both {{{soloists}}} and {{{groups}}}",
+                        {
+                            soloists: `\`${ArtistType.SOLOIST}\``,
+                            groups: `\`${ArtistType.GROUP}\``,
+                        }
+                    ),
+                },
+                {
+                    example: "`,artisttype`",
+                    explanation: state.localizer.translate(guildID, "Resets the artist type option"),
+                },
+            ],
+        });
 
-    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+    helpPriority = 150;
+
+    call = async ({
+        message,
+        parsedMessage,
+    }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.ARTIST_TYPE);
@@ -82,7 +110,14 @@ export default class ArtistTypeCommand implements BaseCommand {
 
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: "Game Option Conflict",
-                description: `\`groups\` game option is currently set. \`artisttype\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed`,
+                description: state.localizer.translate(message.guildID,
+                    "{{{groups}}} game option is currently set. {{{artisttype}}} and {{{groups}}} are incompatible. Remove the {{{groups}}} option by typing {{{groupsCommand}}} to proceed",
+                    {
+                        groups: `\`${GameOption.GROUPS}\``,
+                        artisttype: `\`${GameOption.ARTIST_TYPE}\``,
+                        groupsCommand: `\`${process.env.BOT_PREFIX}groups\``,
+                    }
+                ),
             });
             return;
         }

@@ -4,10 +4,11 @@ import {
     sendInfoMessage,
     sendMessage,
 } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("list");
 
@@ -30,27 +31,38 @@ export default class ListCommand implements BaseCommand {
         ],
     };
 
-    help = {
-        name: "list",
-        description:
-            "Displays the currently selected groups for a given game option.",
-        usage: ",list [groups | excludes | includes]",
-        examples: [
-            {
-                example: "`,list groups`",
-                explanation: "Lists the current `,groups` options",
-            },
-            {
-                example: "`,list excludes`",
-                explanation: "Lists the current `,excludes` options",
-            },
-            {
-                example: "`,list includes`",
-                explanation: "Lists the current `,includes` options",
-            },
-        ],
-        priority: 200,
-    };
+    help = (guildID: string): Help => ({
+            name: "list",
+            description: state.localizer.translate(guildID,
+                "Displays the currently selected groups for a given game option."
+            ),
+            usage: ",list [groups | excludes | includes]",
+            examples: [
+                {
+                    example: "`,list groups`",
+                    explanation: state.localizer.translate(guildID,
+                        "Lists the current {{{groups}}} options",
+                        { groups: "`,groups`" }
+                    ),
+                },
+                {
+                    example: "`,list excludes`",
+                    explanation: state.localizer.translate(guildID,
+                        "Lists the current {{{excludes}}} options",
+                        { excludes: "`,excludes`" }
+                    ),
+                },
+                {
+                    example: "`,list includes`",
+                    explanation: state.localizer.translate(guildID,
+                        "Lists the current {{{includes}}} options",
+                        { includes: "`,includes`" }
+                    ),
+                },
+            ],
+        });
+
+    helpPriority = 200;
 
     call = async ({
         message,
@@ -83,8 +95,9 @@ export default class ListCommand implements BaseCommand {
                 sendMessage(
                     channel.id,
                     {
-                        content:
-                            "Too many groups to list in a Discord message, see the attached file",
+                        content: state.localizer.translate(message.guildID,
+                            "Too many groups to list in a Discord message, see the attached file"
+                        ),
                     },
                     {
                         name: "groups.txt",
@@ -99,15 +112,19 @@ export default class ListCommand implements BaseCommand {
                 );
 
                 await sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: "Error Sending File",
-                    description:
-                        "Too many groups to list in a Discord message, see the attached file. Make sure that the bot has ATTACH_FILE permissions",
+                    title: state.localizer.translate(message.guildID, "Error Sending File"),
+                    description: state.localizer.translate(message.guildID,
+                        "Too many groups to list in a Discord message, see the attached file. Make sure that the bot has {{{attachFile}}} permissions",
+                        { attachFile: "ATTACH_FILE" }
+                    ),
                 });
                 return;
             }
         } else {
             await sendInfoMessage(MessageContext.fromMessage(message), {
-                title: `Current \`${optionListed}\` Value`,
+                title: state.localizer.translate(message.guildID, "Current {{{optionListed}}} Value", {
+                    optionsListed: `\`${optionListed}\``,
+                }),
                 description: optionValue,
             });
         }

@@ -8,8 +8,10 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("answer");
+
 export enum AnswerType {
     TYPING = "typing",
     TYPING_TYPOS = "typingtypos",
@@ -35,39 +37,54 @@ export default class AnswerCommand implements BaseCommand {
         ],
     };
 
-    help = {
-        name: "answer",
-        description:
-            "Choose how to answer: by typing your answer, or via multiple choice. Options are the following, `typing`, `typingtypos`, `easy`, `medium`, and `hard`. Playing on multiple choice mode reduces EXP by (0.25x, 0.5x, 0.75x) based on difficulty",
-        usage: ",answer [answerType]",
-        examples: [
-            {
-                example: "`,answer typing`",
-                explanation: "Type your answer in the chat to guess",
-            },
-            {
-                example: "`,answer typingtypos`",
-                explanation:
-                    "Type your answer in the chat to guess. Small typos will be marked as correct. 0.8x EXP penalty will be applied.",
-            },
-            {
-                example: "`,answer easy`",
-                explanation:
-                    "Click on the button from 4 multiple choice options to guess. 0.25x EXP penalty will be applied.",
-            },
-            {
-                example: "`,answer medium`",
-                explanation:
-                    "Click on the button from 6 multiple choice options to guess. 0.5x EXP penalty will be applied.",
-            },
-            {
-                example: "`,answer hard`",
-                explanation:
-                    "Click on the button from 8 multiple choice options to guess. 0.75x EXP penalty will be applied.",
-            },
-        ],
-        priority: 150,
-    };
+    help = (guildID: string) => ({
+            name: "answer",
+            description: state.localizer.translate(guildID,
+                "Choose how to answer: by typing your answer, or via multiple choice. Options are the following, `{{{typing}}}`, `{{{typingtypos}}}`, `{{{easy}}}`, `{{{medium}}}`, and `{{{hard}}}`. Playing on multiple choice mode reduces EXP by (0.25x, 0.5x, 0.75x) based on difficulty.",
+                {
+                    typing: `\`${AnswerType.TYPING}\``,
+                    typingtypos: `\`${AnswerType.TYPING_TYPOS}\``,
+                    easy: `\`${AnswerType.MULTIPLE_CHOICE_EASY}\``,
+                    medium: `\`${AnswerType.MULTIPLE_CHOICE_MED}\``,
+                    hard: `\`${AnswerType.MULTIPLE_CHOICE_HARD}\``,
+                }
+            ),
+            usage: ",answer [answerType]",
+            examples: [
+                {
+                    example: "`,answer typing`",
+                    explanation: state.localizer.translate(guildID,
+                        "Type your answer in the chat to guess"
+                    ),
+                },
+                {
+                    example: "`,answer typingtypos`",
+                    explanation: state.localizer.translate(guildID,
+                        "Type your answer in the chat to guess. Small typos will be marked as correct. 0.8x EXP penalty will be applied."
+                    ),
+                },
+                {
+                    example: "`,answer easy`",
+                    explanation: state.localizer.translate(guildID,
+                        "Click on the button from 4 multiple choice options to guess. 0.25x EXP penalty will be applied."
+                    ),
+                },
+                {
+                    example: "`,answer medium`",
+                    explanation: state.localizer.translate(guildID,
+                        "Click on the button from 6 multiple choice options to guess. 0.5x EXP penalty will be applied."
+                    ),
+                },
+                {
+                    example: "`,answer hard`",
+                    explanation: state.localizer.translate(guildID,
+                        "Click on the button from 8 multiple choice options to guess. 0.75x EXP penalty will be applied."
+                    ),
+                },
+            ],
+        });
+
+    helpPriority = 150;
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

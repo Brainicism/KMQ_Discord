@@ -8,8 +8,10 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("seek");
+
 export enum SeekType {
     BEGINNING = "beginning",
     RANDOM = "random",
@@ -33,34 +35,44 @@ export default class SeekCommand implements BaseCommand {
         ],
     };
 
-    help = {
-        name: "seek",
-        description:
-            "Choose whether each song is played from the beginning, middle, or at a random point",
-        usage: ",seek [beginning | middle | random]",
-        examples: [
-            {
-                example: "`,seek random`",
-                explanation:
-                    "Songs will be played starting from a random point in the middle",
-            },
-            {
-                example: "`,seek middle`",
-                explanation:
-                    "Songs will be played starting from the middle point",
-            },
-            {
-                example: "`,seek beginning`",
-                explanation:
-                    "Song will be played starting from the very beginning",
-            },
-            {
-                example: "`,seek`",
-                explanation: `Reset to the default seek of \`${DEFAULT_SEEK}\``,
-            },
-        ],
-        priority: 130,
-    };
+    help = (guildID: string) => ({
+            name: "seek",
+            description: state.localizer.translate(guildID,
+                "Choose whether each song is played from the beginning, middle, or at a random point."
+            ),
+            usage: ",seek [beginning | middle | random]",
+            examples: [
+                {
+                    example: "`,seek random`",
+                    explanation: state.localizer.translate(guildID,
+                        "Songs will be played starting from a random point in the middle"
+                    ),
+                },
+                {
+                    example: "`,seek middle`",
+                    explanation: state.localizer.translate(guildID,
+                        "Songs will be played starting from the middle point"
+                    ),
+                },
+                {
+                    example: "`,seek beginning`",
+                    explanation: state.localizer.translate(guildID,
+                        "Song will be played starting from the very beginning"
+                    ),
+                },
+                {
+                    example: "`,seek`",
+                    explanation: state.localizer.translate(guildID,
+                        "Reset to the default seek of {{{defaultSeek}}}",
+                        {
+                            defaultSeek: DEFAULT_SEEK,
+                        }
+                    ),
+                },
+            ],
+        });
+
+    helpPriority = 130;
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

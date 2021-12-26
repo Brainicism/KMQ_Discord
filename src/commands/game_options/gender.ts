@@ -9,8 +9,10 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("gender");
+
 export enum Gender {
     MALE = "male",
     FEMALE = "female",
@@ -45,39 +47,66 @@ export default class GenderCommand implements BaseCommand {
         ],
     };
 
-    help = {
-        name: "gender",
-        description: `Choose the gender of the artists you'd like to hear from. Options are the following, \`male\`, \`female\`, and \`coed\`. Alternatively, use \`${process.env.BOT_PREFIX}gender alternating\` to rotate between \`male\` and \`female\` artists every round.`,
-        usage: ",gender [gender_1 | alternating] {gender_2} {gender_3}",
-        examples: [
-            {
-                example: "`,gender female`",
-                explanation: "Play songs only from `female` artists",
-            },
-            {
-                example: "`,gender male female`",
-                explanation: "Play songs from both `male` and `female` artists",
-            },
-            {
-                example: "`,gender coed`",
-                explanation:
-                    "Play songs only from `coed` groups (groups with both male and female members)",
-            },
-            {
-                example: "`,gender`",
-                explanation:
-                    "Reset to the default genders of `male`, `female`, and `coed`",
-            },
-            {
-                example: "`,gender alternating`",
-                explanation:
-                    "Alternate between `male` and `female` artists every round",
-            },
-        ],
-        priority: 150,
-    };
+    help = (guildID: string) => ({
+            name: "gender",
+            description: state.localizer.translate(guildID,
+                "Choose the gender of the artists you'd like to hear from. Options are the following, {{{male}}}, {{{female}}}, and {{{coed}}}. Alternatively, use {{{genderAlternating}}} to rotate between {{{male}}} and {{{female}}} artists every round.",
+                {
+                    male: Gender.MALE,
+                    female: Gender.FEMALE,
+                    genderAlternating: `\`${process.env.BOT_PREFIX}gender alternating\``,
+                }
+            ),
+            usage: ",gender [gender_1 | alternating] {gender_2} {gender_3}",
+            examples: [
+                {
+                    example: "`,gender female`",
+                    explanation: state.localizer.translate(guildID,
+                        "Play songs only from {{{female}}} artists",
+                        { female: Gender.FEMALE }
+                    ),
+                },
+                {
+                    example: "`,gender male female`",
+                    explanation: state.localizer.translate(guildID,
+                        "Play songs from both {{{male}}} and {{{female}}} artists",
+                        { male: Gender.MALE, female: Gender.FEMALE }
+                    ),
+                },
+                {
+                    example: "`,gender coed`",
+                    explanation: state.localizer.translate(guildID,
+                        "Play songs only from {{{coed}}} groups (groups with both male and female members)",
+                        { coed: Gender.COED }
+                    ),
+                },
+                {
+                    example: "`,gender`",
+                    explanation: state.localizer.translate(guildID,
+                        "Reset to the default genders of {{{male}}}, {{{female}}}, and {{{coed}}}",
+                        {
+                            male: Gender.MALE,
+                            female: Gender.FEMALE,
+                            coed: Gender.COED,
+                        }
+                    ),
+                },
+                {
+                    example: "`,gender alternating`",
+                    explanation: state.localizer.translate(guildID,
+                        "Alternate between {{{male}}} and {{{female}}} artists every round",
+                        { male: Gender.MALE, female: Gender.FEMALE }
+                    ),
+                },
+            ],
+        });
 
-    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+    helpPriority = 150;
+
+    call = async ({
+        message,
+        parsedMessage,
+    }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         const selectedGenders = parsedMessage.components as Array<Gender>;
 
@@ -102,8 +131,15 @@ export default class GenderCommand implements BaseCommand {
                 );
 
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: "Game Option Conflict",
-                    description: `\`groups\` game option is currently set. \`gender\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed`,
+                    title: state.localizer.translate(message.guildID, "Game Option Conflict"),
+                    description: state.localizer.translate(message.guildID,
+                        "{{{groups}}} game option is currently set. {{{gender}}} and {{{groups}}} are incompatible. Remove the {{{groups}}} option by typing {{{groupsCommand}}} to proceed",
+                        {
+                            groups: `\`${GameOption.GROUPS}\``,
+                            gender: `\`${GameOption.GENDER}\``,
+                            groupsCommand: `\`${process.env.BOT_PREFIX}groups\``,
+                        }
+                    ),
                 });
                 return;
             }
@@ -115,8 +151,13 @@ export default class GenderCommand implements BaseCommand {
                 guildPreference.getGroupIDs().length === 1
             ) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: "Game Option Warning",
-                    description: `With only one group chosen, \`${process.env.BOT_PREFIX}gender alternating\` may not behave as expected. Consider including more groups to correctly alternate genders.`,
+                    title: state.localizer.translate(message.guildID, "Game Option Warning"),
+                    description: state.localizer.translate(message.guildID,
+                        "With only one group chosen, {{{alternatingGenderCommand}}} may not behave as expected. Consider including more groups to correctly alternate genders.",
+                        {
+                            alternatingGenderCommand: `\`${process.env.BOT_PREFIX}gender alternating\``,
+                        }
+                    ),
                 });
             }
 
