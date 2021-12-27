@@ -13,6 +13,7 @@ import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
+import { GROUP_LIST_URL } from "../../constants";
 
 const logger = new IPCLogger("excludes");
 
@@ -21,7 +22,7 @@ export default class ExcludeCommand implements BaseCommand {
 
     help = {
         name: "exclude",
-        description: `Select as many groups that you would like to ignore, separated by commas. A list of group names can be found [here](http://${process.env.WEB_SERVER_IP}:${process.env.WEB_SERVER_PORT}/groups)`,
+        description: `Select as many groups that you would like to ignore, separated by commas. A list of group names can be found [here](${GROUP_LIST_URL})`,
         usage: ",exclude [group1],{group2}",
         examples: [
             {
@@ -38,6 +39,14 @@ export default class ExcludeCommand implements BaseCommand {
             },
         ],
         priority: 130,
+        actionRowComponents: [
+            {
+                style: 5 as const,
+                url: GROUP_LIST_URL,
+                type: 2 as const,
+                label: "Full List of Groups",
+            },
+        ],
     };
 
     aliases = ["excludes", "ignore", "ignores"];

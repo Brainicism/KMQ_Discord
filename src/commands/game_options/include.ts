@@ -12,6 +12,7 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { GROUP_LIST_URL } from "../../constants";
 
 const logger = new IPCLogger("includes");
 
@@ -20,7 +21,7 @@ export default class IncludeCommand implements BaseCommand {
 
     help = {
         name: "include",
-        description: `Select as many groups that you would like to forcefully include, ignoring other filters (\`gender\`, \`artisttype\`, etc), separated by commas. A list of group names can be found [here](http://${process.env.WEB_SERVER_IP}:${process.env.WEB_SERVER_PORT}/groups)`,
+        description: `Select as many groups that you would like to forcefully include, ignoring other filters (\`gender\`, \`artisttype\`, etc), separated by commas. A list of group names can be found [here](${GROUP_LIST_URL})`,
         usage: ",include [group1],{group2}",
         examples: [
             {
@@ -38,6 +39,14 @@ export default class IncludeCommand implements BaseCommand {
             },
         ],
         priority: 130,
+        actionRowComponents: [
+            {
+                style: 5 as const,
+                url: GROUP_LIST_URL,
+                type: 2 as const,
+                label: "Full List of Groups",
+            },
+        ],
     };
 
     aliases = ["includes"];
