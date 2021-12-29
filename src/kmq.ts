@@ -15,7 +15,6 @@ import { getInternalLogger } from "./logger";
 import { clearRestartNotification } from "./helpers/management_utils";
 import storeDailyStats from "./scripts/store-daily-stats";
 import dbContext from "./database_context";
-import { reloadFactCache } from "./fact_generator";
 import { EnvType } from "./types";
 import { seedAndDownloadNewSongs } from "./seed/seed_db";
 import {
@@ -85,7 +84,6 @@ function registerGlobalIntervals(fleet: Fleet): void {
     // everyday at 12am UTC => 7pm EST
     schedule.scheduleJob("0 0 * * *", async () => {
         storeDailyStats(fleet.stats?.guilds);
-        reloadFactCache();
     });
 
     // every hour
