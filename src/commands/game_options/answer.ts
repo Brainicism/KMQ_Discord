@@ -66,19 +66,19 @@ export default class AnswerCommand implements BaseCommand {
                 {
                     example: "`,answer easy`",
                     explanation: state.localizer.translate(guildID,
-                        "Click on the button from 4 multiple choice options to guess. 0.25x EXP penalty will be applied."
+                        "Click on the button from {{{optionCount}}} multiple choice options to guess. {{{penalty}}} EXP penalty will be applied.", { optionCount: String(4), penalty: "0.25x" }
                     ),
                 },
                 {
                     example: "`,answer medium`",
                     explanation: state.localizer.translate(guildID,
-                        "Click on the button from 6 multiple choice options to guess. 0.5x EXP penalty will be applied."
+                        "Click on the button from {{{optionCount}}} multiple choice options to guess. {{{penalty}}} EXP penalty will be applied.", { optionCount: String(6), penalty: "0.5x" }
                     ),
                 },
                 {
                     example: "`,answer hard`",
                     explanation: state.localizer.translate(guildID,
-                        "Click on the button from 8 multiple choice options to guess. 0.75x EXP penalty will be applied."
+                        "Click on the button from {{{optionCount}}} multiple choice options to guess. {{{penalty}}} EXP penalty will be applied.", { optionCount: String(8), penalty: "0.75x" }
                     ),
                 },
             ],

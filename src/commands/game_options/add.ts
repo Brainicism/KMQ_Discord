@@ -63,22 +63,22 @@ export default class AddCommand implements BaseCommand {
                 {
                     example: "`,add groups twice, red velvet`",
                     explanation: state.localizer.translate(guildID,
-                        "Adds Twice and Red Velvet to the current {{{groups}}} option",
-                        { groups: "`,groups`" }
+                        "Adds {{{groupOne}}} and {{{groupTwo}}} to the current {{{groups}}} option",
+                        { groupOne: "Twice", groupTwo: "Red Velvet", groups: "`,groups`" }
                     ),
                 },
                 {
                     example: "`,add exclude BESTie, Dia, iKON`",
                     explanation: state.localizer.translate(guildID,
-                        "Adds BESTie, Dia, and IKON to the current {{{exclude}}} option",
-                        { exclude: "`,exclude`" }
+                        "Adds {{{groupOne}}}, {{{groupTwo}}}, and {{{groupThree}}} to the current {{{exclude}}} option",
+                        { groupOne: "BESTie", groupTwo: "Dia", groupThree: "IKON", exclude: "`,exclude`" }
                     ),
                 },
                 {
                     example: "`,add include exo`",
                     explanation: state.localizer.translate(guildID,
-                        "Adds EXO to the current {{{include}}} option",
-                        { include: "`,include`" }
+                        "Adds {{{groupOne}}} to the current {{{include}}} option",
+                        { groupOne: "EXO", include: "`,include`" }
                     ),
                 },
             ],

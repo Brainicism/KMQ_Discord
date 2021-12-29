@@ -42,11 +42,11 @@ export default class ExcludeCommand implements BaseCommand {
                 {
                     example: "`,exclude blackpink, bts, red velvet`",
                     explanation: state.localizer.translate(guildID,
-                        "Ignore songs from {{{artistOne}}}, {{{artistTwo}}}, and {{{artistThree}}}",
+                        "Ignore songs from {{{groupOne}}}, {{{groupTwo}}}, and {{{groupThree}}}",
                         {
-                            artistOne: "Blackpink",
-                            artistTwo: "BTS",
-                            artistThree: "Red Velvet",
+                            groupOne: "Blackpink",
+                            groupTwo: "BTS",
+                            groupThree: "Red Velvet",
                         }
                     ),
                 },

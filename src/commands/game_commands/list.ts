@@ -123,7 +123,7 @@ export default class ListCommand implements BaseCommand {
         } else {
             await sendInfoMessage(MessageContext.fromMessage(message), {
                 title: state.localizer.translate(message.guildID, "Current {{{optionListed}}} Value", {
-                    optionsListed: `\`${optionListed}\``,
+                    optionListed: `\`${optionListed}\``,
                 }),
                 description: optionValue,
             });

@@ -93,11 +93,11 @@ async function getProfileFields(
     const songsGuessed = playerStats["songs_guessed"];
     const gamesPlayed = playerStats["games_played"];
     const firstPlayDateString = friendlyFormattedDate(
-        new Date(playerStats["first_play"])
+        new Date(playerStats["first_play"]), guildID
     );
 
     const lastActiveDateString = friendlyFormattedDate(
-        new Date(playerStats["last_active"])
+        new Date(playerStats["last_active"]), guildID
     );
 
     const exp = playerStats["exp"];

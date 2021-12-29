@@ -15,7 +15,7 @@ import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
-import { LocaleType } from "../../helpers/localization_manager";
+import { LocaleType, DEFAULT_LOCALE } from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("debug");
 
@@ -52,7 +52,7 @@ export default class DebugCommand implements BaseCommand {
 
         fields.push({
             name: "Locale",
-            value: state.locales[message.guildID] ?? LocaleType.EN,
+            value: state.locales[message.guildID] ?? DEFAULT_LOCALE,
             inline: false,
         });
 

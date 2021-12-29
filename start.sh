@@ -24,7 +24,7 @@ cd build/
 if [ "${NODE_ENV}" == "dry-run" ] || [ "${NODE_ENV}" == "ci" ]; then
     exec node kmq.js
 elif [ "${NODE_ENV}" == "development" ]; then
-    exec node --inspect=9229 kmq.js
+    ps -e | grep node | grep -v grep | xargs kill || exec node --inspect=9229 kmq.js
 elif [ "${NODE_ENV}" == "production" ]; then
     git log -n 1 --pretty=format:"%H" > ../version
     exec node kmq.js

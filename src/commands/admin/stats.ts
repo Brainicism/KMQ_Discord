@@ -146,7 +146,7 @@ export default class SkipCommand implements BaseCommand {
                 Number(recentPlayers)
             )} | ${friendlyFormattedNumber(Number(totalPlayers))}`,
             [state.localizer.translate(message.guildID, "Latest Song Update")]:
-                friendlyFormattedDate(latestAvailableSong),
+                friendlyFormattedDate(latestAvailableSong, message.guildID),
         };
 
         const systemStatistics = {

@@ -291,7 +291,7 @@
 	"Duration Updated": "Duration Updated",
 	"%s minute remaining": {
 		"one": "%s minute remaining",
-		"other": "%s minutes remaining"
+		"other": "%s minute remaining"
 	},
 	"{{{timerInSeconds}}} sec": "{{{timerInSeconds}}} sec",
 	"Timer Updated": "Timer Updated",
@@ -324,7 +324,7 @@
 	"Expected one of the following valid values for the second argument: (a positive number, {{{argument}}})": "Expected one of the following valid values for the second argument: (a positive number, {{{argument}}})",
 	"level": {
 		"one": "level",
-		"other": "levels"
+		"other": "level"
 	},
 	"{{{formattedNumber}}} {{{levelText}}} gained": "{{{formattedNumber}}} {{{levelText}}} gained",
 	"{{{gameCount}}} games played": "{{{gameCount}}} games played",

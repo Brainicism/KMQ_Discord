@@ -1,5 +1,4 @@
 import Eris from "eris";
-import pluralize from "pluralize";
 import dbContext from "../../database_context";
 import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
@@ -182,13 +181,13 @@ export default class LeaderboardCommand implements BaseCommand {
         if (pageOffset === 0 && !type && !scope && !duration) {
             sendValidationErrorMessage(
                 message,
-                `Expected one of the following valid values for the first argument: (a positive number, ${arrayToString(
+                state.localizer.translate(message.guildID, "Expected one of the following valid values for the first argument: (a positive number, {{{typeOrScopeOrDuration}}})", { typeOrScopeOrDuration: arrayToString(
                     [
                         ...Object.values(LeaderboardType),
                         ...Object.values(LeaderboardScope),
                         ...Object.values(LeaderboardDuration),
                     ]
-                )})`,
+                )}),
                 arg,
                 this.help(message.guildID).usage
             );
@@ -218,12 +217,12 @@ export default class LeaderboardCommand implements BaseCommand {
         } else if (pageOffset === 0) {
             sendValidationErrorMessage(
                 message,
-                `Expected one of the following valid values for the second argument: (a positive number, ${arrayToString(
+                state.localizer.translate(message.guildID, "Expected one of the following valid values for the second argument: (a positive number, {{{argument}}})", { argument: arrayToString(
                     [
                         ...Object.values(LeaderboardScope),
                         ...Object.values(LeaderboardDuration),
                     ]
-                )})`,
+                )}),
                 arg,
                 this.help(message.guildID).usage
             );
@@ -251,9 +250,7 @@ export default class LeaderboardCommand implements BaseCommand {
         } else if (pageOffset === 0) {
             sendValidationErrorMessage(
                 message,
-                `Expected one of the following valid values for the second argument: (a positive number, ${arrayToString(
-                    Object.values(LeaderboardDuration)
-                )})`,
+                state.localizer.translate(message.guildID, `Expected one of the following valid values for the second argument: (a positive number, {{{argument}}})`, { argument: arrayToString(Object.values(LeaderboardDuration)) }),
                 arg,
                 this.help(message.guildID).usage
             );
@@ -263,7 +260,7 @@ export default class LeaderboardCommand implements BaseCommand {
         if (pageOffset === 0 && parsedMessage.components.length > 3) {
             sendValidationErrorMessage(
                 message,
-                "Expected one of the following valid values for the third argument: (a positive number)",
+                state.localizer.translate(message.guildID, "Expected a positive number for the third argument"),
                 arg,
                 this.help(message.guildID).usage
             );
@@ -491,13 +488,13 @@ export default class LeaderboardCommand implements BaseCommand {
                                             player.level, messageContext.guildID
                                         )})`;
                                     } else {
-                                        const levelText = state.localizer.translate(messageContext.guildID,
+                                        const levelText = state.localizer.translateN(messageContext.guildID,
                                             "level",
                                             player.level
                                         );
 
                                         level = state.localizer.translate(messageContext.guildID,
-                                            "{{{formattedNumber}}} {{{level}}} gained",
+                                            "{{{formattedNumber}}} {{{levelText}}} gained",
                                             {
                                                 formattedNumber:
                                                     friendlyFormattedNumber(
@@ -527,24 +524,14 @@ export default class LeaderboardCommand implements BaseCommand {
 
                                             break;
                                         case LeaderboardType.GAMES_PLAYED: {
-                                            const games = `${friendlyFormattedNumber(
-                                                player.game_count
-                                            )} ${pluralize(
-                                                "game",
-                                                player.game_count
-                                            )} played`;
+                                            const games = state.localizer.translate(messageContext.guildID, `{{{gameCount}}} games played`, { gameCount: friendlyFormattedNumber(player.game_count) });
 
                                             value = `${games} | ${level}`;
                                             break;
                                         }
 
                                         case LeaderboardType.SONGS_GUESSED: {
-                                            const guesses = `${friendlyFormattedNumber(
-                                                player.songs_guessed
-                                            )} ${pluralize(
-                                                "song",
-                                                player.songs_guessed
-                                            )} guessed`;
+                                            const guesses = state.localizer.translate(messageContext.guildID, `{{{songsGuessed}}} song guessed`, { songsGuessed: friendlyFormattedNumber(player.songs_guessed) });
 
                                             value = `${guesses} | ${level}`;
                                             break;
@@ -585,6 +572,8 @@ export default class LeaderboardCommand implements BaseCommand {
                                 break;
                         }
 
+                        leaderboardScope = state.localizer.translate(messageContext.guildID, leaderboardScope);
+
                         const durationString = !permanentLb
                             ? ` ${duration[0].toUpperCase()}${duration.slice(
                                   1
@@ -605,6 +594,8 @@ export default class LeaderboardCommand implements BaseCommand {
                             default:
                                 break;
                         }
+
+                        leaderboardType = state.localizer.translate(messageContext.guildID, leaderboardType);
 
                         resolve({
                             title: bold(

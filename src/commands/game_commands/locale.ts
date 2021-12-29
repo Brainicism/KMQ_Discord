@@ -11,6 +11,7 @@ import {
 } from "../../helpers/localization_manager";
 import dbContext from "../../database_context";
 import { state } from "../../kmq_worker";
+import { KmqImages } from "../../constants";
 
 const logger = new IPCLogger("locale");
 
@@ -27,7 +28,7 @@ export default class LocaleTypeCommand implements BaseCommand {
                     ),
                 },
                 {
-                    example: "`,locale kr`",
+                    example: "`,locale ko`",
                     explanation: state.localizer.translate(guildID,
                         "Change the bot's language to Korean"
                     ),
@@ -38,6 +39,18 @@ export default class LocaleTypeCommand implements BaseCommand {
     helpPriority = 30;
 
     aliases = ["botlanguage"];
+
+    validations = {
+        minArgCount: 1,
+        maxArgCount: 1,
+        arguments: [
+            {
+                name: "localeType",
+                type: "enum" as const,
+                enums: Object.values(LocaleType),
+            },
+        ],
+    };
 
     call = async ({
         message,
@@ -55,9 +68,10 @@ export default class LocaleTypeCommand implements BaseCommand {
         sendInfoMessage(MessageContext.fromMessage(message), {
             title: state.localizer.translate(message.guildID, "Locale Updated"),
             description: state.localizer.translate(message.guildID,
-                "The bot's language has been updated to {{{language}}}",
+                "The bot's language has been updated to `{{{language}}}`.",
                 { language }
             ),
+            thumbnailUrl: KmqImages.THUMBS_UP,
         });
 
         logger.info(
@@ -66,7 +80,7 @@ export default class LocaleTypeCommand implements BaseCommand {
     };
 
     static updateLocale(guildID: string, locale: LocaleType): void {
-        if (locale !== LocaleType.EN) {
+        if (locale !== DEFAULT_LOCALE) {
             state.locales[guildID] = locale;
             dbContext
                 .kmq("locale")

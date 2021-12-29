@@ -7,7 +7,7 @@ const logger = new IPCLogger("localization_manager");
 
 export enum LocaleType {
     EN = "en",
-    KR = "kr",
+    KR = "ko",
 }
 
 export const DEFAULT_LOCALE = LocaleType.EN;
@@ -39,35 +39,40 @@ export default class LocalizationManager {
 
     /**
      * Translate the given phrase using locale configuration
+     * @param guildID - The guild ID associated with the guild receiving the string
      * @param phraseOrOptions - The phrase to translate or options for translation
      * @returns The translated phrase
      */
     translate(guildID: string, phraseOrOptions: string | TranslateOptions, replace: string[] | Replacements = {}): string {
         if (phraseOrOptions instanceof Object) {
-            phraseOrOptions.locale = state.locales[guildID] ?? LocaleType.EN;
+            phraseOrOptions.locale = state.locales[guildID] ?? DEFAULT_LOCALE;
         } else {
             phraseOrOptions = {
                 phrase: phraseOrOptions,
-                locale: state.locales[guildID] ?? LocaleType.EN,
+                locale: state.locales[guildID] ?? DEFAULT_LOCALE,
             }
         }
 
         if (replace instanceof Array) {
+            // eslint-disable-next-line no-underscore-dangle
             return this.internalLocalizer.__(phraseOrOptions, ...replace);
         }
 
+        // eslint-disable-next-line no-underscore-dangle
         return this.internalLocalizer.__(phraseOrOptions, replace);
     }
 
     /**
      * Translate with plural condition the given phrase and count using locale configuration
+     * @param guildID - The guild ID associated with the guild receiving the string
      * @param phrase - Short phrase to be translated. All plural options ("one", "few", other", ...) have to be provided by your translation file
-     * @param count - The number which allow to select from plural to singular
+     * @param count - The number which decides whether to select singular or plural
      * @returns The translated phrase
      */
     translateN(guildID: string, phraseOrOptions: string | PluralOptions, count: number): string {
         if (phraseOrOptions instanceof Object) {
-            phraseOrOptions.locale = state.locales[guildID] ?? LocaleType.EN;
+            phraseOrOptions.locale = state.locales[guildID] ?? DEFAULT_LOCALE;
+            // eslint-disable-next-line no-underscore-dangle
             return this.internalLocalizer.__n(phraseOrOptions, count);
         }
 
@@ -75,8 +80,10 @@ export default class LocalizationManager {
                 singular: phraseOrOptions,
                 plural: phraseOrOptions,
                 count,
-                locale: state.locales[guildID] ?? LocaleType.EN,
+                locale: state.locales[guildID] ?? DEFAULT_LOCALE,
             }
+
+            // eslint-disable-next-line no-underscore-dangle
             return this.internalLocalizer.__n(phraseOrOptions, count);
 
     }

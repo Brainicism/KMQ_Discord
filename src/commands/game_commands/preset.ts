@@ -404,7 +404,7 @@ export default class PresetCommand implements BaseCommand {
                     "You can load this preset later with {{{presetLoad}}}.",
                     {
                         presetLoad:
-                            "${process.env.BOT_PREFIX}preset load ${presetName}",
+                            `\`${process.env.BOT_PREFIX}preset load ${presetName}\``,
                     }
                 ),
                 thumbnailUrl: KmqImages.HAPPY,
