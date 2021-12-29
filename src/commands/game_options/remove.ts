@@ -11,7 +11,7 @@ import {
 import { IPCLogger } from "../../logger";
 import { GameOption, MatchedArtist } from "../../types";
 import MessageContext from "../../structures/message_context";
-import { GROUP_LIST_URL } from "./groups";
+import { GROUP_LIST_URL } from "../../constants";
 import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("remove");
