@@ -48,7 +48,7 @@ export default class CutoffCommand implements BaseCommand {
                 {
                     example: "`,cutoff 2015`",
                     explanation: state.localizer.translate(guildID,
-                        "Play songs released after the year {{{year}}}.",
+                        "Play songs released after the year {{{year}}}",
                         {
                             year: String(2015),
                         }
@@ -57,7 +57,7 @@ export default class CutoffCommand implements BaseCommand {
                 {
                     example: "`,cutoff 2015 2018`",
                     explanation: state.localizer.translate(guildID,
-                        "Play songs released between the years {{{beginningYear}}}-{{{endYear}}}.",
+                        "Play songs released between the years {{{beginningYear}}}-{{{endYear}}}",
                         {
                             beginningYear: String(2015),
                             endYear: String(2018),

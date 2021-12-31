@@ -33,6 +33,13 @@ export default class LocaleTypeCommand implements BaseCommand {
                         "Change the bot's language to Korean"
                     ),
                 },
+                {
+                    example: "`,locale`",
+                    explanation: state.localizer.translate(guildID,
+                        "Reset the bot's language to {{{defaultLocale}}}",
+                        { defaultLocale: DEFAULT_LOCALE }
+                    ),
+                },
             ],
         });
 
@@ -66,7 +73,7 @@ export default class LocaleTypeCommand implements BaseCommand {
         LocaleTypeCommand.updateLocale(message.guildID, language);
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(message.guildID, "Locale Updated"),
+            title: state.localizer.translate(message.guildID, "{{{option}}} Updated", { option: "Locale" }),
             description: state.localizer.translate(message.guildID,
                 "The bot's language has been updated to `{{{language}}}`.",
                 { language }

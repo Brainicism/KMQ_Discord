@@ -622,8 +622,8 @@ export async function sendEndRoundMessage(
             bonusType = "ARTIST";
         }
 
-        bonusType = state.localizer.translate(messageContext.guildID, bonusType);
-        correctDescription += `⭐__**${state.localizer.translate(messageContext.guildID, "BONUS {{{bonusType}}} ROUND", { bonusType })}**__⭐\n`;
+        bonusType = state.localizer.translate(messageContext.guildID, `BONUS ${bonusType} ROUND`);
+        correctDescription += `⭐__**${bonusType}**__⭐\n`;
     }
 
     if (correctGuess) {

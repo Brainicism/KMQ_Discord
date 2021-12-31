@@ -46,12 +46,12 @@ export default class LanguageCommand implements BaseCommand {
                 {
                     example: "`,language korean`",
                     explanation: state.localizer.translate(guildID,
-                        "Plays only Korean songs. Ignores songs that are in foreign languages: English, Japanese, Chinese."
+                        "Plays only Korean songs. Ignores songs that are in foreign languages: English, Japanese, Chinese"
                     ),
                 },
                 {
                     example: "`,language all`",
-                    explanation: state.localizer.translate(guildID, "Play all available songs."),
+                    explanation: state.localizer.translate(guildID, "Play all available songs"),
                 },
                 {
                     example: "`,language`",

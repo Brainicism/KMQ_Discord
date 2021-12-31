@@ -37,8 +37,7 @@ export default class MultiGuessCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "multiguess",
             description: state.localizer.translate(guildID,
-                "Sets whether multiple people can guess a song correctly. When {{{on}}}, players will have 1.5 seconds after the first correct answer is given, to continue to answer.\
-        The first answer receives full EXP, correct answers that come after receive multiplicatively less EXP.",
+                "Sets whether multiple people can guess a song correctly. When {{{on}}}, players will have 1.5 seconds after the first correct answer is given, to continue to answer. The first answer receives full EXP, correct answers that come after receive multiplicatively less EXP.",
                 { on: `\`${MultiGuessType.ON}\`` }
             ),
             usage: ",multiguess [on | off]",
@@ -46,13 +45,13 @@ export default class MultiGuessCommand implements BaseCommand {
                 {
                     example: "`,multiguess on`",
                     explanation: state.localizer.translate(guildID,
-                        "Allows for a 1.5 second grace period from when the first correct guess occurs. Multiple players are able to guess correctly."
+                        "Allows for a 1.5 second grace period from when the first correct guess occurs. Multiple players are able to guess correctly"
                     ),
                 },
                 {
                     example: "`,multiguess off`",
                     explanation: state.localizer.translate(guildID,
-                        "Only the first person who guesses correct is awarded the point."
+                        "Only the first person who guesses correct is awarded the point"
                     ),
                 },
                 {

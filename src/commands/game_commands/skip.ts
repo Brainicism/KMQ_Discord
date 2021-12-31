@@ -72,7 +72,7 @@ export default class SkipCommand implements BaseCommand {
     ];
 
     help = (guildID: string) => ({
-            name: state.localizer.translate(guildID, "skip"),
+            name: "skip",
             description: state.localizer.translate(guildID,
                 "Vote to skip the current song. A song is skipped when majority of participants vote to skip it."
             ),

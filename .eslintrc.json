@@ -1,12 +1,11 @@
 {
     "extends": [
-        "airbnb-typescript/base", "prettier", "plugin:i18next/recommended"
+        "airbnb-typescript/base", "prettier"
     ],
     "plugins": [
         "eslint-plugin-tsdoc",
         "jsdoc",
-        "only-warn",
-        "i18next"
+        "only-warn"
     ],
     "parserOptions": {
         "project": "./tsconfig.json"
