@@ -69,7 +69,11 @@ describe("begin command", () => {
             describe("invoker is not the game session's author", () => {
                 it("should return false", () => {
                     assert.strictEqual(
-                        BeginCommand.canStart(gameSession, "567", new MessageContext("", gameStarter)),
+                        BeginCommand.canStart(
+                            gameSession,
+                            "567",
+                            new MessageContext("", gameStarter)
+                        ),
                         false
                     );
                 });
@@ -88,7 +92,11 @@ describe("begin command", () => {
             describe("no teams have been added yet", () => {
                 it("should return false", () => {
                     assert.strictEqual(
-                        BeginCommand.canStart(gameSession, "1231", new MessageContext("", gameStarter)),
+                        BeginCommand.canStart(
+                            gameSession,
+                            "1231",
+                            new MessageContext("", gameStarter)
+                        ),
                         false
                     );
                 });

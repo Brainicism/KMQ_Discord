@@ -609,7 +609,10 @@ export default class LeaderboardCommand implements BaseCommand {
                         let leaderboardScope: string;
                         switch (scope) {
                             case LeaderboardScope.GLOBAL:
-                                leaderboardScope = "leaderboard.global";
+                                leaderboardScope = state.localizer.translate(
+                                    messageContext.guildID,
+                                    "leaderboard.global"
+                                );
                                 break;
                             case LeaderboardScope.SERVER:
                                 if (process.env.NODE_ENV !== EnvType.TEST) {
@@ -619,12 +622,19 @@ export default class LeaderboardCommand implements BaseCommand {
                                         ).name
                                     }'s`;
                                 } else {
-                                    leaderboardScope = "leaderboard.server";
+                                    leaderboardScope =
+                                        state.localizer.translate(
+                                            messageContext.guildID,
+                                            "leaderboard.server"
+                                        );
                                 }
 
                                 break;
                             case LeaderboardScope.GAME:
-                                leaderboardScope = "leaderboard.currentGame";
+                                leaderboardScope = state.localizer.translate(
+                                    messageContext.guildID,
+                                    "leaderboard.currentGame"
+                                );
                                 break;
                             default:
                                 break;
@@ -647,10 +657,16 @@ export default class LeaderboardCommand implements BaseCommand {
                                 leaderboardType = "";
                                 break;
                             case LeaderboardType.GAMES_PLAYED:
-                                leaderboardType = "leaderboard.byGamesPlayed";
+                                leaderboardType = state.localizer.translate(
+                                    messageContext.guildID,
+                                    "leaderboard.byGamesPlayed"
+                                );
                                 break;
                             case LeaderboardType.SONGS_GUESSED:
-                                leaderboardType = "leaderboard.bySongsGuessed";
+                                leaderboardType = state.localizer.translate(
+                                    messageContext.guildID,
+                                    "leaderboard.bySongsGuessed"
+                                );
                                 break;
                             default:
                                 break;
@@ -663,7 +679,15 @@ export default class LeaderboardCommand implements BaseCommand {
 
                         resolve({
                             title: bold(
-                                `${leaderboardScope}${durationString}Leaderboard${leaderboardType}`
+                                state.localizer.translate(
+                                    messageContext.guildID,
+                                    "leaderboard.title",
+                                    {
+                                        leaderboardScope,
+                                        durationString,
+                                        leaderboardType,
+                                    }
+                                )
                             ),
                             fields,
                             timestamp: new Date(),
@@ -687,8 +711,14 @@ export default class LeaderboardCommand implements BaseCommand {
 
         if (alreadyEnrolled) {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "leaderboard.failure.alreadyEnrolled.title",
-                description: "leaderboard.failure.alreadyEnrolled.description",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "leaderboard.failure.alreadyEnrolled.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "leaderboard.failure.alreadyEnrolled.description"
+                ),
             });
             return;
         }
@@ -699,8 +729,14 @@ export default class LeaderboardCommand implements BaseCommand {
         });
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: "leaderboard.enrolled.title",
-            description: "leaderboard.enrolled.description",
+            title: state.localizer.translate(
+                message.guildID,
+                "leaderboard.enrolled.title"
+            ),
+            description: state.localizer.translate(
+                message.guildID,
+                "leaderboard.enrolled.description"
+            ),
         });
     }
 
@@ -713,8 +749,14 @@ export default class LeaderboardCommand implements BaseCommand {
             .del();
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: "leaderboard.unenrolled.title",
-            description: "leaderboard.unenrolled.description",
+            title: state.localizer.translate(
+                message.guildID,
+                "leaderboard.unenrolled.title"
+            ),
+            description: state.localizer.translate(
+                message.guildID,
+                "leaderboard.unenrolled.description"
+            ),
         });
     }
 
@@ -733,9 +775,14 @@ export default class LeaderboardCommand implements BaseCommand {
         if (scope === LeaderboardScope.GAME) {
             if (!state.gameSessions[message.guildID]) {
                 sendErrorMessage(messageContext, {
-                    title: "misc.failure.game.noneInProgress.title",
-                    description:
-                        "leaderboard.failure.game.noneInProgress.description",
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "misc.failure.game.noneInProgress.title"
+                    ),
+                    description: state.localizer.translate(
+                        message.guildID,
+                        "leaderboard.failure.game.noneInProgress.description"
+                    ),
                     thumbnailUrl: KmqImages.NOT_IMPRESSED,
                 });
                 return;
@@ -746,9 +793,14 @@ export default class LeaderboardCommand implements BaseCommand {
 
             if (participantIDs.size === 0) {
                 sendErrorMessage(messageContext, {
-                    title: "leaderboard.failure.game.noParticipants.title",
-                    description:
-                        "leaderboard.failure.game.noParticipants.description",
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "leaderboard.failure.game.noParticipants.title"
+                    ),
+                    description: state.localizer.translate(
+                        message.guildID,
+                        "leaderboard.failure.game.noParticipants.description"
+                    ),
                     thumbnailUrl: KmqImages.NOT_IMPRESSED,
                 });
                 return;
@@ -765,8 +817,14 @@ export default class LeaderboardCommand implements BaseCommand {
 
         if (pageCount === 0) {
             sendErrorMessage(messageContext, {
-                title: "leaderboard.failure.empty.title",
-                description: "leaderboard.failure.empty.description",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "leaderboard.failure.empty.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "leaderboard.failure.empty.description"
+                ),
                 thumbnailUrl: KmqImages.DEAD,
             });
             return;
@@ -774,8 +832,14 @@ export default class LeaderboardCommand implements BaseCommand {
 
         if (pageOffset > pageCount) {
             sendErrorMessage(messageContext, {
-                title: "leaderboard.failure.outOfRange.title",
-                description: "leaderboard.failure.outOfRange.description",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "leaderboard.failure.outOfRange.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "leaderboard.failure.outOfRange.description"
+                ),
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
             });
             return;

@@ -140,7 +140,7 @@ export default class JoinCommand implements BaseCommand {
                 description: state.localizer.translate(
                     message.guildID,
                     "misc.failure.joinError.noTeamName.description",
-                    { joinCommand: ",join" }
+                    { joinCommand: `${process.env.BOT_PREFIX}join` }
                 ),
             });
             return;
@@ -297,7 +297,7 @@ export default class JoinCommand implements BaseCommand {
                     ? state.localizer.translate(
                           message.guildID,
                           "misc.playerJoinedTeam.beforeGameStart.description",
-                          { beginCommand: "`,begin`" }
+                          { beginCommand: `\`${process.env.BOT_PREFIX}begin\`` }
                       )
                     : state.localizer.translate(
                           message.guildID,

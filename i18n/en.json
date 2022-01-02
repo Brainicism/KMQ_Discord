@@ -7,9 +7,17 @@
 		"one": "%s minute",
 		"other": "%s minutes"
 	},
+	"%s minute ago": {
+		"one": "%s minute ago",
+		"other": "%s minutes ago"
+	},
 	"%s minute remaining": {
 		"one": "%s minute remaining",
 		"other": "%s minutes remaining"
+	},
+	"%s hour ago": {
+		"one": "%s hour ago",
+		"other": "%s hours ago"
 	},
 	"1st": "1st",
 	"2nd": "2nd",
@@ -188,6 +196,7 @@
 	"language.help.example.all": "Play all available songs",
 	"language.help.example.korean": "Plays only Korean songs. Ignores songs that are in foreign languages: English, Japanese, Chinese",
 	"language.help.example.reset": "Reset to the default language of {{{defaultLanguage}}}",
+	"leaderboard.title": "{{{leaderboardScope}}}{{{durationString}}}Leaderboard{{{leaderboardType}}}",
 	"leaderboard.byGamesPlayed": " (by games played)",
 	"leaderboard.bySongsGuessed": " (by songs guessed)",
 	"leaderboard.currentGame": "Current Game's",
