@@ -590,5 +590,5 @@
 	"vote.help.description": "Shows instructions on how to vote to receive 2x EXP for an hour.",
 	"vote.unavailable.hours": "You can vote in **{{{hours}}}**.",
 	"vote.unavailable.minutes": "You can vote in **{{{minutes}}}**.",
-	"vote.unavailable.seconds": "You can vote in **{{{seconds}}}**.",
+	"vote.unavailable.seconds": "You can vote in **{{{seconds}}}**."
 }
