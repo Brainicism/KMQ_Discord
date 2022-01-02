@@ -48,7 +48,6 @@
     "eris-fleet": "^1.0.0",
     "eris-pagination": "https://github.com/brainicism/eris-pagination#a30b37b",
     "erlpack": "https://github.com/abalabahaha/erlpack.git",
-    "eslint-plugin-i18next": "https://github.com/edvardchen/eslint-plugin-i18next",
     "fastify": "^3.17.0",
     "fastify-response-caching": "https://github.com/TheTimmaeh/fastify-response-caching#d71df88",
     "fluent-ffmpeg": "^2.1.2",
