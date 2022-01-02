@@ -49,8 +49,8 @@ export default class SkipCommand implements BaseCommand {
         } catch (e) {
             logger.error(`Error retrieving stats via IPC. err = ${e}`);
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "stats.failure.title",
-                description: "stats.failure.description",
+                title: state.localizer.translate(message.guildID, "stats.failure.title"),
+                description: state.localizer.translate(message.guildID, "stats.failure.description"),
             });
             return;
         }

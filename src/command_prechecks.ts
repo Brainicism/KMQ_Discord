@@ -69,7 +69,7 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "misc.preCheck.title",
+                title: state.localizer.translate(message.guildID, "misc.preCheck.title"),
                 description: state.localizer.translate(
                     message.guildID,
                     errorMessage ?? "misc.preCheck.debugServer"
