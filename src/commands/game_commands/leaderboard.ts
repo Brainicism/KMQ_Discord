@@ -507,7 +507,9 @@ export default class LeaderboardCommand implements BaseCommand {
                                               messageContext.guildID,
                                               "leaderboard.rankNumber",
                                               {
-                                                  rank: rank + 1,
+                                                  rank: friendlyFormattedNumber(
+                                                      rank + 1
+                                                  ),
                                               }
                                           );
 

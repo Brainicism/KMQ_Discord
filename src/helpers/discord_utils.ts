@@ -1121,23 +1121,18 @@ export async function sendOptionsMessage(
             title = updatedOptions[0].option;
         }
 
-        title = state.localizer.translate(
-            messageContext.guildID,
-            "options.presetOrOptionRestOrUpdate",
-            {
-                presetOrOption: title,
-                resetOrUpdated:
-                    updatedOptions[0] && updatedOptions[0].reset
-                        ? state.localizer.translate(
-                              messageContext.guildID,
-                              "option.reset"
-                          )
-                        : state.localizer.translate(
-                              messageContext.guildID,
-                              "option.updated"
-                          ),
-            }
-        );
+        title =
+            updatedOptions[0] && updatedOptions[0].reset
+                ? state.localizer.translate(
+                      messageContext.guildID,
+                      "options.reset",
+                      { presetOrOption: title }
+                  )
+                : state.localizer.translate(
+                      messageContext.guildID,
+                      "options.updated",
+                      { presetOrOption: title }
+                  );
     }
 
     await sendInfoMessage(
@@ -1209,7 +1204,7 @@ export async function sendEndGameMessage(
                 ? bold(
                       state.localizer.translate(
                           gameSession.guildID,
-                          "scoreboard.scoreboardTitle"
+                          "score.scoreboardTitle"
                       )
                   )
                 : null,
@@ -1323,7 +1318,7 @@ export async function sendScoreboardMessage(
             description: "(╯°□°）╯︵ ┻━┻",
             title: state.localizer.translate(
                 message.guildID,
-                "scoreboard.scoreboardTitle"
+                "score.scoreboardTitle"
             ),
         });
     }

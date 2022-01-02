@@ -68,7 +68,7 @@ export default class VoteCommand implements BaseCommand {
             if (nextVoteTime.getTime() <= Date.now()) {
                 voteStatusString = state.localizer.translate(
                     message.guildID,
-                    "vote.voteAvailable"
+                    "vote.available"
                 );
             } else {
                 const hoursLeft = Math.floor(

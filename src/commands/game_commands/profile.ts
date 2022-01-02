@@ -23,25 +23,25 @@ import { state } from "../../kmq_worker";
 const logger = new IPCLogger("profile");
 
 const RANK_TITLES = [
-    { title: "Novice", req: 0 },
-    { title: "Trainee", req: 10 },
-    { title: "Pre-debut", req: 20 },
-    { title: "Nugu", req: 30 },
-    { title: "New Artist Of The Year", req: 40 },
-    { title: "Artist Of The Year", req: 50 },
-    { title: "Bonsang Award Winner", req: 60 },
-    { title: "Daesang Award Winner", req: 70 },
-    { title: "CEO of KMQ Entertainment", req: 80 },
-    { title: "President of South Korea", req: 90 },
-    { title: "Reuniter of the Two Koreas", req: 100 },
-    { title: "Ruler of the Two Koreas", req: 110 },
-    { title: "Supreme Ruler of Asia", req: 120 },
-    { title: "Benevolent Ruler of Earth", req: 130 },
-    { title: "Almighty Ruler of the Solar System", req: 140 },
-    { title: "Divine Ruler of the Stars", req: 150 },
-    { title: "Enlightened Ruler of the Galaxy", req: 160 },
-    { title: "Immortal Ruler of the Universe", req: 170 },
-    { title: "Omniscient Ruler of the Multiverse", req: 180 },
+    { title: "profile.rank.novice", req: 0 },
+    { title: "profile.rank.trainee", req: 10 },
+    { title: "profile.rank.preDebut", req: 20 },
+    { title: "profile.rank.nugu", req: 30 },
+    { title: "profile.rank.newAoty", req: 40 },
+    { title: "profile.rank.aoty", req: 50 },
+    { title: "profile.rank.bonsang", req: 60 },
+    { title: "profile.rank.daesang", req: 70 },
+    { title: "profile.rank.ceo", req: 80 },
+    { title: "profile.rank.president", req: 90 },
+    { title: "profile.rank.reuniter", req: 100 },
+    { title: "profile.rank.ruler", req: 110 },
+    { title: "profile.rank.supreme", req: 120 },
+    { title: "profile.rank.benevolent", req: 130 },
+    { title: "profile.rank.almighty", req: 140 },
+    { title: "profile.rank.divine", req: 150 },
+    { title: "profile.rank.enlightened", req: 160 },
+    { title: "profile.rank.immortal", req: 170 },
+    { title: "profile.rank.omniscient", req: 180 },
 ];
 
 /**
@@ -63,10 +63,11 @@ export function getRankNameByLevel(level: number, guildID: string): string {
 
     for (let i = RANK_TITLES.length - 1; i >= 0; i--) {
         const rankTitle = RANK_TITLES[i];
-        if (level >= rankTitle.req) return rankTitle.title;
+        if (level >= rankTitle.req)
+            return state.localizer.translate(guildID, rankTitle.title);
     }
 
-    return RANK_TITLES[0].title;
+    return state.localizer.translate(guildID, RANK_TITLES[0].title);
 }
 
 async function getProfileFields(

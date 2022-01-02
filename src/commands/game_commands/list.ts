@@ -13,8 +13,18 @@ import { state } from "../../kmq_worker";
 const logger = new IPCLogger("list");
 
 enum ListType {
+    // Groups with aliases
     GROUPS = "groups",
+    GROUP = "group",
+    ARTIST = "artist",
+    ARTISTS = "artists",
+
+    // Exclude with aliases
+    EXCLUDE = "exclude",
     EXCLUDES = "excludes",
+
+    // Include with aliases
+    INCLUDE = "include",
     INCLUDES = "includes",
 }
 
@@ -78,12 +88,17 @@ export default class ListCommand implements BaseCommand {
         let optionValue: string;
         switch (optionListed) {
             case ListType.GROUPS:
+            case ListType.GROUP:
+            case ListType.ARTIST:
+            case ListType.ARTISTS:
                 optionValue = guildPreference.getDisplayedGroupNames(true);
                 break;
+            case ListType.INCLUDE:
             case ListType.INCLUDES:
                 optionValue =
                     guildPreference.getDisplayedIncludesGroupNames(true);
                 break;
+            case ListType.EXCLUDE:
             case ListType.EXCLUDES:
                 optionValue =
                     guildPreference.getDisplayedExcludesGroupNames(true);

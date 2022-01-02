@@ -101,7 +101,10 @@ export default class IncludeCommand implements BaseCommand {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "misc.failure.gameOptionConflict.title",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.failure.gameOptionConflict.title"
+                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "misc.failure.gameOptionConflict.description",

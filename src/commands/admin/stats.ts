@@ -177,7 +177,7 @@ export default class SkipCommand implements BaseCommand {
                 .toString(),
             [state.localizer.translate(
                 message.guildID,
-                "stats.processMemoryUsage"
+                "stats.memoryUsage"
             )]: `${fleetStats.totalRam.toFixed(2)} MB`,
             [state.localizer.translate(
                 message.guildID,
@@ -193,7 +193,7 @@ export default class SkipCommand implements BaseCommand {
             )]: `${mysqlLatency.toFixed(2)} ms`,
             [state.localizer.translate(
                 message.guildID,
-                "stats.systen.uptime"
+                "stats.system.uptime"
             )]: `${(process.uptime() / (60 * 60)).toFixed(2)} hours`,
         };
 
