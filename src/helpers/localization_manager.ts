@@ -23,7 +23,6 @@ export default class LocalizationManager {
             autoReload: true,
             updateFiles: true,
             syncFiles: true,
-            prefix: "kmq-",
 
             logDebugFn: (_msg) => {},
 
