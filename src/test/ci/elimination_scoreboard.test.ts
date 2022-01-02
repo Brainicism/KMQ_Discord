@@ -19,10 +19,10 @@ describe("score/exp updating", () => {
 
     describe("single player scoreboard", () => {
         describe("user guesses correctly multiple times", () => {
-            it("should not affect their lives", () => {
+            it("should not affect their lives", async () => {
                 scoreboard.addPlayer(userIDs[0], "yeonwoo#4747", "someurl");
                 for (let i = 0; i < 20; i++) {
-                    scoreboard.updateScoreboard([
+                    await scoreboard.updateScoreboard([
                         { userID: userIDs[0], pointsEarned: 1, expGain: 0 },
                     ]);
 
@@ -37,9 +37,9 @@ describe("score/exp updating", () => {
 
     describe("multi player scoreboard", () => {
         describe("one person guesses correctly multiple times", () => {
-            it("should decrement every other user's scores", () => {
+            it("should decrement every other user's scores", async () => {
                 for (let i = 0; i < 5; i++) {
-                    scoreboard.updateScoreboard([
+                    await scoreboard.updateScoreboard([
                         { userID: userIDs[0], pointsEarned: 1, expGain: 50 },
                     ]);
                 }
@@ -62,28 +62,28 @@ describe("score/exp updating", () => {
         });
 
         describe("each player guesses correctly a different amount of times", () => {
-            it("should decrease each player's score by the amount of guesses of every other player", () => {
-                scoreboard.updateScoreboard([
+            it("should decrease each player's score by the amount of guesses of every other player", async () => {
+                await scoreboard.updateScoreboard([
                     { userID: userIDs[0], pointsEarned: 1, expGain: 50 },
                 ]);
 
-                scoreboard.updateScoreboard([
+                await scoreboard.updateScoreboard([
                     { userID: userIDs[0], pointsEarned: 1, expGain: 50 },
                 ]);
 
-                scoreboard.updateScoreboard([
+                await scoreboard.updateScoreboard([
                     { userID: userIDs[1], pointsEarned: 1, expGain: 50 },
                 ]);
 
-                scoreboard.updateScoreboard([
+                await scoreboard.updateScoreboard([
                     { userID: userIDs[1], pointsEarned: 1, expGain: 50 },
                 ]);
 
-                scoreboard.updateScoreboard([
+                await scoreboard.updateScoreboard([
                     { userID: userIDs[1], pointsEarned: 1, expGain: 50 },
                 ]);
 
-                scoreboard.updateScoreboard([
+                await scoreboard.updateScoreboard([
                     { userID: userIDs[2], pointsEarned: 1, expGain: 50 },
                 ]);
 
@@ -106,8 +106,8 @@ describe("score/exp updating", () => {
     });
 
     describe("multiguess", () => {
-        beforeEach(() => {
-            scoreboard.updateScoreboard([
+        beforeEach(async () => {
+            await scoreboard.updateScoreboard([
                 { userID: userIDs[0], pointsEarned: 1, expGain: 50 },
                 { userID: userIDs[1], pointsEarned: 1, expGain: 25 },
             ]);
@@ -156,8 +156,8 @@ describe("winner detection", () => {
     });
 
     describe("single player, has guessed at least once", () => {
-        it("should return the single player", () => {
-            scoreboard.updateScoreboard([
+        it("should return the single player", async () => {
+            await scoreboard.updateScoreboard([
                 { userID: userIDs[0], pointsEarned: 10, expGain: 0 },
             ]);
             assert.strictEqual(scoreboard.getWinners().length, 1);
@@ -166,16 +166,16 @@ describe("winner detection", () => {
     });
 
     describe("multiple players, has different number of lives", () => {
-        it("should return the player with most number of lives", () => {
-            scoreboard.updateScoreboard([
+        it("should return the player with most number of lives", async () => {
+            await scoreboard.updateScoreboard([
                 { userID: userIDs[0], pointsEarned: 1, expGain: 0 },
             ]);
 
-            scoreboard.updateScoreboard([
+            await scoreboard.updateScoreboard([
                 { userID: userIDs[0], pointsEarned: 1, expGain: 0 },
             ]);
 
-            scoreboard.updateScoreboard([
+            await scoreboard.updateScoreboard([
                 { userID: userIDs[1], pointsEarned: 1, expGain: 0 },
             ]);
             assert.strictEqual(scoreboard.getWinners().length, 1);
@@ -184,24 +184,24 @@ describe("winner detection", () => {
     });
 
     describe("multiple players, tied score", () => {
-        it("should return the two tied players", () => {
-            scoreboard.updateScoreboard([
+        it("should return the two tied players", async () => {
+            await scoreboard.updateScoreboard([
                 { userID: userIDs[0], pointsEarned: 1, expGain: 0 },
             ]);
 
-            scoreboard.updateScoreboard([
+            await scoreboard.updateScoreboard([
                 { userID: userIDs[1], pointsEarned: 1, expGain: 0 },
             ]);
 
-            scoreboard.updateScoreboard([
+            await scoreboard.updateScoreboard([
                 { userID: userIDs[1], pointsEarned: 1, expGain: 0 },
             ]);
 
-            scoreboard.updateScoreboard([
+            await scoreboard.updateScoreboard([
                 { userID: userIDs[2], pointsEarned: 1, expGain: 0 },
             ]);
 
-            scoreboard.updateScoreboard([
+            await scoreboard.updateScoreboard([
                 { userID: userIDs[2], pointsEarned: 1, expGain: 0 },
             ]);
             assert.strictEqual(scoreboard.getWinners().length, 2);

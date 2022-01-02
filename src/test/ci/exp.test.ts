@@ -45,12 +45,17 @@ describe("calculateOptionsMultiplier", () => {
                     .callsFake(() =>
                         Promise.resolve({ count: 1, countBeforeLimit: 200 })
                     );
+
+                sandbox
+                    .stub(game_utils, "isFirstGameOfDay")
+                    .callsFake(() => Promise.resolve(false));
             });
 
             it("should return insufficient song count penalty", async () => {
                 const modifiers = await calculateOptionsExpMultiplierInternal(
                     guildPreference,
-                    false
+                    false,
+                    null
                 );
 
                 assert.strictEqual(modifiers.length, 1);
@@ -69,6 +74,10 @@ describe("calculateOptionsMultiplier", () => {
                     .callsFake(() =>
                         Promise.resolve({ count: 200, countBeforeLimit: 200 })
                     );
+
+                sandbox
+                    .stub(game_utils, "isFirstGameOfDay")
+                    .callsFake(() => Promise.resolve(false));
             });
 
             describe("no active modifiers", () => {
@@ -76,7 +85,8 @@ describe("calculateOptionsMultiplier", () => {
                     const modifiers =
                         await calculateOptionsExpMultiplierInternal(
                             guildPreference,
-                            false
+                            false,
+                            null
                         );
 
                     assert.strictEqual(modifiers.length, 0);
@@ -88,7 +98,8 @@ describe("calculateOptionsMultiplier", () => {
                     const modifiers =
                         await calculateOptionsExpMultiplierInternal(
                             guildPreference,
-                            true
+                            true,
+                            null
                         );
 
                     assert.strictEqual(modifiers.length, 1);
@@ -118,7 +129,8 @@ describe("calculateOptionsMultiplier", () => {
                         const modifiers =
                             await calculateOptionsExpMultiplierInternal(
                                 guildPreference,
-                                false
+                                false,
+                                null
                             );
 
                         assert.strictEqual(modifiers.length, 1);
@@ -139,7 +151,8 @@ describe("calculateOptionsMultiplier", () => {
                         const modifiers =
                             await calculateOptionsExpMultiplierInternal(
                                 guildPreference,
-                                false
+                                false,
+                                null
                             );
 
                         assert.strictEqual(modifiers.length, 1);
@@ -158,7 +171,8 @@ describe("calculateOptionsMultiplier", () => {
                         const modifiers =
                             await calculateOptionsExpMultiplierInternal(
                                 guildPreference,
-                                false
+                                false,
+                                null
                             );
 
                         assert.strictEqual(modifiers.length, 1);
@@ -181,7 +195,8 @@ describe("calculateOptionsMultiplier", () => {
                         const modifiers =
                             await calculateOptionsExpMultiplierInternal(
                                 guildPreference,
-                                false
+                                false,
+                                null
                             );
 
                         assert.strictEqual(modifiers.length, 1);
@@ -202,6 +217,10 @@ describe("calculateOptionsMultiplier", () => {
                 .callsFake(() =>
                     Promise.resolve({ count: 200, countBeforeLimit: 200 })
                 );
+
+            sandbox
+                .stub(game_utils, "isFirstGameOfDay")
+                .callsFake(() => Promise.resolve(false));
         });
 
         describe("is weekend", () => {
@@ -209,7 +228,8 @@ describe("calculateOptionsMultiplier", () => {
                 sandbox.stub(utils, "isWeekend").callsFake(() => true);
                 const modifiers = await calculateOptionsExpMultiplierInternal(
                     guildPreference,
-                    false
+                    false,
+                    null
                 );
 
                 assert.strictEqual(modifiers.length, 1);
@@ -225,7 +245,8 @@ describe("calculateOptionsMultiplier", () => {
                 sandbox.stub(utils, "isPowerHour").callsFake(() => true);
                 const modifiers = await calculateOptionsExpMultiplierInternal(
                     guildPreference,
-                    false
+                    false,
+                    null
                 );
 
                 assert.strictEqual(modifiers.length, 1);
@@ -237,8 +258,34 @@ describe("calculateOptionsMultiplier", () => {
         });
     });
 
+    describe("first game of day", () => {
+        beforeEach(() => {
+            sandbox
+                .stub(game_utils, "isFirstGameOfDay")
+                .callsFake(() => Promise.resolve(true));
+        });
+
+        afterEach(() => {
+            sandbox.restore();
+        });
+
+        describe("is first game of day", async () => {
+            const modifiers = await calculateOptionsExpMultiplierInternal(
+                guildPreference,
+                false,
+                null
+            );
+
+            assert.strictEqual(modifiers.length, 1);
+            assert.strictEqual(
+                modifiers[0].name,
+                ExpBonusModifier.FIRST_GAME_OF_DAY
+            );
+        });
+    });
+
     describe("everything", () => {
-        it("should return all bonuses/penalties", async () => {
+        beforeEach(() => {
             sandbox.stub(utils, "isPowerHour").callsFake(() => true);
             sandbox.stub(utils, "isWeekend").callsFake(() => true);
             sandbox
@@ -246,26 +293,39 @@ describe("calculateOptionsMultiplier", () => {
                 .callsFake(() =>
                     Promise.resolve({ count: 1, countBeforeLimit: 200 })
                 );
+
+            sandbox
+                .stub(game_utils, "isFirstGameOfDay")
+                .callsFake(() => Promise.resolve(true));
+        });
+
+        afterEach(() => {
+            sandbox.restore();
+        });
+
+        it("should return all bonuses/penalties", async () => {
             guildPreference.setAnswerType(AnswerType.MULTIPLE_CHOICE_HARD);
             await guildPreference.setGuessModeType(GuessModeType.BOTH);
             const modifiers = await calculateOptionsExpMultiplierInternal(
                 guildPreference,
-                true
+                true,
+                null
             );
 
-            assert.strictEqual(modifiers.length, 5);
+            const expectedModifiers = [
+                ExpBonusModifier.VOTE,
+                ExpBonusModifier.POWER_HOUR,
+                ExpBonusModifier.MC_GUESS_HARD,
+                ExpBonusModifier.BELOW_SONG_COUNT_THRESHOLD,
+                ExpBonusModifier.ARTIST_GUESS,
+                ExpBonusModifier.FIRST_GAME_OF_DAY,
+            ];
+
+            assert.strictEqual(modifiers.length, expectedModifiers.length);
             assert.ok(
                 modifiers
                     .map((x) => x.name)
-                    .every((x) =>
-                        [
-                            ExpBonusModifier.VOTE,
-                            ExpBonusModifier.POWER_HOUR,
-                            ExpBonusModifier.MC_GUESS_HARD,
-                            ExpBonusModifier.BELOW_SONG_COUNT_THRESHOLD,
-                            ExpBonusModifier.ARTIST_GUESS,
-                        ].includes(x)
-                    )
+                    .every((x) => expectedModifiers.includes(x))
             );
         });
     });

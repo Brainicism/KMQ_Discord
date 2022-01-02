@@ -14,6 +14,7 @@ import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import { GROUP_LIST_URL } from "../../constants";
 
 const logger = new IPCLogger("excludes");
 
@@ -30,7 +31,7 @@ export default class ExcludeCommand implements BaseCommand {
             guildID,
             "exclude.help.description",
             {
-                groupsLink: `http://${process.env.WEB_SERVER_IP}:${process.env.WEB_SERVER_PORT}/groups`,
+                groupsLink: GROUP_LIST_URL,
             }
         ),
         usage: ",exclude [group1],{group2}",
@@ -62,6 +63,17 @@ export default class ExcludeCommand implements BaseCommand {
                 explanation: state.localizer.translate(
                     guildID,
                     "exclude.help.example.reset"
+                ),
+            },
+        ],
+        actionRowComponents: [
+            {
+                style: 5 as const,
+                url: GROUP_LIST_URL,
+                type: 2 as const,
+                label: state.localizer.translate(
+                    guildID,
+                    "misc.interaction.fullGroupsList"
                 ),
             },
         ],

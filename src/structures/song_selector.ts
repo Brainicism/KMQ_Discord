@@ -141,6 +141,8 @@ export default class SongSelector {
             );
         }
 
+        this.checkLastPlayedSongs();
+
         if (randomSong === null) {
             return null;
         }
@@ -202,6 +204,7 @@ export default class SongSelector {
      */
     resetUniqueSongs(): void {
         this.uniqueSongsPlayed.clear();
+        this.lastPlayedSongs = [];
     }
 
     getSongs(): { songs: Set<QueriedSong>; countBeforeLimit: number } {

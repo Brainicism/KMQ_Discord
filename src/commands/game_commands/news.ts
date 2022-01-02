@@ -9,6 +9,7 @@ import {
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import { state } from "../../kmq_worker";
+import { getKmqCurrentVersion } from "../../helpers/game_utils";
 
 const logger = new IPCLogger("news");
 
@@ -43,6 +44,7 @@ export default class NewsCommand implements BaseCommand {
             ),
             description: news,
             thumbnailUrl: KmqImages.READING_BOOK,
+            footerText: getKmqCurrentVersion(),
         });
 
         logger.info(`${getDebugLogHeader(message)} | News retrieved.`);

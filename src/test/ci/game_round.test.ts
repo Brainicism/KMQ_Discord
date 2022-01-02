@@ -311,36 +311,75 @@ describe("similarityCheck", () => {
     });
 
     describe("meets similarity criteria", () => {
-        it("should return true", () => {
-            // 1 transposition error
-            assert.ok(GameRound.similarityCheck("abcdegf", ["abcdefg"]));
-            // 2 transposition errors
-            assert.ok(GameRound.similarityCheck("bacdegf", ["abcdefg"]));
-            // 1 removal required
-            assert.ok(GameRound.similarityCheck("abcdefgh", ["abcdefg"]));
-            // 1 removal, one transposition error
-            assert.ok(GameRound.similarityCheck("bacdefgh", ["abcdefg"]));
-            // 1 insertion required
-            assert.ok(GameRound.similarityCheck("abcdef", ["abcdefg"]));
-            // 1 insertion required, one transposition error
-            assert.ok(GameRound.similarityCheck("bacdef", ["abcdefg"]));
+        describe("4 < length <= 6", () => {
+            it("should return true", () => {
+                // 1 transposition error (distance = 1)
+                assert.ok(GameRound.similarityCheck("abcde", ["abcde"]));
+                // 1 removal required (distance = 1)
+                assert.ok(GameRound.similarityCheck("abcde", ["abcde"]));
+                // 1 insertion required (distance = 1)
+                assert.ok(GameRound.similarityCheck("abcd", ["abcde"]));
+            });
+        });
+
+        describe("length > 6", () => {
+            it("should return true", () => {
+                // 1 transposition error (distance = 1)
+                assert.ok(GameRound.similarityCheck("abcdegf", ["abcdefg"]));
+                // 2 transposition errors (distance = 2)
+                assert.ok(GameRound.similarityCheck("bacdegf", ["abcdefg"]));
+                // 1 removal required (distance = 1)
+                assert.ok(GameRound.similarityCheck("abcdefgh", ["abcdefg"]));
+                // 1 removal, one transposition error (distance = 2)
+                assert.ok(GameRound.similarityCheck("bacdefgh", ["abcdefg"]));
+                // 1 insertion required (distance = 1)
+                assert.ok(GameRound.similarityCheck("abcdefg", ["abcdefgh"]));
+                // 1 insertion required, one transposition error (distance = 2)
+                assert.ok(GameRound.similarityCheck("abcdegf", ["abcdefgh"]));
+            });
         });
     });
 
     describe("does not meet similarity criteria", () => {
-        it("should return false", () => {
-            // 3 transposition errors
-            assert.ok(!GameRound.similarityCheck("badcegf", ["abcdefg"]));
-            // 2 removals required
-            assert.ok(!GameRound.similarityCheck("abcdefghi", ["abcdefg"]));
-            // 2 insertions required
-            assert.ok(!GameRound.similarityCheck("abcde", ["abcdefg"]));
-            // correct choice is too short, transposition error
-            assert.ok(!GameRound.similarityCheck("bacd", ["abcd"]));
-            // correct choice is too short, insertion required
-            assert.ok(!GameRound.similarityCheck("abd", ["abcd"]));
-            // correct choice is too short, removal required
-            assert.ok(!GameRound.similarityCheck("abcde", ["abcd"]));
+        describe("length <= 4, all should fail", () => {
+            it("should return false", () => {
+                assert.ok(!GameRound.similarityCheck("a", ["a"]));
+                assert.ok(!GameRound.similarityCheck("bb", ["bb"]));
+                assert.ok(!GameRound.similarityCheck("ccc", ["cccc"]));
+                assert.ok(!GameRound.similarityCheck("dddd", ["dddd"]));
+            });
+        });
+
+        describe("4 < length <= 6, edit distance of 1 allowed", () => {
+            it("should return false", () => {
+                // 2 transposition errors (distance = 2)
+                assert.ok(!GameRound.similarityCheck("baced", ["abcde"]));
+                // 2 removal required (distance = 2)
+                assert.ok(!GameRound.similarityCheck("abcdefg", ["abcde"]));
+                // 2 insertion required (distance = 2)
+                assert.ok(!GameRound.similarityCheck("abc", ["abcde"]));
+                // 1 removal, one transposition error (distance = 2)
+                assert.ok(!GameRound.similarityCheck("bacdef", ["abcde"]));
+                // 1 insertion required, one transposition error (distance = 2)
+                assert.ok(!GameRound.similarityCheck("bacde", ["abcdef"]));
+            });
+        });
+
+        describe("length > 6, edit distance of 2 allowed && max 2 insert/removals", () => {
+            it("should return false", () => {
+                // 3 transposition errors (distance = 3)
+                assert.ok(!GameRound.similarityCheck("badcegf", ["abcdefg"]));
+                // 2 removals required (2 removals not allowed)
+                assert.ok(!GameRound.similarityCheck("abcdefghi", ["abcdefg"]));
+                // 2 insertions required (2 insertions not allowed)
+                assert.ok(!GameRound.similarityCheck("abcdefg", ["abcdefghi"]));
+                // 1 removal, 2 transposition error (distance = 3)
+                assert.ok(!GameRound.similarityCheck("badcefgh", ["abcdefg"]));
+                // 1 insertion, 2 transposition error (distance = 3)
+                assert.ok(!GameRound.similarityCheck("badcef", ["abcdefg"]));
+                // 1 insertion, 1 removal, 1 transposition error (distance = 3)
+                assert.ok(!GameRound.similarityCheck("bacdegh", ["abcdefg"]));
+            });
         });
     });
 

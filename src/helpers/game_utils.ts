@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { execSync } from "child_process";
 import dbContext from "../database_context";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
@@ -370,4 +371,30 @@ export async function getMultipleChoiceOptions(
     }
 
     return result;
+}
+
+/**
+ * @param userID - The user's ID
+ * @returns whether this is the user's first game played today
+ */
+export async function isFirstGameOfDay(userID: string): Promise<boolean> {
+    const player = await dbContext
+        .kmq("player_stats")
+        .select(
+            dbContext.kmq.raw(
+                "DAYOFYEAR(last_active) = DAYOFYEAR(CURDATE()) as firstGameOfDay"
+            )
+        )
+        .where("player_id", "=", userID)
+        .first();
+
+    if (!player) return true;
+    return player["firstGameOfDay"] === 0;
+}
+
+/**
+ * @returns KMQ's current version
+ */
+export function getKmqCurrentVersion(): string {
+    return execSync("git describe --tags").toString().trim();
 }

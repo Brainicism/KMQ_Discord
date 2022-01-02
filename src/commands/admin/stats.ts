@@ -16,6 +16,7 @@ import {
     friendlyFormattedNumber,
     measureExecutionTime,
 } from "../../helpers/utils";
+import { getKmqCurrentVersion } from "../../helpers/game_utils";
 
 const logger = new IPCLogger("stats");
 
@@ -229,10 +230,10 @@ export default class SkipCommand implements BaseCommand {
                 }
             ),
             fields,
-            footerText: state.localizer.translate(
+            footerText: `${getKmqCurrentVersion()} | ${state.localizer.translate(
                 message.guildID,
                 "stats.footer"
-            ),
+            )}`,
             timestamp: new Date(),
             thumbnailUrl: KmqImages.READING_BOOK,
         });

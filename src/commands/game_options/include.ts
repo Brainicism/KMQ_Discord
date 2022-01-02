@@ -13,6 +13,7 @@ import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import { GROUP_LIST_URL } from "../../constants";
 
 const logger = new IPCLogger("includes");
 
@@ -31,7 +32,7 @@ export default class IncludeCommand implements BaseCommand {
             {
                 gender: `\`${GameOption.GENDER}\``,
                 artisttype: `\`${GameOption.ARTIST_TYPE}\``,
-                groupsLink: `http://${process.env.WEB_SERVER_IP}:${process.env.WEB_SERVER_PORT}/groups`,
+                groupsLink: GROUP_LIST_URL,
             }
         ),
         usage: ",include [group1],{group2}",
@@ -61,6 +62,17 @@ export default class IncludeCommand implements BaseCommand {
                 explanation: state.localizer.translate(
                     guildID,
                     "include.help.example.reset"
+                ),
+            },
+        ],
+        actionRowComponents: [
+            {
+                style: 5 as const,
+                url: GROUP_LIST_URL,
+                type: 2 as const,
+                label: state.localizer.translate(
+                    guildID,
+                    "misc.interaction.fullGroupsList"
                 ),
             },
         ],
