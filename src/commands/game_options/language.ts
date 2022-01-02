@@ -39,25 +39,25 @@ export default class LanguageCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "language",
             description: state.localizer.translate(guildID,
-                "Choose whether songs played should be exclusively in Korean."
+                "language.help.description"
             ),
             usage: ",language [korean | all]",
             examples: [
                 {
                     example: "`,language korean`",
                     explanation: state.localizer.translate(guildID,
-                        "Plays only Korean songs. Ignores songs that are in foreign languages: English, Japanese, Chinese"
+                        "language.help.example.korean"
                     ),
                 },
                 {
                     example: "`,language all`",
-                    explanation: state.localizer.translate(guildID, "Play all available songs"),
+                    explanation: state.localizer.translate(guildID, "language.help.example.all"),
                 },
                 {
                     example: "`,language`",
                     explanation: state.localizer.translate(guildID,
-                        "Reset to the default language of {{{all}}}",
-                        { all: `\`${LanguageType.ALL}\`` }
+                        "language.help.example.reset",
+                        { defaultLanguage: `\`${LanguageType.ALL}\`` }
                     ),
                 },
             ],

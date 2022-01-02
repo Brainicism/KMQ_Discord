@@ -36,9 +36,9 @@ export default class BeginCommand implements BaseCommand {
         if (gameSession.gameType === GameType.ELIMINATION) {
             if (gameSession.owner.id !== authorID) {
                 sendErrorMessage(messageContext, {
-                    title: state.localizer.translate(messageContext.guildID, "Begin Ignored"),
+                    title: state.localizer.translate(messageContext.guildID, "begin.ignored.title"),
                     description: state.localizer.translate(messageContext.guildID,
-                        "Only the person who did {{{playElimination}}} ({{{mentionedUser}}}) can start the game.",
+                        "begin.ignored.notOwner.description",
                         {
                             playElimination: `\`${process.env.BOT_PREFIX}play elimination\``,
                             mentionedUser: getMention(gameSession.owner.id),
@@ -51,9 +51,9 @@ export default class BeginCommand implements BaseCommand {
             const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
             if (teamScoreboard.getNumTeams() === 0) {
                 sendErrorMessage(messageContext, {
-                    title: state.localizer.translate(messageContext.guildID, "Begin Ignored"),
+                    title: state.localizer.translate(messageContext.guildID, "begin.ignored.title"),
                     description: state.localizer.translate(messageContext.guildID,
-                        "Create a team using `{{{join}}} [team name]` before you can start the game.",
+                        "begin.ignored.noTeam.description",
                         { join: `${process.env.BOT_PREFIX}join` }
                     ),
                 });

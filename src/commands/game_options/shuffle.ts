@@ -37,7 +37,7 @@ export default class ShuffleCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "shuffle",
             description: state.localizer.translate(guildID,
-                "Choose whether songs are played in truly random order ({{{random}}}) or randomly but uniquely until all songs are played ({{{shuffle}}}).",
+                "shuffle.help.description",
                 {
                     random: `\`${ShuffleType.RANDOM}\``,
                     shuffle: `\`${ShuffleType.UNIQUE}\``,
@@ -47,18 +47,18 @@ export default class ShuffleCommand implements BaseCommand {
             examples: [
                 {
                     example: "`,shuffle random`",
-                    explanation: state.localizer.translate(guildID, "Songs will play randomly."),
+                    explanation: state.localizer.translate(guildID, "shuffle.help.example.random"),
                 },
                 {
                     example: "`,shuffle unique`",
                     explanation: state.localizer.translate(guildID,
-                        "Every song will play once before any are repeated."
+                        "shuffle.help.example.unique"
                     ),
                 },
                 {
                     example: "`,shuffle`",
                     explanation: state.localizer.translate(guildID,
-                        "Reset to the default shuffle mode of {{{defaultShuffle}}}",
+                        "shuffle.help.example.reset",
                         { defaultShuffle: `\`${DEFAULT_SHUFFLE}\`` }
                     ),
                 },

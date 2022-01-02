@@ -24,13 +24,13 @@ export default class ResetCommand implements BaseCommand {
 
     help = (guildID: string) => ({
             name: "reset",
-            description: state.localizer.translate(guildID, "Reset to the default game options."),
+            description: state.localizer.translate(guildID, "reset.help.description"),
             usage: ",reset",
             examples: [
                 {
                     example: "`,reset`",
                     explanation: state.localizer.translate(guildID,
-                        "Resets to the default game options"
+                        "reset.help.example.reset"
                     ),
                 },
             ],

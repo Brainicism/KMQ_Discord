@@ -22,7 +22,7 @@ export default class IncludeCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "include",
             description: state.localizer.translate(guildID,
-                "Select as many groups that you would like to forcefully include, ignoring other filters ({{{gender}}}, {{{artisttype}}}, etc), separated by commas. A list of group names can be found [here]({{{groupsLink}}}).",
+                "include.help.description",
                 {
                     gender: `\`${GameOption.GENDER}\``,
                     artisttype: `\`${GameOption.ARTIST_TYPE}\``,
@@ -34,24 +34,24 @@ export default class IncludeCommand implements BaseCommand {
                 {
                     example: "`,include blackpink`",
                     explanation: state.localizer.translate(guildID,
-                        "Forcefully include songs from {{{group}}}",
+                        "include.help.example.singleGroup",
                         { group: "Blackpink" }
                     ),
                 },
                 {
                     example: "`,include blackpink, bts, red velvet`",
                     explanation: state.localizer.translate(guildID,
-                        "Forcefully include songs from {{{group1}}}, {{{group2}}}, and {{{group3}}}",
+                        "include.help.example.multipleGroups",
                         {
-                            group1: "Blackpink",
-                            group2: "BTS",
-                            group3: "Red Velvet",
+                            groupOne: "Blackpink",
+                            groupTwo: "BTS",
+                            groupThree: "Red Velvet",
                         }
                     ),
                 },
                 {
                     example: "`,include`",
-                    explanation: state.localizer.translate(guildID, "Resets the include option"),
+                    explanation: state.localizer.translate(guildID, "include.help.example.reset"),
                 },
             ],
         });
@@ -79,9 +79,10 @@ export default class IncludeCommand implements BaseCommand {
         if (parsedMessage.components.length > 1) {
             if (["add", "remove"].includes(parsedMessage.components[0])) {
                 includeWarning = state.localizer.translate(message.guildID,
-                    "Did you mean to use {{{addOrRemove}}} include?",
+                    "misc.warning.addRemoveOrdering.footer",
                     {
                         addOrRemove: `${process.env.BOT_PREFIX}${parsedMessage.components[0]}`,
+                        command: "include",
                     }
                 );
             }
@@ -95,13 +96,13 @@ export default class IncludeCommand implements BaseCommand {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Game Option Conflict",
+                title: "misc.failure.gameOptionConflict.title",
                 description: state.localizer.translate(message.guildID,
-                    "{{{groups}}} game option is currently set. {{{include}}} and {{{groups}}} are incompatible. Remove the {{{groups}}} option by typing {{{groupsCommand}}} to proceed.",
+                    "misc.failure.gameOptionConflict.description",
                     {
-                        groups: `\`${GameOption.GROUPS}\``,
-                        include: `\`${GameOption.INCLUDE}\``,
-                        groupsCommand: `\`${process.env.BOT_PREFIX}${GameOption.GROUPS}\``,
+                        optionOne: `\`${GameOption.GROUPS}\``,
+                        optionTwo: `\`${GameOption.INCLUDE}\``,
+                        optionOneCommand: `\`${process.env.BOT_PREFIX}${GameOption.GROUPS}\``,
                     }
                 ),
             });
@@ -126,13 +127,14 @@ export default class IncludeCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "Unknown Group Name"),
+                title: state.localizer.translate(message.guildID, "misc.failure.unrecognizedGroups.title"),
                 description: state.localizer.translate(message.guildID,
-                    "One or more of the specified group names was not recognized. Those groups that matched are included. Please ensure that the group name matches exactly with the list provided by {{{helpGroups}}}. \nThe following groups were **not** recognized:\n {{{unmatchedGroups}}} \nUse {{{add}}} to add the unmatched groups.",
+                    "misc.failure.unrecognizedGroups.description",
                     {
+                        matchedGroupsAction: state.localizer.translate(message.guildID, "include.failure.unrecognizedGroups.included"),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: unmatchedGroups.join(", "),
-                        add: `\`${process.env.BOT_PREFIX}add\``,
+                        solution: state.localizer.translate(message.guildID, "misc.failure.unrecognizedGroups.solution", { command: `\`${process.env.BOT_PREFIX}add\``}),
                     }
                 ),
                 footerText: includeWarning,

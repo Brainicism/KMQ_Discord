@@ -50,7 +50,7 @@ export default class RemoveCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "remove",
             description: state.localizer.translate(guildID,
-                "Removes one or more groups from the current {{{groups}}}, {{{exclude}}}, or {{{include}}} options.",
+                "remove.help.description",
                 {
                     groups: `\`${process.env.BOT_PREFIX}groups\``,
                     exclude: `\`${process.env.BOT_PREFIX}exclude\``,
@@ -62,7 +62,7 @@ export default class RemoveCommand implements BaseCommand {
                 {
                     example: "`,remove groups twice, red velvet`",
                     explanation: state.localizer.translate(guildID,
-                        "Removes {{{groupOne}}} and {{{groupTwo}}} from the current {{{groups}}} option",
+                        "remove.help.example.groups",
                         {
                             groupOne: "Twice",
                             groupTwo: "Red Velvet",
@@ -73,7 +73,7 @@ export default class RemoveCommand implements BaseCommand {
                 {
                     example: "`,remove exclude BESTie, Dia, iKON`",
                     explanation: state.localizer.translate(guildID,
-                        "Removes {{{groupOne}}}, {{{groupTwo}}}, and {{{groupThree}}} from the current {{{exclude}}} option",
+                        "remove.help.example.exclude",
                         {
                             groupOne: "BESTie",
                             groupTwo: "Dia",
@@ -85,7 +85,7 @@ export default class RemoveCommand implements BaseCommand {
                 {
                     example: "`,remove include exo`",
                     explanation: state.localizer.translate(guildID,
-                        "Removes {{{group}}} from the current {{{include}}} option",
+                        "remove.help.example.include",
                         {
                             group: "exo",
                             include: `\`${process.env.BOT_PREFIX}include\``,
@@ -98,7 +98,7 @@ export default class RemoveCommand implements BaseCommand {
                     style: 5 as const,
                     url: GROUP_LIST_URL,
                     type: 2 as const,
-                    label: "Full List of Groups",
+                    label: state.localizer.translate(guildID, "misc.interaction.fullGroupsList"),
                 },
             ],
         });
@@ -132,9 +132,9 @@ export default class RemoveCommand implements BaseCommand {
 
         if (!currentMatchedArtists) {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "Remove Failed"),
+                title: state.localizer.translate(message.guildID, "remove.failure.noGroupsSelected.title"),
                 description: state.localizer.translate(message.guildID,
-                    "There are no groups currently selected"
+                    "remove.failure.noGroupsSelected.description"
                 ),
             });
             return;
@@ -165,12 +165,14 @@ export default class RemoveCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "Unknown Group Name"),
+                title: state.localizer.translate(message.guildID, "misc.failure.unrecognizedGroups.title"),
                 description: state.localizer.translate(message.guildID,
-                    "One or more of the specified group names was not recognized. Those groups that matched are removed. Please ensure that the group name matches exactly with the list provided by {{{helpGroups}}}. \nThe following groups were **not** recognized:\n {{{unmatchedGroups}}} ",
+                    "misc.failure.unrecognizedGroups.description",
                     {
+                        matchedGroupsAction: state.localizer.translate(message.guildID, "remove.failure.unrecognizedGroups.removed"),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: unmatchedGroups.join(", "),
+                        solution: "",
                     }
                 ),
             });

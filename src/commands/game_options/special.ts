@@ -80,45 +80,45 @@ export default class SpecialCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "special",
             description: state.localizer.translate(guildID,
-                "Hey. This hasn't been announced yet, but check out the KMQ server to try it out! Play a special mode with modified audio."
+                "special.help.description"
             ),
             usage: ",special [reverse | slow | fast | faster | lowpitch | highpitch | nightcore]",
             examples: [
                 {
                     example: "`,special reverse`",
-                    explanation: state.localizer.translate(guildID, "Plays the song in reverse"),
+                    explanation: state.localizer.translate(guildID, "special.help.example.reverse"),
                 },
                 {
                     example: "`,special slow`",
-                    explanation: state.localizer.translate(guildID, "Plays the song at a slow speed"),
+                    explanation: state.localizer.translate(guildID, "special.help.example.slow"),
                 },
                 {
                     example: "`,special fast`",
-                    explanation: state.localizer.translate(guildID, "Plays the song at a fast speed"),
+                    explanation: state.localizer.translate(guildID, "special.help.example.fast"),
                 },
                 {
                     example: "`,special faster`",
                     explanation: state.localizer.translate(guildID,
-                        "Plays the song at a faster speed"
+                        "special.help.example.faster"
                     ),
                 },
                 {
                     example: "`,special lowpitch`",
-                    explanation: state.localizer.translate(guildID, "Plays the song at a low pitch"),
+                    explanation: state.localizer.translate(guildID, "special.help.example.lowPitch"),
                 },
                 {
                     example: "`,special highpitch`",
-                    explanation: state.localizer.translate(guildID, "Plays the song at a high pitch"),
+                    explanation: state.localizer.translate(guildID, "special.help.example.highPitch"),
                 },
                 {
                     example: "`,special nightcore`",
                     explanation: state.localizer.translate(guildID,
-                        "Plays a nightcore edit of the song"
+                        "special.help.example.nightcore"
                     ),
                 },
                 {
                     example: "`,special`",
-                    explanation: state.localizer.translate(guildID, "Reset the special option"),
+                    explanation: state.localizer.translate(guildID, "specia.help.example.reset"),
                 },
             ],
         });

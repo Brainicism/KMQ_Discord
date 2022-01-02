@@ -14,7 +14,7 @@ export default class ScoreCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "score",
             description: state.localizer.translate(guildID,
-                "See the scoreboard for the current game."
+                "score.help.description",
             ),
             usage: ",score",
             examples: [],
@@ -31,9 +31,9 @@ export default class ScoreCommand implements BaseCommand {
         const gameSession = gameSessions[message.guildID];
         if (!gameSession) {
             await sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "No Active Game"),
+                title: state.localizer.translate(message.guildID, "misc.failure.game.noneInProgress.title"),
                 description: state.localizer.translate(message.guildID,
-                    "There is no currently active game of KMQ. Start a new game with {{{play}}}!",
+                    "score.failure.noneInProgress.description",
                     { play: `\`${process.env.BOT_PREFIX}play\`` }
                 ),
             });

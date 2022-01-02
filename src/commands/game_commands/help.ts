@@ -60,11 +60,11 @@ const helpMessage = async (
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "{{{kmq}}} Command Help", {
+                title: state.localizer.translate(message.guildID, "help.title", {
                     kmq: "K-pop Music Quiz",
                 }),
                 description: state.localizer.translate(message.guildID,
-                    "Sorry, there is no documentation on {{{action}}}.",
+                    "help.failure.noDocs",
                     { action }
                 ),
             });
@@ -79,7 +79,7 @@ const helpMessage = async (
         embedDesc = helpManual.description;
         embedActionRowComponents = helpManual.actionRowComponents;
         if (helpManual.examples.length > 0) {
-            embedDesc += `\n\n**${state.localizer.translate(message.guildID, "Examples")}**\n`;
+            embedDesc += `\n\n**${state.localizer.translate(message.guildID, "help.examples")}**\n`;
         }
 
         embedFields = helpManual.examples.map((example) => ({
@@ -89,7 +89,7 @@ const helpMessage = async (
 
         if (commandFilesWithAliases[action].aliases) {
             embedFooter = {
-                text: `${state.localizer.translate(message.guildID, "Aliases")}: ${commandFilesWithAliases[
+                text: `${state.localizer.translate(message.guildID, "misc.inGame.aliases")}: ${commandFilesWithAliases[
                     action
                 ].aliases.join(", ")}`,
             };
@@ -103,10 +103,9 @@ const helpMessage = async (
         );
 
         commandsWithHelp.sort((x, y) => y.helpPriority - x.helpPriority);
-        embedTitle = state.localizer.translate(message.guildID, "{{{kmq}}} Command Help", { kmq: "K-pop Music Quiz" });
+        embedTitle = state.localizer.translate(message.guildID, "help.title", { kmq: "K-pop Music Quiz" });
         embedDesc = state.localizer.translate(message.guildID,
-            `Type {{{play}}} in chat and the bot will play a random kpop song in VC. The goal of this game is to be the first person to guess the song name in chat.
-See your current game options with {{{options}}}. Use \`{{{help}}} [command]\` to get more details about a command.`,
+            "help.description",
             {
                 play: `\`${process.env.BOT_PREFIX}play\``,
                 options: `\`${process.env.BOT_PREFIX}options\``,
@@ -132,19 +131,19 @@ See your current game options with {{{options}}}. Use \`{{{help}}} [command]\` t
                 style: 5,
                 url: "https://discord.gg/RCuzwYV",
                 type: 2,
-                label: state.localizer.translate(message.guildID, "Official KMQ Server"),
+                label: state.localizer.translate(message.guildID, "misc.interaction.officialKmqServer"),
             },
             {
                 style: 5,
                 url: "https://brainicism.github.io/KMQ_Discord/GAMEPLAY",
                 type: 2,
-                label: state.localizer.translate(message.guildID, "How To Play"),
+                label: state.localizer.translate(message.guildID, "misc.interaction.howToPlay"),
             },
             {
                 style: 5,
                 url: "https://brainicism.github.io/KMQ_Discord/FAQ",
                 type: 2,
-                label: state.localizer.translate(message.guildID, "Frequently Asked Questions"),
+                label: state.localizer.translate(message.guildID, "misc.interaction.faq"),
             },
         ];
     }
@@ -187,20 +186,20 @@ export default class HelpCommand implements BaseCommand {
     help = (guildID: string): Help => ({
         name: "help",
         description: state.localizer.translate(guildID,
-            "Get help about the game's commands. Add a command to get information about the specific command."
+            "help.help.description"
         ),
         usage: `,help [${state.localizer.translate(guildID, "command")}]`,
         examples: [
             {
                 example: "`,help`",
                 explanation: state.localizer.translate(guildID,
-                    "Shows all available commands and a short description"
+                    "help.help.example.allCommands"
                 ),
             },
             {
                 example: "`,help cutoff`",
                 explanation: state.localizer.translate(guildID,
-                    "Shows a detailed description for the cutoff command"
+                    "help.help.example.sampleCommand"
                 ),
             },
         ],

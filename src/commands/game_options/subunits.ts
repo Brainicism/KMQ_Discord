@@ -39,7 +39,7 @@ export default class SubunitsCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "subunits",
             description: state.localizer.translate(guildID,
-                "Choose whether to automatically include a group's subunits, when using {{{groups}}}.",
+                "subunits.help.description",
                 { groups: `\`${process.env.BOT_PREFIX}groups\`` }
             ),
             usage: ",subunits [include | exclude]",
@@ -47,18 +47,18 @@ export default class SubunitsCommand implements BaseCommand {
                 {
                     example: "`,subunits include`",
                     explanation: state.localizer.translate(guildID,
-                        "Automatically include subunits. For example, `{{{groups}}} BTS` would include songs by BTS, J-Hope, RM, etc.",
-                        { groups: `${process.env.BOT_PREFIX}groups` }
+                        "subunits.help.example.include",
+                        { groupCommand: `${process.env.BOT_PREFIX}groups`, parentGroup: "BTS", subunitOne: "J-Hope", subunitTwo: "RM", }
                     ),
                 },
                 {
                     example: "`,subunits exclude`",
-                    explanation: state.localizer.translate(guildID, "Do not include subunits."),
+                    explanation: state.localizer.translate(guildID, "subunits.help.example.exclude"),
                 },
                 {
                     example: "`,subunits`",
                     explanation: state.localizer.translate(guildID,
-                        "Reset to the default option of {{{defaultSubunit}}}",
+                        "subunits.help.example.reset",
                         { defaultSubunit: `\`${DEFAULT_SUBUNIT_PREFERENCE}\`` }
                     ),
                 },

@@ -29,7 +29,7 @@ export default class ArtistTypeCommand implements BaseCommand {
         maxArgCount: 1,
         arguments: [
             {
-                name: "artist_Type",
+                name: "artistType",
                 type: "enum" as const,
                 enums: Object.values(ArtistType),
             },
@@ -39,19 +39,19 @@ export default class ArtistTypeCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "artisttype",
             description: state.localizer.translate(guildID,
-                "Choose whether you'd like to hear from soloists, groups, or both. Options are the following, {{{soloists}}}, {{{groups}}}, and {{{both}}}.",
+                "artisttype.help.description",
                 {
                     soloists: `\`${ArtistType.SOLOIST}\``,
                     groups: `\`${ArtistType.GROUP}\``,
                     both: `\`${ArtistType.BOTH}\``,
                 }
             ),
-            usage: ",artisttype [artisttype]",
+            usage: ",artisttype [artistType]",
             examples: [
                 {
                     example: "`,artisttype soloists`",
                     explanation: state.localizer.translate(guildID,
-                        "Play songs only from {{{soloists}}}",
+                        "artisttype.help.example.soloists",
                         {
                             soloists: `\`${ArtistType.SOLOIST}\``,
                         }
@@ -60,7 +60,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                 {
                     example: "`,artisttype groups`",
                     explanation: state.localizer.translate(guildID,
-                        "Play songs only from {{{groups}}}",
+                        "artisttype.help.example.groups",
                         {
                             groups: `\`${ArtistType.GROUP}\``,
                         }
@@ -69,7 +69,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                 {
                     example: "`,artisttype both`",
                     explanation: state.localizer.translate(guildID,
-                        "Plays songs from both {{{soloists}}} and {{{groups}}}",
+                        "artisttype.help.example.both",
                         {
                             soloists: `\`${ArtistType.SOLOIST}\``,
                             groups: `\`${ArtistType.GROUP}\``,
@@ -78,7 +78,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                 },
                 {
                     example: "`,artisttype`",
-                    explanation: state.localizer.translate(guildID, "Resets the artist type option"),
+                    explanation: state.localizer.translate(guildID, "artisttype.help.example.reset"),
                 },
             ],
         });
@@ -109,13 +109,13 @@ export default class ArtistTypeCommand implements BaseCommand {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Game Option Conflict",
+                title: "misc.failure.gameOptionConflict.title",
                 description: state.localizer.translate(message.guildID,
-                    "{{{groups}}} game option is currently set. {{{artisttype}}} and {{{groups}}} are incompatible. Remove the {{{groups}}} option by typing {{{groupsCommand}}} to proceed",
+                    "misc.failure.gameOptionConflict.description",
                     {
-                        groups: `\`${GameOption.GROUPS}\``,
-                        artisttype: `\`${GameOption.ARTIST_TYPE}\``,
-                        groupsCommand: `\`${process.env.BOT_PREFIX}groups\``,
+                        optionOne: `\`${GameOption.GROUPS}\``,
+                        optionTwo: `\`${GameOption.ARTIST_TYPE}\``,
+                        optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
                     }
                 ),
             });

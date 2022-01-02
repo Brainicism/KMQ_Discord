@@ -41,14 +41,14 @@ export default class CutoffCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "cutoff",
             description: state.localizer.translate(guildID,
-                "Set a cutoff year range for songs. If one value is specified, only songs AFTER that year will be played. If two values are specified, only songs BETWEEN those two years will be played"
+                "cutoff.help.description"
             ),
             usage: ",cutoff [year_start] {year_end}",
             examples: [
                 {
                     example: "`,cutoff 2015`",
                     explanation: state.localizer.translate(guildID,
-                        "Play songs released after the year {{{year}}}",
+                        "cutoff.help.example.singleCutoff",
                         {
                             year: String(2015),
                         }
@@ -57,7 +57,7 @@ export default class CutoffCommand implements BaseCommand {
                 {
                     example: "`,cutoff 2015 2018`",
                     explanation: state.localizer.translate(guildID,
-                        "Play songs released between the years {{{beginningYear}}}-{{{endYear}}}",
+                        "cutoff.help.example.twoCutoffs",
                         {
                             beginningYear: String(2015),
                             endYear: String(2018),
@@ -67,7 +67,7 @@ export default class CutoffCommand implements BaseCommand {
                 {
                     example: "`,cutoff`",
                     explanation: state.localizer.translate(guildID,
-                        "Reset to the default cutoff of {{{defaultBeginningSearchYear}}} to {{{defaultEndSearchYear}}}",
+                        "cutoff.help.example.reset",
                         {
                             defaultBeginningSearchYear: String(
                                 DEFAULT_BEGINNING_SEARCH_YEAR
@@ -116,9 +116,9 @@ export default class CutoffCommand implements BaseCommand {
             const endYear = yearRange[1];
             if (endYear < startYear) {
                 await sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(message.guildID, "Invalid End Year"),
+                    title: state.localizer.translate(message.guildID, "cutoff.failure.invalidEndYear.title"),
                     description: state.localizer.translate(message.guildID,
-                        "End year must be after or equal to start year"
+                        "cutoff.failure.invalidEndYear.description",
                     ),
                 });
                 return;

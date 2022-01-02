@@ -21,15 +21,13 @@ const logger = new IPCLogger("skip");
 
 async function sendSkipNotification(
     message: GuildTextableMessage,
-    gameSession: GameSession,
+    gameRound: GameRound,
 ): Promise<void> {
     await sendInfoMessage(
         MessageContext.fromMessage(message),
         {
-            title: state.localizer.translate(message.guildID, "Skip"),
-            description: `${gameSession.gameRound.getNumSkippers()}/${getMajorityCount(
-                message.guildID
-            )} ${state.localizer.translate(message.guildID, "skips received")}.`,
+            title: state.localizer.translate(message.guildID, "skip.title"),
+            description: state.localizer.translate(message.guildID, "skip.vote.description", { skipCounter: `${gameRound.getNumSkippers()}/${getMajorityCount(message.guildID)}` }),
         },
         true
     );
@@ -41,10 +39,8 @@ async function sendSkipMessage(
 ): Promise<void> {
     await sendInfoMessage(MessageContext.fromMessage(message), {
         color: EMBED_SUCCESS_COLOR,
-        title: state.localizer.translate(message.guildID, "Skip"),
-        description: `${gameRound.getNumSkippers()}/${getMajorityCount(
-            message.guildID
-        )} ${state.localizer.translate(message.guildID, "skips achieved, skipping...")}`,
+        title: state.localizer.translate(message.guildID, "skip.title"),
+        description: state.localizer.translate(message.guildID, "skip.success.description", { skipCounter: `${gameRound.getNumSkippers()}/${getMajorityCount(message.guildID)}` }),
         thumbnailUrl: KmqImages.NOT_IMPRESSED,
     });
 }
@@ -74,7 +70,7 @@ export default class SkipCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "skip",
             description: state.localizer.translate(guildID,
-                "Vote to skip the current song. A song is skipped when majority of participants vote to skip it."
+                "skip.help.description"
             ),
             usage: ",skip",
             examples: [],
@@ -149,7 +145,7 @@ export default class SkipCommand implements BaseCommand {
             );
         } else {
             logger.info(`${getDebugLogHeader(message)} | Skip vote received.`);
-            await sendSkipNotification(message, gameSession);
+            await sendSkipNotification(message, gameSession.gameRound);
         }
 
         gameSession.lastActiveNow();

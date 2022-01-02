@@ -40,7 +40,7 @@ export default class AnswerCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "answer",
             description: state.localizer.translate(guildID,
-                "Choose how to answer: by typing your answer, or via multiple choice. Options are the following, `{{{typing}}}`, `{{{typingtypos}}}`, `{{{easy}}}`, `{{{medium}}}`, and `{{{hard}}}`. Playing on multiple choice mode reduces EXP by (0.25x, 0.5x, 0.75x) based on difficulty.",
+                "answer.help.description",
                 {
                     typing: `\`${AnswerType.TYPING}\``,
                     typingtypos: `\`${AnswerType.TYPING_TYPOS}\``,
@@ -54,31 +54,31 @@ export default class AnswerCommand implements BaseCommand {
                 {
                     example: "`,answer typing`",
                     explanation: state.localizer.translate(guildID,
-                        "Type your answer in the chat to guess"
+                        "answer.help.example.typing",
                     ),
                 },
                 {
                     example: "`,answer typingtypos`",
                     explanation: state.localizer.translate(guildID,
-                        "Type your answer in the chat to guess. Small typos will be marked as correct. 0.8x EXP penalty will be applied."
+                        "answer.help.example.typingTypos",
                     ),
                 },
                 {
                     example: "`,answer easy`",
                     explanation: state.localizer.translate(guildID,
-                        "Click on the button from {{{optionCount}}} multiple choice options to guess. {{{penalty}}} EXP penalty will be applied.", { optionCount: String(4), penalty: "0.25x" }
+                        "answer.help.example.multipleChoice", { optionCount: String(4), penalty: "0.25x" }
                     ),
                 },
                 {
                     example: "`,answer medium`",
                     explanation: state.localizer.translate(guildID,
-                        "Click on the button from {{{optionCount}}} multiple choice options to guess. {{{penalty}}} EXP penalty will be applied.", { optionCount: String(6), penalty: "0.5x" }
+                        "answer.help.example.multipleChoice", { optionCount: String(6), penalty: "0.5x" }
                     ),
                 },
                 {
                     example: "`,answer hard`",
                     explanation: state.localizer.translate(guildID,
-                        "Click on the button from {{{optionCount}}} multiple choice options to guess. {{{penalty}}} EXP penalty will be applied.", { optionCount: String(8), penalty: "0.75x" }
+                        "answer.help.example.multipleChoice", { optionCount: String(8), penalty: "0.75x" }
                     ),
                 },
             ],

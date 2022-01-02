@@ -39,25 +39,25 @@ export default class OstCommand implements BaseCommand {
 
     help = (guildID: string) => ({
             name: "ost",
-            description: state.localizer.translate(guildID, "Choose whether to include OST songs."),
+            description: state.localizer.translate(guildID, "ost.help.description"),
             usage: ",ost [include | exclude | exclusive]",
             examples: [
                 {
                     example: "`,ost include`",
-                    explanation: state.localizer.translate(guildID, "Include OST songs."),
+                    explanation: state.localizer.translate(guildID, "ost.help.example.include"),
                 },
                 {
                     example: "`,ost exclude`",
-                    explanation: state.localizer.translate(guildID, "Exclude OST songs."),
+                    explanation: state.localizer.translate(guildID, "ost.help.example.exclude"),
                 },
                 {
                     example: "`,ost exclusive`",
-                    explanation: state.localizer.translate(guildID, "Exclusively play OST songs."),
+                    explanation: state.localizer.translate(guildID, "ost.help.example.exclusive"),
                 },
                 {
                     example: "`,ost`",
                     explanation: state.localizer.translate(guildID,
-                        "Reset to the default option of {{{defaultOst}}}",
+                        "ost.help.example.reset",
                         { defaultOst: `\`${DEFAULT_OST_PREFERENCE}\`` }
                     ),
                 },

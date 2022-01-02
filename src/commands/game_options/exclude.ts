@@ -23,7 +23,7 @@ export default class ExcludeCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "exclude",
             description: state.localizer.translate(guildID,
-                "Select as many groups that you would like to ignore, separated by commas. A list of group names can be found [here]({{{groupsLink}}}).",
+                "exclude.help.description",
                 {
                     groupsLink: `http://${process.env.WEB_SERVER_IP}:${process.env.WEB_SERVER_PORT}/groups`,
                 }
@@ -33,7 +33,7 @@ export default class ExcludeCommand implements BaseCommand {
                 {
                     example: "`,exclude blackpink`",
                     explanation: state.localizer.translate(guildID,
-                        "Ignore songs from {{{artist}}}",
+                        "exclude.help.example.singleGroup",
                         {
                             artist: "Blackpink",
                         }
@@ -42,7 +42,7 @@ export default class ExcludeCommand implements BaseCommand {
                 {
                     example: "`,exclude blackpink, bts, red velvet`",
                     explanation: state.localizer.translate(guildID,
-                        "Ignore songs from {{{groupOne}}}, {{{groupTwo}}}, and {{{groupThree}}}",
+                        "exclude.help.example.multipleGroups",
                         {
                             groupOne: "Blackpink",
                             groupTwo: "BTS",
@@ -52,7 +52,7 @@ export default class ExcludeCommand implements BaseCommand {
                 },
                 {
                     example: "`,exclude`",
-                    explanation: state.localizer.translate(guildID, "Resets the exclude option"),
+                    explanation: state.localizer.translate(guildID, "exclude.help.example.reset"),
                 },
             ],
         });
@@ -81,9 +81,10 @@ export default class ExcludeCommand implements BaseCommand {
         if (parsedMessage.components.length > 1) {
             if (["add", "remove"].includes(parsedMessage.components[0])) {
                 excludeWarning = state.localizer.translate(message.guildID,
-                    "Did you mean to use {{{addOrRemove}}} exclude?",
+                    "misc.warning.addRemoveOrdering.footer",
                     {
                         addOrRemove: `${process.env.BOT_PREFIX}${parsedMessage.components[0]}`,
+                        command: "exclude",
                     }
                 );
             }
@@ -106,13 +107,14 @@ export default class ExcludeCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "Unknown Group Name"),
+                title: state.localizer.translate(message.guildID, "misc.failure.unrecognizedGroups.title"),
                 description: state.localizer.translate(message.guildID,
-                    "One or more of the specified group names was not recognized. Those groups that matched are excluded. Please ensure that the group name matches exactly with the list provided by {{{helpGroups}}}. \nThe following groups were **not** recognized:\n {{{unmatchedGroups}}}\nUse {{{addExclude}}} to add the unmatched groups.",
+                    "misc.failure.unrecognizedGroups.description",
                     {
+                        matchedGroupsAction: state.localizer.translate(message.guildID, "exclude.failure.unrecognizedGroups.excluded"),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: `${unmatchedGroups.join(", ")}`,
-                        addExclude: `\`${process.env.BOT_PREFIX}add exclude\``,
+                        solution: `\`${process.env.BOT_PREFIX}add exclude\``,
                     }
                 ),
                 footerText: excludeWarning,
@@ -130,20 +132,15 @@ export default class ExcludeCommand implements BaseCommand {
             );
             if (intersection.size > 0) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(message.guildID, "Groups and Exclude Conflict"),
+                    title: state.localizer.translate(message.guildID, "misc.failure.groupsExcludeConflict.title"),
                     description: state.localizer.translate(message.guildID,
-                        `One or more of the given {{{exclude}}} groups is already included in {{{groups}}}. \nThe following groups were **not** added to {{{exclude}}}:\n ${[
-                            ...intersection,
-                        ]
-                            .filter((x) => !x.includes("+"))
-                            .join(
-                                ", "
-                            )} \nUse {{{removeGroups}}} and then {{{excludeCommand}}} these groups to prevent them from playing.`,
+                        "misc.failure.groupsExcludeConflict.description",
                         {
-                            exclude: `\`${GameOption.EXCLUDE}\``,
-                            groups: `\`${GameOption.GROUPS}\``,
-                            removeGroups: `\`${process.env.BOT_PREFIX}remove groups\``,
-                            excludeCommand: `\`${process.env.BOT_PREFIX}exclude\``,
+                            conflictingOptionOne: `\`${GameOption.EXCLUDE}\``,
+                            conflictingOptionTwo: `\`${GameOption.GROUPS}\``,
+                            solutionStepOne: `\`${process.env.BOT_PREFIX}remove groups\``,
+                            solutionStepTwo: `\`${process.env.BOT_PREFIX}exclude\``,
+                            allowOrPrevent: state.localizer.translate(message.guildID, "misc.failure.groupsExcludeConflict.prevent"),
                         }
                     ),
                 });

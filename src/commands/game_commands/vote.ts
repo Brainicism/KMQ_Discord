@@ -26,7 +26,7 @@ export default class VoteCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "vote",
             description: state.localizer.translate(guildID,
-                "Shows instructions on how to vote to receive 2x EXP for an hour."
+                "vote.help.description",
             ),
             usage: ",vote",
             examples: [],
@@ -63,7 +63,7 @@ export default class VoteCommand implements BaseCommand {
                     VOTE_BONUS_DURATION
             );
             if (nextVoteTime.getTime() <= Date.now()) {
-                voteStatusString = state.localizer.translate(message.guildID, "You can vote now!");
+                voteStatusString = state.localizer.translate(message.guildID, "vote.voteAvailable");
             } else {
                 const hoursLeft = Math.floor(
                     (nextVoteTime.getTime() - Date.now()) / (60 * 60 * 1000)
@@ -73,25 +73,20 @@ export default class VoteCommand implements BaseCommand {
                     nextVoteTime.getTime() - Date.now()
                 ).getMinutes();
 
-                if (hoursLeft === 0 && minutesLeft === 0) {
-                    const secondsLeft = new Date(
-                        nextVoteTime.getTime() - Date.now()
-                    ).getSeconds();
+                const secondsLeft = new Date(
+                    nextVoteTime.getTime() - Date.now()
+                ).getSeconds();
 
-                    voteStatusString = state.localizer.translateN(message.guildID,
-                        "You can vote in **%s** second.",
-                        secondsLeft
-                    );
+                if(hoursLeft > 0) {
+                    voteStatusString = state.localizer.translate(message.guildID, "vote.unavailable.hours", { hours: state.localizer.translateN(message.guildID, "%s hour", hoursLeft) })
+                } else if (minutesLeft > 0) {
+                    voteStatusString = state.localizer.translate(message.guildID, "vote.unavailable.minutes", { minutes: state.localizer.translateN(message.guildID, "%s minute", minutesLeft) });
                 } else {
-                    voteStatusString = `${state.localizer.translate(message.guildID, "You can vote in")} ${
-                        hoursLeft > 0
-                            ? state.localizer.translateN(message.guildID, "**%s** hour and ", hoursLeft)
-                            : ""
-                    }${state.localizer.translateN(message.guildID, "**%s** minute.", minutesLeft)}.`;
+                    voteStatusString = state.localizer.translate(message.guildID,"vote.unavailable.seconds",{ seconds: state.localizer.translateN(message.guildID, "%s second", secondsLeft) });
                 }
             }
         } else {
-            voteStatusString = state.localizer.translate(message.guildID, "You can vote now!");
+            voteStatusString = state.localizer.translate(message.guildID, "vote.available");
         }
 
         sendInfoMessage(
@@ -99,10 +94,10 @@ export default class VoteCommand implements BaseCommand {
             {
                 color: boostActive ? EMBED_SUCCESS_BONUS_COLOR : null,
                 title: boostActive
-                    ? state.localizer.translate(message.guildID, "Boost Active!")
-                    : state.localizer.translate(message.guildID, "Boost Inactive"),
+                    ? state.localizer.translate(message.guildID, "vote.boostActive")
+                    : state.localizer.translate(message.guildID, "vote.boostInactive"),
                 description: `${voteStatusString}\n\n${state.localizer.translate(message.guildID,
-                    "Vote for KMQ on [top.gg]({{{voteLink}}}) and you'll receive 2x EXP for an hour! You can vote once every {{{voteResetDuration}}} hours.\n\nWe'd appreciate it if you could also leave a [review]({{{reviewLink}}}).",
+                    "vote.description",
                     {
                         voteLink: VOTE_LINK,
                         voteResetDuration: String(VOTE_RESET_DURATION),
@@ -119,14 +114,14 @@ export default class VoteCommand implements BaseCommand {
                                 url: VOTE_LINK,
                                 type: 2 as const,
                                 emoji: { name: "✅" },
-                                label: state.localizer.translate(message.guildID, "Vote!"),
+                                label: state.localizer.translate(message.guildID, "misc.interaction.vote"),
                             },
                             {
                                 style: 5,
                                 url: REVIEW_LINK,
                                 type: 2 as const,
                                 emoji: { name: "📖" },
-                                label: state.localizer.translate(message.guildID, "Leave a review!"),
+                                label: state.localizer.translate(message.guildID, "misc.interaction.leaveReview"),
                             },
                         ],
                     },

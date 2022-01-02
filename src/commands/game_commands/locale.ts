@@ -18,25 +18,25 @@ const logger = new IPCLogger("locale");
 export default class LocaleTypeCommand implements BaseCommand {
     help = (guildID: string): Help => ({
             name: "locale",
-            description: state.localizer.translate(guildID, "Change the language of the bot."),
+            description: state.localizer.translate(guildID, "locale.help.description"),
             usage: ",locale [language]",
             examples: [
                 {
                     example: "`,locale en`",
                     explanation: state.localizer.translate(guildID,
-                        "Change the bot's language to English"
+                        "locale.help.example.toEnglish",
                     ),
                 },
                 {
                     example: "`,locale ko`",
                     explanation: state.localizer.translate(guildID,
-                        "Change the bot's language to Korean"
+                        "locale.help.example.toKorean",
                     ),
                 },
                 {
                     example: "`,locale`",
                     explanation: state.localizer.translate(guildID,
-                        "Reset the bot's language to {{{defaultLocale}}}",
+                        "locale.help.example.reset",
                         { defaultLocale: DEFAULT_LOCALE }
                     ),
                 },
@@ -73,9 +73,9 @@ export default class LocaleTypeCommand implements BaseCommand {
         LocaleTypeCommand.updateLocale(message.guildID, language);
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(message.guildID, "{{{option}}} Updated", { option: "Locale" }),
+            title: state.localizer.translate(message.guildID, "options.updated", { presetOrOption: "Locale" }),
             description: state.localizer.translate(message.guildID,
-                "The bot's language has been updated to `{{{language}}}`.",
+                "locale.updatedDescription",
                 { language }
             ),
             thumbnailUrl: KmqImages.THUMBS_UP,

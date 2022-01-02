@@ -38,32 +38,32 @@ export default class SeekCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "seek",
             description: state.localizer.translate(guildID,
-                "Choose whether each song is played from the beginning, middle, or at a random point."
+                "seek.help.description",
             ),
             usage: ",seek [beginning | middle | random]",
             examples: [
                 {
                     example: "`,seek random`",
                     explanation: state.localizer.translate(guildID,
-                        "Songs will be played starting from a random point in the middle"
+                        "seek.help.example.random"
                     ),
                 },
                 {
                     example: "`,seek middle`",
                     explanation: state.localizer.translate(guildID,
-                        "Songs will be played starting from the middle point"
+                        "seek.help.example.middle"
                     ),
                 },
                 {
                     example: "`,seek beginning`",
                     explanation: state.localizer.translate(guildID,
-                        "Song will be played starting from the very beginning"
+                        "seek.help.example.beginning"
                     ),
                 },
                 {
                     example: "`,seek`",
                     explanation: state.localizer.translate(guildID,
-                        "Reset to the default seek of {{{defaultSeek}}}",
+                        "seek.help.example.reset",
                         {
                             defaultSeek: DEFAULT_SEEK,
                         }

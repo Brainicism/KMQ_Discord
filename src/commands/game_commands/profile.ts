@@ -37,8 +37,8 @@ const RANK_TITLES = [
     { title: "Ruler of the Two Koreas", req: 110 },
     { title: "Supreme Ruler of Asia", req: 120 },
     { title: "Benevolent Ruler of Earth", req: 130 },
-    { title: "Divine Ruler of the Stars", req: 140 },
-    { title: "Almighty Ruler of the Solar System", req: 150 },
+    { title: "Almighty Ruler of the Solar System", req: 140 },
+    { title: "Divine Ruler of the Stars", req: 150 },
     { title: "Enlightened Ruler of the Galaxy", req: 160 },
     { title: "Immortal Ruler of the Universe", req: 170 },
     { title: "Omniscient Ruler of the Multiverse", req: 180 },
@@ -156,7 +156,7 @@ async function getProfileFields(
 
     const fields: Array<Eris.EmbedField> = [
         {
-            name: state.localizer.translate(guildID, "Level"),
+            name: state.localizer.translate(guildID, "misc.level"),
             value: `${friendlyFormattedNumber(level)} (${getRankNameByLevel(
                 level,
                 guildID
@@ -164,21 +164,21 @@ async function getProfileFields(
             inline: true,
         },
         {
-            name: state.localizer.translate(guildID, "Experience"),
+            name: state.localizer.translate(guildID, "profile.experience"),
             value: `${friendlyFormattedNumber(exp)}/${friendlyFormattedNumber(
                 CUM_EXP_TABLE[level + 1]
             )}`,
             inline: true,
         },
         {
-            name: state.localizer.translate(guildID, "Overall Rank"),
+            name: state.localizer.translate(guildID, "profile.overallRank"),
             value: `#${friendlyFormattedNumber(
                 relativeLevelRank
             )}/${friendlyFormattedNumber(totalPlayers)}`,
             inline: true,
         },
         {
-            name: state.localizer.translate(guildID, "Songs Guessed"),
+            name: state.localizer.translate(guildID, "profile.songsGuessed"),
             value: `${friendlyFormattedNumber(
                 songsGuessed
             )} | #${friendlyFormattedNumber(
@@ -187,7 +187,7 @@ async function getProfileFields(
             inline: true,
         },
         {
-            name: state.localizer.translate(guildID, "Games Played"),
+            name: state.localizer.translate(guildID, "profile.gamesPlayed"),
             value: `${friendlyFormattedNumber(
                 gamesPlayed
             )} | #${friendlyFormattedNumber(
@@ -196,17 +196,17 @@ async function getProfileFields(
             inline: true,
         },
         {
-            name: state.localizer.translate(guildID, "First Played"),
+            name: state.localizer.translate(guildID, "profile.firstPlayed"),
             value: firstPlayDateString,
             inline: true,
         },
         {
-            name: state.localizer.translate(guildID, "Last Active"),
+            name: state.localizer.translate(guildID, "profile.lastActive"),
             value: lastActiveDateString,
             inline: true,
         },
         {
-            name: state.localizer.translate(guildID, "Times Voted"),
+            name: state.localizer.translate(guildID, "profile.timesVoted"),
             value: friendlyFormattedNumber(timesVoted),
             inline: true,
         },
@@ -228,7 +228,7 @@ async function getProfileFields(
 
     if (badges) {
         fields.push({
-            name: state.localizer.translate(guildID, "Badges"),
+            name: state.localizer.translate(guildID, "profile.badges"),
             value: badges,
             inline: false,
         });
@@ -240,17 +240,17 @@ async function getProfileFields(
 export default class ProfileCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "profile",
-            description: state.localizer.translate(guildID, "Shows your game stats."),
+            description: state.localizer.translate(guildID, "profile.help.description"),
             usage: ",profile { @mention }",
             examples: [
                 {
                     example: "`,profile`",
-                    explanation: state.localizer.translate(guildID, "View your own player profile."),
+                    explanation: state.localizer.translate(guildID, "profile.help.example.self"),
                 },
                 {
                     example: "`,profile @FortnitePlayer`",
                     explanation: state.localizer.translate(guildID,
-                        "Views {{{playerName}}}'s player profile.",
+                        "profile.help.example.otherPlayerMention",
                         {
                             playerName: "FortnitePlayer",
                         }
@@ -259,7 +259,7 @@ export default class ProfileCommand implements BaseCommand {
                 {
                     example: "`,profile 141734249702096896`",
                     explanation: state.localizer.translate(guildID,
-                        "Views a player profile based on their Discord ID."
+                        "profile.help.example.otherPlayerID",
                     ),
                 },
             ],
@@ -289,10 +289,10 @@ export default class ProfileCommand implements BaseCommand {
 
                 if (!requestedPlayer) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: state.localizer.translate(message.guildID, "No Profile Found"),
+                        title: state.localizer.translate(message.guildID, "profile.failure.notFound.title"),
                         description: state.localizer.translate(message.guildID,
-                            "Could not find the specified user ID. See {{{profileHelp}}} for details.",
-                            { profileHelp: "`,help profile`" }
+                            "profile.failure.notFound.description",
+                            { profileHelp: `\`${process.env.BOT_PREFIX}help profile\`` }
                         ),
                     });
                     return;
@@ -300,10 +300,10 @@ export default class ProfileCommand implements BaseCommand {
             }
         } else {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "No Profile Found"),
+                title: state.localizer.translate(message.guildID, "profile.failure.notFound.title"),
                 description: state.localizer.translate(message.guildID,
-                    "Make sure you're using this command correctly. See {{{profileHelp}}} for more details.",
-                    { profileHelp: "`,help profile`" }
+                    "profile.failure.notFound.badUsage.description",
+                    { profileHelp: `\`${process.env.BOT_PREFIX}help profile\`` }
                 ),
             });
             return;
@@ -313,9 +313,9 @@ export default class ProfileCommand implements BaseCommand {
 
         if (fields.length === 0) {
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "No Profile Found"),
+                title: state.localizer.translate(message.guildID, "profile.failure.notFound.title"),
                 description: state.localizer.translate(message.guildID,
-                    "This user needs to play their first game before their stats are tracked."
+                    "misc.interaction.profile.noStats",
                 ),
             });
             return;
@@ -353,7 +353,7 @@ export async function handleProfileInteraction(
         tryCreateInteractionErrorAcknowledgement(
             interaction,
             state.localizer.translate(interaction.guildID,
-                "I can't access that user right now. Try using {{{profileUserID}}} instead.",
+                "misc.interaction.profile.inaccessible",
                 {
                     profileUserID: `\`${process.env.BOT_PREFIX}profile ${userId}\``,
                 }
@@ -373,7 +373,7 @@ export async function handleProfileInteraction(
         tryCreateInteractionErrorAcknowledgement(
             interaction,
             state.localizer.translate(interaction.guildID,
-                "This user needs to play their first game before their stats are tracked."
+                "misc.interaction.profile.noStats",
             )
         );
 

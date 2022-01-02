@@ -24,7 +24,7 @@ export default class GroupsCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "groups",
             description: state.localizer.translate(guildID,
-                "Select as many groups that you would like to hear from, separated by commas. A list of group names can be found [here]({{{groupList}}}).",
+                "groups.help.description",
                 {
                     groupList: GROUP_LIST_URL,
                 }
@@ -34,7 +34,7 @@ export default class GroupsCommand implements BaseCommand {
                 {
                     example: "`,groups blackpink`",
                     explanation: state.localizer.translate(guildID,
-                        "Plays songs only from {{{group}}}",
+                        "groups.help.example.singleGroup",
                         {
                             group: "Blackpink",
                         }
@@ -43,7 +43,7 @@ export default class GroupsCommand implements BaseCommand {
                 {
                     example: "`,groups blackpink, bts, red velvet`",
                     explanation: state.localizer.translate(guildID,
-                        "Plays songs only from {{{groupOne}}}, {{{groupTwo}}}, and {{{groupThree}}}",
+                        "groups.help.example.multipleGroups",
                         {
                             groupOne: "Blackpink",
                             groupTwo: "BTS",
@@ -53,7 +53,7 @@ export default class GroupsCommand implements BaseCommand {
                 },
                 {
                     example: "`,groups`",
-                    explanation: state.localizer.translate(guildID, "Resets the groups option"),
+                    explanation: state.localizer.translate(guildID, "groups.help.example.reset"),
                 },
             ],
             actionRowComponents: [
@@ -61,7 +61,7 @@ export default class GroupsCommand implements BaseCommand {
                     style: 5 as const,
                     url: GROUP_LIST_URL,
                     type: 2 as const,
-                    label: state.localizer.translate(guildID, "Full List of Groups"),
+                    label: state.localizer.translate(guildID, "misc.interaction.fullGroupsList"),
                 },
             ],
         });
@@ -90,9 +90,10 @@ export default class GroupsCommand implements BaseCommand {
         if (parsedMessage.components.length > 1) {
             if (["add", "remove"].includes(parsedMessage.components[0])) {
                 groupsWarning = state.localizer.translate(message.guildID,
-                    "Did you mean to use {{{addOrRemove}}} groups?",
+                    "misc.warning.addRemoveOrdering.footer",
                     {
                         addOrRemove: `${process.env.BOT_PREFIX}${parsedMessage.components[0]}`,
+                        command: "groups",
                     }
                 );
             }
@@ -115,13 +116,14 @@ export default class GroupsCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "Unknown Group Name"),
+                title: state.localizer.translate(message.guildID, "misc.failure.unrecognizedGroups.title"),
                 description: state.localizer.translate(message.guildID,
-                    "One or more of the specified group names was not recognized. Those groups that matched are added. Please ensure that the group name matches exactly with the list provided by {{{helpGroups}}}. \nThe following groups were **not** recognized:\n {{{unmatchedGroups}}} \nUse {{{add}}} to add the unmatched groups.",
+                    "misc.failure.unrecognizedGroups.description",
                     {
+                        addedOrRemoved: state.localizer.translate(message.guildID, "misc.failure.unrecognizedGroups.added"),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: unmatchedGroups.join(", "),
-                        add: `\`${process.env.BOT_PREFIX}add\``,
+                        solution: state.localizer.translate(message.guildID, "misc.failure.unrecognizedGroups.solution", { command: `\`${process.env.BOT_PREFIX}add\``})
                     }
                 ),
                 footerText: groupsWarning,
@@ -139,20 +141,15 @@ export default class GroupsCommand implements BaseCommand {
             );
             if (intersection.size > 0) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(message.guildID, "Groups and Exclude Conflict"),
+                    title: state.localizer.translate(message.guildID, "misc.failure.groupsExcludeConflict.title"),
                     description: state.localizer.translate(message.guildID,
-                        `One or more of the given {{{groups}}} is already included in {{{exclude}}}. \nThe following groups were **not** added to {{{groups}}}:\n ${[
-                            ...intersection,
-                        ]
-                            .filter((x) => !x.includes("+"))
-                            .join(
-                                ", "
-                            )} \nUse {{{removeExclude}}} and then {{{groupsCommand}}} to allow them to play.`,
+                       "misc.failure.groupsExcludeConflict.description",
                         {
-                            groups: `\`${GameOption.GROUPS}\``,
-                            exclude: `\`${GameOption.EXCLUDE}\``,
-                            removeExclude: `\`${process.env.BOT_PREFIX}remove ${GameOption.EXCLUDE}\``,
-                            groupsCommand: `\`${process.env.BOT_PREFIX}${GameOption.GROUPS}\``,
+                            conflictingOptionOne: `\`${GameOption.GROUPS}\``,
+                            conflictingOptionTwo: `\`${GameOption.EXCLUDE}\``,
+                            solutionStepOne: `\`${process.env.BOT_PREFIX}remove ${GameOption.EXCLUDE}\``,
+                            solutionStepTwo: `\`${process.env.BOT_PREFIX}${GameOption.GROUPS}\``,
+                            allowOrPrevent: state.localizer.translate(message.guildID, "misc.failure.groupsExcludeConflict.allow")
                         }
                     ),
                 });

@@ -31,20 +31,20 @@ export default class GuessTimeoutCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "timer",
             description: state.localizer.translate(guildID,
-                "Try your best to guess correctly before the timer runs out! Enter a time in seconds, or give no arguments to disable."
+                "timer.help.description"
             ),
             usage: ",timer [time]",
             examples: [
                 {
                     example: "`,timer 15`",
                     explanation: state.localizer.translate(guildID,
-                        "In {{{timer}}} seconds, if no user has guessed correctly, the round ends and the next one begins automatically",
+                        "timer.help.set",
                         { timer: String(15) }
                     ),
                 },
                 {
                     example: "`,timer`",
-                    explanation: state.localizer.translate(guildID, "Disables the timer"),
+                    explanation: state.localizer.translate(guildID, "timer.help.reset"),
                 },
             ],
         });

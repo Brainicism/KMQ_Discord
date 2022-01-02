@@ -31,20 +31,20 @@ export default class GoalCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "goal",
             description: state.localizer.translate(guildID,
-                "Once the player with the most points reaches the goal score, the game ends. Calling it with no arguments disables the goal. If a game is in progress, the goal must exceed the highest score."
+                "goa.help.description"
             ),
             usage: ",goal [goal]",
             examples: [
                 {
                     example: "`,goal 30`",
                     explanation: state.localizer.translate(guildID,
-                        "The first player to {{{goal}}} wins the game",
+                        "goal.help.example.set",
                         { goal: String(30) }
                     ),
                 },
                 {
                     example: "`,goal`",
-                    explanation: state.localizer.translate(guildID, "Disables the goal"),
+                    explanation: state.localizer.translate(guildID, "goal.help.example.reset"),
                 },
             ],
         });
@@ -80,9 +80,9 @@ export default class GoalCommand implements BaseCommand {
                 );
 
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(message.guildID, "Error Applying Goal"),
+                    title: state.localizer.translate(message.guildID, "goal.failure.goalExceeded.title"),
                     description: state.localizer.translate(message.guildID,
-                        "Given goal exceeds highest score. Please raise your goal, or start a new game."
+                        "goal.failure.goalExceeded.description"
                     ),
                 });
                 return;
@@ -98,9 +98,9 @@ export default class GoalCommand implements BaseCommand {
                 );
 
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(message.guildID, "Game Option Conflict"),
+                    title: state.localizer.translate(message.guildID, "misc.failure.gameOptionConflict.title"),
                     description: state.localizer.translate(message.guildID,
-                        "An {{{elimination}}} game is currently in progress.  and {{{elimination}}} are incompatible. Play a {{{classic}}} or {{{teams}}} game to use {{{goal}}}.",
+                        "goal.failure.gameOptionConflict.description",
                         {
                             elimination: `\`${GameType.ELIMINATION}\``,
                             goal: `\`${GameOption.GOAL}\``,

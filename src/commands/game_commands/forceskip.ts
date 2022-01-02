@@ -25,7 +25,7 @@ export default class ForceSkipCommand implements BaseCommand {
     help = (guildID: string): Help => ({
             name: "forceskip",
             description: state.localizer.translate(guildID,
-                "The person that started the game can force-skip the current song, no majority necessary."
+                "forceskip.help.description",
             ),
             usage: ",forceskip",
             examples: [],
@@ -65,9 +65,9 @@ export default class ForceSkipCommand implements BaseCommand {
 
         if (message.author.id !== gameSession.owner.id) {
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "Force Skip Ignored"),
+                title: state.localizer.translate(message.guildID, "forceskip.failure.notOwner.title"),
                 description: state.localizer.translate(message.guildID,
-                    "Only the person who started the game ({{{mentionedUser}}}) can force-skip.",
+                    "forceskip.failure.notOwner.description",
                     { mentionedUser: getMention(gameSession.owner.id) }
                 ),
             });
@@ -79,9 +79,9 @@ export default class ForceSkipCommand implements BaseCommand {
             MessageContext.fromMessage(message),
             {
                 color: EMBED_SUCCESS_COLOR,
-                title: state.localizer.translate(message.guildID, "Skip"),
+                title: state.localizer.translate(message.guildID, "skip.title"),
                 description: state.localizer.translate(message.guildID,
-                    "Owner has forceskipped the round..."
+                    "forceskip.description"
                 ),
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
             },

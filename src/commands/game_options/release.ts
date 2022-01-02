@@ -39,27 +39,27 @@ export default class ReleaseCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "release",
             description: state.localizer.translate(guildID,
-                "Choose whether to include only official music videos, or all videos (b-sides, dance practices, acoustic versions, remixes, etc.)."
+                "release.help.description"
             ),
             usage: ",release [official | all]",
             examples: [
                 {
                     example: "`,release official`",
                     explanation: state.localizer.translate(guildID,
-                        "Plays only {{{official}}} music videos",
+                        "release.help.example.official",
                         { official: `\`${ReleaseType.OFFICIAL}\`` }
                     ),
                 },
                 {
                     example: "`,release all`",
                     explanation: state.localizer.translate(guildID,
-                        "Plays all available videos, including dance practices, acoustic versions, remixes"
+                        "release.help.example.all"
                     ),
                 },
                 {
                     example: "`,release`",
                     explanation: state.localizer.translate(guildID,
-                        "Reset to the default release type of {{{defaultRelease}}}",
+                        "release.help.example.reset",
                         { defaultRelease: `\`${DEFAULT_RELEASE_TYPE}\`` }
                     ),
                 },

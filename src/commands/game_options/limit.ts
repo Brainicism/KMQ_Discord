@@ -40,14 +40,14 @@ export default class LimitCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "limit",
             description: state.localizer.translate(guildID,
-                "Set a maximum number of results in the song query. This effectively sets the 'Top X number of songs' based on the selected filters."
+                "limit.help.description"
             ),
             usage: ",limit [limit]",
             examples: [
                 {
                     example: "`,limit 250`",
                     explanation: state.localizer.translate(guildID,
-                        "Plays the top {{{limit}}} most listened songs from the currently selected options.",
+                        "limit.help.example.singleLimit",
                         {
                             limit: String(250),
                         }
@@ -56,14 +56,14 @@ export default class LimitCommand implements BaseCommand {
                 {
                     example: "`,limit 250 500`",
                     explanation: state.localizer.translate(guildID,
-                        "Plays between the {{{limit_1}}} to {{{limit_2}}} most listened songs from the currently selected options.",
-                        { limit_1: String(250), limit_2: String(500) }
+                        "limit.help.example.twoLimits",
+                        { limitStart: String(250), limitEnd: String(500) }
                     ),
                 },
                 {
                     example: "`,limit`",
                     explanation: state.localizer.translate(guildID,
-                        "Reset to the default limit of {{{defaultLimit}}}",
+                        "limit.help.example.reset",
                         { defaultLimit: `\`${DEFAULT_LIMIT}\`` }
                     ),
                 },
@@ -95,9 +95,9 @@ export default class LimitCommand implements BaseCommand {
             limitEnd = parseInt(parsedMessage.components[0]);
             if (limitEnd === 0) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(message.guildID, "Game Option Error"),
+                    title: state.localizer.translate(message.guildID, "limit.failure.invalidLimit.title"),
                     description: state.localizer.translate(message.guildID,
-                        "End limit must be greater than 0"
+                        "limit.failure.invalidLimit.greaterThanZero.description"
                     ),
                 });
                 return;
@@ -107,9 +107,9 @@ export default class LimitCommand implements BaseCommand {
             limitEnd = parseInt(parsedMessage.components[1]);
             if (limitEnd <= limitStart) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(message.guildID, "Game Option Error"),
+                    title: state.localizer.translate(message.guildID, "limit.failure.invalidLimit.title"),
                     description: state.localizer.translate(message.guildID,
-                        "End limit must be greater than start limit"
+                        "limit.failure.invalidLimit.greaterThanStart.description"
                     ),
                 });
                 return;

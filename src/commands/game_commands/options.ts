@@ -13,7 +13,7 @@ const logger = new IPCLogger("options");
 export default class OptionsCommand implements BaseCommand {
     help = (guildID: string): Help => ({
             name: "options",
-            description: state.localizer.translate(guildID, "Displays the current game options."),
+            description: state.localizer.translate(guildID, "options.help.description"),
             usage: ",options",
             examples: [],
         });

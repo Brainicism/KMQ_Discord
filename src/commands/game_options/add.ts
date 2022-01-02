@@ -51,11 +51,11 @@ export default class AddCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "add",
             description: state.localizer.translate(guildID,
-                "Adds one or more groups to the current {{{groups}}}, {{{exclude}}}, or {{{include}}} options.",
+                "add.help.description",
                 {
-                    groups: "`,groups`",
-                    exclude: "`,exclude`",
-                    include: "`,include`",
+                    groups: `\`${process.env.BOT_PREFIX}groups\``,
+                    exclude: `\`${process.env.BOT_PREFIX}exclude\``,
+                    include: `\`${process.env.BOT_PREFIX}include\``,
                 }
             ),
             usage: ",add [groups | exclude | include] [list of groups]",
@@ -63,22 +63,22 @@ export default class AddCommand implements BaseCommand {
                 {
                     example: "`,add groups twice, red velvet`",
                     explanation: state.localizer.translate(guildID,
-                        "Adds {{{groupOne}}} and {{{groupTwo}}} to the current {{{groups}}} option",
-                        { groupOne: "Twice", groupTwo: "Red Velvet", groups: "`,groups`" }
+                        "add.help.example.groups",
+                        { groupOne: "Twice", groupTwo: "Red Velvet", groups: `\`${process.env.BOT_PREFIX}groups\`` }
                     ),
                 },
                 {
                     example: "`,add exclude BESTie, Dia, iKON`",
                     explanation: state.localizer.translate(guildID,
-                        "Adds {{{groupOne}}}, {{{groupTwo}}}, and {{{groupThree}}} to the current {{{exclude}}} option",
-                        { groupOne: "BESTie", groupTwo: "Dia", groupThree: "IKON", exclude: "`,exclude`" }
+                        "add.help.example.exclude",
+                        { groupOne: "BESTie", groupTwo: "Dia", groupThree: "IKON", exclude: `\`${process.env.BOT_PREFIX}exclude\`` }
                     ),
                 },
                 {
                     example: "`,add include exo`",
                     explanation: state.localizer.translate(guildID,
-                        "Adds {{{groupOne}}} to the current {{{include}}} option",
-                        { groupOne: "EXO", include: "`,include`" }
+                        "add.help.example.include",
+                        { groupOne: "EXO", include: `\`${process.env.BOT_PREFIX}include\`` }
                     ),
                 },
             ],
@@ -87,7 +87,7 @@ export default class AddCommand implements BaseCommand {
                     style: 5 as const,
                     url: GROUP_LIST_URL,
                     type: 2 as const,
-                    label: state.localizer.translate(guildID, "Full List of Groups"),
+                    label: state.localizer.translate(guildID, "misc.interaction.fullGroupsList"),
                 },
             ],
         });
@@ -148,12 +148,14 @@ export default class AddCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "Unknown Group Name"),
+                title: state.localizer.translate(message.guildID, "misc.failure.unrecognizedGroups.title"),
                 description: state.localizer.translate(message.guildID,
-                    "One or more of the specified group names was not recognized. Those groups that matched are added. Please ensure that the group name matches exactly with the list provided by {{{helpGroups}}}. \nThe following groups were **not** recognized:\n {{{unmatchedGroups}}}",
+                    "misc.failure.unrecognizedGroups.description",
                     {
+                        matchedGroupsAction: state.localizer.translate(message.guildID, "add.failure.unrecgonizedGroups.added"),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
-                        unmatchedGroups: `${unmatchedGroups.join(", ")}`,
+                        unmatchedGroups: unmatchedGroups.join(", "),
+                        solution: "",
                     }
                 ),
             });
@@ -178,19 +180,16 @@ export default class AddCommand implements BaseCommand {
                 );
                 if (intersection.size > 0) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: state.localizer.translate(message.guildID, "Groups and Exclude Conflict"),
+                        title: state.localizer.translate(message.guildID, "misc.failure.groupsExcludeConflict.title"),
                         description: state.localizer.translate(message.guildID,
-                            `One or more of the given {{{groups}}} is already included in {{{exclude}}}. \nThe following groups were **not** added to {{{groups}}}:\n ${[
-                                ...intersection,
-                            ]
-                                .filter((x) => !x.includes("+"))
-                                .join(
-                                    ", "
-                                )} \nUse {{{removeExclude}}} and then {{{groups}}} to allow them to play.`,
+                            "misc.failure.groupsExcludeConflict.description",
                             {
-                                groups: `\`${process.env.BOT_PREFIX}groups\``,
-                                exclude: `\`${process.env.BOT_PREFIX}exclude\``,
-                                removeExclude: `\`${process.env.BOT_PREFIX}remove exclude\``,
+                                conflictingOptionOne: `\`${process.env.BOT_PREFIX}groups\``,
+                                conflictingOptionTwo: `\`${process.env.BOT_PREFIX}exclude\``,
+                                groupsList: [...intersection].filter((x) => !x.includes("+")).join(", "),
+                                solutionStepOne: `\`${process.env.BOT_PREFIX}remove exclude\``,
+                                solutionStepTwo: `\`${process.env.BOT_PREFIX}groups\``,
+                                allowOrPrevent: state.localizer.translate(message.guildID, "misc.failure.groupsExcludeConflict.allow")
                             }
                         ),
                     });
@@ -244,18 +243,13 @@ export default class AddCommand implements BaseCommand {
                     sendErrorMessage(MessageContext.fromMessage(message), {
                         title: state.localizer.translate(message.guildID, "Groups and Exclude Conflict"),
                         description: state.localizer.translate(message.guildID,
-                            `One or more of the given {{{exclude}}} groups is already included in {{{groups}}}. \nThe following groups were **not** added to {{{exclude}}}:\n ${[
-                                ...intersection,
-                            ]
-                                .filter((x) => !x.includes("+"))
-                                .join(
-                                    ", "
-                                )} \nUse {{{removeGroups}}} and then {{{addExclude}}} these groups to prevent them from playing.`,
+                            `misc.failure.groupsExcludeConflict.description`,
                             {
-                                exclude: `\`${process.env.BOT_PREFIX}exclude\``,
-                                groups: `\`${process.env.BOT_PREFIX}groups\``,
-                                removeGroups: `\`${process.env.BOT_PREFIX}remove groups\``,
-                                addExclude: `\`${process.env.BOT_PREFIX}add exclude\``,
+                                conflictingOptionOne: `\`${process.env.BOT_PREFIX}exclude\``,
+                                conflictingOptionTwo: `\`${process.env.BOT_PREFIX}groups\``,
+                                groupsList: [...intersection].filter((x) => !x.includes("+")).join(", "),
+                                solutionPartOne: `\`${process.env.BOT_PREFIX}remove groups\``,
+                                solutionPartTwo: `\`${process.env.BOT_PREFIX}add exclude\``,
                             }
                         ),
                     });

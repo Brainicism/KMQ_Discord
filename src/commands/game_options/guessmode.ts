@@ -40,32 +40,32 @@ export default class GuessModeCommand implements BaseCommand {
     help = (guildID: string) => ({
             name: "guessmode",
             description: state.localizer.translate(guildID,
-                "Choose whether to guess by song title, artist name, or both."
+                "guessmode.help.description"
             ),
             usage: ",guessmode [song | artist | both]",
             examples: [
                 {
                     example: "`,guessmode song`",
                     explanation: state.localizer.translate(guildID,
-                        "Type the correct song name to win a game round"
+                        "guessmode.help.example.song"
                     ),
                 },
                 {
                     example: "`,guessmode artist`",
                     explanation: state.localizer.translate(guildID,
-                        "Type the correct name of the artist to win a game round"
+                        "guessmode.help.example.artist"
                     ),
                 },
                 {
                     example: "`,guessmode both`",
                     explanation: state.localizer.translate(guildID,
-                        "Type the correct name of the artist (0.2 points) or the name of the song (1 point) to win a game round"
+                        "guessmode.help.example.both"
                     ),
                 },
                 {
                     example: "`,guessmode`",
                     explanation: state.localizer.translate(guildID,
-                        "Reset to the default guess mode of {{{defaultGuessMode}}}",
+                        "guessmode.help.example.reset",
                         {
                             defaultGuessMode: DEFAULT_GUESS_MODE,
                         }

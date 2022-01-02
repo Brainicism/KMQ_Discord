@@ -24,7 +24,7 @@ export default class ForceHintCommand implements BaseCommand {
     help = (guildID: string): Help => ({
             name: "forcehint",
             description: state.localizer.translate(guildID,
-                "The person that started the game can force-hint the current song, no majority necessary."
+                "forcehint.help.description",
             ),
             usage: ",forcehint",
             examples: [],
@@ -53,9 +53,9 @@ export default class ForceHintCommand implements BaseCommand {
             return;
         if (message.author.id !== gameSession.owner.id) {
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "Force Hint Ignored"),
+                title: state.localizer.translate(message.guildID, "forcehint.failure.notOwner.title"),
                 description: state.localizer.translate(message.guildID,
-                    "Only the person who started the game ({{{mentionedUser}}}) can force-hint.",
+                    "forcehint.failure.notOwner.description",
                     { mentionedUser: getMention(gameSession.owner.id) }
                 ),
             });
@@ -65,7 +65,7 @@ export default class ForceHintCommand implements BaseCommand {
         gameRound.hintRequested(message.author.id);
         gameRound.hintUsed = true;
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(message.guildID, "Hint"),
+            title: state.localizer.translate(message.guildID, "hint.title"),
             description: generateHint(message.guildID,
                 guildPreference.gameOptions.guessModeType,
                 gameRound,
