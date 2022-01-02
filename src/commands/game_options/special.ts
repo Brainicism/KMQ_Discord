@@ -118,7 +118,7 @@ export default class SpecialCommand implements BaseCommand {
                 },
                 {
                     example: "`,special`",
-                    explanation: state.localizer.translate(guildID, "specia.help.example.reset"),
+                    explanation: state.localizer.translate(guildID, "special.help.example.reset"),
                 },
             ],
         });

@@ -83,9 +83,9 @@ export default class JoinCommand implements BaseCommand {
             );
 
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "misc.playerJoinedMidgame.title"),
+                title: state.localizer.translate(message.guildID, "misc.playerJoinedMidGame.title"),
                 description: state.localizer.translate(message.guildID,
-                    "misc.playerJoinedMidgame.description",
+                    "misc.playerJoinedMidGame.description",
                     {
                         mentionedUser: getMention(message.author.id),
                         lives: `\`${newPlayer.getLives()}\``,

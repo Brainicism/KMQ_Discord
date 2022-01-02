@@ -657,7 +657,7 @@ async function mostGames(locale: LocaleType): Promise<string[]> {
     if (result.length === 0) return [];
     const mostGamesPlayed = result[0];
     return [
-        state.localizer.internalLocalizer.__({ locale, phrase: "fact.fun.mostActiveServer"}, { gamesPlayed: friendlyFormattedNumber(mostGamesPlayed.games_played), songsGuessed: friendlyFormattedNumber(mostGamesPlayed.songs_guessed) })
+        state.localizer.internalLocalizer.__({ locale, phrase: "fact.kmq.mostActiveServer"}, { gamesPlayed: friendlyFormattedNumber(mostGamesPlayed.games_played), songsGuessed: friendlyFormattedNumber(mostGamesPlayed.songs_guessed) })
     ];
 }
 
@@ -815,7 +815,7 @@ async function historicalGaonWeekly(locale: LocaleType): Promise<Array<string>> 
 
     return parsedResults.map(
         (x) =>
-            state.localizer.internalLocalizer.__({ locale, phrase: "fact.fun.historialGaonWeekly"}, { year: x[0].year, songName: generateSongArtistHyperlink(locale, x[0].songName,x[0].artistName) })
+            state.localizer.internalLocalizer.__({ locale, phrase: "fact.fun.historicalGaonWeekly"}, { year: x[0].year, songName: generateSongArtistHyperlink(locale, x[0].songName,x[0].artistName) })
     );
 }
 
