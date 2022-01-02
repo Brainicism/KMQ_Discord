@@ -5,10 +5,17 @@ import GameSession from "../../structures/game_session";
 import KmqMember from "../../structures/kmq_member";
 import Player from "../../structures/player";
 import TeamScoreboard from "../../structures/team_scoreboard";
+import { state } from "../../kmq_worker";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
 
 const gameStarter = new KmqMember("jisoo", "jisoo#4747", "url", "123");
 
 describe("begin command", () => {
+    beforeEach(() => {
+        state.localizer = new LocalizationManager();
+    });
+
     describe("can start", () => {
         describe("game session is null", () => {
             it("should return false", () => {
@@ -62,7 +69,7 @@ describe("begin command", () => {
             describe("invoker is not the game session's author", () => {
                 it("should return false", () => {
                     assert.strictEqual(
-                        BeginCommand.canStart(gameSession, "567", null),
+                        BeginCommand.canStart(gameSession, "567", new MessageContext("", gameStarter)),
                         false
                     );
                 });
@@ -81,7 +88,7 @@ describe("begin command", () => {
             describe("no teams have been added yet", () => {
                 it("should return false", () => {
                     assert.strictEqual(
-                        BeginCommand.canStart(gameSession, "1231", null),
+                        BeginCommand.canStart(gameSession, "1231", new MessageContext("", gameStarter)),
                         false
                     );
                 });

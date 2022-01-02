@@ -13,6 +13,7 @@ import KmqMember from "../../structures/kmq_member";
 import GameSession from "../../structures/game_session";
 import { GameType } from "../../types";
 import { state } from "../../kmq_worker";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const SERVER_ID = "0";
 const gameStarter = new KmqMember("jisoo", "jisoo#4747", "url", "123");
@@ -69,6 +70,7 @@ describe("getLeaderboardEmbeds", () => {
     describe("off by one errors", () => {
         beforeEach(async () => {
             await dbContext.kmq("player_stats").del();
+            state.localizer = new LocalizationManager();
         });
 
         describe("fits a page perfectly", () => {
