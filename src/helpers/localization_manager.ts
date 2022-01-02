@@ -19,7 +19,7 @@ export default class LocalizationManager {
         this.internalLocalizer.configure({
             locales: Object.values(LocaleType),
             defaultLocale: LocaleType.EN,
-            directory: path.join(__dirname, "../../locales"),
+            directory: path.join(__dirname, "../../i18n"),
             autoReload: true,
             updateFiles: true,
             syncFiles: true,
