@@ -13,16 +13,19 @@ import { state } from "../../kmq_worker";
 const logger = new IPCLogger("news");
 
 export default class NewsCommand implements BaseCommand {
-    help = (guildID: string): Help => ({
-            name: "news",
-            description: state.localizer.translate(guildID, "news.help.description"),
-            usage: ",news",
-            examples: [],
-        });
+    aliases = ["updates"];
 
     helpPriority = 10;
 
-    aliases = ["updates"];
+    help = (guildID: string): Help => ({
+        name: "news",
+        description: state.localizer.translate(
+            guildID,
+            "news.help.description"
+        ),
+        usage: ",news",
+        examples: [],
+    });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         const newsFilePath = path.resolve(__dirname, "../../../data/news.md");
@@ -34,7 +37,10 @@ export default class NewsCommand implements BaseCommand {
         const news = fs.readFileSync(newsFilePath).toString();
 
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(message.guildID, "news.updates.title"),
+            title: state.localizer.translate(
+                message.guildID,
+                "news.updates.title"
+            ),
             description: news,
             thumbnailUrl: KmqImages.READING_BOOK,
         });

@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import {
@@ -20,6 +20,8 @@ export enum MultiGuessType {
 export const DEFAULT_MULTIGUESS_TYPE = MultiGuessType.ON;
 
 export default class MultiGuessCommand implements BaseCommand {
+    helpPriority = 150;
+
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -34,37 +36,39 @@ export default class MultiGuessCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string) => ({
-            name: "multiguess",
-            description: state.localizer.translate(guildID,
-                "multiguess.help.description",
-                { on: `\`${MultiGuessType.ON}\`` }
-            ),
-            usage: ",multiguess [on | off]",
-            examples: [
-                {
-                    example: "`,multiguess on`",
-                    explanation: state.localizer.translate(guildID,
-                        "multiguess.help.example.on"
-                    ),
-                },
-                {
-                    example: "`,multiguess off`",
-                    explanation: state.localizer.translate(guildID,
-                        "multiguess.help.example.off"
-                    ),
-                },
-                {
-                    example: "`,multiguess`",
-                    explanation: state.localizer.translate(guildID,
-                        "multiguess.help.example.reset",
-                        { defaultMultiguess: `\`${DEFAULT_MULTIGUESS_TYPE}\`` }
-                    ),
-                },
-            ],
-        });
-
-    helpPriority = 150;
+    help = (guildID: string): Help => ({
+        name: "multiguess",
+        description: state.localizer.translate(
+            guildID,
+            "multiguess.help.description",
+            { on: `\`${MultiGuessType.ON}\`` }
+        ),
+        usage: ",multiguess [on | off]",
+        examples: [
+            {
+                example: "`,multiguess on`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "multiguess.help.example.on"
+                ),
+            },
+            {
+                example: "`,multiguess off`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "multiguess.help.example.off"
+                ),
+            },
+            {
+                example: "`,multiguess`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "multiguess.help.example.reset",
+                    { defaultMultiguess: `\`${DEFAULT_MULTIGUESS_TYPE}\`` }
+                ),
+            },
+        ],
+    });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

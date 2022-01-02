@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -23,15 +23,17 @@ export const REVIEW_LINK = "https://top.gg/bot/508759831755096074#reviews";
 export default class VoteCommand implements BaseCommand {
     aliases = ["v", "voted"];
 
-    help = (guildID: string) => ({
-            name: "vote",
-            description: state.localizer.translate(guildID,
-                "vote.help.description",
-            ),
-            usage: ",vote",
-            examples: [],
-        });
     helpPriority = 60;
+
+    help = (guildID: string): Help => ({
+        name: "vote",
+        description: state.localizer.translate(
+            guildID,
+            "vote.help.description"
+        ),
+        usage: ",vote",
+        examples: [],
+    });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         let voteStatusString = "";
@@ -49,7 +51,8 @@ export default class VoteCommand implements BaseCommand {
                 (1000 * 60);
 
             voteStatusString = `${bold(
-                state.localizer.translateN(message.guildID,
+                state.localizer.translateN(
+                    message.guildID,
                     "%s minute",
                     Math.max(Math.ceil(timeRemaining), 0)
                 )
@@ -63,7 +66,10 @@ export default class VoteCommand implements BaseCommand {
                     VOTE_BONUS_DURATION
             );
             if (nextVoteTime.getTime() <= Date.now()) {
-                voteStatusString = state.localizer.translate(message.guildID, "vote.voteAvailable");
+                voteStatusString = state.localizer.translate(
+                    message.guildID,
+                    "vote.voteAvailable"
+                );
             } else {
                 const hoursLeft = Math.floor(
                     (nextVoteTime.getTime() - Date.now()) / (60 * 60 * 1000)
@@ -77,16 +83,49 @@ export default class VoteCommand implements BaseCommand {
                     nextVoteTime.getTime() - Date.now()
                 ).getSeconds();
 
-                if(hoursLeft > 0) {
-                    voteStatusString = state.localizer.translate(message.guildID, "vote.unavailable.hours", { hours: state.localizer.translateN(message.guildID, "%s hour", hoursLeft) })
+                if (hoursLeft > 0) {
+                    voteStatusString = state.localizer.translate(
+                        message.guildID,
+                        "vote.unavailable.hours",
+                        {
+                            hours: state.localizer.translateN(
+                                message.guildID,
+                                "%s hour",
+                                hoursLeft
+                            ),
+                        }
+                    );
                 } else if (minutesLeft > 0) {
-                    voteStatusString = state.localizer.translate(message.guildID, "vote.unavailable.minutes", { minutes: state.localizer.translateN(message.guildID, "%s minute", minutesLeft) });
+                    voteStatusString = state.localizer.translate(
+                        message.guildID,
+                        "vote.unavailable.minutes",
+                        {
+                            minutes: state.localizer.translateN(
+                                message.guildID,
+                                "%s minute",
+                                minutesLeft
+                            ),
+                        }
+                    );
                 } else {
-                    voteStatusString = state.localizer.translate(message.guildID,"vote.unavailable.seconds",{ seconds: state.localizer.translateN(message.guildID, "%s second", secondsLeft) });
+                    voteStatusString = state.localizer.translate(
+                        message.guildID,
+                        "vote.unavailable.seconds",
+                        {
+                            seconds: state.localizer.translateN(
+                                message.guildID,
+                                "%s second",
+                                secondsLeft
+                            ),
+                        }
+                    );
                 }
             }
         } else {
-            voteStatusString = state.localizer.translate(message.guildID, "vote.available");
+            voteStatusString = state.localizer.translate(
+                message.guildID,
+                "vote.available"
+            );
         }
 
         sendInfoMessage(
@@ -94,9 +133,16 @@ export default class VoteCommand implements BaseCommand {
             {
                 color: boostActive ? EMBED_SUCCESS_BONUS_COLOR : null,
                 title: boostActive
-                    ? state.localizer.translate(message.guildID, "vote.boostActive")
-                    : state.localizer.translate(message.guildID, "vote.boostInactive"),
-                description: `${voteStatusString}\n\n${state.localizer.translate(message.guildID,
+                    ? state.localizer.translate(
+                          message.guildID,
+                          "vote.boostActive"
+                      )
+                    : state.localizer.translate(
+                          message.guildID,
+                          "vote.boostInactive"
+                      ),
+                description: `${voteStatusString}\n\n${state.localizer.translate(
+                    message.guildID,
                     "vote.description",
                     {
                         voteLink: VOTE_LINK,
@@ -114,14 +160,20 @@ export default class VoteCommand implements BaseCommand {
                                 url: VOTE_LINK,
                                 type: 2 as const,
                                 emoji: { name: "✅" },
-                                label: state.localizer.translate(message.guildID, "misc.interaction.vote"),
+                                label: state.localizer.translate(
+                                    message.guildID,
+                                    "misc.interaction.vote"
+                                ),
                             },
                             {
                                 style: 5,
                                 url: REVIEW_LINK,
                                 type: 2 as const,
                                 emoji: { name: "📖" },
-                                label: state.localizer.translate(message.guildID, "misc.interaction.leaveReview"),
+                                label: state.localizer.translate(
+                                    message.guildID,
+                                    "misc.interaction.leaveReview"
+                                ),
                             },
                         ],
                     },

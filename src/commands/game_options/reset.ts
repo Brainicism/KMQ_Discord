@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
 import {
@@ -14,6 +14,8 @@ import { state } from "../../kmq_worker";
 const logger = new IPCLogger("reset");
 
 export default class ResetCommand implements BaseCommand {
+    helpPriority = 130;
+
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -22,21 +24,23 @@ export default class ResetCommand implements BaseCommand {
         arguments: [],
     };
 
-    help = (guildID: string) => ({
-            name: "reset",
-            description: state.localizer.translate(guildID, "reset.help.description"),
-            usage: ",reset",
-            examples: [
-                {
-                    example: "`,reset`",
-                    explanation: state.localizer.translate(guildID,
-                        "reset.help.example.reset"
-                    ),
-                },
-            ],
-        });
-
-    helpPriority = 130;
+    help = (guildID: string): Help => ({
+        name: "reset",
+        description: state.localizer.translate(
+            guildID,
+            "reset.help.description"
+        ),
+        usage: ",reset",
+        examples: [
+            {
+                example: "`,reset`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "reset.help.example.reset"
+                ),
+            },
+        ],
+    });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

@@ -1,5 +1,5 @@
 import { EmbedOptions } from "eris";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { QueriedSong } from "../../types";
 import dbContext from "../../database_context";
 import {
@@ -22,23 +22,27 @@ const logger = new IPCLogger("recentlyadded");
 const FIELDS_PER_EMBED = 9;
 
 export default class RecentlyAddedCommand implements BaseCommand {
-    help = (guildID: string) => ({
-            name: "recentlyadded",
-            description: state.localizer.translate(guildID,
-                "recentlyadded.help.description",
-            ),
-            usage: ",recentlyadded",
-            examples: [
-                {
-                    example: "`,recentlyadded`",
-                    explanation: state.localizer.translate(guildID, "recentlyadded.help.example"),
-                },
-            ],
-        });
-
     helpPriority = 30;
 
     aliases = ["recent"];
+
+    help = (guildID: string): Help => ({
+        name: "recentlyadded",
+        description: state.localizer.translate(
+            guildID,
+            "recentlyadded.help.description"
+        ),
+        usage: ",recentlyadded",
+        examples: [
+            {
+                example: "`,recentlyadded`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "recentlyadded.help.example"
+                ),
+            },
+        ],
+    });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         const newSongs: Array<QueriedSong> = await dbContext
@@ -62,9 +66,13 @@ export default class RecentlyAddedCommand implements BaseCommand {
 
         if (newSongs.length === 0) {
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "recentlyadded.failure.noSongs.title"),
-                description: state.localizer.translate(message.guildID,
-                    "recentlyadded.failure.noSongs.description",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "recentlyadded.failure.noSongs.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "recentlyadded.failure.noSongs.description"
                 ),
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
             });
@@ -73,9 +81,15 @@ export default class RecentlyAddedCommand implements BaseCommand {
 
         const fields = newSongs.map((song) => ({
             name: `"${song.originalSongName}" - ${song.artist}`,
-            value: `${state.localizer.translate(message.guildID, "recentlyadded.released")} ${standardDateFormat(
+            value: `${state.localizer.translate(
+                message.guildID,
+                "recentlyadded.released"
+            )} ${standardDateFormat(
                 song.publishDate
-            )}\n[${friendlyFormattedNumber(song.views)} ${state.localizer.translate(message.guildID,
+            )}\n[${friendlyFormattedNumber(
+                song.views
+            )} ${state.localizer.translate(
+                message.guildID,
                 "recentlyadded.views"
             )}](https://youtu.be/${song.youtubeLink})`,
             inline: true,
@@ -84,9 +98,13 @@ export default class RecentlyAddedCommand implements BaseCommand {
         const embedFieldSubsets = chunkArray(fields, FIELDS_PER_EMBED);
         const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
             (embedFieldsSubset) => ({
-                title: state.localizer.translate(message.guildID, "recentlyadded.title"),
-                description: state.localizer.translate(message.guildID,
-                    "recentlyadded.description",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "recentlyadded.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "recentlyadded.description"
                 ),
                 fields: embedFieldsSubset,
             })

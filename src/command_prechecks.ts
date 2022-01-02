@@ -44,7 +44,8 @@ export default class CommandPrechecks {
 
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: state.localizer.translate(message.guildID, "Wait..."),
-                description: state.localizer.translate(message.guildID,
+                description: state.localizer.translate(
+                    message.guildID,
                     errorMessage ??
                         "You must be in the same voice channel as the bot to use this command."
                 ),
@@ -67,7 +68,8 @@ export default class CommandPrechecks {
 
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: "Wait...",
-                description: state.localizer.translate(message.guildID,
+                description: state.localizer.translate(
+                    message.guildID,
                     errorMessage ?? "You can't do that in this server."
                 ),
             });
@@ -90,7 +92,8 @@ export default class CommandPrechecks {
 
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: "Wait...",
-                description: state.localizer.translate(message.guildID,
+                description: state.localizer.translate(
+                    message.guildID,
                     errorMessage ?? "You can't do that in this channel."
                 ),
             });
@@ -123,7 +126,8 @@ export default class CommandPrechecks {
 
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: "Wait...",
-                description: state.localizer.translate(message.guildID,
+                description: state.localizer.translate(
+                    message.guildID,
                     errorMessage ??
                         "This command has been disabled for regular users in the competition."
                 ),

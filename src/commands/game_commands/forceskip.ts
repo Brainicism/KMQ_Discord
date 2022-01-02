@@ -17,28 +17,26 @@ import { state } from "../../kmq_worker";
 const logger = new IPCLogger("forceskip");
 
 export default class ForceSkipCommand implements BaseCommand {
+    aliases = ["fskip", "fs"];
+
+    helpPriority = 1009;
+
     preRunChecks = [
         { checkFn: CommandPrechecks.inGameCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
     ];
 
     help = (guildID: string): Help => ({
-            name: "forceskip",
-            description: state.localizer.translate(guildID,
-                "forceskip.help.description",
-            ),
-            usage: ",forceskip",
-            examples: [],
-        });
+        name: "forceskip",
+        description: state.localizer.translate(
+            guildID,
+            "forceskip.help.description"
+        ),
+        usage: ",forceskip",
+        examples: [],
+    });
 
-    helpPriority = 1009;
-
-    aliases = ["fskip", "fs"];
-
-    call = async ({
-        gameSessions,
-        message,
-    }: CommandArgs): Promise<void> => {
+    call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         const gameSession = gameSessions[message.guildID];
         if (
@@ -65,8 +63,12 @@ export default class ForceSkipCommand implements BaseCommand {
 
         if (message.author.id !== gameSession.owner.id) {
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "forceskip.failure.notOwner.title"),
-                description: state.localizer.translate(message.guildID,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "forceskip.failure.notOwner.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
                     "forceskip.failure.notOwner.description",
                     { mentionedUser: getMention(gameSession.owner.id) }
                 ),
@@ -80,7 +82,8 @@ export default class ForceSkipCommand implements BaseCommand {
             {
                 color: EMBED_SUCCESS_COLOR,
                 title: state.localizer.translate(message.guildID, "skip.title"),
-                description: state.localizer.translate(message.guildID,
+                description: state.localizer.translate(
+                    message.guildID,
                     "forceskip.description"
                 ),
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,

@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
 import {
@@ -21,6 +21,8 @@ export enum GuessModeType {
 export const DEFAULT_GUESS_MODE = GuessModeType.SONG_NAME;
 
 export default class GuessModeCommand implements BaseCommand {
+    helpPriority = 130;
+
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     aliases = ["mode"];
@@ -37,44 +39,47 @@ export default class GuessModeCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string) => ({
-            name: "guessmode",
-            description: state.localizer.translate(guildID,
-                "guessmode.help.description"
-            ),
-            usage: ",guessmode [song | artist | both]",
-            examples: [
-                {
-                    example: "`,guessmode song`",
-                    explanation: state.localizer.translate(guildID,
-                        "guessmode.help.example.song"
-                    ),
-                },
-                {
-                    example: "`,guessmode artist`",
-                    explanation: state.localizer.translate(guildID,
-                        "guessmode.help.example.artist"
-                    ),
-                },
-                {
-                    example: "`,guessmode both`",
-                    explanation: state.localizer.translate(guildID,
-                        "guessmode.help.example.both"
-                    ),
-                },
-                {
-                    example: "`,guessmode`",
-                    explanation: state.localizer.translate(guildID,
-                        "guessmode.help.example.reset",
-                        {
-                            defaultGuessMode: DEFAULT_GUESS_MODE,
-                        }
-                    ),
-                },
-            ],
-        });
-
-    helpPriority = 130;
+    help = (guildID: string): Help => ({
+        name: "guessmode",
+        description: state.localizer.translate(
+            guildID,
+            "guessmode.help.description"
+        ),
+        usage: ",guessmode [song | artist | both]",
+        examples: [
+            {
+                example: "`,guessmode song`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "guessmode.help.example.song"
+                ),
+            },
+            {
+                example: "`,guessmode artist`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "guessmode.help.example.artist"
+                ),
+            },
+            {
+                example: "`,guessmode both`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "guessmode.help.example.both"
+                ),
+            },
+            {
+                example: "`,guessmode`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "guessmode.help.example.reset",
+                    {
+                        defaultGuessMode: DEFAULT_GUESS_MODE,
+                    }
+                ),
+            },
+        ],
+    });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

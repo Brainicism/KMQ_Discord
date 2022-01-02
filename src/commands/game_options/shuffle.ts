@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
 import {
@@ -20,6 +20,8 @@ export enum ShuffleType {
 export const DEFAULT_SHUFFLE = ShuffleType.UNIQUE;
 
 export default class ShuffleCommand implements BaseCommand {
+    helpPriority = 110;
+
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -34,38 +36,42 @@ export default class ShuffleCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string) => ({
-            name: "shuffle",
-            description: state.localizer.translate(guildID,
-                "shuffle.help.description",
-                {
-                    random: `\`${ShuffleType.RANDOM}\``,
-                    shuffle: `\`${ShuffleType.UNIQUE}\``,
-                }
-            ),
-            usage: ",shuffle [random | unique]",
-            examples: [
-                {
-                    example: "`,shuffle random`",
-                    explanation: state.localizer.translate(guildID, "shuffle.help.example.random"),
-                },
-                {
-                    example: "`,shuffle unique`",
-                    explanation: state.localizer.translate(guildID,
-                        "shuffle.help.example.unique"
-                    ),
-                },
-                {
-                    example: "`,shuffle`",
-                    explanation: state.localizer.translate(guildID,
-                        "shuffle.help.example.reset",
-                        { defaultShuffle: `\`${DEFAULT_SHUFFLE}\`` }
-                    ),
-                },
-            ],
-        });
-
-    helpPriority = 110;
+    help = (guildID: string): Help => ({
+        name: "shuffle",
+        description: state.localizer.translate(
+            guildID,
+            "shuffle.help.description",
+            {
+                random: `\`${ShuffleType.RANDOM}\``,
+                shuffle: `\`${ShuffleType.UNIQUE}\``,
+            }
+        ),
+        usage: ",shuffle [random | unique]",
+        examples: [
+            {
+                example: "`,shuffle random`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "shuffle.help.example.random"
+                ),
+            },
+            {
+                example: "`,shuffle unique`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "shuffle.help.example.unique"
+                ),
+            },
+            {
+                example: "`,shuffle`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "shuffle.help.example.reset",
+                    { defaultShuffle: `\`${DEFAULT_SHUFFLE}\`` }
+                ),
+            },
+        ],
+    });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

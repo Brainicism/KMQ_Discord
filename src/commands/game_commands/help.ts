@@ -20,7 +20,7 @@ const FIELDS_PER_EMBED = 6;
 
 const helpMessage = async (
     message: GuildTextableMessage,
-    action: string,
+    action: string
 ): Promise<void> => {
     let embedTitle = "";
     let embedDesc = "";
@@ -60,10 +60,15 @@ const helpMessage = async (
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "help.title", {
-                    kmq: "K-pop Music Quiz",
-                }),
-                description: state.localizer.translate(message.guildID,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "help.title",
+                    {
+                        kmq: "K-pop Music Quiz",
+                    }
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
                     "help.failure.noDocs",
                     { action }
                 ),
@@ -71,7 +76,10 @@ const helpMessage = async (
             return;
         }
 
-        const helpManual = commandFilesWithAliases[action].help(message.guildID);
+        const helpManual = commandFilesWithAliases[action].help(
+            message.guildID
+        );
+
         embedTitle = `\`${helpManual.usage.replace(
             placeholder,
             process.env.BOT_PREFIX
@@ -79,7 +87,10 @@ const helpMessage = async (
         embedDesc = helpManual.description;
         embedActionRowComponents = helpManual.actionRowComponents;
         if (helpManual.examples.length > 0) {
-            embedDesc += `\n\n**${state.localizer.translate(message.guildID, "help.examples")}**\n`;
+            embedDesc += `\n\n**${state.localizer.translate(
+                message.guildID,
+                "help.examples"
+            )}**\n`;
         }
 
         embedFields = helpManual.examples.map((example) => ({
@@ -89,9 +100,10 @@ const helpMessage = async (
 
         if (commandFilesWithAliases[action].aliases) {
             embedFooter = {
-                text: `${state.localizer.translate(message.guildID, "misc.inGame.aliases")}: ${commandFilesWithAliases[
-                    action
-                ].aliases.join(", ")}`,
+                text: `${state.localizer.translate(
+                    message.guildID,
+                    "misc.inGame.aliases"
+                )}: ${commandFilesWithAliases[action].aliases.join(", ")}`,
             };
         }
     } else {
@@ -103,8 +115,12 @@ const helpMessage = async (
         );
 
         commandsWithHelp.sort((x, y) => y.helpPriority - x.helpPriority);
-        embedTitle = state.localizer.translate(message.guildID, "help.title", { kmq: "K-pop Music Quiz" });
-        embedDesc = state.localizer.translate(message.guildID,
+        embedTitle = state.localizer.translate(message.guildID, "help.title", {
+            kmq: "K-pop Music Quiz",
+        });
+
+        embedDesc = state.localizer.translate(
+            message.guildID,
             "help.description",
             {
                 play: `\`${process.env.BOT_PREFIX}play\``,
@@ -131,19 +147,28 @@ const helpMessage = async (
                 style: 5,
                 url: "https://discord.gg/RCuzwYV",
                 type: 2,
-                label: state.localizer.translate(message.guildID, "misc.interaction.officialKmqServer"),
+                label: state.localizer.translate(
+                    message.guildID,
+                    "misc.interaction.officialKmqServer"
+                ),
             },
             {
                 style: 5,
                 url: "https://brainicism.github.io/KMQ_Discord/GAMEPLAY",
                 type: 2,
-                label: state.localizer.translate(message.guildID, "misc.interaction.howToPlay"),
+                label: state.localizer.translate(
+                    message.guildID,
+                    "misc.interaction.howToPlay"
+                ),
             },
             {
                 style: 5,
                 url: "https://brainicism.github.io/KMQ_Discord/FAQ",
                 type: 2,
-                label: state.localizer.translate(message.guildID, "misc.interaction.faq"),
+                label: state.localizer.translate(
+                    message.guildID,
+                    "misc.interaction.faq"
+                ),
             },
         ];
     }
@@ -183,34 +208,34 @@ const helpMessage = async (
 };
 
 export default class HelpCommand implements BaseCommand {
+    helpPriority = 1000;
+
     help = (guildID: string): Help => ({
         name: "help",
-        description: state.localizer.translate(guildID,
+        description: state.localizer.translate(
+            guildID,
             "help.help.description"
         ),
         usage: `,help [${state.localizer.translate(guildID, "command")}]`,
         examples: [
             {
                 example: "`,help`",
-                explanation: state.localizer.translate(guildID,
+                explanation: state.localizer.translate(
+                    guildID,
                     "help.help.example.allCommands"
                 ),
             },
             {
                 example: "`,help cutoff`",
-                explanation: state.localizer.translate(guildID,
+                explanation: state.localizer.translate(
+                    guildID,
                     "help.help.example.sampleCommand"
                 ),
             },
         ],
     });
 
-    helpPriority = 1000;
-
-    call = async ({
-        parsedMessage,
-        message,
-    }: CommandArgs): Promise<void> => {
+    call = async ({ parsedMessage, message }: CommandArgs): Promise<void> => {
         await helpMessage(message, parsedMessage.argument);
         logger.info(
             `${getDebugLogHeader(message)} | Help documentation retrieved.`

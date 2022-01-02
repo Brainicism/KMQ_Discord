@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import {
@@ -22,6 +22,8 @@ export const DEFAULT_LANGUAGE = LanguageType.ALL;
 // z = chinese, j = japanese, e = english, s = spanish
 export const FOREIGN_LANGUAGE_TAGS = ["z", "j", "e", "s"];
 export default class LanguageCommand implements BaseCommand {
+    helpPriority = 150;
+
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -36,34 +38,38 @@ export default class LanguageCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string) => ({
-            name: "language",
-            description: state.localizer.translate(guildID,
-                "language.help.description"
-            ),
-            usage: ",language [korean | all]",
-            examples: [
-                {
-                    example: "`,language korean`",
-                    explanation: state.localizer.translate(guildID,
-                        "language.help.example.korean"
-                    ),
-                },
-                {
-                    example: "`,language all`",
-                    explanation: state.localizer.translate(guildID, "language.help.example.all"),
-                },
-                {
-                    example: "`,language`",
-                    explanation: state.localizer.translate(guildID,
-                        "language.help.example.reset",
-                        { defaultLanguage: `\`${LanguageType.ALL}\`` }
-                    ),
-                },
-            ],
-        });
-
-    helpPriority = 150;
+    help = (guildID: string): Help => ({
+        name: "language",
+        description: state.localizer.translate(
+            guildID,
+            "language.help.description"
+        ),
+        usage: ",language [korean | all]",
+        examples: [
+            {
+                example: "`,language korean`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "language.help.example.korean"
+                ),
+            },
+            {
+                example: "`,language all`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "language.help.example.all"
+                ),
+            },
+            {
+                example: "`,language`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "language.help.example.reset",
+                    { defaultLanguage: `\`${LanguageType.ALL}\`` }
+                ),
+            },
+        ],
+    });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

@@ -59,59 +59,7 @@ const leaderboardQuotes = [
 ];
 
 export default class LeaderboardCommand implements BaseCommand {
-    help = (guildID: string): Help => ({
-            name: "leaderboard",
-            description: state.localizer.translate(guildID, "leaderboard.help.description"),
-            usage: ",leaderboard {page_number}\n,leaderboard {gamesplayed | songsguessed} {server | game} {daily | weekly | monthly | yearly} {page_number}\n,leaderboard [enroll | unenroll]",
-            examples: [
-                {
-                    example: "`,leaderboard`",
-                    explanation: state.localizer.translate(guildID, "leaderboard.help.example.global"),
-                },
-                {
-                    example: "`,leaderboard 3`",
-                    explanation: state.localizer.translate(guildID,
-                        "leaderboard.help.example.globalPage"
-                    ),
-                },
-                {
-                    example: "`,leaderboard game monthly 2`",
-                    explanation: state.localizer.translate(guildID,
-                        "leaderboard.help.example.gameMonthlyPage"
-                    ),
-                },
-                {
-                    example: "`,leaderboard songsguessed server 3`",
-                    explanation: state.localizer.translate(guildID,
-                        "leaderboard.help.example.serverSongsGuessedPage"
-                    ),
-                },
-                {
-                    example: "`,leaderboard enroll`",
-                    explanation: state.localizer.translate(guildID,
-                        "leaderboard.help.example.enroll"
-                    ),
-                },
-                {
-                    example: "`,leaderboard unenroll`",
-                    explanation: state.localizer.translate(guildID,
-                        "leaderboard.help.example.unenroll"
-                    ),
-                },
-                {
-                    example: "`,leaderboard server`",
-                    explanation: state.localizer.translate(guildID,
-                        "leaderboard.help.example.server"
-                    ),
-                },
-                {
-                    example: "`,leaderboard weekly 4`",
-                    explanation: state.localizer.translate(guildID,
-                        "leaderboard.help.example.globalWeeklyPage"
-                    ),
-                },
-            ],
-        });
+    aliases = ["lb"];
 
     helpPriority = 50;
 
@@ -121,12 +69,74 @@ export default class LeaderboardCommand implements BaseCommand {
         arguments: [],
     };
 
-    aliases = ["lb"];
+    help = (guildID: string): Help => ({
+        name: "leaderboard",
+        description: state.localizer.translate(
+            guildID,
+            "leaderboard.help.description"
+        ),
+        usage: ",leaderboard {page_number}\n,leaderboard {gamesplayed | songsguessed} {server | game} {daily | weekly | monthly | yearly} {page_number}\n,leaderboard [enroll | unenroll]",
+        examples: [
+            {
+                example: "`,leaderboard`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "leaderboard.help.example.global"
+                ),
+            },
+            {
+                example: "`,leaderboard 3`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "leaderboard.help.example.globalPage"
+                ),
+            },
+            {
+                example: "`,leaderboard game monthly 2`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "leaderboard.help.example.gameMonthlyPage"
+                ),
+            },
+            {
+                example: "`,leaderboard songsguessed server 3`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "leaderboard.help.example.serverSongsGuessedPage"
+                ),
+            },
+            {
+                example: "`,leaderboard enroll`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "leaderboard.help.example.enroll"
+                ),
+            },
+            {
+                example: "`,leaderboard unenroll`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "leaderboard.help.example.unenroll"
+                ),
+            },
+            {
+                example: "`,leaderboard server`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "leaderboard.help.example.server"
+                ),
+            },
+            {
+                example: "`,leaderboard weekly 4`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "leaderboard.help.example.globalWeeklyPage"
+                ),
+            },
+        ],
+    });
 
-    call = async ({
-        message,
-        parsedMessage,
-    }: CommandArgs): Promise<void> => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         if (parsedMessage.components.length === 0) {
             LeaderboardCommand.showLeaderboard(
                 message,
@@ -181,13 +191,17 @@ export default class LeaderboardCommand implements BaseCommand {
         if (pageOffset === 0 && !type && !scope && !duration) {
             sendValidationErrorMessage(
                 message,
-                state.localizer.translate(message.guildID, "leaderboard.validation.firstArg", { typeOrScopeOrDuration: arrayToString(
-                    [
-                        ...Object.values(LeaderboardType),
-                        ...Object.values(LeaderboardScope),
-                        ...Object.values(LeaderboardDuration),
-                    ]
-                )}),
+                state.localizer.translate(
+                    message.guildID,
+                    "leaderboard.validation.firstArg",
+                    {
+                        typeOrScopeOrDuration: arrayToString([
+                            ...Object.values(LeaderboardType),
+                            ...Object.values(LeaderboardScope),
+                            ...Object.values(LeaderboardDuration),
+                        ]),
+                    }
+                ),
                 arg,
                 this.help(message.guildID).usage
             );
@@ -217,12 +231,16 @@ export default class LeaderboardCommand implements BaseCommand {
         } else if (pageOffset === 0) {
             sendValidationErrorMessage(
                 message,
-                state.localizer.translate(message.guildID, "leaderboard.validation.secondArg", { argument: arrayToString(
-                    [
-                        ...Object.values(LeaderboardScope),
-                        ...Object.values(LeaderboardDuration),
-                    ]
-                )}),
+                state.localizer.translate(
+                    message.guildID,
+                    "leaderboard.validation.secondArg",
+                    {
+                        argument: arrayToString([
+                            ...Object.values(LeaderboardScope),
+                            ...Object.values(LeaderboardDuration),
+                        ]),
+                    }
+                ),
                 arg,
                 this.help(message.guildID).usage
             );
@@ -250,7 +268,15 @@ export default class LeaderboardCommand implements BaseCommand {
         } else if (pageOffset === 0) {
             sendValidationErrorMessage(
                 message,
-                state.localizer.translate(message.guildID, `leaderboard.validation.secondArg`, { argument: arrayToString(Object.values(LeaderboardDuration)) }),
+                state.localizer.translate(
+                    message.guildID,
+                    "leaderboard.validation.secondArg",
+                    {
+                        argument: arrayToString(
+                            Object.values(LeaderboardDuration)
+                        ),
+                    }
+                ),
                 arg,
                 this.help(message.guildID).usage
             );
@@ -260,7 +286,10 @@ export default class LeaderboardCommand implements BaseCommand {
         if (pageOffset === 0 && parsedMessage.components.length > 3) {
             sendValidationErrorMessage(
                 message,
-                state.localizer.translate(message.guildID, "leaderboard.validation.thirdArg"),
+                state.localizer.translate(
+                    message.guildID,
+                    "leaderboard.validation.thirdArg"
+                ),
                 arg,
                 this.help(message.guildID).usage
             );
@@ -474,26 +503,35 @@ export default class LeaderboardCommand implements BaseCommand {
 
                                     const displayName = enrolledPlayer
                                         ? enrolledPlayer.display_name
-                                        : state.localizer.translate(messageContext.guildID, "leaderboard.rankNumber", {
-                                              rank: rank + 1,
-                                          });
+                                        : state.localizer.translate(
+                                              messageContext.guildID,
+                                              "leaderboard.rankNumber",
+                                              {
+                                                  rank: rank + 1,
+                                              }
+                                          );
 
                                     let level: string;
                                     if (permanentLb) {
-                                        level = `${state.localizer.translate(messageContext.guildID,
+                                        level = `${state.localizer.translate(
+                                            messageContext.guildID,
                                             "misc.level"
                                         )} ${friendlyFormattedNumber(
                                             player.level
                                         )} (${getRankNameByLevel(
-                                            player.level, messageContext.guildID
+                                            player.level,
+                                            messageContext.guildID
                                         )})`;
                                     } else {
-                                        const levelText = state.localizer.translateN(messageContext.guildID,
-                                            "leaderboard.level",
-                                            player.level
-                                        );
+                                        const levelText =
+                                            state.localizer.translateN(
+                                                messageContext.guildID,
+                                                "leaderboard.level",
+                                                player.level
+                                            );
 
-                                        level = state.localizer.translate(messageContext.guildID,
+                                        level = state.localizer.translate(
+                                            messageContext.guildID,
                                             "leaderboard.levelsGained",
                                             {
                                                 formattedNumber:
@@ -524,14 +562,34 @@ export default class LeaderboardCommand implements BaseCommand {
 
                                             break;
                                         case LeaderboardType.GAMES_PLAYED: {
-                                            const games = state.localizer.translate(messageContext.guildID, "leaderboard.gamesPlayed", { gameCount: friendlyFormattedNumber(player.game_count) });
+                                            const games =
+                                                state.localizer.translate(
+                                                    messageContext.guildID,
+                                                    "leaderboard.gamesPlayed",
+                                                    {
+                                                        gameCount:
+                                                            friendlyFormattedNumber(
+                                                                player.game_count
+                                                            ),
+                                                    }
+                                                );
 
                                             value = `${games} | ${level}`;
                                             break;
                                         }
 
                                         case LeaderboardType.SONGS_GUESSED: {
-                                            const guesses = state.localizer.translate(messageContext.guildID, "leaderboard.songsGuessed", { songsGuessed: friendlyFormattedNumber(player.songs_guessed) });
+                                            const guesses =
+                                                state.localizer.translate(
+                                                    messageContext.guildID,
+                                                    "leaderboard.songsGuessed",
+                                                    {
+                                                        songsGuessed:
+                                                            friendlyFormattedNumber(
+                                                                player.songs_guessed
+                                                            ),
+                                                    }
+                                                );
 
                                             value = `${guesses} | ${level}`;
                                             break;
@@ -572,7 +630,10 @@ export default class LeaderboardCommand implements BaseCommand {
                                 break;
                         }
 
-                        leaderboardScope = state.localizer.translate(messageContext.guildID, leaderboardScope);
+                        leaderboardScope = state.localizer.translate(
+                            messageContext.guildID,
+                            leaderboardScope
+                        );
 
                         const durationString = !permanentLb
                             ? ` ${duration[0].toUpperCase()}${duration.slice(
@@ -595,7 +656,10 @@ export default class LeaderboardCommand implements BaseCommand {
                                 break;
                         }
 
-                        leaderboardType = state.localizer.translate(messageContext.guildID, leaderboardType);
+                        leaderboardType = state.localizer.translate(
+                            messageContext.guildID,
+                            leaderboardType
+                        );
 
                         resolve({
                             title: bold(
@@ -624,8 +688,7 @@ export default class LeaderboardCommand implements BaseCommand {
         if (alreadyEnrolled) {
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: "leaderboard.failure.alreadyEnrolled.title",
-                description:
-                    "leaderboard.failure.alreadyEnrolled.description",
+                description: "leaderboard.failure.alreadyEnrolled.description",
             });
             return;
         }
@@ -671,7 +734,8 @@ export default class LeaderboardCommand implements BaseCommand {
             if (!state.gameSessions[message.guildID]) {
                 sendErrorMessage(messageContext, {
                     title: "misc.failure.game.noneInProgress.title",
-                    description: "leaderboard.failure.game.noneInProgress.description",
+                    description:
+                        "leaderboard.failure.game.noneInProgress.description",
                     thumbnailUrl: KmqImages.NOT_IMPRESSED,
                 });
                 return;
@@ -702,8 +766,7 @@ export default class LeaderboardCommand implements BaseCommand {
         if (pageCount === 0) {
             sendErrorMessage(messageContext, {
                 title: "leaderboard.failure.empty.title",
-                description:
-                    "leaderboard.failure.empty.description",
+                description: "leaderboard.failure.empty.description",
                 thumbnailUrl: KmqImages.DEAD,
             });
             return;

@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     sendOptionsMessage,
     getDebugLogHeader,
@@ -23,6 +23,8 @@ export enum Gender {
 export const DEFAULT_GENDER = [Gender.FEMALE, Gender.MALE, Gender.COED];
 
 export default class GenderCommand implements BaseCommand {
+    helpPriority = 150;
+
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -47,66 +49,67 @@ export default class GenderCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string) => ({
-            name: "gender",
-            description: state.localizer.translate(guildID,
-                "gender.help.description",
-                {
-                    male: Gender.MALE,
-                    female: Gender.FEMALE,
-                    genderAlternating: `\`${process.env.BOT_PREFIX}gender alternating\``,
-                }
-            ),
-            usage: ",gender [gender_1 | alternating] {gender_2} {gender_3}",
-            examples: [
-                {
-                    example: "`,gender female`",
-                    explanation: state.localizer.translate(guildID,
-                        "gender.help.example.female",
-                        { female: Gender.FEMALE }
-                    ),
-                },
-                {
-                    example: "`,gender male female`",
-                    explanation: state.localizer.translate(guildID,
-                        "gender.help.example.maleFemale",
-                        { male: Gender.MALE, female: Gender.FEMALE }
-                    ),
-                },
-                {
-                    example: "`,gender coed`",
-                    explanation: state.localizer.translate(guildID,
-                        "gender.help.example.coed",
-                        { coed: Gender.COED }
-                    ),
-                },
-                {
-                    example: "`,gender`",
-                    explanation: state.localizer.translate(guildID,
-                        "gender.help.example.reset",
-                        {
-                            male: Gender.MALE,
-                            female: Gender.FEMALE,
-                            coed: Gender.COED,
-                        }
-                    ),
-                },
-                {
-                    example: "`,gender alternating`",
-                    explanation: state.localizer.translate(guildID,
-                        "gender.help.example.alternating",
-                        { male: Gender.MALE, female: Gender.FEMALE }
-                    ),
-                },
-            ],
-        });
+    help = (guildID: string): Help => ({
+        name: "gender",
+        description: state.localizer.translate(
+            guildID,
+            "gender.help.description",
+            {
+                male: Gender.MALE,
+                female: Gender.FEMALE,
+                genderAlternating: `\`${process.env.BOT_PREFIX}gender alternating\``,
+            }
+        ),
+        usage: ",gender [gender_1 | alternating] {gender_2} {gender_3}",
+        examples: [
+            {
+                example: "`,gender female`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "gender.help.example.female",
+                    { female: Gender.FEMALE }
+                ),
+            },
+            {
+                example: "`,gender male female`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "gender.help.example.maleFemale",
+                    { male: Gender.MALE, female: Gender.FEMALE }
+                ),
+            },
+            {
+                example: "`,gender coed`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "gender.help.example.coed",
+                    { coed: Gender.COED }
+                ),
+            },
+            {
+                example: "`,gender`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "gender.help.example.reset",
+                    {
+                        male: Gender.MALE,
+                        female: Gender.FEMALE,
+                        coed: Gender.COED,
+                    }
+                ),
+            },
+            {
+                example: "`,gender alternating`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "gender.help.example.alternating",
+                    { male: Gender.MALE, female: Gender.FEMALE }
+                ),
+            },
+        ],
+    });
 
-    helpPriority = 150;
-
-    call = async ({
-        message,
-        parsedMessage,
-    }: CommandArgs): Promise<void> => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         const selectedGenders = parsedMessage.components as Array<Gender>;
 
@@ -131,8 +134,12 @@ export default class GenderCommand implements BaseCommand {
                 );
 
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(message.guildID, "misc.failure.gameOptionConflict.title"),
-                    description: state.localizer.translate(message.guildID,
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "misc.failure.gameOptionConflict.title"
+                    ),
+                    description: state.localizer.translate(
+                        message.guildID,
                         "misc.failure.gameOptionConflict.description",
                         {
                             optionOne: `\`${GameOption.GROUPS}\``,
@@ -151,8 +158,12 @@ export default class GenderCommand implements BaseCommand {
                 guildPreference.getGroupIDs().length === 1
             ) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(message.guildID, "gender.warning.gameOption.title"),
-                    description: state.localizer.translate(message.guildID,
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "gender.warning.gameOption.title"
+                    ),
+                    description: state.localizer.translate(
+                        message.guildID,
                         "gender.warning.gameOption.description",
                         {
                             alternatingGenderCommand: `\`${process.env.BOT_PREFIX}gender alternating\``,

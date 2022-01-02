@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     sendOptionsMessage,
     getDebugLogHeader,
@@ -17,6 +17,8 @@ export const DEFAULT_BEGINNING_SEARCH_YEAR = 1990;
 export const DEFAULT_ENDING_SEARCH_YEAR = new Date().getFullYear();
 
 export default class CutoffCommand implements BaseCommand {
+    helpPriority = 140;
+
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -38,55 +40,54 @@ export default class CutoffCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string) => ({
-            name: "cutoff",
-            description: state.localizer.translate(guildID,
-                "cutoff.help.description"
-            ),
-            usage: ",cutoff [year_start] {year_end}",
-            examples: [
-                {
-                    example: "`,cutoff 2015`",
-                    explanation: state.localizer.translate(guildID,
-                        "cutoff.help.example.singleCutoff",
-                        {
-                            year: String(2015),
-                        }
-                    ),
-                },
-                {
-                    example: "`,cutoff 2015 2018`",
-                    explanation: state.localizer.translate(guildID,
-                        "cutoff.help.example.twoCutoffs",
-                        {
-                            beginningYear: String(2015),
-                            endYear: String(2018),
-                        }
-                    ),
-                },
-                {
-                    example: "`,cutoff`",
-                    explanation: state.localizer.translate(guildID,
-                        "cutoff.help.example.reset",
-                        {
-                            defaultBeginningSearchYear: String(
-                                DEFAULT_BEGINNING_SEARCH_YEAR
-                            ),
-                            defaultEndSearchYear: String(
-                                DEFAULT_ENDING_SEARCH_YEAR
-                            ),
-                        }
-                    ),
-                },
-            ],
-        });
+    help = (guildID: string): Help => ({
+        name: "cutoff",
+        description: state.localizer.translate(
+            guildID,
+            "cutoff.help.description"
+        ),
+        usage: ",cutoff [year_start] {year_end}",
+        examples: [
+            {
+                example: "`,cutoff 2015`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "cutoff.help.example.singleCutoff",
+                    {
+                        year: String(2015),
+                    }
+                ),
+            },
+            {
+                example: "`,cutoff 2015 2018`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "cutoff.help.example.twoCutoffs",
+                    {
+                        beginningYear: String(2015),
+                        endYear: String(2018),
+                    }
+                ),
+            },
+            {
+                example: "`,cutoff`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "cutoff.help.example.reset",
+                    {
+                        defaultBeginningSearchYear: String(
+                            DEFAULT_BEGINNING_SEARCH_YEAR
+                        ),
+                        defaultEndSearchYear: String(
+                            DEFAULT_ENDING_SEARCH_YEAR
+                        ),
+                    }
+                ),
+            },
+        ],
+    });
 
-    helpPriority = 140;
-
-    call = async ({
-        message,
-        parsedMessage,
-    }: CommandArgs): Promise<void> => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.setBeginningCutoffYear(
@@ -116,9 +117,13 @@ export default class CutoffCommand implements BaseCommand {
             const endYear = yearRange[1];
             if (endYear < startYear) {
                 await sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(message.guildID, "cutoff.failure.invalidEndYear.title"),
-                    description: state.localizer.translate(message.guildID,
-                        "cutoff.failure.invalidEndYear.description",
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "cutoff.failure.invalidEndYear.title"
+                    ),
+                    description: state.localizer.translate(
+                        message.guildID,
+                        "cutoff.failure.invalidEndYear.description"
                     ),
                 });
                 return;

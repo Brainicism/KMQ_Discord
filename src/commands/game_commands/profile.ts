@@ -9,7 +9,7 @@ import {
     sendInfoMessage,
     tryCreateInteractionErrorAcknowledgement,
 } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import {
     friendlyFormattedDate,
@@ -46,20 +46,19 @@ const RANK_TITLES = [
 
 /**
  * @param level - The user's level
+ * @param guildID - The guild ID
  * @returns a string describing the user's rank corresponding with their level
  */
-export function getRankNameByLevel(
-    level: number,
-    guildID: string,
-): string {
+export function getRankNameByLevel(level: number, guildID: string): string {
     const highestRankTitle = RANK_TITLES[RANK_TITLES.length - 1];
     const levelsPastMaxRank = level - (highestRankTitle.req + 10);
     if (levelsPastMaxRank >= 0) {
         // add roman numeral suffix for every 5 levels above max rank title
         const stepsAboveMaxRank = Math.floor(levelsPastMaxRank / 5) + 1;
-        return `${state.localizer.translate(guildID, highestRankTitle.title)} ${romanize(
-            stepsAboveMaxRank + 1
-        )}`;
+        return `${state.localizer.translate(
+            guildID,
+            highestRankTitle.title
+        )} ${romanize(stepsAboveMaxRank + 1)}`;
     }
 
     for (let i = RANK_TITLES.length - 1; i >= 0; i--) {
@@ -71,7 +70,8 @@ export function getRankNameByLevel(
 }
 
 async function getProfileFields(
-    requestedPlayer: Eris.User, guildID: string,
+    requestedPlayer: Eris.User,
+    guildID: string
 ): Promise<Array<Eris.EmbedField>> {
     const playerStats = await dbContext
         .kmq("player_stats")
@@ -93,11 +93,13 @@ async function getProfileFields(
     const songsGuessed = playerStats["songs_guessed"];
     const gamesPlayed = playerStats["games_played"];
     const firstPlayDateString = friendlyFormattedDate(
-        new Date(playerStats["first_play"]), guildID
+        new Date(playerStats["first_play"]),
+        guildID
     );
 
     const lastActiveDateString = friendlyFormattedDate(
-        new Date(playerStats["last_active"]), guildID
+        new Date(playerStats["last_active"]),
+        guildID
     );
 
     const exp = playerStats["exp"];
@@ -238,39 +240,44 @@ async function getProfileFields(
 }
 
 export default class ProfileCommand implements BaseCommand {
-    help = (guildID: string) => ({
-            name: "profile",
-            description: state.localizer.translate(guildID, "profile.help.description"),
-            usage: ",profile { @mention }",
-            examples: [
-                {
-                    example: "`,profile`",
-                    explanation: state.localizer.translate(guildID, "profile.help.example.self"),
-                },
-                {
-                    example: "`,profile @FortnitePlayer`",
-                    explanation: state.localizer.translate(guildID,
-                        "profile.help.example.otherPlayerMention",
-                        {
-                            playerName: "FortnitePlayer",
-                        }
-                    ),
-                },
-                {
-                    example: "`,profile 141734249702096896`",
-                    explanation: state.localizer.translate(guildID,
-                        "profile.help.example.otherPlayerID",
-                    ),
-                },
-            ],
-        });
-
     helpPriority = 50;
 
-    call = async ({
-        message,
-        parsedMessage,
-    }: CommandArgs): Promise<void> => {
+    help = (guildID: string): Help => ({
+        name: "profile",
+        description: state.localizer.translate(
+            guildID,
+            "profile.help.description"
+        ),
+        usage: ",profile { @mention }",
+        examples: [
+            {
+                example: "`,profile`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "profile.help.example.self"
+                ),
+            },
+            {
+                example: "`,profile @FortnitePlayer`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "profile.help.example.otherPlayerMention",
+                    {
+                        playerName: "FortnitePlayer",
+                    }
+                ),
+            },
+            {
+                example: "`,profile 141734249702096896`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "profile.help.example.otherPlayerID"
+                ),
+            },
+        ],
+    });
+
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         let requestedPlayer: Eris.User;
         if (parsedMessage.components.length === 0) {
             requestedPlayer = message.author;
@@ -289,10 +296,16 @@ export default class ProfileCommand implements BaseCommand {
 
                 if (!requestedPlayer) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: state.localizer.translate(message.guildID, "profile.failure.notFound.title"),
-                        description: state.localizer.translate(message.guildID,
+                        title: state.localizer.translate(
+                            message.guildID,
+                            "profile.failure.notFound.title"
+                        ),
+                        description: state.localizer.translate(
+                            message.guildID,
                             "profile.failure.notFound.description",
-                            { profileHelp: `\`${process.env.BOT_PREFIX}help profile\`` }
+                            {
+                                profileHelp: `\`${process.env.BOT_PREFIX}help profile\``,
+                            }
                         ),
                     });
                     return;
@@ -300,8 +313,12 @@ export default class ProfileCommand implements BaseCommand {
             }
         } else {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "profile.failure.notFound.title"),
-                description: state.localizer.translate(message.guildID,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "profile.failure.notFound.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
                     "profile.failure.notFound.badUsage.description",
                     { profileHelp: `\`${process.env.BOT_PREFIX}help profile\`` }
                 ),
@@ -313,9 +330,13 @@ export default class ProfileCommand implements BaseCommand {
 
         if (fields.length === 0) {
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "profile.failure.notFound.title"),
-                description: state.localizer.translate(message.guildID,
-                    "misc.interaction.profile.noStats",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "profile.failure.notFound.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "misc.interaction.profile.noStats"
                 ),
             });
             return;
@@ -346,13 +367,14 @@ export default class ProfileCommand implements BaseCommand {
  */
 export async function handleProfileInteraction(
     interaction: Eris.CommandInteraction,
-    userId: string,
+    userId: string
 ): Promise<void> {
     const user = await state.ipc.fetchUser(userId);
     if (!user) {
         tryCreateInteractionErrorAcknowledgement(
             interaction,
-            state.localizer.translate(interaction.guildID,
+            state.localizer.translate(
+                interaction.guildID,
                 "misc.interaction.profile.inaccessible",
                 {
                     profileUserID: `\`${process.env.BOT_PREFIX}profile ${userId}\``,
@@ -372,8 +394,9 @@ export async function handleProfileInteraction(
     if (fields.length === 0) {
         tryCreateInteractionErrorAcknowledgement(
             interaction,
-            state.localizer.translate(interaction.guildID,
-                "misc.interaction.profile.noStats",
+            state.localizer.translate(
+                interaction.guildID,
+                "misc.interaction.profile.noStats"
             )
         );
 

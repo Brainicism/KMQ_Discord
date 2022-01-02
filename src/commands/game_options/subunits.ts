@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
 import {
@@ -20,9 +20,11 @@ export enum SubunitsPreference {
 export const DEFAULT_SUBUNIT_PREFERENCE = SubunitsPreference.INCLUDE;
 
 export default class SubunitsCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
-
     aliases = ["subunit", "su"];
+
+    helpPriority = 130;
+
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
         minArgCount: 0,
@@ -36,36 +38,45 @@ export default class SubunitsCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string) => ({
-            name: "subunits",
-            description: state.localizer.translate(guildID,
-                "subunits.help.description",
-                { groups: `\`${process.env.BOT_PREFIX}groups\`` }
-            ),
-            usage: ",subunits [include | exclude]",
-            examples: [
-                {
-                    example: "`,subunits include`",
-                    explanation: state.localizer.translate(guildID,
-                        "subunits.help.example.include",
-                        { groupCommand: `${process.env.BOT_PREFIX}groups`, parentGroup: "BTS", subunitOne: "J-Hope", subunitTwo: "RM", }
-                    ),
-                },
-                {
-                    example: "`,subunits exclude`",
-                    explanation: state.localizer.translate(guildID, "subunits.help.example.exclude"),
-                },
-                {
-                    example: "`,subunits`",
-                    explanation: state.localizer.translate(guildID,
-                        "subunits.help.example.reset",
-                        { defaultSubunit: `\`${DEFAULT_SUBUNIT_PREFERENCE}\`` }
-                    ),
-                },
-            ],
-        });
-
-    helpPriority = 130;
+    help = (guildID: string): Help => ({
+        name: "subunits",
+        description: state.localizer.translate(
+            guildID,
+            "subunits.help.description",
+            { groups: `\`${process.env.BOT_PREFIX}groups\`` }
+        ),
+        usage: ",subunits [include | exclude]",
+        examples: [
+            {
+                example: "`,subunits include`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "subunits.help.example.include",
+                    {
+                        groupCommand: `${process.env.BOT_PREFIX}groups`,
+                        parentGroup: "BTS",
+                        subunitOne: "J-Hope",
+                        subunitTwo: "RM",
+                    }
+                ),
+            },
+            {
+                example: "`,subunits exclude`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "subunits.help.example.exclude"
+                ),
+            },
+            {
+                example: "`,subunits`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "subunits.help.example.reset",
+                    { defaultSubunit: `\`${DEFAULT_SUBUNIT_PREFERENCE}\`` }
+                ),
+            },
+        ],
+    });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

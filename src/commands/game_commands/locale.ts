@@ -5,10 +5,7 @@ import {
 } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import {
-    LocaleType,
-    DEFAULT_LOCALE,
-} from "../../helpers/localization_manager";
+import { LocaleType, DEFAULT_LOCALE } from "../../helpers/localization_manager";
 import dbContext from "../../database_context";
 import { state } from "../../kmq_worker";
 import { KmqImages } from "../../constants";
@@ -16,36 +13,9 @@ import { KmqImages } from "../../constants";
 const logger = new IPCLogger("locale");
 
 export default class LocaleTypeCommand implements BaseCommand {
-    help = (guildID: string): Help => ({
-            name: "locale",
-            description: state.localizer.translate(guildID, "locale.help.description"),
-            usage: ",locale [language]",
-            examples: [
-                {
-                    example: "`,locale en`",
-                    explanation: state.localizer.translate(guildID,
-                        "locale.help.example.toEnglish",
-                    ),
-                },
-                {
-                    example: "`,locale ko`",
-                    explanation: state.localizer.translate(guildID,
-                        "locale.help.example.toKorean",
-                    ),
-                },
-                {
-                    example: "`,locale`",
-                    explanation: state.localizer.translate(guildID,
-                        "locale.help.example.reset",
-                        { defaultLocale: DEFAULT_LOCALE }
-                    ),
-                },
-            ],
-        });
+    aliases = ["botlanguage"];
 
     helpPriority = 30;
-
-    aliases = ["botlanguage"];
 
     validations = {
         minArgCount: 1,
@@ -59,10 +29,40 @@ export default class LocaleTypeCommand implements BaseCommand {
         ],
     };
 
-    call = async ({
-        message,
-        parsedMessage,
-    }: CommandArgs): Promise<void> => {
+    help = (guildID: string): Help => ({
+        name: "locale",
+        description: state.localizer.translate(
+            guildID,
+            "locale.help.description"
+        ),
+        usage: ",locale [language]",
+        examples: [
+            {
+                example: "`,locale en`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "locale.help.example.toEnglish"
+                ),
+            },
+            {
+                example: "`,locale ko`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "locale.help.example.toKorean"
+                ),
+            },
+            {
+                example: "`,locale`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "locale.help.example.reset",
+                    { defaultLocale: DEFAULT_LOCALE }
+                ),
+            },
+        ],
+    });
+
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         let language: LocaleType;
         if (parsedMessage.components.length === 0) {
             language = DEFAULT_LOCALE;
@@ -73,8 +73,13 @@ export default class LocaleTypeCommand implements BaseCommand {
         LocaleTypeCommand.updateLocale(message.guildID, language);
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(message.guildID, "options.updated", { presetOrOption: "Locale" }),
-            description: state.localizer.translate(message.guildID,
+            title: state.localizer.translate(
+                message.guildID,
+                "options.updated",
+                { presetOrOption: "Locale" }
+            ),
+            description: state.localizer.translate(
+                message.guildID,
                 "locale.updatedDescription",
                 { language }
             ),

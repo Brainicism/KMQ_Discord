@@ -15,7 +15,7 @@ import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
-import { LocaleType, DEFAULT_LOCALE } from "../../helpers/localization_manager";
+import { DEFAULT_LOCALE } from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("debug");
 
@@ -73,7 +73,8 @@ export default class DebugCommand implements BaseCommand {
         const debugID = uuid.v4();
         await sendInfoMessage(MessageContext.fromMessage(message), {
             title: state.localizer.translate(message.guildID, "debug.title"),
-            description: state.localizer.translate(message.guildID,
+            description: state.localizer.translate(
+                message.guildID,
                 "debug.description",
                 {
                     debugID: `\`${debugID}\``,

@@ -5,7 +5,7 @@ import moment from "moment-timezone";
 import crypto from "crypto";
 import _ from "lodash";
 import { state } from "../kmq_worker";
-import LocalizationManager from "../helpers/localization_manager";
+import LocalizationManager from "./localization_manager";
 import { IPCLogger } from "../logger";
 
 const logger = new IPCLogger("utils");
@@ -204,6 +204,7 @@ export function standardDateFormat(date: Date): string {
 
 /**
  * @param date - the date Object
+ * @param guildID - the guild ID
  * @returns the date in (minutes/hours ago) or yyyy-mm-dd format
  */
 export function friendlyFormattedDate(date: Date, guildID: string): string {
@@ -213,15 +214,24 @@ export function friendlyFormattedDate(date: Date, guildID: string): string {
     } else {
         localizer = state.localizer;
     }
+
     const timeDiffSeconds = (Date.now() - date.getTime()) / 1000;
     const timeDiffMinutes = timeDiffSeconds / 60.0;
     if (timeDiffMinutes <= 60) {
-        return localizer.translateN(guildID, "%s minute ago", Math.ceil(timeDiffMinutes));
+        return localizer.translateN(
+            guildID,
+            "%s minute ago",
+            Math.ceil(timeDiffMinutes)
+        );
     }
 
     const timeDiffHours = timeDiffMinutes / 60.0;
     if (timeDiffHours <= 24) {
-        return localizer.translateN(guildID, "%s hour ago", Math.ceil(timeDiffHours));
+        return localizer.translateN(
+            guildID,
+            "%s hour ago",
+            Math.ceil(timeDiffHours)
+        );
     }
 
     return standardDateFormat(date);

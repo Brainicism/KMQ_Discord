@@ -42,17 +42,13 @@ export default class JoinCommand implements BaseCommand {
         if (gameSession.gameType === GameType.ELIMINATION) {
             JoinCommand.joinEliminationGame(message, gameSession);
         } else if (gameSession.gameType === GameType.TEAMS) {
-            JoinCommand.joinTeamsGame(
-                message,
-                parsedMessage,
-                gameSession,
-            );
+            JoinCommand.joinTeamsGame(message, parsedMessage, gameSession);
         }
     };
 
     static joinEliminationGame(
         message: GuildTextableMessage,
-        gameSession: GameSession,
+        gameSession: GameSession
     ): void {
         const kmqMember = KmqMember.fromUser(message.author);
         if (gameSession.participants.has(message.author.id)) {
@@ -61,8 +57,12 @@ export default class JoinCommand implements BaseCommand {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "misc.playerAlreadyJoined.title"),
-                description: state.localizer.translate(message.guildID,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.playerAlreadyJoined.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
                     "misc.playerAlreadyJoined.description",
                     { mentionedUser: getMention(message.author.id) }
                 ),
@@ -83,8 +83,12 @@ export default class JoinCommand implements BaseCommand {
             );
 
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "misc.playerJoinedMidGame.title"),
-                description: state.localizer.translate(message.guildID,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.playerJoinedMidGame.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
                     "misc.playerJoinedMidGame.description",
                     {
                         mentionedUser: getMention(message.author.id),
@@ -101,7 +105,9 @@ export default class JoinCommand implements BaseCommand {
 
         if (previouslyJoinedPlayers.length > 10) {
             previouslyJoinedPlayers = previouslyJoinedPlayers.slice(0, 10);
-            previouslyJoinedPlayers.push(state.localizer.translate(message.guildID, "misc.andManyOthers"));
+            previouslyJoinedPlayers.push(
+                state.localizer.translate(message.guildID, "misc.andManyOthers")
+            );
         }
 
         const players = `${getMention(
@@ -109,7 +115,10 @@ export default class JoinCommand implements BaseCommand {
         )}, ${previouslyJoinedPlayers.join(", ")}`;
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(message.guildID, "misc.playerJoined.title"),
+            title: state.localizer.translate(
+                message.guildID,
+                "misc.playerJoined.title"
+            ),
             description: players,
         });
         logger.info(`${getDebugLogHeader(message)} | Player has joined.`);
@@ -119,13 +128,17 @@ export default class JoinCommand implements BaseCommand {
     static joinTeamsGame(
         message: GuildTextableMessage,
         parsedMessage: ParsedMessage,
-        gameSession: GameSession,
+        gameSession: GameSession
     ): void {
         if (parsedMessage.components.length === 0) {
             logger.warn(`${getDebugLogHeader(message)} | Missing team name.`);
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "misc.failure.joinError.title"),
-                description: state.localizer.translate(message.guildID,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.failure.joinError.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
                     "misc.failure.joinError.noTeamName.description",
                     { joinCommand: ",join" }
                 ),
@@ -154,9 +167,13 @@ export default class JoinCommand implements BaseCommand {
                     .includes(emojiID)
             ) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(message.guildID, "misc.failure.joinError.invalidTeamName.title"),
-                    description: state.localizer.translate(message.guildID,
-                        "misc.failure.joinError.badEmojis.description",
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "misc.failure.joinError.invalidTeamName.title"
+                    ),
+                    description: state.localizer.translate(
+                        message.guildID,
+                        "misc.failure.joinError.badEmojis.description"
                     ),
                 });
 
@@ -177,8 +194,12 @@ export default class JoinCommand implements BaseCommand {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "misc.failure.joinError.title"),
-                description: state.localizer.translate(message.guildID,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.failure.joinError.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
                     "misc.failure.joinError.invalidCharacters.description"
                 ),
             });
@@ -202,15 +223,27 @@ export default class JoinCommand implements BaseCommand {
             );
 
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "play.team.new"),
-                description: state.localizer.translate(message.guildID,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "play.team.new"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
                     "play.team.join",
                     {
                         teamName: bold(teamName),
                         mentionedUser: getMention(message.author.id),
                         joinCommand: `${process.env.BOT_PREFIX}join`,
                         teamNameWithCleanEmojis,
-                        startGameInstructions: !gameSession.sessionInitialized ? state.localizer.translate(message.guildID, "play.team.join.startGameInstructions", { beginCommand: `\`${process.env.BOT_PREFIX}begin\``, }) : "",
+                        startGameInstructions: !gameSession.sessionInitialized
+                            ? state.localizer.translate(
+                                  message.guildID,
+                                  "play.team.join.startGameInstructions",
+                                  {
+                                      beginCommand: `\`${process.env.BOT_PREFIX}begin\``,
+                                  }
+                              )
+                            : "",
                     }
                 ),
                 thumbnailUrl: KmqImages.READING_BOOK,
@@ -223,9 +256,13 @@ export default class JoinCommand implements BaseCommand {
             const team = teamScoreboard.getTeam(teamName);
             if (team.hasPlayer(message.author.id)) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(message.guildID, "misc.failure.joinError.title"),
-                    description: state.localizer.translate(message.guildID,
-                        "misc.failure.joinError.alreadyInTeam.description",
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "misc.failure.joinError.title"
+                    ),
+                    description: state.localizer.translate(
+                        message.guildID,
+                        "misc.failure.joinError.alreadyInTeam.description"
                     ),
                 });
 
@@ -248,16 +285,22 @@ export default class JoinCommand implements BaseCommand {
             );
 
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "misc.playerJoinedTeam.title", {
-                    joiningUser: getUserTag(message.author),
-                    teamName: team.name,
-                }),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.playerJoinedTeam.title",
+                    {
+                        joiningUser: getUserTag(message.author),
+                        teamName: team.name,
+                    }
+                ),
                 description: !gameSession.sessionInitialized
-                    ? state.localizer.translate(message.guildID,
+                    ? state.localizer.translate(
+                          message.guildID,
                           "misc.playerJoinedTeam.beforeGameStart.description",
                           { beginCommand: "`,begin`" }
                       )
-                    : state.localizer.translate(message.guildID,
+                    : state.localizer.translate(
+                          message.guildID,
                           "misc.playerJoinedTeam.afterGameStart.description",
                           {
                               mentionedUser: getMention(message.author.id),

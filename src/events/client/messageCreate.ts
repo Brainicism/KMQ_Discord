@@ -85,7 +85,9 @@ export default async function messageCreateHandler(
                 message,
                 parsedMessage,
                 invokedCommand.validations,
-                typeof invokedCommand.help === "function" ? invokedCommand.help(message.guildID).usage : null,
+                typeof invokedCommand.help === "function"
+                    ? invokedCommand.help(message.guildID).usage
+                    : null
             )
         ) {
             const { gameSessions } = state;

@@ -3,7 +3,7 @@ import {
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     getGuildPreference,
     getMatchingGroupNames,
@@ -34,6 +34,8 @@ enum RemoveType {
 }
 
 export default class RemoveCommand implements BaseCommand {
+    helpPriority = 200;
+
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -47,68 +49,70 @@ export default class RemoveCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string) => ({
-            name: "remove",
-            description: state.localizer.translate(guildID,
-                "remove.help.description",
-                {
-                    groups: `\`${process.env.BOT_PREFIX}groups\``,
-                    exclude: `\`${process.env.BOT_PREFIX}exclude\``,
-                    include: `\`${process.env.BOT_PREFIX}include\``,
-                }
-            ),
-            usage: ",remove [groups | exclude | include] [list of groups]",
-            examples: [
-                {
-                    example: "`,remove groups twice, red velvet`",
-                    explanation: state.localizer.translate(guildID,
-                        "remove.help.example.groups",
-                        {
-                            groupOne: "Twice",
-                            groupTwo: "Red Velvet",
-                            groups: `\`${process.env.BOT_PREFIX}groups\``,
-                        }
-                    ),
-                },
-                {
-                    example: "`,remove exclude BESTie, Dia, iKON`",
-                    explanation: state.localizer.translate(guildID,
-                        "remove.help.example.exclude",
-                        {
-                            groupOne: "BESTie",
-                            groupTwo: "Dia",
-                            groupThree: "iKON",
-                            exclude: `\`${process.env.BOT_PREFIX}exclude\``,
-                        }
-                    ),
-                },
-                {
-                    example: "`,remove include exo`",
-                    explanation: state.localizer.translate(guildID,
-                        "remove.help.example.include",
-                        {
-                            group: "exo",
-                            include: `\`${process.env.BOT_PREFIX}include\``,
-                        }
-                    ),
-                },
-            ],
-            actionRowComponents: [
-                {
-                    style: 5 as const,
-                    url: GROUP_LIST_URL,
-                    type: 2 as const,
-                    label: state.localizer.translate(guildID, "misc.interaction.fullGroupsList"),
-                },
-            ],
-        });
+    help = (guildID: string): Help => ({
+        name: "remove",
+        description: state.localizer.translate(
+            guildID,
+            "remove.help.description",
+            {
+                groups: `\`${process.env.BOT_PREFIX}groups\``,
+                exclude: `\`${process.env.BOT_PREFIX}exclude\``,
+                include: `\`${process.env.BOT_PREFIX}include\``,
+            }
+        ),
+        usage: ",remove [groups | exclude | include] [list of groups]",
+        examples: [
+            {
+                example: "`,remove groups twice, red velvet`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "remove.help.example.groups",
+                    {
+                        groupOne: "Twice",
+                        groupTwo: "Red Velvet",
+                        groups: `\`${process.env.BOT_PREFIX}groups\``,
+                    }
+                ),
+            },
+            {
+                example: "`,remove exclude BESTie, Dia, iKON`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "remove.help.example.exclude",
+                    {
+                        groupOne: "BESTie",
+                        groupTwo: "Dia",
+                        groupThree: "iKON",
+                        exclude: `\`${process.env.BOT_PREFIX}exclude\``,
+                    }
+                ),
+            },
+            {
+                example: "`,remove include exo`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "remove.help.example.include",
+                    {
+                        group: "exo",
+                        include: `\`${process.env.BOT_PREFIX}include\``,
+                    }
+                ),
+            },
+        ],
+        actionRowComponents: [
+            {
+                style: 5 as const,
+                url: GROUP_LIST_URL,
+                type: 2 as const,
+                label: state.localizer.translate(
+                    guildID,
+                    "misc.interaction.fullGroupsList"
+                ),
+            },
+        ],
+    });
 
-    helpPriority = 200;
-
-    call = async ({
-        message,
-        parsedMessage,
-    }: CommandArgs): Promise<void> => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         const optionListed = parsedMessage.components[0] as RemoveType;
         let currentMatchedArtists: MatchedArtist[];
@@ -132,8 +136,12 @@ export default class RemoveCommand implements BaseCommand {
 
         if (!currentMatchedArtists) {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "remove.failure.noGroupsSelected.title"),
-                description: state.localizer.translate(message.guildID,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "remove.failure.noGroupsSelected.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
                     "remove.failure.noGroupsSelected.description"
                 ),
             });
@@ -165,11 +173,18 @@ export default class RemoveCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "misc.failure.unrecognizedGroups.title"),
-                description: state.localizer.translate(message.guildID,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.failure.unrecognizedGroups.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
                     "misc.failure.unrecognizedGroups.description",
                     {
-                        matchedGroupsAction: state.localizer.translate(message.guildID, "remove.failure.unrecognizedGroups.removed"),
+                        matchedGroupsAction: state.localizer.translate(
+                            message.guildID,
+                            "remove.failure.unrecognizedGroups.removed"
+                        ),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: unmatchedGroups.join(", "),
                         solution: "",

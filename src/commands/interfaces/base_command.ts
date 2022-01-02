@@ -34,13 +34,13 @@ export interface Help {
     actionRowComponents?: Eris.ActionRowComponents[];
 }
 
-export interface HelpGenerator {
+export interface HelpFunc {
     (guildID: string): Help;
 }
 
 export default interface BaseCommand {
     call: CallFunc;
-    help?: HelpGenerator;
+    help?: HelpFunc;
     helpPriority?: number;
     aliases?: Array<string>;
     validations?: CommandValidations;

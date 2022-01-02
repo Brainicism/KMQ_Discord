@@ -282,6 +282,13 @@ export async function reloadBonusGroups(): Promise<void> {
     );
 }
 
+async function reloadLocales(): Promise<void> {
+    const updatedLocales = await dbContext.kmq("locale").select("*");
+    for (const l of updatedLocales) {
+        state.locales[l.guild_id] = l as LocaleType;
+    }
+}
+
 /**
  * Clears any existing restart timers
  */
@@ -347,11 +354,4 @@ export function deleteGameSession(guildID: string): void {
     }
 
     delete state.gameSessions[guildID];
-}
-
-async function reloadLocales() {
-    const updatedLocales = await dbContext.kmq("locale").select("*");
-    for (const l of updatedLocales) {
-        state.locales[l.guild_id] = l as LocaleType;
-    }
 }

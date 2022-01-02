@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     sendOptionsMessage,
     getDebugLogHeader,
@@ -18,53 +18,56 @@ import { state } from "../../kmq_worker";
 const logger = new IPCLogger("excludes");
 
 export default class ExcludeCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
-
-    help = (guildID: string) => ({
-            name: "exclude",
-            description: state.localizer.translate(guildID,
-                "exclude.help.description",
-                {
-                    groupsLink: `http://${process.env.WEB_SERVER_IP}:${process.env.WEB_SERVER_PORT}/groups`,
-                }
-            ),
-            usage: ",exclude [group1],{group2}",
-            examples: [
-                {
-                    example: "`,exclude blackpink`",
-                    explanation: state.localizer.translate(guildID,
-                        "exclude.help.example.singleGroup",
-                        {
-                            artist: "Blackpink",
-                        }
-                    ),
-                },
-                {
-                    example: "`,exclude blackpink, bts, red velvet`",
-                    explanation: state.localizer.translate(guildID,
-                        "exclude.help.example.multipleGroups",
-                        {
-                            groupOne: "Blackpink",
-                            groupTwo: "BTS",
-                            groupThree: "Red Velvet",
-                        }
-                    ),
-                },
-                {
-                    example: "`,exclude`",
-                    explanation: state.localizer.translate(guildID, "exclude.help.example.reset"),
-                },
-            ],
-        });
-
     helpPriority = 130;
 
     aliases = ["excludes", "ignore", "ignores"];
 
-    call = async ({
-        message,
-        parsedMessage,
-    }: CommandArgs): Promise<void> => {
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+
+    help = (guildID: string): Help => ({
+        name: "exclude",
+        description: state.localizer.translate(
+            guildID,
+            "exclude.help.description",
+            {
+                groupsLink: `http://${process.env.WEB_SERVER_IP}:${process.env.WEB_SERVER_PORT}/groups`,
+            }
+        ),
+        usage: ",exclude [group1],{group2}",
+        examples: [
+            {
+                example: "`,exclude blackpink`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "exclude.help.example.singleGroup",
+                    {
+                        artist: "Blackpink",
+                    }
+                ),
+            },
+            {
+                example: "`,exclude blackpink, bts, red velvet`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "exclude.help.example.multipleGroups",
+                    {
+                        groupOne: "Blackpink",
+                        groupTwo: "BTS",
+                        groupThree: "Red Velvet",
+                    }
+                ),
+            },
+            {
+                example: "`,exclude`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "exclude.help.example.reset"
+                ),
+            },
+        ],
+    });
+
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.EXCLUDE);
@@ -80,7 +83,8 @@ export default class ExcludeCommand implements BaseCommand {
         let excludeWarning = "";
         if (parsedMessage.components.length > 1) {
             if (["add", "remove"].includes(parsedMessage.components[0])) {
-                excludeWarning = state.localizer.translate(message.guildID,
+                excludeWarning = state.localizer.translate(
+                    message.guildID,
                     "misc.warning.addRemoveOrdering.footer",
                     {
                         addOrRemove: `${process.env.BOT_PREFIX}${parsedMessage.components[0]}`,
@@ -107,11 +111,18 @@ export default class ExcludeCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "misc.failure.unrecognizedGroups.title"),
-                description: state.localizer.translate(message.guildID,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.failure.unrecognizedGroups.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
                     "misc.failure.unrecognizedGroups.description",
                     {
-                        matchedGroupsAction: state.localizer.translate(message.guildID, "exclude.failure.unrecognizedGroups.excluded"),
+                        matchedGroupsAction: state.localizer.translate(
+                            message.guildID,
+                            "exclude.failure.unrecognizedGroups.excluded"
+                        ),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: `${unmatchedGroups.join(", ")}`,
                         solution: `\`${process.env.BOT_PREFIX}add exclude\``,
@@ -132,15 +143,22 @@ export default class ExcludeCommand implements BaseCommand {
             );
             if (intersection.size > 0) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(message.guildID, "misc.failure.groupsExcludeConflict.title"),
-                    description: state.localizer.translate(message.guildID,
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "misc.failure.groupsExcludeConflict.title"
+                    ),
+                    description: state.localizer.translate(
+                        message.guildID,
                         "misc.failure.groupsExcludeConflict.description",
                         {
                             conflictingOptionOne: `\`${GameOption.EXCLUDE}\``,
                             conflictingOptionTwo: `\`${GameOption.GROUPS}\``,
                             solutionStepOne: `\`${process.env.BOT_PREFIX}remove groups\``,
                             solutionStepTwo: `\`${process.env.BOT_PREFIX}exclude\``,
-                            allowOrPrevent: state.localizer.translate(message.guildID, "misc.failure.groupsExcludeConflict.prevent"),
+                            allowOrPrevent: state.localizer.translate(
+                                message.guildID,
+                                "misc.failure.groupsExcludeConflict.prevent"
+                            ),
                         }
                     ),
                 });

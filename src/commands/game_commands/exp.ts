@@ -78,14 +78,16 @@ interface ExpModifier {
  */
 export async function calculateOptionsExpMultiplierInternal(
     guildPreference: GuildPreference,
-    voteBonusExp: boolean,
+    voteBonusExp: boolean
 ): Promise<Array<ExpModifier>> {
-
     const modifiers: Array<ExpModifier> = [];
     // bonus for voting
     if (voteBonusExp) {
         modifiers.push({
-            displayName: state.localizer.translate(guildPreference.guildID, "exp.voteBonus"),
+            displayName: state.localizer.translate(
+                guildPreference.guildID,
+                "exp.voteBonus"
+            ),
             name: ExpBonusModifier.VOTE,
             isPenalty: false,
         });
@@ -94,7 +96,10 @@ export async function calculateOptionsExpMultiplierInternal(
     // power hour bonus
     if (isWeekend() || isPowerHour()) {
         modifiers.push({
-            displayName: state.localizer.translate(guildPreference.guildID, "exp.powerHourBonus"),
+            displayName: state.localizer.translate(
+                guildPreference.guildID,
+                "exp.powerHourBonus"
+            ),
             name: ExpBonusModifier.POWER_HOUR,
             isPenalty: false,
         });
@@ -102,7 +107,10 @@ export async function calculateOptionsExpMultiplierInternal(
 
     if (guildPreference.typosAllowed()) {
         modifiers.push({
-            displayName: state.localizer.translate(guildPreference.guildID, "exp.typosAllowedPenalty"),
+            displayName: state.localizer.translate(
+                guildPreference.guildID,
+                "exp.typosAllowedPenalty"
+            ),
             name: ExpBonusModifier.TYPO,
             isPenalty: true,
         });
@@ -126,7 +134,10 @@ export async function calculateOptionsExpMultiplierInternal(
         }
 
         modifiers.push({
-            displayName: state.localizer.translate(guildPreference.guildID, "exp.multipleChoicePenalty"),
+            displayName: state.localizer.translate(
+                guildPreference.guildID,
+                "exp.multipleChoicePenalty"
+            ),
             name: multipleChoicePenalty,
             isPenalty: true,
         });
@@ -135,7 +146,10 @@ export async function calculateOptionsExpMultiplierInternal(
     const totalSongs = (await getAvailableSongCount(guildPreference)).count;
     if (totalSongs < 10) {
         modifiers.push({
-            displayName: state.localizer.translate(guildPreference.guildID, "exp.lowSongCountPenalty"),
+            displayName: state.localizer.translate(
+                guildPreference.guildID,
+                "exp.lowSongCountPenalty"
+            ),
             name: ExpBonusModifier.BELOW_SONG_COUNT_THRESHOLD,
             isPenalty: true,
         });
@@ -147,8 +161,13 @@ export async function calculateOptionsExpMultiplierInternal(
         guildPreference.gameOptions.guessModeType === GuessModeType.BOTH
     ) {
         modifiers.push({
-            displayName: state.localizer.translate(guildPreference.guildID, "exp.artistGroupGuessModePenalty"),
-            name: guildPreference.isGroupsMode() ? ExpBonusModifier.ARTIST_GUESS_GROUPS_SELECTED : ExpBonusModifier.ARTIST_GUESS,
+            displayName: state.localizer.translate(
+                guildPreference.guildID,
+                "exp.artistGroupGuessModePenalty"
+            ),
+            name: guildPreference.isGroupsMode()
+                ? ExpBonusModifier.ARTIST_GUESS_GROUPS_SELECTED
+                : ExpBonusModifier.ARTIST_GUESS,
             isPenalty: true,
         });
     }
@@ -265,15 +284,14 @@ export async function calculateTotalRoundExp(
 }
 
 export default class ExpCommand implements BaseCommand {
-    help = (guildID: string): Help => ({
-            name: "exp",
-            description: state.localizer.translate(guildID,
-                "exp.help.description"
-            ),
-            usage: ",exp",
-            examples: [],
-        });
     helpPriority = 50;
+
+    help = (guildID: string): Help => ({
+        name: "exp",
+        description: state.localizer.translate(guildID, "exp.help.description"),
+        usage: ",exp",
+        examples: [],
+    });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         const voteBonusActive = await userBonusIsActive(message.author.id);
@@ -282,7 +300,7 @@ export default class ExpCommand implements BaseCommand {
 
         const activeModifiers = await calculateOptionsExpMultiplierInternal(
             guildPreference,
-            voteBonusActive,
+            voteBonusActive
         );
 
         const totalModifier = await calculateOptionsExpMultiplier(
@@ -298,18 +316,28 @@ export default class ExpCommand implements BaseCommand {
         );
 
         modifierText.push(
-            `\`${state.localizer.translate(message.guildID, "exp.totalModifier")}:\` **__${totalModifier.toFixed(2)}x__**`
+            `\`${state.localizer.translate(
+                message.guildID,
+                "exp.totalModifier"
+            )}:\` **__${totalModifier.toFixed(2)}x__**`
         );
 
         fields.push({
-            name: state.localizer.translate(message.guildID, "exp.activeModifiers"),
+            name: state.localizer.translate(
+                message.guildID,
+                "exp.activeModifiers"
+            ),
             value: `${modifierText.join("\n")}`,
             inline: false,
         });
 
         fields.push({
-            name: state.localizer.translate(message.guildID, "exp.bonusArtistsTitle"),
-            value: `\`${state.localizer.translate(message.guildID,
+            name: state.localizer.translate(
+                message.guildID,
+                "exp.bonusArtistsTitle"
+            ),
+            value: `\`${state.localizer.translate(
+                message.guildID,
                 "exp.bonusArtists"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.BONUS_ARTIST
@@ -320,35 +348,49 @@ export default class ExpCommand implements BaseCommand {
         });
 
         const bonusExpExplanations = [
-            `\`${state.localizer.translate(message.guildID,
+            `\`${state.localizer.translate(
+                message.guildID,
                 "exp.explanation.powerHour"
             )}:\` ${ExpBonusModifierValues[ExpBonusModifier.POWER_HOUR].toFixed(
                 2
             )}x 📈`,
-            `\`${state.localizer.translate(message.guildID, "exp.explanation.voting")}!:\` ${ExpBonusModifierValues[
-                ExpBonusModifier.VOTE
-            ].toFixed(2)}x 📈`,
-            `\`${state.localizer.translate(message.guildID,
+            `\`${state.localizer.translate(
+                message.guildID,
+                "exp.explanation.voting"
+            )}!:\` ${ExpBonusModifierValues[ExpBonusModifier.VOTE].toFixed(
+                2
+            )}x 📈`,
+            `\`${state.localizer.translate(
+                message.guildID,
                 "exp.streak"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.GUESS_STREAK
             ].toFixed(2)}x 📈`,
-            `\`${state.localizer.translate(message.guildID, "exp.explanation.quickGuess")}:\` ${ExpBonusModifierValues[
+            `\`${state.localizer.translate(
+                message.guildID,
+                "exp.explanation.quickGuess"
+            )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.QUICK_GUESS
             ].toFixed(2)}x 📈 `,
-            `\`${state.localizer.translate(message.guildID,
+            `\`${state.localizer.translate(
+                message.guildID,
                 "exp.explalanation.bonusArtistGuess"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.BONUS_ARTIST
             ].toFixed(2)}x 📈 `,
-            `\`${state.localizer.translate(message.guildID,
+            `\`${state.localizer.translate(
+                message.guildID,
                 "exp.explanation.rareGuess"
-            )}:\` 2.00x ${state.localizer.translate(message.guildID, "exp.explanation.rareGuess.upTo")} 50.00x 📈`,
+            )}:\` 2.00x ${state.localizer.translate(
+                message.guildID,
+                "exp.explanation.rareGuess.upTo"
+            )} 50.00x 📈`,
         ];
 
         fields.push({
             name: state.localizer.translate(message.guildID, "exp.bonusTitle"),
-            value: `${state.localizer.translate(message.guildID,
+            value: `${state.localizer.translate(
+                message.guildID,
                 "exp.bonusDescription"
             )}:\n ${bonusExpExplanations.map((x) => `- ${x}`).join("\n")}`,
             inline: false,

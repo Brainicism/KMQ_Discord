@@ -5,7 +5,7 @@ import {
     sendInfoMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
@@ -35,6 +35,8 @@ enum PresetAction {
 export default class PresetCommand implements BaseCommand {
     aliases = ["presets"];
 
+    helpPriority = 200;
+
     validations = {
         minArgCount: 0,
         maxArgCount: 3,
@@ -47,84 +49,91 @@ export default class PresetCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string) => ({
-            name: "preset",
-            description: state.localizer.translate(guildID,
-                "preset.help.description"
-            ),
-            usage: ",preset [list | save | load | delete | export] {preset_name}\n,preset import [preset_identifier] [preset_name]",
-            examples: [
-                {
-                    example: "`,preset list`",
-                    explanation: state.localizer.translate(guildID,
-                        "preset.help.example.list"
-                    ),
-                },
-                {
-                    example: "`,preset save [preset_name]`",
-                    explanation: state.localizer.translate(guildID,
-                        "preset.help.example.save"
-                    ),
-                },
-                {
-                    example: "`,preset load [preset_name | preset_identifier]`",
-                    explanation: state.localizer.translate(guildID,
-                        "preset.help.example.load",
-                        { exampleIdentifier: "`KMQ-XXXXX-...`" }
-                    ),
-                },
-                {
-                    example: "`,preset replace [preset_name]`",
-                    explanation: state.localizer.translate(guildID,
-                        "preset.help.example.replace"
-                    ),
-                },
-                {
-                    example: "`,preset delete [preset_name]`",
-                    explanation: state.localizer.translate(guildID, "preset.help.example.delete"),
-                },
-                {
-                    example: "`,preset export [preset_name]`",
-                    explanation: state.localizer.translate(guildID,
-                        "preset.help.example.export"
-                    ),
-                },
-                {
-                    example:
-                        "`,preset import [preset_identifier] [preset_name]`",
-                    explanation: state.localizer.translate(guildID,
-                        "preset.help.example.import",
-                        { exampleIdentifier: "`KMQ-XXXXX-...`" }
-                    ),
-                },
-            ],
-        });
-
-    helpPriority = 200;
-
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
-    call = async ({
-        message,
-        parsedMessage,
-    }: CommandArgs): Promise<void> => {
+    help = (guildID: string): Help => ({
+        name: "preset",
+        description: state.localizer.translate(
+            guildID,
+            "preset.help.description"
+        ),
+        usage: ",preset [list | save | load | delete | export] {preset_name}\n,preset import [preset_identifier] [preset_name]",
+        examples: [
+            {
+                example: "`,preset list`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "preset.help.example.list"
+                ),
+            },
+            {
+                example: "`,preset save [preset_name]`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "preset.help.example.save"
+                ),
+            },
+            {
+                example: "`,preset load [preset_name | preset_identifier]`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "preset.help.example.load",
+                    { exampleIdentifier: "`KMQ-XXXXX-...`" }
+                ),
+            },
+            {
+                example: "`,preset replace [preset_name]`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "preset.help.example.replace"
+                ),
+            },
+            {
+                example: "`,preset delete [preset_name]`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "preset.help.example.delete"
+                ),
+            },
+            {
+                example: "`,preset export [preset_name]`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "preset.help.example.export"
+                ),
+            },
+            {
+                example: "`,preset import [preset_identifier] [preset_name]`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "preset.help.example.import",
+                    { exampleIdentifier: "`KMQ-XXXXX-...`" }
+                ),
+            },
+        ],
+    });
+
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         const presetAction =
             (parsedMessage.components[0] as PresetAction) || null;
 
         const messageContext = MessageContext.fromMessage(message);
         if (!presetAction || presetAction === PresetAction.LIST) {
-            PresetCommand.listPresets(
-                guildPreference,
-                messageContext,
-            );
+            PresetCommand.listPresets(guildPreference, messageContext);
             return;
         }
 
         const missingPresetMessage = (): void => {
             sendErrorMessage(messageContext, {
-                title: state.localizer.translate(message.guildID, "preset.failure.missingName.title"),
-                description: state.localizer.translate(message.guildID, "preset.failure.missingName.description"),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "preset.failure.missingName.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "preset.failure.missingName.description"
+                ),
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
             });
 
@@ -148,43 +157,47 @@ export default class PresetCommand implements BaseCommand {
                 await PresetCommand.savePreset(
                     presetName,
                     guildPreference,
-                    messageContext,
+                    messageContext
                 );
                 break;
             case PresetAction.LOAD:
                 await PresetCommand.loadPreset(
                     presetName,
                     guildPreference,
-                    messageContext,
+                    messageContext
                 );
                 break;
             case PresetAction.DELETE:
                 await PresetCommand.deletePreset(
                     presetName,
                     guildPreference,
-                    messageContext,
+                    messageContext
                 );
                 break;
             case PresetAction.REPLACE:
                 await PresetCommand.replacePreset(
                     presetName,
                     guildPreference,
-                    messageContext,
+                    messageContext
                 );
                 break;
             case PresetAction.EXPORT:
                 await PresetCommand.exportPreset(
                     presetName,
                     guildPreference,
-                    messageContext,
+                    messageContext
                 );
                 break;
             case PresetAction.IMPORT: {
                 const presetUUID = parsedMessage.components[1];
                 if (!presetUUID) {
                     sendErrorMessage(messageContext, {
-                        title: state.localizer.translate(message.guildID, "preset.failure.missingIdentifier.title"),
-                        description: state.localizer.translate(message.guildID,
+                        title: state.localizer.translate(
+                            message.guildID,
+                            "preset.failure.missingIdentifier.title"
+                        ),
+                        description: state.localizer.translate(
+                            message.guildID,
                             "preset.failure.missingIdentifier.description",
                             {
                                 presetExport: `${process.env.BOT_PREFIX}preset export`,
@@ -210,7 +223,7 @@ export default class PresetCommand implements BaseCommand {
                     presetUUID,
                     presetName,
                     guildPreference,
-                    messageContext,
+                    messageContext
                 );
                 break;
             }
@@ -222,7 +235,7 @@ export default class PresetCommand implements BaseCommand {
     static async deletePreset(
         presetName: string,
         guildPreference: GuildPreference,
-        messageContext: MessageContext,
+        messageContext: MessageContext
     ): Promise<void> {
         const deleteResult = await guildPreference.deletePreset(presetName);
         if (!deleteResult) {
@@ -233,8 +246,12 @@ export default class PresetCommand implements BaseCommand {
             );
 
             await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(messageContext.guildID, "preset.failure.noSuchPreset.title"),
-                description: state.localizer.translate(messageContext.guildID,
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "preset.failure.noSuchPreset.title"
+                ),
+                description: state.localizer.translate(
+                    messageContext.guildID,
                     "preset.failure.noSuchPreset.description",
                     { presetName: `\`${presetName}\`` }
                 ),
@@ -249,8 +266,12 @@ export default class PresetCommand implements BaseCommand {
         );
 
         await sendInfoMessage(messageContext, {
-            title: state.localizer.translate(messageContext.guildID, "preset.deleted.title"),
-            description: state.localizer.translate(messageContext.guildID,
+            title: state.localizer.translate(
+                messageContext.guildID,
+                "preset.deleted.title"
+            ),
+            description: state.localizer.translate(
+                messageContext.guildID,
                 "preset.deleted.description",
                 { presetName: `\`${presetName}\`` }
             ),
@@ -261,7 +282,7 @@ export default class PresetCommand implements BaseCommand {
     static async loadPreset(
         presetName: string,
         guildPreference: GuildPreference,
-        messageContext: MessageContext,
+        messageContext: MessageContext
     ): Promise<void> {
         let guildID = messageContext.guildID;
         if (presetName.startsWith("KMQ-")) {
@@ -282,8 +303,12 @@ export default class PresetCommand implements BaseCommand {
                 );
 
                 await sendErrorMessage(messageContext, {
-                    title: state.localizer.translate(messageContext.guildID, "preset.failure.noSuchPreset.title"),
-                    description: state.localizer.translate(messageContext.guildID,
+                    title: state.localizer.translate(
+                        messageContext.guildID,
+                        "preset.failure.noSuchPreset.title"
+                    ),
+                    description: state.localizer.translate(
+                        messageContext.guildID,
                         "preset.failure.noSuchPreset.identifier.description",
                         { presetUUID: `\`${presetUUID}\`` }
                     ),
@@ -324,8 +349,12 @@ export default class PresetCommand implements BaseCommand {
             );
 
             await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(messageContext.guildID, "preset.failure.noSuchPreset.title"),
-                description: state.localizer.translate(messageContext.guildID,
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "preset.failure.noSuchPreset.title"
+                ),
+                description: state.localizer.translate(
+                    messageContext.guildID,
                     "preset.failure.noSuchPreset.description",
                     { presetName: `\`${presetName}\`` }
                 ),
@@ -336,7 +365,7 @@ export default class PresetCommand implements BaseCommand {
     static async savePreset(
         presetName: string,
         guildPreference: GuildPreference,
-        messageContext: MessageContext,
+        messageContext: MessageContext
     ): Promise<void> {
         const presets = await guildPreference.listPresets();
         if (presets.length >= MAX_NUM_PRESETS) {
@@ -347,8 +376,12 @@ export default class PresetCommand implements BaseCommand {
             );
 
             await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(messageContext.guildID, "preset.failure.tooMany.title"),
-                description: state.localizer.translate(messageContext.guildID,
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "preset.failure.tooMany.title"
+                ),
+                description: state.localizer.translate(
+                    messageContext.guildID,
                     "preset.failure.tooMany.description",
                     { maxNumPresets: String(MAX_NUM_PRESETS) }
                 ),
@@ -364,8 +397,12 @@ export default class PresetCommand implements BaseCommand {
             );
 
             await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(messageContext.guildID, "preset.failure.lengthyName.title"),
-                description: state.localizer.translate(messageContext.guildID,
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "preset.failure.lengthyName.title"
+                ),
+                description: state.localizer.translate(
+                    messageContext.guildID,
                     "preset.failure.lengthyName.description",
                     { presetNameMaxLength: String(PRESET_NAME_MAX_LENGTH) }
                 ),
@@ -381,8 +418,12 @@ export default class PresetCommand implements BaseCommand {
             );
 
             await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(messageContext.guildID, "preset.failure.illegalPrefix.title"),
-                description: state.localizer.translate(messageContext.guildID,
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "preset.failure.illegalPrefix.title"
+                ),
+                description: state.localizer.translate(
+                    messageContext.guildID,
                     "preset.failure.illegalPrefix.description",
                     { importPrefix: "`KMQ-`" }
                 ),
@@ -399,12 +440,15 @@ export default class PresetCommand implements BaseCommand {
             );
 
             await sendInfoMessage(messageContext, {
-                title: state.localizer.translate(messageContext.guildID, "preset.saved.title"),
-                description: state.localizer.translate(messageContext.guildID,
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "preset.saved.title"
+                ),
+                description: state.localizer.translate(
+                    messageContext.guildID,
                     "preset.savedOrReplaced.description",
                     {
-                        presetLoad:
-                            `\`${process.env.BOT_PREFIX}preset load ${presetName}\``,
+                        presetLoad: `\`${process.env.BOT_PREFIX}preset load ${presetName}\``,
                     }
                 ),
                 thumbnailUrl: KmqImages.HAPPY,
@@ -417,8 +461,12 @@ export default class PresetCommand implements BaseCommand {
             );
 
             await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(messageContext.guildID, "preset.failure.alreadyExists.title"),
-                description: state.localizer.translate(messageContext.guildID,
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "preset.failure.alreadyExists.title"
+                ),
+                description: state.localizer.translate(
+                    messageContext.guildID,
                     "preset.failure.alreadyExists.description",
                     {
                         presetNameFormatted: `\`${presetName}\``,
@@ -434,7 +482,7 @@ export default class PresetCommand implements BaseCommand {
     static async replacePreset(
         presetName: string,
         guildPreference: GuildPreference,
-        messageContext: MessageContext,
+        messageContext: MessageContext
     ): Promise<void> {
         const oldUUID = await guildPreference.deletePreset(presetName);
         if (!oldUUID) {
@@ -453,8 +501,12 @@ export default class PresetCommand implements BaseCommand {
         );
 
         await sendInfoMessage(messageContext, {
-            title: state.localizer.translate(messageContext.guildID, "preset.replaced.title"),
-            description: state.localizer.translate(messageContext.guildID,
+            title: state.localizer.translate(
+                messageContext.guildID,
+                "preset.replaced.title"
+            ),
+            description: state.localizer.translate(
+                messageContext.guildID,
                 "preset.savedOrReplaced.description",
                 {
                     presetLoad: `\`${process.env.BOT_PREFIX}preset load ${presetName}\``,
@@ -467,7 +519,7 @@ export default class PresetCommand implements BaseCommand {
     static async exportPreset(
         presetName: string,
         guildPreference: GuildPreference,
-        messageContext: MessageContext,
+        messageContext: MessageContext
     ): Promise<void> {
         const presetUUID = await guildPreference.getPresetUUID(presetName);
         if (!presetUUID) {
@@ -478,8 +530,12 @@ export default class PresetCommand implements BaseCommand {
             );
 
             await sendInfoMessage(messageContext, {
-                title: state.localizer.translate(messageContext.guildID, "preset.failure.noSuchPreset.title"),
-                description: state.localizer.translate(messageContext.guildID,
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "preset.failure.noSuchPreset.title"
+                ),
+                description: state.localizer.translate(
+                    messageContext.guildID,
                     "preset.failure.noSuchPreset.description",
                     { presetName: `\`${presetName}\`` }
                 ),
@@ -495,8 +551,12 @@ export default class PresetCommand implements BaseCommand {
         );
 
         await sendInfoMessage(messageContext, {
-            title: state.localizer.translate(messageContext.guildID, "preset.exported.title"),
-            description: state.localizer.translate(messageContext.guildID,
+            title: state.localizer.translate(
+                messageContext.guildID,
+                "preset.exported.title"
+            ),
+            description: state.localizer.translate(
+                messageContext.guildID,
                 "preset.exported.description",
                 {
                     presetName: `\`${presetName}\``,
@@ -513,7 +573,7 @@ export default class PresetCommand implements BaseCommand {
         presetUUID: string,
         presetName: string,
         guildPreference: GuildPreference,
-        messageContext: MessageContext,
+        messageContext: MessageContext
     ): Promise<void> {
         if ((await guildPreference.listPresets()).includes(presetName)) {
             logger.warn(
@@ -523,8 +583,12 @@ export default class PresetCommand implements BaseCommand {
             );
 
             sendErrorMessage(messageContext, {
-                title: state.localizer.translate(messageContext.guildID, "preset.failure.alreadyExists.title"),
-                description: state.localizer.translate(messageContext.guildID,
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "preset.failure.alreadyExists.title"
+                ),
+                description: state.localizer.translate(
+                    messageContext.guildID,
                     "preset.failure.alreadyExists.description",
                     {
                         presetNameFormatted: `\`${presetName}\``,
@@ -552,8 +616,12 @@ export default class PresetCommand implements BaseCommand {
             );
 
             await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(messageContext.guildID, "preset.failure.noSuchPreset.title"),
-                description: state.localizer.translate(messageContext.guildID,
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "preset.failure.noSuchPreset.title"
+                ),
+                description: state.localizer.translate(
+                    messageContext.guildID,
                     "preset.failure.noSuchPreset.identifer.description",
                     { presetUUID: `\`${presetUUID}\`` }
                 ),
@@ -599,8 +667,12 @@ export default class PresetCommand implements BaseCommand {
         );
 
         sendInfoMessage(messageContext, {
-            title: state.localizer.translate(messageContext.guildID, "preset.imported.title"),
-            description: state.localizer.translate(messageContext.guildID,
+            title: state.localizer.translate(
+                messageContext.guildID,
+                "preset.imported.title"
+            ),
+            description: state.localizer.translate(
+                messageContext.guildID,
                 "preset.imported.description",
                 {
                     presetLoad: `${process.env.BOT_PREFIX}preset load`,
@@ -613,15 +685,19 @@ export default class PresetCommand implements BaseCommand {
 
     static async listPresets(
         guildPreference: GuildPreference,
-        messageContext: MessageContext,
+        messageContext: MessageContext
     ): Promise<void> {
         const presets = await guildPreference.listPresets();
         sendInfoMessage(messageContext, {
-            title: state.localizer.translate(messageContext.guildID, "preset.list.title"),
+            title: state.localizer.translate(
+                messageContext.guildID,
+                "preset.list.title"
+            ),
             description:
                 presets.length > 0
                     ? presets.join("\n")
-                    : state.localizer.translate(messageContext.guildID,
+                    : state.localizer.translate(
+                          messageContext.guildID,
                           "preset.list.failure.noPresets.description",
                           {
                               presetHelp: `\`${process.env.BOT_PREFIX}help preset\``,
@@ -629,7 +705,8 @@ export default class PresetCommand implements BaseCommand {
                       ),
             footerText:
                 presets.length > 0
-                    ? state.localizer.translate(messageContext.guildID,
+                    ? state.localizer.translate(
+                          messageContext.guildID,
                           "preset.list.loadInstructions.footer",
                           { presetLoad: `${process.env.BOT_PREFIX}preset load` }
                       )

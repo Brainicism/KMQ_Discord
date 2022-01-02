@@ -40,16 +40,21 @@ export default class LocalizationManager {
      * Translate the given phrase using locale configuration
      * @param guildID - The guild ID associated with the guild receiving the string
      * @param phraseOrOptions - The phrase to translate or options for translation
+     * @param replace - Replacements to be applied to the phrase
      * @returns The translated phrase
      */
-    translate(guildID: string, phraseOrOptions: string | TranslateOptions, replace: string[] | Replacements = {}): string {
+    translate(
+        guildID: string,
+        phraseOrOptions: string | TranslateOptions,
+        replace: string[] | Replacements = {}
+    ): string {
         if (phraseOrOptions instanceof Object) {
             phraseOrOptions.locale = state.locales[guildID] ?? DEFAULT_LOCALE;
         } else {
             phraseOrOptions = {
                 phrase: phraseOrOptions,
                 locale: state.locales[guildID] ?? DEFAULT_LOCALE,
-            }
+            };
         }
 
         if (replace instanceof Array) {
@@ -64,26 +69,29 @@ export default class LocalizationManager {
     /**
      * Translate with plural condition the given phrase and count using locale configuration
      * @param guildID - The guild ID associated with the guild receiving the string
-     * @param phrase - Short phrase to be translated. All plural options ("one", "few", other", ...) have to be provided by your translation file
+     * @param phraseOrOptions - Short phrase to be translated. All plural options ("one", "few", other", ...) have to be provided by your translation file
      * @param count - The number which decides whether to select singular or plural
      * @returns The translated phrase
      */
-    translateN(guildID: string, phraseOrOptions: string | PluralOptions, count: number): string {
+    translateN(
+        guildID: string,
+        phraseOrOptions: string | PluralOptions,
+        count: number
+    ): string {
         if (phraseOrOptions instanceof Object) {
             phraseOrOptions.locale = state.locales[guildID] ?? DEFAULT_LOCALE;
             // eslint-disable-next-line no-underscore-dangle
             return this.internalLocalizer.__n(phraseOrOptions, count);
         }
 
-            phraseOrOptions = {
-                singular: phraseOrOptions,
-                plural: phraseOrOptions,
-                count,
-                locale: state.locales[guildID] ?? DEFAULT_LOCALE,
-            }
+        phraseOrOptions = {
+            singular: phraseOrOptions,
+            plural: phraseOrOptions,
+            count,
+            locale: state.locales[guildID] ?? DEFAULT_LOCALE,
+        };
 
-            // eslint-disable-next-line no-underscore-dangle
-            return this.internalLocalizer.__n(phraseOrOptions, count);
-
+        // eslint-disable-next-line no-underscore-dangle
+        return this.internalLocalizer.__n(phraseOrOptions, count);
     }
 }

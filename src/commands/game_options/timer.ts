@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
@@ -13,6 +13,10 @@ import { state } from "../../kmq_worker";
 const logger = new IPCLogger("guessTimeout");
 
 export default class GuessTimeoutCommand implements BaseCommand {
+    aliases = ["time", "timeout", "t"];
+
+    helpPriority = 110;
+
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -28,29 +32,31 @@ export default class GuessTimeoutCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string) => ({
-            name: "timer",
-            description: state.localizer.translate(guildID,
-                "timer.help.description"
-            ),
-            usage: ",timer [time]",
-            examples: [
-                {
-                    example: "`,timer 15`",
-                    explanation: state.localizer.translate(guildID,
-                        "timer.help.set",
-                        { timer: String(15) }
-                    ),
-                },
-                {
-                    example: "`,timer`",
-                    explanation: state.localizer.translate(guildID, "timer.help.reset"),
-                },
-            ],
-        });
-
-    helpPriority = 110;
-    aliases = ["time", "timeout", "t"];
+    help = (guildID: string): Help => ({
+        name: "timer",
+        description: state.localizer.translate(
+            guildID,
+            "timer.help.description"
+        ),
+        usage: ",timer [time]",
+        examples: [
+            {
+                example: "`,timer 15`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "timer.help.set",
+                    { timer: String(15) }
+                ),
+            },
+            {
+                example: "`,timer`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "timer.help.reset"
+                ),
+            },
+        ],
+    });
 
     call = async ({
         message,

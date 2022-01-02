@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import GameSession from "../../structures/game_session";
 import {
     areUserAndBotInSameVoiceChannel,
@@ -21,13 +21,21 @@ const logger = new IPCLogger("skip");
 
 async function sendSkipNotification(
     message: GuildTextableMessage,
-    gameRound: GameRound,
+    gameRound: GameRound
 ): Promise<void> {
     await sendInfoMessage(
         MessageContext.fromMessage(message),
         {
             title: state.localizer.translate(message.guildID, "skip.title"),
-            description: state.localizer.translate(message.guildID, "skip.vote.description", { skipCounter: `${gameRound.getNumSkippers()}/${getMajorityCount(message.guildID)}` }),
+            description: state.localizer.translate(
+                message.guildID,
+                "skip.vote.description",
+                {
+                    skipCounter: `${gameRound.getNumSkippers()}/${getMajorityCount(
+                        message.guildID
+                    )}`,
+                }
+            ),
         },
         true
     );
@@ -35,12 +43,20 @@ async function sendSkipNotification(
 
 async function sendSkipMessage(
     message: GuildTextableMessage,
-    gameRound: GameRound,
+    gameRound: GameRound
 ): Promise<void> {
     await sendInfoMessage(MessageContext.fromMessage(message), {
         color: EMBED_SUCCESS_COLOR,
         title: state.localizer.translate(message.guildID, "skip.title"),
-        description: state.localizer.translate(message.guildID, "skip.success.description", { skipCounter: `${gameRound.getNumSkippers()}/${getMajorityCount(message.guildID)}` }),
+        description: state.localizer.translate(
+            message.guildID,
+            "skip.success.description",
+            {
+                skipCounter: `${gameRound.getNumSkippers()}/${getMajorityCount(
+                    message.guildID
+                )}`,
+            }
+        ),
         thumbnailUrl: KmqImages.NOT_IMPRESSED,
     });
 }
@@ -62,27 +78,25 @@ function isSkipMajority(
 }
 
 export default class SkipCommand implements BaseCommand {
+    helpPriority = 1010;
+
+    aliases = ["s"];
     preRunChecks = [
         { checkFn: CommandPrechecks.inGameCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
     ];
 
-    help = (guildID: string) => ({
-            name: "skip",
-            description: state.localizer.translate(guildID,
-                "skip.help.description"
-            ),
-            usage: ",skip",
-            examples: [],
-        });
-    helpPriority = 1010;
+    help = (guildID: string): Help => ({
+        name: "skip",
+        description: state.localizer.translate(
+            guildID,
+            "skip.help.description"
+        ),
+        usage: ",skip",
+        examples: [],
+    });
 
-    aliases = ["s"];
-
-    call = async ({
-        gameSessions,
-        message,
-    }: CommandArgs): Promise<void> => {
+    call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         const gameSession = gameSessions[message.guildID];
         if (

@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     sendOptionsMessage,
     getDebugLogHeader,
@@ -21,6 +21,8 @@ export enum SeekType {
 export const DEFAULT_SEEK = SeekType.RANDOM;
 
 export default class SeekCommand implements BaseCommand {
+    helpPriority = 130;
+
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -35,44 +37,47 @@ export default class SeekCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string) => ({
-            name: "seek",
-            description: state.localizer.translate(guildID,
-                "seek.help.description",
-            ),
-            usage: ",seek [beginning | middle | random]",
-            examples: [
-                {
-                    example: "`,seek random`",
-                    explanation: state.localizer.translate(guildID,
-                        "seek.help.example.random"
-                    ),
-                },
-                {
-                    example: "`,seek middle`",
-                    explanation: state.localizer.translate(guildID,
-                        "seek.help.example.middle"
-                    ),
-                },
-                {
-                    example: "`,seek beginning`",
-                    explanation: state.localizer.translate(guildID,
-                        "seek.help.example.beginning"
-                    ),
-                },
-                {
-                    example: "`,seek`",
-                    explanation: state.localizer.translate(guildID,
-                        "seek.help.example.reset",
-                        {
-                            defaultSeek: DEFAULT_SEEK,
-                        }
-                    ),
-                },
-            ],
-        });
-
-    helpPriority = 130;
+    help = (guildID: string): Help => ({
+        name: "seek",
+        description: state.localizer.translate(
+            guildID,
+            "seek.help.description"
+        ),
+        usage: ",seek [beginning | middle | random]",
+        examples: [
+            {
+                example: "`,seek random`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "seek.help.example.random"
+                ),
+            },
+            {
+                example: "`,seek middle`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "seek.help.example.middle"
+                ),
+            },
+            {
+                example: "`,seek beginning`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "seek.help.example.beginning"
+                ),
+            },
+            {
+                example: "`,seek`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "seek.help.example.reset",
+                    {
+                        defaultSeek: DEFAULT_SEEK,
+                    }
+                ),
+            },
+        ],
+    });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

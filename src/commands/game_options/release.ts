@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
 import {
@@ -20,9 +20,11 @@ export const NON_OFFICIAL_VIDEO_TAGS = ["c", "d", "a", "r", "v", "x", "p"];
 export const DEFAULT_RELEASE_TYPE = ReleaseType.OFFICIAL;
 
 export default class ReleaseCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
-
     aliases = ["releases", "videotype"];
+
+    helpPriority = 130;
+
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
         minArgCount: 0,
@@ -36,37 +38,40 @@ export default class ReleaseCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string) => ({
-            name: "release",
-            description: state.localizer.translate(guildID,
-                "release.help.description"
-            ),
-            usage: ",release [official | all]",
-            examples: [
-                {
-                    example: "`,release official`",
-                    explanation: state.localizer.translate(guildID,
-                        "release.help.example.official",
-                        { official: `\`${ReleaseType.OFFICIAL}\`` }
-                    ),
-                },
-                {
-                    example: "`,release all`",
-                    explanation: state.localizer.translate(guildID,
-                        "release.help.example.all"
-                    ),
-                },
-                {
-                    example: "`,release`",
-                    explanation: state.localizer.translate(guildID,
-                        "release.help.example.reset",
-                        { defaultRelease: `\`${DEFAULT_RELEASE_TYPE}\`` }
-                    ),
-                },
-            ],
-        });
+    help = (guildID: string): Help => ({
+        name: "release",
+        description: state.localizer.translate(
+            guildID,
+            "release.help.description"
+        ),
+        usage: ",release [official | all]",
+        examples: [
+            {
+                example: "`,release official`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "release.help.example.official",
+                    { official: `\`${ReleaseType.OFFICIAL}\`` }
+                ),
+            },
+            {
+                example: "`,release all`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "release.help.example.all"
+                ),
+            },
+            {
+                example: "`,release`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "release.help.example.reset",
+                    { defaultRelease: `\`${DEFAULT_RELEASE_TYPE}\`` }
+                ),
+            },
+        ],
+    });
 
-    helpPriority = 130;
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
 

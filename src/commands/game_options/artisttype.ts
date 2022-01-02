@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     sendOptionsMessage,
     getDebugLogHeader,
@@ -22,6 +22,8 @@ export enum ArtistType {
 export const DEFAULT_ARTIST_TYPE = ArtistType.BOTH;
 
 export default class ArtistTypeCommand implements BaseCommand {
+    helpPriority = 150;
+
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -36,59 +38,61 @@ export default class ArtistTypeCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string) => ({
-            name: "artisttype",
-            description: state.localizer.translate(guildID,
-                "artisttype.help.description",
-                {
-                    soloists: `\`${ArtistType.SOLOIST}\``,
-                    groups: `\`${ArtistType.GROUP}\``,
-                    both: `\`${ArtistType.BOTH}\``,
-                }
-            ),
-            usage: ",artisttype [artistType]",
-            examples: [
-                {
-                    example: "`,artisttype soloists`",
-                    explanation: state.localizer.translate(guildID,
-                        "artisttype.help.example.soloists",
-                        {
-                            soloists: `\`${ArtistType.SOLOIST}\``,
-                        }
-                    ),
-                },
-                {
-                    example: "`,artisttype groups`",
-                    explanation: state.localizer.translate(guildID,
-                        "artisttype.help.example.groups",
-                        {
-                            groups: `\`${ArtistType.GROUP}\``,
-                        }
-                    ),
-                },
-                {
-                    example: "`,artisttype both`",
-                    explanation: state.localizer.translate(guildID,
-                        "artisttype.help.example.both",
-                        {
-                            soloists: `\`${ArtistType.SOLOIST}\``,
-                            groups: `\`${ArtistType.GROUP}\``,
-                        }
-                    ),
-                },
-                {
-                    example: "`,artisttype`",
-                    explanation: state.localizer.translate(guildID, "artisttype.help.example.reset"),
-                },
-            ],
-        });
+    help = (guildID: string): Help => ({
+        name: "artisttype",
+        description: state.localizer.translate(
+            guildID,
+            "artisttype.help.description",
+            {
+                soloists: `\`${ArtistType.SOLOIST}\``,
+                groups: `\`${ArtistType.GROUP}\``,
+                both: `\`${ArtistType.BOTH}\``,
+            }
+        ),
+        usage: ",artisttype [artistType]",
+        examples: [
+            {
+                example: "`,artisttype soloists`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "artisttype.help.example.soloists",
+                    {
+                        soloists: `\`${ArtistType.SOLOIST}\``,
+                    }
+                ),
+            },
+            {
+                example: "`,artisttype groups`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "artisttype.help.example.groups",
+                    {
+                        groups: `\`${ArtistType.GROUP}\``,
+                    }
+                ),
+            },
+            {
+                example: "`,artisttype both`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "artisttype.help.example.both",
+                    {
+                        soloists: `\`${ArtistType.SOLOIST}\``,
+                        groups: `\`${ArtistType.GROUP}\``,
+                    }
+                ),
+            },
+            {
+                example: "`,artisttype`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "artisttype.help.example.reset"
+                ),
+            },
+        ],
+    });
 
-    helpPriority = 150;
-
-    call = async ({
-        message,
-        parsedMessage,
-    }: CommandArgs): Promise<void> => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.ARTIST_TYPE);
@@ -110,7 +114,8 @@ export default class ArtistTypeCommand implements BaseCommand {
 
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: "misc.failure.gameOptionConflict.title",
-                description: state.localizer.translate(message.guildID,
+                description: state.localizer.translate(
+                    message.guildID,
                     "misc.failure.gameOptionConflict.description",
                     {
                         optionOne: `\`${GameOption.GROUPS}\``,

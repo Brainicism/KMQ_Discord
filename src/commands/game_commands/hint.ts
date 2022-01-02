@@ -53,7 +53,7 @@ function isHintAvailable(
 
 async function sendHintNotification(
     message: GuildTextableMessage,
-    gameSession: GameSession,
+    gameSession: GameSession
 ): Promise<void> {
     if (!gameSession.gameRound) return;
     if (gameSession.gameType === GameType.ELIMINATION) {
@@ -63,12 +63,18 @@ async function sendHintNotification(
         await sendInfoMessage(
             MessageContext.fromMessage(message),
             {
-                title: state.localizer.translate(message.guildID, "hint.request.title"),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "hint.request.title"
+                ),
                 description: `${gameSession.gameRound.getHintRequests()}/${
                     Math.floor(
                         eliminationScoreboard.getAlivePlayersCount() * 0.5
                     ) + 1
-                } ${state.localizer.translate(message.guildID, "hint.request.description")}.`,
+                } ${state.localizer.translate(
+                    message.guildID,
+                    "hint.request.description"
+                )}.`,
             },
             true
         );
@@ -76,10 +82,16 @@ async function sendHintNotification(
         await sendInfoMessage(
             MessageContext.fromMessage(message),
             {
-                title: state.localizer.translate(message.guildID, "hint.request.title"),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "hint.request.title"
+                ),
                 description: `${gameSession.gameRound.getHintRequests()}/${getMajorityCount(
                     message.guildID
-                )} ${state.localizer.translate(message.guildID, "hint.request.description")}.`,
+                )} ${state.localizer.translate(
+                    message.guildID,
+                    "hint.request.description"
+                )}.`,
             },
             true
         );
@@ -97,14 +109,18 @@ export function validHintCheck(
     gameSession: GameSession,
     guildPreference: GuildPreference,
     gameRound: GameRound,
-    message: GuildTextableMessage,
+    message: GuildTextableMessage
 ): boolean {
     if (!gameSession || !gameRound) {
         logger.warn(`${getDebugLogHeader(message)} | No active game session`);
         sendErrorMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(message.guildID, "hint.failure.invalidHintRequest.title"),
-            description: state.localizer.translate(message.guildID,
-                "hint.failure.invalidHintRequest.noSongPlaying.description",
+            title: state.localizer.translate(
+                message.guildID,
+                "hint.failure.invalidHintRequest.title"
+            ),
+            description: state.localizer.translate(
+                message.guildID,
+                "hint.failure.invalidHintRequest.noSongPlaying.description"
             ),
             thumbnailUrl: KmqImages.NOT_IMPRESSED,
         });
@@ -117,9 +133,13 @@ export function validHintCheck(
 
         if (eliminationScoreboard.isPlayerEliminated(message.author.id)) {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "hint.failure.invalidHintRequest.title"),
-                description: state.localizer.translate(message.guildID,
-                    "hint.failure.invalidHintRequest.eliminated.description",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "hint.failure.invalidHintRequest.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "hint.failure.invalidHintRequest.eliminated.description"
                 ),
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
             });
@@ -127,9 +147,13 @@ export function validHintCheck(
         }
     } else if (guildPreference.isMultipleChoiceMode()) {
         sendErrorMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(message.guildID, "hint.failure.invalidHintRequest.title"),
-            description: state.localizer.translate(message.guildID,
-                "hint.failure.invalidHintRequest.multipleChoice.description",
+            title: state.localizer.translate(
+                message.guildID,
+                "hint.failure.invalidHintRequest.title"
+            ),
+            description: state.localizer.translate(
+                message.guildID,
+                "hint.failure.invalidHintRequest.multipleChoice.description"
             ),
             thumbnailUrl: KmqImages.NOT_IMPRESSED,
         });
@@ -140,6 +164,7 @@ export function validHintCheck(
 }
 
 /**
+ * @param guildID - The guild ID
  * @param guessMode - The guess mode
  * @param gameRound - The game round
  * @returns the hint corresponding to the current game round
@@ -147,55 +172,49 @@ export function validHintCheck(
 export function generateHint(
     guildID: string,
     guessMode: GuessModeType,
-    gameRound: GameRound,
+    gameRound: GameRound
 ): string {
     switch (guessMode) {
         case GuessModeType.ARTIST:
-            return `${state.localizer.translate(guildID, "hint.artistName")}: ${codeLine(
-                gameRound.hints.artistHint
-            )}`;
+            return `${state.localizer.translate(
+                guildID,
+                "hint.artistName"
+            )}: ${codeLine(gameRound.hints.artistHint)}`;
         case GuessModeType.SONG_NAME:
         case GuessModeType.BOTH:
         default:
-            return `${state.localizer.translate(guildID, "hint.songName")}: ${codeLine(
-                gameRound.hints.songHint
-            )}`;
+            return `${state.localizer.translate(
+                guildID,
+                "hint.songName"
+            )}: ${codeLine(gameRound.hints.songHint)}`;
     }
 }
 
 export default class HintCommand implements BaseCommand {
+    aliases = ["h"];
+
+    helpPriority = 1020;
+
     preRunChecks = [
         { checkFn: CommandPrechecks.inGameCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
     ];
 
     help = (guildID: string): Help => ({
-            name: "hint",
-            description: state.localizer.translate(guildID,
-                "hint.help.description"
-            ),
-            usage: ",hint",
-            examples: [],
-        });
-    helpPriority = 1020;
+        name: "hint",
+        description: state.localizer.translate(
+            guildID,
+            "hint.help.description"
+        ),
+        usage: ",hint",
+        examples: [],
+    });
 
-    aliases = ["h"];
-
-    call = async ({
-        gameSessions,
-        message,
-    }: CommandArgs): Promise<void> => {
+    call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
         const gameSession = gameSessions[message.guildID];
         const gameRound = gameSession?.gameRound;
         const guildPreference = await getGuildPreference(message.guildID);
-        if (
-            !validHintCheck(
-                gameSession,
-                guildPreference,
-                gameRound,
-                message,
-            )
-        )
+        if (!validHintCheck(gameSession, guildPreference, gameRound, message))
             return;
 
         gameRound.hintRequested(message.author.id);
@@ -204,9 +223,10 @@ export default class HintCommand implements BaseCommand {
             gameRound.hintUsed = true;
             await sendInfoMessage(MessageContext.fromMessage(message), {
                 title: state.localizer.translate(message.guildID, "hint.title"),
-                description: generateHint(message.guildID,
+                description: generateHint(
+                    message.guildID,
                     guildPreference.gameOptions.guessModeType,
-                    gameRound,
+                    gameRound
                 ),
                 thumbnailUrl: KmqImages.READING_BOOK,
             });

@@ -81,11 +81,7 @@ describe("begin command", () => {
             describe("no teams have been added yet", () => {
                 it("should return false", () => {
                     assert.strictEqual(
-                        BeginCommand.canStart(
-                            gameSession,
-                            "1231",
-                            null,
-                        ),
+                        BeginCommand.canStart(gameSession, "1231", null),
                         false
                     );
                 });
@@ -100,11 +96,7 @@ describe("begin command", () => {
                     );
 
                     assert.strictEqual(
-                        BeginCommand.canStart(
-                            gameSession,
-                            "1231",
-                            null,
-                        ),
+                        BeginCommand.canStart(gameSession, "1231", null),
                         true
                     );
 
@@ -114,11 +106,7 @@ describe("begin command", () => {
                     );
 
                     assert.strictEqual(
-                        BeginCommand.canStart(
-                            gameSession,
-                            "1231",
-                            null,
-                        ),
+                        BeginCommand.canStart(gameSession, "1231", null),
                         true
                     );
                 });

@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
@@ -14,6 +14,8 @@ import { state } from "../../kmq_worker";
 const logger = new IPCLogger("goal");
 
 export default class GoalCommand implements BaseCommand {
+    helpPriority = 120;
+
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -28,28 +30,31 @@ export default class GoalCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string) => ({
-            name: "goal",
-            description: state.localizer.translate(guildID,
-                "goal.help.description"
-            ),
-            usage: ",goal [goal]",
-            examples: [
-                {
-                    example: "`,goal 30`",
-                    explanation: state.localizer.translate(guildID,
-                        "goal.help.example.set",
-                        { goal: String(30) }
-                    ),
-                },
-                {
-                    example: "`,goal`",
-                    explanation: state.localizer.translate(guildID, "goal.help.example.reset"),
-                },
-            ],
-        });
-
-    helpPriority = 120;
+    help = (guildID: string): Help => ({
+        name: "goal",
+        description: state.localizer.translate(
+            guildID,
+            "goal.help.description"
+        ),
+        usage: ",goal [goal]",
+        examples: [
+            {
+                example: "`,goal 30`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "goal.help.example.set",
+                    { goal: String(30) }
+                ),
+            },
+            {
+                example: "`,goal`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "goal.help.example.reset"
+                ),
+            },
+        ],
+    });
 
     call = async ({
         message,
@@ -80,8 +85,12 @@ export default class GoalCommand implements BaseCommand {
                 );
 
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(message.guildID, "goal.failure.goalExceeded.title"),
-                    description: state.localizer.translate(message.guildID,
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "goal.failure.goalExceeded.title"
+                    ),
+                    description: state.localizer.translate(
+                        message.guildID,
                         "goal.failure.goalExceeded.description"
                     ),
                 });
@@ -98,8 +107,12 @@ export default class GoalCommand implements BaseCommand {
                 );
 
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(message.guildID, "misc.failure.gameOptionConflict.title"),
-                    description: state.localizer.translate(message.guildID,
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "misc.failure.gameOptionConflict.title"
+                    ),
+                    description: state.localizer.translate(
+                        message.guildID,
                         "goal.failure.gameOptionConflict.description",
                         {
                             elimination: `\`${GameType.ELIMINATION}\``,

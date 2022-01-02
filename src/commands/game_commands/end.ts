@@ -7,23 +7,21 @@ import { state } from "../../kmq_worker";
 const logger = new IPCLogger("end");
 
 export default class EndCommand implements BaseCommand {
+    aliases = ["stop", "e"];
+
+    helpPriority = 1020;
+
     preRunChecks = [
         { checkFn: CommandPrechecks.inGameCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
     ];
 
     help = (guildID: string): Help => ({
-            name: "end",
-            description: state.localizer.translate(guildID,
-                "end.help.description",
-            ),
-            usage: ",end",
-            examples: [],
-        });
-
-    helpPriority = 1020;
-
-    aliases = ["stop", "e"];
+        name: "end",
+        description: state.localizer.translate(guildID, "end.help.description"),
+        usage: ",end",
+        examples: [],
+    });
 
     call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
         const gameSession = gameSessions[message.guildID];

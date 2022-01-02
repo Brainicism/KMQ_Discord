@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     sendOptionsMessage,
     getDebugLogHeader,
@@ -19,61 +19,67 @@ const logger = new IPCLogger("groups");
 
 export const GROUP_LIST_URL = "https://kmq.kpop.gg/static/data/group_list.txt";
 export default class GroupsCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
-
-    help = (guildID: string) => ({
-            name: "groups",
-            description: state.localizer.translate(guildID,
-                "groups.help.description",
-                {
-                    groupList: GROUP_LIST_URL,
-                }
-            ),
-            usage: ",groups [group1],{group2}",
-            examples: [
-                {
-                    example: "`,groups blackpink`",
-                    explanation: state.localizer.translate(guildID,
-                        "groups.help.example.singleGroup",
-                        {
-                            group: "Blackpink",
-                        }
-                    ),
-                },
-                {
-                    example: "`,groups blackpink, bts, red velvet`",
-                    explanation: state.localizer.translate(guildID,
-                        "groups.help.example.multipleGroups",
-                        {
-                            groupOne: "Blackpink",
-                            groupTwo: "BTS",
-                            groupThree: "Red Velvet",
-                        }
-                    ),
-                },
-                {
-                    example: "`,groups`",
-                    explanation: state.localizer.translate(guildID, "groups.help.example.reset"),
-                },
-            ],
-            actionRowComponents: [
-                {
-                    style: 5 as const,
-                    url: GROUP_LIST_URL,
-                    type: 2 as const,
-                    label: state.localizer.translate(guildID, "misc.interaction.fullGroupsList"),
-                },
-            ],
-        });
-
     helpPriority = 135;
 
     aliases = ["group", "artist", "artists"];
 
-    call = async ({
-        message,
-        parsedMessage,
-    }: CommandArgs): Promise<void> => {
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+
+    help = (guildID: string): Help => ({
+        name: "groups",
+        description: state.localizer.translate(
+            guildID,
+            "groups.help.description",
+            {
+                groupList: GROUP_LIST_URL,
+            }
+        ),
+        usage: ",groups [group1],{group2}",
+        examples: [
+            {
+                example: "`,groups blackpink`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "groups.help.example.singleGroup",
+                    {
+                        group: "Blackpink",
+                    }
+                ),
+            },
+            {
+                example: "`,groups blackpink, bts, red velvet`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "groups.help.example.multipleGroups",
+                    {
+                        groupOne: "Blackpink",
+                        groupTwo: "BTS",
+                        groupThree: "Red Velvet",
+                    }
+                ),
+            },
+            {
+                example: "`,groups`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "groups.help.example.reset"
+                ),
+            },
+        ],
+        actionRowComponents: [
+            {
+                style: 5 as const,
+                url: GROUP_LIST_URL,
+                type: 2 as const,
+                label: state.localizer.translate(
+                    guildID,
+                    "misc.interaction.fullGroupsList"
+                ),
+            },
+        ],
+    });
+
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.GROUPS);
@@ -89,7 +95,8 @@ export default class GroupsCommand implements BaseCommand {
         let groupsWarning = "";
         if (parsedMessage.components.length > 1) {
             if (["add", "remove"].includes(parsedMessage.components[0])) {
-                groupsWarning = state.localizer.translate(message.guildID,
+                groupsWarning = state.localizer.translate(
+                    message.guildID,
                     "misc.warning.addRemoveOrdering.footer",
                     {
                         addOrRemove: `${process.env.BOT_PREFIX}${parsedMessage.components[0]}`,
@@ -116,14 +123,25 @@ export default class GroupsCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "misc.failure.unrecognizedGroups.title"),
-                description: state.localizer.translate(message.guildID,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.failure.unrecognizedGroups.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
                     "misc.failure.unrecognizedGroups.description",
                     {
-                        addedOrRemoved: state.localizer.translate(message.guildID, "misc.failure.unrecognizedGroups.added"),
+                        addedOrRemoved: state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.unrecognizedGroups.added"
+                        ),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: unmatchedGroups.join(", "),
-                        solution: state.localizer.translate(message.guildID, "misc.failure.unrecognizedGroups.solution", { command: `\`${process.env.BOT_PREFIX}add\``})
+                        solution: state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.unrecognizedGroups.solution",
+                            { command: `\`${process.env.BOT_PREFIX}add\`` }
+                        ),
                     }
                 ),
                 footerText: groupsWarning,
@@ -141,15 +159,22 @@ export default class GroupsCommand implements BaseCommand {
             );
             if (intersection.size > 0) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(message.guildID, "misc.failure.groupsExcludeConflict.title"),
-                    description: state.localizer.translate(message.guildID,
-                       "misc.failure.groupsExcludeConflict.description",
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "misc.failure.groupsExcludeConflict.title"
+                    ),
+                    description: state.localizer.translate(
+                        message.guildID,
+                        "misc.failure.groupsExcludeConflict.description",
                         {
                             conflictingOptionOne: `\`${GameOption.GROUPS}\``,
                             conflictingOptionTwo: `\`${GameOption.EXCLUDE}\``,
                             solutionStepOne: `\`${process.env.BOT_PREFIX}remove ${GameOption.EXCLUDE}\``,
                             solutionStepTwo: `\`${process.env.BOT_PREFIX}${GameOption.GROUPS}\``,
-                            allowOrPrevent: state.localizer.translate(message.guildID, "misc.failure.groupsExcludeConflict.allow")
+                            allowOrPrevent: state.localizer.translate(
+                                message.guildID,
+                                "misc.failure.groupsExcludeConflict.allow"
+                            ),
                         }
                     ),
                 });

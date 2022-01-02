@@ -19,6 +19,8 @@ enum ListType {
 }
 
 export default class ListCommand implements BaseCommand {
+    helpPriority = 200;
+
     validations = {
         minArgCount: 1,
         maxArgCount: 1,
@@ -32,37 +34,39 @@ export default class ListCommand implements BaseCommand {
     };
 
     help = (guildID: string): Help => ({
-            name: "list",
-            description: state.localizer.translate(guildID,
-                "list.help.description"
-            ),
-            usage: ",list [groups | excludes | includes]",
-            examples: [
-                {
-                    example: "`,list groups`",
-                    explanation: state.localizer.translate(guildID,
-                        "list.help.example.groups",
-                        { groups: `\`${process.env.BOT_PREFIX}groups\`` }
-                    ),
-                },
-                {
-                    example: "`,list excludes`",
-                    explanation: state.localizer.translate(guildID,
-                        "list.help.example.exclude",
-                        { exclude: `\`${process.env.BOT_PREFIX}excludes\`` }
-                    ),
-                },
-                {
-                    example: "`,list includes`",
-                    explanation: state.localizer.translate(guildID,
-                        "list.help.example.include",
-                        { include: `\`${process.env.BOT_PREFIX}includes\`` }
-                    ),
-                },
-            ],
-        });
-
-    helpPriority = 200;
+        name: "list",
+        description: state.localizer.translate(
+            guildID,
+            "list.help.description"
+        ),
+        usage: ",list [groups | excludes | includes]",
+        examples: [
+            {
+                example: "`,list groups`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "list.help.example.groups",
+                    { groups: `\`${process.env.BOT_PREFIX}groups\`` }
+                ),
+            },
+            {
+                example: "`,list excludes`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "list.help.example.exclude",
+                    { exclude: `\`${process.env.BOT_PREFIX}excludes\`` }
+                ),
+            },
+            {
+                example: "`,list includes`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "list.help.example.include",
+                    { include: `\`${process.env.BOT_PREFIX}includes\`` }
+                ),
+            },
+        ],
+    });
 
     call = async ({
         message,
@@ -88,14 +92,20 @@ export default class ListCommand implements BaseCommand {
                 optionValue = null;
         }
 
-        optionValue = optionValue || state.localizer.translate(message.guildID, "list.currentValue.nothingSelected");
+        optionValue =
+            optionValue ||
+            state.localizer.translate(
+                message.guildID,
+                "list.currentValue.nothingSelected"
+            );
 
         if (optionValue.length > 2000) {
             try {
                 sendMessage(
                     channel.id,
                     {
-                        content: state.localizer.translate(message.guildID,
+                        content: state.localizer.translate(
+                            message.guildID,
                             "list.failure.groupsInFile"
                         ),
                     },
@@ -112,8 +122,12 @@ export default class ListCommand implements BaseCommand {
                 );
 
                 await sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(message.guildID, "Error Sending File"),
-                    description: state.localizer.translate(message.guildID,
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "Error Sending File"
+                    ),
+                    description: state.localizer.translate(
+                        message.guildID,
                         "list.failure.groupsInFile.noFilePermissions",
                         { attachFile: "ATTACH_FILE" }
                     ),
@@ -122,9 +136,13 @@ export default class ListCommand implements BaseCommand {
             }
         } else {
             await sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "list.currentValue.title", {
-                    optionListed: `\`${optionListed}\``,
-                }),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "list.currentValue.title",
+                    {
+                        optionListed: `\`${optionListed}\``,
+                    }
+                ),
                 description: optionValue,
             });
         }

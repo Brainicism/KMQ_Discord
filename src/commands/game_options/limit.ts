@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     sendErrorMessage,
@@ -16,6 +16,8 @@ const logger = new IPCLogger("limit");
 export const DEFAULT_LIMIT = 500;
 
 export default class LimitCommand implements BaseCommand {
+    helpPriority = 140;
+
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -37,45 +39,44 @@ export default class LimitCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string) => ({
-            name: "limit",
-            description: state.localizer.translate(guildID,
-                "limit.help.description"
-            ),
-            usage: ",limit [limit]",
-            examples: [
-                {
-                    example: "`,limit 250`",
-                    explanation: state.localizer.translate(guildID,
-                        "limit.help.example.singleLimit",
-                        {
-                            limit: String(250),
-                        }
-                    ),
-                },
-                {
-                    example: "`,limit 250 500`",
-                    explanation: state.localizer.translate(guildID,
-                        "limit.help.example.twoLimits",
-                        { limitStart: String(250), limitEnd: String(500) }
-                    ),
-                },
-                {
-                    example: "`,limit`",
-                    explanation: state.localizer.translate(guildID,
-                        "limit.help.example.reset",
-                        { defaultLimit: `\`${DEFAULT_LIMIT}\`` }
-                    ),
-                },
-            ],
-        });
+    help = (guildID: string): Help => ({
+        name: "limit",
+        description: state.localizer.translate(
+            guildID,
+            "limit.help.description"
+        ),
+        usage: ",limit [limit]",
+        examples: [
+            {
+                example: "`,limit 250`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "limit.help.example.singleLimit",
+                    {
+                        limit: String(250),
+                    }
+                ),
+            },
+            {
+                example: "`,limit 250 500`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "limit.help.example.twoLimits",
+                    { limitStart: String(250), limitEnd: String(500) }
+                ),
+            },
+            {
+                example: "`,limit`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "limit.help.example.reset",
+                    { defaultLimit: `\`${DEFAULT_LIMIT}\`` }
+                ),
+            },
+        ],
+    });
 
-    helpPriority = 140;
-
-    call = async ({
-        message,
-        parsedMessage,
-    }: CommandArgs): Promise<void> => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.LIMIT);
@@ -95,8 +96,12 @@ export default class LimitCommand implements BaseCommand {
             limitEnd = parseInt(parsedMessage.components[0]);
             if (limitEnd === 0) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(message.guildID, "limit.failure.invalidLimit.title"),
-                    description: state.localizer.translate(message.guildID,
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "limit.failure.invalidLimit.title"
+                    ),
+                    description: state.localizer.translate(
+                        message.guildID,
                         "limit.failure.invalidLimit.greaterThanZero.description"
                     ),
                 });
@@ -107,8 +112,12 @@ export default class LimitCommand implements BaseCommand {
             limitEnd = parseInt(parsedMessage.components[1]);
             if (limitEnd <= limitStart) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(message.guildID, "limit.failure.invalidLimit.title"),
-                    description: state.localizer.translate(message.guildID,
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "limit.failure.invalidLimit.title"
+                    ),
+                    description: state.localizer.translate(
+                        message.guildID,
                         "limit.failure.invalidLimit.greaterThanStart.description"
                     ),
                 });

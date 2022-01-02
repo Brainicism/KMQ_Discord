@@ -33,7 +33,8 @@ import {
     bold,
     codeLine,
     chunkArray,
-    chooseRandom, friendlyFormattedNumber
+    chooseRandom,
+    friendlyFormattedNumber,
 } from "../helpers/utils";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
@@ -461,23 +462,43 @@ export default class GameSession {
                     (a, b) =>
                         b.endLevel - b.startLevel - (a.endLevel - a.startLevel)
                 )
-                .map(
-                    (leveledUpPlayer) =>
-                        state.localizer.translate(this.guildID, "misc.levelUp.entry", {
+                .map((leveledUpPlayer) =>
+                    state.localizer.translate(
+                        this.guildID,
+                        "misc.levelUp.entry",
+                        {
                             user: getMention(leveledUpPlayer.userID),
-                            startLevel: codeLine(String(leveledUpPlayer.startLevel)),
-                            endLevel: codeLine(String(leveledUpPlayer.endLevel)),
-                            rank: codeLine(getRankNameByLevel(leveledUpPlayer.endLevel, this.guildID)),
-                        })
+                            startLevel: codeLine(
+                                String(leveledUpPlayer.startLevel)
+                            ),
+                            endLevel: codeLine(
+                                String(leveledUpPlayer.endLevel)
+                            ),
+                            rank: codeLine(
+                                getRankNameByLevel(
+                                    leveledUpPlayer.endLevel,
+                                    this.guildID
+                                )
+                            ),
+                        }
+                    )
                 )
                 .slice(0, 10);
 
             if (leveledUpPlayers.length > 10) {
-                levelUpMessages.push(state.localizer.translate(this.guildID, "misc.andManyOthers"));
+                levelUpMessages.push(
+                    state.localizer.translate(
+                        this.guildID,
+                        "misc.andManyOthers"
+                    )
+                );
             }
 
             sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: state.localizer.translate(this.guildID, "misc.levelUp.title"),
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.levelUp.title"
+                ),
                 description: levelUpMessages.join("\n"),
                 thumbnailUrl: KmqImages.THUMBS_UP,
             });
@@ -526,8 +547,26 @@ export default class GameSession {
             ).reduce((total, x) => total + x.size, 0);
 
             await sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: state.localizer.translate(this.guildID, "misc.sendingBookmarkedSongs.title"),
-                description: state.localizer.translate(this.guildID, "misc.sendingBookmarkedSongs.description", { songs: state.localizer.translateN(this.guildID, "%s song", bookmarkedSongCount), players: state.localizer.translateN(this.guildID, "%s player", bookmarkedSongsPlayerCount) }),
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.sendingBookmarkedSongs.title"
+                ),
+                description: state.localizer.translate(
+                    this.guildID,
+                    "misc.sendingBookmarkedSongs.description",
+                    {
+                        songs: state.localizer.translateN(
+                            this.guildID,
+                            "%s song",
+                            bookmarkedSongCount
+                        ),
+                        players: state.localizer.translateN(
+                            this.guildID,
+                            "%s player",
+                            bookmarkedSongsPlayerCount
+                        ),
+                    }
+                ),
                 thumbnailUrl: KmqImages.READING_BOOK,
             });
             await sendBookmarkedSongs(this.bookmarkedSongs);
@@ -680,9 +719,14 @@ export default class GameSession {
                 await this.reloadSongs(guildPreference);
             } catch (err) {
                 await sendErrorMessage(messageContext, {
-                    title: state.localizer.translate(this.guildID, "misc.failure.errorSelectingSong.title"),
-                    description:
-                        state.localizer.translate(this.guildID, "misc.failure.errorSelectingSong.description")
+                    title: state.localizer.translate(
+                        this.guildID,
+                        "misc.failure.errorSelectingSong.title"
+                    ),
+                    description: state.localizer.translate(
+                        this.guildID,
+                        "misc.failure.errorSelectingSong.description"
+                    ),
                 });
 
                 logger.error(
@@ -706,8 +750,15 @@ export default class GameSession {
             );
 
             await sendInfoMessage(messageContext, {
-                title: state.localizer.translate(this.guildID, "misc.uniqueSongsReset.title"),
-                description: state.localizer.translate(this.guildID, "misc.uniqueSongsReset.description", { totalSongCount: friendlyFormattedNumber(totalSongCount) }),
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.uniqueSongsReset.title"
+                ),
+                description: state.localizer.translate(
+                    this.guildID,
+                    "misc.uniqueSongsReset.description",
+                    { totalSongCount: friendlyFormattedNumber(totalSongCount) }
+                ),
                 thumbnailUrl: KmqImages.LISTENING,
             });
         }
@@ -719,9 +770,14 @@ export default class GameSession {
 
         if (randomSong === null) {
             sendErrorMessage(messageContext, {
-                title: state.localizer.translate(this.guildID, "misc.failure.songQuery.title"),
-                description:
-                    state.localizer.translate(this.guildID, "misc.failure.songQuery.description"),
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.songQuery.title"
+                ),
+                description: state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.songQuery.description"
+                ),
             });
             await this.endSession();
             return;
@@ -751,9 +807,14 @@ export default class GameSession {
             );
 
             await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(this.guildID, "misc.failure.vcJoin.title"),
-                description:
-                    state.localizer.translate(this.guildID, "misc.failure.vcJoin.description"),
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.vcJoin.title"
+                ),
+                description: state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.vcJoin.description"
+                ),
             });
             return;
         }
@@ -828,7 +889,17 @@ export default class GameSession {
             this.gameRound.interactionMessage = await sendInfoMessage(
                 new MessageContext(this.textChannelID),
                 {
-                    title: state.localizer.translate(this.guildID, "misc.interaction.guess.title", { songOrArtist: guildPreference.gameOptions.guessModeType === GuessModeType.BOTH ? "song" : guildPreference.gameOptions.guessModeType }),
+                    title: state.localizer.translate(
+                        this.guildID,
+                        "misc.interaction.guess.title",
+                        {
+                            songOrArtist:
+                                guildPreference.gameOptions.guessModeType ===
+                                GuessModeType.BOTH
+                                    ? "song"
+                                    : guildPreference.gameOptions.guessModeType,
+                        }
+                    ),
                     components,
                     thumbnailUrl: KmqImages.LISTENING,
                 }
@@ -965,8 +1036,19 @@ export default class GameSession {
         );
 
         sendInfoMessage(new MessageContext(this.textChannelID), {
-            title: state.localizer.translate(this.guildID, "misc.gameOwnerChanged.title"),
-            description: state.localizer.translate(this.guildID, "misc.gameOwnerChanged.description", { newGameOwner: getMention(this.owner.id), forcehintCommand: `\`${process.env.BOT_PREFIX}forcehint\``, forceskipCommand: `\`${process.env.BOT_PREFIX}forceskip\`` }),
+            title: state.localizer.translate(
+                this.guildID,
+                "misc.gameOwnerChanged.title"
+            ),
+            description: state.localizer.translate(
+                this.guildID,
+                "misc.gameOwnerChanged.description",
+                {
+                    newGameOwner: getMention(this.owner.id),
+                    forcehintCommand: `\`${process.env.BOT_PREFIX}forcehint\``,
+                    forceskipCommand: `\`${process.env.BOT_PREFIX}forceskip\``,
+                }
+            ),
             thumbnailUrl: KmqImages.LISTENING,
         });
     }
@@ -987,8 +1069,11 @@ export default class GameSession {
         if (this.gameRound.incorrectMCGuessers.has(interaction.member.id)) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                state.localizer.translate(this.guildID, "misc.failure.alreadyEliminated"
-            ));
+                state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.alreadyEliminated"
+                )
+            );
             return;
         }
 
@@ -997,8 +1082,11 @@ export default class GameSession {
         ) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                state.localizer.translate(this.guildID, "misc.failure.interaction.optionFromPreviousRound"
-            ));
+                state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.interaction.optionFromPreviousRound"
+                )
+            );
             return;
         }
 
@@ -1009,8 +1097,11 @@ export default class GameSession {
         ) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                state.localizer.translate(this.guildID, "misc.failure.interaction.eliminated"
-            ));
+                state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.interaction.eliminated"
+                )
+            );
 
             if (!this.gameRound) {
                 return;
@@ -1048,14 +1139,26 @@ export default class GameSession {
         if (!song) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                state.localizer.translate(this.guildID, "misc.failure.interaction.invalidBookmark", { BOOKMARK_MESSAGE_SIZE: String(BOOKMARK_MESSAGE_SIZE) }))
+                state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.interaction.invalidBookmark",
+                    { BOOKMARK_MESSAGE_SIZE: String(BOOKMARK_MESSAGE_SIZE) }
+                )
+            );
             return;
         }
 
         tryCreateInteractionSuccessAcknowledgement(
             interaction,
-            state.localizer.translate(this.guildID, "misc.interaction.bookmarked.title"),
-            state.localizer.translate(this.guildID, "misc.interaction.bookmarked.description", { songName: bold(song.originalSongName) })
+            state.localizer.translate(
+                this.guildID,
+                "misc.interaction.bookmarked.title"
+            ),
+            state.localizer.translate(
+                this.guildID,
+                "misc.interaction.bookmarked.description",
+                { songName: bold(song.originalSongName) }
+            )
         );
         this.addBookmarkedSong(interaction.member?.id, song);
     }
@@ -1196,8 +1299,14 @@ export default class GameSession {
         const messageContext = new MessageContext(this.textChannelID);
         await this.endRound({ correct: false, error: true }, guildPreference);
         await sendErrorMessage(messageContext, {
-            title: state.localizer.translate(this.guildID, "misc.failure.songPlaying.title"),
-            description: state.localizer.translate(this.guildID, "misc.failure.songPlaying.description"),
+            title: state.localizer.translate(
+                this.guildID,
+                "misc.failure.songPlaying.title"
+            ),
+            description: state.localizer.translate(
+                this.guildID,
+                "misc.failure.songPlaying.description"
+            ),
         });
         this.roundsPlayed--;
         this.startRound(guildPreference, messageContext);

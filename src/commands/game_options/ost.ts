@@ -3,7 +3,7 @@ import {
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
@@ -21,6 +21,8 @@ export enum OstPreference {
 export const DEFAULT_OST_PREFERENCE = OstPreference.EXCLUDE;
 
 export default class OstCommand implements BaseCommand {
+    helpPriority = 130;
+
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     aliases = ["osts"];
@@ -37,34 +39,42 @@ export default class OstCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string) => ({
-            name: "ost",
-            description: state.localizer.translate(guildID, "ost.help.description"),
-            usage: ",ost [include | exclude | exclusive]",
-            examples: [
-                {
-                    example: "`,ost include`",
-                    explanation: state.localizer.translate(guildID, "ost.help.example.include"),
-                },
-                {
-                    example: "`,ost exclude`",
-                    explanation: state.localizer.translate(guildID, "ost.help.example.exclude"),
-                },
-                {
-                    example: "`,ost exclusive`",
-                    explanation: state.localizer.translate(guildID, "ost.help.example.exclusive"),
-                },
-                {
-                    example: "`,ost`",
-                    explanation: state.localizer.translate(guildID,
-                        "ost.help.example.reset",
-                        { defaultOst: `\`${DEFAULT_OST_PREFERENCE}\`` }
-                    ),
-                },
-            ],
-        });
-
-    helpPriority = 130;
+    help = (guildID: string): Help => ({
+        name: "ost",
+        description: state.localizer.translate(guildID, "ost.help.description"),
+        usage: ",ost [include | exclude | exclusive]",
+        examples: [
+            {
+                example: "`,ost include`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "ost.help.example.include"
+                ),
+            },
+            {
+                example: "`,ost exclude`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "ost.help.example.exclude"
+                ),
+            },
+            {
+                example: "`,ost exclusive`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "ost.help.example.exclusive"
+                ),
+            },
+            {
+                example: "`,ost`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "ost.help.example.reset",
+                    { defaultOst: `\`${DEFAULT_OST_PREFERENCE}\`` }
+                ),
+            },
+        ],
+    });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

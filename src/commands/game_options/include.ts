@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     sendOptionsMessage,
     getDebugLogHeader,
@@ -17,52 +17,56 @@ import { state } from "../../kmq_worker";
 const logger = new IPCLogger("includes");
 
 export default class IncludeCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
-
-    help = (guildID: string) => ({
-            name: "include",
-            description: state.localizer.translate(guildID,
-                "include.help.description",
-                {
-                    gender: `\`${GameOption.GENDER}\``,
-                    artisttype: `\`${GameOption.ARTIST_TYPE}\``,
-                    groupsLink: `http://${process.env.WEB_SERVER_IP}:${process.env.WEB_SERVER_PORT}/groups`,
-                }
-            ),
-            usage: ",include [group1],{group2}",
-            examples: [
-                {
-                    example: "`,include blackpink`",
-                    explanation: state.localizer.translate(guildID,
-                        "include.help.example.singleGroup",
-                        { group: "Blackpink" }
-                    ),
-                },
-                {
-                    example: "`,include blackpink, bts, red velvet`",
-                    explanation: state.localizer.translate(guildID,
-                        "include.help.example.multipleGroups",
-                        {
-                            groupOne: "Blackpink",
-                            groupTwo: "BTS",
-                            groupThree: "Red Velvet",
-                        }
-                    ),
-                },
-                {
-                    example: "`,include`",
-                    explanation: state.localizer.translate(guildID, "include.help.example.reset"),
-                },
-            ],
-        });
-
-    helpPriority = 130;
     aliases = ["includes"];
 
-    call = async ({
-        message,
-        parsedMessage,
-    }: CommandArgs): Promise<void> => {
+    helpPriority = 130;
+
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+
+    help = (guildID: string): Help => ({
+        name: "include",
+        description: state.localizer.translate(
+            guildID,
+            "include.help.description",
+            {
+                gender: `\`${GameOption.GENDER}\``,
+                artisttype: `\`${GameOption.ARTIST_TYPE}\``,
+                groupsLink: `http://${process.env.WEB_SERVER_IP}:${process.env.WEB_SERVER_PORT}/groups`,
+            }
+        ),
+        usage: ",include [group1],{group2}",
+        examples: [
+            {
+                example: "`,include blackpink`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "include.help.example.singleGroup",
+                    { group: "Blackpink" }
+                ),
+            },
+            {
+                example: "`,include blackpink, bts, red velvet`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "include.help.example.multipleGroups",
+                    {
+                        groupOne: "Blackpink",
+                        groupTwo: "BTS",
+                        groupThree: "Red Velvet",
+                    }
+                ),
+            },
+            {
+                example: "`,include`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "include.help.example.reset"
+                ),
+            },
+        ],
+    });
+
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.INCLUDE);
@@ -78,7 +82,8 @@ export default class IncludeCommand implements BaseCommand {
         let includeWarning = "";
         if (parsedMessage.components.length > 1) {
             if (["add", "remove"].includes(parsedMessage.components[0])) {
-                includeWarning = state.localizer.translate(message.guildID,
+                includeWarning = state.localizer.translate(
+                    message.guildID,
                     "misc.warning.addRemoveOrdering.footer",
                     {
                         addOrRemove: `${process.env.BOT_PREFIX}${parsedMessage.components[0]}`,
@@ -97,7 +102,8 @@ export default class IncludeCommand implements BaseCommand {
 
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: "misc.failure.gameOptionConflict.title",
-                description: state.localizer.translate(message.guildID,
+                description: state.localizer.translate(
+                    message.guildID,
                     "misc.failure.gameOptionConflict.description",
                     {
                         optionOne: `\`${GameOption.GROUPS}\``,
@@ -127,14 +133,25 @@ export default class IncludeCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "misc.failure.unrecognizedGroups.title"),
-                description: state.localizer.translate(message.guildID,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.failure.unrecognizedGroups.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
                     "misc.failure.unrecognizedGroups.description",
                     {
-                        matchedGroupsAction: state.localizer.translate(message.guildID, "include.failure.unrecognizedGroups.included"),
+                        matchedGroupsAction: state.localizer.translate(
+                            message.guildID,
+                            "include.failure.unrecognizedGroups.included"
+                        ),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: unmatchedGroups.join(", "),
-                        solution: state.localizer.translate(message.guildID, "misc.failure.unrecognizedGroups.solution", { command: `\`${process.env.BOT_PREFIX}add\``}),
+                        solution: state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.unrecognizedGroups.solution",
+                            { command: `\`${process.env.BOT_PREFIX}add\`` }
+                        ),
                     }
                 ),
                 footerText: includeWarning,

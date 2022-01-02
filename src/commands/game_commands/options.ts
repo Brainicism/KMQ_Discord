@@ -11,14 +11,17 @@ import { state } from "../../kmq_worker";
 const logger = new IPCLogger("options");
 
 export default class OptionsCommand implements BaseCommand {
-    help = (guildID: string): Help => ({
-            name: "options",
-            description: state.localizer.translate(guildID, "options.help.description"),
-            usage: ",options",
-            examples: [],
-        });
-
     helpPriority = 50;
+
+    help = (guildID: string): Help => ({
+        name: "options",
+        description: state.localizer.translate(
+            guildID,
+            "options.help.description"
+        ),
+        usage: ",options",
+        examples: [],
+    });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

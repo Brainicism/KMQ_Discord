@@ -3,7 +3,7 @@ import {
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     getGuildPreference,
     getMatchingGroupNames,
@@ -37,6 +37,8 @@ enum AddType {
 export default class AddCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
+    helpPriority = 200;
+
     validations = {
         minArgCount: 2,
         arguments: [
@@ -48,56 +50,70 @@ export default class AddCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string) => ({
-            name: "add",
-            description: state.localizer.translate(guildID,
-                "add.help.description",
-                {
-                    groups: `\`${process.env.BOT_PREFIX}groups\``,
-                    exclude: `\`${process.env.BOT_PREFIX}exclude\``,
-                    include: `\`${process.env.BOT_PREFIX}include\``,
-                }
-            ),
-            usage: ",add [groups | exclude | include] [list of groups]",
-            examples: [
-                {
-                    example: "`,add groups twice, red velvet`",
-                    explanation: state.localizer.translate(guildID,
-                        "add.help.example.groups",
-                        { groupOne: "Twice", groupTwo: "Red Velvet", groups: `\`${process.env.BOT_PREFIX}groups\`` }
-                    ),
-                },
-                {
-                    example: "`,add exclude BESTie, Dia, iKON`",
-                    explanation: state.localizer.translate(guildID,
-                        "add.help.example.exclude",
-                        { groupOne: "BESTie", groupTwo: "Dia", groupThree: "IKON", exclude: `\`${process.env.BOT_PREFIX}exclude\`` }
-                    ),
-                },
-                {
-                    example: "`,add include exo`",
-                    explanation: state.localizer.translate(guildID,
-                        "add.help.example.include",
-                        { groupOne: "EXO", include: `\`${process.env.BOT_PREFIX}include\`` }
-                    ),
-                },
-            ],
-            actionRowComponents: [
-                {
-                    style: 5 as const,
-                    url: GROUP_LIST_URL,
-                    type: 2 as const,
-                    label: state.localizer.translate(guildID, "misc.interaction.fullGroupsList"),
-                },
-            ],
-        });
+    help = (guildID: string): Help => ({
+        name: "add",
+        description: state.localizer.translate(
+            guildID,
+            "add.help.description",
+            {
+                groups: `\`${process.env.BOT_PREFIX}groups\``,
+                exclude: `\`${process.env.BOT_PREFIX}exclude\``,
+                include: `\`${process.env.BOT_PREFIX}include\``,
+            }
+        ),
+        usage: ",add [groups | exclude | include] [list of groups]",
+        examples: [
+            {
+                example: "`,add groups twice, red velvet`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "add.help.example.groups",
+                    {
+                        groupOne: "Twice",
+                        groupTwo: "Red Velvet",
+                        groups: `\`${process.env.BOT_PREFIX}groups\``,
+                    }
+                ),
+            },
+            {
+                example: "`,add exclude BESTie, Dia, iKON`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "add.help.example.exclude",
+                    {
+                        groupOne: "BESTie",
+                        groupTwo: "Dia",
+                        groupThree: "IKON",
+                        exclude: `\`${process.env.BOT_PREFIX}exclude\``,
+                    }
+                ),
+            },
+            {
+                example: "`,add include exo`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "add.help.example.include",
+                    {
+                        groupOne: "EXO",
+                        include: `\`${process.env.BOT_PREFIX}include\``,
+                    }
+                ),
+            },
+        ],
+        actionRowComponents: [
+            {
+                style: 5 as const,
+                url: GROUP_LIST_URL,
+                type: 2 as const,
+                label: state.localizer.translate(
+                    guildID,
+                    "misc.interaction.fullGroupsList"
+                ),
+            },
+        ],
+    });
 
-    helpPriority = 200;
-
-    call = async ({
-        message,
-        parsedMessage,
-    }: CommandArgs): Promise<void> => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         const optionListed = parsedMessage.components[0] as AddType;
         let groupNamesString: string;
@@ -148,11 +164,18 @@ export default class AddCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "misc.failure.unrecognizedGroups.title"),
-                description: state.localizer.translate(message.guildID,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.failure.unrecognizedGroups.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
                     "misc.failure.unrecognizedGroups.description",
                     {
-                        matchedGroupsAction: state.localizer.translate(message.guildID, "add.failure.unrecgonizedGroups.added"),
+                        matchedGroupsAction: state.localizer.translate(
+                            message.guildID,
+                            "add.failure.unrecgonizedGroups.added"
+                        ),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: unmatchedGroups.join(", "),
                         solution: "",
@@ -180,16 +203,25 @@ export default class AddCommand implements BaseCommand {
                 );
                 if (intersection.size > 0) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: state.localizer.translate(message.guildID, "misc.failure.groupsExcludeConflict.title"),
-                        description: state.localizer.translate(message.guildID,
+                        title: state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.groupsExcludeConflict.title"
+                        ),
+                        description: state.localizer.translate(
+                            message.guildID,
                             "misc.failure.groupsExcludeConflict.description",
                             {
                                 conflictingOptionOne: `\`${process.env.BOT_PREFIX}groups\``,
                                 conflictingOptionTwo: `\`${process.env.BOT_PREFIX}exclude\``,
-                                groupsList: [...intersection].filter((x) => !x.includes("+")).join(", "),
+                                groupsList: [...intersection]
+                                    .filter((x) => !x.includes("+"))
+                                    .join(", "),
                                 solutionStepOne: `\`${process.env.BOT_PREFIX}remove exclude\``,
                                 solutionStepTwo: `\`${process.env.BOT_PREFIX}groups\``,
-                                allowOrPrevent: state.localizer.translate(message.guildID, "misc.failure.groupsExcludeConflict.allow")
+                                allowOrPrevent: state.localizer.translate(
+                                    message.guildID,
+                                    "misc.failure.groupsExcludeConflict.allow"
+                                ),
                             }
                         ),
                     });
@@ -241,13 +273,19 @@ export default class AddCommand implements BaseCommand {
                 );
                 if (intersection.size > 0) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: state.localizer.translate(message.guildID, "Groups and Exclude Conflict"),
-                        description: state.localizer.translate(message.guildID,
-                            `misc.failure.groupsExcludeConflict.description`,
+                        title: state.localizer.translate(
+                            message.guildID,
+                            "Groups and Exclude Conflict"
+                        ),
+                        description: state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.groupsExcludeConflict.description",
                             {
                                 conflictingOptionOne: `\`${process.env.BOT_PREFIX}exclude\``,
                                 conflictingOptionTwo: `\`${process.env.BOT_PREFIX}groups\``,
-                                groupsList: [...intersection].filter((x) => !x.includes("+")).join(", "),
+                                groupsList: [...intersection]
+                                    .filter((x) => !x.includes("+"))
+                                    .join(", "),
                                 solutionPartOne: `\`${process.env.BOT_PREFIX}remove groups\``,
                                 solutionPartTwo: `\`${process.env.BOT_PREFIX}add exclude\``,
                             }

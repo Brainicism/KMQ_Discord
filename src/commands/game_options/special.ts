@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     sendOptionsMessage,
     getDebugLogHeader,
@@ -56,6 +56,8 @@ export const specialFfmpegArgs = {
 };
 
 export default class SpecialCommand implements BaseCommand {
+    helpPriority = 130;
+
     preRunChecks = [
         {
             checkFn: CommandPrechecks.debugServerPrecheck,
@@ -77,53 +79,72 @@ export default class SpecialCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string) => ({
-            name: "special",
-            description: state.localizer.translate(guildID,
-                "special.help.description"
-            ),
-            usage: ",special [reverse | slow | fast | faster | lowpitch | highpitch | nightcore]",
-            examples: [
-                {
-                    example: "`,special reverse`",
-                    explanation: state.localizer.translate(guildID, "special.help.example.reverse"),
-                },
-                {
-                    example: "`,special slow`",
-                    explanation: state.localizer.translate(guildID, "special.help.example.slow"),
-                },
-                {
-                    example: "`,special fast`",
-                    explanation: state.localizer.translate(guildID, "special.help.example.fast"),
-                },
-                {
-                    example: "`,special faster`",
-                    explanation: state.localizer.translate(guildID,
-                        "special.help.example.faster"
-                    ),
-                },
-                {
-                    example: "`,special lowpitch`",
-                    explanation: state.localizer.translate(guildID, "special.help.example.lowPitch"),
-                },
-                {
-                    example: "`,special highpitch`",
-                    explanation: state.localizer.translate(guildID, "special.help.example.highPitch"),
-                },
-                {
-                    example: "`,special nightcore`",
-                    explanation: state.localizer.translate(guildID,
-                        "special.help.example.nightcore"
-                    ),
-                },
-                {
-                    example: "`,special`",
-                    explanation: state.localizer.translate(guildID, "special.help.example.reset"),
-                },
-            ],
-        });
-
-    helpPriority = 130;
+    help = (guildID: string): Help => ({
+        name: "special",
+        description: state.localizer.translate(
+            guildID,
+            "special.help.description"
+        ),
+        usage: ",special [reverse | slow | fast | faster | lowpitch | highpitch | nightcore]",
+        examples: [
+            {
+                example: "`,special reverse`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "special.help.example.reverse"
+                ),
+            },
+            {
+                example: "`,special slow`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "special.help.example.slow"
+                ),
+            },
+            {
+                example: "`,special fast`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "special.help.example.fast"
+                ),
+            },
+            {
+                example: "`,special faster`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "special.help.example.faster"
+                ),
+            },
+            {
+                example: "`,special lowpitch`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "special.help.example.lowPitch"
+                ),
+            },
+            {
+                example: "`,special highpitch`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "special.help.example.highPitch"
+                ),
+            },
+            {
+                example: "`,special nightcore`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "special.help.example.nightcore"
+                ),
+            },
+            {
+                example: "`,special`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "special.help.example.reset"
+                ),
+            },
+        ],
+    });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
