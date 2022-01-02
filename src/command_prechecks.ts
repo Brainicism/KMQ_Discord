@@ -43,11 +43,13 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "Wait..."),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.preCheck.title"
+                ),
                 description: state.localizer.translate(
                     message.guildID,
-                    errorMessage ??
-                        "You must be in the same voice channel as the bot to use this command."
+                    errorMessage ?? "misc.preCheck.differentVC"
                 ),
             });
             return false;
@@ -67,10 +69,10 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Wait...",
+                title: "misc.preCheck.title",
                 description: state.localizer.translate(
                     message.guildID,
-                    errorMessage ?? "You can't do that in this server."
+                    errorMessage ?? "misc.preCheck.debugServer"
                 ),
             });
         }
@@ -91,10 +93,10 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Wait...",
+                title: "misc.preCheck.title",
                 description: state.localizer.translate(
                     message.guildID,
-                    errorMessage ?? "You can't do that in this channel."
+                    errorMessage ?? "misc.preCheck.debugChannel"
                 ),
             });
         }
@@ -125,11 +127,10 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Wait...",
+                title: "misc.preCheck.title",
                 description: state.localizer.translate(
                     message.guildID,
-                    errorMessage ??
-                        "This command has been disabled for regular users in the competition."
+                    errorMessage ?? "misc.preCheck.competition"
                 ),
             });
         }

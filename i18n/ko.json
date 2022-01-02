@@ -590,5 +590,10 @@
 	"vote.help.description": "Shows instructions on how to vote to receive 2x EXP for an hour.",
 	"vote.unavailable.hours": "You can vote in **{{{hours}}}**.",
 	"vote.unavailable.minutes": "You can vote in **{{{minutes}}}**.",
-	"vote.unavailable.seconds": "You can vote in **{{{seconds}}}**."
+	"vote.unavailable.seconds": "You can vote in **{{{seconds}}}**.",
+	"misc.preCheck.title": "Wait...",
+	"misc.preCheck.differentVC": "You must be in the same voice channel as the bot to use this command.",
+	"misc.preCheck.debugServer": "You can't do that in this server.",
+	"misc.preCheck.debugChannel": "You can't do that in this channel.",
+	"misc.preCheck.competition": "This command has been disabled for regular users in the competition."
 }
