@@ -387,7 +387,7 @@ export default class ExpCommand implements BaseCommand {
             )}x 📈`,
             `\`${state.localizer.translate(
                 message.guildID,
-                "exp.streak"
+                "exp.explanation.streak"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.GUESS_STREAK
             ].toFixed(2)}x 📈`,
