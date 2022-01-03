@@ -18,6 +18,7 @@ import LocalizationManager from "../../helpers/localization_manager";
 const SERVER_ID = "0";
 const gameStarter = new KmqMember("jisoo", "jisoo#4747", "url", "123");
 const messageContext = new MessageContext("", gameStarter, SERVER_ID, "");
+state.localizer = new LocalizationManager();
 
 const INITIAL_MONTH = 5;
 const INITIAL_DAY = 14;
@@ -70,7 +71,6 @@ describe("getLeaderboardEmbeds", () => {
     describe("off by one errors", () => {
         beforeEach(async () => {
             await dbContext.kmq("player_stats").del();
-            state.localizer = new LocalizationManager();
         });
 
         describe("fits a page perfectly", () => {

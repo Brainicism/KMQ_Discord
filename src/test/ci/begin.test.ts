@@ -10,12 +10,9 @@ import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 
 const gameStarter = new KmqMember("jisoo", "jisoo#4747", "url", "123");
+state.localizer = new LocalizationManager();
 
 describe("begin command", () => {
-    beforeEach(() => {
-        state.localizer = new LocalizationManager();
-    });
-
     describe("can start", () => {
         describe("game session is null", () => {
             it("should return false", () => {

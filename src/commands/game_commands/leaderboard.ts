@@ -641,11 +641,6 @@ export default class LeaderboardCommand implements BaseCommand {
                                 break;
                         }
 
-                        leaderboardScope = state.localizer.translate(
-                            messageContext.guildID,
-                            leaderboardScope
-                        );
-
                         const durationString = !permanentLb
                             ? ` ${duration[0].toUpperCase()}${duration.slice(
                                   1
@@ -672,11 +667,6 @@ export default class LeaderboardCommand implements BaseCommand {
                             default:
                                 break;
                         }
-
-                        leaderboardType = state.localizer.translate(
-                            messageContext.guildID,
-                            leaderboardType
-                        );
 
                         resolve({
                             title: bold(

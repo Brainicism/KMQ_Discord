@@ -18,12 +18,12 @@ import { state } from "../../kmq_worker";
 import LocalizationManager from "../../helpers/localization_manager";
 
 let guildPreference: GuildPreference;
+state.localizer = new LocalizationManager();
 const sandbox: SinonSandbox = sinon.createSandbox();
 describe("calculateOptionsMultiplier", () => {
     beforeEach(() => {
         guildPreference = GuildPreference.fromGuild("123");
         sandbox.stub(guildPreference, "updateGuildPreferences");
-        state.localizer = new LocalizationManager();
     });
 
     afterEach(() => {
