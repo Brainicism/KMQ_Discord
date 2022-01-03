@@ -14,11 +14,8 @@ import * as game_utils from "../../helpers/game_utils";
 import * as utils from "../../helpers/utils";
 import GameRound from "../../structures/game_round";
 import GuildPreference from "../../structures/guild_preference";
-import { state } from "../../kmq_worker";
-import LocalizationManager from "../../helpers/localization_manager";
 
 let guildPreference: GuildPreference;
-state.localizer = new LocalizationManager();
 const sandbox: SinonSandbox = sinon.createSandbox();
 describe("calculateOptionsMultiplier", () => {
     beforeEach(() => {

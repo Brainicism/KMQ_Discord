@@ -5,12 +5,9 @@ import GameSession from "../../structures/game_session";
 import KmqMember from "../../structures/kmq_member";
 import Player from "../../structures/player";
 import TeamScoreboard from "../../structures/team_scoreboard";
-import { state } from "../../kmq_worker";
-import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 
 const gameStarter = new KmqMember("jisoo", "jisoo#4747", "url", "123");
-state.localizer = new LocalizationManager();
 
 describe("begin command", () => {
     describe("can start", () => {
