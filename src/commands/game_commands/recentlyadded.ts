@@ -22,8 +22,6 @@ const logger = new IPCLogger("recentlyadded");
 const FIELDS_PER_EMBED = 9;
 
 export default class RecentlyAddedCommand implements BaseCommand {
-    helpPriority = 30;
-
     aliases = ["recent"];
 
     help = (guildID: string): Help => ({
@@ -42,6 +40,7 @@ export default class RecentlyAddedCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 30,
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {

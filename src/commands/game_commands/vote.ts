@@ -23,8 +23,6 @@ export const REVIEW_LINK = "https://top.gg/bot/508759831755096074#reviews";
 export default class VoteCommand implements BaseCommand {
     aliases = ["v", "voted"];
 
-    helpPriority = 60;
-
     help = (guildID: string): Help => ({
         name: "vote",
         description: state.localizer.translate(
@@ -33,6 +31,7 @@ export default class VoteCommand implements BaseCommand {
         ),
         usage: ",vote",
         examples: [],
+        priority: 60,
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {

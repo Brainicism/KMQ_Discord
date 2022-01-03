@@ -20,8 +20,6 @@ export enum ShuffleType {
 export const DEFAULT_SHUFFLE = ShuffleType.UNIQUE;
 
 export default class ShuffleCommand implements BaseCommand {
-    helpPriority = 110;
-
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -71,6 +69,7 @@ export default class ShuffleCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 110,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

@@ -11,8 +11,6 @@ import { state } from "../../kmq_worker";
 const logger = new IPCLogger("score");
 
 export default class ScoreCommand implements BaseCommand {
-    helpPriority = 50;
-
     aliases = ["scoreboard", "sb"];
 
     help = (guildID: string): Help => ({
@@ -23,6 +21,7 @@ export default class ScoreCommand implements BaseCommand {
         ),
         usage: ",score",
         examples: [],
+        priority: 50,
     });
 
     call = async ({ message, gameSessions }: CommandArgs): Promise<void> => {

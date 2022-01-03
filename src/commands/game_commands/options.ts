@@ -11,8 +11,6 @@ import { state } from "../../kmq_worker";
 const logger = new IPCLogger("options");
 
 export default class OptionsCommand implements BaseCommand {
-    helpPriority = 50;
-
     help = (guildID: string): Help => ({
         name: "options",
         description: state.localizer.translate(
@@ -21,6 +19,7 @@ export default class OptionsCommand implements BaseCommand {
         ),
         usage: ",options",
         examples: [],
+        priority: 50,
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {

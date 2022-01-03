@@ -19,8 +19,6 @@ enum DurationAction {
 }
 
 export default class DurationCommand implements BaseCommand {
-    helpPriority = 110;
-
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -87,6 +85,7 @@ export default class DurationCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 110,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

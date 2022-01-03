@@ -37,8 +37,6 @@ enum AddType {
 export default class AddCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
-    helpPriority = 200;
-
     validations = {
         minArgCount: 2,
         arguments: [
@@ -111,6 +109,7 @@ export default class AddCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 200,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

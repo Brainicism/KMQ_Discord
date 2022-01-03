@@ -22,8 +22,6 @@ export const DEFAULT_SUBUNIT_PREFERENCE = SubunitsPreference.INCLUDE;
 export default class SubunitsCommand implements BaseCommand {
     aliases = ["subunit", "su"];
 
-    helpPriority = 130;
-
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -76,6 +74,7 @@ export default class SubunitsCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 130,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

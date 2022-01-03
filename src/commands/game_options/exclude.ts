@@ -19,8 +19,6 @@ import { GROUP_LIST_URL } from "../../constants";
 const logger = new IPCLogger("excludes");
 
 export default class ExcludeCommand implements BaseCommand {
-    helpPriority = 130;
-
     aliases = ["excludes", "ignore", "ignores"];
 
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
@@ -77,6 +75,7 @@ export default class ExcludeCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 130,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

@@ -21,8 +21,6 @@ export enum SeekType {
 export const DEFAULT_SEEK = SeekType.RANDOM;
 
 export default class SeekCommand implements BaseCommand {
-    helpPriority = 130;
-
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -77,6 +75,7 @@ export default class SeekCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 130,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

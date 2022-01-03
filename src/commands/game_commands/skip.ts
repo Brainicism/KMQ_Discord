@@ -78,8 +78,6 @@ function isSkipMajority(
 }
 
 export default class SkipCommand implements BaseCommand {
-    helpPriority = 1010;
-
     aliases = ["s"];
     preRunChecks = [
         { checkFn: CommandPrechecks.inGameCommandPrecheck },
@@ -94,6 +92,7 @@ export default class SkipCommand implements BaseCommand {
         ),
         usage: ",skip",
         examples: [],
+        priority: 1010,
     });
 
     call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {

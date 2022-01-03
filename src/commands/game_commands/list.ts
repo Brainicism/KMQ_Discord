@@ -29,8 +29,6 @@ enum ListType {
 }
 
 export default class ListCommand implements BaseCommand {
-    helpPriority = 200;
-
     validations = {
         minArgCount: 1,
         maxArgCount: 1,
@@ -76,6 +74,7 @@ export default class ListCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 200,
     });
 
     call = async ({

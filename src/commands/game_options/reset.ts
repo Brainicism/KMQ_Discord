@@ -14,8 +14,6 @@ import { state } from "../../kmq_worker";
 const logger = new IPCLogger("reset");
 
 export default class ResetCommand implements BaseCommand {
-    helpPriority = 130;
-
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -40,6 +38,7 @@ export default class ResetCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 130,
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {

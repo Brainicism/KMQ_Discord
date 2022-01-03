@@ -25,8 +25,6 @@ export const DEFAULT_ANSWER_TYPE = AnswerType.TYPING;
 export default class AnswerCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
-    helpPriority = 150;
-
     validations = {
         minArgCount: 0,
         maxArgCount: 1,
@@ -93,6 +91,7 @@ export default class AnswerCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 150,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

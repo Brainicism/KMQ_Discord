@@ -14,8 +14,6 @@ import { state } from "../../kmq_worker";
 const logger = new IPCLogger("goal");
 
 export default class GoalCommand implements BaseCommand {
-    helpPriority = 120;
-
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -54,6 +52,7 @@ export default class GoalCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 120,
     });
 
     call = async ({

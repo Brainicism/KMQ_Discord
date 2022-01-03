@@ -16,8 +16,6 @@ const logger = new IPCLogger("limit");
 export const DEFAULT_LIMIT = 500;
 
 export default class LimitCommand implements BaseCommand {
-    helpPriority = 140;
-
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -74,6 +72,7 @@ export default class LimitCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 140,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

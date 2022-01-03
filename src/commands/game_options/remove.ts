@@ -34,8 +34,6 @@ enum RemoveType {
 }
 
 export default class RemoveCommand implements BaseCommand {
-    helpPriority = 200;
-
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -110,6 +108,7 @@ export default class RemoveCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 200,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

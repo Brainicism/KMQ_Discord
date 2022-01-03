@@ -193,8 +193,6 @@ export function generateHint(
 export default class HintCommand implements BaseCommand {
     aliases = ["h"];
 
-    helpPriority = 1020;
-
     preRunChecks = [
         { checkFn: CommandPrechecks.inGameCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
@@ -208,6 +206,7 @@ export default class HintCommand implements BaseCommand {
         ),
         usage: ",hint",
         examples: [],
+        priority: 1020,
     });
 
     call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {

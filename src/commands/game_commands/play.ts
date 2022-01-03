@@ -157,8 +157,6 @@ export default class PlayCommand implements BaseCommand {
 
     aliases = ["random", "start", "p"];
 
-    helpPriority = 1050;
-
     help = (guildID: string): Help => ({
         name: "play",
         description: state.localizer.translate(
@@ -166,6 +164,7 @@ export default class PlayCommand implements BaseCommand {
             "play.help.description"
         ),
         usage: ",play {classic | elimination | teams}\n,play elimination {lives}",
+        priority: 1050,
         examples: [
             {
                 example: "`,play`",

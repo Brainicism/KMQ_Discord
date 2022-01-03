@@ -20,8 +20,6 @@ const logger = new IPCLogger("includes");
 export default class IncludeCommand implements BaseCommand {
     aliases = ["includes"];
 
-    helpPriority = 130;
-
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     help = (guildID: string): Help => ({
@@ -76,6 +74,7 @@ export default class IncludeCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 130,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

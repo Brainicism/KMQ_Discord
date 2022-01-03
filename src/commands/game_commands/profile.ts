@@ -241,8 +241,6 @@ async function getProfileFields(
 }
 
 export default class ProfileCommand implements BaseCommand {
-    helpPriority = 50;
-
     help = (guildID: string): Help => ({
         name: "profile",
         description: state.localizer.translate(
@@ -276,6 +274,7 @@ export default class ProfileCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 50,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

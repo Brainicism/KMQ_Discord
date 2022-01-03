@@ -302,13 +302,12 @@ export async function calculateTotalRoundExp(
 }
 
 export default class ExpCommand implements BaseCommand {
-    helpPriority = 50;
-
     help = (guildID: string): Help => ({
         name: "exp",
         description: state.localizer.translate(guildID, "exp.help.description"),
         usage: ",exp",
         examples: [],
+        priority: 50,
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {

@@ -61,8 +61,6 @@ const leaderboardQuotes = [
 export default class LeaderboardCommand implements BaseCommand {
     aliases = ["lb"];
 
-    helpPriority = 50;
-
     validations = {
         minArgCount: 0,
         maxArgCount: 3,
@@ -134,6 +132,7 @@ export default class LeaderboardCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 50,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

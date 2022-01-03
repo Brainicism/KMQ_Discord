@@ -16,8 +16,6 @@ const logger = new IPCLogger("news");
 export default class NewsCommand implements BaseCommand {
     aliases = ["updates"];
 
-    helpPriority = 10;
-
     help = (guildID: string): Help => ({
         name: "news",
         description: state.localizer.translate(
@@ -26,6 +24,7 @@ export default class NewsCommand implements BaseCommand {
         ),
         usage: ",news",
         examples: [],
+        priority: 10,
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {

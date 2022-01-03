@@ -22,8 +22,6 @@ export enum ArtistType {
 export const DEFAULT_ARTIST_TYPE = ArtistType.BOTH;
 
 export default class ArtistTypeCommand implements BaseCommand {
-    helpPriority = 150;
-
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -90,6 +88,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 150,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

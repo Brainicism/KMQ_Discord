@@ -20,8 +20,6 @@ export enum MultiGuessType {
 export const DEFAULT_MULTIGUESS_TYPE = MultiGuessType.ON;
 
 export default class MultiGuessCommand implements BaseCommand {
-    helpPriority = 150;
-
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -68,6 +66,7 @@ export default class MultiGuessCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 150,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

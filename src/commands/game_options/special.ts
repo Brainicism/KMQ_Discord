@@ -56,8 +56,6 @@ export const specialFfmpegArgs = {
 };
 
 export default class SpecialCommand implements BaseCommand {
-    helpPriority = 130;
-
     preRunChecks = [
         {
             checkFn: CommandPrechecks.debugServerPrecheck,
@@ -144,6 +142,7 @@ export default class SpecialCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 130,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

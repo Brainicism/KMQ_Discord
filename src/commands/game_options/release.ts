@@ -22,8 +22,6 @@ export const DEFAULT_RELEASE_TYPE = ReleaseType.OFFICIAL;
 export default class ReleaseCommand implements BaseCommand {
     aliases = ["releases", "videotype"];
 
-    helpPriority = 130;
-
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -70,6 +68,7 @@ export default class ReleaseCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 130,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

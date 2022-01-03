@@ -15,8 +15,6 @@ const logger = new IPCLogger("guessTimeout");
 export default class GuessTimeoutCommand implements BaseCommand {
     aliases = ["time", "timeout", "t"];
 
-    helpPriority = 110;
-
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -56,6 +54,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 110,
     });
 
     call = async ({

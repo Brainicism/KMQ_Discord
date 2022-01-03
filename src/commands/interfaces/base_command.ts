@@ -32,6 +32,7 @@ export interface Help {
     usage: string;
     examples: Array<{ example: string; explanation: string }>;
     actionRowComponents?: Eris.ActionRowComponents[];
+    priority?: number;
 }
 
 export interface HelpFunc {
@@ -41,7 +42,6 @@ export interface HelpFunc {
 export default interface BaseCommand {
     call: CallFunc;
     help?: HelpFunc;
-    helpPriority?: number;
     aliases?: Array<string>;
     validations?: CommandValidations;
     preRunChecks?: Array<{

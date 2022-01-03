@@ -21,8 +21,6 @@ import { getKmqCurrentVersion } from "../../helpers/game_utils";
 const logger = new IPCLogger("stats");
 
 export default class SkipCommand implements BaseCommand {
-    helpPriority = 1;
-
     help = (guildID: string): Help => ({
         name: "stats",
         description: state.localizer.translate(
@@ -31,6 +29,7 @@ export default class SkipCommand implements BaseCommand {
         ),
         usage: ",stats",
         examples: [],
+        priority: 1,
     });
 
     call = async ({ message, channel }: CommandArgs): Promise<void> => {

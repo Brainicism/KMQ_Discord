@@ -9,8 +9,6 @@ const logger = new IPCLogger("end");
 export default class EndCommand implements BaseCommand {
     aliases = ["stop", "e"];
 
-    helpPriority = 1020;
-
     preRunChecks = [
         { checkFn: CommandPrechecks.inGameCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
@@ -21,6 +19,7 @@ export default class EndCommand implements BaseCommand {
         description: state.localizer.translate(guildID, "end.help.description"),
         usage: ",end",
         examples: [],
+        priority: 1020,
     });
 
     call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {

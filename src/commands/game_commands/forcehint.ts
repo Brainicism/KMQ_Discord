@@ -18,8 +18,6 @@ const logger = new IPCLogger("forcehint");
 export default class ForceHintCommand implements BaseCommand {
     aliases = ["fhint", "fh"];
 
-    helpPriority = 1009;
-
     preRunChecks = [
         { checkFn: CommandPrechecks.inGameCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
@@ -33,6 +31,7 @@ export default class ForceHintCommand implements BaseCommand {
         ),
         usage: ",forcehint",
         examples: [],
+        priority: 1009,
     });
 
     call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {

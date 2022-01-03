@@ -19,8 +19,6 @@ import { GROUP_LIST_URL } from "../../constants";
 const logger = new IPCLogger("groups");
 
 export default class GroupsCommand implements BaseCommand {
-    helpPriority = 135;
-
     aliases = ["group", "artist", "artists"];
 
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
@@ -77,6 +75,7 @@ export default class GroupsCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 135,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

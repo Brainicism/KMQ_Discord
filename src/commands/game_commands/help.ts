@@ -114,7 +114,10 @@ const helpMessage = async (
             (command) => command.help
         );
 
-        commandsWithHelp.sort((x, y) => y.helpPriority - x.helpPriority);
+        commandsWithHelp.sort(
+            (x, y) => y.help(null).priority - x.help(null).priority
+        );
+
         embedTitle = state.localizer.translate(message.guildID, "help.title", {
             kmq: "K-pop Music Quiz",
         });
@@ -208,8 +211,6 @@ const helpMessage = async (
 };
 
 export default class HelpCommand implements BaseCommand {
-    helpPriority = 1000;
-
     help = (guildID: string): Help => ({
         name: "help",
         description: state.localizer.translate(
@@ -233,6 +234,7 @@ export default class HelpCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 1000,
     });
 
     call = async ({ parsedMessage, message }: CommandArgs): Promise<void> => {

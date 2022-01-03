@@ -17,8 +17,6 @@ export const DEFAULT_BEGINNING_SEARCH_YEAR = 1990;
 export const DEFAULT_ENDING_SEARCH_YEAR = new Date().getFullYear();
 
 export default class CutoffCommand implements BaseCommand {
-    helpPriority = 140;
-
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -85,6 +83,7 @@ export default class CutoffCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 140,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

@@ -35,8 +35,6 @@ enum PresetAction {
 export default class PresetCommand implements BaseCommand {
     aliases = ["presets"];
 
-    helpPriority = 200;
-
     validations = {
         minArgCount: 0,
         maxArgCount: 3,
@@ -111,6 +109,7 @@ export default class PresetCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 200,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

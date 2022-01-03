@@ -15,8 +15,6 @@ const logger = new IPCLogger("locale");
 export default class LocaleTypeCommand implements BaseCommand {
     aliases = ["botlanguage"];
 
-    helpPriority = 30;
-
     validations = {
         minArgCount: 1,
         maxArgCount: 1,
@@ -60,6 +58,7 @@ export default class LocaleTypeCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 30,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

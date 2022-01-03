@@ -23,8 +23,6 @@ export enum Gender {
 export const DEFAULT_GENDER = [Gender.FEMALE, Gender.MALE, Gender.COED];
 
 export default class GenderCommand implements BaseCommand {
-    helpPriority = 150;
-
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -107,6 +105,7 @@ export default class GenderCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 150,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

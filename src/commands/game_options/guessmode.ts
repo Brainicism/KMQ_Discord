@@ -21,8 +21,6 @@ export enum GuessModeType {
 export const DEFAULT_GUESS_MODE = GuessModeType.SONG_NAME;
 
 export default class GuessModeCommand implements BaseCommand {
-    helpPriority = 130;
-
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     aliases = ["mode"];
@@ -79,6 +77,7 @@ export default class GuessModeCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 130,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

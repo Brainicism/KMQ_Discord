@@ -21,8 +21,6 @@ export enum OstPreference {
 export const DEFAULT_OST_PREFERENCE = OstPreference.EXCLUDE;
 
 export default class OstCommand implements BaseCommand {
-    helpPriority = 130;
-
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     aliases = ["osts"];
@@ -74,6 +72,7 @@ export default class OstCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 130,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

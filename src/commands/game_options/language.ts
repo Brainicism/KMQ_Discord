@@ -22,8 +22,6 @@ export const DEFAULT_LANGUAGE = LanguageType.ALL;
 // z = chinese, j = japanese, e = english, s = spanish
 export const FOREIGN_LANGUAGE_TAGS = ["z", "j", "e", "s"];
 export default class LanguageCommand implements BaseCommand {
-    helpPriority = 150;
-
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -69,6 +67,7 @@ export default class LanguageCommand implements BaseCommand {
                 ),
             },
         ],
+        priority: 150,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

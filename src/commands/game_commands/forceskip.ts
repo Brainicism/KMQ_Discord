@@ -19,8 +19,6 @@ const logger = new IPCLogger("forceskip");
 export default class ForceSkipCommand implements BaseCommand {
     aliases = ["fskip", "fs"];
 
-    helpPriority = 1009;
-
     preRunChecks = [
         { checkFn: CommandPrechecks.inGameCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
@@ -34,6 +32,7 @@ export default class ForceSkipCommand implements BaseCommand {
         ),
         usage: ",forceskip",
         examples: [],
+        priority: 1009,
     });
 
     call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
