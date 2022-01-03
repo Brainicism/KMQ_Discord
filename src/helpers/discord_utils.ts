@@ -257,7 +257,10 @@ export async function textPermissionsCheck(
             )} | Missing SEND_MESSAGES permissions`
         );
         const embed = {
-            title: "misc.failure.missingPermissions.title",
+            title: state.localizer.translate(
+                guildID,
+                "misc.failure.missingPermissions.title"
+            ),
             description: state.localizer.translate(
                 guildID,
                 "misc.failure.missingPermissions.description",
