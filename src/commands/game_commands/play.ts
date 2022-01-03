@@ -223,7 +223,7 @@ export default class PlayCommand implements BaseCommand {
                 ),
                 description: state.localizer.translate(
                     message.guildID,
-                    "play.failure.botRestaring.description",
+                    "play.failure.botRestarting.description",
                     { timeUntilRestart: `\`${timeUntilRestart}\`` }
                 ),
             });

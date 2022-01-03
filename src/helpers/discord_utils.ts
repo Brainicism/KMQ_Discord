@@ -1277,7 +1277,7 @@ export async function sendPaginationedEmbed(
             return EmbedPaginator.createPaginationEmbed(
                 message,
                 embeds,
-                { timeout: 5 * 60 * 1000, startPage, cycling: true },
+                { timeout: 60000, startPage, cycling: true },
                 components
             );
         }

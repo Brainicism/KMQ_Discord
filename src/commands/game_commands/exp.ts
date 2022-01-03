@@ -399,7 +399,7 @@ export default class ExpCommand implements BaseCommand {
             ].toFixed(2)}x 📈 `,
             `\`${state.localizer.translate(
                 message.guildID,
-                "exp.explalanation.bonusArtistGuess"
+                "exp.explanation.bonusArtistGuess"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.BONUS_ARTIST
             ].toFixed(2)}x 📈 `,

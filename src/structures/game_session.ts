@@ -896,9 +896,15 @@ export default class GameSession {
                         {
                             songOrArtist:
                                 guildPreference.gameOptions.guessModeType ===
-                                GuessModeType.BOTH
-                                    ? "song"
-                                    : guildPreference.gameOptions.guessModeType,
+                                GuessModeType.ARTIST
+                                    ? state.localizer.translate(
+                                          this.guildID,
+                                          "misc.artist"
+                                      )
+                                    : state.localizer.translate(
+                                          this.guildID,
+                                          "misc.song"
+                                      ),
                         }
                     ),
                     components,

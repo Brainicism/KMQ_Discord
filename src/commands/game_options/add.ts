@@ -173,7 +173,7 @@ export default class AddCommand implements BaseCommand {
                     {
                         matchedGroupsAction: state.localizer.translate(
                             message.guildID,
-                            "add.failure.unrecgonizedGroups.added"
+                            "add.failure.unrecognizedGroups.added"
                         ),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: unmatchedGroups.join(", "),
@@ -274,7 +274,7 @@ export default class AddCommand implements BaseCommand {
                     sendErrorMessage(MessageContext.fromMessage(message), {
                         title: state.localizer.translate(
                             message.guildID,
-                            "Groups and Exclude Conflict"
+                            "misc.failure.groupsExcludeConflict.title"
                         ),
                         description: state.localizer.translate(
                             message.guildID,

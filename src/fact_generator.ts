@@ -276,7 +276,7 @@ async function recentMusicShowWin(locale: LocaleType): Promise<string[]> {
         state.localizer.internalLocalizer.__(
             {
                 locale,
-                phrase: "Fun Fact: {{{hyperlink}}} recently won on {{{musicShow}}} on {{{winDate}}}",
+                phrase: "fact.fun.recentMusicShowWin",
             },
             {
                 hyperlink: generateSongArtistHyperlink(
