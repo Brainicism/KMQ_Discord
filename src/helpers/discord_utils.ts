@@ -707,7 +707,7 @@ export async function sendEndRoundMessage(
 
             correctDescription += `\n\n**${state.localizer.translate(
                 messageContext.guildID,
-                "misc.runnersUp"
+                "misc.inGame.runnersUp"
             )}**\n${runnersUpDescription}`;
         }
     }
@@ -1330,7 +1330,7 @@ export async function sendScoreboardMessage(
 
     let footerText = state.localizer.translate(
         message.guildID,
-        "misc.yourScore",
+        "misc.classic.yourScore",
         {
             score: String(
                 gameSession.scoreboard.getPlayerScore(message.author.id)
@@ -1344,7 +1344,7 @@ export async function sendScoreboardMessage(
 
         footerText = state.localizer.translate(
             message.guildID,
-            "misc.yourLives",
+            "misc.elimination.yourLives",
             {
                 lives: String(
                     eliminationScoreboard.getPlayerLives(message.author.id)
