@@ -558,12 +558,12 @@ export default class GameSession {
                     {
                         songs: state.localizer.translateN(
                             this.guildID,
-                            "%s song",
+                            "misc.plural.song",
                             bookmarkedSongCount
                         ),
                         players: state.localizer.translateN(
                             this.guildID,
-                            "%s player",
+                            "misc.plural.player",
                             bookmarkedSongsPlayerCount
                         ),
                     }

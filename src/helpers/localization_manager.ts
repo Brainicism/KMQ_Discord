@@ -7,7 +7,7 @@ const logger = new IPCLogger("localization_manager");
 
 export enum LocaleType {
     EN = "en",
-    KR = "ko",
+    KO = "ko",
 }
 
 export const DEFAULT_LOCALE = LocaleType.EN;

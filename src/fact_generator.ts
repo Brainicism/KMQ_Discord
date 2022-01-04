@@ -980,8 +980,8 @@ async function recentUniquePlayers(locale: LocaleType): Promise<string[]> {
                     recentActivePlayers:
                         friendlyFormattedNumber(recentActivePlayers),
                     xDays: state.localizer.internalLocalizer.__n({
-                        singular: "%s day",
-                        plural: "%s days",
+                        singular: "misc.plural.day.one",
+                        plural: "misc.plural.day.other",
                         count: interval,
                         locale,
                     }),

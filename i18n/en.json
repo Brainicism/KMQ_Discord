@@ -1,24 +1,4 @@
 {
-    "%s day": {
-        "one": "%s day",
-        "other": "%s days"
-    },
-    "%s hour ago": {
-        "one": "%s hour ago",
-        "other": "%s hours ago"
-    },
-    "%s minute": {
-        "one": "%s minute",
-        "other": "%s minutes"
-    },
-    "%s minute ago": {
-        "one": "%s minute ago",
-        "other": "%s minutes ago"
-    },
-    "%s minute remaining": {
-        "one": "%s minute remaining",
-        "other": "%s minutes remaining"
-    },
     "10th": "10th",
     "11th": "11th",
     "12th": "12th",
@@ -489,9 +469,13 @@
                 "description": "Change the language of the bot.",
                 "example": {
                     "reset": "Reset the bot's language to {{{defaultLocale}}}",
-                    "toEnglish": "Change the bot's language to English",
-                    "toKorean": "Change the bot's language to Korean"
+                    "toEnglish": "Change the bot's language to {{{english}}}",
+                    "toKorean": "Change the bot's language to {{{korean}}}"
                 }
+            },
+            "language": {
+                "en": "English",
+                "ko": "Korean"
             },
             "updatedDescription": "The bot's language has been updated to `{{{language}}}`."
         },
@@ -1145,6 +1129,44 @@
         "warning": {
             "addRemoveOrdering": {
                 "footer": "Did you mean to use {{{addOrRemove}}} {{{command}}}?"
+            }
+        },
+        "plural": {
+            "day": {
+                "one": "%s day",
+                "other": "%s days"
+            },
+            "hour": {
+                "one": "%s hour",
+                "other": "%s hours"
+            },
+            "hourAgo": {
+                "one": "%s hour ago",
+                "other": "%s hours ago"
+            },
+            "minute": {
+                "one": "%s minute",
+                "other": "%s minutes"
+            },
+            "minuteAgo": {
+                "one": "%s minute ago",
+                "other": "%s minutes ago"
+            },
+            "minuteRemaining": {
+                "one": "%s minute remaining",
+                "other": "%s minutes remaining"
+            },
+            "player": {
+                "one": "%s player",
+                "other": "%s players"
+            },
+            "second": {
+                "one": "%s second",
+                "other": "%s seconds"
+            },
+            "song": {
+                "one": "%s song",
+                "other": "%s songs"
             }
         }
     }

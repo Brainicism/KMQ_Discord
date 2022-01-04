@@ -16,15 +16,9 @@ export default class LocaleTypeCommand implements BaseCommand {
     aliases = ["botlanguage"];
 
     validations = {
-        minArgCount: 1,
+        minArgCount: 0,
         maxArgCount: 1,
-        arguments: [
-            {
-                name: "localeType",
-                type: "enum" as const,
-                enums: Object.values(LocaleType),
-            },
-        ],
+        arguments: [],
     };
 
     help = (guildID: string): Help => ({
@@ -36,17 +30,29 @@ export default class LocaleTypeCommand implements BaseCommand {
         usage: ",locale [language]",
         examples: [
             {
-                example: "`,locale en`",
+                example: "`,locale english`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "command.locale.help.example.toEnglish"
+                    "command.locale.help.example.toEnglish",
+                    {
+                        english: state.localizer.translate(
+                            guildID,
+                            "command.locale.language.en"
+                        ),
+                    }
                 ),
             },
             {
-                example: "`,locale ko`",
+                example: "`,locale korean`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "command.locale.help.example.toKorean"
+                    "command.locale.help.example.toKorean",
+                    {
+                        korean: state.localizer.translate(
+                            guildID,
+                            "command.locale.language.ko"
+                        ),
+                    }
                 ),
             },
             {
@@ -54,7 +60,12 @@ export default class LocaleTypeCommand implements BaseCommand {
                 explanation: state.localizer.translate(
                     guildID,
                     "command.locale.help.example.reset",
-                    { defaultLocale: DEFAULT_LOCALE }
+                    {
+                        defaultLocale: state.localizer.translate(
+                            guildID,
+                            `command.locale.language.${DEFAULT_LOCALE}`
+                        ),
+                    }
                 ),
             },
         ],
@@ -66,7 +77,20 @@ export default class LocaleTypeCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             language = DEFAULT_LOCALE;
         } else {
-            language = parsedMessage.components[0] as LocaleType;
+            switch (parsedMessage.components[0].toLowerCase()) {
+                case "en":
+                case "english":
+                    language = LocaleType.EN;
+                    break;
+                case "ko":
+                case "kr":
+                case "korean":
+                    language = LocaleType.KO;
+                    break;
+                default:
+                    language = DEFAULT_LOCALE;
+                    break;
+            }
         }
 
         LocaleTypeCommand.updateLocale(message.guildID, language);
@@ -80,7 +104,12 @@ export default class LocaleTypeCommand implements BaseCommand {
             description: state.localizer.translate(
                 message.guildID,
                 "command.locale.updatedDescription",
-                { language }
+                {
+                    language: state.localizer.translate(
+                        message.guildID,
+                        `command.locale.language.${language}`
+                    ),
+                }
             ),
             thumbnailUrl: KmqImages.THUMBS_UP,
         });

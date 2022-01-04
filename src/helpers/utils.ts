@@ -220,7 +220,7 @@ export function friendlyFormattedDate(date: Date, guildID: string): string {
     if (timeDiffMinutes <= 60) {
         return localizer.translateN(
             guildID,
-            "%s minute ago",
+            "misc.plural.minuteAgo",
             Math.ceil(timeDiffMinutes)
         );
     }
@@ -229,7 +229,7 @@ export function friendlyFormattedDate(date: Date, guildID: string): string {
     if (timeDiffHours <= 24) {
         return localizer.translateN(
             guildID,
-            "%s hour ago",
+            "misc.plural.hourAgo",
             Math.ceil(timeDiffHours)
         );
     }

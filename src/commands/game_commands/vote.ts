@@ -52,7 +52,7 @@ export default class VoteCommand implements BaseCommand {
             voteStatusString = `${bold(
                 state.localizer.translateN(
                     message.guildID,
-                    "%s minute",
+                    "misc.plural.minute",
                     Math.max(Math.ceil(timeRemaining), 0)
                 )
             )} left.`;
@@ -89,7 +89,7 @@ export default class VoteCommand implements BaseCommand {
                         {
                             hours: state.localizer.translateN(
                                 message.guildID,
-                                "%s hour",
+                                "misc.plural.hour",
                                 hoursLeft
                             ),
                         }
@@ -101,7 +101,7 @@ export default class VoteCommand implements BaseCommand {
                         {
                             minutes: state.localizer.translateN(
                                 message.guildID,
-                                "%s minute",
+                                "misc.plural.minute",
                                 minutesLeft
                             ),
                         }
@@ -113,7 +113,7 @@ export default class VoteCommand implements BaseCommand {
                         {
                             seconds: state.localizer.translateN(
                                 message.guildID,
-                                "%s second",
+                                "misc.plural.second",
                                 secondsLeft
                             ),
                         }

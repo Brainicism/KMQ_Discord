@@ -635,7 +635,7 @@ export async function sendEndRoundMessage(
             timeRemaining > 0
                 ? `⏰ ${state.localizer.translateN(
                       messageContext.guildID,
-                      "%s minute remaining",
+                      "misc.plural.minute",
                       Math.ceil(timeRemaining)
                   )}`
                 : `⏰ ${state.localizer.translate(
@@ -731,7 +731,7 @@ export async function sendEndRoundMessage(
         scoreboardTitle += bold(
             state.localizer.translate(
                 messageContext.guildID,
-                "score.scoreboardTitle"
+                "command.score.scoreboardTitle"
             )
         );
     }
@@ -933,15 +933,19 @@ export async function sendOptionsMessage(
     optionStrings[GameOption.GUESS_MODE_TYPE] = gameOptions.guessModeType;
     optionStrings[GameOption.SPECIAL_TYPE] = gameOptions.specialType;
     optionStrings[GameOption.TIMER] = guildPreference.isGuessTimeoutSet()
-        ? state.localizer.translate(messageContext.guildID, "options.timer", {
-              timerInSeconds: String(gameOptions.guessTimeout),
-          })
+        ? state.localizer.translate(
+              messageContext.guildID,
+              "command.options.timer",
+              {
+                  timerInSeconds: String(gameOptions.guessTimeout),
+              }
+          )
         : null;
 
     optionStrings[GameOption.DURATION] = guildPreference.isDurationSet()
         ? state.localizer.translate(
               messageContext.guildID,
-              "options.duration",
+              "command.options.duration",
               { durationInMinutes: String(gameOptions.duration) }
           )
         : null;
@@ -1010,7 +1014,7 @@ export async function sendOptionsMessage(
             italicize(
                 state.localizer.translate(
                     messageContext.guildID,
-                    "options.notSet"
+                    "command.options.notSet"
                 )
             );
     }
@@ -1034,7 +1038,7 @@ export async function sendOptionsMessage(
 
     priorityOptions = state.localizer.translate(
         messageContext.guildID,
-        "options.overview",
+        "command.options.overview",
         {
             limit: bold(limit),
             totalSongs: bold(
@@ -1103,7 +1107,7 @@ export async function sendOptionsMessage(
     ) {
         footerText = state.localizer.translate(
             messageContext.guildID,
-            "options.perCommandHelp",
+            "command.options.perCommandHelp",
             { helpCommand: `${process.env.BOT_PREFIX}help` }
         );
     }
@@ -1112,13 +1116,13 @@ export async function sendOptionsMessage(
     if (updatedOptions === null || allReset) {
         title = state.localizer.translate(
             messageContext.guildID,
-            "options.title"
+            "command.options.title"
         );
     } else {
         if (preset) {
             title = state.localizer.translate(
                 messageContext.guildID,
-                "options.preset"
+                "command.options.preset"
             );
         } else {
             title = updatedOptions[0].option;
@@ -1128,12 +1132,12 @@ export async function sendOptionsMessage(
             updatedOptions[0] && updatedOptions[0].reset
                 ? state.localizer.translate(
                       messageContext.guildID,
-                      "options.reset",
+                      "command.options.reset",
                       { presetOrOption: title }
                   )
                 : state.localizer.translate(
                       messageContext.guildID,
-                      "options.updated",
+                      "command.options.updated",
                       { presetOrOption: title }
                   );
     }
@@ -1207,7 +1211,7 @@ export async function sendEndGameMessage(
                 ? bold(
                       state.localizer.translate(
                           gameSession.guildID,
-                          "score.scoreboardTitle"
+                          "command.score.scoreboardTitle"
                       )
                   )
                 : null,
@@ -1321,7 +1325,7 @@ export async function sendScoreboardMessage(
             description: "(╯°□°）╯︵ ┻━┻",
             title: state.localizer.translate(
                 message.guildID,
-                "score.scoreboardTitle"
+                "command.score.scoreboardTitle"
             ),
         });
     }
@@ -1378,7 +1382,7 @@ export async function sendScoreboardMessage(
             color: EMBED_SUCCESS_COLOR,
             title: state.localizer.translate(
                 message.guildID,
-                "score.scoreboardTitle"
+                "command.score.scoreboardTitle"
             ),
             fields: winnersFieldSubset,
             footer: {
