@@ -55,7 +55,13 @@ export default class PresetCommand implements BaseCommand {
             guildID,
             "command.preset.help.description"
         ),
-        usage: ",preset [list | save | load | delete | export] {preset_name}\n,preset import [preset_identifier] [preset_name]",
+        usage: `,preset [list | save | load | delete | export] {preset_name}\n,preset import [${state.localizer.translate(
+            guildID,
+            "command.preset.help.usage.presetIdentifier"
+        )}] [${state.localizer.translate(
+            guildID,
+            "command.preset.help.usage.presetName"
+        )}]`,
         examples: [
             {
                 example: "`,preset list`",

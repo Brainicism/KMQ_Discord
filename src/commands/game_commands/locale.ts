@@ -27,7 +27,10 @@ export default class LocaleTypeCommand implements BaseCommand {
             guildID,
             "command.locale.help.description"
         ),
-        usage: ",locale [language]",
+        usage: `,locale [${state.localizer.translate(
+            guildID,
+            "command.locale.help.usage.language"
+        )}]`,
         examples: [
             {
                 example: "`,locale english`",

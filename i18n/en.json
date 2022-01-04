@@ -111,6 +111,9 @@
                     "increment": "Add {{{duration}}} minutes to the current game's duration",
                     "reset": "Disables the duration",
                     "set": "The game will automatically end after {{{duration}}} minutes"
+                },
+                "usage": {
+                    "minutes": "minutes"
                 }
             }
         },
@@ -219,6 +222,9 @@
                 "example": {
                     "reset": "Disables the goal",
                     "set": "The first player to {{{goal}}} wins the game"
+                },
+                "usage": {
+                    "points": "points"
                 }
             }
         },
@@ -292,7 +298,7 @@
                 }
             },
             "help": {
-                "description": "Select as many groups that you would like to forcefully include, ignoring other filters ({{{gender}}}, {{{artisttype}}}, etc), separated by commas. A list of group names can be found [here]({{{groupList}}}).",
+                "description": "Select as many groups that you would like to forcefully include, ignoring other filters ({{{gender}}}, {{{artisttype}}}, etc.), separated by commas. A list of group names can be found [here]({{{groupList}}}).",
                 "example": {
                     "multipleGroups": "Forcefully include songs from {{{groupOne}}}, {{{groupTwo}}}, and {{{groupThree}}}",
                     "reset": "Resets the include option",
@@ -400,6 +406,9 @@
                     "server": "Shows the server-wide leaderboard",
                     "serverSongsGuessedPage": "Shows the 3rd page of the server-wide leaderboard by total songs guessed",
                     "unenroll": "Hides your name from the leaderboard"
+                },
+                "usage": {
+                    "pageNumber": "page_number"
                 }
             },
             "level": {
@@ -472,6 +481,9 @@
                     "reset": "Reset the bot's language to {{{defaultLocale}}}",
                     "toEnglish": "Change the bot's language to {{{english}}}",
                     "toKorean": "Change the bot's language to {{{korean}}}"
+                },
+                "usage": {
+                    "language": "language"
                 }
             },
             "language": {
@@ -574,6 +586,9 @@
                     "classic": "Start a classic game of KMQ (type in your guess first to get a point)",
                     "elimination": "Start an elimination game of KMQ where each player starts with {{{lives}}} lives",
                     "teams": "Split up into as many teams as you want and see who you can depend on to help you win!"
+                },
+                "usage": {
+                    "lives": "lives"
                 }
             },
             "team": {
@@ -637,6 +652,10 @@
                     "load": "Loads the mentioned preset or preset identifier ({{{exampleIdentifier}}}) into the game options",
                     "replace": "Replace the mentioned preset's options with the current game options",
                     "save": "Saves the current game options as a preset"
+                },
+                "usage": {
+                    "presetIdentifier": "preset_identifier",
+                    "presetName": "preset_name"
                 }
             },
             "imported": {
@@ -689,6 +708,9 @@
                     "otherPlayerID": "Views a player profile based on their Discord ID",
                     "otherPlayerMention": "Views {{{playerName}}}'s player profile",
                     "self": "View your own player profile"
+                },
+                "usage": {
+                    "mention": "mention"
                 }
             },
             "kmqCreator": "🎭 Kimiqo's Creator",
@@ -879,6 +901,9 @@
                 "example": {
                     "reset": "Disables the timer",
                     "set": "In {{{timer}}} seconds, if no user has guessed correctly, the round ends and the next one begins automatically"
+                },
+                "usage": {
+                    "seconds": "seconds"
                 }
             }
         },
@@ -1124,6 +1149,7 @@
             "entry": "{{{user}}} has leveled up from {{{startLevel}}} to {{{endLevel}}} ({{{rank}}})",
             "title": "🚀 Power Up!"
         },
+        "listOfGroups": "list of groups",
         "plural": {
             "day": {
                 "one": "%s day",

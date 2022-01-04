@@ -43,7 +43,7 @@ export default class LimitCommand implements BaseCommand {
             guildID,
             "command.limit.help.description"
         ),
-        usage: ",limit [limit]",
+        usage: ",limit [limit_1] {limit_2}",
         examples: [
             {
                 example: "`,limit 250`",

@@ -58,7 +58,10 @@ export default class RemoveCommand implements BaseCommand {
                 include: `\`${process.env.BOT_PREFIX}include\``,
             }
         ),
-        usage: ",remove [groups | exclude | include] [list of groups]",
+        usage: `,remove [groups | exclude | include] [${state.localizer.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]`,
         examples: [
             {
                 example: "`,remove groups twice, red velvet`",

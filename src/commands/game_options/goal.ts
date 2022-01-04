@@ -34,7 +34,10 @@ export default class GoalCommand implements BaseCommand {
             guildID,
             "command.goal.help.description"
         ),
-        usage: ",goal [goal]",
+        usage: `,goal [${state.localizer.translate(
+            guildID,
+            "command.goal.help.usage.points"
+        )}]`,
         examples: [
             {
                 example: "`,goal 30`",

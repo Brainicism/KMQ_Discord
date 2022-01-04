@@ -50,7 +50,7 @@ export default class AnswerCommand implements BaseCommand {
                 hard: `\`${AnswerType.MULTIPLE_CHOICE_HARD}\``,
             }
         ),
-        usage: ",answer [answerType]",
+        usage: ",answer [typing | typingtypos | easy | medium | hard]",
         examples: [
             {
                 example: "`,answer typing`",

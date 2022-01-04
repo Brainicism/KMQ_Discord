@@ -45,7 +45,10 @@ export default class DurationCommand implements BaseCommand {
             guildID,
             "command.duration.help.description"
         ),
-        usage: ",duration [minutes]",
+        usage: `,duration [${state.localizer.translate(
+            guildID,
+            "command.duration.help.usage.minutes"
+        )}]`,
         examples: [
             {
                 example: "`,duration 15`",

@@ -73,7 +73,13 @@ export default class LeaderboardCommand implements BaseCommand {
             guildID,
             "command.leaderboard.help.description"
         ),
-        usage: ",leaderboard {page_number}\n,leaderboard {gamesplayed | songsguessed} {server | game} {daily | weekly | monthly | yearly} {page_number}\n,leaderboard [enroll | unenroll]",
+        usage: `,leaderboard {${state.localizer.translate(
+            guildID,
+            "command.leaderboard.help.usage.pageNumber"
+        )}}\n,leaderboard {gamesplayed | songsguessed} {server | game} {daily | weekly | monthly | yearly} {${state.localizer.translate(
+            guildID,
+            "command.leaderboard.help.usage.pageNumber"
+        )}}\n,leaderboard [enroll | unenroll]`,
         examples: [
             {
                 example: "`,leaderboard`",

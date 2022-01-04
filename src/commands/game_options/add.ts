@@ -59,7 +59,10 @@ export default class AddCommand implements BaseCommand {
                 include: `\`${process.env.BOT_PREFIX}include\``,
             }
         ),
-        usage: ",add [groups | exclude | include] [list of groups]",
+        usage: `,add [groups | exclude | include] [${state.localizer.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]`,
         examples: [
             {
                 example: "`,add groups twice, red velvet`",

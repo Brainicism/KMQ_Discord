@@ -163,7 +163,10 @@ export default class PlayCommand implements BaseCommand {
             guildID,
             "command.play.help.description"
         ),
-        usage: ",play {classic | elimination | teams}\n,play elimination {lives}",
+        usage: `,play {classic | elimination | teams}\n,play elimination {${state.localizer.translate(
+            guildID,
+            "command.play.help.usage.lives"
+        )}}`,
         priority: 1050,
         examples: [
             {

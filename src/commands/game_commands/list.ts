@@ -47,7 +47,7 @@ export default class ListCommand implements BaseCommand {
             guildID,
             "command.list.help.description"
         ),
-        usage: ",list [groups | excludes | includes]",
+        usage: ",list [groups | exclude | include]",
         examples: [
             {
                 example: "`,list groups`",
@@ -58,19 +58,19 @@ export default class ListCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,list excludes`",
+                example: "`,list exclude`",
                 explanation: state.localizer.translate(
                     guildID,
                     "command.list.help.example.exclude",
-                    { exclude: `\`${process.env.BOT_PREFIX}excludes\`` }
+                    { exclude: `\`${process.env.BOT_PREFIX}exclude\`` }
                 ),
             },
             {
-                example: "`,list includes`",
+                example: "`,list include`",
                 explanation: state.localizer.translate(
                     guildID,
                     "command.list.help.example.include",
-                    { include: `\`${process.env.BOT_PREFIX}includes\`` }
+                    { include: `\`${process.env.BOT_PREFIX}include\`` }
                 ),
             },
         ],

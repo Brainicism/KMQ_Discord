@@ -47,7 +47,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                 both: `\`${ArtistType.BOTH}\``,
             }
         ),
-        usage: ",artisttype [artistType]",
+        usage: ",artisttype [soloists | groups | both]",
         examples: [
             {
                 example: "`,artisttype soloists`",
