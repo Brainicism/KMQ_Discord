@@ -147,10 +147,11 @@
                 "powerHour": "Playing during a KMQ Power Hour or Weekend",
                 "quickGuess": "Guessing quickly",
                 "rareGuess": "Rare correct guesses bonus",
-                "rareGuess.upTo": "{{{rareGuessLowerBound}}} up to {{{rareGuessUpperBound}}}",
+                "rareGuessRange": "{{{rareGuessLowerBound}}} up to {{{rareGuessUpperBound}}}",
                 "streak": "Having a guess streak of over 5",
                 "voting": "Voting"
             },
+            "firstGameOfDayBonus": "First Game of the Day Bonus",
             "help": {
                 "description": "Shows your current EXP modifier, and the list of current bonus EXP artists."
             },
@@ -568,9 +569,9 @@
             },
             "gameStarting": "Game Starting in #{{{textChannelName}}} in 🔊 {{{voiceChannelName}}}",
             "help": {
+                "description": "Starts a game of KMQ. Pick between classic (default), elimination mode, and teams mode.",
                 "example": {
                     "classic": "Start a classic game of KMQ (type in your guess first to get a point)",
-                    "description": "Starts a game of KMQ. Pick between classic (default), elimination mode, and teams mode.",
                     "elimination": "Start an elimination game of KMQ where each player starts with {{{lives}}} lives",
                     "teams": "Split up into as many teams as you want and see who you can depend on to help you win!"
                 }
@@ -734,8 +735,7 @@
                 "example": "Show recently added songs"
             },
             "released": "Released",
-            "title": "Recently Added Songs",
-            "views": "views"
+            "title": "Recently Added Songs"
         },
         "release": {
             "help": {
@@ -1003,6 +1003,25 @@
                 "solution": "Use {{{command}}} to add the unmatched groups.",
                 "title": "Unknown Group Name"
             },
+            "validation": {
+                "boolean": {
+                    "notBoolean": "Expected true/false value for {{{argument}}}."
+                },
+                "char": {
+                    "notChar": "Expected a character for {{{argument}}}."
+                },
+                "enum": {
+                    "notInEnum": "Expected one of the following valid {{{argument}}} values: ({{{validValues}}})."
+                },
+                "numArguments": {
+                    "incorrect": "{Incorrect number of arguments. See `{{{help}}} {{{command}}}` for usage."
+                },
+                "number": {
+                    "max": "Expected value less than or equal to {{{max}}} for {{{argument}}}",
+                    "min": "Expected value greater than or equal to {{{min}}} for {{{argument}}}.",
+                    "notNumber": "Expected numeric value for {{{argument}}}."
+                }
+            },
             "vcFull": {
                 "description": "Ensure that there's enough room in the voice channel for me to join.",
                 "title": "Voice Channel Full"
@@ -1105,32 +1124,6 @@
             "entry": "{{{user}}} has leveled up from {{{startLevel}}} to {{{endLevel}}} ({{{rank}}})",
             "title": "🚀 Power Up!"
         },
-        "preCheck": {
-            "competition": "This command has been disabled for regular users in the competition.",
-            "debugChannel": "You can't do that in this channel.",
-            "debugServer": "You can't do that in this server.",
-            "differentVC": "You must be in the same voice channel as the bot to use this command.",
-            "title": "Wait..."
-        },
-        "sendingBookmarkedSongs": {
-            "description": "Sending {{{songs}}} to {{{players}}}.\n\nBookmark songs during the game by right-clicking the song message and selecting `Apps > Bookmark Song`",
-            "title": "Sending Bookmarked Songs..."
-        },
-        "song": "song",
-        "team": {
-            "yourScore": "Your score: {{{score}}}",
-            "yourTeamScore": "Your team's score: {{{teamScore}}}"
-        },
-        "timeFinished": "Time's up",
-        "uniqueSongsReset": {
-            "description": "All songs have been played. {{{totalSongCount}}} songs will be reshuffled.",
-            "title": "Resetting Unique Songs"
-        },
-        "warning": {
-            "addRemoveOrdering": {
-                "footer": "Did you mean to use {{{addOrRemove}}} {{{command}}}?"
-            }
-        },
         "plural": {
             "day": {
                 "one": "%s day",
@@ -1167,6 +1160,34 @@
             "song": {
                 "one": "%s song",
                 "other": "%s songs"
+            }
+        },
+        "preCheck": {
+            "competition": "This command has been disabled for regular users in the competition.",
+            "debugChannel": "You can't do that in this channel.",
+            "debugServer": "You can't do that in this server.",
+            "differentVC": "You must be in the same voice channel as the bot to use this command.",
+            "title": "Wait..."
+        },
+        "sendingBookmarkedSongs": {
+            "description": "Sending {{{songs}}} to {{{players}}}.\n\nBookmark songs during the game by right-clicking the song message and selecting `Apps > Bookmark Song`",
+            "title": "Sending Bookmarked Songs..."
+        },
+        "song": "song",
+        "team": {
+            "yourScore": "Your score: {{{score}}}",
+            "yourTeamScore": "Your team's score: {{{teamScore}}}"
+        },
+        "timeFinished": "Time's up",
+        "uniqueSongsReset": {
+            "description": "All songs have been played. {{{totalSongCount}}} songs will be reshuffled.",
+            "title": "Resetting Unique Songs"
+        },
+        "usage": "Usage",
+        "views": "views",
+        "warning": {
+            "addRemoveOrdering": {
+                "footer": "Did you mean to use {{{addOrRemove}}} {{{command}}}?"
             }
         }
     }
