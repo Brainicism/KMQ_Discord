@@ -368,12 +368,10 @@
         "language": {
             "help": {
                 "description": "Choose whether songs played should be exclusively in Korean.",
-                "help": {
-                    "example": {
-                        "all": "Play all available songs",
-                        "korean": "Plays only Korean songs. Ignores songs that are in foreign languages: English, Japanese, Chinese",
-                        "reset": "Reset to the default language of {{{defaultLanguage}}}"
-                    }
+                "example": {
+                    "all": "Play all available songs",
+                    "korean": "Plays only Korean songs. Ignores songs that are in foreign languages: English, Japanese, Chinese",
+                    "reset": "Reset to the default language of {{{defaultLanguage}}}"
                 }
             }
         },
