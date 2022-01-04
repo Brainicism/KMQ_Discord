@@ -42,7 +42,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                 example: "`,timer 15`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "command.timer.help.set",
+                    "command.timer.help.example.set",
                     { timer: String(15) }
                 ),
             },
@@ -50,7 +50,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
                 example: "`,timer`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "command.timer.help.reset"
+                    "command.timer.help.example.reset"
                 ),
             },
         ],

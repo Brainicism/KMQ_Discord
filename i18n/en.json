@@ -584,10 +584,12 @@
             },
             "gameStarting": "Game Starting in #{{{textChannelName}}} in 🔊 {{{voiceChannelName}}}",
             "help": {
-                "classic": "Start a classic game of KMQ (type in your guess first to get a point)",
-                "description": "Starts a game of KMQ. Pick between classic (default), elimination mode, and teams mode.",
-                "elimination": "Start an elimination game of KMQ where each player starts with {{{lives}}} lives",
-                "teams": "Split up into as many teams as you want and see who you can depend on to help you win!"
+                "example": {
+                    "classic": "Start a classic game of KMQ (type in your guess first to get a point)",
+                    "description": "Starts a game of KMQ. Pick between classic (default), elimination mode, and teams mode.",
+                    "elimination": "Start an elimination game of KMQ where each player starts with {{{lives}}} lives",
+                    "teams": "Split up into as many teams as you want and see who you can depend on to help you win!"
+                }
             },
             "team": {
                 "joinTeam": {
@@ -890,8 +892,10 @@
         "timer": {
             "help": {
                 "description": "Try your best to guess correctly before the timer runs out! Enter a time in seconds, or give no arguments to disable.",
-                "reset": "Disables the timer",
-                "set": "In {{{timer}}} seconds, if no user has guessed correctly, the round ends and the next one begins automatically"
+                "example": {
+                    "reset": "Disables the timer",
+                    "set": "In {{{timer}}} seconds, if no user has guessed correctly, the round ends and the next one begins automatically"
+                }
             }
         },
         "vote": {

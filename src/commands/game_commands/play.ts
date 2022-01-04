@@ -170,14 +170,14 @@ export default class PlayCommand implements BaseCommand {
                 example: "`,play`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "command.play.help.classic"
+                    "command.play.help.example.classic"
                 ),
             },
             {
                 example: "`,play elimination 5`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "command.play.help.elimination",
+                    "command.play.help.example.elimination",
                     {
                         lives: "`5`",
                     }
@@ -187,7 +187,7 @@ export default class PlayCommand implements BaseCommand {
                 example: "`,play elimination`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "command.play.help.elimination",
+                    "command.play.help.example.elimination",
                     {
                         lives: `\`${DEFAULT_LIVES}\``,
                     }
@@ -197,7 +197,7 @@ export default class PlayCommand implements BaseCommand {
                 example: "`,play teams`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "command.play.help.teams"
+                    "command.play.help.example.teams"
                 ),
             },
         ],
