@@ -409,10 +409,11 @@ export default class ExpCommand implements BaseCommand {
             `\`${state.localizer.translate(
                 message.guildID,
                 "command.exp.explanation.rareGuess"
-            )}:\` 2.00x ${state.localizer.translate(
+            )}:\` ${state.localizer.translate(
                 message.guildID,
-                "command.exp.explanation.rareGuess.upTo"
-            )} 50.00x 📈`,
+                "command.exp.explanation.rareGuess.upTo",
+                { rareGuessLowerBound: "2.00x", rareGuessUpperBound: "50.00x" }
+            )} 📈`,
         ];
 
         fields.push({

@@ -167,7 +167,7 @@
                 "powerHour": "Playing during a KMQ Power Hour or Weekend",
                 "quickGuess": "Guessing quickly",
                 "rareGuess": "Rare correct guesses bonus",
-                "rareGuess.upTo": "up to",
+                "rareGuess.upTo": "{{{rareGuessLowerBound}}} up to {{{rareGuessUpperBound}}}",
                 "streak": "Having a guess streak of over 5",
                 "voting": "Voting"
             },
