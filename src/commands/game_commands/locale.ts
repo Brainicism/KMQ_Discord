@@ -98,7 +98,7 @@ export default class LocaleTypeCommand implements BaseCommand {
         sendInfoMessage(MessageContext.fromMessage(message), {
             title: state.localizer.translate(
                 message.guildID,
-                "options.updated",
+                "command.options.updated",
                 { presetOrOption: "Locale" }
             ),
             description: state.localizer.translate(
