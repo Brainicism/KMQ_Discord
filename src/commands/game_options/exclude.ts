@@ -27,7 +27,7 @@ export default class ExcludeCommand implements BaseCommand {
         name: "exclude",
         description: state.localizer.translate(
             guildID,
-            "exclude.help.description",
+            "command.exclude.help.description",
             {
                 groupsLink: GROUP_LIST_URL,
             }
@@ -38,7 +38,7 @@ export default class ExcludeCommand implements BaseCommand {
                 example: "`,exclude blackpink`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "exclude.help.example.singleGroup",
+                    "command.exclude.help.example.singleGroup",
                     {
                         artist: "Blackpink",
                     }
@@ -48,7 +48,7 @@ export default class ExcludeCommand implements BaseCommand {
                 example: "`,exclude blackpink, bts, red velvet`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "exclude.help.example.multipleGroups",
+                    "command.exclude.help.example.multipleGroups",
                     {
                         groupOne: "Blackpink",
                         groupTwo: "BTS",
@@ -60,7 +60,7 @@ export default class ExcludeCommand implements BaseCommand {
                 example: "`,exclude`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "exclude.help.example.reset"
+                    "command.exclude.help.example.reset"
                 ),
             },
         ],
@@ -132,7 +132,7 @@ export default class ExcludeCommand implements BaseCommand {
                     {
                         matchedGroupsAction: state.localizer.translate(
                             message.guildID,
-                            "exclude.failure.unrecognizedGroups.excluded"
+                            "command.exclude.failure.unrecognizedGroups.excluded"
                         ),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: `${unmatchedGroups.join(", ")}`,

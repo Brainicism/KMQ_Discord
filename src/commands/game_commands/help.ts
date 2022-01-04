@@ -62,14 +62,14 @@ const helpMessage = async (
             await sendErrorMessage(MessageContext.fromMessage(message), {
                 title: state.localizer.translate(
                     message.guildID,
-                    "help.title",
+                    "command.help.title",
                     {
                         kmq: "K-pop Music Quiz",
                     }
                 ),
                 description: state.localizer.translate(
                     message.guildID,
-                    "help.failure.noDocs",
+                    "command.help.failure.noDocs",
                     { action }
                 ),
             });
@@ -89,7 +89,7 @@ const helpMessage = async (
         if (helpManual.examples.length > 0) {
             embedDesc += `\n\n**${state.localizer.translate(
                 message.guildID,
-                "help.examples"
+                "command.help.examples"
             )}**\n`;
         }
 
@@ -118,13 +118,17 @@ const helpMessage = async (
             (x, y) => y.help(null).priority - x.help(null).priority
         );
 
-        embedTitle = state.localizer.translate(message.guildID, "help.title", {
-            kmq: "K-pop Music Quiz",
-        });
+        embedTitle = state.localizer.translate(
+            message.guildID,
+            "command.help.title",
+            {
+                kmq: "K-pop Music Quiz",
+            }
+        );
 
         embedDesc = state.localizer.translate(
             message.guildID,
-            "help.description",
+            "command.help.description",
             {
                 play: `\`${process.env.BOT_PREFIX}play\``,
                 options: `\`${process.env.BOT_PREFIX}options\``,
@@ -215,22 +219,25 @@ export default class HelpCommand implements BaseCommand {
         name: "help",
         description: state.localizer.translate(
             guildID,
-            "help.help.description"
+            "command.help.help.description"
         ),
-        usage: `,help [${state.localizer.translate(guildID, "command")}]`,
+        usage: `,help [${state.localizer.translate(
+            guildID,
+            "command.help.command"
+        )}]`,
         examples: [
             {
                 example: "`,help`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "help.help.example.allCommands"
+                    "command.help.help.example.allCommands"
                 ),
             },
             {
                 example: "`,help cutoff`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "help.help.example.sampleCommand"
+                    "command.help.help.example.sampleCommand"
                 ),
             },
         ],

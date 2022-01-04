@@ -32,7 +32,7 @@ export default class GoalCommand implements BaseCommand {
         name: "goal",
         description: state.localizer.translate(
             guildID,
-            "goal.help.description"
+            "command.goal.help.description"
         ),
         usage: ",goal [goal]",
         examples: [
@@ -40,7 +40,7 @@ export default class GoalCommand implements BaseCommand {
                 example: "`,goal 30`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "goal.help.example.set",
+                    "command.goal.help.example.set",
                     { goal: String(30) }
                 ),
             },
@@ -48,7 +48,7 @@ export default class GoalCommand implements BaseCommand {
                 example: "`,goal`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "goal.help.example.reset"
+                    "command.goal.help.example.reset"
                 ),
             },
         ],
@@ -86,11 +86,11 @@ export default class GoalCommand implements BaseCommand {
                 sendErrorMessage(MessageContext.fromMessage(message), {
                     title: state.localizer.translate(
                         message.guildID,
-                        "goal.failure.goalExceeded.title"
+                        "command.goal.failure.goalExceeded.title"
                     ),
                     description: state.localizer.translate(
                         message.guildID,
-                        "goal.failure.goalExceeded.description"
+                        "command.goal.failure.goalExceeded.description"
                     ),
                 });
                 return;
@@ -112,7 +112,7 @@ export default class GoalCommand implements BaseCommand {
                     ),
                     description: state.localizer.translate(
                         message.guildID,
-                        "goal.failure.gameOptionConflict.description",
+                        "command.goal.failure.gameOptionConflict.description",
                         {
                             elimination: `\`${GameType.ELIMINATION}\``,
                             goal: `\`${GameOption.GOAL}\``,

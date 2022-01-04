@@ -41,7 +41,7 @@ export default class AnswerCommand implements BaseCommand {
         name: "answer",
         description: state.localizer.translate(
             guildID,
-            "answer.help.description",
+            "command.answer.help.description",
             {
                 typing: `\`${AnswerType.TYPING}\``,
                 typingtypos: `\`${AnswerType.TYPING_TYPOS}\``,
@@ -56,21 +56,21 @@ export default class AnswerCommand implements BaseCommand {
                 example: "`,answer typing`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "answer.help.example.typing"
+                    "command.answer.help.example.typing"
                 ),
             },
             {
                 example: "`,answer typingtypos`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "answer.help.example.typingTypos"
+                    "command.answer.help.example.typingTypos"
                 ),
             },
             {
                 example: "`,answer easy`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "answer.help.example.multipleChoice",
+                    "command.answer.help.example.multipleChoice",
                     { optionCount: String(4), penalty: "0.25x" }
                 ),
             },
@@ -78,7 +78,7 @@ export default class AnswerCommand implements BaseCommand {
                 example: "`,answer medium`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "answer.help.example.multipleChoice",
+                    "command.answer.help.example.multipleChoice",
                     { optionCount: String(6), penalty: "0.5x" }
                 ),
             },
@@ -86,7 +86,7 @@ export default class AnswerCommand implements BaseCommand {
                 example: "`,answer hard`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "answer.help.example.multipleChoice",
+                    "command.answer.help.example.multipleChoice",
                     { optionCount: String(8), penalty: "0.75x" }
                 ),
             },

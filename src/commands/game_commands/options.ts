@@ -15,7 +15,7 @@ export default class OptionsCommand implements BaseCommand {
         name: "options",
         description: state.localizer.translate(
             guildID,
-            "options.help.description"
+            "command.options.help.description"
         ),
         usage: ",options",
         examples: [],

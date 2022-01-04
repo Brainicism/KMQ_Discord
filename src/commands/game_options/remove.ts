@@ -51,7 +51,7 @@ export default class RemoveCommand implements BaseCommand {
         name: "remove",
         description: state.localizer.translate(
             guildID,
-            "remove.help.description",
+            "command.remove.help.description",
             {
                 groups: `\`${process.env.BOT_PREFIX}groups\``,
                 exclude: `\`${process.env.BOT_PREFIX}exclude\``,
@@ -64,7 +64,7 @@ export default class RemoveCommand implements BaseCommand {
                 example: "`,remove groups twice, red velvet`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "remove.help.example.groups",
+                    "command.remove.help.example.groups",
                     {
                         groupOne: "Twice",
                         groupTwo: "Red Velvet",
@@ -76,7 +76,7 @@ export default class RemoveCommand implements BaseCommand {
                 example: "`,remove exclude BESTie, Dia, iKON`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "remove.help.example.exclude",
+                    "command.remove.help.example.exclude",
                     {
                         groupOne: "BESTie",
                         groupTwo: "Dia",
@@ -89,7 +89,7 @@ export default class RemoveCommand implements BaseCommand {
                 example: "`,remove include exo`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "remove.help.example.include",
+                    "command.remove.help.example.include",
                     {
                         group: "exo",
                         include: `\`${process.env.BOT_PREFIX}include\``,
@@ -137,11 +137,11 @@ export default class RemoveCommand implements BaseCommand {
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: state.localizer.translate(
                     message.guildID,
-                    "remove.failure.noGroupsSelected.title"
+                    "command.remove.failure.noGroupsSelected.title"
                 ),
                 description: state.localizer.translate(
                     message.guildID,
-                    "remove.failure.noGroupsSelected.description"
+                    "command.remove.failure.noGroupsSelected.description"
                 ),
             });
             return;
@@ -182,7 +182,7 @@ export default class RemoveCommand implements BaseCommand {
                     {
                         matchedGroupsAction: state.localizer.translate(
                             message.guildID,
-                            "remove.failure.unrecognizedGroups.removed"
+                            "command.remove.failure.unrecognizedGroups.removed"
                         ),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: unmatchedGroups.join(", "),

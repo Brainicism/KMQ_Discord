@@ -38,7 +38,7 @@ export default class ShuffleCommand implements BaseCommand {
         name: "shuffle",
         description: state.localizer.translate(
             guildID,
-            "shuffle.help.description",
+            "command.shuffle.help.description",
             {
                 random: `\`${ShuffleType.RANDOM}\``,
                 shuffle: `\`${ShuffleType.UNIQUE}\``,
@@ -50,21 +50,21 @@ export default class ShuffleCommand implements BaseCommand {
                 example: "`,shuffle random`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "shuffle.help.example.random"
+                    "command.shuffle.help.example.random"
                 ),
             },
             {
                 example: "`,shuffle unique`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "shuffle.help.example.unique"
+                    "command.shuffle.help.example.unique"
                 ),
             },
             {
                 example: "`,shuffle`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "shuffle.help.example.reset",
+                    "command.shuffle.help.example.reset",
                     { defaultShuffle: `\`${DEFAULT_SHUFFLE}\`` }
                 ),
             },

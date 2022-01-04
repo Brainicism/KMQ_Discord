@@ -27,7 +27,7 @@ export default class ForceHintCommand implements BaseCommand {
         name: "forcehint",
         description: state.localizer.translate(
             guildID,
-            "forcehint.help.description"
+            "command.forcehint.help.description"
         ),
         usage: ",forcehint",
         examples: [],
@@ -45,11 +45,11 @@ export default class ForceHintCommand implements BaseCommand {
             await sendErrorMessage(MessageContext.fromMessage(message), {
                 title: state.localizer.translate(
                     message.guildID,
-                    "forcehint.failure.notOwner.title"
+                    "command.forcehint.failure.notOwner.title"
                 ),
                 description: state.localizer.translate(
                     message.guildID,
-                    "forcehint.failure.notOwner.description",
+                    "command.forcehint.failure.notOwner.description",
                     { mentionedUser: getMention(gameSession.owner.id) }
                 ),
             });

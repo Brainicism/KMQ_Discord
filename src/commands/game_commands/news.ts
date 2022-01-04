@@ -20,7 +20,7 @@ export default class NewsCommand implements BaseCommand {
         name: "news",
         description: state.localizer.translate(
             guildID,
-            "news.help.description"
+            "command.news.help.description"
         ),
         usage: ",news",
         examples: [],
@@ -39,7 +39,7 @@ export default class NewsCommand implements BaseCommand {
         await sendInfoMessage(MessageContext.fromMessage(message), {
             title: state.localizer.translate(
                 message.guildID,
-                "news.updates.title"
+                "command.news.updates.title"
             ),
             description: news,
             thumbnailUrl: KmqImages.READING_BOOK,

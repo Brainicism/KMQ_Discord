@@ -20,6 +20,7 @@ export default class LocalizationManager {
             locales: Object.values(LocaleType),
             defaultLocale: LocaleType.EN,
             directory: path.join(__dirname, "../../i18n"),
+            objectNotation: true,
 
             logDebugFn: (_msg) => {},
 

@@ -38,11 +38,11 @@ export default class BeginCommand implements BaseCommand {
                 sendErrorMessage(messageContext, {
                     title: state.localizer.translate(
                         messageContext.guildID,
-                        "begin.ignored.title"
+                        "command.begin.ignored.title"
                     ),
                     description: state.localizer.translate(
                         messageContext.guildID,
-                        "begin.ignored.notOwner.description",
+                        "command.begin.ignored.notOwner.description",
                         {
                             playElimination: `\`${process.env.BOT_PREFIX}play elimination\``,
                             mentionedUser: getMention(gameSession.owner.id),
@@ -57,11 +57,11 @@ export default class BeginCommand implements BaseCommand {
                 sendErrorMessage(messageContext, {
                     title: state.localizer.translate(
                         messageContext.guildID,
-                        "begin.ignored.title"
+                        "command.begin.ignored.title"
                     ),
                     description: state.localizer.translate(
                         messageContext.guildID,
-                        "begin.ignored.noTeam.description",
+                        "command.begin.ignored.noTeam.description",
                         { join: `${process.env.BOT_PREFIX}join` }
                     ),
                 });

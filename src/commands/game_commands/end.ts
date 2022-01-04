@@ -16,7 +16,10 @@ export default class EndCommand implements BaseCommand {
 
     help = (guildID: string): Help => ({
         name: "end",
-        description: state.localizer.translate(guildID, "end.help.description"),
+        description: state.localizer.translate(
+            guildID,
+            "command.end.help.description"
+        ),
         usage: ",end",
         examples: [],
         priority: 1020,

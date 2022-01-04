@@ -26,10 +26,13 @@ async function sendSkipNotification(
     await sendInfoMessage(
         MessageContext.fromMessage(message),
         {
-            title: state.localizer.translate(message.guildID, "skip.title"),
+            title: state.localizer.translate(
+                message.guildID,
+                "command.skip.title"
+            ),
             description: state.localizer.translate(
                 message.guildID,
-                "skip.vote.description",
+                "command.skip.vote.description",
                 {
                     skipCounter: `${gameRound.getNumSkippers()}/${getMajorityCount(
                         message.guildID
@@ -47,10 +50,10 @@ async function sendSkipMessage(
 ): Promise<void> {
     await sendInfoMessage(MessageContext.fromMessage(message), {
         color: EMBED_SUCCESS_COLOR,
-        title: state.localizer.translate(message.guildID, "skip.title"),
+        title: state.localizer.translate(message.guildID, "command.skip.title"),
         description: state.localizer.translate(
             message.guildID,
-            "skip.success.description",
+            "command.skip.success.description",
             {
                 skipCounter: `${gameRound.getNumSkippers()}/${getMajorityCount(
                     message.guildID
@@ -88,7 +91,7 @@ export default class SkipCommand implements BaseCommand {
         name: "skip",
         description: state.localizer.translate(
             guildID,
-            "skip.help.description"
+            "command.skip.help.description"
         ),
         usage: ",skip",
         examples: [],

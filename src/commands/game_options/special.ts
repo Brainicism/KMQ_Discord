@@ -81,7 +81,7 @@ export default class SpecialCommand implements BaseCommand {
         name: "special",
         description: state.localizer.translate(
             guildID,
-            "special.help.description"
+            "command.special.help.description"
         ),
         usage: ",special [reverse | slow | fast | faster | lowpitch | highpitch | nightcore]",
         examples: [
@@ -89,56 +89,56 @@ export default class SpecialCommand implements BaseCommand {
                 example: "`,special reverse`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "special.help.example.reverse"
+                    "command.special.help.example.reverse"
                 ),
             },
             {
                 example: "`,special slow`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "special.help.example.slow"
+                    "command.special.help.example.slow"
                 ),
             },
             {
                 example: "`,special fast`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "special.help.example.fast"
+                    "command.special.help.example.fast"
                 ),
             },
             {
                 example: "`,special faster`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "special.help.example.faster"
+                    "command.special.help.example.faster"
                 ),
             },
             {
                 example: "`,special lowpitch`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "special.help.example.lowPitch"
+                    "command.special.help.example.lowPitch"
                 ),
             },
             {
                 example: "`,special highpitch`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "special.help.example.highPitch"
+                    "command.special.help.example.highPitch"
                 ),
             },
             {
                 example: "`,special nightcore`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "special.help.example.nightcore"
+                    "command.special.help.example.nightcore"
                 ),
             },
             {
                 example: "`,special`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "special.help.example.reset"
+                    "command.special.help.example.reset"
                 ),
             },
         ],

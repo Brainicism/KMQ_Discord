@@ -26,7 +26,7 @@ export default class IncludeCommand implements BaseCommand {
         name: "include",
         description: state.localizer.translate(
             guildID,
-            "include.help.description",
+            "command.include.help.description",
             {
                 gender: `\`${GameOption.GENDER}\``,
                 artisttype: `\`${GameOption.ARTIST_TYPE}\``,
@@ -39,7 +39,7 @@ export default class IncludeCommand implements BaseCommand {
                 example: "`,include blackpink`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "include.help.example.singleGroup",
+                    "command.include.help.example.singleGroup",
                     { group: "Blackpink" }
                 ),
             },
@@ -47,7 +47,7 @@ export default class IncludeCommand implements BaseCommand {
                 example: "`,include blackpink, bts, red velvet`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "include.help.example.multipleGroups",
+                    "command.include.help.example.multipleGroups",
                     {
                         groupOne: "Blackpink",
                         groupTwo: "BTS",
@@ -59,7 +59,7 @@ export default class IncludeCommand implements BaseCommand {
                 example: "`,include`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "include.help.example.reset"
+                    "command.include.help.example.reset"
                 ),
             },
         ],
@@ -157,7 +157,7 @@ export default class IncludeCommand implements BaseCommand {
                     {
                         matchedGroupsAction: state.localizer.translate(
                             message.guildID,
-                            "include.failure.unrecognizedGroups.included"
+                            "command.include.failure.unrecognizedGroups.included"
                         ),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: unmatchedGroups.join(", "),

@@ -41,7 +41,7 @@ export default class GuessModeCommand implements BaseCommand {
         name: "guessmode",
         description: state.localizer.translate(
             guildID,
-            "guessmode.help.description"
+            "command.guessmode.help.description"
         ),
         usage: ",guessmode [song | artist | both]",
         examples: [
@@ -49,28 +49,28 @@ export default class GuessModeCommand implements BaseCommand {
                 example: "`,guessmode song`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "guessmode.help.example.song"
+                    "command.guessmode.help.example.song"
                 ),
             },
             {
                 example: "`,guessmode artist`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "guessmode.help.example.artist"
+                    "command.guessmode.help.example.artist"
                 ),
             },
             {
                 example: "`,guessmode both`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "guessmode.help.example.both"
+                    "command.guessmode.help.example.both"
                 ),
             },
             {
                 example: "`,guessmode`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "guessmode.help.example.reset",
+                    "command.guessmode.help.example.reset",
                     {
                         defaultGuessMode: DEFAULT_GUESS_MODE,
                     }

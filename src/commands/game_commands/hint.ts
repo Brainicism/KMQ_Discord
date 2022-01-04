@@ -65,7 +65,7 @@ async function sendHintNotification(
             {
                 title: state.localizer.translate(
                     message.guildID,
-                    "hint.request.title"
+                    "command.hint.request.title"
                 ),
                 description: `${gameSession.gameRound.getHintRequests()}/${
                     Math.floor(
@@ -73,7 +73,7 @@ async function sendHintNotification(
                     ) + 1
                 } ${state.localizer.translate(
                     message.guildID,
-                    "hint.request.description"
+                    "command.hint.request.description"
                 )}.`,
             },
             true
@@ -84,13 +84,13 @@ async function sendHintNotification(
             {
                 title: state.localizer.translate(
                     message.guildID,
-                    "hint.request.title"
+                    "command.hint.request.title"
                 ),
                 description: `${gameSession.gameRound.getHintRequests()}/${getMajorityCount(
                     message.guildID
                 )} ${state.localizer.translate(
                     message.guildID,
-                    "hint.request.description"
+                    "command.hint.request.description"
                 )}.`,
             },
             true
@@ -116,11 +116,11 @@ export function validHintCheck(
         sendErrorMessage(MessageContext.fromMessage(message), {
             title: state.localizer.translate(
                 message.guildID,
-                "hint.failure.invalidHintRequest.title"
+                "command.hint.failure.invalidHintRequest.title"
             ),
             description: state.localizer.translate(
                 message.guildID,
-                "hint.failure.invalidHintRequest.noSongPlaying.description"
+                "command.hint.failure.invalidHintRequest.noSongPlaying.description"
             ),
             thumbnailUrl: KmqImages.NOT_IMPRESSED,
         });
@@ -135,11 +135,11 @@ export function validHintCheck(
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: state.localizer.translate(
                     message.guildID,
-                    "hint.failure.invalidHintRequest.title"
+                    "command.hint.failure.invalidHintRequest.title"
                 ),
                 description: state.localizer.translate(
                     message.guildID,
-                    "hint.failure.invalidHintRequest.eliminated.description"
+                    "command.hint.failure.invalidHintRequest.eliminated.description"
                 ),
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
             });
@@ -149,11 +149,11 @@ export function validHintCheck(
         sendErrorMessage(MessageContext.fromMessage(message), {
             title: state.localizer.translate(
                 message.guildID,
-                "hint.failure.invalidHintRequest.title"
+                "command.hint.failure.invalidHintRequest.title"
             ),
             description: state.localizer.translate(
                 message.guildID,
-                "hint.failure.invalidHintRequest.multipleChoice.description"
+                "command.hint.failure.invalidHintRequest.multipleChoice.description"
             ),
             thumbnailUrl: KmqImages.NOT_IMPRESSED,
         });
@@ -178,14 +178,14 @@ export function generateHint(
         case GuessModeType.ARTIST:
             return `${state.localizer.translate(
                 guildID,
-                "hint.artistName"
+                "command.hint.artistName"
             )}: ${codeLine(gameRound.hints.artistHint)}`;
         case GuessModeType.SONG_NAME:
         case GuessModeType.BOTH:
         default:
             return `${state.localizer.translate(
                 guildID,
-                "hint.songName"
+                "command.hint.songName"
             )}: ${codeLine(gameRound.hints.songHint)}`;
     }
 }
@@ -202,7 +202,7 @@ export default class HintCommand implements BaseCommand {
         name: "hint",
         description: state.localizer.translate(
             guildID,
-            "hint.help.description"
+            "command.hint.help.description"
         ),
         usage: ",hint",
         examples: [],
@@ -221,7 +221,10 @@ export default class HintCommand implements BaseCommand {
         if (isHintAvailable(message, gameSession)) {
             gameRound.hintUsed = true;
             await sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(message.guildID, "hint.title"),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.hint.title"
+                ),
                 description: generateHint(
                     message.guildID,
                     guildPreference.gameOptions.guessModeType,

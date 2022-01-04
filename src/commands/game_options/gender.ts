@@ -51,7 +51,7 @@ export default class GenderCommand implements BaseCommand {
         name: "gender",
         description: state.localizer.translate(
             guildID,
-            "gender.help.description",
+            "command.gender.help.description",
             {
                 male: Gender.MALE,
                 female: Gender.FEMALE,
@@ -64,7 +64,7 @@ export default class GenderCommand implements BaseCommand {
                 example: "`,gender female`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "gender.help.example.female",
+                    "command.gender.help.example.female",
                     { female: Gender.FEMALE }
                 ),
             },
@@ -72,7 +72,7 @@ export default class GenderCommand implements BaseCommand {
                 example: "`,gender male female`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "gender.help.example.maleFemale",
+                    "command.gender.help.example.maleFemale",
                     { male: Gender.MALE, female: Gender.FEMALE }
                 ),
             },
@@ -80,7 +80,7 @@ export default class GenderCommand implements BaseCommand {
                 example: "`,gender coed`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "gender.help.example.coed",
+                    "command.gender.help.example.coed",
                     { coed: Gender.COED }
                 ),
             },
@@ -88,7 +88,7 @@ export default class GenderCommand implements BaseCommand {
                 example: "`,gender`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "gender.help.example.reset",
+                    "command.gender.help.example.reset",
                     {
                         male: Gender.MALE,
                         female: Gender.FEMALE,
@@ -100,7 +100,7 @@ export default class GenderCommand implements BaseCommand {
                 example: "`,gender alternating`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "gender.help.example.alternating",
+                    "command.gender.help.example.alternating",
                     { male: Gender.MALE, female: Gender.FEMALE }
                 ),
             },
@@ -159,11 +159,11 @@ export default class GenderCommand implements BaseCommand {
                 sendErrorMessage(MessageContext.fromMessage(message), {
                     title: state.localizer.translate(
                         message.guildID,
-                        "gender.warning.gameOption.title"
+                        "command.gender.warning.gameOption.title"
                     ),
                     description: state.localizer.translate(
                         message.guildID,
-                        "gender.warning.gameOption.description",
+                        "command.gender.warning.gameOption.description",
                         {
                             alternatingGenderCommand: `\`${process.env.BOT_PREFIX}gender alternating\``,
                         }

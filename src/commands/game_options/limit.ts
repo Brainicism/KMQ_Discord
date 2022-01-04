@@ -41,7 +41,7 @@ export default class LimitCommand implements BaseCommand {
         name: "limit",
         description: state.localizer.translate(
             guildID,
-            "limit.help.description"
+            "command.limit.help.description"
         ),
         usage: ",limit [limit]",
         examples: [
@@ -49,7 +49,7 @@ export default class LimitCommand implements BaseCommand {
                 example: "`,limit 250`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "limit.help.example.singleLimit",
+                    "command.limit.help.example.singleLimit",
                     {
                         limit: String(250),
                     }
@@ -59,7 +59,7 @@ export default class LimitCommand implements BaseCommand {
                 example: "`,limit 250 500`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "limit.help.example.twoLimits",
+                    "command.limit.help.example.twoLimits",
                     { limitStart: String(250), limitEnd: String(500) }
                 ),
             },
@@ -67,7 +67,7 @@ export default class LimitCommand implements BaseCommand {
                 example: "`,limit`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "limit.help.example.reset",
+                    "command.limit.help.example.reset",
                     { defaultLimit: `\`${DEFAULT_LIMIT}\`` }
                 ),
             },
@@ -97,11 +97,11 @@ export default class LimitCommand implements BaseCommand {
                 sendErrorMessage(MessageContext.fromMessage(message), {
                     title: state.localizer.translate(
                         message.guildID,
-                        "limit.failure.invalidLimit.title"
+                        "command.limit.failure.invalidLimit.title"
                     ),
                     description: state.localizer.translate(
                         message.guildID,
-                        "limit.failure.invalidLimit.greaterThanZero.description"
+                        "command.limit.failure.invalidLimit.greaterThanZero.description"
                     ),
                 });
                 return;
@@ -113,11 +113,11 @@ export default class LimitCommand implements BaseCommand {
                 sendErrorMessage(MessageContext.fromMessage(message), {
                     title: state.localizer.translate(
                         message.guildID,
-                        "limit.failure.invalidLimit.title"
+                        "command.limit.failure.invalidLimit.title"
                     ),
                     description: state.localizer.translate(
                         message.guildID,
-                        "limit.failure.invalidLimit.greaterThanStart.description"
+                        "command.limit.failure.invalidLimit.greaterThanStart.description"
                     ),
                 });
                 return;

@@ -17,7 +17,7 @@ export default class ScoreCommand implements BaseCommand {
         name: "score",
         description: state.localizer.translate(
             guildID,
-            "score.help.description"
+            "command.score.help.description"
         ),
         usage: ",score",
         examples: [],
@@ -34,7 +34,7 @@ export default class ScoreCommand implements BaseCommand {
                 ),
                 description: state.localizer.translate(
                     message.guildID,
-                    "score.failure.noneInProgress.description",
+                    "command.score.failure.noneInProgress.description",
                     { play: `\`${process.env.BOT_PREFIX}play\`` }
                 ),
             });

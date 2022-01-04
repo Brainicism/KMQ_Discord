@@ -26,7 +26,7 @@ export default class ResetCommand implements BaseCommand {
         name: "reset",
         description: state.localizer.translate(
             guildID,
-            "reset.help.description"
+            "command.reset.help.description"
         ),
         usage: ",reset",
         examples: [
@@ -34,7 +34,7 @@ export default class ResetCommand implements BaseCommand {
                 example: "`,reset`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "reset.help.example.reset"
+                    "command.reset.help.example.reset"
                 ),
             },
         ],

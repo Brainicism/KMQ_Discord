@@ -42,7 +42,7 @@ export default class CutoffCommand implements BaseCommand {
         name: "cutoff",
         description: state.localizer.translate(
             guildID,
-            "cutoff.help.description"
+            "command.cutoff.help.description"
         ),
         usage: ",cutoff [year_start] {year_end}",
         examples: [
@@ -50,7 +50,7 @@ export default class CutoffCommand implements BaseCommand {
                 example: "`,cutoff 2015`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "cutoff.help.example.singleCutoff",
+                    "command.cutoff.help.example.singleCutoff",
                     {
                         year: String(2015),
                     }
@@ -60,7 +60,7 @@ export default class CutoffCommand implements BaseCommand {
                 example: "`,cutoff 2015 2018`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "cutoff.help.example.twoCutoffs",
+                    "command.cutoff.help.example.twoCutoffs",
                     {
                         beginningYear: String(2015),
                         endYear: String(2018),
@@ -71,7 +71,7 @@ export default class CutoffCommand implements BaseCommand {
                 example: "`,cutoff`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "cutoff.help.example.reset",
+                    "command.cutoff.help.example.reset",
                     {
                         defaultBeginningSearchYear: String(
                             DEFAULT_BEGINNING_SEARCH_YEAR
@@ -118,11 +118,11 @@ export default class CutoffCommand implements BaseCommand {
                 await sendErrorMessage(MessageContext.fromMessage(message), {
                     title: state.localizer.translate(
                         message.guildID,
-                        "cutoff.failure.invalidEndYear.title"
+                        "command.cutoff.failure.invalidEndYear.title"
                     ),
                     description: state.localizer.translate(
                         message.guildID,
-                        "cutoff.failure.invalidEndYear.description"
+                        "command.cutoff.failure.invalidEndYear.description"
                     ),
                 });
                 return;

@@ -40,7 +40,7 @@ export default class SubunitsCommand implements BaseCommand {
         name: "subunits",
         description: state.localizer.translate(
             guildID,
-            "subunits.help.description",
+            "command.subunits.help.description",
             { groups: `\`${process.env.BOT_PREFIX}groups\`` }
         ),
         usage: ",subunits [include | exclude]",
@@ -49,7 +49,7 @@ export default class SubunitsCommand implements BaseCommand {
                 example: "`,subunits include`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "subunits.help.example.include",
+                    "command.subunits.help.example.include",
                     {
                         groupCommand: `${process.env.BOT_PREFIX}groups`,
                         parentGroup: "BTS",
@@ -62,14 +62,14 @@ export default class SubunitsCommand implements BaseCommand {
                 example: "`,subunits exclude`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "subunits.help.example.exclude"
+                    "command.subunits.help.example.exclude"
                 ),
             },
             {
                 example: "`,subunits`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "subunits.help.example.reset",
+                    "command.subunits.help.example.reset",
                     { defaultSubunit: `\`${DEFAULT_SUBUNIT_PREFERENCE}\`` }
                 ),
             },

@@ -25,7 +25,7 @@ export default class SkipCommand implements BaseCommand {
         name: "stats",
         description: state.localizer.translate(
             guildID,
-            "stats.help.description"
+            "command.stats.help.description"
         ),
         usage: ",stats",
         examples: [],
@@ -50,11 +50,11 @@ export default class SkipCommand implements BaseCommand {
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: state.localizer.translate(
                     message.guildID,
-                    "stats.failure.title"
+                    "command.stats.failure.title"
                 ),
                 description: state.localizer.translate(
                     message.guildID,
-                    "stats.failure.description"
+                    "command.stats.failure.description"
                 ),
             });
             return;
@@ -143,63 +143,63 @@ export default class SkipCommand implements BaseCommand {
         const gameStatistics = {
             [state.localizer.translate(
                 message.guildID,
-                "stats.game.activeGameSessions"
+                "command.stats.game.activeGameSessions"
             )]: activeGameSessions,
             [state.localizer.translate(
                 message.guildID,
-                "stats.game.activePlayers"
+                "command.stats.game.activePlayers"
             )]: activePlayers,
             [state.localizer.translate(
                 message.guildID,
-                "stats.game.recentGameSessions"
+                "command.stats.game.recentGameSessions"
             )]: `${friendlyFormattedNumber(
                 Number(recentGameSessions)
             )} | ${friendlyFormattedNumber(Number(totalGameSessions))}`,
             [state.localizer.translate(
                 message.guildID,
-                "stats.game.recentGameRounds"
+                "command.stats.game.recentGameRounds"
             )]: `${friendlyFormattedNumber(
                 recentGameRounds
             )} | ${friendlyFormattedNumber(totalGameRounds)}`,
             [state.localizer.translate(
                 message.guildID,
-                "stats.game.recentPlayers"
+                "command.stats.game.recentPlayers"
             )]: `${friendlyFormattedNumber(
                 Number(recentPlayers)
             )} | ${friendlyFormattedNumber(Number(totalPlayers))}`,
             [state.localizer.translate(
                 message.guildID,
-                "stats.game.latestSongUpdate"
+                "command.stats.game.latestSongUpdate"
             )]: friendlyFormattedDate(latestAvailableSong, message.guildID),
         };
 
         const systemStatistics = {
             [state.localizer.translate(
                 message.guildID,
-                "stats.system.loadAverage"
+                "command.stats.system.loadAverage"
             )]: os
                 .loadavg()
                 .map((x) => x.toFixed(2))
                 .toString(),
             [state.localizer.translate(
                 message.guildID,
-                "stats.memoryUsage"
+                "command.stats.memoryUsage"
             )]: `${fleetStats.totalRam.toFixed(2)} MB`,
             [state.localizer.translate(
                 message.guildID,
-                "stats.system.apiLatency"
+                "command.stats.system.apiLatency"
             )]: `${channel.guild.shard.latency} ms`,
             [state.localizer.translate(
                 message.guildID,
-                "stats.system.requestLatency"
+                "command.stats.system.requestLatency"
             )]: `${requestLatency} ms`,
             [state.localizer.translate(
                 message.guildID,
-                "stats.system.databaseLatency"
+                "command.stats.system.databaseLatency"
             )]: `${mysqlLatency.toFixed(2)} ms`,
             [state.localizer.translate(
                 message.guildID,
-                "stats.system.uptime"
+                "command.stats.system.uptime"
             )]: `${(process.uptime() / (60 * 60)).toFixed(2)} hours`,
         };
 
@@ -207,7 +207,7 @@ export default class SkipCommand implements BaseCommand {
             {
                 name: state.localizer.translate(
                     message.guildID,
-                    "stats.game.title"
+                    "command.stats.game.title"
                 ),
                 value: `\`\`\`\n${Object.entries(gameStatistics)
                     .map((stat) => `${stat[0]}: ${stat[1]}`)
@@ -216,7 +216,7 @@ export default class SkipCommand implements BaseCommand {
             {
                 name: state.localizer.translate(
                     message.guildID,
-                    "stats.system.title"
+                    "command.stats.system.title"
                 ),
                 value: `\`\`\`\n${Object.entries(systemStatistics)
                     .map((stat) => `${stat[0]}: ${stat[1]}`)
@@ -226,10 +226,13 @@ export default class SkipCommand implements BaseCommand {
 
         logger.info(`${getDebugLogHeader(message)} | Stats retrieved`);
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(message.guildID, "stats.title"),
+            title: state.localizer.translate(
+                message.guildID,
+                "command.stats.title"
+            ),
             description: state.localizer.translate(
                 message.guildID,
-                "stats.description",
+                "command.stats.description",
                 {
                     link: "https://kmq.kpop.gg/status",
                 }
@@ -237,7 +240,7 @@ export default class SkipCommand implements BaseCommand {
             fields,
             footerText: `${getKmqCurrentVersion()} | ${state.localizer.translate(
                 message.guildID,
-                "stats.footer"
+                "command.stats.footer"
             )}`,
             timestamp: new Date(),
             thumbnailUrl: KmqImages.READING_BOOK,

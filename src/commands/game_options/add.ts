@@ -52,7 +52,7 @@ export default class AddCommand implements BaseCommand {
         name: "add",
         description: state.localizer.translate(
             guildID,
-            "add.help.description",
+            "command.add.help.description",
             {
                 groups: `\`${process.env.BOT_PREFIX}groups\``,
                 exclude: `\`${process.env.BOT_PREFIX}exclude\``,
@@ -65,7 +65,7 @@ export default class AddCommand implements BaseCommand {
                 example: "`,add groups twice, red velvet`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "add.help.example.groups",
+                    "command.add.help.example.groups",
                     {
                         groupOne: "Twice",
                         groupTwo: "Red Velvet",
@@ -77,7 +77,7 @@ export default class AddCommand implements BaseCommand {
                 example: "`,add exclude BESTie, Dia, iKON`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "add.help.example.exclude",
+                    "command.add.help.example.exclude",
                     {
                         groupOne: "BESTie",
                         groupTwo: "Dia",
@@ -90,7 +90,7 @@ export default class AddCommand implements BaseCommand {
                 example: "`,add include exo`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "add.help.example.include",
+                    "command.add.help.example.include",
                     {
                         groupOne: "EXO",
                         include: `\`${process.env.BOT_PREFIX}include\``,
@@ -173,7 +173,7 @@ export default class AddCommand implements BaseCommand {
                     {
                         matchedGroupsAction: state.localizer.translate(
                             message.guildID,
-                            "add.failure.unrecognizedGroups.added"
+                            "command.add.failure.unrecognizedGroups.added"
                         ),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: unmatchedGroups.join(", "),

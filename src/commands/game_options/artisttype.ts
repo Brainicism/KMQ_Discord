@@ -40,7 +40,7 @@ export default class ArtistTypeCommand implements BaseCommand {
         name: "artisttype",
         description: state.localizer.translate(
             guildID,
-            "artisttype.help.description",
+            "command.artisttype.help.description",
             {
                 soloists: `\`${ArtistType.SOLOIST}\``,
                 groups: `\`${ArtistType.GROUP}\``,
@@ -53,7 +53,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                 example: "`,artisttype soloists`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "artisttype.help.example.soloists",
+                    "command.artisttype.help.example.soloists",
                     {
                         soloists: `\`${ArtistType.SOLOIST}\``,
                     }
@@ -63,7 +63,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                 example: "`,artisttype groups`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "artisttype.help.example.groups",
+                    "command.artisttype.help.example.groups",
                     {
                         groups: `\`${ArtistType.GROUP}\``,
                     }
@@ -73,7 +73,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                 example: "`,artisttype both`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "artisttype.help.example.both",
+                    "command.artisttype.help.example.both",
                     {
                         soloists: `\`${ArtistType.SOLOIST}\``,
                         groups: `\`${ArtistType.GROUP}\``,
@@ -84,7 +84,7 @@ export default class ArtistTypeCommand implements BaseCommand {
                 example: "`,artisttype`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "artisttype.help.example.reset"
+                    "command.artisttype.help.example.reset"
                 ),
             },
         ],

@@ -38,7 +38,7 @@ export default class MultiGuessCommand implements BaseCommand {
         name: "multiguess",
         description: state.localizer.translate(
             guildID,
-            "multiguess.help.description",
+            "command.multiguess.help.description",
             { on: `\`${MultiGuessType.ON}\`` }
         ),
         usage: ",multiguess [on | off]",
@@ -47,21 +47,21 @@ export default class MultiGuessCommand implements BaseCommand {
                 example: "`,multiguess on`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "multiguess.help.example.on"
+                    "command.multiguess.help.example.on"
                 ),
             },
             {
                 example: "`,multiguess off`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "multiguess.help.example.off"
+                    "command.multiguess.help.example.off"
                 ),
             },
             {
                 example: "`,multiguess`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "multiguess.help.example.reset",
+                    "command.multiguess.help.example.reset",
                     { defaultMultiguess: `\`${DEFAULT_MULTIGUESS_TYPE}\`` }
                 ),
             },

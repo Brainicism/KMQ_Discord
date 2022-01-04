@@ -40,7 +40,7 @@ export default class ReleaseCommand implements BaseCommand {
         name: "release",
         description: state.localizer.translate(
             guildID,
-            "release.help.description"
+            "command.release.help.description"
         ),
         usage: ",release [official | all]",
         examples: [
@@ -48,7 +48,7 @@ export default class ReleaseCommand implements BaseCommand {
                 example: "`,release official`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "release.help.example.official",
+                    "command.release.help.example.official",
                     { official: `\`${ReleaseType.OFFICIAL}\`` }
                 ),
             },
@@ -56,14 +56,14 @@ export default class ReleaseCommand implements BaseCommand {
                 example: "`,release all`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "release.help.example.all"
+                    "command.release.help.example.all"
                 ),
             },
             {
                 example: "`,release`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "release.help.example.reset",
+                    "command.release.help.example.reset",
                     { defaultRelease: `\`${DEFAULT_RELEASE_TYPE}\`` }
                 ),
             },

@@ -27,7 +27,7 @@ export default class VoteCommand implements BaseCommand {
         name: "vote",
         description: state.localizer.translate(
             guildID,
-            "vote.help.description"
+            "command.vote.help.description"
         ),
         usage: ",vote",
         examples: [],
@@ -67,7 +67,7 @@ export default class VoteCommand implements BaseCommand {
             if (nextVoteTime.getTime() <= Date.now()) {
                 voteStatusString = state.localizer.translate(
                     message.guildID,
-                    "vote.available"
+                    "command.vote.available"
                 );
             } else {
                 const hoursLeft = Math.floor(
@@ -85,7 +85,7 @@ export default class VoteCommand implements BaseCommand {
                 if (hoursLeft > 0) {
                     voteStatusString = state.localizer.translate(
                         message.guildID,
-                        "vote.unavailable.hours",
+                        "command.vote.unavailable.hours",
                         {
                             hours: state.localizer.translateN(
                                 message.guildID,
@@ -97,7 +97,7 @@ export default class VoteCommand implements BaseCommand {
                 } else if (minutesLeft > 0) {
                     voteStatusString = state.localizer.translate(
                         message.guildID,
-                        "vote.unavailable.minutes",
+                        "command.vote.unavailable.minutes",
                         {
                             minutes: state.localizer.translateN(
                                 message.guildID,
@@ -109,7 +109,7 @@ export default class VoteCommand implements BaseCommand {
                 } else {
                     voteStatusString = state.localizer.translate(
                         message.guildID,
-                        "vote.unavailable.seconds",
+                        "command.vote.unavailable.seconds",
                         {
                             seconds: state.localizer.translateN(
                                 message.guildID,
@@ -123,7 +123,7 @@ export default class VoteCommand implements BaseCommand {
         } else {
             voteStatusString = state.localizer.translate(
                 message.guildID,
-                "vote.available"
+                "command.vote.available"
             );
         }
 
@@ -134,15 +134,15 @@ export default class VoteCommand implements BaseCommand {
                 title: boostActive
                     ? state.localizer.translate(
                           message.guildID,
-                          "vote.boostActive"
+                          "command.vote.boostActive"
                       )
                     : state.localizer.translate(
                           message.guildID,
-                          "vote.boostInactive"
+                          "command.vote.boostInactive"
                       ),
                 description: `${voteStatusString}\n\n${state.localizer.translate(
                     message.guildID,
-                    "vote.description",
+                    "command.vote.description",
                     {
                         voteLink: VOTE_LINK,
                         voteResetDuration: String(VOTE_RESET_DURATION),

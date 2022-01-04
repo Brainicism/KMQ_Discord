@@ -45,7 +45,7 @@ export default class ListCommand implements BaseCommand {
         name: "list",
         description: state.localizer.translate(
             guildID,
-            "list.help.description"
+            "command.list.help.description"
         ),
         usage: ",list [groups | excludes | includes]",
         examples: [
@@ -53,7 +53,7 @@ export default class ListCommand implements BaseCommand {
                 example: "`,list groups`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "list.help.example.groups",
+                    "command.list.help.example.groups",
                     { groups: `\`${process.env.BOT_PREFIX}groups\`` }
                 ),
             },
@@ -61,7 +61,7 @@ export default class ListCommand implements BaseCommand {
                 example: "`,list excludes`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "list.help.example.exclude",
+                    "command.list.help.example.exclude",
                     { exclude: `\`${process.env.BOT_PREFIX}excludes\`` }
                 ),
             },
@@ -69,7 +69,7 @@ export default class ListCommand implements BaseCommand {
                 example: "`,list includes`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "list.help.example.include",
+                    "command.list.help.example.include",
                     { include: `\`${process.env.BOT_PREFIX}includes\`` }
                 ),
             },
@@ -110,7 +110,7 @@ export default class ListCommand implements BaseCommand {
             optionValue ||
             state.localizer.translate(
                 message.guildID,
-                "list.currentValue.nothingSelected"
+                "command.list.currentValue.nothingSelected"
             );
 
         if (optionValue.length > 2000) {
@@ -120,7 +120,7 @@ export default class ListCommand implements BaseCommand {
                     {
                         content: state.localizer.translate(
                             message.guildID,
-                            "list.failure.groupsInFile"
+                            "command.list.failure.groupsInFile"
                         ),
                     },
                     {
@@ -142,7 +142,7 @@ export default class ListCommand implements BaseCommand {
                     ),
                     description: state.localizer.translate(
                         message.guildID,
-                        "list.failure.groupsInFile.noFilePermissions",
+                        "command.list.failure.groupsInFile.noFilePermissions",
                         { attachFile: "ATTACH_FILE" }
                     ),
                 });
@@ -152,7 +152,7 @@ export default class ListCommand implements BaseCommand {
             await sendInfoMessage(MessageContext.fromMessage(message), {
                 title: state.localizer.translate(
                     message.guildID,
-                    "list.currentValue.title",
+                    "command.list.currentValue.title",
                     {
                         optionListed: `\`${optionListed}\``,
                     }

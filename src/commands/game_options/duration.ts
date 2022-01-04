@@ -43,7 +43,7 @@ export default class DurationCommand implements BaseCommand {
         name: "duration",
         description: state.localizer.translate(
             guildID,
-            "duration.help.description"
+            "command.duration.help.description"
         ),
         usage: ",duration [minutes]",
         examples: [
@@ -51,7 +51,7 @@ export default class DurationCommand implements BaseCommand {
                 example: "`,duration 15`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "duration.help.example.set",
+                    "command.duration.help.example.set",
                     {
                         duration: String(15),
                     }
@@ -61,7 +61,7 @@ export default class DurationCommand implements BaseCommand {
                 example: "`,duration 5 add`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "duration.help.example.increment",
+                    "command.duration.help.example.increment",
                     {
                         duration: String(5),
                     }
@@ -71,7 +71,7 @@ export default class DurationCommand implements BaseCommand {
                 example: "`,duration 5 remove`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "duration.help.example.decrement",
+                    "command.duration.help.example.decrement",
                     {
                         duration: String(5),
                     }
@@ -81,7 +81,7 @@ export default class DurationCommand implements BaseCommand {
                 example: "`,duration`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "duration.help.example.reset"
+                    "command.duration.help.example.reset"
                 ),
             },
         ],
@@ -117,11 +117,11 @@ export default class DurationCommand implements BaseCommand {
                     sendErrorMessage(MessageContext.fromMessage(message), {
                         title: state.localizer.translate(
                             message.guildID,
-                            "duration.failure.removingDuration.title"
+                            "command.duration.failure.removingDuration.title"
                         ),
                         description: state.localizer.translate(
                             message.guildID,
-                            "duration.failure.removingDuration.notSet.description"
+                            "command.duration.failure.removingDuration.notSet.description"
                         ),
                     });
                     return;
@@ -132,11 +132,11 @@ export default class DurationCommand implements BaseCommand {
                     sendErrorMessage(MessageContext.fromMessage(message), {
                         title: state.localizer.translate(
                             message.guildID,
-                            "duration.failure.removingDuration.title"
+                            "command.duration.failure.removingDuration.title"
                         ),
                         description: state.localizer.translate(
                             message.guildID,
-                            "duration.failure.removingDuration.tooShort.description"
+                            "command.duration.failure.removingDuration.tooShort.description"
                         ),
                     });
                     return;

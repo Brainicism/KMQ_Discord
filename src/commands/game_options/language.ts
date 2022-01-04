@@ -40,7 +40,7 @@ export default class LanguageCommand implements BaseCommand {
         name: "language",
         description: state.localizer.translate(
             guildID,
-            "language.help.description"
+            "command.language.help.description"
         ),
         usage: ",language [korean | all]",
         examples: [
@@ -48,21 +48,21 @@ export default class LanguageCommand implements BaseCommand {
                 example: "`,language korean`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "language.help.example.korean"
+                    "command.language.help.example.korean"
                 ),
             },
             {
                 example: "`,language all`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "language.help.example.all"
+                    "command.language.help.example.all"
                 ),
             },
             {
                 example: "`,language`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "language.help.example.reset",
+                    "command.language.help.example.reset",
                     { defaultLanguage: `\`${LanguageType.ALL}\`` }
                 ),
             },

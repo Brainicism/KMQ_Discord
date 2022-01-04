@@ -39,35 +39,38 @@ export default class OstCommand implements BaseCommand {
 
     help = (guildID: string): Help => ({
         name: "ost",
-        description: state.localizer.translate(guildID, "ost.help.description"),
+        description: state.localizer.translate(
+            guildID,
+            "command.ost.help.description"
+        ),
         usage: ",ost [include | exclude | exclusive]",
         examples: [
             {
                 example: "`,ost include`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "ost.help.example.include"
+                    "command.ost.help.example.include"
                 ),
             },
             {
                 example: "`,ost exclude`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "ost.help.example.exclude"
+                    "command.ost.help.example.exclude"
                 ),
             },
             {
                 example: "`,ost exclusive`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "ost.help.example.exclusive"
+                    "command.ost.help.example.exclusive"
                 ),
             },
             {
                 example: "`,ost`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "ost.help.example.reset",
+                    "command.ost.help.example.reset",
                     { defaultOst: `\`${DEFAULT_OST_PREFERENCE}\`` }
                 ),
             },

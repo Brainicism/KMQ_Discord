@@ -59,11 +59,11 @@ export default class JoinCommand implements BaseCommand {
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: state.localizer.translate(
                     message.guildID,
-                    "misc.playerAlreadyJoined.title"
+                    "command.join.playerAlreadyJoined.title"
                 ),
                 description: state.localizer.translate(
                     message.guildID,
-                    "misc.playerAlreadyJoined.description",
+                    "command.join.playerAlreadyJoined.description",
                     { mentionedUser: getMention(message.author.id) }
                 ),
             });
@@ -85,11 +85,11 @@ export default class JoinCommand implements BaseCommand {
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: state.localizer.translate(
                     message.guildID,
-                    "misc.playerJoinedMidGame.title"
+                    "command.join.playerJoinedMidGame.title"
                 ),
                 description: state.localizer.translate(
                     message.guildID,
-                    "misc.playerJoinedMidGame.description",
+                    "command.join.playerJoinedMidGame.description",
                     {
                         mentionedUser: getMention(message.author.id),
                         lives: `\`${newPlayer.getLives()}\``,
@@ -117,7 +117,7 @@ export default class JoinCommand implements BaseCommand {
         sendInfoMessage(MessageContext.fromMessage(message), {
             title: state.localizer.translate(
                 message.guildID,
-                "misc.playerJoined.title"
+                "command.join.playerJoined.title"
             ),
             description: players,
         });
@@ -135,11 +135,11 @@ export default class JoinCommand implements BaseCommand {
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: state.localizer.translate(
                     message.guildID,
-                    "misc.failure.joinError.title"
+                    "command.join.failure.joinError.title"
                 ),
                 description: state.localizer.translate(
                     message.guildID,
-                    "misc.failure.joinError.noTeamName.description",
+                    "command.join.failure.joinError.noTeamName.description",
                     { joinCommand: `${process.env.BOT_PREFIX}join` }
                 ),
             });
@@ -169,11 +169,11 @@ export default class JoinCommand implements BaseCommand {
                 sendErrorMessage(MessageContext.fromMessage(message), {
                     title: state.localizer.translate(
                         message.guildID,
-                        "misc.failure.joinError.invalidTeamName.title"
+                        "command.join.failure.joinError.invalidTeamName.title"
                     ),
                     description: state.localizer.translate(
                         message.guildID,
-                        "misc.failure.joinError.badEmojis.description"
+                        "command.join.failure.joinError.badEmojis.description"
                     ),
                 });
 
@@ -196,11 +196,11 @@ export default class JoinCommand implements BaseCommand {
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: state.localizer.translate(
                     message.guildID,
-                    "misc.failure.joinError.title"
+                    "command.join.failure.joinError.title"
                 ),
                 description: state.localizer.translate(
                     message.guildID,
-                    "misc.failure.joinError.invalidCharacters.description"
+                    "command.join.failure.joinError.invalidCharacters.description"
                 ),
             });
             return;
@@ -225,11 +225,11 @@ export default class JoinCommand implements BaseCommand {
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: state.localizer.translate(
                     message.guildID,
-                    "play.team.new"
+                    "command.join.team.new"
                 ),
                 description: state.localizer.translate(
                     message.guildID,
-                    "play.team.join",
+                    "command.join.team.join",
                     {
                         teamName: bold(teamName),
                         mentionedUser: getMention(message.author.id),
@@ -238,7 +238,7 @@ export default class JoinCommand implements BaseCommand {
                         startGameInstructions: !gameSession.sessionInitialized
                             ? state.localizer.translate(
                                   message.guildID,
-                                  "play.team.join.startGameInstructions",
+                                  "command.join.team.startGameInstructions",
                                   {
                                       beginCommand: `\`${process.env.BOT_PREFIX}begin\``,
                                   }
@@ -258,11 +258,11 @@ export default class JoinCommand implements BaseCommand {
                 sendErrorMessage(MessageContext.fromMessage(message), {
                     title: state.localizer.translate(
                         message.guildID,
-                        "misc.failure.joinError.title"
+                        "command.join.failure.joinError.title"
                     ),
                     description: state.localizer.translate(
                         message.guildID,
-                        "misc.failure.joinError.alreadyInTeam.description"
+                        "command.join.failure.joinError.alreadyInTeam.description"
                     ),
                 });
 
@@ -287,7 +287,7 @@ export default class JoinCommand implements BaseCommand {
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: state.localizer.translate(
                     message.guildID,
-                    "misc.playerJoinedTeam.title",
+                    "command.join.playerJoinedTeam.title",
                     {
                         joiningUser: getUserTag(message.author),
                         teamName: team.name,
@@ -296,12 +296,12 @@ export default class JoinCommand implements BaseCommand {
                 description: !gameSession.sessionInitialized
                     ? state.localizer.translate(
                           message.guildID,
-                          "misc.playerJoinedTeam.beforeGameStart.description",
+                          "command.join.playerJoinedTeam.beforeGameStart.description",
                           { beginCommand: `\`${process.env.BOT_PREFIX}begin\`` }
                       )
                     : state.localizer.translate(
                           message.guildID,
-                          "misc.playerJoinedTeam.afterGameStart.description",
+                          "command.join.playerJoinedTeam.afterGameStart.description",
                           {
                               mentionedUser: getMention(message.author.id),
                               teamName: bold(team.name),

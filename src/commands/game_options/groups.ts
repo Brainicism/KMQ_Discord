@@ -27,7 +27,7 @@ export default class GroupsCommand implements BaseCommand {
         name: "groups",
         description: state.localizer.translate(
             guildID,
-            "groups.help.description",
+            "command.groups.help.description",
             {
                 groupList: GROUP_LIST_URL,
             }
@@ -38,7 +38,7 @@ export default class GroupsCommand implements BaseCommand {
                 example: "`,groups blackpink`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "groups.help.example.singleGroup",
+                    "command.groups.help.example.singleGroup",
                     {
                         group: "Blackpink",
                     }
@@ -48,7 +48,7 @@ export default class GroupsCommand implements BaseCommand {
                 example: "`,groups blackpink, bts, red velvet`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "groups.help.example.multipleGroups",
+                    "command.groups.help.example.multipleGroups",
                     {
                         groupOne: "Blackpink",
                         groupTwo: "BTS",
@@ -60,7 +60,7 @@ export default class GroupsCommand implements BaseCommand {
                 example: "`,groups`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "groups.help.example.reset"
+                    "command.groups.help.example.reset"
                 ),
             },
         ],

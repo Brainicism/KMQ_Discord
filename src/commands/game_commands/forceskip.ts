@@ -28,7 +28,7 @@ export default class ForceSkipCommand implements BaseCommand {
         name: "forceskip",
         description: state.localizer.translate(
             guildID,
-            "forceskip.help.description"
+            "command.forceskip.help.description"
         ),
         usage: ",forceskip",
         examples: [],
@@ -64,11 +64,11 @@ export default class ForceSkipCommand implements BaseCommand {
             await sendErrorMessage(MessageContext.fromMessage(message), {
                 title: state.localizer.translate(
                     message.guildID,
-                    "forceskip.failure.notOwner.title"
+                    "command.forceskip.failure.notOwner.title"
                 ),
                 description: state.localizer.translate(
                     message.guildID,
-                    "forceskip.failure.notOwner.description",
+                    "command.forceskip.failure.notOwner.description",
                     { mentionedUser: getMention(gameSession.owner.id) }
                 ),
             });
@@ -83,7 +83,7 @@ export default class ForceSkipCommand implements BaseCommand {
                 title: state.localizer.translate(message.guildID, "skip.title"),
                 description: state.localizer.translate(
                     message.guildID,
-                    "forceskip.description"
+                    "command.forceskip.description"
                 ),
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
             },

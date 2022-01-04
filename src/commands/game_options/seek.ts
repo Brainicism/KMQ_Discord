@@ -39,7 +39,7 @@ export default class SeekCommand implements BaseCommand {
         name: "seek",
         description: state.localizer.translate(
             guildID,
-            "seek.help.description"
+            "command.seek.help.description"
         ),
         usage: ",seek [beginning | middle | random]",
         examples: [
@@ -47,28 +47,28 @@ export default class SeekCommand implements BaseCommand {
                 example: "`,seek random`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "seek.help.example.random"
+                    "command.seek.help.example.random"
                 ),
             },
             {
                 example: "`,seek middle`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "seek.help.example.middle"
+                    "command.seek.help.example.middle"
                 ),
             },
             {
                 example: "`,seek beginning`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "seek.help.example.beginning"
+                    "command.seek.help.example.beginning"
                 ),
             },
             {
                 example: "`,seek`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "seek.help.example.reset",
+                    "command.seek.help.example.reset",
                     {
                         defaultSeek: DEFAULT_SEEK,
                     }

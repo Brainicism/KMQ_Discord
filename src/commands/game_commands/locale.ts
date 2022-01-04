@@ -31,7 +31,7 @@ export default class LocaleTypeCommand implements BaseCommand {
         name: "locale",
         description: state.localizer.translate(
             guildID,
-            "locale.help.description"
+            "command.locale.help.description"
         ),
         usage: ",locale [language]",
         examples: [
@@ -39,21 +39,21 @@ export default class LocaleTypeCommand implements BaseCommand {
                 example: "`,locale en`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "locale.help.example.toEnglish"
+                    "command.locale.help.example.toEnglish"
                 ),
             },
             {
                 example: "`,locale ko`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "locale.help.example.toKorean"
+                    "command.locale.help.example.toKorean"
                 ),
             },
             {
                 example: "`,locale`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "locale.help.example.reset",
+                    "command.locale.help.example.reset",
                     { defaultLocale: DEFAULT_LOCALE }
                 ),
             },
@@ -79,7 +79,7 @@ export default class LocaleTypeCommand implements BaseCommand {
             ),
             description: state.localizer.translate(
                 message.guildID,
-                "locale.updatedDescription",
+                "command.locale.updatedDescription",
                 { language }
             ),
             thumbnailUrl: KmqImages.THUMBS_UP,

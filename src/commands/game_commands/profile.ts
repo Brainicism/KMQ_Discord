@@ -23,25 +23,25 @@ import { state } from "../../kmq_worker";
 const logger = new IPCLogger("profile");
 
 const RANK_TITLES = [
-    { title: "profile.rank.novice", req: 0 },
-    { title: "profile.rank.trainee", req: 10 },
-    { title: "profile.rank.preDebut", req: 20 },
-    { title: "profile.rank.nugu", req: 30 },
-    { title: "profile.rank.newAoty", req: 40 },
-    { title: "profile.rank.aoty", req: 50 },
-    { title: "profile.rank.bonsang", req: 60 },
-    { title: "profile.rank.daesang", req: 70 },
-    { title: "profile.rank.ceo", req: 80 },
-    { title: "profile.rank.president", req: 90 },
-    { title: "profile.rank.reuniter", req: 100 },
-    { title: "profile.rank.ruler", req: 110 },
-    { title: "profile.rank.supreme", req: 120 },
-    { title: "profile.rank.benevolent", req: 130 },
-    { title: "profile.rank.divine", req: 140 },
-    { title: "profile.rank.almighty", req: 150 },
-    { title: "profile.rank.enlightened", req: 160 },
-    { title: "profile.rank.immortal", req: 170 },
-    { title: "profile.rank.omniscient", req: 180 },
+    { title: "command.profile.rank.novice", req: 0 },
+    { title: "command.profile.rank.trainee", req: 10 },
+    { title: "command.profile.rank.preDebut", req: 20 },
+    { title: "command.profile.rank.nugu", req: 30 },
+    { title: "command.profile.rank.newAoty", req: 40 },
+    { title: "command.profile.rank.aoty", req: 50 },
+    { title: "command.profile.rank.bonsang", req: 60 },
+    { title: "command.profile.rank.daesang", req: 70 },
+    { title: "command.profile.rank.ceo", req: 80 },
+    { title: "command.profile.rank.president", req: 90 },
+    { title: "command.profile.rank.reuniter", req: 100 },
+    { title: "command.profile.rank.ruler", req: 110 },
+    { title: "command.profile.rank.supreme", req: 120 },
+    { title: "command.profile.rank.benevolent", req: 130 },
+    { title: "command.profile.rank.divine", req: 140 },
+    { title: "command.profile.rank.almighty", req: 150 },
+    { title: "command.profile.rank.enlightened", req: 160 },
+    { title: "command.profile.rank.immortal", req: 170 },
+    { title: "command.profile.rank.omniscient", req: 180 },
 ];
 
 /**
@@ -167,21 +167,30 @@ async function getProfileFields(
             inline: true,
         },
         {
-            name: state.localizer.translate(guildID, "profile.experience"),
+            name: state.localizer.translate(
+                guildID,
+                "command.profile.experience"
+            ),
             value: `${friendlyFormattedNumber(exp)}/${friendlyFormattedNumber(
                 CUM_EXP_TABLE[level + 1]
             )}`,
             inline: true,
         },
         {
-            name: state.localizer.translate(guildID, "profile.overallRank"),
+            name: state.localizer.translate(
+                guildID,
+                "command.profile.overallRank"
+            ),
             value: `#${friendlyFormattedNumber(
                 relativeLevelRank
             )}/${friendlyFormattedNumber(totalPlayers)}`,
             inline: true,
         },
         {
-            name: state.localizer.translate(guildID, "profile.songsGuessed"),
+            name: state.localizer.translate(
+                guildID,
+                "command.profile.songsGuessed"
+            ),
             value: `${friendlyFormattedNumber(
                 songsGuessed
             )} | #${friendlyFormattedNumber(
@@ -190,7 +199,10 @@ async function getProfileFields(
             inline: true,
         },
         {
-            name: state.localizer.translate(guildID, "profile.gamesPlayed"),
+            name: state.localizer.translate(
+                guildID,
+                "command.profile.gamesPlayed"
+            ),
             value: `${friendlyFormattedNumber(
                 gamesPlayed
             )} | #${friendlyFormattedNumber(
@@ -199,17 +211,26 @@ async function getProfileFields(
             inline: true,
         },
         {
-            name: state.localizer.translate(guildID, "profile.firstPlayed"),
+            name: state.localizer.translate(
+                guildID,
+                "command.profile.firstPlayed"
+            ),
             value: firstPlayDateString,
             inline: true,
         },
         {
-            name: state.localizer.translate(guildID, "profile.lastActive"),
+            name: state.localizer.translate(
+                guildID,
+                "command.profile.lastActive"
+            ),
             value: lastActiveDateString,
             inline: true,
         },
         {
-            name: state.localizer.translate(guildID, "profile.timesVoted"),
+            name: state.localizer.translate(
+                guildID,
+                "command.profile.timesVoted"
+            ),
             value: friendlyFormattedNumber(timesVoted),
             inline: true,
         },
@@ -231,7 +252,7 @@ async function getProfileFields(
 
     if (badges) {
         fields.push({
-            name: state.localizer.translate(guildID, "profile.badges"),
+            name: state.localizer.translate(guildID, "command.profile.badges"),
             value: badges,
             inline: false,
         });
@@ -245,7 +266,7 @@ export default class ProfileCommand implements BaseCommand {
         name: "profile",
         description: state.localizer.translate(
             guildID,
-            "profile.help.description"
+            "command.profile.help.description"
         ),
         usage: ",profile { @mention }",
         examples: [
@@ -253,14 +274,14 @@ export default class ProfileCommand implements BaseCommand {
                 example: "`,profile`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "profile.help.example.self"
+                    "command.profile.help.example.self"
                 ),
             },
             {
                 example: "`,profile @FortnitePlayer`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "profile.help.example.otherPlayerMention",
+                    "command.profile.help.example.otherPlayerMention",
                     {
                         playerName: "FortnitePlayer",
                     }
@@ -270,7 +291,7 @@ export default class ProfileCommand implements BaseCommand {
                 example: "`,profile 141734249702096896`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "profile.help.example.otherPlayerID"
+                    "command.profile.help.example.otherPlayerID"
                 ),
             },
         ],
@@ -298,11 +319,11 @@ export default class ProfileCommand implements BaseCommand {
                     sendErrorMessage(MessageContext.fromMessage(message), {
                         title: state.localizer.translate(
                             message.guildID,
-                            "profile.failure.notFound.title"
+                            "command.profile.failure.notFound.title"
                         ),
                         description: state.localizer.translate(
                             message.guildID,
-                            "profile.failure.notFound.description",
+                            "command.profile.failure.notFound.description",
                             {
                                 profileHelp: `\`${process.env.BOT_PREFIX}help profile\``,
                             }
@@ -315,11 +336,11 @@ export default class ProfileCommand implements BaseCommand {
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: state.localizer.translate(
                     message.guildID,
-                    "profile.failure.notFound.title"
+                    "command.profile.failure.notFound.title"
                 ),
                 description: state.localizer.translate(
                     message.guildID,
-                    "profile.failure.notFound.badUsage.description",
+                    "command.profile.failure.notFound.badUsage.description",
                     { profileHelp: `\`${process.env.BOT_PREFIX}help profile\`` }
                 ),
             });
@@ -332,7 +353,7 @@ export default class ProfileCommand implements BaseCommand {
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: state.localizer.translate(
                     message.guildID,
-                    "profile.failure.notFound.title"
+                    "command.profile.failure.notFound.title"
                 ),
                 description: state.localizer.translate(
                     message.guildID,
