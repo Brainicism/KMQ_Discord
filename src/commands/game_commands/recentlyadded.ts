@@ -89,7 +89,7 @@ export default class RecentlyAddedCommand implements BaseCommand {
                 song.views
             )} ${state.localizer.translate(
                 message.guildID,
-                "command.recentlyadded.views"
+                "misc.views"
             )}](https://youtu.be/${song.youtubeLink})`,
             inline: true,
         }));

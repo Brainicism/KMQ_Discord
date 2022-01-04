@@ -938,7 +938,7 @@ export default class GameSession {
             await this.endRound(
                 { correct: false },
                 guildPreference,
-                new MessageContext(this.textChannelID)
+                new MessageContext(this.textChannelID, null, this.guildID)
             );
 
             this.startRound(
@@ -1274,7 +1274,7 @@ export default class GameSession {
             await this.endRound(
                 { correct: false },
                 guildPreference,
-                new MessageContext(this.textChannelID)
+                new MessageContext(this.textChannelID, null, this.guildID)
             );
 
             this.startRound(

@@ -113,7 +113,10 @@ export async function calculateOptionsExpMultiplierInternal(
     const isPlayersFirstGame = await isFirstGameOfDay(playerID);
     if (isPlayersFirstGame) {
         modifiers.push({
-            displayName: "First Game of the Day Bonus",
+            displayName: state.localizer.translate(
+                guildPreference.guildID,
+                "command.exp.firstGameOfDayBonus"
+            ),
             name: ExpBonusModifier.FIRST_GAME_OF_DAY,
             isPenalty: false,
         });
@@ -411,7 +414,7 @@ export default class ExpCommand implements BaseCommand {
                 "command.exp.explanation.rareGuess"
             )}:\` ${state.localizer.translate(
                 message.guildID,
-                "command.exp.explanation.rareGuess.upTo",
+                "command.exp.explanation.rareGuessRange",
                 { rareGuessLowerBound: "2.00x", rareGuessUpperBound: "50.00x" }
             )} 📈`,
         ];

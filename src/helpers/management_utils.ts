@@ -285,7 +285,7 @@ export async function reloadBonusGroups(): Promise<void> {
 async function reloadLocales(): Promise<void> {
     const updatedLocales = await dbContext.kmq("locale").select("*");
     for (const l of updatedLocales) {
-        state.locales[l.guild_id] = l as LocaleType;
+        state.locales[l.guild_id] = l.locale as LocaleType;
     }
 }
 

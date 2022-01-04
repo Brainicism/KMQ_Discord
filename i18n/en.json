@@ -147,7 +147,7 @@
                 "powerHour": "Playing during a KMQ Power Hour or Weekend",
                 "quickGuess": "Guessing quickly",
                 "rareGuess": "Rare correct guesses bonus",
-                "rareGuess.upTo": "{{{rareGuessLowerBound}}} up to {{{rareGuessUpperBound}}}",
+                "rareGuessRange": "{{{rareGuessLowerBound}}} up to {{{rareGuessUpperBound}}}",
                 "streak": "Having a guess streak of over 5",
                 "voting": "Voting"
             },
@@ -156,6 +156,7 @@
             },
             "lowSongCountPenalty": "Low Song Count Penalty",
             "multipleChoicePenalty": "Multiple Choice Penalty",
+            "firstGameOfDayBonus": "First Game of the Day Bonus",
             "powerHourBonus": "Power Hour Bonus",
             "title": "EXP Bonuses",
             "totalModifier": "Total Modifier",
@@ -568,9 +569,9 @@
             },
             "gameStarting": "Game Starting in #{{{textChannelName}}} in 🔊 {{{voiceChannelName}}}",
             "help": {
+                "description": "Starts a game of KMQ. Pick between classic (default), elimination mode, and teams mode.",
                 "example": {
                     "classic": "Start a classic game of KMQ (type in your guess first to get a point)",
-                    "description": "Starts a game of KMQ. Pick between classic (default), elimination mode, and teams mode.",
                     "elimination": "Start an elimination game of KMQ where each player starts with {{{lives}}} lives",
                     "teams": "Split up into as many teams as you want and see who you can depend on to help you win!"
                 }
@@ -734,8 +735,7 @@
                 "example": "Show recently added songs"
             },
             "released": "Released",
-            "title": "Recently Added Songs",
-            "views": "views"
+            "title": "Recently Added Songs"
         },
         "release": {
             "help": {
@@ -1010,6 +1010,25 @@
             "vcJoin": {
                 "description": "Something went wrong, try starting the game again in a bit.",
                 "title": "Error Joining Voice Channel"
+            },
+            "validation": {
+                "numArguments": {
+                    "incorrect": "{Incorrect number of arguments. See `{{{help}}} {{{command}}}` for usage."
+                },
+                "number": {
+                    "notNumber": "Expected numeric value for {{{argument}}}.",
+                    "min": "Expected value greater than or equal to {{{min}}} for {{{argument}}}.",
+                    "max": "Expected value less than or equal to {{{max}}} for {{{argument}}}"
+                },
+                "boolean": {
+                    "notBoolean": "Expected true/false value for {{{argument}}}."
+                },
+                "enum": {
+                    "notInEnum": "Expected one of the following valid {{{argument}}} values: ({{{validValues}}})."
+                },
+                "char": {
+                    "notChar": "Expected a character for {{{argument}}}."
+                }
             }
         },
         "formattedLimit": "{{{limitStart}}} to {{{limitEnd}}} ({{{songCount}}} songs)",
@@ -1131,6 +1150,8 @@
                 "footer": "Did you mean to use {{{addOrRemove}}} {{{command}}}?"
             }
         },
+        "views": "views",
+        "usage": "Usage",
         "plural": {
             "day": {
                 "one": "%s day",

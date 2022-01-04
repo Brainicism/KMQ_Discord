@@ -140,9 +140,10 @@ const helpMessage = async (
             const helpManual = command.help(message.guildID);
             return {
                 name: helpManual.name,
-                value: `${
-                    helpManual.description
-                }\nUsage: \`${helpManual.usage.replace(
+                value: `${helpManual.description}\n${state.localizer.translate(
+                    message.guildID,
+                    "misc.usage"
+                )}: \`${helpManual.usage.replace(
                     placeholder,
                     process.env.BOT_PREFIX
                 )}\``,

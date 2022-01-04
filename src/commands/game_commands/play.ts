@@ -238,7 +238,10 @@ export default class PlayCommand implements BaseCommand {
 
         if (!voiceChannel) {
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "command.play.failure.notInVC.title",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.play.failure.notInVC.title"
+                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "command.play.failure.notInVC.description",

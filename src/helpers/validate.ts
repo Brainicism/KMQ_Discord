@@ -4,6 +4,7 @@ import { CommandValidations } from "../commands/interfaces/base_command";
 import { IPCLogger } from "../logger";
 import { arrayToString } from "./utils";
 import MessageContext from "../structures/message_context";
+import { state } from "../kmq_worker";
 
 const logger = new IPCLogger("validate");
 
@@ -41,7 +42,14 @@ export default (
     ) {
         sendValidationErrorMessage(
             message,
-            `Incorrect number of arguments. See \`${process.env.BOT_PREFIX}help ${parsedMessage.action}\` for usage.`,
+            state.localizer.translate(
+                message.guildID,
+                "misc.failure.validation.numArguments.incorrect",
+                {
+                    help: `${process.env.BOT_PREFIX}help`,
+                    command: parsedMessage.action,
+                }
+            ),
             args,
             usage
         );
@@ -58,7 +66,11 @@ export default (
                 if (Number.isNaN(Number(arg))) {
                     sendValidationErrorMessage(
                         message,
-                        `Expected numeric value for \`${validation.name}\`.`,
+                        state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.validation.number.notNumber",
+                            { argument: `\`${validation.name}\`` }
+                        ),
                         arg,
                         usage
                     );
@@ -70,7 +82,14 @@ export default (
                 if ("minValue" in validation && intArg < validation.minValue) {
                     sendValidationErrorMessage(
                         message,
-                        `Expected value greater than \`${validation.minValue}\` for \`${validation.name}\`.`,
+                        state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.validation.number.min",
+                            {
+                                min: `\`${validation.minValue}\``,
+                                argument: `\`${validation.name}\``,
+                            }
+                        ),
                         arg,
                         usage
                     );
@@ -80,7 +99,14 @@ export default (
                 if ("maxValue" in validation && intArg > validation.maxValue) {
                     sendValidationErrorMessage(
                         message,
-                        `Expected value less than or equal to \`${validation.maxValue}\` for \`${validation.name}\`.`,
+                        state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.validation.number.max",
+                            {
+                                max: `\`${validation.maxValue}\``,
+                                argument: `\`${validation.name}\``,
+                            }
+                        ),
                         arg,
                         usage
                     );
@@ -95,7 +121,11 @@ export default (
                 if (!(arg === "false" || arg === "true")) {
                     sendValidationErrorMessage(
                         message,
-                        `Expected true/false value for \`${validation.name}\`.`,
+                        state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.validation.boolean.notBoolean",
+                            { argument: `\`${validation.name}\`` }
+                        ),
                         arg,
                         usage
                     );
@@ -111,9 +141,14 @@ export default (
                 if (!enums.includes(arg)) {
                     sendValidationErrorMessage(
                         message,
-                        `Expected one of the following valid \`${
-                            validation.name
-                        }\` values: (${arrayToString(enums)}).`,
+                        state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.validation.enum.notInEnum",
+                            {
+                                argument: `\`${validation.name}\``,
+                                validValues: arrayToString(enums),
+                            }
+                        ),
                         arg,
                         usage
                     );
@@ -128,7 +163,11 @@ export default (
                 if (arg.length !== 1) {
                     sendValidationErrorMessage(
                         message,
-                        `Expected a character for \`${validation.name}\`.`,
+                        state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.validation.char.notChar",
+                            { argument: `\`${validation.name}\`` }
+                        ),
                         arg,
                         usage
                     );

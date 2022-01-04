@@ -812,7 +812,9 @@ export async function sendEndRoundMessage(
     };
 
     const thumbnailUrl = `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`;
-    const footerText = `${friendlyFormattedNumber(gameRound.views)} views${
+    const footerText = `${friendlyFormattedNumber(
+        gameRound.views
+    )} ${state.localizer.translate(messageContext.guildID, "misc.views")}${
         footer.text ? `\n${footer.text}` : ""
     }`;
 

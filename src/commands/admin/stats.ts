@@ -183,7 +183,7 @@ export default class SkipCommand implements BaseCommand {
                 .toString(),
             [state.localizer.translate(
                 message.guildID,
-                "command.stats.memoryUsage"
+                "command.stats.system.memoryUsage"
             )]: `${fleetStats.totalRam.toFixed(2)} MB`,
             [state.localizer.translate(
                 message.guildID,
@@ -200,7 +200,11 @@ export default class SkipCommand implements BaseCommand {
             [state.localizer.translate(
                 message.guildID,
                 "command.stats.system.uptime"
-            )]: `${(process.uptime() / (60 * 60)).toFixed(2)} hours`,
+            )]: state.localizer.translateN(
+                message.guildID,
+                "misc.plural.hour",
+                Number((process.uptime() / (60 * 60)).toFixed(2))
+            ),
         };
 
         const fields: Array<Eris.EmbedField> = [

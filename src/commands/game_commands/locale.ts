@@ -93,7 +93,7 @@ export default class LocaleTypeCommand implements BaseCommand {
             }
         }
 
-        LocaleTypeCommand.updateLocale(message.guildID, language);
+        await LocaleTypeCommand.updateLocale(message.guildID, language);
 
         sendInfoMessage(MessageContext.fromMessage(message), {
             title: state.localizer.translate(
@@ -119,10 +119,13 @@ export default class LocaleTypeCommand implements BaseCommand {
         );
     };
 
-    static updateLocale(guildID: string, locale: LocaleType): void {
+    static async updateLocale(
+        guildID: string,
+        locale: LocaleType
+    ): Promise<void> {
         if (locale !== DEFAULT_LOCALE) {
             state.locales[guildID] = locale;
-            dbContext
+            await dbContext
                 .kmq("locale")
                 .insert({ guild_id: guildID, locale })
                 .onConflict("guild_id")
@@ -130,7 +133,7 @@ export default class LocaleTypeCommand implements BaseCommand {
         } else {
             if (state.locales[guildID]) {
                 delete state.locales[guildID];
-                dbContext
+                await dbContext
                     .kmq("locale")
                     .select({ guild_id: guildID, locale })
                     .del();
