@@ -138,11 +138,11 @@ export default class ListCommand implements BaseCommand {
                 await sendErrorMessage(MessageContext.fromMessage(message), {
                     title: state.localizer.translate(
                         message.guildID,
-                        "Error Sending File"
+                        "command.list.failure.groupsInFile.noFilePermissions.title"
                     ),
                     description: state.localizer.translate(
                         message.guildID,
-                        "command.list.failure.groupsInFile.noFilePermissions",
+                        "command.list.failure.groupsInFile.noFilePermissions.description",
                         { attachFile: "ATTACH_FILE" }
                     ),
                 });

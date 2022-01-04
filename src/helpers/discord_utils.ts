@@ -122,7 +122,7 @@ function missingPermissionsText(
 ): string {
     return state.localizer.translate(
         guildID,
-        "misc.failure.missingPermissions",
+        "misc.failure.missingPermissionsText",
         {
             missingPermissions: missingPermissions.join(", "),
             permissionsLink:
