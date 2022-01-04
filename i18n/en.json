@@ -118,10 +118,10 @@
                     "notSet": {
                         "description": "The duration is not currently set."
                     },
+                    "title": "Error Removing Duration",
                     "tooShort": {
                         "description": "The duration cannot be less than 2 minutes."
-                    },
-                    "title": "Error Removing Duration"
+                    }
                 }
             },
             "help": {
@@ -272,8 +272,8 @@
             "help": {
                 "description": "Get help about the game's commands. Add a command to get information about the specific command.",
                 "example": {
-                    "sampleCommand": "Shows a detailed description for the cutoff command",
-                    "allCommands": "Shows all available commands and a short description"
+                    "allCommands": "Shows all available commands and a short description",
+                    "sampleCommand": "Shows a detailed description for the cutoff command"
                 }
             },
             "title": "{{{kmq}}} Command Help"
@@ -995,11 +995,11 @@
                 "optionFromPreviousRound": "You are attempting to pick an option from an already completed round."
             },
             "messageTooLong": "Response message was too long, report this error to the KMQ help server",
-            "missingPermissionsText": "Ensure that the bot has the following permissions: {{{missingPermissions}}}\n\nSee the following link for details: {{{permissionsLink}}}. If you are still having issues, join the official KMQ server found in {{{helpCommand}}}",
             "missingPermissions": {
                 "description": "Hi! I'm unable to message in the {{{channelName}}} channel. Please make sure the bot has permissions to message in this channel.",
                 "title": "Missing Permissions"
             },
+            "missingPermissionsText": "Ensure that the bot has the following permissions: {{{missingPermissions}}}\n\nSee the following link for details: {{{permissionsLink}}}. If you are still having issues, join the official KMQ server found in {{{helpCommand}}}",
             "retrievingSongData": {
                 "description": "Try again in a bit, or report this error to the official KMQ server found in {{{helpCommand}}}.",
                 "title": "Error Retrieving Song Data"
