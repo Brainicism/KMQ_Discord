@@ -285,7 +285,7 @@
                 "description": "Gives a hint to the currently playing song."
             },
             "request": {
-                "description": "hint requests received",
+                "description": "{{{hintCounter}}} hint requests received.",
                 "title": "Hint Request"
             },
             "songName": "Song Name",
@@ -684,7 +684,6 @@
             }
         },
         "profile": {
-            "alphaTester": "⌚ Alpha Testers",
             "badges": "Badges",
             "experience": "Experience",
             "failure": {
@@ -696,11 +695,7 @@
                     "title": "No Profile Found"
                 }
             },
-            "firstGen": "🤗 First Gen KMQer",
             "firstPlayed": "First Played",
-            "firstTourneyAllParticipant": "🎖️ First Tourney (All Groups) Participant",
-            "firstTourneyFemaleParticipant": "🎖️ First Tourney (Female Groups) Participant",
-            "firstTourneyMaleParticipant": "🎖️ First Tourney (Male Groups) Participant",
             "gamesPlayed": "Games Played",
             "help": {
                 "description": "Shows your game stats.",
@@ -713,9 +708,7 @@
                     "mention": "mention"
                 }
             },
-            "kmqCreator": "🎭 Kimiqo's Creator",
             "lastActive": "Last Active",
-            "ohmiFan": "🤕 #1 <@141734249702096896> Fan",
             "overallRank": "Overall Rank",
             "rank": {
                 "almighty": "Almighty Ruler of the Solar System",
@@ -738,9 +731,6 @@
                 "supreme": "Supreme Ruler of the Two Koreas",
                 "trainee": "Trainee"
             },
-            "secondTourneyAllParticipant": "🎖️ Second Tourney (All Groups) Participant",
-            "secondTourneyFemaleParticipant": "🎖️ Second Tourney (Female Groups) Participant",
-            "secondTourneyMaleParticipant": "🎖️ Second Tourney (Male Groups) Participant",
             "songsGuessed": "Songs Guessed",
             "timesVoted": "Times Voted"
         },
@@ -833,11 +823,12 @@
                 "description": "Vote to skip the current song. A song is skipped when majority of participants vote to skip it."
             },
             "success": {
-                "description": "{{{skipCounter}}} skips achieved, skipping..."
+                "description": "{{{skipCounter}}} skips achieved, skipping...",
+                "title": "Skip"
             },
-            "title": "Skip",
             "vote": {
-                "description": "{{{skipCounter}}} skips received."
+                "description": "{{{skipCounter}}} skip requests received.",
+                "title": "Skip Request"
             }
         },
         "special": {
