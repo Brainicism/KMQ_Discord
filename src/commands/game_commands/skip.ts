@@ -28,7 +28,7 @@ async function sendSkipNotification(
         {
             title: state.localizer.translate(
                 message.guildID,
-                "command.skip.title"
+                "command.skip.vote.title"
             ),
             description: state.localizer.translate(
                 message.guildID,
@@ -50,7 +50,10 @@ async function sendSkipMessage(
 ): Promise<void> {
     await sendInfoMessage(MessageContext.fromMessage(message), {
         color: EMBED_SUCCESS_COLOR,
-        title: state.localizer.translate(message.guildID, "command.skip.title"),
+        title: state.localizer.translate(
+            message.guildID,
+            "command.skip.success.title"
+        ),
         description: state.localizer.translate(
             message.guildID,
             "command.skip.success.description",

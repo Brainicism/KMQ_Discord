@@ -285,7 +285,7 @@
                 "description": "Gives a hint to the currently playing song."
             },
             "request": {
-                "description": "hint requests received",
+                "description": "{{{hintCounter}}} hint requests received.",
                 "title": "Hint Request"
             },
             "songName": "Song Name",
@@ -833,11 +833,12 @@
                 "description": "Vote to skip the current song. A song is skipped when majority of participants vote to skip it."
             },
             "success": {
-                "description": "{{{skipCounter}}} skips achieved, skipping..."
+                "description": "{{{skipCounter}}} skips achieved, skipping...",
+                "title": "Skip"
             },
-            "title": "Skip",
             "vote": {
-                "description": "{{{skipCounter}}} skips received."
+                "description": "{{{skipCounter}}} skip requests received.",
+                "title": "Skip Request"
             }
         },
         "special": {

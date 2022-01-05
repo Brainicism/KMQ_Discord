@@ -67,14 +67,18 @@ async function sendHintNotification(
                     message.guildID,
                     "command.hint.request.title"
                 ),
-                description: `${gameSession.gameRound.getHintRequests()}/${
-                    Math.floor(
-                        eliminationScoreboard.getAlivePlayersCount() * 0.5
-                    ) + 1
-                } ${state.localizer.translate(
+                description: state.localizer.translate(
                     message.guildID,
-                    "command.hint.request.description"
-                )}.`,
+                    "command.hint.request.description",
+                    {
+                        hintCounter: `${gameSession.gameRound.getHintRequests()}/${
+                            Math.floor(
+                                eliminationScoreboard.getAlivePlayersCount() *
+                                    0.5
+                            ) + 1
+                        }`,
+                    }
+                ),
             },
             true
         );
@@ -86,12 +90,15 @@ async function sendHintNotification(
                     message.guildID,
                     "command.hint.request.title"
                 ),
-                description: `${gameSession.gameRound.getHintRequests()}/${getMajorityCount(
-                    message.guildID
-                )} ${state.localizer.translate(
+                description: state.localizer.translate(
                     message.guildID,
-                    "command.hint.request.description"
-                )}.`,
+                    "command.hint.request.description",
+                    {
+                        hintCounter: `${gameSession.gameRound.getHintRequests()}/${getMajorityCount(
+                            message.guildID
+                        )}`,
+                    }
+                ),
             },
             true
         );
