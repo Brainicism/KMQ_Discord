@@ -22,6 +22,9 @@ export default class LocalizationManager {
             directory: path.join(__dirname, "../../i18n"),
             objectNotation: true,
             indent: "    ",
+            mustacheConfig: {
+                tags: ["{", "}"],
+            },
 
             logDebugFn: (_msg) => {},
 
