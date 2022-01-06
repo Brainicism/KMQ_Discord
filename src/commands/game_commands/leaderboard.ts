@@ -41,11 +41,11 @@ export enum LeaderboardScope {
 }
 
 export enum LeaderboardDuration {
-    ALL_TIME = "alltime",
     DAILY = "daily",
     WEEKLY = "weekly",
     MONTHLY = "monthly",
     YEARLY = "yearly",
+    ALL_TIME = "alltime",
 }
 
 enum LeaderboardAction {
@@ -361,6 +361,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     new Date(d.getFullYear(), 0)
                 );
                 break;
+            case LeaderboardDuration.ALL_TIME:
             default:
                 break;
         }
@@ -520,17 +521,26 @@ export default class LeaderboardCommand implements BaseCommand {
 
                                     let level: string;
                                     if (permanentLb) {
-                                        level = `${state.localizer.translate(
+                                        level = state.localizer.translate(
                                             messageContext.guildID,
-                                            "misc.level"
-                                        )} ${friendlyFormattedNumber(
-                                            player.level
-                                        )} (${getRankNameByLevel(
-                                            player.level,
-                                            messageContext.guildID
-                                        )})`;
+                                            "command.leaderboard.levelEntry.permanent",
+                                            {
+                                                level: state.localizer.translate(
+                                                    messageContext.guildID,
+                                                    "misc.level"
+                                                ),
+                                                formattedNumber:
+                                                    friendlyFormattedNumber(
+                                                        player.level
+                                                    ),
+                                                rankName: getRankNameByLevel(
+                                                    player.level,
+                                                    messageContext.guildID
+                                                ),
+                                            }
+                                        );
                                     } else {
-                                        const levelText =
+                                        const levelPluralized =
                                             state.localizer.translateN(
                                                 messageContext.guildID,
                                                 "command.leaderboard.level",
@@ -539,13 +549,13 @@ export default class LeaderboardCommand implements BaseCommand {
 
                                         level = state.localizer.translate(
                                             messageContext.guildID,
-                                            "command.leaderboard.levelsGained",
+                                            "command.leaderboard.levelEntry.temporary",
                                             {
                                                 formattedNumber:
                                                     friendlyFormattedNumber(
                                                         player.level
                                                     ),
-                                                levelText,
+                                                levelPluralized,
                                             }
                                         );
                                     }
@@ -618,21 +628,27 @@ export default class LeaderboardCommand implements BaseCommand {
                             case LeaderboardScope.GLOBAL:
                                 leaderboardScope = state.localizer.translate(
                                     messageContext.guildID,
-                                    "command.leaderboard.global"
+                                    "command.leaderboard.scope.global"
                                 );
                                 break;
                             case LeaderboardScope.SERVER:
                                 if (process.env.NODE_ENV !== EnvType.TEST) {
-                                    leaderboardScope = `${
-                                        state.client.guilds.get(
-                                            messageContext.guildID
-                                        ).name
-                                    }'s`;
+                                    leaderboardScope =
+                                        state.localizer.translate(
+                                            messageContext.guildID,
+                                            "command.leaderboard.scope.server.withName",
+                                            {
+                                                serverName:
+                                                    state.client.guilds.get(
+                                                        messageContext.guildID
+                                                    ).name,
+                                            }
+                                        );
                                 } else {
                                     leaderboardScope =
                                         state.localizer.translate(
                                             messageContext.guildID,
-                                            "command.leaderboard.server"
+                                            "command.leaderboard.scope.server.noName"
                                         );
                                 }
 
@@ -640,18 +656,48 @@ export default class LeaderboardCommand implements BaseCommand {
                             case LeaderboardScope.GAME:
                                 leaderboardScope = state.localizer.translate(
                                     messageContext.guildID,
-                                    "command.leaderboard.currentGame"
+                                    "command.leaderboard.scope.currentGame"
                                 );
                                 break;
                             default:
                                 break;
                         }
 
-                        const durationString = !permanentLb
-                            ? ` ${duration[0].toUpperCase()}${duration.slice(
-                                  1
-                              )} `
-                            : " ";
+                        let leaderboardDuration: string;
+                        switch (duration) {
+                            case LeaderboardDuration.DAILY:
+                                leaderboardDuration = state.localizer.translate(
+                                    messageContext.guildID,
+                                    "command.leaderboard.duration.daily"
+                                );
+                                break;
+                            case LeaderboardDuration.WEEKLY:
+                                leaderboardDuration = state.localizer.translate(
+                                    messageContext.guildID,
+                                    "command.leaderboard.duration.weekly"
+                                );
+                                break;
+                            case LeaderboardDuration.MONTHLY:
+                                leaderboardDuration = state.localizer.translate(
+                                    messageContext.guildID,
+                                    "command.leaderboard.duration.monthly"
+                                );
+                                break;
+                            case LeaderboardDuration.YEARLY:
+                                leaderboardDuration = state.localizer.translate(
+                                    messageContext.guildID,
+                                    "command.leaderboard.duration.yearly"
+                                );
+                                break;
+                            case LeaderboardDuration.ALL_TIME:
+                                leaderboardDuration = state.localizer.translate(
+                                    messageContext.guildID,
+                                    "command.leaderboard.duration.allTime"
+                                );
+                                break;
+                            default:
+                                break;
+                        }
 
                         let leaderboardType: string;
                         switch (type) {
@@ -659,16 +705,16 @@ export default class LeaderboardCommand implements BaseCommand {
                                 leaderboardType = "";
                                 break;
                             case LeaderboardType.GAMES_PLAYED:
-                                leaderboardType = state.localizer.translate(
+                                leaderboardType = `(${state.localizer.translate(
                                     messageContext.guildID,
-                                    "command.leaderboard.byGamesPlayed"
-                                );
+                                    "command.leaderboard.type.byGamesPlayed"
+                                )})`;
                                 break;
                             case LeaderboardType.SONGS_GUESSED:
-                                leaderboardType = state.localizer.translate(
+                                leaderboardType = `(${state.localizer.translate(
                                     messageContext.guildID,
-                                    "command.leaderboard.bySongsGuessed"
-                                );
+                                    "command.leaderboard.type.bySongsGuessed"
+                                )})`;
                                 break;
                             default:
                                 break;
@@ -676,15 +722,17 @@ export default class LeaderboardCommand implements BaseCommand {
 
                         resolve({
                             title: bold(
-                                state.localizer.translate(
-                                    messageContext.guildID,
-                                    "command.leaderboard.title",
-                                    {
-                                        leaderboardScope,
-                                        durationString,
-                                        leaderboardType,
-                                    }
-                                )
+                                state.localizer
+                                    .translate(
+                                        messageContext.guildID,
+                                        "command.leaderboard.title",
+                                        {
+                                            leaderboardScope,
+                                            leaderboardDuration,
+                                            leaderboardType,
+                                        }
+                                    )
+                                    .trimEnd()
                             ),
                             fields,
                             timestamp: new Date(),

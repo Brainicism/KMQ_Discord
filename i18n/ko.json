@@ -363,9 +363,13 @@
             }
         },
         "leaderboard": {
-            "byGamesPlayed": " (by games played)",
-            "bySongsGuessed": " (by songs guessed)",
-            "currentGame": "Current Game's",
+            "duration": {
+                "allTime": "All-time",
+                "daily": "Daily",
+                "monthly": "Monthly",
+                "weekly": "Weekly",
+                "yearly": "Yearly"
+            },
             "enrolled": {
                 "description": "Your name is now visible on the leaderboard.",
                 "title": "Leaderboard Enrollment Complete"
@@ -394,7 +398,6 @@
                 }
             },
             "gamesPlayed": "{{{gameCount}}} games played",
-            "global": "Global",
             "help": {
                 "description": "View the KMQ leaderboard.",
                 "example": {
@@ -415,11 +418,25 @@
                 "one": "level",
                 "other": "levels"
             },
-            "levelsGained": "{{{formattedNumber}}} {{{levelText}}} gained",
+            "levelEntry": {
+                "permanent": "{{{level}}} {{{formattedNumber}}} ({{{rankName}}})",
+                "temporary": "{{{formattedNumber}}} {{{levelPluralized}}} gained"
+            },
             "rankNumber": "Rank #{{{rank}}}",
-            "server": "Server's",
+            "scope": {
+                "currentGame": "Current Game's",
+                "global": "Global",
+                "server": {
+                    "noName": "Server's",
+                    "withName": "{{{serverName}}}'s"
+                }
+            },
             "songsGuessed": "{{{songsGuessed}}} songs guessed",
-            "title": "{{{leaderboardScope}}}{{{durationString}}}Leaderboard{{{leaderboardType}}}",
+            "title": "{{{leaderboardScope}}} {{{leaderboardDuration}}} Leaderboard {{{leaderboardType}}}",
+            "type": {
+                "byGamesPlayed": "by games played",
+                "bySongsGuessed": "by songs guessed"
+            },
             "unenrolled": {
                 "description": "You are no longer visible on the leaderboard.",
                 "title": "Leaderboard Unenrollment Complete"
