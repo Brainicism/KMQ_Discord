@@ -176,7 +176,7 @@ export default class AddCommand implements BaseCommand {
                     {
                         matchedGroupsAction: state.localizer.translate(
                             message.guildID,
-                            "command.add.failure.unrecognizedGroups.added"
+                            "misc.failure.unrecognizedGroups.added"
                         ),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: unmatchedGroups.join(", "),

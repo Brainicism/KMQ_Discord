@@ -136,7 +136,13 @@ export default class ExcludeCommand implements BaseCommand {
                         ),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: `${unmatchedGroups.join(", ")}`,
-                        solution: `\`${process.env.BOT_PREFIX}add exclude\``,
+                        solution: state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.unrecognizedGroups.solution",
+                            {
+                                command: `\`${process.env.BOT_PREFIX}add exclude\``,
+                            }
+                        ),
                     }
                 ),
                 footerText: excludeWarning,

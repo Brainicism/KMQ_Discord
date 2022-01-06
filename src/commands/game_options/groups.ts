@@ -130,7 +130,7 @@ export default class GroupsCommand implements BaseCommand {
                     message.guildID,
                     "misc.failure.unrecognizedGroups.description",
                     {
-                        addedOrRemoved: state.localizer.translate(
+                        matchedGroupsAction: state.localizer.translate(
                             message.guildID,
                             "misc.failure.unrecognizedGroups.added"
                         ),
@@ -139,7 +139,9 @@ export default class GroupsCommand implements BaseCommand {
                         solution: state.localizer.translate(
                             message.guildID,
                             "misc.failure.unrecognizedGroups.solution",
-                            { command: `\`${process.env.BOT_PREFIX}add\`` }
+                            {
+                                command: `\`${process.env.BOT_PREFIX}add groups\``,
+                            }
                         ),
                     }
                 ),

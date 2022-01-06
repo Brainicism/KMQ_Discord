@@ -191,13 +191,13 @@
         },
         "gender": {
             "help": {
-                "description": "Choose the gender of the artists you'd like to hear from. Options are the following, {{male}}, {{female}}, and {{coed}}. Alternatively, use {{genderAlternating}} to rotate between {{male}} and {{female}} artists every round.",
+                "description": "Choose the gender of the artists you'd like to hear from. Options are the following, {{male}}, {{female}}, and {{coed}}. Alternatively, use {{genderAlternating}} to rotate between male and female artists every round.",
                 "example": {
-                    "alternating": "Alternate between {{male}} and {{female}} artists every round",
-                    "coed": "Play songs only from {{coed}} groups (groups with both male and female members)",
-                    "female": "Play songs only from {{female}} artists",
-                    "maleFemale": "Play songs from both {{male}} and {{female}} artists",
-                    "reset": "Reset to the default genders of {{male}}, {{female}}, and {{coed}}"
+                    "alternating": "Alternate between male and female artists every round",
+                    "coed": "Play songs only from coed groups (groups with both male and female members)",
+                    "female": "Play songs only from female artists",
+                    "maleFemale": "Play songs from both male and female artists",
+                    "reset": "Reset to the default genders of male, female, and coed"
                 }
             },
             "warning": {
@@ -1032,7 +1032,8 @@
                 "title": "Song Query Error"
             },
             "unrecognizedGroups": {
-                "description": "One or more of the specified group names was not recognized. Those groups that matched are {{matchedGroupsAction}}. Please ensure that the group name matches exactly with the list provided by {{helpGroups}}.\nThe following groups were **not** recognized:\n {{unmatchedGroups}}{{solution}}",
+                "added": "added",
+                "description": "One or more of the specified group names was not recognized. Those groups that matched are {{matchedGroupsAction}}. Please ensure that the group name matches exactly with the list provided by {{helpGroups}}.\nThe following groups were **not** recognized:\n {{unmatchedGroups}}\n{{solution}}",
                 "solution": "Use {{command}} to add the unmatched groups.",
                 "title": "Unknown Group Name"
             },

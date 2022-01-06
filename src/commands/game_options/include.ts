@@ -164,7 +164,9 @@ export default class IncludeCommand implements BaseCommand {
                         solution: state.localizer.translate(
                             message.guildID,
                             "misc.failure.unrecognizedGroups.solution",
-                            { command: `\`${process.env.BOT_PREFIX}add\`` }
+                            {
+                                command: `\`${process.env.BOT_PREFIX}add include\``,
+                            }
                         ),
                     }
                 ),

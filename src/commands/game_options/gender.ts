@@ -53,8 +53,9 @@ export default class GenderCommand implements BaseCommand {
             guildID,
             "command.gender.help.description",
             {
-                male: Gender.MALE,
-                female: Gender.FEMALE,
+                male: `\`${Gender.MALE}\``,
+                female: `\`${Gender.FEMALE}\``,
+                coed: `\`${Gender.COED}\``,
                 genderAlternating: `\`${process.env.BOT_PREFIX}gender alternating\``,
             }
         ),
@@ -64,44 +65,35 @@ export default class GenderCommand implements BaseCommand {
                 example: "`,gender female`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "command.gender.help.example.female",
-                    { female: Gender.FEMALE }
+                    "command.gender.help.example.female"
                 ),
             },
             {
                 example: "`,gender male female`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "command.gender.help.example.maleFemale",
-                    { male: Gender.MALE, female: Gender.FEMALE }
+                    "command.gender.help.example.maleFemale"
                 ),
             },
             {
                 example: "`,gender coed`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "command.gender.help.example.coed",
-                    { coed: Gender.COED }
+                    "command.gender.help.example.coed"
                 ),
             },
             {
                 example: "`,gender`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "command.gender.help.example.reset",
-                    {
-                        male: Gender.MALE,
-                        female: Gender.FEMALE,
-                        coed: Gender.COED,
-                    }
+                    "command.gender.help.example.reset"
                 ),
             },
             {
                 example: "`,gender alternating`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "command.gender.help.example.alternating",
-                    { male: Gender.MALE, female: Gender.FEMALE }
+                    "command.gender.help.example.alternating"
                 ),
             },
         ],
