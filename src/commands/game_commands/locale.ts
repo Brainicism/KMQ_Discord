@@ -12,20 +12,39 @@ import { KmqImages } from "../../constants";
 
 const logger = new IPCLogger("locale");
 
+enum LocaleArgument {
+    EN = "en",
+    ENGLISH = "english",
+
+    KO = "ko",
+    KR = "kr",
+    KOREAN = "korean",
+}
+
 export default class LocaleTypeCommand implements BaseCommand {
     aliases = ["botlanguage"];
 
     validations = {
         minArgCount: 0,
         maxArgCount: 1,
-        arguments: [],
+        arguments: [
+            {
+                name: "localeType",
+                type: "enum" as const,
+                enums: Object.values(LocaleArgument),
+            },
+        ],
     };
 
     help = (guildID: string): Help => ({
         name: "locale",
         description: state.localizer.translate(
             guildID,
-            "command.locale.help.description"
+            "command.locale.help.description",
+            {
+                english: `\`${LocaleArgument.ENGLISH}\``,
+                korean: `\`${LocaleArgument.KOREAN}\``,
+            }
         ),
         usage: `,locale [${state.localizer.translate(
             guildID,
@@ -80,19 +99,20 @@ export default class LocaleTypeCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             language = DEFAULT_LOCALE;
         } else {
-            switch (parsedMessage.components[0].toLowerCase()) {
-                case "en":
-                case "english":
+            switch (
+                parsedMessage.components[0].toLowerCase() as LocaleArgument
+            ) {
+                case LocaleArgument.EN:
+                case LocaleArgument.ENGLISH:
                     language = LocaleType.EN;
                     break;
-                case "ko":
-                case "kr":
-                case "korean":
+                case LocaleArgument.KO:
+                case LocaleArgument.KR:
+                case LocaleArgument.KOREAN:
                     language = LocaleType.KO;
                     break;
                 default:
-                    language = DEFAULT_LOCALE;
-                    break;
+                    return;
             }
         }
 
