@@ -54,10 +54,10 @@
             "help": {
                 "description": "Choose whether you'd like to hear from soloists, groups, or both. Options are the following, {{soloists}}, {{groups}}, and {{both}}.",
                 "example": {
-                    "both": "Plays songs from both {{soloists}} and {{groups}}",
-                    "groups": "Play songs only from {{groups}}",
+                    "both": "Plays songs from both soloists and groups",
+                    "groups": "Play songs only from groups",
                     "reset": "Resets the artist type option",
-                    "soloists": "Play songs only from {{soloists}}"
+                    "soloists": "Play songs only from soloists"
                 }
             }
         },
@@ -191,13 +191,13 @@
         },
         "gender": {
             "help": {
-                "description": "Choose the gender of the artists you'd like to hear from. Options are the following, {{male}}, {{female}}, and {{coed}}. Alternatively, use {{genderAlternating}} to rotate between {{male}} and {{female}} artists every round.",
+                "description": "Choose the gender of the artists you'd like to hear from. Options are the following, {{male}}, {{female}}, and {{coed}}. Alternatively, use {{genderAlternating}} to rotate between male and female artists every round.",
                 "example": {
-                    "alternating": "Alternate between {{male}} and {{female}} artists every round",
-                    "coed": "Play songs only from {{coed}} groups (groups with both male and female members)",
-                    "female": "Play songs only from {{female}} artists",
-                    "maleFemale": "Play songs from both {{male}} and {{female}} artists",
-                    "reset": "Reset to the default genders of {{male}}, {{female}}, and {{coed}}"
+                    "alternating": "Alternate between male and female artists every round",
+                    "coed": "Play songs only from coed groups (groups with both male and female members)",
+                    "female": "Play songs only from female artists",
+                    "maleFemale": "Play songs from both male and female artists",
+                    "reset": "Reset to the default genders of male, female, and coed"
                 }
             },
             "warning": {
@@ -251,7 +251,7 @@
         },
         "help": {
             "command": "command",
-            "description": "Type {{play}} in chat and the bot will play a random k-pop song in VC. The goal of this game is to be the first person to guess the song name in chat.\nSee your current game options with {{options}}. Use `{{help}} [command]` to get more details ",
+            "description": "Type {{play}} in chat and the bot will play a random k-pop song in VC. The goal of this game is to be the first person to guess the song name in chat.\nSee your current game options with {{options}}. Use `{{help}} [{{command}}]` to get more details ",
             "examples": "Examples",
             "failure": {
                 "noDocs": "Sorry, there is no documentation on {{action}}."
@@ -348,8 +348,10 @@
                 "title": "{{joiningUser}} joined {{teamName}}"
             },
             "team": {
+                "join": "To join {{{teamName}}} alongside {{{mentionedUser}}}, enter `{{{joinCommand}}} {{{teamNameWithCleanEmojis}}}`.{{startGameInstructions}}",
                 "new": "New Team Created",
                 "startGameInstructions": "\nStart the game with {{beginCommand}}."
+
             }
         },
         "language": {
@@ -917,8 +919,10 @@
         },
         "vote": {
             "available": "You can vote now!",
-            "boostActive": "Boost Inactive!",
-            "boostInactive": "Boost Inactive",
+            "boost": {
+                "active": "Boost active!",
+                "inactive": "Boost Inactive"
+            },
             "description": "Vote for KMQ on [top.gg]({{voteLink}}) and you'll receive 2x EXP for an hour! You can vote once every {{voteResetDuration}} hours.\n\nWe'd appreciate it if you could also leave a [review]({{reviewLink}}).",
             "help": {
                 "description": "Shows instructions on how to vote to receive 2x EXP for an hour."
@@ -1032,7 +1036,8 @@
                 "title": "Song Query Error"
             },
             "unrecognizedGroups": {
-                "description": "One or more of the specified group names was not recognized. Those groups that matched are {{matchedGroupsAction}}. Please ensure that the group name matches exactly with the list provided by {{helpGroups}}.\nThe following groups were **not** recognized:\n {{unmatchedGroups}}{{solution}}",
+                "added": "added",
+                "description": "One or more of the specified group names was not recognized. Those groups that matched are {{matchedGroupsAction}}. Please ensure that the group name matches exactly with the list provided by {{helpGroups}}.\nThe following groups were **not** recognized:\n {{unmatchedGroups}}\n{{solution}}",
                 "solution": "Use {{command}} to add the unmatched groups.",
                 "title": "Unknown Group Name"
             },

@@ -351,7 +351,6 @@
                 "join": "To join {{{teamName}}} alongside {{{mentionedUser}}}, enter `{{{joinCommand}}} {{{teamNameWithCleanEmojis}}}`.{{startGameInstructions}}",
                 "new": "New Team Created",
                 "startGameInstructions": "\nStart the game with {{beginCommand}}."
-
             }
         },
         "language": {
