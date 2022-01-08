@@ -42,7 +42,7 @@
         },
         "answer": {
             "help": {
-                "description": "Choose how to answer: by typing your answer, or via multiple choice. Options are the following, `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, and `{{hard}}`. Playing on multiple choice mode reduces EXP by (0.25x, 0.5x, 0.75x) based on difficulty.",
+                "description": "Choose how to answer: by typing your answer, or via multiple choice. Options are the following: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, and `{{hard}}`. Playing on multiple choice mode reduces EXP by (0.25x, 0.5x, 0.75x) based on difficulty.",
                 "example": {
                     "multipleChoice": "Click on the button from {{optionCount}} multiple choice options to guess. {{penalty}} EXP penalty will be applied",
                     "typing": "Type your answer in the chat to guess",
@@ -52,7 +52,7 @@
         },
         "artisttype": {
             "help": {
-                "description": "Choose whether you'd like to hear from soloists, groups, or both. Options are the following, {{soloists}}, {{groups}}, and {{both}}.",
+                "description": "Choose whether you'd like to hear from soloists, groups, or both. Options are the following: {{soloists}}, {{groups}}, and {{both}}.",
                 "example": {
                     "both": "Plays songs from both soloists and groups",
                     "groups": "Play songs only from groups",
@@ -191,7 +191,7 @@
         },
         "gender": {
             "help": {
-                "description": "Choose the gender of the artists you'd like to hear from. Options are the following, {{male}}, {{female}}, and {{coed}}. Alternatively, use {{genderAlternating}} to rotate between male and female artists every round.",
+                "description": "Choose the gender of the artists you'd like to hear from. Options are the following: {{male}}, {{female}}, and {{coed}}. Alternatively, use {{genderAlternating}} to rotate between male and female artists every round.",
                 "example": {
                     "alternating": "Alternate between male and female artists every round",
                     "coed": "Play songs only from coed groups (groups with both male and female members)",
@@ -351,7 +351,6 @@
                 "join": "To join {{{teamName}}} alongside {{{mentionedUser}}}, enter `{{{joinCommand}}} {{{teamNameWithCleanEmojis}}}`.{{startGameInstructions}}",
                 "new": "New Team Created",
                 "startGameInstructions": "\nStart the game with {{beginCommand}}."
-
             }
         },
         "language": {
@@ -495,7 +494,7 @@
         },
         "locale": {
             "help": {
-                "description": "Change the language of the bot.",
+                "description": "Change the language of the bot. Options are the following: {{english}}, {{korean}}.",
                 "example": {
                     "reset": "Reset the bot's language to {{defaultLocale}}",
                     "toEnglish": "Change the bot's language to {{english}}",
