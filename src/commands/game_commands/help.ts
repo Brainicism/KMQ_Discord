@@ -133,6 +133,10 @@ const helpMessage = async (
                 play: `\`${process.env.BOT_PREFIX}play\``,
                 options: `\`${process.env.BOT_PREFIX}options\``,
                 help: `${process.env.BOT_PREFIX}help`,
+                command: state.localizer.translate(
+                    message.guildID,
+                    "command.help.command"
+                ),
             }
         );
 

@@ -29,7 +29,7 @@ export default class ExcludeCommand implements BaseCommand {
             guildID,
             "command.exclude.help.description",
             {
-                groupsLink: GROUP_LIST_URL,
+                groupList: GROUP_LIST_URL,
             }
         ),
         usage: ",exclude [group1],{group2}",
@@ -40,7 +40,7 @@ export default class ExcludeCommand implements BaseCommand {
                     guildID,
                     "command.exclude.help.example.singleGroup",
                     {
-                        artist: "Blackpink",
+                        group: "Blackpink",
                     }
                 ),
             },
@@ -168,8 +168,11 @@ export default class ExcludeCommand implements BaseCommand {
                         message.guildID,
                         "misc.failure.groupsExcludeConflict.description",
                         {
-                            conflictingOptionOne: `\`${GameOption.EXCLUDE}\``,
-                            conflictingOptionTwo: `\`${GameOption.GROUPS}\``,
+                            conflictingOptionOne: "`exclude`",
+                            conflictingOptionTwo: "`groups`",
+                            groupsList: [...intersection]
+                                .filter((x) => !x.includes("+"))
+                                .join(", "),
                             solutionStepOne: `\`${process.env.BOT_PREFIX}remove groups\``,
                             solutionStepTwo: `\`${process.env.BOT_PREFIX}exclude\``,
                             allowOrPrevent: state.localizer.translate(

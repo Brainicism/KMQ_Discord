@@ -133,8 +133,8 @@ export default class GenderCommand implements BaseCommand {
                         message.guildID,
                         "misc.failure.gameOptionConflict.description",
                         {
-                            optionOne: `\`${GameOption.GROUPS}\``,
-                            optionTwo: `\`${GameOption.GENDER}\``,
+                            optionOne: "`groups`",
+                            optionTwo: "`gender`",
                             optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
                         }
                     ),

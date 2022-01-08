@@ -59,7 +59,10 @@ export default class ForceHintCommand implements BaseCommand {
         gameRound.hintRequested(message.author.id);
         gameRound.hintUsed = true;
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(message.guildID, "hint.title"),
+            title: state.localizer.translate(
+                message.guildID,
+                "command.hint.title"
+            ),
             description: generateHint(
                 message.guildID,
                 guildPreference.gameOptions.guessModeType,

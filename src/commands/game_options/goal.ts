@@ -118,7 +118,7 @@ export default class GoalCommand implements BaseCommand {
                         "command.goal.failure.gameOptionConflict.description",
                         {
                             elimination: `\`${GameType.ELIMINATION}\``,
-                            goal: `\`${GameOption.GOAL}\``,
+                            goal: "`goal`",
                             classic: `\`${GameType.CLASSIC}\``,
                             teams: `\`${GameType.TEAMS}\``,
                         }

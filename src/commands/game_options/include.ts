@@ -28,9 +28,9 @@ export default class IncludeCommand implements BaseCommand {
             guildID,
             "command.include.help.description",
             {
-                gender: `\`${GameOption.GENDER}\``,
-                artisttype: `\`${GameOption.ARTIST_TYPE}\``,
-                groupsLink: GROUP_LIST_URL,
+                gender: "`gender`",
+                artisttype: "`artisttype`",
+                groupList: GROUP_LIST_URL,
             }
         ),
         usage: ",include [group1],{group2}",

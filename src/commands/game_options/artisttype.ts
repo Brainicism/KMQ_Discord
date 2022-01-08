@@ -53,31 +53,21 @@ export default class ArtistTypeCommand implements BaseCommand {
                 example: "`,artisttype soloists`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "command.artisttype.help.example.soloists",
-                    {
-                        soloists: `\`${ArtistType.SOLOIST}\``,
-                    }
+                    "command.artisttype.help.example.soloists"
                 ),
             },
             {
                 example: "`,artisttype groups`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "command.artisttype.help.example.groups",
-                    {
-                        groups: `\`${ArtistType.GROUP}\``,
-                    }
+                    "command.artisttype.help.example.groups"
                 ),
             },
             {
                 example: "`,artisttype both`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "command.artisttype.help.example.both",
-                    {
-                        soloists: `\`${ArtistType.SOLOIST}\``,
-                        groups: `\`${ArtistType.GROUP}\``,
-                    }
+                    "command.artisttype.help.example.both"
                 ),
             },
             {
@@ -120,8 +110,8 @@ export default class ArtistTypeCommand implements BaseCommand {
                     message.guildID,
                     "misc.failure.gameOptionConflict.description",
                     {
-                        optionOne: `\`${GameOption.GROUPS}\``,
-                        optionTwo: `\`${GameOption.ARTIST_TYPE}\``,
+                        optionOne: "`groups`",
+                        optionTwo: "`artisttype`",
                         optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
                     }
                 ),

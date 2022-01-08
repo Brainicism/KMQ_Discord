@@ -134,11 +134,11 @@ export default class VoteCommand implements BaseCommand {
                 title: boostActive
                     ? state.localizer.translate(
                           message.guildID,
-                          "command.vote.boostActive"
+                          "command.vote.boost.active"
                       )
                     : state.localizer.translate(
                           message.guildID,
-                          "command.vote.boostInactive"
+                          "command.vote.boost.inactive"
                       ),
                 description: `${voteStatusString}\n\n${state.localizer.translate(
                     message.guildID,

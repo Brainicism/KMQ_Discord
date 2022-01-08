@@ -168,10 +168,13 @@ export default class GroupsCommand implements BaseCommand {
                         message.guildID,
                         "misc.failure.groupsExcludeConflict.description",
                         {
-                            conflictingOptionOne: `\`${GameOption.GROUPS}\``,
-                            conflictingOptionTwo: `\`${GameOption.EXCLUDE}\``,
-                            solutionStepOne: `\`${process.env.BOT_PREFIX}remove ${GameOption.EXCLUDE}\``,
-                            solutionStepTwo: `\`${process.env.BOT_PREFIX}${GameOption.GROUPS}\``,
+                            conflictingOptionOne: "`exclude`",
+                            conflictingOptionTwo: "`groups`",
+                            groupsList: [...intersection]
+                                .filter((x) => !x.includes("+"))
+                                .join(", "),
+                            solutionStepOne: `\`${process.env.BOT_PREFIX}remove exclude\``,
+                            solutionStepTwo: `\`${process.env.BOT_PREFIX}groups\``,
                             allowOrPrevent: state.localizer.translate(
                                 message.guildID,
                                 "misc.failure.groupsExcludeConflict.allow"
