@@ -478,6 +478,11 @@ export default class PlayCommand implements BaseCommand {
                 );
             }
 
+            // prevent any duplicate game sessions
+            if (gameSessions[message.guildID]) {
+                gameSessions[message.guildID].endSession();
+            }
+
             gameSessions[message.guildID] = gameSession;
         } else {
             logger.warn(

@@ -91,7 +91,7 @@ function registerGlobalIntervals(fleet: Fleet): void {
         if (process.env.NODE_ENV !== EnvType.PROD) return;
         logger.info("Performing regularly scheduled Daisuki database seed");
         const overrideFileExists = fs.existsSync(
-            path.join(__dirname, "../../data/skip_seed")
+            path.join(__dirname, "../data/skip_seed")
         );
 
         if (overrideFileExists) {
