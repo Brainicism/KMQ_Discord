@@ -6,7 +6,11 @@ import pluralize from "pluralize";
 import GuildPreference from "../structures/guild_preference";
 import GameSession from "../structures/game_session";
 import { IPCLogger } from "../logger";
-import { getAvailableSongCount, userBonusIsActive } from "./game_utils";
+import {
+    getAvailableSongCount,
+    getKmqCurrentVersion,
+    userBonusIsActive,
+} from "./game_utils";
 import { getFact } from "../fact_generator";
 import {
     EmbedPayload,
@@ -1423,6 +1427,7 @@ export function sendDebugAlertWebhook(
         ],
         username: "Kimiqo",
         avatar_url: avatarUrl,
+        footerText: getKmqCurrentVersion(),
     });
 }
 
