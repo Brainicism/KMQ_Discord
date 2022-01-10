@@ -424,10 +424,10 @@
                 "temporary": "{{formattedNumber}} {{levelPluralized}} 획득하셨습니다!"
             },
             "quote": {
-                "name": "당신의 이름이 리더보드에 표시되기를 원하십니까? 참조 {{command}}",
-                "nextPage": "리더보드의 다음 페이지를 보고 싶으십니까? 참조 {{command}}"
+                "name": "당신이 리더보드에 표시되기를 원하십니까? / 참고: {{command}}",
+                "nextPage": "리더보드의 다음 페이지를 보고 싶으십니까? / 참고: {{command}}"
             },
-            "rankNumber": "순위: #{{rank}}",
+            "rankNumber": "순위: {{rank}}위",
             "scope": {
                 "currentGame": "현재 게임",
                 "global": "글로벌",
@@ -832,7 +832,7 @@
         },
         "shuffle": {
             "help": {
-                "description": "노래가 완전히 무작위로 재생되는지 ({{random}}) 아니면 모든 노래가 재생될 때까지 무작위로 고유하게 재생되는지 ({{shuffle}}) 선택하십시오.",
+                "description": "노래가 완전히 무작위로 재생되는지 ({{random}}) 아니면 모든 노래가 재생될 때까지 무작위로 재생되는지 ({{shuffle}}) 선택하십시오.",
                 "example": {
                     "random": "노래는 무작위로 재생됩니다.",
                     "reset": "{{defaultShuffle}}의 기본 셔플 모드로 재설정합니다.",
@@ -845,11 +845,11 @@
                 "description": "현재 노래를 건너뛰려면 투표하세요. / 대다수의 참가자가 건너뛰기로 투표하면 노래를 건너뜁니다."
             },
             "success": {
-                "description": "{{skipCounter}} 건너뛰기 달성, 건너뛰기...",
+                "description": "{{skipCounter}} 건너뛰기 요청이 수락되었습니다!",
                 "title": "건너뛰기"
             },
             "vote": {
-                "description": "{{skipCounter}} 건너뛰기 요청이 수신되었습니다.",
+                "description": "{{skipCounter}} 건너뛰기가 요청되었습니다!",
                 "title": "건너뛰기 요청"
             }
         },
@@ -862,7 +862,7 @@
                     "highPitch": "높은 음높이로 노래를 재생합니다.",
                     "lowPitch": "낮은 음높이로 노래를 재생합니다.",
                     "nightcore": "노래의 나이트코어 편집을 재생합니다.",
-                    "reset": "특수 옵션 재설정합니다.",
+                    "reset": "특수 옵션을 재설정합니다.",
                     "reverse": "노래를 거꾸로 재생합니다.",
                     "slow": "느린 속도로 노래를 재생합니다."
                 }
@@ -881,7 +881,7 @@
                 "latestSongUpdate": "최신 노래 업데이트",
                 "recentGameRounds": "(최근) 게임 라운드",
                 "recentGameSessions": "(최근) 게임 세션",
-                "recentPlayers": "(최근) 선수",
+                "recentPlayers": "(최근) 플레이어",
                 "title": "게임 통계"
             },
             "help": {
@@ -1083,7 +1083,7 @@
                 "bonusArtists": "매일 10명의 아티스트가 무작위로 선택되어 노래에 2배의 경험치를 제공합니다. / 현재 목록을 보려면 `,exp`를 참조하십시오!",
                 "cutoff": "`cutoff` 게임 옵션을 사용하여 노래를 듣고 싶은 년도를 설정할 수 있습니다. / 자세한 내용은 `,help cutoff`를 참조하세요.",
                 "duration": "KMQ가 공부에 방해가 되나요? / 각 게임의 길이를 제한하려면 `,duration`을 확인하세요. 자세한 내용은 `,help duration`을 참조하세요.",
-                "exclude": "You can set which groups you *don't* want to hear songs from using the `exclude` game option. See `,help exclude` for more details.",
+                "exclude": "`,exclude` 게임 옵션을 사용하여 노래를 *듣고 싶지 않은* 그룹을 설정할 수 있습니다. / 자세한 내용은 `,help exclude`을 참조하세요.",
                 "exp": "라운드당 경험치가 어떻게 계산되는지 궁금하십니까? / 전체 분석은 `,exp`를 참조하십시오!",
                 "firstGameOfDayBonus": "오늘의 첫 번째 게임에는 1.5배의 경험치 보너스가 있습니다!",
                 "gender": "`gender` 게임 옵션을 사용하여 노래를 듣고 싶은 성별 그룹을 설정할 수 있습니다. / 자세한 내용은 `,help gender`을 참조하세요.",
@@ -1135,10 +1135,9 @@
             "bonusExpRound": "보너스 경험치 라운드",
             "correctGuess": "{{correctGuesser}}가 올바르게 추측됨. (+{{expGain}} 경험치)",
             "noCorrectGuesses": "아무도 얻지 못했다.",
-            "noWinners": "아무도 우승하지 못했다.",
+            "noWinners": "아무도 우승하지 못했습니다.",
             "runnersUp": "준우승",
-            "songsCorrectlyGuessed": "{{songCount}}곡을 정확히 추측을 하였습니다!",
-            "uniqueSongsPlayed": "{{uniqueSongCount}}개의 고유한 노래가 재생되었습니다.",
+            "uniqueSongsPlayed": "{{uniqueSongCount}}개의 노래가 재생되었습니다.",
             "winMessage": "{{playerName}} 승리!"
         },
         "interaction": {
@@ -1226,10 +1225,10 @@
         "timeFinished": "시간의 최대",
         "uniqueSongsReset": {
             "description": "모든 곡이 재생되었습니다. {{totalSongCount}}곡이 재구성됩니다.",
-            "title": "고유 곡 재설정"
+            "title": "곡 재설정"
         },
-        "usage": "용법",
-        "views": "견해",
+        "usage": "사용법",
+        "views": "조회수",
         "warning": {
             "addRemoveOrdering": {
                 "footer": "{{addOrRemove}} {{command}}를 사용하려고 했습니까?"
