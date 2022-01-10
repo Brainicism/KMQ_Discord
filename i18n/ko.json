@@ -416,8 +416,8 @@
                 }
             },
             "level": {
-                "one": "level",
-                "other": "levels"
+                "one": "레벨",
+                "other": "레벨"
             },
             "levelEntry": {
                 "permanent": "{{level}} {{formattedNumber}} ({{rankName}})",
@@ -535,7 +535,7 @@
             },
             "notSet": "설정되지 않음",
             "overview": "이제 다음 게임 옵션에서 사용 가능한 노래 {{totalSongs}}개 중 상위 {{limit}}개를 재생합니다.\n\n{{priorityOptions}}",
-            "perCommandHelp": "명령 사용 방법에 대한 정보를 찾고 계십니까? / 자세한 내용은 \"{{helpCommand}} [command]\"을 확인하세요.",
+            "perCommandHelp": "명령 사용 방법에 대한 정보를 찾고 계십니까? / 자세한 내용은 \"{{helpCommand}} [명령]\"을 확인하세요.",
             "preset": "사전 설정",
             "reset": "{{presetOrOption}}으로 재설정합니다.",
             "timer": "{{timerInSeconds}}초",
@@ -567,7 +567,7 @@
                 }
             },
             "exp": {
-                "doubleExpForVoting": "[voting]({{link}})에 대한 경험치를 두 배로 받습니다!",
+                "doubleExpForVoting": "[투표]({{link}})에 대한 경험치를 두 배로 받습니다!",
                 "howToVote": "투표 방법에 대한 정보는 {{vote}}를 참조하세요. / KMQ를 지원해주셔서 감사합니다!",
                 "powerHour": "KMQ Power Hour가 활성화되었습니다!",
                 "weekend": "두 배 경험치 (주말) 활성화되었습니다!"
@@ -592,7 +592,7 @@
                         "join": "{{join}} 게임에 입장하였습니다."
                     },
                     "teams": {
-                        "join": "`{{join}} [team name]` 팀에 입장하셨습니다."
+                        "join": "`{{join}} [팀 이름]` 팀에 입장하셨습니다."
                     },
                     "title": "{{playOldGameType}} 무시"
                 }
@@ -624,7 +624,7 @@
                 "title": "사전 설정을 삭제합니다."
             },
             "exported": {
-                "description": "다음을 사용하여 다른 서버의 새 사전 설정으로 {{presetName}} 가져옵니다.:\n\n`{{presetImport}} {{presetUUID}} [preset_name]`\n\n다음을 사용하여 사전 설정의 옵션을 직접 로드:\n\n`{{presetLoad }} {{presetUUID}}`",
+                "description": "다음을 사용하여 다른 서버의 새 사전 설정으로 {{presetName}} 가져옵니다.:\n\n`{{presetImport}} {{presetUUID}} [사전 설정 이름]`\n\n다음을 사용하여 사전 설정의 옵션을 직접 로드:\n\n`{{presetLoad}} {{presetUUID}}`",
                 "title": "사전 설정을 내보내기합니다."
             },
             "failure": {
@@ -641,7 +641,7 @@
                     "title": "사전 설정 이름이 너무 깁니다."
                 },
                 "missingIdentifier": {
-                    "description": "사전 설정 식별자를 지정해야 합니다. / 사전 설정의 식별자를 검색하려면 `{{presetExport}} [preset_name]`를 사용하세요.",
+                    "description": "사전 설정 식별자를 지정해야 합니다. / 사전 설정의 식별자를 검색하려면 `{{presetExport}} [사전 설정 이름]`를 사용하세요.",
                     "title": "사전 설정 식별자가 누락되었습니다."
                 },
                 "missingName": {
@@ -922,7 +922,7 @@
                 "active": "부스트 활성화",
                 "inactive": "부스트 비활성화"
             },
-            "description": "[top.gg]({{voteLink}})에서 KMQ에 투표하면 1시간 동안 경험치가 2배 지급됩니다! / {{voteResetDuration}}시간마다 한 번씩 투표할 수 있습니다.\n\n[review]({{reviewLink}})도 남겨주시면 감사하겠습니다.",
+            "description": "[top.gg]({{voteLink}})에서 KMQ에 투표하면 1시간 동안 경험치가 2배 지급됩니다! / {{voteResetDuration}}시간마다 한 번씩 투표할 수 있습니다.\n\n[리뷰를]({{reviewLink}})도 남겨주시면 감사하겠습니다.",
             "help": {
                 "description": "1시간 동안 경험치 2배를 받기 위해 투표하는 방법에 대한 지침을 보여줍니다."
             },
@@ -1005,9 +1005,9 @@
                 "title": "게임 옵션 충돌"
             },
             "groupsExcludeConflict": {
-                "allow": "to allow them to play",
+                "allow": "그들이 놀 수 있도록",
                 "description": "지정된 {{conflictingOptionOne}} 중 하나 이상이 이미 {{conflictingOptionTwo}}에 포함되어 있습니다. \n\n다음 그룹은 {{conflictingOptionOne}}에 **추가되지 않습니다.**\n\n {{groupsList}}\n{{solutionStepOne}}을 사용한 다음 {{solutionStepTwo}} {{allowOrPrevent}}를 사용하세요.",
-                "prevent": "to prevent them from playing",
+                "prevent": "그들이 놀지 못하도록",
                 "title": "그룹 및 충돌 제외"
             },
             "interaction": {
@@ -1207,7 +1207,7 @@
             "title": "잠시만 기다려주십시오..."
         },
         "sendingBookmarkedSongs": {
-            "description": "{{players}}에게 {{songs}}을(를) 보냅니다.\n\n노래 메시지를 마우스 오른쪽 버튼으로 클릭하고 `Apps > Bookmark Song`를 선택하여 게임 중에 노래를 북마크하세요.",
+            "description": "{{players}}에게 {{songs}}을(를) 보냅니다.\n\n노래 메시지를 마우스 오른쪽 버튼으로 클릭하고 `앱 > Bookmark Song`를 선택하여 게임 중에 노래를 북마크하세요.",
             "title": "북마크된 노래를 보내는 중..."
         },
         "song": "노래",
