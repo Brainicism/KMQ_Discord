@@ -129,7 +129,7 @@
                 }
             },
             "help": {
-                "description": "제외할 아티스트를 쉼표로 구분하여 선택하십시오. / 그룹 이름 목록은 [바로가기]({{groupList}})에서 찾을 수 있습니다.",
+                "description": "제외할 아티스트를 쉼표로 구분하여 선택하십시오. / 그룹 이름 목록은 [여기]({{groupList}})에서 찾을 수 있습니다.",
                 "example": {
                     "multipleGroups": "{{groupOne}}, {{groupTwo}}, {{groupThree}}의 노래를 무시합니다.",
                     "reset": "제외 옵션을 재설정합니다.",
@@ -230,7 +230,7 @@
         },
         "groups": {
             "help": {
-                "description": "듣고 싶은 그룹을 쉼표로 구분하여 선택하십시오. / 그룹 이름 목록은 [바로가기]({{groupList}})에서 찾을 수 있습니다.",
+                "description": "듣고 싶은 그룹을 쉼표로 구분하여 선택하십시오. / 그룹 이름 목록은 [여기]({{groupList}})에서 찾을 수 있습니다.",
                 "example": {
                     "multipleGroups": "{{groupOne}}, {{groupTwo}}, {{groupThree}}의 노래만 재생합니다.",
                     "reset": "그룹 옵션을 재설정합니다.",
@@ -298,7 +298,7 @@
                 }
             },
             "help": {
-                "description": "다른 필터({{gender}}, {{artisttype}} 등)를 무시하고 쉼표로 구분하여 강제로 포함할 그룹을 선택합니다. / 그룹 이름 목록은 [바로가기]({{groupList}})에서 찾을 수 있습니다.",
+                "description": "다른 필터({{gender}}, {{artisttype}} 등)를 무시하고 쉼표로 구분하여 강제로 포함할 그룹을 선택합니다. / 그룹 이름 목록은 [여기]({{groupList}})에서 찾을 수 있습니다.",
                 "example": {
                     "multipleGroups": "{{groupOne}}, {{groupTwo}}, {{groupThree}}의 노래를 강제로 포함합니다.",
                     "reset": "포함 옵션을 재설정합니다.",
