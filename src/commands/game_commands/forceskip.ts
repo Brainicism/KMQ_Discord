@@ -82,7 +82,7 @@ export default class ForceSkipCommand implements BaseCommand {
                 color: EMBED_SUCCESS_COLOR,
                 title: state.localizer.translate(
                     message.guildID,
-                    "command.skip.title"
+                    "command.skip.success.title"
                 ),
                 description: state.localizer.translate(
                     message.guildID,

@@ -387,7 +387,7 @@ export default class GameSession {
         await this.endRound(
             { correct: false },
             await getGuildPreference(this.guildID),
-            new MessageContext(this.textChannelID)
+            new MessageContext(this.textChannelID, null, this.guildID)
         );
         const voiceConnection = state.client.voiceConnections.get(this.guildID);
 
