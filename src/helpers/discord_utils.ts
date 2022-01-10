@@ -1218,7 +1218,9 @@ export async function sendEndGameMessage(
                   )
                 : null,
             thumbnailUrl: winners[0].getAvatarURL(),
-            title: `🎉 ${gameSession.scoreboard.getWinnerMessage()} 🎉`,
+            title: `🎉 ${gameSession.scoreboard.getWinnerMessage(
+                gameSession.guildID
+            )} 🎉`,
             fields,
             footerText,
             components: [

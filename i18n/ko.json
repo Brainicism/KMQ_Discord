@@ -945,7 +945,7 @@
             "companyByArtistViews": "재미있는 사실: {{name}}은(는) {{ordinal}} 가장 많이 본 엔터테인먼트 회사로 총 유튜브 조회수는 {{views}}회입니다!",
             "fanclubName": "재미있는 사실: {{name}}님의 팬클럽 이름은 '{{fanclub}}'입니다!",
             "historicalGaonWeekly": "재미있는 사실: 이번 주 {{year}}에 {{songName}}이(가) 가온 주간 차트에서 1위를 차지했습니다!",
-            "hyperlinkGenerator": "[\"{{songName}}\" by {{artistName}}]({{url}})",
+            "hyperlinkGenerator": "[\"{{songName}}\" - {{artistName}}]({{url}})",
             "mostActiveYear": "재미있는 사실: {{year}}은(는) {{count}}개의 뮤직 비디오가 출시된 {{ordinal}} K-POP에서 가장 활발한 해였습니다!",
             "mostDebuts": "재미있는 사실: {{year}}은(는) {{count}} 그룹이 데뷔하면서 {{ordinal}}이(가) 가장 많이 데뷔했습니다!",
             "mostGaonAppearances": "재미있는 사실: {{artistName}}은(는) {{appearances}}번의 출연으로 가온 디지털 주간 차트에 가장 많이 {{ordinalNum}} 올랐습니다!",
@@ -1137,7 +1137,8 @@
             "noCorrectGuesses": "아무도 얻지 못했다.",
             "noWinners": "아무도 우승하지 못했다.",
             "runnersUp": "준우승",
-            "uniqueSongsPlayed": "{{uniqueSongCount}}개의 고유한 노래가 재생되었습니다."
+            "uniqueSongsPlayed": "{{uniqueSongCount}}개의 고유한 노래가 재생되었습니다.",
+            "winMessage": "{{playerName}} 승리!"
         },
         "interaction": {
             "bookmarked": {

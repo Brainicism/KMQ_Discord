@@ -1138,7 +1138,8 @@
             "noCorrectGuesses": "Nobody got it.",
             "noWinners": "Nobody Won",
             "runnersUp": "Runners Up",
-            "uniqueSongsPlayed": "{{uniqueSongCount}} unique songs played."
+            "uniqueSongsPlayed": "{{uniqueSongCount}} unique songs played.",
+            "winMessage": "{{playerName}} wins!"
         },
         "interaction": {
             "bookmarked": {
