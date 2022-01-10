@@ -54,8 +54,8 @@ enum LeaderboardAction {
 }
 
 const leaderboardQuotes = [
-    `Want your name to show up on the leaderboard? See ${process.env.BOT_PREFIX}help leaderboard`,
-    `Want to see the next page of the leaderboard? See ${process.env.BOT_PREFIX}help leaderboard`,
+    "command.leaderboard.quote.name",
+    "command.leaderboard.quote.nextPage",
 ];
 
 export default class LeaderboardCommand implements BaseCommand {
@@ -737,7 +737,15 @@ export default class LeaderboardCommand implements BaseCommand {
                             fields,
                             timestamp: new Date(),
                             thumbnail: { url: KmqImages.THUMBS_UP },
-                            footer: { text: chooseRandom(leaderboardQuotes) },
+                            footer: {
+                                text: state.localizer.translate(
+                                    messageContext.guildID,
+                                    chooseRandom(leaderboardQuotes),
+                                    {
+                                        command: `${process.env.BOT_PREFIX}help leaderboard`,
+                                    }
+                                ),
+                            },
                         });
                     })
             );

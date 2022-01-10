@@ -423,6 +423,10 @@
                 "permanent": "{{level}} {{formattedNumber}} ({{rankName}})",
                 "temporary": "{{formattedNumber}} {{levelPluralized}} gained"
             },
+            "quote": {
+                "name": "Want your name to show up on the leaderboard? See {{command}}",
+                "nextPage": "Want to see the next page of the leaderboard? See {{command}}"
+            },
             "rankNumber": "Rank #{{rank}}",
             "scope": {
                 "currentGame": "Current Game's",

@@ -423,6 +423,10 @@
                 "permanent": "{{level}} {{formattedNumber}} ({{rankName}})",
                 "temporary": "{{formattedNumber}} {{levelPluralized}} 획득하셨습니다!"
             },
+            "quote": {
+                "name": "당신의 이름이 리더보드에 표시되기를 원하십니까? 참조 {{command}}",
+                "nextPage": "리더보드의 다음 페이지를 보고 싶으십니까? 참조 {{command}}"
+            },
             "rankNumber": "순위: #{{rank}}",
             "scope": {
                 "currentGame": "현재 게임",
