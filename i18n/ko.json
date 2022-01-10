@@ -1,308 +1,308 @@
 {
-    "10th": "10th",
-    "11th": "11th",
-    "12th": "12th",
-    "13th": "13th",
-    "14th": "14th",
-    "15th": "15th",
-    "16th": "16th",
-    "17th": "17th",
-    "18th": "18th",
-    "19th": "19th",
-    "1st": "1st",
-    "20th": "20th",
-    "21st": "21st",
-    "22nd": "22nd",
-    "23rd": "23rd",
-    "24th": "24th",
-    "25th": "25th",
-    "2nd": "2nd",
-    "3rd": "3rd",
-    "4th": "4th",
-    "5th": "5th",
-    "6th": "6th",
-    "7th": "7th",
-    "8th": "8th",
-    "9th": "9th",
+    "10th": "10일",
+    "11th": "11일",
+    "12th": "12일",
+    "13th": "13일",
+    "14th": "14일",
+    "15th": "15일",
+    "16th": "16일",
+    "17th": "17일",
+    "18th": "18일",
+    "19th": "19일",
+    "1st": "1위",
+    "20th": "20일",
+    "21st": "21일",
+    "22nd": "22일",
+    "23rd": "23일",
+    "24th": "24일",
+    "25th": "25일",
+    "2nd": "2위",
+    "3rd": "3위",
+    "4th": "4위",
+    "5th": "5위",
+    "6th": "6위",
+    "7th": "7위",
+    "8th": "8일",
+    "9th": "9일",
     "command": {
         "add": {
             "failure": {
                 "unrecognizedGroups": {
-                    "added": "added"
+                    "added": "추가"
                 }
             },
             "help": {
-                "description": "Adds one or more groups to the current {{groups}}, {{exclude}}, or {{include}} options.",
+                "description": "현재 {{groups}}, {{exclude}} 또는 {{include}} 옵션에 하나 이상의 그룹을 추가합니다.",
                 "example": {
-                    "exclude": "Adds {{groupOne}}, {{groupTwo}}, and {{groupThree}} to the current {{exclude}} option",
-                    "groups": "Adds {{groupOne}} and {{groupTwo}} to the current {{groups}} option",
-                    "include": "Adds {{groupOne}} to the current {{include}} option"
+                    "exclude": "현재 {{exclude}} 옵션에 {{groupOne}}, {{groupTwo}} 및 {{groupThree}}를 추가합니다.",
+                    "groups": "현재 {{groups}} 옵션에 {{groupOne}} 및 {{groupTwo}} 추가합니다.",
+                    "include": "현재 {{include}} 옵션에 {{groupOne}}을 추가합니다."
                 }
             }
         },
         "answer": {
             "help": {
-                "description": "Choose how to answer: by typing your answer, or via multiple choice. Options are the following: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, and `{{hard}}`. Playing on multiple choice mode reduces EXP by (0.25x, 0.5x, 0.75x) based on difficulty.",
+                "description": "정답 입력 방법을 선택하세요. 정답을 입력하거나 객관식을 사용하세요. 옵션은 `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, `{{hard}}`입니다. / 객관식 모드에서 플레이하면 난이도에 따라 경험치가 (0.25x, 0.5x, 0.75x) 감소합니다.",
                 "example": {
-                    "multipleChoice": "Click on the button from {{optionCount}} multiple choice options to guess. {{penalty}} EXP penalty will be applied",
-                    "typing": "Type your answer in the chat to guess",
-                    "typingTypos": "Type your answer in the chat to guess. Small typos will be marked as correct. 0.8x EXP penalty will be applied"
+                    "multipleChoice": "{{optionCount}}개의 객관식 옵션에서 버튼을 클릭하여 추측하세요. / {{penalty}} EXP 패널티가 적용됩니다.",
+                    "typing": "추측한 정답을 채팅에 입력하세요.",
+                    "typingTypos": "추측하려면 채팅에 입력하세요. / 작은 오타는 올바른 것으로 표시됩니다. / 0.8배 경험치 패널티가 적용됩니다."
                 }
             }
         },
         "artisttype": {
             "help": {
-                "description": "Choose whether you'd like to hear from soloists, groups, or both. Options are the following: {{soloists}}, {{groups}}, and {{both}}.",
+                "description": "솔로 아티스트, 그룹또는 모든 아티스트의 음악을 듣고 싶은지 선택하세요. / 옵션은 {{soloists}}, {{groups}} 및 {{both}}입니다.",
                 "example": {
-                    "both": "Plays songs from both soloists and groups",
-                    "groups": "Play songs only from groups",
-                    "reset": "Resets the artist type option",
-                    "soloists": "Play songs only from soloists"
+                    "both": "솔로 아티스트와 그룹의 노래를 모두 재생합니다.",
+                    "groups": "그룹의 노래만 재생합니다.",
+                    "reset": "아티스트 유형 옵션을 재설정합니다.",
+                    "soloists": "솔로 아티스트의 곡만 재생합니다."
                 }
             }
         },
         "begin": {
             "ignored": {
                 "noTeam": {
-                    "description": "Create a team using `{{join}} [team name]` before you can start the game."
+                    "description": "게임을 시작하기 전에 `{{join}} [팀 이름]`을 사용하여 팀을 만드세요."
                 },
                 "notOwner": {
-                    "description": "Only the person who did {{playElimination}} ({{mentionedUser}}) can start the game."
+                    "description": "{{playElimination}}을 한 사람, ({{mentionedUser}})만 게임을 시작할 수 있습니다."
                 },
-                "title": "Begin Ignored"
+                "title": "시작 무시"
             }
         },
         "cutoff": {
             "failure": {
                 "invalidEndYear": {
-                    "description": "The end year must be after or equal to the start year.",
-                    "title": "Invalid End Year"
+                    "description": "종료년도는 시작년도 이후이거나 같아야 합니다.",
+                    "title": "잘못된 종료년도입니다."
                 }
             },
             "help": {
-                "description": "Set a cutoff year range for songs. If one value is specified, only songs AFTER that year will be played. If two values are specified, only songs BETWEEN those two years will be played.",
+                "description": "노래의 년도 범위를 설정합니다. / 값을 하나만 지정하면 해당 년도 이후의 노래만 재생됩니다. / 값을 두 개 지정하면 해당 2년 사이의 노래만 재생됩니다.",
                 "example": {
-                    "reset": "Reset to the default cutoff of {{defaultBeginningSearchYear}} to {{defaultEndSearchYear}}",
-                    "singleCutoff": "Play songs released after the year {{year}}",
-                    "twoCutoffs": "Play songs released between the years {{beginningYear}}-{{endYear}}"
+                    "reset": "{{defaultBeginningSearchYear}}의 기본 년도 범위를 {{defaultEndSearchYear}}로 재설정합니다.",
+                    "singleCutoff": "{{year}}년 이후에 발매된 노래 재생합니다.",
+                    "twoCutoffs": "{{beginningYear}}~{{endYear}}년 사이에 출시된 노래 재생합니다."
                 }
             }
         },
         "debug": {
-            "description": "If you were asked by a bot developer to do this, give them this:\n{{debugID}}",
-            "title": "Debug Details Sent!"
+            "description": "봇 개발자가 이 작업을 수행하도록 요청한 경우 다음을 제공하세요.\n\n{{debugID}}",
+            "title": "디버그 세부 정보가 전송되었습니다!"
         },
         "duration": {
             "failure": {
                 "removingDuration": {
                     "notSet": {
-                        "description": "The duration is not currently set."
+                        "description": "년도는 현재 설정되어 있지 않습니다."
                     },
-                    "title": "Error Removing Duration",
+                    "title": "년도을 제거하는 동안 오류가 발생했습니다.",
                     "tooShort": {
-                        "description": "The duration cannot be less than 2 minutes."
+                        "description": "지속 시간은 2분 이상이어야 합니다."
                     }
                 }
             },
             "help": {
-                "description": "Sets a maximum length for the KMQ game in minutes.",
+                "description": "KMQ 게임의 최대 길이를 분 단위로 설정합니다.",
                 "example": {
-                    "decrement": "Remove {{duration}} minutes from the current game's duration",
-                    "increment": "Add {{duration}} minutes to the current game's duration",
-                    "reset": "Disables the duration",
-                    "set": "The game will automatically end after {{duration}} minutes"
+                    "decrement": "현재 게임 시간에서 {{duration}}분을 제거합니다.",
+                    "increment": "현재 게임 시간에 {{duration}}분을 추가합니다.",
+                    "reset": "게임 지속 시간을 비활성화합니다.",
+                    "set": "{{duration}}분 후에 게임이 자동으로 종료됩니다."
                 },
                 "usage": {
-                    "minutes": "minutes"
+                    "minutes": "분"
                 }
             }
         },
         "end": {
             "help": {
-                "description": "Finishes the current game and decides on a winner."
+                "description": "현재 게임을 종료하고 승자를 결정합니다."
             }
         },
         "exclude": {
             "failure": {
                 "unrecognizedGroups": {
-                    "excluded": "excluded"
+                    "excluded": "제외된"
                 }
             },
             "help": {
-                "description": "Select as many groups that you would like to ignore, separated by commas. A list of group names can be found [here]({{groupList}}).",
+                "description": "제외할 아티스트를 쉼표로 구분하여 선택하십시오. / 그룹 이름 목록은 ({{groupList}})에서 찾을 수 있습니다.",
                 "example": {
-                    "multipleGroups": "Ignore songs from {{groupOne}}, {{groupTwo}}, and {{groupThree}}",
-                    "reset": "Resets the exclude option",
-                    "singleGroup": "Ignore songs from {{group}}"
+                    "multipleGroups": "{{groupOne}}, {{groupTwo}}, {{groupThree}}의 노래를 무시합니다.",
+                    "reset": "제외 옵션을 재설정합니다.",
+                    "singleGroup": "{{group}}의 노래를 제외합니다."
                 }
             }
         },
         "exp": {
-            "activeModifiers": "🚀 Active Modifiers 🚀",
-            "artistGroupGuessModePenalty": "Artist/Group Guess Mode Penalty",
-            "bonusArtists": "Guessing songs by the daily bonus artists",
-            "bonusArtistsTitle": "🎤 Current Bonus Artists 🎤",
-            "bonusDescription": "You can get bonus EXP for the following",
-            "bonusTitle": "Ways to get EXP Bonuses",
+            "activeModifiers": "🚀 활성화된 수정 내용 🚀",
+            "artistGroupGuessModePenalty": "아티스트/그룹 추측 모드 패널티입니다.",
+            "bonusArtists": "데일리 보너스 아티스트분들의 노래를 맞혀보세요.",
+            "bonusArtistsTitle": "🎤 현재 추가 경험치를 지급하는 아티스트 🎤",
+            "bonusDescription": "다음에 대한 추가 경험치를 얻을 수 있습니다",
+            "bonusTitle": "경험치 보너스를 받는 방법",
             "explanation": {
-                "bonusArtistGuess": "Guessing correctly for a bonus artist",
-                "firstGameOfDay": "First game of the day",
-                "powerHour": "Playing during a KMQ Power Hour or Weekend",
-                "quickGuess": "Guessing quickly",
-                "rareGuess": "Rare correct guesses bonus",
-                "rareGuessRange": "{{rareGuessLowerBound}} up to {{rareGuessUpperBound}}",
-                "streak": "Having a guess streak of over 5",
-                "voting": "Voting"
+                "bonusArtistGuess": "보너스 아티스트의 정확한 추측",
+                "firstGameOfDay": "오늘의 첫 게임",
+                "powerHour": "KMQ Power Hour 또는 주말 동안 재생합니다",
+                "quickGuess": "빠른 추측",
+                "rareGuess": "희귀한 정확 추측 보너스",
+                "rareGuessRange": "{{rareGuessLowerBound}} 최대 {{rareGuessUpperBound}}",
+                "streak": "추측 연속 행진이 5번 이상인 경우",
+                "voting": "투표"
             },
-            "firstGameOfDayBonus": "First Game of the Day Bonus",
+            "firstGameOfDayBonus": "오늘의 첫 게임 보너스",
             "help": {
-                "description": "Shows your current EXP modifier, and the list of current bonus EXP artists."
+                "description": "현재 경험치 수정 및 현재 보너스 경험치 아티스트 목록을 표시합니다."
             },
-            "lowSongCountPenalty": "Low Song Count Penalty",
-            "multipleChoicePenalty": "Multiple Choice Penalty",
-            "powerHourBonus": "Power Hour Bonus",
-            "title": "EXP Bonuses",
-            "totalModifier": "Total Modifier",
-            "typosAllowedPenalty": "Typos Allowed Penalty",
-            "voteBonus": "Vote Bonus"
+            "lowSongCountPenalty": "낮은 노래 수 패널티",
+            "multipleChoicePenalty": "객관식 패널티",
+            "powerHourBonus": "Power Hour 보너스",
+            "title": "경험치 보너스",
+            "totalModifier": "총 수정",
+            "typosAllowedPenalty": "오타 허용 패널티",
+            "voteBonus": "투표 보너스"
         },
         "forcehint": {
             "failure": {
                 "notOwner": {
-                    "description": "Only the game owner ({{mentionedUser}}) can use force-hint.",
-                    "title": "Force Hint Ignored"
+                    "description": "게임 소유자 ({{mentionedUser}})만 강제 힌트를 사용할 수 있습니다.",
+                    "title": "강제 힌트 무시"
                 }
             },
             "help": {
-                "description": "The person that started the game can force-hint the current song, no majority necessary."
+                "description": "게임을 시작한 사람은 현재 노래를 강제로 암시할 수 있으며 과반수는 필요하지 않습니다."
             }
         },
         "forceskip": {
-            "description": "Owner has forceskipped the round...",
+            "description": "게임 소유자 ({{mentionedUser}})가 강제로 라운드를 건너뛰었습니다...",
             "failure": {
                 "notOwner": {
-                    "description": "Only the game owner ({{mentionedUser}}) can force-skip the current song.",
-                    "title": "Force Skip Ignored"
+                    "description": "게임 소유자({{mentionedUser}})만 현재 노래를 강제로 건너뛸 수 있습니다.",
+                    "title": "강제 건너뛰기 무시"
                 }
             },
             "help": {
-                "description": "The person that started the game can force-skip the current song, no majority necessary."
+                "description": "게임을 시작한 사람은 과반수 필요 없이 현재 노래를 강제로 건너뛸 수 있습니다."
             }
         },
         "gender": {
             "help": {
-                "description": "Choose the gender of the artists you'd like to hear from. Options are the following: {{male}}, {{female}}, and {{coed}}. Alternatively, use {{genderAlternating}} to rotate between male and female artists every round.",
+                "description": "듣고 싶은 아티스트의 성별을 선택하세요. / 옵션은 {{male}}, {{female}}, {{coed}}입니다. / {{genderAlternating}}을 사용하여 라운드마다 남성 아티스트와 여성 아티스트 사이를 순환합니다.",
                 "example": {
-                    "alternating": "Alternate between male and female artists every round",
-                    "coed": "Play songs only from coed groups (groups with both male and female members)",
-                    "female": "Play songs only from female artists",
-                    "maleFemale": "Play songs from both male and female artists",
-                    "reset": "Reset to the default genders of male, female, and coed"
+                    "alternating": "매 라운드마다 남성과 여성 아티스트를 번갈아 갑니다.",
+                    "coed": "남녀 혼성 그룹의 노래만 재생합니다. (남성과 여성이 모두 있는 그룹)",
+                    "female": "여성 아티스트의 노래만 재생합니다.",
+                    "maleFemale": "남성 및 여성 아티스트의 노래를 모두 재생합니다.",
+                    "reset": "남성, 여성, 남녀 혼성 그룹의 기본 성별로 재설정합니다."
                 }
             },
             "warning": {
                 "gameOption": {
-                    "description": "With only one group chosen, {{alternatingGenderCommand}} may not behave as expected. Consider including more groups to correctly alternate genders.",
-                    "title": "Game Option Warning"
+                    "description": "하나의 그룹만 선택하면 {{alternatingGenderCommand}}가 예상대로 작동하지 않을 수 있습니다. / 성별을 올바르게 바꾸려면 더 많은 그룹을 포함하는 것이 좋습니다.",
+                    "title": "게임 옵션 경고"
                 }
             }
         },
         "goal": {
             "failure": {
                 "gameOptionConflict": {
-                    "title": "An {{elimination}} game is currently in progress. {{goal}} and {{elimination}} are incompatible. Play a {{classic}} or {{teams}} game to use {{goal}}."
+                    "title": "{{elimination}} 게임이 현재 진행 중입니다. / {{goal}}과 {{elimination}}은(는) 호환되지 않습니다. / {{goal}}을(를) 사용하려면 {{classic}} 또는 {{teams}} 게임을 플레이하세요."
                 },
                 "goalExceeded": {
-                    "description": "The given goal exceeds the highest score. Please raise your goal, or start a new game.",
-                    "title": "Error Applying Goal"
+                    "description": "주어진 목표가 최고 점수를 초과합니다. 목표를 높이거나 새로운 게임을 시작하세요.",
+                    "title": "목표를 적용하는 동안 오류가 발생했습니다."
                 }
             },
             "help": {
-                "description": "Once the player with the most points reaches the goal score, the game ends. Calling it with no arguments disables the goal. If a game is in progress, the goal must exceed the highest score.",
+                "description": "가장 많은 점수를 얻은 플레이어가 목표 점수에 도달하면 게임이 종료됩니다. / 인수 없이 호출하면 목표가 비활성화됩니다. / 게임이 진행 중인 경우 목표는 최고 점수를 초과해야 합니다.",
                 "example": {
-                    "reset": "Disables the goal",
-                    "set": "The first player to {{goal}} wins the game"
+                    "reset": "목표를 비활성화합니다.",
+                    "set": "{{goal}}을(를) 먼저 달성한 플레이어가 게임에서 승리합니다."
                 },
                 "usage": {
-                    "points": "points"
+                    "points": "점수"
                 }
             }
         },
         "groups": {
             "help": {
-                "description": "Select as many groups that you would like to hear from, separated by commas. A list of group names can be found [here]({{groupList}}).",
+                "description": "듣고 싶은 그룹을 쉼표로 구분하여 선택하십시오. / 그룹 이름 목록은 ({{groupList}})에서 찾을 수 있습니다.",
                 "example": {
-                    "multipleGroups": "Plays songs only from {{groupOne}}, {{groupTwo}}, and {{groupThree}}",
-                    "reset": "Resets the groups option",
-                    "singleGroup": "Plays songs only from {{group}}"
+                    "multipleGroups": "{{groupOne}}, {{groupTwo}}, {{groupThree}}의 노래만 재생합니다.",
+                    "reset": "그룹 옵션을 재설정합니다.",
+                    "singleGroup": "{{group}}의 노래만 재생합니다."
                 }
             }
         },
         "guessmode": {
             "help": {
-                "description": "Choose whether to guess by song title, artist name, or both.",
+                "description": "노래 제목, 아티스트 이름 또는 둘 다로 추측할지 선택합니다.",
                 "example": {
-                    "artist": "Type the correct name of the artist to win a game round",
-                    "both": "Type the correct name of the artist (0.2 points) or the name of the song (1 point) to win a game round",
-                    "reset": "Reset to the default guess mode of {{defaultGuessMode}}",
-                    "song": "Type the correct song name to win a game round"
+                    "artist": "게임 라운드에서 승리하려면 아티스트의 정확한 이름을 입력하세요.",
+                    "both": "게임 라운드에서 승리하려면 아티스트의 정확한 이름 (0.2점) 또는 노래 이름 (1점)을 입력하십시오.",
+                    "reset": "{{defaultGuessMode}}의 기본 추측 모드로 재설정합니다.",
+                    "song": "게임 라운드에서 승리하려면 올바른 노래 이름을 입력하세요."
                 }
             }
         },
         "help": {
-            "command": "command",
-            "description": "Type {{play}} in chat and the bot will play a random k-pop song in VC. The goal of this game is to be the first person to guess the song name in chat.\nSee your current game options with {{options}}. Use `{{help}} [{{command}}]` to get more details ",
-            "examples": "Examples",
+            "command": "명령어",
+            "description": "채팅에 {{play}}를 입력하면 봇이 임의의 K-POP 노래를 재생합니다. / 이 게임의 목표는 채팅에서 노래 이름을 가장 먼저 추측하는 사람이 되는 것입니다.\n\n{{options}}에서 현재 게임 옵션을 확인하세요. / 자세한 내용을 보려면 `{{help}} [{{command}}]`를 사용하세요.",
+            "examples": "예시",
             "failure": {
-                "noDocs": "Sorry, there is no documentation on {{action}}."
+                "noDocs": "죄송합니다. {{action}}에 대한 문서가 없습니다."
             },
             "help": {
-                "description": "Get help about the game's commands. Add a command to get information about the specific command.",
+                "description": "게임의 명령에 대한 도움말을 얻습니다. / 특정 명령에 대한 정보를 얻으려면 명령을 추가하십시오.",
                 "example": {
-                    "allCommands": "Shows all available commands and a short description",
-                    "sampleCommand": "Shows a detailed description for the cutoff command"
+                    "allCommands": "사용 가능한 모든 명령어와 간단한 설명을 표시합니다.",
+                    "sampleCommand": "년도 범위 명령어에 대한 자세한 설명을 표시합니다."
                 }
             },
-            "title": "{{kmq}} Command Help"
+            "title": "{{kmq}} 명령어 도움말"
         },
         "hint": {
-            "artistName": "Artist Name",
+            "artistName": "아티스트 이름",
             "failure": {
                 "invalidHintRequest": {
                     "eliminated": {
-                        "description": "Only alive players may request hints."
+                        "description": "음성 채팅에 있는 플레이어만 힌트를 요청할 수 있습니다."
                     },
                     "multipleChoice": {
-                        "description": "You cannot request hints while playing multiple choice."
+                        "description": "객관식 게임 중에는 힌트를 요청할 수 없습니다."
                     },
                     "noSongPlaying": {
-                        "description": "A hint can only be requested when a song is playing."
+                        "description": "힌트는 노래가 재생 중일 때만 요청할 수 있습니다."
                     },
-                    "title": "Invalid Hint Request"
+                    "title": "잘못된 힌트 요청입니다."
                 }
             },
             "help": {
-                "description": "Gives a hint to the currently playing song."
+                "description": "현재 재생 중인 노래에 대한 힌트를 제공합니다."
             },
             "request": {
-                "description": "{{hintCounter}} hint requests received.",
-                "title": "Hint Request"
+                "description": "{{hintCounter}} 힌트 요청이 전송되었습니다.",
+                "title": "힌트 요청"
             },
-            "songName": "Song Name",
-            "title": "Hint"
+            "songName": "노래 이름",
+            "title": "힌트"
         },
         "include": {
             "failure": {
                 "unrecognizedGroups": {
-                    "included": "included"
+                    "included": "포함"
                 }
             },
             "help": {
-                "description": "Select as many groups that you would like to forcefully include, ignoring other filters ({{gender}}, {{artisttype}}, etc.), separated by commas. A list of group names can be found [here]({{groupList}}).",
+                "description": "다른 필터({{gender}}, {{artisttype}} 등)를 무시하고 쉼표로 구분하여 강제로 포함할 그룹을 선택합니다. / 그룹 이름 목록은 ({{groupList}})에서 찾을 수 있습니다.",
                 "example": {
-                    "multipleGroups": "Forcefully include songs from {{groupOne}}, {{groupTwo}}, and {{groupThree}}",
-                    "reset": "Resets the include option",
-                    "singleGroup": "Forcefully include songs from {{group}}"
+                    "multipleGroups": "{{groupOne}}, {{groupTwo}}, {{groupThree}}의 노래를 강제로 포함합니다.",
+                    "reset": "포함 옵션을 재설정합니다.",
+                    "singleGroup": "{{group}}의 노래를 강제로 포함합니다."
                 }
             }
         },
@@ -310,109 +310,109 @@
             "failure": {
                 "joinError": {
                     "alreadyInTeam": {
-                        "description": "You're already a member of this team."
+                        "description": "당신은 이미 이 팀의 구성원입니다."
                     },
                     "badEmojis": {
-                        "description": "You can only include emojis that are in this server."
+                        "description": "이 서버에 있는 이모티콘만 포함할 수 있습니다."
                     },
                     "invalidCharacters": {
-                        "description": "Your team name consists of only invalid characters."
+                        "description": "팀 이름이 잘못된 문자로만 구성되어 있습니다."
                     },
                     "invalidTeamName": {
-                        "title": "Invalid Team Name"
+                        "title": "잘못된 팀 이름"
                     },
                     "noTeamName": {
-                        "description": "Include a team name to create a team or to join that team if it already exists (`{{joinCommand}} [team name]`)"
+                        "description": "팀을 만들거나 이미 있는 경우 해당 팀에 합류하려면 팀 이름을 포함하세요. (`{{joinCommand}} [팀 이름]`)"
                     },
-                    "title": "Join Error"
+                    "title": "가입 오류"
                 }
             },
             "playerAlreadyJoined": {
-                "description": "{{mentionedUser}} is already in the game.",
-                "title": "Player Already Joined"
+                "description": "{{presentedUser}}님은 이미 게임에 참여하고 있습니다.",
+                "title": "이미 참가한 플레이어"
             },
             "playerJoined": {
-                "title": "Player Joined"
+                "title": "참가한 플레이어"
             },
             "playerJoinedMidGame": {
-                "description": "{{mentionedUser}} has spawned with {{lives}} lives.",
-                "title": "Player Joined Mid Game"
+                "description": "{{claimedUser}}이(가) {{lives}}명의 목숨과 함께 생성되었습니다.",
+                "title": "플레이어가 게임 중반에 합류했습니다."
             },
             "playerJoinedTeam": {
                 "afterGameStart": {
-                    "description": "{{mentionedUser}} thinks they have what it takes to lead {{teamName}} to victory!"
+                    "description": "{{mentionedUser}}은(는) {{teamName}}을(를) 승리로 이끄는 데 필요한 모든 것이 있다고 생각합니다!"
                 },
                 "beforeGameStart": {
-                    "description": "When everyone has joined a team, {{beginCommand}} the game!"
+                    "description": "모두가 팀에 합류하면 게임을 {{beginCommand}} 합니다!"
                 },
-                "title": "{{joiningUser}} joined {{teamName}}"
+                "title": "{{joiningUser}}이(가) {{teamName}}에 합류했습니다."
             },
             "team": {
-                "join": "To join {{{teamName}}} alongside {{{mentionedUser}}}, enter `{{{joinCommand}}} {{{teamNameWithCleanEmojis}}}`.{{startGameInstructions}}",
-                "new": "New Team Created",
-                "startGameInstructions": "\nStart the game with {{beginCommand}}."
+                "join": "{{{claimedUser}}}와 함께 {{{teamName}}}에 합류하려면 `{{{joinCommand}}} {{{teamNameWithCleanEmojis}}}`를 입력하세요. {{startGameInstructions}}",
+                "new": "새로운 팀이 생성되었습니다.",
+                "startGameInstructions": "\n\n{{beginCommand}}로 게임을 시작하세요."
             }
         },
         "language": {
             "help": {
-                "description": "Choose whether songs played should be exclusively in Korean.",
+                "description": "재생되는 노래를 한국어로만 제공할지 여부를 선택합니다.",
                 "example": {
-                    "all": "Play all available songs",
-                    "korean": "Plays only Korean songs. Ignores songs that are in foreign languages: English, Japanese, Chinese",
-                    "reset": "Reset to the default language of {{defaultLanguage}}"
+                    "all": "사용 가능한 모든 노래가 재생되었습니다!",
+                    "korean": "한국 노래만 재생합니다. / 외국어로 된 노래 무시: 영어, 일본어, 중국어",
+                    "reset": "{{defaultLanguage}}의 기본 언어로 재설정합니다."
                 }
             }
         },
         "leaderboard": {
             "duration": {
-                "allTime": "All-time",
-                "daily": "Daily",
-                "monthly": "Monthly",
-                "weekly": "Weekly",
-                "yearly": "Yearly"
+                "allTime": "모든 시간",
+                "daily": "일별",
+                "monthly": "월별",
+                "weekly": "주별",
+                "yearly": "년별"
             },
             "enrolled": {
-                "description": "Your name is now visible on the leaderboard.",
-                "title": "Leaderboard Enrollment Complete"
+                "description": "이제 귀하의 이름이 리더보드에 표시됩니다.",
+                "title": "리더보드 등록 완료"
             },
             "failure": {
                 "alreadyEnrolled": {
-                    "description": "You are already visible on the leaderboard. If you'd like to update your display name, unenroll and enroll again.",
-                    "title": "Player Already Enrolled"
+                    "description": "리더보드에 이미 표시되어 있습니다. / 표시 이름을 업데이트하려면 등록을 취소하고 다시 등록하십시오.",
+                    "title": "이미 등록된 플레이어입니다."
                 },
                 "empty": {
-                    "description": "No one has earned EXP in this time interval. Now's your chance to go for first place!",
-                    "title": "Empty Leaderboard"
+                    "description": "이 기간 동안 경험치를 획득한 사람은 없습니다. / 지금이 1위를 할 수 있는 기회입니다!",
+                    "title": "빈 리더보드"
                 },
                 "game": {
                     "noParticipants": {
-                        "description": "Someone needs to score a point before this command works.",
-                        "title": "No Participants"
+                        "description": "이 명령어가 작동하려면 누군가가 점수를 매겨야 합니다.",
+                        "title": "참가자가 없습니다."
                     },
                     "noneInProgress": {
-                        "description": "There is no game in progress."
+                        "description": "진행 중인 게임이 없습니다."
                     }
                 },
                 "outOfRange": {
-                    "description": "The leaderboard doesn't go this far.",
+                    "description": "순위표는 여기까지 오지 않습니다.",
                     "title": "😐"
                 }
             },
-            "gamesPlayed": "{{gameCount}} games played",
+            "gamesPlayed": "{{gameCount}}회를 플레이 했습니다!",
             "help": {
-                "description": "View the KMQ leaderboard.",
+                "description": "KMQ 리더보드를 봅니다.",
                 "example": {
-                    "enroll": "Allows your name to be displayed on the leaderboard",
-                    "gameMonthlyPage": "Shows the 2nd page of the monthly scoreboard containing players with points in the current game",
-                    "global": "Show the global leaderboard",
-                    "globalPage": "Shows the 3rd page of the global leaderboard",
-                    "globalWeeklyPage": "Shows the 4th page of the leaderboard, by EXP gained this week",
-                    "server": "Shows the server-wide leaderboard",
-                    "serverSongsGuessedPage": "Shows the 3rd page of the server-wide leaderboard by total songs guessed",
-                    "unenroll": "Hides your name from the leaderboard"
+                    "enroll": "리더보드에 이름을 표시할 수 있습니다.",
+                    "gameMonthlyPage": "현재 게임에서 포인트를 보유한 플레이어가 포함된 월별 스코어보드의 두 번째 페이지를 표시합니다.",
+                    "global": "글로벌 리더보드를 표시합니다!",
+                    "globalPage": "글로벌 리더보드의 세 번째 페이지를 표시합니다.",
+                    "globalWeeklyPage": "이번 주에 얻은 경험치로 순위표의 4번째 페이지를 보여줍니다.",
+                    "server": "서버 전체 리더보드를 표시합니다.",
+                    "serverSongsGuessedPage": "추측한 총 노래로 서버 전체 순위표의 세 번째 페이지를 표시합니다.",
+                    "unenroll": "리더보드에서 이름을 숨깁니다."
                 },
                 "usage": {
-                    "pageNumber": "page_number"
+                    "pageNumber": "페이지 수"
                 }
             },
             "level": {
@@ -421,135 +421,135 @@
             },
             "levelEntry": {
                 "permanent": "{{level}} {{formattedNumber}} ({{rankName}})",
-                "temporary": "{{formattedNumber}} {{levelPluralized}} gained"
+                "temporary": "{{formattedNumber}} {{levelPluralized}} 획득하셨습니다!"
             },
-            "rankNumber": "Rank #{{rank}}",
+            "rankNumber": "순위: #{{rank}}",
             "scope": {
-                "currentGame": "Current Game's",
-                "global": "Global",
+                "currentGame": "현재 게임",
+                "global": "글로벌",
                 "server": {
-                    "noName": "Server's",
-                    "withName": "{{serverName}}'s"
+                    "noName": "서버",
+                    "withName": "{{serverName}}의"
                 }
             },
-            "songsGuessed": "{{songsGuessed}} songs guessed",
-            "title": "{{leaderboardScope}} {{leaderboardDuration}} Leaderboard {{leaderboardType}}",
+            "songsGuessed": "{{songsGuessed}} 곡 추측",
+            "title": "{{leaderboardScope}} {{leaderboardDuration}} 리더보드 {{leaderboardType}}",
             "type": {
-                "byGamesPlayed": "by games played",
-                "bySongsGuessed": "by songs guessed"
+                "byGamesPlayed": "플레이한 게임으로",
+                "bySongsGuessed": "추측되는 노래로"
             },
             "unenrolled": {
-                "description": "You are no longer visible on the leaderboard.",
-                "title": "Leaderboard Unenrollment Complete"
+                "description": "더 이상 리더보드에 표시되지 않습니다.",
+                "title": "리더보드 등록 취소가 완료되었습니다!"
             },
             "validation": {
-                "firstArg": "Expected one of the following valid values for the first argument: (a positive number, {{typeOrScopeOrDuration}})",
-                "secondArg": "Expected one of the following valid values for the second argument: (a positive number, {{argument}})",
-                "thirdArg": "Expected a positive number for the third argument"
+                "firstArg": "첫 번째 인수에 대해 다음 유효한 값 중 하나가 필요합니다. (양수, {{typeOrScopeOrDuration}})",
+                "secondArg": "두 번째 인수에 대해 다음 유효한 값 중 하나가 필요합니다. (양수, {{argument}})",
+                "thirdArg": "세 번째 인수에는 양수가 필요합니다."
             }
         },
         "limit": {
             "failure": {
                 "invalidLimit": {
                     "greaterThanStart": {
-                        "description": "End limit must be greater than the start limit."
+                        "description": "종료 제한은 시작 제한보다 커야 합니다."
                     },
                     "greaterThanZero": {
-                        "description": "End limit must be greater than 0."
+                        "description": "종료 제한은 0보다 커야 합니다."
                     },
-                    "title": "Invalid End Limit"
+                    "title": "유효하지 않은 종료 제한합니다."
                 }
             },
             "help": {
-                "description": "Set a maximum number of results in the song query. This effectively sets the \"Top X number of songs\" based on the selected filters.",
+                "description": "노래 결과에서 최대 결과 수를 설정합니다. / 이렇게 하면 선택한 필터를 기반으로 \"상위 X개의 노래\"가 효과적으로 설정됩니다.",
                 "example": {
-                    "reset": "Reset to the default limit of {{defaultLimit}}",
-                    "singleLimit": "Plays the top {{limit}} most listened songs from the currently selected options",
-                    "twoLimits": "Plays between the {{limitStart}} to {{limitEnd}} most listened songs from the currently selected options"
+                    "reset": "{{defaultLimit}}의 기본 제한으로 재설정합니다.",
+                    "singleLimit": "현재 선택한 옵션에서 가장 많이 듣는 노래 상위 {{limit}}개를 재생합니다.",
+                    "twoLimits": "현재 선택한 옵션에서 {{limitStart}}에서 {{limitEnd}}까지 가장 많이 듣는 노래 사이에서 재생합니다."
                 }
             }
         },
         "list": {
             "currentValue": {
-                "nothingSelected": "Nothing currently selected",
-                "title": "Current {{optionListed}} Value"
+                "nothingSelected": "현재 선택된 항목이 없습니다.",
+                "title": "현재 {{optionListed}} 값입니다."
             },
             "failure": {
                 "groupsInFile": {
-                    "description": "Too many groups to list in a Discord message, see the attached file.",
+                    "description": "그룹이 너무 많아 디스코드 메시지에 나열할 수 없습니다. / 첨부 파일을 참조하세요.",
                     "noFilePermissions": {
-                        "description": "Too many groups to list in a Discord message. The bot needs {{attachFile}} permissions to send the groups list file.",
-                        "title": "Error Sending File"
+                        "description": "디스코드 메시지에 나열할 그룹이 너무 많습니다. / 봇은 그룹 목록 파일을 보내려면 {{attachFile}} 권한이 필요합니다.",
+                        "title": "파일 전송에 오류가 있습니다."
                     }
                 }
             },
             "help": {
-                "description": "Displays the currently selected groups for a given game option.",
+                "description": "주어진 게임 옵션에 대해 현재 선택된 그룹을 표시합니다.",
                 "example": {
-                    "exclude": "Lists the current {{exclude}} options",
-                    "groups": "Lists the current {{groups}} options",
-                    "include": "Lists the current {{include}} options"
+                    "exclude": "현재 {{exclude}} 옵션을 나열합니다.",
+                    "groups": "현재 {{groups}} 옵션을 나열합니다.",
+                    "include": "현재 {{include}} 옵션을 나열합니다."
                 }
             }
         },
         "locale": {
             "help": {
-                "description": "Change the language of the bot. Options are the following: {{english}}, {{korean}}.",
+                "description": "봇의 언어를 변경합니다. / 옵션은 {{english}}, {{korean}}입니다.",
                 "example": {
-                    "reset": "Reset the bot's language to {{defaultLocale}}",
-                    "toEnglish": "Change the bot's language to {{english}}",
-                    "toKorean": "Change the bot's language to {{korean}}"
+                    "reset": "봇의 언어를 {{defaultLocale}}로 재설정합니다.",
+                    "toEnglish": "봇의 언어를 {{english}}로 변경합니다.",
+                    "toKorean": "봇의 언어를 {{korean}}로 변경"
                 },
                 "usage": {
-                    "language": "language"
+                    "language": "언어"
                 }
             },
             "language": {
-                "en": "English",
-                "ko": "Korean"
+                "en": "영어",
+                "ko": "한국어"
             },
-            "updatedDescription": "The bot's language has been updated to `{{language}}`."
+            "updatedDescription": "봇의 언어가 `{{language}}`로 업데이트되었습니다."
         },
         "multiguess": {
             "help": {
-                "description": "Sets whether multiple people can guess a song correctly. When {{on}}, players will have 1.5 seconds after the first correct answer is given, to continue to answer. The first answer receives full EXP, correct answers that come after receive multiplicatively less EXP.",
+                "description": "여러 사람이 노래를 정확하게 추측할 수 있는지 여부를 설정합니다. / {{on}}일 때 플레이어는 첫 번째 정답이 제공된 후 1.5초 동안 계속 답해야 합니다. / 첫 번째 답변은 전체 경험치를 받고, 정답은 배수로 더 적은 경험치를 받습니다.",
                 "example": {
-                    "off": "Only the first person who guesses correct is awarded the point",
-                    "on": "Allows for a 1.5 second grace period from when the first correct guess occurs. Multiple players are able to guess correctly",
-                    "reset": "Reset to the default multiguess type of {{defaultMultiguess}}"
+                    "off": "먼저 정답을 맞춘 사람에게만 점수가 부여됩니다.",
+                    "on": "첫 번째 정확한 추측이 발생한 후 1.5초의 유예 기간을 허용합니다. / 여러 플레이어가 정확하게 추측할 수 있습니다.",
+                    "reset": "{{defaultMultiguess}}의 기본 다중 추측 유형으로 재설정합니다."
                 }
             }
         },
         "news": {
             "help": {
-                "description": "Displays the latest updates to KMQ."
+                "description": "KMQ에 대한 최신 업데이트를 표시합니다."
             },
             "updates": {
-                "title": "Updates"
+                "title": "업데이트"
             }
         },
         "options": {
-            "duration": "{{durationInMinutes}} mins",
+            "duration": "{{durationInMinutes}}분",
             "help": {
-                "description": "Displays the current game options."
+                "description": "현재 게임 옵션을 표시합니다."
             },
-            "notSet": "Not set",
-            "overview": "Now playing the top {{limit}} out of {{totalSongs}} available songs from the following game options:\n\n{{priorityOptions}}",
-            "perCommandHelp": "Looking for information on how to use a command? Check out \"{{helpCommand}} [command]\" to learn more.",
-            "preset": "Preset",
-            "reset": "{{presetOrOption}} Reset",
-            "timer": "{{timerInSeconds}} sec",
-            "title": "Options",
-            "updated": "{{presetOrOption}} Updated"
+            "notSet": "설정되지 않음",
+            "overview": "이제 다음 게임 옵션에서 사용 가능한 노래 {{totalSongs}}개 중 상위 {{limit}}개를 재생합니다.\n\n{{priorityOptions}}",
+            "perCommandHelp": "명령 사용 방법에 대한 정보를 찾고 계십니까? / 자세한 내용은 \"{{helpCommand}} [command]\"을 확인하세요.",
+            "preset": "사전 설정",
+            "reset": "{{presetOrOption}}으로 재설정합니다.",
+            "timer": "{{timerInSeconds}}초",
+            "title": "옵션",
+            "updated": "{{presetOrOption}}으로 업데이트되었습니다!"
         },
         "ost": {
             "help": {
-                "description": "Choose whether to include OST songs.",
+                "description": "OST 노래를 포함할지 여부를 선택합니다.",
                 "example": {
-                    "exclude": "Exclude OST songs",
-                    "exclusive": "Exclusively play OST songs",
-                    "include": "Include OST songs",
-                    "reset": "Reset to the default option of {{defaultOst}}"
+                    "exclude": "OST 노래를 제외합니다.",
+                    "exclusive": "OST 노래를 단독으로 재생합니다.",
+                    "include": "OST 노래를 포함합니다.",
+                    "reset": "{{defaultOst}}의 기본 옵션으로 재설정합니다."
                 }
             }
         },
@@ -557,675 +557,674 @@
             "elimination": {
                 "failure": {
                     "alreadyJoined": {
-                        "description": "{{mentionedUser}} is already in the game.",
-                        "title": "Player Already Joined"
+                        "description": "{{presentedUser}}님은 이미 게임에 참여하고 있습니다.",
+                        "title": "이미 참가한 플레이어입니다."
                     }
                 },
                 "join": {
                     "description": "Type {{join}} to play in the upcoming elimination game. Once all have joined, {{mentionedUser}} must send {{begin}} to start the game. Everyone begins with {{lives}} lives.",
-                    "title": "{{join}} the game and start it with {{begin}}!"
+                    "title": "{{join}} 게임을 시작하고 {{begin}}로 시작하세요!"
                 }
             },
             "exp": {
-                "doubleExpForVoting": "will receive double EXP for [voting]({{link}})!",
-                "howToVote": "See {{vote}} for info on how to vote. Thanks for supporting KMQ!",
-                "powerHour": "KMQ POWER HOUR ACTIVE",
-                "weekend": "DOUBLE EXP WEEKEND ACTIVE"
+                "doubleExpForVoting": "[voting]({{link}})에 대한 경험치를 두 배로 받습니다!",
+                "howToVote": "투표 방법에 대한 정보는 {{vote}}를 참조하세요. / KMQ를 지원해주셔서 감사합니다!",
+                "powerHour": "KMQ Power Hour가 활성화되었습니다!",
+                "weekend": "두 배 경험치 (주말) 활성화되었습니다!"
             },
             "failure": {
-                "alreadyInSession": "Game Already in Session",
+                "alreadyInSession": "게임이 이미 세션 중입니다.",
                 "botRestarting": {
-                    "description": "Bot is restarting in {{timeUntilRestart}} minutes, please wait until the bot is back up!",
-                    "title": "Cannot Start New Game"
+                    "description": "봇이 {{timeUntilRestart}}분 후에 다시 시작됩니다. / 봇이 백업될 때까지 기다리세요!",
+                    "title": "새 게임을 시작할 수 없습니다."
                 },
                 "hiddenGameMode": {
-                    "description": "You do not have permission to use this command.",
-                    "title": "Hidden Game Mode"
+                    "description": "이 명령어를 사용할 권한이 없습니다.",
+                    "title": "숨겨진 게임 모드"
                 },
                 "notInVC": {
-                    "description": "Send {{play}} again when you are in a voice channel.",
-                    "title": "Join a Voice Channel"
+                    "description": "음성 채널에 있을 때 {{play}}를 다시 보내세요.",
+                    "title": "음성 채널을 가입하세요!"
                 },
                 "overrideTeamsOrElimination": {
-                    "description": "If you meant to start a {{oldGameType}} game, {{end}} this game, call {{playOldGameType}}, {{gameSpecificInstructions}}, and then call {{begin}}.",
+                    "description": "{{oldGameType}} 게임, 이 게임을 {{end}} 시작하려면 {{playOldGameType}}, {{gameSpecificInstructions}}를 호출한 다음 {{begin}}를 호출하세요.",
                     "elimination": {
-                        "join": "{{join}} the game"
+                        "join": "{{join}} 게임에 입장하였습니다."
                     },
                     "teams": {
-                        "join": "`{{join}} [team name]` a team"
+                        "join": "`{{join}} [team name]` 팀에 입장하셨습니다."
                     },
-                    "title": "Ignoring {{playOldGameType}}"
+                    "title": "{{playOldGameType}} 무시"
                 }
             },
-            "gameStarting": "Game Starting in #{{textChannelName}} in 🔊 {{voiceChannelName}}",
+            "gameStarting": "🔊 {{voiceChannelName}}의 #{{textChannelName}}에서 시작하는 게임입니다.",
             "help": {
-                "description": "Starts a game of KMQ. Pick between classic (default), elimination mode, and teams mode.",
+                "description": "KMQ 게임을 시작합니다. / 클래식 (기본), 제거 모드, 팀 모드 중에서 선택합니다.",
                 "example": {
-                    "classic": "Start a classic game of KMQ (type in your guess first to get a point)",
-                    "elimination": "Start an elimination game of KMQ where each player starts with {{lives}} lives",
-                    "teams": "Split up into as many teams as you want and see who you can depend on to help you win!"
+                    "classic": "KMQ의 클래식 (기본) 게임을 시작하십시오. (포인트를 얻으려면 먼저 추측을 입력하십시오.)",
+                    "elimination": "각 플레이어가 {{lives}} 생명으로 시작하는 KMQ 제거 게임 시작합니다.",
+                    "teams": "원하는 만큼 팀을 나누고 승리를 도울 수 있는 사람을 확인하세요!"
                 },
                 "usage": {
-                    "lives": "lives"
+                    "lives": "목슴"
                 }
             },
             "team": {
                 "joinTeam": {
-                    "description": "Team leaders, type `{{join}} [team name]` to form a new team. Remember, switching teams mid-game will forfeit all your current score and EXP.",
-                    "title": "{{join}} a team!"
+                    "description": "팀 리더는 `{{join}} [team name]`을 입력하여 새 팀을 구성하세요. / 게임 중간에 팀을 바꾸면 현재 점수와 경험치를 모두 잃게 됩니다.",
+                    "title": "{{join}} 팀에 입장하셨습니다!"
                 }
             },
-            "typeGuess": "Listen to the song and type your guess!",
-            "voteReminder": "Psst. Earn more EXP by voting (see {{vote}})"
+            "typeGuess": "노래를 듣고 추측을 입력하십시오!",
+            "voteReminder": "쉿!. 투표로 더 많은 경험치를 얻으세요. ({{vote}} 참조)"
         },
         "preset": {
             "deleted": {
-                "description": "Preset {{presetName}} successfully deleted.",
-                "title": "Preset Deleted"
+                "description": "{{presetName}} 사전 설정이 성공적으로 삭제되었습니다.",
+                "title": "사전 설정을 삭제합니다."
             },
             "exported": {
-                "description": "Import {{presetName}} as a new preset in other servers using:\n`{{presetImport}} {{presetUUID}} [preset_name]`\n\nAlternatively, load the preset's options directly using:\n`{{presetLoad}} {{presetUUID}}`",
-                "title": "Preset Exported"
+                "description": "다음을 사용하여 다른 서버의 새 사전 설정으로 {{presetName}} 가져옵니다.:\n\n`{{presetImport}} {{presetUUID}} [preset_name]`\n\n다음을 사용하여 사전 설정의 옵션을 직접 로드:\n\n`{{presetLoad }} {{presetUUID}}`",
+                "title": "사전 설정을 내보내기합니다."
             },
             "failure": {
                 "alreadyExists": {
-                    "description": "Preset {{presetNameFormatted}} already exists. You can delete the old one with `{{presetDelete}} {{presetName}}`.",
-                    "title": "Preset Already Exists"
+                    "description": "{{presetNameFormatted}} 사전 설정이 이미 있습니다. / `{{presetDelete}} {{presetName}}`로 이전 것을 삭제할 수 있습니다.",
+                    "title": "사전 설정이 이미 있습니다."
                 },
                 "illegalPrefix": {
-                    "description": "Preset name cannot begin with {{importPrefix}}.",
-                    "title": "Preset Error"
+                    "description": "사전 설정 이름은 {{importPrefix}}로 시작할 수 없습니다.",
+                    "title": "사전 설정에 오류가 있습니다."
                 },
                 "lengthyName": {
-                    "description": "Preset name must be at most {{presetNameMaxLength}} characters.",
-                    "title": "Preset Name Too Long"
+                    "description": "사전 설정 이름은 {{presetNameMaxLength}}자 이하여야 합니다.",
+                    "title": "사전 설정 이름이 너무 깁니다."
                 },
                 "missingIdentifier": {
-                    "description": "You must specify a preset identifier. Use `{{presetExport}} [preset_name]` to retrieve a preset's identifier.",
-                    "title": "Preset Identifier Missing"
+                    "description": "사전 설정 식별자를 지정해야 합니다. / 사전 설정의 식별자를 검색하려면 `{{presetExport}} [preset_name]`를 사용하세요.",
+                    "title": "사전 설정 식별자가 누락되었습니다."
                 },
                 "missingName": {
-                    "description": "You must specify a preset name.",
-                    "title": "Preset Name Missing"
+                    "description": "사전 설정 이름을 지정해야 합니다.",
+                    "title": "사전 설정 이름이 누락되었습니다."
                 },
                 "noSuchPreset": {
-                    "description": "Preset {{presetName}} doesn't exist.",
+                    "description": "사전 설정 {{presetName}}이(가) 존재하지 않습니다.",
                     "identifier": {
-                        "description": "Preset identifer {{presetUUID}} doesn't exist."
+                        "description": "사전 설정 식별자 {{presetUUID}}가 존재하지 않습니다."
                     },
-                    "title": "No Such Preset"
+                    "title": "그러한 사전 설정이 없습니다."
                 },
                 "tooMany": {
-                    "description": "Each guild may only have up to {{maxNumPresets}} presets. Please delete some before adding more.",
-                    "title": "Too Many Presets"
+                    "description": "각 길드는 최대 {{maxNumPresets}}개의 사전 설정만 가질 수 있습니다. / 더 추가하기 전에 일부를 삭제하십시오.",
+                    "title": "사전 설정이 너무 많습니다."
                 }
             },
             "help": {
-                "description": "Various actions to save/load game option presets. Preset name must be one word long.",
+                "description": "게임 옵션 사전 설정을 저장/로드하는 다양한 작업이며 사전 설정 이름은 한 단어여야 합니다.",
                 "example": {
-                    "delete": "Deletes the mentioned preset",
-                    "export": "Returns a unique identifier that can be used to load/import the mentioned preset",
-                    "import": "Creates a new preset with name `preset_name` using an exported preset identifier ({{exampleIdentifier}})",
-                    "list": "Lists all of the server's presets",
-                    "load": "Loads the mentioned preset or preset identifier ({{exampleIdentifier}}) into the game options",
-                    "replace": "Replace the mentioned preset's options with the current game options",
-                    "save": "Saves the current game options as a preset"
+                    "delete": "언급된 사전 설정을 삭제합니다.",
+                    "export": "언급된 사전 설정을 로드/가져오기하는 데 사용할 수 있는 고유 식별자를 반환합니다.",
+                    "import": "내보낸 사전 설정 식별자({{exampleIdentifier}})를 사용하여 이름이 `preset_name`인 새 사전 설정을 만듭니다.",
+                    "list": "서버의 모든 사전 설정을 나열합니다.",
+                    "load": "언급된 사전 설정 또는 사전 설정 식별자 ({{exampleIdentifier}})를 게임 옵션에 로드합니다.",
+                    "replace": "언급된 사전 설정의 옵션을 현재 게임 옵션으로 교체합니다.",
+                    "save": "현재 게임 옵션을 사전 설정으로 저장합니다."
                 },
                 "usage": {
-                    "presetIdentifier": "preset_identifier",
-                    "presetName": "preset_name"
+                    "presetIdentifier": "사전_설정_식별자",
+                    "presetName": "사전_설정_이름"
                 }
             },
             "imported": {
-                "description": "Load the newly imported preset using `{{presetLoad}} {{presetName}}`.",
-                "title": "Preset Imported"
+                "description": "`{{presetLoad}} {{presetName}}`를 사용하여 새로 가져온 사전 설정을 로드합니다.",
+                "title": "사전 설정을 가져옵니다."
             },
             "list": {
                 "failure": {
                     "noPresets": {
-                        "description": "You have no presets. Refer to {{presetHelp}} to see how to create one."
+                        "description": "사전 설정이 없습니다. 생성 방법은 {{presetHelp}}를 참조하세요."
                     }
                 },
                 "loadInstructions": {
-                    "footer": "Load a preset with {{presetLoad}} [preset_name]"
+                    "footer": "{{presetLoad}} [preset_name]로 사전 설정을 로드합니다."
                 },
-                "title": "Available Presets"
+                "title": "사용 가능한 사전 설정"
             },
             "replaced": {
-                "title": "Preset Replaced"
+                "title": "사전 설정이 교체됨"
             },
             "saved": {
-                "title": "Preset Saved"
+                "title": "사전 설정이 저장됨"
             },
             "savedOrReplaced": {
-                "description": "You can load this preset later with {{presetLoad}}."
+                "description": "이 사전 설정은 나중에 {{presetLoad}}로 로드할 수 있습니다."
             }
         },
         "profile": {
-            "badges": "Badges",
-            "experience": "Experience",
+            "badges": "배지",
+            "experience": "경험치",
             "failure": {
                 "notFound": {
                     "badUsage": {
-                        "description": "Make sure you're using this command correctly. See {{profileHelp}} for more details."
+                        "description": "이 명령을 올바르게 사용하고 있는지 확인하십시오. / 자세한 내용은 {{profileHelp}}를 참조하세요."
                     },
-                    "description": "Could not find the specified user ID. See {{profileHelp}} for details.",
-                    "title": "No Profile Found"
+                    "description": "지정된 사용자 ID를 찾을 수 없습니다. / 자세한 내용은 {{profileHelp}}를 참조하세요.",
+                    "title": "프로필을 찾을 수 없습니다."
                 }
             },
-            "firstPlayed": "First Played",
-            "gamesPlayed": "Games Played",
+            "firstPlayed": "첫 번째로 플레이",
+            "gamesPlayed": "플레이한 게임",
             "help": {
-                "description": "Shows your game stats.",
+                "description": "게임 통계를 보여줍니다.",
                 "example": {
-                    "otherPlayerID": "Views a player profile based on their Discord ID",
-                    "otherPlayerMention": "Views {{playerName}}'s player profile",
-                    "self": "View your own player profile"
+                    "otherPlayerID": "디스코드 아이디를 기반으로 플레이어 프로필을 봅니다.",
+                    "otherPlayerMention": "{{playerName}}의 플레이어 프로필 보기",
+                    "self": "자신의 프로필 보기"
                 },
                 "usage": {
-                    "mention": "mention"
+                    "mention": "멘션"
                 }
             },
-            "lastActive": "Last Active",
-            "overallRank": "Overall Rank",
+            "lastActive": "마지막 활동",
+            "overallRank": "전체 순위",
             "rank": {
-                "almighty": "Almighty Ruler of the Solar System",
-                "aoty": "Artist of the Year",
-                "benevolent": "Benevolent Ruler of Earth",
-                "bonsang": "Bonsang Award Winner",
-                "ceo": "CEO of KMQ Entertainment",
-                "daesang": "Daesang Award Winner",
-                "divine": "Divine Ruler of the Stars",
-                "enlightened": "Enlightened Ruler of the Galaxy",
-                "immortal": "Immortal Ruler of the Universe",
-                "newAoty": "New Artist of the Year",
-                "novice": "Novice",
-                "nugu": "Nugu",
-                "omniscient": "Omniscient Ruler of the Multiverse",
-                "preDebut": "Pre-debut",
-                "president": "President of South Korea",
-                "reuniter": "Reuniter of the Two Koreas",
-                "ruler": "Ruler of the Two Koreas",
-                "supreme": "Supreme Ruler of the Two Koreas",
-                "trainee": "Trainee"
+                "almighty": "태양계의 전능한 통치자",
+                "aoty": "올해의 아티스트",
+                "benevolent": "자비로운 대지의 지배자",
+                "bonsang": "본상 수상자",
+                "ceo": "KMQ 엔터테인먼트 대표이사",
+                "daesang": "대상 수상자",
+                "divine": "별의 신성한 통치자",
+                "enlightened": "계몽된 은하계의 지배자",
+                "immortal": "우주의 불멸의 지배자",
+                "newAoty": "올해의 신인 아티스트",
+                "novice": "초심자",
+                "nugu": "누구",
+                "omniscient": "다우주의 전지전능한 통치자",
+                "preDebut": "데뷔 전",
+                "president": "대한민국 대통령",
+                "reuniter": "남/북한의 통일",
+                "ruler": "남/북한의 통치자",
+                "supreme": "남/북한의 최고 통치자",
+                "trainee": "연습생"
             },
-            "songsGuessed": "Songs Guessed",
-            "timesVoted": "Times Voted"
+            "songsGuessed": "추측한 노래",
+            "timesVoted": "투표 횟수"
         },
         "recentlyadded": {
-            "description": "The following songs were added to KMQ in the past two weeks:",
+            "description": "지난 2주 동안 다음 노래가 KMQ에 추가되었습니다.",
             "failure": {
                 "noSongs": {
-                    "description": "Check back later to see if KMQ has added new songs.",
-                    "title": "No Songs Recently Added"
+                    "description": "KMQ에 새 노래가 추가되었는지 나중에 다시 확인하세요.",
+                    "title": "최근 추가된 노래 없음"
                 }
             },
             "help": {
-                "description": "View songs added to KMQ in the past two weeks.",
-                "example": "Show recently added songs"
+                "description": "지난 2주 동안 KMQ에 추가된 노래를 봅니다.",
+                "example": "최근에 추가한 노래 표시"
             },
-            "released": "Released",
-            "title": "Recently Added Songs"
+            "released": "출시 된",
+            "title": "최근 추가된 노래"
         },
         "release": {
             "help": {
-                "description": "Choose whether to include only official music videos, or all videos (b-sides, dance practices, acoustic versions, remixes, etc.).",
+                "description": "공식 뮤직 비디오만 포함할지 아니면 모든 비디오 (b-side, 댄스 연습, 어쿠스틱 버전, 리믹스 등)를 포함할지 선택합니다.",
                 "example": {
-                    "all": "Plays all available videos, including dance practices, acoustic versions, remixes",
-                    "official": "Plays only {{official}} music videos",
-                    "reset": "Reset to the default release type of {{defaultRelease}}"
+                    "all": "댄스 연습, 어쿠스틱 버전, 리믹스를 포함하여 사용 가능한 모든 비디오를 재생합니다.",
+                    "official": "{{official}} 뮤직 비디오만 재생",
+                    "reset": "{{defaultRelease}}의 기본 릴리스 유형으로 재설정합니다."
                 }
             }
         },
         "remove": {
             "failure": {
                 "noGroupsSelected": {
-                    "description": "There are no groups currently selected.",
-                    "title": "Remove Failed"
+                    "description": "현재 선택된 그룹이 없습니다.",
+                    "title": "제거 실패"
                 },
                 "unrecognizedGroups": {
-                    "removed": "removed"
+                    "removed": "제거됨"
                 }
             },
             "help": {
-                "description": "Removes one or more groups from the current {{groups}}, {{exclude}}, or {{include}} options.",
+                "description": "현재 {{groups}}, {{exclude}}, {{include}} 옵션에서 하나 이상의 그룹을 제거합니다.",
                 "example": {
-                    "exclude": "Removes {{groupOne}}, {{groupTwo}}, and {{groupThree}} from the current {{exclude}} option",
-                    "groups": "Removes {{groupOne}} and {{groupTwo}} from the current {{groups}} option",
-                    "include": "Removes {{group}} from the current {{include}} option"
+                    "exclude": "현재 {{exclude}} 옵션에서 {{groupOne}}, {{groupTwo}}, {{groupThree}}를 제거합니다.",
+                    "groups": "현재 {{groups}} 옵션에서 {{groupOne}}, {{groupTwo}} 제거합니다.",
+                    "include": "현재 {{include}} 옵션에서 {{group}} 제거합니다."
                 }
             }
         },
         "reset": {
             "help": {
-                "description": "Reset to the default game options.",
+                "description": "기본 게임 옵션으로 재설정합니다.",
                 "example": {
-                    "reset": "Resets to the default game options"
+                    "reset": "기본 게임 옵션으로 재설정"
                 }
             }
         },
         "score": {
             "failure": {
                 "noneInProgress": {
-                    "description": "There is no currently active game of KMQ. Start a new game with {{play}}!"
+                    "description": "현재 진행 중인 KMQ 게임이 없습니다. / {{play}}로 새 게임을 시작하세요!"
                 }
             },
             "help": {
-                "description": "See the scoreboard for the current game."
+                "description": "현재 게임의 스코어보드를 참조하세요."
             },
-            "scoreboardTitle": "Scoreboard"
+            "scoreboardTitle": "스코어보드"
         },
         "seek": {
             "help": {
-                "description": "Choose whether each song is played from the beginning, middle, or at a random point.",
+                "description": "각 노래를 처음, 중간 또는 임의의 지점에서 재생할지 여부를 선택합니다.",
                 "example": {
-                    "beginning": "Song will be played starting from the very beginning",
-                    "middle": "Songs will be played starting from the middle point",
-                    "random": "Songs will be played starting from a random point in the middle",
-                    "reset": "Reset to the default seek of {{defaultSeek}}"
+                    "beginning": "처음부터 노래가 재생됩니다.",
+                    "middle": "중간 지점부터 노래가 재생됩니다.",
+                    "random": "중간에 임의의 지점에서 시작하여 노래가 재생됩니다.",
+                    "reset": "{{defaultSeek}}의 기본 탐색으로 재설정합니다."
                 }
             }
         },
         "shuffle": {
             "help": {
-                "description": "Choose whether songs are played in truly random order ({{random}}) or randomly but uniquely until all songs are played ({{shuffle}}).",
+                "description": "노래가 완전히 무작위로 재생되는지 ({{random}}) 아니면 모든 노래가 재생될 때까지 무작위로 고유하게 재생되는지 ({{shuffle}}) 선택하십시오.",
                 "example": {
-                    "random": "Songs will play randomly",
-                    "reset": "Reset to the default shuffle mode of {{defaultShuffle}}",
-                    "unique": "Every song will play once before any are repeated"
+                    "random": "노래는 무작위로 재생됩니다.",
+                    "reset": "{{defaultShuffle}}의 기본 셔플 모드로 재설정합니다.",
+                    "unique": "모든 노래는 반복되기 전에 한 번 재생됩니다."
                 }
             }
         },
         "skip": {
             "help": {
-                "description": "Vote to skip the current song. A song is skipped when majority of participants vote to skip it."
+                "description": "현재 노래를 건너뛰려면 투표하세요. / 대다수의 참가자가 건너뛰기로 투표하면 노래를 건너뜁니다."
             },
             "success": {
-                "description": "{{skipCounter}} skips achieved, skipping...",
-                "title": "Skip"
+                "description": "{{skipCounter}} 건너뛰기 달성, 건너뛰기...",
+                "title": "건너뛰기"
             },
             "vote": {
-                "description": "{{skipCounter}} skip requests received.",
-                "title": "Skip Request"
+                "description": "{{skipCounter}} 건너뛰기 요청이 수신되었습니다.",
+                "title": "건너뛰기 요청"
             }
         },
         "special": {
             "help": {
-                "description": "Hey. This hasn't been announced yet, but check out the KMQ server to try it out! Play a special mode with modified audio.",
+                "description": "야. 아직 발표되지 않았지만 KMQ 서버를 확인하여 사용해 보세요! / 수정된 오디오로 특수 모드를 재생합니다.",
                 "example": {
-                    "fast": "Plays the song at a fast speed",
-                    "faster": "Plays the song at a faster speed",
-                    "highPitch": "Plays the song at a high pitch",
-                    "lowPitch": "Plays the song at a low pitch",
-                    "nightcore": "Plays a nightcore edit of the song",
-                    "reset": "Reset the special option",
-                    "reverse": "Plays the song in reverse",
-                    "slow": "Plays the song at a slow speed"
+                    "fast": "빠른 속도로 노래를 재생합니다.",
+                    "faster": "더 빠른 속도로 노래를 재생합니다.",
+                    "highPitch": "높은 음높이로 노래를 재생합니다.",
+                    "lowPitch": "낮은 음높이로 노래를 재생합니다.",
+                    "nightcore": "노래의 나이트코어 편집을 재생합니다.",
+                    "reset": "특수 옵션 재설정합니다.",
+                    "reverse": "노래를 거꾸로 재생합니다.",
+                    "slow": "느린 속도로 노래를 재생합니다."
                 }
             }
         },
         "stats": {
-            "description": "Detailed bot status: {{link}}",
+            "description": "자세한 봇 상태: {{link}}",
             "failure": {
-                "description": "Please try again later.",
-                "title": "Error Retrieving Stats"
+                "description": "나중에 다시 시도 해주십시오.",
+                "title": "통계 검색 오류"
             },
-            "footer": "\"Recent\" statistics represent data from last 24 hours.",
+            "footer": "\"최근\" 통계는 지난 24시간 동안의 데이터를 나타냅니다.",
             "game": {
-                "activeGameSessions": "Active Game Sessions",
-                "activePlayers": "Active Players",
-                "latestSongUpdate": "Latest Song Update",
-                "recentGameRounds": "(Recent) Game Rounds",
-                "recentGameSessions": "(Recent) Game Sessions",
-                "recentPlayers": "(Recent) Players",
-                "title": "Game Statistics"
+                "activeGameSessions": "활성 게임 세션",
+                "activePlayers": "활성 플레이어",
+                "latestSongUpdate": "최신 노래 업데이트",
+                "recentGameRounds": "(최근) 게임 라운드",
+                "recentGameSessions": "(최근) 게임 세션",
+                "recentPlayers": "(최근) 선수",
+                "title": "게임 통계"
             },
             "help": {
-                "description": "Various usage/system statistics."
+                "description": "다양한 사용/시스템 통계"
             },
             "system": {
-                "apiLatency": "API Latency",
-                "databaseLatency": "Database Latency",
-                "loadAverage": "System Load Average",
-                "memoryUsage": "Process Memory Usage",
-                "requestLatency": "Request Latency",
-                "title": "System Statistics",
-                "uptime": "Uptime"
+                "apiLatency": "API 지연 시간",
+                "databaseLatency": "데이터베이스 지연 시간",
+                "loadAverage": "시스템 부하 평균",
+                "memoryUsage": "프로세스 메모리 사용량",
+                "requestLatency": "요청 지연 시간",
+                "title": "시스템 통계",
+                "uptime": "업타임"
             },
-            "title": "Bot Statistics"
+            "title": "봇 통계"
         },
         "subunits": {
             "help": {
-                "description": "Choose whether to automatically include a group's subunits, when using {{groups}}.",
+                "description": "{{groups}을(를) 사용할 때 그룹의 하위 단위를 자동으로 포함할지 여부를 선택하십시오.",
                 "example": {
-                    "exclude": "Do not include subunits",
-                    "include": "Automatically include subunits. For example, `{{groupCommand}} {{parentGroup}}` would include songs by {{parentGroup}}, {{subunitOne}}, {{subunitTwo}}, etc.",
-                    "reset": "Reset to the default option of {{defaultSubunit}}"
+                    "exclude": "하위 단위를 포함하지 마십시오.",
+                    "include": "자동으로 하위 단위를 포함합니다. / 예를 들어 `{{groupCommand}} {{parentGroup}}`에는 {{parentGroup}}, {{subunitOne}}, {{subunitTwo}} 등의 노래가 포함됩니다.",
+                    "reset": "{{defaultSubunit}}의 기본 옵션으로 재설정합니다."
                 }
             }
         },
         "timer": {
             "help": {
-                "description": "Try your best to guess correctly before the timer runs out! Enter a time in seconds, or give no arguments to disable.",
+                "description": "타이머가 다 떨어지기 전에 올바르게 추측하기 위해 최선을 다하십시오! / 시간을 초 단위로 입력하거나 비활성화할 인수를 지정하지 마십시오.",
                 "example": {
-                    "reset": "Disables the timer",
-                    "set": "In {{timer}} seconds, if no user has guessed correctly, the round ends and the next one begins automatically"
+                    "reset": "타이머 비활성화",
+                    "set": "{{timer}}초 내에 사용자가 올바르게 추측하지 않으면 라운드가 종료되고 다음 라운드가 자동으로 시작됩니다."
                 },
                 "usage": {
-                    "seconds": "seconds"
+                    "seconds": "초"
                 }
             }
         },
         "vote": {
-            "available": "You can vote now!",
+            "available": "지금 투표할 수 있습니다!",
             "boost": {
-                "active": "Boost active!",
-                "inactive": "Boost Inactive"
+                "active": "부스트 활성화",
+                "inactive": "부스트 비활성화"
             },
-            "description": "Vote for KMQ on [top.gg]({{voteLink}}) and you'll receive 2x EXP for an hour! You can vote once every {{voteResetDuration}} hours.\n\nWe'd appreciate it if you could also leave a [review]({{reviewLink}}).",
+            "description": "[top.gg]({{voteLink}})에서 KMQ에 투표하면 1시간 동안 경험치가 2배 지급됩니다! / {{voteResetDuration}}시간마다 한 번씩 투표할 수 있습니다.\n\n[review]({{reviewLink}})도 남겨주시면 감사하겠습니다.",
             "help": {
-                "description": "Shows instructions on how to vote to receive 2x EXP for an hour."
+                "description": "1시간 동안 경험치 2배를 받기 위해 투표하는 방법에 대한 지침을 보여줍니다."
             },
             "unavailable": {
-                "hours": "You can vote in **{{hours}}**.",
-                "minutes": "You can vote in **{{minutes}}**.",
-                "seconds": "You can vote in **{{seconds}}**."
+                "hours": "**{{hours}}시간** 후에 투표할 수 있습니다.",
+                "minutes": "**{{minutes}}분** 후에 투표할 수 있습니다.",
+                "seconds": "**{{seconds}}초** 후에 투표할 수 있습니다."
             }
         }
     },
     "fact": {
         "fun": {
-            "bigThreeDominance": "Fun Fact: BTS, Blackpink and Twice combined account for {{bigThreeViews}} YouTube views, or {{proportion}}%!",
-            "birthday": "Fun Fact: {{name}}'s birthday is this month on {{formattedDate}}!",
-            "companyByArtistCount": "Fun Fact: {{company}} is the entertainment company with the {{ordinal}} most artists (including subunits and solo debuts) at {{count}} total!",
-            "companyByArtistViews": "Fun Fact: {{name}} is the {{ordinal}} most viewed entertainment company with {{views}} total YouTube views!",
-            "fanclubName": "Fun Fact: {{name}}'s fanclub name is '{{fanclub}}'!",
-            "historicalGaonWeekly": "Fun Fact: On this week in {{year}}, {{songName}} was the top charting song on the GAON Weekly charts!",
+            "bigThreeDominance": "재미있는 사실: 방탄소년단, 블랙핑크, 트와이스 합산 유튜브 조회수는 {{bigThreeViews}} 또는 {{proportion}}%입니다!",
+            "birthday": "재미있는 사실: {{name}}님의 생일은 이번 달 {{formattedDate}}입니다!",
+            "companyByArtistCount": "재미있는 사실: {{company}}는 총 {{count}}명의 아티스트 (서브유닛 및 솔로 데뷔 포함)가 가장 {{ordinal}}명인 엔터테인먼트 회사입니다!",
+            "companyByArtistViews": "재미있는 사실: {{name}}은(는) {{ordinal}} 가장 많이 본 엔터테인먼트 회사로 총 유튜브 조회수는 {{views}}회입니다!",
+            "fanclubName": "재미있는 사실: {{name}}님의 팬클럽 이름은 '{{fanclub}}'입니다!",
+            "historicalGaonWeekly": "재미있는 사실: 이번 주 {{year}}에 {{songName}}이(가) 가온 주간 차트에서 1위를 차지했습니다!",
             "hyperlinkGenerator": "[\"{{songName}}\" by {{artistName}}]({{url}})",
-            "mostActiveYear": "Fun Fact: {{year}} was the {{ordinal}} most active year in K-Pop with {{count}} music video releases!",
-            "mostDebuts": "Fun Fact: {{year}} had the {{ordinal}} most debuts with {{count}} groups debuting!",
-            "mostGaonAppearances": "Fun Fact: {{artistName}} has placed on the GAON digital weekly charts the {{ordinalNum}} most times with {{appearances}} appearances!",
-            "mostGaonFirsts": "Fun Fact: {{artistName}} has topped the GAON digital weekly charts the {{ordinalNum}} most times with {{firstPlaceCount}} first place appearances!",
-            "mostLikedGroup": "Fun Fact: {{artist}} is the {{ordinal}} most liked group with {{likes}} total YouTube likes!",
-            "mostLikedVideo": "Fun Fact: {{hyperlink}} is the {{ordinal}} most liked video with {{likes}} total YouTube likes!",
-            "mostMVs": "Fun Fact: {{artist}} has the {{ordinal}} most music videos with {{count}} on YouTube!",
-            "mostMusicShowWins": "Fun Fact: {{artist}} has won the {{ordinal}} most music shows with {{count}} wins!",
-            "mostViewedGroup": "Fun Fact: {{artist}} is the {{ordinal}} most viewed group with {{views}} total YouTube views!",
-            "mostViewedSoloist": "Fun Fact: {{artist}} is the {{ordinal}} most viewed solo artist with {{totalViews}} total YouTube views!",
-            "mostViewedVideo": "Fun Fact: {{hyperlink}} is the {{ordinal}} most viewed video with {{views}} total YouTube views!",
-            "mvViewMilestone": "Fun Fact: {{hyperlink}} recently reached {{views}} views on YouTube!",
-            "newMV": "New Song Alert: Check out this recently released music video, {{hyperlink}}",
-            "oldMV": "Fun Fact: {{hyperlink}} was released this week back in {{year}}!",
-            "recentGaonWeekly": "Fun Fact: {{songName}} is the {{ordinalNum}} highest charting song on the Gaon Weekly charts last week!",
-            "recentMusicShowWin": "Fun Fact: {{hyperlink}} recently won on {{musicShow}} on {{winDate}}",
-            "viewsByArtistType": "Fun Fact: There is a combined total of {{totalViews}} views on all K-Pop music videos on YouTube, {{groupViews}} (${{groupProportion}}%) of which are from groups, while {{soloViews}} (${{soloProportion}}%) are from solo artists.",
-            "viewsByGender": "Fun Fact: There is a combined total of {{totalViews}} views on all K-Pop music videos on YouTube, {{maleViews}} ({{maleProportion}}%) of which are from male groups, {{femaleViews}} ({{femaleProportion}}%) from female groups, and the remaining {{coedViews}} ({{coedProportion}}%) from co-ed groups."
+            "mostActiveYear": "재미있는 사실: {{year}}은(는) {{count}}개의 뮤직 비디오가 출시된 {{ordinal}} K-POP에서 가장 활발한 해였습니다!",
+            "mostDebuts": "재미있는 사실: {{year}}은(는) {{count}} 그룹이 데뷔하면서 {{ordinal}}이(가) 가장 많이 데뷔했습니다!",
+            "mostGaonAppearances": "재미있는 사실: {{artistName}}은(는) {{appearances}}번의 출연으로 가온 디지털 주간 차트에 가장 많이 {{ordinalNum}} 올랐습니다!",
+            "mostGaonFirsts": "재미있는 사실: {{artistName}}은(는) 가온 디지털 주간 차트에서 가장 많이 {{ordinalNum}} 1위를 차지했으며 {{firstPlaceCount}}회 1위를 차지했습니다!",
+            "mostLikedGroup": "재미있는 사실: {{artist}}는 유튜브에서 총 {{likes}}개의 좋아요를 받은 {{ordinal}}개의 가장 좋아하는 그룹입니다!",
+            "mostLikedVideo": "재미있는 사실: {{hyperlink}}는 유튜브에서 총 {{likes}}개의 좋아요를 받은 {{ordinal}}개의 동영상입니다!",
+            "mostMVs": "재미있는 사실: {{artist}}이(가) 유튜브에서 {{count}}명의 뮤직 비디오가 {{ordinal}} 가장 많습니다!",
+            "mostMusicShowWins": "재미있는 사실: {{artist}}은(는) {{count}}개의 우승으로 대부분의 음악방송에서 {{ordinal}}번의 우승을 차지했습니다!",
+            "mostViewedGroup": "재미있는 사실: {{artist}}는 {{ordinal}} 가장 많이 본 그룹으로 총 유튜브 조회수는 {{views}}회입니다!",
+            "mostViewedSoloist": "재미있는 사실: {{artist}}은(는) {{ordinal}} 가장 많이 본 솔로 아티스트이며 총 유튜브 조회수는 {{totalViews}}입니다!",
+            "mostViewedVideo": "재미있는 사실: {{hyperlink}}는 {{ordinal}} 가장 많이 본 동영상이며 총 유튜브 조회수는 {{views}}회입니다!",
+            "mvViewMilestone": "재미있는 사실: {{hyperlink}}이(가) 최근 유튜브에서 {{view}} 조회수에 도달했습니다!",
+            "newMV": "신곡 알림: 최근에 공개된 이 뮤직 비디오 {{hyperlink}}를 확인하세요.",
+            "oldMV": "재미있는 사실: {{hyperlink}}가 이번 주에 {{year}}에 출시되었습니다!",
+            "recentGaonWeekly": "재미있는 사실: {{songName}}은(는) 지난주 가온 주간 차트에서 {{ordinalNum}}개의 가장 높은 차트를 기록한 곡입니다!",
+            "recentMusicShowWin": "재미있는 사실: {{winDate}}의 {{musicShow}}에서 {{hyperlink}}가 최근 우승했습니다.",
+            "viewsByArtistType": "재미있는 사실: 유튜브의 모든 K-POP 뮤직 비디오에 대한 총 조회수는 {{totalViews}}회이며, 그 중 {{groupViews}}(${{groupProportion}}%)가 그룹에서 발생한 반면 {{soloViews}}($ {{soloProportion}}%)는 솔로 아티스트에서 발생했습니다.",
+            "viewsByGender": "재미있는 사실: 재미있는 사실: 유튜브의 모든 K-POP 뮤직 비디오에 대한 총 조회수는 {{totalViews}}회이며, 그 중 {{maleViews}}({{maleProportion}}%)는 남성 그룹, {{femaleViews}} ({{femaleProportion}}%)는 여성 그룹에서, 나머지 {{coedViews}}({{coedProportion}}%)는 남녀 혼성 그룹에서 발생했습니다."
         },
         "kmq": {
-            "guessRate": "Fun Fact: {{hyperlink}} has a guess rate of {{percentage}}% over {{roundsPlayed}} rounds played",
-            "highestLeveledPlayerStats": "Fun Fact: The {{ordinalNum}} highest leveled KMQ player is Level {{level}}, with {{songsGuessed}} songs guessed over {{gamesPlayed}} games!",
-            "longestGame": "KMQ Fact: The world's (current) longest game of KMQ lasted {{sessionLength}} minutes, with {{roundsPlayed}} songs played, an average guess time of {{avgGuessTime}} seconds, with {{numParticipants}} participants! Can you beat that?",
-            "mostActivePlayerGamesPlayed": "KMQ Fact: The most active player has played {{gamesPlayed}} games since Nov 8th, 2020!",
-            "mostActivePlayerSongsGuessed": "KMQ Fact: The most active player has guessed {{songsGuessed}} songs since Nov 8th, 2020!",
-            "mostActiveServer": "KMQ Fact: The most active server has played {{gamesPlayed}} games of KMQ, with a total of {{songsGuessed}} songs guessed!",
-            "mostCorrectGuessesServer": "KMQ Fact: The server with the most correct guesses has played {{gamesPlayed}} games of KMQ, with a total of {{songsGuessed}} songs guessed!",
-            "recentGameCount": "KMQ Fact: There has been a total of {{recentGameCount}} games of KMQ have been played in the last week!",
-            "recentSessions": "KMQ Fact: A total of {{recentSessions}} games of KMQ have been played in the last week!",
-            "totalGames": "KMQ Fact: A grand total of {{totalGamesPlayed}} games of KMQ have been played!",
-            "uniquePlayers": "KMQ Fact: {{recentActivePlayers}} unique players have played KMQ in the past {{xDays}}!"
+            "guessRate": "재미있는 사실: {{hyperlink}}의 추측률은 {{roundsPlayed}} 라운드 동안 {{percentage}}% 입니다.",
+            "highestLeveledPlayerStats": "재미있는 사실: {{ordinalNum}} 최고 레벨의 KMQ 플레이어는 레벨 {{level}}이며, {{gamesPlayed}} 게임에서 {{songsGuessed}} 곡이 추측됩니다!",
+            "longestGame": "KMQ 사실: 세계에서 (현재) 가장 긴 KMQ 게임은 {{roundsPlayed}}곡이 재생되고 {{numParticipants}}명이 참여하여 평균 추측 시간이 {{avgGuessTime}}초로 {{sessionLength}}분 동안 진행되었습니다! / 당신은 그것을 이길 수 있습니까?",
+            "mostActivePlayerGamesPlayed": "KMQ 사실: 가장 활동적인 플레이어는 2020년 11월 8일 이후로 {{gamesPlayed}} 게임을 했습니다!",
+            "mostActivePlayerSongsGuessed": "KMQ 사실: 가장 활동적인 플레이어는 2020년 11월 8일 이후로 {{songsGuessed}}곡을 추측했습니다!",
+            "mostActiveServer": "KMQ 사실: 가장 활동적인 서버는 KMQ의 {{gamesPlayed}} 게임을 플레이했으며 총 {{songsGuessed}} 곡을 추측했습니다!",
+            "mostCorrectGuessesServer": "KMQ 사실: 가장 정확한 추측을 한 서버는 KMQ의 {{gamesPlayed}} 게임을 플레이했으며 총 {{songsGuessed}}곡이 추측되었습니다!",
+            "recentGameCount": "KMQ 사실: 지난 주에 KMQ의 총 {{recentGameCount}} 게임이 진행되었습니다!",
+            "recentSessions": "KMQ 사실: 지난 주에 총 {{recentSessions}}개의 KMQ 게임이 진행되었습니다!",
+            "totalGames": "KMQ 사실: KMQ의 총 {{totalGamesPlayed}} 게임이 플레이되었습니다!",
+            "uniquePlayers": "KMQ 사실: {{recentActivePlayers}}명의 플레이어가 지난 {{xDays}} 동안 KMQ를 플레이했습니다!"
         }
     },
     "misc": {
-        "andManyOthers": "and many others...",
-        "artist": "artist",
+        "andManyOthers": "그리고 많은 다른 사람들...",
+        "artist": "아티스트",
         "classic": {
-            "yourScore": "Your score is {{score}}."
+            "yourScore": "당신의 점수는 {{score}}점 입니다."
         },
         "conflict": "conflict",
         "elimination": {
-            "yourLives": "You have {{lives}} lives."
+            "yourLives": "당신의 목숨은 {{lives}}개 남았습니다."
         },
         "failure": {
             "afkChannel": {
-                "description": "Ensure you're not in the inactive voice channel so that you can hear me!",
-                "title": "AFK Voice Channel"
+                "description": "내 말을 들을 수 있도록 비활성화된 음성 채널에 있지 않은지 확인하세요!",
+                "title": "잠수 음성 채널"
             },
-            "error": "Error",
+            "error": "오류",
             "errorSelectingSong": {
-                "description": "Please try starting the round again. If the issue persists, report it in our official KMQ server.",
-                "title": "Error Selecting Song"
+                "description": "라운드를 다시 시작해 주세요. / 문제가 지속되면 공식 KMQ 서버에 보고하십시오.",
+                "title": "노래 선택 오류"
             },
             "game": {
                 "noneInProgress": {
-                    "title": "No Active Game"
+                    "title": "활성화된 게임 없음"
                 }
             },
             "gameOptionConflict": {
-                "description": "{{optionOne}} game option is currently set. {{optionTwo}} and {{optionOne}} are incompatible. Remove the {{optionOne}} option by typing {{optionOneCommand}} to proceed.",
-                "title": "Game Option Conflict"
+                "description": "{{optionOne}} 게임 옵션이 현재 설정되어 있습니다. / {{optionTwo}} 및 {{optionOne}}은(는) 호환되지 않습니다. / 계속하려면 {{optionOneCommand}}를 입력하여 {{optionOne}} 옵션을 제거하세요.",
+                "title": "게임 옵션 충돌"
             },
             "groupsExcludeConflict": {
                 "allow": "to allow them to play",
-                "description": "One or more of the given {{conflictingOptionOne}} is already included in {{conflictingOptionTwo}}. \nThe following groups were **not** added to {{conflictingOptionOne}}:\n {{groupsList}}\nUse {{solutionStepOne}} and then {{solutionStepTwo}} {{allowOrPrevent}}.",
+                "description": "지정된 {{conflictingOptionOne}} 중 하나 이상이 이미 {{conflictingOptionTwo}}에 포함되어 있습니다. \n\n다음 그룹은 {{conflictingOptionOne}}에 **추가되지 않습니다.**\n\n {{groupsList}}\n{{solutionStepOne}}을 사용한 다음 {{solutionStepTwo}} {{allowOrPrevent}}를 사용하세요.",
                 "prevent": "to prevent them from playing",
-                "title": "Groups and Exclude Conflict"
+                "title": "그룹 및 충돌 제외"
             },
             "interaction": {
-                "alreadyEliminated": "You've already been eliminated this round.",
-                "eliminated": "You've been eliminated this round.",
-                "invalidBookmark": "You can only bookmark songs recently played in the last {{BOOKMARK_MESSAGE_SIZE}} rounds. You must bookmark the message sent by the bot containing the song.",
-                "optionFromPreviousRound": "You are attempting to pick an option from an already completed round."
+                "alreadyEliminated": "당신은 이미 이번 라운드에서 탈락했습니다.",
+                "eliminated": "이번 라운드에서 탈락했습니다.",
+                "invalidBookmark": "최근 {{BOOKMARK_MESSAGE_SIZE}} 라운드에서 재생한 노래만 북마크에 추가할 수 있습니다. / 노래가 포함된 봇이 보낸 메시지를 북마크에 추가해야 합니다.",
+                "optionFromPreviousRound": "이미 완료된 라운드에서 옵션을 선택하려고 합니다."
             },
-            "messageTooLong": "Response message was too long, report this error to the KMQ help server",
+            "messageTooLong": "응답 메시지가 너무 깁니다. / 이 오류를 KMQ 도움말 서버에 보고하세요.",
             "missingPermissions": {
-                "description": "Hi! I'm unable to message in the {{channelName}} channel. Please make sure the bot has permissions to message in this channel.",
-                "title": "Missing Permissions"
+                "description": "{{channelName}} 채널에서 메시지를 보낼 수 없습니다. / 봇에 이 채널에서 메시지를 보낼 수 있는 권한이 있는지 확인하세요.",
+                "title": "누락된 권한"
             },
-            "missingPermissionsText": "Ensure that the bot has the following permissions: {{missingPermissions}}\n\nSee the following link for details: {{permissionsLink}}. If you are still having issues, join the official KMQ server found in {{helpCommand}}",
+            "missingPermissionsText": "봇에 {{missingPermissions}} 권한이 있는지 확인하세요.\n\n자세한 내용은 {{permissionsLink}} 링크를 참조하세요. / 여전히 문제가 발생하면 {{helpCommand}}에 있는 공식 KMQ 서버에 가입하세요.",
             "retrievingSongData": {
-                "description": "Try again in a bit, or report this error to the official KMQ server found in {{helpCommand}}.",
-                "title": "Error Retrieving Song Data"
+                "description": "잠시 후 다시 시도하거나 {{helpCommand}}에 있는 공식 KMQ 서버에 이 오류를 보고하세요.",
+                "title": "노래 데이터를 검색하는 동안 오류가 발생했습니다."
             },
             "songPlaying": {
-                "description": "Starting new round in 3 seconds...",
-                "title": "Error Playing Song"
+                "description": "3초 후에 새 라운드 시작됩니다...",
+                "title": "노래를 재생하는 동안 오류가 발생했습니다."
             },
             "songQuery": {
-                "description": "Failed to find songs matching this criteria. Try to broaden your search.",
-                "title": "Song Query Error"
+                "description": "이 기준과 일치하는 노래를 찾지 못했습니다. 검색 범위를 넓히십시오.",
+                "title": "노래 검색 오류"
             },
             "unrecognizedGroups": {
-                "added": "added",
-                "description": "One or more of the specified group names was not recognized. Those groups that matched are {{matchedGroupsAction}}. Please ensure that the group name matches exactly with the list provided by {{helpGroups}}.\nThe following groups were **not** recognized:\n {{unmatchedGroups}}\n{{solution}}",
-                "solution": "Use {{command}} to add the unmatched groups.",
-                "title": "Unknown Group Name"
+                "added": "추가",
+                "description": "지정된 그룹 이름 중 하나 이상이 인식되지 않습니다. / 일치하는 그룹은 {{matchedGroupsAction}}입니다. / 그룹 이름이 {{helpGroups}}에서 제공한 목록과 정확히 일치하는지 확인하세요.\n\n다음 그룹은 **인식되지 않습니다**.\n\n{{unmatchedGroups}}\n{{solution}}",
+                "solution": "{{command}}를 사용하여 일치하지 않는 그룹을 추가합니다.",
+                "title": "알 수 없는 그룹 이름"
             },
             "validation": {
                 "boolean": {
-                    "notBoolean": "Expected true/false value for {{argument}}."
+                    "notBoolean": "{{argument}}에 대한 true/false 값이 예상됩니다."
                 },
                 "char": {
-                    "notChar": "Expected a character for {{argument}}."
+                    "notChar": "{{argument}}에 대한 문자가 필요합니다."
                 },
                 "enum": {
-                    "notInEnum": "Expected one of the following valid {{argument}} values: ({{validValues}})."
+                    "notInEnum": "다음 유효한 {{argument}} 값 중 하나가 필요합니다: ({{validValues}})."
                 },
                 "numArguments": {
-                    "incorrect": "{Incorrect number of arguments. See `{{help}} {{command}}` for usage."
+                    "incorrect": "인수 수가 잘못되었습니다. / 사용법은 `{{help}} {{command}}`를 참조하세요."
                 },
                 "number": {
-                    "max": "Expected value less than or equal to {{max}} for {{argument}}",
-                    "min": "Expected value greater than or equal to {{min}} for {{argument}}.",
-                    "notNumber": "Expected numeric value for {{argument}}."
+                    "max": "{{argument}}에 대해 {{max}}보다 작거나 같은 예상 값입니다.",
+                    "min": "{{argument}}에 대해 {{min}}보다 크거나 같은 예상 값입니다.",
+                    "notNumber": "{{argument}}에 대한 예상 숫자 값입니다."
                 }
             },
             "vcFull": {
-                "description": "Ensure that there's enough room in the voice channel for me to join.",
-                "title": "Voice Channel Full"
+                "description": "봇이 참여할 수 있도록 음성 채널에 충분한 공간이 있는지 확인하십시오.",
+                "title": "음성 채널이 가득 참"
             },
             "vcJoin": {
-                "description": "Something went wrong, try starting the game again in a bit.",
-                "title": "Error Joining Voice Channel"
+                "description": "문제가 발생했습니다. / 잠시 후 게임을 다시 시작해 보세요.",
+                "title": "음성 채널 가입 오류"
             }
         },
-        "formattedLimit": "{{limitStart}} to {{limitEnd}} ({{songCount}} songs)",
+        "formattedLimit": "{{limitStart}} ~ {{limitEnd}} ({{songCount}}곡)",
         "gameMessages": {
             "beepBoop": {
-                "oss": "Did you know KMQ is open source? [Check us out on GitHub and give us a star!](https://github.com/Brainicism/KMQ_Discord/)",
-                "title": "Beep Boop 🤖"
+                "oss": "KMQ가 오픈 소스라는 것을 알고 계셨습니까? [GitHub에서 저희를 확인하고 별점을 주세요!] (https://github.com/Brainicism/KMQ_Discord/)",
+                "title": "🤖 삐뽀 🤖"
             },
             "didYouKnow": {
-                "artistType": "You can pick whether you want to hear from soloists or groups using `,artisttype`. See `,help artisttype` to learn more.",
-                "bonusArtists": "There's a random selection of 10 artists chosen everyday that provide 2x EXP for their songs. See `,exp` to see the current list!",
-                "cutoff": "You can set which years you want to hear songs from using the `cutoff` game option. See `,help cutoff` for more details.",
-                "duration": "KMQ distracting you from studying? Check out `,duration` to limit the length of each game. See `,help duration` to learn more.",
-                "elimination": "Raise the stakes and try `elimination` mode, where you lose a life for not guessing correctly ☠. See `,help play` for more details.",
+                "artistType": "`,artisttype`을 사용하여 솔로 아티스트 또는 그룹의 음악을 들을지 여부를 선택할 수 있습니다. / 자세한 내용은 `,help artisttype`을 참조하세요.",
+                "bonusArtists": "매일 10명의 아티스트가 무작위로 선택되어 노래에 2배의 경험치를 제공합니다. / 현재 목록을 보려면 `,exp`를 참조하십시오!",
+                "cutoff": "`cutoff` 게임 옵션을 사용하여 노래를 듣고 싶은 년도를 설정할 수 있습니다. / 자세한 내용은 `,help cutoff`를 참조하세요.",
+                "duration": "KMQ가 공부에 방해가 되나요? / 각 게임의 길이를 제한하려면 `,duration`을 확인하세요. 자세한 내용은 `,help duration`을 참조하세요.",
                 "exclude": "You can set which groups you *don't* want to hear songs from using the `exclude` game option. See `,help exclude` for more details.",
-                "exp": "Curious how your EXP per round is calculated? See `,exp` for a full breakdown!",
-                "firstGameOfDayBonus": "Your first game of the day will have a 1.5x EXP bonus!",
-                "gender": "You can set what gender groups you want to hear songs from using the `gender` game option. See `,help gender` for more details.",
-                "groups": "You can set which groups you want to exclusively hear songs from using the `groups` game option. See `,help groups` for more details.",
-                "guessmode": "Tired of guessing song names? Switch it up by changing the guess mode to `artist` or `both`. See `,help guessmode` for more details.",
-                "language": "Don't like hearing Japanese/English/Chinese songs? Check out `,language`? See `,help language` to learn more.",
-                "leaderboard": "Think you got what it takes to be a top KMQ player? See `,leaderboard` and `,help leaderboard` to see where you stand.",
-                "limit": "You can limit the number of songs you hear from by popularity. See `,help limit` for more details.",
-                "multiguess": "Slow typer? Allow for multiple correct guesses for a given round using `,multiguess`! See `,help multiguess` to learn more.",
-                "multipleChoice": "Song name on the tip of your tongue every time? Slow typer? Playing on mobile? Check out multiple choice mode! See `,help answer` for more details!",
-                "presets": "Have favorite game option presets? Save and load them with presets! See `,help preset` to learn more.",
-                "profile": "You can see how many games you've played and how many songs you've guessed in total using `,profile`.",
-                "profileInteraction": "You can see a player's profile by right clicking their profile picture, and pressing Apps > Profile!",
-                "reset": "You can reset the game options by using `,reset`.",
-                "seek": "You can pick whether each song starts from the `beginning`, `middle`, or `random` position. See `,help seek` for more details.",
-                "special": "Want to hear songs play in reverse, 2x speed, or 0.5x speed? Try `,special` on the official KMQ server found in `,help`.",
-                "teams": "Ever wanted to team up to defeat that insanely good KMQ player? Start playing with custom teams using `,play teams`! See `,help play` for more details.",
-                "tempLeaderboard": "You can see the daily, weekly, and monthly leaderboard with `,leaderboard`. See `,help leaderboard` to learn more.",
-                "tempLeaderboards": "You can see the daily, weekly, and monthly leaderboard with `,leaderboard`. See `,help leaderboard` to learn more.",
-                "timer": "You can set a time limit for guessing each song by using the `timer` game option. See `,help timer` for more details.",
-                "title": "Did you know?",
-                "typingTypos": "Make a lot of typos? Try out `,answer typingtypos` to allow for minor typos in your guesses! See `,help answer` for more details."
+                "exp": "라운드당 경험치가 어떻게 계산되는지 궁금하십니까? / 전체 분석은 `,exp`를 참조하십시오!",
+                "firstGameOfDayBonus": "오늘의 첫 번째 게임에는 1.5배의 경험치 보너스가 있습니다!",
+                "gender": "`gender` 게임 옵션을 사용하여 노래를 듣고 싶은 성별 그룹을 설정할 수 있습니다. / 자세한 내용은 `,help gender`을 참조하세요.",
+                "groups": "`groups` 게임 옵션을 사용하여 노래를 독점적으로 듣고 싶은 그룹을 설정할 수 있습니다. / 자세한 내용은 `,help groups`을 참조하세요.",
+                "guessmode": "노래 이름을 추측하는 것이 지겹습니까? 추측 모드를 `artist` 또는 `both`로 변경하여 전환하세요. / 자세한 내용은  `,help guessmode`를 참조하세요.",
+                "language": "일본어/영어/중국어 노래가 듣기 싫으세요? / `,language`를 확인하시겠습니까? / 자세한 내용은 `,help language`를 참조하세요.",
+                "leaderboard": "최고의 KMQ 플레이어가 되기 위해 필요한 것이 무엇이라고 생각하십니까? / 현재 위치를 확인하려면 `,leaderboard` 및 `,help leaderboard`를 참조하세요.",
+                "limit": "인기도별로 들을 수 있는 노래의 수를 제한할 수 있습니다. 자세한 내용은 `,help limit`을 참조하세요.",
+                "multiguess": "타자가 느리십니까? / `,multiguess`를 사용하여 주어진 라운드에 대해 여러 번 정확한 추측을 허용합니다! / 자세한 내용은 `,help multiguess`을 참조하세요.",
+                "multipleChoice": "매번 머리 속에 맴도는 곡명?, 느린 타자?, 모바일에서 플레이하시나요? / 객관식 모드를 확인하십시오! / 자세한 내용은 `,help answer`을 참조하세요!",
+                "presets": "좋아하는 게임 옵션 사전 설정이 있습니까? / 사전 설정으로 저장하고 로드하세요! / 자세한 내용은 `,help preset`을 참조하세요.",
+                "profile": "`,profile`을 사용하여 플레이한 게임 수와 총 몇 곡을 추측했는지 확인할 수 있습니다.",
+                "profileInteraction": "프로필 사진을 우클릭한 후 `Apps > Profile`을 누르면 플레이어의 프로필을 볼 수 있습니다!",
+                "reset": "`,reset`을 사용하여 게임 옵션을 재설정할 수 있습니다.",
+                "seek": "각 노래가 `beginning`, `middle`, `random` 위치에서 시작되는지 여부를 선택할 수 있습니다. / 자세한 내용은 `,help seek`를 참조하세요.",
+                "special": "노래를 역방향, 2배속 또는 0.5배속으로 재생하고 싶으십니까? / `,help`에 있는 공식 KMQ 서버에서 `,special`을 사용해 보세요.",
+                "teams": "팀을 이루어 그 미친 듯이 뛰어난 KMQ 플레이어를 물리치고 싶었던 적이 있습니까? / `,play team`을 사용하여 커스텀 팀으로 플레이를 시작하세요! / 자세한 내용은 `,help play`을 참조하세요.",
+                "tempLeaderboard": "일간, 주간, 월간 리더보드는 `,leaderboard'로 확인할 수 있습니다. / 자세한 내용은 `,help leaderboard`를 참조하세요.",
+                "tempLeaderboards": "일간, 주간, 월간 리더보드는 `,leaderboard'로 확인할 수 있습니다. / 자세한 내용은 `,help leaderboard`를 참조하세요.",
+                "timer": "`timer` 게임 옵션을 사용하여 각 노래를 추측하는 시간 제한을 설정할 수 있습니다. / 자세한 내용은 `,help timer`를 참조하세요.",
+                "title": "알고 계셨나요?",
+                "typingTypos": "오타가 많나요? / 추측에 사소한 오타를 허용하기 위해 `,answer typingtypos`를 사용해 보세요! / 자세한 내용은 `,help answer` 을 참조하세요."
             },
             "kmqServer": {
-                "fanArt": "Are you an artist? Draw some KMQ fan art to get an exclusive profile badge! Join the [official KMQ server](https://discord.gg/R55g4CRESW) to share!",
-                "newFriends": "Looking for new friends to play KMQ with, or want to play against the best of the best? Feel free to [come by](https://discord.gg/RCuzwYV) and say hi!",
-                "title": "Check out our Discord server!",
-                "title.likeKmq": "Like KMQ?"
+                "fanArt": "당신은 예술가입니까? / KMQ 팬아트를 그려서 독점 프로필 배지를 받으세요! / [KMQ 공식 서버] (https://discord.gg/R55g4CRESW)에 참여하여 공유하세요!",
+                "newFriends": "KMQ를 함께 할 새로운 친구를 찾고 계시나요? / 아니면 최고 중 최고와 대결하고 싶으신가요? / 부담 없이 [방문] (https://discord.gg/RCuzwYV)하고 인사하세요!",
+                "title": "Discord 서버를 확인하세요!",
+                "title.likeKmq": "KMQ처럼?"
             },
             "likeKmq": {
-                "title": "Like KMQ?",
-                "vote": "Give us a vote (and get 2x exp, see `,vote`) and leave a review on [Top.GG!](https://top.gg/bot/508759831755096074)"
+                "title": "KMQ처럼?",
+                "vote": "투표를 하고 (경험치 2배 획득, `,vote` 참조) [Top.GG!] (https://top.gg/bot/508759831755096074)에 리뷰를 남겨주세요."
             },
             "wrongSongName": {
-                "aliases.": "Have a suggestion for an alternate song name? Tell us on the official KMQ server!",
-                "title": "Wrong Song Name?"
+                "aliases.": "노래 이름에 대한 제안이 있으십니까? / 공식 KMQ 서버에서 알려주세요!",
+                "title": "노래 이름이 이상한가요?"
             }
         },
         "gameOwnerChanged": {
-            "description": "The new game owner is {{newGameOwner}}. They are in charge of {{forcehintCommand}} and {{forceskipCommand}}.",
-            "title": "Game Owner Changed"
+            "description": "새 게임 소유자는 {{newGameOwner}}입니다. / 그들은 {{forcehintCommand}} 및 {{forceskipCommand}}를 담당합니다.",
+            "title": "게임 소유자 변경"
         },
         "inGame": {
-            "aliases": "Aliases",
-            "bonusArtistRound": "BONUS ARTIST ROUND",
-            "bonusExpArtistRound": "BONUS EXP AND ARTIST ROUND",
-            "bonusExpRound": "BONUS EXP ROUND",
-            "correctGuess": "{{correctGuesser}} guessed correctly (+{{expGain}} EXP)",
-            "noCorrectGuesses": "Nobody got it.",
-            "noWinners": "Nobody Won",
-            "runnersUp": "Runners Up",
-            "uniqueSongsPlayed": "{{uniqueSongCount}} unique songs played."
+            "aliases": "별칭",
+            "bonusArtistRound": "보너스 아티스트 라운드",
+            "bonusExpArtistRound": "보너스 경험치 및 아티스트 라운드",
+            "bonusExpRound": "보너스 경험치 라운드",
+            "correctGuess": "{{correctGuesser}}가 올바르게 추측됨. (+{{expGain}} 경험치)",
+            "noCorrectGuesses": "아무도 얻지 못했다.",
+            "noWinners": "아무도 우승하지 못했다.",
+            "runnersUp": "준우승",
+            "uniqueSongsPlayed": "{{uniqueSongCount}}개의 고유한 노래가 재생되었습니다."
         },
         "interaction": {
             "bookmarked": {
-                "description": "You'll receive a direct message with a link to {{songName}} at the end of the game.",
-                "title": "Song Bookmarked"
+                "description": "게임이 끝나면 {{songName}} 링크가 포함된 다이렉트 메시지를 받게 됩니다.",
+                "title": "노래 북마크"
             },
-            "faq": "Frequently Asked Questions",
-            "fullGroupsList": "Full List of Groups",
+            "faq": "자주 묻는 질문",
+            "fullGroupsList": "전체 그룹 목록",
             "guess": {
-                "title": "Guess the {{songOrArtist}}"
+                "title": "{{songOrArtist}} 추측"
             },
-            "howToPlay": "How To Play",
-            "leaveReview": "Leave a review!",
-            "officialKmqServer": "Official KMQ Server",
+            "howToPlay": "게임 방법",
+            "leaveReview": "리뷰를 남겨주세요!",
+            "officialKmqServer": "공식 KMQ 서버",
             "profile": {
-                "inaccessible": "I can't access that user right now. Try using {{profileUserID}} instead.",
-                "noStats": "This user needs to play their first game before their stats are tracked."
+                "inaccessible": "지금은 해당 사용자에 액세스할 수 없습니다. / {{profileUserID}}를 사용해 보세요.",
+                "noStats": "이 사용자는 통계를 추적하기 전에 첫 게임을 플레이해야 합니다."
             },
             "title": {
-                "failure": "Uh-oh"
+                "failure": "잠깐만"
             },
-            "vote": "Vote!"
+            "vote": "투표!"
         },
-        "level": "Level",
+        "level": "레벨",
         "levelUp": {
-            "entry": "{{user}} has leveled up from {{startLevel}} to {{endLevel}} ({{rank}})",
-            "title": "🚀 Power Up!"
+            "entry": "{{user}}님이 {{startLevel}}에서 {{endLevel}}({{rank}})로 레벨 업되었습니다.",
+            "title": "🚀 레벨 업을 축하합니다! 🚀"
         },
-        "listOfGroups": "list of groups",
+        "listOfGroups": "그룹 목록",
         "plural": {
             "day": {
-                "one": "%s day",
-                "other": "%s days"
+                "one": "%s일",
+                "other": "%s일s"
             },
             "hour": {
-                "one": "%s hour",
-                "other": "%s hours"
+                "one": "%s시간",
+                "other": "%s시간"
             },
             "hourAgo": {
-                "one": "%s hour ago",
-                "other": "%s hours ago"
+                "one": "%s시간 전",
+                "other": "%s시간 전"
             },
             "minute": {
-                "one": "%s minute",
-                "other": "%s minutes"
+                "one": "%s분",
+                "other": "%s분"
             },
             "minuteAgo": {
-                "one": "%s minute ago",
-                "other": "%s minutes ago"
+                "one": "%s분 전",
+                "other": "%s분 전"
             },
             "minuteRemaining": {
-                "one": "%s minute remaining",
-                "other": "%s minutes remaining"
+                "one": "%s분 남음",
+                "other": "%s분 남음"
             },
             "player": {
-                "one": "%s player",
-                "other": "%s players"
+                "one": "%s명",
+                "other": "%s명"
             },
             "second": {
-                "one": "%s second",
-                "other": "%s seconds"
+                "one": "%s초",
+                "other": "%s초"
             },
             "song": {
-                "one": "%s song",
-                "other": "%s songs"
+                "one": "%s곡",
+                "other": "%s곡"
             }
         },
         "preCheck": {
-            "competition": "This command has been disabled for regular users in the competition.",
-            "debugChannel": "You can't do that in this channel.",
-            "debugServer": "You can't do that in this server.",
-            "differentVC": "You must be in the same voice channel as the bot to use this command.",
-            "title": "Wait..."
+            "competition": "이 명령어는 경쟁에서 일반 사용자를 위해 비활성화되었습니다.",
+            "debugChannel": "이 채널에서는 할 수 없습니다.",
+            "debugServer": "이 서버에서는 할 수 없습니다.",
+            "differentVC": "이 명령어를 사용하려면 봇과 동일한 음성 채널에 있어야 합니다.",
+            "title": "잠시만 기다려주십시오..."
         },
         "sendingBookmarkedSongs": {
-            "description": "Sending {{songs}} to {{players}}.\n\nBookmark songs during the game by right-clicking the song message and selecting `Apps > Bookmark Song`",
-            "title": "Sending Bookmarked Songs..."
+            "description": "{{players}}에게 {{songs}}을(를) 보냅니다.\n\n노래 메시지를 마우스 오른쪽 버튼으로 클릭하고 `Apps > Bookmark Song`를 선택하여 게임 중에 노래를 북마크하세요.",
+            "title": "북마크된 노래를 보내는 중..."
         },
-        "song": "song",
+        "song": "노래",
         "team": {
-            "yourScore": "Your score: {{score}}",
-            "yourTeamScore": "Your team's score: {{teamScore}}"
+            "yourScore": "당신의 점수: {{score}}",
+            "yourTeamScore": "당신의 팀 점수: {{teamScore}}"
         },
-        "timeFinished": "Time's up",
+        "timeFinished": "시간의 최대",
         "uniqueSongsReset": {
-            "description": "All songs have been played. {{totalSongCount}} songs will be reshuffled.",
-            "title": "Resetting Unique Songs"
+            "description": "모든 곡이 재생되었습니다. {{totalSongCount}}곡이 재구성됩니다.",
+            "title": "고유 곡 재설정"
         },
-        "usage": "Usage",
-        "views": "views",
+        "usage": "용법",
+        "views": "견해",
         "warning": {
             "addRemoveOrdering": {
-                "footer": "Did you mean to use {{addOrRemove}} {{command}}?"
+                "footer": "{{addOrRemove}} {{command}}를 사용하려고 했습니까?"
             }
         }
     }
