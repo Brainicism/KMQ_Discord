@@ -129,7 +129,7 @@
                 }
             },
             "help": {
-                "description": "제외할 아티스트를 쉼표로 구분하여 선택하십시오. / 그룹 이름 목록은 ({{groupList}})에서 찾을 수 있습니다.",
+                "description": "제외할 아티스트를 쉼표로 구분하여 선택하십시오. / 그룹 이름 목록은 [바로가기]({{groupList}})에서 찾을 수 있습니다.",
                 "example": {
                     "multipleGroups": "{{groupOne}}, {{groupTwo}}, {{groupThree}}의 노래를 무시합니다.",
                     "reset": "제외 옵션을 재설정합니다.",
@@ -230,7 +230,7 @@
         },
         "groups": {
             "help": {
-                "description": "듣고 싶은 그룹을 쉼표로 구분하여 선택하십시오. / 그룹 이름 목록은 ({{groupList}})에서 찾을 수 있습니다.",
+                "description": "듣고 싶은 그룹을 쉼표로 구분하여 선택하십시오. / 그룹 이름 목록은 [바로가기]({{groupList}})에서 찾을 수 있습니다.",
                 "example": {
                     "multipleGroups": "{{groupOne}}, {{groupTwo}}, {{groupThree}}의 노래만 재생합니다.",
                     "reset": "그룹 옵션을 재설정합니다.",
@@ -298,7 +298,7 @@
                 }
             },
             "help": {
-                "description": "다른 필터({{gender}}, {{artisttype}} 등)를 무시하고 쉼표로 구분하여 강제로 포함할 그룹을 선택합니다. / 그룹 이름 목록은 ({{groupList}})에서 찾을 수 있습니다.",
+                "description": "다른 필터({{gender}}, {{artisttype}} 등)를 무시하고 쉼표로 구분하여 강제로 포함할 그룹을 선택합니다. / 그룹 이름 목록은 [바로가기]({{groupList}})에서 찾을 수 있습니다.",
                 "example": {
                     "multipleGroups": "{{groupOne}}, {{groupTwo}}, {{groupThree}}의 노래를 강제로 포함합니다.",
                     "reset": "포함 옵션을 재설정합니다.",
@@ -348,7 +348,7 @@
                 "title": "{{joiningUser}}이(가) {{teamName}}에 합류했습니다."
             },
             "team": {
-                "join": "{{{mentionedUser}}}와 함께 {{{teamName}}}에 합류하려면 `{{{joinCommand}}} {{{teamNameWithCleanEmojis}}}`를 입력하세요. {{startGameInstructions}}",
+                "join": "{{mentionedUser}}와 함께 {{teamName}}에 합류하려면 `{{joinCommand}} {{teamNameWithCleanEmojis}}`를 입력하세요. {{startGameInstructions}}",
                 "new": "새로운 팀이 생성되었습니다.",
                 "startGameInstructions": "\n\n{{beginCommand}}로 게임을 시작하세요."
             }
@@ -896,7 +896,7 @@
         },
         "subunits": {
             "help": {
-                "description": "{{groups}을(를) 사용할 때 그룹의 하위 단위를 자동으로 포함할지 여부를 선택하십시오.",
+                "description": "{{groups}}을(를) 사용할 때 그룹의 하위 단위를 자동으로 포함할지 여부를 선택하십시오.",
                 "example": {
                     "exclude": "하위 단위를 포함하지 마십시오.",
                     "include": "자동으로 하위 단위를 포함합니다. / 예를 들어 `{{groupCommand}} {{parentGroup}}`에는 {{parentGroup}}, {{subunitOne}}, {{subunitTwo}} 등의 노래가 포함됩니다.",
@@ -1071,7 +1071,7 @@
         "formattedLimit": "{{limitStart}} ~ {{limitEnd}} ({{songCount}}곡)",
         "gameMessages": {
             "beepBoop": {
-                "oss": "KMQ가 오픈 소스라는 것을 알고 계셨습니까? [GitHub에서 저희를 확인하고 별점을 주세요!] (https://github.com/Brainicism/KMQ_Discord/)",
+                "oss": "KMQ가 오픈 소스라는 것을 알고 계셨습니까? [GitHub에서 저희를 확인하고 별점을 주세요!](https://github.com/Brainicism/KMQ_Discord/)",
                 "title": "🤖 삐뽀 🤖"
             },
             "didYouKnow": {
@@ -1104,14 +1104,16 @@
                 "typingTypos": "오타가 많나요? / 추측에 사소한 오타를 허용하기 위해 `,answer typingtypos`를 사용해 보세요! / 자세한 내용은 `,help answer` 을 참조하세요."
             },
             "kmqServer": {
-                "fanArt": "당신은 예술가입니까? / KMQ 팬아트를 그려서 독점 프로필 배지를 받으세요! / [KMQ 공식 서버] (https://discord.gg/R55g4CRESW)에 참여하여 공유하세요!",
-                "newFriends": "KMQ를 함께 할 새로운 친구를 찾고 계시나요? / 아니면 최고 중 최고와 대결하고 싶으신가요? / 부담 없이 [방문] (https://discord.gg/RCuzwYV)하고 인사하세요!",
-                "title": "Discord 서버를 확인하세요!",
-                "title.likeKmq": "KMQ처럼?"
+                "fanArt": "당신은 예술가입니까? / KMQ 팬아트를 그려서 독점 프로필 배지를 받으세요! / [KMQ 공식 서버](https://discord.gg/R55g4CRESW)에 참여하여 공유하세요!",
+                "newFriends": "KMQ를 함께 할 새로운 친구를 찾고 계시나요? / 아니면 최고 중 최고와 대결하고 싶으신가요? / 부담 없이 [방문](https://discord.gg/RCuzwYV)하고 인사하세요!",
+                "title": {
+                    "discordServer": "Discord 서버를 확인하세요!",
+                    "likeKmq": "KMQ처럼?"
+                }
             },
             "likeKmq": {
                 "title": "KMQ처럼?",
-                "vote": "투표를 하고 (경험치 2배 획득, `,vote` 참조) [Top.GG!] (https://top.gg/bot/508759831755096074)에 리뷰를 남겨주세요."
+                "vote": "투표를 하고 (경험치 2배 획득, `,vote` 참조) [Top.GG!](https://top.gg/bot/508759831755096074)에 리뷰를 남겨주세요."
             },
             "wrongSongName": {
                 "aliases.": "노래 이름에 대한 제안이 있으십니까? / 공식 KMQ 서버에서 알려주세요!",

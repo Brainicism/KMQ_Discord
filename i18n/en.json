@@ -1107,8 +1107,10 @@
             "kmqServer": {
                 "fanArt": "Are you an artist? Draw some KMQ fan art to get an exclusive profile badge! Join the [official KMQ server](https://discord.gg/R55g4CRESW) to share!",
                 "newFriends": "Looking for new friends to play KMQ with, or want to play against the best of the best? Feel free to [come by](https://discord.gg/RCuzwYV) and say hi!",
-                "title": "Check out our Discord server!",
-                "title.likeKmq": "Like KMQ?"
+                "title": {
+                    "discordServer": "Check out our Discord server!",
+                    "likeKmq": "Like KMQ?"
+                }
             },
             "likeKmq": {
                 "title": "Like KMQ?",
