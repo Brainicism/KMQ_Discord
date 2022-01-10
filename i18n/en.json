@@ -1138,6 +1138,7 @@
             "noCorrectGuesses": "Nobody got it.",
             "noWinners": "Nobody Won",
             "runnersUp": "Runners Up",
+            "songsCorrectlyGuessed": "{{songCount}} songs correctly guessed!",
             "uniqueSongsPlayed": "{{uniqueSongCount}} unique songs played.",
             "winMessage": "{{playerName}} wins!"
         },

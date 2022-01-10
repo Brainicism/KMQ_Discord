@@ -1164,7 +1164,14 @@ export async function sendOptionsMessage(
 export async function sendEndGameMessage(
     gameSession: GameSession
 ): Promise<void> {
-    const footerText = `${gameSession.getCorrectGuesses()}/${gameSession.getRoundsPlayed()} songs correctly guessed!`;
+    const footerText = state.localizer.translate(
+        gameSession.guildID,
+        "misc.inGame.songsCorrectlyGuessed",
+        {
+            songCount: `${gameSession.getCorrectGuesses()}/${gameSession.getRoundsPlayed()}`,
+        }
+    );
+
     if (gameSession.scoreboard.isEmpty()) {
         await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
             title: state.localizer.translate(
