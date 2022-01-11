@@ -1010,7 +1010,7 @@
             },
             "groupsExcludeConflict": {
                 "allow": "그들이 놀 수 있도록",
-                "description": "지정된 {{conflictingOptionOne}} 중 하나 이상이 이미 {{conflictingOptionTwo}}에 포함되어 있습니다. \n\n다음 그룹은 {{conflictingOptionOne}}에 **추가되지 않습니다.**\n\n {{groupsList}}\n{{solutionStepOne}}을 사용한 다음 {{solutionStepTwo}} {{allowOrPrevent}}를 사용하세요.",
+                "description": "지정된 {{conflictingOptionOne}} 중 하나 이상이 이미 {{conflictingOptionTwo}}에 포함되어 있습니다.\n다음 그룹은 {{conflictingOptionOne}}에 추가되지 않았습니다.\n\n{{groups List}}\n\n{{solutionStepOne}}을 사용한 다음 {{solutionStepTwo}}{{allowOrPrevent}}를 사용하세요.",
                 "prevent": "그들이 놀지 못하도록",
                 "title": "그룹 및 충돌 제외"
             },
