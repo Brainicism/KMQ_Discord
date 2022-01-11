@@ -12,7 +12,7 @@ on:
         - minor
         - patch
 jobs:
-  build:
+  snap:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -38,6 +38,7 @@ jobs:
           echo "Pushing new prod branch"
   redeploy:
     uses: Brainicism/KMQ_Discord/.github/workflows/restart-prod.yml@master
+    needs: snap
     secrets:
       SSH_DEPLOY_PRIVATE_KEY: ${{ secrets.SSH_DEPLOY_PRIVATE_KEY }}
       SSH_DEPLOY_KNOWN_HOSTS: ${{ secrets.SSH_DEPLOY_KNOWN_HOSTS }}
