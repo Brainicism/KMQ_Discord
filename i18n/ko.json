@@ -620,7 +620,7 @@
                 }
             },
             "typeGuess": "노래를 듣고 추측을 입력하십시오!",
-            "voteReminder": "쉿!. 투표로 더 많은 경험치를 얻으세요. ({{vote}} 참조)"
+            "voteReminder": "투표로 더 많은 경험치를 얻으세요. ({{vote}} 참조)"
         },
         "preset": {
             "deleted": {
@@ -1161,7 +1161,7 @@
             "title": {
                 "failure": "잠깐만"
             },
-            "vote": "투표!"
+            "vote": "투표"
         },
         "level": "레벨",
         "levelUp": {
