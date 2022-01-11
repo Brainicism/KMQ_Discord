@@ -1103,7 +1103,6 @@
                 "special": "노래를 역방향, 2배속 또는 0.5배속으로 재생하고 싶으십니까? / `,help`에 있는 공식 KMQ 서버에서 `,special`을 사용해 보세요.",
                 "teams": "팀을 이루어 그 미친 듯이 뛰어난 KMQ 플레이어를 물리치고 싶었던 적이 있습니까? / `,play team`을 사용하여 커스텀 팀으로 플레이를 시작하세요! / 자세한 내용은 `,help play`을 참조하세요.",
                 "tempLeaderboard": "일간, 주간, 월간 리더보드는 `,leaderboard'로 확인할 수 있습니다. / 자세한 내용은 `,help leaderboard`를 참조하세요.",
-                "tempLeaderboards": "일간, 주간, 월간 리더보드는 `,leaderboard'로 확인할 수 있습니다. / 자세한 내용은 `,help leaderboard`를 참조하세요.",
                 "timer": "`timer` 게임 옵션을 사용하여 각 노래를 추측하는 시간 제한을 설정할 수 있습니다. / 자세한 내용은 `,help timer`를 참조하세요.",
                 "title": "알고 계셨나요?",
                 "typingTypos": "오타가 많나요? / 추측에 사소한 오타를 허용하기 위해 `,answer typingtypos`를 사용해 보세요! / 자세한 내용은 `,help answer` 을 참조하세요."
