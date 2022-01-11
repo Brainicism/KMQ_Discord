@@ -930,6 +930,7 @@
             "help": {
                 "description": "1시간 동안 경험치 2배를 받기 위해 투표하는 방법에 대한 지침을 보여줍니다."
             },
+            "timeLeft": "{{time}} 남았습니다.",
             "unavailable": {
                 "hours": "**{{hours}}** 후에 투표할 수 있습니다.",
                 "minutes": "**{{minutes}}** 후에 투표할 수 있습니다.",

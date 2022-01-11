@@ -49,13 +49,19 @@ export default class VoteCommand implements BaseCommand {
                 ).getTime() /
                 (1000 * 60);
 
-            voteStatusString = `${bold(
-                state.localizer.translateN(
-                    message.guildID,
-                    "misc.plural.minute",
-                    Math.max(Math.ceil(timeRemaining), 0)
-                )
-            )} left.`;
+            voteStatusString = state.localizer.translate(
+                message.guildID,
+                "command.vote.timeLeft",
+                {
+                    time: bold(
+                        state.localizer.translateN(
+                            message.guildID,
+                            "misc.plural.minute",
+                            Math.max(Math.ceil(timeRemaining), 0)
+                        )
+                    ),
+                }
+            );
         } else if (userVoterStatus) {
             // User has voted before
             const nextVoteTime = new Date(userVoterStatus["buff_expiry_date"]);

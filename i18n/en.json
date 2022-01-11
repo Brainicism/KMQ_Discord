@@ -930,6 +930,7 @@
             "help": {
                 "description": "Shows instructions on how to vote to receive 2x EXP for an hour."
             },
+            "timeLeft": "{{time}} left.",
             "unavailable": {
                 "hours": "You can vote in **{{hours}}**.",
                 "minutes": "You can vote in **{{minutes}}**.",
