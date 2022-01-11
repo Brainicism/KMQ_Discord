@@ -147,7 +147,7 @@
             "explanation": {
                 "bonusArtistGuess": "보너스 아티스트의 정확한 추측",
                 "firstGameOfDay": "오늘의 첫 게임",
-                "powerHour": "KMQ Power Hour 또는 주말 동안 재생합니다",
+                "powerHour": "KMQ 슈퍼 시간 또는 주말 동안 재생합니다",
                 "quickGuess": "빠른 추측",
                 "rareGuess": "희귀한 정확 추측 보너스",
                 "rareGuessRange": "{{rareGuessLowerBound}} 최대 {{rareGuessUpperBound}}",
@@ -160,7 +160,7 @@
             },
             "lowSongCountPenalty": "낮은 노래 수 패널티",
             "multipleChoicePenalty": "객관식 패널티",
-            "powerHourBonus": "Power Hour 보너스",
+            "powerHourBonus": "슈퍼 시간 보너스",
             "title": "경험치 보너스",
             "totalModifier": "총 수정",
             "typosAllowedPenalty": "오타 허용 패널티",
@@ -573,8 +573,8 @@
             "exp": {
                 "doubleExpForVoting": "[투표]({{link}})에 대한 경험치를 두 배로 받습니다!",
                 "howToVote": "투표 방법에 대한 정보는 {{vote}}를 참조하세요. / KMQ를 지원해주셔서 감사합니다!",
-                "powerHour": "KMQ Power Hour가 활성화되었습니다!",
-                "weekend": "두 배 경험치 (주말) 활성화되었습니다!"
+                "powerHour": "KMQ 슈퍼 시간이 활성화되었습니다!",
+                "weekend": "두 배 경험치 (주말)가 활성화되었습니다!"
             },
             "failure": {
                 "alreadyInSession": "게임이 이미 세션 중입니다.",
@@ -855,7 +855,7 @@
         },
         "special": {
             "help": {
-                "description": "야. 아직 발표되지 않았지만 KMQ 서버를 확인하여 사용해 보세요! / 수정된 오디오로 특수 모드를 재생합니다.",
+                "description": "아직 발표되지 않았지만 KMQ 서버를 확인하여 사용해 보세요! / 수정된 오디오로 특수 모드를 재생합니다.",
                 "example": {
                     "fast": "빠른 속도로 노래를 재생합니다.",
                     "faster": "더 빠른 속도로 노래를 재생합니다.",
@@ -876,8 +876,8 @@
             },
             "footer": "\"최근\" 통계는 지난 24시간 동안의 데이터를 나타냅니다.",
             "game": {
-                "activeGameSessions": "활성 게임 세션",
-                "activePlayers": "활성 플레이어",
+                "activeGameSessions": "활성화된 게임 세션",
+                "activePlayers": "활성화된 플레이어",
                 "latestSongUpdate": "최신 노래 업데이트",
                 "recentGameRounds": "(최근) 게임 라운드",
                 "recentGameSessions": "(최근) 게임 세션",
@@ -910,7 +910,7 @@
         },
         "timer": {
             "help": {
-                "description": "타이머가 다 떨어지기 전에 올바르게 추측하기 위해 최선을 다하십시오! / 시간을 초 단위로 입력하거나 비활성화할 인수를 지정하지 마십시오.",
+                "description": "타이머가 다 끝나기 전에 올바르게 추측하기 위해 최선을 다하십시오! / 시간을 초 단위로 입력하거나 비활성화할 인수를 지정하지 마십시오.",
                 "example": {
                     "reset": "타이머 비활성화",
                     "set": "{{timer}}초 내에 사용자가 올바르게 추측하지 않으면 라운드가 종료되고 다음 라운드가 자동으로 시작됩니다."
@@ -991,7 +991,7 @@
         },
         "failure": {
             "afkChannel": {
-                "description": "내 말을 들을 수 있도록 비활성화된 음성 채널에 있지 않은지 확인하세요!",
+                "description": "봇이 노래를 재생할 수 있도록 비활성화된 음성 채널에 있지 않은지 확인하세요!",
                 "title": "잠수 음성 채널"
             },
             "error": "오류",
