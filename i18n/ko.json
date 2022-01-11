@@ -1137,6 +1137,7 @@
             "noCorrectGuesses": "아무도 얻지 못했다.",
             "noWinners": "아무도 우승하지 못했습니다.",
             "runnersUp": "준우승",
+            "songsCorrectlyGuessed": "{{songCount}}곡을 정확히 추측을 하였습니다!",
             "uniqueSongsPlayed": "{{uniqueSongCount}}개의 노래가 재생되었습니다.",
             "winMessage": "{{playerName}} 승리!"
         },
