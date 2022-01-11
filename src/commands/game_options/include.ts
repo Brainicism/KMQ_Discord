@@ -120,9 +120,9 @@ export default class IncludeCommand implements BaseCommand {
                     message.guildID,
                     "misc.failure.gameOptionConflict.description",
                     {
-                        optionOne: `\`${GameOption.GROUPS}\``,
-                        optionTwo: `\`${GameOption.INCLUDE}\``,
-                        optionOneCommand: `\`${process.env.BOT_PREFIX}${GameOption.GROUPS}\``,
+                        optionOne: "`groups`",
+                        optionTwo: "`include`",
+                        optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
                     }
                 ),
             });
