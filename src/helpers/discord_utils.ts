@@ -1208,8 +1208,14 @@ export async function sendEndGameMessage(
 
         if (endGameMessage) {
             fields.push({
-                name: endGameMessage.title,
-                value: endGameMessage.message,
+                name: state.localizer.translate(
+                    gameSession.guildID,
+                    endGameMessage.title
+                ),
+                value: state.localizer.translate(
+                    gameSession.guildID,
+                    endGameMessage.message
+                ),
                 inline: false,
             });
         }
