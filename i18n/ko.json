@@ -926,14 +926,14 @@
                 "active": "부스트 활성화",
                 "inactive": "부스트 비활성화"
             },
-            "description": "[top.gg]({{voteLink}})에서 KMQ에 투표하면 1시간 동안 경험치가 2배 지급됩니다! / {{voteResetDuration}}시간마다 한 번씩 투표할 수 있습니다.\n\n[리뷰를]({{reviewLink}})도 남겨주시면 감사하겠습니다.",
+            "description": "[top.gg]({{voteLink}})에서 KMQ에 투표하면 1시간 동안 경험치가 2배 지급됩니다! / {{voteResetDuration}}시간마다 한 번씩 투표할 수 있습니다.\n\n[리뷰]({{reviewLink}})도 남겨주시면 감사하겠습니다.",
             "help": {
                 "description": "1시간 동안 경험치 2배를 받기 위해 투표하는 방법에 대한 지침을 보여줍니다."
             },
             "unavailable": {
-                "hours": "**{{hours}}시간** 후에 투표할 수 있습니다.",
-                "minutes": "**{{minutes}}분** 후에 투표할 수 있습니다.",
-                "seconds": "**{{seconds}}초** 후에 투표할 수 있습니다."
+                "hours": "**{{hours}}** 후에 투표할 수 있습니다.",
+                "minutes": "**{{minutes}}** 후에 투표할 수 있습니다.",
+                "seconds": "**{{seconds}}** 후에 투표할 수 있습니다."
             }
         }
     },
@@ -1009,9 +1009,9 @@
                 "title": "게임 옵션 충돌"
             },
             "groupsExcludeConflict": {
-                "allow": "그들이 놀 수 있도록",
+                "allow": "재생을 할 수 있도록",
                 "description": "지정된 {{conflictingOptionOne}} 중 하나 이상이 이미 {{conflictingOptionTwo}}에 포함되어 있습니다.\n다음 그룹은 {{conflictingOptionOne}}에 **추가되지 않았습니다.**\n{{groupsList}}\n{{solutionStepOne}}을 사용한 다음 {{solutionStepTwo}}{{allowOrPrevent}}를 사용하세요.",
-                "prevent": "그들이 놀지 못하도록",
+                "prevent": "재생을 하지 못하도록",
                 "title": "그룹 및 충돌 제외"
             },
             "interaction": {
