@@ -1062,7 +1062,8 @@
                     "max": "Expected value less than or equal to {{max}} for {{argument}}",
                     "min": "Expected value greater than or equal to {{min}} for {{argument}}.",
                     "notNumber": "Expected numeric value for {{argument}}."
-                }
+                },
+                "title": "Input validation error"
             },
             "vcFull": {
                 "description": "Ensure that there's enough room in the voice channel for me to join.",

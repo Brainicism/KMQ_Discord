@@ -21,7 +21,10 @@ export async function sendValidationErrorMessage(
     usage?: string
 ): Promise<void> {
     await sendErrorMessage(MessageContext.fromMessage(message), {
-        title: "Input validation error",
+        title: state.localizer.translate(
+            message.guildID,
+            "misc.failure.validation.title"
+        ),
         description: warning,
         footerText: usage,
     });
