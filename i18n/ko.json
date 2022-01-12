@@ -1226,7 +1226,7 @@
         },
         "timeFinished": "시간의 최대",
         "uniqueSongsReset": {
-            "description": "모든 곡이 재생되었습니다. {{totalSongCount}}곡이 재구성됩니다.",
+            "description": "모든 곡이 재생되었습니다. ({{totalSongCount}}곡이 재구성됩니다.)",
             "title": "곡 재설정"
         },
         "usage": "사용법",
