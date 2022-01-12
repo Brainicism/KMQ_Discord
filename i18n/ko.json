@@ -1134,7 +1134,7 @@
             "bonusArtistRound": "보너스 아티스트 라운드",
             "bonusExpArtistRound": "보너스 경험치 및 아티스트 라운드",
             "bonusExpRound": "보너스 경험치 라운드",
-            "correctGuess": "{{correctGuesser}}가 올바르게 추측됨. (+{{expGain}} 경험치)",
+            "correctGuess": "{{correctGuesser}}가 올바르게 추측되었습니다. (+{{expGain}} 경험치)",
             "noCorrectGuesses": "아무도 얻지 못했다.",
             "noWinners": "아무도 우승하지 못했습니다.",
             "runnersUp": "준우승",
