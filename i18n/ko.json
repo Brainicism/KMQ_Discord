@@ -676,8 +676,8 @@
                     "save": "현재 게임 옵션을 사전 설정으로 저장합니다."
                 },
                 "usage": {
-                    "presetIdentifier": "사전_설정_식별자",
-                    "presetName": "사전_설정_이름"
+                    "presetIdentifier": "사전 설정 식별자",
+                    "presetName": "사전 설정 이름"
                 }
             },
             "imported": {
@@ -730,7 +730,7 @@
                     "mention": "멘션"
                 }
             },
-            "lastActive": "마지막 활동",
+            "lastActive": "마지막 활동한 시간",
             "overallRank": "전체 순위",
             "rank": {
                 "almighty": "태양계의 전능한 통치자",
@@ -753,7 +753,7 @@
                 "supreme": "남/북한의 최고 통치자",
                 "trainee": "연습생"
             },
-            "songsGuessed": "추측한 노래",
+            "songsGuessed": "추측한 노래 개수",
             "timesVoted": "투표 횟수"
         },
         "recentlyadded": {
