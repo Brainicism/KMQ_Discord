@@ -415,10 +415,8 @@
                     "pageNumber": "page_number"
                 }
             },
-            "level": {
-                "one": "level",
-                "other": "levels"
-            },
+            "level_one": "level",
+            "level_other": "levels",
             "levelEntry": {
                 "permanent": "{{level}} {{formattedNumber}} ({{rankName}})",
                 "temporary": "{{formattedNumber}} {{levelPluralized}} gained"
@@ -942,22 +940,22 @@
         "fun": {
             "bigThreeDominance": "Fun Fact: BTS, Blackpink and Twice combined account for {{bigThreeViews}} YouTube views, or {{proportion}}%!",
             "birthday": "Fun Fact: {{name}}'s birthday is this month on {{formattedDate}}!",
-            "companyByArtistCount": "Fun Fact: {{company}} is the entertainment company with the {{ordinal}} most artists (including subunits and solo debuts) at {{count}} total!",
-            "companyByArtistViews": "Fun Fact: {{name}} is the {{ordinal}} most viewed entertainment company with {{views}} total YouTube views!",
+            "companyByArtistCount": "Fun Fact: {{company}} is the entertainment company with the {{ordinalNum}} most artists (including subunits and solo debuts) at {{num}} total!",
+            "companyByArtistViews": "Fun Fact: {{name}} is the {{ordinalNum}} most viewed entertainment company with {{views}} total YouTube views!",
             "fanclubName": "Fun Fact: {{name}}'s fanclub name is '{{fanclub}}'!",
             "historicalGaonWeekly": "Fun Fact: On this week in {{year}}, {{songName}} was the top charting song on the GAON Weekly charts!",
             "hyperlinkGenerator": "[\"{{songName}}\" by {{artistName}}]({{url}})",
-            "mostActiveYear": "Fun Fact: {{year}} was the {{ordinal}} most active year in K-Pop with {{count}} music video releases!",
-            "mostDebuts": "Fun Fact: {{year}} had the {{ordinal}} most debuts with {{count}} groups debuting!",
+            "mostActiveYear": "Fun Fact: {{year}} was the {{ordinalNum}} most active year in K-Pop with {{num}} music video releases!",
+            "mostDebuts": "Fun Fact: {{year}} had the {{ordinalNum}} most debuts with {{num}} groups debuting!",
             "mostGaonAppearances": "Fun Fact: {{artistName}} has placed on the GAON digital weekly charts the {{ordinalNum}} most times with {{appearances}} appearances!",
             "mostGaonFirsts": "Fun Fact: {{artistName}} has topped the GAON digital weekly charts the {{ordinalNum}} most times with {{firstPlaceCount}} first place appearances!",
-            "mostLikedGroup": "Fun Fact: {{artist}} is the {{ordinal}} most liked group with {{likes}} total YouTube likes!",
-            "mostLikedVideo": "Fun Fact: {{hyperlink}} is the {{ordinal}} most liked video with {{likes}} total YouTube likes!",
-            "mostMVs": "Fun Fact: {{artist}} has the {{ordinal}} most music videos with {{count}} on YouTube!",
-            "mostMusicShowWins": "Fun Fact: {{artist}} has won the {{ordinal}} most music shows with {{count}} wins!",
-            "mostViewedGroup": "Fun Fact: {{artist}} is the {{ordinal}} most viewed group with {{views}} total YouTube views!",
-            "mostViewedSoloist": "Fun Fact: {{artist}} is the {{ordinal}} most viewed solo artist with {{totalViews}} total YouTube views!",
-            "mostViewedVideo": "Fun Fact: {{hyperlink}} is the {{ordinal}} most viewed video with {{views}} total YouTube views!",
+            "mostLikedGroup": "Fun Fact: {{artist}} is the {{ordinalNum}} most liked group with {{likes}} total YouTube likes!",
+            "mostLikedVideo": "Fun Fact: {{hyperlink}} is the {{ordinalNum}} most liked video with {{likes}} total YouTube likes!",
+            "mostMVs": "Fun Fact: {{artist}} has the {{ordinalNum}} most music videos with {{num}} on YouTube!",
+            "mostMusicShowWins": "Fun Fact: {{artist}} has won the {{ordinalNum}} most music shows with {{num}} wins!",
+            "mostViewedGroup": "Fun Fact: {{artist}} is the {{ordinalNum}} most viewed group with {{views}} total YouTube views!",
+            "mostViewedSoloist": "Fun Fact: {{artist}} is the {{ordinalNum}} most viewed solo artist with {{totalViews}} total YouTube views!",
+            "mostViewedVideo": "Fun Fact: {{hyperlink}} is the {{ordinalNum}} most viewed video with {{views}} total YouTube views!",
             "mvViewMilestone": "Fun Fact: {{hyperlink}} recently reached {{views}} views on YouTube!",
             "newMV": "New Song Alert: Check out this recently released music video, {{hyperlink}}",
             "oldMV": "Fun Fact: {{hyperlink}} was released this week back in {{year}}!",
@@ -1176,42 +1174,24 @@
         },
         "listOfGroups": "list of groups",
         "plural": {
-            "day": {
-                "one": "%s day",
-                "other": "%s days"
-            },
-            "hour": {
-                "one": "%s hour",
-                "other": "%s hours"
-            },
-            "hourAgo": {
-                "one": "%s hour ago",
-                "other": "%s hours ago"
-            },
-            "minute": {
-                "one": "%s minute",
-                "other": "%s minutes"
-            },
-            "minuteAgo": {
-                "one": "%s minute ago",
-                "other": "%s minutes ago"
-            },
-            "minuteRemaining": {
-                "one": "%s minute remaining",
-                "other": "%s minutes remaining"
-            },
-            "player": {
-                "one": "%s player",
-                "other": "%s players"
-            },
-            "second": {
-                "one": "%s second",
-                "other": "%s seconds"
-            },
-            "song": {
-                "one": "%s song",
-                "other": "%s songs"
-            }
+            "day_one": "{{count}} day",
+            "day_other": "{{count}} days",
+            "hour_one": "{{count}} hour",
+            "hour_other": "{{count}} hours",
+            "hourAgo_one": "{{count}} hour ago",
+            "hourAgo_other": "{{count}} hours ago",
+            "minute_one": "{{count}} minute",
+            "minute_other": "{{count}} minutes",
+            "minuteAgo_one": "{{count}} minute ago",
+            "minuteAgo_other": "{{count}} minutes ago",
+            "minuteRemaining_one": "{{count}} minute remaining",
+            "minuteRemaining_other": "{{count}} minutes remaining",
+            "player_one": "{{count}} player",
+            "player_other": "{{count}} players",
+            "second_one": "{{count}} second",
+            "second_other": "{{count}} seconds",
+            "song_one": "{{count}} song",
+            "song_other": "{{count}} songs"
         },
         "preCheck": {
             "competition": "This command has been disabled for regular users in the competition.",

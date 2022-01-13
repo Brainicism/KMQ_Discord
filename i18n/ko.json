@@ -415,10 +415,8 @@
                     "pageNumber": "페이지 수"
                 }
             },
-            "level": {
-                "one": "레벨",
-                "other": "레벨"
-            },
+            "level_one": "레벨",
+            "level_other": "레벨",
             "levelEntry": {
                 "permanent": "{{level}} {{formattedNumber}} ({{rankName}})",
                 "temporary": "{{formattedNumber}} {{levelPluralized}}를 획득하셨습니다!"
@@ -942,7 +940,7 @@
         "fun": {
             "bigThreeDominance": "재미있는 사실: 방탄소년단, 블랙핑크, 트와이스의 합산 유튜브 조회수는 {{bigThreeViews}}회 또는 {{proportion}}%를 차지 합니다.",
             "birthday": "재미있는 사실: {{name}}의 생일은 이번 달 {{formattedDate}}입니다!",
-            "companyByArtistCount": "재미있는 사실: {{company}}는 총 {{count}}명의 아티스트 (서브유닛 및 솔로 데뷔 포함)가 가장 {{ordinal}}명인 엔터테인먼트 회사입니다!",
+            "companyByArtistCount": "재미있는 사실: {{company}}는 총 {{num}}명의 아티스트 (서브유닛 및 솔로 데뷔 포함)가 가장 {{ordinal}}명인 엔터테인먼트 회사입니다!",
             "companyByArtistViews": "재미있는 사실: {{name}}은(는) {{ordinal}} 가장 많이 본 엔터테인먼트 회사로 총 유튜브 조회수는 {{views}}회입니다!",
             "fanclubName": "재미있는 사실: {{name}}님의 팬클럽 이름은 '{{fanclub}}'입니다!",
             "historicalGaonWeekly": "재미있는 사실: 이번 주 {{year}}에 {{songName}}이(가) 가온 주간 차트에서 1위를 차지했습니다!",
@@ -1180,42 +1178,24 @@
         },
         "listOfGroups": "그룹 목록",
         "plural": {
-            "day": {
-                "one": "%s일",
-                "other": "%s일s"
-            },
-            "hour": {
-                "one": "%s시간",
-                "other": "%s시간"
-            },
-            "hourAgo": {
-                "one": "%s시간 전",
-                "other": "%s시간 전"
-            },
-            "minute": {
-                "one": "%s분",
-                "other": "%s분"
-            },
-            "minuteAgo": {
-                "one": "%s분 전",
-                "other": "%s분 전"
-            },
-            "minuteRemaining": {
-                "one": "%s분 남음",
-                "other": "%s분 남음"
-            },
-            "player": {
-                "one": "%s명",
-                "other": "%s명"
-            },
-            "second": {
-                "one": "%s초",
-                "other": "%s초"
-            },
-            "song": {
-                "one": "%s곡",
-                "other": "%s곡"
-            }
+            "day_one": "{{count}}일",
+            "day_other": "{{count}}일s",
+            "hour_one": "{{count}}시간",
+            "hour_other": "{{count}}시간",
+            "hourAgo_one": "{{count}}시간 전",
+            "hourAgo_other": "{{count}}시간 전",
+            "minute_one": "{{count}}분",
+            "minute_other": "{{count}}분",
+            "minuteAgo_one": "{{count}}분 전",
+            "minuteAgo_other": "{{count}}분 전",
+            "minuteRemaining_one": "{{count}}분 남음",
+            "minuteRemaining_other": "{{count}}분 남음",
+            "player_one": "{{count}}명",
+            "player_other": "{{count}}명",
+            "second_one": "{{count}}초",
+            "second_other": "{{count}}초",
+            "song_one": "{{count}}곡",
+            "song_other": "{{count}}곡"
         },
         "preCheck": {
             "competition": "이 명령어는 경쟁에서 일반 사용자를 위해 비활성화되었습니다.",
