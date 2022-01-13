@@ -995,6 +995,10 @@
                 "description": "Ensure you're not in the inactive voice channel so that you can hear me!",
                 "title": "AFK Voice Channel"
             },
+            "command": {
+                "description": "I ran into an error while running this command.\nProvide this to a developer if this happens consistently:\n{{debugId}}",
+                "title": "Error Running Command"
+            },
             "error": "Error",
             "errorSelectingSong": {
                 "description": "Please try starting the round again. If the issue persists, report it in our official KMQ server.",
