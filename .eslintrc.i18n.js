@@ -9,5 +9,18 @@ module.exports = {
                 filePath: path.resolve("./i18n/en.json"),
             },
         ],
+        "i18n-json/valid-message-syntax": [
+            "warn",
+            {
+                syntax: path.resolve("./i18n/i18next_syntax_validator.js"),
+            },
+        ],
+        "i18n-json/sorted-keys": [
+            "warn",
+            {
+                order: "asc",
+                indentSpaces: 4,
+            },
+        ],
     },
 };
