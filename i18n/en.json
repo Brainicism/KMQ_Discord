@@ -415,12 +415,12 @@
                     "pageNumber": "page_number"
                 }
             },
-            "level_one": "level",
-            "level_other": "levels",
             "levelEntry": {
                 "permanent": "{{level}} {{formattedNumber}} ({{rankName}})",
                 "temporary": "{{formattedNumber}} {{levelPluralized}} gained"
             },
+            "level_one": "level",
+            "level_other": "levels",
             "quote": {
                 "name": "Want your name to show up on the leaderboard? See {{command}}",
                 "nextPage": "Want to see the next page of the leaderboard? See {{command}}"
@@ -1176,16 +1176,16 @@
         "plural": {
             "day_one": "{{count}} day",
             "day_other": "{{count}} days",
-            "hour_one": "{{count}} hour",
-            "hour_other": "{{count}} hours",
             "hourAgo_one": "{{count}} hour ago",
             "hourAgo_other": "{{count}} hours ago",
-            "minute_one": "{{count}} minute",
-            "minute_other": "{{count}} minutes",
+            "hour_one": "{{count}} hour",
+            "hour_other": "{{count}} hours",
             "minuteAgo_one": "{{count}} minute ago",
             "minuteAgo_other": "{{count}} minutes ago",
             "minuteRemaining_one": "{{count}} minute remaining",
             "minuteRemaining_other": "{{count}} minutes remaining",
+            "minute_one": "{{count}} minute",
+            "minute_other": "{{count}} minutes",
             "player_one": "{{count}} player",
             "player_other": "{{count}} players",
             "second_one": "{{count}} second",

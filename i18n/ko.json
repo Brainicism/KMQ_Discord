@@ -415,12 +415,12 @@
                     "pageNumber": "페이지 수"
                 }
             },
-            "level_one": "레벨",
-            "level_other": "레벨",
             "levelEntry": {
                 "permanent": "{{level}} {{formattedNumber}} ({{rankName}})",
                 "temporary": "{{formattedNumber}} {{levelPluralized}}를 획득하셨습니다!"
             },
+            "level_one": "레벨",
+            "level_other": "레벨",
             "quote": {
                 "name": "당신이 리더보드에 표시되기를 원하십니까? (참고: {{command}})",
                 "nextPage": "리더보드의 다음 페이지를 보고 싶으십니까? (참고: {{command}})"
@@ -984,10 +984,6 @@
         "classic": {
             "yourScore": "당신의 점수는 {{score}}점 입니다."
         },
-        "command": {
-            "description": "이 명령어를 실행하는 동안 오류가 발생했습니다.\n이 문제가 지속적으로 발생하면 개발자에게 제공하세요.\n{{debugId}}",
-            "title": "명령어를 실행하는 동안 오류가 발생했습니다"
-        },
         "conflict": "conflict",
         "elimination": {
             "yourLives": "당신의 목숨은 {{lives}}개 남았습니다."
@@ -1180,16 +1176,16 @@
         "plural": {
             "day_one": "{{count}}일",
             "day_other": "{{count}}일s",
-            "hour_one": "{{count}}시간",
-            "hour_other": "{{count}}시간",
             "hourAgo_one": "{{count}}시간 전",
             "hourAgo_other": "{{count}}시간 전",
-            "minute_one": "{{count}}분",
-            "minute_other": "{{count}}분",
+            "hour_one": "{{count}}시간",
+            "hour_other": "{{count}}시간",
             "minuteAgo_one": "{{count}}분 전",
             "minuteAgo_other": "{{count}}분 전",
             "minuteRemaining_one": "{{count}}분 남음",
             "minuteRemaining_other": "{{count}}분 남음",
+            "minute_one": "{{count}}분",
+            "minute_other": "{{count}}분",
             "player_one": "{{count}}명",
             "player_other": "{{count}}명",
             "second_one": "{{count}}초",
