@@ -1,9 +1,6 @@
-import { I18n, TranslateOptions, Replacements, PluralOptions } from "i18n";
-import path from "path";
-import { IPCLogger } from "../logger";
+import i18next from "i18next";
+import Backend from "i18next-fs-backend";
 import { state } from "../kmq_worker";
-
-const logger = new IPCLogger("localization_manager");
 
 export enum LocaleType {
     EN = "en",
@@ -13,27 +10,20 @@ export enum LocaleType {
 export const DEFAULT_LOCALE = LocaleType.EN;
 
 export default class LocalizationManager {
-    internalLocalizer: I18n;
+    internalLocalizer: typeof i18next;
     constructor() {
-        this.internalLocalizer = new I18n();
-        this.internalLocalizer.configure({
-            locales: Object.values(LocaleType),
-            defaultLocale: LocaleType.EN,
-            directory: path.join(__dirname, "../../i18n"),
-            objectNotation: true,
-            indent: "    ",
-            mustacheConfig: {
-                tags: ["{", "}"],
+        this.internalLocalizer = i18next.createInstance().use(Backend);
+        this.internalLocalizer.init({
+            preload: Object.values(LocaleType),
+            supportedLngs: Object.values(LocaleType),
+            saveMissing: true,
+            saveMissingTo: "current",
+            fallbackLng: false,
+            interpolation: {
+                escapeValue: false,
             },
-
-            logDebugFn: (_msg) => {},
-
-            logWarnFn: (msg) => {
-                logger.warn(msg);
-            },
-
-            logErrorFn: (msg) => {
-                logger.error(msg);
+            backend: {
+                loadPath: "../i18n/{{lng}}.json",
             },
         });
     }
@@ -41,59 +31,32 @@ export default class LocalizationManager {
     /**
      * Translate the given phrase using locale configuration
      * @param guildID - The guild ID associated with the guild receiving the string
-     * @param phraseOrOptions - The phrase to translate or options for translation
+     * @param phrase - The phrase to translate
      * @param replace - Replacements to be applied to the phrase
      * @returns The translated phrase
      */
     translate(
         guildID: string,
-        phraseOrOptions: string | TranslateOptions,
-        replace: string[] | Replacements = {}
+        phrase: string,
+        replace: { [key: string]: string } = {}
     ): string {
-        if (phraseOrOptions instanceof Object) {
-            phraseOrOptions.locale = state.locales[guildID] ?? DEFAULT_LOCALE;
-        } else {
-            phraseOrOptions = {
-                phrase: phraseOrOptions,
-                locale: state.locales[guildID] ?? DEFAULT_LOCALE,
-            };
-        }
-
-        if (replace instanceof Array) {
-            // eslint-disable-next-line no-underscore-dangle
-            return this.internalLocalizer.__(phraseOrOptions, ...replace);
-        }
-
-        // eslint-disable-next-line no-underscore-dangle
-        return this.internalLocalizer.__(phraseOrOptions, replace);
+        return this.internalLocalizer.t(phrase, {
+            lng: state.locales[guildID] ?? DEFAULT_LOCALE,
+            replace,
+        });
     }
 
     /**
      * Translate with plural condition the given phrase and count using locale configuration
      * @param guildID - The guild ID associated with the guild receiving the string
-     * @param phraseOrOptions - Short phrase to be translated. All plural options ("one", "few", other", ...) have to be provided by your translation file
+     * @param phrase - The phrase to translate
      * @param count - The number which decides whether to select singular or plural
      * @returns The translated phrase
      */
-    translateN(
-        guildID: string,
-        phraseOrOptions: string | PluralOptions,
-        count: number
-    ): string {
-        if (phraseOrOptions instanceof Object) {
-            phraseOrOptions.locale = state.locales[guildID] ?? DEFAULT_LOCALE;
-            // eslint-disable-next-line no-underscore-dangle
-            return this.internalLocalizer.__n(phraseOrOptions, count);
-        }
-
-        phraseOrOptions = {
-            singular: phraseOrOptions,
-            plural: phraseOrOptions,
+    translateN(guildID: string, phrase: string, count: number): string {
+        return this.internalLocalizer.t(phrase, {
+            lng: state.locales[guildID] ?? DEFAULT_LOCALE,
             count,
-            locale: state.locales[guildID] ?? DEFAULT_LOCALE,
-        };
-
-        // eslint-disable-next-line no-underscore-dangle
-        return this.internalLocalizer.__n(phraseOrOptions, count);
+        });
     }
 }
