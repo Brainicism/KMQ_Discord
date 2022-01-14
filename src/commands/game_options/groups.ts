@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     sendOptionsMessage,
     getDebugLogHeader,
@@ -13,43 +13,70 @@ import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 import { GROUP_LIST_URL } from "../../constants";
 
 const logger = new IPCLogger("groups");
+
 export default class GroupsCommand implements BaseCommand {
+    aliases = ["group", "artist", "artists"];
+
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
-    help = {
+    help = (guildID: string): Help => ({
         name: "groups",
-        description: `Select as many groups that you would like to hear from, separated by commas. A list of group names can be found [here](${GROUP_LIST_URL}).`,
+        description: state.localizer.translate(
+            guildID,
+            "command.groups.help.description",
+            {
+                groupList: GROUP_LIST_URL,
+            }
+        ),
         usage: ",groups [group1],{group2}",
         examples: [
             {
                 example: "`,groups blackpink`",
-                explanation: "Plays songs only from Blackpink",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.groups.help.example.singleGroup",
+                    {
+                        group: "Blackpink",
+                    }
+                ),
             },
             {
                 example: "`,groups blackpink, bts, red velvet`",
-                explanation:
-                    "Plays songs only from Blackpink, BTS, and Red Velvet",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.groups.help.example.multipleGroups",
+                    {
+                        groupOne: "Blackpink",
+                        groupTwo: "BTS",
+                        groupThree: "Red Velvet",
+                    }
+                ),
             },
             {
                 example: "`,groups`",
-                explanation: "Resets the groups option",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.groups.help.example.reset"
+                ),
             },
         ],
-        priority: 135,
         actionRowComponents: [
             {
                 style: 5 as const,
                 url: GROUP_LIST_URL,
                 type: 2 as const,
-                label: "Full List of Groups",
+                label: state.localizer.translate(
+                    guildID,
+                    "misc.interaction.fullGroupsList"
+                ),
             },
         ],
-    };
-
-    aliases = ["group", "artist", "artists"];
+        priority: 135,
+    });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
@@ -67,7 +94,14 @@ export default class GroupsCommand implements BaseCommand {
         let groupsWarning = "";
         if (parsedMessage.components.length > 1) {
             if (["add", "remove"].includes(parsedMessage.components[0])) {
-                groupsWarning = `Did you mean to use ${process.env.BOT_PREFIX}${parsedMessage.components[0]} groups?`;
+                groupsWarning = state.localizer.translate(
+                    message.guildID,
+                    "misc.warning.addRemoveOrdering.footer",
+                    {
+                        addOrRemove: `${process.env.BOT_PREFIX}${parsedMessage.components[0]}`,
+                        command: "groups",
+                    }
+                );
             }
         }
 
@@ -88,14 +122,29 @@ export default class GroupsCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Unknown Group Name",
-                description: `One or more of the specified group names was not recognized. Those groups that matched are added. Please ensure that the group name matches exactly with the list provided by \`${
-                    process.env.BOT_PREFIX
-                }help groups\`. \nThe following groups were **not** recognized:\n ${unmatchedGroups.join(
-                    ", "
-                )} \nUse \`${
-                    process.env.BOT_PREFIX
-                }add\` to add the unmatched groups.`,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.failure.unrecognizedGroups.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "misc.failure.unrecognizedGroups.description",
+                    {
+                        matchedGroupsAction: state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.unrecognizedGroups.added"
+                        ),
+                        helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
+                        unmatchedGroups: unmatchedGroups.join(", "),
+                        solution: state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.unrecognizedGroups.solution",
+                            {
+                                command: `\`${process.env.BOT_PREFIX}add groups\``,
+                            }
+                        ),
+                    }
+                ),
                 footerText: groupsWarning,
             });
         }
@@ -111,16 +160,27 @@ export default class GroupsCommand implements BaseCommand {
             );
             if (intersection.size > 0) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: "Groups and Exclude Conflict",
-                    description: `One or more of the given \`groups\` is already included in \`exclude\`. \nThe following groups were **not** added to \`groups\`:\n ${[
-                        ...intersection,
-                    ]
-                        .filter((x) => !x.includes("+"))
-                        .join(", ")} \nUse \`${
-                        process.env.BOT_PREFIX
-                    }remove exclude\` and then \`${
-                        process.env.BOT_PREFIX
-                    }groups\` to allow them to play.`,
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "misc.failure.groupsExcludeConflict.title"
+                    ),
+                    description: state.localizer.translate(
+                        message.guildID,
+                        "misc.failure.groupsExcludeConflict.description",
+                        {
+                            conflictingOptionOne: "`exclude`",
+                            conflictingOptionTwo: "`groups`",
+                            groupsList: [...intersection]
+                                .filter((x) => !x.includes("+"))
+                                .join(", "),
+                            solutionStepOne: `\`${process.env.BOT_PREFIX}remove exclude\``,
+                            solutionStepTwo: `\`${process.env.BOT_PREFIX}groups\``,
+                            allowOrPrevent: state.localizer.translate(
+                                message.guildID,
+                                "misc.failure.groupsExcludeConflict.allow"
+                            ),
+                        }
+                    ),
                 });
                 return;
             }

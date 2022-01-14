@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
@@ -8,10 +8,13 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("guessTimeout");
 
 export default class GuessTimeoutCommand implements BaseCommand {
+    aliases = ["time", "timeout", "t"];
+
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
@@ -27,25 +30,35 @@ export default class GuessTimeoutCommand implements BaseCommand {
         ],
     };
 
-    help = {
+    help = (guildID: string): Help => ({
         name: "timer",
-        description:
-            "Try your best to guess correctly before the timer runs out! Enter a time in seconds, or give no arguments to disable.",
-        usage: ",timer [time]",
+        description: state.localizer.translate(
+            guildID,
+            "command.timer.help.description"
+        ),
+        usage: `,timer [${state.localizer.translate(
+            guildID,
+            "command.timer.help.usage.seconds"
+        )}]`,
         examples: [
             {
                 example: "`,timer 15`",
-                explanation:
-                    "In 15 seconds, if no user has guessed correctly, the round ends and the next one begins automatically",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.timer.help.example.set",
+                    { timer: String(15) }
+                ),
             },
             {
                 example: "`,timer`",
-                explanation: "Disables the timer",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.timer.help.example.reset"
+                ),
             },
         ],
         priority: 110,
-    };
-    aliases = ["time", "timeout", "t"];
+    });
 
     call = async ({
         message,

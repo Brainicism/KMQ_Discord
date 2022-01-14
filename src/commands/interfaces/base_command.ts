@@ -26,16 +26,22 @@ export interface CallFunc {
     (args: CommandArgs): Promise<void>;
 }
 
+export interface Help {
+    name: string;
+    description: string;
+    usage: string;
+    examples: Array<{ example: string; explanation: string }>;
+    actionRowComponents?: Eris.ActionRowComponents[];
+    priority?: number;
+}
+
+export interface HelpFunc {
+    (guildID: string): Help;
+}
+
 export default interface BaseCommand {
     call: CallFunc;
-    help?: {
-        name: string;
-        description: string;
-        usage: string;
-        examples: Array<{ example: string; explanation: string }>;
-        priority: number;
-        actionRowComponents?: Eris.ActionRowComponents[];
-    };
+    help?: HelpFunc;
     aliases?: Array<string>;
     validations?: CommandValidations;
     preRunChecks?: Array<{

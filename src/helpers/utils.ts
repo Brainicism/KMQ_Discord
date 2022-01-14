@@ -4,7 +4,8 @@ import { exec } from "child_process";
 import moment from "moment-timezone";
 import crypto from "crypto";
 import _ from "lodash";
-import pluralize from "pluralize";
+import { state } from "../kmq_worker";
+import LocalizationManager from "./localization_manager";
 import { IPCLogger } from "../logger";
 
 const logger = new IPCLogger("utils");
@@ -203,18 +204,34 @@ export function standardDateFormat(date: Date): string {
 
 /**
  * @param date - the date Object
+ * @param guildID - the guild ID
  * @returns the date in (minutes/hours ago) or yyyy-mm-dd format
  */
-export function friendlyFormattedDate(date: Date): string {
+export function friendlyFormattedDate(date: Date, guildID: string): string {
+    let localizer: LocalizationManager;
+    if (guildID === null) {
+        localizer = new LocalizationManager();
+    } else {
+        localizer = state.localizer;
+    }
+
     const timeDiffSeconds = (Date.now() - date.getTime()) / 1000;
     const timeDiffMinutes = timeDiffSeconds / 60.0;
     if (timeDiffMinutes <= 60) {
-        return `${pluralize("minute", Math.ceil(timeDiffMinutes), true)} ago`;
+        return localizer.translateN(
+            guildID,
+            "misc.plural.minuteAgo",
+            Math.ceil(timeDiffMinutes)
+        );
     }
 
     const timeDiffHours = timeDiffMinutes / 60.0;
     if (timeDiffHours <= 24) {
-        return `${pluralize("hour", Math.ceil(timeDiffHours), true)} ago`;
+        return localizer.translateN(
+            guildID,
+            "misc.plural.hourAgo",
+            Math.ceil(timeDiffHours)
+        );
     }
 
     return standardDateFormat(date);

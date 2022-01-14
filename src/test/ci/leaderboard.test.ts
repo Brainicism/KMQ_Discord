@@ -33,7 +33,6 @@ const date = new Date(
 );
 
 const secondAgo = new Date(new Date(date).setSeconds(INITIAL_SECONDS - 1));
-
 const yesterday = new Date(new Date(date).setDate(INITIAL_DAY - 1));
 const lastWeek = new Date(new Date(date).setDate(INITIAL_DAY - 7));
 const lastMonth = new Date(new Date(date).setMonth(INITIAL_MONTH - 1));

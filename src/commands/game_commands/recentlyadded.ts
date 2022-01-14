@@ -1,5 +1,5 @@
 import { EmbedOptions } from "eris";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { QueriedSong } from "../../types";
 import dbContext from "../../database_context";
 import {
@@ -15,26 +15,33 @@ import {
 import { KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("recentlyadded");
 
 const FIELDS_PER_EMBED = 9;
 
 export default class RecentlyAddedCommand implements BaseCommand {
-    help = {
+    aliases = ["recent"];
+
+    help = (guildID: string): Help => ({
         name: "recentlyadded",
-        description: "View songs added to KMQ in the past two weeks.",
+        description: state.localizer.translate(
+            guildID,
+            "command.recentlyadded.help.description"
+        ),
         usage: ",recentlyadded",
         examples: [
             {
                 example: "`,recentlyadded`",
-                explanation: "Show recently added songs",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.recentlyadded.help.example"
+                ),
             },
         ],
         priority: 30,
-    };
-
-    aliases = ["recent"];
+    });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         const newSongs: Array<QueriedSong> = await dbContext
@@ -58,9 +65,14 @@ export default class RecentlyAddedCommand implements BaseCommand {
 
         if (newSongs.length === 0) {
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: "No Songs Recently Added",
-                description:
-                    "Check back later to see if KMQ has added new songs.",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.recentlyadded.failure.noSongs.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "command.recentlyadded.failure.noSongs.description"
+                ),
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
             });
             return;
@@ -68,20 +80,31 @@ export default class RecentlyAddedCommand implements BaseCommand {
 
         const fields = newSongs.map((song) => ({
             name: `"${song.originalSongName}" - ${song.artist}`,
-            value: `Released ${standardDateFormat(
+            value: `${state.localizer.translate(
+                message.guildID,
+                "command.recentlyadded.released"
+            )} ${standardDateFormat(
                 song.publishDate
             )}\n[${friendlyFormattedNumber(
                 song.views
-            )} views](https://youtu.be/${song.youtubeLink})`,
+            )} ${state.localizer.translate(
+                message.guildID,
+                "misc.views"
+            )}](https://youtu.be/${song.youtubeLink})`,
             inline: true,
         }));
 
         const embedFieldSubsets = chunkArray(fields, FIELDS_PER_EMBED);
         const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
             (embedFieldsSubset) => ({
-                title: "Recently Added Songs",
-                description:
-                    "The following songs were added to KMQ in the past two weeks:",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.recentlyadded.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "command.recentlyadded.description"
+                ),
                 fields: embedFieldsSubset,
             })
         );

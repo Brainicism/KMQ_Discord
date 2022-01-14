@@ -213,7 +213,8 @@ async function startWebServer(fleet: Fleet): Promise<void> {
                     cluster.shards.map((x) => x.latency)
                 ).toLocaleString(),
                 uptime: friendlyFormattedDate(
-                    new Date(Date.now() - cluster.uptime)
+                    new Date(Date.now() - cluster.uptime),
+                    null
                 ),
                 voiceConnections: cluster.voice,
                 activeGameSessions: gameplayStats.get(i).activeGameSessions,

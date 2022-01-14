@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -10,6 +10,7 @@ import { KmqImages } from "../../constants";
 import dbContext from "../../database_context";
 import { bold } from "../../helpers/utils";
 import { userBonusIsActive } from "../../helpers/game_utils";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("vote");
 
@@ -22,14 +23,16 @@ export const REVIEW_LINK = "https://top.gg/bot/508759831755096074#reviews";
 export default class VoteCommand implements BaseCommand {
     aliases = ["v", "voted"];
 
-    help = {
+    help = (guildID: string): Help => ({
         name: "vote",
-        description:
-            "Shows instructions on how to vote to receive 2x EXP for an hour.",
+        description: state.localizer.translate(
+            guildID,
+            "command.vote.help.description"
+        ),
         usage: ",vote",
         examples: [],
         priority: 60,
-    };
+    });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         let voteStatusString = "";
@@ -46,9 +49,19 @@ export default class VoteCommand implements BaseCommand {
                 ).getTime() /
                 (1000 * 60);
 
-            voteStatusString = `${bold(
-                String(Math.max(Math.ceil(timeRemaining), 0))
-            )} minute${timeRemaining > 1 ? "s" : ""} left.`;
+            voteStatusString = state.localizer.translate(
+                message.guildID,
+                "command.vote.timeLeft",
+                {
+                    time: bold(
+                        state.localizer.translateN(
+                            message.guildID,
+                            "misc.plural.minute",
+                            Math.max(Math.ceil(timeRemaining), 0)
+                        )
+                    ),
+                }
+            );
         } else if (userVoterStatus) {
             // User has voted before
             const nextVoteTime = new Date(userVoterStatus["buff_expiry_date"]);
@@ -58,7 +71,10 @@ export default class VoteCommand implements BaseCommand {
                     VOTE_BONUS_DURATION
             );
             if (nextVoteTime.getTime() <= Date.now()) {
-                voteStatusString = "You can vote now!";
+                voteStatusString = state.localizer.translate(
+                    message.guildID,
+                    "command.vote.available"
+                );
             } else {
                 const hoursLeft = Math.floor(
                     (nextVoteTime.getTime() - Date.now()) / (60 * 60 * 1000)
@@ -68,32 +84,77 @@ export default class VoteCommand implements BaseCommand {
                     nextVoteTime.getTime() - Date.now()
                 ).getMinutes();
 
-                if (hoursLeft === 0 && minutesLeft === 0) {
-                    const secondsLeft = new Date(
-                        nextVoteTime.getTime() - Date.now()
-                    ).getSeconds();
+                const secondsLeft = new Date(
+                    nextVoteTime.getTime() - Date.now()
+                ).getSeconds();
 
-                    voteStatusString = `You can vote in ${bold(
-                        String(secondsLeft)
-                    )} seconds.`;
+                if (hoursLeft > 0) {
+                    voteStatusString = state.localizer.translate(
+                        message.guildID,
+                        "command.vote.unavailable.hours",
+                        {
+                            hours: state.localizer.translateN(
+                                message.guildID,
+                                "misc.plural.hour",
+                                hoursLeft
+                            ),
+                        }
+                    );
+                } else if (minutesLeft > 0) {
+                    voteStatusString = state.localizer.translate(
+                        message.guildID,
+                        "command.vote.unavailable.minutes",
+                        {
+                            minutes: state.localizer.translateN(
+                                message.guildID,
+                                "misc.plural.minute",
+                                minutesLeft
+                            ),
+                        }
+                    );
                 } else {
-                    voteStatusString = `You can vote in ${
-                        hoursLeft > 0
-                            ? `${bold(String(hoursLeft))} hours and `
-                            : ""
-                    }${bold(String(minutesLeft))} minutes.`;
+                    voteStatusString = state.localizer.translate(
+                        message.guildID,
+                        "command.vote.unavailable.seconds",
+                        {
+                            seconds: state.localizer.translateN(
+                                message.guildID,
+                                "misc.plural.second",
+                                secondsLeft
+                            ),
+                        }
+                    );
                 }
             }
         } else {
-            voteStatusString = "You can vote now!";
+            voteStatusString = state.localizer.translate(
+                message.guildID,
+                "command.vote.available"
+            );
         }
 
         sendInfoMessage(
             MessageContext.fromMessage(message),
             {
                 color: boostActive ? EMBED_SUCCESS_BONUS_COLOR : null,
-                title: boostActive ? "Boost Active!" : "Boost Inactive",
-                description: `${voteStatusString}\n\nVote for KMQ on [top.gg](${VOTE_LINK}) and you'll receive 2x EXP for an hour! You can vote once every ${VOTE_RESET_DURATION} hours.\n\nWe'd appreciate it if you could also leave a [review](${REVIEW_LINK}).`,
+                title: boostActive
+                    ? state.localizer.translate(
+                          message.guildID,
+                          "command.vote.boost.active"
+                      )
+                    : state.localizer.translate(
+                          message.guildID,
+                          "command.vote.boost.inactive"
+                      ),
+                description: `${voteStatusString}\n\n${state.localizer.translate(
+                    message.guildID,
+                    "command.vote.description",
+                    {
+                        voteLink: VOTE_LINK,
+                        voteResetDuration: String(VOTE_RESET_DURATION),
+                        reviewLink: REVIEW_LINK,
+                    }
+                )} `,
                 thumbnailUrl: KmqImages.THUMBS_UP,
                 components: [
                     {
@@ -104,14 +165,20 @@ export default class VoteCommand implements BaseCommand {
                                 url: VOTE_LINK,
                                 type: 2 as const,
                                 emoji: { name: "✅" },
-                                label: "Vote!",
+                                label: state.localizer.translate(
+                                    message.guildID,
+                                    "misc.interaction.vote"
+                                ),
                             },
                             {
                                 style: 5,
                                 url: REVIEW_LINK,
                                 type: 2 as const,
                                 emoji: { name: "📖" },
-                                label: "Leave a review!",
+                                label: state.localizer.translate(
+                                    message.guildID,
+                                    "misc.interaction.leaveReview"
+                                ),
                             },
                         ],
                     },

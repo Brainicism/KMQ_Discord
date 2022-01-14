@@ -15,6 +15,7 @@ import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
+import { DEFAULT_LOCALE } from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("debug");
 
@@ -49,6 +50,12 @@ export default class DebugCommand implements BaseCommand {
             inline: false,
         });
 
+        fields.push({
+            name: "Locale",
+            value: state.locales[message.guildID] ?? DEFAULT_LOCALE,
+            inline: false,
+        });
+
         const voiceChannel = getUserVoiceChannel(
             MessageContext.fromMessage(message)
         );
@@ -65,8 +72,17 @@ export default class DebugCommand implements BaseCommand {
 
         const debugID = uuid.v4();
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: "Debug Details Sent!",
-            description: `If you were asked by a bot developer to do this, give them this:\n\`${debugID}\``,
+            title: state.localizer.translate(
+                message.guildID,
+                "command.debug.title"
+            ),
+            description: state.localizer.translate(
+                message.guildID,
+                "command.debug.description",
+                {
+                    debugID: `\`${debugID}\``,
+                }
+            ),
             thumbnailUrl: KmqImages.READING_BOOK,
         });
 

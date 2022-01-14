@@ -8,6 +8,7 @@ import MessageContext from "./structures/message_context";
 import { GameType, GuildTextableMessage } from "./types";
 import { IPCLogger } from "./logger";
 import dbContext from "./database_context";
+import { state } from "./kmq_worker";
 
 const logger = new IPCLogger("command_prechecks");
 export interface PrecheckArgs {
@@ -42,10 +43,14 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Wait...",
-                description:
-                    errorMessage ??
-                    "You must be in the same voice channel as the bot to use this command.",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.preCheck.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    errorMessage ?? "misc.preCheck.differentVC"
+                ),
             });
             return false;
         }
@@ -64,9 +69,14 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Wait...",
-                description:
-                    errorMessage ?? "You can't do that in this server.",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.preCheck.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    errorMessage ?? "misc.preCheck.debugServer"
+                ),
             });
         }
 
@@ -86,9 +96,14 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Wait...",
-                description:
-                    errorMessage ?? "You can't do that in this channel.",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.preCheck.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    errorMessage ?? "misc.preCheck.debugChannel"
+                ),
             });
         }
 
@@ -118,10 +133,14 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Wait...",
-                description:
-                    errorMessage ??
-                    "This command has been disabled for regular users in the competition.",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.preCheck.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    errorMessage ?? "misc.preCheck.competition"
+                ),
             });
         }
 

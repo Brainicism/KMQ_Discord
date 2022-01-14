@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     sendErrorMessage,
@@ -9,8 +9,10 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("limit");
+
 export const DEFAULT_LIMIT = 500;
 
 export default class LimitCommand implements BaseCommand {
@@ -35,29 +37,43 @@ export default class LimitCommand implements BaseCommand {
         ],
     };
 
-    help = {
+    help = (guildID: string): Help => ({
         name: "limit",
-        description:
-            "Set a maximum number of results in the song query. This effectively sets the 'Top X number of songs' based on the selected filters.",
-        usage: ",limit [limit]",
+        description: state.localizer.translate(
+            guildID,
+            "command.limit.help.description"
+        ),
+        usage: ",limit [limit_1] {limit_2}",
         examples: [
             {
                 example: "`,limit 250`",
-                explanation:
-                    "Plays the top 250 most listened songs from the currently selected options.",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.limit.help.example.singleLimit",
+                    {
+                        limit: String(250),
+                    }
+                ),
             },
             {
                 example: "`,limit 250 500`",
-                explanation:
-                    "Plays between the 250th to 500th most listened songs from the currently selected options.",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.limit.help.example.twoLimits",
+                    { limitStart: String(250), limitEnd: String(500) }
+                ),
             },
             {
                 example: "`,limit`",
-                explanation: `Reset to the default limit of \`${DEFAULT_LIMIT}\``,
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.limit.help.example.reset",
+                    { defaultLimit: `\`${DEFAULT_LIMIT}\`` }
+                ),
             },
         ],
         priority: 140,
-    };
+    });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
@@ -79,8 +95,14 @@ export default class LimitCommand implements BaseCommand {
             limitEnd = parseInt(parsedMessage.components[0]);
             if (limitEnd === 0) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: "Game Option Error",
-                    description: "End limit must be greater than 0",
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "command.limit.failure.invalidLimit.title"
+                    ),
+                    description: state.localizer.translate(
+                        message.guildID,
+                        "command.limit.failure.invalidLimit.greaterThanZero.description"
+                    ),
                 });
                 return;
             }
@@ -89,8 +111,14 @@ export default class LimitCommand implements BaseCommand {
             limitEnd = parseInt(parsedMessage.components[1]);
             if (limitEnd <= limitStart) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: "Game Option Error",
-                    description: "End limit must be greater than start limit",
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "command.limit.failure.invalidLimit.title"
+                    ),
+                    description: state.localizer.translate(
+                        message.guildID,
+                        "command.limit.failure.invalidLimit.greaterThanStart.description"
+                    ),
                 });
                 return;
             }

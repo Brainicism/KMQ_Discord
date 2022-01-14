@@ -5,6 +5,9 @@ import { Gender } from "./commands/game_options/gender";
 import KmqMember from "./structures/kmq_member";
 import KmqClient from "./kmq_client";
 import RateLimiter from "./rate_limiter";
+import LocalizationManager, {
+    LocaleType,
+} from "./helpers/localization_manager";
 
 export type GuildTextableMessage = Eris.Message<GuildTextableChannel>;
 
@@ -64,6 +67,8 @@ export interface State {
     ipc: IPC;
     rateLimiter: RateLimiter;
     bonusArtists: Set<string>;
+    locales: { [guildID: string]: LocaleType };
+    localizer: LocalizationManager;
 }
 
 export enum GameOption {

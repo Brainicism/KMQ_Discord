@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -8,20 +8,24 @@ import {
 } from "../../helpers/discord_utils";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
+import { state } from "../../kmq_worker";
 import { getKmqCurrentVersion } from "../../helpers/game_utils";
 
 const logger = new IPCLogger("news");
 
 export default class NewsCommand implements BaseCommand {
-    help = {
+    aliases = ["updates"];
+
+    help = (guildID: string): Help => ({
         name: "news",
-        description: "Displays the latest updates to KMQ.",
+        description: state.localizer.translate(
+            guildID,
+            "command.news.help.description"
+        ),
         usage: ",news",
         examples: [],
         priority: 10,
-    };
-
-    aliases = ["updates"];
+    });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         const newsFilePath = path.resolve(__dirname, "../../../data/news.md");
@@ -33,7 +37,10 @@ export default class NewsCommand implements BaseCommand {
         const news = fs.readFileSync(newsFilePath).toString();
 
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: "Updates",
+            title: state.localizer.translate(
+                message.guildID,
+                "command.news.updates.title"
+            ),
             description: news,
             thumbnailUrl: KmqImages.READING_BOOK,
             footerText: getKmqCurrentVersion(),

@@ -20,7 +20,7 @@ import {
     isPowerHour,
     isWeekend,
 } from "../../helpers/utils";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import dbContext from "../../database_context";
 import { IPCLogger } from "../../logger";
 import { GameInfoMessage, GameType, GuildTextableMessage } from "../../types";
@@ -28,6 +28,7 @@ import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("play");
 const DEFAULT_LIVES = 10;
@@ -43,9 +44,17 @@ export async function sendBeginGameMessage(
     textChannelName: string,
     voiceChannelName: string,
     message: GuildTextableMessage,
-    participants: Array<{ id: string; username: string; discriminator: string }>
+    participants: Array<{
+        id: string;
+        username: string;
+        discriminator: string;
+    }>
 ): Promise<void> {
-    let gameInstructions = "Listen to the song and type your guess!";
+    let gameInstructions = state.localizer.translate(
+        message.guildID,
+        "command.play.typeGuess"
+    );
+
     const bonusUsers = await activeBonusUsers();
     const bonusUserParticipants = participants.filter((x) =>
         bonusUsers.has(x.id)
@@ -58,21 +67,48 @@ export async function sendBeginGameMessage(
 
         if (bonusUserTags.length > 10) {
             bonusUserTags = bonusUserTags.slice(0, 10);
-            bonusUserTags.push("and many others");
+            bonusUserTags.push(
+                state.localizer.translate(message.guildID, "misc.andManyOthers")
+            );
         }
 
-        gameInstructions += `\n\n${bonusUserTags.join(
-            ", "
-        )} will receive double EXP for [voting](https://top.gg/bot/508759831755096074/vote)! See \`,vote\` for info on how to vote. Thanks for supporting KMQ!`;
+        gameInstructions += `\n\n${bonusUserTags.join(", ")}`;
+        gameInstructions += state.localizer.translate(
+            message.guildID,
+            "command.play.exp.doubleExpForVoting",
+            {
+                link: "https://top.gg/bot/508759831755096074/vote",
+            }
+        );
+
+        gameInstructions += state.localizer.translate(
+            message.guildID,
+            "command.play.exp.howToVote",
+            { vote: `\`${process.env.BOT_PREFIX}vote\`` }
+        );
     }
 
     if (isWeekend()) {
-        gameInstructions += "\n\n**⬆️ DOUBLE EXP WEEKEND ACTIVE ⬆️**";
+        gameInstructions += `\n\n**⬆️ ${state.localizer.translate(
+            message.guildID,
+            "command.play.exp.weekend"
+        )} ⬆️**`;
     } else if (isPowerHour()) {
-        gameInstructions += "\n\n**⬆️ KMQ POWER HOUR ACTIVE ⬆️**";
+        gameInstructions += `\n\n**⬆️ ${state.localizer.translate(
+            message.guildID,
+            "command.play.exp.powerHour"
+        )} ⬆️**`;
     }
 
-    const startTitle = `Game Starting in #${textChannelName} in 🔊 ${voiceChannelName}`;
+    const startTitle = state.localizer.translate(
+        message.guildID,
+        "command.play.gameStarting",
+        {
+            textChannelName,
+            voiceChannelName,
+        }
+    );
+
     const gameInfoMessage: GameInfoMessage = chooseWeightedRandom(
         await dbContext.kmq("game_messages")
     );
@@ -80,8 +116,14 @@ export async function sendBeginGameMessage(
     const fields: Eris.EmbedField[] = [];
     if (gameInfoMessage) {
         fields.push({
-            name: gameInfoMessage.title,
-            value: gameInfoMessage.message,
+            name: state.localizer.translate(
+                message.guildID,
+                gameInfoMessage.title
+            ),
+            value: state.localizer.translate(
+                message.guildID,
+                gameInfoMessage.message
+            ),
             inline: false,
         });
     }
@@ -91,7 +133,13 @@ export async function sendBeginGameMessage(
         description: gameInstructions,
         footerText:
             bonusUserParticipants.length === 0 && Math.random() < 0.5
-                ? "Psst. Earn more EXP by voting (see ,vote)"
+                ? state.localizer.translate(
+                      message.guildID,
+                      "command.play.voteReminder",
+                      {
+                          vote: `${process.env.BOT_PREFIX}vote`,
+                      }
+                  )
                 : null,
         thumbnailUrl: KmqImages.HAPPY,
         fields,
@@ -109,34 +157,54 @@ export default class PlayCommand implements BaseCommand {
 
     aliases = ["random", "start", "p"];
 
-    help = {
+    help = (guildID: string): Help => ({
         name: "play",
-        description:
-            "Starts a game of KMQ. Pick between classic (default), elimination mode, and teams mode.",
-        usage: ",play {classic | elimination | teams}\n,play elimination {lives}",
+        description: state.localizer.translate(
+            guildID,
+            "command.play.help.description"
+        ),
+        usage: `,play {classic | elimination | teams}\n,play elimination {${state.localizer.translate(
+            guildID,
+            "command.play.help.usage.lives"
+        )}}`,
         priority: 1050,
         examples: [
             {
                 example: "`,play`",
-                explanation:
-                    "Start a classic game of KMQ (type in your guess first to get a point)",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.play.help.example.classic"
+                ),
             },
             {
                 example: "`,play elimination 5`",
-                explanation:
-                    "Start an elimination game of KMQ where each player starts with `5` lives.",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.play.help.example.elimination",
+                    {
+                        lives: "`5`",
+                    }
+                ),
             },
             {
                 example: "`,play elimination`",
-                explanation: `Start an elimination game of KMQ where each player starts with \`${DEFAULT_LIVES}\` lives.`,
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.play.help.example.elimination",
+                    {
+                        lives: `\`${DEFAULT_LIVES}\``,
+                    }
+                ),
             },
             {
                 example: "`,play teams`",
-                explanation:
-                    "Split up into as many teams as you want and see who you can depend on to help you win!",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.play.help.example.teams"
+                ),
             },
         ],
-    };
+    });
 
     call = async ({
         message,
@@ -152,8 +220,15 @@ export default class PlayCommand implements BaseCommand {
         const timeUntilRestart = await getTimeUntilRestart();
         if (timeUntilRestart) {
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Cannot Start New Game",
-                description: `Bot is restarting in \`${timeUntilRestart}\` minutes, please wait until the bot is back up!`,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.play.failure.botRestarting.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "command.play.failure.botRestarting.description",
+                    { timeUntilRestart: `\`${timeUntilRestart}\`` }
+                ),
             });
 
             logger.warn(
@@ -166,8 +241,15 @@ export default class PlayCommand implements BaseCommand {
 
         if (!voiceChannel) {
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Join a Voice Channel",
-                description: `Send \`${process.env.BOT_PREFIX}play\` again when you are in a voice channel.`,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.play.failure.notInVC.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "command.play.failure.notInVC.description",
+                    { play: `\`${process.env.BOT_PREFIX}play\`` }
+                ),
             });
 
             logger.warn(
@@ -225,10 +307,22 @@ export default class PlayCommand implements BaseCommand {
                         ? parseInt(parsedMessage.components[1])
                         : DEFAULT_LIVES;
 
-                const startTitle = `\`${prefix}join\` the game and start it with \`${prefix}begin\`!`;
-                const gameInstructions = `Type \`${prefix}join\` to play in the upcoming elimination game. Once all have joined, ${getMention(
-                    gameOwner.id
-                )} must send \`${prefix}begin\` to start the game. Everyone begins with \`${lives}\` lives.`;
+                const startTitle = state.localizer.translate(
+                    message.guildID,
+                    "command.play.elimination.join.title",
+                    { join: `\`${prefix}join\``, begin: `\`${prefix}begin\`` }
+                );
+
+                const gameInstructions = state.localizer.translate(
+                    message.guildID,
+                    "command.play.elimination.join.description",
+                    {
+                        join: `\`${prefix}join\``,
+                        mentionedUser: getMention(gameOwner.id),
+                        begin: `\`${prefix}begin\``,
+                        lives: `\`${lives}\``,
+                    }
+                );
 
                 gameSession = new GameSession(
                     textChannel.id,
@@ -252,8 +346,19 @@ export default class PlayCommand implements BaseCommand {
                 });
             } else if (isTeamsMode) {
                 // (1) TEAMS game creation
-                const startTitle = `\`${prefix}join\` a team!`;
-                const gameInstructions = `Team leaders, type \`${prefix}join [team name]\` to form a new team. Remember, switching teams mid-game will forfeit all your current score and EXP.`;
+                const startTitle = state.localizer.translate(
+                    message.guildID,
+                    "command.play.team.joinTeam.title",
+                    {
+                        join: `\`${prefix}join\``,
+                    }
+                );
+
+                const gameInstructions = state.localizer.translate(
+                    message.guildID,
+                    "command.play.team.joinTeam.description",
+                    { join: `${prefix}join` }
+                );
 
                 gameSession = new GameSession(
                     textChannel.id,
@@ -277,13 +382,40 @@ export default class PlayCommand implements BaseCommand {
                 if (gameSessions[message.guildID]) {
                     // (2) Let the user know they're starting a non-elimination/teams game
                     const oldGameType = gameSessions[message.guildID].gameType;
-                    const ignoringOldGameTypeTitle = `Ignoring \`${prefix}play ${oldGameType}\``;
+                    const ignoringOldGameTypeTitle = state.localizer.translate(
+                        message.guildID,
+                        "command.play.failure.overrideTeamsOrElimination.title",
+                        { playOldGameType: `\`${prefix}play ${oldGameType}\`` }
+                    );
+
                     const gameSpecificInstructions =
                         oldGameType === GameType.ELIMINATION
-                            ? `\`${prefix}join\` the game`
-                            : `\`${prefix}join [team name]\` a team`;
+                            ? state.localizer.translate(
+                                  message.guildID,
+                                  "command.play.failure.overrideTeamsOrElimination.elimination.join",
+                                  {
+                                      join: `\`${prefix}join\``,
+                                  }
+                              )
+                            : state.localizer.translate(
+                                  message.guildID,
+                                  "command.play.failure.overrideTeamsOrElimination.teams.join",
+                                  {
+                                      join: `${prefix}join`,
+                                  }
+                              );
 
-                    const oldGameTypeInstructions = `If you meant to start a \`${oldGameType}\` game, \`${prefix}end\` this game, call \`${prefix}play ${oldGameType}\`, ${gameSpecificInstructions}, and then call \`${prefix}begin\`.`;
+                    const oldGameTypeInstructions = state.localizer.translate(
+                        message.guildID,
+                        "command.play.failure.overrideTeamsOrElimination.description",
+                        {
+                            oldGameType: `\`${oldGameType}\``,
+                            end: `\`${prefix}end\``,
+                            playOldGameType: `\`${prefix}play ${oldGameType}\``,
+                            gameSpecificInstructions,
+                            begin: `\`${prefix}begin\``,
+                        }
+                    );
 
                     logger.warn(
                         `${getDebugLogHeader(
@@ -312,9 +444,14 @@ export default class PlayCommand implements BaseCommand {
 
                     if (!isModerator) {
                         sendErrorMessage(messageContext, {
-                            title: "Hidden Game Mode",
-                            description:
-                                "You do not have permission to use this command.",
+                            title: state.localizer.translate(
+                                message.guildID,
+                                "command.play.failure.hiddenGameMode.title"
+                            ),
+                            description: state.localizer.translate(
+                                message.guildID,
+                                "command.play.failure.hiddenGameMode.description"
+                            ),
                             thumbnailUrl: KmqImages.DEAD,
                         });
                         return;
@@ -355,7 +492,10 @@ export default class PlayCommand implements BaseCommand {
             );
 
             await sendErrorMessage(messageContext, {
-                title: "Game Already in Session",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.play.failure.alreadyInSession"
+                ),
             });
         }
     };

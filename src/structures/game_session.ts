@@ -3,7 +3,6 @@ import Eris from "eris";
 import fs from "fs";
 import _ from "lodash";
 import * as uuid from "uuid";
-import pluralize from "pluralize";
 import { SeekType } from "../commands/game_options/seek";
 import dbContext from "../database_context";
 import {
@@ -35,6 +34,7 @@ import {
     codeLine,
     chunkArray,
     chooseRandom,
+    friendlyFormattedNumber,
 } from "../helpers/utils";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
@@ -387,7 +387,7 @@ export default class GameSession {
         await this.endRound(
             { correct: false },
             await getGuildPreference(this.guildID),
-            new MessageContext(this.textChannelID)
+            new MessageContext(this.textChannelID, null, this.guildID)
         );
         const voiceConnection = state.client.voiceConnections.get(this.guildID);
 
@@ -463,26 +463,43 @@ export default class GameSession {
                     (a, b) =>
                         b.endLevel - b.startLevel - (a.endLevel - a.startLevel)
                 )
-                .map(
-                    (leveledUpPlayer) =>
-                        `${getMention(
-                            leveledUpPlayer.userID
-                        )} has leveled from ${codeLine(
-                            String(leveledUpPlayer.startLevel)
-                        )} to ${codeLine(
-                            String(leveledUpPlayer.endLevel)
-                        )} (${codeLine(
-                            getRankNameByLevel(leveledUpPlayer.endLevel)
-                        )})`
+                .map((leveledUpPlayer) =>
+                    state.localizer.translate(
+                        this.guildID,
+                        "misc.levelUp.entry",
+                        {
+                            user: getMention(leveledUpPlayer.userID),
+                            startLevel: codeLine(
+                                String(leveledUpPlayer.startLevel)
+                            ),
+                            endLevel: codeLine(
+                                String(leveledUpPlayer.endLevel)
+                            ),
+                            rank: codeLine(
+                                getRankNameByLevel(
+                                    leveledUpPlayer.endLevel,
+                                    this.guildID
+                                )
+                            ),
+                        }
+                    )
                 )
                 .slice(0, 10);
 
             if (leveledUpPlayers.length > 10) {
-                levelUpMessages.push("and many others...");
+                levelUpMessages.push(
+                    state.localizer.translate(
+                        this.guildID,
+                        "misc.andManyOthers"
+                    )
+                );
             }
 
             sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: "🚀 Power Up!",
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.levelUp.title"
+                ),
                 description: levelUpMessages.join("\n"),
                 thumbnailUrl: KmqImages.THUMBS_UP,
             });
@@ -531,16 +548,26 @@ export default class GameSession {
             ).reduce((total, x) => total + x.size, 0);
 
             await sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: "Sending Bookmarked Songs...",
-                description: `Sending ${pluralize(
-                    "song",
-                    bookmarkedSongCount,
-                    true
-                )} to ${pluralize(
-                    "player",
-                    bookmarkedSongsPlayerCount,
-                    true
-                )}.\n\nBookmark songs during the game by right-clicking the song message and selecting \`Apps > Bookmark Song\`.`,
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.sendingBookmarkedSongs.title"
+                ),
+                description: state.localizer.translate(
+                    this.guildID,
+                    "misc.sendingBookmarkedSongs.description",
+                    {
+                        songs: state.localizer.translateN(
+                            this.guildID,
+                            "misc.plural.song",
+                            bookmarkedSongCount
+                        ),
+                        players: state.localizer.translateN(
+                            this.guildID,
+                            "misc.plural.player",
+                            bookmarkedSongsPlayerCount
+                        ),
+                    }
+                ),
                 thumbnailUrl: KmqImages.READING_BOOK,
             });
             await sendBookmarkedSongs(this.bookmarkedSongs);
@@ -693,9 +720,14 @@ export default class GameSession {
                 await this.reloadSongs(guildPreference);
             } catch (err) {
                 await sendErrorMessage(messageContext, {
-                    title: "Error Selecting Song",
-                    description:
-                        "Please try starting the round again. If the issue persists, report it in our official KMQ server.",
+                    title: state.localizer.translate(
+                        this.guildID,
+                        "misc.failure.errorSelectingSong.title"
+                    ),
+                    description: state.localizer.translate(
+                        this.guildID,
+                        "misc.failure.errorSelectingSong.description"
+                    ),
                 });
 
                 logger.error(
@@ -719,8 +751,15 @@ export default class GameSession {
             );
 
             await sendInfoMessage(messageContext, {
-                title: "Resetting Unique Songs",
-                description: `All songs have been played. ${totalSongCount} songs will be reshuffled.`,
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.uniqueSongsReset.title"
+                ),
+                description: state.localizer.translate(
+                    this.guildID,
+                    "misc.uniqueSongsReset.description",
+                    { totalSongCount: friendlyFormattedNumber(totalSongCount) }
+                ),
                 thumbnailUrl: KmqImages.LISTENING,
             });
         }
@@ -732,9 +771,14 @@ export default class GameSession {
 
         if (randomSong === null) {
             sendErrorMessage(messageContext, {
-                title: "Song Query Error",
-                description:
-                    "Failed to find songs matching this criteria. Try to broaden your search.",
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.songQuery.title"
+                ),
+                description: state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.songQuery.description"
+                ),
             });
             await this.endSession();
             return;
@@ -764,9 +808,14 @@ export default class GameSession {
             );
 
             await sendErrorMessage(messageContext, {
-                title: "Error Joining Voice Channel",
-                description:
-                    "Something went wrong, try starting the game again in a bit.",
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.vcJoin.title"
+                ),
+                description: state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.vcJoin.description"
+                ),
             });
             return;
         }
@@ -841,12 +890,23 @@ export default class GameSession {
             this.gameRound.interactionMessage = await sendInfoMessage(
                 new MessageContext(this.textChannelID),
                 {
-                    title: `Guess the ${
-                        guildPreference.gameOptions.guessModeType ===
-                        GuessModeType.BOTH
-                            ? "song"
-                            : guildPreference.gameOptions.guessModeType
-                    }!`,
+                    title: state.localizer.translate(
+                        this.guildID,
+                        "misc.interaction.guess.title",
+                        {
+                            songOrArtist:
+                                guildPreference.gameOptions.guessModeType ===
+                                GuessModeType.ARTIST
+                                    ? state.localizer.translate(
+                                          this.guildID,
+                                          "misc.artist"
+                                      )
+                                    : state.localizer.translate(
+                                          this.guildID,
+                                          "misc.song"
+                                      ),
+                        }
+                    ),
                     components,
                     thumbnailUrl: KmqImages.LISTENING,
                 }
@@ -878,7 +938,7 @@ export default class GameSession {
             await this.endRound(
                 { correct: false },
                 guildPreference,
-                new MessageContext(this.textChannelID)
+                new MessageContext(this.textChannelID, null, this.guildID)
             );
 
             this.startRound(
@@ -983,10 +1043,19 @@ export default class GameSession {
         );
 
         sendInfoMessage(new MessageContext(this.textChannelID), {
-            title: "Game Owner Changed",
-            description: `The new game owner is ${getMention(
-                this.owner.id
-            )}. They are in charge of \`,forcehint\` and \`,forceskip\`.`,
+            title: state.localizer.translate(
+                this.guildID,
+                "misc.gameOwnerChanged.title"
+            ),
+            description: state.localizer.translate(
+                this.guildID,
+                "misc.gameOwnerChanged.description",
+                {
+                    newGameOwner: getMention(this.owner.id),
+                    forcehintCommand: `\`${process.env.BOT_PREFIX}forcehint\``,
+                    forceskipCommand: `\`${process.env.BOT_PREFIX}forceskip\``,
+                }
+            ),
             thumbnailUrl: KmqImages.LISTENING,
         });
     }
@@ -1007,7 +1076,10 @@ export default class GameSession {
         if (this.gameRound.incorrectMCGuessers.has(interaction.member.id)) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                "You've already been eliminated this round."
+                state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.alreadyEliminated"
+                )
             );
             return;
         }
@@ -1017,7 +1089,10 @@ export default class GameSession {
         ) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                "You are attempting to pick an option from an already completed round."
+                state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.interaction.optionFromPreviousRound"
+                )
             );
             return;
         }
@@ -1029,7 +1104,10 @@ export default class GameSession {
         ) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                "You've been eliminated this round."
+                state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.interaction.eliminated"
+                )
             );
 
             if (!this.gameRound) {
@@ -1068,17 +1146,26 @@ export default class GameSession {
         if (!song) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                `You can only bookmark songs recently played in the last ${BOOKMARK_MESSAGE_SIZE} rounds. You must bookmark the message sent by the bot containing the song.`
+                state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.interaction.invalidBookmark",
+                    { BOOKMARK_MESSAGE_SIZE: String(BOOKMARK_MESSAGE_SIZE) }
+                )
             );
             return;
         }
 
         tryCreateInteractionSuccessAcknowledgement(
             interaction,
-            "Song Bookmarked",
-            `You'll receive a direct message with a link to ${bold(
-                song.originalSongName
-            )} at the end of the game.`
+            state.localizer.translate(
+                this.guildID,
+                "misc.interaction.bookmarked.title"
+            ),
+            state.localizer.translate(
+                this.guildID,
+                "misc.interaction.bookmarked.description",
+                { songName: bold(song.originalSongName) }
+            )
         );
         this.addBookmarkedSong(interaction.member?.id, song);
     }
@@ -1187,7 +1274,7 @@ export default class GameSession {
             await this.endRound(
                 { correct: false },
                 guildPreference,
-                new MessageContext(this.textChannelID)
+                new MessageContext(this.textChannelID, null, this.guildID)
             );
 
             this.startRound(
@@ -1219,8 +1306,14 @@ export default class GameSession {
         const messageContext = new MessageContext(this.textChannelID);
         await this.endRound({ correct: false, error: true }, guildPreference);
         await sendErrorMessage(messageContext, {
-            title: "Error Playing Song",
-            description: "Starting new round in 3 seconds...",
+            title: state.localizer.translate(
+                this.guildID,
+                "misc.failure.songPlaying.title"
+            ),
+            description: state.localizer.translate(
+                this.guildID,
+                "misc.failure.songPlaying.description"
+            ),
         });
         this.roundsPlayed--;
         this.startRound(guildPreference, messageContext);

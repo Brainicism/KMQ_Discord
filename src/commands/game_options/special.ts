@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     sendOptionsMessage,
     getDebugLogHeader,
@@ -8,8 +8,10 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("special");
+
 export enum SpecialType {
     REVERSE = "reverse",
     SLOW = "slow",
@@ -75,47 +77,73 @@ export default class SpecialCommand implements BaseCommand {
         ],
     };
 
-    help = {
+    help = (guildID: string): Help => ({
         name: "special",
-        description:
-            "Hey. This hasn't been announced yet, but check out the KMQ server to try it out! Play a special mode with modified audio.",
+        description: state.localizer.translate(
+            guildID,
+            "command.special.help.description"
+        ),
         usage: ",special [reverse | slow | fast | faster | lowpitch | highpitch | nightcore]",
         examples: [
             {
                 example: "`,special reverse`",
-                explanation: "Plays the song in reverse",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.special.help.example.reverse"
+                ),
             },
             {
                 example: "`,special slow`",
-                explanation: "Plays the song at a slow speed",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.special.help.example.slow"
+                ),
             },
             {
                 example: "`,special fast`",
-                explanation: "Plays the song at a fast speed",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.special.help.example.fast"
+                ),
             },
             {
                 example: "`,special faster`",
-                explanation: "Plays the song at a faster speed",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.special.help.example.faster"
+                ),
             },
             {
                 example: "`,special lowpitch`",
-                explanation: "Plays the song at a low pitch",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.special.help.example.lowPitch"
+                ),
             },
             {
                 example: "`,special highpitch`",
-                explanation: "Plays the song at a high pitch",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.special.help.example.highPitch"
+                ),
             },
             {
                 example: "`,special nightcore`",
-                explanation: "Plays a nightcore edit of the song",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.special.help.example.nightcore"
+                ),
             },
             {
                 example: "`,special`",
-                explanation: "Reset the special option",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.special.help.example.reset"
+                ),
             },
         ],
         priority: 130,
-    };
+    });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

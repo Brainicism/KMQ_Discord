@@ -8,6 +8,8 @@ import Player from "../structures/player";
 import { EnvType } from "../types";
 import { IPCLogger } from "../logger";
 import { md5Hash } from "../helpers/utils";
+import { state } from "../kmq_worker";
+import LocalizationManager from "../helpers/localization_manager";
 
 const logger = new IPCLogger("test_setup");
 const sandbox = sinon.createSandbox();
@@ -131,6 +133,7 @@ before(async function () {
         process.exit(1);
     }
 
+    state.localizer = new LocalizationManager();
     this.timeout(10000);
     logger.info("Setting up test database...");
     await setup();

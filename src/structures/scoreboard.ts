@@ -4,6 +4,7 @@ import { getMention } from "../helpers/discord_utils";
 import { IPCLogger } from "../logger";
 import GuildPreference from "./guild_preference";
 import { isFirstGameOfDay } from "../helpers/game_utils";
+import { state } from "../kmq_worker";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("scoreboard");
@@ -29,12 +30,19 @@ export default class Scoreboard {
         this.highestScore = 0;
     }
 
-    /** @returns a string congratulating the winner(s) */
-    getWinnerMessage(): string {
+    /**
+     * @param guildID - The ID of the guild to get the scoreboard for
+     * @returns a string congratulating the winner(s)
+     */
+    getWinnerMessage(guildID: string): string {
         let winnerStr = "";
 
         if (this.firstPlace.length === 1) {
-            return `${this.firstPlace[0].getName()} wins!`;
+            return state.localizer.translate(
+                guildID,
+                "misc.inGame.winMessage",
+                { playerName: this.firstPlace[0].getName() }
+            );
         }
 
         for (let i = 0; i < this.firstPlace.length; i++) {

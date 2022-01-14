@@ -232,6 +232,7 @@ Use `,help [command_name]` for more details for any of the following commands:
 - `,vote`: Show your current 2x bonus EXP modifier status from voting for the bot on [top.gg](https://top.gg/bot/508759831755096074/vote). Thanks for supporting KMQ!
 - `,recentlyadded`: See a list of songs added to KMQ in the past 2 weeks
 - `,exp`: Show your current bonus EXP modifiers
+- `,locale`: Change the language of the bot
 
 ## Game Option Commands
 - `,limit`: Set a maximum number of results in the song query. This effectively sets the "top `x` number of songs" based on the selected filters

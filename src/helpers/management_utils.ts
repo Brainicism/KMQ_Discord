@@ -34,6 +34,7 @@ import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
 import { EnvType } from "../types";
 import channelDeleteHandler from "../events/client/channelDelete";
+import { LocaleType } from "./localization_manager";
 
 const logger = new IPCLogger("management_utils");
 
@@ -281,6 +282,13 @@ export async function reloadBonusGroups(): Promise<void> {
     );
 }
 
+async function reloadLocales(): Promise<void> {
+    const updatedLocales = await dbContext.kmq("locale").select("*");
+    for (const l of updatedLocales) {
+        state.locales[l.guild_id] = l.locale as LocaleType;
+    }
+}
+
 /**
  * Clears any existing restart timers
  */
@@ -332,6 +340,7 @@ export async function reloadCaches(): Promise<void> {
     reloadAliases();
     reloadFactCache();
     reloadBonusGroups();
+    reloadLocales();
 }
 
 /**

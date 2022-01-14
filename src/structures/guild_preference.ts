@@ -270,7 +270,7 @@ export default class GuildPreference {
     public gameOptions: GameOptions;
 
     /** The Discord Guild ID */
-    private readonly guildID: string;
+    public readonly guildID: string;
 
     /** The GuildPreference's respective GameOptions */
 
