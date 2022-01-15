@@ -2,6 +2,8 @@ import Eris from "eris";
 import { IPCLogger } from "../../logger";
 import { getDebugChannel, sendInfoMessage } from "../../helpers/discord_utils";
 import MessageContext from "../../structures/message_context";
+import LocaleTypeCommand from "../../commands/game_commands/locale";
+import { LocaleType } from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("guildCreate");
 
@@ -15,6 +17,11 @@ export default async function guildCreateHandler(
     logger.info(
         `New server joined: ${guild.id} with ${guild.memberCount} users`
     );
+
+    if (guild.preferredLocale === "ko") {
+        LocaleTypeCommand.updateLocale(guild.id, LocaleType.KO);
+    }
+
     const kmqDebugChannel = await getDebugChannel();
     if (!kmqDebugChannel) return;
     const joinDate: Date = new Date(guild.joinedAt);
