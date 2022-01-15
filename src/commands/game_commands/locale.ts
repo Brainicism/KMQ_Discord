@@ -158,7 +158,7 @@ export default class LocaleTypeCommand implements BaseCommand {
                 delete state.locales[guildID];
                 await dbContext
                     .kmq("locale")
-                    .select({ guild_id: guildID, locale })
+                    .where({ guild_id: guildID })
                     .del();
             }
         }
