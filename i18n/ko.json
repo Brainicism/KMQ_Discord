@@ -962,7 +962,7 @@
             "recentGaonWeekly": "재미있는 사실: {{songName}}은(는) 지난 주 가온 주간 차트에서 {{ordinalNum}}로 가장 높은 차트를 기록한 곡입니다!",
             "recentMusicShowWin": "재미있는 사실: {{winDate}}의 {{musicShow}}에서 {{hyperlink}}가 최근 우승했습니다.",
             "viewsByArtistType": "재미있는 사실: 유튜브의 모든 K-POP 뮤직 비디오에 대한 총 조회수는 {{totalViews}}회이며, 그 중 {{groupViews}} ({{groupProportion}}%)가 그룹에서 발생한 반면 {{soloViews}} ({{soloProportion}}%)는 솔로 아티스트에서 발생했습니다.",
-            "viewsByGender": "재미있는 사실: 유튜브의 모든 K-POP 뮤직비디오 조회수는 총 {{totalViews}}회이며, 이 중 {{maleViews}} ({maleProportion}}%)가 남성 그룹이고, {{femaleViews}} ({femaleProportion}}%)가 여성 그룹이며, 나머지 {{coedViews}}%가 남녀 혼성 그룹입니다."
+            "viewsByGender": "재미있는 사실: 유튜브의 모든 K-POP 뮤직비디오 조회수는 총 {{totalViews}}회이며, 이 중 {{maleViews}} ({{maleProportion}}%)가 남성 그룹이고, {{femaleViews}} ({{femaleProportion}}%)가 여성 그룹이며, 나머지 {{coedViews}}%가 남녀 혼성 그룹입니다."
         },
         "kmq": {
             "guessRate": "재미있는 사실: {{hyperlink}}의 추측률은 {{roundsPlayed}} 라운드 동안 {{percentage}}% 입니다.",
