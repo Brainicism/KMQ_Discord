@@ -935,6 +935,7 @@ async function recentUniquePlayers(lng: LocaleType): Promise<string[]> {
                     count: interval,
                     lng,
                 }),
+                lng,
             })
         );
     }
