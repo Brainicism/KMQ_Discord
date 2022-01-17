@@ -709,7 +709,7 @@
             "failure": {
                 "notFound": {
                     "badUsage": {
-                        "description": "이 명령을 올바르게 사용하고 있는지 확인하십시오. (자세한 내용은 {{profileHelp}}를 참조하세요.)"
+                        "description": "이 명령어를 올바르게 사용하고 있는지 확인하십시오. (자세한 내용은 {{profileHelp}}를 참조하세요.)"
                     },
                     "description": "지정된 사용자 ID를 찾을 수 없습니다. (자세한 내용은 {{profileHelp}}를 참조하세요.)",
                     "title": "프로필을 찾을 수 없습니다."
