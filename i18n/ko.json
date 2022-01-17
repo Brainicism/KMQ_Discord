@@ -403,7 +403,7 @@
                 "description": "KMQ 리더보드를 봅니다.",
                 "example": {
                     "enroll": "리더보드에 이름을 표시할 수 있습니다.",
-                    "gameMonthlyPage": "현재 게임에서 포인트를 보유한 플레이어가 포함된 월별 스코어보드의 두 번째 페이지를 표시합니다.",
+                    "gameMonthlyPage": "현재 게임에서 포인트를 보유한 플레이어가 포함된 월별 점수판의 두 번째 페이지를 표시합니다.",
                     "global": "글로벌 리더보드를 표시합니다!",
                     "globalPage": "글로벌 리더보드의 세 번째 페이지를 표시합니다.",
                     "globalWeeklyPage": "이번 주에 얻은 경험치로 순위표의 4번째 페이지를 보여줍니다.",
@@ -542,7 +542,7 @@
             "reset": "{{presetOrOption}}으로 재설정합니다.",
             "timer": "{{timerInSeconds}}초",
             "title": "옵션",
-            "updated": "{{presetOrOption}}으로 업데이트되었습니다!"
+            "updated": "{{presetOrOption}}이 업데이트되었습니다!"
         },
         "ost": {
             "help": {
@@ -759,7 +759,7 @@
             "failure": {
                 "noSongs": {
                     "description": "KMQ에 새 노래가 추가되었는지 나중에 다시 확인하세요.",
-                    "title": "최근 추가된 노래 없음"
+                    "title": "최근에 추가된 노래 없음"
                 }
             },
             "help": {
@@ -813,9 +813,9 @@
                 }
             },
             "help": {
-                "description": "현재 게임의 스코어보드를 참조하세요."
+                "description": "현재 게임의 점수판를 참조하세요."
             },
-            "scoreboardTitle": "스코어보드"
+            "scoreboardTitle": "점수판"
         },
         "seek": {
             "help": {
@@ -938,9 +938,9 @@
     },
     "fact": {
         "fun": {
-            "bigThreeDominance": "재미있는 사실: 방탄소년단, 블랙핑크, 트와이스의 합산 유튜브 조회수는 {{bigThreeViews}}회 또는 {{proportion}}%를 차지 합니다.",
+            "bigThreeDominance": "재미있는 사실: 방탄소년단, 블랙핑크, 트와이스를 합친 유튜브 조회수는 {{bigThreeViews}}회, {{proportion}}%입니다!",
             "birthday": "재미있는 사실: {{name}}의 생일은 이번 달 {{formattedDate}}입니다!",
-            "companyByArtistCount": "재미있는 사실: {{company}}는 총 {{num}}명의 아티스트 (서브유닛 및 솔로 데뷔 포함)가 가장 {{ordinalNum}}명인 엔터테인먼트 회사입니다!",
+            "companyByArtistCount": "재미있는 사실: {{company}}은(는) 총 {{num}}명의 아티스트 (유닛 및 솔로 데뷔 포함)를 보유하고 있는 엔터테인먼트 회사입니다.",
             "companyByArtistViews": "재미있는 사실: {{name}}은(는) {{ordinalNum}} 가장 많이 본 엔터테인먼트 회사로 총 유튜브 조회수는 {{views}}회입니다!",
             "fanclubName": "재미있는 사실: {{name}}님의 팬클럽 이름은 '{{fanclub}}'입니다!",
             "historicalGaonWeekly": "재미있는 사실: 이번 주 {{year}}에 {{songName}}이(가) 가온 주간 차트에서 1위를 차지했습니다!",
@@ -951,7 +951,7 @@
             "mostGaonFirsts": "재미있는 사실: {{artistName}}은(는) 가온 디지털 주간 차트에서 가장 많이 {{ordinalNum}} 1위를 차지했으며 {{firstPlaceCount}}회 1위를 차지했습니다!",
             "mostLikedGroup": "재미있는 사실: {{artist}}는 유튜브에서 총 {{likes}}개의 좋아요를 받은 {{ordinalNum}}개의 가장 좋아하는 그룹입니다!",
             "mostLikedVideo": "재미있는 사실: {{hyperlink}}는 유튜브에서 총 {{likes}}개의 좋아요를 받은 {{ordinalNum}}개의 동영상입니다!",
-            "mostMVs": "재미있는 사실: {{artist}}이(가) 유튜브에서 {{num}}명의 뮤직 비디오가 {{ordinalNum}} 가장 많습니다!",
+            "mostMVs": "재미있는 사실: {{artist}}이(가) 유튜브에서 {{num}}명의 뮤직비디오가 {{ordinalNum}} 가장 많습니다!",
             "mostMusicShowWins": "재미있는 사실: {{artist}}은(는) {{num}}번의 우승으로 대부분의 음악방송에서 {{ordinalNum}}간 우승을 차지했습니다!",
             "mostViewedGroup": "재미있는 사실: {{artist}}는 {{ordinalNum}} 동안 가장 많이 본 그룹으로 총 유튜브 조회수는 {{views}}회입니다!",
             "mostViewedSoloist": "재미있는 사실: {{artist}}은(는) {{ordinalNum}} 가장 많이 본 솔로 아티스트이며 총 유튜브 조회수는 {{totalViews}}입니다!",
@@ -1049,7 +1049,7 @@
             },
             "validation": {
                 "boolean": {
-                    "notBoolean": "{{argument}}에 대한 TRUE/FALSE 값이 예상됩니다."
+                    "notBoolean": "{{argument}}에 대한 True/False 값이 예상됩니다."
                 },
                 "char": {
                     "notChar": "{{argument}}에 대한 문자가 필요합니다."
@@ -1218,7 +1218,7 @@
         "views": "조회수",
         "warning": {
             "addRemoveOrdering": {
-                "footer": "{{addOrRemove}} {{command}}를 사용하려고 했습니까?"
+                "footer": "{{addOrRemove}} {{command}}을(를) 사용하시겠습니까?"
             }
         }
     }
