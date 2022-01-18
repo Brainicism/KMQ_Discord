@@ -348,7 +348,7 @@
                 "title": "{{joiningUser}} joined {{teamName}}"
             },
             "team": {
-                "join": "To join {{{teamName}}} alongside {{{mentionedUser}}}, enter `{{{joinCommand}}} {{{teamNameWithCleanEmojis}}}`.{{startGameInstructions}}",
+                "join": "To join {{teamName}} alongside {{mentionedUser}}, enter `{{joinCommand}} {{teamNameWithCleanEmojis}}`.{{startGameInstructions}}",
                 "new": "New Team Created",
                 "startGameInstructions": "\nStart the game with {{beginCommand}}."
             }

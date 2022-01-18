@@ -1078,7 +1078,7 @@ export default class GameSession {
                 interaction,
                 state.localizer.translate(
                     this.guildID,
-                    "misc.failure.alreadyEliminated"
+                    "misc.failure.interaction.alreadyEliminated"
                 )
             );
             return;
