@@ -1175,7 +1175,7 @@
         "listOfGroups": "그룹 목록",
         "plural": {
             "day_one": "{{count}}일",
-            "day_other": "{{count}}일s",
+            "day_other": "{{count}}일",
             "hourAgo_one": "{{count}}시간 전",
             "hourAgo_other": "{{count}}시간 전",
             "hour_one": "{{count}}시간",
