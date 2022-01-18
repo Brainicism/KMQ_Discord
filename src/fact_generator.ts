@@ -621,7 +621,7 @@ async function mostViewedSoloArtist(lng: LocaleType): Promise<string[]> {
                 getOrdinalNum(idx + 1),
                 { lng }
             ),
-            totalViews: friendlyFormattedNumber(x["total_views"]),
+            views: friendlyFormattedNumber(x["total_views"]),
             lng,
         })
     );
