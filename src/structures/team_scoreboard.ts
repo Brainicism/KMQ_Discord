@@ -140,10 +140,10 @@ export default class TeamScoreboard extends Scoreboard {
             // If the removed team was the only team in first, first place is now second place
             if (this.firstPlace.length === 0) {
                 const highestScore = Math.max(
-                    ...Object.values(this.players).map(
-                        (x: Team) => x.getScore(),
-                        0
-                    )
+                    ...Object.values(this.players).map((x: Team) =>
+                        x.getScore()
+                    ),
+                    0
                 );
 
                 if (highestScore === 0) return;
