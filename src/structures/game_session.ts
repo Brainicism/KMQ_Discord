@@ -1062,6 +1062,10 @@ export default class GameSession {
         interaction: Eris.ComponentInteraction,
         messageContext: MessageContext
     ): Promise<void> {
+        if (!this.gameRound) {
+            return;
+        }
+
         if (
             !getCurrentVoiceMembers(this.voiceChannelID)
                 .map((x) => x.id)
@@ -1107,10 +1111,6 @@ export default class GameSession {
                     "misc.failure.interaction.eliminated"
                 )
             );
-
-            if (!this.gameRound) {
-                return;
-            }
 
             this.gameRound.incorrectMCGuessers.add(interaction.member.id);
             this.gameRound.interactionIncorrectAnswerUUIDs[
