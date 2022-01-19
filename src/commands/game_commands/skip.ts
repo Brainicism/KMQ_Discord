@@ -140,7 +140,7 @@ export default class SkipCommand implements BaseCommand {
             logger.info(`${getDebugLogHeader(message)} | User skipped`);
         }
 
-        if (gameSession.gameRound.skipAchieved || !gameSession.gameRound) {
+        if (gameSession.gameRound.skipAchieved) {
             // song already being skipped
             return;
         }

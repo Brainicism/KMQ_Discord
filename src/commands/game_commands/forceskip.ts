@@ -55,7 +55,7 @@ export default class ForceSkipCommand implements BaseCommand {
             return;
         }
 
-        if (gameSession.gameRound.skipAchieved || !gameSession.gameRound) {
+        if (gameSession.gameRound.skipAchieved) {
             // song already being skipped
             return;
         }
