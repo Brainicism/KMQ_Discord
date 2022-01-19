@@ -28,6 +28,11 @@ const BOT_LISTING_SITES: { [siteName: string]: BotListing } = {
         payloadKeyName: "guilds",
         name: "discordbotlist.com",
     },
+    KOREAN_BOTS_TOKEN: {
+        endpoint: "https://koreanbots.dev/api/v2/bots/%d/stats",
+        payloadKeyName: "servers",
+        name: "koreanbots.dev",
+    },
 };
 
 /**
