@@ -47,6 +47,7 @@ import MessageContext from "../structures/message_context";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { REVIEW_LINK, VOTE_LINK } from "../commands/game_commands/vote";
 import { UniqueSongCounter } from "../structures/song_selector";
+import { LocaleType } from "./localization_manager";
 
 const logger = new IPCLogger("utils");
 export const EMBED_ERROR_COLOR = 0xed4245; // Red
@@ -803,9 +804,14 @@ export async function sendEndRoundMessage(
         color = EMBED_ERROR_COLOR;
     }
 
-    const songAndArtist = bold(
-        `"${gameRound.originalSongName}" - ${gameRound.artistName}`
-    );
+    let songName = gameRound.originalSongName;
+    let artistName = gameRound.artistName;
+    if (state.locales[messageContext.guildID] === LocaleType.KO) {
+        songName = gameRound.koreanSongName || songName;
+        artistName = gameRound.koreanArtistName || artistName;
+    }
+
+    const songAndArtist = bold(`"${songName}" - ${artistName}`);
 
     const embed = {
         color,

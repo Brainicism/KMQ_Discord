@@ -28,7 +28,9 @@ const state: State = {
     client: null,
     aliases: {
         artist: {},
+        artistKorean: {},
         song: {},
+        songKorean: {},
     },
     processStartTime: Date.now(),
     ipc: null,

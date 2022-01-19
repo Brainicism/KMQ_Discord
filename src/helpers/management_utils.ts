@@ -227,6 +227,12 @@ export async function reloadAliases(): Promise<void> {
         .select(["artist_name", "artist_aliases"])
         .where("artist_aliases", "<>", "");
 
+    const hangulArtistMapping = await dbContext
+        .kmq("available_songs")
+        .distinct(["artist_name", "hangul_artist_name"])
+        .select(["artist_name", "hangul_artist_name"])
+        .where("hangul_artist_name", "<>", "");
+
     const newSongAliases = {};
     for (const mapping of songAliasMapping) {
         newSongAliases[mapping["link"]] = mapping["song_aliases"]
@@ -234,9 +240,11 @@ export async function reloadAliases(): Promise<void> {
             .filter((x) => x);
     }
 
+    const hangulTitles = {};
     for (const mapping of hangulAliasMapping) {
         if (!newSongAliases[mapping["link"]]) {
             newSongAliases[mapping["link"]] = [];
+            hangulTitles[mapping["link"]] = mapping["hangul_aliases"][0];
         }
 
         newSongAliases[mapping["link"]].push(
@@ -251,8 +259,18 @@ export async function reloadAliases(): Promise<void> {
             .filter((x) => x);
     }
 
+    const hangulArtists = {};
+    for (const mapping of hangulArtistMapping) {
+        if (!hangulArtists[mapping["artist_name"]]) {
+            hangulArtists[mapping["artist_name"]] =
+                mapping["hangul_artist_name"];
+        }
+    }
+
     state.aliases.artist = newArtistAliases;
+    state.aliases.artistKorean = hangulArtists;
     state.aliases.song = newSongAliases;
+    state.aliases.songKorean = hangulTitles;
     logger.info("Reloaded alias data");
 }
 

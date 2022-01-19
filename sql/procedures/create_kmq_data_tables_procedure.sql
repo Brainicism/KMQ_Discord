@@ -14,6 +14,7 @@ BEGIN
 		artist_aliases VARCHAR(255) NOT NULL,
 		link VARCHAR(255) NOT NULL,
 		artist_name VARCHAR(255) NOT NULL,
+		hangul_artist_name VARCHAR(255),
 		members ENUM('female','male','coed') NOT NULL,
 		views BIGINT NOT NULL,
 		publishedon DATE NOT NULL,
@@ -37,6 +38,7 @@ BEGIN
 		kpop_videos.app_kpop_group.alias AS artist_aliases,
 		vlink AS link,
 		TRIM(kpop_videos.app_kpop_group.name) AS artist_name,
+		TRIM(kpop_videos.app_kpop_group.kname) AS hangul_artist_name,
 		kpop_videos.app_kpop_group.members AS members,
 		kpop_videos.app_kpop.views AS views,
 		releasedate as publishedon,
@@ -67,6 +69,7 @@ BEGIN
 			kpop_videos.app_kpop_group.alias AS artist_aliases,
 			vlink AS link,
 			TRIM(kpop_videos.app_kpop_group.name) AS artist_name,
+			TRIM(kpop_videos.app_kpop_group.kname) AS hangul_artist_name,
 			kpop_videos.app_kpop_group.members AS members,
 			kpop_videos.app_kpop_audio.views AS views,
 			releasedate as publishedon,
@@ -89,7 +92,7 @@ BEGIN
 
 	RENAME TABLE available_songs TO old, available_songs_temp TO available_songs;
 	DROP TABLE old;
-	
+
 	/* copy over new copy of app_kpop_group */
 	DROP TABLE IF EXISTS kmq.kpop_groups_temp;
 	CREATE TABLE kmq.kpop_groups_temp LIKE kpop_videos.app_kpop_group;
