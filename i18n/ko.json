@@ -1,29 +1,29 @@
 {
-    "10th": "10일",
-    "11th": "11일",
-    "12th": "12일",
-    "13th": "13일",
-    "14th": "14일",
-    "15th": "15일",
-    "16th": "16일",
-    "17th": "17일",
-    "18th": "18일",
-    "19th": "19일",
-    "1st": "1위",
-    "20th": "20일",
-    "21st": "21일",
-    "22nd": "22일",
-    "23rd": "23일",
-    "24th": "24일",
-    "25th": "25일",
-    "2nd": "2위",
-    "3rd": "3위",
-    "4th": "4위",
-    "5th": "5위",
-    "6th": "6위",
-    "7th": "7위",
-    "8th": "8일",
-    "9th": "9일",
+    "10th": "10",
+    "11th": "11",
+    "12th": "12",
+    "13th": "13",
+    "14th": "14",
+    "15th": "15",
+    "16th": "16",
+    "17th": "17",
+    "18th": "18",
+    "19th": "19",
+    "1st": "1",
+    "20th": "20",
+    "21st": "21",
+    "22nd": "22",
+    "23rd": "23",
+    "24th": "24",
+    "25th": "25",
+    "2nd": "2",
+    "3rd": "3",
+    "4th": "4",
+    "5th": "5",
+    "6th": "6",
+    "7th": "7",
+    "8th": "8",
+    "9th": "9",
     "command": {
         "add": {
             "failure": {
@@ -403,7 +403,7 @@
                 "description": "KMQ 리더보드를 봅니다.",
                 "example": {
                     "enroll": "리더보드에 이름을 표시할 수 있습니다.",
-                    "gameMonthlyPage": "현재 게임에서 포인트를 보유한 플레이어가 포함된 월별 스코어보드의 두 번째 페이지를 표시합니다.",
+                    "gameMonthlyPage": "현재 게임에서 포인트를 보유한 플레이어가 포함된 월별 점수판의 두 번째 페이지를 표시합니다.",
                     "global": "글로벌 리더보드를 표시합니다!",
                     "globalPage": "글로벌 리더보드의 세 번째 페이지를 표시합니다.",
                     "globalWeeklyPage": "이번 주에 얻은 경험치로 순위표의 4번째 페이지를 보여줍니다.",
@@ -542,7 +542,7 @@
             "reset": "{{presetOrOption}}으로 재설정합니다.",
             "timer": "{{timerInSeconds}}초",
             "title": "옵션",
-            "updated": "{{presetOrOption}}으로 업데이트되었습니다!"
+            "updated": "{{presetOrOption}}이 업데이트되었습니다!"
         },
         "ost": {
             "help": {
@@ -709,7 +709,7 @@
             "failure": {
                 "notFound": {
                     "badUsage": {
-                        "description": "이 명령을 올바르게 사용하고 있는지 확인하십시오. (자세한 내용은 {{profileHelp}}를 참조하세요.)"
+                        "description": "이 명령어를 올바르게 사용하고 있는지 확인하십시오. (자세한 내용은 {{profileHelp}}를 참조하세요.)"
                     },
                     "description": "지정된 사용자 ID를 찾을 수 없습니다. (자세한 내용은 {{profileHelp}}를 참조하세요.)",
                     "title": "프로필을 찾을 수 없습니다."
@@ -759,7 +759,7 @@
             "failure": {
                 "noSongs": {
                     "description": "KMQ에 새 노래가 추가되었는지 나중에 다시 확인하세요.",
-                    "title": "최근 추가된 노래 없음"
+                    "title": "최근에 추가된 노래 없음"
                 }
             },
             "help": {
@@ -813,9 +813,9 @@
                 }
             },
             "help": {
-                "description": "현재 게임의 스코어보드를 참조하세요."
+                "description": "현재 게임의 점수판를 참조하세요."
             },
-            "scoreboardTitle": "스코어보드"
+            "scoreboardTitle": "점수판"
         },
         "seek": {
             "help": {
@@ -938,36 +938,36 @@
     },
     "fact": {
         "fun": {
-            "bigThreeDominance": "재미있는 사실: 방탄소년단, 블랙핑크, 트와이스의 합산 유튜브 조회수는 {{bigThreeViews}}회 또는 {{proportion}}%를 차지 합니다.",
+            "bigThreeDominance": "재미있는 사실: 방탄소년단, 블랙핑크, 트와이스를 합친 유튜브 조회수는 {{bigThreeViews}}회, {{proportion}}%입니다!",
             "birthday": "재미있는 사실: {{name}}의 생일은 이번 달 {{formattedDate}}입니다!",
-            "companyByArtistCount": "재미있는 사실: {{company}}는 총 {{num}}명의 아티스트 (서브유닛 및 솔로 데뷔 포함)가 가장 {{ordinalNum}}명인 엔터테인먼트 회사입니다!",
-            "companyByArtistViews": "재미있는 사실: {{name}}은(는) {{ordinalNum}} 가장 많이 본 엔터테인먼트 회사로 총 유튜브 조회수는 {{views}}회입니다!",
-            "fanclubName": "재미있는 사실: {{name}}님의 팬클럽 이름은 '{{fanclub}}'입니다!",
+            "companyByArtistCount": "재미있는 사실: {{company}}은(는) 총 {{num}}명의 아티스트 (유닛 및 솔로 데뷔 포함) 중 {{ordinalNum}}번째로 많은 아티스트를 보유하고 있는 엔터테인먼트 회사입니다!",
+            "companyByArtistViews": "재미있는 사실: {{name}}은(는) 총 유튜브 조회수 {{views}}회로 가장 많이 시청한 엔터테인먼트 회사 {{ordinalNum}}위입니다!",
+            "fanclubName": "재미있는 사실: {{name}}의 팬클럽 이름은 '{{fanclub}}'입니다!",
             "historicalGaonWeekly": "재미있는 사실: 이번 주 {{year}}에 {{songName}}이(가) 가온 주간 차트에서 1위를 차지했습니다!",
             "hyperlinkGenerator": "[\"{{songName}}\" - {{artistName}}]({{url}})",
-            "mostActiveYear": "재미있는 사실: {{year}}은(는) {{num}}개의 뮤직 비디오가 출시된 {{ordinalNum}} K-POP에서 가장 활발한 해였습니다!",
-            "mostDebuts": "재미있는 사실: {{year}}은(는) {{num}} 그룹이 데뷔하면서 {{ordinalNum}}이(가) 가장 많이 데뷔했습니다!",
-            "mostGaonAppearances": "재미있는 사실: {{artistName}}은(는) {{appearances}}번의 출연으로 가온 디지털 주간 차트에 가장 많이 {{ordinalNum}} 올랐습니다!",
-            "mostGaonFirsts": "재미있는 사실: {{artistName}}은(는) 가온 디지털 주간 차트에서 가장 많이 {{ordinalNum}} 1위를 차지했으며 {{firstPlaceCount}}회 1위를 차지했습니다!",
-            "mostLikedGroup": "재미있는 사실: {{artist}}는 유튜브에서 총 {{likes}}개의 좋아요를 받은 {{ordinalNum}}개의 가장 좋아하는 그룹입니다!",
-            "mostLikedVideo": "재미있는 사실: {{hyperlink}}는 유튜브에서 총 {{likes}}개의 좋아요를 받은 {{ordinalNum}}개의 동영상입니다!",
-            "mostMVs": "재미있는 사실: {{artist}}이(가) 유튜브에서 {{num}}명의 뮤직 비디오가 {{ordinalNum}} 가장 많습니다!",
-            "mostMusicShowWins": "재미있는 사실: {{artist}}은(는) {{num}}번의 우승으로 대부분의 음악방송에서 {{ordinalNum}}간 우승을 차지했습니다!",
-            "mostViewedGroup": "재미있는 사실: {{artist}}는 {{ordinalNum}} 동안 가장 많이 본 그룹으로 총 유튜브 조회수는 {{views}}회입니다!",
-            "mostViewedSoloist": "재미있는 사실: {{artist}}은(는) {{ordinalNum}} 가장 많이 본 솔로 아티스트이며 총 유튜브 조회수는 {{totalViews}}입니다!",
-            "mostViewedVideo": "재미있는 사실: {{hyperlink}}는 {{ordinalNum}} 가장 많이 본 동영상이며 총 유튜브 조회수는 {{views}}회입니다!",
-            "mvViewMilestone": "재미있는 사실: {{hyperlink}}이(가) 최근 유튜브에서 {{view}} 조회수에 도달했습니다!",
+            "mostActiveYear": "재미있는 사실: {{year}}년은 {{num}}개의 뮤직 비디오가 공개되어 K-POP에서 {{ordinalNum}}번째로 활발한 해였습니다!",
+            "mostDebuts": "재미있는 사실: {{year}}년은 {{num}}개의 그룹이 데뷔로 {{ordinalNum}}번째로 많은 데뷔를 했습니다!",
+            "mostGaonAppearances": "재미있는 사실: {{artistName}}은(는) {{appearances}}번의 출연으로 가온 디지털 주간 차트에서 {{ordinalNum}}위를 기록했습니다!",
+            "mostGaonFirsts": "재미있는 사실: {{artistName}}은(는) {{ordinalNum}}번 1위를 기록하며 가온 디지털 주간 차트에서 {{firstPlaceCount}}위를 기록했습니다!",
+            "mostLikedGroup": "재미있는 사실: {{artist}}는 유튜브에서 총 {{likes}}개의 좋아요를 받으며 {{ordinalNum}}번째로 많은 좋아요를 받은 그룹입니다!",
+            "mostLikedVideo": "재미있는 사실: {{hyperlink}}는 유튜브에서 총 {{likes}}개의 좋아요를 받으며 {{ordinalNum}}번째로 많은 좋아요를 받은 영상입니다!",
+            "mostMVs": "재미있는 사실: {{artist}}이(가) 유튜브에서 {{num}}개의 뮤직비디오를 보유하고 있으며 {{ordinalNum}}번째로 많은 뮤직비디오를 보유하고 있습니다!",
+            "mostMusicShowWins": "재미있는 사실: {{artist}}은(는) {{num}}번의 우승으로 음악방송에서 {{ordinalNum}}관왕을 차지했습니다!",
+            "mostViewedGroup": "재미있는 사실: {{artist}}은(는)  총 유튜브 조회수는 {{views}}회로 {{ordinalNum}}번째로 많이 본 그룹입니다!",
+            "mostViewedSoloist": "재미있는 사실: {{artist}}은(는)  총 유튜브 조회수는 {{views}}회로 {{ordinalNum}}번째로 많이 본 솔로 아티스트입니다!",
+            "mostViewedVideo": "재미있는 사실: {{hyperlink}}는 총 유튜브 조회수는 {{views}}회로 {{ordinalNum}}번째로 가장 많이 본 동영상입니다!",
+            "mvViewMilestone": "재미있는 사실: {{hyperlink}}이(가) 최근 유튜브에서 {{view}}회를 도달했습니다!",
             "newMV": "신곡 알림: 최근에 공개된 이 뮤직 비디오 {{hyperlink}}(을)를 확인하세요.",
             "oldMV": "재미있는 사실: {{hyperlink}}가 {{year}}년에 출시되었습니다!",
-            "recentGaonWeekly": "재미있는 사실: {{songName}}은(는) 지난 주 가온 주간 차트에서 {{ordinalNum}}로 가장 높은 차트를 기록한 곡입니다!",
+            "recentGaonWeekly": "재미있는 사실: {{songName}}은(는) 지난 주 가온 주간 차트에서 {{ordinalNum}}번째로 가장 높은 차트를 기록한 곡입니다!",
             "recentMusicShowWin": "재미있는 사실: {{winDate}}의 {{musicShow}}에서 {{hyperlink}}가 최근 우승했습니다.",
-            "viewsByArtistType": "재미있는 사실: 유튜브의 모든 K-POP 뮤직 비디오에 대한 총 조회수는 {{totalViews}}회이며, 그 중 {{groupViews}}(${{groupProportion}}%)가 그룹에서 발생한 반면 {{soloViews}}($ {{soloProportion}}%)는 솔로 아티스트에서 발생했습니다.",
-            "viewsByGender": "재미있는 사실: 재미있는 사실: 유튜브의 모든 K-POP 뮤직 비디오에 대한 총 조회수는 {{totalViews}}회이며, 그 중 {{maleViews}}({{maleProportion}}%)는 남성 그룹, {{femaleViews}} ({{femaleProportion}}%)는 여성 그룹에서, 나머지 {{coedViews}}({{coedProportion}}%)는 남녀 혼성 그룹에서 발생했습니다."
+            "viewsByArtistType": "재미있는 사실: 유튜브의 모든 K-POP 뮤직 비디오에 대한 총 조회수는 {{totalViews}}회이며, 그 중 {{groupViews}} ({{groupProportion}}%)가 그룹에서 발생한 반면 {{soloViews}} ({{soloProportion}}%)는 솔로 아티스트에서 발생했습니다.",
+            "viewsByGender": "재미있는 사실: 유튜브의 모든 K-POP 뮤직비디오 조회수는 총 {{totalViews}}회이며, 이 중 {{maleViews}} ({{maleProportion}}%)가 남성 그룹이고, {{femaleViews}} ({{femaleProportion}}%)가 여성 그룹이며, 나머지 {{coedViews}} ({{coedProportion}}%)가 남녀 혼성 그룹입니다."
         },
         "kmq": {
             "guessRate": "재미있는 사실: {{hyperlink}}의 추측률은 {{roundsPlayed}} 라운드 동안 {{percentage}}% 입니다.",
-            "highestLeveledPlayerStats": "재미있는 사실: {{ordinalNum}} 최고 레벨의 KMQ 플레이어는 레벨 {{level}}이며, {{gamesPlayed}} 게임에서 {{songsGuessed}} 곡이 추측됩니다!",
-            "longestGame": "KMQ 사실: 세계에서 (현재) 가장 긴 KMQ 게임은 {{roundsPlayed}}곡이 재생되고 {{numParticipants}}명이 참여하여 평균 추측 시간이 {{avgGuessTime}}초로 {{sessionLength}}분 동안 진행되었습니다! / 당신은 그것을 이길 수 있습니까?",
+            "highestLeveledPlayerStats": "재미있는 사실: {{ordinalNum}}번째로 높은 레벨인 KMQ 플레이어는 레벨 {{level}}이며, {{gamesPlayed}}개의 게임에서 {{songsGuessed}} 곡이 추측되었습니다!",
+            "longestGame": "KMQ 사실: 세계에서 (현재) 가장 긴 KMQ 게임은 {{roundsPlayed}}곡이 재생되고 {{numParticipants}}명이 참여하여 평균 추측 시간이 {{avgGuessTime}}초로 {{sessionLength}}분 동안 진행되었습니다! (당신은 그것을 이길 수 있습니까?)",
             "mostActivePlayerGamesPlayed": "KMQ 사실: 가장 활동적인 플레이어는 2020년 11월 8일 이후로 {{gamesPlayed}} 게임을 했습니다!",
             "mostActivePlayerSongsGuessed": "KMQ 사실: 가장 활동적인 플레이어는 2020년 11월 8일 이후로 {{songsGuessed}}곡을 추측했습니다!",
             "mostActiveServer": "KMQ 사실: 가장 활동적인 서버는 KMQ의 {{gamesPlayed}} 게임을 플레이했으며 총 {{songsGuessed}} 곡을 추측했습니다!",
@@ -1049,7 +1049,7 @@
             },
             "validation": {
                 "boolean": {
-                    "notBoolean": "{{argument}}에 대한 TRUE/FALSE 값이 예상됩니다."
+                    "notBoolean": "{{argument}}에 대한 True/False 값이 예상됩니다."
                 },
                 "char": {
                     "notChar": "{{argument}}에 대한 문자가 필요합니다."
@@ -1113,7 +1113,7 @@
             },
             "kmqServer": {
                 "fanArt": "당신은 그림을 그리십니까? (KMQ 팬아트를 그려서 독점 프로필 배지를 받을 수 있으며 [KMQ 공식 서버](https://discord.gg/R55g4CRESW)에 참여하여 공유하세요!)",
-                "newFriends": "KMQ를 함께 할 새로운 친구를 찾고 계시나요? 아니면 최고 중 최고와 대결하고 싶으신가요? (부담 없이 [여기에 방문](https://discord.gg/RCuzwYV)하고 즐겨보세요!)",
+                "newFriends": "KMQ를 함께 할 새로운 친구를 찾고 계십니까, 아니면 최고 중의 최고와 대결하고 싶으십니까? (언제든지 [들러서](https://discord.gg/RCuzwYV) 인사하세요!)",
                 "title": {
                     "discordServer": "디스코드 서버를 확인하세요!",
                     "likeKmq": "KMQ처럼?"
@@ -1175,7 +1175,7 @@
         "listOfGroups": "그룹 목록",
         "plural": {
             "day_one": "{{count}}일",
-            "day_other": "{{count}}일s",
+            "day_other": "{{count}}일",
             "hourAgo_one": "{{count}}시간 전",
             "hourAgo_other": "{{count}}시간 전",
             "hour_one": "{{count}}시간",
@@ -1218,7 +1218,7 @@
         "views": "조회수",
         "warning": {
             "addRemoveOrdering": {
-                "footer": "{{addOrRemove}} {{command}}를 사용하려고 했습니까?"
+                "footer": "{{addOrRemove}} {{command}}을(를) 사용하시겠습니까?"
             }
         }
     }

@@ -20,7 +20,7 @@ import { getKmqCurrentVersion } from "../../helpers/game_utils";
 
 const logger = new IPCLogger("stats");
 
-export default class SkipCommand implements BaseCommand {
+export default class StatsCommand implements BaseCommand {
     help = (guildID: string): Help => ({
         name: "stats",
         description: state.localizer.translate(

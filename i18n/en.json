@@ -348,7 +348,7 @@
                 "title": "{{joiningUser}} joined {{teamName}}"
             },
             "team": {
-                "join": "To join {{{teamName}}} alongside {{{mentionedUser}}}, enter `{{{joinCommand}}} {{{teamNameWithCleanEmojis}}}`.{{startGameInstructions}}",
+                "join": "To join {{teamName}} alongside {{mentionedUser}}, enter `{{joinCommand}} {{teamNameWithCleanEmojis}}`.{{startGameInstructions}}",
                 "new": "New Team Created",
                 "startGameInstructions": "\nStart the game with {{beginCommand}}."
             }
@@ -954,7 +954,7 @@
             "mostMVs": "Fun Fact: {{artist}} has the {{ordinalNum}} most music videos with {{num}} on YouTube!",
             "mostMusicShowWins": "Fun Fact: {{artist}} has won the {{ordinalNum}} most music shows with {{num}} wins!",
             "mostViewedGroup": "Fun Fact: {{artist}} is the {{ordinalNum}} most viewed group with {{views}} total YouTube views!",
-            "mostViewedSoloist": "Fun Fact: {{artist}} is the {{ordinalNum}} most viewed solo artist with {{totalViews}} total YouTube views!",
+            "mostViewedSoloist": "Fun Fact: {{artist}} is the {{ordinalNum}} most viewed solo artist with {{views}} total YouTube views!",
             "mostViewedVideo": "Fun Fact: {{hyperlink}} is the {{ordinalNum}} most viewed video with {{views}} total YouTube views!",
             "mvViewMilestone": "Fun Fact: {{hyperlink}} recently reached {{views}} views on YouTube!",
             "newMV": "New Song Alert: Check out this recently released music video, {{hyperlink}}",

@@ -620,9 +620,7 @@ export default class GameSession {
         if (!this.gameRound) return;
         if (!this.guessEligible(messageContext)) return;
 
-        const guildPreference = await getGuildPreference(
-            messageContext.guildID
-        );
+        const guildPreference = await getGuildPreference(this.guildID);
 
         const pointsEarned = this.checkGuess(
             messageContext.author.id,
@@ -685,7 +683,7 @@ export default class GameSession {
                 await this.endRound(
                     { correct: false },
                     guildPreference,
-                    new MessageContext(this.textChannelID)
+                    new MessageContext(this.textChannelID, null, this.guildID)
                 );
 
                 this.startRound(
@@ -1078,7 +1076,7 @@ export default class GameSession {
                 interaction,
                 state.localizer.translate(
                     this.guildID,
-                    "misc.failure.alreadyEliminated"
+                    "misc.failure.interaction.alreadyEliminated"
                 )
             );
             return;
