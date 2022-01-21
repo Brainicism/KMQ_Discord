@@ -97,11 +97,17 @@ export default class GameRound {
     /** The original song name */
     public readonly originalSongName: string;
 
+    /** The song name, in Hangul */
+    public readonly songHangulName?: string;
+
     /** The potential song aliases */
     public readonly songAliases: string[];
 
     /** The artist name */
     public readonly artistName: string;
+
+    /** The artist name, in Hangul */
+    public readonly artistHangulName?: string;
 
     /** The potential artist aliases */
     public readonly artistAliases: string[];
@@ -179,9 +185,11 @@ export default class GameRound {
     ) {
         this.songName = cleanedSongName;
         this.originalSongName = originalSongName;
+        this.songHangulName = state.aliases.songHangul[videoID];
         this.songAliases = state.aliases.song[videoID] || [];
         this.acceptedSongAnswers = [cleanedSongName, ...this.songAliases];
         const artistNames = artist.split("+").map((x) => x.trim());
+        this.artistHangulName = state.aliases.artistHangul[artist];
         this.artistAliases = artistNames.flatMap(
             (x) => state.aliases.artist[x] || []
         );

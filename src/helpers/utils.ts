@@ -417,3 +417,13 @@ export async function measureExecutionTime(
     const hrend = process.hrtime(hrstart);
     return hrend[0] * 1000 + hrend[1] / 1000000;
 }
+
+/**
+ * @param s - the string to be tested for Hangul
+ * @returns true if the string contains any Hangul
+ */
+export function containsHangul(s: string): boolean {
+    return /[\uac00-\ud7af]|[\u1100-\u11ff]|[\u3130-\u318f]|[\ua960-\ua97f]|[\ud7b0-\ud7ff]/giu.test(
+        s
+    );
+}

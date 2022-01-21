@@ -47,6 +47,7 @@ import MessageContext from "../structures/message_context";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { REVIEW_LINK, VOTE_LINK } from "../commands/game_commands/vote";
 import { UniqueSongCounter } from "../structures/song_selector";
+import { LocaleType } from "./localization_manager";
 
 const logger = new IPCLogger("utils");
 export const EMBED_ERROR_COLOR = 0xed4245; // Red
@@ -616,18 +617,32 @@ export async function sendEndRoundMessage(
         "misc.inGame.aliases"
     );
 
+    const koLocale = state.locales[messageContext.guildID] === LocaleType.KO;
+    const aliases: Array<string> = [];
     if (guessModeType === GuessModeType.ARTIST) {
-        if (gameRound.artistAliases.length > 0) {
-            footer.text = `${aliasesText}: ${Array.from(
-                gameRound.artistAliases
-            ).join(", ")}`;
+        if (gameRound.artistHangulName) {
+            if (koLocale) {
+                aliases.push(gameRound.artistName);
+            } else {
+                aliases.push(gameRound.artistHangulName);
+            }
         }
+
+        aliases.push(...gameRound.artistAliases);
     } else {
-        if (gameRound.songAliases.length > 0) {
-            footer.text = `${aliasesText}: ${Array.from(
-                gameRound.songAliases
-            ).join(", ")}`;
+        if (gameRound.songHangulName) {
+            if (koLocale) {
+                aliases.push(gameRound.originalSongName);
+            } else {
+                aliases.push(gameRound.songHangulName);
+            }
         }
+
+        aliases.push(...gameRound.songAliases);
+    }
+
+    if (aliases.length > 0) {
+        footer.text = `${aliasesText}: ${aliases.join(", ")}`;
     }
 
     if (timeRemaining) {
@@ -803,9 +818,14 @@ export async function sendEndRoundMessage(
         color = EMBED_ERROR_COLOR;
     }
 
-    const songAndArtist = bold(
-        `"${gameRound.originalSongName}" - ${gameRound.artistName}`
-    );
+    let songName = gameRound.originalSongName;
+    let artistName = gameRound.artistName;
+    if (koLocale) {
+        songName = gameRound.songHangulName || songName;
+        artistName = gameRound.artistHangulName || artistName;
+    }
+
+    const songAndArtist = bold(`"${songName}" - ${artistName}`);
 
     const embed = {
         color,
