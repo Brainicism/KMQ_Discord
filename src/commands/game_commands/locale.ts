@@ -18,6 +18,7 @@ enum LocaleArgument {
 
     KO = "ko",
     KR = "kr",
+    KR_HANGUL = "한국어",
     KOREAN = "korean",
 }
 
@@ -108,6 +109,7 @@ export default class LocaleTypeCommand implements BaseCommand {
                     break;
                 case LocaleArgument.KO:
                 case LocaleArgument.KR:
+                case LocaleArgument.KR_HANGUL:
                 case LocaleArgument.KOREAN:
                     language = LocaleType.KO;
                     break;
