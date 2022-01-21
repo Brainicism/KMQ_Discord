@@ -61,9 +61,9 @@ export interface State {
     client: KmqClient;
     aliases: {
         artist: { [artistName: string]: Array<string> };
-        artistKorean: { [artistName: string]: string };
+        artistHangul: { [artistName: string]: string };
         song: { [songName: string]: Array<string> };
-        songKorean: { [songName: string]: string };
+        songHangul: { [songName: string]: string };
     };
     processStartTime: number;
     ipc: IPC;

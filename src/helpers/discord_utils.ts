@@ -617,18 +617,32 @@ export async function sendEndRoundMessage(
         "misc.inGame.aliases"
     );
 
+    const koLocale = state.locales[messageContext.guildID] === LocaleType.KO;
+    const aliases: Array<string> = [];
     if (guessModeType === GuessModeType.ARTIST) {
-        if (gameRound.artistAliases.length > 0) {
-            footer.text = `${aliasesText}: ${Array.from(
-                gameRound.artistAliases
-            ).join(", ")}`;
+        if (gameRound.artistHangulName) {
+            if (koLocale) {
+                aliases.push(gameRound.artistName);
+            } else {
+                aliases.push(gameRound.artistHangulName);
+            }
         }
+
+        aliases.push(...gameRound.artistAliases);
     } else {
-        if (gameRound.songAliases.length > 0) {
-            footer.text = `${aliasesText}: ${Array.from(
-                gameRound.songAliases
-            ).join(", ")}`;
+        if (gameRound.songHangulName) {
+            if (koLocale) {
+                aliases.push(gameRound.originalSongName);
+            } else {
+                aliases.push(gameRound.songHangulName);
+            }
         }
+
+        aliases.push(...gameRound.songAliases);
+    }
+
+    if (aliases.length > 0) {
+        footer.text = `${aliasesText}: ${aliases.join(", ")}`;
     }
 
     if (timeRemaining) {
@@ -806,9 +820,9 @@ export async function sendEndRoundMessage(
 
     let songName = gameRound.originalSongName;
     let artistName = gameRound.artistName;
-    if (state.locales[messageContext.guildID] === LocaleType.KO) {
-        songName = gameRound.koreanSongName || songName;
-        artistName = gameRound.koreanArtistName || artistName;
+    if (koLocale) {
+        songName = gameRound.songHangulName || songName;
+        artistName = gameRound.artistHangulName || artistName;
     }
 
     const songAndArtist = bold(`"${songName}" - ${artistName}`);
