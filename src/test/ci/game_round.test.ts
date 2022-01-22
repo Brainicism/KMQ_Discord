@@ -121,6 +121,50 @@ describe("constructor defaults", () => {
                 });
             });
         });
+
+        describe("Hangul song aliases", () => {
+            describe("song has a Hangul alias", () => {
+                it("records the alias as an accepted answer", () => {
+                    state.aliases.songHangul["abcde"] = "서사시곡";
+
+                    gameRound = new GameRound(
+                        "A really epic song",
+                        "A really epic song",
+                        "A really epic person",
+                        "abcde",
+                        new Date(),
+                        2
+                    );
+
+                    assert.deepStrictEqual(gameRound.acceptedSongAnswers, [
+                        "A really epic song",
+                        "서사시곡",
+                    ]);
+                });
+            });
+        });
+
+        describe("Hangul artist aliases", () => {
+            describe("artist has Hangul alias", () => {
+                it("records the alias as an accepted answer", () => {
+                    state.aliases.artistHangul["Person2"] = "2인칭";
+
+                    gameRound = new GameRound(
+                        "A really epic song",
+                        "A really epic song",
+                        "Person2",
+                        "abcde",
+                        new Date(),
+                        5
+                    );
+
+                    assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
+                        "Person2",
+                        "2인칭",
+                    ]);
+                });
+            });
+        });
     });
 });
 
