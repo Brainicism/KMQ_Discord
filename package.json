@@ -1,6 +1,6 @@
 {
   "name": "kmq",
-  "version": "4.0.2",
+  "version": "4.1.0",
   "main": "src/kmq.js",
   "scripts": {
     "seed": "ts-node src/seed/seed_db",
