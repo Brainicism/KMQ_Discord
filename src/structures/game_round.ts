@@ -188,12 +188,20 @@ export default class GameRound {
         this.songHangulName = state.aliases.songHangul[videoID];
         this.songAliases = state.aliases.song[videoID] || [];
         this.acceptedSongAnswers = [cleanedSongName, ...this.songAliases];
+        if (this.songHangulName) {
+            this.acceptedSongAnswers.push(this.songHangulName);
+        }
+
         const artistNames = artist.split("+").map((x) => x.trim());
         this.artistHangulName = state.aliases.artistHangul[artist];
         this.artistAliases = artistNames.flatMap(
             (x) => state.aliases.artist[x] || []
         );
         this.acceptedArtistAnswers = [...artistNames, ...this.artistAliases];
+        if (this.artistHangulName) {
+            this.acceptedArtistAnswers.push(this.artistHangulName);
+        }
+
         this.artistName = artist;
         this.videoID = videoID;
         this.skipAchieved = false;
