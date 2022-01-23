@@ -8,8 +8,9 @@ import {
     weekOfYear,
     friendlyFormattedNumber,
 } from "./helpers/utils";
-import { DEFAULT_LOCALE, LocaleType } from "./helpers/localization_manager";
+import { LocaleType } from "./helpers/localization_manager";
 import { state } from "./kmq_worker";
+import { getGuildLocale } from "./helpers/discord_utils";
 import { IPCLogger } from "./logger";
 
 const logger = new IPCLogger("fact_generator");
@@ -153,7 +154,7 @@ function parseGaonWeeklyRankList(
  * @returns a random cached fact
  */
 export function getFact(guildID: string): string {
-    const locale: LocaleType = state.locales[guildID] ?? DEFAULT_LOCALE;
+    const locale: LocaleType = getGuildLocale(guildID);
     const randomVal = Math.random();
     const factGroup =
         randomVal < 0.85

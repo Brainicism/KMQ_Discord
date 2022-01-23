@@ -11,6 +11,8 @@ import { GuessModeType } from "../commands/game_options/guessmode";
 import { cleanArtistName, cleanSongName } from "../structures/game_round";
 import { AnswerType } from "../commands/game_options/answer";
 import SongSelector from "../structures/song_selector";
+import { LocaleType } from "./localization_manager";
+import { containsHangul } from "./utils";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -212,6 +214,7 @@ export async function getMatchingGroupNames(
  * @param gender - The correct answer's group's gender
  * @param answer - The correct answer
  * @param artistID - The correct answer's group's ID
+ * @param locale - The server's locale
  * @returns unshuffled incorrect choices based on difficulty
  */
 export async function getMultipleChoiceOptions(
@@ -219,8 +222,10 @@ export async function getMultipleChoiceOptions(
     guessMode: GuessModeType,
     gender: Gender,
     answer: string,
-    artistID: number
+    artistID: number,
+    locale: LocaleType
 ): Promise<string[]> {
+    const useHangul = locale === LocaleType.KO && containsHangul(answer);
     let easyNames: string[];
     let names: string[];
     let result: string[];
@@ -240,18 +245,18 @@ export async function getMultipleChoiceOptions(
         guessMode === GuessModeType.SONG_NAME ||
         guessMode === GuessModeType.BOTH
     ) {
+        const songName = useHangul ? "hangul_song_name" : "clean_song_name";
         easyNames = (
             await dbContext
                 .kmq("available_songs")
-                .select("clean_song_name")
-                .groupByRaw("UPPER(clean_song_name)")
+                .select(songName)
+                .groupByRaw(`UPPER(${songName})`)
                 .where("members", gender)
-                .andWhereRaw(
-                    "NOT UPPER(clean_song_name) = ?",
-                    answer.toUpperCase()
-                )
+                .andWhereRaw(`NOT UPPER(${songName}) = ?`, [
+                    answer.toUpperCase(),
+                ])
                 .andWhereNot("id_artist", artistID)
-        ).map((x) => x["clean_song_name"]);
+        ).map((x) => x[songName]);
         switch (answerType) {
             case AnswerType.MULTIPLE_CHOICE_EASY: {
                 // Easy: EASY_CHOICES from same gender as chosen artist
@@ -265,13 +270,12 @@ export async function getMultipleChoiceOptions(
                     (
                         await dbContext
                             .kmq("available_songs")
-                            .select("clean_song_name")
-                            .groupByRaw("UPPER(clean_song_name)")
+                            .select(songName)
+                            .groupByRaw(`UPPER(${songName})`)
                             .where("id_artist", artistID)
-                            .andWhereRaw(
-                                "NOT UPPER(clean_song_name) = ?",
-                                answer.toUpperCase()
-                            )
+                            .andWhereRaw(`NOT UPPER(${songName}) = ?`, [
+                                answer.toUpperCase(),
+                            ])
                     ).map((x) => x["clean_song_name"]),
                     MEDIUM_SAME_ARIST_CHOICES
                 );
@@ -280,16 +284,16 @@ export async function getMultipleChoiceOptions(
                     (
                         await dbContext
                             .kmq("available_songs")
-                            .select("clean_song_name")
-                            .groupByRaw("UPPER(clean_song_name)")
+                            .select(songName)
+                            .groupByRaw(`UPPER(${songName})`)
                             .where("members", gender)
-                            .andWhereRaw("UPPER(clean_song_name) NOT IN (?)", [
+                            .andWhereRaw(`UPPER(${songName}) NOT IN (?)`, [
                                 [...sameArtistSongs, answer].map((x) =>
                                     x.toUpperCase()
                                 ),
                             ])
                             .andWhereNot("id_artist", artistID)
-                    ).map((x) => x["clean_song_name"]),
+                    ).map((x) => x[songName]),
                     MEDIUM_CHOICES - MEDIUM_SAME_ARIST_CHOICES
                 );
 
@@ -302,14 +306,13 @@ export async function getMultipleChoiceOptions(
                 names = (
                     await dbContext
                         .kmq("available_songs")
-                        .select("clean_song_name")
-                        .groupByRaw("UPPER(clean_song_name)")
+                        .select(songName)
+                        .groupByRaw(`UPPER(${songName})`)
                         .where("id_artist", artistID)
-                        .andWhereRaw(
-                            "NOT UPPER(clean_song_name) = ?",
-                            answer.toUpperCase()
-                        )
-                ).map((x) => x["clean_song_name"]);
+                        .andWhereRaw(`NOT UPPER(${songName}) = ?`, [
+                            answer.toUpperCase(),
+                        ])
+                ).map((x) => x[songName]);
                 result = _.sampleSize(names, HARD_CHOICES);
                 break;
             }
@@ -341,12 +344,13 @@ export async function getMultipleChoiceOptions(
             }
         }
     } else {
+        const artistName = useHangul ? "hangul_artist_name" : "artist_name";
         easyNames = (
             await dbContext
                 .kmq("available_songs")
-                .select("artist_name")
-                .whereNot("artist_name", answer)
-        ).map((x) => x["artist_name"]);
+                .select(artistName)
+                .whereNot(artistName, answer)
+        ).map((x) => x[artistName]);
         switch (answerType) {
             case AnswerType.MULTIPLE_CHOICE_EASY:
                 // Easy: EASY_CHOICES from any artist
@@ -359,10 +363,10 @@ export async function getMultipleChoiceOptions(
                 names = (
                     await dbContext
                         .kmq("available_songs")
-                        .select("artist_name")
+                        .select(artistName)
                         .where("members", gender)
-                        .andWhereNot("artist_name", answer)
-                ).map((x) => x["artist_name"]);
+                        .andWhereNot(artistName, answer)
+                ).map((x) => x[artistName]);
                 result = _.sampleSize(names, CHOICES_BY_DIFFICULTY[answerType]);
                 break;
             default:

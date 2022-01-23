@@ -19,6 +19,7 @@ import {
     tryCreateInteractionSuccessAcknowledgement,
     tryCreateInteractionErrorAcknowledgement,
     getMention,
+    getGuildLocale,
 } from "../helpers/discord_utils";
 import {
     ensureVoiceConnection,
@@ -821,18 +822,20 @@ export default class GameSession {
         this.playSong(guildPreference, messageContext);
 
         if (guildPreference.isMultipleChoiceMode()) {
+            const locale = getGuildLocale(this.guildID);
             const correctChoice =
                 guildPreference.gameOptions.guessModeType ===
                 GuessModeType.ARTIST
-                    ? this.gameRound.artistName
-                    : this.gameRound.songName;
+                    ? this.gameRound.getLocalizedArtistName(locale)
+                    : this.gameRound.getLocalizedSongName(locale, false);
 
             const wrongChoices = await getMultipleChoiceOptions(
                 guildPreference.gameOptions.answerType,
                 guildPreference.gameOptions.guessModeType,
                 randomSong.members,
                 correctChoice,
-                randomSong.artistID
+                randomSong.artistID,
+                locale
             );
 
             let buttons: Array<Eris.InteractionButton> = [];

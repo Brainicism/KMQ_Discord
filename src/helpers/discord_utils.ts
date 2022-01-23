@@ -47,7 +47,7 @@ import MessageContext from "../structures/message_context";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { REVIEW_LINK, VOTE_LINK } from "../commands/game_commands/vote";
 import { UniqueSongCounter } from "../structures/song_selector";
-import { LocaleType } from "./localization_manager";
+import { LocaleType, DEFAULT_LOCALE } from "./localization_manager";
 
 const logger = new IPCLogger("utils");
 export const EMBED_ERROR_COLOR = 0xed4245; // Red
@@ -617,11 +617,11 @@ export async function sendEndRoundMessage(
         "misc.inGame.aliases"
     );
 
-    const koLocale = state.locales[messageContext.guildID] === LocaleType.KO;
+    const locale = getGuildLocale(messageContext.guildID);
     const aliases: Array<string> = [];
     if (guessModeType === GuessModeType.ARTIST) {
         if (gameRound.artistHangulName) {
-            if (koLocale) {
+            if (locale === LocaleType.KO) {
                 aliases.push(gameRound.artistName);
             } else {
                 aliases.push(gameRound.artistHangulName);
@@ -631,7 +631,7 @@ export async function sendEndRoundMessage(
         aliases.push(...gameRound.artistAliases);
     } else {
         if (gameRound.songHangulName) {
-            if (koLocale) {
+            if (locale === LocaleType.KO) {
                 aliases.push(gameRound.originalSongName);
             } else {
                 aliases.push(gameRound.songHangulName);
@@ -818,14 +818,11 @@ export async function sendEndRoundMessage(
         color = EMBED_ERROR_COLOR;
     }
 
-    let songName = gameRound.originalSongName;
-    let artistName = gameRound.artistName;
-    if (koLocale) {
-        songName = gameRound.songHangulName || songName;
-        artistName = gameRound.artistHangulName || artistName;
-    }
-
-    const songAndArtist = bold(`"${songName}" - ${artistName}`);
+    const songAndArtist = bold(
+        `"${gameRound.getLocalizedSongName(
+            locale
+        )}" - ${gameRound.getLocalizedArtistName(locale)}`
+    );
 
     const embed = {
         color,
@@ -1840,4 +1837,12 @@ export async function tryCreateInteractionErrorAcknowledgement(
     } catch (err) {
         interactionRejectionHandler(interaction, err);
     }
+}
+
+/**
+ * @param guildID - The guild ID
+ * @returns the locale associated with the given guild
+ */
+export function getGuildLocale(guildID: string): LocaleType {
+    return state.locales[guildID] ?? DEFAULT_LOCALE;
 }

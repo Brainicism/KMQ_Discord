@@ -8,6 +8,7 @@ import {
     ExpBonusModifier,
     ExpBonusModifierValues,
 } from "../commands/game_commands/exp";
+import { LocaleType } from "../helpers/localization_manager";
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
 const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\(\)\+\u200B]/g;
@@ -343,6 +344,34 @@ export default class GameRound {
      */
     setBaseExpReward(baseExp: number): void {
         this.baseExp = baseExp;
+    }
+
+    /**
+     * @param locale - The guild's locale
+     * @param original - Whether to return the original song name
+     * @returns the song name in Hangul if the server is using the Korean locale and the song has a Hangul name;
+     * the original song name otherwise
+     */
+    getLocalizedSongName(locale: LocaleType, original = true): string {
+        const songName = original ? this.originalSongName : this.songName;
+        if (locale !== LocaleType.KO) {
+            return songName;
+        }
+
+        return this.songHangulName || songName;
+    }
+
+    /**
+     * @param locale - The guild's locale
+     * @returns the artist's name in Hangul if the server is using the Korean locale and the artist has a Hangul name;
+     * the artist's name otherwise
+     */
+    getLocalizedArtistName(locale: LocaleType): string {
+        if (locale !== LocaleType.KO) {
+            return this.artistName;
+        }
+
+        return this.artistHangulName || this.artistName;
     }
 
     /**
