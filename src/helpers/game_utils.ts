@@ -245,18 +245,29 @@ export async function getMultipleChoiceOptions(
         guessMode === GuessModeType.SONG_NAME ||
         guessMode === GuessModeType.BOTH
     ) {
+        const pickNonEmpty = (results: {
+            clean_song_name: string;
+            hangul_song_name: string;
+        }): string => {
+            if (locale === LocaleType.KO && results.hangul_song_name) {
+                return results.hangul_song_name;
+            }
+
+            return results.clean_song_name;
+        };
+
         const songName = useHangul ? "hangul_song_name" : "clean_song_name";
         easyNames = (
             await dbContext
                 .kmq("available_songs")
-                .select(songName)
+                .select("clean_song_name", "hangul_song_name")
                 .groupByRaw(`UPPER(${songName})`)
                 .where("members", gender)
                 .andWhereRaw(`NOT UPPER(${songName}) = ?`, [
                     answer.toUpperCase(),
                 ])
                 .andWhereNot("id_artist", artistID)
-        ).map((x) => x[songName]);
+        ).map((x) => pickNonEmpty(x));
         switch (answerType) {
             case AnswerType.MULTIPLE_CHOICE_EASY: {
                 // Easy: EASY_CHOICES from same gender as chosen artist
@@ -270,13 +281,13 @@ export async function getMultipleChoiceOptions(
                     (
                         await dbContext
                             .kmq("available_songs")
-                            .select(songName)
+                            .select("clean_song_name", "hangul_song_name")
                             .groupByRaw(`UPPER(${songName})`)
                             .where("id_artist", artistID)
                             .andWhereRaw(`NOT UPPER(${songName}) = ?`, [
                                 answer.toUpperCase(),
                             ])
-                    ).map((x) => x["clean_song_name"]),
+                    ).map((x) => pickNonEmpty(x)),
                     MEDIUM_SAME_ARIST_CHOICES
                 );
 
@@ -284,7 +295,7 @@ export async function getMultipleChoiceOptions(
                     (
                         await dbContext
                             .kmq("available_songs")
-                            .select(songName)
+                            .select("clean_song_name", "hangul_song_name")
                             .groupByRaw(`UPPER(${songName})`)
                             .where("members", gender)
                             .andWhereRaw(`UPPER(${songName}) NOT IN (?)`, [
@@ -293,7 +304,7 @@ export async function getMultipleChoiceOptions(
                                 ),
                             ])
                             .andWhereNot("id_artist", artistID)
-                    ).map((x) => x[songName]),
+                    ).map((x) => pickNonEmpty(x)),
                     MEDIUM_CHOICES - MEDIUM_SAME_ARIST_CHOICES
                 );
 
@@ -306,13 +317,13 @@ export async function getMultipleChoiceOptions(
                 names = (
                     await dbContext
                         .kmq("available_songs")
-                        .select(songName)
+                        .select("clean_song_name", "hangul_song_name")
                         .groupByRaw(`UPPER(${songName})`)
                         .where("id_artist", artistID)
                         .andWhereRaw(`NOT UPPER(${songName}) = ?`, [
                             answer.toUpperCase(),
                         ])
-                ).map((x) => x[songName]);
+                ).map((x) => pickNonEmpty(x));
                 result = _.sampleSize(names, HARD_CHOICES);
                 break;
             }
@@ -344,13 +355,24 @@ export async function getMultipleChoiceOptions(
             }
         }
     } else {
+        const pickNonEmpty = (results: {
+            artist_name: string;
+            hangul_artist_name: string;
+        }): string => {
+            if (locale === LocaleType.KO && results.hangul_artist_name) {
+                return results.hangul_artist_name;
+            }
+
+            return results.artist_name;
+        };
+
         const artistName = useHangul ? "hangul_artist_name" : "artist_name";
         easyNames = (
             await dbContext
                 .kmq("available_songs")
-                .select(artistName)
+                .select("artist_name", "hangul_artist_name")
                 .whereNot(artistName, answer)
-        ).map((x) => x[artistName]);
+        ).map((x) => pickNonEmpty(x));
         switch (answerType) {
             case AnswerType.MULTIPLE_CHOICE_EASY:
                 // Easy: EASY_CHOICES from any artist
@@ -363,10 +385,10 @@ export async function getMultipleChoiceOptions(
                 names = (
                     await dbContext
                         .kmq("available_songs")
-                        .select(artistName)
+                        .select("artist_name", "hangul_artist_name")
                         .where("members", gender)
                         .andWhereNot(artistName, answer)
-                ).map((x) => x[artistName]);
+                ).map((x) => pickNonEmpty(x));
                 result = _.sampleSize(names, CHOICES_BY_DIFFICULTY[answerType]);
                 break;
             default:
