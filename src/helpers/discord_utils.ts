@@ -1689,6 +1689,7 @@ export async function sendBookmarkedSongs(
         [userID: string]: Map<string, QueriedSong>;
     }
 ): Promise<void> {
+    const locale = getGuildLocale(guildID);
     for (const [userID, songs] of Object.entries(bookmarkedSongs)) {
         const allEmbedFields: Array<{
             name: string;
@@ -1696,7 +1697,10 @@ export async function sendBookmarkedSongs(
             inline: boolean;
         }> = [...songs].map((song) => ({
             name: `${bold(
-                `"${song[1].originalSongName}" - ${song[1].artistName}`
+                `"${getLocalizedSongName(
+                    song[1],
+                    locale
+                )}" - ${getLocalizedArtistName(song[1], locale)}`
             )} (${standardDateFormat(song[1].publishDate)})`,
             value: `[${friendlyFormattedNumber(
                 song[1].views

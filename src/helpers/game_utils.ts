@@ -249,7 +249,11 @@ export async function getMultipleChoiceOptions(
             clean_song_name_en: string;
             clean_song_name_ko: string;
         }): string => {
-            if (locale === LocaleType.KO && results.clean_song_name_ko) {
+            if (
+                locale === LocaleType.KO &&
+                results.clean_song_name_ko &&
+                useHangul
+            ) {
                 return results.clean_song_name_ko;
             }
 
@@ -362,7 +366,11 @@ export async function getMultipleChoiceOptions(
             artist_name_en: string;
             artist_name_ko: string;
         }): string => {
-            if (locale === LocaleType.KO && results.artist_name_ko) {
+            if (
+                locale === LocaleType.KO &&
+                results.artist_name_ko &&
+                useHangul
+            ) {
                 return results.artist_name_ko;
             }
 
@@ -445,7 +453,11 @@ export function getLocalizedSongName(
         return songName;
     }
 
-    return song.hangulSongName || songName;
+    const hangulSongName = original
+        ? song.originalHangulSongName
+        : song.hangulSongName;
+
+    return hangulSongName || songName;
 }
 
 /**

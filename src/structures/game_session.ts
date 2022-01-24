@@ -346,7 +346,11 @@ export default class GameSession {
                     song: {
                         songName: gameRound.song.songName,
                         originalSongName: gameRound.song.originalSongName,
+                        hangulSongName: gameRound.song.hangulSongName,
+                        originalHangulSongName:
+                            gameRound.song.originalHangulSongName,
                         artistName: gameRound.song.artistName,
+                        hangulArtistName: gameRound.song.hangulArtistName,
                         youtubeLink: gameRound.song.youtubeLink,
                         publishDate: gameRound.song.publishDate,
                         views: gameRound.song.views,
