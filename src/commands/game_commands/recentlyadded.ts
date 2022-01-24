@@ -52,10 +52,10 @@ export default class RecentlyAddedCommand implements BaseCommand {
         const newSongs: Array<QueriedSong> = await dbContext
             .kmq("available_songs")
             .select([
-                "song_name AS originalSongName",
-                "hangul_song_name AS originalHangulSongName",
-                "artist_name AS artistName",
-                "hangul_artist_name AS hangulArtistName",
+                "song_name_en AS originalSongName",
+                "song_name_ko AS originalHangulSongName",
+                "artist_name_en AS artistName",
+                "artist_name_ko AS hangulArtistName",
                 "link AS youtubeLink",
                 "publishedon AS publishDate",
                 "views",

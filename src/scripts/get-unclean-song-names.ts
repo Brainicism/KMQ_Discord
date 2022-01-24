@@ -8,8 +8,8 @@ const logger = new IPCLogger("get-unclean-song-names");
     const songs: Array<QueriedSong> = await dbContext
         .kmq("available_songs")
         .select([
-            "song_name as songName",
-            "artist_name as artistName",
+            "song_name_en as songName",
+            "artist_name_en as artistName",
             "link as youtubeLink",
         ]);
 

@@ -246,21 +246,24 @@ export async function getMultipleChoiceOptions(
         guessMode === GuessModeType.BOTH
     ) {
         const pickNonEmpty = (results: {
-            clean_song_name: string;
-            hangul_song_name: string;
+            clean_song_name_en: string;
+            clean_song_name_ko: string;
         }): string => {
-            if (locale === LocaleType.KO && results.hangul_song_name) {
-                return results.hangul_song_name;
+            if (locale === LocaleType.KO && results.clean_song_name_ko) {
+                return results.clean_song_name_ko;
             }
 
-            return results.clean_song_name;
+            return results.clean_song_name_en;
         };
 
-        const songName = useHangul ? "hangul_song_name" : "clean_song_name";
+        const songName = useHangul
+            ? "clean_song_name_ko"
+            : "clean_song_name_en";
+
         easyNames = (
             await dbContext
                 .kmq("available_songs")
-                .select("clean_song_name", "hangul_song_name")
+                .select("clean_song_name_en", "clean_song_name_ko")
                 .groupByRaw(`UPPER(${songName})`)
                 .where("members", gender)
                 .andWhereRaw(`NOT UPPER(${songName}) = ?`, [
@@ -281,7 +284,7 @@ export async function getMultipleChoiceOptions(
                     (
                         await dbContext
                             .kmq("available_songs")
-                            .select("clean_song_name", "hangul_song_name")
+                            .select("clean_song_name_en", "clean_song_name_ko")
                             .groupByRaw(`UPPER(${songName})`)
                             .where("id_artist", artistID)
                             .andWhereRaw(`NOT UPPER(${songName}) = ?`, [
@@ -295,7 +298,7 @@ export async function getMultipleChoiceOptions(
                     (
                         await dbContext
                             .kmq("available_songs")
-                            .select("clean_song_name", "hangul_song_name")
+                            .select("clean_song_name_en", "clean_song_name_ko")
                             .groupByRaw(`UPPER(${songName})`)
                             .where("members", gender)
                             .andWhereRaw(`UPPER(${songName}) NOT IN (?)`, [
@@ -317,7 +320,7 @@ export async function getMultipleChoiceOptions(
                 names = (
                     await dbContext
                         .kmq("available_songs")
-                        .select("clean_song_name", "hangul_song_name")
+                        .select("clean_song_name_en", "clean_song_name_ko")
                         .groupByRaw(`UPPER(${songName})`)
                         .where("id_artist", artistID)
                         .andWhereRaw(`NOT UPPER(${songName}) = ?`, [
@@ -356,21 +359,21 @@ export async function getMultipleChoiceOptions(
         }
     } else {
         const pickNonEmpty = (results: {
-            artist_name: string;
-            hangul_artist_name: string;
+            artist_name_en: string;
+            artist_name_ko: string;
         }): string => {
-            if (locale === LocaleType.KO && results.hangul_artist_name) {
-                return results.hangul_artist_name;
+            if (locale === LocaleType.KO && results.artist_name_ko) {
+                return results.artist_name_ko;
             }
 
-            return results.artist_name;
+            return results.artist_name_en;
         };
 
-        const artistName = useHangul ? "hangul_artist_name" : "artist_name";
+        const artistName = useHangul ? "artist_name_ko" : "artist_name_en";
         easyNames = (
             await dbContext
                 .kmq("available_songs")
-                .select("artist_name", "hangul_artist_name")
+                .select("artist_name_en", "artist_name_ko")
                 .whereNot(artistName, answer)
         ).map((x) => pickNonEmpty(x));
         switch (answerType) {
@@ -385,7 +388,7 @@ export async function getMultipleChoiceOptions(
                 names = (
                     await dbContext
                         .kmq("available_songs")
-                        .select("artist_name", "hangul_artist_name")
+                        .select("artist_name_en", "artist_name_ko")
                         .where("members", gender)
                         .andWhereNot(artistName, answer)
                 ).map((x) => pickNonEmpty(x));

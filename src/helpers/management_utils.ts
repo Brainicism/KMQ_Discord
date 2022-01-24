@@ -203,7 +203,7 @@ export async function updateBotStatus(): Promise<void> {
     }
 
     client.editStatus("online", {
-        name: `"${randomPopularSong["song_name"]}" by ${randomPopularSong["artist_name"]}`,
+        name: `"${randomPopularSong["song_name_en"]}" by ${randomPopularSong["artist_name_en"]}`,
         type: 1,
         url: `https://www.youtube.com/watch?v=${randomPopularSong["link"]}`,
     });
@@ -218,8 +218,8 @@ export async function reloadAliases(): Promise<void> {
 
     const artistAliasMapping = await dbContext
         .kmq("available_songs")
-        .distinct(["artist_name", "artist_aliases"])
-        .select(["artist_name", "artist_aliases"])
+        .distinct(["artist_name_en", "artist_aliases"])
+        .select(["artist_name_en", "artist_aliases"])
         .where("artist_aliases", "<>", "");
 
     const songAliases = {};
@@ -231,7 +231,7 @@ export async function reloadAliases(): Promise<void> {
 
     const artistAliases = {};
     for (const mapping of artistAliasMapping) {
-        artistAliases[mapping["artist_name"]] = mapping["artist_aliases"]
+        artistAliases[mapping["artist_name_en"]] = mapping["artist_aliases"]
             .split(";")
             .filter((x: string) => x);
     }
