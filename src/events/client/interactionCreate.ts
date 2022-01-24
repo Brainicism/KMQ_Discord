@@ -65,7 +65,10 @@ export default async function interactionCreateHandler(
                 if (!gameSession) {
                     tryCreateInteractionErrorAcknowledgement(
                         interaction,
-                        "You can only bookmark songs during a game."
+                        state.localizer.translate(
+                            interaction.guildID,
+                            "misc.failure.interaction.bookmarkOutsideGame"
+                        )
                     );
                     return;
                 }
