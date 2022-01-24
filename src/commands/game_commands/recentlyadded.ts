@@ -6,12 +6,17 @@ import {
     getDebugLogHeader,
     sendPaginationedEmbed,
     sendInfoMessage,
+    getGuildLocale,
 } from "../../helpers/discord_utils";
 import {
     standardDateFormat,
     chunkArray,
     friendlyFormattedNumber,
 } from "../../helpers/utils";
+import {
+    getLocalizedSongName,
+    getLocalizedArtistName,
+} from "../../helpers/game_utils";
 import { KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
@@ -47,9 +52,10 @@ export default class RecentlyAddedCommand implements BaseCommand {
         const newSongs: Array<QueriedSong> = await dbContext
             .kmq("available_songs")
             .select([
-                "clean_song_name AS songName",
                 "song_name AS originalSongName",
-                "artist_name AS artist",
+                "hangul_song_name AS originalHangulSongName",
+                "artist_name AS artistName",
+                "hangul_artist_name AS hangulArtistName",
                 "link AS youtubeLink",
                 "publishedon AS publishDate",
                 "views",
@@ -78,8 +84,12 @@ export default class RecentlyAddedCommand implements BaseCommand {
             return;
         }
 
+        const locale = getGuildLocale(message.guildID);
         const fields = newSongs.map((song) => ({
-            name: `"${song.originalSongName}" - ${song.artist}`,
+            name: `"${getLocalizedSongName(
+                song,
+                locale
+            )}" - ${getLocalizedArtistName(song, locale)}`,
             value: `${state.localizer.translate(
                 message.guildID,
                 "command.recentlyadded.released"

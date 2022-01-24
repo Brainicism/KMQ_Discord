@@ -9,7 +9,7 @@ const logger = new IPCLogger("get-unclean-song-names");
         .kmq("available_songs")
         .select([
             "song_name as songName",
-            "artist_name as artist",
+            "artist_name as artistName",
             "link as youtubeLink",
         ]);
 

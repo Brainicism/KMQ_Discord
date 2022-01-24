@@ -216,33 +216,17 @@ export async function reloadAliases(): Promise<void> {
         .select(["link", "song_aliases"])
         .where("song_aliases", "<>", "");
 
-    const hangulSongMapping = await dbContext
-        .kmq("available_songs")
-        .select(["link", "hangul_song_name"])
-        .where("hangul_song_name", "<>", "");
-
     const artistAliasMapping = await dbContext
         .kmq("available_songs")
         .distinct(["artist_name", "artist_aliases"])
         .select(["artist_name", "artist_aliases"])
         .where("artist_aliases", "<>", "");
 
-    const hangulArtistMapping = await dbContext
-        .kmq("available_songs")
-        .distinct(["artist_name", "hangul_artist_name"])
-        .select(["artist_name", "hangul_artist_name"])
-        .where("hangul_artist_name", "<>", "");
-
     const songAliases = {};
     for (const mapping of songAliasMapping) {
         songAliases[mapping["link"]] = mapping["song_aliases"]
             .split(";")
             .filter((x: string) => x);
-    }
-
-    const songHangul = {};
-    for (const mapping of hangulSongMapping) {
-        songHangul[mapping["link"]] = mapping["hangul_song_name"];
     }
 
     const artistAliases = {};
@@ -252,15 +236,8 @@ export async function reloadAliases(): Promise<void> {
             .filter((x: string) => x);
     }
 
-    const artistHangul = {};
-    for (const mapping of hangulArtistMapping) {
-        artistHangul[mapping["artist_name"]] = mapping["hangul_artist_name"];
-    }
-
     state.aliases.artist = artistAliases;
-    state.aliases.artistHangul = artistHangul;
     state.aliases.song = songAliases;
-    state.aliases.songHangul = songHangul;
     logger.info("Reloaded alias data");
 }
 

@@ -5,7 +5,7 @@ import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
 import GameSession from "../structures/game_session";
 import GuildPreference from "../structures/guild_preference";
-import { MatchedArtist } from "../types";
+import { MatchedArtist, QueriedSong } from "../types";
 import { Gender } from "../commands/game_options/gender";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { cleanArtistName, cleanSongName } from "../structures/game_round";
@@ -232,7 +232,7 @@ export async function getMultipleChoiceOptions(
 
     const EASY_CHOICES = 3;
     const MEDIUM_CHOICES = 5;
-    const MEDIUM_SAME_ARIST_CHOICES = 2;
+    const MEDIUM_SAME_ARTIST_CHOICES = 2;
     const HARD_CHOICES = 7;
 
     const CHOICES_BY_DIFFICULTY = {
@@ -288,7 +288,7 @@ export async function getMultipleChoiceOptions(
                                 answer.toUpperCase(),
                             ])
                     ).map((x) => pickNonEmpty(x)),
-                    MEDIUM_SAME_ARIST_CHOICES
+                    MEDIUM_SAME_ARTIST_CHOICES
                 );
 
                 const sameGenderSongs = _.sampleSize(
@@ -305,7 +305,7 @@ export async function getMultipleChoiceOptions(
                             ])
                             .andWhereNot("id_artist", artistID)
                     ).map((x) => pickNonEmpty(x)),
-                    MEDIUM_CHOICES - MEDIUM_SAME_ARIST_CHOICES
+                    MEDIUM_CHOICES - MEDIUM_SAME_ARTIST_CHOICES
                 );
 
                 result = [...sameArtistSongs, ...sameGenderSongs];
@@ -423,4 +423,41 @@ export async function isFirstGameOfDay(userID: string): Promise<boolean> {
  */
 export function getKmqCurrentVersion(): string {
     return execSync("git describe --tags").toString().trim();
+}
+
+/**
+ * @param song - The song to retrieve the name from
+ * @param locale - The guild's locale
+ * @param original - Whether to return the original song name
+ * @returns the song name in Hangul if the server is using the Korean locale and the song has a Hangul name;
+ * the original song name otherwise
+ */
+export function getLocalizedSongName(
+    song: QueriedSong,
+    locale: LocaleType,
+    original = true
+): string {
+    const songName = original ? song.originalSongName : song.songName;
+    if (locale !== LocaleType.KO) {
+        return songName;
+    }
+
+    return song.hangulSongName || songName;
+}
+
+/**
+ * @param song - The song to retrieve the artist from
+ * @param locale - The guild's locale
+ * @returns the artist's name in Hangul if the server is using the Korean locale and the artist has a Hangul name;
+ * the artist's name otherwise
+ */
+export function getLocalizedArtistName(
+    song: QueriedSong,
+    locale: LocaleType
+): string {
+    if (locale !== LocaleType.KO) {
+        return song.artistName;
+    }
+
+    return song.hangulArtistName || song.artistName;
 }

@@ -20,8 +20,11 @@ async function setup(): Promise<void> {
     await dbContext.kmq.raw(`CREATE TABLE available_songs (
         song_name VARCHAR(255),
         clean_song_name VARCHAR(255),
+        hangul_song_name VARCHAR(255),
+        clean_hangul_song_name VARCHAR(255),
         link VARCHAR(255),
         artist_name VARCHAR(255),
+        hangul_artist_name VARCHAR(255),
         members ENUM('male', 'female', 'coed'),
         views BIGINT(19),
         id_artist INT(10),

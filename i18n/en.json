@@ -1148,7 +1148,11 @@
         "interaction": {
             "bookmarked": {
                 "description": "You'll receive a direct message with a link to {{songName}} at the end of the game.",
-                "title": "Song Bookmarked"
+                "title": "Song Bookmarked",
+                "message": {
+                    "title": "Bookmarked Songs",
+                    "playedOn": "Played on {{date}}"
+                }
             },
             "faq": "Frequently Asked Questions",
             "fullGroupsList": "Full List of Groups",

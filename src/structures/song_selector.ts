@@ -232,7 +232,10 @@ export default class SongSelector {
         const fields = [
             "clean_song_name as songName",
             "song_name as originalSongName",
-            "artist_name as artist",
+            "hangul_song_name as hangulSongName",
+            "clean_hangul_song_name as originalHangulSongName",
+            "artist_name as artistName",
+            "hangul_artist_name as hangulArtistName",
             "link as youtubeLink",
             "publishedon as publishDate",
             "members",
