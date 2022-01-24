@@ -1149,6 +1149,10 @@
         "interaction": {
             "bookmarked": {
                 "description": "게임이 끝나면 {{songName}} 링크가 포함된 다이렉트 메시지를 받게 됩니다.",
+                "message": {
+                    "playedOn": "{{date}}에 재생됨",
+                    "title": "북마크된 노래들"
+                },
                 "title": "노래 북마크"
             },
             "faq": "자주 묻는 질문",

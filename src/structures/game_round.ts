@@ -8,6 +8,7 @@ import {
     ExpBonusModifier,
     ExpBonusModifierValues,
 } from "../commands/game_commands/exp";
+import { QueriedSong } from "../types";
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
 const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\(\)\+\u200B]/g;
@@ -91,38 +92,17 @@ function generateHint(name: string): string {
 }
 
 export default class GameRound {
-    /** The song name with brackets removed */
-    public readonly songName: string;
-
-    /** The original song name */
-    public readonly originalSongName: string;
-
-    /** The song name, in Hangul */
-    public readonly songHangulName?: string;
+    /** The song associated with the round */
+    public readonly song: QueriedSong;
 
     /** The potential song aliases */
     public readonly songAliases: string[];
 
-    /** The artist name */
-    public readonly artistName: string;
-
-    /** The artist name, in Hangul */
-    public readonly artistHangulName?: string;
-
     /** The potential artist aliases */
     public readonly artistAliases: string[];
 
-    /** The youtube video ID of the current song */
-    public readonly videoID: string;
-
     /** Timestamp of the creation of the GameRound in epoch milliseconds */
     public readonly startedAt: number;
-
-    /** The song publish date on YouTube */
-    public readonly publishDate: Date;
-
-    /** The song's views on YouTube */
-    public readonly views: number;
 
     /** Round bonus modifier */
     public bonusModifier: number;
@@ -175,47 +155,36 @@ export default class GameRound {
     /** The base EXP for this GameRound */
     private baseExp: number;
 
-    constructor(
-        cleanedSongName: string,
-        originalSongName: string,
-        artist: string,
-        videoID: string,
-        publishDate: Date,
-        views: number
-    ) {
-        this.songName = cleanedSongName;
-        this.originalSongName = originalSongName;
-        this.songHangulName = state.aliases.songHangul[videoID];
-        this.songAliases = state.aliases.song[videoID] || [];
-        this.acceptedSongAnswers = [cleanedSongName, ...this.songAliases];
-        if (this.songHangulName) {
-            this.acceptedSongAnswers.push(this.songHangulName);
+    constructor(song: QueriedSong) {
+        this.song = song;
+        this.songAliases = state.aliases.song[song.youtubeLink] || [];
+        this.acceptedSongAnswers = [song.songName, ...this.songAliases];
+        if (song.hangulSongName) {
+            this.acceptedSongAnswers.push(song.hangulSongName);
         }
 
-        const artistNames = artist.split("+").map((x) => x.trim());
-        this.artistHangulName = state.aliases.artistHangul[artist];
+        const artistNames = song.artistName.split("+").map((x) => x.trim());
+        if (song.hangulArtistName) {
+            artistNames.push(
+                ...song.hangulArtistName.split("+").map((x) => x.trim())
+            );
+        }
+
         this.artistAliases = artistNames.flatMap(
             (x) => state.aliases.artist[x] || []
         );
         this.acceptedArtistAnswers = [...artistNames, ...this.artistAliases];
-        if (this.artistHangulName) {
-            this.acceptedArtistAnswers.push(this.artistHangulName);
-        }
 
-        this.artistName = artist;
-        this.videoID = videoID;
         this.skipAchieved = false;
         this.startedAt = Date.now();
-        this.publishDate = publishDate;
-        this.views = views;
         this.skippers = new Set();
         this.hintUsed = false;
         this.hintRequesters = new Set();
         this.correctGuessers = [];
         this.finished = false;
         this.hints = {
-            songHint: generateHint(this.songName),
-            artistHint: generateHint(this.artistName),
+            songHint: generateHint(song.songName),
+            artistHint: generateHint(song.artistName),
         };
         this.interactionCorrectAnswerUUID = null;
         this.interactionIncorrectAnswerUUIDs = {};
@@ -412,7 +381,7 @@ export default class GameRound {
     }
 
     isBonusArtist(): boolean {
-        return state.bonusArtists.has(this.artistName);
+        return state.bonusArtists.has(this.song.artistName);
     }
 
     /**
@@ -454,7 +423,7 @@ export default class GameRound {
         );
 
         return {
-            exact: this.songName && cleanedSongAliases.includes(guess),
+            exact: this.song.songName && cleanedSongAliases.includes(guess),
             similar: GameRound.similarityCheck(guess, cleanedSongAliases),
         };
     }
@@ -471,7 +440,7 @@ export default class GameRound {
         );
 
         return {
-            exact: this.songName && cleanedArtistAliases.includes(guess),
+            exact: this.song.songName && cleanedArtistAliases.includes(guess),
             similar: GameRound.similarityCheck(guess, cleanedArtistAliases),
         };
     }

@@ -19,10 +19,13 @@ import {
     tryCreateInteractionSuccessAcknowledgement,
     tryCreateInteractionErrorAcknowledgement,
     getMention,
+    getGuildLocale,
 } from "../helpers/discord_utils";
 import {
     ensureVoiceConnection,
     getGuildPreference,
+    getLocalizedArtistName,
+    getLocalizedSongName,
     getMultipleChoiceOptions,
     userBonusIsActive,
 } from "../helpers/game_utils";
@@ -263,7 +266,7 @@ export default class GameSession {
                             `${getDebugLogHeader(messageContext)}, uid: ${
                                 correctGuesser.id
                             } | Song correctly guessed. song = ${
-                                gameRound.songName
+                                gameRound.song.songName
                             }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
                         );
                     } else {
@@ -274,7 +277,7 @@ export default class GameSession {
                             } | Song correctly guessed ${getOrdinalNum(
                                 guessPosition
                             )}. song = ${
-                                gameRound.songName
+                                gameRound.song.songName
                             }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
                         );
                     }
@@ -341,19 +344,23 @@ export default class GameSession {
                 this.songMessageIDs.push({
                     messageID: endRoundMessage.id,
                     song: {
-                        songName: gameRound.songName,
-                        originalSongName: gameRound.originalSongName,
-                        artist: gameRound.artistName,
-                        youtubeLink: gameRound.videoID,
-                        publishDate: gameRound.publishDate,
-                        views: gameRound.views,
+                        songName: gameRound.song.songName,
+                        originalSongName: gameRound.song.originalSongName,
+                        hangulSongName: gameRound.song.hangulSongName,
+                        originalHangulSongName:
+                            gameRound.song.originalHangulSongName,
+                        artistName: gameRound.song.artistName,
+                        hangulArtistName: gameRound.song.hangulArtistName,
+                        youtubeLink: gameRound.song.youtubeLink,
+                        publishDate: gameRound.song.publishDate,
+                        views: gameRound.song.views,
                     },
                 });
             }
         }
 
         this.incrementSongStats(
-            gameRound.videoID,
+            gameRound.song.youtubeLink,
             guessResult.correct,
             gameRound.skipAchieved,
             gameRound.hintUsed,
@@ -570,7 +577,7 @@ export default class GameSession {
                 ),
                 thumbnailUrl: KmqImages.READING_BOOK,
             });
-            await sendBookmarkedSongs(this.bookmarkedSongs);
+            await sendBookmarkedSongs(this.guildID, this.bookmarkedSongs);
 
             // Store bookmarked songs
             await dbContext.kmq.transaction(async (trx) => {
@@ -821,18 +828,20 @@ export default class GameSession {
         this.playSong(guildPreference, messageContext);
 
         if (guildPreference.isMultipleChoiceMode()) {
+            const locale = getGuildLocale(this.guildID);
             const correctChoice =
                 guildPreference.gameOptions.guessModeType ===
                 GuessModeType.ARTIST
-                    ? this.gameRound.artistName
-                    : this.gameRound.songName;
+                    ? getLocalizedArtistName(this.gameRound.song, locale)
+                    : getLocalizedSongName(this.gameRound.song, locale, false);
 
             const wrongChoices = await getMultipleChoiceOptions(
                 guildPreference.gameOptions.answerType,
                 guildPreference.gameOptions.guessModeType,
                 randomSong.members,
                 correctChoice,
-                randomSong.artistID
+                randomSong.artistID,
+                locale
             );
 
             let buttons: Array<Eris.InteractionButton> = [];
@@ -1132,8 +1141,8 @@ export default class GameSession {
         this.guessSong(
             messageContext,
             guildPreference.gameOptions.guessModeType !== GuessModeType.ARTIST
-                ? this.gameRound.songName
-                : this.gameRound.artistName
+                ? this.gameRound.song.songName
+                : this.gameRound.song.artistName
         );
     }
 
@@ -1162,7 +1171,11 @@ export default class GameSession {
             state.localizer.translate(
                 this.guildID,
                 "misc.interaction.bookmarked.description",
-                { songName: bold(song.originalSongName) }
+                {
+                    songName: bold(
+                        getLocalizedSongName(song, getGuildLocale(this.guildID))
+                    ),
+                }
             )
         );
         this.addBookmarkedSong(interaction.member?.id, song);
@@ -1174,14 +1187,7 @@ export default class GameSession {
      * @returns the new GameRound
      */
     private prepareRound(randomSong: QueriedSong): GameRound {
-        const gameRound = new GameRound(
-            randomSong.songName,
-            randomSong.originalSongName,
-            randomSong.artist,
-            randomSong.youtubeLink,
-            randomSong.publishDate,
-            randomSong.views
-        );
+        const gameRound = new GameRound(randomSong);
 
         gameRound.setBaseExpReward(this.calculateBaseExp());
         return gameRound;
@@ -1201,7 +1207,7 @@ export default class GameSession {
             return;
         }
 
-        const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${gameRound.videoID}.ogg`;
+        const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${gameRound.song.youtubeLink}.ogg`;
 
         let seekLocation: number;
         const seekType = guildPreference.gameOptions.seekType;
@@ -1212,7 +1218,7 @@ export default class GameSession {
                 await dbContext
                     .kmq("cached_song_duration")
                     .select(["duration"])
-                    .where("vlink", "=", gameRound.videoID)
+                    .where("vlink", "=", gameRound.song.youtubeLink)
                     .first()
             ).duration;
 
@@ -1600,7 +1606,7 @@ export default class GameSession {
      */
     private getDebugSongDetails(): string {
         if (!this.gameRound) return "No active game round";
-        return `${this.gameRound.songName}:${this.gameRound.artistName}:${this.gameRound.videoID}`;
+        return `${this.gameRound.song.songName}:${this.gameRound.song.artistName}:${this.gameRound.song.youtubeLink}`;
     }
     /**
      * https://www.desmos.com/calculator/9x3dkrmt84

@@ -9,6 +9,8 @@ import {
     getAvailableSongCount,
     getKmqCurrentVersion,
     userBonusIsActive,
+    getLocalizedSongName,
+    getLocalizedArtistName,
 } from "./game_utils";
 import { getFact } from "../fact_generator";
 import {
@@ -47,7 +49,7 @@ import MessageContext from "../structures/message_context";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { REVIEW_LINK, VOTE_LINK } from "../commands/game_commands/vote";
 import { UniqueSongCounter } from "../structures/song_selector";
-import { LocaleType } from "./localization_manager";
+import { LocaleType, DEFAULT_LOCALE } from "./localization_manager";
 
 const logger = new IPCLogger("utils");
 export const EMBED_ERROR_COLOR = 0xed4245; // Red
@@ -617,24 +619,24 @@ export async function sendEndRoundMessage(
         "misc.inGame.aliases"
     );
 
-    const koLocale = state.locales[messageContext.guildID] === LocaleType.KO;
+    const locale = getGuildLocale(messageContext.guildID);
     const aliases: Array<string> = [];
     if (guessModeType === GuessModeType.ARTIST) {
-        if (gameRound.artistHangulName) {
-            if (koLocale) {
-                aliases.push(gameRound.artistName);
+        if (gameRound.song.hangulArtistName) {
+            if (locale === LocaleType.KO) {
+                aliases.push(gameRound.song.artistName);
             } else {
-                aliases.push(gameRound.artistHangulName);
+                aliases.push(gameRound.song.hangulArtistName);
             }
         }
 
         aliases.push(...gameRound.artistAliases);
     } else {
-        if (gameRound.songHangulName) {
-            if (koLocale) {
-                aliases.push(gameRound.originalSongName);
+        if (gameRound.song.hangulSongName) {
+            if (locale === LocaleType.KO) {
+                aliases.push(gameRound.song.originalSongName);
             } else {
-                aliases.push(gameRound.songHangulName);
+                aliases.push(gameRound.song.originalHangulSongName);
             }
         }
 
@@ -818,26 +820,24 @@ export async function sendEndRoundMessage(
         color = EMBED_ERROR_COLOR;
     }
 
-    let songName = gameRound.originalSongName;
-    let artistName = gameRound.artistName;
-    if (koLocale) {
-        songName = gameRound.songHangulName || songName;
-        artistName = gameRound.artistHangulName || artistName;
-    }
-
-    const songAndArtist = bold(`"${songName}" - ${artistName}`);
+    const songAndArtist = bold(
+        `"${getLocalizedSongName(
+            gameRound.song,
+            locale
+        )}" - ${getLocalizedArtistName(gameRound.song, locale)}`
+    );
 
     const embed = {
         color,
-        title: `${songAndArtist} (${gameRound.publishDate.getFullYear()})`,
-        url: `https://youtu.be/${gameRound.videoID}`,
+        title: `${songAndArtist} (${gameRound.song.publishDate.getFullYear()})`,
+        url: `https://youtu.be/${gameRound.song.youtubeLink}`,
         description,
         fields,
     };
 
-    const thumbnailUrl = `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`;
+    const thumbnailUrl = `https://img.youtube.com/vi/${gameRound.song.youtubeLink}/hqdefault.jpg`;
     const footerText = `${friendlyFormattedNumber(
-        gameRound.views
+        gameRound.song.views
     )} ${state.localizer.translate(messageContext.guildID, "misc.views")}${
         footer.text ? `\n${footer.text}` : ""
     }`;
@@ -1680,11 +1680,16 @@ export function sendDebugAlertWebhook(
 
 /**
  * Send the bookmarked songs to the corresponding users
+ * @param guildID - The guild where the songs were bookmarked
  * @param bookmarkedSongs - The bookmarked songs
  */
-export async function sendBookmarkedSongs(bookmarkedSongs: {
-    [userID: string]: Map<string, QueriedSong>;
-}): Promise<void> {
+export async function sendBookmarkedSongs(
+    guildID: string,
+    bookmarkedSongs: {
+        [userID: string]: Map<string, QueriedSong>;
+    }
+): Promise<void> {
+    const locale = getGuildLocale(guildID);
     for (const [userID, songs] of Object.entries(bookmarkedSongs)) {
         const allEmbedFields: Array<{
             name: string;
@@ -1692,11 +1697,17 @@ export async function sendBookmarkedSongs(bookmarkedSongs: {
             inline: boolean;
         }> = [...songs].map((song) => ({
             name: `${bold(
-                `"${song[1].originalSongName}" - ${song[1].artist}`
+                `"${getLocalizedSongName(
+                    song[1],
+                    locale
+                )}" - ${getLocalizedArtistName(song[1], locale)}`
             )} (${standardDateFormat(song[1].publishDate)})`,
             value: `[${friendlyFormattedNumber(
                 song[1].views
-            )} views](https://youtu.be/${song[1].youtubeLink})`,
+            )} ${state.localizer.translate(
+                guildID,
+                "misc.views"
+            )}](https://youtu.be/${song[1].youtubeLink})`,
             inline: false,
         }));
 
@@ -1706,9 +1717,20 @@ export async function sendBookmarkedSongs(bookmarkedSongs: {
                     name: "Kimiqo",
                     icon_url: KmqImages.READING_BOOK,
                 },
-                title: bold("Bookmarked Songs"),
+                title: bold(
+                    state.localizer.translate(
+                        guildID,
+                        "misc.interaction.bookmarked.message.title"
+                    )
+                ),
                 fields,
-                footer: { text: `Played on ${standardDateFormat(new Date())}` },
+                footer: {
+                    text: state.localizer.translate(
+                        guildID,
+                        "misc.interaction.bookmarked.message.playedOn",
+                        { date: standardDateFormat(new Date()) }
+                    ),
+                },
             };
 
             await sendDmMessage(userID, { embeds: [embed] });
@@ -1840,4 +1862,12 @@ export async function tryCreateInteractionErrorAcknowledgement(
     } catch (err) {
         interactionRejectionHandler(interaction, err);
     }
+}
+
+/**
+ * @param guildID - The guild ID
+ * @returns the locale associated with the given guild
+ */
+export function getGuildLocale(guildID: string): LocaleType {
+    return state.locales[guildID] ?? DEFAULT_LOCALE;
 }

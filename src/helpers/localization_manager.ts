@@ -1,6 +1,6 @@
 import i18next from "i18next";
 import Backend from "i18next-fs-backend";
-import { state } from "../kmq_worker";
+import { getGuildLocale } from "./discord_utils";
 
 export enum LocaleType {
     EN = "en",
@@ -41,7 +41,7 @@ export default class LocalizationManager {
         replace: { [key: string]: string } = {}
     ): string {
         return this.internalLocalizer.t(phrase, {
-            lng: state.locales[guildID] ?? DEFAULT_LOCALE,
+            lng: getGuildLocale(guildID),
             replace,
         });
     }
@@ -55,7 +55,7 @@ export default class LocalizationManager {
      */
     translateN(guildID: string, phrase: string, count: number): string {
         return this.internalLocalizer.t(phrase, {
-            lng: state.locales[guildID] ?? DEFAULT_LOCALE,
+            lng: getGuildLocale(guildID),
             count,
         });
     }

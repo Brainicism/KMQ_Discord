@@ -25,7 +25,10 @@ export interface ParsedMessage {
 export interface QueriedSong {
     songName: string;
     originalSongName: string;
-    artist: string;
+    hangulSongName?: string;
+    originalHangulSongName?: string;
+    artistName: string;
+    hangulArtistName?: string;
     youtubeLink: string;
     publishDate?: Date;
     members?: Gender;
@@ -61,9 +64,7 @@ export interface State {
     client: KmqClient;
     aliases: {
         artist: { [artistName: string]: Array<string> };
-        artistHangul: { [artistName: string]: string };
         song: { [songName: string]: Array<string> };
-        songHangul: { [songName: string]: string };
     };
     processStartTime: number;
     ipc: IPC;

@@ -203,7 +203,7 @@ export async function updateBotStatus(): Promise<void> {
     }
 
     client.editStatus("online", {
-        name: `"${randomPopularSong["song_name"]}" by ${randomPopularSong["artist_name"]}`,
+        name: `"${randomPopularSong["song_name_en"]}" by ${randomPopularSong["artist_name_en"]}`,
         type: 1,
         url: `https://www.youtube.com/watch?v=${randomPopularSong["link"]}`,
     });
@@ -216,22 +216,11 @@ export async function reloadAliases(): Promise<void> {
         .select(["link", "song_aliases"])
         .where("song_aliases", "<>", "");
 
-    const hangulSongMapping = await dbContext
-        .kmq("available_songs")
-        .select(["link", "hangul_song_name"])
-        .where("hangul_song_name", "<>", "");
-
     const artistAliasMapping = await dbContext
         .kmq("available_songs")
-        .distinct(["artist_name", "artist_aliases"])
-        .select(["artist_name", "artist_aliases"])
+        .distinct(["artist_name_en", "artist_aliases"])
+        .select(["artist_name_en", "artist_aliases"])
         .where("artist_aliases", "<>", "");
-
-    const hangulArtistMapping = await dbContext
-        .kmq("available_songs")
-        .distinct(["artist_name", "hangul_artist_name"])
-        .select(["artist_name", "hangul_artist_name"])
-        .where("hangul_artist_name", "<>", "");
 
     const songAliases = {};
     for (const mapping of songAliasMapping) {
@@ -240,27 +229,15 @@ export async function reloadAliases(): Promise<void> {
             .filter((x: string) => x);
     }
 
-    const songHangul = {};
-    for (const mapping of hangulSongMapping) {
-        songHangul[mapping["link"]] = mapping["hangul_song_name"];
-    }
-
     const artistAliases = {};
     for (const mapping of artistAliasMapping) {
-        artistAliases[mapping["artist_name"]] = mapping["artist_aliases"]
+        artistAliases[mapping["artist_name_en"]] = mapping["artist_aliases"]
             .split(";")
             .filter((x: string) => x);
     }
 
-    const artistHangul = {};
-    for (const mapping of hangulArtistMapping) {
-        artistHangul[mapping["artist_name"]] = mapping["hangul_artist_name"];
-    }
-
     state.aliases.artist = artistAliases;
-    state.aliases.artistHangul = artistHangul;
     state.aliases.song = songAliases;
-    state.aliases.songHangul = songHangul;
     logger.info("Reloaded alias data");
 }
 

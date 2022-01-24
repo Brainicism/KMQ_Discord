@@ -8,8 +8,9 @@ import {
     weekOfYear,
     friendlyFormattedNumber,
 } from "./helpers/utils";
-import { DEFAULT_LOCALE, LocaleType } from "./helpers/localization_manager";
+import { LocaleType } from "./helpers/localization_manager";
 import { state } from "./kmq_worker";
+import { getGuildLocale } from "./helpers/discord_utils";
 import { IPCLogger } from "./logger";
 
 const logger = new IPCLogger("fact_generator");
@@ -153,7 +154,7 @@ function parseGaonWeeklyRankList(
  * @returns a random cached fact
  */
 export function getFact(guildID: string): string {
-    const locale: LocaleType = state.locales[guildID] ?? DEFAULT_LOCALE;
+    const locale: LocaleType = getGuildLocale(guildID);
     const randomVal = Math.random();
     const factGroup =
         randomVal < 0.85
@@ -668,7 +669,7 @@ async function songReleaseAnniversaries(lng: LocaleType): Promise<string[]> {
         .kmq("available_songs")
         .select(
             dbContext.kmq.raw(
-                "song_name, artist_name, YEAR(publishedon) as publish_year, link"
+                "song_name_en, artist_name_en, YEAR(publishedon) as publish_year, link"
             )
         )
         .whereRaw("WEEK(publishedon) = WEEK(NOW())")
@@ -680,8 +681,8 @@ async function songReleaseAnniversaries(lng: LocaleType): Promise<string[]> {
         state.localizer.internalLocalizer.t("fact.fun.oldMV", {
             hyperlink: generateSongArtistHyperlink(
                 lng,
-                x["song_name"],
-                x["artist_name"],
+                x["song_name_en"],
+                x["artist_name_en"],
                 x["link"]
             ),
             year: String(x["publish_year"]),
@@ -695,7 +696,7 @@ async function songGuessRate(lng: LocaleType): Promise<string[]> {
         .kmq("song_metadata")
         .select(
             dbContext.kmq.raw(
-                "song_name, artist_name, ROUND(correct_guesses/rounds_played * 100, 2) as c, link, rounds_played"
+                "song_name_en, artist_name_en, ROUND(correct_guesses/rounds_played * 100, 2) AS c, link, rounds_played"
             )
         )
         .where("rounds_played", ">", 2500)
@@ -709,8 +710,8 @@ async function songGuessRate(lng: LocaleType): Promise<string[]> {
         state.localizer.internalLocalizer.t("fact.kmq.guessRate", {
             hyperlink: generateSongArtistHyperlink(
                 lng,
-                x["song_name"],
-                x["artist_name"],
+                x["song_name_en"],
+                x["artist_name_en"],
                 x["link"]
             ),
             percentage: x["c"],

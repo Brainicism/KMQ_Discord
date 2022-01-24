@@ -204,8 +204,8 @@ async function getSongsFromDb(db: DatabaseContext): Promise<any> {
             "rankedAudioSongs",
             db.kpopVideos
                 .select([
-                    "app_kpop_audio.name",
-                    "app_kpop_group.name AS artist",
+                    "app_kpop_audio.name AS songName",
+                    "app_kpop_group.name AS artistName",
                     "vlink AS youtubeLink",
                     "app_kpop_audio.views AS views",
                     "app_kpop_audio.tags AS tags",
@@ -225,13 +225,13 @@ async function getSongsFromDb(db: DatabaseContext): Promise<any> {
                 })
                 .andWhere("tags", "NOT LIKE", "%c%")
         )
-        .select("name as songName", "artist", "youtubeLink", "views")
+        .select("songName", "artistName", "youtubeLink", "views")
         .from("rankedAudioSongs")
         .where("rank", "<=", process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST)
         .union(function () {
             this.select(
-                "app_kpop.name",
-                "app_kpop_group.name AS artist",
+                "app_kpop.name AS songName",
+                "app_kpop_group.name AS artistName",
                 "vlink AS youtubeLink",
                 "app_kpop.views AS views"
             )
@@ -301,7 +301,7 @@ const downloadNewSongs = async (
 
     for (const song of songsToDownload) {
         logger.info(
-            `Downloading song: '${song.songName}' by ${song.artist} | ${
+            `Downloading song: '${song.songName}' by ${song.artistName} | ${
                 song.youtubeLink
             } (${downloadCount + 1}/${songsToDownload.length})`
         );
@@ -326,7 +326,7 @@ const downloadNewSongs = async (
         }
 
         logger.info(
-            `Encoding song: '${song.songName}' by ${song.artist} | ${song.youtubeLink}`
+            `Encoding song: '${song.songName}' by ${song.artistName} | ${song.youtubeLink}`
         );
         try {
             await retryJob(ffmpegOpusJob, [song.youtubeLink], 1, true, 5000);

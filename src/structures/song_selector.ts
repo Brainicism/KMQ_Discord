@@ -230,9 +230,12 @@ export default class SongSelector {
         guildPreference: GuildPreference
     ): Promise<{ songs: Set<QueriedSong>; countBeforeLimit: number }> {
         const fields = [
-            "clean_song_name as songName",
-            "song_name as originalSongName",
-            "artist_name as artist",
+            "clean_song_name_en as songName",
+            "song_name_en as originalSongName",
+            "song_name_ko as hangulSongName",
+            "clean_song_name_ko as originalHangulSongName",
+            "artist_name_en as artistName",
+            "artist_name_ko as hangulArtistName",
             "link as youtubeLink",
             "publishedon as publishDate",
             "members",
