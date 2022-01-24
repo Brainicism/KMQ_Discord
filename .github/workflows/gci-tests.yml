@@ -44,7 +44,7 @@ jobs:
       - name: npm run lint
         run: npm run lint_ci
       - name: Check translations
-        run: npm run lint_i18n
+        run: npm run lint_i18n_ci
       - name: Copy .env for CI
         run: |
           echo "DB_USER=root" >> .env
