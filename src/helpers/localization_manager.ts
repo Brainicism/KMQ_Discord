@@ -17,8 +17,7 @@ export default class LocalizationManager {
             preload: Object.values(LocaleType),
             supportedLngs: Object.values(LocaleType),
             saveMissing: true,
-            saveMissingTo: "current",
-            fallbackLng: false,
+            fallbackLng: DEFAULT_LOCALE,
             interpolation: {
                 escapeValue: false,
             },
