@@ -4,7 +4,7 @@ import schedule from "node-schedule";
 import _ from "lodash";
 import { IPCLogger } from "../logger";
 import { state } from "../kmq_worker";
-import { sendInfoMessage } from "./discord_utils";
+import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
 import messageCreateHandler from "../events/client/messageCreate";
 import voiceChannelLeaveHandler from "../events/client/voiceChannelLeave";
 import voiceChannelSwitchHandler from "../events/client/voiceChannelSwitch";
@@ -29,7 +29,7 @@ import guildDeleteHandler from "../events/client/guildDelete";
 import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
 import guildAvailableHandler from "../events/client/guildAvailable";
 import interactionCreateHandler from "../events/client/interactionCreate";
-import { chooseRandom } from "./utils";
+import { chooseRandom, isPowerHour } from "./utils";
 import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
 import { EnvType } from "../types";
@@ -191,6 +191,14 @@ export async function updateBotStatus(): Promise<void> {
         return;
     }
 
+    if (isPowerHour()) {
+        client.editStatus("online", {
+            name: "🎶 Power Hour! 🎶",
+            type: 1,
+        });
+        return;
+    }
+
     const randomPopularSongs = await dbContext
         .kmq("available_songs")
         .orderBy("publishedon", "DESC")
@@ -289,34 +297,49 @@ export async function clearRestartNotification(): Promise<void> {
  *  Sets up recurring cron-based tasks
  * */
 export function registerIntervals(clusterID: number): void {
-    // set up cleanup for inactive game sessions
+    // Everyday at 12am UTC => 7pm EST
+    schedule.scheduleJob("0 0 * * *", async () => {
+        // New fun facts
+        reloadFactCache();
+        // New bonus groups
+        reloadBonusGroups();
+    });
+
+    // Every hour
+    schedule.scheduleJob("0 * * * *", async () => {
+        if (!isPowerHour()) return;
+        if (!state.client.guilds.has(process.env.DEBUG_SERVER_ID)) return;
+        // Ping a role in KMQ server notifying of power hour
+        sendPowerHourNotification();
+    });
+
+    // Every 10 minutes
     schedule.scheduleJob("*/10 * * * *", () => {
+        // Cleanup inactive game sessions
         cleanupInactiveGameSessions();
+        // Change bot's status (song playing, power hour, etc.)
         updateBotStatus();
     });
 
-    // set up check for restart notifications
+    // Every 5 minutes
+    schedule.scheduleJob("*/5 * * * *", async () => {
+        // Update song/artist aliases
+        reloadAliases();
+        // Cleanup inactive Discord voice connections
+        clearInactiveVoiceConnections();
+        // Store per-cluster stats
+        await updateSystemStats(clusterID);
+    });
+
+    // Every minute
     schedule.scheduleJob("* * * * *", async () => {
         if (process.env.NODE_ENV !== EnvType.PROD) return;
-        // unscheduled restarts
+        // set up check for restart notifications
         const timeUntilRestart = await getTimeUntilRestart();
         if (timeUntilRestart) {
             updateBotStatus();
             await checkRestartNotification(timeUntilRestart);
         }
-    });
-
-    // everyday at 12am UTC => 7pm EST
-    schedule.scheduleJob("0 0 * * *", async () => {
-        reloadFactCache();
-        reloadBonusGroups();
-    });
-
-    // every 5 minutes
-    schedule.scheduleJob("*/5 * * * *", async () => {
-        reloadAliases();
-        clearInactiveVoiceConnections();
-        await updateSystemStats(clusterID);
     });
 }
 
