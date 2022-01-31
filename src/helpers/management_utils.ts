@@ -29,7 +29,7 @@ import guildDeleteHandler from "../events/client/guildDelete";
 import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
 import guildAvailableHandler from "../events/client/guildAvailable";
 import interactionCreateHandler from "../events/client/interactionCreate";
-import { chooseRandom, isPowerHour } from "./utils";
+import { chooseRandom, isPowerHour, isWeekend } from "./utils";
 import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
 import { EnvType } from "../types";
@@ -191,7 +191,7 @@ export async function updateBotStatus(): Promise<void> {
         return;
     }
 
-    if (isPowerHour()) {
+    if (isPowerHour() && !isWeekend()) {
         client.editStatus("online", {
             name: "🎶 Power Hour! 🎶",
             type: 1,
@@ -307,7 +307,7 @@ export function registerIntervals(clusterID: number): void {
 
     // Every hour
     schedule.scheduleJob("0 * * * *", async () => {
-        if (!isPowerHour()) return;
+        if (!isPowerHour() || isWeekend()) return;
         if (!state.client.guilds.has(process.env.DEBUG_SERVER_ID)) return;
         // Ping a role in KMQ server notifying of power hour
         sendPowerHourNotification();
