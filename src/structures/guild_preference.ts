@@ -920,6 +920,9 @@ export default class GuildPreference {
             (option) => !_.isEqual(oldOptions[option[0]], option[1])
         );
 
-        return updatedOptions.map((x) => x[0] as GameOption);
+        return _.uniqBy(
+            updatedOptions.map((x) => x[0] as GameOption),
+            "option"
+        );
     }
 }
