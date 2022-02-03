@@ -194,7 +194,7 @@ export async function updateBotStatus(): Promise<void> {
     if (isPowerHour() && !isWeekend()) {
         client.editStatus("online", {
             name: "🎶 Power Hour! 🎶",
-            type: 1,
+            type: 5,
         });
         return;
     }
