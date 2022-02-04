@@ -7,7 +7,7 @@ config({ path: resolve(__dirname, "../.env") });
 
 function generateKnexContext(
     databaseName: string,
-    minPoolSize = 0,
+    minPoolSize: number,
     maxPoolSize: number
 ): any {
     return {
