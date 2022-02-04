@@ -17,6 +17,8 @@ then
     rebuild
 fi
 
+echo "Killing running instances..."
+ps a | grep node | egrep "kmq\.js|cluster_manager\.js" | awk '{print $1}' | xargs kill &> /dev/null || echo "No running instances to kill"
 echo "Bootstrapping..."
 node build/seed/bootstrap.js
 echo "Starting bot..."

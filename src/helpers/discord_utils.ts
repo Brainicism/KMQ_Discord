@@ -522,12 +522,14 @@ export async function sendErrorMessage(
  * @param embedPayload - What to include in the message
  * @param reply - Whether to reply to the given message
  * @param boldTitle - Whether to bold the title
+ * @param content - Plain text content
  */
 export async function sendInfoMessage(
     messageContext: MessageContext,
     embedPayload: EmbedPayload,
     reply = false,
-    boldTitle = true
+    boldTitle = true,
+    content?: string
 ): Promise<Eris.Message<Eris.TextableChannel>> {
     if (embedPayload.description && embedPayload.description.length > 2048) {
         return sendErrorMessage(messageContext, {
@@ -582,6 +584,7 @@ export async function sendInfoMessage(
                       }
                     : null,
             components: embedPayload.components,
+            content,
         },
         null,
         messageContext.author.id
@@ -1870,4 +1873,29 @@ export async function tryCreateInteractionErrorAcknowledgement(
  */
 export function getGuildLocale(guildID: string): LocaleType {
     return state.locales[guildID] ?? DEFAULT_LOCALE;
+}
+
+/**
+ * Sends the power hour notification to the KMQ server
+ */
+export function sendPowerHourNotification(): void {
+    if (
+        !process.env.POWER_HOUR_NOTIFICATION_CHANNEL_ID ||
+        !process.env.POWER_HOUR_NOTIFICATION_ROLE_ID
+    ) {
+        return;
+    }
+
+    logger.info("Sending power hour notification");
+    sendInfoMessage(
+        new MessageContext(process.env.POWER_HOUR_NOTIFICATION_CHANNEL_ID),
+        {
+            title: "⬆️ KMQ Power Hour Starts Now! ⬆️",
+            description: "Earn 2x EXP for the next hour!",
+            thumbnailUrl: KmqImages.LISTENING,
+        },
+        false,
+        true,
+        `<@&${process.env.POWER_HOUR_NOTIFICATION_ROLE_ID}>`
+    );
 }
