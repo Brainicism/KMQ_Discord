@@ -31,7 +31,7 @@ We update our songs frequently! Expect to see songs on the bot the same day they
 # EXP System
 Think you have what it takes to be a KMQ master? Rise through the ranks, gaining EXP and leveling up by playing KMQ. Every correct guess will net you some EXP, increasing based on your game options. The higher the number of songs selected by your game options, the more EXP you will get!
 
-Everyone starts off as a `Novice` and works their way up as a `Trainee` (Level 10), `Pre-debut` (Level 20), `Nugu` (Level 30), and many more! Check out `,profile` and `,scoreboard` to see where you and other players stand!
+Everyone starts off as a `Novice` and works their way up as a `Trainee` (Level 10), `Pre-debut` (Level 20), `Nugu` (Level 30), and many more! Check out `,profile` and `,leaderboard` to see where you and other players stand!
 
 ## EXP Modifiers
 - Playing with more people will increase how much EXP you gain, ranging between 1x (single player) to 1.5x EXP (6+ players)
