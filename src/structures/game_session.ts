@@ -1186,7 +1186,7 @@ export default class GameSession {
      * @returns whether the given song is in the game's list of songs
      */
     isSongInOptions(songID: string): boolean {
-        return [...this.songSelector?.getSongs()?.songs]
+        return [...(this.songSelector.getSongs().songs ?? [])]
             .map((x) => x.youtubeLink)
             .includes(songID);
     }
