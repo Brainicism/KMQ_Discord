@@ -1198,6 +1198,9 @@
             "title": "🚀 레벨 업을 축하합니다! 🚀"
         },
         "listOfGroups": "그룹 목록",
+        "no": "아니요",
+        "none": "없음",
+        "notApplicable": "해당 없음",
         "plural": {
             "day_one": "{{count}}일",
             "day_other": "{{count}}일",
@@ -1247,6 +1250,7 @@
             "addRemoveOrdering": {
                 "footer": "{{addOrRemove}} {{command}}을(를) 사용하시겠습니까?"
             }
-        }
+        },
+        "yes": "예"
     }
 }

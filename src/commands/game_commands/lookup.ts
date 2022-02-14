@@ -262,11 +262,15 @@ export default class LookupCommand implements BaseCommand {
             },
             {
                 name: state.localizer.translate(guildID, "misc.songAliases"),
-                value: songAliases || "None",
+                value:
+                    songAliases ||
+                    state.localizer.translate(guildID, "misc.none"),
             },
             {
                 name: state.localizer.translate(guildID, "misc.artistAliases"),
-                value: artistAliases || "None",
+                value:
+                    artistAliases ||
+                    state.localizer.translate(guildID, "misc.none"),
             },
         ];
 
@@ -274,14 +278,22 @@ export default class LookupCommand implements BaseCommand {
             fields.push(
                 {
                     name: state.localizer.translate(guildID, "misc.duration"),
-                    value: songDuration || "N/A",
+                    value:
+                        songDuration ||
+                        state.localizer.translate(
+                            guildID,
+                            "misc.notApplicable"
+                        ),
                 },
                 {
                     name: state.localizer.translate(
                         guildID,
                         "command.lookup.inCurrentGameOptions"
                     ),
-                    value: includedInOptions ? "Yes" : "No",
+                    value: state.localizer.translate(
+                        guildID,
+                        includedInOptions ? "misc.yes" : "misc.no"
+                    ),
                 }
             );
         }

@@ -1198,6 +1198,9 @@
             "title": "🚀 Power Up!"
         },
         "listOfGroups": "list of groups",
+        "no": "No",
+        "none": "None",
+        "notApplicable": "N/A",
         "plural": {
             "day_one": "{{count}} day",
             "day_other": "{{count}} days",
@@ -1247,6 +1250,7 @@
             "addRemoveOrdering": {
                 "footer": "Did you mean to use {{addOrRemove}} {{command}}?"
             }
-        }
+        },
+        "yes": "Yes"
     }
 }
