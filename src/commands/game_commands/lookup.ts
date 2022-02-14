@@ -103,7 +103,7 @@ export default class LookupCommand implements BaseCommand {
             return;
         }
 
-        const availableSongEntry: QueriedSong = await dbContext
+        const kmqSongEntry: QueriedSong = await dbContext
             .kmq("available_songs")
             .select(SongSelector.getQueriedSongFields())
             .where("link", videoID)
@@ -154,21 +154,38 @@ export default class LookupCommand implements BaseCommand {
         let artistAliases: string;
         let views: number;
         let publishDate: Date;
+        let songDuration: string;
         let includedInOptions = false;
 
-        if (availableSongEntry) {
+        if (kmqSongEntry) {
             description = state.localizer.translate(
                 guildID,
                 "command.lookup.inKMQ",
                 { link: daisukiLink }
             );
-            songName = getLocalizedSongName(availableSongEntry, locale);
-            artistName = getLocalizedArtistName(availableSongEntry, locale);
+            songName = getLocalizedSongName(kmqSongEntry, locale);
+            artistName = getLocalizedArtistName(kmqSongEntry, locale);
             songAliases = state.aliases.song[videoID]?.join(", ");
             artistAliases =
-                state.aliases.artist[availableSongEntry.artistName]?.join(", ");
-            views = availableSongEntry.views;
-            publishDate = availableSongEntry.publishDate;
+                state.aliases.artist[kmqSongEntry.artistName]?.join(", ");
+            views = kmqSongEntry.views;
+            publishDate = kmqSongEntry.publishDate;
+
+            let durationInSeconds = (
+                await dbContext
+                    .kmq("cached_song_duration")
+                    .where("vlink", videoID)
+                    .first()
+            )?.duration;
+
+            // duration in minutes and seconds
+            if (durationInSeconds) {
+                const minutes = Math.floor(durationInSeconds / 60);
+                const seconds = durationInSeconds % 60;
+                songDuration = `${minutes}:${
+                    seconds < 10 ? "0" : ""
+                }${seconds}`;
+            }
 
             if (state.gameSessions[guildID]) {
                 const gameSession = state.gameSessions[guildID];
@@ -239,36 +256,30 @@ export default class LookupCommand implements BaseCommand {
 
         const viewsString = state.localizer.translate(guildID, "misc.views");
 
-        sendInfoMessage(messageContext, {
-            title: `${songName} - ${artistName}`,
-            url: `https://youtu.be/${videoID}`,
-            description,
-            thumbnailUrl: `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`,
-            fields: [
+        const fields = [
+            {
+                name: viewsString[0].toUpperCase() + viewsString.slice(1),
+                value: friendlyFormattedNumber(views),
+            },
+            {
+                name: state.localizer.translate(guildID, "misc.releaseDate"),
+                value: friendlyFormattedDate(publishDate, guildID),
+            },
+            {
+                name: state.localizer.translate(guildID, "misc.songAliases"),
+                value: songAliases || "None",
+            },
+            {
+                name: state.localizer.translate(guildID, "misc.artistAliases"),
+                value: artistAliases || "None",
+            },
+        ];
+
+        if (kmqSongEntry) {
+            fields.push(
                 {
-                    name: viewsString[0].toUpperCase() + viewsString.slice(1),
-                    value: friendlyFormattedNumber(views),
-                },
-                {
-                    name: state.localizer.translate(
-                        guildID,
-                        "misc.releaseDate"
-                    ),
-                    value: friendlyFormattedDate(publishDate, guildID),
-                },
-                {
-                    name: state.localizer.translate(
-                        guildID,
-                        "misc.songAliases"
-                    ),
-                    value: songAliases || "None",
-                },
-                {
-                    name: state.localizer.translate(
-                        guildID,
-                        "misc.artistAliases"
-                    ),
-                    value: artistAliases || "None",
+                    name: state.localizer.translate(guildID, "misc.duration"),
+                    value: songDuration || "N/A",
                 },
                 {
                     name: state.localizer.translate(
@@ -276,8 +287,20 @@ export default class LookupCommand implements BaseCommand {
                         "command.lookup.inCurrentGameOptions"
                     ),
                     value: includedInOptions ? "Yes" : "No",
-                },
-            ],
+                }
+            );
+        }
+
+        sendInfoMessage(messageContext, {
+            title: `${songName} - ${artistName}`,
+            url: `https://youtu.be/${videoID}`,
+            description,
+            thumbnailUrl: `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`,
+            fields: fields.map((x) => ({
+                name: x.name,
+                value: x.value,
+                inline: true,
+            })),
         });
     };
 }

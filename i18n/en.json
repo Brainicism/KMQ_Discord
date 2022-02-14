@@ -519,13 +519,13 @@
                     "song": "Provides information about {{song}} by {{artist}}."
                 }
             },
-            "notFound": {
-                "title": "Song Not Found",
-                "description": "The requested song was not found in KMQ's cache of the Daisuki database. It is not included in KMQ."
-            },
-            "notInKMQ": "This song has an entry on [Daisuki]({{link}}), but it isn't included in KMQ.",
             "inCurrentGameOptions": "In Current Game Options?",
             "inKMQ": "This song is included in KMQ! Here's the link to [Daisuki]({{link}}).",
+            "notFound": {
+                "description": "The requested song was not found in KMQ's cache of the Daisuki database. It is not included in KMQ.",
+                "title": "Song Not Found"
+            },
+            "notInKMQ": "This song has an entry on [Daisuki]({{link}}), but it isn't included in KMQ.",
             "validation": {
                 "invalidYouTubeID": "Expected a valid YouTube ID or link."
             }
@@ -1004,6 +1004,7 @@
             "yourScore": "Your score is {{score}}."
         },
         "conflict": "conflict",
+        "duration": "Duration",
         "elimination": {
             "yourLives": "You have {{lives}} lives."
         },

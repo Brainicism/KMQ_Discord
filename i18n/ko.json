@@ -519,13 +519,13 @@
                     "song": "{{artist}별 {{song}}에 대한 정보를 제공합니다."
                 }
             },
-            "notFound": {
-                "title": "노래를 찾을 수 없음",
-                "description": "요청한 노래를 KMQ의 다이수키 데이터베이스 캐시에서 찾을 수 없습니다. KMQ에는 포함되어 있지 않습니다."
-            },
-            "notInKMQ": "이 곡은 [다이스키]({{link}})에 수록돼 있지만, KMQ에는 수록돼 있지 않습니다.",
             "inCurrentGameOptions": "현재 게임 옵션에서?",
             "inKMQ": "이 노래는 KMQ에 포함되어 있습니다! 여기 [다이스키]({{link}})의 링크가 있습니다.",
+            "notFound": {
+                "description": "요청한 노래를 KMQ의 다이수키 데이터베이스 캐시에서 찾을 수 없습니다. KMQ에는 포함되어 있지 않습니다.",
+                "title": "노래를 찾을 수 없음"
+            },
+            "notInKMQ": "이 곡은 [다이스키]({{link}})에 수록돼 있지만, KMQ에는 수록돼 있지 않습니다.",
             "validation": {
                 "invalidYouTubeID": "올바른 YouTube ID 또는 링크가 필요합니다."
             }
@@ -1004,6 +1004,7 @@
             "yourScore": "당신의 점수는 {{score}}점 입니다."
         },
         "conflict": "갈등",
+        "duration": "지속시간",
         "elimination": {
             "yourLives": "당신의 목숨은 {{lives}}개 남았습니다."
         },
