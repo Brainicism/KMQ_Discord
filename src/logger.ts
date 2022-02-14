@@ -8,6 +8,8 @@ import { EnvType } from "./types";
 
 config({ path: resolve(__dirname, "../.env") });
 
+type LoggerArg = string | number | Object | Array<string | number | Object>;
+
 /**
  * @returns a logger
  */
@@ -58,18 +60,27 @@ export class IPCLogger {
         this.logger = getInternalLogger();
     }
 
-    getCategorizedMessage(msg: string): string {
+    getCategorizedMessage(msg: LoggerArg): string {
+        if (msg instanceof Array) {
+            msg = msg
+                .map((x) => (x instanceof Object ? JSON.stringify(x) : x))
+                .join(" ");
+        } else if (msg instanceof Object) {
+            msg = JSON.stringify(msg);
+        }
+
         return `${this.category} | ${msg}`;
     }
-    info(msg: string | number): void {
+
+    info(msg: LoggerArg): void {
         if (!isMaster) {
-            console.log(this.getCategorizedMessage(msg as string));
+            console.log(this.getCategorizedMessage(msg));
         } else {
-            this.logger.info(this.getCategorizedMessage(msg as string));
+            this.logger.info(this.getCategorizedMessage(msg));
         }
     }
 
-    error(msg: string): void {
+    error(msg: LoggerArg): void {
         if (!isMaster) {
             console.error(this.getCategorizedMessage(msg));
         } else {
@@ -77,7 +88,7 @@ export class IPCLogger {
         }
     }
 
-    debug(msg: string): void {
+    debug(msg: LoggerArg): void {
         if (!isMaster) {
             console.debug(this.getCategorizedMessage(msg));
         } else {
@@ -85,7 +96,7 @@ export class IPCLogger {
         }
     }
 
-    warn(msg: string): void {
+    warn(msg: LoggerArg): void {
         if (!isMaster) {
             console.warn(this.getCategorizedMessage(msg));
         } else {
