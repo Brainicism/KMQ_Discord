@@ -512,6 +512,24 @@
             },
             "updatedDescription": "봇의 언어가 `{{language}}`로 업데이트되었습니다."
         },
+        "lookup": {
+            "help": {
+                "description": "주어진 노래가 노래 데이터 외에 KMQ의 데이터베이스와 게임 옵션을 포함하는지 검색합니다.",
+                "example": {
+                    "song": "{{artist}별 {{song}}에 대한 정보를 제공합니다."
+                }
+            },
+            "notFound": {
+                "title": "노래를 찾을 수 없음",
+                "description": "요청한 노래를 KMQ의 다이수키 데이터베이스 캐시에서 찾을 수 없습니다. KMQ에는 포함되어 있지 않습니다."
+            },
+            "notInKMQ": "이 곡은 [다이스키]({{link}})에 수록돼 있지만, KMQ에는 수록돼 있지 않습니다.",
+            "inCurrentGameOptions": "현재 게임 옵션에서?",
+            "inKMQ": "이 노래는 KMQ에 포함되어 있습니다! 여기 [다이스키]({{link}})의 링크가 있습니다.",
+            "validation": {
+                "invalidYouTubeID": "올바른 YouTube ID 또는 링크가 필요합니다."
+            }
+        },
         "multiguess": {
             "help": {
                 "description": "여러 사람이 노래를 정확하게 추측할 수 있는지 여부를 설정합니다. ({{on}}일 때 플레이어는 첫 번째 정답이 제출된 후 1.5초 내에 정답을 제출해야 하며 첫 번째 정답은 모든 경험치를 받고, 두 번째 정답부터는 배수로 더 적은 경험치를 받습니다.)",
@@ -981,10 +999,11 @@
     "misc": {
         "andManyOthers": "그리고 많은 다른 사람들...",
         "artist": "아티스트",
+        "artistAliases": "아티스트 별칭",
         "classic": {
             "yourScore": "당신의 점수는 {{score}}점 입니다."
         },
-        "conflict": "conflict",
+        "conflict": "갈등",
         "elimination": {
             "yourLives": "당신의 목숨은 {{lives}}개 남았습니다."
         },
@@ -1205,11 +1224,13 @@
             "differentVC": "이 명령어를 사용하려면 봇과 동일한 음성 채널에 있어야 합니다.",
             "title": "잠시만 기다려주십시오..."
         },
+        "releaseDate": "릴리스 날짜",
         "sendingBookmarkedSongs": {
             "description": "{{players}}에게 {{songs}}을(를) 보냅니다.\n\n노래 메시지를 마우스 오른쪽 버튼으로 클릭하고 `앱 > Bookmark Song`를 선택하여 게임 중에 노래를 북마크하세요.",
             "title": "북마크된 노래를 보내는 중..."
         },
         "song": "노래",
+        "songAliases": "노래 별칭",
         "team": {
             "yourScore": "당신의 점수: {{score}}",
             "yourTeamScore": "당신의 팀 점수: {{teamScore}}"

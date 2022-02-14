@@ -222,14 +222,10 @@ export default class SongSelector {
     }
 
     /**
-     * Returns a list of songs from the data store, narrowed down by the specified game options
-     * @param guildPreference - The GuildPreference
-     * @returns a list of songs, as well as the number of songs before the filter option was applied
+     * @returns the fields queried to generate the song list
      */
-    static async getFilteredSongList(
-        guildPreference: GuildPreference
-    ): Promise<{ songs: Set<QueriedSong>; countBeforeLimit: number }> {
-        const fields = [
+    static getQueriedSongFields(): Array<string> {
+        return [
             "clean_song_name_en as songName",
             "song_name_en as originalSongName",
             "song_name_ko as hangulSongName",
@@ -245,8 +241,19 @@ export default class SongSelector {
             "tags",
             "views",
         ];
+    }
 
-        let queryBuilder = dbContext.kmq("available_songs").select(fields);
+    /**
+     * Returns a list of songs from the data store, narrowed down by the specified game options
+     * @param guildPreference - The GuildPreference
+     * @returns a list of songs, as well as the number of songs before the filter option was applied
+     */
+    static async getFilteredSongList(
+        guildPreference: GuildPreference
+    ): Promise<{ songs: Set<QueriedSong>; countBeforeLimit: number }> {
+        let queryBuilder = dbContext
+            .kmq("available_songs")
+            .select(SongSelector.getQueriedSongFields());
 
         if (guildPreference.gameOptions.forcePlaySongID) {
             queryBuilder = queryBuilder.where(

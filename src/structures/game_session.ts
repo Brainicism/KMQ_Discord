@@ -1182,6 +1182,16 @@ export default class GameSession {
     }
 
     /**
+     * @param songID - the YouTube ID of a song
+     * @returns whether the given song is in the game's list of songs
+     */
+    isSongInOptions(songID: string): boolean {
+        return [...this.songSelector.getSongs()?.songs]
+            .map((x) => x.youtubeLink)
+            .includes(songID);
+    }
+
+    /**
      * Prepares a new GameRound
      * @param randomSong - The queried song
      * @returns the new GameRound

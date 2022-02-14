@@ -427,3 +427,35 @@ export function containsHangul(s: string): boolean {
         s
     );
 }
+
+/**
+ * @param s - the string to extract a video ID from
+ * @returns the video ID
+ */
+export function extractYouTubeID(s: string): string {
+    if (s.startsWith("https://")) {
+        s = s.replace("https://", "");
+    }
+
+    if (s.startsWith("www.")) {
+        s = s.replace("www.", "");
+    }
+
+    if (s.startsWith("youtube.com/watch?v=")) {
+        s = s.replace("youtube.com/watch?v=", "");
+    }
+
+    if (s.startsWith("youtu.be/")) {
+        s = s.replace("youtu.be/", "");
+    }
+
+    return s;
+}
+
+/**
+ * @param id - the potential YouTube video ID
+ * @returns true the given id is the same format as a YouTube video ID (note: does not check if the video exists)
+ */
+export function validYouTubeIDFormat(id: string): boolean {
+    return /^[a-zA-Z0-9_-]{11}$/.test(id);
+}
