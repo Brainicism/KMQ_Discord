@@ -1,3 +1,4 @@
+import { getVideoID } from "ytdl-core";
 import { LocaleType } from "../../helpers/localization_manager";
 import BaseCommand, { Help, CommandArgs } from "../interfaces/base_command";
 import { state } from "../../kmq_worker";
@@ -12,8 +13,6 @@ import MessageContext from "../../structures/message_context";
 import {
     friendlyFormattedDate,
     friendlyFormattedNumber,
-    extractYouTubeID,
-    validYouTubeIDFormat,
 } from "../../helpers/utils";
 import { IPCLogger } from "../../logger";
 import { sendValidationErrorMessage } from "../../helpers/validate";
@@ -82,9 +81,15 @@ export default class LookupCommand implements BaseCommand {
             arg = arg.slice(1, -1);
         }
 
-        const videoID = extractYouTubeID(arg);
+        if (arg.startsWith("youtube.com") || arg.startsWith("youtu.be")) {
+            // ytdl::getVideoID() requires URLs start with "https://"
+            arg = "https://" + arg;
+        }
 
-        if (!validYouTubeIDFormat(videoID)) {
+        let videoID: string;
+        try {
+            videoID = getVideoID(arg);
+        } catch {
             await sendValidationErrorMessage(
                 message,
                 state.localizer.translate(
@@ -98,7 +103,7 @@ export default class LookupCommand implements BaseCommand {
             logger.info(
                 `${getDebugLogHeader(
                     message
-                )} | Invalid YouTube ID passed. videoID = ${videoID}.`
+                )} | Invalid YouTube ID passed. arg = ${arg}.`
             );
             return;
         }
