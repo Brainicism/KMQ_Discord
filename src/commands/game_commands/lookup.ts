@@ -192,31 +192,21 @@ export default class LookupCommand implements BaseCommand {
                 }${seconds}`;
             }
 
-            if (state.gameSessions[guildID]) {
-                const gameSession = state.gameSessions[guildID];
-                includedInOptions = gameSession.isSongInOptions(videoID);
-                logger.info(
-                    `${getDebugLogHeader(
-                        message
-                    )} | KMQ song lookup during a game. videoID = ${videoID}. Included in options = ${includedInOptions}.`
-                );
-            } else {
-                includedInOptions = [
-                    ...(
-                        await SongSelector.getFilteredSongList(
-                            await getGuildPreference(guildID)
-                        )
-                    ).songs,
-                ]
-                    .map((x) => x.youtubeLink)
-                    .includes(videoID);
+            includedInOptions = [
+                ...(
+                    await SongSelector.getFilteredSongList(
+                        await getGuildPreference(guildID)
+                    )
+                ).songs,
+            ]
+                .map((x) => x.youtubeLink)
+                .includes(videoID);
 
-                logger.info(
-                    `${getDebugLogHeader(
-                        message
-                    )} | KMQ song lookup outside a game. videoID = ${videoID}. Included in options = ${includedInOptions}.`
-                );
-            }
+            logger.info(
+                `${getDebugLogHeader(
+                    message
+                )} | KMQ song lookup. videoID = ${videoID}. Included in options = ${includedInOptions}.`
+            );
         } else {
             description = state.localizer.translate(
                 guildID,
