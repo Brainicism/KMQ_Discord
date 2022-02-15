@@ -227,6 +227,7 @@ Use `,help [command_name]` for more details for any of the following commands:
 - `,news`: Show the latest features/changes to the bot
 - `,profile`: Show per-player stats, along with a ranking against everyone else
 - `,leaderboard`: Show the server/game/global KMQ leaderboard
+- `,score`: Show the current game's scoreboard with EXP gained
 - `,list`: Show the currently selected groups for `,groups`, `,include`, or `,exclude`
 - `,preset`: Quickly save, load, and export game options as presets (even across servers!)
 - `,vote`: Show your current 2x bonus EXP modifier status from voting for the bot on [top.gg](https://top.gg/bot/508759831755096074/vote). Thanks for supporting KMQ!
