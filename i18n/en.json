@@ -512,6 +512,24 @@
             },
             "updatedDescription": "The bot's language has been updated to `{{language}}`."
         },
+        "lookup": {
+            "help": {
+                "description": "Check whether a given YouTube video is included KMQ's database and the current game options.",
+                "example": {
+                    "song": "Provides information about {{song}} by {{artist}}."
+                }
+            },
+            "inCurrentGameOptions": "In Current Game Options?",
+            "inKMQ": "This song is included in KMQ! Here's the link to [Daisuki]({{link}}).",
+            "notFound": {
+                "description": "The requested song was not found in KMQ's copy of the Daisuki database. It is not included in KMQ.",
+                "title": "Song Not Found"
+            },
+            "notInKMQ": "This song has an entry on [Daisuki]({{link}}), but it isn't included in KMQ.",
+            "validation": {
+                "invalidYouTubeID": "Expected a valid YouTube ID or link."
+            }
+        },
         "multiguess": {
             "help": {
                 "description": "Sets whether multiple people can guess a song correctly. When {{on}}, players will have 1.5 seconds after the first correct answer is given, to continue to answer. The first answer receives full EXP, correct answers that come after receive multiplicatively less EXP.",
@@ -981,10 +999,12 @@
     "misc": {
         "andManyOthers": "and many others...",
         "artist": "artist",
+        "artistAliases": "Artist Aliases",
         "classic": {
             "yourScore": "Your score is {{score}}."
         },
         "conflict": "conflict",
+        "duration": "Duration",
         "elimination": {
             "yourLives": "You have {{lives}} lives."
         },
@@ -1059,7 +1079,7 @@
                     "notInEnum": "Expected one of the following valid {{argument}} values: ({{validValues}})."
                 },
                 "numArguments": {
-                    "incorrect": "{Incorrect number of arguments. See `{{help}} {{command}}` for usage."
+                    "incorrect": "Incorrect number of arguments. See `{{help}} {{command}}` for usage."
                 },
                 "number": {
                     "max": "Expected value less than or equal to {{max}} for {{argument}}",
@@ -1178,6 +1198,9 @@
             "title": "🚀 Power Up!"
         },
         "listOfGroups": "list of groups",
+        "no": "No",
+        "none": "None",
+        "notApplicable": "N/A",
         "plural": {
             "day_one": "{{count}} day",
             "day_other": "{{count}} days",
@@ -1205,11 +1228,13 @@
             "differentVC": "You must be in the same voice channel as the bot to use this command.",
             "title": "Wait..."
         },
+        "releaseDate": "Release Date",
         "sendingBookmarkedSongs": {
             "description": "Sending {{songs}} to {{players}}.\n\nBookmark songs during the game by right-clicking the song message and selecting `Apps > Bookmark Song`",
             "title": "Sending Bookmarked Songs..."
         },
         "song": "song",
+        "songAliases": "Song Aliases",
         "team": {
             "yourScore": "Your score: {{score}}",
             "yourTeamScore": "Your team's score: {{teamScore}}"
@@ -1225,6 +1250,7 @@
             "addRemoveOrdering": {
                 "footer": "Did you mean to use {{addOrRemove}} {{command}}?"
             }
-        }
+        },
+        "yes": "Yes"
     }
 }
