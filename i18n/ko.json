@@ -514,20 +514,20 @@
         },
         "lookup": {
             "help": {
-                "description": "주어진 YouTube 동영상이 KMQ의 데이터베이스와 현재 게임 옵션에 포함되어 있는지 확인합니다.",
+                "description": "주어진 유튜브 동영상이 KMQ의 데이터베이스와 현재 게임 옵션에 포함되어 있는지 확인합니다.",
                 "example": {
-                    "song": "{{artist}별 {{song}}에 대한 정보를 제공합니다."
+                    "song": "{{artist}} - {{song}}에 대한 정보를 제공합니다."
                 }
             },
-            "inCurrentGameOptions": "현재 게임 옵션에서?",
-            "inKMQ": "이 노래는 KMQ에 포함되어 있습니다! 여기 [다이스키]({{link}})의 링크가 있습니다.",
+            "inCurrentGameOptions": "현재 게임 옵션",
+            "inKMQ": "KMQ에 수록된 곡이며 [Daisuki]({{link}})의 링크가 있습니다.",
             "notFound": {
-                "description": "요청한 노래는 KMQ의 다이스키 데이터베이스 복사본에서 찾을 수 없습니다. KMQ에는 포함되어 있지 않습니다.",
+                "description": "KMQ의 Daisuki 데이터베이스 사본에서 요청한 노래를 찾을 수 없으며 KMQ에는 포함되어 있지 않습니다.",
                 "title": "노래를 찾을 수 없음"
             },
-            "notInKMQ": "이 곡은 [다이스키]({{link}})에 수록돼 있지만, KMQ에는 수록돼 있지 않습니다.",
+            "notInKMQ": "이 노래는 [Daisuki]({{link}})에 항목이 있지만 KMQ에는 포함되어 있지 않습니다.",
             "validation": {
-                "invalidYouTubeID": "올바른 YouTube ID 또는 링크가 필요합니다."
+                "invalidYouTubeID": "올바른 유튜브 아이디 또는 링크가 필요합니다."
             }
         },
         "multiguess": {
