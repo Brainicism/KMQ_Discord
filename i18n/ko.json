@@ -520,7 +520,7 @@
                 }
             },
             "inCurrentGameOptions": "현재 게임 옵션",
-            "inKMQ": "KMQ에 수록된 곡이며 [Daisuki]({{link}})의 링크가 있습니다.",
+            "inKMQ": "KMQ에 수록된 곡이며 [여기]({{link}})에 링크가 있습니다.",
             "notFound": {
                 "description": "KMQ의 Daisuki 데이터베이스 사본에서 요청한 노래를 찾을 수 없으며 KMQ에는 포함되어 있지 않습니다.",
                 "title": "노래를 찾을 수 없음"
@@ -984,7 +984,7 @@
         },
         "kmq": {
             "guessRate": "재미있는 사실: {{hyperlink}}의 추측률은 {{roundsPlayed}} 라운드 동안 {{percentage}}% 입니다.",
-            "highestLeveledPlayerStats": "재미있는 사실: {{ordinalNum}}번째로 높은 레벨인 KMQ 플레이어는 레벨 {{level}}이며, {{gamesPlayed}}개의 게임에서 {{songsGuessed}} 곡이 추측되었습니다!",
+            "highestLeveledPlayerStats": "재미있는 사실: {{ordinalNum}}번째로 높은 레벨인 KMQ 플레이어는 {{level}} 레벨이며, {{gamesPlayed}}개의 게임에서 {{songsGuessed}} 곡이 추측되었습니다!",
             "longestGame": "KMQ 사실: 세계에서 (현재) 가장 긴 KMQ 게임은 {{roundsPlayed}}곡이 재생되고 {{numParticipants}}명이 참여하여 평균 추측 시간이 {{avgGuessTime}}초로 {{sessionLength}}분 동안 진행되었습니다! (당신은 이 기록을 깰 수 있습니까?)",
             "mostActivePlayerGamesPlayed": "KMQ 사실: 가장 활동적인 플레이어는 2020년 11월 8일 이후로 {{gamesPlayed}}번의 게임을 했습니다!",
             "mostActivePlayerSongsGuessed": "KMQ 사실: 가장 활동적인 플레이어는 2020년 11월 8일 이후로 {{songsGuessed}}곡을 추측했습니다!",
@@ -1004,7 +1004,7 @@
             "yourScore": "당신의 점수는 {{score}}점 입니다."
         },
         "conflict": "갈등",
-        "duration": "지속시간",
+        "duration": "시간",
         "elimination": {
             "yourLives": "당신의 목숨은 {{lives}}개 남았습니다."
         },
