@@ -1443,7 +1443,11 @@ export async function sendScoreboardMessage(
  * @param message - The Message object
  */
 export function disconnectVoiceConnection(message: GuildTextableMessage): void {
-    state.client.closeVoiceConnection(message.guildID);
+    state.client.closeVoiceConnection(
+        message.guildID !== state.client.user.id
+            ? message.guildID
+            : process.env.DEBUG_SERVER_ID
+    );
 }
 
 /**
@@ -1453,7 +1457,12 @@ export function disconnectVoiceConnection(message: GuildTextableMessage): void {
 export function getVoiceConnection(
     message: Eris.Message
 ): Eris.VoiceConnection {
-    const voiceConnection = state.client.voiceConnections.get(message.guildID);
+    const voiceConnection = state.client.voiceConnections.get(
+        message.guildID !== state.client.user.id
+            ? message.guildID
+            : process.env.DEBUG_SERVER_ID
+    );
+
     return voiceConnection;
 }
 
@@ -1465,7 +1474,9 @@ export function areUserAndBotInSameVoiceChannel(
     message: Eris.Message
 ): boolean {
     const botVoiceConnection = state.client.voiceConnections.get(
-        message.guildID
+        message.guildID !== state.client.user.id
+            ? message.guildID
+            : process.env.DEBUG_SERVER_ID
     );
 
     if (!message.member.voiceState || !botVoiceConnection) {
@@ -1483,7 +1494,11 @@ export function getUserVoiceChannel(
     messageContext: MessageContext
 ): Eris.VoiceChannel {
     const member = state.client.guilds
-        .get(messageContext.guildID)
+        .get(
+            messageContext.guildID !== state.client.user.id
+                ? messageContext.guildID
+                : process.env.DEBUG_SERVER_ID
+        )
         .members.get(messageContext.author.id);
 
     const voiceChannelID = member.voiceState.channelID;
@@ -1612,7 +1627,10 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
  * @returns whether the bot is alone 😔
  */
 export function checkBotIsAlone(guildID: string): boolean {
-    const voiceConnection = state.client.voiceConnections.get(guildID);
+    const voiceConnection = state.client.voiceConnections.get(
+        guildID !== state.client.user.id ? guildID : process.env.DEBUG_SERVER_ID
+    );
+
     if (!voiceConnection || !voiceConnection.channelID) return true;
     const channel = state.client.getChannel(
         voiceConnection.channelID
@@ -1643,8 +1661,9 @@ export function getDebugChannel(): Promise<Eris.TextChannel> {
  * @returns the number of users required for a majority
  */
 export function getMajorityCount(guildID: string): number {
-    const voiceChannelID =
-        state.client.voiceConnections.get(guildID)?.channelID;
+    const voiceChannelID = state.client.voiceConnections.get(
+        guildID !== state.client.user.id ? guildID : process.env.DEBUG_SERVER_ID
+    )?.channelID;
 
     if (voiceChannelID) {
         return Math.floor(getNumParticipants(voiceChannelID) * 0.5) + 1;
@@ -1852,7 +1871,9 @@ export async function tryCreateInteractionErrorAcknowledgement(
                     },
                     title: bold(
                         state.localizer.translate(
-                            interaction.guildID,
+                            interaction.guildID === state.client.user.id
+                                ? state.client.user.id
+                                : interaction.guildID,
                             "misc.interaction.title.failure"
                         )
                     ),

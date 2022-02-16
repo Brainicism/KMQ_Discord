@@ -24,7 +24,12 @@ export default async function interactionCreateHandler(
         | Eris.UnknownInteraction
 ): Promise<void> {
     if (interaction instanceof Eris.ComponentInteraction) {
-        const gameSession = state.gameSessions[interaction.guildID];
+        const guildID =
+            interaction.guildID === process.env.DEBUG_SERVER_ID
+                ? state.client.user.id
+                : interaction.guildID;
+
+        const gameSession = state.gameSessions[guildID];
         if (!gameSession || !gameSession.gameRound) {
             tryInteractionAcknowledge(interaction);
             return;
@@ -38,7 +43,7 @@ export default async function interactionCreateHandler(
                 interaction.member.avatarURL,
                 interaction.member.id
             ),
-            interaction.guildID
+            guildID
         );
 
         gameSession.handleMultipleChoiceInteraction(
@@ -46,6 +51,11 @@ export default async function interactionCreateHandler(
             messageContext
         );
     } else if (interaction instanceof Eris.CommandInteraction) {
+        const guildID =
+            interaction.guildID === process.env.DEBUG_SERVER_ID
+                ? state.client.user.id
+                : interaction.guildID;
+
         if (
             interaction.data.type ===
             Eris.Constants.ApplicationCommandTypes.USER
@@ -61,12 +71,12 @@ export default async function interactionCreateHandler(
             Eris.Constants.ApplicationCommandTypes.MESSAGE
         ) {
             if (interaction.data.name === BOOKMARK_COMMAND_NAME) {
-                const gameSession = state.gameSessions[interaction.guildID];
+                const gameSession = state.gameSessions[guildID];
                 if (!gameSession) {
                     tryCreateInteractionErrorAcknowledgement(
                         interaction,
                         state.localizer.translate(
-                            interaction.guildID,
+                            guildID,
                             "misc.failure.interaction.bookmarkOutsideGame"
                         )
                     );

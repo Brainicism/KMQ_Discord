@@ -50,12 +50,18 @@ export default async function messageCreateHandler(
 
     const parsedMessage = parseMessage(message.content) || null;
     const textChannel = message.channel as Eris.TextChannel;
+    const guildID =
+        message.guildID === process.env.DEBUG_SERVER_ID
+            ? state.client.user.id
+            : message.guildID;
+
+    message.guildID = guildID;
     if (
         message.mentions.includes(state.client.user) &&
         message.content.split(" ").length === 1
     ) {
         // Any message that mentions the bot sends the current options
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await getGuildPreference(guildID);
         sendOptionsMessage(
             MessageContext.fromMessage(message),
             guildPreference,
@@ -86,12 +92,12 @@ export default async function messageCreateHandler(
                 parsedMessage,
                 invokedCommand.validations,
                 typeof invokedCommand.help === "function"
-                    ? invokedCommand.help(message.guildID).usage
+                    ? invokedCommand.help(guildID).usage
                     : null
             )
         ) {
             const { gameSessions } = state;
-            const gameSession = gameSessions[message.guildID];
+            const gameSession = gameSessions[guildID];
             if (invokedCommand.preRunChecks) {
                 for (const precheck of invokedCommand.preRunChecks) {
                     if (
@@ -127,19 +133,19 @@ export default async function messageCreateHandler(
 
                 sendErrorMessage(MessageContext.fromMessage(message), {
                     title: state.localizer.translate(
-                        message.guildID,
+                        guildID,
                         "misc.failure.command.title"
                     ),
                     description: state.localizer.translate(
-                        message.guildID,
+                        guildID,
                         "misc.failure.command.description",
                         { debugId }
                     ),
                 });
             }
         }
-    } else if (state.gameSessions[message.guildID]?.gameRound) {
-        const gameSession = state.gameSessions[message.guildID];
+    } else if (state.gameSessions[guildID]?.gameRound) {
+        const gameSession = state.gameSessions[guildID];
         gameSession.guessSong(
             MessageContext.fromMessage(message),
             message.content

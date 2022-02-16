@@ -13,7 +13,11 @@ export default async function voiceChannelSwitchHandler(
     newChannel: Eris.VoiceChannel,
     oldChannel: Eris.VoiceChannel
 ): Promise<void> {
-    const guildID = oldChannel.guild.id;
+    const guildID =
+        oldChannel.guild.id === process.env.DEBUG_SERVER_ID
+            ? state.client.user.id
+            : oldChannel.guild.id;
+
     const gameSession = state.gameSessions[guildID];
     if (!gameSession) {
         return;

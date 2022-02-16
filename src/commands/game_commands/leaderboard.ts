@@ -641,7 +641,11 @@ export default class LeaderboardCommand implements BaseCommand {
                                             {
                                                 serverName:
                                                     state.client.guilds.get(
-                                                        messageContext.guildID
+                                                        messageContext.guildID !==
+                                                            state.client.user.id
+                                                            ? messageContext.guildID
+                                                            : process.env
+                                                                  .DEBUG_SERVER_ID
                                                     ).name,
                                             }
                                         );

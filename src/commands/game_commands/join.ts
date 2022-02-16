@@ -162,7 +162,11 @@ export default class JoinCommand implements BaseCommand {
 
             if (
                 !state.client.guilds
-                    .get(message.guildID)
+                    .get(
+                        message.guildID !== state.client.user.id
+                            ? message.guildID
+                            : process.env.DEBUG_SERVER_ID
+                    )
                     .emojis.map((e) => e.id)
                     .includes(emojiID)
             ) {

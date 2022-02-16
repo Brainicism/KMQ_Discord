@@ -11,7 +11,11 @@ export default function voiceChannelLeaveHandler(
     member: Eris.Member,
     oldChannel: Eris.VoiceChannel
 ): void {
-    const guildID = oldChannel.guild.id;
+    const guildID =
+        oldChannel.guild.id === process.env.DEBUG_SERVER_ID
+            ? state.client.user.id
+            : oldChannel.guild.id;
+
     const gameSession = state.gameSessions[guildID];
     if (!gameSession) {
         return;

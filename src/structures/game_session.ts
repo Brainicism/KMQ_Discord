@@ -396,7 +396,11 @@ export default class GameSession {
             await getGuildPreference(this.guildID),
             new MessageContext(this.textChannelID, null, this.guildID)
         );
-        const voiceConnection = state.client.voiceConnections.get(this.guildID);
+        const voiceConnection = state.client.voiceConnections.get(
+            this.guildID !== state.client.user.id
+                ? this.guildID
+                : process.env.DEBUG_SERVER_ID
+        );
 
         if (this.gameType === GameType.COMPETITION) {
             // log scoreboard

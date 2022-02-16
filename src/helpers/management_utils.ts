@@ -130,7 +130,10 @@ function clearInactiveVoiceConnections(): void {
     ) as Array<string>;
 
     const activeVoiceChannelGuildIDs = Object.values(state.gameSessions).map(
-        (x) => x.guildID
+        (x) =>
+            x.guildID !== state.client.user.id
+                ? x.guildID
+                : process.env.DEBUG_SERVER_ID
     );
 
     for (const existingVoiceChannelGuildID of existingVoiceChannelGuildIDs) {
