@@ -973,7 +973,7 @@
             "mostMusicShowWins": "재미있는 사실: {{artist}}은(는) {{num}}번의 우승으로 음악방송에서 {{ordinalNum}}관왕을 차지했습니다!",
             "mostViewedGroup": "재미있는 사실: {{artist}}은(는)  총 유튜브 조회수는 {{views}}회로 {{ordinalNum}}번째로 많이 본 그룹입니다!",
             "mostViewedSoloist": "재미있는 사실: {{artist}}은(는)  총 유튜브 조회수는 {{views}}회로 {{ordinalNum}}번째로 많이 본 솔로 아티스트입니다!",
-            "mostViewedVideo": "재미있는 사실: {{hyperlink}}는 총 유튜브 조회수는 {{views}}회로 {{ordinalNum}}번째로 가장 많이 본 동영상입니다!",
+            "mostViewedVideo": "재미있는 사실: {{hyperlink}}은(는) 총 유튜브 조회수는 {{views}}회로 {{ordinalNum}}번째로 가장 많이 본 동영상입니다!",
             "mvViewMilestone": "재미있는 사실: {{hyperlink}}이(가) 최근 유튜브에서 {{view}}회를 도달했습니다!",
             "newMV": "신곡 알림: 최근에 공개된 이 뮤직 비디오 {{hyperlink}}(을)를 확인하세요.",
             "oldMV": "재미있는 사실: {{hyperlink}}가 {{year}}년에 출시되었습니다!",
@@ -989,7 +989,7 @@
             "mostActivePlayerGamesPlayed": "KMQ 사실: 가장 활동적인 플레이어는 2020년 11월 8일 이후로 {{gamesPlayed}}번의 게임을 했습니다!",
             "mostActivePlayerSongsGuessed": "KMQ 사실: 가장 활동적인 플레이어는 2020년 11월 8일 이후로 {{songsGuessed}}곡을 추측했습니다!",
             "mostActiveServer": "KMQ 사실: 가장 활동적인 서버는 KMQ의 {{gamesPlayed}} 게임을 플레이했으며 총 {{songsGuessed}} 곡을 추측했습니다!",
-            "mostCorrectGuessesServer": "KMQ 사실: 가장 정확한 추측을 한 서버는 KMQ의 {{gamesPlayed}}번의 게임을 플레이했으며 총 {{songsGuessed}}곡이 추측되었습니다!",
+            "mostCorrectGuessesServer": "KMQ 사실: KMQ를 가장 정확한 추측을 한 서버는 {{gamesPlayed}}번의 게임을 플레이했으며 총 {{songsGuessed}}곡이 추측되었습니다!",
             "recentGameCount": "KMQ 사실: 지난 주에 KMQ의 총 {{recentGameCount}}번의 게임이 진행되었습니다!",
             "recentSessions": "KMQ 사실: 지난 주에 총 {{recentSessions}}개의 KMQ 게임이 진행되었습니다!",
             "totalGames": "KMQ 사실: KMQ의 총 {{totalGamesPlayed}}번의 게임이 플레이되었습니다!",
@@ -1228,7 +1228,7 @@
             "differentVC": "이 명령어를 사용하려면 봇과 동일한 음성 채널에 있어야 합니다.",
             "title": "잠시만 기다려주십시오..."
         },
-        "releaseDate": "릴리스 날짜",
+        "releaseDate": "출시 날짜",
         "sendingBookmarkedSongs": {
             "description": "{{players}}에게 {{songs}}을(를) 보냅니다.\n\n노래 메시지를 마우스 오른쪽 버튼으로 클릭하고 `앱 > Bookmark Song`를 선택하여 게임 중에 노래를 북마크하세요.",
             "title": "북마크된 노래를 보내는 중..."
