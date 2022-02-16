@@ -514,20 +514,20 @@
         },
         "lookup": {
             "help": {
-                "description": "주어진 YouTube 동영상이 KMQ의 데이터베이스와 현재 게임 옵션에 포함되어 있는지 확인합니다.",
+                "description": "주어진 유튜브 동영상이 KMQ의 데이터베이스와 현재 게임 옵션에 포함되어 있는지 확인합니다.",
                 "example": {
-                    "song": "{{artist}별 {{song}}에 대한 정보를 제공합니다."
+                    "song": "{{artist}} - {{song}}에 대한 정보를 제공합니다."
                 }
             },
-            "inCurrentGameOptions": "현재 게임 옵션에서?",
-            "inKMQ": "이 노래는 KMQ에 포함되어 있습니다! 여기 [다이스키]({{link}})의 링크가 있습니다.",
+            "inCurrentGameOptions": "현재 게임 옵션",
+            "inKMQ": "KMQ에 수록된 곡이며 [여기]({{link}})에 링크가 있습니다.",
             "notFound": {
-                "description": "요청한 노래는 KMQ의 다이스키 데이터베이스 복사본에서 찾을 수 없습니다. KMQ에는 포함되어 있지 않습니다.",
+                "description": "KMQ의 Daisuki 데이터베이스 사본에서 요청한 노래를 찾을 수 없으며 KMQ에는 포함되어 있지 않습니다.",
                 "title": "노래를 찾을 수 없음"
             },
-            "notInKMQ": "이 곡은 [다이스키]({{link}})에 수록돼 있지만, KMQ에는 수록돼 있지 않습니다.",
+            "notInKMQ": "이 노래는 [Daisuki]({{link}})에 항목이 있지만 KMQ에는 포함되어 있지 않습니다.",
             "validation": {
-                "invalidYouTubeID": "올바른 YouTube ID 또는 링크가 필요합니다."
+                "invalidYouTubeID": "올바른 유튜브 아이디 또는 링크가 필요합니다."
             }
         },
         "multiguess": {
@@ -966,33 +966,33 @@
             "mostActiveYear": "재미있는 사실: {{year}}년은 {{num}}개의 뮤직 비디오가 공개되어 K-POP에서 {{ordinalNum}}번째로 활발한 해였습니다!",
             "mostDebuts": "재미있는 사실: {{year}}년은 {{num}}개의 그룹이 데뷔로 {{ordinalNum}}번째로 많은 데뷔를 했습니다!",
             "mostGaonAppearances": "재미있는 사실: {{artistName}}은(는) {{appearances}}번의 출연으로 가온 디지털 주간 차트에서 {{ordinalNum}}위를 기록했습니다!",
-            "mostGaonFirsts": "재미있는 사실: {{artistName}}은(는) {{ordinalNum}}번 1위를 기록하며 가온 디지털 주간 차트에서 {{firstPlaceCount}}위를 기록했습니다!",
+            "mostGaonFirsts": "재미있는 사실: {{artistName}}은(는) 가온 디지털 주간 차트에서 {{firstPlaceCount}}번 1위를 차지하여 가장 많은 {{ordinalNum}}위를 차지했습니다!",
             "mostLikedGroup": "재미있는 사실: {{artist}}는 유튜브에서 총 {{likes}}개의 좋아요를 받으며 {{ordinalNum}}번째로 많은 좋아요를 받은 그룹입니다!",
             "mostLikedVideo": "재미있는 사실: {{hyperlink}}는 유튜브에서 총 {{likes}}개의 좋아요를 받으며 {{ordinalNum}}번째로 많은 좋아요를 받은 영상입니다!",
             "mostMVs": "재미있는 사실: {{artist}}이(가) 유튜브에서 {{num}}개의 뮤직비디오를 보유하고 있으며 {{ordinalNum}}번째로 많은 뮤직비디오를 보유하고 있습니다!",
             "mostMusicShowWins": "재미있는 사실: {{artist}}은(는) {{num}}번의 우승으로 음악방송에서 {{ordinalNum}}관왕을 차지했습니다!",
             "mostViewedGroup": "재미있는 사실: {{artist}}은(는)  총 유튜브 조회수는 {{views}}회로 {{ordinalNum}}번째로 많이 본 그룹입니다!",
             "mostViewedSoloist": "재미있는 사실: {{artist}}은(는)  총 유튜브 조회수는 {{views}}회로 {{ordinalNum}}번째로 많이 본 솔로 아티스트입니다!",
-            "mostViewedVideo": "재미있는 사실: {{hyperlink}}는 총 유튜브 조회수는 {{views}}회로 {{ordinalNum}}번째로 가장 많이 본 동영상입니다!",
+            "mostViewedVideo": "재미있는 사실: {{hyperlink}}은(는) 총 유튜브 조회수는 {{views}}회로 {{ordinalNum}}번째로 가장 많이 본 동영상입니다!",
             "mvViewMilestone": "재미있는 사실: {{hyperlink}}이(가) 최근 유튜브에서 {{view}}회를 도달했습니다!",
             "newMV": "신곡 알림: 최근에 공개된 이 뮤직 비디오 {{hyperlink}}(을)를 확인하세요.",
             "oldMV": "재미있는 사실: {{hyperlink}}가 {{year}}년에 출시되었습니다!",
             "recentGaonWeekly": "재미있는 사실: {{songName}}은(는) 지난 주 가온 주간 차트에서 {{ordinalNum}}번째로 가장 높은 차트를 기록한 곡입니다!",
             "recentMusicShowWin": "재미있는 사실: {{winDate}}의 {{musicShow}}에서 {{hyperlink}}가 최근 우승했습니다.",
-            "viewsByArtistType": "재미있는 사실: 유튜브의 모든 K-POP 뮤직 비디오에 대한 총 조회수는 {{totalViews}}회이며, 그 중 {{groupViews}} ({{groupProportion}}%)가 그룹에서 발생한 반면 {{soloViews}} ({{soloProportion}}%)는 솔로 아티스트에서 발생했습니다.",
-            "viewsByGender": "재미있는 사실: 유튜브의 모든 K-POP 뮤직비디오 조회수는 총 {{totalViews}}회이며, 이 중 {{maleViews}} ({{maleProportion}}%)가 남성 그룹이고, {{femaleViews}} ({{femaleProportion}}%)가 여성 그룹이며, 나머지 {{coedViews}} ({{coedProportion}}%)가 남녀 혼성 그룹입니다."
+            "viewsByArtistType": "재미있는 사실: 유튜브의 모든 K-POP 뮤직 비디오에 대한 총 조회수는 {{totalViews}}회이며, 그 중 {{groupViews}}회 ({{groupProportion}}%)가 그룹에서 발생한 반면 {{soloViews}}회 ({{soloProportion}}%)는 솔로 아티스트에서 발생했습니다.",
+            "viewsByGender": "재미있는 사실: 유튜브의 모든 K-POP 뮤직비디오 조회수는 총 {{totalViews}}회이며, 이 중 {{maleViews}}회 ({{maleProportion}}%)가 남성 그룹이고, {{femaleViews}}회 ({{femaleProportion}}%)가 여성 그룹이며, 나머지 {{coedViews}}회 ({{coedProportion}}%)가 남녀 혼성 그룹입니다."
         },
         "kmq": {
             "guessRate": "재미있는 사실: {{hyperlink}}의 추측률은 {{roundsPlayed}} 라운드 동안 {{percentage}}% 입니다.",
-            "highestLeveledPlayerStats": "재미있는 사실: {{ordinalNum}}번째로 높은 레벨인 KMQ 플레이어는 레벨 {{level}}이며, {{gamesPlayed}}개의 게임에서 {{songsGuessed}} 곡이 추측되었습니다!",
-            "longestGame": "KMQ 사실: 세계에서 (현재) 가장 긴 KMQ 게임은 {{roundsPlayed}}곡이 재생되고 {{numParticipants}}명이 참여하여 평균 추측 시간이 {{avgGuessTime}}초로 {{sessionLength}}분 동안 진행되었습니다! (당신은 그것을 이길 수 있습니까?)",
-            "mostActivePlayerGamesPlayed": "KMQ 사실: 가장 활동적인 플레이어는 2020년 11월 8일 이후로 {{gamesPlayed}} 게임을 했습니다!",
+            "highestLeveledPlayerStats": "재미있는 사실: {{ordinalNum}}번째로 높은 레벨인 KMQ 플레이어는 {{level}} 레벨이며, {{gamesPlayed}}개의 게임에서 {{songsGuessed}} 곡이 추측되었습니다!",
+            "longestGame": "KMQ 사실: 세계에서 (현재) 가장 긴 KMQ 게임은 {{roundsPlayed}}곡이 재생되고 {{numParticipants}}명이 참여하여 평균 추측 시간이 {{avgGuessTime}}초로 {{sessionLength}}분 동안 진행되었습니다! (당신은 이 기록을 깰 수 있습니까?)",
+            "mostActivePlayerGamesPlayed": "KMQ 사실: 가장 활동적인 플레이어는 2020년 11월 8일 이후로 {{gamesPlayed}}번의 게임을 했습니다!",
             "mostActivePlayerSongsGuessed": "KMQ 사실: 가장 활동적인 플레이어는 2020년 11월 8일 이후로 {{songsGuessed}}곡을 추측했습니다!",
             "mostActiveServer": "KMQ 사실: 가장 활동적인 서버는 KMQ의 {{gamesPlayed}} 게임을 플레이했으며 총 {{songsGuessed}} 곡을 추측했습니다!",
-            "mostCorrectGuessesServer": "KMQ 사실: 가장 정확한 추측을 한 서버는 KMQ의 {{gamesPlayed}} 게임을 플레이했으며 총 {{songsGuessed}}곡이 추측되었습니다!",
-            "recentGameCount": "KMQ 사실: 지난 주에 KMQ의 총 {{recentGameCount}} 게임이 진행되었습니다!",
+            "mostCorrectGuessesServer": "KMQ 사실: KMQ를 가장 정확한 추측을 한 서버는 {{gamesPlayed}}번의 게임을 플레이했으며 총 {{songsGuessed}}곡이 추측되었습니다!",
+            "recentGameCount": "KMQ 사실: 지난 주에 KMQ의 총 {{recentGameCount}}번의 게임이 진행되었습니다!",
             "recentSessions": "KMQ 사실: 지난 주에 총 {{recentSessions}}개의 KMQ 게임이 진행되었습니다!",
-            "totalGames": "KMQ 사실: KMQ의 총 {{totalGamesPlayed}} 게임이 플레이되었습니다!",
+            "totalGames": "KMQ 사실: KMQ의 총 {{totalGamesPlayed}}번의 게임이 플레이되었습니다!",
             "uniquePlayers": "KMQ 사실: {{recentActivePlayers}}명의 플레이어가 지난 {{xDays}} 동안 KMQ를 플레이했습니다!"
         }
     },
@@ -1004,7 +1004,7 @@
             "yourScore": "당신의 점수는 {{score}}점 입니다."
         },
         "conflict": "갈등",
-        "duration": "지속시간",
+        "duration": "시간",
         "elimination": {
             "yourLives": "당신의 목숨은 {{lives}}개 남았습니다."
         },
@@ -1228,7 +1228,7 @@
             "differentVC": "이 명령어를 사용하려면 봇과 동일한 음성 채널에 있어야 합니다.",
             "title": "잠시만 기다려주십시오..."
         },
-        "releaseDate": "릴리스 날짜",
+        "releaseDate": "출시 날짜",
         "sendingBookmarkedSongs": {
             "description": "{{players}}에게 {{songs}}을(를) 보냅니다.\n\n노래 메시지를 마우스 오른쪽 버튼으로 클릭하고 `앱 > Bookmark Song`를 선택하여 게임 중에 노래를 북마크하세요.",
             "title": "북마크된 노래를 보내는 중..."
