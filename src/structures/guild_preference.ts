@@ -895,7 +895,7 @@ export default class GuildPreference {
             await dbContext
                 .kmq("game_options")
                 .insert(updatedOptions)
-                .onConflict(["guild_id", "option_name"])
+                .onConflict(["guild_id", "option_name", "client_id"])
                 .merge()
                 .transacting(trx);
         });
