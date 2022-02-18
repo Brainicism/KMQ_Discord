@@ -5,7 +5,7 @@
 exports.up = function (knex) {
     return knex.schema.table("game_options", (table) => {
         table
-            .text("client_id")
+            .string("client_id")
             .notNullable()
             .defaultTo(process.env.BOT_CLIENT_ID);
     });
