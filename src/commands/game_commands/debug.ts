@@ -45,7 +45,7 @@ export default class DebugCommand implements BaseCommand {
         fields.push({
             name: "Text Permissions",
             value: JSON.stringify(
-                channel.permissionsOf(state.client.user.id).json
+                channel.permissionsOf(process.env.BOT_CLIENT_ID).json
             ),
             inline: false,
         });
@@ -64,7 +64,7 @@ export default class DebugCommand implements BaseCommand {
             fields.push({
                 name: "Voice Permissions",
                 value: JSON.stringify(
-                    voiceChannel.permissionsOf(state.client.user.id).json
+                    voiceChannel.permissionsOf(process.env.BOT_CLIENT_ID).json
                 ),
                 inline: false,
             });

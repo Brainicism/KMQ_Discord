@@ -253,11 +253,10 @@ export async function textPermissionsCheck(
     guildID: string,
     authorID: string
 ): Promise<boolean> {
-    const { client } = state;
     const messageContext = new MessageContext(textChannelID, null, guildID);
     const channel = await fetchChannel(textChannelID);
     if (!channel) return false;
-    if (!channel.permissionsOf(client.user.id).has("sendMessages")) {
+    if (!channel.permissionsOf(process.env.BOT_CLIENT_ID).has("sendMessages")) {
         logger.warn(
             `${getDebugLogHeader(
                 messageContext
@@ -280,7 +279,8 @@ export async function textPermissionsCheck(
     }
 
     const missingPermissions = REQUIRED_TEXT_PERMISSIONS.filter(
-        (permission) => !channel.permissionsOf(client.user.id).has(permission)
+        (permission) =>
+            !channel.permissionsOf(process.env.BOT_CLIENT_ID).has(permission)
     );
 
     if (missingPermissions.length > 0) {
@@ -405,7 +405,9 @@ export async function sendMessage(
     // only reply to message if has required permissions
     if (
         channel &&
-        !channel.permissionsOf(state.client.user.id).has("readMessageHistory")
+        !channel
+            .permissionsOf(process.env.BOT_CLIENT_ID)
+            .has("readMessageHistory")
     ) {
         if (messageContent.messageReference) {
             messageContent.messageReference = null;
@@ -1539,7 +1541,9 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
     const messageContext = MessageContext.fromMessage(message);
     const missingPermissions = REQUIRED_VOICE_PERMISSIONS.filter(
         (permission) =>
-            !voiceChannel.permissionsOf(state.client.user.id).has(permission)
+            !voiceChannel
+                .permissionsOf(process.env.BOT_CLIENT_ID)
+                .has(permission)
     );
 
     if (missingPermissions.length > 0) {
@@ -1621,7 +1625,7 @@ export function checkBotIsAlone(guildID: string): boolean {
     if (channel.voiceMembers.size === 0) return true;
     if (
         channel.voiceMembers.size === 1 &&
-        channel.voiceMembers.has(state.client.user.id)
+        channel.voiceMembers.has(process.env.BOT_CLIENT_ID)
     ) {
         return true;
     }

@@ -40,7 +40,7 @@ const parseMessage = (message: string): ParsedMessage => {
 export default async function messageCreateHandler(
     message: Eris.Message
 ): Promise<void> {
-    if (message.author.id === state.client.user.id || message.author.bot)
+    if (message.author.id === process.env.BOT_CLIENT_ID || message.author.bot)
         return;
     if (!isGuildMessage(message)) return;
     if (state.client.unavailableGuilds.has(message.guildID)) {
