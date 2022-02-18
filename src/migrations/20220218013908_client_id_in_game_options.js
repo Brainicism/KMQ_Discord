@@ -8,7 +8,8 @@ exports.up = function (knex) {
             .string("client_id")
             .notNullable()
             .defaultTo(process.env.BOT_CLIENT_ID);
-        table.primary(["guild_id", "option_name", "client_id"]);
+        table.dropUnique(["guild_id", "option_name"]);
+        table.unique(["guild_id", "option_name", "client_id"]);
     });
 };
 
@@ -18,7 +19,8 @@ exports.up = function (knex) {
  */
 exports.down = function (knex) {
     return knex.schema.table("game_options", (table) => {
-        table.dropPrimary("client_id");
+        table.dropUnique(["guild_id", "option_name", "client_id"]);
+        table.unique(["guild_id", "option_name"]);
         table.dropColumn("client_id");
     });
 };
