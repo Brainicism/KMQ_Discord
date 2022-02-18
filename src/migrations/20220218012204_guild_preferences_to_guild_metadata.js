@@ -3,7 +3,7 @@
  * @returns { Promise<void> }
  */
 exports.up = function (knex) {
-    return knex.schema.renameTable("guild_preferences", "guild_metadata");
+    return knex.schema.renameTable("guild_preferences", "guilds");
 };
 
 /**
@@ -11,5 +11,5 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-    return knex.schema.renameTable("guild_metadata", "guild_preferences");
+    return knex.schema.renameTable("guilds", "guild_preferences");
 };

@@ -823,7 +823,7 @@ async function longestGame(lng: LocaleType): Promise<string[]> {
 
 async function mostGames(lng: LocaleType): Promise<string[]> {
     const result = await dbContext
-        .kmq("guild_metadata")
+        .kmq("guilds")
         .select("games_played", "songs_guessed")
         .orderBy("games_played", "DESC")
         .limit(1);
@@ -843,7 +843,7 @@ async function mostGames(lng: LocaleType): Promise<string[]> {
 
 async function mostCorrectGuessed(lng: LocaleType): Promise<string[]> {
     const result = await dbContext
-        .kmq("guild_metadata")
+        .kmq("guilds")
         .select("games_played", "songs_guessed")
         .orderBy("songs_guessed", "DESC")
         .limit(1);
