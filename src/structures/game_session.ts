@@ -516,7 +516,7 @@ export default class GameSession {
 
         // commit guild stats
         await dbContext
-            .kmq("guild_preferences")
+            .kmq("guild_metadata")
             .where("guild_id", this.guildID)
             .increment("games_played", 1);
 
@@ -608,7 +608,7 @@ export default class GameSession {
     async lastActiveNow(): Promise<void> {
         this.lastActive = Date.now();
         await dbContext
-            .kmq("guild_preferences")
+            .kmq("guild_metadata")
             .where({ guild_id: this.guildID })
             .update({ last_active: new Date() });
     }
@@ -668,7 +668,7 @@ export default class GameSession {
 
             // increment guild's song guess count
             await dbContext
-                .kmq("guild_preferences")
+                .kmq("guild_metadata")
                 .where("guild_id", this.guildID)
                 .increment("songs_guessed", 1);
 

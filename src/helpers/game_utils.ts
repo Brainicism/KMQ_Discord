@@ -93,14 +93,14 @@ export async function getGuildPreference(
     guildID: string
 ): Promise<GuildPreference> {
     const guildPreferences = await dbContext
-        .kmq("guild_preferences")
+        .kmq("guild_metadata")
         .select("*")
         .where("guild_id", "=", guildID);
 
     if (guildPreferences.length === 0) {
         const guildPreference = GuildPreference.fromGuild(guildID);
         await dbContext
-            .kmq("guild_preferences")
+            .kmq("guild_metadata")
             .insert({ guild_id: guildID, join_date: new Date() });
         return guildPreference;
     }
