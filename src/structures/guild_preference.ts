@@ -885,6 +885,7 @@ export default class GuildPreference {
         const updatedOptions = Object.values(updatedOptionsObjects).map(
             (option) => ({
                 guild_id: this.guildID,
+                client_id: process.env.BOT_CLIENT_ID,
                 option_name: option.name,
                 option_value: JSON.stringify(option.value),
             })

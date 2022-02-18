@@ -80,10 +80,10 @@ export default class BotListingManager {
     // eslint-disable-next-line class-methods-use-this
     private async postStat(siteConfigKeyName: string): Promise<void> {
         const botListing = BOT_LISTING_SITES[siteConfigKeyName];
-        const { ipc, client } = state;
+        const { ipc } = state;
         try {
             await Axios.post(
-                botListing.endpoint.replace("%d", client.user.id),
+                botListing.endpoint.replace("%d", process.env.BOT_CLIENT_ID),
                 {
                     [botListing.payloadKeyName]: (await ipc.getStats()).guilds,
                 },
