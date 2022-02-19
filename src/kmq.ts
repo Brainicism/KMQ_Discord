@@ -273,7 +273,13 @@ async function startWebServer(fleet: Fleet): Promise<void> {
     });
 
     try {
-        await httpServer.listen(process.env.WEB_SERVER_PORT, "0.0.0.0");
+        if (!process.env.WEB_SERVER_PORT) {
+            logger.warn(
+                "WEB_SERVER_PORT not specified, not starting web server"
+            );
+        } else {
+            await httpServer.listen(process.env.WEB_SERVER_PORT, "0.0.0.0");
+        }
     } catch (err) {
         logger.error(`Erroring starting HTTP server: ${err}`);
     }
