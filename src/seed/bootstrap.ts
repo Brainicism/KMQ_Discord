@@ -41,17 +41,16 @@ function hasRequiredEnvironmentVariables(): boolean {
         "PREMIUM_AUDIO_SONGS_PER_ARTIST",
     ];
 
-    let hasRequired = true;
     for (const requiredEnvVariable of requiredEnvVariables) {
         if (!process.env[requiredEnvVariable]) {
             logger.error(
                 `Missing required environment variable '${requiredEnvVariable}'`
             );
-            hasRequired = false;
+            return false;
         }
     }
 
-    return hasRequired;
+    return true;
 }
 
 async function kmqDatabaseExists(db: DatabaseContext): Promise<boolean> {
