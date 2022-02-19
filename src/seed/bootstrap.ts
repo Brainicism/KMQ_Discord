@@ -27,6 +27,33 @@ async function tableExists(
     );
 }
 
+function hasRequiredEnvironmentVariables(): boolean {
+    const requiredEnvVariables = [
+        "BOT_TOKEN",
+        "BOT_CLIENT_ID",
+        "DB_USER",
+        "DB_PASS",
+        "DB_HOST",
+        "DB_PORT",
+        "SONG_DOWNLOAD_DIR",
+        "BOT_PREFIX",
+        "NODE_ENV",
+        "PREMIUM_AUDIO_SONGS_PER_ARTIST",
+    ];
+
+    let hasRequired = true;
+    for (const requiredEnvVariable of requiredEnvVariables) {
+        if (!process.env[requiredEnvVariable]) {
+            logger.error(
+                `Missing required environment variable '${requiredEnvVariable}'`
+            );
+            hasRequired = false;
+        }
+    }
+
+    return hasRequired;
+}
+
 async function kmqDatabaseExists(db: DatabaseContext): Promise<boolean> {
     const kmqExists = await tableExists(db, "kmq");
     const kmqTestExists = await tableExists(db, "kmq_test");
@@ -135,6 +162,11 @@ async function bootstrapDatabases(): Promise<void> {
 (async () => {
     if (require.main === module) {
         if (process.env.NODE_ENV === EnvType.CI) return;
+        if (!hasRequiredEnvironmentVariables()) {
+            logger.error("Missing required environment variables, aborting...");
+            process.exit(1);
+        }
+
         await bootstrapDatabases();
     }
 })();
