@@ -2,7 +2,7 @@
 
 ## [Click here to join our official Discord server!](https://discord.gg/R55g4CRESW)
 
-## [You can invite the bot here](http://invite.kpop.gg).
+## [You can invite the bot here.](http://invite.kpop.gg)
 
 Welcome to KMQ, the K-Pop song guessing game. Type `,play` while in a voice channel to begin a game of KMQ! The bot will automatically start playing a random song, and the first person to type in the correct guess will win a point.
 
@@ -249,15 +249,11 @@ Use `,help [command_name]` for more details for any of the following commands:
 - `,gender`: Choose the gender of the artists to exclusively play from
 - `,answer`: Choose whether to type in your answer (and allow typos), or to pick from multiple choices on buttons
 - `,cutoff`: Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen
-
-
 - `,artisttype`: Choose whether to hear from soloists, groups, or both.
 - `,release`: Specify whether only official releases are played, or include b-sides + dance practices + acoustic versions + remixes
 - `,language`: Choose whether to include Japanese/English/Chinese songs, or only Korean songs
 - `,subunits`: Choose whether to automatically include a group's subunits when using `,groups`
 - `,ost`: Include, exclude, or exclusively play OST music videos
-
-
 - `,multiguess`: Choose whether to allow multiple players to guess correctly in a round
 - `,shuffle`: Choose whether songs should play in "true" random order or in uniquely random order.
 - `,seek`: Choose whether each song starts from the beginning, middle, or a random point
