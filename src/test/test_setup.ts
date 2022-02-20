@@ -35,7 +35,7 @@ async function setup(): Promise<void> {
         id_parent_artist INT(10),
         vtype ENUM('main', 'audio'),
         tags VARCHAR(255),
-        rank INT
+        \`rank\` INT
     )`);
 
     await dbContext.kmq.raw(`CREATE TABLE kpop_groups(
