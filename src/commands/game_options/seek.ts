@@ -1,12 +1,17 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import {
+    sendOptionsMessage,
+    getDebugLogHeader,
+} from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("seek");
+
 export enum SeekType {
     BEGINNING = "beginning",
     RANDOM = "random",
@@ -30,43 +35,72 @@ export default class SeekCommand implements BaseCommand {
         ],
     };
 
-    help = {
+    help = (guildID: string): Help => ({
         name: "seek",
-        description: "Choose whether each song is played from the beginning, middle, or at a random point",
+        description: state.localizer.translate(
+            guildID,
+            "command.seek.help.description"
+        ),
         usage: ",seek [beginning | middle | random]",
         examples: [
             {
                 example: "`,seek random`",
-                explanation: "Songs will be played starting from a random point in the middle",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.seek.help.example.random"
+                ),
             },
             {
                 example: "`,seek middle`",
-                explanation: "Songs will be played starting from the middle point",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.seek.help.example.middle"
+                ),
             },
             {
                 example: "`,seek beginning`",
-                explanation: "Song will be played starting from the very beginning",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.seek.help.example.beginning"
+                ),
             },
             {
                 example: "`,seek`",
-                explanation: `Reset to the default seek of \`${DEFAULT_SEEK}\``,
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.seek.help.example.reset",
+                    {
+                        defaultSeek: DEFAULT_SEEK,
+                    }
+                ),
             },
         ],
         priority: 130,
-    };
+    });
 
-    call = async ({ message, parsedMessage }: CommandArgs) => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.SEEK_TYPE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SEEK_TYPE, reset: true });
+            await sendOptionsMessage(
+                MessageContext.fromMessage(message),
+                guildPreference,
+                [{ option: GameOption.SEEK_TYPE, reset: true }]
+            );
             logger.info(`${getDebugLogHeader(message)} | Seek reset.`);
             return;
         }
 
         const seekType = parsedMessage.components[0] as SeekType;
         await guildPreference.setSeekType(seekType);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SEEK_TYPE, reset: false });
-        logger.info(`${getDebugLogHeader(message)} | Seek type set to ${seekType}`);
+        await sendOptionsMessage(
+            MessageContext.fromMessage(message),
+            guildPreference,
+            [{ option: GameOption.SEEK_TYPE, reset: false }]
+        );
+
+        logger.info(
+            `${getDebugLogHeader(message)} | Seek type set to ${seekType}`
+        );
     };
 }

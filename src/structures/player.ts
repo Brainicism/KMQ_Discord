@@ -1,6 +1,10 @@
+import {
+    ExpBonusModifier,
+    ExpBonusModifierValues,
+} from "../commands/game_commands/exp";
 import { getUserTag, getMention } from "../helpers/discord_utils";
 import { roundDecimal, bold } from "../helpers/utils";
-import { state } from "../kmq";
+import { state } from "../kmq_worker";
 
 export default class Player {
     /** The Discord tag of the player, of the format "Player#1234" */
@@ -18,31 +22,53 @@ export default class Player {
     /** The player's EXP gain */
     private expGain: number;
 
-    constructor(tag: string, id: string, avatarURL: string, points: number) {
+    /** Whether it's the player's first game of the day */
+    private firstGameOfTheDay: boolean;
+
+    constructor(
+        tag: string,
+        id: string,
+        avatarURL: string,
+        points: number,
+        firstGameOfTheDay = false
+    ) {
         this.name = tag;
         this.id = id;
         this.score = points;
         this.avatarURL = avatarURL;
         this.expGain = 0;
+        this.firstGameOfTheDay = firstGameOfTheDay;
     }
 
-    static fromUserID(userID: string) {
+    static fromUserID(userID: string, firstGameOfDay = false): Player {
         const user = state.client.users.get(userID);
-        return new Player(getUserTag(user), user.id, user.avatarURL, 0);
+        return new Player(
+            getUserTag(user),
+            user.id,
+            user.avatarURL,
+            0,
+            firstGameOfDay
+        );
     }
 
     /** @returns the player's Discord tag  */
     getName(): string {
         return this.name;
     }
+
     /**
      * Prints the tag (including the discriminator) in the smaller scoreboard, but only
      * the username in the larger scoreboard
-     * @param wonRound - Whether the player won the previous round
+     * @param first - Whether the player won the previous round
+     * @param wonRound - Whether the player guessed correctly in the previous round
      * @param mention - Whether the displayed name should be a clickable mention
      * @returns what to display as the name of the player in the scoreboard
      */
-    getDisplayedName(wonRound: boolean, mention: boolean): string {
+    getDisplayedName(
+        first: boolean,
+        wonRound: boolean,
+        mention: boolean
+    ): string {
         let name = this.name;
         if (mention) {
             name = getMention(this.getID());
@@ -53,7 +79,11 @@ export default class Player {
                 name = bold(name);
             }
 
-            name = `🎵 ${name}`;
+            if (first) {
+                name = `🎶 ${name}`;
+            } else {
+                name = `🎵 ${name}`;
+            }
         }
 
         return name;
@@ -66,7 +96,9 @@ export default class Player {
 
     /** @returns what to display as the score in the scoreboard for the player */
     getDisplayedScore(): string {
-        return Number.isInteger(roundDecimal(this.getScore(), 1)) ? roundDecimal(this.getScore(), 1).toString() : this.getScore().toFixed(1);
+        return Number.isInteger(roundDecimal(this.getScore(), 1))
+            ? roundDecimal(this.getScore(), 1).toString()
+            : this.getScore().toFixed(1);
     }
 
     /** @returns the player's EXP gain */
@@ -88,7 +120,7 @@ export default class Player {
      * Increments the player's score by the specified amount
      * @param pointsEarned - The number of points earned by the correct guess
      */
-    incrementScore(pointsEarned: number) {
+    incrementScore(pointsEarned: number): void {
         this.score += pointsEarned;
     }
 
@@ -97,7 +129,10 @@ export default class Player {
      * @param expGain - The amount of EXP that was gained
      */
 
-    incrementExp(expGain: number) {
-        this.expGain += expGain;
+    incrementExp(expGain: number): void {
+        this.expGain +=
+            (this.firstGameOfTheDay
+                ? ExpBonusModifierValues[ExpBonusModifier.FIRST_GAME_OF_DAY]
+                : 1) * expGain;
     }
 }

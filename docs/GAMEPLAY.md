@@ -1,6 +1,8 @@
-[Click here to join our official server!](https://discord.gg/R55g4CRESW)
+# K-pop Music Quiz
 
-You can invite the bot [here](https://discord.com/oauth2/authorize?client_id=508759831755096074&scope=bot&permissions=3501120).
+## [Click here to join our official Discord server!](https://discord.gg/R55g4CRESW)
+
+## [You can invite the bot here](http://invite.kpop.gg).
 
 Welcome to KMQ, the K-Pop song guessing game. Type `,play` while in a voice channel to begin a game of KMQ! The bot will automatically start playing a random song, and the first person to type in the correct guess will win a point.
 
@@ -29,11 +31,11 @@ We update our songs frequently! Expect to see songs on the bot the same day they
 # EXP System
 Think you have what it takes to be a KMQ master? Rise through the ranks, gaining EXP and leveling up by playing KMQ. Every correct guess will net you some EXP, increasing based on your game options. The higher the number of songs selected by your game options, the more EXP you will get!
 
-Everyone starts off as a `Novice` and works their way up as a `Trainee` (Level 10), `Pre-debut` (Level 20), `Nugu` (Level 30), and many more! Check out `,profile` and `,scoreboard` to see where you and other players stand!
+Everyone starts off as a `Novice` and works their way up as a `Trainee` (Level 10), `Pre-debut` (Level 20), `Nugu` (Level 30), and many more! Check out `,profile` and `,leaderboard` to see where you and other players stand!
 
 ## EXP Modifiers
-- Playing with more people will increase how much EXP you gain, ranging between 0.75x (single player) to 1.25x EXP (6+ players)
-- Guessing quickly will earn you 1.1x EXP
+- Playing with more people will increase how much EXP you gain, ranging between 1x (single player) to 1.5x EXP (6+ players)
+- Guessing quickly (within 1 second) will earn you 1.1x EXP
 - Guess streaks greater than 5 will earn you 1.2x EXP
 - Voting on [top.gg](https://top.gg/bot/508759831755096074/vote) rewards you 2x EXP for an hour. You can vote once every 12 hours. See `,vote` for more details
 - Every weekend is a 2x EXP weekend! Available all day on Saturdays and Sundays EST time
@@ -42,6 +44,7 @@ Everyone starts off as a `Novice` and works their way up as a `Trainee` (Level 1
 - Using a hint reduces EXP by 0.5x
 - All EXP bonuses stack on one another
 - Playing on multiple choice mode reduces EXP by (0.25x, 0.5x, 0.75x) based on difficulty
+- Rounds will randomly have rare EXP bonuses of 2x, 5x, 10x, and 50x!
 
 ## Requirements
 You will only gain EXP if:
@@ -224,15 +227,20 @@ Use `,help [command_name]` for more details for any of the following commands:
 - `,news`: Show the latest features/changes to the bot
 - `,profile`: Show per-player stats, along with a ranking against everyone else
 - `,leaderboard`: Show the server/game/global KMQ leaderboard
+- `,score`: Show the current game's scoreboard with EXP gained
 - `,list`: Show the currently selected groups for `,groups`, `,include`, or `,exclude`
 - `,preset`: Quickly save, load, and export game options as presets (even across servers!)
 - `,vote`: Show your current 2x bonus EXP modifier status from voting for the bot on [top.gg](https://top.gg/bot/508759831755096074/vote). Thanks for supporting KMQ!
+- `,recentlyadded`: See a list of songs added to KMQ in the past 2 weeks
+- `,exp`: Show your current bonus EXP modifiers
+- `,locale`: Change the language of the bot
+- `,lookup`: Get information about the given song (whether it's available in KMQ, aliases, etc.)
 
 ## Game Option Commands
 - `,limit`: Set a maximum number of results in the song query. This effectively sets the "top `x` number of songs" based on the selected filters
 - `,groups`: Specify which groups/artists to exclusively play from
 - `,gender`: Choose the gender of the artists to exclusively play from
-- `,answer`: Choose whether to type in your answer, or to pick from multiple choices on buttons
+- `,answer`: Choose whether to type in your answer (and allow typos), or to pick from multiple choices on buttons
 - `,cutoff`: Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen
 - `,artisttype`: Choose whether to hear from soloists, groups, or both.
 - `,release`: Specify whether only official releases are played, or include b-sides + dance practices + acoustic versions + remixes

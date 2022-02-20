@@ -5,6 +5,9 @@ import { Gender } from "./commands/game_options/gender";
 import KmqMember from "./structures/kmq_member";
 import KmqClient from "./kmq_client";
 import RateLimiter from "./rate_limiter";
+import LocalizationManager, {
+    LocaleType,
+} from "./helpers/localization_manager";
 
 export type GuildTextableMessage = Eris.Message<GuildTextableChannel>;
 
@@ -22,17 +25,22 @@ export interface ParsedMessage {
 export interface QueriedSong {
     songName: string;
     originalSongName: string;
-    artist: string;
+    hangulSongName?: string;
+    originalHangulSongName?: string;
+    artistName: string;
+    hangulArtistName?: string;
     youtubeLink: string;
     publishDate?: Date;
     members?: Gender;
     artistID?: number;
     isSolo?: string;
     rank?: number;
+    views?: number;
 }
 
 export interface EmbedPayload {
     title: string;
+    url?: string;
     description?: string;
     footerText?: string;
     thumbnailUrl?: string;
@@ -56,12 +64,15 @@ export interface State {
     gameSessions: { [guildID: string]: GameSession };
     client: KmqClient;
     aliases: {
-        artist: { [artistName: string]: Array<string> },
-        song: { [songName: string]: Array<string> }
+        artist: { [artistName: string]: Array<string> };
+        song: { [songName: string]: Array<string> };
     };
     processStartTime: number;
     ipc: IPC;
     rateLimiter: RateLimiter;
+    bonusArtists: Set<string>;
+    locales: { [guildID: string]: LocaleType };
+    localizer: LocalizationManager;
 }
 
 export enum GameOption {
@@ -85,7 +96,6 @@ export enum GameOption {
     DURATION = "Duration",
     EXCLUDE = "Exclude",
     INCLUDE = "Include",
-    PRESET = "Preset",
     FORCE_PLAY_SONG = "Force Play Song",
 }
 
@@ -121,7 +131,11 @@ export const PriorityGameOption: Array<GameOption> = [
 ];
 
 export const ConflictingGameOptions: { [option: string]: Array<GameOption> } = {
-    [GameOption.GROUPS]: [GameOption.INCLUDE, GameOption.GENDER, GameOption.ARTIST_TYPE],
+    [GameOption.GROUPS]: [
+        GameOption.INCLUDE,
+        GameOption.GENDER,
+        GameOption.ARTIST_TYPE,
+    ],
 };
 
 export enum EnvType {

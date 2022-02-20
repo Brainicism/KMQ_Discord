@@ -1,10 +1,10 @@
-exports.up = function(knex) {
+exports.up = function (knex) {
     return knex.schema.table("game_sessions", (table) => {
         table.integer("correct_guesses").notNullable();
     });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
     return knex.schema.table("game_sessions", (table) => {
         table.dropColumn("correct_guesses");
     });

@@ -4,6 +4,7 @@ import { CommandValidations } from "../commands/interfaces/base_command";
 import { IPCLogger } from "../logger";
 import { arrayToString } from "./utils";
 import MessageContext from "../structures/message_context";
+import { state } from "../kmq_worker";
 
 const logger = new IPCLogger("validate");
 
@@ -11,20 +12,50 @@ const logger = new IPCLogger("validate");
  * @param message - the Message object
  * @param warning - the warning text
  * @param arg - The incorrect argument
+ * @param usage - The usage instructions
  */
-export async function sendValidationErrorMessage(message: GuildTextableMessage, warning: string, arg: string | Array<string>, usage?: string) {
-    await sendErrorMessage(MessageContext.fromMessage(message), { title: "Input validation error", description: warning, footerText: usage });
+export async function sendValidationErrorMessage(
+    message: GuildTextableMessage,
+    warning: string,
+    arg: string | Array<string>,
+    usage?: string
+): Promise<void> {
+    await sendErrorMessage(MessageContext.fromMessage(message), {
+        title: state.localizer.translate(
+            message.guildID,
+            "misc.failure.validation.title"
+        ),
+        description: warning,
+        footerText: usage,
+    });
     logger.warn(`${getDebugLogHeader(message)} | ${warning}. val = ${arg}`);
 }
 
-export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, validations: CommandValidations, usage?: string) => {
+export default (
+    message: GuildTextableMessage,
+    parsedMessage: ParsedMessage,
+    validations: CommandValidations,
+    usage?: string
+): boolean => {
     if (!validations) return true;
     const args = parsedMessage.components;
-    if (args.length > validations.maxArgCount || args.length < validations.minArgCount) {
-        sendValidationErrorMessage(message,
-            `Incorrect number of arguments. See \`${process.env.BOT_PREFIX}help ${parsedMessage.action}\` for usage.`,
+    if (
+        args.length > validations.maxArgCount ||
+        args.length < validations.minArgCount
+    ) {
+        sendValidationErrorMessage(
+            message,
+            state.localizer.translate(
+                message.guildID,
+                "misc.failure.validation.numArguments.incorrect",
+                {
+                    help: `${process.env.BOT_PREFIX}help`,
+                    command: parsedMessage.action,
+                }
+            ),
             args,
-            usage);
+            usage
+        );
         return false;
     }
 
@@ -36,28 +67,52 @@ export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, val
         switch (validation.type) {
             case "number": {
                 if (Number.isNaN(Number(arg))) {
-                    sendValidationErrorMessage(message,
-                        `Expected numeric value for \`${validation.name}\`.`,
+                    sendValidationErrorMessage(
+                        message,
+                        state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.validation.number.notNumber",
+                            { argument: `\`${validation.name}\`` }
+                        ),
                         arg,
-                        usage);
+                        usage
+                    );
                     return false;
                 }
 
                 // parse as integer for now, might cause problems later?
                 const intArg = parseInt(arg);
                 if ("minValue" in validation && intArg < validation.minValue) {
-                    sendValidationErrorMessage(message,
-                        `Expected value greater than \`${validation.minValue}\` for \`${validation.name}\`.`,
+                    sendValidationErrorMessage(
+                        message,
+                        state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.validation.number.min",
+                            {
+                                min: `\`${validation.minValue}\``,
+                                argument: `\`${validation.name}\``,
+                            }
+                        ),
                         arg,
-                        usage);
+                        usage
+                    );
                     return false;
                 }
 
                 if ("maxValue" in validation && intArg > validation.maxValue) {
-                    sendValidationErrorMessage(message,
-                        `Expected value less than or equal to \`${validation.maxValue}\` for \`${validation.name}\`.`,
+                    sendValidationErrorMessage(
+                        message,
+                        state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.validation.number.max",
+                            {
+                                max: `\`${validation.maxValue}\``,
+                                argument: `\`${validation.name}\``,
+                            }
+                        ),
                         arg,
-                        usage);
+                        usage
+                    );
                     return false;
                 }
 
@@ -67,10 +122,16 @@ export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, val
             case "boolean": {
                 arg = arg.toLowerCase();
                 if (!(arg === "false" || arg === "true")) {
-                    sendValidationErrorMessage(message,
-                        `Expected true/false value for \`${validation.name}\`.`,
+                    sendValidationErrorMessage(
+                        message,
+                        state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.validation.boolean.notBoolean",
+                            { argument: `\`${validation.name}\`` }
+                        ),
                         arg,
-                        usage);
+                        usage
+                    );
                     return false;
                 }
 
@@ -81,10 +142,19 @@ export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, val
                 const { enums } = validation;
                 arg = arg.toLowerCase();
                 if (!enums.includes(arg)) {
-                    sendValidationErrorMessage(message,
-                        `Expected one of the following valid \`${validation.name}\` values: (${arrayToString(enums)}).`,
+                    sendValidationErrorMessage(
+                        message,
+                        state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.validation.enum.notInEnum",
+                            {
+                                argument: `\`${validation.name}\``,
+                                validValues: arrayToString(enums),
+                            }
+                        ),
                         arg,
-                        usage);
+                        usage
+                    );
                     return false;
                 }
 
@@ -94,10 +164,16 @@ export default (message: GuildTextableMessage, parsedMessage: ParsedMessage, val
 
             case "char": {
                 if (arg.length !== 1) {
-                    sendValidationErrorMessage(message,
-                        `Expected a character for \`${validation.name}\`.`,
+                    sendValidationErrorMessage(
+                        message,
+                        state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.validation.char.notChar",
+                            { argument: `\`${validation.name}\`` }
+                        ),
                         arg,
-                        usage);
+                        usage
+                    );
                     return false;
                 }
 

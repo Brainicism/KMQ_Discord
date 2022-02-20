@@ -1,7 +1,8 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import MessageContext from "../../structures/message_context";
 import { isUserPremium } from "../../helpers/game_utils";
 import { sendInfoMessage } from "../../helpers/discord_utils";
+import { state } from "../../kmq_worker";
 import { KmqImages } from "../../constants";
 
 export default class PremiumCommand implements BaseCommand {
@@ -11,38 +12,76 @@ export default class PremiumCommand implements BaseCommand {
         arguments: [],
     };
 
-    help = {
+    help = (guildID: string): Help => ({
         name: "premium",
-        description: "Find out more about KMQ premium including whether you're currently a member.",
+        description: state.localizer.translate(
+            guildID,
+            "commands.premium.help.description"
+        ),
         usage: ",premium",
         examples: [
             {
                 example: "`,premium`",
-                explanation: "Shows your premium status.",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "commands.premium.help.example"
+                ),
             },
         ],
         priority: 50,
-    };
+    });
 
-    call = async ({ message }: CommandArgs) => {
+    call = async ({ message }: CommandArgs): Promise<void> => {
         const premiumMember = await isUserPremium(message.author.id);
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: premiumMember ? "Thanks for supporting KMQ!" : "Subscribe to Premium KMQ!",
-            description: `${premiumMember ? "You have [Premium KMQ](https://www.patreon.com/kmq)." : "Subscribe to [Premium KMQ](https://www.patreon.com/kmq) here."}\n\nMake sure to connect your Discord account [here](https://www.patreon.com/settings/apps) to receive your perks.`,
+            title: state.localizer.translate(
+                message.guildID,
+                premiumMember
+                    ? "commands.premium.title.premium"
+                    : "commands.premium.title.nonPremium"
+            ),
+            description: `${state.localizer.translate(
+                message.guildID,
+                premiumMember
+                    ? "commands.premium.description.premium"
+                    : "commands.premium.description.nonPremium"
+            )}\n\n${state.localizer.translate(
+                message.guildID,
+                "commands.premium.description.connectionReminder"
+            )}`,
             fields: [
                 {
-                    name: "More songs!",
-                    value: "Gain access to the top 25 b-sides songs per-artist (up from 10)",
+                    name: state.localizer.translate(
+                        message.guildID,
+                        "commands.premium.perks.moreSongs.title"
+                    ),
+                    value: state.localizer.translate(
+                        message.guildID,
+                        "commands.premium.perks.moreSongs.description"
+                    ),
                 },
                 {
-                    name: "`,special` in every server!",
-                    value: "Change song playback speed anywhere you play!",
+                    name: state.localizer.translate(
+                        message.guildID,
+                        "commands.premium.perks.special.title"
+                    ),
+                    value: state.localizer.translate(
+                        message.guildID,
+                        "commands.premium.perks.special.description"
+                    ),
                 },
                 {
-                    name: "Premium Supporter Badge!",
-                    value: "Show off your dedication to KMQ with an exclusive badge on your profile",
+                    name: state.localizer.translate(
+                        message.guildID,
+                        "commands.premium.perks.badge.title"
+                    ),
+                    value: state.localizer.translate(
+                        message.guildID,
+                        "commands.premium.perks.badge.description"
+                    ),
                 },
             ],
-            thumbnailUrl: KmqImages.HAPPY });
+            thumbnailUrl: KmqImages.HAPPY,
+        });
     };
 }

@@ -1,30 +1,51 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { sendInfoMessage, sendScoreboardMessage, getDebugLogHeader } from "../../helpers/discord_utils";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import {
+    sendInfoMessage,
+    sendScoreboardMessage,
+    getDebugLogHeader,
+} from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("score");
 
 export default class ScoreCommand implements BaseCommand {
-    help = {
+    aliases = ["scoreboard", "sb"];
+
+    help = (guildID: string): Help => ({
         name: "score",
-        description: "See the scoreboard for the current game",
+        description: state.localizer.translate(
+            guildID,
+            "command.score.help.description"
+        ),
         usage: ",score",
         examples: [],
         priority: 50,
-    };
+    });
 
-    aliases = ["scoreboard", "sb"];
-
-    call = async ({ message, gameSessions }: CommandArgs) => {
+    call = async ({ message, gameSessions }: CommandArgs): Promise<void> => {
         const gameSession = gameSessions[message.guildID];
         if (!gameSession) {
-            sendInfoMessage(MessageContext.fromMessage(message), { title: "No Active Game", description: `There is no currently active game of KMQ. Start a new game with \`${process.env.BOT_PREFIX}play\`!` });
-            logger.warn(`${getDebugLogHeader(message)} | No active game session.`);
+            await sendInfoMessage(MessageContext.fromMessage(message), {
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.failure.game.noneInProgress.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "command.score.failure.noneInProgress.description",
+                    { play: `\`${process.env.BOT_PREFIX}play\`` }
+                ),
+            });
+
+            logger.warn(
+                `${getDebugLogHeader(message)} | No active game session.`
+            );
             return;
         }
 
-        logger.info(`${getDebugLogHeader(message)} | Score retrieved`);
         await sendScoreboardMessage(message, gameSession);
+        logger.info(`${getDebugLogHeader(message)} | Score retrieved`);
     };
 }

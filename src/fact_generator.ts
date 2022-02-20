@@ -1,7 +1,16 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable no-underscore-dangle */
 import { URL } from "url";
 import dbContext from "./database_context";
-import { chooseRandom, getOrdinalNum, weekOfYear, friendlyFormattedNumber } from "./helpers/utils";
+import {
+    chooseRandom,
+    getOrdinalNum,
+    weekOfYear,
+    friendlyFormattedNumber,
+} from "./helpers/utils";
+import { LocaleType } from "./helpers/localization_manager";
+import { state } from "./kmq_worker";
+import { getGuildLocale } from "./helpers/discord_utils";
 import { IPCLogger } from "./logger";
 
 const logger = new IPCLogger("fact_generator");
@@ -15,22 +24,62 @@ const musicShows = {
     showchampion: "Show Champion",
 };
 
-const funFactFunctions = [recentMusicVideos, recentMilestone, recentMusicShowWin, musicShowWins, mostViewedGroups, mostLikedGroups, mostViewedVideo, mostLikedVideo,
-    mostMusicVideos, yearWithMostDebuts, yearWithMostReleases, viewsByGender, mostViewedSoloArtist, viewsBySolo, bigThreeDominance, mostGaonFirsts,
-    mostGaonAppearances, historicalGaonWeekly, recentGaonWeekly, fanclubName, closeBirthdays, mostArtistsEntertainmentCompany, mostViewedEntertainmentCompany, songReleaseAnniversaries];
+const funFactFunctions: Array<(locale: LocaleType) => Promise<string[]>> = [
+    recentMusicVideos,
+    recentMilestone,
+    recentMusicShowWin,
+    musicShowWins,
+    mostViewedGroups,
+    mostLikedGroups,
+    mostViewedVideo,
+    mostLikedVideo,
+    mostMusicVideos,
+    yearWithMostDebuts,
+    yearWithMostReleases,
+    viewsByGender,
+    mostViewedSoloArtist,
+    viewsBySolo,
+    bigThreeDominance,
+    mostGaonFirsts,
+    mostGaonAppearances,
+    historicalGaonWeekly,
+    recentGaonWeekly,
+    fanclubName,
+    closeBirthdays,
+    mostArtistsEntertainmentCompany,
+    mostViewedEntertainmentCompany,
+    songReleaseAnniversaries,
+];
 
-const kmqFactFunctions = [longestGame, mostGames, mostCorrectGuessed, globalTotalGames, recentGameSessions, recentGames, mostSongsGuessedPlayer,
-    mostGamesPlayedPlayer, recentUniquePlayers, topLeveledPlayers, songGuessRate];
+const kmqFactFunctions: Array<(locale: LocaleType) => Promise<string[]>> = [
+    longestGame,
+    mostGames,
+    mostCorrectGuessed,
+    globalTotalGames,
+    recentGameSessions,
+    recentGames,
+    mostSongsGuessedPlayer,
+    mostGamesPlayedPlayer,
+    recentUniquePlayers,
+    topLeveledPlayers,
+    songGuessRate,
+];
 
-let factCache: {
-    funFacts: string[][],
-    kmqFacts: string[][],
-    lastUpdated: number
-} = {
-    funFacts: [],
-    kmqFacts: [],
-    lastUpdated: null,
-};
+interface FactCache {
+    funFacts: string[][];
+    kmqFacts: string[][];
+    lastUpdated: number;
+}
+
+const localeToFactCache: { [locale: string]: FactCache } = {};
+
+for (const locale of Object.values(LocaleType)) {
+    localeToFactCache[locale] = {
+        funFacts: [],
+        kmqFacts: [],
+        lastUpdated: null,
+    };
+}
 
 interface GaonWeeklyEntry {
     songName: string;
@@ -40,35 +89,51 @@ interface GaonWeeklyEntry {
     year: string;
 }
 
-export async function reloadFactCache() {
+/**
+ * Reloads the fact fcache
+ */
+export async function reloadFactCache(): Promise<void> {
     logger.info("Regenerating fact cache...");
-    await generateFacts();
+    for (const locale of Object.values(LocaleType)) {
+        await generateFacts(locale);
+    }
 }
 
-async function resolveFactPromises(promises: Promise<string[]>[]): Promise<string[][]> {
+async function resolveFactPromises(
+    promises: Promise<string[]>[]
+): Promise<string[][]> {
     const settledPromises = await Promise.allSettled(promises);
-    const rejectedPromises = settledPromises.filter((x) => x["status"] === "rejected") as PromiseRejectedResult[];
+    const rejectedPromises = settledPromises.filter(
+        (x) => x["status"] === "rejected"
+    ) as PromiseRejectedResult[];
+
     for (const rejectedPromise of rejectedPromises) {
         logger.error(`Failed to evaluate fact: ${rejectedPromise.reason}`);
     }
 
-    const resolvedPromises = settledPromises.filter((x) => x["status"] === "fulfilled") as PromiseFulfilledResult<string[]>[];
+    const resolvedPromises = settledPromises.filter(
+        (x) => x["status"] === "fulfilled"
+    ) as PromiseFulfilledResult<string[]>[];
+
     return resolvedPromises.map((x) => x["value"]);
 }
 
-async function generateFacts() {
-    const funFactPromises = funFactFunctions.map((x) => x());
-    const kmqFactPromises = kmqFactFunctions.map((x) => x());
+async function generateFacts(locale: LocaleType): Promise<void> {
+    const funFactPromises = funFactFunctions.map((x) => x(locale));
+    const kmqFactPromises = kmqFactFunctions.map((x) => x(locale));
     const funFacts = await resolveFactPromises(funFactPromises);
     const kmqFacts = await resolveFactPromises(kmqFactPromises);
-    factCache = {
+    localeToFactCache[locale] = {
         funFacts: funFacts.filter((facts) => facts.length > 0),
         kmqFacts: kmqFacts.filter((facts) => facts.length > 0),
         lastUpdated: Date.now(),
     };
 }
 
-function parseGaonWeeklyRankList(ranklist: string, year: string): Array<GaonWeeklyEntry> {
+function parseGaonWeeklyRankList(
+    ranklist: string,
+    year: string
+): Array<GaonWeeklyEntry> {
     return JSON.parse(ranklist).map((x) => {
         const songName = x[0];
         const artistName = x[1];
@@ -84,20 +149,39 @@ function parseGaonWeeklyRankList(ranklist: string, year: string): Array<GaonWeek
     });
 }
 
-export function getFact(): string {
+/**
+ * @param guildID - The guild ID
+ * @returns a random cached fact
+ */
+export function getFact(guildID: string): string {
+    const locale: LocaleType = getGuildLocale(guildID);
     const randomVal = Math.random();
-    const factGroup = randomVal < 0.85 ? factCache.funFacts : factCache.kmqFacts;
+    const factGroup =
+        randomVal < 0.85
+            ? localeToFactCache[locale].funFacts
+            : localeToFactCache[locale].kmqFacts;
+
     if (factGroup.length === 0) return null;
     return chooseRandom(chooseRandom(factGroup));
 }
 
-async function recentMusicVideos(): Promise<string[]> {
+async function recentMusicVideos(lng: LocaleType): Promise<string[]> {
     const oneMonthPriorDate = new Date();
     oneMonthPriorDate.setMonth(oneMonthPriorDate.getMonth() - 1);
-    const result = await dbContext.kpopVideos("kpop_videos.app_kpop")
-        .select(["app_kpop.name as name", "app_kpop_group.name as artist", "vlink as youtubeLink", "publishedon"])
+    const result = await dbContext
+        .kpopVideos("kpop_videos.app_kpop")
+        .select([
+            "app_kpop.name as name",
+            "app_kpop_group.name as artist",
+            "vlink as youtubeLink",
+            "publishedon",
+        ])
         .join("kpop_videos.app_kpop_group", function join() {
-            this.on("kpop_videos.app_kpop.id_artist", "=", "kpop_videos.app_kpop_group.id");
+            this.on(
+                "kpop_videos.app_kpop.id_artist",
+                "=",
+                "kpop_videos.app_kpop_group.id"
+            );
         })
         .andWhere("vtype", "main")
         .andWhere("publishedon", ">", oneMonthPriorDate)
@@ -108,14 +192,30 @@ async function recentMusicVideos(): Promise<string[]> {
         return [];
     }
 
-    return result.map((x) => `New Song Alert: Check out this recently released music video, ["${x["name"]}" by ${x["artist"]}](https://youtu.be/${x["youtubeLink"]})`);
+    return result.map((x) =>
+        state.localizer.internalLocalizer.t("fact.fun.newMV", {
+            hyperlink: generateSongArtistHyperlink(
+                lng,
+                x["name"],
+                x["artist"],
+                x["youtubeLink"]
+            ),
+            lng,
+        })
+    );
 }
 
-async function recentMilestone(): Promise<string[]> {
+async function recentMilestone(lng: LocaleType): Promise<string[]> {
     const twoWeeksPriorDate = new Date();
     twoWeeksPriorDate.setDate(twoWeeksPriorDate.getDate() - 14);
-    const result = await dbContext.kpopVideos("app_kpop_miles")
-        .select(["app_kpop_miles.mvalue as milestone_views", "app_kpop.name as song_name", "app_kpop_group.name as artist_name", "app_kpop.vlink as link"])
+    const result = await dbContext
+        .kpopVideos("app_kpop_miles")
+        .select([
+            "app_kpop_miles.mvalue as milestone_views",
+            "app_kpop.name as song_name",
+            "app_kpop_group.name as artist_name",
+            "app_kpop.vlink as link",
+        ])
         .where("date", ">", twoWeeksPriorDate)
         .join("app_kpop", function join() {
             this.on("app_kpop.id", "=", "app_kpop_miles.id_mv");
@@ -129,14 +229,32 @@ async function recentMilestone(): Promise<string[]> {
         return [];
     }
 
-    return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} recently reached ${friendlyFormattedNumber(x["milestone_views"])} views on YouTube!`);
+    return result.map((x) =>
+        state.localizer.internalLocalizer.t("fact.fun.mvViewMilestone", {
+            hyperlink: generateSongArtistHyperlink(
+                lng,
+                x["song_name"],
+                x["artist_name"],
+                x["link"]
+            ),
+            views: friendlyFormattedNumber(x["milestone_views"]),
+            lng,
+        })
+    );
 }
 
-async function recentMusicShowWin(): Promise<string[]> {
+async function recentMusicShowWin(lng: LocaleType): Promise<string[]> {
     const twoWeeksPriorDate = new Date();
     twoWeeksPriorDate.setDate(twoWeeksPriorDate.getDate() - 7);
-    const result = await dbContext.kpopVideos("app_kpop_ms")
-        .select(["app_kpop_ms.musicshow as music_show", "app_kpop_ms.date as win_date", "app_kpop_ms.musicname as winning_song", "app_kpop_group.name as artist_name", "app_kpop.vlink as link"])
+    const result = await dbContext
+        .kpopVideos("app_kpop_ms")
+        .select([
+            "app_kpop_ms.musicshow as music_show",
+            "app_kpop_ms.date as win_date",
+            "app_kpop_ms.musicname as winning_song",
+            "app_kpop_group.name as artist_name",
+            "app_kpop.vlink as link",
+        ])
         .where("date", ">", twoWeeksPriorDate)
         .where("app_kpop_ms.id_musicvideo", "!=", 0)
         .join("app_kpop_group", function join() {
@@ -151,11 +269,24 @@ async function recentMusicShowWin(): Promise<string[]> {
         return [];
     }
 
-    return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x["winning_song"], x["artist_name"], x["link"])} recently won on ${musicShows[x["music_show"]]} on ${x["win_date"].toISOString().substring(0, 10)}!`);
+    return result.map((x) =>
+        state.localizer.internalLocalizer.t("fact.fun.recentMusicShowWin", {
+            hyperlink: generateSongArtistHyperlink(
+                lng,
+                x["winning_song"],
+                x["artist_name"],
+                x["link"]
+            ),
+            musicShow: musicShows[x["music_show"]],
+            winDate: x["win_date"].toISOString().substring(0, 10),
+            lng,
+        })
+    );
 }
 
-async function musicShowWins(): Promise<string[]> {
-    const result = await dbContext.kpopVideos("app_kpop_ms")
+async function musicShowWins(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kpopVideos("app_kpop_ms")
         .select(["app_kpop_group.name as artist_name"])
         .count("app_kpop_ms.id_artist as count")
         .groupBy("app_kpop_ms.id_artist")
@@ -166,11 +297,22 @@ async function musicShowWins(): Promise<string[]> {
         .orderBy("count", "DESC")
         .limit(25);
 
-    return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} has won the ${getOrdinalNum(idx + 1)} most music show with ${x["count"]} wins!`);
+    return result.map((x, idx) =>
+        state.localizer.internalLocalizer.t("fact.fun.mostMusicShowWins", {
+            artist: x["artist_name"],
+            ordinalNum: state.localizer.internalLocalizer.t(
+                getOrdinalNum(idx + 1),
+                { lng }
+            ),
+            num: x["count"],
+            lng,
+        })
+    );
 }
 
-async function mostViewedGroups(): Promise<string[]> {
-    const result = await dbContext.kpopVideos("app_kpop")
+async function mostViewedGroups(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kpopVideos("app_kpop")
         .select(["app_kpop_group.name as artist_name"])
         .sum("app_kpop.views as total_views")
         .groupBy("app_kpop.id_artist")
@@ -181,11 +323,22 @@ async function mostViewedGroups(): Promise<string[]> {
         .orderBy("total_views", "DESC")
         .limit(25);
 
-    return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} is the ${getOrdinalNum(idx + 1)} most viewed group with ${friendlyFormattedNumber(x["total_views"])} total YouTube views!`);
+    return result.map((x, idx) =>
+        state.localizer.internalLocalizer.t("fact.fun.mostViewedGroup", {
+            artist: x["artist_name"],
+            ordinalNum: state.localizer.internalLocalizer.t(
+                getOrdinalNum(idx + 1),
+                { lng }
+            ),
+            views: friendlyFormattedNumber(x["total_views"]),
+            lng,
+        })
+    );
 }
 
-async function mostLikedGroups(): Promise<string[]> {
-    const result = await dbContext.kpopVideos("app_kpop")
+async function mostLikedGroups(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kpopVideos("app_kpop")
         .select(["app_kpop_group.name as artist_name"])
         .sum("app_kpop.likes as total_likes")
         .groupBy("app_kpop.id_artist")
@@ -196,12 +349,28 @@ async function mostLikedGroups(): Promise<string[]> {
         .where("app_kpop_group.issolo", "=", "n")
         .orderBy("total_likes", "DESC");
 
-    return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} is the ${getOrdinalNum(idx + 1)} most liked group with ${friendlyFormattedNumber(x["total_likes"])} total YouTube likes!`);
+    return result.map((x, idx) =>
+        state.localizer.internalLocalizer.t("fact.fun.mostLikedGroup", {
+            artist: x["artist_name"],
+            ordinalNum: state.localizer.internalLocalizer.t(
+                getOrdinalNum(idx + 1),
+                { lng }
+            ),
+            likes: friendlyFormattedNumber(x["total_likes"]),
+            lng,
+        })
+    );
 }
 
-async function mostViewedVideo(): Promise<string[]> {
-    const result = await dbContext.kpopVideos("app_kpop")
-        .select(["app_kpop_group.name as artist_name", "app_kpop.name as song_name", "app_kpop.views as views", "app_kpop.vlink as link"])
+async function mostViewedVideo(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kpopVideos("app_kpop")
+        .select([
+            "app_kpop_group.name as artist_name",
+            "app_kpop.name as song_name",
+            "app_kpop.views as views",
+            "app_kpop.vlink as link",
+        ])
         .join("app_kpop_group", function join() {
             this.on("app_kpop.id_artist", "=", "app_kpop_group.id");
         })
@@ -209,23 +378,62 @@ async function mostViewedVideo(): Promise<string[]> {
         .orderBy("views", "DESC")
         .limit(25);
 
-    return result.map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} is the ${getOrdinalNum(idx + 1)} most viewed music video with ${friendlyFormattedNumber(x["views"])} YouTube views!`);
+    return result.map((x, idx) =>
+        state.localizer.internalLocalizer.t("fact.fun.mostViewedVideo", {
+            hyperlink: generateSongArtistHyperlink(
+                lng,
+                x["song_name"],
+                x["artist_name"],
+                x["link"]
+            ),
+            ordinalNum: state.localizer.internalLocalizer.t(
+                getOrdinalNum(idx + 1),
+                { lng }
+            ),
+            views: friendlyFormattedNumber(x["views"]),
+            lng,
+        })
+    );
 }
 
-async function mostLikedVideo(): Promise<string[]> {
-    const result = await dbContext.kpopVideos("app_kpop")
-        .select(["app_kpop_group.name as artist_name", "app_kpop.name as song_name", "app_kpop.likes as likes", "app_kpop.vlink as link"])
+async function mostLikedVideo(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kpopVideos("app_kpop")
+        .select([
+            "app_kpop_group.name as artist_name",
+            "app_kpop.name as song_name",
+            "app_kpop.likes as likes",
+            "app_kpop.vlink as link",
+        ])
         .join("app_kpop_group", function join() {
             this.on("app_kpop.id_artist", "=", "app_kpop_group.id");
         })
         .orderBy("likes", "DESC")
         .limit(25);
 
-    return result.map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} is the ${getOrdinalNum(idx + 1)} most liked music video with ${friendlyFormattedNumber(x["likes"])} YouTube likes!`);
+    return result.map((x, idx) =>
+        state.localizer.internalLocalizer.t("fact.fun.mostLikedVideo", {
+            hyperlink: generateSongArtistHyperlink(
+                lng,
+                x["song_name"],
+                x["artist_name"],
+                x["link"]
+            ),
+            ordinalNum: state.localizer.internalLocalizer.t(
+                getOrdinalNum(idx + 1),
+                { lng }
+            ),
+            likes: friendlyFormattedNumber(x["likes"]),
+            lng,
+        })
+    );
 }
 
-async function mostViewedEntertainmentCompany(): Promise<string[]> {
-    const result = await dbContext.kpopVideos("app_kpop")
+async function mostViewedEntertainmentCompany(
+    lng: LocaleType
+): Promise<string[]> {
+    const result = await dbContext
+        .kpopVideos("app_kpop")
         .select(["app_kpop_company.name as name"])
         .join("app_kpop_group", function join() {
             this.on("app_kpop.id_artist", "=", "app_kpop_group.id");
@@ -238,11 +446,24 @@ async function mostViewedEntertainmentCompany(): Promise<string[]> {
         .orderBy("views", "DESC")
         .limit(15);
 
-    return result.map((x, idx) => `Fun Fact: ${x["name"]} is the entertainment company with the ${getOrdinalNum(idx + 1)} most YouTube views at ${friendlyFormattedNumber(x["views"])}!`);
+    return result.map((x, idx) =>
+        state.localizer.internalLocalizer.t("fact.fun.companyByArtistViews", {
+            name: x["name"],
+            ordinalNum: state.localizer.internalLocalizer.t(
+                getOrdinalNum(idx + 1),
+                { lng }
+            ),
+            views: friendlyFormattedNumber(x["views"]),
+            lng,
+        })
+    );
 }
 
-async function mostArtistsEntertainmentCompany(): Promise<string[]> {
-    const result = await dbContext.kpopVideos("app_kpop_group")
+async function mostArtistsEntertainmentCompany(
+    lng: LocaleType
+): Promise<string[]> {
+    const result = await dbContext
+        .kpopVideos("app_kpop_group")
         .select(["app_kpop_company.name as name"])
         .join("app_kpop_company", function join() {
             this.on("app_kpop_company.id", "=", "app_kpop_group.id_company");
@@ -253,11 +474,22 @@ async function mostArtistsEntertainmentCompany(): Promise<string[]> {
         .orderBy("count", "DESC")
         .limit(15);
 
-    return result.map((x, idx) => `Fun Fact: ${x["name"]} is the entertainment company with the ${getOrdinalNum(idx + 1)} most artists (including subunits and solo debuts) at ${x["count"]}!`);
+    return result.map((x, idx) =>
+        state.localizer.internalLocalizer.t("fact.fun.companyByArtistCount", {
+            company: x["name"],
+            ordinalNum: state.localizer.internalLocalizer.t(
+                getOrdinalNum(idx + 1),
+                { lng }
+            ),
+            num: friendlyFormattedNumber(x["count"]),
+            lng,
+        })
+    );
 }
 
-async function mostMusicVideos(): Promise<string[]> {
-    const result = await dbContext.kpopVideos("app_kpop")
+async function mostMusicVideos(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kpopVideos("app_kpop")
         .select(["app_kpop_group.name as artist_name"])
         .where("vtype", "=", "main")
         .count("app_kpop.id_artist as count")
@@ -268,11 +500,22 @@ async function mostMusicVideos(): Promise<string[]> {
         .orderBy("count", "DESC")
         .limit(25);
 
-    return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} has the ${getOrdinalNum(idx + 1)} most music videos with ${x["count"]} on YouTube!`);
+    return result.map((x, idx) =>
+        state.localizer.internalLocalizer.t("fact.fun.mostMVs", {
+            artist: x["artist_name"],
+            ordinalNum: state.localizer.internalLocalizer.t(
+                getOrdinalNum(idx + 1),
+                { lng }
+            ),
+            num: x["count"],
+            lng,
+        })
+    );
 }
 
-async function yearWithMostDebuts(): Promise<string[]> {
-    const result = await dbContext.kpopVideos("app_kpop_group")
+async function yearWithMostDebuts(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kpopVideos("app_kpop_group")
         .select("app_kpop_group.formation as formation_year")
         .count("app_kpop_group.id as count")
         .where("formation", "!=", 0)
@@ -280,23 +523,49 @@ async function yearWithMostDebuts(): Promise<string[]> {
         .orderBy("count", "DESC")
         .limit(15);
 
-    return result.map((x, idx) => `Fun Fact: ${x["formation_year"]} had the ${getOrdinalNum(idx + 1)} most debuts with ${x["count"]} groups debuting!`);
+    return result.map((x, idx) =>
+        state.localizer.internalLocalizer.t("fact.fun.mostDebuts", {
+            year: x["formation_year"],
+            ordinalNum: state.localizer.internalLocalizer.t(
+                getOrdinalNum(idx + 1),
+                { lng }
+            ),
+            num: x["count"],
+            lng,
+        })
+    );
 }
 
-async function yearWithMostReleases(): Promise<string[]> {
-    const result = await dbContext.kpopVideos("app_kpop")
-        .select(dbContext.kpopVideos.raw("YEAR(app_kpop.publishedon) as release_year"))
+async function yearWithMostReleases(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kpopVideos("app_kpop")
+        .select(
+            dbContext.kpopVideos.raw(
+                "YEAR(app_kpop.publishedon) as release_year"
+            )
+        )
         .count("* as count")
         .where("app_kpop.vtype", "=", "main")
         .groupBy("release_year")
         .orderBy("count", "DESC")
         .limit(15);
 
-    return result.map((x, idx) => `Fun Fact: ${x["release_year"]} was the ${getOrdinalNum(idx + 1)} most active year in K-Pop with ${x["count"]} music video releases!`);
+    return result.map((x, idx) =>
+        state.localizer.internalLocalizer.t("fact.fun.mostActiveYear", {
+            year: String(x["release_year"]),
+            ordinalNum: state.localizer.internalLocalizer.t(
+                getOrdinalNum(idx + 1),
+                { lng }
+            ),
+            num: String(x["count"]),
+            lng,
+        })
+    );
 }
 
-async function viewsByGender(): Promise<string[]> {
-    const result = await dbContext.kpopVideos("app_kpop")
+async function viewsByGender(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kpopVideos("app_kpop")
         .select(["app_kpop_group.members as gender"])
         .join("app_kpop_group", function join() {
             this.on("app_kpop.id_artist", "=", "app_kpop_group.id");
@@ -319,11 +588,23 @@ async function viewsByGender(): Promise<string[]> {
         };
     }
 
-    return [`Fun Fact: There is a combined total of ${friendlyFormattedNumber(totalViews)} views on all K-Pop music videos on YouTube. ${data.male.views} (${data.male.proportion}%) of which are from male, ${data.female.views} (${data.female.proportion}%) from female, and the remaining ${data.coed.views} (${data.coed.proportion}%) from co-ed groups!`];
+    return [
+        state.localizer.internalLocalizer.t("fact.fun.viewsByGender", {
+            totalViews: friendlyFormattedNumber(totalViews),
+            maleViews: data.male.views,
+            maleProportion: data.male.proportion,
+            femaleViews: data.female.views,
+            femaleProportion: data.female.proportion,
+            coedViews: data.coed.views,
+            coedProportion: data.coed.proportion,
+            lng,
+        }),
+    ];
 }
 
-async function mostViewedSoloArtist(): Promise<string[]> {
-    const result = await dbContext.kpopVideos("app_kpop")
+async function mostViewedSoloArtist(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kpopVideos("app_kpop")
         .select(["app_kpop_group.name as artist_name"])
         .sum("app_kpop.views as total_views")
         .groupBy("app_kpop.id_artist")
@@ -334,11 +615,22 @@ async function mostViewedSoloArtist(): Promise<string[]> {
         .orderBy("total_views", "DESC")
         .limit(25);
 
-    return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} is the ${getOrdinalNum(idx + 1)} most viewed solo artist with ${friendlyFormattedNumber(x["total_views"])} total YouTube views!`);
+    return result.map((x, idx) =>
+        state.localizer.internalLocalizer.t("fact.fun.mostViewedSoloist", {
+            artist: x["artist_name"],
+            ordinalNum: state.localizer.internalLocalizer.t(
+                getOrdinalNum(idx + 1),
+                { lng }
+            ),
+            views: friendlyFormattedNumber(x["total_views"]),
+            lng,
+        })
+    );
 }
 
-async function viewsBySolo(): Promise<string[]> {
-    const result = await dbContext.kpopVideos("app_kpop")
+async function viewsBySolo(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kpopVideos("app_kpop")
         .select(["app_kpop_group.issolo as issolo"])
         .join("app_kpop_group", function join() {
             this.on("app_kpop.id_artist", "=", "app_kpop_group.id");
@@ -360,35 +652,78 @@ async function viewsBySolo(): Promise<string[]> {
         },
     };
 
-    return [`Fun Fact: There is a combined total of ${friendlyFormattedNumber(totalViews)} views on all K-Pop music videos on YouTube. ${data.group.views} (${data.group.proportion}%) of which are groups, while ${data.solo.views} (${data.solo.proportion}%) are from solo artists!`];
+    return [
+        state.localizer.internalLocalizer.t("fact.fun.viewsByArtistType", {
+            totalViews: friendlyFormattedNumber(totalViews),
+            groupViews: data.group.views,
+            groupProportion: data.group.proportion,
+            soloViews: data.solo.views,
+            soloProportion: data.solo.proportion,
+            lng,
+        }),
+    ];
 }
 
-async function songReleaseAnniversaries(): Promise<string[]> {
-    const result = await dbContext.kmq("available_songs")
-        .select(dbContext.kmq.raw("song_name, artist_name, YEAR(publishedon) as publish_year, link"))
+async function songReleaseAnniversaries(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kmq("available_songs")
+        .select(
+            dbContext.kmq.raw(
+                "song_name_en, artist_name_en, YEAR(publishedon) as publish_year, link"
+            )
+        )
         .whereRaw("WEEK(publishedon) = WEEK(NOW())")
         .andWhereRaw("YEAR(publishedon) != YEAR(NOW())")
         .orderBy("views", "DESC")
         .limit(25);
 
-    return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} was released this week back in ${x["publish_year"]}`);
+    return result.map((x) =>
+        state.localizer.internalLocalizer.t("fact.fun.oldMV", {
+            hyperlink: generateSongArtistHyperlink(
+                lng,
+                x["song_name_en"],
+                x["artist_name_en"],
+                x["link"]
+            ),
+            year: String(x["publish_year"]),
+            lng,
+        })
+    );
 }
 
-async function songGuessRate(): Promise<string[]> {
-    const result = await dbContext.kmq("song_guess_count")
-        .select(dbContext.kmq.raw("song_name, artist_name, ROUND(correct_guesses/rounds_played * 100, 2) as c, link, rounds_played"))
+async function songGuessRate(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kmq("song_metadata")
+        .select(
+            dbContext.kmq.raw(
+                "song_name_en, artist_name_en, ROUND(correct_guesses/rounds_played * 100, 2) AS c, link, rounds_played"
+            )
+        )
         .where("rounds_played", ">", 2500)
         .join("available_songs", function join() {
-            this.on("available_songs.link", "=", "song_guess_count.vlink");
+            this.on("available_songs.link", "=", "song_metadata.vlink");
         })
         .orderByRaw("RAND()")
         .limit(100);
 
-    return result.map((x) => `Fun Fact: ${generateSongArtistHyperlink(x["song_name"], x["artist_name"], x["link"])} has a guess rate of ${x["c"]}% over ${x["rounds_played"]} rounds played`);
+    return result.map((x) =>
+        state.localizer.internalLocalizer.t("fact.kmq.guessRate", {
+            hyperlink: generateSongArtistHyperlink(
+                lng,
+                x["song_name_en"],
+                x["artist_name_en"],
+                x["link"]
+            ),
+            percentage: x["c"],
+            roundsPlayed: x["rounds_played"],
+            lng,
+        })
+    );
 }
 
-async function bigThreeDominance(): Promise<string[]> {
-    const result = await dbContext.kpopVideos("app_kpop")
+async function bigThreeDominance(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kpopVideos("app_kpop")
         .select(["app_kpop_group.name as artist_name"])
         .sum("app_kpop.views as total_views")
         .groupBy("app_kpop.id_artist")
@@ -398,157 +733,296 @@ async function bigThreeDominance(): Promise<string[]> {
         .whereIn("app_kpop_group.name", ["Blackpink", "Twice", "BTS"])
         .orderBy("total_views", "DESC");
 
-    const totalViewsResult = await dbContext.kpopVideos("app_kpop")
+    const totalViewsResult = await dbContext
+        .kpopVideos("app_kpop")
         .sum("views as total_views");
 
-    const bigThreeViews = result.reduce((prev, current) => prev + current.total_views, 0);
+    const bigThreeViews = result.reduce(
+        (prev, current) => prev + current.total_views,
+        0
+    );
+
     const proportion = (100 * bigThreeViews) / totalViewsResult[0].total_views;
-    return [`Fun Fact: BTS, Blackpink and Twice combined account for ${friendlyFormattedNumber(bigThreeViews)} YouTube views, or ${proportion.toFixed(2)}%!`];
+    return [
+        state.localizer.internalLocalizer.t("fact.fun.bigThreeDominance", {
+            bigThreeViews: friendlyFormattedNumber(bigThreeViews),
+            proportion: proportion.toFixed(2),
+            lng,
+        }),
+    ];
 }
 
-async function fanclubName(): Promise<Array<string>> {
-    const result = await dbContext.kmq("kpop_groups")
+async function fanclubName(lng: LocaleType): Promise<Array<string>> {
+    const result = await dbContext
+        .kmq("kpop_groups")
         .select(["name", "fanclub"])
         .where("fanclub", "!=", "")
         .orderByRaw("RAND()")
         .limit(10);
 
-    return result.map((x) => `Fun Fact: ${x["name"]}'s fanclub name is '${x["fanclub"]}'!`);
+    return result.map((x) =>
+        state.localizer.internalLocalizer.t("fact.fun.fanclubName", {
+            name: x["name"],
+            fanclub: x["fanclub"],
+            lng,
+        })
+    );
 }
 
-async function closeBirthdays(): Promise<Array<string>> {
-    const result = await dbContext.kmq("kpop_groups")
-        .select(dbContext.kmq.raw("name, MONTH(date_birth) AS birth_month, DATE_FORMAT(date_birth, '%M %e') as formatted_bday"))
+async function closeBirthdays(lng: LocaleType): Promise<Array<string>> {
+    const result = await dbContext
+        .kmq("kpop_groups")
+        .select(
+            dbContext.kmq.raw(
+                "name, MONTH(date_birth) AS birth_month, DATE_FORMAT(date_birth, '%M %e') as formatted_bday"
+            )
+        )
         .whereNotNull("date_birth")
         .whereRaw("MONTH(date_birth) = MONTH(CURRENT_DATE())")
         .limit(10);
 
-    return result.map((x) => `Fun Fact: ${x["name"]}'s birthday is this month on ${x["formatted_bday"]}!`);
+    return result.map((x) =>
+        state.localizer.internalLocalizer.t("fact.fun.birthday", {
+            name: x["name"],
+            formattedDate: x["formatted_bday"],
+            lng,
+        })
+    );
 }
 
-async function longestGame(): Promise<string[]> {
-    const result = await dbContext.kmq("game_sessions")
-        .select(["rounds_played", "session_length", "num_participants", "avg_guess_time"])
+async function longestGame(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kmq("game_sessions")
+        .select([
+            "rounds_played",
+            "session_length",
+            "num_participants",
+            "avg_guess_time",
+        ])
         .orderBy("session_length", "DESC")
         .limit(1);
 
     if (result.length === 0) return [];
     const longestKmqGame = result[0];
-    return [`KMQ Fact: The world's (current) longest game of KMQ lasted ${friendlyFormattedNumber(longestKmqGame.session_length)} minutes, with over ${friendlyFormattedNumber(longestKmqGame.rounds_played)} songs played, an average guess time of ${longestKmqGame.avg_guess_time} seconds, with ${longestKmqGame.num_participants} participants! Can you beat that?`];
+    return [
+        state.localizer.internalLocalizer.t("fact.kmq.longestGame", {
+            sessionLength: friendlyFormattedNumber(
+                longestKmqGame.session_length
+            ),
+            roundsPlayed: friendlyFormattedNumber(longestKmqGame.rounds_played),
+            avgGuessTime: friendlyFormattedNumber(
+                longestKmqGame.avg_guess_time
+            ),
+            numParticipants: friendlyFormattedNumber(
+                longestKmqGame.num_participants
+            ),
+            lng,
+        }),
+    ];
 }
 
-async function mostGames(): Promise<string[]> {
-    const result = await dbContext.kmq("guild_preferences")
+async function mostGames(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kmq("guilds")
         .select("games_played", "songs_guessed")
         .orderBy("games_played", "DESC")
         .limit(1);
 
     if (result.length === 0) return [];
     const mostGamesPlayed = result[0];
-    return [`KMQ Fact: The most active server has played ${friendlyFormattedNumber(mostGamesPlayed.games_played)} games of KMQ, with a total of ${friendlyFormattedNumber(mostGamesPlayed.songs_guessed)} songs guessed!`];
+    return [
+        state.localizer.internalLocalizer.t("fact.kmq.mostActiveServer", {
+            gamesPlayed: friendlyFormattedNumber(mostGamesPlayed.games_played),
+            songsGuessed: friendlyFormattedNumber(
+                mostGamesPlayed.songs_guessed
+            ),
+            lng,
+        }),
+    ];
 }
 
-async function mostCorrectGuessed(): Promise<string[]> {
-    const result = await dbContext.kmq("guild_preferences")
+async function mostCorrectGuessed(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kmq("guilds")
         .select("games_played", "songs_guessed")
         .orderBy("songs_guessed", "DESC")
         .limit(1);
 
     if (result.length === 0) return [];
     const mostGamesPlayed = result[0];
-    return [`KMQ Fact: The server with the most correct guesses has played ${friendlyFormattedNumber(mostGamesPlayed.games_played)} games of KMQ, with a total of ${mostGamesPlayed.songs_guessed} songs guessed!`];
+    return [
+        state.localizer.internalLocalizer.t(
+            "fact.kmq.mostCorrectGuessesServer",
+            {
+                gamesPlayed: friendlyFormattedNumber(
+                    mostGamesPlayed.games_played
+                ),
+                songsGuessed: friendlyFormattedNumber(
+                    mostGamesPlayed.songs_guessed
+                ),
+                lng,
+            }
+        ),
+    ];
 }
 
-async function globalTotalGames(): Promise<string[]> {
-    const result = await dbContext.kmq("game_sessions")
-        .count("* as count");
+async function globalTotalGames(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext.kmq("game_sessions").count("* as count");
 
     if (result.length === 0) return [];
     const totalGamesPlayed = result[0].count as number;
-    return [`KMQ Fact: A grand total of ${friendlyFormattedNumber(totalGamesPlayed)} games of KMQ have been played!`];
+    return [
+        state.localizer.internalLocalizer.t("fact.kmq.totalGames", {
+            totalGamesPlayed: friendlyFormattedNumber(totalGamesPlayed),
+            lng,
+        }),
+    ];
 }
 
-async function recentGameSessions(): Promise<string[]> {
+async function recentGameSessions(lng: LocaleType): Promise<string[]> {
     const oneWeeksPriorDate = new Date();
     oneWeeksPriorDate.setDate(oneWeeksPriorDate.getDate() - 7);
-    const result = await dbContext.kmq("game_sessions")
+    const result = await dbContext
+        .kmq("game_sessions")
         .count("* as count")
         .where("start_date", ">", oneWeeksPriorDate);
 
     if (result.length === 0) return [];
     const recentSessions = result[0].count as number;
-    return [`KMQ Fact: A total of ${friendlyFormattedNumber(recentSessions)} games of KMQ have been played in the last week!`];
+    return [
+        state.localizer.internalLocalizer.t("fact.kmq.recentSessions", {
+            recentSessions: friendlyFormattedNumber(recentSessions),
+            lng,
+        }),
+    ];
 }
 
-async function recentGames(): Promise<string[]> {
+async function recentGames(lng: LocaleType): Promise<string[]> {
     const oneWeekPriorDate = new Date();
     oneWeekPriorDate.setDate(oneWeekPriorDate.getDate() - 7);
-    const result = await dbContext.kmq("game_sessions")
+    const result = await dbContext
+        .kmq("game_sessions")
         .count("* as count")
         .where("start_date", ">", oneWeekPriorDate);
 
     if (result.length === 0) return [];
     const recentGameCount = result[0].count as number;
-    return [`KMQ Fact: There has been a total of ${friendlyFormattedNumber(recentGameCount)} games of KMQ played in the last week, averaging ${Math.round(recentGameCount / 7)} per day!`];
+    return [
+        state.localizer.internalLocalizer.t("fact.kmq.recentGameCount", {
+            recentGameCount: friendlyFormattedNumber(recentGameCount),
+            lng,
+        }),
+    ];
 }
 
-async function recentUniquePlayers(): Promise<string[]> {
+async function recentUniquePlayers(lng: LocaleType): Promise<string[]> {
     const intervals = [1, 7, 30];
     const output: Array<string> = [];
     for (const interval of intervals) {
         const priorDate = new Date();
         priorDate.setDate(priorDate.getDate() - interval);
-        const result = await dbContext.kmq("player_stats")
+        const result = await dbContext
+            .kmq("player_stats")
             .count("* as count")
             .where("last_active", ">", priorDate);
 
         if (result.length === 0) return [];
         const recentActivePlayers = result[0].count as number;
-        output.push(`KMQ Fact: ${friendlyFormattedNumber(recentActivePlayers)} unique players have played KMQ in the past ${interval} day(s)!`);
+        output.push(
+            state.localizer.internalLocalizer.t("fact.kmq.uniquePlayers", {
+                recentActivePlayers:
+                    friendlyFormattedNumber(recentActivePlayers),
+                xDays: state.localizer.internalLocalizer.t("misc.plural.day", {
+                    count: interval,
+                    lng,
+                }),
+                lng,
+            })
+        );
     }
 
     return output;
 }
 
-async function mostSongsGuessedPlayer(): Promise<string[]> {
-    const result = await dbContext.kmq("player_stats")
+async function mostSongsGuessedPlayer(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kmq("player_stats")
         .select(["songs_guessed"])
         .orderBy("songs_guessed", "DESC")
         .limit(1);
 
     if (result.length === 0) return [];
-    return [`KMQ Fact: The most active player has guessed ${friendlyFormattedNumber(result[0].songs_guessed)} songs since Nov 8th, 2020!`];
+    return [
+        state.localizer.internalLocalizer.t(
+            "fact.kmq.mostActivePlayerSongsGuessed",
+            {
+                songsGuessed: friendlyFormattedNumber(result[0].songs_guessed),
+                lng,
+            }
+        ),
+    ];
 }
 
-async function mostGamesPlayedPlayer(): Promise<string[]> {
-    const result = await dbContext.kmq("player_stats")
+async function mostGamesPlayedPlayer(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kmq("player_stats")
         .select(["games_played"])
         .orderBy("games_played", "DESC")
         .limit(1);
 
     if (result.length === 0) return [];
-    return [`KMQ Fact: The most active player has played ${friendlyFormattedNumber(result[0].games_played)} games since Nov 8th, 2020!`];
+    return [
+        state.localizer.internalLocalizer.t(
+            "fact.kmq.mostActivePlayerGamesPlayed",
+            {
+                gamesPlayed: friendlyFormattedNumber(result[0].games_played),
+                lng,
+            }
+        ),
+    ];
 }
 
-async function mostGaonFirsts(): Promise<string[]> {
-    const result = await dbContext.kpopVideos("app_kpop_group")
+async function mostGaonFirsts(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kpopVideos("app_kpop_group")
         .select(["name as artist_name", "gaondigital_firsts as firsts"])
         .orderBy("firsts", "DESC")
         .limit(25);
 
-    return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} has topped the GAON digital weekly charts the ${getOrdinalNum(idx + 1)} most times with ${x["firsts"]} first place appearances!`);
+    return result.map((x, idx) =>
+        state.localizer.internalLocalizer.t("fact.fun.mostGaonFirsts", {
+            artistName: x["artist_name"],
+            ordinalNum: state.localizer.internalLocalizer.t(
+                getOrdinalNum(idx + 1),
+                { lng }
+            ),
+            firstPlaceCount: x["firsts"],
+            lng,
+        })
+    );
 }
 
-async function mostGaonAppearances(): Promise<string[]> {
-    const result = await dbContext.kpopVideos("app_kpop_group")
+async function mostGaonAppearances(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kpopVideos("app_kpop_group")
         .select(["name as artist_name", "gaondigital_times as appearances"])
         .orderBy("appearances", "DESC")
         .limit(25);
 
-    return result.map((x, idx) => `Fun Fact: ${x["artist_name"]} has placed on the GAON digital weekly charts the ${getOrdinalNum(idx + 1)} most times with ${x["appearances"]} appearances!`);
+    return result.map((x, idx) =>
+        state.localizer.internalLocalizer.t("fact.fun.mostGaonAppearances", {
+            artistName: x["artist_name"],
+            ordinalNum: state.localizer.internalLocalizer.t(
+                getOrdinalNum(idx + 1),
+                { lng }
+            ),
+            appearances: x["appearances"],
+            lng,
+        })
+    );
 }
 
-async function historicalGaonWeekly(): Promise<Array<string>> {
+async function historicalGaonWeekly(lng: LocaleType): Promise<Array<string>> {
     const startYear = 2010;
     const endYear = new Date().getFullYear() - 1;
     let week = weekOfYear();
@@ -557,46 +1031,114 @@ async function historicalGaonWeekly(): Promise<Array<string>> {
      * Better safe than sorry and just call it the 52nd week
      */
     week = week === 53 ? 52 : week;
-    const yearRange = Array.from({ length: endYear - startYear + 1 }, (value, key) => startYear + key);
-    const result = await dbContext.kpopVideos("app_kpop_gaondigi")
+    const yearRange = Array.from(
+        { length: endYear - startYear + 1 },
+        (value, key) => startYear + key
+    );
+
+    const result = await dbContext
+        .kpopVideos("app_kpop_gaondigi")
         .select(["ranklist", "year", "week"])
         .where("week", "=", week)
         .whereIn("year", yearRange)
         .orderBy("year", "DESC");
 
-    const parsedResults = result.map((x) => parseGaonWeeklyRankList(x["ranklist"], x["year"]));
-    return parsedResults.map((x) => `Fun Fact: On this week in ${x[0].year}, ${generateSongArtistHyperlink(x[0].songName, x[0].artistName)} was the top charting song on the Gaon Weekly charts!`);
+    const parsedResults = result.map((x) =>
+        parseGaonWeeklyRankList(x["ranklist"], x["year"])
+    );
+
+    return parsedResults.map((x) =>
+        state.localizer.internalLocalizer.t("fact.fun.historicalGaonWeekly", {
+            year: x[0].year,
+            songName: generateSongArtistHyperlink(
+                lng,
+                x[0].songName,
+                x[0].artistName
+            ),
+            lng,
+        })
+    );
 }
 
-async function recentGaonWeekly(): Promise<Array<string>> {
-    const result = await dbContext.kpopVideos("app_kpop_gaondigi")
+async function recentGaonWeekly(lng: LocaleType): Promise<Array<string>> {
+    const result = await dbContext
+        .kpopVideos("app_kpop_gaondigi")
         .select(["ranklist", "year", "week"])
         .orderBy("year", "DESC")
         .orderBy("week", "DESC")
         .limit(1);
 
-    const parsedResult = parseGaonWeeklyRankList(result[0].ranklist, result[0].year);
-    return parsedResult.slice(0, 10).map((x, idx) => `Fun Fact: ${generateSongArtistHyperlink(x["songName"], x["artistName"])} is the ${getOrdinalNum(idx + 1)} highest charting song on the Gaon Weekly charts last week!`);
+    const parsedResult = parseGaonWeeklyRankList(
+        result[0].ranklist,
+        result[0].year
+    );
+
+    return parsedResult.slice(0, 10).map((x, idx) =>
+        state.localizer.internalLocalizer.t("fact.fun.recentGaonWeekly", {
+            songName: generateSongArtistHyperlink(
+                lng,
+                x["songName"],
+                x["artistName"]
+            ),
+            ordinalNum: state.localizer.internalLocalizer.t(
+                getOrdinalNum(idx + 1),
+                { lng }
+            ),
+            lng,
+        })
+    );
 }
 
-async function topLeveledPlayers(): Promise<Array<string>> {
-    const result = await dbContext.kmq("player_stats")
+async function topLeveledPlayers(lng: LocaleType): Promise<Array<string>> {
+    const result = await dbContext
+        .kmq("player_stats")
         .select(["songs_guessed", "games_played", "level"])
         .orderBy("exp", "DESC")
         .limit(10);
 
-    return result.map((x, idx) => `KMQ Fact: The ${getOrdinalNum(idx + 1)} highest leveled KMQ player is Level \`${x["level"]}\` with \`${x["songs_guessed"]}\` songs guessed over \`${x["games_played"]}\` games!`);
+    return result.map((x, idx) =>
+        state.localizer.internalLocalizer.t(
+            "fact.kmq.highestLeveledPlayerStats",
+            {
+                ordinalNum: state.localizer.internalLocalizer.t(
+                    getOrdinalNum(idx + 1),
+                    { lng }
+                ),
+                level: `\`${x["level"]}\``,
+                songsGuessed: `\`${friendlyFormattedNumber(
+                    x["songs_guessed"]
+                )}\``,
+                gamesPlayed: `\`${friendlyFormattedNumber(
+                    x["games_played"]
+                )}\``,
+                lng,
+            }
+        )
+    );
 }
 
-function generateSongArtistHyperlink(songName: string, artistName: string, videoId?: string): string {
+function generateSongArtistHyperlink(
+    lng: LocaleType,
+    songName: string,
+    artistName: string,
+    videoId?: string
+): string {
     let url: string;
     if (videoId) {
         url = `https://www.youtube.com/watch?v=${videoId}`;
     } else {
         const searchUrl = new URL("https://youtube.com/results");
-        searchUrl.searchParams.append("search_query", `${songName} ${artistName}`);
+        searchUrl.searchParams.append(
+            "search_query",
+            `${songName} ${artistName}`
+        );
         url = searchUrl.toString();
     }
 
-    return `["${songName}" by ${artistName}](${url})`;
+    return state.localizer.internalLocalizer.t("fact.fun.hyperlinkGenerator", {
+        songName,
+        artistName,
+        url,
+        lng,
+    });
 }

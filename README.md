@@ -2,7 +2,7 @@
 
 [![Top.GG Bot Status](https://top.gg/api/widget/status/508759831755096074.svg)](https://top.gg/bot/508759831755096074)
 [![Discord](https://img.shields.io/discord/679165980995223582)](https://discord.gg/RCuzwYV)
-[![Build status](https://img.shields.io/github/workflow/status/brainicism/KMQ_Discord/CI)](https://github.com/Brainicism/KMQ_Discord/actions?query=workflow%3ACI)
+[![Build status](https://img.shields.io/github/workflow/status/brainicism/KMQ_Discord/gci-e2e)](https://github.com/Brainicism/KMQ_Discord/actions/workflows/gci-e2e.yml)
 
 
 
@@ -24,8 +24,12 @@ Gameplay is initiated via `,play`, which invites the bot to a voice channel. The
 # Development
 If you are interested in contributing to KMQ, [instructions on setup and development can be found here.](docs/DEVELOPER.md)
 
+# Privacy Policy
+Our privacy policy can be found [here](https://brainicism.github.io/KMQ_Discord/PRIVACY).
+
 # Credits
-- [Caio Vianna Lima Netto](http://kpop.daisuki.com.br/index.html) - Maintaining his wonderful Korean music database that we would not exist without  
+- [Caio Vianna Lima Netto](http://kpop.daisuki.com.br/index.html) - Maintaining his wonderful Korean music database that we would not exist without
 - [Taaha Mahdi](https://github.com/taahamahdi/) - Lead Developer
 - Anonymous Artist - Lead Character Designer
 - [Emily Louie](https://github.com/emilyslouie) - Lead Graphic Designer
+- [hoehoetvhs](https://github.com/hoehoetvhss) - Korean Translator

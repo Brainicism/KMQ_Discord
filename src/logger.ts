@@ -7,30 +7,44 @@ import DailyRotateFile from "winston-daily-rotate-file";
 import { EnvType } from "./types";
 
 config({ path: resolve(__dirname, "../.env") });
+
+type LoggerArg = string | number | Object | Array<string | number | Object>;
+
+/**
+ * @returns a logger
+ */
 export function getInternalLogger(): winston.Logger {
     const format = winston.format;
     const consoleFormat = format.printf(({ level, message, timestamp }) => {
-        const header = format.colorize().colorize(level, `${timestamp} [${level.toUpperCase()}] -`);
+        const header = format
+            .colorize()
+            .colorize(level, `${timestamp} [${level.toUpperCase()}] -`);
+
         return `${header} ${message}`;
     });
 
-    const logFormat = format.printf(({ level, message, timestamp }) => `${timestamp} [${level.toUpperCase()}] - ${message}`);
+    const logFormat = format.printf(
+        ({ level, message, timestamp }) =>
+            `${timestamp} [${level.toUpperCase()}] - ${message}`
+    );
+
     return winston.createLogger({
         level: process.env.DEBUG_LOGGING ? "debug" : "info",
-        format: format.combine(
-            format.timestamp(),
-            logFormat,
-        ),
+        format: format.combine(format.timestamp(), logFormat),
         transports: [
             new winston.transports.Console({
-                format: format.combine(
-                    format.timestamp(),
-                    consoleFormat,
-                ),
+                format: format.combine(format.timestamp(), consoleFormat),
                 silent: process.env.NODE_ENV === EnvType.TEST,
             }),
-            new (DailyRotateFile)({ filename: "../logs/error.log", level: "error", maxFiles: "14d" }),
-            new (DailyRotateFile)({ filename: "../logs/combined.log", maxFiles: "14d" }),
+            new DailyRotateFile({
+                filename: "../logs/error.log",
+                level: "error",
+                maxFiles: "14d",
+            }),
+            new DailyRotateFile({
+                filename: "../logs/combined.log",
+                maxFiles: "14d",
+            }),
         ],
     });
 }
@@ -46,18 +60,27 @@ export class IPCLogger {
         this.logger = getInternalLogger();
     }
 
-    getCategorizedMessage(msg: string) {
+    getCategorizedMessage(msg: LoggerArg): string {
+        if (msg instanceof Array) {
+            msg = msg
+                .map((x) => (x instanceof Object ? JSON.stringify(x) : x))
+                .join(" ");
+        } else if (msg instanceof Object) {
+            msg = JSON.stringify(msg);
+        }
+
         return `${this.category} | ${msg}`;
     }
-    info(msg: string | number) {
+
+    info(msg: LoggerArg): void {
         if (!isMaster) {
-            console.log(this.getCategorizedMessage(msg as string));
+            console.log(this.getCategorizedMessage(msg));
         } else {
-            this.logger.info(this.getCategorizedMessage(msg as string));
+            this.logger.info(this.getCategorizedMessage(msg));
         }
     }
 
-    error(msg: string) {
+    error(msg: LoggerArg): void {
         if (!isMaster) {
             console.error(this.getCategorizedMessage(msg));
         } else {
@@ -65,7 +88,7 @@ export class IPCLogger {
         }
     }
 
-    debug(msg: string) {
+    debug(msg: LoggerArg): void {
         if (!isMaster) {
             console.debug(this.getCategorizedMessage(msg));
         } else {
@@ -73,7 +96,7 @@ export class IPCLogger {
         }
     }
 
-    warn(msg: string) {
+    warn(msg: LoggerArg): void {
         if (!isMaster) {
             console.warn(this.getCategorizedMessage(msg));
         } else {

@@ -12,7 +12,10 @@ export default class Team extends Player {
 
     /** @returns the score of all the players on this team */
     getScore(): number {
-        return this.getPlayers().reduce((totalScore, player) => totalScore + player.getScore(), 0);
+        return this.getPlayers().reduce(
+            (totalScore, player) => totalScore + player.getScore(),
+            0
+        );
     }
 
     /** @returns the name of the team */
@@ -21,13 +24,19 @@ export default class Team extends Player {
     }
 
     /**
-     * @param wonRound - Whether the team won the previous round
+     * @param first - Whether the player won the previous round
+     * @param _wonRound - unused
+     * @param _duplicateName - unused
      * @returns what to display as the name of the team in the scoreboard
      */
-    getDisplayedName(wonRound: boolean, _duplicateName: boolean): string {
+    getDisplayedName(
+        first: boolean,
+        _wonRound: boolean,
+        _duplicateName: boolean
+    ): string {
         let name = `Team ${this.getName()}`;
-        if (wonRound) {
-            name = `🎵 ${bold(name)}`;
+        if (first) {
+            name = `🎶 ${bold(name)}`;
         }
 
         return name;
@@ -37,18 +46,20 @@ export default class Team extends Player {
      * @param player - The player to add
      * Adds player to this team
      */
-    addPlayer(player: Player) {
+    addPlayer(player: Player): void {
         this.players[player.id] = player;
     }
 
     /**
+     * @param userID - The userID of the player to remove
      * Removes the given player from this team
      */
-    removePlayer(userID: string) {
+    removePlayer(userID: string): void {
         delete this.players[userID];
     }
 
     /**
+     * @param userID - The userID of the player to get
      * @returns the player associated with the given userID
      */
     getPlayer(userID: string): Player {
@@ -56,6 +67,7 @@ export default class Team extends Player {
     }
 
     /**
+     * @param userID - The userID of the player to check
      * @returns whether the player is on this team
      */
     hasPlayer(userID: string): boolean {

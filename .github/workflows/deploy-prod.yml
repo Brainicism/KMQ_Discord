@@ -1,0 +1,45 @@
+name: deploy-prod
+
+on:
+  workflow_dispatch:
+    inputs:
+      semver-type:
+        type: choice
+        description: The semver type
+        default: minor
+        options:
+        - major
+        - minor
+        - patch
+jobs:
+  snap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout KMQ_Discord
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT }}
+      - name: Snap prod branch
+        run: |
+          git config --global user.name 'KMQ GH Action Committer'
+          git config --global user.email '<>'
+          git checkout master
+          npm version ${{ github.event.inputs.semver-type }}
+          git push --follow-tags
+          git checkout prod
+          echo "Checking out 'prod', latest commit:"
+          git log -n 1 --pretty
+          git pull --rebase origin master
+          echo "Rebasing off 'master', latest commit:"
+          git log -n 1 --pretty
+          git push
+          echo "Pushing new prod branch"
+  redeploy:
+    uses: Brainicism/KMQ_Discord/.github/workflows/restart-prod.yml@master
+    needs: snap
+    secrets:
+      SSH_DEPLOY_PRIVATE_KEY: ${{ secrets.SSH_DEPLOY_PRIVATE_KEY }}
+      SSH_DEPLOY_KNOWN_HOSTS: ${{ secrets.SSH_DEPLOY_KNOWN_HOSTS }}
+      PROD_SSH_CONNECTION_STRING: ${{ secrets.PROD_SSH_CONNECTION_STRING }}

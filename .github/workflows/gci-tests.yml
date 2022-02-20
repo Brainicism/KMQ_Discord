@@ -1,4 +1,4 @@
-name: CI
+name: gci-tests
 
 on:
   workflow_dispatch:
@@ -8,14 +8,17 @@ on:
     branches: [ master ]
     paths-ignore:
       - 'images/**'
-      - 'sql/**'
+      - 'sql/analytics/**'
       - '**.md'
       - 'docs/**'
+  pull_request_target:
+    types: [labeled]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    if: ${{!github.event.issue.pull_request_target || contains(github.event.pull_request.labels.*.name, 'safe to test')}}
     env:
       DB_PASS_CI: kmq_ci_password
       DB_USER_CI: kmq_ci
@@ -35,29 +38,24 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v2.1.2
         with:
-          node-version: 14.2.0
+          node-version: 16
       - name: Install node dependencies
         run: yarn install --frozen-lockfile
+      - name: Prettier
+        run: npm run prettier_ci
       - name: npm run lint
         run: npm run lint_ci
+      - name: Check translations
+        run: npm run lint_i18n_ci
       - name: Copy .env for CI
-        env:
-          BOT_TOKEN: ${{ secrets.KMQ_CI_BOT_TOKEN }}
         run: |
-          echo "DB_USER=$DB_USER_CI" >> .env
-          echo "DB_PASS=$DB_PASS_CI" >> .env
+          echo "DB_USER=root" >> .env
+          echo "DB_PASS=root" >> .env
           echo "DB_HOST=127.0.0.1" >> .env
-          echo "BOT_TOKEN=$BOT_TOKEN" >> .env
-          echo "AUDIO_SONGS_PER_ARTIST=$AUDIO_SONGS_PER_ARTIST" >> .env
-          echo "PREMIUM_AUDIO_SONGS_PER_ARTIST=$PREMIUM_AUDIO_SONGS_PER_ARTIST" >> .env
         shell: bash
-      - name: Setup MySQL server
-        uses: mirromutth/mysql-action@v1.1
-        with:
-          mysql database: 'kmq_test'
-          mysql version: '5.7'
-          mysql user: '$DB_USER_CI'
-          mysql password: '$DB_PASS_CI'
+      - name: Enable MySQL
+        run: |
+          sudo systemctl start mysql.service
       - name: Wait for MySQL server to start
         run: |
           while ! mysqladmin ping --host=127.0.0.1 --password="$DB_PASS_CI" --silent; do
@@ -65,5 +63,3 @@ jobs:
           done
       - name: Run tests
         run: npm run test_ci
-      - name: Build and CI dry-run
-        run: npm run ci

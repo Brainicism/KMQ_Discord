@@ -1,7 +1,7 @@
-FROM node:15-alpine AS build
+FROM node:16-alpine AS build
 
 RUN apk add --no-cache git \
-    python \
+    python3 \
     make \
     g++ \
     autoconf \
@@ -22,7 +22,7 @@ COPY sql_dumps/daisuki/bootstrap-audio.sql sql_dumps/daisuki/bootstrap-audio.sql
 COPY sql/ sql/
 
 # ================================================================= #
-FROM node:15-alpine
+FROM node:16-alpine
 RUN apk add --no-cache mysql-client \
     ffmpeg \ 
     bash

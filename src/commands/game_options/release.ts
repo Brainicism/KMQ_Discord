@@ -1,10 +1,14 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { getDebugLogHeader, sendOptionsMessage } from "../../helpers/discord_utils";
+import {
+    getDebugLogHeader,
+    sendOptionsMessage,
+} from "../../helpers/discord_utils";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("release");
 
@@ -16,9 +20,9 @@ export const NON_OFFICIAL_VIDEO_TAGS = ["c", "d", "a", "r", "v", "x", "p"];
 export const DEFAULT_RELEASE_TYPE = ReleaseType.OFFICIAL;
 
 export default class ReleaseCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
-
     aliases = ["releases", "videotype"];
+
+    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
         minArgCount: 0,
@@ -32,40 +36,67 @@ export default class ReleaseCommand implements BaseCommand {
         ],
     };
 
-    help = {
+    help = (guildID: string): Help => ({
         name: "release",
-        description: "Choose whether to include only official music videos, or all videos (b-sides, dance practices, acoustic versions, remixes, etc.)",
+        description: state.localizer.translate(
+            guildID,
+            "command.release.help.description"
+        ),
         usage: ",release [official | all]",
         examples: [
             {
                 example: "`,release official`",
-                explanation: "Plays only `official` music videos",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.release.help.example.official",
+                    { official: `\`${ReleaseType.OFFICIAL}\`` }
+                ),
             },
             {
                 example: "`,release all`",
-                explanation: "Plays all available videos, including dance practices, acoustic versions, remixes",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.release.help.example.all"
+                ),
             },
             {
                 example: "`,release`",
-                explanation: `Reset to the default release type of \`${DEFAULT_RELEASE_TYPE}\``,
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.release.help.example.reset",
+                    { defaultRelease: `\`${DEFAULT_RELEASE_TYPE}\`` }
+                ),
             },
         ],
         priority: 130,
-    };
+    });
 
-    call = async ({ message, parsedMessage }: CommandArgs) => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
 
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.RELEASE_TYPE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.RELEASE_TYPE, reset: true });
+            await sendOptionsMessage(
+                MessageContext.fromMessage(message),
+                guildPreference,
+                [{ option: GameOption.RELEASE_TYPE, reset: true }]
+            );
             logger.info(`${getDebugLogHeader(message)} | Video type reset.`);
             return;
         }
 
-        const releaseType = parsedMessage.components[0].toLowerCase() as ReleaseType;
+        const releaseType =
+            parsedMessage.components[0].toLowerCase() as ReleaseType;
+
         await guildPreference.setReleaseType(releaseType);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.RELEASE_TYPE, reset: false });
-        logger.info(`${getDebugLogHeader(message)} | Video type set to ${releaseType}`);
+        await sendOptionsMessage(
+            MessageContext.fromMessage(message),
+            guildPreference,
+            [{ option: GameOption.RELEASE_TYPE, reset: false }]
+        );
+
+        logger.info(
+            `${getDebugLogHeader(message)} | Video type set to ${releaseType}`
+        );
     };
 }

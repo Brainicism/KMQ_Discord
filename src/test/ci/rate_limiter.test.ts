@@ -19,7 +19,10 @@ describe("queue filling, no expiring", () => {
                 assert.strictEqual(rateLimiter.check(userID), true);
             }
 
-            assert.strictEqual(rateLimiter.limitMap[userID].length, queueCapacity - 1);
+            assert.strictEqual(
+                rateLimiter.limitMap[userID].length,
+                queueCapacity - 1
+            );
         });
     });
 
@@ -29,7 +32,10 @@ describe("queue filling, no expiring", () => {
                 assert.strictEqual(rateLimiter.check(userID), true);
             }
 
-            assert.strictEqual(rateLimiter.limitMap[userID].length, queueCapacity);
+            assert.strictEqual(
+                rateLimiter.limitMap[userID].length,
+                queueCapacity
+            );
         });
     });
 
@@ -44,7 +50,10 @@ describe("queue filling, no expiring", () => {
                 assert.strictEqual(rateLimiter.check(userID), false);
             }
 
-            assert.strictEqual(rateLimiter.limitMap[userID].length, queueCapacity);
+            assert.strictEqual(
+                rateLimiter.limitMap[userID].length,
+                queueCapacity
+            );
         });
     });
 });
@@ -57,7 +66,7 @@ describe("queue filling, expiring", () => {
                     assert.strictEqual(rateLimiter.check(userID), true);
                 }
 
-                await delay((queueExpiryTime * expiryFudgeFactor) * 1000);
+                await delay(queueExpiryTime * expiryFudgeFactor * 1000);
                 assert.strictEqual(rateLimiter.check(userID), true);
                 assert.strictEqual(rateLimiter.limitMap[userID].length, 1);
             });
@@ -69,20 +78,23 @@ describe("queue filling, expiring", () => {
                     assert.strictEqual(rateLimiter.check(userID), true);
                 }
 
-                await delay((queueExpiryTime * expiryFudgeFactor) * 1000);
+                await delay(queueExpiryTime * expiryFudgeFactor * 1000);
 
                 for (let i = 0; i < queueCapacity; i++) {
                     assert.strictEqual(rateLimiter.check(userID), true);
                 }
 
-                assert.strictEqual(rateLimiter.limitMap[userID].length, queueCapacity);
+                assert.strictEqual(
+                    rateLimiter.limitMap[userID].length,
+                    queueCapacity
+                );
             });
         });
     });
 
     describe("staggered", () => {
         const requestsToExpire = 3;
-        const staggerDelay = (queueExpiryTime / (queueCapacity)) * 1000;
+        const staggerDelay = (queueExpiryTime / queueCapacity) * 1000;
         describe("queue completely filled up, several requests expire, and several more requests enter at the same time", () => {
             it("should allow all requests to pass, then allow an equal number of expired requests to pass, fail otherwise", async () => {
                 for (let i = 0; i < queueCapacity; i++) {
@@ -90,8 +102,14 @@ describe("queue filling, expiring", () => {
                     assert.strictEqual(rateLimiter.check(userID), true);
                 }
 
-                assert.strictEqual(rateLimiter.limitMap[userID].length, queueCapacity);
-                await delay((staggerDelay * expiryFudgeFactor) * requestsToExpire);
+                assert.strictEqual(
+                    rateLimiter.limitMap[userID].length,
+                    queueCapacity
+                );
+
+                await delay(
+                    staggerDelay * expiryFudgeFactor * requestsToExpire
+                );
 
                 for (let i = 0; i < requestsToExpire; i++) {
                     assert.strictEqual(rateLimiter.check(userID), true);
@@ -100,7 +118,10 @@ describe("queue filling, expiring", () => {
                 assert.strictEqual(rateLimiter.check(userID), false);
                 assert.strictEqual(rateLimiter.check(userID), false);
                 assert.strictEqual(rateLimiter.check(userID), false);
-                assert.strictEqual(rateLimiter.limitMap[userID].length, queueCapacity);
+                assert.strictEqual(
+                    rateLimiter.limitMap[userID].length,
+                    queueCapacity
+                );
             });
         });
 
@@ -111,7 +132,10 @@ describe("queue filling, expiring", () => {
                     assert.strictEqual(rateLimiter.check(userID), true);
                 }
 
-                assert.strictEqual(rateLimiter.limitMap[userID].length, queueCapacity);
+                assert.strictEqual(
+                    rateLimiter.limitMap[userID].length,
+                    queueCapacity
+                );
 
                 for (let i = 0; i < requestsToExpire; i++) {
                     await delay(staggerDelay * expiryFudgeFactor);
@@ -121,7 +145,10 @@ describe("queue filling, expiring", () => {
                 assert.strictEqual(rateLimiter.check(userID), false);
                 assert.strictEqual(rateLimiter.check(userID), false);
                 assert.strictEqual(rateLimiter.check(userID), false);
-                assert.strictEqual(rateLimiter.limitMap[userID].length, queueCapacity);
+                assert.strictEqual(
+                    rateLimiter.limitMap[userID].length,
+                    queueCapacity
+                );
             });
         });
     });
@@ -139,10 +166,16 @@ describe("multiple users", () => {
                 assert.strictEqual(rateLimiter.check(userID2), true);
             }
 
-            assert.strictEqual(rateLimiter.limitMap[userID].length, queueCapacity);
+            assert.strictEqual(
+                rateLimiter.limitMap[userID].length,
+                queueCapacity
+            );
             assert.strictEqual(rateLimiter.check(userID), false);
             assert.strictEqual(rateLimiter.check(userID2), true);
-            assert.strictEqual(rateLimiter.limitMap[userID2].length, queueCapacity / 2 + 1);
+            assert.strictEqual(
+                rateLimiter.limitMap[userID2].length,
+                queueCapacity / 2 + 1
+            );
         });
     });
 });

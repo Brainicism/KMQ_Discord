@@ -5,11 +5,22 @@ import { EnvType } from "./types";
 
 config({ path: resolve(__dirname, "../.env") });
 
-function generateKnexContext(databaseName: string, minPoolSize = 0, maxPoolSize: number) {
+function generateKnexContext(
+    databaseName: string,
+    minPoolSize: number,
+    maxPoolSize: number
+): any {
     return {
         client: "mysql2",
         connection: {
-            user: process.env.DB_USER, password: process.env.DB_PASS, database: databaseName, host: process.env.DB_HOST, charset: "utf8mb4", port: parseInt(process.env.DB_PORT), decimalNumbers: true,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASS,
+            database: databaseName,
+            host: process.env.DB_HOST,
+            charset: "utf8mb4",
+            port: parseInt(process.env.DB_PORT),
+            decimalNumbers: true,
+            multipleStatements: true,
         },
         pool: {
             min: minPoolSize,
@@ -34,10 +45,12 @@ export class DatabaseContext {
 
         this.kpopVideos = knex(generateKnexContext("kpop_videos", 0, 1));
         this.agnostic = knex(generateKnexContext(null, 0, 1));
-        this.kpopVideosValidation = knex(generateKnexContext("kpop_videos_validation", 0, 1));
+        this.kpopVideosValidation = knex(
+            generateKnexContext("kpop_videos_validation", 0, 1)
+        );
     }
 
-    async destroy() {
+    async destroy(): Promise<void> {
         if (this.kmq) {
             await this.kmq.destroy();
         }
@@ -56,6 +69,9 @@ export class DatabaseContext {
     }
 }
 
+/**
+ * @returns a new database connection
+ */
 export function getNewConnection(): DatabaseContext {
     return new DatabaseContext();
 }

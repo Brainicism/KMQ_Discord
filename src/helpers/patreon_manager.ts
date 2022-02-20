@@ -13,21 +13,27 @@ const campaign = new Campaign({
 });
 
 interface PatronResponse {
-    patron_status: string,
-    discord_user_id: string,
-    pledge_relationship_start?: Date,
+    patron_status: string;
+    discord_user_id: string;
+    pledge_relationship_start?: Date;
 }
 
 export interface Patron {
-    discordID: string,
-    activePatron: boolean,
-    firstSubscribed?: Date,
+    discordID: string;
+    activePatron: boolean;
+    firstSubscribed?: Date;
 }
 
-export default async function updatePremiumUsers() {
+/**
+ * Fetch up-to-date Patreon members and update Premium members accordingly
+ */
+export default async function updatePremiumUsers(): Promise<void> {
     let fetchedPatrons: Array<PatronResponse>;
     try {
-        fetchedPatrons = await campaign.fetchPatrons(["active_patron", "declined_patron"]);
+        fetchedPatrons = await campaign.fetchPatrons([
+            "active_patron",
+            "declined_patron",
+        ]);
     } catch (err) {
         logger.error(`Failed fetching patrons. err = ${err}`);
         return;
@@ -41,7 +47,17 @@ export default async function updatePremiumUsers() {
             firstSubscribed: x.pledge_relationship_start,
         }));
 
-    const activePatronIDs: string[] = patrons.filter((x) => x.activePatron).map((x) => x.discordID);
-    removePremium((await dbContext.kmq("premium_users").select("user_id").whereNotIn("user_id", activePatronIDs)).map((x) => x.user_id));
+    const activePatronIDs: string[] = patrons
+        .filter((x) => x.activePatron)
+        .map((x) => x.discordID);
+
+    removePremium(
+        (
+            await dbContext
+                .kmq("premium_users")
+                .select("user_id")
+                .whereNotIn("user_id", activePatronIDs)
+        ).map((x) => x.user_id)
+    );
     addPremium(patrons);
 }

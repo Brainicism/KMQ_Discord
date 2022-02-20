@@ -1,19 +1,10 @@
 import { IPCLogger } from "../../logger";
-import { state } from "../../kmq";
-import dbContext from "../../database_context";
 
 const logger = new IPCLogger("SIGINT");
 
-export default async function SIGINTHandler() {
-    logger.debug("SIGINT received, cleaning up...");
-
-    const endSessionPromises = Object.keys(state.gameSessions).map(async (guildID) => {
-        const gameSession = state.gameSessions[guildID];
-        logger.debug(`gid: ${guildID} | Forcing game session end`);
-        await gameSession.endSession();
-    });
-
-    await Promise.allSettled(endSessionPromises);
-    await dbContext.destroy();
-    process.exit(0);
+/**
+ * Handles the 'SIGINT' event
+ */
+export default function SIGINTHandler(): void {
+    logger.debug("Catch SIGINT to allow for soft kill");
 }

@@ -1,4 +1,4 @@
-name: E2E
+name: gci-e2e
 
 on:
   schedule:
@@ -8,18 +8,21 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-    paths:
-      - 'docker/**'
-      - .github/workflows/e2e.yml
-      - src/seed/seed_db.ts
-      - src/scripts/download-new-songs.ts
-      - src/seed/bootstrap.ts
-      - start.sh
+    paths-ignore:
+      - 'images/**'
+      - 'sql/analytics/**'
+      - '**.md'
+      - 'docs/**'
+      - 'i18n/**'
+  pull_request_target:
+    types: [labeled]
+
 
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    if: ${{!github.event.issue.pull_request_target || contains(github.event.pull_request.labels.*.name, 'safe to test')}}
     env:
       DB_PASS_CI: kmq_ci_password
       DB_USER_CI: root

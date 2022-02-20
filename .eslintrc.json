@@ -1,25 +1,52 @@
 {
     "extends": [
-        "airbnb-typescript/base"
+        "airbnb-typescript/base", "prettier"
     ],
     "plugins": [
         "eslint-plugin-tsdoc",
-        "only-warn"
+        "jsdoc",
+        "only-warn",
+        "import"
     ],
     "parserOptions": {
         "project": "./tsconfig.json"
     },
     "rules": {
         "@typescript-eslint/indent": [
-            "warn",
-            4
+            "off"
         ],
         "@typescript-eslint/quotes": [
             "warn",
             "double"
         ],
+        "@typescript-eslint/explicit-function-return-type": [
+            "warn",
+            {
+                "allowExpressions": true
+            }
+        ],
+        "@typescript-eslint/type-annotation-spacing": [
+            "warn"
+        ],
         "import/no-cycle": [
             "off"
+        ],
+        "jsdoc/require-jsdoc": [
+            "warn",
+            {
+                "publicOnly": true
+            }
+        ],
+        "valid-jsdoc": [
+            "warn",
+            {
+                "requireReturnType": false,
+                "requireParamType": false,
+                "requireReturn": false
+            }
+        ],
+        "tsdoc/syntax": [
+            "warn"
         ],
         "lines-between-class-members": [
             "off"

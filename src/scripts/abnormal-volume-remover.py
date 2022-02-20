@@ -16,12 +16,12 @@ for idx, song in enumerate(songs):
         continue
     if idx < start_idx:
         continue
-    
+
     song_path = join(song_dir, song);
     print(f"Checking {song} ({idx+1}/{len(songs)})")
     cmd = f"ffmpeg -i {song_path} -af 'volumedetect' -f null /dev/null 2>&1 | grep mean_volume | awk -F': ' '{{print $2}}' | cut -d' ' -f1"
     detected_volume = float(subprocess.check_output(cmd, shell=True).decode("utf-8").strip())
-    if int(detected_volume) == 0: 
+    if int(detected_volume) == 0:
         print(f"Unnormalized file detected and removed: {song}")
         unlink(song_path)
         files_removed += 1

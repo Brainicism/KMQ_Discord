@@ -1,6 +1,6 @@
 import Axios from "axios";
 import { IPCLogger } from "../logger";
-import { state } from "../kmq";
+import { state } from "../kmq_worker";
 import dbContext from "../database_context";
 import { EnvType } from "../types";
 import { VOTE_BONUS_DURATION } from "../commands/game_commands/vote";
@@ -28,21 +28,30 @@ const BOT_LISTING_SITES: { [siteName: string]: BotListing } = {
         payloadKeyName: "guilds",
         name: "discordbotlist.com",
     },
+    KOREAN_BOTS_TOKEN: {
+        endpoint: "https://koreanbots.dev/api/v2/bots/%d/stats",
+        payloadKeyName: "servers",
+        name: "koreanbots.dev",
+    },
 };
 
 /**
  * @param userID - The user's Discord ID
  */
-export async function userVoted(userID: string) {
-    const userVoterStatus = await dbContext.kmq("top_gg_user_votes")
+export async function userVoted(userID: string): Promise<void> {
+    const userVoterStatus = await dbContext
+        .kmq("top_gg_user_votes")
         .where("user_id", "=", userID)
         .first();
 
     const currentVotes = userVoterStatus ? userVoterStatus["total_votes"] : 0;
-    await dbContext.kmq("top_gg_user_votes")
+    await dbContext
+        .kmq("top_gg_user_votes")
         .insert({
             user_id: userID,
-            buff_expiry_date: new Date(Date.now() + (VOTE_BONUS_DURATION * 1000 * 60 * 60)),
+            buff_expiry_date: new Date(
+                Date.now() + VOTE_BONUS_DURATION * 1000 * 60 * 60
+            ),
             total_votes: currentVotes + 1,
         })
         .onConflict("user_id")
@@ -52,33 +61,43 @@ export async function userVoted(userID: string) {
 }
 
 export default class BotListingManager {
-    async start() {
+    async start(): Promise<void> {
         if (process.env.NODE_ENV === EnvType.PROD) {
-            setInterval(() => { this.postStats(); }, 1800000);
+            setInterval(() => {
+                this.postStats();
+            }, 1800000);
         }
     }
 
-    private async postStats() {
-        for (const siteConfigKeyName of Object.keys(BOT_LISTING_SITES).filter((x) => x in process.env)) {
+    private async postStats(): Promise<void> {
+        for (const siteConfigKeyName of Object.keys(BOT_LISTING_SITES).filter(
+            (x) => x in process.env
+        )) {
             this.postStat(siteConfigKeyName);
         }
     }
 
     // eslint-disable-next-line class-methods-use-this
-    private async postStat(siteConfigKeyName: string) {
+    private async postStat(siteConfigKeyName: string): Promise<void> {
         const botListing = BOT_LISTING_SITES[siteConfigKeyName];
-        const { ipc, client } = state;
+        const { ipc } = state;
         try {
-            await Axios.post(botListing.endpoint.replace("%d", client.user.id), {
-                [botListing.payloadKeyName]: (await ipc.getStats()).guilds,
-            }, {
-                headers: {
-                    Authorization: process.env[siteConfigKeyName],
+            await Axios.post(
+                botListing.endpoint.replace("%d", process.env.BOT_CLIENT_ID),
+                {
+                    [botListing.payloadKeyName]: (await ipc.getStats()).guilds,
                 },
-            });
+                {
+                    headers: {
+                        Authorization: process.env[siteConfigKeyName],
+                    },
+                }
+            );
             logger.info(`${botListing.name} server count posted`);
         } catch (e) {
-            logger.error(`Error updating ${botListing.name} server count. error = ${e}`);
+            logger.error(
+                `Error updating ${botListing.name} server count. error = ${e}`
+            );
         }
     }
 }

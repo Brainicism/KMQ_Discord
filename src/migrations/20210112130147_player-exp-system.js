@@ -1,4 +1,3 @@
-
 exports.up = function (knex) {
     return knex.schema.table("player_stats", function (table) {
         table.integer("exp").defaultTo(0);

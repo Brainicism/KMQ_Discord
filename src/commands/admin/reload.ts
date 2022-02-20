@@ -3,7 +3,7 @@ import { IPCLogger } from "../../logger";
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import MessageContext from "../../structures/message_context";
-import { state } from "../../kmq";
+import { state } from "../../kmq_worker";
 import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("reload");
@@ -28,23 +28,37 @@ export default class ReloadCommand implements BaseCommand {
         ],
     };
 
-    call = async ({ message, parsedMessage }: CommandArgs) => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         try {
             execSync("npx tsc");
         } catch (e) {
             logger.error("Error transpiling KMQ commands");
-            sendErrorMessage(MessageContext.fromMessage(message), { title: "Error Reloading", description: `Uh oh.\n${e}` });
+            sendErrorMessage(MessageContext.fromMessage(message), {
+                title: "Error Reloading",
+                description: `Uh oh.\n${e}`,
+            });
             return;
         }
 
         const reloadType = parsedMessage.components[0] as ReloadType;
         if (reloadType === ReloadType.ALL) {
-            state.ipc.broadcast("reload_commands");
-            sendInfoMessage(MessageContext.fromMessage(message), { title: "Reloading All Clusters", description: "See logs for completion status" });
+            state.ipc.allClustersCommand("reload_commands");
+            sendInfoMessage(MessageContext.fromMessage(message), {
+                title: "Reloading All Clusters",
+                description: "See logs for completion status",
+            });
             return;
         }
 
-        state.client.reloadCommands();
-        sendInfoMessage(MessageContext.fromMessage(message), { title: "Cluster Reload Complete", description: "All changes should now be applied" });
+        ReloadCommand.reloadCommands();
+        sendInfoMessage(MessageContext.fromMessage(message), {
+            title: "Cluster Reload Complete",
+            description: "All changes should now be applied",
+        });
     };
+
+    static reloadCommands(): void {
+        logger.info("Reloading all commands");
+        state.client.reloadCommands();
+    }
 }

@@ -1,5 +1,4 @@
-
-exports.up = function(knex) {
+exports.up = function (knex) {
     return knex.schema.createTable("premium_users", (table) => {
         table.string("user_id");
         table.boolean("active").notNullable();
@@ -8,6 +7,6 @@ exports.up = function(knex) {
     });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
     return knex.schema.dropTableIfExists("premium_users");
 };

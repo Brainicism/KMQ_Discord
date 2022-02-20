@@ -1,10 +1,14 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { sendOptionsMessage, getDebugLogHeader } from "../../helpers/discord_utils";
+import {
+    sendOptionsMessage,
+    getDebugLogHeader,
+} from "../../helpers/discord_utils";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("shuffle");
 
@@ -30,39 +34,69 @@ export default class ShuffleCommand implements BaseCommand {
         ],
     };
 
-    help = {
+    help = (guildID: string): Help => ({
         name: "shuffle",
-        description: "Choose whether songs are played in truly random order (`random`) or randomly but uniquely until all songs are played (`shuffle`).",
+        description: state.localizer.translate(
+            guildID,
+            "command.shuffle.help.description",
+            {
+                random: `\`${ShuffleType.RANDOM}\``,
+                shuffle: `\`${ShuffleType.UNIQUE}\``,
+            }
+        ),
         usage: ",shuffle [random | unique]",
         examples: [
             {
                 example: "`,shuffle random`",
-                explanation: "Songs will play randomly.",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.shuffle.help.example.random"
+                ),
             },
             {
                 example: "`,shuffle unique`",
-                explanation: "Every song will play once before any are repeated.",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.shuffle.help.example.unique"
+                ),
             },
             {
                 example: "`,shuffle`",
-                explanation: `Reset to the default shuffle mode of \`${DEFAULT_SHUFFLE}\``,
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.shuffle.help.example.reset",
+                    { defaultShuffle: `\`${DEFAULT_SHUFFLE}\`` }
+                ),
             },
         ],
         priority: 110,
-    };
+    });
 
-    call = async ({ message, parsedMessage }: CommandArgs) => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.SHUFFLE_TYPE);
-            await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SHUFFLE_TYPE, reset: true });
+            await sendOptionsMessage(
+                MessageContext.fromMessage(message),
+                guildPreference,
+                [{ option: GameOption.SHUFFLE_TYPE, reset: true }]
+            );
             logger.info(`${getDebugLogHeader(message)} | Shuffle type reset.`);
             return;
         }
 
-        const shuffleType = parsedMessage.components[0].toLowerCase() as ShuffleType;
+        const shuffleType =
+            parsedMessage.components[0].toLowerCase() as ShuffleType;
+
         await guildPreference.setShuffleType(shuffleType);
-        await sendOptionsMessage(MessageContext.fromMessage(message), guildPreference, { option: GameOption.SHUFFLE_TYPE, reset: false });
-        logger.info(`${getDebugLogHeader(message)} | Shuffle set to ${shuffleType}`);
+        await sendOptionsMessage(
+            MessageContext.fromMessage(message),
+            guildPreference,
+            [{ option: GameOption.SHUFFLE_TYPE, reset: false }]
+        );
+
+        logger.info(
+            `${getDebugLogHeader(message)} | Shuffle set to ${shuffleType}`
+        );
     };
 }

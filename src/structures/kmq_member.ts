@@ -17,7 +17,13 @@ export default class KmqMember {
     /** Number of points the member has received */
     public pointsAwarded: number;
 
-    constructor(username: string, tag: string, avatarUrl: string, id: string, pointsAwarded = 0) {
+    constructor(
+        username: string,
+        tag: string,
+        avatarUrl: string,
+        id: string,
+        pointsAwarded = 0
+    ) {
         this.username = username;
         this.tag = tag;
         this.avatarUrl = avatarUrl;
@@ -25,7 +31,16 @@ export default class KmqMember {
         this.pointsAwarded = pointsAwarded;
     }
 
-    static fromUser(user: Eris.User | Eris.Member, pointsAwarded = 0) {
-        return new KmqMember(user.username, getUserTag(user), user.avatarURL, user.id, pointsAwarded);
+    static fromUser(
+        user: Eris.User | Eris.Member,
+        pointsAwarded = 0
+    ): KmqMember {
+        return new KmqMember(
+            user.username,
+            getUserTag(user),
+            user.avatarURL,
+            user.id,
+            pointsAwarded
+        );
     }
 }
