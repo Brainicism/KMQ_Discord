@@ -16,12 +16,11 @@ declare namespace NodeJS {
         DEBUG_TEXT_CHANNEL_ID?: string;
         BOT_PREFIX: string;
         NODE_ENV: string;
-        WEB_SERVER_IP: string;
         WEB_SERVER_PORT: string;
         ALERT_WEBHOOK_URL?: string;
         AUDIO_SONGS_PER_ARTIST: number;
         PREMIUM_AUDIO_SONGS_PER_ARTIST: number;
-        DEBUG_LOGGING: boolean;
+        DEBUG_LOGGING?: boolean;
         POWER_HOUR_NOTIFICATION_CHANNEL_ID?: string;
         POWER_HOUR_NOTIFICATION_ROLE_ID?: string;
         PATREON_CREATOR_ACCESS_TOKEN?: string;
