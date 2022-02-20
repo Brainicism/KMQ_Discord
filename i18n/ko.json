@@ -640,32 +640,32 @@
         },
         "premium": {
             "help": {
-                "description": "KMQ Premium에 대한 자세한 내용을 확인하실 수 있습니다.",
-                "example": "프리미엄 상태를 표시합니다."
+                "description": "현재 회원인지 여부를 포함하여 KMQ 프리미엄에 대해 자세히 알아보십시오.",
+                "example": "귀하의 프리미엄 상태를 보여줍니다."
             },
             "status": {
                 "description": {
-                    "connectionReminder": "당신의 특전을 받으려면 당신의 Discord 계정 [여기](https://www.patreon.com/settings/apps)을 연결하세요.",
-                    "nonPremium": "여기에서 [KMQ Premium](https://www.patreon.com/kmq)을 구독하십시오.",
-                    "premium": "[KMQ 프리미엄](https://www.patreon.com/kmq)이 있습니다."
+                    "connectionReminder": "[여기](https://www.patreon.com/settings/apps)에서 디스코드 계정을 연결하여 혜택을 받으세요.",
+                    "nonPremium": "여기에서 [KMQ 프리미엄](https://www.patreon.com/kmq)을 구독하세요.",
+                    "premium": "귀하는 이미 [KMQ 프리미엄](https://www.patreon.com/kmq)이 있습니다."
                 },
                 "perks": {
                     "badge": {
-                        "description": "프로필에 배지를 달고 KMQ에 대한 헌신을 과시하십시오.",
+                        "description": "프로필에 전용 배지를 사용하여 KMQ에 대한 도움을 과시하세요.",
                         "title": "프리미엄 서포터 배지!"
                     },
                     "moreSongs": {
-                        "description": "모든 아티스트의 상위 25개 B-사이드(10개에서 증가)에 액세스하십시오.",
+                        "description": "모든 아티스트의 상위 25개 b-side에 액세스 (최대 10개)하세요.",
                         "title": "노래 더!"
                     },
                     "special": {
-                        "description": "재생하는 곳마다 노래 재생 속도를 변경하세요!",
-                        "title": "`,special`는 모든 서버에 있습니다!"
+                        "description": "어디서든 노래 재생 속도를 변경하세요!",
+                        "title": "모든 서버에서 `,special`을 입력하세요!"
                     }
                 },
                 "title": {
-                    "nonPremium": "KMQ 프리미엄을 구독하십시오!",
-                    "premium": "KMQ를 응원해 주셔서 감사합니다!"
+                    "nonPremium": "KMQ 프리미엄을 구독하세요!",
+                    "premium": "KMQ를 지원해주셔서 감사합니다!"
                 }
             }
         },
