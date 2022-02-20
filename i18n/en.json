@@ -644,28 +644,28 @@
                 "example": "Shows your premium status."
             },
             "status": {
-                "title": {
-                    "premium": "Thanks for supporting KMQ!",
-                    "nonPremium": "Subscribe to KMQ Premium!"
-                },
                 "description": {
-                    "premium": "You have [KMQ Premium](https://www.patreon.com/kmq).",
+                    "connectionReminder": "Make sure to connect your Discord account [here](https://www.patreon.com/settings/apps) to receive your perks.",
                     "nonPremium": "Subscribe to [KMQ Premium](https://www.patreon.com/kmq) here.",
-                    "connectionReminder": "Make sure to connect your Discord account [here](https://www.patreon.com/settings/apps) to receive your perks."
+                    "premium": "You have [KMQ Premium](https://www.patreon.com/kmq)."
                 },
                 "perks": {
+                    "badge": {
+                        "description": "Show off your dedication to KMQ with an exclusive badge on your profile",
+                        "title": "Premium Supporter Badge!"
+                    },
                     "moreSongs": {
-                        "title": "More songs!",
-                        "description": "Gain access to the top 25 b-sides for every artist (up from 10)"
+                        "description": "Gain access to the top 25 b-sides for every artist (up from 10)",
+                        "title": "More songs!"
                     },
                     "special": {
-                        "title": "`,special` in every server!",
-                        "description": "Change song playback speed anywhere you play!"
-                    },
-                    "badge": {
-                        "title": "Premium Supporter Badge!",
-                        "description": "Show off your dedication to KMQ with an exclusive badge on your profile"
+                        "description": "Change song playback speed anywhere you play!",
+                        "title": "`,special` in every server!"
                     }
+                },
+                "title": {
+                    "nonPremium": "Subscribe to KMQ Premium!",
+                    "premium": "Thanks for supporting KMQ!"
                 }
             }
         },

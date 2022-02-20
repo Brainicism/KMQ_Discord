@@ -644,28 +644,28 @@
                 "example": "프리미엄 상태를 표시합니다."
             },
             "status": {
-                "title": {
-                    "premium": "KMQ를 응원해 주셔서 감사합니다!",
-                    "nonPremium": "KMQ 프리미엄을 구독하십시오!"
-                },
                 "description": {
-                    "premium": "[KMQ 프리미엄](https://www.patreon.com/kmq)이 있습니다.",
+                    "connectionReminder": "당신의 특전을 받으려면 당신의 Discord 계정 [여기](https://www.patreon.com/settings/apps)을 연결하세요.",
                     "nonPremium": "여기에서 [KMQ Premium](https://www.patreon.com/kmq)을 구독하십시오.",
-                    "connectionReminder": "당신의 특전을 받으려면 당신의 Discord 계정 [여기](https://www.patreon.com/settings/apps)을 연결하세요."
+                    "premium": "[KMQ 프리미엄](https://www.patreon.com/kmq)이 있습니다."
                 },
                 "perks": {
+                    "badge": {
+                        "description": "프로필에 배지를 달고 KMQ에 대한 헌신을 과시하십시오.",
+                        "title": "프리미엄 서포터 배지!"
+                    },
                     "moreSongs": {
-                        "title": "노래 더!",
-                        "description": "모든 아티스트의 상위 25개 B-사이드(10개에서 증가)에 액세스하십시오."
+                        "description": "모든 아티스트의 상위 25개 B-사이드(10개에서 증가)에 액세스하십시오.",
+                        "title": "노래 더!"
                     },
                     "special": {
-                        "title": "`,special`는 모든 서버에 있습니다!",
-                        "description": "재생하는 곳마다 노래 재생 속도를 변경하세요!"
-                    },
-                    "badge": {
-                        "title": "프리미엄 서포터 배지!",
-                        "description": "프로필에 배지를 달고 KMQ에 대한 헌신을 과시하십시오."
+                        "description": "재생하는 곳마다 노래 재생 속도를 변경하세요!",
+                        "title": "`,special`는 모든 서버에 있습니다!"
                     }
+                },
+                "title": {
+                    "nonPremium": "KMQ 프리미엄을 구독하십시오!",
+                    "premium": "KMQ를 응원해 주셔서 감사합니다!"
                 }
             }
         },
