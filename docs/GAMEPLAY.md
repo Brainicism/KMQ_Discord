@@ -211,6 +211,12 @@ To keep things fair, switching teams mid-game forfeits your current points and E
 
 ![teams](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/teams.png)
 
+# KMQ Premium
+Support us by helping pay for the bot's hosting through a [monthly Patreon subscription](https://www.patreon.com/kmq).
+
+In return, get access to:
+* More songs (up to 25 b-side tracks per artist, up from 10)
+* `,special` in any Discord server
 
 # Full Command List
 Use `,help [command_name]` for more details for any of the following commands:
@@ -230,11 +236,12 @@ Use `,help [command_name]` for more details for any of the following commands:
 - `,score`: Show the current game's scoreboard with EXP gained
 - `,list`: Show the currently selected groups for `,groups`, `,include`, or `,exclude`
 - `,preset`: Quickly save, load, and export game options as presets (even across servers!)
-- `,vote`: Show your current 2x bonus EXP modifier status from voting for the bot on [top.gg](https://top.gg/bot/508759831755096074/vote). Thanks for supporting KMQ!
+- `,vote`: Show your current 2x bonus EXP modifier status from voting for the bot on [top.gg](https://top.gg/bot/508759831755096074/vote)
 - `,recentlyadded`: See a list of songs added to KMQ in the past 2 weeks
 - `,exp`: Show your current bonus EXP modifiers
 - `,locale`: Change the language of the bot
 - `,lookup`: Get information about the given song (whether it's available in KMQ, aliases, etc.)
+- `,premium`: Learn about [KMQ Premium](#kmq-premium)
 
 ## Game Option Commands
 - `,limit`: Set a maximum number of results in the song query. This effectively sets the "top `x` number of songs" based on the selected filters
@@ -242,14 +249,19 @@ Use `,help [command_name]` for more details for any of the following commands:
 - `,gender`: Choose the gender of the artists to exclusively play from
 - `,answer`: Choose whether to type in your answer (and allow typos), or to pick from multiple choices on buttons
 - `,cutoff`: Set a cutoff year for songs. Only songs released during and after the cutoff year will be chosen
+
+
 - `,artisttype`: Choose whether to hear from soloists, groups, or both.
 - `,release`: Specify whether only official releases are played, or include b-sides + dance practices + acoustic versions + remixes
 - `,language`: Choose whether to include Japanese/English/Chinese songs, or only Korean songs
 - `,subunits`: Choose whether to automatically include a group's subunits when using `,groups`
 - `,ost`: Include, exclude, or exclusively play OST music videos
+
+
 - `,multiguess`: Choose whether to allow multiple players to guess correctly in a round
 - `,shuffle`: Choose whether songs should play in "true" random order or in uniquely random order.
 - `,seek`: Choose whether each song starts from the beginning, middle, or a random point
+- `,special`: Modify how each song sounds, such as playing it in reverse, changing its pitch, etc. ([KMQ Premium](#kmq-premium) only)
 - `,guessmode`: Choose whether to guess based on song name, artist name, or both
 - `,goal`: Specify a number of points to be reached before a winner is selected and the game ends
 - `,timer`: Specify how many songs each songs played before it's automatically skipped
