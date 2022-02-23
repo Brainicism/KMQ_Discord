@@ -103,7 +103,7 @@ export default class Player {
 
     /** @returns the player's EXP gain */
     getExpGain(): number {
-        return this.expGain;
+        return Math.floor(this.expGain);
     }
 
     /** @returns the player's Discord ID */
