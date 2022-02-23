@@ -14,12 +14,12 @@ import {
     deleteGameSession,
     getTimeUntilRestart,
 } from "../../helpers/management_utils";
-import { activeBonusUsers, getGuildPreference } from "../../helpers/game_utils";
 import {
-    chooseWeightedRandom,
+    activeBonusUsers,
+    getGuildPreference,
     isPowerHour,
-    isWeekend,
-} from "../../helpers/utils";
+} from "../../helpers/game_utils";
+import { chooseWeightedRandom, isWeekend } from "../../helpers/utils";
 import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import dbContext from "../../database_context";
 import { IPCLogger } from "../../logger";

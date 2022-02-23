@@ -7,12 +7,13 @@ import {
 import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import { isPowerHour, isWeekend } from "../../helpers/utils";
+import { isWeekend } from "../../helpers/utils";
 import {
     getGuildPreference,
     getAvailableSongCount,
     userBonusIsActive,
     isFirstGameOfDay,
+    isPowerHour,
 } from "../../helpers/game_utils";
 import { AnswerType } from "../game_options/answer";
 import { GuessModeType } from "../game_options/guessmode";

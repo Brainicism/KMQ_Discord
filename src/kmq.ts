@@ -26,7 +26,7 @@ import { KmqImages } from "./constants";
 import KmqClient from "./kmq_client";
 import backupKmqDatabase from "./scripts/backup-kmq-database";
 import { userVoted } from "./helpers/bot_listing_manager";
-import { friendlyFormattedDate } from "./helpers/utils";
+import { standardDateFormat } from "./helpers/utils";
 
 const logger = getInternalLogger();
 
@@ -212,9 +212,8 @@ async function startWebServer(fleet: Fleet): Promise<void> {
                 apiLatency: _.mean(
                     cluster.shards.map((x) => x.latency)
                 ).toLocaleString(),
-                uptime: friendlyFormattedDate(
-                    new Date(Date.now() - cluster.uptime),
-                    null
+                uptime: standardDateFormat(
+                    new Date(Date.now() - cluster.uptime)
                 ),
                 voiceConnections: cluster.voice,
                 activeGameSessions: gameplayStats.get(i).activeGameSessions,
