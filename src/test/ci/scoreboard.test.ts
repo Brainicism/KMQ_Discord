@@ -2,6 +2,7 @@ import assert from "assert";
 import GuildPreference from "../../structures/guild_preference";
 import Scoreboard from "../../structures/scoreboard";
 import { GameOption } from "../../types";
+import Player from "../../structures/player";
 
 let scoreboard: Scoreboard;
 beforeEach(() => {
@@ -14,7 +15,7 @@ describe("score/exp updating", () => {
     const userIDs = ["12345", "23456"];
     describe("single player scoreboard", () => {
         describe("user guesses correctly multiple times", () => {
-            it("should increment the user's score/xp", async () => {
+            it("should increment the user's score/EXP", async () => {
                 for (let i = 0; i < 20; i++) {
                     await scoreboard.updateScoreboard([
                         { userID: userIDs[0], pointsEarned: 1, expGain: 50 },
@@ -34,7 +35,7 @@ describe("score/exp updating", () => {
         });
 
         describe("user has not guessed yet", () => {
-            it("should not increment the user's score/xp", () => {
+            it("should not increment the user's score/EXP", () => {
                 assert.strictEqual(scoreboard.getPlayerScore(userIDs[0]), 0);
                 assert.strictEqual(scoreboard.getPlayerExpGain(userIDs[0]), 0);
             });
@@ -92,6 +93,28 @@ describe("score/exp updating", () => {
             assert.strictEqual(scoreboard.getPlayerScore(userIDs[1]), 1);
             assert.strictEqual(scoreboard.getPlayerExpGain(userIDs[0]), 50);
             assert.strictEqual(scoreboard.getPlayerExpGain(userIDs[1]), 25);
+        });
+    });
+
+    describe("position changes", () => {
+        it("should return the correct ranking of every player", async () => {
+            const players = {
+                "12345": new Player("", "12345", "", 2),
+                jisooID: new Player("", "jisooID", "", 3),
+            };
+
+            assert.deepStrictEqual(Scoreboard.getRanking(players), [
+                "jisooID",
+                "12345",
+            ]);
+
+            players["1234"] = new Player("", "1234", "", 1);
+
+            assert.deepStrictEqual(Scoreboard.getRanking(players), [
+                "jisooID",
+                "12345",
+                "1234",
+            ]);
         });
     });
 });
