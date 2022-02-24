@@ -60,15 +60,6 @@ export function strikethrough(text: string): string {
 }
 
 /**
- * @param num - The number to round
- * @param places - The number of places to round
- * @returns the rounded number
- */
-export function roundDecimal(num: number, places: number): number {
-    return Math.round(num * 10 ** places) / 10 ** places;
-}
-
-/**
  * Chunks in an array in subarrays of specified size
  * @param array - The input array
  * @param chunkSize - The size of each chunked array
@@ -99,7 +90,7 @@ export function getAudioDurationInSeconds(songPath: string): Promise<number> {
     return new Promise((resolve) => {
         exec(
             `ffprobe -i "${songPath}" -show_entries format=duration -v quiet -of csv="p=0"`,
-            (err, stdout, stderr) => {
+            (_err, stdout, stderr) => {
                 if (!stdout || stderr) {
                     logger.error(
                         `Error getting audio duration: path = ${songPath}, err = ${stderr}`
@@ -149,7 +140,7 @@ export function weekOfYear(dateObj?: Date): number {
     return (
         1 +
         Math.round(
-            ((date.getTime() - week1.getTime()) / 86400000 -
+            ((date.getTime() - week1.getTime()) / (1000 * 60 * 60 * 24) -
                 3 +
                 ((week1.getDay() + 6) % 7)) /
                 7
@@ -290,31 +281,12 @@ export function md5Hash(input: string | number, bits: number): number {
     return parseInt(hash.slice(0, bits / 4), 16);
 }
 
-/** @returns whether its a KMQ power hour */
-export function isPowerHour(): boolean {
-    const date = new Date();
-    const dateSeed =
-        (date.getDate() * 31 + date.getMonth()) * 31 + date.getFullYear();
-
-    // distribute between each third of the day to accomodate timezone differences
-    const powerHours = [
-        md5Hash(dateSeed, 8) % 7,
-        (md5Hash(dateSeed + 1, 8) % 7) + 8,
-        (md5Hash(dateSeed + 2, 8) % 7) + 16,
-    ];
-
-    const currentHour = date.getHours();
-    return powerHours.some(
-        (powerHour) => currentHour >= powerHour && currentHour <= powerHour + 1
-    );
-}
-
 /**
  * @param n - the number to format
- * @returns the given number, with thousands separated by spaces
+ * @returns the given number, with thousands separated by commas
  */
 export function friendlyFormattedNumber(n: number): string {
-    return n?.toLocaleString("en");
+    return n.toLocaleString("en");
 }
 
 /**
