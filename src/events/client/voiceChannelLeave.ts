@@ -27,10 +27,6 @@ export default async function voiceChannelLeaveHandler(
         return;
     }
 
-    if (gameSession.finished) {
-        return;
-    }
-
     gameSession.updateOwner();
     if (await isUserPremium(member.id)) {
         gameSession.updatePremiumStatus(false);

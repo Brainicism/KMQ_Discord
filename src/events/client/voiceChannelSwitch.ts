@@ -25,10 +25,6 @@ export default async function voiceChannelSwitchHandler(
         return;
     }
 
-    if (gameSession.finished) {
-        return;
-    }
-
     gameSession.updateOwner();
 
     if (await isUserPremium(member.id)) {
