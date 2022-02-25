@@ -155,11 +155,11 @@ export default class Player {
         }
 
         if (currentRank < previousRank) {
-            return "⬆️";
+            return "↑";
         }
 
         if (currentRank > previousRank) {
-            return "⬇️";
+            return "↓";
         }
     }
 }

@@ -35,7 +35,7 @@ describe("increment score", () => {
                         previousRanking,
                         true
                     ),
-                    "⬆️"
+                    "↑"
                 );
             });
         });
@@ -49,7 +49,7 @@ describe("increment score", () => {
                         previousRanking,
                         true
                     ),
-                    "⬇️"
+                    "↓"
                 );
             });
         });
