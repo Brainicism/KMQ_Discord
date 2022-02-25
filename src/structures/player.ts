@@ -3,7 +3,7 @@ import {
     ExpBonusModifierValues,
 } from "../commands/game_commands/exp";
 import { getUserTag, getMention } from "../helpers/discord_utils";
-import { roundDecimal, bold } from "../helpers/utils";
+import { bold } from "../helpers/utils";
 import { state } from "../kmq_worker";
 
 export default class Player {
@@ -96,9 +96,10 @@ export default class Player {
 
     /** @returns what to display as the score in the scoreboard for the player */
     getDisplayedScore(): string {
-        return Number.isInteger(roundDecimal(this.getScore(), 1))
-            ? roundDecimal(this.getScore(), 1).toString()
-            : this.getScore().toFixed(1);
+        const rounded = Number(this.getScore().toFixed(1));
+        return Number.isInteger(rounded)
+            ? rounded.toFixed()
+            : rounded.toFixed(1);
     }
 
     /** @returns the player's EXP gain */

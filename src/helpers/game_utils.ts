@@ -13,7 +13,7 @@ import { AnswerType } from "../commands/game_options/answer";
 import { Patron, PATREON_SUPPORTER_BADGE } from "./patreon_manager";
 import SongSelector from "../structures/song_selector";
 import { LocaleType } from "./localization_manager";
-import { containsHangul } from "./utils";
+import { containsHangul, md5Hash } from "./utils";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -557,4 +557,23 @@ export function getLocalizedArtistName(
     }
 
     return song.hangulArtistName || song.artistName;
+}
+
+/** @returns whether its a KMQ power hour */
+export function isPowerHour(): boolean {
+    const date = new Date();
+    const dateSeed =
+        (date.getDate() * 31 + date.getMonth()) * 31 + date.getFullYear();
+
+    // distribute between each third of the day to accomodate timezone differences
+    const powerHours = [
+        md5Hash(dateSeed, 8) % 7,
+        (md5Hash(dateSeed + 1, 8) % 7) + 8,
+        (md5Hash(dateSeed + 2, 8) % 7) + 16,
+    ];
+
+    const currentHour = date.getHours();
+    return powerHours.some(
+        (powerHour) => currentHour >= powerHour && currentHour <= powerHour + 1
+    );
 }

@@ -30,7 +30,7 @@ describe("calculateOptionsMultiplier", () => {
     describe("no time-based modifiers", () => {
         beforeEach(() => {
             // non power hour
-            sandbox.stub(utils, "isPowerHour").callsFake(() => false);
+            sandbox.stub(game_utils, "isPowerHour").callsFake(() => false);
             // non weekend
             sandbox.stub(utils, "isWeekend").callsFake(() => false);
         });
@@ -239,7 +239,7 @@ describe("calculateOptionsMultiplier", () => {
 
         describe("is power hour", () => {
             it("should return power hour modifier", async () => {
-                sandbox.stub(utils, "isPowerHour").callsFake(() => true);
+                sandbox.stub(game_utils, "isPowerHour").callsFake(() => true);
                 const modifiers = await calculateOptionsExpMultiplierInternal(
                     guildPreference,
                     false,
@@ -283,7 +283,7 @@ describe("calculateOptionsMultiplier", () => {
 
     describe("everything", () => {
         beforeEach(() => {
-            sandbox.stub(utils, "isPowerHour").callsFake(() => true);
+            sandbox.stub(game_utils, "isPowerHour").callsFake(() => true);
             sandbox.stub(utils, "isWeekend").callsFake(() => true);
             sandbox
                 .stub(game_utils, "getAvailableSongCount")

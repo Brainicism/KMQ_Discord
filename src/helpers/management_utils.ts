@@ -22,6 +22,7 @@ import SIGINTHandler from "../events/process/SIGINT";
 import {
     cleanupInactiveGameSessions,
     getMatchingGroupNames,
+    isPowerHour,
 } from "./game_utils";
 import dbContext from "../database_context";
 import debugHandler from "../events/client/debug";
@@ -30,7 +31,7 @@ import guildDeleteHandler from "../events/client/guildDelete";
 import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
 import guildAvailableHandler from "../events/client/guildAvailable";
 import interactionCreateHandler from "../events/client/interactionCreate";
-import { chooseRandom, isPowerHour, isWeekend } from "./utils";
+import { chooseRandom, isWeekend } from "./utils";
 import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
 import { EnvType } from "../types";
