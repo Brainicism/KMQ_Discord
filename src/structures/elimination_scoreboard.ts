@@ -47,6 +47,8 @@ export default class EliminationScoreboard extends Scoreboard {
     async updateScoreboard(
         guessResults: Array<SuccessfulGuessResult>
     ): Promise<void> {
+        this.previousRoundRanking = Scoreboard.getRanking(this.players);
+
         // give everybody EXP
         for (const guessResult of guessResults) {
             const correctGuesser = this.players[guessResult.userID];

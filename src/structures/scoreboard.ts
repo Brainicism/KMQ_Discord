@@ -8,6 +8,7 @@ import { state } from "../kmq_worker";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("scoreboard");
+
 export interface SuccessfulGuessResult {
     userID: string;
     pointsEarned: number;
@@ -24,12 +25,14 @@ export default class Scoreboard {
     /** The current highest score */
     protected highestScore: number;
 
-    private previousRoundRanking: Array<string>;
+    /** The last round's player ranking by score */
+    protected previousRoundRanking: Array<string>;
 
     constructor() {
         this.players = {};
         this.firstPlace = [];
         this.highestScore = 0;
+        this.previousRoundRanking = [];
     }
 
     /**
