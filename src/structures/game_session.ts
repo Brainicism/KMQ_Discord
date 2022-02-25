@@ -1208,11 +1208,9 @@ export default class GameSession {
             if (await isUserPremium(member.id)) {
                 if (!this.premiumGame) {
                     this.premiumGame = true;
-                    const guildPreference = await getGuildPreference(
-                        this.guildID
+                    await this.reloadSongs(
+                        await getGuildPreference(this.guildID)
                     );
-
-                    await this.reloadSongs(guildPreference);
                 }
 
                 return;

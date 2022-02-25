@@ -27,7 +27,6 @@ import KmqClient from "./kmq_client";
 import backupKmqDatabase from "./scripts/backup-kmq-database";
 import { userVoted } from "./helpers/bot_listing_manager";
 import { friendlyFormattedDate } from "./helpers/utils";
-import updatePremiumUsers from "./helpers/patreon_manager";
 
 const logger = getInternalLogger();
 
@@ -110,15 +109,6 @@ function registerGlobalIntervals(fleet: Fleet): void {
             );
         }
     });
-
-    if (
-        process.env.PATREON_CREATOR_ACCESS_TOKEN &&
-        process.env.PATREON_CAMPAIGN_ID
-    ) {
-        schedule.scheduleJob("*/5 * * * *", async () => {
-            updatePremiumUsers();
-        });
-    }
 
     // every minute
     schedule.scheduleJob("* * * * *", async () => {

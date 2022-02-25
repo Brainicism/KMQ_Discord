@@ -1,16 +1,11 @@
-import { Campaign } from "patreon-discord";
 import dbContext from "../database_context";
 import { IPCLogger } from "../logger";
 import { addPremium, removePremium } from "./game_utils";
+import { state } from "../kmq_worker";
 
 const logger = new IPCLogger("patreon_manager");
 
 export const PATREON_SUPPORTER_BADGE = "🎧 Premium Supporter";
-
-const campaign = new Campaign({
-    patreonToken: process.env.PATREON_CREATOR_ACCESS_TOKEN,
-    campaignId: process.env.PATREON_CAMPAIGN_ID,
-});
 
 interface PatronResponse {
     patron_status: string;
@@ -24,15 +19,28 @@ export interface Patron {
     firstSubscribed?: Date;
 }
 
+enum PatronState {
+    ACTIVE = "active_patron",
+    DECLINED = "declined_patron",
+}
+
 /**
  * Fetch up-to-date Patreon members and update Premium members accordingly
  */
 export default async function updatePremiumUsers(): Promise<void> {
+    if (
+        !state.patreonCampaign ||
+        !process.env.PATREON_CREATOR_ACCESS_TOKEN ||
+        !process.env.PATREON_CAMPAIGN_ID
+    ) {
+        return;
+    }
+
     let fetchedPatrons: Array<PatronResponse>;
     try {
-        fetchedPatrons = await campaign.fetchPatrons([
-            "active_patron",
-            "declined_patron",
+        fetchedPatrons = await state.patreonCampaign.fetchPatrons([
+            PatronState.ACTIVE,
+            PatronState.DECLINED,
         ]);
     } catch (err) {
         logger.error(`Failed fetching patrons. err = ${err}`);
@@ -43,7 +51,7 @@ export default async function updatePremiumUsers(): Promise<void> {
         .filter((x: PatronResponse) => !!x.discord_user_id)
         .map((x: PatronResponse) => ({
             discordID: x.discord_user_id,
-            activePatron: x.patron_status === "active_patron",
+            activePatron: x.patron_status === PatronState.ACTIVE,
             firstSubscribed: x.pledge_relationship_start,
         }));
 

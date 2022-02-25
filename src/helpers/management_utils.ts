@@ -36,6 +36,7 @@ import MessageContext from "../structures/message_context";
 import { EnvType } from "../types";
 import channelDeleteHandler from "../events/client/channelDelete";
 import { LocaleType } from "./localization_manager";
+import updatePremiumUsers from "./patreon_manager";
 
 const logger = new IPCLogger("management_utils");
 
@@ -331,6 +332,8 @@ export function registerIntervals(clusterID: number): void {
         clearInactiveVoiceConnections();
         // Store per-cluster stats
         await updateSystemStats(clusterID);
+        // Sync state with Patreon subscribers
+        updatePremiumUsers();
     });
 
     // Every minute

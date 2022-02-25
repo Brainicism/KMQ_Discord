@@ -1,4 +1,5 @@
 import Eris, { GuildTextableChannel } from "eris";
+import { Campaign } from "patreon-discord";
 import { IPC } from "eris-fleet/dist/util/IPC";
 import GameSession from "./structures/game_session";
 import { Gender } from "./commands/game_options/gender";
@@ -73,6 +74,7 @@ export interface State {
     bonusArtists: Set<string>;
     locales: { [guildID: string]: LocaleType };
     localizer: LocalizationManager;
+    patreonCampaign: Campaign;
 }
 
 export enum GameOption {
