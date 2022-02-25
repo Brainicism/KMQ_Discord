@@ -67,7 +67,7 @@ const REQUIRED_VOICE_PERMISSIONS = [
     "voiceSpeak" as const,
 ];
 
-const SCOREBOARD_FIELD_CUTOFF = 9;
+const SCOREBOARD_FIELD_CUTOFF = 6;
 const MAX_SCOREBOARD_PLAYERS = 30;
 const MAX_RUNNERS_UP = 30;
 const MAX_INTERACTION_RESPONSE_TIME = 3 * 1000;
@@ -795,10 +795,15 @@ export async function sendEndRoundMessage(
         fields = scoreboard.getScoreboardEmbedThreeFields(
             MAX_SCOREBOARD_PLAYERS,
             false,
+            true,
             roundResultIDs
         );
     } else {
-        fields = scoreboard.getScoreboardEmbedFields(false, roundResultIDs);
+        fields = scoreboard.getScoreboardEmbedFields(
+            false,
+            true,
+            roundResultIDs
+        );
     }
 
     if (fact) {
@@ -1219,11 +1224,13 @@ export async function sendEndGameMessage(
         if (useLargerScoreboard) {
             fields = gameSession.scoreboard.getScoreboardEmbedThreeFields(
                 MAX_SCOREBOARD_PLAYERS,
-                gameSession.gameType !== GameType.TEAMS
+                gameSession.gameType !== GameType.TEAMS,
+                false
             );
         } else {
             fields = gameSession.scoreboard.getScoreboardEmbedFields(
-                gameSession.gameType !== GameType.TEAMS
+                gameSession.gameType !== GameType.TEAMS,
+                false
             );
         }
 
@@ -1377,7 +1384,7 @@ export async function sendScoreboardMessage(
     }
 
     const winnersFieldSubsets = chunkArray(
-        gameSession.scoreboard.getScoreboardEmbedFields(true),
+        gameSession.scoreboard.getScoreboardEmbedFields(true, true),
         EMBED_FIELDS_PER_PAGE
     );
 

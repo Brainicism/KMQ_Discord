@@ -136,4 +136,30 @@ export default class Player {
                 ? ExpBonusModifierValues[ExpBonusModifier.FIRST_GAME_OF_DAY]
                 : 1) * expGain;
     }
+
+    /**
+     * @param currentRoundRanking - The current round's ranking of players
+     * @param previousRoundRanking - The last round's ranking of players
+     * @param inProgress - Whether the game is in progress
+     * @returns what to prefix player's name with in the scoreboard
+     */
+    getRankingPrefix(
+        currentRoundRanking: Array<string>,
+        previousRoundRanking: Array<string>,
+        inProgress: boolean
+    ): string {
+        const currentRank = currentRoundRanking.indexOf(this.getID());
+        const previousRank = previousRoundRanking.indexOf(this.getID());
+        if (!inProgress || previousRank < 0 || currentRank === previousRank) {
+            return `${currentRank + 1}.`;
+        }
+
+        if (currentRank < previousRank) {
+            return "↑";
+        }
+
+        if (currentRank > previousRank) {
+            return "↓";
+        }
+    }
 }

@@ -8,6 +8,7 @@ import { state } from "../kmq_worker";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("scoreboard");
+
 export interface SuccessfulGuessResult {
     userID: string;
     pointsEarned: number;
@@ -24,10 +25,14 @@ export default class Scoreboard {
     /** The current highest score */
     protected highestScore: number;
 
+    /** The last round's player ranking by score */
+    protected previousRoundRanking: Array<string>;
+
     constructor() {
         this.players = {};
         this.firstPlace = [];
         this.highestScore = 0;
+        this.previousRoundRanking = [];
     }
 
     /**
@@ -64,17 +69,23 @@ export default class Scoreboard {
     }
     /**
      * @param showExp - Whether to display the EXP gained in the game for each player
+     * @param inProgress - Whether the game is in progress
      * @param roundWinnerIDs - The IDs of all players that won the current round, if any
      * @returns An array of DiscordEmbed fields representing each participant's score
      */
     getScoreboardEmbedFields(
         showExp: boolean,
+        inProgress: boolean,
         roundWinnerIDs?: Array<string>
     ): Array<{ name: string; value: string; inline: boolean }> {
         return Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
-            .map((x, index) => ({
-                name: `${index + 1}. ${x.getDisplayedName(
+            .map((x) => ({
+                name: `${x.getRankingPrefix(
+                    Scoreboard.getRanking(this.players),
+                    this.previousRoundRanking,
+                    inProgress
+                )} ${x.getDisplayedName(
                     roundWinnerIDs && roundWinnerIDs[0] === x.getID(),
                     roundWinnerIDs?.includes(x.getID()),
                     false
@@ -84,7 +95,7 @@ export default class Scoreboard {
                         ? ` (+${friendlyFormattedNumber(x.getExpGain())} EXP)`
                         : ""
                 }`,
-                inline: true,
+                inline: false,
             }));
     }
 
@@ -92,12 +103,14 @@ export default class Scoreboard {
      * Separates scoreboard players into two fields for large games
      * @param cutoff - How many players to include before truncating the scoreboard
      * @param showExp - Whether to display the EXP gained in the game for each player
+     * @param inProgress - Whether the game is in progress
      * @param roundWinnerIDs - The IDs of all players that won the current round, if any
      * @returns An array of 3 DiscordEmbed fields containing each player and their score, separated by newline
      */
     getScoreboardEmbedThreeFields(
         cutoff: number,
         showExp: boolean,
+        inProgress: boolean,
         roundWinnerIDs?: Array<string>
     ): Array<{ name: string; value: string; inline: boolean }> {
         const ZERO_WIDTH_SPACE = "​";
@@ -105,8 +118,14 @@ export default class Scoreboard {
             .sort((a, b) => b.getScore() - a.getScore())
             .slice(0, cutoff)
             .map(
-                (x, index) =>
-                    `${bold(String(index + 1))}. ${x.getDisplayedName(
+                (x) =>
+                    `${bold(
+                        x.getRankingPrefix(
+                            Scoreboard.getRanking(this.players),
+                            this.previousRoundRanking,
+                            inProgress
+                        )
+                    )}. ${x.getDisplayedName(
                         roundWinnerIDs && roundWinnerIDs[0] === x.getID(),
                         roundWinnerIDs?.includes(x.getID()),
                         true
@@ -158,6 +177,8 @@ export default class Scoreboard {
     async updateScoreboard(
         guessResults: Array<SuccessfulGuessResult>
     ): Promise<void> {
+        this.previousRoundRanking = Scoreboard.getRanking(this.players);
+
         for (const guessResult of guessResults) {
             if (!this.players[guessResult.userID]) {
                 this.players[guessResult.userID] = Player.fromUserID(
@@ -263,5 +284,15 @@ export default class Scoreboard {
     /** @returns a list of tags of the player participating in the game */
     getPlayers(): Array<Player> {
         return Object.values(this.players);
+    }
+
+    /**
+     * @param players - user IDs mapped to Players
+     * @returns players IDs, sorted by rank in the game
+     */
+    static getRanking(players: { [userID: string]: Player }): Array<string> {
+        return Object.entries(players)
+            .sort((a, b) => b[1].getScore() - a[1].getScore())
+            .map((x) => x[0]);
     }
 }
