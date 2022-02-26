@@ -13,6 +13,9 @@ export default class Player {
     /** The Discord user ID of the player */
     public readonly id: string;
 
+    /** Whether the player is still in the game voice channel */
+    public inVC: boolean;
+
     /** The player's current score */
     protected score: number;
 
@@ -34,6 +37,7 @@ export default class Player {
     ) {
         this.name = tag;
         this.id = id;
+        this.inVC = true;
         this.score = points;
         this.avatarURL = avatarURL;
         this.expGain = 0;
@@ -70,7 +74,7 @@ export default class Player {
         mention: boolean
     ): string {
         let name = this.name;
-        if (mention) {
+        if (mention && this.inVC) {
             name = getMention(this.getID());
         }
 

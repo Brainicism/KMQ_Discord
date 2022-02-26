@@ -287,6 +287,15 @@ export default class Scoreboard {
     }
 
     /**
+     * Update whether a player is in VC
+     * @param userID - The Discord user ID of the player to update
+     * @param inVC - Whether the player is currently in the voice channel
+     */
+    setInVC(userID: string, inVC: boolean): void {
+        this.players[userID].inVC = inVC;
+    }
+
+    /**
      * @param players - user IDs mapped to Players
      * @returns players IDs, sorted by rank in the game
      */

@@ -26,5 +26,9 @@ export default async function voiceChannelSwitchHandler(
 
     if (!gameSession.finished) {
         gameSession.updateOwner();
+        gameSession.setPlayerInVC(
+            member.id,
+            newChannel.id === gameSession.voiceChannelID
+        );
     }
 }

@@ -1182,6 +1182,15 @@ export default class GameSession {
     }
 
     /**
+     * Update whether a player is in VC
+     * @param userID - The Discord user ID of the player to update
+     * @param inVC - Whether the player is currently in the voice channel
+     */
+    setPlayerInVC(userID: string, inVC: boolean): void {
+        this.scoreboard.setInVC(userID, inVC);
+    }
+
+    /**
      * Prepares a new GameRound
      * @param randomSong - The queried song
      * @returns the new GameRound

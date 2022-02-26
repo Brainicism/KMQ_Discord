@@ -8,6 +8,7 @@ import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
 import messageCreateHandler from "../events/client/messageCreate";
 import voiceChannelLeaveHandler from "../events/client/voiceChannelLeave";
 import voiceChannelSwitchHandler from "../events/client/voiceChannelSwitch";
+import voiceChannelJoinHandler from "../events/client/voiceChannelJoin";
 import connectHandler from "../events/client/connect";
 import errorHandler from "../events/client/error";
 import warnHandler from "../events/client/warn";
@@ -53,6 +54,7 @@ export function registerClientEvents(): void {
         .on("messageCreate", messageCreateHandler)
         .on("voiceChannelLeave", voiceChannelLeaveHandler)
         .on("voiceChannelSwitch", voiceChannelSwitchHandler)
+        .on("voiceChannelJoin", voiceChannelJoinHandler)
         .on("channelDelete", channelDeleteHandler)
         .on("connect", connectHandler)
         .on("error", errorHandler)
