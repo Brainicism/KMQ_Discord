@@ -101,22 +101,102 @@ describe("score/exp updating", () => {
     describe("position changes", () => {
         it("should return the correct ranking of every player", async () => {
             const players = {
-                "12345": new Player("", "12345", "", 2),
+                ohmiID: new Player("", "ohmiID", "", 2),
+                12345: new Player("", "12345", "", 2),
                 jisooID: new Player("", "jisooID", "", 3),
             };
 
-            assert.deepStrictEqual(Scoreboard.getRanking(players), [
-                "jisooID",
-                "12345",
-            ]);
+            const sb = new Scoreboard();
+            Object.values(players).map((x) => sb.addPlayer(x));
 
-            players["1234"] = new Player("", "1234", "", 1);
+            assert.deepStrictEqual(sb.getRanking(), {
+                [players["jisooID"].getScore()]: 0,
 
-            assert.deepStrictEqual(Scoreboard.getRanking(players), [
-                "jisooID",
-                "12345",
-                "1234",
-            ]);
+                // Matching score entries coalesce into one
+                [players["12345"].getScore()]: 1,
+                [players["ohmiID"].getScore()]: 1,
+            });
+
+            const newPlayer = new Player("", "1234", "", 1);
+            sb.addPlayer(newPlayer);
+            players["1234"] = newPlayer;
+
+            assert.deepStrictEqual(sb.getRanking(), {
+                [players["jisooID"].getScore()]: 0,
+                [players["12345"].getScore()]: 1,
+                [players["ohmiID"].getScore()]: 1,
+                [players["1234"].getScore()]: 2,
+            });
+        });
+    });
+
+    describe("player's prefix should change based on new ranking", () => {
+        const previousRanking = ["12345", "jisoo", "ohmi"];
+        const newRanking = ["ohmi", "jisoo", "12345"];
+
+        describe("player moved ahead in ranking", () => {
+            it("should show the player has gained ranking", () => {
+                const winningPlayer = Player.fromUserID("ohmi");
+                winningPlayer.setPreviousRanking(
+                    previousRanking.indexOf("ohmi")
+                );
+
+                assert.strictEqual(
+                    winningPlayer.getRankingPrefix(
+                        newRanking.indexOf("ohmi"),
+                        true
+                    ),
+                    "↑"
+                );
+            });
+        });
+
+        describe("player was passed in ranking", () => {
+            it("should show the player has lost ranking", () => {
+                const losingPlayer = Player.fromUserID("12345");
+                losingPlayer.setPreviousRanking(
+                    previousRanking.indexOf("12345")
+                );
+
+                assert.strictEqual(
+                    losingPlayer.getRankingPrefix(
+                        newRanking.indexOf("12345"),
+                        true
+                    ),
+                    "↓"
+                );
+            });
+        });
+
+        describe("player didn't change position in ranking", () => {
+            it("should not show any ranking change", () => {
+                const samePlayer = Player.fromUserID("jisoo");
+                samePlayer.setPreviousRanking(previousRanking.indexOf("jisoo"));
+                assert.strictEqual(
+                    samePlayer.getRankingPrefix(
+                        newRanking.indexOf("jisoo"),
+                        true
+                    ),
+                    "2."
+                );
+            });
+        });
+
+        describe("the game has ended", () => {
+            it("should not show any ranking change, even if there was one", () => {
+                const winningPlayer = Player.fromUserID("ohmi");
+                winningPlayer.setPreviousRanking(
+                    previousRanking.indexOf("ohmi")
+                );
+
+                assert.strictEqual(
+                    winningPlayer.getRankingPrefix(
+                        newRanking.indexOf("ohmi"),
+                        false
+                    ),
+                    "1."
+                );
+            });
         });
     });
 });

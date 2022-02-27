@@ -1188,8 +1188,9 @@ export default class GameSession {
                 this.gameType === GameType.ELIMINATION
                     ? EliminationPlayer.fromUserID(
                           userID,
-                          (this.scoreboard as EliminationScoreboard)
-                              .startingLives
+                          (
+                              this.scoreboard as EliminationScoreboard
+                          ).getLivesOfWeakestPlayer()
                       )
                     : Player.fromUserID(userID)
             );

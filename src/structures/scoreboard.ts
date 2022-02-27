@@ -20,14 +20,10 @@ export default class Scoreboard {
     /** The current highest score */
     protected highestScore: number;
 
-    /** The last round's player ranking by score */
-    protected previousRoundRanking: Array<string>;
-
     constructor() {
         this.players = {};
         this.firstPlace = [];
         this.highestScore = 0;
-        this.previousRoundRanking = [];
     }
 
     /**
@@ -80,13 +76,13 @@ export default class Scoreboard {
         inProgress: boolean,
         roundWinnerIDs?: Array<string>
     ): Array<{ name: string; value: string; inline: boolean }> {
+        const currentRanking = this.getRanking();
         return Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
             .filter((x) => x.getScore() > 0 || x.inVC)
             .map((x) => ({
                 name: `${x.getRankingPrefix(
-                    Scoreboard.getRanking(this.players),
-                    this.previousRoundRanking,
+                    currentRanking[x.getScore()],
                     inProgress
                 )} ${x.getDisplayedName(
                     roundWinnerIDs && roundWinnerIDs[0] === x.id,
@@ -117,6 +113,7 @@ export default class Scoreboard {
         roundWinnerIDs?: Array<string>
     ): Array<{ name: string; value: string; inline: boolean }> {
         const ZERO_WIDTH_SPACE = "​";
+        const currentRanking = this.getRanking();
         const players = Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
             .filter((x) => x.getScore() > 0 || x.inVC)
@@ -125,8 +122,7 @@ export default class Scoreboard {
                 (x) =>
                     `${bold(
                         x.getRankingPrefix(
-                            Scoreboard.getRanking(this.players),
-                            this.previousRoundRanking,
+                            currentRanking[x.getScore()],
                             inProgress
                         )
                     )}. ${x.getDisplayedName(
@@ -181,7 +177,10 @@ export default class Scoreboard {
     async updateScoreboard(
         guessResults: Array<SuccessfulGuessResult>
     ): Promise<void> {
-        this.previousRoundRanking = Scoreboard.getRanking(this.players);
+        const previousRoundRanking = this.getRanking();
+        for (const player of Object.values(this.players)) {
+            player.setPreviousRanking(previousRoundRanking[player.getScore()]);
+        }
 
         for (const guessResult of guessResults) {
             this.players[guessResult.userID].incrementScore(
@@ -290,12 +289,18 @@ export default class Scoreboard {
     }
 
     /**
-     * @param players - user IDs mapped to Players
-     * @returns players IDs, sorted by rank in the game
+     * @returns a mapping of player scores to ranking
      */
-    static getRanking(players: { [userID: string]: Player }): Array<string> {
-        return Object.entries(players)
-            .sort((a, b) => b[1].getScore() - a[1].getScore())
-            .map((x) => x[0]);
+    getRanking(): { [score: number]: number } {
+        const rankingToScore = {};
+        const sortedUniqueScores = [
+            ...new Set(Object.values(this.players).map((x) => x.getScore())),
+        ].sort((a, b) => b - a);
+
+        for (let i = 0; i < sortedUniqueScores.length; i++) {
+            rankingToScore[sortedUniqueScores[i]] = i;
+        }
+
+        return rankingToScore;
     }
 }

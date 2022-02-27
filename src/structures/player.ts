@@ -1,5 +1,3 @@
-import { User } from "eris";
-import { EnvType } from "../types";
 import {
     ExpBonusModifier,
     ExpBonusModifierValues,
@@ -30,6 +28,9 @@ export default class Player {
     /** Whether it's the player's first game of the day */
     private firstGameOfTheDay: boolean;
 
+    /** The previous round's ranking */
+    private previousRoundRanking: number;
+
     constructor(
         tag: string,
         id: string,
@@ -44,6 +45,7 @@ export default class Player {
         this.avatarURL = avatarURL;
         this.expGain = 0;
         this.firstGameOfTheDay = firstGameOfTheDay;
+        this.previousRoundRanking = -1;
     }
 
     static fromUserID(
@@ -51,16 +53,7 @@ export default class Player {
         score = 0,
         firstGameOfDay = false
     ): Player {
-        const user = [EnvType.CI, EnvType.TEST].includes(
-            process.env.NODE_ENV as EnvType
-        )
-            ? ({
-                  id: userID,
-                  avatarURL: "",
-                  username: "",
-                  discriminator: "",
-              } as User)
-            : state.client.users.get(userID);
+        const user = state.client.users.get(userID);
 
         return new Player(
             getUserTag(user),
@@ -147,19 +140,18 @@ export default class Player {
                 : 1) * expGain;
     }
 
+    setPreviousRanking(previousRanking: number): void {
+        this.previousRoundRanking = previousRanking;
+    }
+
     /**
-     * @param currentRoundRanking - The current round's ranking of players
-     * @param previousRoundRanking - The last round's ranking of players
+     * @param currentRoundRanking - The player's current round ranking
      * @param inProgress - Whether the game is in progress
      * @returns what to prefix player's name with in the scoreboard
      */
-    getRankingPrefix(
-        currentRoundRanking: Array<string>,
-        previousRoundRanking: Array<string>,
-        inProgress: boolean
-    ): string {
-        const currentRank = currentRoundRanking.indexOf(this.id);
-        const previousRank = previousRoundRanking.indexOf(this.id);
+    getRankingPrefix(currentRoundRanking: number, inProgress: boolean): string {
+        const previousRank = this.previousRoundRanking;
+        const currentRank = currentRoundRanking;
         if (!inProgress || previousRank < 0 || currentRank === previousRank) {
             return `${currentRank + 1}.`;
         }
