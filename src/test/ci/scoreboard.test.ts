@@ -128,6 +128,38 @@ describe("score/exp updating", () => {
                 [players["1234"].getScore()]: 2,
             });
         });
+
+        it("should return the same ranking when all players have the same score", async () => {
+            const players = {
+                ohmiID: new Player("", "ohmiID", "", 2),
+                12345: new Player("", "12345", "", 2),
+                jisooID: new Player("", "jisooID", "", 2),
+            };
+
+            const sb = new Scoreboard();
+            Object.values(players).map((x) => sb.addPlayer(x));
+
+            assert.deepStrictEqual(sb.getRanking(), {
+                2: 0,
+            });
+        });
+
+        it("should return different rankings when all players have different scores", async () => {
+            const players = {
+                ohmiID: new Player("", "ohmiID", "", 1),
+                12345: new Player("", "12345", "", 2),
+                jisooID: new Player("", "jisooID", "", 3),
+            };
+
+            const sb = new Scoreboard();
+            Object.values(players).map((x) => sb.addPlayer(x));
+
+            assert.deepStrictEqual(sb.getRanking(), {
+                [players["jisooID"].getScore()]: 0,
+                [players["12345"].getScore()]: 1,
+                [players["ohmiID"].getScore()]: 2,
+            });
+        });
     });
 
     describe("player's prefix should change based on new ranking", () => {
