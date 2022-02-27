@@ -1,5 +1,5 @@
 import Player from "./player";
-import { bold } from "../helpers/utils";
+import { bold, chooseRandom } from "../helpers/utils";
 
 export default class Team extends Player {
     private players: { [userID: string]: Player };
@@ -86,5 +86,22 @@ export default class Team extends Player {
      */
     getNumPlayers(): number {
         return this.getPlayers().length;
+    }
+
+    /** @returns the team's EXP gain */
+    getExpGain(): number {
+        return Math.floor(
+            Object.values(this.players).reduce(
+                (total, curr) => total + curr.getExpGain(),
+                0
+            )
+        );
+    }
+
+    /** @returns a random team member's avatar URL */
+    getAvatarURL(): string {
+        return chooseRandom(
+            Object.values(this.players).map((x) => x.getAvatarURL())
+        );
     }
 }

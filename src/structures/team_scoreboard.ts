@@ -212,7 +212,16 @@ export default class TeamScoreboard extends Scoreboard {
     /**
      * @returns player IDs for players in every team
      */
-    getPlayersIDs(): Array<string> {
+    getPlayerIDs(): Array<string> {
         return this.getPlayers().map((x) => x.id);
+    }
+
+    /**
+     * Update whether a player is in VC
+     * @param userID - The Discord user ID of the player to update
+     * @param inVC - Whether the player is currently in the voice channel
+     */
+    setInVC(userID: string, inVC: boolean): void {
+        this.getPlayer(userID).inVC = inVC;
     }
 }
