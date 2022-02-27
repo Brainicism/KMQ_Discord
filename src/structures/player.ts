@@ -152,16 +152,17 @@ export default class Player {
     getRankingPrefix(currentRoundRanking: number, inProgress: boolean): string {
         const previousRank = this.previousRoundRanking;
         const currentRank = currentRoundRanking;
+        const displayedRank = `${currentRank + 1}.`;
         if (!inProgress || previousRank < 0 || currentRank === previousRank) {
-            return `${currentRank + 1}.`;
+            return displayedRank;
         }
 
         if (currentRank < previousRank) {
-            return "↑";
+            return `↑ ${displayedRank}`;
         }
 
         if (currentRank > previousRank) {
-            return "↓";
+            return `↓ ${displayedRank}`;
         }
     }
 }

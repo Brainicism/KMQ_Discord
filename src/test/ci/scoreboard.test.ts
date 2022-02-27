@@ -146,7 +146,7 @@ describe("score/exp updating", () => {
                         newRanking.indexOf("ohmi"),
                         true
                     ),
-                    "↑"
+                    "↑ 1."
                 );
             });
         });
@@ -163,7 +163,7 @@ describe("score/exp updating", () => {
                         newRanking.indexOf("12345"),
                         true
                     ),
-                    "↓"
+                    "↓ 3."
                 );
             });
         });
