@@ -202,13 +202,6 @@ export default class Scoreboard {
         }
     }
 
-    /**
-     * @returns whether the scoreboard has any players in it
-     */
-    isEmpty(): boolean {
-        return Object.keys(this.players).length === 0;
-    }
-
     /** @returns a list of the player currently in first place */
     getWinners(): Array<Player> {
         return this.firstPlace;

@@ -79,7 +79,7 @@ export default class GoalCommand implements BaseCommand {
         const userGoal = parseInt(parsedMessage.components[0]);
         if (gameSession) {
             if (
-                !gameSession.scoreboard.isEmpty() &&
+                gameSession.scoreboard.getWinners().length > 0 &&
                 userGoal <= gameSession.scoreboard.getWinners()[0].getScore()
             ) {
                 logger.info(
