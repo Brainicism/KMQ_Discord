@@ -41,9 +41,13 @@ export enum LeaderboardScope {
 }
 
 export enum LeaderboardDuration {
+    TODAY = "today",
     DAILY = "daily",
+    WEEK = "week",
     WEEKLY = "weekly",
+    MONTH = "month",
     MONTHLY = "monthly",
+    YEAR = "year",
     YEARLY = "yearly",
     ALL_TIME = "alltime",
 }
@@ -329,6 +333,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
         const d = date || new Date();
         switch (duration) {
+            case LeaderboardDuration.TODAY:
             case LeaderboardDuration.DAILY:
                 topPlayersQuery = topPlayersQuery.where(
                     "date",
@@ -336,6 +341,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     new Date(d.getFullYear(), d.getMonth(), d.getDate())
                 );
                 break;
+            case LeaderboardDuration.WEEK:
             case LeaderboardDuration.WEEKLY:
                 topPlayersQuery = topPlayersQuery.where(
                     "date",
@@ -347,6 +353,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     )
                 );
                 break;
+            case LeaderboardDuration.MONTH:
             case LeaderboardDuration.MONTHLY:
                 topPlayersQuery = topPlayersQuery.where(
                     "date",
@@ -354,6 +361,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     new Date(d.getFullYear(), d.getMonth())
                 );
                 break;
+            case LeaderboardDuration.YEAR:
             case LeaderboardDuration.YEARLY:
                 topPlayersQuery = topPlayersQuery.where(
                     "date",
@@ -668,24 +676,28 @@ export default class LeaderboardCommand implements BaseCommand {
 
                         let leaderboardDuration: string;
                         switch (duration) {
+                            case LeaderboardDuration.TODAY:
                             case LeaderboardDuration.DAILY:
                                 leaderboardDuration = state.localizer.translate(
                                     messageContext.guildID,
                                     "command.leaderboard.duration.daily"
                                 );
                                 break;
+                            case LeaderboardDuration.WEEK:
                             case LeaderboardDuration.WEEKLY:
                                 leaderboardDuration = state.localizer.translate(
                                     messageContext.guildID,
                                     "command.leaderboard.duration.weekly"
                                 );
                                 break;
+                            case LeaderboardDuration.MONTH:
                             case LeaderboardDuration.MONTHLY:
                                 leaderboardDuration = state.localizer.translate(
                                     messageContext.guildID,
                                     "command.leaderboard.duration.monthly"
                                 );
                                 break;
+                            case LeaderboardDuration.YEAR:
                             case LeaderboardDuration.YEARLY:
                                 leaderboardDuration = state.localizer.translate(
                                     messageContext.guildID,
