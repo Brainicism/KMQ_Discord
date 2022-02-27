@@ -7,7 +7,7 @@ export default class Team extends Player {
     constructor(name: string, player: Player) {
         super(name, name, null, 0);
         this.players = {};
-        this.players[player.getID()] = player;
+        this.players[player.id] = player;
     }
 
     /** @returns the score of all the players on this team */

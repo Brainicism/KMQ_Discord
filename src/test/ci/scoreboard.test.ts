@@ -4,15 +4,17 @@ import Scoreboard from "../../structures/scoreboard";
 import { GameOption } from "../../types";
 import Player from "../../structures/player";
 
+const userIDs = ["12345", "23456", "34567"];
+
 let scoreboard: Scoreboard;
 beforeEach(() => {
     scoreboard = new Scoreboard();
+    userIDs.map((x) => scoreboard.addPlayer(Player.fromUserID(x)));
 });
 
 let guildPreference: GuildPreference;
 
 describe("score/exp updating", () => {
-    const userIDs = ["12345", "23456"];
     describe("single player scoreboard", () => {
         describe("user guesses correctly multiple times", () => {
             it("should increment the user's score/EXP", async () => {
@@ -133,12 +135,11 @@ describe("winner detection", () => {
                 { userID, pointsEarned: 10, expGain: 0 },
             ]);
             assert.strictEqual(scoreboard.getWinners().length, 1);
-            assert.strictEqual(scoreboard.getWinners()[0].getID(), userID);
+            assert.strictEqual(scoreboard.getWinners()[0].id, userID);
         });
     });
 
     describe("multiple players, has different scores", () => {
-        const userIDs = ["12345", "23456"];
         it("should return the player with most points", async () => {
             await scoreboard.updateScoreboard([
                 { userID: userIDs[0], pointsEarned: 10, expGain: 0 },
@@ -148,12 +149,11 @@ describe("winner detection", () => {
                 { userID: userIDs[1], pointsEarned: 15, expGain: 0 },
             ]);
             assert.strictEqual(scoreboard.getWinners().length, 1);
-            assert.strictEqual(scoreboard.getWinners()[0].getID(), userIDs[1]);
+            assert.strictEqual(scoreboard.getWinners()[0].id, userIDs[1]);
         });
     });
 
     describe("multiple players, tied score", () => {
-        const userIDs = ["12345", "23456", "34567"];
         it("should return the two tied players", async () => {
             await scoreboard.updateScoreboard([
                 { userID: userIDs[0], pointsEarned: 5, expGain: 0 },
@@ -168,7 +168,7 @@ describe("winner detection", () => {
             ]);
             assert.strictEqual(scoreboard.getWinners().length, 2);
             assert.deepStrictEqual(
-                scoreboard.getWinners().map((x) => x.getID()),
+                scoreboard.getWinners().map((x) => x.id),
                 [userIDs[1], userIDs[2]]
             );
         });
@@ -189,7 +189,6 @@ describe("game finished", () => {
     });
 
     describe("goal is set", () => {
-        const userIDs = ["12345", "23456", "34567"];
         describe("no one has a score yet", () => {
             it("should return false", () => {
                 assert.strictEqual(

@@ -380,13 +380,15 @@ export default class LeaderboardCommand implements BaseCommand {
             );
         } else if (scope === LeaderboardScope.GAME) {
             const participantIDs =
-                state.gameSessions[messageContext.guildID].participants;
+                state.gameSessions[
+                    messageContext.guildID
+                ].scoreboard.getPlayerIDs();
 
             const gamePlayers = (
                 await dbContext
                     .kmq(dbTable)
                     .select("player_id")
-                    .whereIn("player_id", [...participantIDs])
+                    .whereIn("player_id", participantIDs)
             ).map((x) => x.player_id);
 
             topPlayersQuery = topPlayersQuery.whereIn("player_id", gamePlayers);
@@ -843,9 +845,11 @@ export default class LeaderboardCommand implements BaseCommand {
             }
 
             const participantIDs =
-                state.gameSessions[message.guildID].participants;
+                state.gameSessions[
+                    messageContext.guildID
+                ].scoreboard.getPlayerIDs();
 
-            if (participantIDs.size === 0) {
+            if (participantIDs.length === 0) {
                 sendErrorMessage(messageContext, {
                     title: state.localizer.translate(
                         message.guildID,

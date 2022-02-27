@@ -121,7 +121,7 @@ export default class TeamScoreboard extends Scoreboard {
      * @param teamName - The name of the team to add the player to
      * @param player - The player to add to the team
      */
-    addPlayer(teamName: string, player: Player): void {
+    addTeamPlayer(teamName: string, player: Player): void {
         // If the user is switching teams, remove them from their existing team first
         this.removePlayer(player.id);
         this.players[teamName].addPlayer(player);
@@ -199,7 +199,7 @@ export default class TeamScoreboard extends Scoreboard {
      * @returns the player's tag
      */
     getPlayerName(userID: string): string {
-        return this.getPlayer(userID).getName();
+        return this.getPlayer(userID).name;
     }
 
     /**
@@ -207,5 +207,12 @@ export default class TeamScoreboard extends Scoreboard {
      */
     getPlayers(): Array<Player> {
         return Object.values(this.players).flatMap((team) => team.getPlayers());
+    }
+
+    /**
+     * @returns player IDs for players in every team
+     */
+    getPlayersIDs(): Array<string> {
+        return this.getPlayers().map((x) => x.id);
     }
 }

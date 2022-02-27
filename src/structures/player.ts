@@ -1,3 +1,5 @@
+import { User } from "eris";
+import { EnvType } from "../types";
 import {
     ExpBonusModifier,
     ExpBonusModifierValues,
@@ -44,20 +46,29 @@ export default class Player {
         this.firstGameOfTheDay = firstGameOfTheDay;
     }
 
-    static fromUserID(userID: string, firstGameOfDay = false): Player {
-        const user = state.client.users.get(userID);
+    static fromUserID(
+        userID: string,
+        score = 0,
+        firstGameOfDay = false
+    ): Player {
+        const user = [EnvType.CI, EnvType.TEST].includes(
+            process.env.NODE_ENV as EnvType
+        )
+            ? ({
+                  id: userID,
+                  avatarURL: "",
+                  username: "",
+                  discriminator: "",
+              } as User)
+            : state.client.users.get(userID);
+
         return new Player(
             getUserTag(user),
             user.id,
             user.avatarURL,
-            0,
+            score,
             firstGameOfDay
         );
-    }
-
-    /** @returns the player's Discord tag  */
-    getName(): string {
-        return this.name;
     }
 
     /**
@@ -75,7 +86,7 @@ export default class Player {
     ): string {
         let name = this.name;
         if (mention && this.inVC) {
-            name = getMention(this.getID());
+            name = getMention(this.id);
         }
 
         if (wonRound) {
@@ -109,11 +120,6 @@ export default class Player {
     /** @returns the player's EXP gain */
     getExpGain(): number {
         return Math.floor(this.expGain);
-    }
-
-    /** @returns the player's Discord ID */
-    getID(): string {
-        return this.id;
     }
 
     /** @returns the player's avatar URL */
@@ -152,8 +158,8 @@ export default class Player {
         previousRoundRanking: Array<string>,
         inProgress: boolean
     ): string {
-        const currentRank = currentRoundRanking.indexOf(this.getID());
-        const previousRank = previousRoundRanking.indexOf(this.getID());
+        const currentRank = currentRoundRanking.indexOf(this.id);
+        const previousRank = previousRoundRanking.indexOf(this.id);
         if (!inProgress || previousRank < 0 || currentRank === previousRank) {
             return `${currentRank + 1}.`;
         }

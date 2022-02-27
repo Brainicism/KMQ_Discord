@@ -26,9 +26,11 @@ export default async function voiceChannelSwitchHandler(
 
     if (!gameSession.finished) {
         gameSession.updateOwner();
-        gameSession.setPlayerInVC(
-            member.id,
-            newChannel.id === gameSession.voiceChannelID
-        );
+        if (member.id !== process.env.BOT_CLIENT_ID) {
+            gameSession.setPlayerInVC(
+                member.id,
+                newChannel.id === gameSession.voiceChannelID
+            );
+        }
     }
 }

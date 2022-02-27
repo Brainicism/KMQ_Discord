@@ -11,6 +11,7 @@ import dbContext from "../../database_context";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
 import GameSession from "../../structures/game_session";
+import Player from "../../structures/player";
 import { GameType } from "../../types";
 import { state } from "../../kmq_worker";
 
@@ -234,9 +235,9 @@ describe("getLeaderboardEmbeds", () => {
                 const statsRows = [];
 
                 statsRows.push(...generatePlayerStats(INITIAL_TOTAL_ENTRIES));
-                gameSession.participants = new Set(
-                    [...Array(INITIAL_TOTAL_ENTRIES).keys()].map((i) =>
-                        String(i)
+                [...Array(INITIAL_TOTAL_ENTRIES).keys()].map((i) =>
+                    gameSession.scoreboard.addPlayer(
+                        Player.fromUserID(String(i))
                     )
                 );
 
@@ -562,9 +563,13 @@ describe("getLeaderboardEmbeds", () => {
                 state.gameSessions = { [SERVER_ID]: gameSession };
 
                 // Player with id 0 is not in game
-                for (let i = 1; i < INITIAL_TOTAL_ENTRIES; i++) {
-                    gameSession.participants.add(String(i));
-                }
+                [...Array(INITIAL_TOTAL_ENTRIES).keys()]
+                    .filter((x) => x !== 0)
+                    .map((i) =>
+                        gameSession.scoreboard.addPlayer(
+                            Player.fromUserID(String(i))
+                        )
+                    );
             });
 
             describe("daily leaderboard", () => {

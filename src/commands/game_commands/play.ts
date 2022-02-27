@@ -8,7 +8,6 @@ import {
     getUserVoiceChannel,
     getUserTag,
     getCurrentVoiceMembers,
-    getMention,
 } from "../../helpers/discord_utils";
 import {
     deleteGameSession,
@@ -29,9 +28,9 @@ import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import { DEFAULT_LIVES } from "../../structures/elimination_scoreboard";
 
 const logger = new IPCLogger("play");
-const DEFAULT_LIVES = 10;
 
 /**
  * Sends the beginning of game session message
@@ -262,20 +261,16 @@ export default class PlayCommand implements BaseCommand {
             return;
         }
 
-        const isEliminationMode =
-            parsedMessage.components.length >= 1 &&
-            parsedMessage.components[0].toLowerCase() === "elimination";
-
-        const isTeamsMode =
-            parsedMessage.components.length >= 1 &&
-            parsedMessage.components[0].toLowerCase() === "teams";
+        const gameType =
+            (parsedMessage.components[0]?.toLowerCase() as GameType) ??
+            GameType.CLASSIC;
 
         if (
             gameSessions[message.guildID] &&
             !gameSessions[message.guildID].sessionInitialized &&
-            (isEliminationMode || isTeamsMode)
+            gameType === GameType.TEAMS
         ) {
-            // User sent ,play elimination or ,play teams twice, reset the GameSession
+            // User sent ,play teams twice, reset the GameSession
             deleteGameSession(message.guildID);
             logger.info(
                 `${getDebugLogHeader(
@@ -292,59 +287,12 @@ export default class PlayCommand implements BaseCommand {
             !gameSessions[message.guildID].sessionInitialized
         ) {
             // (1) No game session exists yet (create ELIMINATION, TEAMS, CLASSIC, or COMPETITION game), or
-            // (2) User attempting to ,play after a ,play elimination/teams that didn't start, start CLASSIC game
+            // (2) User attempting to ,play after a ,play teams that didn't start, start CLASSIC game
             const textChannel = channel;
             const gameOwner = KmqMember.fromUser(message.author);
             let gameSession: GameSession;
 
-            if (isEliminationMode) {
-                // (1) ELIMINATION game creation
-                const lives =
-                    parsedMessage.components.length > 1 &&
-                    Number.isInteger(parseInt(parsedMessage.components[1])) &&
-                    parseInt(parsedMessage.components[1]) > 0 &&
-                    parseInt(parsedMessage.components[1]) <= 10000
-                        ? parseInt(parsedMessage.components[1])
-                        : DEFAULT_LIVES;
-
-                const startTitle = state.localizer.translate(
-                    message.guildID,
-                    "command.play.elimination.join.title",
-                    { join: `\`${prefix}join\``, begin: `\`${prefix}begin\`` }
-                );
-
-                const gameInstructions = state.localizer.translate(
-                    message.guildID,
-                    "command.play.elimination.join.description",
-                    {
-                        join: `\`${prefix}join\``,
-                        mentionedUser: getMention(gameOwner.id),
-                        begin: `\`${prefix}begin\``,
-                        lives: `\`${lives}\``,
-                    }
-                );
-
-                gameSession = new GameSession(
-                    textChannel.id,
-                    voiceChannel.id,
-                    textChannel.guild.id,
-                    gameOwner,
-                    GameType.ELIMINATION,
-                    lives
-                );
-                gameSession.addEliminationParticipant(gameOwner);
-                logger.info(
-                    `${getDebugLogHeader(
-                        message
-                    )} | Elimination game session created.`
-                );
-
-                await sendInfoMessage(messageContext, {
-                    title: startTitle,
-                    description: gameInstructions,
-                    thumbnailUrl: KmqImages.HAPPY,
-                });
-            } else if (isTeamsMode) {
+            if (gameType === GameType.TEAMS) {
                 // (1) TEAMS game creation
                 const startTitle = state.localizer.translate(
                     message.guildID,
@@ -365,7 +313,7 @@ export default class PlayCommand implements BaseCommand {
                     voiceChannel.id,
                     textChannel.guild.id,
                     gameOwner,
-                    GameType.TEAMS
+                    gameType
                 );
 
                 logger.info(
@@ -378,9 +326,9 @@ export default class PlayCommand implements BaseCommand {
                     thumbnailUrl: KmqImages.HAPPY,
                 });
             } else {
-                // (1 and 2) CLASSIC and COMPETITION game creation
+                // (1 and 2) CLASSIC, ELIMINATION, and COMPETITION game creation
                 if (gameSessions[message.guildID]) {
-                    // (2) Let the user know they're starting a non-elimination/teams game
+                    // (2) Let the user know they're starting a non-teams game
                     const oldGameType = gameSessions[message.guildID].gameType;
                     const ignoringOldGameTypeTitle = state.localizer.translate(
                         message.guildID,
@@ -430,11 +378,7 @@ export default class PlayCommand implements BaseCommand {
                     });
                 }
 
-                const isCompetitionMode =
-                    parsedMessage.components.length >= 1 &&
-                    parsedMessage.components[0].toLowerCase() === "competition";
-
-                if (isCompetitionMode) {
+                if (gameType === GameType.COMPETITION) {
                     const isModerator = await dbContext
                         .kmq("competition_moderators")
                         .select("user_id")
@@ -458,12 +402,26 @@ export default class PlayCommand implements BaseCommand {
                     }
                 }
 
+                let lives: number;
+                if (gameType === GameType.ELIMINATION) {
+                    lives =
+                        parsedMessage.components.length > 1 &&
+                        Number.isInteger(
+                            parseInt(parsedMessage.components[1])
+                        ) &&
+                        parseInt(parsedMessage.components[1]) > 0 &&
+                        parseInt(parsedMessage.components[1]) <= 10000
+                            ? parseInt(parsedMessage.components[1])
+                            : DEFAULT_LIVES;
+                }
+
                 gameSession = new GameSession(
                     textChannel.id,
                     voiceChannel.id,
                     textChannel.guild.id,
                     gameOwner,
-                    isCompetitionMode ? GameType.COMPETITION : GameType.CLASSIC
+                    gameType,
+                    lives
                 );
 
                 await sendBeginGameMessage(

@@ -13,10 +13,7 @@ describe("begin command", () => {
     describe("can start", () => {
         describe("game session is null", () => {
             it("should return false", () => {
-                assert.strictEqual(
-                    BeginCommand.canStart(null, "123", null),
-                    false
-                );
+                assert.strictEqual(BeginCommand.canStart(null, null), false);
             });
         });
 
@@ -31,46 +28,14 @@ describe("begin command", () => {
 
             it("should return false (classic games are not started using ,begin)", () => {
                 assert.strictEqual(
-                    BeginCommand.canStart(gameSession, "123", null),
+                    BeginCommand.canStart(gameSession, null),
                     false
                 );
 
                 assert.strictEqual(
-                    BeginCommand.canStart(gameSession, "567", null),
+                    BeginCommand.canStart(gameSession, null),
                     false
                 );
-            });
-        });
-
-        describe("elimination game session", () => {
-            const gameSession = new GameSession(
-                null,
-                null,
-                null,
-                gameStarter,
-                GameType.ELIMINATION
-            );
-
-            describe("invoker is the game session's author", () => {
-                it("should return true", () => {
-                    assert.strictEqual(
-                        BeginCommand.canStart(gameSession, "123", null),
-                        true
-                    );
-                });
-            });
-
-            describe("invoker is not the game session's author", () => {
-                it("should return false", () => {
-                    assert.strictEqual(
-                        BeginCommand.canStart(
-                            gameSession,
-                            "567",
-                            new MessageContext("", gameStarter)
-                        ),
-                        false
-                    );
-                });
             });
         });
 
@@ -88,7 +53,7 @@ describe("begin command", () => {
                     assert.strictEqual(
                         BeginCommand.canStart(
                             gameSession,
-                            "1231",
+
                             new MessageContext("", gameStarter)
                         ),
                         false
@@ -105,7 +70,7 @@ describe("begin command", () => {
                     );
 
                     assert.strictEqual(
-                        BeginCommand.canStart(gameSession, "1231", null),
+                        BeginCommand.canStart(gameSession, null),
                         true
                     );
 
@@ -115,7 +80,7 @@ describe("begin command", () => {
                     );
 
                     assert.strictEqual(
-                        BeginCommand.canStart(gameSession, "1231", null),
+                        BeginCommand.canStart(gameSession, null),
                         true
                     );
                 });
