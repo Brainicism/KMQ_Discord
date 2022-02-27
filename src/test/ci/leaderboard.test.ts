@@ -1,4 +1,5 @@
 import assert from "assert";
+import sinon from "sinon";
 import { describe } from "mocha";
 import { EmbedGenerator } from "eris-pagination";
 import LeaderboardCommand, {
@@ -14,6 +15,9 @@ import GameSession from "../../structures/game_session";
 import Player from "../../structures/player";
 import { GameType } from "../../types";
 import { state } from "../../kmq_worker";
+import * as discordUtils from "../../helpers/discord_utils";
+
+const sandbox = sinon.createSandbox();
 
 const SERVER_ID = "0";
 const gameStarter = new KmqMember("jisoo", "jisoo#4747", "url", "123");
@@ -223,6 +227,9 @@ describe("getLeaderboardEmbeds", () => {
             });
 
             it("should match the number of pages and embeds", async () => {
+                sandbox
+                    .stub(discordUtils, "getCurrentVoiceMembers")
+                    .callsFake((_voiceChannelID) => []);
                 const gameSession = new GameSession(
                     "",
                     "",
@@ -230,6 +237,8 @@ describe("getLeaderboardEmbeds", () => {
                     gameStarter,
                     GameType.CLASSIC
                 );
+
+                sandbox.restore();
 
                 state.gameSessions = { [SERVER_ID]: gameSession };
                 const statsRows = [];
@@ -552,6 +561,9 @@ describe("getLeaderboardEmbeds", () => {
 
         describe("game leaderboard", () => {
             beforeEach(async () => {
+                sandbox
+                    .stub(discordUtils, "getCurrentVoiceMembers")
+                    .callsFake((_voiceChannelID) => []);
                 const gameSession = new GameSession(
                     "",
                     "",
@@ -559,6 +571,8 @@ describe("getLeaderboardEmbeds", () => {
                     gameStarter,
                     GameType.CLASSIC
                 );
+
+                sandbox.restore();
 
                 state.gameSessions = { [SERVER_ID]: gameSession };
 

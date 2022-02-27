@@ -1,5 +1,5 @@
 import assert from "assert";
-import sinon, { SinonSandbox } from "sinon";
+import sinon from "sinon";
 import {
     calculateOptionsExpMultiplierInternal,
     calculateRoundExpMultiplier,
@@ -16,7 +16,7 @@ import GameRound from "../../structures/game_round";
 import GuildPreference from "../../structures/guild_preference";
 
 let guildPreference: GuildPreference;
-const sandbox: SinonSandbox = sinon.createSandbox();
+const sandbox = sinon.createSandbox();
 describe("calculateOptionsMultiplier", () => {
     beforeEach(() => {
         guildPreference = GuildPreference.fromGuild("123");

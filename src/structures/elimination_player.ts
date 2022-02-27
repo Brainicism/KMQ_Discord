@@ -1,8 +1,6 @@
 import Player from "./player";
 import { getUserTag } from "../helpers/discord_utils";
 import { state } from "../kmq_worker";
-import { EnvType } from "../types";
-import { User } from "eris";
 import { DEFAULT_LIVES } from "./elimination_scoreboard";
 
 export default class EliminationPlayer extends Player {
@@ -13,16 +11,7 @@ export default class EliminationPlayer extends Player {
         score = DEFAULT_LIVES,
         firstGameOfDay = false
     ): EliminationPlayer {
-        const user = [EnvType.CI, EnvType.TEST].includes(
-            process.env.NODE_ENV as EnvType
-        )
-            ? ({
-                  id: userID,
-                  avatarURL: "",
-                  username: "",
-                  discriminator: "",
-              } as User)
-            : state.client.users.get(userID);
+        const user = state.client.users.get(userID);
 
         return new EliminationPlayer(
             getUserTag(user),

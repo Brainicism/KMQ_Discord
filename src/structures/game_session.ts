@@ -41,7 +41,7 @@ import {
 } from "../helpers/utils";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
-import { QueriedSong, PlayerRoundResult, GameType, EnvType } from "../types";
+import { QueriedSong, PlayerRoundResult, GameType } from "../types";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
 import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
@@ -205,24 +205,16 @@ export default class GameSession {
             this.scoreboard = new Scoreboard();
         }
 
-        if (
-            ![EnvType.CI, EnvType.TEST].includes(
-                process.env.NODE_ENV as EnvType
-            )
-        ) {
-            getCurrentVoiceMembers(this.voiceChannelID)
-                .filter((x) => x.id !== process.env.BOT_CLIENT_ID)
-                .map((x) => x.id)
-                .map((x) =>
-                    this.scoreboard.addPlayer(
-                        [GameType.CLASSIC, GameType.COMPETITION].includes(
-                            this.gameType
-                        )
-                            ? Player.fromUserID(x)
-                            : EliminationPlayer.fromUserID(x, eliminationLives)
-                    )
-                );
-        }
+        getCurrentVoiceMembers(this.voiceChannelID)
+            .filter((x) => x.id !== process.env.BOT_CLIENT_ID)
+            .map((x) => x.id)
+            .map((x) =>
+                this.scoreboard.addPlayer(
+                    this.gameType === GameType.ELIMINATION
+                        ? EliminationPlayer.fromUserID(x, eliminationLives)
+                        : Player.fromUserID(x)
+                )
+            );
     }
 
     /**
@@ -1193,13 +1185,13 @@ export default class GameSession {
             this.gameType !== GameType.TEAMS
         ) {
             this.scoreboard.addPlayer(
-                [GameType.CLASSIC, GameType.COMPETITION].includes(this.gameType)
-                    ? Player.fromUserID(userID)
-                    : EliminationPlayer.fromUserID(
+                this.gameType === GameType.ELIMINATION
+                    ? EliminationPlayer.fromUserID(
                           userID,
                           (this.scoreboard as EliminationScoreboard)
                               .startingLives
                       )
+                    : Player.fromUserID(userID)
             );
         }
 

@@ -1,4 +1,5 @@
 import assert from "assert";
+import sinon from "sinon";
 import BeginCommand from "../../commands/game_commands/begin";
 import { GameType } from "../../types";
 import GameSession from "../../structures/game_session";
@@ -6,7 +7,9 @@ import KmqMember from "../../structures/kmq_member";
 import Player from "../../structures/player";
 import TeamScoreboard from "../../structures/team_scoreboard";
 import MessageContext from "../../structures/message_context";
+import * as discordUtils from "../../helpers/discord_utils";
 
+const sandbox = sinon.createSandbox();
 const gameStarter = new KmqMember("jisoo", "jisoo#4747", "url", "123");
 
 describe("begin command", () => {
@@ -18,6 +21,9 @@ describe("begin command", () => {
         });
 
         describe("classic game session", () => {
+            sandbox
+                .stub(discordUtils, "getCurrentVoiceMembers")
+                .callsFake((_voiceChannelID) => []);
             const gameSession = new GameSession(
                 null,
                 null,
@@ -25,6 +31,8 @@ describe("begin command", () => {
                 gameStarter,
                 GameType.CLASSIC
             );
+
+            sandbox.restore();
 
             it("should return false (classic games are not started using ,begin)", () => {
                 assert.strictEqual(
@@ -53,7 +61,6 @@ describe("begin command", () => {
                     assert.strictEqual(
                         BeginCommand.canStart(
                             gameSession,
-
                             new MessageContext("", gameStarter)
                         ),
                         false
