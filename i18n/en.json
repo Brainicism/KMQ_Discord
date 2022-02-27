@@ -66,9 +66,6 @@
                 "noTeam": {
                     "description": "Create a team using `{{join}} [team name]` before you can start the game."
                 },
-                "notOwner": {
-                    "description": "Only the person who did {{playElimination}} ({{mentionedUser}}) can start the game."
-                },
                 "title": "Begin Ignored"
             }
         },
@@ -327,16 +324,8 @@
                     "title": "Join Error"
                 }
             },
-            "playerAlreadyJoined": {
-                "description": "{{mentionedUser}} is already in the game.",
-                "title": "Player Already Joined"
-            },
             "playerJoined": {
                 "title": "Player Joined"
-            },
-            "playerJoinedMidGame": {
-                "description": "{{mentionedUser}} has spawned with {{lives}} lives.",
-                "title": "Player Joined Mid Game"
             },
             "playerJoinedTeam": {
                 "afterGameStart": {
@@ -574,18 +563,6 @@
             }
         },
         "play": {
-            "elimination": {
-                "failure": {
-                    "alreadyJoined": {
-                        "description": "{{mentionedUser}} is already in the game.",
-                        "title": "Player Already Joined"
-                    }
-                },
-                "join": {
-                    "description": "Type {{join}} to play in the upcoming elimination game. Once all have joined, {{mentionedUser}} must send {{begin}} to start the game. Everyone begins with {{lives}} lives.",
-                    "title": "{{join}} the game and start it with {{begin}}!"
-                }
-            },
             "exp": {
                 "doubleExpForVoting": "will receive double EXP for [voting]({{link}})!",
                 "howToVote": "See {{vote}} for info on how to vote. Thanks for supporting KMQ!",
