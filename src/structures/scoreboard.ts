@@ -125,7 +125,7 @@ export default class Scoreboard {
                             currentRanking[x.getScore()],
                             inProgress
                         )
-                    )}. ${x.getDisplayedName(
+                    )} ${x.getDisplayedName(
                         roundWinnerIDs && roundWinnerIDs[0] === x.id,
                         roundWinnerIDs?.includes(x.id),
                         true
