@@ -24,7 +24,7 @@ export default class TeamScoreboard extends Scoreboard {
     async updateScoreboard(
         guessResults: Array<SuccessfulGuessResult>
     ): Promise<void> {
-        const previousRoundRanking = this.getRanking();
+        const previousRoundRanking = this.getScoreToRankingMap();
         for (const player of Object.values(this.players)) {
             player.setPreviousRanking(previousRoundRanking[player.getScore()]);
         }

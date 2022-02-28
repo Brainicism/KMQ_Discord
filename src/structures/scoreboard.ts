@@ -76,7 +76,7 @@ export default class Scoreboard {
         inProgress: boolean,
         roundWinnerIDs?: Array<string>
     ): Array<{ name: string; value: string; inline: boolean }> {
-        const currentRanking = this.getRanking();
+        const currentRanking = this.getScoreToRankingMap();
         return Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
             .filter((x) => x.getScore() > 0 || x.inVC)
@@ -113,7 +113,7 @@ export default class Scoreboard {
         roundWinnerIDs?: Array<string>
     ): Array<{ name: string; value: string; inline: boolean }> {
         const ZERO_WIDTH_SPACE = "​";
-        const currentRanking = this.getRanking();
+        const currentRanking = this.getScoreToRankingMap();
         const players = Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
             .filter((x) => x.getScore() > 0 || x.inVC)
@@ -177,7 +177,7 @@ export default class Scoreboard {
     async updateScoreboard(
         guessResults: Array<SuccessfulGuessResult>
     ): Promise<void> {
-        const previousRoundRanking = this.getRanking();
+        const previousRoundRanking = this.getScoreToRankingMap();
         for (const player of Object.values(this.players)) {
             player.setPreviousRanking(previousRoundRanking[player.getScore()]);
         }
@@ -291,7 +291,7 @@ export default class Scoreboard {
     /**
      * @returns a mapping of player scores to ranking
      */
-    getRanking(): { [score: number]: number } {
+    getScoreToRankingMap(): { [score: number]: number } {
         const rankingToScore = {};
         const sortedUniqueScores = [
             ...new Set(Object.values(this.players).map((x) => x.getScore())),

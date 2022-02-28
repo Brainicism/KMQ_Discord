@@ -109,7 +109,7 @@ describe("score/exp updating", () => {
             const sb = new Scoreboard();
             Object.values(players).map((x) => sb.addPlayer(x));
 
-            assert.deepStrictEqual(sb.getRanking(), {
+            assert.deepStrictEqual(sb.getScoreToRankingMap(), {
                 [players["jisooID"].getScore()]: 0,
 
                 // Matching score entries coalesce into one
@@ -121,7 +121,7 @@ describe("score/exp updating", () => {
             sb.addPlayer(newPlayer);
             players["1234"] = newPlayer;
 
-            assert.deepStrictEqual(sb.getRanking(), {
+            assert.deepStrictEqual(sb.getScoreToRankingMap(), {
                 [players["jisooID"].getScore()]: 0,
                 [players["12345"].getScore()]: 1,
                 [players["ohmiID"].getScore()]: 1,
@@ -139,7 +139,7 @@ describe("score/exp updating", () => {
             const sb = new Scoreboard();
             Object.values(players).map((x) => sb.addPlayer(x));
 
-            assert.deepStrictEqual(sb.getRanking(), {
+            assert.deepStrictEqual(sb.getScoreToRankingMap(), {
                 2: 0,
             });
         });
@@ -154,7 +154,7 @@ describe("score/exp updating", () => {
             const sb = new Scoreboard();
             Object.values(players).map((x) => sb.addPlayer(x));
 
-            assert.deepStrictEqual(sb.getRanking(), {
+            assert.deepStrictEqual(sb.getScoreToRankingMap(), {
                 [players["jisooID"].getScore()]: 0,
                 [players["12345"].getScore()]: 1,
                 [players["ohmiID"].getScore()]: 2,

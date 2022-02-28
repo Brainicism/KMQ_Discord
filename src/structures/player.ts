@@ -45,7 +45,7 @@ export default class Player {
         this.avatarURL = avatarURL;
         this.expGain = 0;
         this.firstGameOfTheDay = firstGameOfTheDay;
-        this.previousRoundRanking = -1;
+        this.previousRoundRanking = null;
     }
 
     static fromUserID(
@@ -153,7 +153,11 @@ export default class Player {
         const previousRank = this.previousRoundRanking;
         const currentRank = currentRoundRanking;
         const displayedRank = `${currentRank + 1}.`;
-        if (!inProgress || previousRank < 0 || currentRank === previousRank) {
+        if (
+            !inProgress ||
+            previousRank === null ||
+            currentRank === previousRank
+        ) {
             return displayedRank;
         }
 
