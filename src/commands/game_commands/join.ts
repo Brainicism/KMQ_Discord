@@ -14,7 +14,6 @@ import { KmqImages } from "../../constants";
 import { bold } from "../../helpers/utils";
 import { state } from "../../kmq_worker";
 import MessageContext from "../../structures/message_context";
-import KmqMember from "../../structures/kmq_member";
 import CommandPrechecks from "../../command_prechecks";
 import { IPCLogger } from "../../logger";
 
@@ -31,99 +30,12 @@ export default class JoinCommand implements BaseCommand {
         parsedMessage,
     }: CommandArgs): Promise<void> => {
         const gameSession = gameSessions[message.guildID];
-        if (
-            !gameSession ||
-            (gameSession.gameType !== GameType.ELIMINATION &&
-                gameSession.gameType !== GameType.TEAMS)
-        ) {
+        if (!gameSession || gameSession.gameType !== GameType.TEAMS) {
             return;
         }
 
-        if (gameSession.gameType === GameType.ELIMINATION) {
-            JoinCommand.joinEliminationGame(message, gameSession);
-        } else if (gameSession.gameType === GameType.TEAMS) {
-            JoinCommand.joinTeamsGame(message, parsedMessage, gameSession);
-        }
+        JoinCommand.joinTeamsGame(message, parsedMessage, gameSession);
     };
-
-    static joinEliminationGame(
-        message: GuildTextableMessage,
-        gameSession: GameSession
-    ): void {
-        const kmqMember = KmqMember.fromUser(message.author);
-        if (gameSession.participants.has(message.author.id)) {
-            logger.info(
-                `${getDebugLogHeader(message)} | Player already in game.`
-            );
-
-            sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "command.join.playerAlreadyJoined.title"
-                ),
-                description: state.localizer.translate(
-                    message.guildID,
-                    "command.join.playerAlreadyJoined.description",
-                    { mentionedUser: getMention(message.author.id) }
-                ),
-            });
-            return;
-        }
-
-        if (gameSession.sessionInitialized) {
-            const newPlayer = gameSession.addEliminationParticipant(
-                kmqMember,
-                true
-            );
-
-            logger.info(
-                `${getDebugLogHeader(
-                    message
-                )} | Player has joined mid-elimination game.`
-            );
-
-            sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "command.join.playerJoinedMidGame.title"
-                ),
-                description: state.localizer.translate(
-                    message.guildID,
-                    "command.join.playerJoinedMidGame.description",
-                    {
-                        mentionedUser: getMention(message.author.id),
-                        lives: `\`${newPlayer.getLives()}\``,
-                    }
-                ),
-            });
-            return;
-        }
-
-        let previouslyJoinedPlayers = gameSession.scoreboard
-            .getPlayerMentions()
-            .reverse();
-
-        if (previouslyJoinedPlayers.length > 10) {
-            previouslyJoinedPlayers = previouslyJoinedPlayers.slice(0, 10);
-            previouslyJoinedPlayers.push(
-                state.localizer.translate(message.guildID, "misc.andManyOthers")
-            );
-        }
-
-        const players = `${getMention(
-            kmqMember.id
-        )}, ${previouslyJoinedPlayers.join(", ")}`;
-
-        sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
-                message.guildID,
-                "command.join.playerJoined.title"
-            ),
-            description: players,
-        });
-        logger.info(`${getDebugLogHeader(message)} | Player has joined.`);
-        gameSession.addEliminationParticipant(kmqMember);
-    }
 
     static joinTeamsGame(
         message: GuildTextableMessage,
@@ -274,7 +186,7 @@ export default class JoinCommand implements BaseCommand {
                 return;
             }
 
-            teamScoreboard.addPlayer(
+            teamScoreboard.addTeamPlayer(
                 team.id,
                 new Player(
                     getUserTag(message.author),

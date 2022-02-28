@@ -28,6 +28,9 @@ export default class Player {
     /** Whether it's the player's first game of the day */
     private firstGameOfTheDay: boolean;
 
+    /** The previous round's ranking */
+    private previousRoundRanking: number;
+
     constructor(
         tag: string,
         id: string,
@@ -42,22 +45,23 @@ export default class Player {
         this.avatarURL = avatarURL;
         this.expGain = 0;
         this.firstGameOfTheDay = firstGameOfTheDay;
+        this.previousRoundRanking = null;
     }
 
-    static fromUserID(userID: string, firstGameOfDay = false): Player {
+    static fromUserID(
+        userID: string,
+        score = 0,
+        firstGameOfDay = false
+    ): Player {
         const user = state.client.users.get(userID);
+
         return new Player(
             getUserTag(user),
             user.id,
             user.avatarURL,
-            0,
+            score,
             firstGameOfDay
         );
-    }
-
-    /** @returns the player's Discord tag  */
-    getName(): string {
-        return this.name;
     }
 
     /**
@@ -75,7 +79,7 @@ export default class Player {
     ): string {
         let name = this.name;
         if (mention && this.inVC) {
-            name = getMention(this.getID());
+            name = getMention(this.id);
         }
 
         if (wonRound) {
@@ -111,11 +115,6 @@ export default class Player {
         return Math.floor(this.expGain);
     }
 
-    /** @returns the player's Discord ID */
-    getID(): string {
-        return this.id;
-    }
-
     /** @returns the player's avatar URL */
     getAvatarURL(): string {
         return this.avatarURL;
@@ -141,29 +140,33 @@ export default class Player {
                 : 1) * expGain;
     }
 
+    setPreviousRanking(previousRanking: number): void {
+        this.previousRoundRanking = previousRanking;
+    }
+
     /**
-     * @param currentRoundRanking - The current round's ranking of players
-     * @param previousRoundRanking - The last round's ranking of players
+     * @param currentRoundRanking - The player's current round ranking
      * @param inProgress - Whether the game is in progress
      * @returns what to prefix player's name with in the scoreboard
      */
-    getRankingPrefix(
-        currentRoundRanking: Array<string>,
-        previousRoundRanking: Array<string>,
-        inProgress: boolean
-    ): string {
-        const currentRank = currentRoundRanking.indexOf(this.getID());
-        const previousRank = previousRoundRanking.indexOf(this.getID());
-        if (!inProgress || previousRank < 0 || currentRank === previousRank) {
-            return `${currentRank + 1}.`;
+    getRankingPrefix(currentRoundRanking: number, inProgress: boolean): string {
+        const previousRank = this.previousRoundRanking;
+        const currentRank = currentRoundRanking;
+        const displayedRank = `${currentRank + 1}.`;
+        if (
+            !inProgress ||
+            previousRank === null ||
+            currentRank === previousRank
+        ) {
+            return displayedRank;
         }
 
         if (currentRank < previousRank) {
-            return "↑";
+            return `↑ ${displayedRank}`;
         }
 
         if (currentRank > previousRank) {
-            return "↓";
+            return `↓ ${displayedRank}`;
         }
     }
 }

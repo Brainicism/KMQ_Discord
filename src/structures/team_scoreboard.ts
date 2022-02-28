@@ -24,7 +24,10 @@ export default class TeamScoreboard extends Scoreboard {
     async updateScoreboard(
         guessResults: Array<SuccessfulGuessResult>
     ): Promise<void> {
-        this.previousRoundRanking = Scoreboard.getRanking(this.players);
+        const previousRoundRanking = this.getScoreToRankingMap();
+        for (const player of Object.values(this.players)) {
+            player.setPreviousRanking(previousRoundRanking[player.getScore()]);
+        }
 
         // give everybody EXP
         for (const guessResult of guessResults) {
@@ -121,7 +124,7 @@ export default class TeamScoreboard extends Scoreboard {
      * @param teamName - The name of the team to add the player to
      * @param player - The player to add to the team
      */
-    addPlayer(teamName: string, player: Player): void {
+    addTeamPlayer(teamName: string, player: Player): void {
         // If the user is switching teams, remove them from their existing team first
         this.removePlayer(player.id);
         this.players[teamName].addPlayer(player);
@@ -199,7 +202,7 @@ export default class TeamScoreboard extends Scoreboard {
      * @returns the player's tag
      */
     getPlayerName(userID: string): string {
-        return this.getPlayer(userID).getName();
+        return this.getPlayer(userID).name;
     }
 
     /**
@@ -207,5 +210,21 @@ export default class TeamScoreboard extends Scoreboard {
      */
     getPlayers(): Array<Player> {
         return Object.values(this.players).flatMap((team) => team.getPlayers());
+    }
+
+    /**
+     * @returns player IDs for players in every team
+     */
+    getPlayerIDs(): Array<string> {
+        return this.getPlayers().map((x) => x.id);
+    }
+
+    /**
+     * Update whether a player is in VC
+     * @param userID - The Discord user ID of the player to update
+     * @param inVC - Whether the player is currently in the voice channel
+     */
+    setInVC(userID: string, inVC: boolean): void {
+        this.getPlayer(userID).inVC = inVC;
     }
 }

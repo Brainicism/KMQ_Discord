@@ -59,6 +59,7 @@ import { specialFfmpegArgs } from "../commands/game_options/special";
 import { AnswerType } from "../commands/game_options/answer";
 import { calculateTotalRoundExp } from "../commands/game_commands/exp";
 import SongSelector from "./song_selector";
+import Player from "../structures/player";
 
 const MULTIGUESS_DELAY = 1500;
 const logger = new IPCLogger("game_session");
@@ -127,9 +128,6 @@ export default class GameSession {
     /** The current GameRound */
     public gameRound: GameRound;
 
-    /** List of active participants in the GameSession */
-    public participants: Set<string>;
-
     /** The time the GameSession was started in epoch milliseconds */
     private readonly startedAt: number;
 
@@ -178,18 +176,9 @@ export default class GameSession {
     ) {
         this.gameType = gameType;
         this.guildID = guildID;
-        if (this.gameType === GameType.ELIMINATION) {
-            this.scoreboard = new EliminationScoreboard(eliminationLives);
-        } else if (this.gameType === GameType.TEAMS) {
-            this.scoreboard = new TeamScoreboard();
-        } else {
-            this.scoreboard = new Scoreboard();
-        }
-
         this.lastActive = Date.now();
         this.sessionInitialized = false;
         this.startedAt = Date.now();
-        this.participants = new Set();
         this.roundsPlayed = 0;
         this.correctGuesses = 0;
         this.guessTimes = [];
@@ -204,6 +193,28 @@ export default class GameSession {
         this.songMessageIDs = [];
         this.bookmarkedSongs = {};
         this.songSelector = new SongSelector();
+
+        if (this.gameType === GameType.TEAMS) {
+            this.scoreboard = new TeamScoreboard();
+            return;
+        }
+
+        if (this.gameType === GameType.ELIMINATION) {
+            this.scoreboard = new EliminationScoreboard(eliminationLives);
+        } else {
+            this.scoreboard = new Scoreboard();
+        }
+
+        getCurrentVoiceMembers(this.voiceChannelID)
+            .filter((x) => x.id !== process.env.BOT_CLIENT_ID)
+            .map((x) => x.id)
+            .map((x) =>
+                this.scoreboard.addPlayer(
+                    this.gameType === GameType.ELIMINATION
+                        ? EliminationPlayer.fromUserID(x, eliminationLives)
+                        : Player.fromUserID(x)
+                )
+            );
     }
 
     /**
@@ -407,8 +418,8 @@ export default class GameSession {
                         .getPlayers()
                         .sort((a, b) => b.getScore() - a.getScore())
                         .map((x) => ({
-                            name: x.getName(),
-                            id: x.getID(),
+                            name: x.name,
+                            id: x.id,
                             score: x.getDisplayedScore(),
                         }))
                 )
@@ -429,7 +440,7 @@ export default class GameSession {
 
         const leveledUpPlayers: Array<LevelUpResult> = [];
         // commit player stats
-        for (const participant of this.participants) {
+        for (const participant of this.scoreboard.getPlayerIDs()) {
             await this.ensurePlayerStat(participant);
             await GameSession.incrementPlayerGamesPlayed(participant);
             const playerScore = this.scoreboard.getPlayerScore(participant);
@@ -531,7 +542,8 @@ export default class GameSession {
         await dbContext.kmq("game_sessions").insert({
             start_date: new Date(this.startedAt),
             guild_id: this.guildID,
-            num_participants: this.participants.size,
+            num_participants: this.scoreboard.getPlayers().map((x) => x.inVC)
+                .length,
             avg_guess_time: averageGuessTime,
             session_length: sessionLength,
             rounds_played: this.roundsPlayed,
@@ -962,26 +974,6 @@ export default class GameSession {
         clearTimeout(this.guessTimeoutFunc);
     }
 
-    /**
-     * Adds a participant for elimination mode
-     * @param user - The user to add
-     * @param midgame - Whether or not the user is being added mid-game
-     * @returns the added elimination participant
-     */
-    addEliminationParticipant(
-        user: KmqMember,
-        midgame = false
-    ): EliminationPlayer {
-        this.participants.add(user.id);
-        const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
-        return eliminationScoreboard.addPlayer(
-            user.id,
-            user.tag,
-            user.avatarUrl,
-            midgame ? eliminationScoreboard.getLivesOfWeakestPlayer() : null
-        );
-    }
-
     getRoundsPlayed(): number {
         return this.roundsPlayed;
     }
@@ -1032,9 +1024,9 @@ export default class GameSession {
             return;
         }
 
-        const participantsInVC = [...this.participants].filter((p) =>
-            voiceMemberIDs.has(p)
-        );
+        const participantsInVC = this.scoreboard
+            .getPlayerIDs()
+            .filter((p) => voiceMemberIDs.has(p));
 
         let newOwnerID: string;
         if (participantsInVC.length > 0) {
@@ -1187,6 +1179,23 @@ export default class GameSession {
      * @param inVC - Whether the player is currently in the voice channel
      */
     setPlayerInVC(userID: string, inVC: boolean): void {
+        if (
+            inVC &&
+            !this.scoreboard.getPlayerIDs().includes(userID) &&
+            this.gameType !== GameType.TEAMS
+        ) {
+            this.scoreboard.addPlayer(
+                this.gameType === GameType.ELIMINATION
+                    ? EliminationPlayer.fromUserID(
+                          userID,
+                          (
+                              this.scoreboard as EliminationScoreboard
+                          ).getLivesOfWeakestPlayer()
+                      )
+                    : Player.fromUserID(userID)
+            );
+        }
+
         this.scoreboard.setInVC(userID, inVC);
     }
 
@@ -1354,9 +1363,6 @@ export default class GameSession {
             this.gameRound.incorrectMCGuessers.has(userID)
         )
             return 0;
-        if (this.gameType !== GameType.ELIMINATION) {
-            this.participants.add(userID);
-        }
 
         const pointsAwarded = this.gameRound.checkGuess(
             guess,
@@ -1395,7 +1401,9 @@ export default class GameSession {
                 .scoreboard as EliminationScoreboard;
 
             if (
-                !this.participants.has(messageContext.author.id) ||
+                !this.scoreboard
+                    .getPlayerIDs()
+                    .includes(messageContext.author.id) ||
                 eliminationScoreboard.isPlayerEliminated(
                     messageContext.author.id
                 )
