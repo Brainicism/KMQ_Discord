@@ -104,11 +104,11 @@ export default class GameSession {
     /** The ID of text channel in which the GameSession was started in, and will be active in */
     public readonly textChannelID: string;
 
-    /** The ID of the voice channel in which the GameSession was started in, and will be active in */
-    public readonly voiceChannelID: string;
-
     /** The Discord Guild ID */
     public readonly guildID: string;
+
+    /** The ID of the voice channel the game will be active in */
+    public voiceChannelID: string;
 
     /** Initially the user who started the GameSession, transferred to current VC member */
     public owner: KmqMember;
@@ -194,27 +194,19 @@ export default class GameSession {
         this.bookmarkedSongs = {};
         this.songSelector = new SongSelector();
 
-        if (this.gameType === GameType.TEAMS) {
-            this.scoreboard = new TeamScoreboard();
-            return;
+        switch (this.gameType) {
+            case GameType.TEAMS:
+                this.scoreboard = new TeamScoreboard();
+                break;
+            case GameType.ELIMINATION:
+                this.scoreboard = new EliminationScoreboard(eliminationLives);
+                break;
+            default:
+                this.scoreboard = new Scoreboard();
+                break;
         }
 
-        if (this.gameType === GameType.ELIMINATION) {
-            this.scoreboard = new EliminationScoreboard(eliminationLives);
-        } else {
-            this.scoreboard = new Scoreboard();
-        }
-
-        getCurrentVoiceMembers(this.voiceChannelID)
-            .filter((x) => x.id !== process.env.BOT_CLIENT_ID)
-            .map((x) => x.id)
-            .map((x) =>
-                this.scoreboard.addPlayer(
-                    this.gameType === GameType.ELIMINATION
-                        ? EliminationPlayer.fromUserID(x, eliminationLives)
-                        : Player.fromUserID(x)
-                )
-            );
+        this.syncAllVoiceMembers();
     }
 
     /**
@@ -1197,6 +1189,39 @@ export default class GameSession {
         }
 
         this.scoreboard.setInVC(userID, inVC);
+    }
+
+    /**
+     * Add all players in VC that aren't tracked to the scoreboard, and update those who left
+     */
+    syncAllVoiceMembers(): void {
+        const currentVoiceMembers = getCurrentVoiceMembers(
+            this.voiceChannelID
+        ).map((x) => x.id);
+
+        this.scoreboard
+            .getPlayerIDs()
+            .filter((x) => !currentVoiceMembers.includes(x))
+            .map((x) => this.setPlayerInVC(x, false));
+
+        if (this.gameType === GameType.TEAMS) {
+            // Players join teams manually with ,join
+            return;
+        }
+
+        currentVoiceMembers
+            .filter((x) => x !== process.env.BOT_CLIENT_ID)
+            .map((x) =>
+                this.scoreboard.addPlayer(
+                    this.gameType === GameType.ELIMINATION
+                        ? EliminationPlayer.fromUserID(
+                              x,
+                              (this.scoreboard as EliminationScoreboard)
+                                  .startingLives
+                          )
+                        : Player.fromUserID(x)
+                )
+            );
     }
 
     /**

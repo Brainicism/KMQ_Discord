@@ -48,6 +48,9 @@ describe("begin command", () => {
         });
 
         describe("teams game session", () => {
+            sandbox
+                .stub(discordUtils, "getCurrentVoiceMembers")
+                .callsFake((_voiceChannelID) => []);
             const gameSession = new GameSession(
                 null,
                 null,
@@ -55,6 +58,8 @@ describe("begin command", () => {
                 gameStarter,
                 GameType.TEAMS
             );
+
+            sandbox.restore();
 
             describe("no teams have been added yet", () => {
                 it("should return false", () => {
