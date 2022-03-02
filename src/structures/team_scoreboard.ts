@@ -225,6 +225,9 @@ export default class TeamScoreboard extends Scoreboard {
      * @param inVC - Whether the player is currently in the voice channel
      */
     setInVC(userID: string, inVC: boolean): void {
-        this.getPlayer(userID).inVC = inVC;
+        const player = this.getPlayer(userID);
+        if (player) {
+            player.inVC = inVC;
+        }
     }
 }
