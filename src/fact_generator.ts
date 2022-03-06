@@ -696,10 +696,10 @@ async function songGuessRate(lng: LocaleType): Promise<string[]> {
         .kmq("song_metadata")
         .select(
             dbContext.kmq.raw(
-                "song_name_en, artist_name_en, ROUND(correct_guesses/rounds_played * 100, 2) AS c, link, rounds_played"
+                "song_name_en, artist_name_en, ROUND(correct_guesses/(correct_guesses + skip_count) * 100, 2) AS c, link, correct_guesses + skip_count AS rounds_played"
             )
         )
-        .where("rounds_played", ">", 2500)
+        .whereRaw("correct_guesses + skip_count > 2500")
         .join("available_songs", function join() {
             this.on("available_songs.link", "=", "song_metadata.vlink");
         })

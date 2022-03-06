@@ -147,7 +147,6 @@ export default class GameSession {
     private songStats: {
         [vlink: string]: {
             correctGuesses: number;
-            roundsPlayed: number;
             skipCount: number;
             hintCount: number;
             timeToGuess: number;
@@ -1582,7 +1581,6 @@ export default class GameSession {
         if (!(vlink in this.songStats)) {
             this.songStats[vlink] = {
                 correctGuesses: 0,
-                roundsPlayed: 0,
                 skipCount: 0,
                 hintCount: 0,
                 timeToGuess: 0,
@@ -1632,7 +1630,6 @@ export default class GameSession {
                     "correct_guesses",
                     this.songStats[vlink].correctGuesses
                 )
-                .increment("rounds_played", this.songStats[vlink].roundsPlayed)
                 .increment("skip_count", this.songStats[vlink].skipCount)
                 .increment("hint_count", this.songStats[vlink].hintCount)
                 .increment(
