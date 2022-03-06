@@ -6,8 +6,9 @@ import {
     sendInfoMessage,
     voicePermissionsCheck,
     getUserVoiceChannel,
-    getUserTag,
     getCurrentVoiceMembers,
+    EMBED_SUCCESS_BONUS_COLOR,
+    getMention,
 } from "../../helpers/discord_utils";
 import {
     deleteGameSession,
@@ -59,10 +60,10 @@ export async function sendBeginGameMessage(
         bonusUsers.has(x.id)
     );
 
-    if (bonusUserParticipants.length > 0) {
-        let bonusUserTags = bonusUserParticipants.map(
-            (x) => `\`${getUserTag(x)}\``
-        );
+    const isBonus = bonusUserParticipants.length > 0;
+
+    if (isBonus) {
+        let bonusUserTags = bonusUserParticipants.map((x) => getMention(x.id));
 
         if (bonusUserTags.length > 10) {
             bonusUserTags = bonusUserTags.slice(0, 10);
@@ -80,6 +81,7 @@ export async function sendBeginGameMessage(
             }
         );
 
+        gameInstructions += " ";
         gameInstructions += state.localizer.translate(
             message.guildID,
             "command.play.exp.howToVote",
@@ -130,8 +132,9 @@ export async function sendBeginGameMessage(
     await sendInfoMessage(MessageContext.fromMessage(message), {
         title: startTitle,
         description: gameInstructions,
+        color: isBonus ? EMBED_SUCCESS_BONUS_COLOR : null,
         footerText:
-            bonusUserParticipants.length === 0 && Math.random() < 0.5
+            !isBonus && Math.random() < 0.5
                 ? state.localizer.translate(
                       message.guildID,
                       "command.play.voteReminder",
