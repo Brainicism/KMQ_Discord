@@ -17,6 +17,10 @@ export default function voiceChannelLeaveHandler(
         return;
     }
 
+    if (oldChannel.id !== gameSession.voiceChannelID) {
+        return;
+    }
+
     if (checkBotIsAlone(guildID)) {
         gameSession.endSession();
         return;

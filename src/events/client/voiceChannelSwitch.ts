@@ -19,6 +19,13 @@ export default async function voiceChannelSwitchHandler(
         return;
     }
 
+    if (
+        newChannel.id !== gameSession.voiceChannelID &&
+        oldChannel.id !== gameSession.voiceChannelID
+    ) {
+        return;
+    }
+
     if (checkBotIsAlone(guildID)) {
         gameSession.endSession();
         return;
