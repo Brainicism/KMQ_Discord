@@ -702,7 +702,7 @@ export async function sendEndRoundMessage(
             playerRoundResults[0].streak >= 5
                 ? `(🔥 ${friendlyFormattedNumber(
                       playerRoundResults[0].streak
-                  )}) `
+                  )})`
                 : ""
         }`;
 
