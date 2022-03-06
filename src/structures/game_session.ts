@@ -1599,6 +1599,7 @@ export default class GameSession {
             };
         }
 
+        this.songStats[vlink].roundsPlayed++;
         this.songStats[vlink].timePlayed += timePlayed;
 
         if (correct) {
