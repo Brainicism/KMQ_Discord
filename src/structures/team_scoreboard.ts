@@ -1,4 +1,7 @@
-import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
+import Scoreboard, {
+    SuccessfulGuessResult,
+    SCOREBOARD_FIELD_CUTOFF,
+} from "./scoreboard";
 import Player from "./player";
 import Team from "./team";
 import { IPCLogger } from "../logger";
@@ -229,5 +232,12 @@ export default class TeamScoreboard extends Scoreboard {
         if (player) {
             player.inVC = inVC;
         }
+    }
+
+    /**
+     * @returns whether the use the scoreboard designed for more players
+     */
+    useLargerScoreboard(): boolean {
+        return this.getNumTeams() > SCOREBOARD_FIELD_CUTOFF;
     }
 }
