@@ -108,7 +108,7 @@ export default class Team extends Player {
     /**
      * @returns whether to include this team in the scoreboard
      */
-    includeInScoreboard(): boolean {
+    shouldIncludeInScoreboard(): boolean {
         return true;
     }
 }

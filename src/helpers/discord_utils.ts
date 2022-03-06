@@ -747,7 +747,7 @@ export async function sendEndRoundMessage(
         );
     }
 
-    const useLargerScoreboard = scoreboard.useLargerScoreboard();
+    const useLargerScoreboard = scoreboard.shouldUseLargerScoreboard();
 
     let scoreboardTitle = "";
     if (scoreboard.getWinners().length > 0 && !useLargerScoreboard) {
@@ -1217,7 +1217,7 @@ export async function sendEndGameMessage(
         const winners = gameSession.scoreboard.getWinners();
         let fields: Array<{ name: string; value: string; inline: boolean }>;
         const useLargerScoreboard =
-            gameSession.scoreboard.useLargerScoreboard();
+            gameSession.scoreboard.shouldUseLargerScoreboard();
 
         if (useLargerScoreboard) {
             fields = gameSession.scoreboard.getScoreboardEmbedThreeFields(

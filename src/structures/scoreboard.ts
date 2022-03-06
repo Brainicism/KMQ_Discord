@@ -81,7 +81,7 @@ export default class Scoreboard {
         const currentRanking = this.getScoreToRankingMap();
         return Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
-            .filter((x) => x.includeInScoreboard())
+            .filter((x) => x.shouldIncludeInScoreboard())
             .map((x) => ({
                 name: `${x.getRankingPrefix(
                     currentRanking[x.getScore()],
@@ -118,7 +118,7 @@ export default class Scoreboard {
         const currentRanking = this.getScoreToRankingMap();
         const players = Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
-            .filter((x) => x.includeInScoreboard())
+            .filter((x) => x.shouldIncludeInScoreboard())
             .slice(0, cutoff)
             .map(
                 (x) =>
@@ -309,10 +309,10 @@ export default class Scoreboard {
     /**
      * @returns whether the use the scoreboard designed for more players
      */
-    useLargerScoreboard(): boolean {
+    shouldUseLargerScoreboard(): boolean {
         return (
-            this.getPlayers().filter((x) => x.includeInScoreboard()).length >
-            SCOREBOARD_FIELD_CUTOFF
+            this.getPlayers().filter((x) => x.shouldIncludeInScoreboard())
+                .length > SCOREBOARD_FIELD_CUTOFF
         );
     }
 }

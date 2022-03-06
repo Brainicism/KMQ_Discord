@@ -47,7 +47,7 @@ export default class EliminationPlayer extends Player {
     /**
      * @returns whether to include this player in the scoreboard
      */
-    includeInScoreboard(): boolean {
+    shouldIncludeInScoreboard(): boolean {
         return true;
     }
 }

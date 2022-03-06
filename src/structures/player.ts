@@ -173,7 +173,7 @@ export default class Player {
     /**
      * @returns whether to include this player in the scoreboard
      */
-    includeInScoreboard(): boolean {
+    shouldIncludeInScoreboard(): boolean {
         return this.getScore() > 0 || this.inVC;
     }
 }
