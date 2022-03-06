@@ -4,6 +4,8 @@ import { getMention } from "../helpers/discord_utils";
 import GuildPreference from "./guild_preference";
 import { state } from "../kmq_worker";
 
+export const SCOREBOARD_FIELD_CUTOFF = 6;
+
 export interface SuccessfulGuessResult {
     userID: string;
     pointsEarned: number;
@@ -79,7 +81,7 @@ export default class Scoreboard {
         const currentRanking = this.getScoreToRankingMap();
         return Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
-            .filter((x) => x.getScore() > 0 || x.inVC)
+            .filter((x) => x.shouldIncludeInScoreboard())
             .map((x) => ({
                 name: `${x.getRankingPrefix(
                     currentRanking[x.getScore()],
@@ -116,7 +118,7 @@ export default class Scoreboard {
         const currentRanking = this.getScoreToRankingMap();
         const players = Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
-            .filter((x) => x.getScore() > 0 || x.inVC)
+            .filter((x) => x.shouldIncludeInScoreboard())
             .slice(0, cutoff)
             .map(
                 (x) =>
@@ -302,5 +304,15 @@ export default class Scoreboard {
         }
 
         return rankingToScore;
+    }
+
+    /**
+     * @returns whether the use the scoreboard designed for more players
+     */
+    shouldUseLargerScoreboard(): boolean {
+        return (
+            this.getPlayers().filter((x) => x.shouldIncludeInScoreboard())
+                .length > SCOREBOARD_FIELD_CUTOFF
+        );
     }
 }

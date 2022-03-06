@@ -104,4 +104,11 @@ export default class Team extends Player {
             Object.values(this.players).map((x) => x.getAvatarURL())
         );
     }
+
+    /**
+     * @returns whether to include this team in the scoreboard
+     */
+    shouldIncludeInScoreboard(): boolean {
+        return true;
+    }
 }

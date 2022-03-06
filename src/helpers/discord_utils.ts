@@ -67,7 +67,6 @@ const REQUIRED_VOICE_PERMISSIONS = [
     "voiceSpeak" as const,
 ];
 
-const SCOREBOARD_FIELD_CUTOFF = 6;
 const MAX_SCOREBOARD_PLAYERS = 30;
 const MAX_RUNNERS_UP = 30;
 const MAX_INTERACTION_RESPONSE_TIME = 3 * 1000;
@@ -748,8 +747,7 @@ export async function sendEndRoundMessage(
         );
     }
 
-    const useLargerScoreboard =
-        scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
+    const useLargerScoreboard = scoreboard.shouldUseLargerScoreboard();
 
     let scoreboardTitle = "";
     if (scoreboard.getWinners().length > 0 && !useLargerScoreboard) {
@@ -1219,7 +1217,7 @@ export async function sendEndGameMessage(
         const winners = gameSession.scoreboard.getWinners();
         let fields: Array<{ name: string; value: string; inline: boolean }>;
         const useLargerScoreboard =
-            gameSession.scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
+            gameSession.scoreboard.shouldUseLargerScoreboard();
 
         if (useLargerScoreboard) {
             fields = gameSession.scoreboard.getScoreboardEmbedThreeFields(

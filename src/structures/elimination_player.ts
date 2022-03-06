@@ -43,4 +43,11 @@ export default class EliminationPlayer extends Player {
     getDisplayedScore(): string {
         return !this.isEliminated() ? `❤️ x ${this.getLives()}` : "☠️";
     }
+
+    /**
+     * @returns whether to include this player in the scoreboard
+     */
+    shouldIncludeInScoreboard(): boolean {
+        return true;
+    }
 }

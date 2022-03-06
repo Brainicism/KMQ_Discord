@@ -169,4 +169,11 @@ export default class Player {
             return `↓ ${displayedRank}`;
         }
     }
+
+    /**
+     * @returns whether to include this player in the scoreboard
+     */
+    shouldIncludeInScoreboard(): boolean {
+        return this.getScore() > 0 || this.inVC;
+    }
 }
