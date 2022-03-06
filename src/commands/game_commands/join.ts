@@ -122,12 +122,7 @@ export default class JoinCommand implements BaseCommand {
         if (!teamScoreboard.hasTeam(teamName)) {
             teamScoreboard.addTeam(
                 teamName,
-                new Player(
-                    getUserTag(message.author),
-                    message.author.id,
-                    message.author.avatarURL,
-                    0
-                )
+                Player.fromUserID(message.author.id)
             );
             const teamNameWithCleanEmojis = teamName.replace(
                 /(<a?)(:[a-zA-Z0-9]+:)([0-9]+>)/gm,
@@ -188,12 +183,7 @@ export default class JoinCommand implements BaseCommand {
 
             teamScoreboard.addTeamPlayer(
                 team.id,
-                new Player(
-                    getUserTag(message.author),
-                    message.author.id,
-                    message.author.avatarURL,
-                    0
-                )
+                Player.fromUserID(message.author.id)
             );
 
             sendInfoMessage(MessageContext.fromMessage(message), {
