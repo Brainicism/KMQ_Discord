@@ -23,9 +23,9 @@ describe("increment score", () => {
     });
 });
 
-describe("increment xp", () => {
+describe("increment EXP", () => {
     describe("not first game of the day", () => {
-        describe("player's exp is incremented multiple times", () => {
+        describe("player's EXP is incremented multiple times", () => {
             it("should increment their exp", () => {
                 const numIncrements = 25;
                 for (let i = 0; i < numIncrements; i++) {

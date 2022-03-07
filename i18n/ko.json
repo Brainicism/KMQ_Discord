@@ -66,9 +66,6 @@
                 "noTeam": {
                     "description": "게임을 시작하기 전에 `{{join}} [팀 이름]`을 사용하여 팀을 만드세요."
                 },
-                "notOwner": {
-                    "description": "{{playElimination}}을 한 사람, ({{mentionedUser}})만 게임을 시작할 수 있습니다."
-                },
                 "title": "게임 시작이 무시되었습니다."
             }
         },
@@ -327,16 +324,8 @@
                     "title": "가입 오류"
                 }
             },
-            "playerAlreadyJoined": {
-                "description": "{{mentionedUser}}님은 이미 게임에 참여하고 있습니다.",
-                "title": "이미 참가한 플레이어"
-            },
             "playerJoined": {
                 "title": "참가한 플레이어"
-            },
-            "playerJoinedMidGame": {
-                "description": "{{mentionedUser}}이(가) {{lives}}명의 목숨과 함께 생성되었습니다.",
-                "title": "플레이어가 게임 중반에 합류했습니다."
             },
             "playerJoinedTeam": {
                 "afterGameStart": {
@@ -574,18 +563,6 @@
             }
         },
         "play": {
-            "elimination": {
-                "failure": {
-                    "alreadyJoined": {
-                        "description": "{{mentionedUser}}님은 이미 게임에 참여하고 있습니다.",
-                        "title": "이미 참가한 플레이어입니다."
-                    }
-                },
-                "join": {
-                    "description": "곧 시작하는 제거 게임에서 플레이하려면 {{join}}을(를) 입력하세요. (모두 참여했으면 {{mentionedUser}}이(가) {{begin}}을 보내 게임을 시작해야 하며 모든 사람은 {{lives}}의 목숨으로 시작합니다.)",
-                    "title": "{{join}} 게임을 시작하고 {{begin}}(으)로 시작하세요!"
-                }
-            },
             "exp": {
                 "doubleExpForVoting": "[투표]({{link}})에 대한 경험치를 두 배로 받습니다!",
                 "howToVote": "투표 방법에 대한 정보는 {{vote}}를 참조하세요. (KMQ를 지원해주셔서 감사합니다!)",
@@ -995,6 +972,7 @@
             "historicalGaonWeekly": "재미있는 사실: 이번 주 {{year}}에 {{songName}}이(가) 가온 주간 차트에서 1위를 차지했습니다!",
             "hyperlinkGenerator": "[\"{{songName}}\" - {{artistName}}]({{url}})",
             "mostActiveYear": "재미있는 사실: {{year}}년은 {{num}}개의 뮤직 비디오가 공개되어 K-POP에서 {{ordinalNum}}번째로 활발한 해였습니다!",
+            "mostAnnualAwardShowWins": "재미있는 사실: {{artistName}은(는) {{wins}}번의 수상으로 {{ordinalNum}}번째로 많은 연간 상을 수상했습니다!",
             "mostDebuts": "재미있는 사실: {{year}}년은 {{num}}개의 그룹이 데뷔로 {{ordinalNum}}번째로 많은 데뷔를 했습니다!",
             "mostGaonAppearances": "재미있는 사실: {{artistName}}은(는) {{appearances}}번의 출연으로 가온 디지털 주간 차트에서 {{ordinalNum}}위를 기록했습니다!",
             "mostGaonFirsts": "재미있는 사실: {{artistName}}은(는) 가온 디지털 주간 차트에서 {{firstPlaceCount}}번 1위를 차지하여 가장 많은 {{ordinalNum}}위를 차지했습니다!",

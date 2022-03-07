@@ -57,7 +57,12 @@ export class BotWorker extends BaseClusterWorker {
                 return null;
             case "game_session_stats": {
                 const activePlayers = Object.values(state.gameSessions).reduce(
-                    (total, curr) => total + curr.participants.size,
+                    (total, curr) =>
+                        total +
+                        curr.scoreboard
+                            .getPlayers()
+                            .filter((x) => x.inVC)
+                            .map((x) => x.id).length,
                     0
                 );
 

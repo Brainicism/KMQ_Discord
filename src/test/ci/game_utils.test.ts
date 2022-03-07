@@ -13,6 +13,9 @@ import GameSession from "../../structures/game_session";
 import { OstPreference } from "../../commands/game_options/ost";
 import { ReleaseType } from "../../commands/game_options/release";
 import { mockSongs } from "../test_setup";
+import * as discordUtils from "../../helpers/discord_utils";
+
+const sandbox = sinon.createSandbox();
 
 async function getMockGuildPreference(): Promise<GuildPreference> {
     const guildPreference = new GuildPreference("test");
@@ -273,11 +276,15 @@ describe("song query", () => {
 
     describe("cleanupInactiveGameSessions", () => {
         const guildId = "123";
+        sandbox
+            .stub(discordUtils, "getCurrentVoiceMembers")
+            .callsFake((_voiceChannelID) => []);
         const gameSession = new GameSession(null, null, guildId, null, null);
-        const sandbox = sinon.createSandbox();
+        sandbox.restore();
+        const endSandbox = sinon.createSandbox();
         const endSessionStub = sandbox.stub(gameSession, "endSession");
         after(() => {
-            sandbox.restore();
+            endSandbox.restore();
         });
 
         state.gameSessions = {

@@ -64,7 +64,7 @@ describe("get team of player", () => {
 
         const secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, player);
         assert.deepStrictEqual(
-            scoreboard.getTeamOfPlayer(player.getID()),
+            scoreboard.getTeamOfPlayer(player.id),
             secondTeam
         );
     });
@@ -81,11 +81,11 @@ describe("team deletion", () => {
 
         const secondTeam = scoreboard.addTeam(SECOND_TEAM_NAME, player);
         const anotherPlayer = new Player(USER_TAG, USER_IDS[2], AVATAR_URL, 0);
-        scoreboard.addPlayer(SECOND_TEAM_NAME, anotherPlayer);
+        scoreboard.addTeamPlayer(SECOND_TEAM_NAME, anotherPlayer);
         const bestPlayer = new Player(USER_TAG, USER_IDS[3], AVATAR_URL, 0);
-        scoreboard.addPlayer(FIRST_TEAM_NAME, bestPlayer);
-        scoreboard.removePlayer(bestPlayer.getID());
-        scoreboard.removePlayer(player.getID());
+        scoreboard.addTeamPlayer(FIRST_TEAM_NAME, bestPlayer);
+        scoreboard.removePlayer(bestPlayer.id);
+        scoreboard.removePlayer(player.id);
         scoreboard.removePlayer(USER_IDS[0]);
         assert.deepStrictEqual(Object.values(scoreboard.getTeams()), [
             secondTeam,
@@ -127,7 +127,7 @@ describe("score/exp updating", () => {
 
     describe("multi player, single team scoreboard", () => {
         beforeEach(() => {
-            scoreboard.addPlayer(
+            scoreboard.addTeamPlayer(
                 FIRST_TEAM_NAME,
                 new Player("second_user#1010", USER_IDS[1], AVATAR_URL, 0)
             );
@@ -178,7 +178,7 @@ describe("score/exp updating", () => {
     describe("multi player, multi team scoreboard", () => {
         let secondTeam: Team;
         beforeEach(() => {
-            scoreboard.addPlayer(
+            scoreboard.addTeamPlayer(
                 FIRST_TEAM_NAME,
                 new Player("second_user#1010", USER_IDS[1], AVATAR_URL, 0)
             );
@@ -188,7 +188,7 @@ describe("score/exp updating", () => {
                 new Player("jennie#2325", USER_IDS[2], AVATAR_URL, 0)
             );
 
-            scoreboard.addPlayer(
+            scoreboard.addTeamPlayer(
                 SECOND_TEAM_NAME,
                 new Player("g-dragon#9999", USER_IDS[3], AVATAR_URL, 0)
             );
@@ -261,7 +261,7 @@ describe("score/exp updating", () => {
     describe("multiguess", () => {
         let secondTeam: Team;
         beforeEach(async () => {
-            scoreboard.addPlayer(
+            scoreboard.addTeamPlayer(
                 FIRST_TEAM_NAME,
                 new Player("sakura#5478", USER_IDS[1], AVATAR_URL, 0)
             );
@@ -271,7 +271,7 @@ describe("score/exp updating", () => {
                 new Player("jennie#2325", USER_IDS[2], AVATAR_URL, 0)
             );
 
-            scoreboard.addPlayer(
+            scoreboard.addTeamPlayer(
                 SECOND_TEAM_NAME,
                 new Player("g-dragon#9999", USER_IDS[3], AVATAR_URL, 0)
             );
@@ -306,7 +306,7 @@ describe("score/exp updating", () => {
 describe("winner detection", () => {
     let secondTeam: Team;
     beforeEach(() => {
-        scoreboard.addPlayer(
+        scoreboard.addTeamPlayer(
             FIRST_TEAM_NAME,
             new Player("sakura#5478", USER_IDS[1], AVATAR_URL, 0)
         );
@@ -316,7 +316,7 @@ describe("winner detection", () => {
             new Player("jennie#2325", USER_IDS[2], AVATAR_URL, 0)
         );
 
-        scoreboard.addPlayer(
+        scoreboard.addTeamPlayer(
             SECOND_TEAM_NAME,
             new Player("g-dragon#9999", USER_IDS[3], AVATAR_URL, 0)
         );

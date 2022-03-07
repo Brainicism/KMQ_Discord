@@ -13,6 +13,9 @@ export default class Player {
     /** The Discord user ID of the player */
     public readonly id: string;
 
+    /** Whether the player is still in the game voice channel */
+    public inVC: boolean;
+
     /** The player's current score */
     protected score: number;
 
@@ -25,6 +28,9 @@ export default class Player {
     /** Whether it's the player's first game of the day */
     private firstGameOfTheDay: boolean;
 
+    /** The previous round's ranking */
+    private previousRoundRanking: number;
+
     constructor(
         tag: string,
         id: string,
@@ -34,26 +40,28 @@ export default class Player {
     ) {
         this.name = tag;
         this.id = id;
+        this.inVC = true;
         this.score = points;
         this.avatarURL = avatarURL;
         this.expGain = 0;
         this.firstGameOfTheDay = firstGameOfTheDay;
+        this.previousRoundRanking = null;
     }
 
-    static fromUserID(userID: string, firstGameOfDay = false): Player {
+    static fromUserID(
+        userID: string,
+        score = 0,
+        firstGameOfDay = false
+    ): Player {
         const user = state.client.users.get(userID);
+
         return new Player(
             getUserTag(user),
             user.id,
             user.avatarURL,
-            0,
+            score,
             firstGameOfDay
         );
-    }
-
-    /** @returns the player's Discord tag  */
-    getName(): string {
-        return this.name;
     }
 
     /**
@@ -70,8 +78,8 @@ export default class Player {
         mention: boolean
     ): string {
         let name = this.name;
-        if (mention) {
-            name = getMention(this.getID());
+        if (mention && this.inVC) {
+            name = getMention(this.id);
         }
 
         if (wonRound) {
@@ -107,11 +115,6 @@ export default class Player {
         return Math.floor(this.expGain);
     }
 
-    /** @returns the player's Discord ID */
-    getID(): string {
-        return this.id;
-    }
-
     /** @returns the player's avatar URL */
     getAvatarURL(): string {
         return this.avatarURL;
@@ -135,5 +138,42 @@ export default class Player {
             (this.firstGameOfTheDay
                 ? ExpBonusModifierValues[ExpBonusModifier.FIRST_GAME_OF_DAY]
                 : 1) * expGain;
+    }
+
+    setPreviousRanking(previousRanking: number): void {
+        this.previousRoundRanking = previousRanking;
+    }
+
+    /**
+     * @param currentRoundRanking - The player's current round ranking
+     * @param inProgress - Whether the game is in progress
+     * @returns what to prefix player's name with in the scoreboard
+     */
+    getRankingPrefix(currentRoundRanking: number, inProgress: boolean): string {
+        const previousRank = this.previousRoundRanking;
+        const currentRank = currentRoundRanking;
+        const displayedRank = `${currentRank + 1}.`;
+        if (
+            !inProgress ||
+            previousRank === null ||
+            currentRank === previousRank
+        ) {
+            return displayedRank;
+        }
+
+        if (currentRank < previousRank) {
+            return `↑ ${displayedRank}`;
+        }
+
+        if (currentRank > previousRank) {
+            return `↓ ${displayedRank}`;
+        }
+    }
+
+    /**
+     * @returns whether to include this player in the scoreboard
+     */
+    shouldIncludeInScoreboard(): boolean {
+        return this.getScore() > 0 || this.inVC;
     }
 }

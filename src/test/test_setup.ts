@@ -5,11 +5,13 @@ import * as discordUtils from "../helpers/discord_utils";
 import kmqKnexConfig from "../config/knexfile_kmq";
 import dbContext from "../database_context";
 import Player from "../structures/player";
+import EliminationPlayer from "../structures/elimination_player";
 import { EnvType } from "../types";
 import { IPCLogger } from "../logger";
 import { md5Hash } from "../helpers/utils";
 import { state } from "../kmq_worker";
 import LocalizationManager from "../helpers/localization_manager";
+import { DEFAULT_LIVES } from "../structures/elimination_scoreboard";
 
 const logger = new IPCLogger("test_setup");
 const sandbox = sinon.createSandbox();
@@ -133,6 +135,13 @@ before(async function () {
     sandbox
         .stub(Player, "fromUserID")
         .callsFake((id) => new Player("", id, "", 0));
+
+    sandbox
+        .stub(EliminationPlayer, "fromUserID")
+        .callsFake(
+            (id, score) =>
+                new EliminationPlayer("", id, "", score ?? DEFAULT_LIVES)
+        );
     console.log("Performing migrations...");
     await dbContext.agnostic.raw("DROP DATABASE IF EXISTS kmq_test;");
     await dbContext.agnostic.raw("CREATE DATABASE kmq_test;");

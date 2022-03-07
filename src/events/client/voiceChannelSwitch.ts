@@ -20,23 +20,36 @@ export default async function voiceChannelSwitchHandler(
         return;
     }
 
+    if (
+        newChannel.id !== gameSession.voiceChannelID &&
+        oldChannel.id !== gameSession.voiceChannelID
+    ) {
+        return;
+    }
+
     if (checkBotIsAlone(guildID)) {
         gameSession.endSession();
         return;
     }
 
-    gameSession.updateOwner();
+    if (!gameSession.finished) {
+        if (member.id !== process.env.BOT_CLIENT_ID) {
+            gameSession.setPlayerInVC(
+                member.id,
+                newChannel.id === gameSession.voiceChannelID
+            );
+            if (await isUserPremium(member.id)) {
+                const premiumMemberSwitchedIn =
+                    newChannel.id === gameSession.voiceChannelID;
 
-    if (await isUserPremium(member.id)) {
-        const premiumMemberSwitchedOut =
-            oldChannel.id === gameSession.voiceChannelID &&
-            newChannel.id !== gameSession.voiceChannelID;
-
-        const premiumMemberSwitchedIn =
-            newChannel.id === gameSession.voiceChannelID;
-
-        if (premiumMemberSwitchedIn || premiumMemberSwitchedOut) {
-            gameSession.updatePremiumStatus(premiumMemberSwitchedIn);
+                gameSession.updatePremiumStatus(premiumMemberSwitchedIn);
+            }
+        } else {
+            // Bot was moved to another VC
+            gameSession.voiceChannelID = newChannel.id;
+            gameSession.syncAllVoiceMembers();
         }
+
+        gameSession.updateOwner();
     }
 }

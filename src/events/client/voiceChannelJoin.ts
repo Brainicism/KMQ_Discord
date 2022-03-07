@@ -15,9 +15,14 @@ export default async function voiceChannelJoinHandler(
         return;
     }
 
-    if (newChannel.id !== gameSession.voiceChannelID) {
+    if (
+        newChannel.id !== gameSession.voiceChannelID ||
+        member.id === process.env.BOT_CLIENT_ID
+    ) {
         return;
     }
+
+    gameSession.setPlayerInVC(member.id, true);
 
     if (await isUserPremium(member.id)) {
         gameSession.updatePremiumStatus(true);

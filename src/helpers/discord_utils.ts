@@ -68,7 +68,6 @@ const REQUIRED_VOICE_PERMISSIONS = [
     "voiceSpeak" as const,
 ];
 
-const SCOREBOARD_FIELD_CUTOFF = 9;
 const MAX_SCOREBOARD_PLAYERS = 30;
 const MAX_RUNNERS_UP = 30;
 const MAX_INTERACTION_RESPONSE_TIME = 3 * 1000;
@@ -450,7 +449,7 @@ async function sendDmMessage(
     messageContent: Eris.AdvancedMessageContent
 ): Promise<Eris.Message> {
     const { client } = state;
-    let dmChannel;
+    let dmChannel: Eris.PrivateChannel;
     try {
         dmChannel = await client.getDMChannel(userID);
     } catch (e) {
@@ -704,7 +703,7 @@ export async function sendEndRoundMessage(
             playerRoundResults[0].streak >= 5
                 ? `(🔥 ${friendlyFormattedNumber(
                       playerRoundResults[0].streak
-                  )}) `
+                  )})`
                 : ""
         }`;
 
@@ -749,11 +748,10 @@ export async function sendEndRoundMessage(
         );
     }
 
-    const useLargerScoreboard =
-        scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
+    const useLargerScoreboard = scoreboard.shouldUseLargerScoreboard();
 
     let scoreboardTitle = "";
-    if (!scoreboard.isEmpty() && !useLargerScoreboard) {
+    if (scoreboard.getWinners().length > 0 && !useLargerScoreboard) {
         scoreboardTitle = "\n\n";
         scoreboardTitle += bold(
             state.localizer.translate(
@@ -785,8 +783,8 @@ export async function sendEndRoundMessage(
     let roundResultIDs: Array<string>;
     if (scoreboard instanceof TeamScoreboard) {
         const teamScoreboard = scoreboard as TeamScoreboard;
-        roundResultIDs = playerRoundResults.map((x) =>
-            teamScoreboard.getTeamOfPlayer(x.player.id).getID()
+        roundResultIDs = playerRoundResults.map(
+            (x) => teamScoreboard.getTeamOfPlayer(x.player.id).id
         );
     } else {
         roundResultIDs = playerRoundResults.map((x) => x.player.id);
@@ -796,10 +794,15 @@ export async function sendEndRoundMessage(
         fields = scoreboard.getScoreboardEmbedThreeFields(
             MAX_SCOREBOARD_PLAYERS,
             false,
+            true,
             roundResultIDs
         );
     } else {
-        fields = scoreboard.getScoreboardEmbedFields(false, roundResultIDs);
+        fields = scoreboard.getScoreboardEmbedFields(
+            false,
+            true,
+            roundResultIDs
+        );
     }
 
     if (fact) {
@@ -1212,7 +1215,7 @@ export async function sendEndGameMessage(
         }
     );
 
-    if (gameSession.scoreboard.isEmpty()) {
+    if (gameSession.scoreboard.getWinners().length === 0) {
         await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
             title: state.localizer.translate(
                 gameSession.guildID,
@@ -1225,16 +1228,18 @@ export async function sendEndGameMessage(
         const winners = gameSession.scoreboard.getWinners();
         let fields: Array<{ name: string; value: string; inline: boolean }>;
         const useLargerScoreboard =
-            gameSession.scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
+            gameSession.scoreboard.shouldUseLargerScoreboard();
 
         if (useLargerScoreboard) {
             fields = gameSession.scoreboard.getScoreboardEmbedThreeFields(
                 MAX_SCOREBOARD_PLAYERS,
-                gameSession.gameType !== GameType.TEAMS
+                gameSession.gameType !== GameType.TEAMS,
+                false
             );
         } else {
             fields = gameSession.scoreboard.getScoreboardEmbedFields(
-                gameSession.gameType !== GameType.TEAMS
+                gameSession.gameType !== GameType.TEAMS,
+                false
             );
         }
 
@@ -1373,22 +1378,8 @@ export async function sendScoreboardMessage(
     message: GuildTextableMessage,
     gameSession: GameSession
 ): Promise<Eris.Message> {
-    if (
-        gameSession.scoreboard.isEmpty() &&
-        gameSession.gameType !== GameType.ELIMINATION
-    ) {
-        return sendInfoMessage(MessageContext.fromMessage(message), {
-            color: EMBED_SUCCESS_COLOR,
-            description: "(╯°□°）╯︵ ┻━┻",
-            title: state.localizer.translate(
-                message.guildID,
-                "command.score.scoreboardTitle"
-            ),
-        });
-    }
-
     const winnersFieldSubsets = chunkArray(
-        gameSession.scoreboard.getScoreboardEmbedFields(true),
+        gameSession.scoreboard.getScoreboardEmbedFields(true, true),
         EMBED_FIELDS_PER_PAGE
     );
 

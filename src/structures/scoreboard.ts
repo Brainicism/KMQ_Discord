@@ -1,13 +1,11 @@
 import Player from "./player";
 import { bold, friendlyFormattedNumber } from "../helpers/utils";
 import { getMention } from "../helpers/discord_utils";
-import { IPCLogger } from "../logger";
 import GuildPreference from "./guild_preference";
-import { isFirstGameOfDay } from "../helpers/game_utils";
 import { state } from "../kmq_worker";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const logger = new IPCLogger("scoreboard");
+export const SCOREBOARD_FIELD_CUTOFF = 6;
+
 export interface SuccessfulGuessResult {
     userID: string;
     pointsEarned: number;
@@ -31,6 +29,13 @@ export default class Scoreboard {
     }
 
     /**
+     * @param player - Adds the given player to the scoreboard
+     */
+    addPlayer(player: Player): void {
+        this.players[player.id] = player;
+    }
+
+    /**
      * @param guildID - The ID of the guild to get the scoreboard for
      * @returns a string congratulating the winner(s)
      */
@@ -41,12 +46,12 @@ export default class Scoreboard {
             return state.localizer.translate(
                 guildID,
                 "misc.inGame.winMessage",
-                { playerName: this.firstPlace[0].getName() }
+                { playerName: this.firstPlace[0].name }
             );
         }
 
         for (let i = 0; i < this.firstPlace.length; i++) {
-            winnerStr += this.firstPlace[i].getName();
+            winnerStr += this.firstPlace[i].name;
             if (i === this.firstPlace.length - 1) {
                 // Last entry -- append just the username
                 winnerStr += " ";
@@ -64,19 +69,26 @@ export default class Scoreboard {
     }
     /**
      * @param showExp - Whether to display the EXP gained in the game for each player
+     * @param inProgress - Whether the game is in progress
      * @param roundWinnerIDs - The IDs of all players that won the current round, if any
      * @returns An array of DiscordEmbed fields representing each participant's score
      */
     getScoreboardEmbedFields(
         showExp: boolean,
+        inProgress: boolean,
         roundWinnerIDs?: Array<string>
     ): Array<{ name: string; value: string; inline: boolean }> {
+        const currentRanking = this.getScoreToRankingMap();
         return Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
-            .map((x, index) => ({
-                name: `${index + 1}. ${x.getDisplayedName(
-                    roundWinnerIDs && roundWinnerIDs[0] === x.getID(),
-                    roundWinnerIDs?.includes(x.getID()),
+            .filter((x) => x.shouldIncludeInScoreboard())
+            .map((x) => ({
+                name: `${x.getRankingPrefix(
+                    currentRanking[x.getScore()],
+                    inProgress
+                )} ${x.getDisplayedName(
+                    roundWinnerIDs && roundWinnerIDs[0] === x.id,
+                    roundWinnerIDs?.includes(x.id),
                     false
                 )}`,
                 value: `${x.getDisplayedScore()}${
@@ -84,7 +96,7 @@ export default class Scoreboard {
                         ? ` (+${friendlyFormattedNumber(x.getExpGain())} EXP)`
                         : ""
                 }`,
-                inline: true,
+                inline: false,
             }));
     }
 
@@ -92,23 +104,32 @@ export default class Scoreboard {
      * Separates scoreboard players into two fields for large games
      * @param cutoff - How many players to include before truncating the scoreboard
      * @param showExp - Whether to display the EXP gained in the game for each player
+     * @param inProgress - Whether the game is in progress
      * @param roundWinnerIDs - The IDs of all players that won the current round, if any
      * @returns An array of 3 DiscordEmbed fields containing each player and their score, separated by newline
      */
     getScoreboardEmbedThreeFields(
         cutoff: number,
         showExp: boolean,
+        inProgress: boolean,
         roundWinnerIDs?: Array<string>
     ): Array<{ name: string; value: string; inline: boolean }> {
         const ZERO_WIDTH_SPACE = "​";
+        const currentRanking = this.getScoreToRankingMap();
         const players = Object.values(this.players)
             .sort((a, b) => b.getScore() - a.getScore())
+            .filter((x) => x.shouldIncludeInScoreboard())
             .slice(0, cutoff)
             .map(
-                (x, index) =>
-                    `${bold(String(index + 1))}. ${x.getDisplayedName(
-                        roundWinnerIDs && roundWinnerIDs[0] === x.getID(),
-                        roundWinnerIDs?.includes(x.getID()),
+                (x) =>
+                    `${bold(
+                        x.getRankingPrefix(
+                            currentRanking[x.getScore()],
+                            inProgress
+                        )
+                    )} ${x.getDisplayedName(
+                        roundWinnerIDs && roundWinnerIDs[0] === x.id,
+                        roundWinnerIDs?.includes(x.id),
                         true
                     )}: ${x.getDisplayedScore()}${
                         showExp
@@ -158,14 +179,12 @@ export default class Scoreboard {
     async updateScoreboard(
         guessResults: Array<SuccessfulGuessResult>
     ): Promise<void> {
-        for (const guessResult of guessResults) {
-            if (!this.players[guessResult.userID]) {
-                this.players[guessResult.userID] = Player.fromUserID(
-                    guessResult.userID,
-                    await isFirstGameOfDay(guessResult.userID)
-                );
-            }
+        const previousRoundRanking = this.getScoreToRankingMap();
+        for (const player of Object.values(this.players)) {
+            player.setPreviousRanking(previousRoundRanking[player.getScore()]);
+        }
 
+        for (const guessResult of guessResults) {
             this.players[guessResult.userID].incrementScore(
                 guessResult.pointsEarned
             );
@@ -182,14 +201,6 @@ export default class Scoreboard {
                 this.firstPlace = [this.players[guessResult.userID]];
             }
         }
-    }
-
-    /**
-     * @returns whether the scoreboard has any players on it
-     * (if there are none in first place, then the scoreboard must be empty)
-     */
-    isEmpty(): boolean {
-        return this.firstPlace.length === 0;
     }
 
     /** @returns a list of the player currently in first place */
@@ -228,14 +239,14 @@ export default class Scoreboard {
     gameFinished(guildPreference: GuildPreference): boolean {
         return (
             guildPreference.isGoalSet() &&
-            !this.isEmpty() &&
+            this.firstPlace.length > 0 &&
             this.firstPlace[0].getScore() >= guildPreference.gameOptions.goal
         );
     }
 
     /** @returns a list of tags of the players participating in the game */
     getPlayerNames(): Array<string> {
-        return Object.values(this.players).map((player) => player.getName());
+        return Object.values(this.players).map((player) => player.name);
     }
 
     /** @returns a list of clickable mentions of the players participating in the game */
@@ -250,7 +261,7 @@ export default class Scoreboard {
      *  @returns the player's tag
      * */
     getPlayerName(userID: string): string {
-        return this.players[userID].getName();
+        return this.players[userID].name;
     }
 
     /**
@@ -260,8 +271,48 @@ export default class Scoreboard {
         return Object.keys(this.players).length;
     }
 
-    /** @returns a list of tags of the player participating in the game */
+    /** @returns a list of players participating in the game */
     getPlayers(): Array<Player> {
         return Object.values(this.players);
+    }
+
+    /** @returns a list of Discord IDs for those participating in the game */
+    getPlayerIDs(): Array<string> {
+        return Object.values(this.players).map((x) => x.id);
+    }
+
+    /**
+     * Update whether a player is in VC
+     * @param userID - The Discord user ID of the player to update
+     * @param inVC - Whether the player is currently in the voice channel
+     */
+    setInVC(userID: string, inVC: boolean): void {
+        this.players[userID].inVC = inVC;
+    }
+
+    /**
+     * @returns a mapping of player scores to ranking
+     */
+    getScoreToRankingMap(): { [score: number]: number } {
+        const rankingToScore = {};
+        const sortedUniqueScores = [
+            ...new Set(Object.values(this.players).map((x) => x.getScore())),
+        ].sort((a, b) => b - a);
+
+        for (let i = 0; i < sortedUniqueScores.length; i++) {
+            rankingToScore[sortedUniqueScores[i]] = i;
+        }
+
+        return rankingToScore;
+    }
+
+    /**
+     * @returns whether the use the scoreboard designed for more players
+     */
+    shouldUseLargerScoreboard(): boolean {
+        return (
+            this.getPlayers().filter((x) => x.shouldIncludeInScoreboard())
+                .length > SCOREBOARD_FIELD_CUTOFF
+        );
     }
 }

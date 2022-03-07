@@ -1,5 +1,5 @@
 import Player from "./player";
-import { bold } from "../helpers/utils";
+import { bold, chooseRandom } from "../helpers/utils";
 
 export default class Team extends Player {
     private players: { [userID: string]: Player };
@@ -7,7 +7,7 @@ export default class Team extends Player {
     constructor(name: string, player: Player) {
         super(name, name, null, 0);
         this.players = {};
-        this.players[player.getID()] = player;
+        this.players[player.id] = player;
     }
 
     /** @returns the score of all the players on this team */
@@ -26,13 +26,13 @@ export default class Team extends Player {
     /**
      * @param first - Whether the player won the previous round
      * @param _wonRound - unused
-     * @param _duplicateName - unused
+     * @param _mention - unused
      * @returns what to display as the name of the team in the scoreboard
      */
     getDisplayedName(
         first: boolean,
         _wonRound: boolean,
-        _duplicateName: boolean
+        _mention: boolean
     ): string {
         let name = `Team ${this.getName()}`;
         if (first) {
@@ -86,5 +86,29 @@ export default class Team extends Player {
      */
     getNumPlayers(): number {
         return this.getPlayers().length;
+    }
+
+    /** @returns the team's EXP gain */
+    getExpGain(): number {
+        return Math.floor(
+            Object.values(this.players).reduce(
+                (total, curr) => total + curr.getExpGain(),
+                0
+            )
+        );
+    }
+
+    /** @returns a random team member's avatar URL */
+    getAvatarURL(): string {
+        return chooseRandom(
+            Object.values(this.players).map((x) => x.getAvatarURL())
+        );
+    }
+
+    /**
+     * @returns whether to include this team in the scoreboard
+     */
+    shouldIncludeInScoreboard(): boolean {
+        return true;
     }
 }

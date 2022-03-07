@@ -49,6 +49,7 @@ const funFactFunctions: Array<(locale: LocaleType) => Promise<string[]>> = [
     mostArtistsEntertainmentCompany,
     mostViewedEntertainmentCompany,
     songReleaseAnniversaries,
+    mostAnnualAwardShowWins,
 ];
 
 const kmqFactFunctions: Array<(locale: LocaleType) => Promise<string[]>> = [
@@ -1019,6 +1020,29 @@ async function mostGaonAppearances(lng: LocaleType): Promise<string[]> {
             appearances: x["appearances"],
             lng,
         })
+    );
+}
+
+async function mostAnnualAwardShowWins(lng: LocaleType): Promise<string[]> {
+    const result = await dbContext
+        .kpopVideos("app_kpop_group")
+        .select(["name as artist_name", "yawards_total as wins"])
+        .orderBy("wins", "DESC")
+        .limit(25);
+
+    return result.map((x, idx) =>
+        state.localizer.internalLocalizer.t(
+            "fact.fun.mostAnnualAwardShowWins",
+            {
+                artistName: x["artist_name"],
+                ordinalNum: state.localizer.internalLocalizer.t(
+                    getOrdinalNum(idx + 1),
+                    { lng }
+                ),
+                wins: x["wins"],
+                lng,
+            }
+        )
     );
 }
 

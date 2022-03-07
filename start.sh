@@ -18,16 +18,16 @@ then
 fi
 
 echo "Killing running instances..."
-ps a | grep node | egrep "kmq\.js|cluster_manager\.js" | awk '{print $1}' | xargs kill &> /dev/null || echo "No running instances to kill"
+ps x | grep node | grep "${PWD}/" | egrep "kmq\.js|cluster_manager\.js" | awk '{print $1}' | xargs kill &> /dev/null || echo "No running instances to kill"
 echo "Bootstrapping..."
 node build/seed/bootstrap.js
 echo "Starting bot..."
 cd build/
 if [ "${NODE_ENV}" == "dry-run" ] || [ "${NODE_ENV}" == "ci" ]; then
-    exec node kmq.js
+    exec node "${PWD}/kmq.js"
 elif [ "${NODE_ENV}" == "development" ]; then
-    exec node --inspect=9229 kmq.js
+    exec node --inspect=9229 "${PWD}/kmq.js"
 elif [ "${NODE_ENV}" == "production" ]; then
     git log -n 1 --pretty=format:"%H" > ../version
-    exec node kmq.js
+    exec node "${PWD}/kmq.js"
 fi

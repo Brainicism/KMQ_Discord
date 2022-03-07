@@ -22,13 +22,20 @@ export default async function voiceChannelLeaveHandler(
         return;
     }
 
+    if (oldChannel.id !== gameSession.voiceChannelID) {
+        return;
+    }
+
     if (checkBotIsAlone(guildID)) {
         gameSession.endSession();
         return;
     }
 
-    gameSession.updateOwner();
-    if (await isUserPremium(member.id)) {
-        gameSession.updatePremiumStatus(false);
+    if (!gameSession.finished) {
+        gameSession.updateOwner();
+        gameSession.setPlayerInVC(member.id, false);
+        if (await isUserPremium(member.id)) {
+            gameSession.updatePremiumStatus(false);
+        }
     }
 }
