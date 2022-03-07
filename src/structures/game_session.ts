@@ -27,6 +27,7 @@ import {
     getLocalizedArtistName,
     getLocalizedSongName,
     getMultipleChoiceOptions,
+    isFirstGameOfDay,
     userBonusIsActive,
 } from "../helpers/game_utils";
 import {
@@ -1170,7 +1171,7 @@ export default class GameSession {
      * @param userID - The Discord user ID of the player to update
      * @param inVC - Whether the player is currently in the voice channel
      */
-    setPlayerInVC(userID: string, inVC: boolean): void {
+    async setPlayerInVC(userID: string, inVC: boolean): Promise<void> {
         if (
             inVC &&
             !this.scoreboard.getPlayerIDs().includes(userID) &&
@@ -1182,9 +1183,14 @@ export default class GameSession {
                           userID,
                           (
                               this.scoreboard as EliminationScoreboard
-                          ).getLivesOfWeakestPlayer()
+                          ).getLivesOfWeakestPlayer(),
+                          await isFirstGameOfDay(userID)
                       )
-                    : Player.fromUserID(userID)
+                    : Player.fromUserID(
+                          userID,
+                          0,
+                          await isFirstGameOfDay(userID)
+                      )
             );
         }
 
@@ -1202,7 +1208,7 @@ export default class GameSession {
         this.scoreboard
             .getPlayerIDs()
             .filter((x) => !currentVoiceMembers.includes(x))
-            .map((x) => this.setPlayerInVC(x, false));
+            .map(async (x) => this.setPlayerInVC(x, false));
 
         if (this.gameType === GameType.TEAMS) {
             // Players join teams manually with ,join
@@ -1211,15 +1217,16 @@ export default class GameSession {
 
         currentVoiceMembers
             .filter((x) => x !== process.env.BOT_CLIENT_ID)
-            .map((x) =>
+            .map(async (x) =>
                 this.scoreboard.addPlayer(
                     this.gameType === GameType.ELIMINATION
                         ? EliminationPlayer.fromUserID(
                               x,
                               (this.scoreboard as EliminationScoreboard)
-                                  .startingLives
+                                  .startingLives,
+                              await isFirstGameOfDay(x)
                           )
-                        : Player.fromUserID(x)
+                        : Player.fromUserID(x, 0, await isFirstGameOfDay(x))
                 )
             );
     }
