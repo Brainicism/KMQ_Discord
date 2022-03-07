@@ -27,6 +27,7 @@ import {
     getLocalizedArtistName,
     getLocalizedSongName,
     getMultipleChoiceOptions,
+    isFirstGameOfDay,
     userBonusIsActive,
 } from "../helpers/game_utils";
 import {
@@ -1170,7 +1171,7 @@ export default class GameSession {
      * @param userID - The Discord user ID of the player to update
      * @param inVC - Whether the player is currently in the voice channel
      */
-    setPlayerInVC(userID: string, inVC: boolean): void {
+    async setPlayerInVC(userID: string, inVC: boolean): Promise<void> {
         if (
             inVC &&
             !this.scoreboard.getPlayerIDs().includes(userID) &&
@@ -1182,9 +1183,14 @@ export default class GameSession {
                           userID,
                           (
                               this.scoreboard as EliminationScoreboard
-                          ).getLivesOfWeakestPlayer()
+                          ).getLivesOfWeakestPlayer(),
+                          await isFirstGameOfDay(userID)
                       )
-                    : Player.fromUserID(userID)
+                    : Player.fromUserID(
+                          userID,
+                          0,
+                          await isFirstGameOfDay(userID)
+                      )
             );
         }
 
@@ -1194,34 +1200,37 @@ export default class GameSession {
     /**
      * Add all players in VC that aren't tracked to the scoreboard, and update those who left
      */
-    syncAllVoiceMembers(): void {
+    async syncAllVoiceMembers(): Promise<void> {
         const currentVoiceMembers = getCurrentVoiceMembers(
             this.voiceChannelID
         ).map((x) => x.id);
 
-        this.scoreboard
+        for (const player of this.scoreboard
             .getPlayerIDs()
-            .filter((x) => !currentVoiceMembers.includes(x))
-            .map((x) => this.setPlayerInVC(x, false));
+            .filter((x) => !currentVoiceMembers.includes(x))) {
+            await this.setPlayerInVC(player, false);
+        }
 
         if (this.gameType === GameType.TEAMS) {
             // Players join teams manually with ,join
             return;
         }
 
-        currentVoiceMembers
-            .filter((x) => x !== process.env.BOT_CLIENT_ID)
-            .map((x) =>
-                this.scoreboard.addPlayer(
-                    this.gameType === GameType.ELIMINATION
-                        ? EliminationPlayer.fromUserID(
-                              x,
-                              (this.scoreboard as EliminationScoreboard)
-                                  .startingLives
-                          )
-                        : Player.fromUserID(x)
-                )
+        for (const player of currentVoiceMembers.filter(
+            (x) => x !== process.env.BOT_CLIENT_ID
+        )) {
+            const firstGameOfDay = await isFirstGameOfDay(player);
+            this.scoreboard.addPlayer(
+                this.gameType === GameType.ELIMINATION
+                    ? EliminationPlayer.fromUserID(
+                          player,
+                          (this.scoreboard as EliminationScoreboard)
+                              .startingLives,
+                          firstGameOfDay
+                      )
+                    : Player.fromUserID(player, 0, firstGameOfDay)
             );
+        }
     }
 
     /**

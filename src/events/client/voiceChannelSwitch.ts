@@ -33,7 +33,7 @@ export default async function voiceChannelSwitchHandler(
 
     if (!gameSession.finished) {
         if (member.id !== process.env.BOT_CLIENT_ID) {
-            gameSession.setPlayerInVC(
+            await gameSession.setPlayerInVC(
                 member.id,
                 newChannel.id === gameSession.voiceChannelID
             );
