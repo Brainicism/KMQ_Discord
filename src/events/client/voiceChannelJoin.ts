@@ -1,6 +1,5 @@
 import Eris from "eris";
 import { state } from "../../kmq_worker";
-import { isUserPremium } from "../../helpers/game_utils";
 
 /**
  * @param member - The member that joined the voice channel
@@ -22,9 +21,9 @@ export default async function voiceChannelJoinHandler(
         return;
     }
 
-    gameSession.setPlayerInVC(member.id, true);
-
-    if (await isUserPremium(member.id)) {
-        gameSession.updatePremiumStatus(true);
+    const oldPremiumState = gameSession.isPremiumGame();
+    await gameSession.setPlayerInVC(member.id, true);
+    if (oldPremiumState !== gameSession.isPremiumGame()) {
+        gameSession.updatePremiumStatus();
     }
 }

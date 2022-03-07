@@ -1,7 +1,6 @@
 import Eris from "eris";
 import { state } from "../../kmq_worker";
 import { checkBotIsAlone } from "../../helpers/discord_utils";
-import { isUserPremium } from "../../helpers/game_utils";
 
 /**
  * Handles the 'voiceChannelSwitch' event
@@ -33,21 +32,20 @@ export default async function voiceChannelSwitchHandler(
     }
 
     if (!gameSession.finished) {
+        const oldPremiumState = gameSession.isPremiumGame();
         if (member.id !== process.env.BOT_CLIENT_ID) {
-            gameSession.setPlayerInVC(
+            await gameSession.setPlayerInVC(
                 member.id,
                 newChannel.id === gameSession.voiceChannelID
             );
-            if (await isUserPremium(member.id)) {
-                const premiumMemberSwitchedIn =
-                    newChannel.id === gameSession.voiceChannelID;
-
-                gameSession.updatePremiumStatus(premiumMemberSwitchedIn);
-            }
         } else {
             // Bot was moved to another VC
             gameSession.voiceChannelID = newChannel.id;
             gameSession.syncAllVoiceMembers();
+        }
+
+        if (oldPremiumState !== gameSession.isPremiumGame()) {
+            gameSession.updatePremiumStatus();
         }
 
         gameSession.updateOwner();

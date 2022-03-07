@@ -13,6 +13,8 @@ export default class Player {
     /** The Discord user ID of the player */
     public readonly id: string;
 
+    public readonly premium: boolean;
+
     /** Whether the player is still in the game voice channel */
     public inVC: boolean;
 
@@ -36,7 +38,8 @@ export default class Player {
         id: string,
         avatarURL: string,
         points: number,
-        firstGameOfTheDay = false
+        firstGameOfTheDay = false,
+        premium = false
     ) {
         this.name = tag;
         this.id = id;
@@ -45,13 +48,15 @@ export default class Player {
         this.avatarURL = avatarURL;
         this.expGain = 0;
         this.firstGameOfTheDay = firstGameOfTheDay;
+        this.premium = premium;
         this.previousRoundRanking = null;
     }
 
     static fromUserID(
         userID: string,
         score = 0,
-        firstGameOfDay = false
+        firstGameOfDay = false,
+        premium = false
     ): Player {
         const user = state.client.users.get(userID);
 
@@ -60,7 +65,8 @@ export default class Player {
             user.id,
             user.avatarURL,
             score,
-            firstGameOfDay
+            firstGameOfDay,
+            premium
         );
     }
 

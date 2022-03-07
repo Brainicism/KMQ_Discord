@@ -1,7 +1,6 @@
 import Eris from "eris";
 import { state } from "../../kmq_worker";
 import { checkBotIsAlone } from "../../helpers/discord_utils";
-import { isUserPremium } from "../../helpers/game_utils";
 
 /**
  * Handles the 'voiceChannelLeave' event
@@ -22,10 +21,6 @@ export default async function voiceChannelLeaveHandler(
         return;
     }
 
-    if (oldChannel.id !== gameSession.voiceChannelID) {
-        return;
-    }
-
     if (checkBotIsAlone(guildID)) {
         gameSession.endSession();
         return;
@@ -33,9 +28,10 @@ export default async function voiceChannelLeaveHandler(
 
     if (!gameSession.finished) {
         gameSession.updateOwner();
-        gameSession.setPlayerInVC(member.id, false);
-        if (await isUserPremium(member.id)) {
-            gameSession.updatePremiumStatus(false);
+        const oldPremiumState = gameSession.isPremiumGame();
+        await gameSession.setPlayerInVC(member.id, false);
+        if (oldPremiumState !== gameSession.isPremiumGame()) {
+            await gameSession.updatePremiumStatus();
         }
     }
 }

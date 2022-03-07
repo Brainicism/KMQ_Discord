@@ -29,6 +29,7 @@ import {
     getMultipleChoiceOptions,
     userBonusIsActive,
     isUserPremium,
+    isFirstGameOfDay,
 } from "../helpers/game_utils";
 import {
     delay,
@@ -168,9 +169,6 @@ export default class GameSession {
     /** Mapping of user ID to bookmarked songs, uses Map since Set doesn't remove QueriedSong duplicates */
     private bookmarkedSongs: { [userID: string]: Map<string, QueriedSong> };
 
-    /** Whether the current game is premium */
-    private premiumGame: boolean;
-
     private songSelector: SongSelector;
 
     constructor(
@@ -199,7 +197,6 @@ export default class GameSession {
         this.lastGuesser = null;
         this.songMessageIDs = [];
         this.bookmarkedSongs = {};
-        this.premiumGame = false;
         this.songSelector = new SongSelector();
 
         switch (this.gameType) {
@@ -722,10 +719,6 @@ export default class GameSession {
         guildPreference: GuildPreference,
         messageContext: MessageContext
     ): Promise<void> {
-        if (!this.sessionInitialized) {
-            await this.updatePremiumStatus(await isUserPremium(this.owner.id));
-        }
-
         this.sessionInitialized = true;
         await delay(
             this.multiguessDelayIsActive(guildPreference)
@@ -987,7 +980,10 @@ export default class GameSession {
     }
 
     async reloadSongs(guildPreference: GuildPreference): Promise<void> {
-        await this.songSelector.reloadSongs(guildPreference, this.premiumGame);
+        await this.songSelector.reloadSongs(
+            guildPreference,
+            this.isPremiumGame()
+        );
     }
 
     /**
@@ -1178,43 +1174,22 @@ export default class GameSession {
     }
 
     /**
-     * If the game changes its premium state, update filtered songs
-     * @param premiumJoined - true if a premium member joined VC
+     * The game has changed its premium state, so update filtered songs/remove ,special
      */
-    async updatePremiumStatus(premiumJoined: boolean): Promise<void> {
-        if (premiumJoined) {
-            this.premiumGame = true;
-            return;
-        }
+    async updatePremiumStatus(): Promise<void> {
+        await this.reloadSongs(await getGuildPreference(this.guildID));
 
-        const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID);
-        for (const member of voiceMembers) {
-            if (await isUserPremium(member.id)) {
-                if (!this.premiumGame) {
-                    this.premiumGame = true;
-                    await this.reloadSongs(
-                        await getGuildPreference(this.guildID)
-                    );
-                }
-
-                return;
-            }
-        }
-
-        if (this.premiumGame) {
-            this.premiumGame = false;
-            const guildPreference = await getGuildPreference(this.guildID);
-            await this.reloadSongs(guildPreference);
-            if (
-                this.guildID !== process.env.DEBUG_SERVER_ID &&
-                guildPreference.gameOptions.specialType
-            ) {
-                await resetSpecial(
-                    guildPreference,
-                    new MessageContext(this.textChannelID),
-                    true
-                );
-            }
+        const guildPreference = await getGuildPreference(this.guildID);
+        if (
+            !this.isPremiumGame() &&
+            this.guildID !== process.env.DEBUG_SERVER_ID &&
+            guildPreference.gameOptions.specialType
+        ) {
+            await resetSpecial(
+                guildPreference,
+                new MessageContext(this.textChannelID),
+                true
+            );
         }
     }
 
@@ -1223,7 +1198,10 @@ export default class GameSession {
      * @returns whether the game is premium
      */
     isPremiumGame(): boolean {
-        return this.premiumGame;
+        return this.scoreboard
+            .getPlayers()
+            .filter((x) => x.inVC)
+            .some((x) => x.premium);
     }
 
     /**
@@ -1231,7 +1209,7 @@ export default class GameSession {
      * @param userID - The Discord user ID of the player to update
      * @param inVC - Whether the player is currently in the voice channel
      */
-    setPlayerInVC(userID: string, inVC: boolean): void {
+    async setPlayerInVC(userID: string, inVC: boolean): Promise<void> {
         if (
             inVC &&
             !this.scoreboard.getPlayerIDs().includes(userID) &&
@@ -1243,9 +1221,16 @@ export default class GameSession {
                           userID,
                           (
                               this.scoreboard as EliminationScoreboard
-                          ).getLivesOfWeakestPlayer()
+                          ).getLivesOfWeakestPlayer(),
+                          await isFirstGameOfDay(userID),
+                          await isUserPremium(userID)
                       )
-                    : Player.fromUserID(userID)
+                    : Player.fromUserID(
+                          userID,
+                          0,
+                          await isFirstGameOfDay(userID),
+                          await isUserPremium(userID)
+                      )
             );
         }
 
@@ -1270,19 +1255,28 @@ export default class GameSession {
             return;
         }
 
-        currentVoiceMembers
-            .filter((x) => x !== process.env.BOT_CLIENT_ID)
-            .map((x) =>
-                this.scoreboard.addPlayer(
-                    this.gameType === GameType.ELIMINATION
-                        ? EliminationPlayer.fromUserID(
-                              x,
-                              (this.scoreboard as EliminationScoreboard)
-                                  .startingLives
-                          )
-                        : Player.fromUserID(x)
+        Promise.all(
+            currentVoiceMembers
+                .filter((x) => x !== process.env.BOT_CLIENT_ID)
+                .map(async (x) =>
+                    this.scoreboard.addPlayer(
+                        this.gameType === GameType.ELIMINATION
+                            ? EliminationPlayer.fromUserID(
+                                  x,
+                                  (this.scoreboard as EliminationScoreboard)
+                                      .startingLives,
+                                  await isFirstGameOfDay(x),
+                                  await isUserPremium(x)
+                              )
+                            : Player.fromUserID(
+                                  x,
+                                  0,
+                                  await isFirstGameOfDay(x),
+                                  await isUserPremium(x)
+                              )
+                    )
                 )
-            );
+        );
     }
 
     /**

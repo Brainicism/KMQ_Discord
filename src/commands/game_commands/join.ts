@@ -16,6 +16,7 @@ import { state } from "../../kmq_worker";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import { IPCLogger } from "../../logger";
+import { isFirstGameOfDay, isUserPremium } from "../../helpers/game_utils";
 
 const logger = new IPCLogger("join");
 
@@ -34,14 +35,14 @@ export default class JoinCommand implements BaseCommand {
             return;
         }
 
-        JoinCommand.joinTeamsGame(message, parsedMessage, gameSession);
+        await JoinCommand.joinTeamsGame(message, parsedMessage, gameSession);
     };
 
-    static joinTeamsGame(
+    static async joinTeamsGame(
         message: GuildTextableMessage,
         parsedMessage: ParsedMessage,
         gameSession: GameSession
-    ): void {
+    ): Promise<void> {
         if (parsedMessage.components.length === 0) {
             logger.warn(`${getDebugLogHeader(message)} | Missing team name.`);
             sendErrorMessage(MessageContext.fromMessage(message), {
@@ -126,7 +127,9 @@ export default class JoinCommand implements BaseCommand {
                     getUserTag(message.author),
                     message.author.id,
                     message.author.avatarURL,
-                    0
+                    0,
+                    await isFirstGameOfDay(message.author.id),
+                    await isUserPremium(message.author.id)
                 )
             );
             const teamNameWithCleanEmojis = teamName.replace(
@@ -192,7 +195,9 @@ export default class JoinCommand implements BaseCommand {
                     getUserTag(message.author),
                     message.author.id,
                     message.author.avatarURL,
-                    0
+                    0,
+                    await isFirstGameOfDay(message.author.id),
+                    await isUserPremium(message.author.id)
                 )
             );
 
