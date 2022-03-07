@@ -2,12 +2,14 @@ import {
     ExpBonusModifier,
     ExpBonusModifierValues,
 } from "../commands/game_commands/exp";
-import { getUserTag, getMention } from "../helpers/discord_utils";
+import { getMention } from "../helpers/discord_utils";
 import { bold } from "../helpers/utils";
 import { state } from "../kmq_worker";
 
 export default class Player {
-    /** The Discord tag of the player, of the format "Player#1234" */
+    /** The Discord username of the player sans discriminator,
+     * i.e. "Player" when the player's user tag is "Player#1234"
+     */
     public readonly name: string;
 
     /** The Discord user ID of the player */
@@ -32,13 +34,13 @@ export default class Player {
     private previousRoundRanking: number;
 
     constructor(
-        tag: string,
+        name: string,
         id: string,
         avatarURL: string,
         points: number,
         firstGameOfTheDay = false
     ) {
-        this.name = tag;
+        this.name = name;
         this.id = id;
         this.inVC = true;
         this.score = points;
@@ -56,7 +58,7 @@ export default class Player {
         const user = state.client.users.get(userID);
 
         return new Player(
-            getUserTag(user),
+            user.username,
             user.id,
             user.avatarURL,
             score,
@@ -65,8 +67,8 @@ export default class Player {
     }
 
     /**
-     * Prints the tag (including the discriminator) in the smaller scoreboard, but only
-     * the username in the larger scoreboard
+     * Formats the player's name depending on whether they won the round, if they guessed first,
+     * and if their name should be a Discord mention
      * @param first - Whether the player won the previous round
      * @param wonRound - Whether the player guessed correctly in the previous round
      * @param mention - Whether the displayed name should be a clickable mention
@@ -105,9 +107,9 @@ export default class Player {
     /** @returns what to display as the score in the scoreboard for the player */
     getDisplayedScore(): string {
         const rounded = Number(this.getScore().toFixed(1));
-        return Number.isInteger(rounded)
-            ? rounded.toFixed()
-            : rounded.toFixed(1);
+        return bold(
+            Number.isInteger(rounded) ? rounded.toFixed() : rounded.toFixed(1)
+        );
     }
 
     /** @returns the player's EXP gain */

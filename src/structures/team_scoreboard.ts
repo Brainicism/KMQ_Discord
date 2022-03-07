@@ -235,7 +235,7 @@ export default class TeamScoreboard extends Scoreboard {
     }
 
     /**
-     * @returns whether the use the scoreboard designed for more players
+     * @returns whether to use the scoreboard designed for more players
      */
     shouldUseLargerScoreboard(): boolean {
         return this.getNumTeams() > SCOREBOARD_FIELD_CUTOFF;

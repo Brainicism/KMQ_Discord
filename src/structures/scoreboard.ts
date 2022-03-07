@@ -307,7 +307,7 @@ export default class Scoreboard {
     }
 
     /**
-     * @returns whether the use the scoreboard designed for more players
+     * @returns whether to use the scoreboard designed for more players
      */
     shouldUseLargerScoreboard(): boolean {
         return (
