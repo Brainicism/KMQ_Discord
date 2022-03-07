@@ -8,9 +8,9 @@ let subparPlayer: Player;
 let firstOnLeaderboardPlayer: Player;
 
 beforeEach(() => {
-    goodPlayer = new Player("ohmi#7183", "12345", "ohmipic", 0);
-    subparPlayer = new Player("Cool#0001", "12", "url", 0);
-    firstOnLeaderboardPlayer = new Player("kpop#1234", "121212", "kpop_pfp", 0);
+    goodPlayer = new Player("ohmi", "12345", "ohmipic", 0);
+    subparPlayer = new Player("Cool", "12", "url", 0);
+    firstOnLeaderboardPlayer = new Player("kpop", "121212", "kpop_pfp", 0);
     team = new Team("kmq", goodPlayer);
 });
 
