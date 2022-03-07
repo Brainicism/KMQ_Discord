@@ -125,11 +125,16 @@ export class BotWorker extends BaseClusterWorker {
             const botListingManager = new BotListingManager();
             botListingManager.start();
 
-            logger.info("Initializing Patreon manager...");
-            state.patreonCampaign = new Campaign({
-                patreonToken: process.env.PATREON_CREATOR_ACCESS_TOKEN,
-                campaignId: process.env.PATREON_CAMPAIGN_ID,
-            });
+            if (
+                process.env.PATREON_CREATOR_ACCESS_TOKEN &&
+                process.env.PATREON_CAMPAIGN_ID
+            ) {
+                logger.info("Initializing Patreon manager...");
+                state.patreonCampaign = new Campaign({
+                    patreonToken: process.env.PATREON_CREATOR_ACCESS_TOKEN,
+                    campaignId: process.env.PATREON_CAMPAIGN_ID,
+                });
+            }
         }
 
         if (
