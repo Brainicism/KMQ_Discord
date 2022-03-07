@@ -1208,7 +1208,7 @@ export default class GameSession {
         this.scoreboard
             .getPlayerIDs()
             .filter((x) => !currentVoiceMembers.includes(x))
-            .map(async (x) => this.setPlayerInVC(x, false));
+            .map(async (x) => await this.setPlayerInVC(x, false));
 
         if (this.gameType === GameType.TEAMS) {
             // Players join teams manually with ,join
