@@ -1248,35 +1248,33 @@ export default class GameSession {
         this.scoreboard
             .getPlayerIDs()
             .filter((x) => !currentVoiceMembers.includes(x))
-            .map((x) => this.setPlayerInVC(x, false));
+            .map(async (x) => this.setPlayerInVC(x, false));
 
         if (this.gameType === GameType.TEAMS) {
             // Players join teams manually with ,join
             return;
         }
 
-        Promise.all(
-            currentVoiceMembers
-                .filter((x) => x !== process.env.BOT_CLIENT_ID)
-                .map(async (x) =>
-                    this.scoreboard.addPlayer(
-                        this.gameType === GameType.ELIMINATION
-                            ? EliminationPlayer.fromUserID(
-                                  x,
-                                  (this.scoreboard as EliminationScoreboard)
-                                      .startingLives,
-                                  await isFirstGameOfDay(x),
-                                  await isUserPremium(x)
-                              )
-                            : Player.fromUserID(
-                                  x,
-                                  0,
-                                  await isFirstGameOfDay(x),
-                                  await isUserPremium(x)
-                              )
-                    )
+        currentVoiceMembers
+            .filter((x) => x !== process.env.BOT_CLIENT_ID)
+            .map(async (x) =>
+                this.scoreboard.addPlayer(
+                    this.gameType === GameType.ELIMINATION
+                        ? EliminationPlayer.fromUserID(
+                              x,
+                              (this.scoreboard as EliminationScoreboard)
+                                  .startingLives,
+                              await isFirstGameOfDay(x),
+                              await isUserPremium(x)
+                          )
+                        : Player.fromUserID(
+                              x,
+                              0,
+                              await isFirstGameOfDay(x),
+                              await isUserPremium(x)
+                          )
                 )
-        );
+            );
     }
 
     /**
