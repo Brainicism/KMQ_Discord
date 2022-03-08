@@ -16,9 +16,12 @@ program.parse();
 const options = program.opts();
 
 /**
+ * @param suffix - What to append to the end of the filename
  * Backups the current KMQ database
  */
-async function backupKmqDatabase(): Promise<void> {
+async function backupKmqDatabase(
+    suffix = standardDateFormat(new Date())
+): Promise<void> {
     if (!fs.existsSync(databaseBackupDir)) {
         fs.mkdirSync(databaseBackupDir);
     }
@@ -29,13 +32,7 @@ async function backupKmqDatabase(): Promise<void> {
 
     return new Promise((resolve, reject) => {
         exec(
-            `mysqldump -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${
-                process.env.DB_HOST
-            } --port ${
-                process.env.DB_PORT
-            } --routines kmq > ${databaseBackupDir}/kmq_backup_${standardDateFormat(
-                new Date()
-            )}.sql`,
+            `mysqldump -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} --routines kmq > ${databaseBackupDir}/kmq_backup_${suffix}.sql`,
             (err) => {
                 if (err) {
                     logger.error(`Error backing up kmq database, err = ${err}`);
