@@ -3,7 +3,6 @@ import { execSync } from "child_process";
 import dbContext from "../database_context";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
-import GameSession from "../structures/game_session";
 import GuildPreference from "../structures/guild_preference";
 import { MatchedArtist, QueriedSong } from "../types";
 import { Gender } from "../commands/game_options/gender";
@@ -13,6 +12,7 @@ import { AnswerType } from "../commands/game_options/answer";
 import SongSelector from "../structures/song_selector";
 import { LocaleType } from "./localization_manager";
 import { containsHangul, md5Hash } from "./utils";
+import Session from "../structures/session";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -25,19 +25,17 @@ interface GroupMatchResults {
 
 /**
  * Joins the VoiceChannel specified by GameSession, and stores the VoiceConnection
- * @param gameSession - The active GameSession
+ * @param session - The active Session
  */
-export async function ensureVoiceConnection(
-    gameSession: GameSession
-): Promise<void> {
+export async function ensureVoiceConnection(session: Session): Promise<void> {
     const { client } = state;
-    if (gameSession.connection && gameSession.connection.ready) return;
-    const connection = await client.joinVoiceChannel(
-        gameSession.voiceChannelID,
-        { opusOnly: true, selfDeaf: true }
-    );
+    if (session.connection && session.connection.ready) return;
+    const connection = await client.joinVoiceChannel(session.voiceChannelID, {
+        opusOnly: true,
+        selfDeaf: true,
+    });
 
-    gameSession.connection = connection;
+    session.connection = connection;
 }
 
 /**

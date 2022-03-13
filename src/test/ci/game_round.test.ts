@@ -217,7 +217,7 @@ describe("skipping", () => {
         describe("one person skipping", () => {
             it("should increment the number of skippers by 1", () => {
                 gameRound.userSkipped("user1");
-                assert.strictEqual(gameRound.getNumSkippers(), 1);
+                assert.strictEqual(gameRound.getSkipCount(), 1);
             });
         });
 
@@ -226,7 +226,7 @@ describe("skipping", () => {
                 gameRound.userSkipped("user1");
                 gameRound.userSkipped("user2");
                 gameRound.userSkipped("user3");
-                assert.strictEqual(gameRound.getNumSkippers(), 3);
+                assert.strictEqual(gameRound.getSkipCount(), 3);
             });
         });
     });
@@ -236,7 +236,7 @@ describe("skipping", () => {
             it("should increment the number of skippers by 1", () => {
                 gameRound.userSkipped("user1");
                 gameRound.userSkipped("user1");
-                assert.strictEqual(gameRound.getNumSkippers(), 1);
+                assert.strictEqual(gameRound.getSkipCount(), 1);
             });
         });
 
@@ -245,7 +245,7 @@ describe("skipping", () => {
                 gameRound.userSkipped("user1");
                 gameRound.userSkipped("user2");
                 gameRound.userSkipped("user2");
-                assert.strictEqual(gameRound.getNumSkippers(), 2);
+                assert.strictEqual(gameRound.getSkipCount(), 2);
             });
         });
     });

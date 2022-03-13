@@ -36,7 +36,7 @@ export default class ForceHintCommand implements BaseCommand {
 
     call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
         const gameSession = gameSessions[message.guildID];
-        const gameRound = gameSession?.gameRound;
+        const gameRound = gameSession?.round;
         const guildPreference = await getGuildPreference(message.guildID);
 
         if (!validHintCheck(gameSession, guildPreference, gameRound, message))

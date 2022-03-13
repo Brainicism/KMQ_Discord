@@ -1,28 +1,22 @@
 /* eslint-disable no-return-assign */
 import Eris from "eris";
-import fs from "fs";
 import _ from "lodash";
 import * as uuid from "uuid";
-import { SeekType } from "../commands/game_options/seek";
 import dbContext from "../database_context";
 import {
     getDebugLogHeader,
-    sendErrorMessage,
-    sendEndRoundMessage,
     sendInfoMessage,
     getNumParticipants,
     getUserVoiceChannel,
     sendEndGameMessage,
     getCurrentVoiceMembers,
-    sendBookmarkedSongs,
     tryInteractionAcknowledge,
-    tryCreateInteractionSuccessAcknowledgement,
     tryCreateInteractionErrorAcknowledgement,
     getMention,
     getGuildLocale,
+    sendEndRoundMessage,
 } from "../helpers/discord_utils";
 import {
-    ensureVoiceConnection,
     getGuildPreference,
     getLocalizedArtistName,
     getLocalizedSongName,
@@ -34,21 +28,18 @@ import {
     delay,
     getOrdinalNum,
     setDifference,
-    bold,
     codeLine,
     chunkArray,
     chooseRandom,
-    friendlyFormattedNumber,
 } from "../helpers/utils";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
-import { QueriedSong, PlayerRoundResult, GameType } from "../types";
+import { QueriedSong, GameType } from "../types";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
 import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
 import EliminationScoreboard from "./elimination_scoreboard";
 import TeamScoreboard from "./team_scoreboard";
-import { deleteGameSession } from "../helpers/management_utils";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { getRankNameByLevel } from "../commands/game_commands/profile";
 import EliminationPlayer from "./elimination_player";
@@ -56,13 +47,14 @@ import { KmqImages } from "../constants";
 import MessageContext from "./message_context";
 import KmqMember from "./kmq_member";
 import { MultiGuessType } from "../commands/game_options/multiguess";
-import { specialFfmpegArgs } from "../commands/game_options/special";
 import { AnswerType } from "../commands/game_options/answer";
 import { calculateTotalRoundExp } from "../commands/game_commands/exp";
-import SongSelector from "./song_selector";
 import Player from "../structures/player";
+import Session, { SONG_START_DELAY } from "./session";
+import Round from "./round";
 
 const MULTIGUESS_DELAY = 1500;
+
 const logger = new IPCLogger("game_session");
 
 const EXP_TABLE = [...Array(1000).keys()].map((level) => {
@@ -76,7 +68,6 @@ export const CUM_EXP_TABLE = EXP_TABLE.map(
             (sum += value)
     )(0)
 );
-export const BOOKMARK_MESSAGE_SIZE = 10;
 
 interface LevelUpResult {
     userID: string;
@@ -95,54 +86,21 @@ export interface GuessResult {
     correctGuessers?: Array<KmqMember>;
 }
 
-export default class GameSession {
+export default class GameSession extends Session {
     /** The GameType that the GameSession started in */
     public readonly gameType: GameType;
 
     /** The Scoreboard object keeping track of players and scoring */
     public readonly scoreboard: Scoreboard;
 
-    /** The ID of text channel in which the GameSession was started in, and will be active in */
-    public readonly textChannelID: string;
-
-    /** The Discord Guild ID */
-    public readonly guildID: string;
-
-    /** The ID of the voice channel the game will be active in */
-    public voiceChannelID: string;
-
-    /** Initially the user who started the GameSession, transferred to current VC member */
-    public owner: KmqMember;
-
-    /** Whether the GameSession is active yet */
-    public sessionInitialized: boolean;
-
-    /** The current active Eris.VoiceConnection */
-    public connection: Eris.VoiceConnection;
-
-    /** Whether the GameSession has ended or not */
-    public finished: boolean;
-
-    /** The last time of activity in epoch milliseconds, used to track inactive sessions  */
-    public lastActive: number;
-
     /** The current GameRound */
-    public gameRound: GameRound;
-
-    /** The time the GameSession was started in epoch milliseconds */
-    private readonly startedAt: number;
-
-    /** The number of GameRounds played */
-    private roundsPlayed: number;
+    public round: GameRound;
 
     /** The number of songs correctly guessed */
     private correctGuesses: number;
 
     /** List of guess times per GameRound */
     private guessTimes: Array<number>;
-
-    /** Timer function used to for ,timer command */
-    private guessTimeoutFunc: NodeJS.Timer;
 
     /** Map of song's YouTube ID to its stats for this game session */
     private songStats: {
@@ -159,14 +117,6 @@ export default class GameSession {
     /** The most recent Guesser, including their current streak */
     private lastGuesser: LastGuesser;
 
-    /** Array of previous songs by messageID for bookmarking songs */
-    private songMessageIDs: { messageID: string; song: QueriedSong }[];
-
-    /** Mapping of user ID to bookmarked songs, uses Map since Set doesn't remove QueriedSong duplicates */
-    private bookmarkedSongs: { [userID: string]: Map<string, QueriedSong> };
-
-    private songSelector: SongSelector;
-
     constructor(
         textChannelID: string,
         voiceChannelID: string,
@@ -175,25 +125,15 @@ export default class GameSession {
         gameType: GameType,
         eliminationLives?: number
     ) {
+        super(textChannelID, voiceChannelID, guildID, gameSessionCreator);
         this.gameType = gameType;
-        this.guildID = guildID;
-        this.lastActive = Date.now();
         this.sessionInitialized = false;
-        this.startedAt = Date.now();
-        this.roundsPlayed = 0;
         this.correctGuesses = 0;
         this.guessTimes = [];
-        this.connection = null;
         this.finished = false;
-        this.voiceChannelID = voiceChannelID;
-        this.textChannelID = textChannelID;
-        this.gameRound = null;
-        this.owner = gameSessionCreator;
+        this.round = null;
         this.songStats = {};
         this.lastGuesser = null;
-        this.songMessageIDs = [];
-        this.bookmarkedSongs = {};
-        this.songSelector = new SongSelector();
 
         switch (this.gameType) {
             case GameType.TEAMS:
@@ -211,27 +151,138 @@ export default class GameSession {
     }
 
     /**
-     * Ends an active GameRound
-     * @param guessResult - Whether the round ended via a correct guess (includes exp gain), or other (timeout, error, etc)
-     * @param guildPreference - The GuildPreference
+     * Starting a new GameRound
+     * @param guildPreference - The guild's GuildPreference
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
-    async endRound(
-        guessResult: GuessResult,
+    async startRound(
         guildPreference: GuildPreference,
-        messageContext?: MessageContext
+        messageContext: MessageContext
     ): Promise<void> {
-        if (this.gameRound === null) {
+        await delay(
+            this.multiguessDelayIsActive(guildPreference)
+                ? SONG_START_DELAY - MULTIGUESS_DELAY
+                : SONG_START_DELAY
+        );
+        if (this.finished || this.round) {
             return;
         }
 
-        const gameRound = this.gameRound;
-        this.gameRound = null;
+        await super.startRound(guildPreference, messageContext);
 
-        gameRound.interactionMarkAnswers(guessResult.correctGuessers?.length);
-        const timePlayed = Date.now() - gameRound.startedAt;
+        if (guildPreference.isMultipleChoiceMode()) {
+            const locale = getGuildLocale(this.guildID);
+            const randomSong = this.round.song;
+            const correctChoice =
+                guildPreference.gameOptions.guessModeType ===
+                GuessModeType.ARTIST
+                    ? getLocalizedArtistName(this.round.song, locale)
+                    : getLocalizedSongName(this.round.song, locale, false);
 
-        let playerRoundResults: Array<PlayerRoundResult> = [];
+            const wrongChoices = await getMultipleChoiceOptions(
+                guildPreference.gameOptions.answerType,
+                guildPreference.gameOptions.guessModeType,
+                randomSong.members,
+                correctChoice,
+                randomSong.artistID,
+                locale
+            );
+
+            let buttons: Array<Eris.InteractionButton> = [];
+            for (const choice of wrongChoices) {
+                const id = uuid.v4();
+                this.round.interactionIncorrectAnswerUUIDs[id] = 0;
+                buttons.push({
+                    type: 2,
+                    style: 1,
+                    label: choice.substring(0, 70),
+                    custom_id: id,
+                });
+            }
+
+            this.round.interactionCorrectAnswerUUID = uuid.v4();
+            buttons.push({
+                type: 2,
+                style: 1,
+                label: correctChoice.substring(0, 70),
+                custom_id: this.round.interactionCorrectAnswerUUID,
+            });
+
+            buttons = _.shuffle(buttons);
+
+            let components: Array<Eris.ActionRow>;
+            switch (guildPreference.gameOptions.answerType) {
+                case AnswerType.MULTIPLE_CHOICE_EASY:
+                    components = [
+                        {
+                            type: 1,
+                            components: buttons,
+                        },
+                    ];
+                    break;
+                case AnswerType.MULTIPLE_CHOICE_MED:
+                    components = chunkArray(buttons, 3).map((x) => ({
+                        type: 1,
+                        components: x,
+                    }));
+                    break;
+                case AnswerType.MULTIPLE_CHOICE_HARD:
+                    components = chunkArray(buttons, 4).map((x) => ({
+                        type: 1,
+                        components: x,
+                    }));
+                    break;
+                default:
+                    break;
+            }
+
+            this.round.interactionComponents = components;
+
+            this.round.interactionMessage = await sendInfoMessage(
+                new MessageContext(this.textChannelID),
+                {
+                    title: state.localizer.translate(
+                        this.guildID,
+                        "misc.interaction.guess.title",
+                        {
+                            songOrArtist:
+                                guildPreference.gameOptions.guessModeType ===
+                                GuessModeType.ARTIST
+                                    ? state.localizer.translate(
+                                          this.guildID,
+                                          "misc.artist"
+                                      )
+                                    : state.localizer.translate(
+                                          this.guildID,
+                                          "misc.song"
+                                      ),
+                        }
+                    ),
+                    components,
+                    thumbnailUrl: KmqImages.LISTENING,
+                }
+            );
+        }
+    }
+
+    /**
+     * Ends an active GameRound
+     * @param guildPreference - The GuildPreference
+     * @param messageContext - An object containing relevant parts of Eris.Message
+     * @param guessResult - Whether the round ended via a correct guess (includes exp gain), or other (timeout, error, etc)
+     */
+    async endRound(
+        guildPreference: GuildPreference,
+        messageContext?: MessageContext,
+        guessResult?: GuessResult
+    ): Promise<void> {
+        if (this.round === null) {
+            return;
+        }
+
+        this.round.interactionMarkAnswers(guessResult.correctGuessers?.length);
+
+        const timePlayed = Date.now() - this.round.startedAt;
         if (guessResult.correct) {
             // update guessing streaks
             if (
@@ -247,65 +298,12 @@ export default class GameSession {
             }
 
             this.guessTimes.push(timePlayed);
-
-            // update scoreboard
-            playerRoundResults = await Promise.all(
-                guessResult.correctGuessers.map(async (correctGuesser, idx) => {
-                    const guessPosition = idx + 1;
-                    const expGain = await calculateTotalRoundExp(
-                        guildPreference,
-                        gameRound,
-                        getNumParticipants(this.voiceChannelID),
-                        this.lastGuesser.streak,
-                        timePlayed,
-                        guessPosition,
-                        await userBonusIsActive(correctGuesser.id),
-                        correctGuesser.id
-                    );
-
-                    let streak = 0;
-                    if (idx === 0) {
-                        streak = this.lastGuesser.streak;
-                        logger.info(
-                            `${getDebugLogHeader(messageContext)}, uid: ${
-                                correctGuesser.id
-                            } | Song correctly guessed. song = ${
-                                gameRound.song.songName
-                            }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
-                        );
-                    } else {
-                        streak = 0;
-                        logger.info(
-                            `${getDebugLogHeader(messageContext)}, uid: ${
-                                correctGuesser.id
-                            } | Song correctly guessed ${getOrdinalNum(
-                                guessPosition
-                            )}. song = ${
-                                gameRound.song.songName
-                            }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
-                        );
-                    }
-
-                    return {
-                        player: correctGuesser,
-                        pointsEarned:
-                            idx === 0
-                                ? correctGuesser.pointsAwarded
-                                : correctGuesser.pointsAwarded / 2,
-                        expGain,
-                        streak,
-                    };
-                })
+            this.updateScoreboard(
+                guessResult,
+                guildPreference,
+                timePlayed,
+                messageContext
             );
-
-            const scoreboardUpdatePayload: SuccessfulGuessResult[] =
-                playerRoundResults.map((x) => ({
-                    userID: x.player.id,
-                    expGain: x.expGain,
-                    pointsEarned: x.pointsEarned,
-                }));
-
-            await this.scoreboard.updateScoreboard(scoreboardUpdatePayload);
         } else {
             if (!guessResult.error) {
                 this.lastGuesser = null;
@@ -318,69 +316,33 @@ export default class GameSession {
             }
         }
 
-        // calculate remaining game duration if applicable
-        const currGameLength = (Date.now() - this.startedAt) / 60000;
-        const remainingDuration = guildPreference.isDurationSet()
-            ? guildPreference.gameOptions.duration - currGameLength
-            : null;
+        this.incrementSongStats(
+            this.round.song.youtubeLink,
+            guessResult.correct,
+            this.round.skipAchieved,
+            this.round.hintUsed,
+            timePlayed
+        );
 
+        const remainingDuration = this.getRemainingDuration(guildPreference);
         if (messageContext) {
             const endRoundMessage = await sendEndRoundMessage(
                 messageContext,
                 this.scoreboard,
-                gameRound,
+                this,
                 guildPreference.gameOptions.guessModeType,
-                playerRoundResults,
                 guildPreference.isMultipleChoiceMode(),
                 remainingDuration,
                 this.songSelector.getUniqueSongCounter(guildPreference)
             );
 
             // if message fails to send, no ID is returned
-            if (endRoundMessage) {
-                if (
-                    Object.keys(this.songMessageIDs).length ===
-                    BOOKMARK_MESSAGE_SIZE
-                ) {
-                    this.songMessageIDs.shift();
-                }
-
-                this.songMessageIDs.push({
-                    messageID: endRoundMessage.id,
-                    song: {
-                        songName: gameRound.song.songName,
-                        originalSongName: gameRound.song.originalSongName,
-                        hangulSongName: gameRound.song.hangulSongName,
-                        originalHangulSongName:
-                            gameRound.song.originalHangulSongName,
-                        artistName: gameRound.song.artistName,
-                        hangulArtistName: gameRound.song.hangulArtistName,
-                        youtubeLink: gameRound.song.youtubeLink,
-                        publishDate: gameRound.song.publishDate,
-                        views: gameRound.song.views,
-                    },
-                });
-            }
+            this.round.endRoundMessageID = endRoundMessage?.id;
         }
 
-        this.incrementSongStats(
-            gameRound.song.youtubeLink,
-            guessResult.correct,
-            gameRound.skipAchieved,
-            gameRound.hintUsed,
-            timePlayed
-        );
+        super.endRound(guildPreference, messageContext);
 
-        // cleanup
-        this.stopGuessTimeout();
-
-        if (this.finished) return;
-        this.roundsPlayed++;
-        // check if duration has been reached
-        if (remainingDuration && remainingDuration < 0) {
-            logger.info(`gid: ${this.guildID} | Game session duration reached`);
-            this.endSession();
-        } else if (this.scoreboard.gameFinished(guildPreference)) {
+        if (this.scoreboard.gameFinished(guildPreference)) {
             this.endSession();
         }
     }
@@ -388,20 +350,12 @@ export default class GameSession {
     /**
      * Ends the current GameSession
      */
-    endSession = async (): Promise<void> => {
+    async endSession(): Promise<void> {
         if (this.finished) {
             return;
         }
 
         this.finished = true;
-        deleteGameSession(this.guildID);
-        await this.endRound(
-            { correct: false },
-            await getGuildPreference(this.guildID),
-            new MessageContext(this.textChannelID, null, this.guildID)
-        );
-        const voiceConnection = state.client.voiceConnections.get(this.guildID);
-
         if (this.gameType === GameType.COMPETITION) {
             // log scoreboard
             logger.info("Scoreboard:");
@@ -417,18 +371,6 @@ export default class GameSession {
                         }))
                 )
             );
-        }
-
-        // leave voice channel
-        if (voiceConnection && voiceConnection.channelID) {
-            voiceConnection.stopPlaying();
-            const voiceChannel = state.client.getChannel(
-                voiceConnection.channelID
-            ) as Eris.VoiceChannel;
-
-            if (voiceChannel) {
-                voiceChannel.leave();
-            }
         }
 
         const leveledUpPlayers: Array<LevelUpResult> = [];
@@ -518,12 +460,6 @@ export default class GameSession {
 
         await sendEndGameMessage(this);
 
-        // commit guild stats
-        await dbContext
-            .kmq("guilds")
-            .where("guild_id", this.guildID)
-            .increment("games_played", 1);
-
         // commit guild's game session
         const sessionLength = (Date.now() - this.startedAt) / (1000 * 60);
         const averageGuessTime =
@@ -549,73 +485,11 @@ export default class GameSession {
             await this.storeSongStats();
         }
 
-        // DM bookmarked songs
-        const bookmarkedSongsPlayerCount = Object.keys(
-            this.bookmarkedSongs
-        ).length;
-
-        if (bookmarkedSongsPlayerCount > 0) {
-            const bookmarkedSongCount = Object.values(
-                this.bookmarkedSongs
-            ).reduce((total, x) => total + x.size, 0);
-
-            await sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: state.localizer.translate(
-                    this.guildID,
-                    "misc.sendingBookmarkedSongs.title"
-                ),
-                description: state.localizer.translate(
-                    this.guildID,
-                    "misc.sendingBookmarkedSongs.description",
-                    {
-                        songs: state.localizer.translateN(
-                            this.guildID,
-                            "misc.plural.song",
-                            bookmarkedSongCount
-                        ),
-                        players: state.localizer.translateN(
-                            this.guildID,
-                            "misc.plural.player",
-                            bookmarkedSongsPlayerCount
-                        ),
-                    }
-                ),
-                thumbnailUrl: KmqImages.READING_BOOK,
-            });
-            await sendBookmarkedSongs(this.guildID, this.bookmarkedSongs);
-
-            // Store bookmarked songs
-            await dbContext.kmq.transaction(async (trx) => {
-                const idLinkPairs: { user_id: string; vlink: string }[] = [];
-                for (const entry of Object.entries(this.bookmarkedSongs)) {
-                    for (const song of entry[1]) {
-                        idLinkPairs.push({ user_id: entry[0], vlink: song[0] });
-                    }
-                }
-
-                await dbContext
-                    .kmq("bookmarked_songs")
-                    .insert(idLinkPairs)
-                    .onConflict(["user_id", "vlink"])
-                    .ignore()
-                    .transacting(trx);
-            });
-        }
+        super.endSession();
 
         logger.info(
             `gid: ${this.guildID} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}. gameType = ${this.gameType}`
         );
-    };
-
-    /**
-     * Updates the GameSession's lastActive timestamp and it's value in the data store
-     */
-    async lastActiveNow(): Promise<void> {
-        this.lastActive = Date.now();
-        await dbContext
-            .kmq("guilds")
-            .where({ guild_id: this.guildID })
-            .update({ last_active: new Date() });
     }
 
     /**
@@ -629,7 +503,7 @@ export default class GameSession {
     ): Promise<void> {
         if (!this.connection) return;
         if (this.connection.listenerCount("end") === 0) return;
-        if (!this.gameRound) return;
+        if (!this.round) return;
         if (!this.guessEligible(messageContext)) return;
 
         const guildPreference = await getGuildPreference(this.guildID);
@@ -643,27 +517,23 @@ export default class GameSession {
         );
 
         if (pointsEarned > 0) {
-            if (this.gameRound.finished) {
+            if (this.round.finished) {
                 return;
             }
 
-            this.gameRound.finished = true;
+            this.round.finished = true;
             await delay(
                 this.multiguessDelayIsActive(guildPreference)
                     ? MULTIGUESS_DELAY
                     : 0
             );
-            if (!this.gameRound) return;
+            if (!this.round) return;
 
             // mark round as complete, so no more guesses can go through
-            await this.endRound(
-                {
-                    correct: true,
-                    correctGuessers: this.gameRound.correctGuessers,
-                },
-                guildPreference,
-                messageContext
-            );
+            await this.endRound(guildPreference, messageContext, {
+                correct: true,
+                correctGuessers: this.round.correctGuessers,
+            });
             this.correctGuesses++;
 
             // update game session's lastActive
@@ -679,7 +549,7 @@ export default class GameSession {
 
             this.startRound(guildPreference, messageContext);
         } else if (guildPreference.isMultipleChoiceMode()) {
-            if (!this.gameRound) return;
+            if (!this.round) return;
             if (
                 setDifference(
                     [
@@ -689,13 +559,13 @@ export default class GameSession {
                             )
                         ),
                     ],
-                    [...this.gameRound.incorrectMCGuessers]
+                    [...this.round.incorrectMCGuessers]
                 ).size === 0
             ) {
                 await this.endRound(
-                    { correct: false },
                     guildPreference,
-                    new MessageContext(this.textChannelID, null, this.guildID)
+                    new MessageContext(this.textChannelID, null, this.guildID),
+                    { correct: false }
                 );
 
                 this.startRound(
@@ -706,307 +576,8 @@ export default class GameSession {
         }
     }
 
-    /**
-     * Starting a new GameRound
-     * @param guildPreference - The guild's GuildPreference
-     * @param messageContext - An object containing relevant parts of Eris.Message
-     */
-    async startRound(
-        guildPreference: GuildPreference,
-        messageContext: MessageContext
-    ): Promise<void> {
-        this.sessionInitialized = true;
-        await delay(
-            this.multiguessDelayIsActive(guildPreference)
-                ? 3000 - MULTIGUESS_DELAY
-                : 3000
-        );
-        if (this.finished || this.gameRound) {
-            return;
-        }
-
-        if (this.songSelector.getSongs() === null) {
-            try {
-                await this.reloadSongs(guildPreference);
-            } catch (err) {
-                await sendErrorMessage(messageContext, {
-                    title: state.localizer.translate(
-                        this.guildID,
-                        "misc.failure.errorSelectingSong.title"
-                    ),
-                    description: state.localizer.translate(
-                        this.guildID,
-                        "misc.failure.errorSelectingSong.description"
-                    ),
-                });
-
-                logger.error(
-                    `${getDebugLogHeader(
-                        messageContext
-                    )} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(
-                        guildPreference
-                    )}`
-                );
-                await this.endSession();
-                return;
-            }
-        }
-
-        if (this.songSelector.checkUniqueSongQueue(guildPreference)) {
-            const totalSongCount = this.songSelector.getCurrentSongCount();
-            logger.info(
-                `${getDebugLogHeader(
-                    messageContext
-                )} | Resetting uniqueSongsPlayed (all ${totalSongCount} unique songs played)`
-            );
-
-            await sendInfoMessage(messageContext, {
-                title: state.localizer.translate(
-                    this.guildID,
-                    "misc.uniqueSongsReset.title"
-                ),
-                description: state.localizer.translate(
-                    this.guildID,
-                    "misc.uniqueSongsReset.description",
-                    { totalSongCount: friendlyFormattedNumber(totalSongCount) }
-                ),
-                thumbnailUrl: KmqImages.LISTENING,
-            });
-        }
-
-        this.songSelector.checkAlternatingGender(guildPreference);
-        const randomSong = await this.songSelector.queryRandomSong(
-            guildPreference
-        );
-
-        if (randomSong === null) {
-            sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
-                    this.guildID,
-                    "misc.failure.songQuery.title"
-                ),
-                description: state.localizer.translate(
-                    this.guildID,
-                    "misc.failure.songQuery.description"
-                ),
-            });
-            await this.endSession();
-            return;
-        }
-
-        // create a new round with randomly chosen song
-        this.gameRound = this.prepareRound(randomSong);
-
-        const voiceChannel = state.client.getChannel(
-            this.voiceChannelID
-        ) as Eris.VoiceChannel;
-
-        if (!voiceChannel || voiceChannel.voiceMembers.size === 0) {
-            await this.endSession();
-            return;
-        }
-
-        // join voice channel and start round
-        try {
-            await ensureVoiceConnection(this);
-        } catch (err) {
-            await this.endSession();
-            logger.error(
-                `${getDebugLogHeader(
-                    messageContext
-                )} | Error obtaining voice connection. err = ${err.toString()}`
-            );
-
-            await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
-                    this.guildID,
-                    "misc.failure.vcJoin.title"
-                ),
-                description: state.localizer.translate(
-                    this.guildID,
-                    "misc.failure.vcJoin.description"
-                ),
-            });
-            return;
-        }
-
-        this.playSong(guildPreference, messageContext);
-
-        if (guildPreference.isMultipleChoiceMode()) {
-            const locale = getGuildLocale(this.guildID);
-            const correctChoice =
-                guildPreference.gameOptions.guessModeType ===
-                GuessModeType.ARTIST
-                    ? getLocalizedArtistName(this.gameRound.song, locale)
-                    : getLocalizedSongName(this.gameRound.song, locale, false);
-
-            const wrongChoices = await getMultipleChoiceOptions(
-                guildPreference.gameOptions.answerType,
-                guildPreference.gameOptions.guessModeType,
-                randomSong.members,
-                correctChoice,
-                randomSong.artistID,
-                locale
-            );
-
-            let buttons: Array<Eris.InteractionButton> = [];
-            for (const choice of wrongChoices) {
-                const id = uuid.v4();
-                this.gameRound.interactionIncorrectAnswerUUIDs[id] = 0;
-                buttons.push({
-                    type: 2,
-                    style: 1,
-                    label: choice.substring(0, 70),
-                    custom_id: id,
-                });
-            }
-
-            this.gameRound.interactionCorrectAnswerUUID = uuid.v4();
-            buttons.push({
-                type: 2,
-                style: 1,
-                label: correctChoice.substring(0, 70),
-                custom_id: this.gameRound.interactionCorrectAnswerUUID,
-            });
-
-            buttons = _.shuffle(buttons);
-
-            let components: Array<Eris.ActionRow>;
-            switch (guildPreference.gameOptions.answerType) {
-                case AnswerType.MULTIPLE_CHOICE_EASY:
-                    components = [
-                        {
-                            type: 1,
-                            components: buttons,
-                        },
-                    ];
-                    break;
-                case AnswerType.MULTIPLE_CHOICE_MED:
-                    components = chunkArray(buttons, 3).map((x) => ({
-                        type: 1,
-                        components: x,
-                    }));
-                    break;
-                case AnswerType.MULTIPLE_CHOICE_HARD:
-                    components = chunkArray(buttons, 4).map((x) => ({
-                        type: 1,
-                        components: x,
-                    }));
-                    break;
-                default:
-                    break;
-            }
-
-            this.gameRound.interactionComponents = components;
-
-            this.gameRound.interactionMessage = await sendInfoMessage(
-                new MessageContext(this.textChannelID),
-                {
-                    title: state.localizer.translate(
-                        this.guildID,
-                        "misc.interaction.guess.title",
-                        {
-                            songOrArtist:
-                                guildPreference.gameOptions.guessModeType ===
-                                GuessModeType.ARTIST
-                                    ? state.localizer.translate(
-                                          this.guildID,
-                                          "misc.artist"
-                                      )
-                                    : state.localizer.translate(
-                                          this.guildID,
-                                          "misc.song"
-                                      ),
-                        }
-                    ),
-                    components,
-                    thumbnailUrl: KmqImages.LISTENING,
-                }
-            );
-        }
-    }
-
-    /**
-     * Sets a timeout for guessing in timer mode
-     * @param messageContext - An object containing relevant parts of Eris.Message
-     * @param guildPreference - The GuildPreference
-     */
-    startGuessTimeout(
-        messageContext: MessageContext,
-        guildPreference: GuildPreference
-    ): Promise<void> {
-        if (!guildPreference.isGuessTimeoutSet()) return;
-
-        const time = guildPreference.gameOptions.guessTimeout;
-        this.guessTimeoutFunc = setTimeout(async () => {
-            if (this.finished || !this.gameRound || this.gameRound.finished)
-                return;
-            logger.info(
-                `${getDebugLogHeader(
-                    messageContext
-                )} | Song finished without being guessed, timer of: ${time} seconds.`
-            );
-
-            await this.endRound(
-                { correct: false },
-                guildPreference,
-                new MessageContext(this.textChannelID, null, this.guildID)
-            );
-
-            this.startRound(
-                await getGuildPreference(this.guildID),
-                messageContext
-            );
-        }, time * 1000);
-    }
-
-    /**
-     * Stops the timer set in timer mode
-     */
-    stopGuessTimeout(): void {
-        clearTimeout(this.guessTimeoutFunc);
-    }
-
-    getRoundsPlayed(): number {
-        return this.roundsPlayed;
-    }
-
     getCorrectGuesses(): number {
         return this.correctGuesses;
-    }
-
-    async reloadSongs(guildPreference: GuildPreference): Promise<void> {
-        await this.songSelector.reloadSongs(guildPreference);
-    }
-
-    /**
-     * Finds the song associated with the endRoundMessage via messageID, if it exists
-     * @param messageID - The Discord message ID used to locate the song
-     * @returns the queried song, or null if it doesn't exist
-     */
-    getSongFromMessageID(messageID: string): QueriedSong {
-        if (!this.songMessageIDs.map((x) => x.messageID).includes(messageID)) {
-            return null;
-        }
-
-        return this.songMessageIDs.find((x) => x.messageID === messageID).song;
-    }
-
-    /**
-     * Stores a song with a user so they can receive it later
-     * @param userID - The user that wants to bookmark the song
-     * @param song - The song to store
-     */
-    addBookmarkedSong(userID: string, song: QueriedSong): void {
-        if (!userID || !song) {
-            return;
-        }
-
-        if (!this.bookmarkedSongs[userID]) {
-            this.bookmarkedSongs[userID] = new Map();
-        }
-
-        this.bookmarkedSongs[userID].set(song.youtubeLink, song);
     }
 
     /** Updates owner to the first player to join the game that didn't leave VC */
@@ -1056,7 +627,7 @@ export default class GameSession {
         interaction: Eris.ComponentInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        if (!this.gameRound) {
+        if (!this.round) {
             return;
         }
 
@@ -1069,7 +640,7 @@ export default class GameSession {
             return;
         }
 
-        if (this.gameRound.incorrectMCGuessers.has(interaction.member.id)) {
+        if (this.round.incorrectMCGuessers.has(interaction.member.id)) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 state.localizer.translate(
@@ -1080,9 +651,7 @@ export default class GameSession {
             return;
         }
 
-        if (
-            !this.gameRound.isValidInteractionGuess(interaction.data.custom_id)
-        ) {
+        if (!this.round.isValidInteractionGuess(interaction.data.custom_id)) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 state.localizer.translate(
@@ -1094,9 +663,7 @@ export default class GameSession {
         }
 
         if (
-            !this.gameRound.isCorrectInteractionAnswer(
-                interaction.data.custom_id
-            )
+            !this.round.isCorrectInteractionAnswer(interaction.data.custom_id)
         ) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
@@ -1106,8 +673,8 @@ export default class GameSession {
                 )
             );
 
-            this.gameRound.incorrectMCGuessers.add(interaction.member.id);
-            this.gameRound.interactionIncorrectAnswerUUIDs[
+            this.round.incorrectMCGuessers.add(interaction.member.id);
+            this.round.interactionIncorrectAnswerUUIDs[
                 interaction.data.custom_id
             ]++;
 
@@ -1122,48 +689,13 @@ export default class GameSession {
             messageContext.guildID
         );
 
-        if (!this.gameRound) return;
+        if (!this.round) return;
         this.guessSong(
             messageContext,
             guildPreference.gameOptions.guessModeType !== GuessModeType.ARTIST
-                ? this.gameRound.song.songName
-                : this.gameRound.song.artistName
+                ? this.round.song.songName
+                : this.round.song.artistName
         );
-    }
-
-    async handleBookmarkInteraction(
-        interaction: Eris.CommandInteraction
-    ): Promise<void> {
-        const song = this.getSongFromMessageID(interaction.data.target_id);
-        if (!song) {
-            tryCreateInteractionErrorAcknowledgement(
-                interaction,
-                state.localizer.translate(
-                    this.guildID,
-                    "misc.failure.interaction.invalidBookmark",
-                    { BOOKMARK_MESSAGE_SIZE: String(BOOKMARK_MESSAGE_SIZE) }
-                )
-            );
-            return;
-        }
-
-        tryCreateInteractionSuccessAcknowledgement(
-            interaction,
-            state.localizer.translate(
-                this.guildID,
-                "misc.interaction.bookmarked.title"
-            ),
-            state.localizer.translate(
-                this.guildID,
-                "misc.interaction.bookmarked.description",
-                {
-                    songName: bold(
-                        getLocalizedSongName(song, getGuildLocale(this.guildID))
-                    ),
-                }
-            )
-        );
-        this.addBookmarkedSong(interaction.member?.id, song);
     }
 
     /**
@@ -1242,141 +774,11 @@ export default class GameSession {
      * @param randomSong - The queried song
      * @returns the new GameRound
      */
-    private prepareRound(randomSong: QueriedSong): GameRound {
+    protected prepareRound(randomSong: QueriedSong): Round {
         const gameRound = new GameRound(randomSong);
 
         gameRound.setBaseExpReward(this.calculateBaseExp());
         return gameRound;
-    }
-
-    /**
-     * Begin playing the GameRound's song in the VoiceChannel, listen on VoiceConnection events
-     * @param guildPreference - The guild's GuildPreference
-     * @param messageContext - An object containing relevant parts of Eris.Message
-     */
-    private async playSong(
-        guildPreference: GuildPreference,
-        messageContext: MessageContext
-    ): Promise<void> {
-        const { gameRound } = this;
-        if (gameRound === null) {
-            return;
-        }
-
-        const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${gameRound.song.youtubeLink}.ogg`;
-
-        let seekLocation: number;
-        const seekType = guildPreference.gameOptions.seekType;
-        if (seekType === SeekType.BEGINNING) {
-            seekLocation = 0;
-        } else {
-            const songDuration = (
-                await dbContext
-                    .kmq("cached_song_duration")
-                    .select(["duration"])
-                    .where("vlink", "=", gameRound.song.youtubeLink)
-                    .first()
-            ).duration;
-
-            if (seekType === SeekType.RANDOM) {
-                seekLocation = songDuration * (0.6 * Math.random());
-            } else if (seekType === SeekType.MIDDLE) {
-                seekLocation = songDuration * (0.4 + 0.2 * Math.random());
-            }
-        }
-
-        const stream = fs.createReadStream(songLocation);
-
-        logger.info(
-            `${getDebugLogHeader(
-                messageContext
-            )} | Playing song in voice connection. seek = ${seekType}. song = ${this.getDebugSongDetails()}. guess mode = ${
-                guildPreference.gameOptions.guessModeType
-            }`
-        );
-        this.connection.removeAllListeners();
-        this.connection.stopPlaying();
-        try {
-            let inputArgs = ["-ss", seekLocation.toString()];
-            let encoderArgs = [];
-            const specialType = guildPreference.gameOptions.specialType;
-            if (specialType) {
-                const ffmpegArgs = specialFfmpegArgs[specialType](seekLocation);
-                inputArgs = ffmpegArgs.inputArgs;
-                encoderArgs = ffmpegArgs.encoderArgs;
-            }
-
-            this.connection.play(stream, {
-                inputArgs,
-                encoderArgs,
-                opusPassthrough: specialType === null,
-            });
-        } catch (e) {
-            logger.error(`Erroring playing on voice connection. err = ${e}`);
-            await this.errorRestartRound(guildPreference);
-            return;
-        }
-
-        this.startGuessTimeout(messageContext, guildPreference);
-
-        // song finished without being guessed
-        this.connection.once("end", async () => {
-            // replace listener with no-op to catch any exceptions thrown after this event
-            this.connection.removeAllListeners("end");
-            this.connection.on("end", () => {});
-            logger.info(
-                `${getDebugLogHeader(
-                    messageContext
-                )} | Song finished without being guessed.`
-            );
-            this.stopGuessTimeout();
-
-            await this.endRound(
-                { correct: false },
-                guildPreference,
-                new MessageContext(this.textChannelID, null, this.guildID)
-            );
-
-            this.startRound(
-                await getGuildPreference(this.guildID),
-                messageContext
-            );
-        });
-
-        this.connection.once("error", async (err) => {
-            // replace listener with no-op to catch any exceptions thrown after this event
-            this.connection.removeAllListeners("error");
-            this.connection.on("error", () => {});
-            logger.error(
-                `${getDebugLogHeader(
-                    messageContext
-                )} | Unknown error with stream dispatcher. song = ${this.getDebugSongDetails()}. err = ${err}`
-            );
-            this.errorRestartRound(guildPreference);
-        });
-    }
-
-    /**
-     * Attempt to restart game with different song
-     * @param guildPreference - The GuildPreference
-     */
-    private async errorRestartRound(
-        guildPreference: GuildPreference
-    ): Promise<void> {
-        const messageContext = new MessageContext(this.textChannelID);
-        await this.endRound({ correct: false, error: true }, guildPreference);
-        await sendErrorMessage(messageContext, {
-            title: state.localizer.translate(
-                this.guildID,
-                "misc.failure.songPlaying.title"
-            ),
-            description: state.localizer.translate(
-                this.guildID,
-                "misc.failure.songPlaying.description"
-            ),
-        });
-        this.roundsPlayed--;
-        this.startRound(guildPreference, messageContext);
     }
 
     /**
@@ -1395,21 +797,18 @@ export default class GameSession {
         multipleChoiceMode: boolean,
         typosAllowed = false
     ): number {
-        if (!this.gameRound) return 0;
-        if (
-            multipleChoiceMode &&
-            this.gameRound.incorrectMCGuessers.has(userID)
-        )
+        if (!this.round) return 0;
+        if (multipleChoiceMode && this.round.incorrectMCGuessers.has(userID))
             return 0;
 
-        const pointsAwarded = this.gameRound.checkGuess(
+        const pointsAwarded = this.round.checkGuess(
             guess,
             guessModeType,
             typosAllowed
         );
 
         if (pointsAwarded) {
-            this.gameRound.userCorrect(userID, pointsAwarded);
+            this.round.userCorrect(userID, pointsAwarded);
         }
 
         return pointsAwarded;
@@ -1657,13 +1056,6 @@ export default class GameSession {
     }
 
     /**
-     * @returns Debug string containing basic information about the GameRound
-     */
-    private getDebugSongDetails(): string {
-        if (!this.gameRound) return "No active game round";
-        return `${this.gameRound.song.songName}:${this.gameRound.song.artistName}:${this.gameRound.song.youtubeLink}`;
-    }
-    /**
      * https://www.desmos.com/calculator/9x3dkrmt84
      * @returns the base EXP reward for the gameround
      */
@@ -1687,11 +1079,70 @@ export default class GameSession {
         );
     }
 
-    private getSongCount(): { count: number; countBeforeLimit: number } {
-        const selectedSongs = this.songSelector.getSongs();
-        return {
-            count: selectedSongs.songs.size,
-            countBeforeLimit: selectedSongs.countBeforeLimit,
-        };
+    private async updateScoreboard(
+        guessResult: GuessResult,
+        guildPreference: GuildPreference,
+        timePlayed: number,
+        messageContext: MessageContext
+    ): Promise<void> {
+        // update scoreboard
+        const playerRoundResults = await Promise.all(
+            guessResult.correctGuessers.map(async (correctGuesser, idx) => {
+                const guessPosition = idx + 1;
+                const expGain = await calculateTotalRoundExp(
+                    guildPreference,
+                    this.round,
+                    getNumParticipants(this.voiceChannelID),
+                    this.lastGuesser.streak,
+                    timePlayed,
+                    guessPosition,
+                    await userBonusIsActive(correctGuesser.id),
+                    correctGuesser.id
+                );
+
+                let streak = 0;
+                if (idx === 0) {
+                    streak = this.lastGuesser.streak;
+                    logger.info(
+                        `${getDebugLogHeader(messageContext)}, uid: ${
+                            correctGuesser.id
+                        } | Song correctly guessed. song = ${
+                            this.round.song.songName
+                        }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
+                    );
+                } else {
+                    streak = 0;
+                    logger.info(
+                        `${getDebugLogHeader(messageContext)}, uid: ${
+                            correctGuesser.id
+                        } | Song correctly guessed ${getOrdinalNum(
+                            guessPosition
+                        )}. song = ${
+                            this.round.song.songName
+                        }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
+                    );
+                }
+
+                return {
+                    player: correctGuesser,
+                    pointsEarned:
+                        idx === 0
+                            ? correctGuesser.pointsAwarded
+                            : correctGuesser.pointsAwarded / 2,
+                    expGain,
+                    streak,
+                };
+            })
+        );
+
+        this.round.playerRoundResults = playerRoundResults;
+        const scoreboardUpdatePayload: SuccessfulGuessResult[] =
+            playerRoundResults.map((x) => ({
+                userID: x.player.id,
+                expGain: x.expGain,
+                pointsEarned: x.pointsEarned,
+            }));
+
+        await this.scoreboard.update(scoreboardUpdatePayload);
     }
 }

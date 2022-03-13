@@ -14,10 +14,10 @@ import { codeLine } from "../../helpers/utils";
 import { GuildTextableMessage, GameType } from "../../types";
 import GameSession from "../../structures/game_session";
 import EliminationScoreboard from "../../structures/elimination_scoreboard";
-import GameRound from "../../structures/game_round";
 import GuildPreference from "../../structures/guild_preference";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import GameRound from "../../structures/game_round";
 
 const logger = new IPCLogger("hint");
 
@@ -30,14 +30,13 @@ function isHintMajority(
             gameSession.scoreboard as EliminationScoreboard;
 
         return (
-            gameSession.gameRound.getHintRequests() >=
+            gameSession.round.getHintRequests() >=
             Math.floor(eliminationScoreboard.getAlivePlayersCount() * 0.5) + 1
         );
     }
 
     return (
-        gameSession.gameRound.getHintRequests() >=
-        getMajorityCount(message.guildID)
+        gameSession.round.getHintRequests() >= getMajorityCount(message.guildID)
     );
 }
 
@@ -45,17 +44,15 @@ function isHintAvailable(
     message: GuildTextableMessage,
     gameSession: GameSession
 ): boolean {
-    if (!gameSession.gameRound) return false;
-    return (
-        gameSession.gameRound.hintUsed || isHintMajority(message, gameSession)
-    );
+    if (!gameSession.round) return false;
+    return gameSession.round.hintUsed || isHintMajority(message, gameSession);
 }
 
 async function sendHintNotification(
     message: GuildTextableMessage,
     gameSession: GameSession
 ): Promise<void> {
-    if (!gameSession.gameRound) return;
+    if (!gameSession.round) return;
     if (gameSession.gameType === GameType.ELIMINATION) {
         const eliminationScoreboard =
             gameSession.scoreboard as EliminationScoreboard;
@@ -71,7 +68,7 @@ async function sendHintNotification(
                     message.guildID,
                     "command.hint.request.description",
                     {
-                        hintCounter: `${gameSession.gameRound.getHintRequests()}/${
+                        hintCounter: `${gameSession.round.getHintRequests()}/${
                             Math.floor(
                                 eliminationScoreboard.getAlivePlayersCount() *
                                     0.5
@@ -94,7 +91,7 @@ async function sendHintNotification(
                     message.guildID,
                     "command.hint.request.description",
                     {
-                        hintCounter: `${gameSession.gameRound.getHintRequests()}/${getMajorityCount(
+                        hintCounter: `${gameSession.round.getHintRequests()}/${getMajorityCount(
                             message.guildID
                         )}`,
                     }
@@ -218,7 +215,7 @@ export default class HintCommand implements BaseCommand {
 
     call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
         const gameSession = gameSessions[message.guildID];
-        const gameRound = gameSession?.gameRound;
+        const gameRound = gameSession?.round;
         const guildPreference = await getGuildPreference(message.guildID);
         if (!validHintCheck(gameSession, guildPreference, gameRound, message))
             return;

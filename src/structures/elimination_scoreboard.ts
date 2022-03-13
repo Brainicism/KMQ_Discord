@@ -19,9 +19,7 @@ export default class EliminationScoreboard extends Scoreboard {
      * Updates the scoreboard with information about correct guessers
      * @param guessResults - Objects containing the user ID, points earned, and EXP gain
      */
-    async updateScoreboard(
-        guessResults: Array<SuccessfulGuessResult>
-    ): Promise<void> {
+    async update(guessResults: Array<SuccessfulGuessResult>): Promise<void> {
         const previousRoundRanking = this.getScoreToRankingMap();
         for (const player of Object.values(this.players)) {
             player.setPreviousRanking(previousRoundRanking[player.getScore()]);

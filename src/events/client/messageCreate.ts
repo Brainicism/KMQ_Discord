@@ -9,7 +9,7 @@ import {
 import { getGuildPreference } from "../../helpers/game_utils";
 import { state } from "../../kmq_worker";
 import validate from "../../helpers/validate";
-import { GuildTextableMessage, ParsedMessage } from "../../types";
+import { EnvType, GuildTextableMessage, ParsedMessage } from "../../types";
 import MessageContext from "../../structures/message_context";
 
 const logger = new IPCLogger("messageCreate");
@@ -138,9 +138,13 @@ export default async function messageCreateHandler(
                         { debugId }
                     ),
                 });
+
+                if (process.env.NODE_ENV === EnvType.DEV) {
+                    throw e;
+                }
             }
         }
-    } else if (state.gameSessions[message.guildID]?.gameRound) {
+    } else if (state.gameSessions[message.guildID]?.round) {
         const gameSession = state.gameSessions[message.guildID];
         gameSession.guessSong(
             MessageContext.fromMessage(message),
