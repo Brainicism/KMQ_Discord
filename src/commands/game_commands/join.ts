@@ -123,10 +123,8 @@ export default class JoinCommand implements BaseCommand {
         if (!teamScoreboard.hasTeam(teamName)) {
             teamScoreboard.addTeam(
                 teamName,
-                new Player(
-                    getUserTag(message.author),
+                Player.fromUserID(
                     message.author.id,
-                    message.author.avatarURL,
                     0,
                     await isFirstGameOfDay(message.author.id),
                     await isUserPremium(message.author.id)
@@ -191,10 +189,8 @@ export default class JoinCommand implements BaseCommand {
 
             teamScoreboard.addTeamPlayer(
                 team.id,
-                new Player(
-                    getUserTag(message.author),
+                Player.fromUserID(
                     message.author.id,
-                    message.author.avatarURL,
                     0,
                     await isFirstGameOfDay(message.author.id),
                     await isUserPremium(message.author.id)

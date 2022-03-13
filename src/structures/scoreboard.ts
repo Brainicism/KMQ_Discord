@@ -287,7 +287,10 @@ export default class Scoreboard {
      * @param inVC - Whether the player is currently in the voice channel
      */
     setInVC(userID: string, inVC: boolean): void {
-        this.players[userID].inVC = inVC;
+        const player = this.players[userID];
+        if (player) {
+            player.inVC = inVC;
+        }
     }
 
     /**
@@ -307,7 +310,7 @@ export default class Scoreboard {
     }
 
     /**
-     * @returns whether the use the scoreboard designed for more players
+     * @returns whether to use the scoreboard designed for more players
      */
     shouldUseLargerScoreboard(): boolean {
         return (

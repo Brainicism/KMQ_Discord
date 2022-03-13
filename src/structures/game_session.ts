@@ -1240,41 +1240,39 @@ export default class GameSession {
     /**
      * Add all players in VC that aren't tracked to the scoreboard, and update those who left
      */
-    syncAllVoiceMembers(): void {
+    async syncAllVoiceMembers(): Promise<void> {
         const currentVoiceMembers = getCurrentVoiceMembers(
             this.voiceChannelID
         ).map((x) => x.id);
 
-        this.scoreboard
+        for (const player of this.scoreboard
             .getPlayerIDs()
-            .filter((x) => !currentVoiceMembers.includes(x))
-            .map(async (x) => this.setPlayerInVC(x, false));
+            .filter((x) => !currentVoiceMembers.includes(x))) {
+            await this.setPlayerInVC(player, false);
+        }
 
         if (this.gameType === GameType.TEAMS) {
             // Players join teams manually with ,join
             return;
         }
 
-        currentVoiceMembers
-            .filter((x) => x !== process.env.BOT_CLIENT_ID)
-            .map(async (x) =>
-                this.scoreboard.addPlayer(
-                    this.gameType === GameType.ELIMINATION
-                        ? EliminationPlayer.fromUserID(
-                              x,
-                              (this.scoreboard as EliminationScoreboard)
-                                  .startingLives,
-                              await isFirstGameOfDay(x),
-                              await isUserPremium(x)
-                          )
-                        : Player.fromUserID(
-                              x,
-                              0,
-                              await isFirstGameOfDay(x),
-                              await isUserPremium(x)
-                          )
-                )
+        for (const player of currentVoiceMembers.filter(
+            (x) => x !== process.env.BOT_CLIENT_ID
+        )) {
+            const firstGameOfDay = await isFirstGameOfDay(player);
+            const premium = await isUserPremium(player);
+            this.scoreboard.addPlayer(
+                this.gameType === GameType.ELIMINATION
+                    ? EliminationPlayer.fromUserID(
+                          player,
+                          (this.scoreboard as EliminationScoreboard)
+                              .startingLives,
+                          firstGameOfDay,
+                          premium
+                      )
+                    : Player.fromUserID(player, 0, firstGameOfDay, premium)
             );
+        }
     }
 
     /**
