@@ -619,16 +619,16 @@ function getAliasFooter(
         aliases.push(...round.songAliases);
     }
 
-    if (aliases.length > 0) {
-        const aliasesText = state.localizer.translateByLocale(
-            locale,
-            "misc.inGame.aliases"
-        );
-
-        return `${aliasesText}: ${aliases.join(", ")}`;
+    if (aliases.length === 0) {
+        return "";
     }
 
-    return "";
+    const aliasesText = state.localizer.translateByLocale(
+        locale,
+        "misc.inGame.aliases"
+    );
+
+    return `${aliasesText}: ${aliases.join(", ")}`;
 }
 
 function getDurationFooter(
@@ -777,9 +777,7 @@ export async function sendEndRoundMessage(
     );
 
     const footerText = `${views}${aliases}${duration}`;
-
     const thumbnailUrl = `https://img.youtube.com/vi/${round.song.youtubeLink}/hqdefault.jpg`;
-
     if (round instanceof GameRound) {
         if (isMultipleChoiceMode && round.interactionMessage) {
             embed["thumbnail"] = { url: thumbnailUrl };

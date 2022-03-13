@@ -84,7 +84,7 @@ export default class StatsCommand implements BaseCommand {
             await dbContext.kmq("game_sessions").count("* as count").first()
         ).count;
 
-        const recentRounds =
+        const recentGameRounds =
             (
                 await dbContext
                     .kmq("game_sessions")
@@ -93,7 +93,7 @@ export default class StatsCommand implements BaseCommand {
                     .first()
             ).total || 0;
 
-        const totalRounds =
+        const totalGameRounds =
             (
                 await dbContext
                     .kmq("game_sessions")
@@ -159,8 +159,8 @@ export default class StatsCommand implements BaseCommand {
                 message.guildID,
                 "command.stats.game.recentGameRounds"
             )]: `${friendlyFormattedNumber(
-                recentRounds
-            )} | ${friendlyFormattedNumber(totalRounds)}`,
+                recentGameRounds
+            )} | ${friendlyFormattedNumber(totalGameRounds)}`,
             [state.localizer.translate(
                 message.guildID,
                 "command.stats.game.recentPlayers"

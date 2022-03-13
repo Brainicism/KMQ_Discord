@@ -18,7 +18,7 @@ import {
     getMention,
 } from "../helpers/discord_utils";
 import { UniqueSongCounter } from "./song_selector";
-import { codeLine, friendlyFormattedNumber } from "../helpers/utils";
+import { friendlyFormattedNumber } from "../helpers/utils";
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
 const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\(\)\+\u200B]/g;
@@ -479,29 +479,6 @@ export default class GameRound extends Round {
 
             return false;
         });
-    }
-
-    protected getUniqueSongCounterMessage(
-        messageContext: MessageContext,
-        uniqueSongCounter: UniqueSongCounter
-    ): string {
-        if (!uniqueSongCounter || uniqueSongCounter.uniqueSongsPlayed === 0) {
-            return "";
-        }
-
-        const uniqueSongMessage = state.localizer.translate(
-            messageContext.guildID,
-            "misc.inGame.uniqueSongsPlayed",
-            {
-                uniqueSongCount: codeLine(
-                    `${friendlyFormattedNumber(
-                        uniqueSongCounter.uniqueSongsPlayed
-                    )}/${friendlyFormattedNumber(uniqueSongCounter.totalSongs)}`
-                ),
-            }
-        );
-
-        return `\n${uniqueSongMessage}`;
     }
 
     /**

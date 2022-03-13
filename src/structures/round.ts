@@ -2,6 +2,7 @@ import { PlayerRoundResult, QueriedSong } from "../types";
 import { state } from "../kmq_worker";
 import { UniqueSongCounter } from "./song_selector";
 import MessageContext from "./message_context";
+import { codeLine, friendlyFormattedNumber } from "../helpers/utils";
 
 export const MAX_RUNNERS_UP = 30;
 export const MAX_SCOREBOARD_PLAYERS = 30;
@@ -71,5 +72,28 @@ export default abstract class Round {
      */
     getSkipCount(): number {
         return this.skippers.size;
+    }
+
+    protected getUniqueSongCounterMessage(
+        messageContext: MessageContext,
+        uniqueSongCounter: UniqueSongCounter
+    ): string {
+        if (!uniqueSongCounter || uniqueSongCounter.uniqueSongsPlayed === 0) {
+            return "";
+        }
+
+        const uniqueSongMessage = state.localizer.translate(
+            messageContext.guildID,
+            "misc.inGame.uniqueSongsPlayed",
+            {
+                uniqueSongCount: codeLine(
+                    `${friendlyFormattedNumber(
+                        uniqueSongCounter.uniqueSongsPlayed
+                    )}/${friendlyFormattedNumber(uniqueSongCounter.totalSongs)}`
+                ),
+            }
+        );
+
+        return `\n${uniqueSongMessage}`;
     }
 }

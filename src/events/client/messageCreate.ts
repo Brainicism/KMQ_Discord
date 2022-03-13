@@ -127,6 +127,10 @@ export default async function messageCreateHandler(
                     }) | ${debugId} | ${JSON.stringify(e)}`
                 );
 
+                if (process.env.NODE_ENV === EnvType.DEV) {
+                    logger.error(e.stack);
+                }
+
                 sendErrorMessage(MessageContext.fromMessage(message), {
                     title: state.localizer.translate(
                         message.guildID,
@@ -138,10 +142,6 @@ export default async function messageCreateHandler(
                         { debugId }
                     ),
                 });
-
-                if (process.env.NODE_ENV === EnvType.DEV) {
-                    throw e;
-                }
             }
         }
     } else if (state.gameSessions[message.guildID]?.round) {
