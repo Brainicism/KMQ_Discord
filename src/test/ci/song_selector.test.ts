@@ -19,6 +19,7 @@ import {
     LanguageType,
 } from "../../commands/game_options/language";
 import { ShuffleType } from "../../commands/game_options/shuffle";
+import { DEFAULT_BEGINNING_SEARCH_YEAR } from "../../commands/game_options/cutoff";
 
 async function getMockGuildPreference(): Promise<GuildPreference> {
     const guildPreference = new GuildPreference("test");
@@ -244,7 +245,7 @@ describe("getFilteredSongList", () => {
                     (song) => song.publishedon >= new Date("2016-01-01")
                 ).length;
 
-                await guildPreference.setBeginningCutoffYear(2016);
+                await guildPreference.setCutoff(2016);
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
@@ -259,7 +260,10 @@ describe("getFilteredSongList", () => {
                     (song) => song.publishedon <= new Date("2015-12-31")
                 ).length;
 
-                await guildPreference.setEndCutoffYear(2015);
+                await guildPreference.setCutoff(
+                    DEFAULT_BEGINNING_SEARCH_YEAR,
+                    2015
+                );
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
@@ -276,8 +280,7 @@ describe("getFilteredSongList", () => {
                         song.publishedon <= new Date("2018-12-31")
                 ).length;
 
-                await guildPreference.setBeginningCutoffYear(2008);
-                await guildPreference.setEndCutoffYear(2018);
+                await guildPreference.setCutoff(2008, 2018);
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
@@ -294,8 +297,7 @@ describe("getFilteredSongList", () => {
                         song.publishedon <= new Date("2017-12-31")
                 ).length;
 
-                await guildPreference.setBeginningCutoffYear(2017);
-                await guildPreference.setEndCutoffYear(2017);
+                await guildPreference.setCutoff(2017, 2017);
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
