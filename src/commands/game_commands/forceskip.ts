@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     sendErrorMessage,
     areUserAndBotInSameVoiceChannel,
@@ -12,25 +12,28 @@ import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("forceskip");
 
 export default class ForceSkipCommand implements BaseCommand {
+    aliases = ["fskip", "fs"];
+
     preRunChecks = [
         { checkFn: CommandPrechecks.inGameCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
     ];
 
-    help = {
+    help = (guildID: string): Help => ({
         name: "forceskip",
-        description:
-            "The person that started the game can force-skip the current song, no majority necessary.",
+        description: state.localizer.translate(
+            guildID,
+            "command.forceskip.help.description"
+        ),
         usage: ",forceskip",
         examples: [],
         priority: 1009,
-    };
-
-    aliases = ["fskip", "fs"];
+    });
 
     call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
@@ -52,17 +55,22 @@ export default class ForceSkipCommand implements BaseCommand {
             return;
         }
 
-        if (gameSession.gameRound.skipAchieved || !gameSession.gameRound) {
+        if (gameSession.gameRound.skipAchieved) {
             // song already being skipped
             return;
         }
 
         if (message.author.id !== gameSession.owner.id) {
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Force Skip Ignored",
-                description: `Only the person who started the game (${getMention(
-                    gameSession.owner.id
-                )}) can force-skip.`,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.forceskip.failure.notOwner.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "command.forceskip.failure.notOwner.description",
+                    { mentionedUser: getMention(gameSession.owner.id) }
+                ),
             });
             return;
         }
@@ -72,8 +80,14 @@ export default class ForceSkipCommand implements BaseCommand {
             MessageContext.fromMessage(message),
             {
                 color: EMBED_SUCCESS_COLOR,
-                title: "Skip",
-                description: "Owner has forceskipped the round...",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.skip.success.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "command.forceskip.description"
+                ),
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
             },
             true

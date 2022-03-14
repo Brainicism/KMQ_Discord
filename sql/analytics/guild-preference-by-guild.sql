@@ -1,3 +1,3 @@
 SELECT *
-FROM kmq.guild_preferences
+FROM kmq.guilds
 WHERE guild_id = '?';

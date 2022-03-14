@@ -7,13 +7,15 @@ BEGIN
 	/* update available_songs table */
 	DROP TABLE IF EXISTS available_songs_temp;
 	CREATE TABLE available_songs_temp (
-		song_name VARCHAR(255) NOT NULL,
-		clean_song_name VARCHAR(255) NOT NULL,
+		song_name_en VARCHAR(255) NOT NULL,
+		clean_song_name_en VARCHAR(255) NOT NULL,
+		song_name_ko VARCHAR(255) NOT NULL,
+		clean_song_name_ko VARCHAR(255) NOT NULL,
 		song_aliases VARCHAR(255) NOT NULL,
-		hangul_aliases VARCHAR(255) NOT NULL,
-		artist_aliases VARCHAR(255) NOT NULL,
 		link VARCHAR(255) NOT NULL,
-		artist_name VARCHAR(255) NOT NULL,
+		artist_name_en VARCHAR(255) NOT NULL,
+		artist_name_ko VARCHAR(255),
+		artist_aliases VARCHAR(255) NOT NULL,
 		members ENUM('female','male','coed') NOT NULL,
 		views BIGINT NOT NULL,
 		publishedon DATE NOT NULL,
@@ -30,13 +32,15 @@ BEGIN
 	/* music videos */
 	INSERT INTO available_songs_temp
 	SELECT
-		TRIM(app_kpop.name) AS song_name,
-		TRIM(SUBSTRING_INDEX(app_kpop.name, '(', 1)) AS clean_song_name,
+		TRIM(kpop_videos.app_kpop.name) AS song_name_en,
+		TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1)) AS clean_song_name_en,
+		TRIM(kpop_videos.app_kpop.kname) AS song_name_ko,
+		TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop.kname, '(', 1)) AS clean_song_name_ko,
 		name_aka AS song_aliases,
-		kpop_videos.app_kpop.kname AS hangul_aliases,
-		kpop_videos.app_kpop_group.alias AS artist_aliases,
 		vlink AS link,
-		TRIM(kpop_videos.app_kpop_group.name) AS artist_name,
+		TRIM(kpop_videos.app_kpop_group.name) AS artist_name_en,
+		TRIM(kpop_videos.app_kpop_group.kname) AS artist_name_ko,
+		kpop_videos.app_kpop_group.alias AS artist_aliases,
 		kpop_videos.app_kpop_group.members AS members,
 		kpop_videos.app_kpop.views AS views,
 		releasedate as publishedon,
@@ -60,13 +64,15 @@ BEGIN
 	SELECT *
 	FROM (
 		SELECT
-			TRIM(app_kpop_audio.name) AS song_name,
-			TRIM(SUBSTRING_INDEX(app_kpop_audio.name, '(', 1)) AS clean_song_name,
+			TRIM(kpop_videos.app_kpop_audio.name) AS song_name_en,
+			TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop_audio.name, '(', 1)) AS clean_song_name_en,
+			TRIM(kpop_videos.app_kpop_audio.kname) AS song_name_ko,
+			TRIM(SUBSTRING_INDEX(kpop_videos.app_kpop_audio.kname, '(', 1)) AS clean_song_name_ko,
 			name_aka AS song_aliases,
-			kpop_videos.app_kpop_audio.kname AS hangul_aliases,
-			kpop_videos.app_kpop_group.alias AS artist_aliases,
 			vlink AS link,
-			TRIM(kpop_videos.app_kpop_group.name) AS artist_name,
+			TRIM(kpop_videos.app_kpop_group.name) AS artist_name_en,
+			TRIM(kpop_videos.app_kpop_group.kname) AS artist_name_ko,
+			kpop_videos.app_kpop_group.alias AS artist_aliases,
 			kpop_videos.app_kpop_group.members AS members,
 			kpop_videos.app_kpop_audio.views AS views,
 			releasedate as publishedon,
@@ -85,11 +91,11 @@ BEGIN
 	) rankedAudioSongs
 	WHERE rank <= maxRank;
 
-	DELETE FROM available_songs_temp WHERE clean_song_name = '';
+	DELETE FROM available_songs_temp WHERE clean_song_name_en = '';
 
 	RENAME TABLE available_songs TO old, available_songs_temp TO available_songs;
 	DROP TABLE old;
-	
+
 	/* copy over new copy of app_kpop_group */
 	DROP TABLE IF EXISTS kmq.kpop_groups_temp;
 	CREATE TABLE kmq.kpop_groups_temp LIKE kpop_videos.app_kpop_group;

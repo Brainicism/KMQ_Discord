@@ -6,6 +6,7 @@ import {
     sendInfoMessage,
     getUserVoiceChannel,
     getDebugLogHeader,
+    getGuildLocale,
 } from "../../helpers/discord_utils";
 import {
     getGuildPreference,
@@ -44,8 +45,14 @@ export default class DebugCommand implements BaseCommand {
         fields.push({
             name: "Text Permissions",
             value: JSON.stringify(
-                channel.permissionsOf(state.client.user.id).json
+                channel.permissionsOf(process.env.BOT_CLIENT_ID).json
             ),
+            inline: false,
+        });
+
+        fields.push({
+            name: "Locale",
+            value: getGuildLocale(message.guildID),
             inline: false,
         });
 
@@ -57,7 +64,7 @@ export default class DebugCommand implements BaseCommand {
             fields.push({
                 name: "Voice Permissions",
                 value: JSON.stringify(
-                    voiceChannel.permissionsOf(state.client.user.id).json
+                    voiceChannel.permissionsOf(process.env.BOT_CLIENT_ID).json
                 ),
                 inline: false,
             });
@@ -65,8 +72,17 @@ export default class DebugCommand implements BaseCommand {
 
         const debugID = uuid.v4();
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: "Debug Details Sent!",
-            description: `If you were asked by a bot developer to do this, give them this:\n\`${debugID}\``,
+            title: state.localizer.translate(
+                message.guildID,
+                "command.debug.title"
+            ),
+            description: state.localizer.translate(
+                message.guildID,
+                "command.debug.description",
+                {
+                    debugID: `\`${debugID}\``,
+                }
+            ),
             thumbnailUrl: KmqImages.READING_BOOK,
         });
 

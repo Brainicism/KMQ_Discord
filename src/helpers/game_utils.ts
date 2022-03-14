@@ -1,15 +1,18 @@
 import _ from "lodash";
+import { execSync } from "child_process";
 import dbContext from "../database_context";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
 import GameSession from "../structures/game_session";
 import GuildPreference from "../structures/guild_preference";
-import { MatchedArtist } from "../types";
+import { MatchedArtist, QueriedSong } from "../types";
 import { Gender } from "../commands/game_options/gender";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { cleanArtistName, cleanSongName } from "../structures/game_round";
 import { AnswerType } from "../commands/game_options/answer";
 import SongSelector from "../structures/song_selector";
+import { LocaleType } from "./localization_manager";
+import { containsHangul, md5Hash } from "./utils";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -90,14 +93,14 @@ export async function getGuildPreference(
     guildID: string
 ): Promise<GuildPreference> {
     const guildPreferences = await dbContext
-        .kmq("guild_preferences")
+        .kmq("guilds")
         .select("*")
         .where("guild_id", "=", guildID);
 
     if (guildPreferences.length === 0) {
         const guildPreference = GuildPreference.fromGuild(guildID);
         await dbContext
-            .kmq("guild_preferences")
+            .kmq("guilds")
             .insert({ guild_id: guildID, join_date: new Date() });
         return guildPreference;
     }
@@ -106,7 +109,7 @@ export async function getGuildPreference(
         await dbContext
             .kmq("game_options")
             .select("*")
-            .where({ guild_id: guildID })
+            .where({ guild_id: guildID, client_id: process.env.BOT_CLIENT_ID })
     )
         .map((x) => ({ [x["option_name"]]: JSON.parse(x["option_value"]) }))
         .reduce((total, curr) => Object.assign(total, curr), {});
@@ -211,6 +214,7 @@ export async function getMatchingGroupNames(
  * @param gender - The correct answer's group's gender
  * @param answer - The correct answer
  * @param artistID - The correct answer's group's ID
+ * @param locale - The server's locale
  * @returns unshuffled incorrect choices based on difficulty
  */
 export async function getMultipleChoiceOptions(
@@ -218,15 +222,17 @@ export async function getMultipleChoiceOptions(
     guessMode: GuessModeType,
     gender: Gender,
     answer: string,
-    artistID: number
+    artistID: number,
+    locale: LocaleType
 ): Promise<string[]> {
+    const useHangul = locale === LocaleType.KO && containsHangul(answer);
     let easyNames: string[];
     let names: string[];
     let result: string[];
 
     const EASY_CHOICES = 3;
     const MEDIUM_CHOICES = 5;
-    const MEDIUM_SAME_ARIST_CHOICES = 2;
+    const MEDIUM_SAME_ARTIST_CHOICES = 2;
     const HARD_CHOICES = 7;
 
     const CHOICES_BY_DIFFICULTY = {
@@ -239,18 +245,36 @@ export async function getMultipleChoiceOptions(
         guessMode === GuessModeType.SONG_NAME ||
         guessMode === GuessModeType.BOTH
     ) {
+        const pickNonEmpty = (results: {
+            clean_song_name_en: string;
+            clean_song_name_ko: string;
+        }): string => {
+            if (
+                locale === LocaleType.KO &&
+                results.clean_song_name_ko &&
+                useHangul
+            ) {
+                return results.clean_song_name_ko;
+            }
+
+            return results.clean_song_name_en;
+        };
+
+        const songName = useHangul
+            ? "clean_song_name_ko"
+            : "clean_song_name_en";
+
         easyNames = (
             await dbContext
                 .kmq("available_songs")
-                .select("clean_song_name")
-                .groupByRaw("UPPER(clean_song_name)")
+                .select("clean_song_name_en", "clean_song_name_ko")
+                .groupByRaw(`UPPER(${songName})`)
                 .where("members", gender)
-                .andWhereRaw(
-                    "NOT UPPER(clean_song_name) = ?",
-                    answer.toUpperCase()
-                )
+                .andWhereRaw(`NOT UPPER(${songName}) = ?`, [
+                    answer.toUpperCase(),
+                ])
                 .andWhereNot("id_artist", artistID)
-        ).map((x) => x["clean_song_name"]);
+        ).map((x) => pickNonEmpty(x));
         switch (answerType) {
             case AnswerType.MULTIPLE_CHOICE_EASY: {
                 // Easy: EASY_CHOICES from same gender as chosen artist
@@ -264,32 +288,31 @@ export async function getMultipleChoiceOptions(
                     (
                         await dbContext
                             .kmq("available_songs")
-                            .select("clean_song_name")
-                            .groupByRaw("UPPER(clean_song_name)")
+                            .select("clean_song_name_en", "clean_song_name_ko")
+                            .groupByRaw(`UPPER(${songName})`)
                             .where("id_artist", artistID)
-                            .andWhereRaw(
-                                "NOT UPPER(clean_song_name) = ?",
-                                answer.toUpperCase()
-                            )
-                    ).map((x) => x["clean_song_name"]),
-                    MEDIUM_SAME_ARIST_CHOICES
+                            .andWhereRaw(`NOT UPPER(${songName}) = ?`, [
+                                answer.toUpperCase(),
+                            ])
+                    ).map((x) => pickNonEmpty(x)),
+                    MEDIUM_SAME_ARTIST_CHOICES
                 );
 
                 const sameGenderSongs = _.sampleSize(
                     (
                         await dbContext
                             .kmq("available_songs")
-                            .select("clean_song_name")
-                            .groupByRaw("UPPER(clean_song_name)")
+                            .select("clean_song_name_en", "clean_song_name_ko")
+                            .groupByRaw(`UPPER(${songName})`)
                             .where("members", gender)
-                            .andWhereRaw("UPPER(clean_song_name) NOT IN (?)", [
+                            .andWhereRaw(`UPPER(${songName}) NOT IN (?)`, [
                                 [...sameArtistSongs, answer].map((x) =>
                                     x.toUpperCase()
                                 ),
                             ])
                             .andWhereNot("id_artist", artistID)
-                    ).map((x) => x["clean_song_name"]),
-                    MEDIUM_CHOICES - MEDIUM_SAME_ARIST_CHOICES
+                    ).map((x) => pickNonEmpty(x)),
+                    MEDIUM_CHOICES - MEDIUM_SAME_ARTIST_CHOICES
                 );
 
                 result = [...sameArtistSongs, ...sameGenderSongs];
@@ -301,14 +324,13 @@ export async function getMultipleChoiceOptions(
                 names = (
                     await dbContext
                         .kmq("available_songs")
-                        .select("clean_song_name")
-                        .groupByRaw("UPPER(clean_song_name)")
+                        .select("clean_song_name_en", "clean_song_name_ko")
+                        .groupByRaw(`UPPER(${songName})`)
                         .where("id_artist", artistID)
-                        .andWhereRaw(
-                            "NOT UPPER(clean_song_name) = ?",
-                            answer.toUpperCase()
-                        )
-                ).map((x) => x["clean_song_name"]);
+                        .andWhereRaw(`NOT UPPER(${songName}) = ?`, [
+                            answer.toUpperCase(),
+                        ])
+                ).map((x) => pickNonEmpty(x));
                 result = _.sampleSize(names, HARD_CHOICES);
                 break;
             }
@@ -340,12 +362,28 @@ export async function getMultipleChoiceOptions(
             }
         }
     } else {
+        const pickNonEmpty = (results: {
+            artist_name_en: string;
+            artist_name_ko: string;
+        }): string => {
+            if (
+                locale === LocaleType.KO &&
+                results.artist_name_ko &&
+                useHangul
+            ) {
+                return results.artist_name_ko;
+            }
+
+            return results.artist_name_en;
+        };
+
+        const artistName = useHangul ? "artist_name_ko" : "artist_name_en";
         easyNames = (
             await dbContext
                 .kmq("available_songs")
-                .select("artist_name")
-                .whereNot("artist_name", answer)
-        ).map((x) => x["artist_name"]);
+                .select("artist_name_en", "artist_name_ko")
+                .whereNot(artistName, answer)
+        ).map((x) => pickNonEmpty(x));
         switch (answerType) {
             case AnswerType.MULTIPLE_CHOICE_EASY:
                 // Easy: EASY_CHOICES from any artist
@@ -358,10 +396,10 @@ export async function getMultipleChoiceOptions(
                 names = (
                     await dbContext
                         .kmq("available_songs")
-                        .select("artist_name")
+                        .select("artist_name_en", "artist_name_ko")
                         .where("members", gender)
-                        .andWhereNot("artist_name", answer)
-                ).map((x) => x["artist_name"]);
+                        .andWhereNot(artistName, answer)
+                ).map((x) => pickNonEmpty(x));
                 result = _.sampleSize(names, CHOICES_BY_DIFFICULTY[answerType]);
                 break;
             default:
@@ -370,4 +408,90 @@ export async function getMultipleChoiceOptions(
     }
 
     return result;
+}
+
+/**
+ * @param userID - The user's ID
+ * @returns whether this is the user's first game played today
+ */
+export async function isFirstGameOfDay(userID: string): Promise<boolean> {
+    const player = await dbContext
+        .kmq("player_stats")
+        .select(
+            dbContext.kmq.raw(
+                "DAYOFYEAR(last_active) = DAYOFYEAR(CURDATE()) as firstGameOfDay"
+            )
+        )
+        .where("player_id", "=", userID)
+        .first();
+
+    if (!player) return true;
+    return player["firstGameOfDay"] === 0;
+}
+
+/**
+ * @returns KMQ's current version
+ */
+export function getKmqCurrentVersion(): string {
+    return execSync("git describe --tags").toString().trim();
+}
+
+/**
+ * @param song - The song to retrieve the name from
+ * @param locale - The guild's locale
+ * @param original - Whether to return the original song name
+ * @returns the song name in Hangul if the server is using the Korean locale and the song has a Hangul name;
+ * the original song name otherwise
+ */
+export function getLocalizedSongName(
+    song: QueriedSong,
+    locale: LocaleType,
+    original = true
+): string {
+    const songName = original ? song.originalSongName : song.songName;
+    if (locale !== LocaleType.KO) {
+        return songName;
+    }
+
+    const hangulSongName = original
+        ? song.originalHangulSongName
+        : song.hangulSongName;
+
+    return hangulSongName || songName;
+}
+
+/**
+ * @param song - The song to retrieve the artist from
+ * @param locale - The guild's locale
+ * @returns the artist's name in Hangul if the server is using the Korean locale and the artist has a Hangul name;
+ * the artist's name otherwise
+ */
+export function getLocalizedArtistName(
+    song: QueriedSong,
+    locale: LocaleType
+): string {
+    if (locale !== LocaleType.KO) {
+        return song.artistName;
+    }
+
+    return song.hangulArtistName || song.artistName;
+}
+
+/** @returns whether its a KMQ power hour */
+export function isPowerHour(): boolean {
+    const date = new Date();
+    const dateSeed =
+        (date.getDate() * 31 + date.getMonth()) * 31 + date.getFullYear();
+
+    // distribute between each third of the day to accomodate timezone differences
+    const powerHours = [
+        md5Hash(dateSeed, 8) % 7,
+        (md5Hash(dateSeed + 1, 8) % 7) + 8,
+        (md5Hash(dateSeed + 2, 8) % 7) + 16,
+    ];
+
+    const currentHour = date.getHours();
+    return powerHours.some(
+        (powerHour) => currentHour >= powerHour && currentHour <= powerHour + 1
+    );
 }

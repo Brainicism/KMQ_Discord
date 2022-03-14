@@ -11,3 +11,5 @@ export class KmqImages {
     public static THUMBS_UP =
         "https://kmq.kpop.gg/static/thumbnails/thumbs_up_bg.png";
 }
+
+export const GROUP_LIST_URL = "https://kmq.kpop.gg/groups";

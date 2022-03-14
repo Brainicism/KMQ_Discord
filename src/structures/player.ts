@@ -1,13 +1,22 @@
-import { getUserTag, getMention } from "../helpers/discord_utils";
-import { roundDecimal, bold } from "../helpers/utils";
+import {
+    ExpBonusModifier,
+    ExpBonusModifierValues,
+} from "../commands/game_commands/exp";
+import { getMention } from "../helpers/discord_utils";
+import { bold } from "../helpers/utils";
 import { state } from "../kmq_worker";
 
 export default class Player {
-    /** The Discord tag of the player, of the format "Player#1234" */
+    /** The Discord username of the player sans discriminator,
+     * i.e. "Player" when the player's user tag is "Player#1234"
+     */
     public readonly name: string;
 
     /** The Discord user ID of the player */
     public readonly id: string;
+
+    /** Whether the player is still in the game voice channel */
+    public inVC: boolean;
 
     /** The player's current score */
     protected score: number;
@@ -18,27 +27,48 @@ export default class Player {
     /** The player's EXP gain */
     private expGain: number;
 
-    constructor(tag: string, id: string, avatarURL: string, points: number) {
-        this.name = tag;
+    /** Whether it's the player's first game of the day */
+    private firstGameOfTheDay: boolean;
+
+    /** The previous round's ranking */
+    private previousRoundRanking: number;
+
+    constructor(
+        name: string,
+        id: string,
+        avatarURL: string,
+        points: number,
+        firstGameOfTheDay = false
+    ) {
+        this.name = name;
         this.id = id;
+        this.inVC = true;
         this.score = points;
         this.avatarURL = avatarURL;
         this.expGain = 0;
+        this.firstGameOfTheDay = firstGameOfTheDay;
+        this.previousRoundRanking = null;
     }
 
-    static fromUserID(userID: string): Player {
+    static fromUserID(
+        userID: string,
+        score = 0,
+        firstGameOfDay = false
+    ): Player {
         const user = state.client.users.get(userID);
-        return new Player(getUserTag(user), user.id, user.avatarURL, 0);
-    }
 
-    /** @returns the player's Discord tag  */
-    getName(): string {
-        return this.name;
+        return new Player(
+            user.username,
+            user.id,
+            user.avatarURL,
+            score,
+            firstGameOfDay
+        );
     }
 
     /**
-     * Prints the tag (including the discriminator) in the smaller scoreboard, but only
-     * the username in the larger scoreboard
+     * Formats the player's name depending on whether they won the round, if they guessed first,
+     * and if their name should be a Discord mention
      * @param first - Whether the player won the previous round
      * @param wonRound - Whether the player guessed correctly in the previous round
      * @param mention - Whether the displayed name should be a clickable mention
@@ -50,8 +80,8 @@ export default class Player {
         mention: boolean
     ): string {
         let name = this.name;
-        if (mention) {
-            name = getMention(this.getID());
+        if (mention && this.inVC) {
+            name = getMention(this.id);
         }
 
         if (wonRound) {
@@ -76,19 +106,15 @@ export default class Player {
 
     /** @returns what to display as the score in the scoreboard for the player */
     getDisplayedScore(): string {
-        return Number.isInteger(roundDecimal(this.getScore(), 1))
-            ? roundDecimal(this.getScore(), 1).toString()
-            : this.getScore().toFixed(1);
+        const rounded = Number(this.getScore().toFixed(1));
+        return bold(
+            Number.isInteger(rounded) ? rounded.toFixed() : rounded.toFixed(1)
+        );
     }
 
     /** @returns the player's EXP gain */
     getExpGain(): number {
-        return this.expGain;
-    }
-
-    /** @returns the player's Discord ID */
-    getID(): string {
-        return this.id;
+        return Math.floor(this.expGain);
     }
 
     /** @returns the player's avatar URL */
@@ -110,6 +136,46 @@ export default class Player {
      */
 
     incrementExp(expGain: number): void {
-        this.expGain += expGain;
+        this.expGain +=
+            (this.firstGameOfTheDay
+                ? ExpBonusModifierValues[ExpBonusModifier.FIRST_GAME_OF_DAY]
+                : 1) * expGain;
+    }
+
+    setPreviousRanking(previousRanking: number): void {
+        this.previousRoundRanking = previousRanking;
+    }
+
+    /**
+     * @param currentRoundRanking - The player's current round ranking
+     * @param inProgress - Whether the game is in progress
+     * @returns what to prefix player's name with in the scoreboard
+     */
+    getRankingPrefix(currentRoundRanking: number, inProgress: boolean): string {
+        const previousRank = this.previousRoundRanking;
+        const currentRank = currentRoundRanking;
+        const displayedRank = `${currentRank + 1}.`;
+        if (
+            !inProgress ||
+            previousRank === null ||
+            currentRank === previousRank
+        ) {
+            return displayedRank;
+        }
+
+        if (currentRank < previousRank) {
+            return `↑ ${displayedRank}`;
+        }
+
+        if (currentRank > previousRank) {
+            return `↓ ${displayedRank}`;
+        }
+    }
+
+    /**
+     * @returns whether to include this player in the scoreboard
+     */
+    shouldIncludeInScoreboard(): boolean {
+        return this.getScore() > 0 || this.inVC;
     }
 }

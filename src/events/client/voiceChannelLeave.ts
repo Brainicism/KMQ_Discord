@@ -17,6 +17,10 @@ export default function voiceChannelLeaveHandler(
         return;
     }
 
+    if (oldChannel.id !== gameSession.voiceChannelID) {
+        return;
+    }
+
     if (checkBotIsAlone(guildID)) {
         gameSession.endSession();
         return;
@@ -24,5 +28,6 @@ export default function voiceChannelLeaveHandler(
 
     if (!gameSession.finished) {
         gameSession.updateOwner();
+        gameSession.setPlayerInVC(member.id, false);
     }
 }

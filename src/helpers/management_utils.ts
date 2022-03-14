@@ -4,10 +4,11 @@ import schedule from "node-schedule";
 import _ from "lodash";
 import { IPCLogger } from "../logger";
 import { state } from "../kmq_worker";
-import { sendInfoMessage } from "./discord_utils";
+import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
 import messageCreateHandler from "../events/client/messageCreate";
 import voiceChannelLeaveHandler from "../events/client/voiceChannelLeave";
 import voiceChannelSwitchHandler from "../events/client/voiceChannelSwitch";
+import voiceChannelJoinHandler from "../events/client/voiceChannelJoin";
 import connectHandler from "../events/client/connect";
 import errorHandler from "../events/client/error";
 import warnHandler from "../events/client/warn";
@@ -21,6 +22,7 @@ import SIGINTHandler from "../events/process/SIGINT";
 import {
     cleanupInactiveGameSessions,
     getMatchingGroupNames,
+    isPowerHour,
 } from "./game_utils";
 import dbContext from "../database_context";
 import debugHandler from "../events/client/debug";
@@ -29,11 +31,12 @@ import guildDeleteHandler from "../events/client/guildDelete";
 import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
 import guildAvailableHandler from "../events/client/guildAvailable";
 import interactionCreateHandler from "../events/client/interactionCreate";
-import { chooseRandom } from "./utils";
+import { chooseRandom, isWeekend } from "./utils";
 import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
 import { EnvType } from "../types";
 import channelDeleteHandler from "../events/client/channelDelete";
+import { LocaleType } from "./localization_manager";
 
 const logger = new IPCLogger("management_utils");
 
@@ -51,6 +54,7 @@ export function registerClientEvents(): void {
         .on("messageCreate", messageCreateHandler)
         .on("voiceChannelLeave", voiceChannelLeaveHandler)
         .on("voiceChannelSwitch", voiceChannelSwitchHandler)
+        .on("voiceChannelJoin", voiceChannelJoinHandler)
         .on("channelDelete", channelDeleteHandler)
         .on("connect", connectHandler)
         .on("error", errorHandler)
@@ -190,6 +194,14 @@ export async function updateBotStatus(): Promise<void> {
         return;
     }
 
+    if (isPowerHour() && !isWeekend()) {
+        client.editStatus("online", {
+            name: "🎶 Power Hour! 🎶",
+            type: 5,
+        });
+        return;
+    }
+
     const randomPopularSongs = await dbContext
         .kmq("available_songs")
         .orderBy("publishedon", "DESC")
@@ -202,7 +214,7 @@ export async function updateBotStatus(): Promise<void> {
     }
 
     client.editStatus("online", {
-        name: `"${randomPopularSong["song_name"]}" by ${randomPopularSong["artist_name"]}`,
+        name: `"${randomPopularSong["song_name_en"]}" by ${randomPopularSong["artist_name_en"]}`,
         type: 1,
         url: `https://www.youtube.com/watch?v=${randomPopularSong["link"]}`,
     });
@@ -215,43 +227,28 @@ export async function reloadAliases(): Promise<void> {
         .select(["link", "song_aliases"])
         .where("song_aliases", "<>", "");
 
-    const hangulAliasMapping = await dbContext
-        .kmq("available_songs")
-        .select(["link", "hangul_aliases"])
-        .where("hangul_aliases", "<>", "");
-
     const artistAliasMapping = await dbContext
         .kmq("available_songs")
-        .distinct(["artist_name", "artist_aliases"])
-        .select(["artist_name", "artist_aliases"])
+        .distinct(["artist_name_en", "artist_aliases"])
+        .select(["artist_name_en", "artist_aliases"])
         .where("artist_aliases", "<>", "");
 
-    const newSongAliases = {};
+    const songAliases = {};
     for (const mapping of songAliasMapping) {
-        newSongAliases[mapping["link"]] = mapping["song_aliases"]
+        songAliases[mapping["link"]] = mapping["song_aliases"]
             .split(";")
-            .filter((x) => x);
+            .filter((x: string) => x);
     }
 
-    for (const mapping of hangulAliasMapping) {
-        if (!newSongAliases[mapping["link"]]) {
-            newSongAliases[mapping["link"]] = [];
-        }
-
-        newSongAliases[mapping["link"]].push(
-            ...mapping["hangul_aliases"].split(";").filter((x) => x)
-        );
-    }
-
-    const newArtistAliases = {};
+    const artistAliases = {};
     for (const mapping of artistAliasMapping) {
-        newArtistAliases[mapping["artist_name"]] = mapping["artist_aliases"]
+        artistAliases[mapping["artist_name_en"]] = mapping["artist_aliases"]
             .split(";")
-            .filter((x) => x);
+            .filter((x: string) => x);
     }
 
-    state.aliases.artist = newArtistAliases;
-    state.aliases.song = newSongAliases;
+    state.aliases.artist = artistAliases;
+    state.aliases.song = songAliases;
     logger.info("Reloaded alias data");
 }
 
@@ -281,6 +278,13 @@ export async function reloadBonusGroups(): Promise<void> {
     );
 }
 
+async function reloadLocales(): Promise<void> {
+    const updatedLocales = await dbContext.kmq("locale").select("*");
+    for (const l of updatedLocales) {
+        state.locales[l.guild_id] = l.locale as LocaleType;
+    }
+}
+
 /**
  * Clears any existing restart timers
  */
@@ -296,34 +300,49 @@ export async function clearRestartNotification(): Promise<void> {
  *  Sets up recurring cron-based tasks
  * */
 export function registerIntervals(clusterID: number): void {
-    // set up cleanup for inactive game sessions
+    // Everyday at 12am UTC => 7pm EST
+    schedule.scheduleJob("0 0 * * *", async () => {
+        // New fun facts
+        reloadFactCache();
+        // New bonus groups
+        reloadBonusGroups();
+    });
+
+    // Every hour
+    schedule.scheduleJob("0 * * * *", async () => {
+        if (!isPowerHour() || isWeekend()) return;
+        if (!state.client.guilds.has(process.env.DEBUG_SERVER_ID)) return;
+        // Ping a role in KMQ server notifying of power hour
+        sendPowerHourNotification();
+    });
+
+    // Every 10 minutes
     schedule.scheduleJob("*/10 * * * *", () => {
+        // Cleanup inactive game sessions
         cleanupInactiveGameSessions();
+        // Change bot's status (song playing, power hour, etc.)
         updateBotStatus();
     });
 
-    // set up check for restart notifications
+    // Every 5 minutes
+    schedule.scheduleJob("*/5 * * * *", async () => {
+        // Update song/artist aliases
+        reloadAliases();
+        // Cleanup inactive Discord voice connections
+        clearInactiveVoiceConnections();
+        // Store per-cluster stats
+        await updateSystemStats(clusterID);
+    });
+
+    // Every minute
     schedule.scheduleJob("* * * * *", async () => {
         if (process.env.NODE_ENV !== EnvType.PROD) return;
-        // unscheduled restarts
+        // set up check for restart notifications
         const timeUntilRestart = await getTimeUntilRestart();
         if (timeUntilRestart) {
             updateBotStatus();
             await checkRestartNotification(timeUntilRestart);
         }
-    });
-
-    // everyday at 12am UTC => 7pm EST
-    schedule.scheduleJob("0 0 * * *", async () => {
-        reloadFactCache();
-        reloadBonusGroups();
-    });
-
-    // every 5 minutes
-    schedule.scheduleJob("*/5 * * * *", async () => {
-        reloadAliases();
-        clearInactiveVoiceConnections();
-        await updateSystemStats(clusterID);
     });
 }
 
@@ -332,6 +351,7 @@ export async function reloadCaches(): Promise<void> {
     reloadAliases();
     reloadFactCache();
     reloadBonusGroups();
+    reloadLocales();
 }
 
 /**

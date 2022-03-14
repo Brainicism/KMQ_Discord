@@ -19,12 +19,30 @@ export default async function voiceChannelSwitchHandler(
         return;
     }
 
+    if (
+        newChannel.id !== gameSession.voiceChannelID &&
+        oldChannel.id !== gameSession.voiceChannelID
+    ) {
+        return;
+    }
+
     if (checkBotIsAlone(guildID)) {
         gameSession.endSession();
         return;
     }
 
     if (!gameSession.finished) {
+        if (member.id !== process.env.BOT_CLIENT_ID) {
+            await gameSession.setPlayerInVC(
+                member.id,
+                newChannel.id === gameSession.voiceChannelID
+            );
+        } else {
+            // Bot was moved to another VC
+            gameSession.voiceChannelID = newChannel.id;
+            gameSession.syncAllVoiceMembers();
+        }
+
         gameSession.updateOwner();
     }
 }

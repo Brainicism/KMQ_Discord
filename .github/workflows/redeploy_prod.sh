@@ -2,9 +2,10 @@
 cd /home/kmq/prod
 
 echo "git fetch"
-git fetch
+git fetch -all
 
 echo "Checking out prod branch"
+git reset --hard origin/prod
 git checkout prod
 
 echo "Pulling latest prod changes"

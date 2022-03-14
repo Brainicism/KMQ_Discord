@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
 import {
@@ -9,6 +9,7 @@ import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import { GameOptionInternalToGameOption } from "../../structures/guild_preference";
 import { GameOption } from "../../types";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("reset");
 
@@ -21,18 +22,24 @@ export default class ResetCommand implements BaseCommand {
         arguments: [],
     };
 
-    help = {
+    help = (guildID: string): Help => ({
         name: "reset",
-        description: "Reset to the default game options",
+        description: state.localizer.translate(
+            guildID,
+            "command.reset.help.description"
+        ),
         usage: ",reset",
         examples: [
             {
                 example: "`,reset`",
-                explanation: "Resets to the default game options",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.reset.help.example.reset"
+                ),
             },
         ],
         priority: 130,
-    };
+    });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

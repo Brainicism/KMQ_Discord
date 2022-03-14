@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     getMajorityCount,
@@ -17,6 +17,7 @@ import EliminationScoreboard from "../../structures/elimination_scoreboard";
 import GameRound from "../../structures/game_round";
 import GuildPreference from "../../structures/guild_preference";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("hint");
 
@@ -62,12 +63,22 @@ async function sendHintNotification(
         await sendInfoMessage(
             MessageContext.fromMessage(message),
             {
-                title: "Hint Request",
-                description: `${gameSession.gameRound.getHintRequests()}/${
-                    Math.floor(
-                        eliminationScoreboard.getAlivePlayersCount() * 0.5
-                    ) + 1
-                } hint requests received.`,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.hint.request.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "command.hint.request.description",
+                    {
+                        hintCounter: `${gameSession.gameRound.getHintRequests()}/${
+                            Math.floor(
+                                eliminationScoreboard.getAlivePlayersCount() *
+                                    0.5
+                            ) + 1
+                        }`,
+                    }
+                ),
             },
             true
         );
@@ -75,10 +86,19 @@ async function sendHintNotification(
         await sendInfoMessage(
             MessageContext.fromMessage(message),
             {
-                title: "Hint Request",
-                description: `${gameSession.gameRound.getHintRequests()}/${getMajorityCount(
-                    message.guildID
-                )} hint requests received.`,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.hint.request.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "command.hint.request.description",
+                    {
+                        hintCounter: `${gameSession.gameRound.getHintRequests()}/${getMajorityCount(
+                            message.guildID
+                        )}`,
+                    }
+                ),
             },
             true
         );
@@ -101,8 +121,14 @@ export function validHintCheck(
     if (!gameSession || !gameRound) {
         logger.warn(`${getDebugLogHeader(message)} | No active game session`);
         sendErrorMessage(MessageContext.fromMessage(message), {
-            title: "Invalid Hint Request",
-            description: "A hint can only be requested when a song is playing.",
+            title: state.localizer.translate(
+                message.guildID,
+                "command.hint.failure.invalidHintRequest.title"
+            ),
+            description: state.localizer.translate(
+                message.guildID,
+                "command.hint.failure.invalidHintRequest.noSongPlaying.description"
+            ),
             thumbnailUrl: KmqImages.NOT_IMPRESSED,
         });
         return false;
@@ -114,17 +140,28 @@ export function validHintCheck(
 
         if (eliminationScoreboard.isPlayerEliminated(message.author.id)) {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Invalid Hint Request",
-                description: "Only alive players may request hints.",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.hint.failure.invalidHintRequest.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "command.hint.failure.invalidHintRequest.eliminated.description"
+                ),
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
             });
             return false;
         }
     } else if (guildPreference.isMultipleChoiceMode()) {
         sendErrorMessage(MessageContext.fromMessage(message), {
-            title: "Invalid Hint Request",
-            description:
-                "You cannot request hints while playing multiple choice.",
+            title: state.localizer.translate(
+                message.guildID,
+                "command.hint.failure.invalidHintRequest.title"
+            ),
+            description: state.localizer.translate(
+                message.guildID,
+                "command.hint.failure.invalidHintRequest.multipleChoice.description"
+            ),
             thumbnailUrl: KmqImages.NOT_IMPRESSED,
         });
         return false;
@@ -134,39 +171,50 @@ export function validHintCheck(
 }
 
 /**
+ * @param guildID - The guild ID
  * @param guessMode - The guess mode
  * @param gameRound - The game round
  * @returns the hint corresponding to the current game round
  */
 export function generateHint(
+    guildID: string,
     guessMode: GuessModeType,
     gameRound: GameRound
 ): string {
     switch (guessMode) {
         case GuessModeType.ARTIST:
-            return `Artist Name: ${codeLine(gameRound.hints.artistHint)}`;
+            return `${state.localizer.translate(
+                guildID,
+                "command.hint.artistName"
+            )}: ${codeLine(gameRound.hints.artistHint)}`;
         case GuessModeType.SONG_NAME:
         case GuessModeType.BOTH:
         default:
-            return `Song Name: ${codeLine(gameRound.hints.songHint)}`;
+            return `${state.localizer.translate(
+                guildID,
+                "command.hint.songName"
+            )}: ${codeLine(gameRound.hints.songHint)}`;
     }
 }
 
 export default class HintCommand implements BaseCommand {
+    aliases = ["h"];
+
     preRunChecks = [
         { checkFn: CommandPrechecks.inGameCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
     ];
 
-    help = {
+    help = (guildID: string): Help => ({
         name: "hint",
-        description: "Gives a hint to the currently playing song",
+        description: state.localizer.translate(
+            guildID,
+            "command.hint.help.description"
+        ),
         usage: ",hint",
         examples: [],
         priority: 1020,
-    };
-
-    aliases = ["h"];
+    });
 
     call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
         const gameSession = gameSessions[message.guildID];
@@ -180,8 +228,12 @@ export default class HintCommand implements BaseCommand {
         if (isHintAvailable(message, gameSession)) {
             gameRound.hintUsed = true;
             await sendInfoMessage(MessageContext.fromMessage(message), {
-                title: "Hint",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.hint.title"
+                ),
                 description: generateHint(
+                    message.guildID,
                     guildPreference.gameOptions.guessModeType,
                     gameRound
                 ),

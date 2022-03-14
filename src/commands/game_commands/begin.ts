@@ -7,7 +7,6 @@ import {
     getDebugLogHeader,
     sendErrorMessage,
     getUserVoiceChannel,
-    getMention,
 } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
@@ -22,39 +21,26 @@ export default class BeginCommand implements BaseCommand {
 
     static canStart(
         gameSession: GameSession,
-        authorID: string,
         messageContext: MessageContext
     ): boolean {
-        if (
-            !gameSession ||
-            (gameSession.gameType !== GameType.ELIMINATION &&
-                gameSession.gameType !== GameType.TEAMS)
-        ) {
+        if (!gameSession || gameSession.gameType !== GameType.TEAMS) {
             return false;
         }
 
-        if (gameSession.gameType === GameType.ELIMINATION) {
-            if (gameSession.owner.id !== authorID) {
-                sendErrorMessage(messageContext, {
-                    title: "Begin Ignored",
-                    description: `Only the person who did \`${
-                        process.env.BOT_PREFIX
-                    }play elimination\` (${getMention(
-                        gameSession.owner.id
-                    )}) can start the game.`,
-                });
-                return false;
-            }
-        } else if (gameSession.gameType === GameType.TEAMS) {
-            const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
-            if (teamScoreboard.getNumTeams() === 0) {
-                sendErrorMessage(messageContext, {
-                    title: "Begin Ignored",
-                    description:
-                        "Create a team using `,join [team name]` before you can start the game.",
-                });
-                return false;
-            }
+        const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
+        if (teamScoreboard.getNumTeams() === 0) {
+            sendErrorMessage(messageContext, {
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "command.begin.ignored.title"
+                ),
+                description: state.localizer.translate(
+                    messageContext.guildID,
+                    "command.begin.ignored.noTeam.description",
+                    { join: `${process.env.BOT_PREFIX}join` }
+                ),
+            });
+            return false;
         }
 
         return true;
@@ -65,13 +51,12 @@ export default class BeginCommand implements BaseCommand {
         gameSessions,
         channel,
     }: CommandArgs): Promise<void> => {
-        const { guildID, author } = message;
+        const { guildID } = message;
         const gameSession = gameSessions[guildID];
 
         if (
             !BeginCommand.canStart(
                 gameSession,
-                author.id,
                 MessageContext.fromMessage(message)
             )
         )
@@ -84,18 +69,12 @@ export default class BeginCommand implements BaseCommand {
                 discriminator: string;
             }>;
 
-            if (gameSession.gameType === GameType.ELIMINATION) {
-                participants = [...gameSession.participants].map((x) =>
-                    state.client.users.get(x)
-                );
-            } else if (gameSession.gameType === GameType.TEAMS) {
-                const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
-                participants = teamScoreboard.getPlayers().map((player) => ({
-                    id: player.id,
-                    username: player.name.split("#")[0],
-                    discriminator: player.name.split("#")[1],
-                }));
-            }
+            const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
+            participants = teamScoreboard.getPlayers().map((player) => ({
+                id: player.id,
+                username: player.name.split("#")[0],
+                discriminator: player.name.split("#")[1],
+            }));
 
             sendBeginGameMessage(
                 channel.name,
@@ -110,9 +89,7 @@ export default class BeginCommand implements BaseCommand {
             );
 
             logger.info(
-                `${getDebugLogHeader(message)} | Game session starting (${
-                    gameSession.gameType
-                } gameType)`
+                `${getDebugLogHeader(message)} | Teams game session starting)`
             );
         }
     };

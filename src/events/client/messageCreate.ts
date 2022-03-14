@@ -40,7 +40,7 @@ const parseMessage = (message: string): ParsedMessage => {
 export default async function messageCreateHandler(
     message: Eris.Message
 ): Promise<void> {
-    if (message.author.id === state.client.user.id || message.author.bot)
+    if (message.author.id === process.env.BOT_CLIENT_ID || message.author.bot)
         return;
     if (!isGuildMessage(message)) return;
     if (state.client.unavailableGuilds.has(message.guildID)) {
@@ -85,7 +85,9 @@ export default async function messageCreateHandler(
                 message,
                 parsedMessage,
                 invokedCommand.validations,
-                invokedCommand.help?.usage
+                typeof invokedCommand.help === "function"
+                    ? invokedCommand.help(message.guildID).usage
+                    : null
             )
         ) {
             const { gameSessions } = state;
@@ -124,8 +126,15 @@ export default async function messageCreateHandler(
                 );
 
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: "Error running command",
-                    description: `I ran into an error while running this command.\nProvide this to a developer if this happens consistently:\n\`${debugId}\``,
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "misc.failure.command.title"
+                    ),
+                    description: state.localizer.translate(
+                        message.guildID,
+                        "misc.failure.command.description",
+                        { debugId }
+                    ),
                 });
             }
         }

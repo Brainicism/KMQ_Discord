@@ -1,25 +1,29 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { getDebugLogHeader } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("end");
 
 export default class EndCommand implements BaseCommand {
+    aliases = ["stop", "e"];
+
     preRunChecks = [
         { checkFn: CommandPrechecks.inGameCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
     ];
 
-    help = {
+    help = (guildID: string): Help => ({
         name: "end",
-        description: "Finishes the current game and decides on a winner.",
+        description: state.localizer.translate(
+            guildID,
+            "command.end.help.description"
+        ),
         usage: ",end",
         examples: [],
         priority: 1020,
-    };
-
-    aliases = ["stop", "e"];
+    });
 
     call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
         const gameSession = gameSessions[message.guildID];

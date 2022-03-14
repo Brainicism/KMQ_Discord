@@ -15,7 +15,6 @@ import { getInternalLogger } from "./logger";
 import { clearRestartNotification } from "./helpers/management_utils";
 import storeDailyStats from "./scripts/store-daily-stats";
 import dbContext from "./database_context";
-import { reloadFactCache } from "./fact_generator";
 import { EnvType } from "./types";
 import { seedAndDownloadNewSongs } from "./seed/seed_db";
 import {
@@ -27,7 +26,7 @@ import { KmqImages } from "./constants";
 import KmqClient from "./kmq_client";
 import backupKmqDatabase from "./scripts/backup-kmq-database";
 import { userVoted } from "./helpers/bot_listing_manager";
-import { friendlyFormattedDate } from "./helpers/utils";
+import { standardDateFormat } from "./helpers/utils";
 
 const logger = getInternalLogger();
 
@@ -85,7 +84,6 @@ function registerGlobalIntervals(fleet: Fleet): void {
     // everyday at 12am UTC => 7pm EST
     schedule.scheduleJob("0 0 * * *", async () => {
         storeDailyStats(fleet.stats?.guilds);
-        reloadFactCache();
     });
 
     // every hour
@@ -93,7 +91,7 @@ function registerGlobalIntervals(fleet: Fleet): void {
         if (process.env.NODE_ENV !== EnvType.PROD) return;
         logger.info("Performing regularly scheduled Daisuki database seed");
         const overrideFileExists = fs.existsSync(
-            path.join(__dirname, "../../data/skip_seed")
+            path.join(__dirname, "../data/skip_seed")
         );
 
         if (overrideFileExists) {
@@ -214,7 +212,7 @@ async function startWebServer(fleet: Fleet): Promise<void> {
                 apiLatency: _.mean(
                     cluster.shards.map((x) => x.latency)
                 ).toLocaleString(),
-                uptime: friendlyFormattedDate(
+                uptime: standardDateFormat(
                     new Date(Date.now() - cluster.uptime)
                 ),
                 voiceConnections: cluster.voice,
@@ -274,7 +272,13 @@ async function startWebServer(fleet: Fleet): Promise<void> {
     });
 
     try {
-        await httpServer.listen(process.env.WEB_SERVER_PORT, "0.0.0.0");
+        if (!process.env.WEB_SERVER_PORT) {
+            logger.warn(
+                "WEB_SERVER_PORT not specified, not starting web server"
+            );
+        } else {
+            await httpServer.listen(process.env.WEB_SERVER_PORT, "0.0.0.0");
+        }
     } catch (err) {
         logger.error(`Erroring starting HTTP server: ${err}`);
     }

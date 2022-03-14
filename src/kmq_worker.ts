@@ -17,6 +17,7 @@ import dbContext from "./database_context";
 import KmqClient from "./kmq_client";
 import ReloadCommand from "./commands/admin/reload";
 import EvalCommand from "./commands/admin/eval";
+import LocalizationManager from "./helpers/localization_manager";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("kmq");
@@ -33,6 +34,8 @@ const state: State = {
     ipc: null,
     rateLimiter: new RateLimiter(15, 30),
     bonusArtists: new Set<string>(),
+    locales: {},
+    localizer: null,
 };
 
 export { state };
@@ -52,7 +55,12 @@ export class BotWorker extends BaseClusterWorker {
                 return null;
             case "game_session_stats": {
                 const activePlayers = Object.values(state.gameSessions).reduce(
-                    (total, curr) => total + curr.participants.size,
+                    (total, curr) =>
+                        total +
+                        curr.scoreboard
+                            .getPlayers()
+                            .filter((x) => x.inVC)
+                            .map((x) => x.id).length,
                     0
                 );
 
@@ -96,6 +104,7 @@ export class BotWorker extends BaseClusterWorker {
         super(setup);
         state.ipc = this.ipc;
         state.client = this.bot as KmqClient;
+        state.localizer = new LocalizationManager();
         logger.info(
             `Started worker ID: ${this.workerID} on cluster ID: ${this.clusterID}`
         );

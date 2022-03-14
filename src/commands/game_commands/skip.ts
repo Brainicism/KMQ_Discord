@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import GameSession from "../../structures/game_session";
 import {
     areUserAndBotInSameVoiceChannel,
@@ -15,20 +15,30 @@ import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import EliminationScoreboard from "../../structures/elimination_scoreboard";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("skip");
 
 async function sendSkipNotification(
     message: GuildTextableMessage,
-    gameSession: GameSession
+    gameRound: GameRound
 ): Promise<void> {
     await sendInfoMessage(
         MessageContext.fromMessage(message),
         {
-            title: "Skip",
-            description: `${gameSession.gameRound.getNumSkippers()}/${getMajorityCount(
-                message.guildID
-            )} skips received.`,
+            title: state.localizer.translate(
+                message.guildID,
+                "command.skip.vote.title"
+            ),
+            description: state.localizer.translate(
+                message.guildID,
+                "command.skip.vote.description",
+                {
+                    skipCounter: `${gameRound.getNumSkippers()}/${getMajorityCount(
+                        message.guildID
+                    )}`,
+                }
+            ),
         },
         true
     );
@@ -40,10 +50,19 @@ async function sendSkipMessage(
 ): Promise<void> {
     await sendInfoMessage(MessageContext.fromMessage(message), {
         color: EMBED_SUCCESS_COLOR,
-        title: "Skip",
-        description: `${gameRound.getNumSkippers()}/${getMajorityCount(
-            message.guildID
-        )} skips achieved, skipping...`,
+        title: state.localizer.translate(
+            message.guildID,
+            "command.skip.success.title"
+        ),
+        description: state.localizer.translate(
+            message.guildID,
+            "command.skip.success.description",
+            {
+                skipCounter: `${gameRound.getNumSkippers()}/${getMajorityCount(
+                    message.guildID
+                )}`,
+            }
+        ),
         thumbnailUrl: KmqImages.NOT_IMPRESSED,
     });
 }
@@ -65,21 +84,22 @@ function isSkipMajority(
 }
 
 export default class SkipCommand implements BaseCommand {
+    aliases = ["s"];
     preRunChecks = [
         { checkFn: CommandPrechecks.inGameCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
     ];
 
-    help = {
+    help = (guildID: string): Help => ({
         name: "skip",
-        description:
-            "Vote to skip the current song. A song is skipped when majority of participants vote to skip it.",
+        description: state.localizer.translate(
+            guildID,
+            "command.skip.help.description"
+        ),
         usage: ",skip",
         examples: [],
         priority: 1010,
-    };
-
-    aliases = ["s"];
+    });
 
     call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
@@ -120,7 +140,7 @@ export default class SkipCommand implements BaseCommand {
             logger.info(`${getDebugLogHeader(message)} | User skipped`);
         }
 
-        if (gameSession.gameRound.skipAchieved || !gameSession.gameRound) {
+        if (gameSession.gameRound.skipAchieved) {
             // song already being skipped
             return;
         }
@@ -144,7 +164,7 @@ export default class SkipCommand implements BaseCommand {
             );
         } else {
             logger.info(`${getDebugLogHeader(message)} | Skip vote received.`);
-            await sendSkipNotification(message, gameSession);
+            await sendSkipNotification(message, gameSession.gameRound);
         }
 
         gameSession.lastActiveNow();

@@ -141,6 +141,8 @@ export default class SongSelector {
             );
         }
 
+        this.checkLastPlayedSongs();
+
         if (randomSong === null) {
             return null;
         }
@@ -202,6 +204,7 @@ export default class SongSelector {
      */
     resetUniqueSongs(): void {
         this.uniqueSongsPlayed.clear();
+        this.lastPlayedSongs = [];
     }
 
     getSongs(): { songs: Set<QueriedSong>; countBeforeLimit: number } {
@@ -219,17 +222,16 @@ export default class SongSelector {
     }
 
     /**
-     * Returns a list of songs from the data store, narrowed down by the specified game options
-     * @param guildPreference - The GuildPreference
-     * @returns a list of songs, as well as the number of songs before the filter option was applied
+     * @returns the fields queried to generate the song list
      */
-    static async getFilteredSongList(
-        guildPreference: GuildPreference
-    ): Promise<{ songs: Set<QueriedSong>; countBeforeLimit: number }> {
-        const fields = [
-            "clean_song_name as songName",
-            "song_name as originalSongName",
-            "artist_name as artist",
+    static getQueriedSongFields(): Array<string> {
+        return [
+            "clean_song_name_en as songName",
+            "song_name_en as originalSongName",
+            "song_name_ko as hangulSongName",
+            "clean_song_name_ko as originalHangulSongName",
+            "artist_name_en as artistName",
+            "artist_name_ko as hangulArtistName",
             "link as youtubeLink",
             "publishedon as publishDate",
             "members",
@@ -239,8 +241,19 @@ export default class SongSelector {
             "tags",
             "views",
         ];
+    }
 
-        let queryBuilder = dbContext.kmq("available_songs").select(fields);
+    /**
+     * Returns a list of songs from the data store, narrowed down by the specified game options
+     * @param guildPreference - The GuildPreference
+     * @returns a list of songs, as well as the number of songs before the filter option was applied
+     */
+    static async getFilteredSongList(
+        guildPreference: GuildPreference
+    ): Promise<{ songs: Set<QueriedSong>; countBeforeLimit: number }> {
+        let queryBuilder = dbContext
+            .kmq("available_songs")
+            .select(SongSelector.getQueriedSongFields());
 
         if (guildPreference.gameOptions.forcePlaySongID) {
             queryBuilder = queryBuilder.where(

@@ -4,14 +4,16 @@ import {
     getDebugLogHeader,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import { isPowerHour, isWeekend } from "../../helpers/utils";
+import { isWeekend } from "../../helpers/utils";
 import {
     getGuildPreference,
     getAvailableSongCount,
     userBonusIsActive,
+    isFirstGameOfDay,
+    isPowerHour,
 } from "../../helpers/game_utils";
 import { AnswerType } from "../game_options/answer";
 import { GuessModeType } from "../game_options/guessmode";
@@ -23,6 +25,7 @@ import GameRound from "../../structures/game_round";
 const logger = new IPCLogger("exp");
 export const PARTICIPANT_MODIFIER_MAX_PARTICIPANTS = 6;
 export const GUESS_STREAK_THRESHOLD = 5;
+
 export enum ExpBonusModifier {
     POWER_HOUR,
     BONUS_ARTIST,
@@ -41,6 +44,7 @@ export enum ExpBonusModifier {
     BELOW_SONG_COUNT_THRESHOLD,
     TYPO,
     HINT_USED,
+    FIRST_GAME_OF_DAY,
 }
 
 export const ExpBonusModifierValues = {
@@ -61,6 +65,7 @@ export const ExpBonusModifierValues = {
     [ExpBonusModifier.BELOW_SONG_COUNT_THRESHOLD]: 0,
     [ExpBonusModifier.TYPO]: 0.8,
     [ExpBonusModifier.HINT_USED]: 0.5,
+    [ExpBonusModifier.FIRST_GAME_OF_DAY]: 1.5,
 };
 
 interface ExpModifier {
@@ -73,17 +78,22 @@ interface ExpModifier {
  * Calculates the exp multiplier based on the round options
  * @param guildPreference - The guild preference
  * @param voteBonusExp - Whether bonus EXP should be applied to the modifier
+ * @param playerID - the player's ID
  * @returns an array describing the EXP modifiers activated and their numerical value
  */
 export async function calculateOptionsExpMultiplierInternal(
     guildPreference: GuildPreference,
-    voteBonusExp: boolean
+    voteBonusExp: boolean,
+    playerID: string
 ): Promise<Array<ExpModifier>> {
     const modifiers: Array<ExpModifier> = [];
     // bonus for voting
     if (voteBonusExp) {
         modifiers.push({
-            displayName: "Vote Bonus",
+            displayName: state.localizer.translate(
+                guildPreference.guildID,
+                "command.exp.voteBonus"
+            ),
             name: ExpBonusModifier.VOTE,
             isPenalty: false,
         });
@@ -92,15 +102,33 @@ export async function calculateOptionsExpMultiplierInternal(
     // power hour bonus
     if (isWeekend() || isPowerHour()) {
         modifiers.push({
-            displayName: "Power Hour Bonus",
+            displayName: state.localizer.translate(
+                guildPreference.guildID,
+                "command.exp.powerHourBonus"
+            ),
             name: ExpBonusModifier.POWER_HOUR,
+            isPenalty: false,
+        });
+    }
+
+    const isPlayersFirstGame = await isFirstGameOfDay(playerID);
+    if (isPlayersFirstGame) {
+        modifiers.push({
+            displayName: state.localizer.translate(
+                guildPreference.guildID,
+                "command.exp.firstGameOfDayBonus"
+            ),
+            name: ExpBonusModifier.FIRST_GAME_OF_DAY,
             isPenalty: false,
         });
     }
 
     if (guildPreference.typosAllowed()) {
         modifiers.push({
-            displayName: "Typos Allowed Penalty",
+            displayName: state.localizer.translate(
+                guildPreference.guildID,
+                "command.exp.typosAllowedPenalty"
+            ),
             name: ExpBonusModifier.TYPO,
             isPenalty: true,
         });
@@ -124,7 +152,10 @@ export async function calculateOptionsExpMultiplierInternal(
         }
 
         modifiers.push({
-            displayName: "Multiple Choice Penalty",
+            displayName: state.localizer.translate(
+                guildPreference.guildID,
+                "command.exp.multipleChoicePenalty"
+            ),
             name: multipleChoicePenalty,
             isPenalty: true,
         });
@@ -133,7 +164,10 @@ export async function calculateOptionsExpMultiplierInternal(
     const totalSongs = (await getAvailableSongCount(guildPreference)).count;
     if (totalSongs < 10) {
         modifiers.push({
-            displayName: "Low Song Count Penalty",
+            displayName: state.localizer.translate(
+                guildPreference.guildID,
+                "command.exp.lowSongCountPenalty"
+            ),
             name: ExpBonusModifier.BELOW_SONG_COUNT_THRESHOLD,
             isPenalty: true,
         });
@@ -144,19 +178,16 @@ export async function calculateOptionsExpMultiplierInternal(
         guildPreference.gameOptions.guessModeType === GuessModeType.ARTIST ||
         guildPreference.gameOptions.guessModeType === GuessModeType.BOTH
     ) {
-        if (guildPreference.isGroupsMode()) {
-            modifiers.push({
-                displayName: "Artist/Group Guess Mode Penalty",
-                name: ExpBonusModifier.ARTIST_GUESS_GROUPS_SELECTED,
-                isPenalty: true,
-            });
-        } else {
-            modifiers.push({
-                displayName: "Artist/Group Guess Mode Penalty",
-                name: ExpBonusModifier.ARTIST_GUESS,
-                isPenalty: true,
-            });
-        }
+        modifiers.push({
+            displayName: state.localizer.translate(
+                guildPreference.guildID,
+                "command.exp.artistGroupGuessModePenalty"
+            ),
+            name: guildPreference.isGroupsMode()
+                ? ExpBonusModifier.ARTIST_GUESS_GROUPS_SELECTED
+                : ExpBonusModifier.ARTIST_GUESS,
+            isPenalty: true,
+        });
     }
 
     return modifiers;
@@ -164,12 +195,14 @@ export async function calculateOptionsExpMultiplierInternal(
 
 async function calculateOptionsExpMultiplier(
     guildPreference: GuildPreference,
-    voteBonusExp: boolean
+    voteBonusExp: boolean,
+    playerID: string
 ): Promise<number> {
     return (
         await calculateOptionsExpMultiplierInternal(
             guildPreference,
-            voteBonusExp
+            voteBonusExp,
+            playerID
         )
     ).reduce((a, b) => ExpBonusModifierValues[b.name] * a, 1);
 }
@@ -238,7 +271,7 @@ export function calculateRoundExpMultiplier(
  * @param guessSpeed - The guess speed
  * @param place - The place of the guess
  * @param voteBonusExp - Whether bonus EXP should be applied to the modifier
- * @param typosAllowed - Whether typos were allowed
+ * @param playerID - the player's ID
  * @returns the round's total EXP based on the EXP modifiers
  */
 export async function calculateTotalRoundExp(
@@ -248,11 +281,13 @@ export async function calculateTotalRoundExp(
     streak: number,
     guessSpeed: number,
     place: number,
-    voteBonusExp: boolean
+    voteBonusExp: boolean,
+    playerID: string
 ): Promise<number> {
     const optionsMultiplier = await calculateOptionsExpMultiplier(
         guildPreference,
-        voteBonusExp
+        voteBonusExp,
+        playerID
     );
 
     const roundMultipler = calculateRoundExpMultiplier(
@@ -271,14 +306,16 @@ export async function calculateTotalRoundExp(
 }
 
 export default class ExpCommand implements BaseCommand {
-    help = {
+    help = (guildID: string): Help => ({
         name: "exp",
-        description:
-            "Shows your current EXP modifier, and the list of current bonus EXP artists.",
+        description: state.localizer.translate(
+            guildID,
+            "command.exp.help.description"
+        ),
         usage: ",exp",
         examples: [],
         priority: 50,
-    };
+    });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         const voteBonusActive = await userBonusIsActive(message.author.id);
@@ -287,12 +324,14 @@ export default class ExpCommand implements BaseCommand {
 
         const activeModifiers = await calculateOptionsExpMultiplierInternal(
             guildPreference,
-            voteBonusActive
+            voteBonusActive,
+            message.author.id
         );
 
         const totalModifier = await calculateOptionsExpMultiplier(
             guildPreference,
-            voteBonusActive
+            voteBonusActive,
+            message.author.id
         );
 
         const modifierText: Array<string> = activeModifiers.map(
@@ -303,18 +342,30 @@ export default class ExpCommand implements BaseCommand {
         );
 
         modifierText.push(
-            `\`Total Modifier:\` **__${totalModifier.toFixed(2)}x__**`
+            `\`${state.localizer.translate(
+                message.guildID,
+                "command.exp.totalModifier"
+            )}:\` **__${totalModifier.toFixed(2)}x__**`
         );
 
         fields.push({
-            name: "🚀 Active Modifiers 🚀",
+            name: state.localizer.translate(
+                message.guildID,
+                "command.exp.activeModifiers"
+            ),
             value: `${modifierText.join("\n")}`,
             inline: false,
         });
 
         fields.push({
-            name: "🎤 Current Bonus Artists 🎤",
-            value: `\`Guessing songs by the daily bonus artists:\`  ${ExpBonusModifierValues[
+            name: state.localizer.translate(
+                message.guildID,
+                "command.exp.bonusArtistsTitle"
+            ),
+            value: `\`${state.localizer.translate(
+                message.guildID,
+                "command.exp.bonusArtists"
+            )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.BONUS_ARTIST
             ].toFixed(2)}x 📈 \n\`\`\`${[...state.bonusArtists]
                 .filter((x) => !x.includes("+"))
@@ -323,34 +374,69 @@ export default class ExpCommand implements BaseCommand {
         });
 
         const bonusExpExplanations = [
-            `\`Playing during a KMQ Power Hour or Weekend:\` ${ExpBonusModifierValues[
-                ExpBonusModifier.POWER_HOUR
+            `\`${state.localizer.translate(
+                message.guildID,
+                "command.exp.explanation.powerHour"
+            )}:\` ${ExpBonusModifierValues[ExpBonusModifier.POWER_HOUR].toFixed(
+                2
+            )}x 📈`,
+            `\`${state.localizer.translate(
+                message.guildID,
+                "command.exp.explanation.firstGameOfDay"
+            )}:\` ${ExpBonusModifierValues[
+                ExpBonusModifier.FIRST_GAME_OF_DAY
             ].toFixed(2)}x 📈`,
-            `\`Voting!:\` ${ExpBonusModifierValues[
-                ExpBonusModifier.VOTE
-            ].toFixed(2)}x 📈`,
-            `\`Having a guess streak of over 5:\` ${ExpBonusModifierValues[
+            `\`${state.localizer.translate(
+                message.guildID,
+                "command.exp.explanation.voting"
+            )}!:\` ${ExpBonusModifierValues[ExpBonusModifier.VOTE].toFixed(
+                2
+            )}x 📈`,
+            `\`${state.localizer.translate(
+                message.guildID,
+                "command.exp.explanation.streak"
+            )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.GUESS_STREAK
             ].toFixed(2)}x 📈`,
-            `\`Guessing quickly:\` ${ExpBonusModifierValues[
+            `\`${state.localizer.translate(
+                message.guildID,
+                "command.exp.explanation.quickGuess"
+            )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.QUICK_GUESS
             ].toFixed(2)}x 📈 `,
-            `\`Guessing correctly for a bonus artist:\` ${ExpBonusModifierValues[
+            `\`${state.localizer.translate(
+                message.guildID,
+                "command.exp.explanation.bonusArtistGuess"
+            )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.BONUS_ARTIST
             ].toFixed(2)}x 📈 `,
-            "`Rare correct guesses bonus:` 2.00x up to 50.00x 📈",
+            `\`${state.localizer.translate(
+                message.guildID,
+                "command.exp.explanation.rareGuess"
+            )}:\` ${state.localizer.translate(
+                message.guildID,
+                "command.exp.explanation.rareGuessRange",
+                { rareGuessLowerBound: "2.00x", rareGuessUpperBound: "50.00x" }
+            )} 📈`,
         ];
 
         fields.push({
-            name: "Ways to get EXP Bonuses",
-            value: `You can get bonus EXP for the following:\n ${bonusExpExplanations
-                .map((x) => `- ${x}`)
-                .join("\n")}`,
+            name: state.localizer.translate(
+                message.guildID,
+                "command.exp.bonusTitle"
+            ),
+            value: `${state.localizer.translate(
+                message.guildID,
+                "command.exp.bonusDescription"
+            )}:\n ${bonusExpExplanations.map((x) => `- ${x}`).join("\n")}`,
             inline: false,
         });
 
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: "EXP Bonuses",
+            title: state.localizer.translate(
+                message.guildID,
+                "command.exp.title"
+            ),
             fields,
             thumbnailUrl: KmqImages.THUMBS_UP,
         });

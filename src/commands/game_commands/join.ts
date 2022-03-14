@@ -14,7 +14,6 @@ import { KmqImages } from "../../constants";
 import { bold } from "../../helpers/utils";
 import { state } from "../../kmq_worker";
 import MessageContext from "../../structures/message_context";
-import KmqMember from "../../structures/kmq_member";
 import CommandPrechecks from "../../command_prechecks";
 import { IPCLogger } from "../../logger";
 
@@ -31,81 +30,12 @@ export default class JoinCommand implements BaseCommand {
         parsedMessage,
     }: CommandArgs): Promise<void> => {
         const gameSession = gameSessions[message.guildID];
-        if (
-            !gameSession ||
-            (gameSession.gameType !== GameType.ELIMINATION &&
-                gameSession.gameType !== GameType.TEAMS)
-        ) {
+        if (!gameSession || gameSession.gameType !== GameType.TEAMS) {
             return;
         }
 
-        if (gameSession.gameType === GameType.ELIMINATION) {
-            JoinCommand.joinEliminationGame(message, gameSession);
-        } else if (gameSession.gameType === GameType.TEAMS) {
-            JoinCommand.joinTeamsGame(message, parsedMessage, gameSession);
-        }
+        JoinCommand.joinTeamsGame(message, parsedMessage, gameSession);
     };
-
-    static joinEliminationGame(
-        message: GuildTextableMessage,
-        gameSession: GameSession
-    ): void {
-        const kmqMember = KmqMember.fromUser(message.author);
-        if (gameSession.participants.has(message.author.id)) {
-            logger.info(
-                `${getDebugLogHeader(message)} | Player already in game.`
-            );
-
-            sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Player Already Joined",
-                description: `${getMention(
-                    message.author.id
-                )} is already in the game.`,
-            });
-            return;
-        }
-
-        if (gameSession.sessionInitialized) {
-            const newPlayer = gameSession.addEliminationParticipant(
-                kmqMember,
-                true
-            );
-
-            logger.info(
-                `${getDebugLogHeader(
-                    message
-                )} | Player has joined mid-elimination game.`
-            );
-
-            sendInfoMessage(MessageContext.fromMessage(message), {
-                title: "Joined Elimination Midgame",
-                description: `\`${getMention(
-                    message.author.id
-                )}\` has spawned with \`${newPlayer.getLives()}\` lives`,
-            });
-            return;
-        }
-
-        let previouslyJoinedPlayers = gameSession.scoreboard
-            .getPlayerMentions()
-            .reverse();
-
-        if (previouslyJoinedPlayers.length > 10) {
-            previouslyJoinedPlayers = previouslyJoinedPlayers.slice(0, 10);
-            previouslyJoinedPlayers.push("and many others...");
-        }
-
-        const players = `${getMention(
-            kmqMember.id
-        )}, ${previouslyJoinedPlayers.join(", ")}`;
-
-        sendInfoMessage(MessageContext.fromMessage(message), {
-            title: "Player Joined",
-            description: players,
-        });
-        logger.info(`${getDebugLogHeader(message)} | Player has joined.`);
-        gameSession.addEliminationParticipant(kmqMember);
-    }
 
     static joinTeamsGame(
         message: GuildTextableMessage,
@@ -115,9 +45,15 @@ export default class JoinCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             logger.warn(`${getDebugLogHeader(message)} | Missing team name.`);
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Join Error",
-                description:
-                    "Include a team name to create a team or to join that team if it already exists (`,join [team name]`)",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.join.failure.joinError.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "command.join.failure.joinError.noTeamName.description",
+                    { joinCommand: `${process.env.BOT_PREFIX}join` }
+                ),
             });
             return;
         }
@@ -143,9 +79,14 @@ export default class JoinCommand implements BaseCommand {
                     .includes(emojiID)
             ) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: "Invalid Team Name",
-                    description:
-                        "You can only include emojis that are in this server.",
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "command.join.failure.joinError.invalidTeamName.title"
+                    ),
+                    description: state.localizer.translate(
+                        message.guildID,
+                        "command.join.failure.joinError.badEmojis.description"
+                    ),
                 });
 
                 logger.warn(
@@ -165,9 +106,14 @@ export default class JoinCommand implements BaseCommand {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Join Error",
-                description:
-                    "Your team name consists of only invalid characters.",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.join.failure.joinError.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "command.join.failure.joinError.invalidCharacters.description"
+                ),
             });
             return;
         }
@@ -176,27 +122,37 @@ export default class JoinCommand implements BaseCommand {
         if (!teamScoreboard.hasTeam(teamName)) {
             teamScoreboard.addTeam(
                 teamName,
-                new Player(
-                    getUserTag(message.author),
-                    message.author.id,
-                    message.author.avatarURL,
-                    0
-                )
+                Player.fromUserID(message.author.id)
             );
             const teamNameWithCleanEmojis = teamName.replace(
                 /(<a?)(:[a-zA-Z0-9]+:)([0-9]+>)/gm,
-                (p1, p2, p3) => p3
+                (_p1, _p2, p3) => p3
             );
 
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: "New Team Created",
-                description: `To join ${bold(teamName)} alongside ${getMention(
-                    message.author.id
-                )}, enter \`,join ${teamNameWithCleanEmojis}\`.${
-                    !gameSession.sessionInitialized
-                        ? " Start the game with `,begin`."
-                        : ""
-                }`,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.join.team.new"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "command.join.team.join",
+                    {
+                        teamName: bold(teamName),
+                        mentionedUser: getMention(message.author.id),
+                        joinCommand: `${process.env.BOT_PREFIX}join`,
+                        teamNameWithCleanEmojis,
+                        startGameInstructions: !gameSession.sessionInitialized
+                            ? state.localizer.translate(
+                                  message.guildID,
+                                  "command.join.team.startGameInstructions",
+                                  {
+                                      beginCommand: `\`${process.env.BOT_PREFIX}begin\``,
+                                  }
+                              )
+                            : "",
+                    }
+                ),
                 thumbnailUrl: KmqImages.READING_BOOK,
             });
 
@@ -207,8 +163,14 @@ export default class JoinCommand implements BaseCommand {
             const team = teamScoreboard.getTeam(teamName);
             if (team.hasPlayer(message.author.id)) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: "Join Error",
-                    description: "You're already a member of this team.",
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "command.join.failure.joinError.title"
+                    ),
+                    description: state.localizer.translate(
+                        message.guildID,
+                        "command.join.failure.joinError.alreadyInTeam.description"
+                    ),
                 });
 
                 logger.info(
@@ -219,25 +181,34 @@ export default class JoinCommand implements BaseCommand {
                 return;
             }
 
-            teamScoreboard.addPlayer(
+            teamScoreboard.addTeamPlayer(
                 team.id,
-                new Player(
-                    getUserTag(message.author),
-                    message.author.id,
-                    message.author.avatarURL,
-                    0
-                )
+                Player.fromUserID(message.author.id)
             );
 
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: `${getUserTag(message.author)} joined ${team.name}`,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.join.playerJoinedTeam.title",
+                    {
+                        joiningUser: getUserTag(message.author),
+                        teamName: team.name,
+                    }
+                ),
                 description: !gameSession.sessionInitialized
-                    ? "When everyone has joined a team, `,begin` the game!"
-                    : `${getMention(
-                          message.author.id
-                      )} thinks they have what it takes to lead ${bold(
-                          team.name
-                      )} to victory!`,
+                    ? state.localizer.translate(
+                          message.guildID,
+                          "command.join.playerJoinedTeam.beforeGameStart.description",
+                          { beginCommand: `\`${process.env.BOT_PREFIX}begin\`` }
+                      )
+                    : state.localizer.translate(
+                          message.guildID,
+                          "command.join.playerJoinedTeam.afterGameStart.description",
+                          {
+                              mentionedUser: getMention(message.author.id),
+                              teamName: bold(team.name),
+                          }
+                      ),
                 thumbnailUrl: KmqImages.LISTENING,
             });
 

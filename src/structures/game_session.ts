@@ -3,7 +3,6 @@ import Eris from "eris";
 import fs from "fs";
 import _ from "lodash";
 import * as uuid from "uuid";
-import pluralize from "pluralize";
 import { SeekType } from "../commands/game_options/seek";
 import dbContext from "../database_context";
 import {
@@ -20,11 +19,15 @@ import {
     tryCreateInteractionSuccessAcknowledgement,
     tryCreateInteractionErrorAcknowledgement,
     getMention,
+    getGuildLocale,
 } from "../helpers/discord_utils";
 import {
     ensureVoiceConnection,
     getGuildPreference,
+    getLocalizedArtistName,
+    getLocalizedSongName,
     getMultipleChoiceOptions,
+    isFirstGameOfDay,
     userBonusIsActive,
 } from "../helpers/game_utils";
 import {
@@ -35,6 +38,7 @@ import {
     codeLine,
     chunkArray,
     chooseRandom,
+    friendlyFormattedNumber,
 } from "../helpers/utils";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
@@ -56,6 +60,7 @@ import { specialFfmpegArgs } from "../commands/game_options/special";
 import { AnswerType } from "../commands/game_options/answer";
 import { calculateTotalRoundExp } from "../commands/game_commands/exp";
 import SongSelector from "./song_selector";
+import Player from "../structures/player";
 
 const MULTIGUESS_DELAY = 1500;
 const logger = new IPCLogger("game_session");
@@ -100,11 +105,11 @@ export default class GameSession {
     /** The ID of text channel in which the GameSession was started in, and will be active in */
     public readonly textChannelID: string;
 
-    /** The ID of the voice channel in which the GameSession was started in, and will be active in */
-    public readonly voiceChannelID: string;
-
     /** The Discord Guild ID */
     public readonly guildID: string;
+
+    /** The ID of the voice channel the game will be active in */
+    public voiceChannelID: string;
 
     /** Initially the user who started the GameSession, transferred to current VC member */
     public owner: KmqMember;
@@ -123,9 +128,6 @@ export default class GameSession {
 
     /** The current GameRound */
     public gameRound: GameRound;
-
-    /** List of active participants in the GameSession */
-    public participants: Set<string>;
 
     /** The time the GameSession was started in epoch milliseconds */
     private readonly startedAt: number;
@@ -175,18 +177,9 @@ export default class GameSession {
     ) {
         this.gameType = gameType;
         this.guildID = guildID;
-        if (this.gameType === GameType.ELIMINATION) {
-            this.scoreboard = new EliminationScoreboard(eliminationLives);
-        } else if (this.gameType === GameType.TEAMS) {
-            this.scoreboard = new TeamScoreboard();
-        } else {
-            this.scoreboard = new Scoreboard();
-        }
-
         this.lastActive = Date.now();
         this.sessionInitialized = false;
         this.startedAt = Date.now();
-        this.participants = new Set();
         this.roundsPlayed = 0;
         this.correctGuesses = 0;
         this.guessTimes = [];
@@ -201,6 +194,20 @@ export default class GameSession {
         this.songMessageIDs = [];
         this.bookmarkedSongs = {};
         this.songSelector = new SongSelector();
+
+        switch (this.gameType) {
+            case GameType.TEAMS:
+                this.scoreboard = new TeamScoreboard();
+                break;
+            case GameType.ELIMINATION:
+                this.scoreboard = new EliminationScoreboard(eliminationLives);
+                break;
+            default:
+                this.scoreboard = new Scoreboard();
+                break;
+        }
+
+        this.syncAllVoiceMembers();
     }
 
     /**
@@ -252,7 +259,8 @@ export default class GameSession {
                         this.lastGuesser.streak,
                         timePlayed,
                         guessPosition,
-                        await userBonusIsActive(correctGuesser.id)
+                        await userBonusIsActive(correctGuesser.id),
+                        correctGuesser.id
                     );
 
                     let streak = 0;
@@ -262,7 +270,7 @@ export default class GameSession {
                             `${getDebugLogHeader(messageContext)}, uid: ${
                                 correctGuesser.id
                             } | Song correctly guessed. song = ${
-                                gameRound.songName
+                                gameRound.song.songName
                             }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
                         );
                     } else {
@@ -273,7 +281,7 @@ export default class GameSession {
                             } | Song correctly guessed ${getOrdinalNum(
                                 guessPosition
                             )}. song = ${
-                                gameRound.songName
+                                gameRound.song.songName
                             }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
                         );
                     }
@@ -297,7 +305,7 @@ export default class GameSession {
                     pointsEarned: x.pointsEarned,
                 }));
 
-            this.scoreboard.updateScoreboard(scoreboardUpdatePayload);
+            await this.scoreboard.updateScoreboard(scoreboardUpdatePayload);
         } else {
             if (!guessResult.error) {
                 this.lastGuesser = null;
@@ -340,19 +348,23 @@ export default class GameSession {
                 this.songMessageIDs.push({
                     messageID: endRoundMessage.id,
                     song: {
-                        songName: gameRound.songName,
-                        originalSongName: gameRound.originalSongName,
-                        artist: gameRound.artistName,
-                        youtubeLink: gameRound.videoID,
-                        publishDate: gameRound.publishDate,
-                        views: gameRound.views,
+                        songName: gameRound.song.songName,
+                        originalSongName: gameRound.song.originalSongName,
+                        hangulSongName: gameRound.song.hangulSongName,
+                        originalHangulSongName:
+                            gameRound.song.originalHangulSongName,
+                        artistName: gameRound.song.artistName,
+                        hangulArtistName: gameRound.song.hangulArtistName,
+                        youtubeLink: gameRound.song.youtubeLink,
+                        publishDate: gameRound.song.publishDate,
+                        views: gameRound.song.views,
                     },
                 });
             }
         }
 
         this.incrementSongStats(
-            gameRound.videoID,
+            gameRound.song.youtubeLink,
             guessResult.correct,
             gameRound.skipAchieved,
             gameRound.hintUsed,
@@ -386,7 +398,7 @@ export default class GameSession {
         await this.endRound(
             { correct: false },
             await getGuildPreference(this.guildID),
-            new MessageContext(this.textChannelID)
+            new MessageContext(this.textChannelID, null, this.guildID)
         );
         const voiceConnection = state.client.voiceConnections.get(this.guildID);
 
@@ -399,8 +411,8 @@ export default class GameSession {
                         .getPlayers()
                         .sort((a, b) => b.getScore() - a.getScore())
                         .map((x) => ({
-                            name: x.getName(),
-                            id: x.getID(),
+                            name: x.name,
+                            id: x.id,
                             score: x.getDisplayedScore(),
                         }))
                 )
@@ -421,7 +433,7 @@ export default class GameSession {
 
         const leveledUpPlayers: Array<LevelUpResult> = [];
         // commit player stats
-        for (const participant of this.participants) {
+        for (const participant of this.scoreboard.getPlayerIDs()) {
             await this.ensurePlayerStat(participant);
             await GameSession.incrementPlayerGamesPlayed(participant);
             const playerScore = this.scoreboard.getPlayerScore(participant);
@@ -462,26 +474,43 @@ export default class GameSession {
                     (a, b) =>
                         b.endLevel - b.startLevel - (a.endLevel - a.startLevel)
                 )
-                .map(
-                    (leveledUpPlayer) =>
-                        `${getMention(
-                            leveledUpPlayer.userID
-                        )} has leveled from ${codeLine(
-                            String(leveledUpPlayer.startLevel)
-                        )} to ${codeLine(
-                            String(leveledUpPlayer.endLevel)
-                        )} (${codeLine(
-                            getRankNameByLevel(leveledUpPlayer.endLevel)
-                        )})`
+                .map((leveledUpPlayer) =>
+                    state.localizer.translate(
+                        this.guildID,
+                        "misc.levelUp.entry",
+                        {
+                            user: getMention(leveledUpPlayer.userID),
+                            startLevel: codeLine(
+                                String(leveledUpPlayer.startLevel)
+                            ),
+                            endLevel: codeLine(
+                                String(leveledUpPlayer.endLevel)
+                            ),
+                            rank: codeLine(
+                                getRankNameByLevel(
+                                    leveledUpPlayer.endLevel,
+                                    this.guildID
+                                )
+                            ),
+                        }
+                    )
                 )
                 .slice(0, 10);
 
             if (leveledUpPlayers.length > 10) {
-                levelUpMessages.push("and many others...");
+                levelUpMessages.push(
+                    state.localizer.translate(
+                        this.guildID,
+                        "misc.andManyOthers"
+                    )
+                );
             }
 
             sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: "🚀 Power Up!",
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.levelUp.title"
+                ),
                 description: levelUpMessages.join("\n"),
                 thumbnailUrl: KmqImages.THUMBS_UP,
             });
@@ -491,7 +520,7 @@ export default class GameSession {
 
         // commit guild stats
         await dbContext
-            .kmq("guild_preferences")
+            .kmq("guilds")
             .where("guild_id", this.guildID)
             .increment("games_played", 1);
 
@@ -506,7 +535,8 @@ export default class GameSession {
         await dbContext.kmq("game_sessions").insert({
             start_date: new Date(this.startedAt),
             guild_id: this.guildID,
-            num_participants: this.participants.size,
+            num_participants: this.scoreboard.getPlayers().map((x) => x.inVC)
+                .length,
             avg_guess_time: averageGuessTime,
             session_length: sessionLength,
             rounds_played: this.roundsPlayed,
@@ -530,19 +560,29 @@ export default class GameSession {
             ).reduce((total, x) => total + x.size, 0);
 
             await sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: "Sending Bookmarked Songs...",
-                description: `Sending ${pluralize(
-                    "song",
-                    bookmarkedSongCount,
-                    true
-                )} to ${pluralize(
-                    "player",
-                    bookmarkedSongsPlayerCount,
-                    true
-                )}.\n\nBookmark songs during the game by right-clicking the song message and selecting \`Apps > Bookmark Song\`.`,
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.sendingBookmarkedSongs.title"
+                ),
+                description: state.localizer.translate(
+                    this.guildID,
+                    "misc.sendingBookmarkedSongs.description",
+                    {
+                        songs: state.localizer.translateN(
+                            this.guildID,
+                            "misc.plural.song",
+                            bookmarkedSongCount
+                        ),
+                        players: state.localizer.translateN(
+                            this.guildID,
+                            "misc.plural.player",
+                            bookmarkedSongsPlayerCount
+                        ),
+                    }
+                ),
                 thumbnailUrl: KmqImages.READING_BOOK,
             });
-            await sendBookmarkedSongs(this.bookmarkedSongs);
+            await sendBookmarkedSongs(this.guildID, this.bookmarkedSongs);
 
             // Store bookmarked songs
             await dbContext.kmq.transaction(async (trx) => {
@@ -573,7 +613,7 @@ export default class GameSession {
     async lastActiveNow(): Promise<void> {
         this.lastActive = Date.now();
         await dbContext
-            .kmq("guild_preferences")
+            .kmq("guilds")
             .where({ guild_id: this.guildID })
             .update({ last_active: new Date() });
     }
@@ -592,9 +632,7 @@ export default class GameSession {
         if (!this.gameRound) return;
         if (!this.guessEligible(messageContext)) return;
 
-        const guildPreference = await getGuildPreference(
-            messageContext.guildID
-        );
+        const guildPreference = await getGuildPreference(this.guildID);
 
         const pointsEarned = this.checkGuess(
             messageContext.author.id,
@@ -635,7 +673,7 @@ export default class GameSession {
 
             // increment guild's song guess count
             await dbContext
-                .kmq("guild_preferences")
+                .kmq("guilds")
                 .where("guild_id", this.guildID)
                 .increment("songs_guessed", 1);
 
@@ -657,7 +695,7 @@ export default class GameSession {
                 await this.endRound(
                     { correct: false },
                     guildPreference,
-                    new MessageContext(this.textChannelID)
+                    new MessageContext(this.textChannelID, null, this.guildID)
                 );
 
                 this.startRound(
@@ -692,9 +730,14 @@ export default class GameSession {
                 await this.reloadSongs(guildPreference);
             } catch (err) {
                 await sendErrorMessage(messageContext, {
-                    title: "Error Selecting Song",
-                    description:
-                        "Please try starting the round again. If the issue persists, report it in our official KMQ server.",
+                    title: state.localizer.translate(
+                        this.guildID,
+                        "misc.failure.errorSelectingSong.title"
+                    ),
+                    description: state.localizer.translate(
+                        this.guildID,
+                        "misc.failure.errorSelectingSong.description"
+                    ),
                 });
 
                 logger.error(
@@ -718,8 +761,15 @@ export default class GameSession {
             );
 
             await sendInfoMessage(messageContext, {
-                title: "Resetting Unique Songs",
-                description: `All songs have been played. ${totalSongCount} songs will be reshuffled.`,
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.uniqueSongsReset.title"
+                ),
+                description: state.localizer.translate(
+                    this.guildID,
+                    "misc.uniqueSongsReset.description",
+                    { totalSongCount: friendlyFormattedNumber(totalSongCount) }
+                ),
                 thumbnailUrl: KmqImages.LISTENING,
             });
         }
@@ -731,9 +781,14 @@ export default class GameSession {
 
         if (randomSong === null) {
             sendErrorMessage(messageContext, {
-                title: "Song Query Error",
-                description:
-                    "Failed to find songs matching this criteria. Try to broaden your search.",
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.songQuery.title"
+                ),
+                description: state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.songQuery.description"
+                ),
             });
             await this.endSession();
             return;
@@ -763,9 +818,14 @@ export default class GameSession {
             );
 
             await sendErrorMessage(messageContext, {
-                title: "Error Joining Voice Channel",
-                description:
-                    "Something went wrong, try starting the game again in a bit.",
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.vcJoin.title"
+                ),
+                description: state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.vcJoin.description"
+                ),
             });
             return;
         }
@@ -773,18 +833,20 @@ export default class GameSession {
         this.playSong(guildPreference, messageContext);
 
         if (guildPreference.isMultipleChoiceMode()) {
+            const locale = getGuildLocale(this.guildID);
             const correctChoice =
                 guildPreference.gameOptions.guessModeType ===
                 GuessModeType.ARTIST
-                    ? this.gameRound.artistName
-                    : this.gameRound.songName;
+                    ? getLocalizedArtistName(this.gameRound.song, locale)
+                    : getLocalizedSongName(this.gameRound.song, locale, false);
 
             const wrongChoices = await getMultipleChoiceOptions(
                 guildPreference.gameOptions.answerType,
                 guildPreference.gameOptions.guessModeType,
                 randomSong.members,
                 correctChoice,
-                randomSong.artistID
+                randomSong.artistID,
+                locale
             );
 
             let buttons: Array<Eris.InteractionButton> = [];
@@ -840,12 +902,23 @@ export default class GameSession {
             this.gameRound.interactionMessage = await sendInfoMessage(
                 new MessageContext(this.textChannelID),
                 {
-                    title: `Guess the ${
-                        guildPreference.gameOptions.guessModeType ===
-                        GuessModeType.BOTH
-                            ? "song"
-                            : guildPreference.gameOptions.guessModeType
-                    }!`,
+                    title: state.localizer.translate(
+                        this.guildID,
+                        "misc.interaction.guess.title",
+                        {
+                            songOrArtist:
+                                guildPreference.gameOptions.guessModeType ===
+                                GuessModeType.ARTIST
+                                    ? state.localizer.translate(
+                                          this.guildID,
+                                          "misc.artist"
+                                      )
+                                    : state.localizer.translate(
+                                          this.guildID,
+                                          "misc.song"
+                                      ),
+                        }
+                    ),
                     components,
                     thumbnailUrl: KmqImages.LISTENING,
                 }
@@ -877,7 +950,7 @@ export default class GameSession {
             await this.endRound(
                 { correct: false },
                 guildPreference,
-                new MessageContext(this.textChannelID)
+                new MessageContext(this.textChannelID, null, this.guildID)
             );
 
             this.startRound(
@@ -892,26 +965,6 @@ export default class GameSession {
      */
     stopGuessTimeout(): void {
         clearTimeout(this.guessTimeoutFunc);
-    }
-
-    /**
-     * Adds a participant for elimination mode
-     * @param user - The user to add
-     * @param midgame - Whether or not the user is being added mid-game
-     * @returns the added elimination participant
-     */
-    addEliminationParticipant(
-        user: KmqMember,
-        midgame = false
-    ): EliminationPlayer {
-        this.participants.add(user.id);
-        const eliminationScoreboard = this.scoreboard as EliminationScoreboard;
-        return eliminationScoreboard.addPlayer(
-            user.id,
-            user.tag,
-            user.avatarUrl,
-            midgame ? eliminationScoreboard.getLivesOfWeakestPlayer() : null
-        );
     }
 
     getRoundsPlayed(): number {
@@ -964,9 +1017,9 @@ export default class GameSession {
             return;
         }
 
-        const participantsInVC = [...this.participants].filter((p) =>
-            voiceMemberIDs.has(p)
-        );
+        const participantsInVC = this.scoreboard
+            .getPlayerIDs()
+            .filter((p) => voiceMemberIDs.has(p));
 
         let newOwnerID: string;
         if (participantsInVC.length > 0) {
@@ -982,10 +1035,19 @@ export default class GameSession {
         );
 
         sendInfoMessage(new MessageContext(this.textChannelID), {
-            title: "Game Owner Changed",
-            description: `The new game owner is ${getMention(
-                this.owner.id
-            )}. They are in charge of \`,forcehint\` and \`,forceskip\`.`,
+            title: state.localizer.translate(
+                this.guildID,
+                "misc.gameOwnerChanged.title"
+            ),
+            description: state.localizer.translate(
+                this.guildID,
+                "misc.gameOwnerChanged.description",
+                {
+                    newGameOwner: getMention(this.owner.id),
+                    forcehintCommand: `\`${process.env.BOT_PREFIX}forcehint\``,
+                    forceskipCommand: `\`${process.env.BOT_PREFIX}forceskip\``,
+                }
+            ),
             thumbnailUrl: KmqImages.LISTENING,
         });
     }
@@ -994,6 +1056,10 @@ export default class GameSession {
         interaction: Eris.ComponentInteraction,
         messageContext: MessageContext
     ): Promise<void> {
+        if (!this.gameRound) {
+            return;
+        }
+
         if (
             !getCurrentVoiceMembers(this.voiceChannelID)
                 .map((x) => x.id)
@@ -1006,7 +1072,10 @@ export default class GameSession {
         if (this.gameRound.incorrectMCGuessers.has(interaction.member.id)) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                "You've already been eliminated this round."
+                state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.interaction.alreadyEliminated"
+                )
             );
             return;
         }
@@ -1016,7 +1085,10 @@ export default class GameSession {
         ) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                "You are attempting to pick an option from an already completed round."
+                state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.interaction.optionFromPreviousRound"
+                )
             );
             return;
         }
@@ -1028,12 +1100,11 @@ export default class GameSession {
         ) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                "You've been eliminated this round."
+                state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.interaction.eliminated"
+                )
             );
-
-            if (!this.gameRound) {
-                return;
-            }
 
             this.gameRound.incorrectMCGuessers.add(interaction.member.id);
             this.gameRound.interactionIncorrectAnswerUUIDs[
@@ -1055,8 +1126,8 @@ export default class GameSession {
         this.guessSong(
             messageContext,
             guildPreference.gameOptions.guessModeType !== GuessModeType.ARTIST
-                ? this.gameRound.songName
-                : this.gameRound.artistName
+                ? this.gameRound.song.songName
+                : this.gameRound.song.artistName
         );
     }
 
@@ -1067,19 +1138,99 @@ export default class GameSession {
         if (!song) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                `You can only bookmark songs recently played in the last ${BOOKMARK_MESSAGE_SIZE} rounds. You must bookmark the message sent by the bot containing the song.`
+                state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.interaction.invalidBookmark",
+                    { BOOKMARK_MESSAGE_SIZE: String(BOOKMARK_MESSAGE_SIZE) }
+                )
             );
             return;
         }
 
         tryCreateInteractionSuccessAcknowledgement(
             interaction,
-            "Song Bookmarked",
-            `You'll receive a direct message with a link to ${bold(
-                song.originalSongName
-            )} at the end of the game.`
+            state.localizer.translate(
+                this.guildID,
+                "misc.interaction.bookmarked.title"
+            ),
+            state.localizer.translate(
+                this.guildID,
+                "misc.interaction.bookmarked.description",
+                {
+                    songName: bold(
+                        getLocalizedSongName(song, getGuildLocale(this.guildID))
+                    ),
+                }
+            )
         );
         this.addBookmarkedSong(interaction.member?.id, song);
+    }
+
+    /**
+     * Update whether a player is in VC
+     * @param userID - The Discord user ID of the player to update
+     * @param inVC - Whether the player is currently in the voice channel
+     */
+    async setPlayerInVC(userID: string, inVC: boolean): Promise<void> {
+        if (
+            inVC &&
+            !this.scoreboard.getPlayerIDs().includes(userID) &&
+            this.gameType !== GameType.TEAMS
+        ) {
+            this.scoreboard.addPlayer(
+                this.gameType === GameType.ELIMINATION
+                    ? EliminationPlayer.fromUserID(
+                          userID,
+                          (
+                              this.scoreboard as EliminationScoreboard
+                          ).getLivesOfWeakestPlayer(),
+                          await isFirstGameOfDay(userID)
+                      )
+                    : Player.fromUserID(
+                          userID,
+                          0,
+                          await isFirstGameOfDay(userID)
+                      )
+            );
+        }
+
+        this.scoreboard.setInVC(userID, inVC);
+    }
+
+    /**
+     * Add all players in VC that aren't tracked to the scoreboard, and update those who left
+     */
+    async syncAllVoiceMembers(): Promise<void> {
+        const currentVoiceMembers = getCurrentVoiceMembers(
+            this.voiceChannelID
+        ).map((x) => x.id);
+
+        for (const player of this.scoreboard
+            .getPlayerIDs()
+            .filter((x) => !currentVoiceMembers.includes(x))) {
+            await this.setPlayerInVC(player, false);
+        }
+
+        if (this.gameType === GameType.TEAMS) {
+            // Players join teams manually with ,join
+            return;
+        }
+
+        for (const player of currentVoiceMembers.filter(
+            (x) => x !== process.env.BOT_CLIENT_ID
+        )) {
+            const firstGameOfDay = await isFirstGameOfDay(player);
+            this.scoreboard.addPlayer(
+                this.gameType === GameType.ELIMINATION
+                    ? EliminationPlayer.fromUserID(
+                          player,
+                          (this.scoreboard as EliminationScoreboard)
+                              .startingLives,
+                          firstGameOfDay
+                      )
+                    : Player.fromUserID(player, 0, firstGameOfDay)
+            );
+        }
     }
 
     /**
@@ -1088,14 +1239,7 @@ export default class GameSession {
      * @returns the new GameRound
      */
     private prepareRound(randomSong: QueriedSong): GameRound {
-        const gameRound = new GameRound(
-            randomSong.songName,
-            randomSong.originalSongName,
-            randomSong.artist,
-            randomSong.youtubeLink,
-            randomSong.publishDate,
-            randomSong.views
-        );
+        const gameRound = new GameRound(randomSong);
 
         gameRound.setBaseExpReward(this.calculateBaseExp());
         return gameRound;
@@ -1115,7 +1259,7 @@ export default class GameSession {
             return;
         }
 
-        const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${gameRound.videoID}.ogg`;
+        const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${gameRound.song.youtubeLink}.ogg`;
 
         let seekLocation: number;
         const seekType = guildPreference.gameOptions.seekType;
@@ -1126,7 +1270,7 @@ export default class GameSession {
                 await dbContext
                     .kmq("cached_song_duration")
                     .select(["duration"])
-                    .where("vlink", "=", gameRound.videoID)
+                    .where("vlink", "=", gameRound.song.youtubeLink)
                     .first()
             ).duration;
 
@@ -1186,7 +1330,7 @@ export default class GameSession {
             await this.endRound(
                 { correct: false },
                 guildPreference,
-                new MessageContext(this.textChannelID)
+                new MessageContext(this.textChannelID, null, this.guildID)
             );
 
             this.startRound(
@@ -1218,8 +1362,14 @@ export default class GameSession {
         const messageContext = new MessageContext(this.textChannelID);
         await this.endRound({ correct: false, error: true }, guildPreference);
         await sendErrorMessage(messageContext, {
-            title: "Error Playing Song",
-            description: "Starting new round in 3 seconds...",
+            title: state.localizer.translate(
+                this.guildID,
+                "misc.failure.songPlaying.title"
+            ),
+            description: state.localizer.translate(
+                this.guildID,
+                "misc.failure.songPlaying.description"
+            ),
         });
         this.roundsPlayed--;
         this.startRound(guildPreference, messageContext);
@@ -1247,9 +1397,6 @@ export default class GameSession {
             this.gameRound.incorrectMCGuessers.has(userID)
         )
             return 0;
-        if (this.gameType !== GameType.ELIMINATION) {
-            this.participants.add(userID);
-        }
 
         const pointsAwarded = this.gameRound.checkGuess(
             guess,
@@ -1288,7 +1435,9 @@ export default class GameSession {
                 .scoreboard as EliminationScoreboard;
 
             if (
-                !this.participants.has(messageContext.author.id) ||
+                !this.scoreboard
+                    .getPlayerIDs()
+                    .includes(messageContext.author.id) ||
                 eliminationScoreboard.isPlayerEliminated(
                     messageContext.author.id
                 )
@@ -1508,7 +1657,7 @@ export default class GameSession {
      */
     private getDebugSongDetails(): string {
         if (!this.gameRound) return "No active game round";
-        return `${this.gameRound.songName}:${this.gameRound.artistName}:${this.gameRound.videoID}`;
+        return `${this.gameRound.song.songName}:${this.gameRound.song.artistName}:${this.gameRound.song.youtubeLink}`;
     }
     /**
      * https://www.desmos.com/calculator/9x3dkrmt84

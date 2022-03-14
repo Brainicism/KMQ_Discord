@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import {
@@ -8,8 +8,10 @@ import {
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("language");
+
 export enum LanguageType {
     KOREAN = "korean",
     ALL = "all",
@@ -34,27 +36,39 @@ export default class LanguageCommand implements BaseCommand {
         ],
     };
 
-    help = {
+    help = (guildID: string): Help => ({
         name: "language",
-        description: "Sets korean-only or all available songs",
+        description: state.localizer.translate(
+            guildID,
+            "command.language.help.description"
+        ),
         usage: ",language [korean | all]",
         examples: [
             {
                 example: "`,language korean`",
-                explanation:
-                    "Plays only korean songs. Ignores songs that are in foreign languages: english, japanese, chinese.",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.language.help.example.korean"
+                ),
             },
             {
                 example: "`,language all`",
-                explanation: "Play all available songs.",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.language.help.example.all"
+                ),
             },
             {
                 example: "`,language`",
-                explanation: "Reset to the default language of `all`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.language.help.example.reset",
+                    { defaultLanguage: `\`${LanguageType.ALL}\`` }
+                ),
             },
         ],
         priority: 150,
-    };
+    });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);

@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     sendOptionsMessage,
     getDebugLogHeader,
@@ -9,8 +9,10 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("artisttype");
+
 export enum ArtistType {
     SOLOIST = "soloists",
     GROUP = "groups",
@@ -27,38 +29,57 @@ export default class ArtistTypeCommand implements BaseCommand {
         maxArgCount: 1,
         arguments: [
             {
-                name: "artist_Type",
+                name: "artistType",
                 type: "enum" as const,
                 enums: Object.values(ArtistType),
             },
         ],
     };
 
-    help = {
+    help = (guildID: string): Help => ({
         name: "artisttype",
-        description:
-            "Choose whether you'd like to hear from soloists, groups, or both. Options are the following, `soloists`, `groups`, and `both`.",
-        usage: ",artisttype [artisttype]",
+        description: state.localizer.translate(
+            guildID,
+            "command.artisttype.help.description",
+            {
+                soloists: `\`${ArtistType.SOLOIST}\``,
+                groups: `\`${ArtistType.GROUP}\``,
+                both: `\`${ArtistType.BOTH}\``,
+            }
+        ),
+        usage: ",artisttype [soloists | groups | both]",
         examples: [
             {
                 example: "`,artisttype soloists`",
-                explanation: "Play songs only from `soloists`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.artisttype.help.example.soloists"
+                ),
             },
             {
                 example: "`,artisttype groups`",
-                explanation: "Play songs only from `groups`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.artisttype.help.example.groups"
+                ),
             },
             {
                 example: "`,artisttype both`",
-                explanation: "Plays songs from both `soloists` and `groups`",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.artisttype.help.example.both"
+                ),
             },
             {
                 example: "`,artisttype`",
-                explanation: "Resets the artist type option",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.artisttype.help.example.reset"
+                ),
             },
         ],
         priority: 150,
-    };
+    });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
@@ -81,8 +102,19 @@ export default class ArtistTypeCommand implements BaseCommand {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Game Option Conflict",
-                description: `\`groups\` game option is currently set. \`artisttype\` and \`groups\` are incompatible. Remove the \`groups\` option by typing \`${process.env.BOT_PREFIX}groups\` to proceed`,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.failure.gameOptionConflict.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "misc.failure.gameOptionConflict.description",
+                    {
+                        optionOne: "`groups`",
+                        optionTwo: "`artisttype`",
+                        optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
+                    }
+                ),
             });
             return;
         }

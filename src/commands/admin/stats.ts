@@ -1,6 +1,6 @@
 import Eris from "eris";
 import os from "os";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     sendErrorMessage,
@@ -16,17 +16,21 @@ import {
     friendlyFormattedNumber,
     measureExecutionTime,
 } from "../../helpers/utils";
+import { getKmqCurrentVersion } from "../../helpers/game_utils";
 
 const logger = new IPCLogger("stats");
 
-export default class SkipCommand implements BaseCommand {
-    help = {
+export default class StatsCommand implements BaseCommand {
+    help = (guildID: string): Help => ({
         name: "stats",
-        description: "Various usage/system statistics.",
+        description: state.localizer.translate(
+            guildID,
+            "command.stats.help.description"
+        ),
         usage: ",stats",
         examples: [],
         priority: 1,
-    };
+    });
 
     call = async ({ message, channel }: CommandArgs): Promise<void> => {
         const fleetStats = await state.ipc.getStats();
@@ -44,8 +48,14 @@ export default class SkipCommand implements BaseCommand {
         } catch (e) {
             logger.error(`Error retrieving stats via IPC. err = ${e}`);
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "Error Retrieving Stats",
-                description: "Please try again later",
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.stats.failure.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "command.stats.failure.description"
+                ),
             });
             return;
         }
@@ -131,41 +141,87 @@ export default class SkipCommand implements BaseCommand {
         )["stat_value"];
 
         const gameStatistics = {
-            "Active Game Sessions": activeGameSessions,
-            "Active Players": activePlayers,
-            "(Recent) Game Sessions": `${friendlyFormattedNumber(
+            [state.localizer.translate(
+                message.guildID,
+                "command.stats.game.activeGameSessions"
+            )]: activeGameSessions,
+            [state.localizer.translate(
+                message.guildID,
+                "command.stats.game.activePlayers"
+            )]: activePlayers,
+            [state.localizer.translate(
+                message.guildID,
+                "command.stats.game.recentGameSessions"
+            )]: `${friendlyFormattedNumber(
                 Number(recentGameSessions)
             )} | ${friendlyFormattedNumber(Number(totalGameSessions))}`,
-            "(Recent) Game Rounds": `${friendlyFormattedNumber(
+            [state.localizer.translate(
+                message.guildID,
+                "command.stats.game.recentGameRounds"
+            )]: `${friendlyFormattedNumber(
                 recentGameRounds
             )} | ${friendlyFormattedNumber(totalGameRounds)}`,
-            "(Recent) Players": `${friendlyFormattedNumber(
+            [state.localizer.translate(
+                message.guildID,
+                "command.stats.game.recentPlayers"
+            )]: `${friendlyFormattedNumber(
                 Number(recentPlayers)
             )} | ${friendlyFormattedNumber(Number(totalPlayers))}`,
-            "Latest Song Update": friendlyFormattedDate(latestAvailableSong),
+            [state.localizer.translate(
+                message.guildID,
+                "command.stats.game.latestSongUpdate"
+            )]: friendlyFormattedDate(latestAvailableSong, message.guildID),
         };
 
         const systemStatistics = {
-            "System Load Average": os
+            [state.localizer.translate(
+                message.guildID,
+                "command.stats.system.loadAverage"
+            )]: os
                 .loadavg()
                 .map((x) => x.toFixed(2))
                 .toString(),
-            "Process Memory Usage": `${fleetStats.totalRam.toFixed(2)} MB`,
-            "API Latency": `${channel.guild.shard.latency} ms`,
-            "Request Latency": `${requestLatency} ms`,
-            "Database Latency": `${mysqlLatency.toFixed(2)} ms`,
-            Uptime: `${(process.uptime() / (60 * 60)).toFixed(2)} hours`,
+            [state.localizer.translate(
+                message.guildID,
+                "command.stats.system.memoryUsage"
+            )]: `${fleetStats.totalRam.toFixed(2)} MB`,
+            [state.localizer.translate(
+                message.guildID,
+                "command.stats.system.apiLatency"
+            )]: `${channel.guild.shard.latency} ms`,
+            [state.localizer.translate(
+                message.guildID,
+                "command.stats.system.requestLatency"
+            )]: `${requestLatency} ms`,
+            [state.localizer.translate(
+                message.guildID,
+                "command.stats.system.databaseLatency"
+            )]: `${mysqlLatency.toFixed(2)} ms`,
+            [state.localizer.translate(
+                message.guildID,
+                "command.stats.system.uptime"
+            )]: state.localizer.translateN(
+                message.guildID,
+                "misc.plural.hour",
+                Number((process.uptime() / (60 * 60)).toFixed(2))
+            ),
         };
 
         const fields: Array<Eris.EmbedField> = [
             {
-                name: "Game Statistics",
+                name: state.localizer.translate(
+                    message.guildID,
+                    "command.stats.game.title"
+                ),
                 value: `\`\`\`\n${Object.entries(gameStatistics)
                     .map((stat) => `${stat[0]}: ${stat[1]}`)
                     .join("\n")}\`\`\``,
             },
             {
-                name: "System Statistics",
+                name: state.localizer.translate(
+                    message.guildID,
+                    "command.stats.system.title"
+                ),
                 value: `\`\`\`\n${Object.entries(systemStatistics)
                     .map((stat) => `${stat[0]}: ${stat[1]}`)
                     .join("\n")}\`\`\``,
@@ -174,11 +230,22 @@ export default class SkipCommand implements BaseCommand {
 
         logger.info(`${getDebugLogHeader(message)} | Stats retrieved`);
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: "Bot Stats",
-            description: "Detailed bot status: https://kmq.kpop.gg/status",
+            title: state.localizer.translate(
+                message.guildID,
+                "command.stats.title"
+            ),
+            description: state.localizer.translate(
+                message.guildID,
+                "command.stats.description",
+                {
+                    link: "https://kmq.kpop.gg/status",
+                }
+            ),
             fields,
-            footerText:
-                "'Recent' statistics represent data from last 24 hours.",
+            footerText: `${getKmqCurrentVersion()} | ${state.localizer.translate(
+                message.guildID,
+                "command.stats.footer"
+            )}`,
             timestamp: new Date(),
             thumbnailUrl: KmqImages.READING_BOOK,
         });

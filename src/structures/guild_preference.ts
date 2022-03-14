@@ -277,7 +277,7 @@ export default class GuildPreference {
     public gameOptions: GameOptions;
 
     /** The Discord Guild ID */
-    private readonly guildID: string;
+    public readonly guildID: string;
 
     /** The GuildPreference's respective GameOptions */
 
@@ -911,6 +911,7 @@ export default class GuildPreference {
         const updatedOptions = Object.values(updatedOptionsObjects).map(
             (option) => ({
                 guild_id: this.guildID,
+                client_id: process.env.BOT_CLIENT_ID,
                 option_name: option.name,
                 option_value: JSON.stringify(option.value),
             })
@@ -920,7 +921,7 @@ export default class GuildPreference {
             await dbContext
                 .kmq("game_options")
                 .insert(updatedOptions)
-                .onConflict(["guild_id", "option_name"])
+                .onConflict(["guild_id", "option_name", "client_id"])
                 .merge()
                 .transacting(trx);
         });
@@ -957,7 +958,10 @@ export default class GuildPreference {
             (option) => !_.isEqual(oldOptions[option[0]], option[1])
         );
 
-        return updatedOptions.map((x) => x[0] as GameOption);
+        return _.uniqBy(
+            updatedOptions.map((x) => x[0] as GameOption),
+            "option"
+        );
     }
 
     /** Sets the current game options as the default */

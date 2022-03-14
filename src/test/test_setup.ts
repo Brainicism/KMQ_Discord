@@ -5,9 +5,13 @@ import * as discordUtils from "../helpers/discord_utils";
 import kmqKnexConfig from "../config/knexfile_kmq";
 import dbContext from "../database_context";
 import Player from "../structures/player";
+import EliminationPlayer from "../structures/elimination_player";
 import { EnvType } from "../types";
 import { IPCLogger } from "../logger";
 import { md5Hash } from "../helpers/utils";
+import { state } from "../kmq_worker";
+import LocalizationManager from "../helpers/localization_manager";
+import { DEFAULT_LIVES } from "../structures/elimination_scoreboard";
 
 const logger = new IPCLogger("test_setup");
 const sandbox = sinon.createSandbox();
@@ -16,10 +20,13 @@ async function setup(): Promise<void> {
     await dbContext.kmq.raw("DROP TABLE IF EXISTS available_songs");
     await dbContext.kmq.raw("DROP TABLE IF EXISTS kpop_groups");
     await dbContext.kmq.raw(`CREATE TABLE available_songs (
-        song_name VARCHAR(255),
-        clean_song_name VARCHAR(255),
+        song_name_en VARCHAR(255),
+        clean_song_name_en VARCHAR(255),
+        song_name_ko VARCHAR(255),
+        clean_song_name_ko VARCHAR(255),
         link VARCHAR(255),
-        artist_name VARCHAR(255),
+        artist_name_en VARCHAR(255),
+        artist_name_ko VARCHAR(255),
         members ENUM('male', 'female', 'coed'),
         views BIGINT(19),
         id_artist INT(10),
@@ -85,9 +92,11 @@ export const mockArtists = [
 export const mockSongs = [...Array(1000).keys()].map((i) => {
     const artist = mockArtists[md5Hash(i, 8) % mockArtists.length];
     return {
-        song_name: `${crypto.randomBytes(8).toString("hex")}`,
+        song_name_en: `${crypto.randomBytes(8).toString("hex")}`,
+        song_name_ko: `${crypto.randomBytes(8).toString("hex")}`,
         link: crypto.randomBytes(4).toString("hex"),
-        artist_name: artist.name,
+        artist_name_en: artist.name,
+        artist_name_ko: artist.name,
         members: artist.members,
         views: md5Hash(i, 16),
         id_artist: artist.id,
@@ -119,6 +128,13 @@ before(async function () {
     sandbox
         .stub(Player, "fromUserID")
         .callsFake((id) => new Player("", id, "", 0));
+
+    sandbox
+        .stub(EliminationPlayer, "fromUserID")
+        .callsFake(
+            (id, score) =>
+                new EliminationPlayer("", id, "", score ?? DEFAULT_LIVES)
+        );
     console.log("Performing migrations...");
     await dbContext.agnostic.raw("DROP DATABASE IF EXISTS kmq_test;");
     await dbContext.agnostic.raw("CREATE DATABASE kmq_test;");
@@ -131,6 +147,7 @@ before(async function () {
         process.exit(1);
     }
 
+    state.localizer = new LocalizationManager();
     this.timeout(10000);
     logger.info("Setting up test database...");
     await setup();

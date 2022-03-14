@@ -1,16 +1,14 @@
 import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
 import EliminationPlayer from "./elimination_player";
-import { IPCLogger } from "../logger";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const logger = new IPCLogger("elimination_scoreboard");
+export const DEFAULT_LIVES = 10;
 
 export default class EliminationScoreboard extends Scoreboard {
+    /** The amount of lives each player starts with */
+    public readonly startingLives: number;
+
     /** Mapping of Discord user ID to EliminationPlayer */
     protected players: { [userID: string]: EliminationPlayer };
-
-    /** The amount of lives each player starts with */
-    private readonly startingLives: number;
 
     constructor(lives: number) {
         super();
@@ -18,33 +16,17 @@ export default class EliminationScoreboard extends Scoreboard {
     }
 
     /**
-     * Begins tracking a player on the game's scoreboard
-     * @param userID - The player's Discord user ID
-     * @param tag - The player's Discord tag
-     * @param avatarUrl - The player's Discord avatar URL
-     * @param lives - The number of lives the player starts with
-     * @returns the EliminationPlayer added
-     */
-    addPlayer(
-        userID: string,
-        tag: string,
-        avatarUrl: string,
-        lives?: number
-    ): EliminationPlayer {
-        this.players[userID] = new EliminationPlayer(
-            tag,
-            userID,
-            avatarUrl,
-            lives ?? this.startingLives
-        );
-        return this.players[userID];
-    }
-
-    /**
      * Updates the scoreboard with information about correct guessers
      * @param guessResults - Objects containing the user ID, points earned, and EXP gain
      */
-    updateScoreboard(guessResults: Array<SuccessfulGuessResult>): void {
+    async updateScoreboard(
+        guessResults: Array<SuccessfulGuessResult>
+    ): Promise<void> {
+        const previousRoundRanking = this.getScoreToRankingMap();
+        for (const player of Object.values(this.players)) {
+            player.setPreviousRanking(previousRoundRanking[player.getScore()]);
+        }
+
         // give everybody EXP
         for (const guessResult of guessResults) {
             const correctGuesser = this.players[guessResult.userID];

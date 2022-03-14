@@ -4,7 +4,8 @@ import { exec } from "child_process";
 import moment from "moment-timezone";
 import crypto from "crypto";
 import _ from "lodash";
-import pluralize from "pluralize";
+import { state } from "../kmq_worker";
+import LocalizationManager from "./localization_manager";
 import { IPCLogger } from "../logger";
 
 const logger = new IPCLogger("utils");
@@ -59,15 +60,6 @@ export function strikethrough(text: string): string {
 }
 
 /**
- * @param num - The number to round
- * @param places - The number of places to round
- * @returns the rounded number
- */
-export function roundDecimal(num: number, places: number): number {
-    return Math.round(num * 10 ** places) / 10 ** places;
-}
-
-/**
  * Chunks in an array in subarrays of specified size
  * @param array - The input array
  * @param chunkSize - The size of each chunked array
@@ -98,7 +90,7 @@ export function getAudioDurationInSeconds(songPath: string): Promise<number> {
     return new Promise((resolve) => {
         exec(
             `ffprobe -i "${songPath}" -show_entries format=duration -v quiet -of csv="p=0"`,
-            (err, stdout, stderr) => {
+            (_err, stdout, stderr) => {
                 if (!stdout || stderr) {
                     logger.error(
                         `Error getting audio duration: path = ${songPath}, err = ${stderr}`
@@ -148,7 +140,7 @@ export function weekOfYear(dateObj?: Date): number {
     return (
         1 +
         Math.round(
-            ((date.getTime() - week1.getTime()) / 86400000 -
+            ((date.getTime() - week1.getTime()) / (1000 * 60 * 60 * 24) -
                 3 +
                 ((week1.getDay() + 6) % 7)) /
                 7
@@ -203,18 +195,34 @@ export function standardDateFormat(date: Date): string {
 
 /**
  * @param date - the date Object
+ * @param guildID - the guild ID
  * @returns the date in (minutes/hours ago) or yyyy-mm-dd format
  */
-export function friendlyFormattedDate(date: Date): string {
+export function friendlyFormattedDate(date: Date, guildID: string): string {
+    let localizer: LocalizationManager;
+    if (guildID === null) {
+        localizer = new LocalizationManager();
+    } else {
+        localizer = state.localizer;
+    }
+
     const timeDiffSeconds = (Date.now() - date.getTime()) / 1000;
     const timeDiffMinutes = timeDiffSeconds / 60.0;
     if (timeDiffMinutes <= 60) {
-        return `${pluralize("minute", Math.ceil(timeDiffMinutes), true)} ago`;
+        return localizer.translateN(
+            guildID,
+            "misc.plural.minuteAgo",
+            Math.ceil(timeDiffMinutes)
+        );
     }
 
     const timeDiffHours = timeDiffMinutes / 60.0;
     if (timeDiffHours <= 24) {
-        return `${pluralize("hour", Math.ceil(timeDiffHours), true)} ago`;
+        return localizer.translateN(
+            guildID,
+            "misc.plural.hourAgo",
+            Math.ceil(timeDiffHours)
+        );
     }
 
     return standardDateFormat(date);
@@ -273,31 +281,12 @@ export function md5Hash(input: string | number, bits: number): number {
     return parseInt(hash.slice(0, bits / 4), 16);
 }
 
-/** @returns whether its a KMQ power hour */
-export function isPowerHour(): boolean {
-    const date = new Date();
-    const dateSeed =
-        (date.getDate() * 31 + date.getMonth()) * 31 + date.getFullYear();
-
-    // distribute between each third of the day to accomodate timezone differences
-    const powerHours = [
-        md5Hash(dateSeed, 8) % 7,
-        (md5Hash(dateSeed + 1, 8) % 7) + 8,
-        (md5Hash(dateSeed + 2, 8) % 7) + 16,
-    ];
-
-    const currentHour = date.getHours();
-    return powerHours.some(
-        (powerHour) => currentHour >= powerHour && currentHour <= powerHour + 1
-    );
-}
-
 /**
  * @param n - the number to format
- * @returns the given number, with thousands separated by spaces
+ * @returns the given number, with thousands separated by commas
  */
 export function friendlyFormattedNumber(n: number): string {
-    return n?.toLocaleString("en");
+    return n.toLocaleString("en");
 }
 
 /**
@@ -399,4 +388,14 @@ export async function measureExecutionTime(
     await promise;
     const hrend = process.hrtime(hrstart);
     return hrend[0] * 1000 + hrend[1] / 1000000;
+}
+
+/**
+ * @param s - the string to be tested for Hangul
+ * @returns true if the string contains any Hangul
+ */
+export function containsHangul(s: string): boolean {
+    return /[\uac00-\ud7af]|[\u1100-\u11ff]|[\u3130-\u318f]|[\ua960-\ua97f]|[\ud7b0-\ud7ff]/giu.test(
+        s
+    );
 }

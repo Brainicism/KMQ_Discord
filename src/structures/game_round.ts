@@ -8,9 +8,10 @@ import {
     ExpBonusModifier,
     ExpBonusModifierValues,
 } from "../commands/game_commands/exp";
+import { QueriedSong } from "../types";
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
-const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\ \(\)\+\u200B]/g;
+const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\(\)\+\u200B]/g;
 /** Set of characters to replace in song names/guesses */
 const CHARACTER_REPLACEMENTS = [
     { pattern: REMOVED_CHARACTERS, replacement: "" },
@@ -91,32 +92,17 @@ function generateHint(name: string): string {
 }
 
 export default class GameRound {
-    /** The song name with brackets removed */
-    public readonly songName: string;
-
-    /** The original song name */
-    public readonly originalSongName: string;
+    /** The song associated with the round */
+    public readonly song: QueriedSong;
 
     /** The potential song aliases */
     public readonly songAliases: string[];
 
-    /** The artist name */
-    public readonly artistName: string;
-
     /** The potential artist aliases */
     public readonly artistAliases: string[];
 
-    /** The youtube video ID of the current song */
-    public readonly videoID: string;
-
     /** Timestamp of the creation of the GameRound in epoch milliseconds */
     public readonly startedAt: number;
-
-    /** The song publish date on YouTube */
-    public readonly publishDate: Date;
-
-    /** The song's views on YouTube */
-    public readonly views: number;
 
     /** Round bonus modifier */
     public bonusModifier: number;
@@ -169,37 +155,36 @@ export default class GameRound {
     /** The base EXP for this GameRound */
     private baseExp: number;
 
-    constructor(
-        cleanedSongName: string,
-        originalSongName: string,
-        artist: string,
-        videoID: string,
-        publishDate: Date,
-        views: number
-    ) {
-        this.songName = cleanedSongName;
-        this.originalSongName = originalSongName;
-        this.songAliases = state.aliases.song[videoID] || [];
-        this.acceptedSongAnswers = [cleanedSongName, ...this.songAliases];
-        const artistNames = artist.split("+").map((x) => x.trim());
+    constructor(song: QueriedSong) {
+        this.song = song;
+        this.songAliases = state.aliases.song[song.youtubeLink] || [];
+        this.acceptedSongAnswers = [song.songName, ...this.songAliases];
+        if (song.hangulSongName) {
+            this.acceptedSongAnswers.push(song.hangulSongName);
+        }
+
+        const artistNames = song.artistName.split("+").map((x) => x.trim());
+        if (song.hangulArtistName) {
+            artistNames.push(
+                ...song.hangulArtistName.split("+").map((x) => x.trim())
+            );
+        }
+
         this.artistAliases = artistNames.flatMap(
             (x) => state.aliases.artist[x] || []
         );
         this.acceptedArtistAnswers = [...artistNames, ...this.artistAliases];
-        this.artistName = artist;
-        this.videoID = videoID;
+
         this.skipAchieved = false;
         this.startedAt = Date.now();
-        this.publishDate = publishDate;
-        this.views = views;
         this.skippers = new Set();
         this.hintUsed = false;
         this.hintRequesters = new Set();
         this.correctGuessers = [];
         this.finished = false;
         this.hints = {
-            songHint: generateHint(this.songName),
-            artistHint: generateHint(this.artistName),
+            songHint: generateHint(song.songName),
+            artistHint: generateHint(song.artistName),
         };
         this.interactionCorrectAnswerUUID = null;
         this.interactionIncorrectAnswerUUIDs = {};
@@ -380,7 +365,7 @@ export default class GameRound {
     isValidInteractionGuess(interactionUUID: string): boolean {
         return (
             interactionUUID === this.interactionCorrectAnswerUUID ||
-            Object.keys(this.interactionIncorrectAnswerUUIDs)?.includes(
+            Object.keys(this.interactionIncorrectAnswerUUIDs).includes(
                 interactionUUID
             )
         );
@@ -396,7 +381,7 @@ export default class GameRound {
     }
 
     isBonusArtist(): boolean {
-        return state.bonusArtists.has(this.artistName);
+        return state.bonusArtists.has(this.song.artistName);
     }
 
     /**
@@ -408,20 +393,22 @@ export default class GameRound {
         guess: string,
         correctChoices: Array<string>
     ): boolean {
-        const distances = correctChoices.flatMap((x) => {
-            if (x.length > 4 && Math.abs(guess.length - x.length) < 2) {
-                return [levenshtien(guess, x)];
+        const distanceRequired = (length: number): number => {
+            if (length <= 4) return -1;
+            if (length <= 6) return 1;
+            return 2;
+        };
+
+        return correctChoices.some((x) => {
+            if (Math.abs(guess.length - x.length) < 2) {
+                const distance = levenshtien(guess, x);
+                if (distance.steps <= distanceRequired(x.length)) {
+                    return true;
+                }
             }
 
-            return [];
+            return false;
         });
-
-        if (distances.length > 0) {
-            const sortedDistances = distances.sort((a, b) => a.steps - b.steps);
-            return sortedDistances[0].steps <= 2;
-        }
-
-        return false;
     }
 
     /**
@@ -436,7 +423,7 @@ export default class GameRound {
         );
 
         return {
-            exact: this.songName && cleanedSongAliases.includes(guess),
+            exact: this.song.songName && cleanedSongAliases.includes(guess),
             similar: GameRound.similarityCheck(guess, cleanedSongAliases),
         };
     }
@@ -453,7 +440,7 @@ export default class GameRound {
         );
 
         return {
-            exact: this.songName && cleanedArtistAliases.includes(guess),
+            exact: this.song.songName && cleanedArtistAliases.includes(guess),
             similar: GameRound.similarityCheck(guess, cleanedArtistAliases),
         };
     }

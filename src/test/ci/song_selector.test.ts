@@ -762,7 +762,10 @@ describe("checkUniqueSongQueue", () => {
 
                     // play all songs but one
                     for (let i = 0; i < numberSongs - 1; i++) {
-                        await songSelector.queryRandomSong(guildPreference);
+                        assert(
+                            await songSelector.queryRandomSong(guildPreference)
+                        );
+
                         assert.strictEqual(
                             songSelector.checkUniqueSongQueue(guildPreference),
                             false
@@ -774,29 +777,76 @@ describe("checkUniqueSongQueue", () => {
             });
 
             describe("all songs have been played", () => {
-                it("should reset the unique song queue", async () => {
-                    const numberSongs = 5;
-                    await guildPreference.setShuffleType(ShuffleType.UNIQUE);
-                    await guildPreference.setLimit(0, numberSongs);
-                    await songSelector.reloadSongs(guildPreference);
+                describe("limit greater than LAST_PLAYED_SONG_QUEUE_SIZE (Bug #1158)", () => {
+                    it("should reset the unique song queue, queryRandomSong should not return null ", async () => {
+                        const numberSongs = LAST_PLAYED_SONG_QUEUE_SIZE + 1;
+                        await guildPreference.setShuffleType(
+                            ShuffleType.UNIQUE
+                        );
+                        await guildPreference.setLimit(0, numberSongs);
+                        await songSelector.reloadSongs(guildPreference);
 
-                    // play all songs but one
-                    for (let i = 0; i < numberSongs - 1; i++) {
-                        await songSelector.queryRandomSong(guildPreference);
+                        // play all songs
+                        for (let i = 0; i < numberSongs; i++) {
+                            assert(
+                                await songSelector.queryRandomSong(
+                                    guildPreference
+                                )
+                            );
+                        }
+
+                        assert.strictEqual(resetSpy.called, false);
+
                         assert.strictEqual(
                             songSelector.checkUniqueSongQueue(guildPreference),
-                            false
+                            true
                         );
-                    }
 
-                    assert.strictEqual(resetSpy.called, false);
-                    // play the last song
-                    await songSelector.queryRandomSong(guildPreference);
-                    assert.strictEqual(
-                        songSelector.checkUniqueSongQueue(guildPreference),
-                        true
-                    );
-                    assert.strictEqual(resetSpy.called, true);
+                        assert.strictEqual(resetSpy.called, true);
+                        // play the first song after reset
+                        assert(
+                            await songSelector.queryRandomSong(guildPreference)
+                        );
+                    });
+                });
+
+                describe("limit smaller than LAST_PLAYED_SONG_QUEUE_SIZE", () => {
+                    it("should reset the unique song queue", async () => {
+                        const numberSongs = 5;
+                        await guildPreference.setShuffleType(
+                            ShuffleType.UNIQUE
+                        );
+                        await guildPreference.setLimit(0, numberSongs);
+                        await songSelector.reloadSongs(guildPreference);
+
+                        // play all songs but one
+                        for (let i = 0; i < numberSongs - 1; i++) {
+                            assert(
+                                await songSelector.queryRandomSong(
+                                    guildPreference
+                                )
+                            );
+
+                            assert.strictEqual(
+                                songSelector.checkUniqueSongQueue(
+                                    guildPreference
+                                ),
+                                false
+                            );
+                        }
+
+                        assert.strictEqual(resetSpy.called, false);
+                        // play the last song
+                        assert(
+                            await songSelector.queryRandomSong(guildPreference)
+                        );
+
+                        assert.strictEqual(
+                            songSelector.checkUniqueSongQueue(guildPreference),
+                            true
+                        );
+                        assert.strictEqual(resetSpy.called, true);
+                    });
                 });
             });
 
@@ -810,7 +860,9 @@ describe("checkUniqueSongQueue", () => {
 
                     // play all songs but one
                     for (let i = 0; i < numberSongs * numberOfResets; i++) {
-                        await songSelector.queryRandomSong(guildPreference);
+                        assert(
+                            await songSelector.queryRandomSong(guildPreference)
+                        );
                         if (i > 0 && (i + 1) % numberSongs === 0) {
                             assert.strictEqual(
                                 songSelector.checkUniqueSongQueue(

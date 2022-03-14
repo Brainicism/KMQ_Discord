@@ -31,7 +31,7 @@ We update our songs frequently! Expect to see songs on the bot the same day they
 # EXP System
 Think you have what it takes to be a KMQ master? Rise through the ranks, gaining EXP and leveling up by playing KMQ. Every correct guess will net you some EXP, increasing based on your game options. The higher the number of songs selected by your game options, the more EXP you will get!
 
-Everyone starts off as a `Novice` and works their way up as a `Trainee` (Level 10), `Pre-debut` (Level 20), `Nugu` (Level 30), and many more! Check out `,profile` and `,scoreboard` to see where you and other players stand!
+Everyone starts off as a `Novice` and works their way up as a `Trainee` (Level 10), `Pre-debut` (Level 20), `Nugu` (Level 30), and many more! Check out `,profile` and `,leaderboard` to see where you and other players stand!
 
 ## EXP Modifiers
 - Playing with more people will increase how much EXP you gain, ranging between 1x (single player) to 1.5x EXP (6+ players)
@@ -227,11 +227,14 @@ Use `,help [command_name]` for more details for any of the following commands:
 - `,news`: Show the latest features/changes to the bot
 - `,profile`: Show per-player stats, along with a ranking against everyone else
 - `,leaderboard`: Show the server/game/global KMQ leaderboard
+- `,score`: Show the current game's scoreboard with EXP gained
 - `,list`: Show the currently selected groups for `,groups`, `,include`, or `,exclude`
 - `,preset`: Quickly save, load, and export game options as presets (even across servers!)
 - `,vote`: Show your current 2x bonus EXP modifier status from voting for the bot on [top.gg](https://top.gg/bot/508759831755096074/vote). Thanks for supporting KMQ!
 - `,recentlyadded`: See a list of songs added to KMQ in the past 2 weeks
 - `,exp`: Show your current bonus EXP modifiers
+- `,locale`: Change the language of the bot
+- `,lookup`: Get information about the given song (whether it's available in KMQ, aliases, etc.)
 
 ## Game Option Commands
 - `,limit`: Set a maximum number of results in the song query. This effectively sets the "top `x` number of songs" based on the selected filters

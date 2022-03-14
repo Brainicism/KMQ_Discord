@@ -2,11 +2,16 @@
 import Eris from "eris";
 import EmbedPaginator from "eris-pagination";
 import axios from "axios";
-import pluralize from "pluralize";
 import GuildPreference from "../structures/guild_preference";
 import GameSession from "../structures/game_session";
 import { IPCLogger } from "../logger";
-import { getAvailableSongCount, userBonusIsActive } from "./game_utils";
+import {
+    getAvailableSongCount,
+    getKmqCurrentVersion,
+    userBonusIsActive,
+    getLocalizedSongName,
+    getLocalizedArtistName,
+} from "./game_utils";
 import { getFact } from "../fact_generator";
 import {
     EmbedPayload,
@@ -44,6 +49,7 @@ import MessageContext from "../structures/message_context";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { REVIEW_LINK, VOTE_LINK } from "../commands/game_commands/vote";
 import { UniqueSongCounter } from "../structures/song_selector";
+import { LocaleType, DEFAULT_LOCALE } from "./localization_manager";
 
 const logger = new IPCLogger("utils");
 export const EMBED_ERROR_COLOR = 0xed4245; // Red
@@ -61,7 +67,6 @@ const REQUIRED_VOICE_PERMISSIONS = [
     "voiceSpeak" as const,
 ];
 
-const SCOREBOARD_FIELD_CUTOFF = 9;
 const MAX_SCOREBOARD_PLAYERS = 30;
 const MAX_RUNNERS_UP = 30;
 const MAX_INTERACTION_RESPONSE_TIME = 3 * 1000;
@@ -113,15 +118,24 @@ export function getDebugLogHeader(
 }
 
 /**
+ * @param guildID - The guild ID
  * @param missingPermissions - List of missing text permissions
  * @returns a friendly string describing the missing text permissions
  */
-function missingPermissionsText(missingPermissions: string[]): string {
-    return `Ensure that the bot has the following permissions: \`${missingPermissions.join(
-        ", "
-    )}\`\n\nSee the following link for details: https://support.discord.com/hc/en-us/articles/206029707-How-do-I-set-up-Permissions-. If you are still having issues, join the official KMQ server found in \`${
-        process.env.BOT_PREFIX
-    }help\``;
+function missingPermissionsText(
+    guildID: string,
+    missingPermissions: string[]
+): string {
+    return state.localizer.translate(
+        guildID,
+        "misc.failure.missingPermissionsText",
+        {
+            missingPermissions: missingPermissions.join(", "),
+            permissionsLink:
+                "https://support.discord.com/hc/en-us/articles/206029707-How-do-I-set-up-Permissions-",
+            helpCommand: `\`${process.env.BOT_PREFIX}help\``,
+        }
+    );
 }
 
 /**
@@ -238,19 +252,25 @@ export async function textPermissionsCheck(
     guildID: string,
     authorID: string
 ): Promise<boolean> {
-    const { client } = state;
     const messageContext = new MessageContext(textChannelID, null, guildID);
     const channel = await fetchChannel(textChannelID);
     if (!channel) return false;
-    if (!channel.permissionsOf(client.user.id).has("sendMessages")) {
+    if (!channel.permissionsOf(process.env.BOT_CLIENT_ID).has("sendMessages")) {
         logger.warn(
             `${getDebugLogHeader(
                 messageContext
             )} | Missing SEND_MESSAGES permissions`
         );
         const embed = {
-            title: "Missing Permissions",
-            description: `Hi! I'm unable to message in ${channel.guild.name}'s #${channel.name} channel. Please make sure the bot has permissions to message in this channel.`,
+            title: state.localizer.translate(
+                guildID,
+                "misc.failure.missingPermissions.title"
+            ),
+            description: state.localizer.translate(
+                guildID,
+                "misc.failure.missingPermissions.description",
+                { channelName: `#${channel.name}` }
+            ),
         };
 
         await sendDmMessage(authorID, { embeds: [embed] });
@@ -258,7 +278,8 @@ export async function textPermissionsCheck(
     }
 
     const missingPermissions = REQUIRED_TEXT_PERMISSIONS.filter(
-        (permission) => !channel.permissionsOf(client.user.id).has(permission)
+        (permission) =>
+            !channel.permissionsOf(process.env.BOT_CLIENT_ID).has(permission)
     );
 
     if (missingPermissions.length > 0) {
@@ -271,7 +292,7 @@ export async function textPermissionsCheck(
         );
 
         sendMessage(channel.id, {
-            content: missingPermissionsText(missingPermissions),
+            content: missingPermissionsText(guildID, missingPermissions),
         });
         return false;
     }
@@ -383,7 +404,9 @@ export async function sendMessage(
     // only reply to message if has required permissions
     if (
         channel &&
-        !channel.permissionsOf(state.client.user.id).has("readMessageHistory")
+        !channel
+            .permissionsOf(process.env.BOT_CLIENT_ID)
+            .has("readMessageHistory")
     ) {
         if (messageContent.messageReference) {
             messageContent.messageReference = null;
@@ -425,7 +448,7 @@ async function sendDmMessage(
     messageContent: Eris.AdvancedMessageContent
 ): Promise<Eris.Message> {
     const { client } = state;
-    let dmChannel;
+    let dmChannel: Eris.PrivateChannel;
     try {
         dmChannel = await client.getDMChannel(userID);
     } catch (e) {
@@ -500,18 +523,25 @@ export async function sendErrorMessage(
  * @param embedPayload - What to include in the message
  * @param reply - Whether to reply to the given message
  * @param boldTitle - Whether to bold the title
+ * @param content - Plain text content
  */
 export async function sendInfoMessage(
     messageContext: MessageContext,
     embedPayload: EmbedPayload,
     reply = false,
-    boldTitle = true
+    boldTitle = true,
+    content?: string
 ): Promise<Eris.Message<Eris.TextableChannel>> {
     if (embedPayload.description && embedPayload.description.length > 2048) {
         return sendErrorMessage(messageContext, {
-            title: "Error",
-            description:
-                "Response message was too long, report this error to the KMQ help server",
+            title: state.localizer.translate(
+                messageContext.guildID,
+                "misc.failure.error"
+            ),
+            description: state.localizer.translate(
+                messageContext.guildID,
+                "misc.failure.messageTooLong"
+            ),
         });
     }
 
@@ -555,6 +585,7 @@ export async function sendInfoMessage(
                       }
                     : null,
             components: embedPayload.components,
+            content,
         },
         null,
         messageContext.author.id
@@ -587,18 +618,37 @@ export async function sendEndRoundMessage(
         text: "",
     };
 
+    const aliasesText = state.localizer.translate(
+        messageContext.guildID,
+        "misc.inGame.aliases"
+    );
+
+    const locale = getGuildLocale(messageContext.guildID);
+    const aliases: Array<string> = [];
     if (guessModeType === GuessModeType.ARTIST) {
-        if (gameRound.artistAliases.length > 0) {
-            footer.text = `Aliases: ${Array.from(gameRound.artistAliases).join(
-                ", "
-            )}`;
+        if (gameRound.song.hangulArtistName) {
+            if (locale === LocaleType.KO) {
+                aliases.push(gameRound.song.artistName);
+            } else {
+                aliases.push(gameRound.song.hangulArtistName);
+            }
         }
+
+        aliases.push(...gameRound.artistAliases);
     } else {
-        if (gameRound.songAliases.length > 0) {
-            footer.text = `Aliases: ${Array.from(gameRound.songAliases).join(
-                ", "
-            )}`;
+        if (gameRound.song.hangulSongName) {
+            if (locale === LocaleType.KO) {
+                aliases.push(gameRound.song.originalSongName);
+            } else {
+                aliases.push(gameRound.song.originalHangulSongName);
+            }
         }
+
+        aliases.push(...gameRound.songAliases);
+    }
+
+    if (aliases.length > 0) {
+        footer.text = `${aliasesText}: ${aliases.join(", ")}`;
     }
 
     if (timeRemaining) {
@@ -608,41 +658,62 @@ export async function sendEndRoundMessage(
 
         footer.text +=
             timeRemaining > 0
-                ? `⏰ ${pluralize(
-                      "minute",
-                      Math.ceil(timeRemaining),
-                      true
-                  )} remaining`
-                : "⏰ Time's up!";
+                ? `⏰ ${state.localizer.translateN(
+                      messageContext.guildID,
+                      "misc.plural.minute",
+                      Math.ceil(timeRemaining)
+                  )}`
+                : `⏰ ${state.localizer.translate(
+                      messageContext.guildID,
+                      "misc.timeFinished"
+                  )}!`;
     }
 
-    const fact = Math.random() <= 0.05 ? getFact() : null;
+    const fact = Math.random() <= 0.05 ? getFact(messageContext.guildID) : null;
 
     const correctGuess = playerRoundResults.length > 0;
     let correctDescription = "";
     if (gameRound.bonusModifier > 1 || gameRound.isBonusArtist()) {
         let bonusType: string;
         if (gameRound.isBonusArtist() && gameRound.bonusModifier > 1) {
-            bonusType = "EXP AND ARTIST";
+            bonusType = state.localizer.translate(
+                messageContext.guildID,
+                "misc.inGame.bonusExpArtistRound"
+            );
         } else if (gameRound.bonusModifier > 1) {
-            bonusType = "EXP";
+            bonusType = state.localizer.translate(
+                messageContext.guildID,
+                "misc.inGame.bonusExpRound"
+            );
         } else {
-            bonusType = "ARTIST";
+            bonusType = state.localizer.translate(
+                messageContext.guildID,
+                "misc.inGame.bonusArtistRound"
+            );
         }
 
-        correctDescription += `⭐__**BONUS ${bonusType} ROUND**__⭐\n`;
+        correctDescription += `⭐__**${bonusType}**__⭐\n`;
     }
 
     if (correctGuess) {
-        correctDescription += `${getMention(playerRoundResults[0].player.id)} ${
+        const correctGuesser = `${getMention(
+            playerRoundResults[0].player.id
+        )} ${
             playerRoundResults[0].streak >= 5
                 ? `(🔥 ${friendlyFormattedNumber(
                       playerRoundResults[0].streak
-                  )}) `
+                  )})`
                 : ""
-        }guessed correctly (+${friendlyFormattedNumber(
-            playerRoundResults[0].expGain
-        )} EXP)`;
+        }`;
+
+        correctDescription += state.localizer.translate(
+            messageContext.guildID,
+            "misc.inGame.correctGuess",
+            {
+                correctGuesser,
+                expGain: friendlyFormattedNumber(playerRoundResults[0].expGain),
+            }
+        );
         if (playerRoundResults.length > 1) {
             const runnersUp = playerRoundResults.slice(1);
             let runnersUpDescription = runnersUp
@@ -656,39 +727,63 @@ export async function sendEndRoundMessage(
                 .join("\n");
 
             if (runnersUp.length >= MAX_RUNNERS_UP) {
-                runnersUpDescription += "\nand many others...";
+                runnersUpDescription += `\n${state.localizer.translate(
+                    messageContext.guildID,
+                    "misc.andManyOthers"
+                )}`;
             }
 
-            correctDescription += `\n\n**Runners Up**\n${runnersUpDescription}`;
+            correctDescription += `\n\n**${state.localizer.translate(
+                messageContext.guildID,
+                "misc.inGame.runnersUp"
+            )}**\n${runnersUpDescription}`;
         }
     }
 
-    const uniqueSongMessage =
-        uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0
-            ? `\n${codeLine(
-                  `${friendlyFormattedNumber(
-                      uniqueSongCounter.uniqueSongsPlayed
-                  )}/${friendlyFormattedNumber(uniqueSongCounter.totalSongs)}`
-              )} unique songs played.`
-            : "";
+    if (!correctGuess) {
+        correctDescription = state.localizer.translate(
+            messageContext.guildID,
+            "misc.inGame.noCorrectGuesses"
+        );
+    }
 
-    const useLargerScoreboard =
-        scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
+    const useLargerScoreboard = scoreboard.shouldUseLargerScoreboard();
 
-    const description = `${
-        correctGuess ? correctDescription : "Nobody got it."
-    }\n${uniqueSongMessage} ${
-        !scoreboard.isEmpty() && !useLargerScoreboard
-            ? "\n\n**Scoreboard**"
-            : ""
-    }`;
+    let scoreboardTitle = "";
+    if (scoreboard.getWinners().length > 0 && !useLargerScoreboard) {
+        scoreboardTitle = "\n\n";
+        scoreboardTitle += bold(
+            state.localizer.translate(
+                messageContext.guildID,
+                "command.score.scoreboardTitle"
+            )
+        );
+    }
+
+    let uniqueSongMessage = "";
+    if (uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0) {
+        uniqueSongMessage = "\n";
+        uniqueSongMessage += state.localizer.translate(
+            messageContext.guildID,
+            "misc.inGame.uniqueSongsPlayed",
+            {
+                uniqueSongCount: codeLine(
+                    `${friendlyFormattedNumber(
+                        uniqueSongCounter.uniqueSongsPlayed
+                    )}/${friendlyFormattedNumber(uniqueSongCounter.totalSongs)}`
+                ),
+            }
+        );
+    }
+
+    const description = `${correctDescription}\n${uniqueSongMessage} ${scoreboardTitle}`;
 
     let fields: Array<{ name: string; value: string; inline: boolean }>;
     let roundResultIDs: Array<string>;
     if (scoreboard instanceof TeamScoreboard) {
         const teamScoreboard = scoreboard as TeamScoreboard;
-        roundResultIDs = playerRoundResults.map((x) =>
-            teamScoreboard.getTeamOfPlayer(x.player.id).getID()
+        roundResultIDs = playerRoundResults.map(
+            (x) => teamScoreboard.getTeamOfPlayer(x.player.id).id
         );
     } else {
         roundResultIDs = playerRoundResults.map((x) => x.player.id);
@@ -698,15 +793,25 @@ export async function sendEndRoundMessage(
         fields = scoreboard.getScoreboardEmbedThreeFields(
             MAX_SCOREBOARD_PLAYERS,
             false,
+            true,
             roundResultIDs
         );
     } else {
-        fields = scoreboard.getScoreboardEmbedFields(false, roundResultIDs);
+        fields = scoreboard.getScoreboardEmbedFields(
+            false,
+            true,
+            roundResultIDs
+        );
     }
 
     if (fact) {
         fields.push({
-            name: "__Did you know?__",
+            name: underline(
+                state.localizer.translate(
+                    messageContext.guildID,
+                    "misc.gameMessages.didYouKnow.title"
+                )
+            ),
             value: fact,
             inline: false,
         });
@@ -724,19 +829,24 @@ export async function sendEndRoundMessage(
     }
 
     const songAndArtist = bold(
-        `"${gameRound.originalSongName}" - ${gameRound.artistName}`
+        `"${getLocalizedSongName(
+            gameRound.song,
+            locale
+        )}" - ${getLocalizedArtistName(gameRound.song, locale)}`
     );
 
     const embed = {
         color,
-        title: `${songAndArtist} (${gameRound.publishDate.getFullYear()})`,
-        url: `https://youtu.be/${gameRound.videoID}`,
+        title: `${songAndArtist} (${gameRound.song.publishDate.getFullYear()})`,
+        url: `https://youtu.be/${gameRound.song.youtubeLink}`,
         description,
         fields,
     };
 
-    const thumbnailUrl = `https://img.youtube.com/vi/${gameRound.videoID}/hqdefault.jpg`;
-    const footerText = `${friendlyFormattedNumber(gameRound.views)} views${
+    const thumbnailUrl = `https://img.youtube.com/vi/${gameRound.song.youtubeLink}/hqdefault.jpg`;
+    const footerText = `${friendlyFormattedNumber(
+        gameRound.song.views
+    )} ${state.localizer.translate(messageContext.guildID, "misc.views")}${
         footer.text ? `\n${footer.text}` : ""
     }`;
 
@@ -791,8 +901,15 @@ export async function sendOptionsMessage(
     const totalSongs = await getAvailableSongCount(guildPreference);
     if (totalSongs === null) {
         sendErrorMessage(messageContext, {
-            title: "Error Retrieving Song Data",
-            description: `Try again in a bit, or report this error to the official KMQ server found in \`${process.env.BOT_PREFIX}help\`.`,
+            title: state.localizer.translate(
+                messageContext.guildID,
+                "misc.failure.retrievingSongData.title"
+            ),
+            description: state.localizer.translate(
+                messageContext.guildID,
+                "misc.failure.retrievingSongData.description",
+                { helpCommand: `\`${process.env.BOT_PREFIX}help\`` }
+            ),
         });
         return;
     }
@@ -808,12 +925,20 @@ export async function sendOptionsMessage(
         gameOptions.limitStart
     );
 
-    const limit =
-        gameOptions.limitStart === 0
-            ? `${friendlyFormattedNumber(visibleLimitEnd)}`
-            : `${getOrdinalNum(visibleLimitStart)} to ${getOrdinalNum(
-                  visibleLimitEnd
-              )} (${friendlyFormattedNumber(totalSongs.count)} songs)`;
+    let limit: string;
+    if (gameOptions.limitStart === 0) {
+        limit = friendlyFormattedNumber(visibleLimitEnd);
+    } else {
+        limit = state.localizer.translate(
+            messageContext.guildID,
+            "misc.formattedLimit",
+            {
+                limitStart: getOrdinalNum(visibleLimitStart),
+                limitEnd: getOrdinalNum(visibleLimitEnd),
+                songCount: friendlyFormattedNumber(totalSongs.count),
+            }
+        );
+    }
 
     // Store the VALUE of ,[option]: [VALUE] into optionStrings
     // Null optionStrings values are set to "Not set" below
@@ -842,11 +967,21 @@ export async function sendOptionsMessage(
     optionStrings[GameOption.GUESS_MODE_TYPE] = gameOptions.guessModeType;
     optionStrings[GameOption.SPECIAL_TYPE] = gameOptions.specialType;
     optionStrings[GameOption.TIMER] = guildPreference.isGuessTimeoutSet()
-        ? `${gameOptions.guessTimeout} sec`
+        ? state.localizer.translate(
+              messageContext.guildID,
+              "command.options.timer",
+              {
+                  timerInSeconds: String(gameOptions.guessTimeout),
+              }
+          )
         : null;
 
     optionStrings[GameOption.DURATION] = guildPreference.isDurationSet()
-        ? `${gameOptions.duration} mins`
+        ? state.localizer.translate(
+              messageContext.guildID,
+              "command.options.duration",
+              { durationInMinutes: String(gameOptions.duration) }
+          )
         : null;
 
     optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode()
@@ -863,7 +998,9 @@ export async function sendOptionsMessage(
     ): string =>
         `${strikethrough(commandValue)} (\`${
             process.env.BOT_PREFIX
-        }${conflictingOption}\` ${italicize("conflict")})`;
+        }${conflictingOption}\` ${italicize(
+            state.localizer.translate(messageContext.guildID, "misc.conflict")
+        )})`;
 
     const { gameSessions } = state;
     const isEliminationMode =
@@ -906,7 +1043,14 @@ export async function sendOptionsMessage(
     }
 
     for (const option of Object.values(GameOption)) {
-        optionStrings[option] = optionStrings[option] || italicize("Not set");
+        optionStrings[option] =
+            optionStrings[option] ||
+            italicize(
+                state.localizer.translate(
+                    messageContext.guildID,
+                    "command.options.notSet"
+                )
+            );
     }
 
     // Underline changed option
@@ -926,9 +1070,17 @@ export async function sendOptionsMessage(
             }`
     ).join("\n");
 
-    priorityOptions = `Now playing the top ${bold(limit)} out of ${bold(
-        String(friendlyFormattedNumber(totalSongs.countBeforeLimit))
-    )} available songs from the following game options:\n\n${priorityOptions}`;
+    priorityOptions = state.localizer.translate(
+        messageContext.guildID,
+        "command.options.overview",
+        {
+            limit: bold(limit),
+            totalSongs: bold(
+                friendlyFormattedNumber(totalSongs.countBeforeLimit)
+            ),
+            priorityOptions,
+        }
+    );
 
     const fieldOptions = Object.keys(GameOptionCommand).filter(
         (option) => !PriorityGameOption.includes(option as GameOption)
@@ -987,18 +1139,47 @@ export async function sendOptionsMessage(
         updatedOptions[0] &&
         updatedOptions[0].reset
     ) {
-        footerText = `Looking for information on how to use a command? Check out '${process.env.BOT_PREFIX}help [command]' to learn more.`;
+        footerText = state.localizer.translate(
+            messageContext.guildID,
+            "command.options.perCommandHelp",
+            { helpCommand: `${process.env.BOT_PREFIX}help` }
+        );
+    }
+
+    let title = "";
+    if (updatedOptions === null || allReset) {
+        title = state.localizer.translate(
+            messageContext.guildID,
+            "command.options.title"
+        );
+    } else {
+        if (preset) {
+            title = state.localizer.translate(
+                messageContext.guildID,
+                "command.options.preset"
+            );
+        } else {
+            title = updatedOptions[0].option;
+        }
+
+        title =
+            updatedOptions[0] && updatedOptions[0].reset
+                ? state.localizer.translate(
+                      messageContext.guildID,
+                      "command.options.reset",
+                      { presetOrOption: title }
+                  )
+                : state.localizer.translate(
+                      messageContext.guildID,
+                      "command.options.updated",
+                      { presetOrOption: title }
+                  );
     }
 
     await sendInfoMessage(
         messageContext,
         {
-            title:
-                updatedOptions === null || allReset
-                    ? "Options"
-                    : `${preset ? "Preset" : updatedOptions[0].option} ${
-                          updatedOptions[0].reset ? "Reset" : "Updated"
-                      }`,
+            title,
             description: priorityOptions,
             fields,
             footerText,
@@ -1015,10 +1196,20 @@ export async function sendOptionsMessage(
 export async function sendEndGameMessage(
     gameSession: GameSession
 ): Promise<void> {
-    const footerText = `${gameSession.getCorrectGuesses()}/${gameSession.getRoundsPlayed()} songs correctly guessed!`;
-    if (gameSession.scoreboard.isEmpty()) {
+    const footerText = state.localizer.translate(
+        gameSession.guildID,
+        "misc.inGame.songsCorrectlyGuessed",
+        {
+            songCount: `${gameSession.getCorrectGuesses()}/${gameSession.getRoundsPlayed()}`,
+        }
+    );
+
+    if (gameSession.scoreboard.getWinners().length === 0) {
         await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
-            title: "Nobody Won",
+            title: state.localizer.translate(
+                gameSession.guildID,
+                "misc.inGame.noWinners"
+            ),
             footerText,
             thumbnailUrl: KmqImages.NOT_IMPRESSED,
         });
@@ -1026,16 +1217,18 @@ export async function sendEndGameMessage(
         const winners = gameSession.scoreboard.getWinners();
         let fields: Array<{ name: string; value: string; inline: boolean }>;
         const useLargerScoreboard =
-            gameSession.scoreboard.getNumPlayers() > SCOREBOARD_FIELD_CUTOFF;
+            gameSession.scoreboard.shouldUseLargerScoreboard();
 
         if (useLargerScoreboard) {
             fields = gameSession.scoreboard.getScoreboardEmbedThreeFields(
                 MAX_SCOREBOARD_PLAYERS,
-                gameSession.gameType !== GameType.TEAMS
+                gameSession.gameType !== GameType.TEAMS,
+                false
             );
         } else {
             fields = gameSession.scoreboard.getScoreboardEmbedFields(
-                gameSession.gameType !== GameType.TEAMS
+                gameSession.gameType !== GameType.TEAMS,
+                false
             );
         }
 
@@ -1045,8 +1238,14 @@ export async function sendEndGameMessage(
 
         if (endGameMessage) {
             fields.push({
-                name: endGameMessage.title,
-                value: endGameMessage.message,
+                name: state.localizer.translate(
+                    gameSession.guildID,
+                    endGameMessage.title
+                ),
+                value: state.localizer.translate(
+                    gameSession.guildID,
+                    endGameMessage.message
+                ),
                 inline: false,
             });
         }
@@ -1057,9 +1256,18 @@ export async function sendEndGameMessage(
                 (await userBonusIsActive(winners[0].id))
                     ? EMBED_SUCCESS_BONUS_COLOR
                     : EMBED_SUCCESS_COLOR,
-            description: !useLargerScoreboard ? "**Scoreboard**" : null,
+            description: !useLargerScoreboard
+                ? bold(
+                      state.localizer.translate(
+                          gameSession.guildID,
+                          "command.score.scoreboardTitle"
+                      )
+                  )
+                : null,
             thumbnailUrl: winners[0].getAvatarURL(),
-            title: `🎉 ${gameSession.scoreboard.getWinnerMessage()} 🎉`,
+            title: `🎉 ${gameSession.scoreboard.getWinnerMessage(
+                gameSession.guildID
+            )} 🎉`,
             fields,
             footerText,
             components: [
@@ -1071,21 +1279,30 @@ export async function sendEndGameMessage(
                             url: VOTE_LINK,
                             type: 2 as const,
                             emoji: { name: "✅" },
-                            label: "Vote!",
+                            label: state.localizer.translate(
+                                gameSession.guildID,
+                                "misc.interaction.vote"
+                            ),
                         },
                         {
                             style: 5,
                             url: REVIEW_LINK,
                             type: 2 as const,
                             emoji: { name: "📖" },
-                            label: "Leave a review!",
+                            label: state.localizer.translate(
+                                gameSession.guildID,
+                                "misc.interaction.leaveReview"
+                            ),
                         },
                         {
                             style: 5,
                             url: "https://discord.gg/RCuzwYV",
                             type: 2,
                             emoji: { name: "🎵" },
-                            label: "Official KMQ Server",
+                            label: state.localizer.translate(
+                                gameSession.guildID,
+                                "misc.interaction.officialKmqServer"
+                            ),
                         },
                     ],
                 },
@@ -1150,46 +1367,60 @@ export async function sendScoreboardMessage(
     message: GuildTextableMessage,
     gameSession: GameSession
 ): Promise<Eris.Message> {
-    if (
-        gameSession.scoreboard.isEmpty() &&
-        gameSession.gameType !== GameType.ELIMINATION
-    ) {
-        return sendInfoMessage(MessageContext.fromMessage(message), {
-            color: EMBED_SUCCESS_COLOR,
-            description: "(╯°□°）╯︵ ┻━┻",
-            title: "Scoreboard",
-        });
-    }
-
     const winnersFieldSubsets = chunkArray(
-        gameSession.scoreboard.getScoreboardEmbedFields(true),
+        gameSession.scoreboard.getScoreboardEmbedFields(true, true),
         EMBED_FIELDS_PER_PAGE
     );
 
-    let footerText = `Your score is ${gameSession.scoreboard.getPlayerScore(
-        message.author.id
-    )}.`;
+    let footerText = state.localizer.translate(
+        message.guildID,
+        "misc.classic.yourScore",
+        {
+            score: String(
+                gameSession.scoreboard.getPlayerScore(message.author.id)
+            ),
+        }
+    );
 
     if (gameSession.gameType === GameType.ELIMINATION) {
         const eliminationScoreboard =
             gameSession.scoreboard as EliminationScoreboard;
 
-        footerText = `You have ${eliminationScoreboard.getPlayerLives(
-            message.author.id
-        )} lives.`;
+        footerText = state.localizer.translate(
+            message.guildID,
+            "misc.elimination.yourLives",
+            {
+                lives: String(
+                    eliminationScoreboard.getPlayerLives(message.author.id)
+                ),
+            }
+        );
     } else if (gameSession.gameType === GameType.TEAMS) {
         const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
-        footerText = `Your team's score: ${teamScoreboard
-            .getTeamOfPlayer(message.author.id)
-            .getScore()}\nYour score: ${teamScoreboard.getPlayerScore(
-            message.author.id
-        )}`;
+        footerText = state.localizer.translate(
+            message.guildID,
+            "misc.team.yourTeamScore",
+            {
+                teamScore: String(
+                    teamScoreboard.getTeamOfPlayer(message.author.id).getScore()
+                ),
+            }
+        );
+        footerText += "\n";
+        footerText += state.localizer.translate(
+            message.guildID,
+            "misc.team.yourScore",
+            { score: String(teamScoreboard.getPlayerScore(message.author.id)) }
+        );
     }
 
     const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map(
         (winnersFieldSubset) => ({
             color: EMBED_SUCCESS_COLOR,
-            title: "Scoreboard",
+            title: state.localizer.translate(
+                message.guildID,
+                "command.score.scoreboardTitle"
+            ),
             fields: winnersFieldSubset,
             footer: {
                 text: footerText,
@@ -1301,7 +1532,9 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
     const messageContext = MessageContext.fromMessage(message);
     const missingPermissions = REQUIRED_VOICE_PERMISSIONS.filter(
         (permission) =>
-            !voiceChannel.permissionsOf(state.client.user.id).has(permission)
+            !voiceChannel
+                .permissionsOf(process.env.BOT_CLIENT_ID)
+                .has(permission)
     );
 
     if (missingPermissions.length > 0) {
@@ -1314,8 +1547,14 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
         );
 
         sendErrorMessage(MessageContext.fromMessage(message), {
-            title: "Missing Permissions",
-            description: missingPermissionsText(missingPermissions),
+            title: state.localizer.translate(
+                message.guildID,
+                "misc.failure.missingPermissions.title"
+            ),
+            description: missingPermissionsText(
+                message.guildID,
+                missingPermissions
+            ),
         });
         return false;
     }
@@ -1327,9 +1566,14 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
     if (channelFull) {
         logger.warn(`${getDebugLogHeader(messageContext)} | Channel full`);
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: "Voice Channel Full",
-            description:
-                "Ensure that there's enough room in the voice channel for me to join",
+            title: state.localizer.translate(
+                message.guildID,
+                "misc.failure.vcFull.title"
+            ),
+            description: state.localizer.translate(
+                message.guildID,
+                "misc.failure.vcFull.description"
+            ),
         });
         return false;
     }
@@ -1343,9 +1587,14 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
         );
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: "AFK Voice Channel",
-            description:
-                "Ensure you're not in the inactive voice channel so that you can hear me!",
+            title: state.localizer.translate(
+                message.guildID,
+                "misc.failure.afkChannel.title"
+            ),
+            description: state.localizer.translate(
+                message.guildID,
+                "misc.failure.afkChannel.description"
+            ),
         });
         return false;
     }
@@ -1367,7 +1616,7 @@ export function checkBotIsAlone(guildID: string): boolean {
     if (channel.voiceMembers.size === 0) return true;
     if (
         channel.voiceMembers.size === 1 &&
-        channel.voiceMembers.has(state.client.user.id)
+        channel.voiceMembers.has(process.env.BOT_CLIENT_ID)
     ) {
         return true;
     }
@@ -1423,16 +1672,22 @@ export function sendDebugAlertWebhook(
         ],
         username: "Kimiqo",
         avatar_url: avatarUrl,
+        footerText: getKmqCurrentVersion(),
     });
 }
 
 /**
  * Send the bookmarked songs to the corresponding users
+ * @param guildID - The guild where the songs were bookmarked
  * @param bookmarkedSongs - The bookmarked songs
  */
-export async function sendBookmarkedSongs(bookmarkedSongs: {
-    [userID: string]: Map<string, QueriedSong>;
-}): Promise<void> {
+export async function sendBookmarkedSongs(
+    guildID: string,
+    bookmarkedSongs: {
+        [userID: string]: Map<string, QueriedSong>;
+    }
+): Promise<void> {
+    const locale = getGuildLocale(guildID);
     for (const [userID, songs] of Object.entries(bookmarkedSongs)) {
         const allEmbedFields: Array<{
             name: string;
@@ -1440,11 +1695,17 @@ export async function sendBookmarkedSongs(bookmarkedSongs: {
             inline: boolean;
         }> = [...songs].map((song) => ({
             name: `${bold(
-                `"${song[1].originalSongName}" - ${song[1].artist}`
+                `"${getLocalizedSongName(
+                    song[1],
+                    locale
+                )}" - ${getLocalizedArtistName(song[1], locale)}`
             )} (${standardDateFormat(song[1].publishDate)})`,
             value: `[${friendlyFormattedNumber(
                 song[1].views
-            )} views](https://youtu.be/${song[1].youtubeLink})`,
+            )} ${state.localizer.translate(
+                guildID,
+                "misc.views"
+            )}](https://youtu.be/${song[1].youtubeLink})`,
             inline: false,
         }));
 
@@ -1454,9 +1715,20 @@ export async function sendBookmarkedSongs(bookmarkedSongs: {
                     name: "Kimiqo",
                     icon_url: KmqImages.READING_BOOK,
                 },
-                title: bold("Bookmarked Songs"),
+                title: bold(
+                    state.localizer.translate(
+                        guildID,
+                        "misc.interaction.bookmarked.message.title"
+                    )
+                ),
                 fields,
-                footer: { text: `Played on ${standardDateFormat(new Date())}` },
+                footer: {
+                    text: state.localizer.translate(
+                        guildID,
+                        "misc.interaction.bookmarked.message.playedOn",
+                        { date: standardDateFormat(new Date()) }
+                    ),
+                },
             };
 
             await sendDmMessage(userID, { embeds: [embed] });
@@ -1573,7 +1845,12 @@ export async function tryCreateInteractionErrorAcknowledgement(
                         name: interaction.member?.username,
                         icon_url: interaction.member?.avatarURL,
                     },
-                    title: bold("Uh-oh"),
+                    title: bold(
+                        state.localizer.translate(
+                            interaction.guildID,
+                            "misc.interaction.title.failure"
+                        )
+                    ),
                     description,
                     thumbnail: { url: KmqImages.DEAD },
                 },
@@ -1583,4 +1860,37 @@ export async function tryCreateInteractionErrorAcknowledgement(
     } catch (err) {
         interactionRejectionHandler(interaction, err);
     }
+}
+
+/**
+ * @param guildID - The guild ID
+ * @returns the locale associated with the given guild
+ */
+export function getGuildLocale(guildID: string): LocaleType {
+    return state.locales[guildID] ?? DEFAULT_LOCALE;
+}
+
+/**
+ * Sends the power hour notification to the KMQ server
+ */
+export function sendPowerHourNotification(): void {
+    if (
+        !process.env.POWER_HOUR_NOTIFICATION_CHANNEL_ID ||
+        !process.env.POWER_HOUR_NOTIFICATION_ROLE_ID
+    ) {
+        return;
+    }
+
+    logger.info("Sending power hour notification");
+    sendInfoMessage(
+        new MessageContext(process.env.POWER_HOUR_NOTIFICATION_CHANNEL_ID),
+        {
+            title: "⬆️ KMQ Power Hour Starts Now! ⬆️",
+            description: "Earn 2x EXP for the next hour!",
+            thumbnailUrl: KmqImages.LISTENING,
+        },
+        false,
+        true,
+        `<@&${process.env.POWER_HOUR_NOTIFICATION_ROLE_ID}>`
+    );
 }

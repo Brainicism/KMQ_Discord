@@ -15,51 +15,72 @@ let gameRound: GameRound;
 describe("constructor defaults", () => {
     describe("artist/song names without aliases", () => {
         it("adds the corresponding name as a correct answer", () => {
-            gameRound = new GameRound(
-                "Song1",
-                "Song1",
+            gameRound = new GameRound({
+                songName: "Song1",
+                originalSongName: "Song1",
+                hangulSongName: "노래1",
+                originalHangulSongName: "노래1",
+                artistName: "Jisoo",
+                hangulArtistName: "지수",
+                youtubeLink: "abcde",
+                publishDate: new Date(),
+                views: 1000000,
+            });
+
+            assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
                 "Jisoo",
-                "abcde",
-                new Date(),
-                1000000
-            );
-            assert.deepStrictEqual(gameRound.acceptedArtistAnswers, ["Jisoo"]);
-            assert.deepStrictEqual(gameRound.acceptedSongAnswers, ["Song1"]);
+                "지수",
+            ]);
+
+            assert.deepStrictEqual(gameRound.acceptedSongAnswers, [
+                "Song1",
+                "노래1",
+            ]);
         });
     });
 
     describe("artist collabs", () => {
         it("should record them as two separate artists", () => {
-            gameRound = new GameRound(
-                "Poggers Song",
-                "Poggers Song",
-                "IU + Blackpink",
-                "abcde",
-                new Date(),
-                69420
-            );
+            gameRound = new GameRound({
+                songName: "Poggers Song",
+                originalSongName: "Poggers Song",
+                hangulSongName: "리그마 포트나이트",
+                originalHangulSongName: "리그마 포트나이트",
+                artistName: "IU + Blackpink",
+                hangulArtistName: "아이유+블랙핑크",
+                youtubeLink: "abcde",
+                publishDate: new Date(),
+                views: 69420,
+            });
 
             assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
                 "IU",
                 "Blackpink",
+                "아이유",
+                "블랙핑크",
             ]);
         });
     });
 
     describe("artist name has trailing or leading spaces", () => {
         it("should remove them", () => {
-            gameRound = new GameRound(
-                "Lovesick Girls",
-                "Lovesick Girls",
-                " Blackpink + IU             ",
-                "abcde",
-                new Date(),
-                123456789
-            );
+            gameRound = new GameRound({
+                songName: "Lovesick Girls",
+                originalSongName: "Lovesick Girls",
+                hangulSongName: "상사병에 걸린 소녀들",
+                originalHangulSongName: "상사병에 걸린 소녀들",
+                artistName: " Blackpink + IU             ",
+                hangulArtistName: "   블랙핑크+아이유                ",
+                youtubeLink: "abcde",
+                publishDate: new Date(),
+                views: 123456789,
+            });
 
             assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
                 "Blackpink",
                 "IU",
+                "블랙핑크",
+                "아이유",
             ]);
         });
     });
@@ -78,19 +99,23 @@ describe("constructor defaults", () => {
                         "A good song",
                     ];
 
-                    gameRound = new GameRound(
-                        "A really epic song",
-                        "A really epic song",
-                        "A really epic person",
-                        "abcde",
-                        new Date(),
-                        2
-                    );
+                    gameRound = new GameRound({
+                        songName: "A really epic song",
+                        originalSongName: "A really epic song",
+                        hangulSongName: "정말 서사시 노래",
+                        originalHangulSongName: "정말 서사시 노래",
+                        artistName: "A really epic person",
+                        hangulArtistName: "정말 서사시인",
+                        youtubeLink: "abcde",
+                        publishDate: new Date(),
+                        views: 2,
+                    });
 
                     assert.deepStrictEqual(gameRound.acceptedSongAnswers, [
                         "A really epic song",
                         "An epic song",
                         "A good song",
+                        "정말 서사시 노래",
                     ]);
                 });
             });
@@ -104,17 +129,21 @@ describe("constructor defaults", () => {
                         "Person Too",
                     ];
 
-                    gameRound = new GameRound(
-                        "A really epic song",
-                        "A really epic song",
-                        "Person2",
-                        "abcde",
-                        new Date(),
-                        5
-                    );
+                    gameRound = new GameRound({
+                        songName: "A really epic song",
+                        originalSongName: "A really epic song",
+                        hangulSongName: "정말 서사시 노래",
+                        originalHangulSongName: "정말 서사시 노래",
+                        artistName: "Person2",
+                        hangulArtistName: "2인칭",
+                        youtubeLink: "abcde",
+                        publishDate: new Date(),
+                        views: 5,
+                    });
 
                     assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
                         "Person2",
+                        "2인칭",
                         "Person Two",
                         "Person Too",
                     ]);
@@ -171,7 +200,17 @@ describe("clean song/artist name", () => {
 
 describe("skipping", () => {
     beforeEach(() => {
-        gameRound = new GameRound("1", "1", "2", "3", new Date(2015, 0), 123);
+        gameRound = new GameRound({
+            songName: "1",
+            originalSongName: "2",
+            hangulSongName: "3",
+            originalHangulSongName: "4",
+            artistName: "5",
+            hangulArtistName: "6",
+            youtubeLink: "7",
+            publishDate: new Date(2015, 0),
+            views: 123,
+        });
     });
 
     describe("unique skippers", () => {
@@ -214,14 +253,17 @@ describe("skipping", () => {
 
 describe("check guess", () => {
     beforeEach(() => {
-        gameRound = new GameRound(
-            "very cool song",
-            "very cool song",
-            "artist",
-            "a1b2c3",
-            new Date(2015, 0),
-            3141592653589
-        );
+        gameRound = new GameRound({
+            songName: "very cool song",
+            originalSongName: "very cool song",
+            hangulSongName: "매우 시원한 노래",
+            originalHangulSongName: "매우 시원한 노래",
+            artistName: "artist",
+            hangulArtistName: "예술가",
+            youtubeLink: "a1b2c3",
+            publishDate: new Date(2015, 0),
+            views: 3141592653589,
+        });
     });
 
     describe("incorrect guess", () => {
@@ -311,36 +353,75 @@ describe("similarityCheck", () => {
     });
 
     describe("meets similarity criteria", () => {
-        it("should return true", () => {
-            // 1 transposition error
-            assert.ok(GameRound.similarityCheck("abcdegf", ["abcdefg"]));
-            // 2 transposition errors
-            assert.ok(GameRound.similarityCheck("bacdegf", ["abcdefg"]));
-            // 1 removal required
-            assert.ok(GameRound.similarityCheck("abcdefgh", ["abcdefg"]));
-            // 1 removal, one transposition error
-            assert.ok(GameRound.similarityCheck("bacdefgh", ["abcdefg"]));
-            // 1 insertion required
-            assert.ok(GameRound.similarityCheck("abcdef", ["abcdefg"]));
-            // 1 insertion required, one transposition error
-            assert.ok(GameRound.similarityCheck("bacdef", ["abcdefg"]));
+        describe("4 < length <= 6", () => {
+            it("should return true", () => {
+                // 1 transposition error (distance = 1)
+                assert.ok(GameRound.similarityCheck("abcde", ["abcde"]));
+                // 1 removal required (distance = 1)
+                assert.ok(GameRound.similarityCheck("abcde", ["abcde"]));
+                // 1 insertion required (distance = 1)
+                assert.ok(GameRound.similarityCheck("abcd", ["abcde"]));
+            });
+        });
+
+        describe("length > 6", () => {
+            it("should return true", () => {
+                // 1 transposition error (distance = 1)
+                assert.ok(GameRound.similarityCheck("abcdegf", ["abcdefg"]));
+                // 2 transposition errors (distance = 2)
+                assert.ok(GameRound.similarityCheck("bacdegf", ["abcdefg"]));
+                // 1 removal required (distance = 1)
+                assert.ok(GameRound.similarityCheck("abcdefgh", ["abcdefg"]));
+                // 1 removal, one transposition error (distance = 2)
+                assert.ok(GameRound.similarityCheck("bacdefgh", ["abcdefg"]));
+                // 1 insertion required (distance = 1)
+                assert.ok(GameRound.similarityCheck("abcdefg", ["abcdefgh"]));
+                // 1 insertion required, one transposition error (distance = 2)
+                assert.ok(GameRound.similarityCheck("abcdegf", ["abcdefgh"]));
+            });
         });
     });
 
     describe("does not meet similarity criteria", () => {
-        it("should return false", () => {
-            // 3 transposition errors
-            assert.ok(!GameRound.similarityCheck("badcegf", ["abcdefg"]));
-            // 2 removals required
-            assert.ok(!GameRound.similarityCheck("abcdefghi", ["abcdefg"]));
-            // 2 insertions required
-            assert.ok(!GameRound.similarityCheck("abcde", ["abcdefg"]));
-            // correct choice is too short, transposition error
-            assert.ok(!GameRound.similarityCheck("bacd", ["abcd"]));
-            // correct choice is too short, insertion required
-            assert.ok(!GameRound.similarityCheck("abd", ["abcd"]));
-            // correct choice is too short, removal required
-            assert.ok(!GameRound.similarityCheck("abcde", ["abcd"]));
+        describe("length <= 4, all should fail", () => {
+            it("should return false", () => {
+                assert.ok(!GameRound.similarityCheck("a", ["a"]));
+                assert.ok(!GameRound.similarityCheck("bb", ["bb"]));
+                assert.ok(!GameRound.similarityCheck("ccc", ["cccc"]));
+                assert.ok(!GameRound.similarityCheck("dddd", ["dddd"]));
+            });
+        });
+
+        describe("4 < length <= 6, edit distance of 1 allowed", () => {
+            it("should return false", () => {
+                // 2 transposition errors (distance = 2)
+                assert.ok(!GameRound.similarityCheck("baced", ["abcde"]));
+                // 2 removal required (distance = 2)
+                assert.ok(!GameRound.similarityCheck("abcdefg", ["abcde"]));
+                // 2 insertion required (distance = 2)
+                assert.ok(!GameRound.similarityCheck("abc", ["abcde"]));
+                // 1 removal, one transposition error (distance = 2)
+                assert.ok(!GameRound.similarityCheck("bacdef", ["abcde"]));
+                // 1 insertion required, one transposition error (distance = 2)
+                assert.ok(!GameRound.similarityCheck("bacde", ["abcdef"]));
+            });
+        });
+
+        describe("length > 6, edit distance of 2 allowed && max 2 insert/removals", () => {
+            it("should return false", () => {
+                // 3 transposition errors (distance = 3)
+                assert.ok(!GameRound.similarityCheck("badcegf", ["abcdefg"]));
+                // 2 removals required (2 removals not allowed)
+                assert.ok(!GameRound.similarityCheck("abcdefghi", ["abcdefg"]));
+                // 2 insertions required (2 insertions not allowed)
+                assert.ok(!GameRound.similarityCheck("abcdefg", ["abcdefghi"]));
+                // 1 removal, 2 transposition error (distance = 3)
+                assert.ok(!GameRound.similarityCheck("badcefgh", ["abcdefg"]));
+                // 1 insertion, 2 transposition error (distance = 3)
+                assert.ok(!GameRound.similarityCheck("badcef", ["abcdefg"]));
+                // 1 insertion, 1 removal, 1 transposition error (distance = 3)
+                assert.ok(!GameRound.similarityCheck("bacdegh", ["abcdefg"]));
+            });
         });
     });
 
@@ -420,14 +501,17 @@ describe("similarityCheck", () => {
 describe("getExpReward", () => {
     const exp = 500;
     beforeEach(() => {
-        gameRound = new GameRound(
-            "very cool song",
-            "very cool song",
-            "artist",
-            "a1b2c3",
-            new Date(2015),
-            246810121416
-        );
+        gameRound = new GameRound({
+            songName: "very cool song",
+            originalSongName: "very cool song",
+            hangulSongName: "매우 시원한 노래",
+            originalHangulSongName: "매우 시원한 노래",
+            artistName: "artist",
+            hangulArtistName: "예술가",
+            youtubeLink: "a1b2c3",
+            publishDate: new Date(2015),
+            views: 246810121416,
+        });
     });
 
     describe("no hint used", () => {

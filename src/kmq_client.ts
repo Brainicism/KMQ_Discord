@@ -34,6 +34,7 @@ export default class KmqClient extends Eris.Client {
                             path.resolve(__dirname, "./commands", category)
                         )
                         .filter((x) => x.endsWith(".js"))
+                        // eslint-disable-next-line @typescript-eslint/no-loop-func
                         .map((x) =>
                             path.resolve(__dirname, "./commands", category, x)
                         )

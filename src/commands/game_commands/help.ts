@@ -1,5 +1,5 @@
 import Eris, { EmbedOptions } from "eris";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     sendErrorMessage,
     getDebugLogHeader,
@@ -12,6 +12,7 @@ import { GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import KmqClient from "../../kmq_client";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("help");
 export const placeholder = /,/g;
@@ -59,13 +60,26 @@ const helpMessage = async (
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: "K-pop Music Quiz Command Help",
-                description: `Sorry, there is no documentation on ${action}`,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.help.title",
+                    {
+                        kmq: "K-pop Music Quiz",
+                    }
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "command.help.failure.noDocs",
+                    { action }
+                ),
             });
             return;
         }
 
-        const helpManual = commandFilesWithAliases[action].help;
+        const helpManual = commandFilesWithAliases[action].help(
+            message.guildID
+        );
+
         embedTitle = `\`${helpManual.usage.replace(
             placeholder,
             process.env.BOT_PREFIX
@@ -73,7 +87,10 @@ const helpMessage = async (
         embedDesc = helpManual.description;
         embedActionRowComponents = helpManual.actionRowComponents;
         if (helpManual.examples.length > 0) {
-            embedDesc += "\n\n**Examples**\n";
+            embedDesc += `\n\n**${state.localizer.translate(
+                message.guildID,
+                "command.help.examples"
+            )}**\n`;
         }
 
         embedFields = helpManual.examples.map((example) => ({
@@ -83,9 +100,10 @@ const helpMessage = async (
 
         if (commandFilesWithAliases[action].aliases) {
             embedFooter = {
-                text: `Aliases: ${commandFilesWithAliases[action].aliases.join(
-                    ", "
-                )}`,
+                text: `${state.localizer.translate(
+                    message.guildID,
+                    "misc.inGame.aliases"
+                )}: ${commandFilesWithAliases[action].aliases.join(", ")}`,
             };
         }
     } else {
@@ -96,18 +114,40 @@ const helpMessage = async (
             (command) => command.help
         );
 
-        commandsWithHelp.sort((x, y) => y.help.priority - x.help.priority);
-        embedTitle = "K-pop Music Quiz Command Help";
-        embedDesc = `Type \`${process.env.BOT_PREFIX}play\` in chat and the bot will play a random kpop song in VC. The goal of this game is to be the first person to guess the song name in chat.
-See your current game options with \`${process.env.BOT_PREFIX}options\`. Use \`${process.env.BOT_PREFIX}help [command]\` to get more details about a command.`;
+        commandsWithHelp.sort(
+            (x, y) => y.help(null).priority - x.help(null).priority
+        );
+
+        embedTitle = state.localizer.translate(
+            message.guildID,
+            "command.help.title",
+            {
+                kmq: "K-pop Music Quiz",
+            }
+        );
+
+        embedDesc = state.localizer.translate(
+            message.guildID,
+            "command.help.description",
+            {
+                play: `\`${process.env.BOT_PREFIX}play\``,
+                options: `\`${process.env.BOT_PREFIX}options\``,
+                help: `${process.env.BOT_PREFIX}help`,
+                command: state.localizer.translate(
+                    message.guildID,
+                    "command.help.command"
+                ),
+            }
+        );
 
         embedFields = commandsWithHelp.map((command) => {
-            const helpManual = command.help;
+            const helpManual = command.help(message.guildID);
             return {
                 name: helpManual.name,
-                value: `${
-                    helpManual.description
-                }\nUsage: \`${helpManual.usage.replace(
+                value: `${helpManual.description}\n${state.localizer.translate(
+                    message.guildID,
+                    "misc.usage"
+                )}: \`${helpManual.usage.replace(
                     placeholder,
                     process.env.BOT_PREFIX
                 )}\``,
@@ -119,19 +159,28 @@ See your current game options with \`${process.env.BOT_PREFIX}options\`. Use \`$
                 style: 5,
                 url: "https://discord.gg/RCuzwYV",
                 type: 2,
-                label: "Official KMQ Server",
+                label: state.localizer.translate(
+                    message.guildID,
+                    "misc.interaction.officialKmqServer"
+                ),
             },
             {
                 style: 5,
                 url: "https://brainicism.github.io/KMQ_Discord/GAMEPLAY",
                 type: 2,
-                label: "How To Play",
+                label: state.localizer.translate(
+                    message.guildID,
+                    "misc.interaction.howToPlay"
+                ),
             },
             {
                 style: 5,
                 url: "https://brainicism.github.io/KMQ_Discord/FAQ",
                 type: 2,
-                label: "Frequently Asked Questions",
+                label: state.localizer.translate(
+                    message.guildID,
+                    "misc.interaction.faq"
+                ),
             },
         ];
     }
@@ -171,25 +220,34 @@ See your current game options with \`${process.env.BOT_PREFIX}options\`. Use \`$
 };
 
 export default class HelpCommand implements BaseCommand {
-    help = {
+    help = (guildID: string): Help => ({
         name: "help",
-        description:
-            "Get help about the game's commands. Add a command to get information about the specific command.",
-        usage: ",help [command]",
+        description: state.localizer.translate(
+            guildID,
+            "command.help.help.description"
+        ),
+        usage: `,help [${state.localizer.translate(
+            guildID,
+            "command.help.command"
+        )}]`,
         examples: [
             {
                 example: "`,help`",
-                explanation:
-                    "Shows all available commands and a short description",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.help.help.example.allCommands"
+                ),
             },
             {
                 example: "`,help cutoff`",
-                explanation:
-                    "Shows a detailed description for the cutoff command",
+                explanation: state.localizer.translate(
+                    guildID,
+                    "command.help.help.example.sampleCommand"
+                ),
             },
         ],
         priority: 1000,
-    };
+    });
 
     call = async ({ parsedMessage, message }: CommandArgs): Promise<void> => {
         await helpMessage(message, parsedMessage.argument);

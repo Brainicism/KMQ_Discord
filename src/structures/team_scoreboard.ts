@@ -1,4 +1,7 @@
-import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
+import Scoreboard, {
+    SuccessfulGuessResult,
+    SCOREBOARD_FIELD_CUTOFF,
+} from "./scoreboard";
 import Player from "./player";
 import Team from "./team";
 import { IPCLogger } from "../logger";
@@ -21,7 +24,14 @@ export default class TeamScoreboard extends Scoreboard {
      * Updates the scoreboard with information about correct guessers
      * @param guessResults - Objects containing the user ID, points earned, and EXP gain
      */
-    updateScoreboard(guessResults: Array<SuccessfulGuessResult>): void {
+    async updateScoreboard(
+        guessResults: Array<SuccessfulGuessResult>
+    ): Promise<void> {
+        const previousRoundRanking = this.getScoreToRankingMap();
+        for (const player of Object.values(this.players)) {
+            player.setPreviousRanking(previousRoundRanking[player.getScore()]);
+        }
+
         // give everybody EXP
         for (const guessResult of guessResults) {
             const correctGuesser = this.getPlayer(guessResult.userID);
@@ -117,7 +127,7 @@ export default class TeamScoreboard extends Scoreboard {
      * @param teamName - The name of the team to add the player to
      * @param player - The player to add to the team
      */
-    addPlayer(teamName: string, player: Player): void {
+    addTeamPlayer(teamName: string, player: Player): void {
         // If the user is switching teams, remove them from their existing team first
         this.removePlayer(player.id);
         this.players[teamName].addPlayer(player);
@@ -138,10 +148,10 @@ export default class TeamScoreboard extends Scoreboard {
             // If the removed team was the only team in first, first place is now second place
             if (this.firstPlace.length === 0) {
                 const highestScore = Math.max(
-                    ...Object.values(this.players).map(
-                        (x: Team) => x.getScore(),
-                        0
-                    )
+                    ...Object.values(this.players).map((x: Team) =>
+                        x.getScore()
+                    ),
+                    0
                 );
 
                 if (highestScore === 0) return;
@@ -195,7 +205,7 @@ export default class TeamScoreboard extends Scoreboard {
      * @returns the player's tag
      */
     getPlayerName(userID: string): string {
-        return this.getPlayer(userID).getName();
+        return this.getPlayer(userID).name;
     }
 
     /**
@@ -203,5 +213,31 @@ export default class TeamScoreboard extends Scoreboard {
      */
     getPlayers(): Array<Player> {
         return Object.values(this.players).flatMap((team) => team.getPlayers());
+    }
+
+    /**
+     * @returns player IDs for players in every team
+     */
+    getPlayerIDs(): Array<string> {
+        return this.getPlayers().map((x) => x.id);
+    }
+
+    /**
+     * Update whether a player is in VC
+     * @param userID - The Discord user ID of the player to update
+     * @param inVC - Whether the player is currently in the voice channel
+     */
+    setInVC(userID: string, inVC: boolean): void {
+        const player = this.getPlayer(userID);
+        if (player) {
+            player.inVC = inVC;
+        }
+    }
+
+    /**
+     * @returns whether to use the scoreboard designed for more players
+     */
+    shouldUseLargerScoreboard(): boolean {
+        return this.getNumTeams() > SCOREBOARD_FIELD_CUTOFF;
     }
 }

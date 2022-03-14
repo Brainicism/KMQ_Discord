@@ -1,4 +1,5 @@
 import assert from "assert";
+import sinon from "sinon";
 import { describe } from "mocha";
 import { EmbedGenerator } from "eris-pagination";
 import LeaderboardCommand, {
@@ -11,8 +12,12 @@ import dbContext from "../../database_context";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
 import GameSession from "../../structures/game_session";
+import Player from "../../structures/player";
 import { GameType } from "../../types";
 import { state } from "../../kmq_worker";
+import * as discordUtils from "../../helpers/discord_utils";
+
+const sandbox = sinon.createSandbox();
 
 const SERVER_ID = "0";
 const gameStarter = new KmqMember("jisoo", "jisoo#4747", "url", "123");
@@ -33,7 +38,6 @@ const date = new Date(
 );
 
 const secondAgo = new Date(new Date(date).setSeconds(INITIAL_SECONDS - 1));
-
 const yesterday = new Date(new Date(date).setDate(INITIAL_DAY - 1));
 const lastWeek = new Date(new Date(date).setDate(INITIAL_DAY - 7));
 const lastMonth = new Date(new Date(date).setMonth(INITIAL_MONTH - 1));
@@ -223,6 +227,9 @@ describe("getLeaderboardEmbeds", () => {
             });
 
             it("should match the number of pages and embeds", async () => {
+                sandbox
+                    .stub(discordUtils, "getCurrentVoiceMembers")
+                    .callsFake((_voiceChannelID) => []);
                 const gameSession = new GameSession(
                     "",
                     "",
@@ -231,13 +238,15 @@ describe("getLeaderboardEmbeds", () => {
                     GameType.CLASSIC
                 );
 
+                sandbox.restore();
+
                 state.gameSessions = { [SERVER_ID]: gameSession };
                 const statsRows = [];
 
                 statsRows.push(...generatePlayerStats(INITIAL_TOTAL_ENTRIES));
-                gameSession.participants = new Set(
-                    [...Array(INITIAL_TOTAL_ENTRIES).keys()].map((i) =>
-                        String(i)
+                [...Array(INITIAL_TOTAL_ENTRIES).keys()].map((i) =>
+                    gameSession.scoreboard.addPlayer(
+                        Player.fromUserID(String(i))
                     )
                 );
 
@@ -552,6 +561,9 @@ describe("getLeaderboardEmbeds", () => {
 
         describe("game leaderboard", () => {
             beforeEach(async () => {
+                sandbox
+                    .stub(discordUtils, "getCurrentVoiceMembers")
+                    .callsFake((_voiceChannelID) => []);
                 const gameSession = new GameSession(
                     "",
                     "",
@@ -560,12 +572,18 @@ describe("getLeaderboardEmbeds", () => {
                     GameType.CLASSIC
                 );
 
+                sandbox.restore();
+
                 state.gameSessions = { [SERVER_ID]: gameSession };
 
                 // Player with id 0 is not in game
-                for (let i = 1; i < INITIAL_TOTAL_ENTRIES; i++) {
-                    gameSession.participants.add(String(i));
-                }
+                [...Array(INITIAL_TOTAL_ENTRIES).keys()]
+                    .filter((x) => x !== 0)
+                    .map((i) =>
+                        gameSession.scoreboard.addPlayer(
+                            Player.fromUserID(String(i))
+                        )
+                    );
             });
 
             describe("daily leaderboard", () => {

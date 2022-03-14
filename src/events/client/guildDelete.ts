@@ -23,7 +23,6 @@ export default async function guildDeleteHandler(
         "en-US"
     )} ${leaveDate.toLocaleTimeString("en-US")}`;
 
-    if (!kmqDebugChannel) return;
     if (guild instanceof Eris.Guild) {
         await sendInfoMessage(new MessageContext(kmqDebugChannel.id), {
             author: {
