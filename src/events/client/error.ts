@@ -8,5 +8,5 @@ const logger = new IPCLogger("error");
  * @param shardID - The shard ID
  */
 export default function errorHandler(err: Error, shardID: number): void {
-    logger.error(`Shard #${shardID} encountered error: ${err.message}`);
+    logger.error(`Shard #${shardID} encountered error: ${JSON.stringify(err)}`);
 }
