@@ -298,7 +298,7 @@ export default class GameSession extends Session {
             }
 
             this.guessTimes.push(timePlayed);
-            this.updateScoreboard(
+            await this.updateScoreboard(
                 guessResult,
                 guildPreference,
                 timePlayed,
