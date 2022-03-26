@@ -111,6 +111,7 @@ async function validateDaisukiTableSchema(
     db: DatabaseContext,
     frozenSchema: any
 ): Promise<void> {
+    const outputMessages = [];
     for (const table of ["app_kpop", "app_kpop_audio", "app_kpop_group"]) {
         const commaSeparatedColumnNames = (
             await db.agnostic.raw(
@@ -120,14 +121,26 @@ async function validateDaisukiTableSchema(
 
         const columnNames = _.sortBy(commaSeparatedColumnNames.split(","));
         if (!_.isEqual(frozenSchema[table], columnNames)) {
-            throw new Error(
-                `Daisuki schema for ${table} has changed.\nOld: ${JSON.stringify(
-                    frozenSchema[table]
-                )}.\nNew: ${JSON.stringify(
-                    columnNames
-                )}\nIf the Daisuki schema change is acceptable, delete frozen schema file and re-run this script`
+            const removedColumns = _.difference(
+                columnNames,
+                frozenSchema[table]
+            );
+
+            const addedColumns = _.difference(frozenSchema[table], columnNames);
+            outputMessages.push(
+                `__${table}__\nAdded columns: ${JSON.stringify(
+                    addedColumns
+                )}.\nRemoved Columns: ${JSON.stringify(removedColumns)}\n`
             );
         }
+    }
+
+    if (outputMessages.length > 0) {
+        outputMessages.unshift("Daisuki schema has changed.");
+        outputMessages.push(
+            "If the Daisuki schema change is acceptable, delete frozen schema file and re-run this script"
+        );
+        throw new Error(outputMessages.join("\n"));
     }
 }
 
