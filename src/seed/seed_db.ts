@@ -9,7 +9,7 @@ import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import { DatabaseContext, getNewConnection } from "../database_context";
 import { generateKmqDataTables, loadStoredProcedures } from "./bootstrap";
 import { EnvType } from "../types";
-import _, { remove } from "lodash";
+import _ from "lodash";
 import { parseJsonFile } from "../helpers/utils";
 
 config({ path: path.resolve(__dirname, "../../.env") });
