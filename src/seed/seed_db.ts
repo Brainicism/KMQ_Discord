@@ -110,8 +110,7 @@ async function recordDaisukiTableSchema(db: DatabaseContext): Promise<void> {
 async function validateDaisukiTableSchema(
     db: DatabaseContext,
     frozenSchema: any
-): Promise<boolean> {
-    let hasChanged = false;
+): Promise<void> {
     for (const table of ["app_kpop", "app_kpop_audio", "app_kpop_group"]) {
         const commaSeparatedColumnNames = (
             await db.agnostic.raw(
@@ -121,18 +120,15 @@ async function validateDaisukiTableSchema(
 
         const columnNames = _.sortBy(commaSeparatedColumnNames.split(","));
         if (!_.isEqual(frozenSchema[table], columnNames)) {
-            logger.error(
+            throw new Error(
                 `Daisuki schema for ${table} has changed.\nOld: ${JSON.stringify(
                     frozenSchema[table]
                 )}.\nNew: ${JSON.stringify(
                     columnNames
-                )}\nIf the Daisuki schema change is acceptable, delete ${frozenDaisukiColumnNamesPath} and re-run this script`
+                )}\nIf the Daisuki schema change is acceptable, delete frozen schema file and re-run this script`
             );
-            hasChanged = true;
         }
     }
-
-    return hasChanged;
 }
 
 async function validateSqlDump(
@@ -216,28 +212,18 @@ async function validateSqlDump(
                 `CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`
             );
         }
-
-        if (fs.existsSync(frozenDaisukiColumnNamesPath)) {
-            logger.info("Daisuki schema exists... checking for changes");
-            const frozenSchema = parseJsonFile(frozenDaisukiColumnNamesPath);
-            const schemaHasChanged = await validateDaisukiTableSchema(
-                db,
-                frozenSchema
-            );
-
-            if (schemaHasChanged) {
-                throw new Error("Daisuki schema has changed.");
-            }
-        }
-
-        logger.info("SQL dump validated successfully");
     } catch (e) {
         throw new Error(`SQL dump validation failed. ${e.sqlMessage}`);
-    } finally {
-        await db.agnostic.raw(
-            "DROP DATABASE IF EXISTS kpop_videos_validation;"
-        );
     }
+
+    if (fs.existsSync(frozenDaisukiColumnNamesPath)) {
+        logger.info("Daisuki schema exists... checking for changes");
+        const frozenSchema = parseJsonFile(frozenDaisukiColumnNamesPath);
+        await validateDaisukiTableSchema(db, frozenSchema);
+    }
+
+    await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_validation;");
+    logger.info("SQL dump validated successfully");
 }
 
 async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
