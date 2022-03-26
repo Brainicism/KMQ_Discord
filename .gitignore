@@ -14,3 +14,4 @@ data/skip_seed
 data/group_list.txt
 .eslintcache
 .vscode/launch.json
+data/frozen_table_schema.json
