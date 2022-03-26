@@ -9,7 +9,7 @@ import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import { DatabaseContext, getNewConnection } from "../database_context";
 import { generateKmqDataTables, loadStoredProcedures } from "./bootstrap";
 import { EnvType } from "../types";
-import _ from "lodash";
+import _, { remove } from "lodash";
 import { parseJsonFile } from "../helpers/utils";
 
 config({ path: path.resolve(__dirname, "../../.env") });
@@ -127,11 +127,13 @@ async function validateDaisukiTableSchema(
             );
 
             const addedColumns = _.difference(frozenSchema[table], columnNames);
-            outputMessages.push(
-                `__${table}__\nAdded columns: ${JSON.stringify(
-                    addedColumns
-                )}.\nRemoved Columns: ${JSON.stringify(removedColumns)}\n`
-            );
+            if (removedColumns.length > 0) {
+                outputMessages.push(
+                    `__${table}__\nAdded columns: ${JSON.stringify(
+                        addedColumns
+                    )}.\nRemoved Columns: ${JSON.stringify(removedColumns)}\n`
+                );
+            }
         }
     }
 
