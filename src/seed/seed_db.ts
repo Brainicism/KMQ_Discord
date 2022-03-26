@@ -88,7 +88,7 @@ async function extractDb(): Promise<void> {
     logger.info("Extracted Daisuki database");
 }
 
-async function recordTableSchema(db: DatabaseContext): Promise<void> {
+async function recordDaisukiTableSchema(db: DatabaseContext): Promise<void> {
     const frozenTableColumnNames = {};
     for (const table of ["app_kpop", "app_kpop_audio", "app_kpop_group"]) {
         const commaSeparatedColumnNames = (
@@ -107,7 +107,7 @@ async function recordTableSchema(db: DatabaseContext): Promise<void> {
     );
 }
 
-async function validateTableSchema(
+async function validateDaisukiTableSchema(
     db: DatabaseContext,
     frozenSchema: any
 ): Promise<boolean> {
@@ -122,11 +122,11 @@ async function validateTableSchema(
         const columnNames = _.sortBy(commaSeparatedColumnNames.split(","));
         if (!_.isEqual(frozenSchema[table], columnNames)) {
             logger.error(
-                `Schema for ${table} has changed.\nOld: ${JSON.stringify(
+                `Daisuki schema for ${table} has changed.\nOld: ${JSON.stringify(
                     frozenSchema[table]
                 )}.\nNew: ${JSON.stringify(
                     columnNames
-                )}\nIf the schema change is acceptable, delete ${frozenDaisukiColumnNamesPath} and re-run this script`
+                )}\nIf the Daisuki schema change is acceptable, delete ${frozenDaisukiColumnNamesPath} and re-run this script`
             );
             hasChanged = true;
         }
@@ -218,19 +218,16 @@ async function validateSqlDump(
         }
 
         if (fs.existsSync(frozenDaisukiColumnNamesPath)) {
-            logger.info("Schema exists... checking for changes");
+            logger.info("Daisuki schema exists... checking for changes");
             const frozenSchema = parseJsonFile(frozenDaisukiColumnNamesPath);
-            const schemaHasChanged = await validateTableSchema(
+            const schemaHasChanged = await validateDaisukiTableSchema(
                 db,
                 frozenSchema
             );
 
             if (schemaHasChanged) {
-                throw new Error("Schema has changed.");
+                throw new Error("Daisuki schema has changed.");
             }
-        } else {
-            logger.info("Schema doesn't exist... creating");
-            await recordTableSchema(db);
         }
 
         logger.info("SQL dump validated successfully");
@@ -282,6 +279,12 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
     execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${audioSeedFilePath}`
     );
+
+    if (!fs.existsSync(frozenDaisukiColumnNamesPath)) {
+        logger.info("Frozen Daisuki schema doesn't exist... creating");
+        await recordDaisukiTableSchema(db);
+    }
+
     logger.info("Performing data overrides");
 
     const overrideQueries = await getOverrideQueries(db);
