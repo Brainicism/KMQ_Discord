@@ -9,11 +9,18 @@ import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import { DatabaseContext, getNewConnection } from "../database_context";
 import { generateKmqDataTables, loadStoredProcedures } from "./bootstrap";
 import { EnvType } from "../types";
+import _ from "lodash";
+import { parseJsonFile } from "../helpers/utils";
 
 config({ path: path.resolve(__dirname, "../../.env") });
 const SQL_DUMP_EXPIRY = 10;
 const mvFileUrl = "http://kpop.daisuki.com.br/download.php?file=full";
 const audioFileUrl = "http://kpop.daisuki.com.br/download.php?file=audio";
+const frozenDaisukiColumnNamesPath = path.join(
+    __dirname,
+    "../../data/frozen_table_schema.json"
+);
+
 const logger = new IPCLogger("seed_db");
 const databaseDownloadDir = path.join(__dirname, "../../sql_dumps/daisuki");
 if (!fs.existsSync(databaseDownloadDir)) {
@@ -79,6 +86,53 @@ async function extractDb(): Promise<void> {
         `unzip -oq ${databaseDownloadDir}/audio-download.zip -d ${databaseDownloadDir}/`
     );
     logger.info("Extracted Daisuki database");
+}
+
+async function recordTableSchema(db: DatabaseContext): Promise<void> {
+    const frozenTableColumnNames = {};
+    for (const table of ["app_kpop", "app_kpop_audio", "app_kpop_group"]) {
+        const commaSeparatedColumnNames = (
+            await db.agnostic.raw(
+                `SELECT group_concat(COLUMN_NAME) as x FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'kpop_videos' AND TABLE_NAME = '${table}';`
+            )
+        )[0][0]["x"];
+
+        const columnNames = _.sortBy(commaSeparatedColumnNames.split(","));
+        frozenTableColumnNames[table] = columnNames;
+    }
+
+    fs.writeFileSync(
+        frozenDaisukiColumnNamesPath,
+        JSON.stringify(frozenTableColumnNames)
+    );
+}
+
+async function validateTableSchema(
+    db: DatabaseContext,
+    frozenSchema: any
+): Promise<boolean> {
+    let hasChanged = false;
+    for (const table of ["app_kpop", "app_kpop_audio", "app_kpop_group"]) {
+        const commaSeparatedColumnNames = (
+            await db.agnostic.raw(
+                `SELECT group_concat(COLUMN_NAME) as x FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'kpop_videos_validation' AND TABLE_NAME = '${table}';`
+            )
+        )[0][0]["x"];
+
+        const columnNames = _.sortBy(commaSeparatedColumnNames.split(","));
+        if (!_.isEqual(frozenSchema[table], columnNames)) {
+            logger.error(
+                `Schema for ${table} has changed.\nOld: ${JSON.stringify(
+                    frozenSchema[table]
+                )}.\nNew: ${JSON.stringify(
+                    columnNames
+                )}\nIf the schema change is acceptable, delete ${frozenDaisukiColumnNamesPath} and re-run this script`
+            );
+            hasChanged = true;
+        }
+    }
+
+    return hasChanged;
 }
 
 async function validateSqlDump(
@@ -161,6 +215,22 @@ async function validateSqlDump(
             await db.kpopVideosValidation.raw(
                 `CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`
             );
+        }
+
+        if (fs.existsSync(frozenDaisukiColumnNamesPath)) {
+            logger.info("Schema exists... checking for changes");
+            const frozenSchema = parseJsonFile(frozenDaisukiColumnNamesPath);
+            const schemaHasChanged = await validateTableSchema(
+                db,
+                frozenSchema
+            );
+
+            if (schemaHasChanged) {
+                throw new Error("Schema has changed.");
+            }
+        } else {
+            logger.info("Schema doesn't exist... creating");
+            await recordTableSchema(db);
         }
 
         logger.info("SQL dump validated successfully");
