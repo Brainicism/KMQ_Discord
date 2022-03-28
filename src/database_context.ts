@@ -39,11 +39,14 @@ export class DatabaseContext {
         if ([EnvType.CI].includes(process.env.NODE_ENV as EnvType)) return;
         if (process.env.NODE_ENV === EnvType.TEST) {
             this.kmq = knex(generateKnexContext("kmq_test", 0, 1));
+            this.kpopVideos = knex(
+                generateKnexContext("kpop_videos_test", 0, 1)
+            );
         } else {
             this.kmq = knex(generateKnexContext("kmq", 0, 5));
+            this.kpopVideos = knex(generateKnexContext("kpop_videos", 0, 1));
         }
 
-        this.kpopVideos = knex(generateKnexContext("kpop_videos", 0, 1));
         this.agnostic = knex(generateKnexContext(null, 0, 1));
         this.kpopVideosValidation = knex(
             generateKnexContext("kpop_videos_validation", 0, 1)

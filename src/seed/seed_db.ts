@@ -22,7 +22,10 @@ const frozenDaisukiColumnNamesPath = path.join(
 );
 
 const logger = new IPCLogger("seed_db");
-const databaseDownloadDir = path.join(__dirname, "../../sql_dumps/daisuki");
+export const databaseDownloadDir = path.join(
+    __dirname,
+    "../../sql_dumps/daisuki"
+);
 if (!fs.existsSync(databaseDownloadDir)) {
     fs.mkdirSync(databaseDownloadDir);
 }
@@ -362,7 +365,7 @@ async function updateKpopDatabase(
  */
 export async function updateGroupList(db: DatabaseContext): Promise<void> {
     const result = await db
-        .kmq("kpop_groups")
+        .kpopVideos("app_kpop_group")
         .select(["name", "members as gender"])
         .where("is_collab", "=", "n")
         .orderBy("name", "ASC");

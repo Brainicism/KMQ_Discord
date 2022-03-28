@@ -237,6 +237,7 @@ export default class SongSelector {
             "members",
             "id_artist as artistID",
             "issolo as isSolo",
+            "tags",
             "members",
             "tags",
             "views",
@@ -291,7 +292,7 @@ export default class SongSelector {
                         });
                     }
                 }
-            }).orWhere(function mainInnerArtistFilter() {
+            }).orWhere(async function mainInnerArtistFilter() {
                 this.whereNotIn(
                     "id_artist",
                     guildPreference.getExcludesGroupIDs()
@@ -323,21 +324,25 @@ export default class SongSelector {
                             guildPreference.getGroupIDs()
                         );
                     } else {
-                        const subunits = dbContext
-                            .kmq("kpop_groups")
-                            .select("id")
-                            .whereIn(
-                                "id_parentgroup",
-                                guildPreference.getGroupIDs()
-                            );
+                        const subunits = (
+                            await dbContext
+                                .kpopVideos("app_kpop_group")
+                                .select("id")
+                                .whereIn(
+                                    "id_parentgroup",
+                                    guildPreference.getGroupIDs()
+                                )
+                        ).map((x) => x["id"]);
 
-                        const collabGroupContainingSubunit = dbContext
-                            .kmq("kpop_groups")
-                            .select("id")
-                            .whereIn("id_artist1", subunits)
-                            .orWhereIn("id_artist2", subunits)
-                            .orWhereIn("id_artist3", subunits)
-                            .orWhereIn("id_artist4", subunits);
+                        const collabGroupContainingSubunit = (
+                            await dbContext
+                                .kpopVideos("app_kpop_group")
+                                .select("id")
+                                .whereIn("id_artist1", subunits)
+                                .orWhereIn("id_artist2", subunits)
+                                .orWhereIn("id_artist3", subunits)
+                                .orWhereIn("id_artist4", subunits)
+                        ).map((x) => x["id"]);
 
                         this.andWhere(function () {
                             this.whereIn(

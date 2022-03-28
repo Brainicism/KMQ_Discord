@@ -35,6 +35,7 @@ export interface QueriedSong {
     artistID?: number;
     isSolo?: string;
     views?: number;
+    tags?: string;
 }
 
 export interface EmbedPayload {
