@@ -239,8 +239,8 @@ export default class SongSelector {
             "issolo as isSolo",
             "tags",
             "members",
-            "tags",
             "views",
+            "vtype",
         ];
     }
 
@@ -269,8 +269,29 @@ export default class SongSelector {
         }
 
         const gameOptions = guildPreference.gameOptions;
-        queryBuilder = queryBuilder.where(function artistFilter() {
-            this.where(function includesInnerArtistFilter() {
+        let subunits = [];
+        let collabGroupContainingSubunit = [];
+        if (gameOptions.subunitPreference === SubunitsPreference.INCLUDE) {
+            subunits = (
+                await dbContext
+                    .kpopVideos("app_kpop_group")
+                    .select("id")
+                    .whereIn("id_parentgroup", guildPreference.getGroupIDs())
+            ).map((x) => x["id"]);
+
+            collabGroupContainingSubunit = (
+                await dbContext
+                    .kpopVideos("app_kpop_group")
+                    .select("id")
+                    .whereIn("id_artist1", subunits)
+                    .orWhereIn("id_artist2", subunits)
+                    .orWhereIn("id_artist3", subunits)
+                    .orWhereIn("id_artist4", subunits)
+            ).map((x) => x["id"]);
+        }
+
+        queryBuilder = queryBuilder.where(async function artistFilter() {
+            this.where(async function includesInnerArtistFilter() {
                 if (!guildPreference.isGroupsMode()) {
                     if (
                         gameOptions.subunitPreference ===
@@ -324,26 +345,6 @@ export default class SongSelector {
                             guildPreference.getGroupIDs()
                         );
                     } else {
-                        const subunits = (
-                            await dbContext
-                                .kpopVideos("app_kpop_group")
-                                .select("id")
-                                .whereIn(
-                                    "id_parentgroup",
-                                    guildPreference.getGroupIDs()
-                                )
-                        ).map((x) => x["id"]);
-
-                        const collabGroupContainingSubunit = (
-                            await dbContext
-                                .kpopVideos("app_kpop_group")
-                                .select("id")
-                                .whereIn("id_artist1", subunits)
-                                .orWhereIn("id_artist2", subunits)
-                                .orWhereIn("id_artist3", subunits)
-                                .orWhereIn("id_artist4", subunits)
-                        ).map((x) => x["id"]);
-
                         this.andWhere(function () {
                             this.whereIn(
                                 "id_artist",

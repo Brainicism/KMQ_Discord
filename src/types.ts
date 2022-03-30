@@ -36,6 +36,8 @@ export interface QueriedSong {
     isSolo?: string;
     views?: number;
     tags?: string;
+    language?: string;
+    vtype?: string;
 }
 
 export interface EmbedPayload {

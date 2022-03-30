@@ -2,16 +2,13 @@ import assert from "assert";
 import sinon from "sinon";
 import { Gender } from "../../commands/game_options/gender";
 import { OstPreference } from "../../commands/game_options/ost";
-import {
-    NON_OFFICIAL_VIDEO_TAGS,
-    ReleaseType,
-} from "../../commands/game_options/release";
+import { ReleaseType } from "../../commands/game_options/release";
 import { SubunitsPreference } from "../../commands/game_options/subunits";
 import GuildPreference from "../../structures/guild_preference";
-import { mockArtists, mockSongs } from "../test_setup";
 import SongSelector, {
     LAST_PLAYED_SONG_QUEUE_SIZE,
 } from "../../structures/song_selector";
+import _ from "lodash";
 import { ArtistType } from "../../commands/game_options/artisttype";
 import { getMatchingGroupNames } from "../../helpers/game_utils";
 import {
@@ -37,18 +34,8 @@ beforeEach(async () => {
 
 describe("getFilteredSongList", () => {
     describe("gender game option", () => {
-        const expectedSongCounts = {
-            [Gender.MALE]: mockSongs.filter((song) => song.members === "male")
-                .length,
-            [Gender.FEMALE]: mockSongs.filter(
-                (song) => song.members === "female"
-            ).length,
-            [Gender.COED]: mockSongs.filter((song) => song.members === "coed")
-                .length,
-        };
-
         describe("single-select gender", () => {
-            it("should match the expected song count", async () => {
+            it("should only return the songs matching the specified gender", async () => {
                 for (const gender of [
                     Gender.MALE,
                     Gender.FEMALE,
@@ -60,8 +47,10 @@ describe("getFilteredSongList", () => {
                     );
 
                     assert.strictEqual(
-                        songs.size,
-                        expectedSongCounts[gender],
+                        Array.from(songs).every(
+                            (song) => song.members === gender
+                        ),
+                        true,
                         `Gender query (${gender}) does not match with actual gender count`
                     );
                 }
@@ -69,371 +58,369 @@ describe("getFilteredSongList", () => {
         });
 
         describe("multi-select gender", () => {
-            it("should match the expected song count", async () => {
-                await guildPreference.setGender([Gender.MALE, Gender.FEMALE]);
+            it("should only return the songs matching the specified genders", async () => {
+                const genderSetting = [Gender.MALE, Gender.FEMALE];
+                await guildPreference.setGender(genderSetting);
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
 
                 assert.strictEqual(
-                    songs.size,
-                    expectedSongCounts[Gender.MALE] +
-                        expectedSongCounts[Gender.FEMALE]
+                    Array.from(songs).every((song) =>
+                        [Gender.MALE, Gender.FEMALE].includes(song.members)
+                    ),
+                    true
                 );
             });
         });
     });
 
     describe("groups", () => {
-        const expectedSongCounts = mockArtists.reduce((map, obj) => {
-            map[obj.id] = mockSongs.filter(
-                (song) => song.id_artist === obj.id
-            ).length;
-            return map;
-        }, {});
-
         beforeEach(async () => {
             await guildPreference.setGender([Gender.ALTERNATING]);
         });
 
         describe("single-selected group", () => {
-            it("should match the expected song count", async () => {
-                for (const artist of mockArtists) {
-                    await guildPreference.setGroups([
-                        { id: artist.id, name: artist.name },
-                    ]);
-                    const { songs } = await SongSelector.getFilteredSongList(
-                        guildPreference
-                    );
-
-                    assert.strictEqual(
-                        songs.size,
-                        expectedSongCounts[artist.id]
-                    );
-                }
-            });
-        });
-
-        describe("multi-selected groups", () => {
-            it("should match the expected song count", async () => {
-                const mockArtistSubset = mockArtists.slice(0, 5);
-                await guildPreference.setGroups(
-                    mockArtistSubset.map((artist) => ({
-                        id: artist.id,
-                        name: artist.name,
-                    }))
-                );
-                const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
-                );
-
-                const expectedMultiSongCount = mockArtistSubset.reduce(
-                    (sum, artist) => sum + expectedSongCounts[artist.id],
-                    0
-                );
-
-                assert.strictEqual(songs.size, expectedMultiSongCount);
-            });
-        });
-    });
-
-    describe("includes", () => {
-        const expectedFemaleCount = mockSongs.filter(
-            (song) => song.members === Gender.FEMALE
-        ).length;
-
-        const includedArtists = mockArtists
-            .filter((artist) => artist.members === Gender.MALE)
-            .slice(0, 2);
-
-        const expectedIncludeCount = mockSongs.filter((song) =>
-            includedArtists.map((artist) => artist.id).includes(song.id_artist)
-        ).length;
-
-        describe("female gender, include 2 male groups", () => {
-            it("should match the expected song count", async () => {
-                await guildPreference.setGender([Gender.FEMALE]);
-                await guildPreference.setIncludes(
-                    includedArtists.map((artist) => ({
-                        id: artist.id,
-                        name: artist.name,
-                    }))
-                );
+            it("should only return the songs matching the specified group", async () => {
+                const selectedArtist = { id: 208, name: "Twice" };
+                await guildPreference.setGroups([selectedArtist]);
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
 
                 assert.strictEqual(
-                    songs.size,
-                    expectedFemaleCount + expectedIncludeCount
+                    Array.from(songs).every(
+                        (song) => song.artistID === selectedArtist.id
+                    ),
+                    true
+                );
+            });
+        });
+
+        describe("multi-selected groups", () => {
+            it("should only return the songs matching the specified groups", async () => {
+                const selectedArtists = [
+                    { id: 208, name: "Twice" },
+                    { id: 40, name: "BTS" },
+                    { id: 61, name: "EXO" },
+                ];
+
+                await guildPreference.setGroups(selectedArtists);
+                const { songs } = await SongSelector.getFilteredSongList(
+                    guildPreference
+                );
+
+                assert.strictEqual(
+                    Array.from(songs).every((song) =>
+                        selectedArtists.map((x) => x.id).includes(song.artistID)
+                    ),
+                    true
+                );
+            });
+        });
+    });
+
+    describe("includes", () => {
+        const includedArtists = [
+            { id: 208, name: "Twice" },
+            { id: 40, name: "BTS" },
+            { id: 61, name: "EXO" },
+        ];
+
+        describe("female gender, include 2 male groups", () => {
+            it("should only return the songs matching the specified gender, and the explicitly included artists", async () => {
+                await guildPreference.setGender([Gender.FEMALE]);
+                await guildPreference.setIncludes(includedArtists);
+                const { songs } = await SongSelector.getFilteredSongList(
+                    guildPreference
+                );
+
+                assert.strictEqual(
+                    Array.from(songs).every(
+                        (song) =>
+                            song.members === Gender.FEMALE ||
+                            includedArtists
+                                .map((x) => x.id)
+                                .includes(song.artistID)
+                    ),
+                    true
                 );
             });
         });
     });
 
     describe("excludes", () => {
-        const expectedFemaleCount = mockSongs.filter(
-            (song) => song.members === Gender.FEMALE
-        ).length;
-
-        const excludeArtists = mockArtists
-            .filter((artist) => artist.members === Gender.FEMALE)
-            .slice(0, 2);
-
-        const expectedExcludeCount = mockSongs.filter((song) =>
-            excludeArtists.map((artist) => artist.id).includes(song.id_artist)
-        ).length;
+        const excludeArtists = [
+            { id: 208, name: "Twice" },
+            { id: 31, name: "Blackpink" },
+        ];
 
         describe("female gender, exclude 2 female groups", () => {
-            it("should match the expected song count", async () => {
+            it("should only return the songs matching the specified gender, explicitly excluding excluded artists ", async () => {
                 await guildPreference.setGender([Gender.FEMALE]);
-                await guildPreference.setExcludes(
-                    excludeArtists.map((artist) => ({
-                        id: artist.id,
-                        name: artist.name,
-                    }))
-                );
+                await guildPreference.setExcludes(excludeArtists);
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
 
                 assert.strictEqual(
-                    songs.size,
-                    expectedFemaleCount - expectedExcludeCount
+                    Array.from(songs).every(
+                        (song) =>
+                            song.members === Gender.FEMALE &&
+                            excludeArtists
+                                .map((x) => x.id)
+                                .every((x) => x !== song.artistID)
+                    ),
+                    true
                 );
             });
         });
     });
 
     describe("artist type", () => {
-        const expectedSoloistCount = mockSongs.filter(
-            (song) => song.issolo === "y"
-        ).length;
-
-        const expectedGroupsCount = mockSongs.filter(
-            (song) => song.issolo === "n"
-        ).length;
-
         describe("soloists", () => {
-            it("should match the expected song count", async () => {
+            it("should only return the songs by soloists", async () => {
                 await guildPreference.setArtistType(ArtistType.SOLOIST);
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
 
-                assert.strictEqual(songs.size, expectedSoloistCount);
+                assert.strictEqual(
+                    Array.from(songs).every((song) => song.isSolo === "y"),
+                    true
+                );
             });
         });
 
         describe("groups", () => {
-            it("should match the expected song count", async () => {
+            it("should only return the songs by groups", async () => {
                 await guildPreference.setArtistType(ArtistType.GROUP);
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
 
-                assert.strictEqual(songs.size, expectedGroupsCount);
+                assert.strictEqual(
+                    Array.from(songs).every((song) => song.isSolo === "n"),
+                    true
+                );
             });
         });
     });
 
     describe("cutoff", () => {
         describe("songs in or after 2016", () => {
-            it("should match the expected song count", async () => {
-                const expectedSongCount = mockSongs.filter(
-                    (song) => song.publishedon >= new Date("2016-01-01")
-                ).length;
-
+            it("should only return the songs published in or after 2016", async () => {
                 await guildPreference.setBeginningCutoffYear(2016);
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
 
-                assert.strictEqual(songs.size, expectedSongCount);
+                assert.strictEqual(
+                    Array.from(songs).every(
+                        (song) => song.publishDate > new Date("2016-01-01")
+                    ),
+                    true
+                );
             });
         });
 
         describe("songs in or before 2015", () => {
-            it("should match the expected song count", async () => {
-                const expectedSongCount = mockSongs.filter(
-                    (song) => song.publishedon <= new Date("2015-12-31")
-                ).length;
-
+            it("should only return the songs published in or before 2015", async () => {
                 await guildPreference.setEndCutoffYear(2015);
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
 
-                assert.strictEqual(songs.size, expectedSongCount);
+                assert.strictEqual(
+                    Array.from(songs).every(
+                        (song) => song.publishDate <= new Date("2015-12-31")
+                    ),
+                    true
+                );
             });
         });
 
         describe("songs between 2008 and 2018", () => {
-            it("should match the expected song count", async () => {
-                const expectedSongCount = mockSongs.filter(
-                    (song) =>
-                        song.publishedon >= new Date("2008-01-01") &&
-                        song.publishedon <= new Date("2018-12-31")
-                ).length;
-
+            it("should only return the songs published between 2008 and 2018", async () => {
                 await guildPreference.setBeginningCutoffYear(2008);
                 await guildPreference.setEndCutoffYear(2018);
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
 
-                assert.strictEqual(songs.size, expectedSongCount);
+                assert.strictEqual(
+                    Array.from(songs).every(
+                        (song) =>
+                            song.publishDate >= new Date("2008-01-01") &&
+                            song.publishDate <= new Date("2018-12-31")
+                    ),
+                    true
+                );
             });
         });
 
         describe("songs in 2017", () => {
-            it("should match the expected song count", async () => {
-                const expectedSongCount = mockSongs.filter(
-                    (song) =>
-                        song.publishedon >= new Date("2017-01-01") &&
-                        song.publishedon <= new Date("2017-12-31")
-                ).length;
-
+            it("sshould only return the songs published in 2017", async () => {
                 await guildPreference.setBeginningCutoffYear(2017);
                 await guildPreference.setEndCutoffYear(2017);
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
 
-                assert.strictEqual(songs.size, expectedSongCount);
+                assert.strictEqual(
+                    Array.from(songs).every(
+                        (song) =>
+                            song.publishDate >= new Date("2017-01-01") &&
+                            song.publishDate <= new Date("2017-12-31")
+                    ),
+                    true
+                );
             });
         });
     });
+});
 
-    describe("subunits", () => {
-        const artistWithSubunit = mockArtists[7];
-        const subunitArtist = mockArtists[8];
+describe("subunits", () => {
+    const artists = [{ id: 16, name: "AOA" }];
 
-        describe("exclude subunits", () => {
-            it("should match the expected song count", async () => {
-                await guildPreference.setGroups([
-                    { id: artistWithSubunit.id, name: artistWithSubunit.name },
-                ]);
-                const expectedSongCount = mockSongs.filter(
-                    (song) => song.id_artist === artistWithSubunit.id
-                ).length;
+    describe("exclude subunits", () => {
+        it("should only return the songs by the specified group, excluding subunits", async () => {
+            await guildPreference.setGroups(artists);
+            await guildPreference.setSubunitPreference(
+                SubunitsPreference.EXCLUDE
+            );
+            const { songs } = await SongSelector.getFilteredSongList(
+                guildPreference
+            );
 
-                await guildPreference.setSubunitPreference(
-                    SubunitsPreference.EXCLUDE
-                );
-                const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
-                );
-
-                assert.strictEqual(songs.size, expectedSongCount);
-            });
+            assert.strictEqual(
+                Array.from(songs).every(
+                    (song) => song.artistID === artists[0].id
+                ),
+                true
+            );
         });
+    });
 
-        describe("include subunits", () => {
-            it("should match the expected song count", async () => {
-                await guildPreference.setGroups([
-                    { id: artistWithSubunit.id, name: artistWithSubunit.name },
-                ]);
-                const expectedSongCount = mockSongs.filter(
-                    (song) =>
-                        song.id_artist === artistWithSubunit.id ||
-                        song.id_artist === subunitArtist.id
-                ).length;
+    describe("include subunits", () => {
+        it("should only return the songs by the specified group, including subunits", async () => {
+            await guildPreference.setGroups(artists);
+            await guildPreference.setSubunitPreference(
+                SubunitsPreference.INCLUDE
+            );
 
-                await guildPreference.setSubunitPreference(
-                    SubunitsPreference.INCLUDE
-                );
-                const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
-                );
+            const { songs } = await SongSelector.getFilteredSongList(
+                guildPreference
+            );
 
-                assert.strictEqual(songs.size, expectedSongCount);
-            });
+            const expectedSubunitIds = [17, 43, 105, 248];
+
+            // all songs must be one of the artist, or the subunit's
+            assert.strictEqual(
+                Array.from(songs).every((song) =>
+                    [...expectedSubunitIds, artists[0].id].includes(
+                        song.artistID
+                    )
+                ),
+                true
+            );
+
+            // should have song from each one of the expected artists/subunits
+            assert.strictEqual(
+                new Set(Array.from(songs).map((song) => song.artistID)).size ===
+                    expectedSubunitIds.length + 1,
+                true
+            );
         });
+    });
 
-        describe("include subunits (and the subunit has a collab)", () => {
-            it("should match the songs from the group, collabs of that group, and collabs of any subunits of that group", async () => {
-                // E is a group with the subunit F. F is in a collab with G. E has a collab with H.
-                // E
-                const artistWithCollabingSubunit = mockArtists[4];
-                // F
-                const subunitWithCollab = mockArtists[5];
-                // F + G
-                const subunitCollabArtist = mockArtists[12];
-                // E + H
-                const parentCollabArtist = mockArtists[13];
+    describe("include subunits (and the subunit has a collab)", () => {
+        it("should match the songs from the group, collabs of that group, and collabs of any subunits of that group", async () => {
+            const artistWithCollabingSubunit = { name: "BIGBANG", id: 28 };
+            // F
+            const subunitWithCollab = { name: "G-DRAGON", id: 68 };
+            // F + G
+            const subunitCollabArtist = { name: "G-DRAGON + TAEYANG", id: 73 };
+            // E + H
+            const parentCollabArtist = { name: "BIGBANG + 2NE1", id: 29 };
 
-                const { matchedGroups, unmatchedGroups } =
-                    await getMatchingGroupNames([
-                        artistWithCollabingSubunit.name,
-                    ]);
+            const expectedIds = [
+                artistWithCollabingSubunit.id,
+                subunitWithCollab.id,
+                subunitCollabArtist.id,
+                parentCollabArtist.id,
+            ];
 
-                await guildPreference.setGroups(matchedGroups);
-                await guildPreference.setSubunitPreference(
-                    SubunitsPreference.INCLUDE
-                );
-                const expectedSongs = mockSongs.filter((song) =>
-                    [
-                        artistWithCollabingSubunit.id,
-                        subunitWithCollab.id,
-                        subunitCollabArtist.id,
-                        parentCollabArtist.id,
-                    ].includes(song.id_artist)
-                );
+            const { matchedGroups, unmatchedGroups } =
+                await getMatchingGroupNames([artistWithCollabingSubunit.name]);
 
-                const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
-                );
+            await guildPreference.setGroups(matchedGroups);
+            await guildPreference.setSubunitPreference(
+                SubunitsPreference.INCLUDE
+            );
 
-                assert.strictEqual(unmatchedGroups.length, 0);
-                assert.deepStrictEqual(
-                    [...songs].map((x) => x.youtubeLink).sort(),
-                    expectedSongs.map((x) => x.link).sort()
-                );
-            });
+            const { songs } = await SongSelector.getFilteredSongList(
+                guildPreference
+            );
+
+            assert.strictEqual(unmatchedGroups.length, 0);
+
+            assert.strictEqual(
+                expectedIds.every((artistId) => {
+                    return Array.from(songs).some(
+                        (song) => song.artistID === artistId
+                    );
+                }),
+                true
+            );
         });
     });
 
     describe("OSTs", () => {
         describe("exclude OSTs", () => {
-            it("should match the expected song count", async () => {
-                const expectedSongCount = mockSongs.filter(
-                    (song) => !song.tags.includes("o")
-                ).length;
-
+            it("should only return songs, not including OSTs", async () => {
                 await guildPreference.setOstPreference(OstPreference.EXCLUDE);
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
 
-                assert.strictEqual(songs.size, expectedSongCount);
+                assert.strictEqual(
+                    Array.from(songs).every((song) => !song.tags.includes("o")),
+                    true
+                );
             });
         });
 
         describe("include OSTs", () => {
-            it("should match the expected song count", async () => {
-                const expectedSongCount = mockSongs.length;
+            it("should only return songs including OSTs", async () => {
                 await guildPreference.setOstPreference(OstPreference.INCLUDE);
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
 
-                assert.strictEqual(songs.size, expectedSongCount);
+                // should have both non osts and osts
+                assert.strictEqual(
+                    Array.from(songs).filter((song) => song.tags.includes("o"))
+                        .length > 0 &&
+                        Array.from(songs).filter(
+                            (song) => !song.tags.includes("o")
+                        ).length > 0,
+                    true
+                );
             });
         });
 
         describe("exclusive OSTs", () => {
-            it("should match the expected song count", async () => {
-                const expectedSongCount = mockSongs.filter((song) =>
-                    song.tags.includes("o")
-                ).length;
-
+            it("should only return songs which are exclusively OSTs", async () => {
                 await guildPreference.setOstPreference(OstPreference.EXCLUSIVE);
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
 
-                assert.strictEqual(songs.size, expectedSongCount);
+                assert.strictEqual(
+                    Array.from(songs).every((song) => song.tags.includes("o")),
+                    true
+                );
             });
         });
     });
@@ -445,23 +432,9 @@ describe("getFilteredSongList", () => {
         });
 
         describe("with limit", () => {
-            it("should match the expected song count", async () => {
+            it("should only return the top [x] number of songs", async () => {
                 const expectedSongCount = limit;
                 await guildPreference.setLimit(0, limit);
-                const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
-                );
-
-                assert.strictEqual(songs.size, expectedSongCount);
-            });
-        });
-
-        describe("without limit", () => {
-            it("should match the expected song count", async () => {
-                const expectedSongCount = mockSongs.filter(
-                    (song) => song.members === Gender.COED
-                ).length;
-
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
@@ -473,62 +446,76 @@ describe("getFilteredSongList", () => {
 
     describe("language", () => {
         describe("language is set to korean only", () => {
-            it("should match the expected song count", async () => {
-                const expectedSongCount = mockSongs.filter(
-                    (song) =>
-                        !FOREIGN_LANGUAGE_TAGS.some((tag) =>
-                            song.tags.includes(tag)
-                        )
-                ).length;
-
+            it("should only return the korean songs", async () => {
                 await guildPreference.setLanguageType(LanguageType.KOREAN);
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
 
-                assert.strictEqual(songs.size, expectedSongCount);
+                // every language tag has atleast one song
+                assert.strictEqual(
+                    Array.from(songs).every(
+                        (song) =>
+                            _.intersection(
+                                song.tags.split(""),
+                                FOREIGN_LANGUAGE_TAGS
+                            ).length === 0
+                    ),
+                    true
+                );
             });
         });
 
         describe("language is set to all", () => {
-            it("should match the expected song count", async () => {
+            it("should return all songs regardless of language", async () => {
                 await guildPreference.setLanguageType(LanguageType.ALL);
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
 
-                assert.strictEqual(songs.size, mockSongs.length);
+                // every language tag has atleast one song
+                assert.strictEqual(
+                    FOREIGN_LANGUAGE_TAGS.every((languageTag) => {
+                        return Array.from(songs).some((song) => {
+                            return song.tags.split("").includes(languageTag);
+                        });
+                    }),
+                    true
+                );
             });
         });
     });
 
     describe("release type", () => {
         describe("release type is set to official only", () => {
-            it("should match the expected song count", async () => {
-                const expectedSongCount = mockSongs.filter(
-                    (song) =>
-                        !NON_OFFICIAL_VIDEO_TAGS.some((tag) =>
-                            song.tags.includes(tag)
-                        ) && song.vtype === "main"
-                ).length;
-
+            it("should return main music videos only", async () => {
                 await guildPreference.setReleaseType(ReleaseType.OFFICIAL);
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
 
-                assert.strictEqual(songs.size, expectedSongCount);
+                assert.strictEqual(
+                    Array.from(songs).every((song) => song.vtype === "main"),
+                    true
+                );
             });
         });
 
         describe("release type is set to all", () => {
-            it("should match the expected song count", async () => {
+            it("should return music videos and audio-only", async () => {
                 await guildPreference.setReleaseType(ReleaseType.ALL);
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
 
-                assert.strictEqual(songs.size, mockSongs.length);
+                assert.strictEqual(
+                    Array.from(songs).filter((song) => song.vtype === "main")
+                        .length > 0 &&
+                        Array.from(songs).filter(
+                            (song) => song.vtype === "audio"
+                        ).length > 0,
+                    true
+                );
             });
         });
     });
@@ -536,22 +523,20 @@ describe("getFilteredSongList", () => {
     describe("force play", async () => {
         describe("forced song exists", () => {
             it("should match that exact one song", async () => {
-                const forcedSong = mockSongs[1];
-                await guildPreference.setForcePlaySong(forcedSong.link);
+                const songLink = "9bZkp7q19f0";
+                await guildPreference.setForcePlaySong(songLink);
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
 
                 assert.strictEqual(songs.size, 1);
-                assert.strictEqual([...songs][0].youtubeLink, forcedSong.link);
+                assert.strictEqual([...songs][0].youtubeLink, songLink);
             });
         });
 
         describe("forced song does not exist", () => {
             it("should not match anything", async () => {
-                await guildPreference.setForcePlaySong(
-                    "WOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO"
-                );
+                await guildPreference.setForcePlaySong("oppa gangnam style");
                 const { songs } = await SongSelector.getFilteredSongList(
                     guildPreference
                 );
@@ -562,24 +547,20 @@ describe("getFilteredSongList", () => {
     });
 });
 
-describe("selectRandomSong", () => {
+describe("selectRandomSong", function () {
     describe("gender override", () => {
         beforeEach(async () => {
             await guildPreference.setGender([Gender.ALTERNATING]);
         });
 
         describe("override to female", () => {
-            it("should match the expected song count of female + coed songs", async () => {
+            it("should only return female/coed songs", async () => {
                 const femaleOrCoedSongs = [];
                 const filteredSongs = (
                     await SongSelector.getFilteredSongList(guildPreference)
                 ).songs;
 
-                const femaleOrCoedSongCount = [...filteredSongs].filter((x) =>
-                    [Gender.FEMALE, Gender.COED].includes(x.members)
-                ).length;
-
-                for (let i = 0; i < femaleOrCoedSongCount; i++) {
+                for (let i = 0; i < 10; i++) {
                     femaleOrCoedSongs.push(
                         await SongSelector.selectRandomSong(
                             filteredSongs,
@@ -596,26 +577,17 @@ describe("selectRandomSong", () => {
                         [Gender.FEMALE, Gender.COED].includes(song.members)
                     )
                 );
-
-                assert.strictEqual(
-                    femaleOrCoedSongCount,
-                    femaleOrCoedSongs.length
-                );
             });
         });
 
         describe("override to male", () => {
-            it("should match the expected song count of male + coed songs", async () => {
+            it("should only return male/coed songs", async () => {
                 const maleOrCoedSongs = [];
                 const filteredSongs = (
                     await SongSelector.getFilteredSongList(guildPreference)
                 ).songs;
 
-                const maleOrCoedSongCount = [...filteredSongs].filter((x) =>
-                    [Gender.MALE, Gender.COED].includes(x.members)
-                ).length;
-
-                for (let i = 0; i < maleOrCoedSongCount; i++) {
+                for (let i = 0; i < 10; i++) {
                     maleOrCoedSongs.push(
                         await SongSelector.selectRandomSong(
                             filteredSongs,
@@ -630,22 +602,22 @@ describe("selectRandomSong", () => {
                         [Gender.MALE, Gender.COED].includes(song.members)
                     )
                 );
-                assert.strictEqual(maleOrCoedSongCount, maleOrCoedSongs.length);
             });
         });
     });
 
     describe("ignored songs", () => {
         describe("ignoring first 10 songs", () => {
-            it("should match the expected song count", async () => {
+            it("should return songs not including the ignored songs", async () => {
                 const numIgnored = 10;
-                const ignoredSongs = new Set(
-                    mockSongs.slice(0, numIgnored).map((song) => song.link)
-                );
-
+                await guildPreference.setLimit(0, 100);
                 const filteredSongs = (
                     await SongSelector.getFilteredSongList(guildPreference)
                 ).songs;
+
+                const ignoredSongs = new Set(
+                    Array.from(filteredSongs).slice(0, numIgnored)
+                );
 
                 const selectedSongs = [];
                 for (let i = 0; i < filteredSongs.size - numIgnored; i++) {

@@ -26,7 +26,7 @@ async function getMockGuildPreference(): Promise<GuildPreference> {
     return guildPreference;
 }
 
-describe.only("song query", () => {
+describe("song query", () => {
     let guildPreference: GuildPreference;
     beforeEach(async () => {
         guildPreference = await getMockGuildPreference();
