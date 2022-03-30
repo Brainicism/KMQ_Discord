@@ -290,8 +290,8 @@ export default class SongSelector {
             ).map((x) => x["id"]);
         }
 
-        queryBuilder = queryBuilder.where(async function artistFilter() {
-            this.where(async function includesInnerArtistFilter() {
+        queryBuilder = queryBuilder.where(function artistFilter() {
+            this.where(function includesInnerArtistFilter() {
                 if (!guildPreference.isGroupsMode()) {
                     if (
                         gameOptions.subunitPreference ===
@@ -313,7 +313,7 @@ export default class SongSelector {
                         });
                     }
                 }
-            }).orWhere(async function mainInnerArtistFilter() {
+            }).orWhere(function mainInnerArtistFilter() {
                 this.whereNotIn(
                     "id_artist",
                     guildPreference.getExcludesGroupIDs()
