@@ -755,7 +755,7 @@ async function bigThreeDominance(lng: LocaleType): Promise<string[]> {
 
 async function fanclubName(lng: LocaleType): Promise<Array<string>> {
     const result = await dbContext
-        .kmq("kpop_groups")
+        .kpopVideos("app_kpop_group")
         .select(["name", "fanclub"])
         .where("fanclub", "!=", "")
         .orderByRaw("RAND()")
@@ -772,7 +772,7 @@ async function fanclubName(lng: LocaleType): Promise<Array<string>> {
 
 async function closeBirthdays(lng: LocaleType): Promise<Array<string>> {
     const result = await dbContext
-        .kmq("kpop_groups")
+        .kpopVideos("app_kpop_group")
         .select(
             dbContext.kmq.raw(
                 "name, MONTH(date_birth) AS birth_month, DATE_FORMAT(date_birth, '%M %e') as formatted_bday"

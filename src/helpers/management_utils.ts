@@ -258,7 +258,7 @@ export async function reloadBonusGroups(): Promise<void> {
     const date = new Date();
     const artistNameQuery: string[] = (
         await dbContext
-            .kmq("kpop_groups")
+            .kpopVideos("app_kpop_group")
             .select(["name"])
             .where("is_collab", "=", "n")
             .orderByRaw(

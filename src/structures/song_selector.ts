@@ -237,9 +237,10 @@ export default class SongSelector {
             "members",
             "id_artist as artistID",
             "issolo as isSolo",
-            "members",
             "tags",
+            "members",
             "views",
+            "vtype",
         ];
     }
 
@@ -268,6 +269,27 @@ export default class SongSelector {
         }
 
         const gameOptions = guildPreference.gameOptions;
+        let subunits = [];
+        let collabGroupContainingSubunit = [];
+        if (gameOptions.subunitPreference === SubunitsPreference.INCLUDE) {
+            subunits = (
+                await dbContext
+                    .kpopVideos("app_kpop_group")
+                    .select("id")
+                    .whereIn("id_parentgroup", guildPreference.getGroupIDs())
+            ).map((x) => x["id"]);
+
+            collabGroupContainingSubunit = (
+                await dbContext
+                    .kpopVideos("app_kpop_group")
+                    .select("id")
+                    .whereIn("id_artist1", subunits)
+                    .orWhereIn("id_artist2", subunits)
+                    .orWhereIn("id_artist3", subunits)
+                    .orWhereIn("id_artist4", subunits)
+            ).map((x) => x["id"]);
+        }
+
         queryBuilder = queryBuilder.where(function artistFilter() {
             this.where(function includesInnerArtistFilter() {
                 if (!guildPreference.isGroupsMode()) {
@@ -323,22 +345,6 @@ export default class SongSelector {
                             guildPreference.getGroupIDs()
                         );
                     } else {
-                        const subunits = dbContext
-                            .kmq("kpop_groups")
-                            .select("id")
-                            .whereIn(
-                                "id_parentgroup",
-                                guildPreference.getGroupIDs()
-                            );
-
-                        const collabGroupContainingSubunit = dbContext
-                            .kmq("kpop_groups")
-                            .select("id")
-                            .whereIn("id_artist1", subunits)
-                            .orWhereIn("id_artist2", subunits)
-                            .orWhereIn("id_artist3", subunits)
-                            .orWhereIn("id_artist4", subunits);
-
                         this.andWhere(function () {
                             this.whereIn(
                                 "id_artist",
