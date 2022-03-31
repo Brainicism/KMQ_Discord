@@ -6,7 +6,6 @@ import dbContext from "../database_context";
 import Player from "../structures/player";
 import EliminationPlayer from "../structures/elimination_player";
 import { EnvType } from "../types";
-import fs from "fs";
 import { execSync } from "child_process";
 import { IPCLogger } from "../logger";
 import { state } from "../kmq_worker";
@@ -86,10 +85,6 @@ before(async function () {
 
     execSync(
         `sed 's/kpop_videos/kpop_videos_test/g;s/kmq/kmq_test/g' ${originalCreateKmqTablesProcedureSqlPath} > ${testCreateKmqTablesProcedureSqlPath}`
-    );
-
-    console.log(
-        fs.readFileSync(testCreateKmqTablesProcedureSqlPath).toString()
     );
 
     execSync(
