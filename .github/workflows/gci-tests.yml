@@ -21,7 +21,8 @@ jobs:
         if: ${{!github.event.issue.pull_request_target || contains(github.event.pull_request.labels.*.name, 'safe to test')}}
         env:
             DB_PASS_CI: kmq_ci_password
-            DB_USER_CI: kmq_ci
+            DB_USER_CI: root
+            DB_PORT: 3306
         steps:
             - name: Checkout KMQ_Discord
               uses: actions/checkout@v2
@@ -31,6 +32,11 @@ jobs:
               uses: actions/setup-python@v2
               with:
                   python-version: "3.6"
+            - name: Setup MariaDB
+              uses: getong/mariadb-action@v1.1
+              with:
+                  mariadb version: "10.3.34"
+                  mysql root password: "$DB_PASS_CI"
             - name: Check for newly introduced environment variables
               run: python src/ci_checks/check_env_var.py
             - name: Setup Node.js environment
@@ -47,14 +53,12 @@ jobs:
               run: npm run lint_i18n_ci
             - name: Copy .env for CI
               run: |
-                  echo "DB_USER=root" >> .env
-                  echo "DB_PASS=root" >> .env
+                  echo "DB_USER=$DB_USER_CI" >> .env
+                  echo "DB_PASS=$DB_PASS_CI" >> .env
                   echo "DB_HOST=127.0.0.1" >> .env
+                  echo "DB_PORT=$DB_PORT" >> .env
                   echo "DB_PORT=3306" >> .env
               shell: bash
-            - name: Enable MySQL
-              run: |
-                  sudo systemctl start mysql.service
             - name: Wait for MySQL server to start
               run: |
                   while ! mysqladmin ping --host=127.0.0.1 --password="$DB_PASS_CI" --silent; do
