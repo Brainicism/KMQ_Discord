@@ -166,6 +166,12 @@ async function bootstrapDatabases(): Promise<void> {
             process.exit(1);
         }
 
+        const dataDir = path.join(__dirname, "../../data");
+        if (!fs.existsSync(dataDir)) {
+            logger.info("Data directory doesn't exist, creating...");
+            fs.mkdirSync(dataDir);
+        }
+
         await bootstrapDatabases();
     }
 })();

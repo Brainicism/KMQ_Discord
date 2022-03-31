@@ -11,6 +11,8 @@ tsconfig.tsbuildinfo
 version
 data/skip_seed
 *.validation.sql
+*.test.sql
 data/group_list.txt
 .eslintcache
 .vscode/launch.json
+data/frozen_table_schema.json

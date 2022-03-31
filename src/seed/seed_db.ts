@@ -9,13 +9,23 @@ import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import { DatabaseContext, getNewConnection } from "../database_context";
 import { generateKmqDataTables, loadStoredProcedures } from "./bootstrap";
 import { EnvType } from "../types";
+import _ from "lodash";
+import { parseJsonFile } from "../helpers/utils";
 
 config({ path: path.resolve(__dirname, "../../.env") });
 const SQL_DUMP_EXPIRY = 10;
 const mvFileUrl = "http://kpop.daisuki.com.br/download.php?file=full";
 const audioFileUrl = "http://kpop.daisuki.com.br/download.php?file=audio";
+const frozenDaisukiColumnNamesPath = path.join(
+    __dirname,
+    "../../data/frozen_table_schema.json"
+);
+
 const logger = new IPCLogger("seed_db");
-const databaseDownloadDir = path.join(__dirname, "../../sql_dumps/daisuki");
+export const databaseDownloadDir = path.join(
+    __dirname,
+    "../../sql_dumps/daisuki"
+);
 if (!fs.existsSync(databaseDownloadDir)) {
     fs.mkdirSync(databaseDownloadDir);
 }
@@ -79,6 +89,64 @@ async function extractDb(): Promise<void> {
         `unzip -oq ${databaseDownloadDir}/audio-download.zip -d ${databaseDownloadDir}/`
     );
     logger.info("Extracted Daisuki database");
+}
+
+async function recordDaisukiTableSchema(db: DatabaseContext): Promise<void> {
+    const frozenTableColumnNames = {};
+    for (const table of ["app_kpop", "app_kpop_audio", "app_kpop_group"]) {
+        const commaSeparatedColumnNames = (
+            await db.agnostic.raw(
+                `SELECT group_concat(COLUMN_NAME) as x FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'kpop_videos' AND TABLE_NAME = '${table}';`
+            )
+        )[0][0]["x"];
+
+        const columnNames = _.sortBy(commaSeparatedColumnNames.split(","));
+        frozenTableColumnNames[table] = columnNames;
+    }
+
+    fs.writeFileSync(
+        frozenDaisukiColumnNamesPath,
+        JSON.stringify(frozenTableColumnNames)
+    );
+}
+
+async function validateDaisukiTableSchema(
+    db: DatabaseContext,
+    frozenSchema: any
+): Promise<void> {
+    const outputMessages = [];
+    for (const table of ["app_kpop", "app_kpop_audio", "app_kpop_group"]) {
+        const commaSeparatedColumnNames = (
+            await db.agnostic.raw(
+                `SELECT group_concat(COLUMN_NAME) as x FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'kpop_videos_validation' AND TABLE_NAME = '${table}';`
+            )
+        )[0][0]["x"];
+
+        const columnNames = _.sortBy(commaSeparatedColumnNames.split(","));
+        if (!_.isEqual(frozenSchema[table], columnNames)) {
+            const removedColumns = _.difference(
+                columnNames,
+                frozenSchema[table]
+            );
+
+            const addedColumns = _.difference(frozenSchema[table], columnNames);
+            if (removedColumns.length > 0) {
+                outputMessages.push(
+                    `__${table}__\nAdded columns: ${JSON.stringify(
+                        addedColumns
+                    )}.\nRemoved Columns: ${JSON.stringify(removedColumns)}\n`
+                );
+            }
+        }
+    }
+
+    if (outputMessages.length > 0) {
+        outputMessages.unshift("Daisuki schema has changed.");
+        outputMessages.push(
+            "If the Daisuki schema change is acceptable, delete frozen schema file and re-run this script"
+        );
+        throw new Error(outputMessages.join("\n"));
+    }
 }
 
 async function validateSqlDump(
@@ -162,15 +230,18 @@ async function validateSqlDump(
                 `CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`
             );
         }
-
-        logger.info("SQL dump validated successfully");
     } catch (e) {
         throw new Error(`SQL dump validation failed. ${e.sqlMessage}`);
-    } finally {
-        await db.agnostic.raw(
-            "DROP DATABASE IF EXISTS kpop_videos_validation;"
-        );
     }
+
+    if (fs.existsSync(frozenDaisukiColumnNamesPath)) {
+        logger.info("Daisuki schema exists... checking for changes");
+        const frozenSchema = parseJsonFile(frozenDaisukiColumnNamesPath);
+        await validateDaisukiTableSchema(db, frozenSchema);
+    }
+
+    await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_validation;");
+    logger.info("SQL dump validated successfully");
 }
 
 async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
@@ -212,6 +283,12 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
     execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${audioSeedFilePath}`
     );
+
+    if (!fs.existsSync(frozenDaisukiColumnNamesPath)) {
+        logger.info("Frozen Daisuki schema doesn't exist... creating");
+        await recordDaisukiTableSchema(db);
+    }
+
     logger.info("Performing data overrides");
 
     const overrideQueries = await getOverrideQueries(db);
@@ -288,7 +365,7 @@ async function updateKpopDatabase(
  */
 export async function updateGroupList(db: DatabaseContext): Promise<void> {
     const result = await db
-        .kmq("kpop_groups")
+        .kpopVideos("app_kpop_group")
         .select(["name", "members as gender"])
         .where("is_collab", "=", "n")
         .orderBy("name", "ASC");

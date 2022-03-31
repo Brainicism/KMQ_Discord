@@ -1210,6 +1210,10 @@ export default class GameSession {
      * @param inVC - Whether the player is currently in the voice channel
      */
     async setPlayerInVC(userID: string, inVC: boolean): Promise<void> {
+        if (!this.scoreboard) {
+            return;
+        }
+
         if (
             inVC &&
             !this.scoreboard.getPlayerIDs().includes(userID) &&

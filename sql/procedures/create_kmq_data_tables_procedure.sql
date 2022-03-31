@@ -95,15 +95,5 @@ BEGIN
 
 	RENAME TABLE available_songs TO old, available_songs_temp TO available_songs;
 	DROP TABLE old;
-
-	/* copy over new copy of app_kpop_group */
-	DROP TABLE IF EXISTS kmq.kpop_groups_temp;
-	CREATE TABLE kmq.kpop_groups_temp LIKE kpop_videos.app_kpop_group;
-	INSERT kmq.kpop_groups_temp	SELECT	* FROM kpop_videos.app_kpop_group;
-	ALTER TABLE kmq.kpop_groups_temp MODIFY name VARCHAR(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-	CREATE TABLE IF NOT EXISTS kmq.kpop_groups LIKE kpop_videos.app_kpop_group;
-	RENAME TABLE kmq.kpop_groups TO old, kmq.kpop_groups_temp TO kmq.kpop_groups;
-	DROP TABLE old;
 END //
 DELIMITER ;

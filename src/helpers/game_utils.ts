@@ -157,13 +157,13 @@ export async function getMatchingGroupNames(
     aliasApplied = false
 ): Promise<GroupMatchResults> {
     const artistIDQuery = dbContext
-        .kmq("kpop_groups")
+        .kpopVideos("app_kpop_group")
         .select(["id"])
         .whereIn("name", rawGroupNames);
 
     const matchingGroups = (
         await dbContext
-            .kmq("kpop_groups")
+            .kpopVideos("app_kpop_group")
             .select(["id", "name"])
             .whereIn("id", [artistIDQuery])
             .orWhereIn("id_artist1", [artistIDQuery])
