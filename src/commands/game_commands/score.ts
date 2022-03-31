@@ -1,17 +1,20 @@
 import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
-    sendInfoMessage,
     sendScoreboardMessage,
     getDebugLogHeader,
 } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
 import { state } from "../../kmq_worker";
+import CommandPrechecks from "../../command_prechecks";
+import Session from "../../structures/session";
+import GameSession from "../../structures/game_session";
 
 const logger = new IPCLogger("score");
 
 export default class ScoreCommand implements BaseCommand {
     aliases = ["scoreboard", "sb"];
+
+    preRunChecks = [{ checkFn: CommandPrechecks.notMusicPrecheck }];
 
     help = (guildID: string): Help => ({
         name: "score",
@@ -24,27 +27,8 @@ export default class ScoreCommand implements BaseCommand {
         priority: 50,
     });
 
-    call = async ({ message, gameSessions }: CommandArgs): Promise<void> => {
-        const gameSession = gameSessions[message.guildID];
-        if (!gameSession) {
-            await sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "misc.failure.game.noneInProgress.title"
-                ),
-                description: state.localizer.translate(
-                    message.guildID,
-                    "command.score.failure.noneInProgress.description",
-                    { play: `\`${process.env.BOT_PREFIX}play\`` }
-                ),
-            });
-
-            logger.warn(
-                `${getDebugLogHeader(message)} | No active game session.`
-            );
-            return;
-        }
-
+    call = async ({ message }: CommandArgs): Promise<void> => {
+        const gameSession = Session.getSession(message.guildID) as GameSession;
         await sendScoreboardMessage(message, gameSession);
         logger.info(`${getDebugLogHeader(message)} | Score retrieved`);
     };

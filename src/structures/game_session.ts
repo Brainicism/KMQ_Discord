@@ -16,7 +16,7 @@ import {
     tryCreateInteractionErrorAcknowledgement,
     getMention,
     getGuildLocale,
-    sendEndRoundMessage,
+    sendRoundMessage,
 } from "../helpers/discord_utils";
 import {
     getGuildPreference,
@@ -33,7 +33,6 @@ import {
     setDifference,
     codeLine,
     chunkArray,
-    chooseRandom,
 } from "../helpers/utils";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
@@ -331,7 +330,7 @@ export default class GameSession extends Session {
 
         const remainingDuration = this.getRemainingDuration(guildPreference);
         if (messageContext) {
-            const endRoundMessage = await sendEndRoundMessage(
+            const endRoundMessage = await sendRoundMessage(
                 messageContext,
                 this.scoreboard,
                 this,
@@ -342,7 +341,7 @@ export default class GameSession extends Session {
             );
 
             // if message fails to send, no ID is returned
-            round.endRoundMessageID = endRoundMessage?.id;
+            round.roundMessageID = endRoundMessage?.id;
         }
 
         await super.endRound(guildPreference, messageContext);
@@ -585,8 +584,11 @@ export default class GameSession extends Session {
     }
 
     /** Updates owner to the first player to join the game that didn't leave VC */
-    updateOwner(): Promise<void> {
-        const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID);
+    updateOwner(): void {
+        const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID).filter(
+            (x) => x.id !== process.env.BOT_CLIENT_ID
+        );
+
         const voiceMemberIDs = new Set(voiceMembers.map((x) => x.id));
         if (voiceMemberIDs.has(this.owner.id) || voiceMemberIDs.size === 0) {
             return;
@@ -596,35 +598,14 @@ export default class GameSession extends Session {
             .getPlayerIDs()
             .filter((p) => voiceMemberIDs.has(p));
 
-        let newOwnerID: string;
-        if (participantsInVC.length > 0) {
-            // Pick the first participant still in VC
-            newOwnerID = participantsInVC[0];
-        } else {
-            // The VC only contains members who haven't participated yet
-            newOwnerID = chooseRandom(voiceMembers).id;
-        }
+        // Pick the first participant still in VC
+        const newOwnerID = participantsInVC[0];
 
         this.owner = KmqMember.fromUser(
             voiceMembers.find((x) => x.id === newOwnerID)
         );
 
-        sendInfoMessage(new MessageContext(this.textChannelID), {
-            title: state.localizer.translate(
-                this.guildID,
-                "misc.gameOwnerChanged.title"
-            ),
-            description: state.localizer.translate(
-                this.guildID,
-                "misc.gameOwnerChanged.description",
-                {
-                    newGameOwner: getMention(this.owner.id),
-                    forcehintCommand: `\`${process.env.BOT_PREFIX}forcehint\``,
-                    forceskipCommand: `\`${process.env.BOT_PREFIX}forceskip\``,
-                }
-            ),
-            thumbnailUrl: KmqImages.LISTENING,
-        });
+        super.updateOwner();
     }
 
     async handleMultipleChoiceInteraction(

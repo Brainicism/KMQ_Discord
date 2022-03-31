@@ -11,6 +11,7 @@ import { state } from "../../kmq_worker";
 import validate from "../../helpers/validate";
 import { EnvType, GuildTextableMessage, ParsedMessage } from "../../types";
 import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("messageCreate");
 
@@ -90,14 +91,13 @@ export default async function messageCreateHandler(
                     : null
             )
         ) {
-            const { gameSessions } = state;
-            const gameSession = gameSessions[message.guildID];
+            const session = Session.getSession(message.guildID);
             if (invokedCommand.preRunChecks) {
                 for (const precheck of invokedCommand.preRunChecks) {
                     if (
                         !(await precheck.checkFn({
                             message,
-                            gameSession,
+                            session,
                             errorMessage: precheck.errorMessage,
                         }))
                     ) {
@@ -114,7 +114,6 @@ export default async function messageCreateHandler(
 
             try {
                 await invokedCommand.call({
-                    gameSessions,
                     channel: textChannel,
                     message,
                     parsedMessage,

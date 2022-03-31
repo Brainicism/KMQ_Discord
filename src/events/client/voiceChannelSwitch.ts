@@ -1,6 +1,7 @@
 import Eris from "eris";
-import { state } from "../../kmq_worker";
 import { checkBotIsAlone } from "../../helpers/discord_utils";
+import Session from "../../structures/session";
+import GameSession from "../../structures/game_session";
 
 /**
  * Handles the 'voiceChannelSwitch' event
@@ -14,38 +15,42 @@ export default async function voiceChannelSwitchHandler(
     oldChannel: Eris.VoiceChannel
 ): Promise<void> {
     const guildID = oldChannel.guild.id;
-    const gameSession = state.gameSessions[guildID];
-    if (!gameSession || gameSession.finished) {
+    const session = Session.getSession(guildID);
+    if (!session || session.finished) {
         return;
     }
 
     if (
-        newChannel.id !== gameSession.voiceChannelID &&
-        oldChannel.id !== gameSession.voiceChannelID
+        newChannel.id !== session.voiceChannelID &&
+        oldChannel.id !== session.voiceChannelID
     ) {
         return;
     }
 
     if (checkBotIsAlone(guildID)) {
-        gameSession.endSession();
+        session.endSession();
         return;
     }
 
-    if (member.id !== process.env.BOT_CLIENT_ID) {
-        await gameSession.setPlayerInVC(
-            member.id,
-            newChannel.id === gameSession.voiceChannelID
-        );
-    } else {
-        // Bot was moved to another VC
-        gameSession.voiceChannelID = newChannel.id;
-        gameSession.syncAllVoiceMembers();
-    }
+    if (!session.finished) {
+        if (session instanceof GameSession) {
+            const oldPremiumState = session.isPremiumGame();
+            if (member.id !== process.env.BOT_CLIENT_ID) {
+                await session.setPlayerInVC(
+                    member.id,
+                    newChannel.id === session.voiceChannelID
+                );
+            } else {
+                // Bot was moved to another VC
+                session.voiceChannelID = newChannel.id;
+                session.syncAllVoiceMembers();
+            }
 
-    const oldPremiumState = gameSession.isPremiumGame();
-    if (oldPremiumState !== gameSession.isPremiumGame()) {
-        gameSession.updatePremiumStatus();
-    }
+            if (oldPremiumState !== session.isPremiumGame()) {
+                session.updatePremiumStatus();
+            }
+        }
 
-    gameSession.updateOwner();
+        session.updateOwner();
+    }
 }

@@ -51,6 +51,7 @@ import { UniqueSongCounter } from "../structures/song_selector";
 import { LocaleType, DEFAULT_LOCALE } from "./localization_manager";
 import Round from "../structures/round";
 import Session from "../structures/session";
+import MusicSession from "../structures/music_session";
 
 const logger = new IPCLogger("discord_utils");
 export const EMBED_ERROR_COLOR = 0xed4245; // Red
@@ -662,8 +663,7 @@ function getDurationFooter(
 }
 
 /**
- * Sends an end of GameRound message displaying the correct answer as well as
- * other game related information
+ * Sends a message displaying song/game related information
  * @param messageContext - An object to pass along relevant parts of Eris.Message
  * @param scoreboard - The GameSession's corresponding Scoreboard
  * @param session - The session generating this end round message
@@ -672,7 +672,7 @@ function getDurationFooter(
  * @param timeRemaining - The time remaining for the duration option
  * @param uniqueSongCounter - The unique song counter
  */
-export async function sendEndRoundMessage(
+export async function sendRoundMessage(
     messageContext: MessageContext,
     scoreboard: Scoreboard,
     session: Session,
@@ -681,9 +681,12 @@ export async function sendEndRoundMessage(
     timeRemaining?: number,
     uniqueSongCounter?: UniqueSongCounter
 ): Promise<Eris.Message<Eris.TextableChannel>> {
-    const useLargerScoreboard = scoreboard.shouldUseLargerScoreboard();
+    const isMusicSession = session instanceof MusicSession;
+    const useLargerScoreboard =
+        !isMusicSession && scoreboard.shouldUseLargerScoreboard();
+
     let scoreboardTitle = "";
-    if (!useLargerScoreboard) {
+    if (!isMusicSession && !useLargerScoreboard) {
         scoreboardTitle = "\n\n";
         scoreboardTitle += bold(
             state.localizer.translate(
@@ -703,7 +706,7 @@ export async function sendEndRoundMessage(
         playerRoundResults
     )}${scoreboardTitle}`;
 
-    let fields: Array<{ name: string; value: string; inline: boolean }>;
+    let fields: Array<{ name: string; value: string; inline: boolean }> = [];
     let roundResultIDs: Array<string>;
     if (scoreboard instanceof TeamScoreboard) {
         const teamScoreboard = scoreboard as TeamScoreboard;
@@ -714,19 +717,21 @@ export async function sendEndRoundMessage(
         roundResultIDs = playerRoundResults.map((x) => x.player.id);
     }
 
-    if (useLargerScoreboard) {
-        fields = scoreboard.getScoreboardEmbedThreeFields(
-            MAX_SCOREBOARD_PLAYERS,
-            false,
-            true,
-            roundResultIDs
-        );
-    } else {
-        fields = scoreboard.getScoreboardEmbedFields(
-            false,
-            true,
-            roundResultIDs
-        );
+    if (!isMusicSession) {
+        if (useLargerScoreboard) {
+            fields = scoreboard.getScoreboardEmbedThreeFields(
+                MAX_SCOREBOARD_PLAYERS,
+                false,
+                true,
+                roundResultIDs
+            );
+        } else {
+            fields = scoreboard.getScoreboardEmbedFields(
+                false,
+                true,
+                roundResultIDs
+            );
+        }
     }
 
     const fact = Math.random() <= 0.05 ? getFact(messageContext.guildID) : null;
@@ -946,7 +951,7 @@ export async function sendOptionsMessage(
     const isEliminationMode =
         gameSessions[messageContext.guildID]?.gameType === GameType.ELIMINATION;
 
-    // Special case: ,goal is conflicting only when current game is elimination
+    // Special case: goal is conflicting only when current game is elimination
     if (guildPreference.isGoalSet()) {
         optionStrings[GameOption.GOAL] = String(gameOptions.goal);
         if (isEliminationMode) {

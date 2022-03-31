@@ -4,6 +4,7 @@ import { IPCLogger } from "../logger";
 import {
     getDebugLogHeader,
     getGuildLocale,
+    getMention,
     sendBookmarkedSongs,
     sendErrorMessage,
     sendInfoMessage,
@@ -18,7 +19,7 @@ import KmqMember from "./kmq_member";
 import MessageContext from "./message_context";
 import Round from "./round";
 import SongSelector from "./song_selector";
-import { deleteGameSession } from "../helpers/management_utils";
+import { deleteSession } from "../helpers/management_utils";
 import {
     ensureVoiceConnection,
     getGuildPreference,
@@ -240,9 +241,9 @@ export default abstract class Session {
             this.songMessageIDs.shift();
         }
 
-        if (round.endRoundMessageID) {
+        if (round.roundMessageID) {
             this.songMessageIDs.push({
-                messageID: round.endRoundMessageID,
+                messageID: round.roundMessageID,
                 song: {
                     songName: round.song.songName,
                     originalSongName: round.song.originalSongName,
@@ -274,7 +275,7 @@ export default abstract class Session {
      * Ends the current GameSession
      */
     async endSession(): Promise<void> {
-        deleteGameSession(this.guildID);
+        deleteSession(this.guildID);
         await this.endRound(
             await getGuildPreference(this.guildID),
             new MessageContext(this.textChannelID, null, this.guildID),
@@ -443,8 +444,25 @@ export default abstract class Session {
         this.bookmarkedSongs[userID].set(song.youtubeLink, song);
     }
 
-    /** Updates owner to the first player to join the game that didn't leave VC */
-    abstract updateOwner(): Promise<void>;
+    /** Sends a message notifying who the new owner is */
+    updateOwner(): void {
+        sendInfoMessage(new MessageContext(this.textChannelID), {
+            title: state.localizer.translate(
+                this.guildID,
+                "misc.gameOwnerChanged.title"
+            ),
+            description: state.localizer.translate(
+                this.guildID,
+                "misc.gameOwnerChanged.description",
+                {
+                    newGameOwner: getMention(this.owner.id),
+                    forcehintCommand: `\`${process.env.BOT_PREFIX}forcehint\``,
+                    forceskipCommand: `\`${process.env.BOT_PREFIX}forceskip\``,
+                }
+            ),
+            thumbnailUrl: KmqImages.LISTENING,
+        });
+    }
 
     getRemainingDuration(guildPreference: GuildPreference): number {
         const currGameLength = (Date.now() - this.startedAt) / 60000;
@@ -490,6 +508,10 @@ export default abstract class Session {
 
     getRoundsPlayed(): number {
         return this.roundsPlayed;
+    }
+
+    static getSession(guildID: string): Session {
+        return state.gameSessions[guildID] ?? state.musicSessions[guildID];
     }
 
     /**

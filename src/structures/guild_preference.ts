@@ -39,12 +39,12 @@ import {
     DEFAULT_MULTIGUESS_TYPE,
     MultiGuessType,
 } from "../commands/game_options/multiguess";
-import { state } from "../kmq_worker";
 import { SpecialType } from "../commands/game_options/special";
 import {
     AnswerType,
     DEFAULT_ANSWER_TYPE,
 } from "../commands/game_options/answer";
+import Session from "./session";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("guild_preference");
@@ -899,9 +899,9 @@ export default class GuildPreference {
                 .merge()
                 .transacting(trx);
         });
-        const gameSession = state.gameSessions[this.guildID];
-        if (gameSession) {
-            await gameSession.reloadSongs(this);
+        const session = Session.getSession(this.guildID);
+        if (session) {
+            await session.reloadSongs(this);
         }
     }
 

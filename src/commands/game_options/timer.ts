@@ -9,6 +9,7 @@ import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("guessTimeout");
 
@@ -60,17 +61,13 @@ export default class GuessTimeoutCommand implements BaseCommand {
         priority: 110,
     });
 
-    call = async ({
-        message,
-        parsedMessage,
-        gameSessions,
-    }: CommandArgs): Promise<void> => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
-        const gameSession = gameSessions[message.guildID];
+        const session = Session.getSession(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.TIMER);
-            if (gameSession) {
-                gameSession.stopGuessTimeout();
+            if (session) {
+                session.stopGuessTimeout();
             }
 
             await sendOptionsMessage(
@@ -88,14 +85,10 @@ export default class GuessTimeoutCommand implements BaseCommand {
         const time = parseInt(parsedMessage.components[0]);
 
         await guildPreference.setGuessTimeout(time);
-        if (
-            gameSession &&
-            gameSession.round &&
-            gameSession.connection.playing
-        ) {
+        if (session && session.round && session.connection.playing) {
             // Timer can start mid-song, starting when the user enters the command
-            gameSession.stopGuessTimeout();
-            gameSession.startGuessTimeout(
+            session.stopGuessTimeout();
+            session.startGuessTimeout(
                 MessageContext.fromMessage(message),
                 guildPreference
             );

@@ -580,10 +580,6 @@
                     "description": "이 명령어를 사용할 권한이 없습니다.",
                     "title": "숨겨진 게임 모드"
                 },
-                "notInVC": {
-                    "description": "음성 채널에 있을 때 {{play}}를 다시 보내세요.",
-                    "title": "음성 채널을 가입하세요!"
-                },
                 "overrideTeamsOrElimination": {
                     "description": "{{oldGameType}} 게임, 이 게임을 {{end}} 시작하려면 {{playOldGameType}}, {{gameSpecificInstructions}}를 호출한 다음 {{begin}}를 호출하세요.",
                     "elimination": {
@@ -1060,6 +1056,10 @@
                 "title": "누락된 권한"
             },
             "missingPermissionsText": "봇에 {{missingPermissions}} 권한이 있는지 확인하세요.\n\n자세한 내용은 {{permissionsLink}} 링크를 참조하세요. (여전히 문제가 발생하면 {{helpCommand}}에 있는 공식 KMQ 서버에 가입하세요.)",
+            "notInVC": {
+                "description": "음성 채널에 있을 때 {{command}}를 다시 보내세요.",
+                "title": "음성 채널을 가입하세요!"
+            },
             "retrievingSongData": {
                 "description": "잠시 후 다시 시도하거나 {{helpCommand}}에 있는 공식 KMQ 서버에 이 오류를 보고하세요.",
                 "title": "노래 데이터를 검색하는 동안 오류가 발생했습니다."
@@ -1155,7 +1155,7 @@
                 "vote": "투표를 하고 (경험치 2배 획득, `,vote` 참조) [top.gg!](https://top.gg/bot/508759831755096074)에 리뷰를 남겨주세요."
             },
             "wrongSongName": {
-                "aliases.": "노래 이름에 대한 제안이 있으십니까? (공식 KMQ 서버에서 알려주세요!)",
+                "aliases": "노래 이름에 대한 제안이 있으십니까? (공식 KMQ 서버에서 알려주세요!)",
                 "title": "노래 이름이 이상한가요?"
             }
         },
@@ -1236,6 +1236,7 @@
             "debugChannel": "이 채널에서는 할 수 없습니다.",
             "debugServer": "이 서버에서는 할 수 없습니다.",
             "differentVC": "이 명령어를 사용하려면 봇과 동일한 음성 채널에 있어야 합니다.",
+            "notMusicSession": "이 명령어는 음악 세션에서 사용할 수 없습니다.",
             "title": "잠시만 기다려주십시오..."
         },
         "releaseDate": "출시 날짜",

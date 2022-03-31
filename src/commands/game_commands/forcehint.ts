@@ -12,6 +12,8 @@ import { KmqImages } from "../../constants";
 import { generateHint, validHintCheck } from "./hint";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import Session from "../../structures/session";
+import GameSession from "src/structures/game_session";
 
 const logger = new IPCLogger("forcehint");
 
@@ -19,7 +21,7 @@ export default class ForceHintCommand implements BaseCommand {
     aliases = ["fhint", "fh"];
 
     preRunChecks = [
-        { checkFn: CommandPrechecks.inGameCommandPrecheck },
+        { checkFn: CommandPrechecks.inSessionCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
     ];
 
@@ -34,8 +36,8 @@ export default class ForceHintCommand implements BaseCommand {
         priority: 1009,
     });
 
-    call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
-        const gameSession = gameSessions[message.guildID];
+    call = async ({ message }: CommandArgs): Promise<void> => {
+        const gameSession = Session.getSession(message.guildID) as GameSession;
         const gameRound = gameSession?.round;
         const guildPreference = await getGuildPreference(message.guildID);
 

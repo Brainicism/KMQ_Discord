@@ -16,6 +16,7 @@ import CommandPrechecks from "../../command_prechecks";
 import EliminationScoreboard from "../../structures/elimination_scoreboard";
 import { state } from "../../kmq_worker";
 import Round from "../../structures/round";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("skip");
 
@@ -69,23 +70,30 @@ async function sendSkipMessage(
 
 function isSkipMajority(
     message: GuildTextableMessage,
-    gameSession: GameSession
+    session: Session
 ): boolean {
-    return gameSession.gameType === GameType.ELIMINATION
-        ? gameSession.round.getSkipCount() >=
-              Math.floor(
-                  (
-                      gameSession.scoreboard as EliminationScoreboard
-                  ).getAlivePlayersCount() * 0.5
-              ) +
-                  1
-        : gameSession.round.getSkipCount() >= getMajorityCount(message.guildID);
+    if (session instanceof GameSession) {
+        const gameSession = session as GameSession;
+        if (gameSession.gameType === GameType.ELIMINATION) {
+            return (
+                gameSession.round.getSkipCount() >=
+                Math.floor(
+                    (
+                        gameSession.scoreboard as EliminationScoreboard
+                    ).getAlivePlayersCount() * 0.5
+                ) +
+                    1
+            );
+        }
+    }
+
+    return session.round.getSkipCount() >= getMajorityCount(message.guildID);
 }
 
 export default class SkipCommand implements BaseCommand {
     aliases = ["s"];
     preRunChecks = [
-        { checkFn: CommandPrechecks.inGameCommandPrecheck },
+        { checkFn: CommandPrechecks.inSessionCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
     ];
 
@@ -100,60 +108,58 @@ export default class SkipCommand implements BaseCommand {
         priority: 1010,
     });
 
-    call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
-        const gameSession = gameSessions[message.guildID];
-        if (
-            !gameSession ||
-            !gameSession.round ||
-            gameSession.round.finished ||
-            !areUserAndBotInSameVoiceChannel(message)
-        ) {
+    call = async ({ message }: CommandArgs): Promise<void> => {
+        if (!areUserAndBotInSameVoiceChannel(message)) {
             logger.warn(
                 `${getDebugLogHeader(
                     message
-                )} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.round: ${
-                    gameSession && !gameSession.round
-                }. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(
-                    message
-                )}`
+                )} | Invalid skip. User and bot are not in the same voice channel.`
             );
             return;
         }
 
-        if (gameSession.gameType === GameType.ELIMINATION) {
-            if (
-                !(
-                    gameSession.scoreboard as EliminationScoreboard
-                ).isPlayerEliminated(message.author.id)
-            ) {
-                logger.info(
-                    `${getDebugLogHeader(
-                        message
-                    )} | User skipped, elimination mode`
-                );
-                gameSession.round.userSkipped(message.author.id);
-            }
-        } else {
-            gameSession.round.userSkipped(message.author.id);
-            logger.info(`${getDebugLogHeader(message)} | User skipped`);
-        }
-
-        if (gameSession.round.skipAchieved) {
-            // song already being skipped
+        const session = Session.getSession(message.guildID);
+        if (
+            !session ||
+            !session.round ||
+            session.round.skipAchieved ||
+            session.round.finished
+        ) {
             return;
         }
 
-        if (isSkipMajority(message, gameSession)) {
-            gameSession.round.skipAchieved = true;
-            sendSkipMessage(message, gameSession.round);
-            await gameSession.endRound(
+        if (session instanceof GameSession) {
+            const gameSession = session as GameSession;
+            if (gameSession.gameType === GameType.ELIMINATION) {
+                if (
+                    !(
+                        gameSession.scoreboard as EliminationScoreboard
+                    ).isPlayerEliminated(message.author.id)
+                ) {
+                    logger.info(
+                        `${getDebugLogHeader(
+                            message
+                        )} | User skipped, elimination mode`
+                    );
+                    gameSession.round.userSkipped(message.author.id);
+                }
+            }
+        }
+
+        session.round.userSkipped(message.author.id);
+        logger.info(`${getDebugLogHeader(message)} | User skipped`);
+
+        const guildPreference = await getGuildPreference(message.guildID);
+        if (isSkipMajority(message, session)) {
+            session.round.skipAchieved = true;
+            sendSkipMessage(message, session.round);
+            await session.endRound(
                 guildPreference,
                 MessageContext.fromMessage(message),
                 { correct: false }
             );
 
-            gameSession.startRound(
+            session.startRound(
                 guildPreference,
                 MessageContext.fromMessage(message)
             );
@@ -163,9 +169,9 @@ export default class SkipCommand implements BaseCommand {
             );
         } else {
             logger.info(`${getDebugLogHeader(message)} | Skip vote received.`);
-            await sendSkipNotification(message, gameSession.round);
+            await sendSkipNotification(message, session.round);
         }
 
-        gameSession.lastActiveNow();
+        session.lastActiveNow();
     };
 }

@@ -13,11 +13,15 @@ import MessageContext from "../../structures/message_context";
 import GameSession from "../../structures/game_session";
 import { state } from "../../kmq_worker";
 import CommandPrechecks from "../../command_prechecks";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("begin");
 
 export default class BeginCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notMusicPrecheck },
+    ];
 
     static canStart(
         gameSession: GameSession,
@@ -46,21 +50,12 @@ export default class BeginCommand implements BaseCommand {
         return true;
     }
 
-    call = async ({
-        message,
-        gameSessions,
-        channel,
-    }: CommandArgs): Promise<void> => {
+    call = async ({ message, channel }: CommandArgs): Promise<void> => {
         const { guildID } = message;
-        const gameSession = gameSessions[guildID];
+        const gameSession = Session.getSession(guildID) as GameSession;
+        const messageContext = MessageContext.fromMessage(message);
 
-        if (
-            !BeginCommand.canStart(
-                gameSession,
-                MessageContext.fromMessage(message)
-            )
-        )
-            return;
+        if (!BeginCommand.canStart(gameSession, messageContext)) return;
         const guildPreference = await getGuildPreference(guildID);
         if (!gameSession.sessionInitialized) {
             let participants: Array<{
@@ -78,15 +73,12 @@ export default class BeginCommand implements BaseCommand {
 
             sendBeginGameMessage(
                 channel.name,
-                getUserVoiceChannel(MessageContext.fromMessage(message)).name,
-                message,
+                getUserVoiceChannel(messageContext).name,
+                messageContext,
                 participants
             );
 
-            gameSession.startRound(
-                guildPreference,
-                MessageContext.fromMessage(message)
-            );
+            gameSession.startRound(guildPreference, messageContext);
 
             logger.info(
                 `${getDebugLogHeader(message)} | Teams game session starting)`

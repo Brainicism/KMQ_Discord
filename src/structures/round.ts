@@ -27,7 +27,7 @@ export default abstract class Round {
     public finished: boolean;
 
     /**  The Discord ID of the end round message */
-    public endRoundMessageID: string;
+    public roundMessageID: string;
 
     /** List of players who have opted to skip the current Round */
     public skippers: Set<string>;
@@ -43,7 +43,7 @@ export default abstract class Round {
             (x) => state.aliases.artist[x] || []
         );
         this.startedAt = Date.now();
-        this.endRoundMessageID = null;
+        this.roundMessageID = null;
         this.skippers = new Set();
         this.skipAchieved = false;
     }
