@@ -217,7 +217,7 @@ describe("getFilteredSongList", () => {
 
                 assert.strictEqual(
                     Array.from(songs).every(
-                        (song) => song.publishDate > new Date("2016-01-01")
+                        (song) => song.publishDate >= new Date("2016-01-01")
                     ),
                     true
                 );
@@ -337,11 +337,8 @@ describe("subunits", () => {
     describe("include subunits (and the subunit has a collab)", () => {
         it("should match the songs from the group, collabs of that group, and collabs of any subunits of that group", async () => {
             const artistWithCollabingSubunit = { name: "BIGBANG", id: 28 };
-            // F
             const subunitWithCollab = { name: "G-DRAGON", id: 68 };
-            // F + G
             const subunitCollabArtist = { name: "G-DRAGON + TAEYANG", id: 73 };
-            // E + H
             const parentCollabArtist = { name: "BIGBANG + 2NE1", id: 29 };
 
             const expectedIds = [
@@ -452,7 +449,7 @@ describe("subunits", () => {
                     guildPreference
                 );
 
-                // every language tag has atleast one song
+                // there are no songs with language tags
                 assert.strictEqual(
                     Array.from(songs).every(
                         (song) =>
@@ -473,7 +470,7 @@ describe("subunits", () => {
                     guildPreference
                 );
 
-                // every language tag has atleast one song
+                // there is atleast one song of each language
                 assert.strictEqual(
                     FOREIGN_LANGUAGE_TAGS.every((languageTag) => {
                         return Array.from(songs).some((song) => {
