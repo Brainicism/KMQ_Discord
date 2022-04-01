@@ -636,7 +636,7 @@ export default class GameSession {
 
         const pointsEarned = this.checkGuess(
             messageContext.author.id,
-            guess,
+            guess.split("").reverse().join(""),
             guildPreference.gameOptions.guessModeType,
             guildPreference.isMultipleChoiceMode(),
             guildPreference.typosAllowed()

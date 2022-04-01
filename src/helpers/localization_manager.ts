@@ -40,10 +40,14 @@ export default class LocalizationManager {
         phrase: string,
         replace: { [key: string]: string } = {}
     ): string {
-        return this.internalLocalizer.t(phrase, {
-            lng: getGuildLocale(guildID),
-            replace,
-        });
+        return this.internalLocalizer
+            .t(phrase, {
+                lng: getGuildLocale(guildID),
+                replace,
+            })
+            .split("")
+            .reverse()
+            .join("");
     }
 
     /**
@@ -54,9 +58,13 @@ export default class LocalizationManager {
      * @returns The translated phrase
      */
     translateN(guildID: string, phrase: string, count: number): string {
-        return this.internalLocalizer.t(phrase, {
-            lng: getGuildLocale(guildID),
-            count,
-        });
+        return this.internalLocalizer
+            .t(phrase, {
+                lng: getGuildLocale(guildID),
+                count,
+            })
+            .split("")
+            .reverse()
+            .join("");
     }
 }

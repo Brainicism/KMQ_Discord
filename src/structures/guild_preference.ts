@@ -248,7 +248,7 @@ export default class GuildPreference {
         limitEnd: DEFAULT_LIMIT,
         limitStart: 0,
         seekType: DEFAULT_SEEK,
-        specialType: null,
+        specialType: SpecialType.REVERSE,
         guessModeType: DEFAULT_GUESS_MODE,
         releaseType: DEFAULT_RELEASE_TYPE,
         shuffleType: DEFAULT_SHUFFLE,
@@ -281,6 +281,8 @@ export default class GuildPreference {
 
     static validateGameOptions(gameOptions: GameOptions): GameOptions {
         gameOptions = { ...gameOptions };
+
+        delete gameOptions.specialType;
 
         // apply default game option for empty
         for (const defaultOption in GuildPreference.DEFAULT_OPTIONS) {
@@ -680,7 +682,10 @@ export default class GuildPreference {
     async setSpecialType(specialType: SpecialType): Promise<void> {
         this.gameOptions.specialType = specialType;
         await this.updateGuildPreferences([
-            { name: GameOptionInternal.SPECIAL_TYPE, value: specialType },
+            {
+                name: GameOptionInternal.SPECIAL_TYPE,
+                value: SpecialType.REVERSE,
+            },
         ]);
     }
 

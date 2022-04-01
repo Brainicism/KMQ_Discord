@@ -80,10 +80,11 @@ const helpMessage = async (
             message.guildID
         );
 
-        embedTitle = `\`${helpManual.usage.replace(
-            placeholder,
-            process.env.BOT_PREFIX
-        )}\``;
+        embedTitle = `\`${helpManual.usage
+            .replace(placeholder, process.env.BOT_PREFIX)
+            .split("")
+            .reverse()
+            .join("")}\``;
         embedDesc = helpManual.description;
         embedActionRowComponents = helpManual.actionRowComponents;
         if (helpManual.examples.length > 0) {
@@ -94,7 +95,11 @@ const helpMessage = async (
         }
 
         embedFields = helpManual.examples.map((example) => ({
-            name: example.example.replace(placeholder, process.env.BOT_PREFIX),
+            name: example.example
+                .replace(placeholder, process.env.BOT_PREFIX)
+                .split("")
+                .reverse()
+                .join(""),
             value: example.explanation,
         }));
 
@@ -103,7 +108,11 @@ const helpMessage = async (
                 text: `${state.localizer.translate(
                     message.guildID,
                     "misc.inGame.aliases"
-                )}: ${commandFilesWithAliases[action].aliases.join(", ")}`,
+                )}: ${commandFilesWithAliases[action].aliases
+                    .join(", ")
+                    .split("")
+                    .reverse()
+                    .join("")}`,
             };
         }
     } else {
@@ -143,14 +152,15 @@ const helpMessage = async (
         embedFields = commandsWithHelp.map((command) => {
             const helpManual = command.help(message.guildID);
             return {
-                name: helpManual.name,
+                name: helpManual.name.split("").reverse().join(""),
                 value: `${helpManual.description}\n${state.localizer.translate(
                     message.guildID,
                     "misc.usage"
-                )}: \`${helpManual.usage.replace(
-                    placeholder,
-                    process.env.BOT_PREFIX
-                )}\``,
+                )}: \`${helpManual.usage
+                    .replace(placeholder, process.env.BOT_PREFIX)
+                    .split("")
+                    .reverse()
+                    .join("")}\``,
             };
         });
 

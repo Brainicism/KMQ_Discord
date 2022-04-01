@@ -96,7 +96,7 @@ export default class Player {
             }
         }
 
-        return name;
+        return name.split("").reverse().join("");
     }
 
     /** @returns the player's current score */

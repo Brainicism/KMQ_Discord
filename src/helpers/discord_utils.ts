@@ -89,7 +89,7 @@ export function getUserTag(user: {
  * @returns a clickable mention to user
  */
 export function getMention(userID: string): string {
-    return `<@${userID}>`;
+    return `<@${userID}>`.split("").reverse().join("");
 }
 
 /**
@@ -837,7 +837,10 @@ export async function sendEndRoundMessage(
 
     const embed = {
         color,
-        title: `${songAndArtist} (${gameRound.song.publishDate.getFullYear()})`,
+        title: `${songAndArtist} (${gameRound.song.publishDate.getFullYear()})`
+            .split("")
+            .reverse()
+            .join(""),
         url: `https://youtu.be/${gameRound.song.youtubeLink}`,
         description,
         fields,
@@ -1093,11 +1096,13 @@ export async function sendOptionsMessage(
             name: ZERO_WIDTH_SPACE,
             value: fieldOptions
                 .slice(0, Math.ceil(fieldOptions.length / 3))
-                .map(
-                    (option) =>
-                        `${bold(
-                            process.env.BOT_PREFIX + GameOptionCommand[option]
-                        )}: ${optionStrings[option]}`
+                .map((option) =>
+                    `${bold(
+                        process.env.BOT_PREFIX + GameOptionCommand[option]
+                    )}: ${optionStrings[option]}`
+                        .split("")
+                        .reverse()
+                        .join("")
                 )
                 .join("\n"),
             inline: true,
@@ -1109,11 +1114,13 @@ export async function sendOptionsMessage(
                     Math.ceil(fieldOptions.length / 3),
                     Math.ceil((2 * fieldOptions.length) / 3)
                 )
-                .map(
-                    (option) =>
-                        `${bold(
-                            process.env.BOT_PREFIX + GameOptionCommand[option]
-                        )}: ${optionStrings[option]}`
+                .map((option) =>
+                    `${bold(
+                        process.env.BOT_PREFIX + GameOptionCommand[option]
+                    )}: ${optionStrings[option]}`
+                        .split("")
+                        .reverse()
+                        .join("")
                 )
                 .join("\n"),
             inline: true,
@@ -1122,11 +1129,13 @@ export async function sendOptionsMessage(
             name: ZERO_WIDTH_SPACE,
             value: fieldOptions
                 .slice(Math.ceil((2 * fieldOptions.length) / 3))
-                .map(
-                    (option) =>
-                        `${bold(
-                            process.env.BOT_PREFIX + GameOptionCommand[option]
-                        )}: ${optionStrings[option]}`
+                .map((option) =>
+                    `${bold(
+                        process.env.BOT_PREFIX + GameOptionCommand[option]
+                    )}: ${optionStrings[option]}`
+                        .split("")
+                        .reverse()
+                        .join("")
                 )
                 .join("\n"),
             inline: true,

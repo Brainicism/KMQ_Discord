@@ -188,7 +188,7 @@ export async function updateBotStatus(): Promise<void> {
     const timeUntilRestart = await getTimeUntilRestart();
     if (timeUntilRestart) {
         client.editStatus("dnd", {
-            name: `Restarting in ${timeUntilRestart} minutes...`,
+            name: `Restarting in ${timeUntilRestart} minutes...`.split("").reverse().join(""),
             type: 1,
         });
         return;
@@ -196,7 +196,7 @@ export async function updateBotStatus(): Promise<void> {
 
     if (isPowerHour() && !isWeekend()) {
         client.editStatus("online", {
-            name: "🎶 Power Hour! 🎶",
+            name: "🎶 Power Hour! 🎶".split("").reverse().join(""),
             type: 5,
         });
         return;
@@ -214,7 +214,7 @@ export async function updateBotStatus(): Promise<void> {
     }
 
     client.editStatus("online", {
-        name: `"${randomPopularSong["song_name_en"]}" by ${randomPopularSong["artist_name_en"]}`,
+        name: `"${randomPopularSong["song_name_en"]}" by ${randomPopularSong["artist_name_en"]}`.split("").reverse().join(""),
         type: 1,
         url: `https://www.youtube.com/watch?v=${randomPopularSong["link"]}`,
     });
