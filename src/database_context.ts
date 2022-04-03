@@ -14,18 +14,18 @@ function generateKnexContext(
     return {
         client: "mysql2",
         connection: {
-            user: process.env.DB_USER,
-            password: process.env.DB_PASS,
-            database: databaseName,
-            host: process.env.DB_HOST,
             charset: "utf8mb4",
-            port: parseInt(process.env.DB_PORT),
+            database: databaseName,
             decimalNumbers: true,
+            host: process.env.DB_HOST,
             multipleStatements: true,
+            password: process.env.DB_PASS,
+            port: parseInt(process.env.DB_PORT),
+            user: process.env.DB_USER,
         },
         pool: {
-            min: minPoolSize,
             max: maxPoolSize,
+            min: minPoolSize,
         },
     };
 }

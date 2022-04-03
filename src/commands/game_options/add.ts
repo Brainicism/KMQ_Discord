@@ -38,31 +38,37 @@ export default class AddCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
-        minArgCount: 2,
         arguments: [
             {
+                enums: Object.values(AddType),
                 name: "option",
                 type: "enum" as const,
-                enums: Object.values(AddType),
             },
         ],
+        minArgCount: 2,
     };
 
     help = (guildID: string): Help => ({
-        name: "add",
+        actionRowComponents: [
+            {
+                label: state.localizer.translate(
+                    guildID,
+                    "misc.interaction.fullGroupsList"
+                ),
+                style: 5 as const,
+                type: 2 as const,
+                url: GROUP_LIST_URL,
+            },
+        ],
         description: state.localizer.translate(
             guildID,
             "command.add.help.description",
             {
-                groups: `\`${process.env.BOT_PREFIX}groups\``,
                 exclude: `\`${process.env.BOT_PREFIX}exclude\``,
+                groups: `\`${process.env.BOT_PREFIX}groups\``,
                 include: `\`${process.env.BOT_PREFIX}include\``,
             }
         ),
-        usage: `,add [groups | exclude | include] [${state.localizer.translate(
-            guildID,
-            "misc.listOfGroups"
-        )}]`,
         examples: [
             {
                 example: "`,add groups twice, red velvet`",
@@ -82,10 +88,10 @@ export default class AddCommand implements BaseCommand {
                     guildID,
                     "command.add.help.example.exclude",
                     {
-                        groupOne: "BESTie",
-                        groupTwo: "Dia",
-                        groupThree: "IKON",
                         exclude: `\`${process.env.BOT_PREFIX}exclude\``,
+                        groupOne: "BESTie",
+                        groupThree: "IKON",
+                        groupTwo: "Dia",
                     }
                 ),
             },
@@ -101,18 +107,12 @@ export default class AddCommand implements BaseCommand {
                 ),
             },
         ],
-        actionRowComponents: [
-            {
-                style: 5 as const,
-                url: GROUP_LIST_URL,
-                type: 2 as const,
-                label: state.localizer.translate(
-                    guildID,
-                    "misc.interaction.fullGroupsList"
-                ),
-            },
-        ],
+        name: "add",
         priority: 200,
+        usage: `,add [groups | exclude | include] [${state.localizer.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]`,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
@@ -166,22 +166,22 @@ export default class AddCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "misc.failure.unrecognizedGroups.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "misc.failure.unrecognizedGroups.description",
                     {
+                        helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         matchedGroupsAction: state.localizer.translate(
                             message.guildID,
                             "misc.failure.unrecognizedGroups.added"
                         ),
-                        helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
-                        unmatchedGroups: unmatchedGroups.join(", "),
                         solution: "",
+                        unmatchedGroups: unmatchedGroups.join(", "),
                     }
+                ),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.failure.unrecognizedGroups.title"
                 ),
             });
         }
@@ -205,14 +205,14 @@ export default class AddCommand implements BaseCommand {
                 );
                 if (intersection.size > 0) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: state.localizer.translate(
-                            message.guildID,
-                            "misc.failure.groupsExcludeConflict.title"
-                        ),
                         description: state.localizer.translate(
                             message.guildID,
                             "misc.failure.groupsExcludeConflict.description",
                             {
+                                allowOrPrevent: state.localizer.translate(
+                                    message.guildID,
+                                    "misc.failure.groupsExcludeConflict.allow"
+                                ),
                                 conflictingOptionOne: `\`${process.env.BOT_PREFIX}groups\``,
                                 conflictingOptionTwo: `\`${process.env.BOT_PREFIX}exclude\``,
                                 groupsList: [...intersection]
@@ -220,11 +220,11 @@ export default class AddCommand implements BaseCommand {
                                     .join(", "),
                                 solutionStepOne: `\`${process.env.BOT_PREFIX}remove exclude\``,
                                 solutionStepTwo: `\`${process.env.BOT_PREFIX}groups\``,
-                                allowOrPrevent: state.localizer.translate(
-                                    message.guildID,
-                                    "misc.failure.groupsExcludeConflict.allow"
-                                ),
                             }
+                        ),
+                        title: state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.groupsExcludeConflict.title"
                         ),
                     });
                 }
@@ -275,10 +275,6 @@ export default class AddCommand implements BaseCommand {
                 );
                 if (intersection.size > 0) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: state.localizer.translate(
-                            message.guildID,
-                            "misc.failure.groupsExcludeConflict.title"
-                        ),
                         description: state.localizer.translate(
                             message.guildID,
                             "misc.failure.groupsExcludeConflict.description",
@@ -291,6 +287,10 @@ export default class AddCommand implements BaseCommand {
                                 solutionPartOne: `\`${process.env.BOT_PREFIX}remove groups\``,
                                 solutionPartTwo: `\`${process.env.BOT_PREFIX}add exclude\``,
                             }
+                        ),
+                        title: state.localizer.translate(
+                            message.guildID,
+                            "misc.failure.groupsExcludeConflict.title"
                         ),
                     });
                 }

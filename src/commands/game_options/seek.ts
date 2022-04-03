@@ -24,24 +24,22 @@ export default class SeekCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
-        minArgCount: 0,
-        maxArgCount: 1,
         arguments: [
             {
+                enums: Object.values(SeekType),
                 name: "seekType",
                 type: "enum" as const,
-                enums: Object.values(SeekType),
             },
         ],
+        maxArgCount: 1,
+        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
-        name: "seek",
         description: state.localizer.translate(
             guildID,
             "command.seek.help.description"
         ),
-        usage: ",seek [beginning | middle | random]",
         examples: [
             {
                 example: "`,seek random`",
@@ -75,7 +73,9 @@ export default class SeekCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "seek",
         priority: 130,
+        usage: ",seek [beginning | middle | random]",
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

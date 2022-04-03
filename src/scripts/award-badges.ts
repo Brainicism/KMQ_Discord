@@ -92,7 +92,7 @@ async function awardBadges(): Promise<void> {
 
     const playersToGiveBadge = badgesObj
         .filter((player) => !playerIDsWithBadgeAlready.has(player.id))
-        .map((player) => ({ user_id: player.id, badge_id: badgeID }));
+        .map((player) => ({ badge_id: badgeID, user_id: player.id }));
 
     await dbContext.kmq.transaction(async (tx) => {
         await dbContext

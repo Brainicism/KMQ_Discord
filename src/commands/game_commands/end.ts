@@ -15,14 +15,14 @@ export default class EndCommand implements BaseCommand {
     ];
 
     help = (guildID: string): Help => ({
-        name: "end",
         description: state.localizer.translate(
             guildID,
             "command.end.help.description"
         ),
-        usage: ",end",
         examples: [],
+        name: "end",
         priority: 1020,
+        usage: ",end",
     });
 
     call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {

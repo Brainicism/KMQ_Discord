@@ -21,7 +21,7 @@ describe("score/exp updating", () => {
             it("should increment the user's score/EXP", async () => {
                 for (let i = 0; i < 20; i++) {
                     await scoreboard.update([
-                        { userID: userIDs[0], pointsEarned: 1, expGain: 50 },
+                        { expGain: 50, pointsEarned: 1, userID: userIDs[0] },
                     ]);
 
                     assert.strictEqual(
@@ -50,14 +50,14 @@ describe("score/exp updating", () => {
             it("should increment each user's score", async () => {
                 for (let i = 0; i < 20; i++) {
                     await scoreboard.update([
-                        { userID: userIDs[0], pointsEarned: 1, expGain: 50 },
+                        { expGain: 50, pointsEarned: 1, userID: userIDs[0] },
                     ]);
                     if (i % 2 === 0) {
                         await scoreboard.update([
                             {
-                                userID: userIDs[1],
-                                pointsEarned: 1,
                                 expGain: 50,
+                                pointsEarned: 1,
+                                userID: userIDs[1],
                             },
                         ]);
                     }
@@ -89,8 +89,8 @@ describe("score/exp updating", () => {
     describe("multiguess", () => {
         it("should increment the score and EXP of every player", async () => {
             await scoreboard.update([
-                { userID: userIDs[0], pointsEarned: 1, expGain: 50 },
-                { userID: userIDs[1], pointsEarned: 1, expGain: 25 },
+                { expGain: 50, pointsEarned: 1, userID: userIDs[0] },
+                { expGain: 25, pointsEarned: 1, userID: userIDs[1] },
             ]);
             assert.strictEqual(scoreboard.getPlayerScore(userIDs[0]), 1);
             assert.strictEqual(scoreboard.getPlayerScore(userIDs[1]), 1);
@@ -102,9 +102,9 @@ describe("score/exp updating", () => {
     describe("position changes", () => {
         it("should return the correct ranking of every player", async () => {
             const players = {
-                ohmiID: new Player("", "ohmiID", "", 2),
                 12345: new Player("", "12345", "", 2),
                 jisooID: new Player("", "jisooID", "", 3),
+                ohmiID: new Player("", "ohmiID", "", 2),
             };
 
             const sb = new Scoreboard();
@@ -132,9 +132,9 @@ describe("score/exp updating", () => {
 
         it("should return the same ranking when all players have the same score", async () => {
             const players = {
-                ohmiID: new Player("", "ohmiID", "", 2),
                 12345: new Player("", "12345", "", 2),
                 jisooID: new Player("", "jisooID", "", 2),
+                ohmiID: new Player("", "ohmiID", "", 2),
             };
 
             const sb = new Scoreboard();
@@ -147,9 +147,9 @@ describe("score/exp updating", () => {
 
         it("should return different rankings when all players have different scores", async () => {
             const players = {
-                ohmiID: new Player("", "ohmiID", "", 1),
                 12345: new Player("", "12345", "", 2),
                 jisooID: new Player("", "jisooID", "", 3),
+                ohmiID: new Player("", "ohmiID", "", 1),
             };
 
             const sb = new Scoreboard();
@@ -244,7 +244,7 @@ describe("winner detection", () => {
     describe("single player, has score", () => {
         const userID = "12345";
         it("should return the single player", async () => {
-            await scoreboard.update([{ userID, pointsEarned: 10, expGain: 0 }]);
+            await scoreboard.update([{ expGain: 0, pointsEarned: 10, userID }]);
             assert.strictEqual(scoreboard.getWinners().length, 1);
             assert.strictEqual(scoreboard.getWinners()[0].id, userID);
         });
@@ -253,11 +253,11 @@ describe("winner detection", () => {
     describe("multiple players, has different scores", () => {
         it("should return the player with most points", async () => {
             await scoreboard.update([
-                { userID: userIDs[0], pointsEarned: 10, expGain: 0 },
+                { expGain: 0, pointsEarned: 10, userID: userIDs[0] },
             ]);
 
             await scoreboard.update([
-                { userID: userIDs[1], pointsEarned: 15, expGain: 0 },
+                { expGain: 0, pointsEarned: 15, userID: userIDs[1] },
             ]);
             assert.strictEqual(scoreboard.getWinners().length, 1);
             assert.strictEqual(scoreboard.getWinners()[0].id, userIDs[1]);
@@ -267,15 +267,15 @@ describe("winner detection", () => {
     describe("multiple players, tied score", () => {
         it("should return the two tied players", async () => {
             await scoreboard.update([
-                { userID: userIDs[0], pointsEarned: 5, expGain: 0 },
+                { expGain: 0, pointsEarned: 5, userID: userIDs[0] },
             ]);
 
             await scoreboard.update([
-                { userID: userIDs[1], pointsEarned: 7, expGain: 0 },
+                { expGain: 0, pointsEarned: 7, userID: userIDs[1] },
             ]);
 
             await scoreboard.update([
-                { userID: userIDs[2], pointsEarned: 7, expGain: 0 },
+                { expGain: 0, pointsEarned: 7, userID: userIDs[2] },
             ]);
             assert.strictEqual(scoreboard.getWinners().length, 2);
             assert.deepStrictEqual(
@@ -312,11 +312,11 @@ describe("game finished", () => {
         describe("first place is not equal/above the goal", () => {
             it("should return false", async () => {
                 await scoreboard.update([
-                    { userID: userIDs[0], pointsEarned: 2, expGain: 0 },
+                    { expGain: 0, pointsEarned: 2, userID: userIDs[0] },
                 ]);
 
                 await scoreboard.update([
-                    { userID: userIDs[1], pointsEarned: 4, expGain: 0 },
+                    { expGain: 0, pointsEarned: 4, userID: userIDs[1] },
                 ]);
 
                 assert.strictEqual(
@@ -329,11 +329,11 @@ describe("game finished", () => {
         describe("first place is equal/above the goal", () => {
             it("should return true", async () => {
                 await scoreboard.update([
-                    { userID: userIDs[0], pointsEarned: 5, expGain: 0 },
+                    { expGain: 0, pointsEarned: 5, userID: userIDs[0] },
                 ]);
 
                 await scoreboard.update([
-                    { userID: userIDs[1], pointsEarned: 4, expGain: 0 },
+                    { expGain: 0, pointsEarned: 4, userID: userIDs[1] },
                 ]);
 
                 assert.strictEqual(

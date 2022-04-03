@@ -23,25 +23,23 @@ export default class MultiGuessCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
-        minArgCount: 0,
-        maxArgCount: 1,
         arguments: [
             {
+                enums: Object.values(MultiGuessType),
                 name: "multiguess_type",
                 type: "enum" as const,
-                enums: Object.values(MultiGuessType),
             },
         ],
+        maxArgCount: 1,
+        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
-        name: "multiguess",
         description: state.localizer.translate(
             guildID,
             "command.multiguess.help.description",
             { on: `\`${MultiGuessType.ON}\`` }
         ),
-        usage: ",multiguess [on | off]",
         examples: [
             {
                 example: "`,multiguess on`",
@@ -66,7 +64,9 @@ export default class MultiGuessCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "multiguess",
         priority: 150,
+        usage: ",multiguess [on | off]",
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

@@ -7,7 +7,8 @@
         "jsdoc",
         "only-warn",
         "import",
-        "simple-import-sort"
+        "simple-import-sort",
+        "sort-keys-fix"
     ],
     "parserOptions": {
         "project": "./tsconfig.json"
@@ -137,10 +138,11 @@
         "quote-props": [
             "off"
         ],
-        "simple-import-sort/imports": "error",
-        "simple-import-sort/exports": "error",
+        "sort-keys-fix/sort-keys-fix": ["warn"],
+        "simple-import-sort/imports": ["warn"],
+        "simple-import-sort/exports": ["warn"],
         "padding-line-between-statements": [
-            "error",
+            "warn",
             {
                 "blankLine": "always",
                 "prev": "block-like",

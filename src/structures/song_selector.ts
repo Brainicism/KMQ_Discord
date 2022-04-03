@@ -49,15 +49,15 @@ export default class SongSelector {
         );
 
         return {
-            uniqueSongsPlayed:
-                this.uniqueSongsPlayed.size -
-                setDifference([...this.uniqueSongsPlayed], [...filteredSongs])
-                    .size,
             totalSongs: Math.min(
                 this.filteredSongs.countBeforeLimit,
                 guildPreference.gameOptions.limitEnd -
                     guildPreference.gameOptions.limitStart
             ),
+            uniqueSongsPlayed:
+                this.uniqueSongsPlayed.size -
+                setDifference([...this.uniqueSongsPlayed], [...filteredSongs])
+                    .size,
         };
     }
 
@@ -263,8 +263,8 @@ export default class SongSelector {
                 guildPreference.gameOptions.forcePlaySongID
             );
             return {
-                songs: new Set(await queryBuilder),
                 countBeforeLimit: 1,
+                songs: new Set(await queryBuilder),
             };
         }
 
@@ -401,8 +401,8 @@ export default class SongSelector {
         const count = result.length;
         result = result.slice(gameOptions.limitStart, gameOptions.limitEnd);
         return {
-            songs: new Set(result),
             countBeforeLimit: count,
+            songs: new Set(result),
         };
     }
 }

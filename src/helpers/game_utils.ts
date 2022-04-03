@@ -108,7 +108,7 @@ export async function getGuildPreference(
         await dbContext
             .kmq("game_options")
             .select("*")
-            .where({ guild_id: guildID, client_id: process.env.BOT_CLIENT_ID })
+            .where({ client_id: process.env.BOT_CLIENT_ID, guild_id: guildID })
     )
         .map((x) => ({ [x["option_name"]]: JSON.parse(x["option_value"]) }))
         .reduce((total, curr) => Object.assign(total, curr), {});
@@ -175,8 +175,8 @@ export async function getMatchingGroupNames(
     );
 
     const result: GroupMatchResults = {
-        unmatchedGroups: unrecognizedGroups,
         matchedGroups: matchingGroups,
+        unmatchedGroups: unrecognizedGroups,
     };
 
     if (result.unmatchedGroups.length > 0 && !aliasApplied) {

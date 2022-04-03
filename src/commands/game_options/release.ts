@@ -25,24 +25,22 @@ export default class ReleaseCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
-        minArgCount: 0,
-        maxArgCount: 1,
         arguments: [
             {
+                enums: Object.values(ReleaseType),
                 name: "release",
                 type: "enum" as const,
-                enums: Object.values(ReleaseType),
             },
         ],
+        maxArgCount: 1,
+        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
-        name: "release",
         description: state.localizer.translate(
             guildID,
             "command.release.help.description"
         ),
-        usage: ",release [official | all]",
         examples: [
             {
                 example: "`,release official`",
@@ -68,7 +66,9 @@ export default class ReleaseCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "release",
         priority: 130,
+        usage: ",release [official | all]",
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

@@ -60,17 +60,17 @@ const downloadDb = async (): Promise<void> => {
     const mvOutput = `${databaseDownloadDir}/mv-download.zip`;
     const audioOutput = `${databaseDownloadDir}/audio-download.zip`;
     const mvResp = await Axios.get(mvFileUrl, {
-        responseType: "arraybuffer",
         headers: {
             "User-Agent": "KMQ (K-pop Music Quiz)",
         },
+        responseType: "arraybuffer",
     });
 
     const audioResp = await Axios.get(audioFileUrl, {
-        responseType: "arraybuffer",
         headers: {
             "User-Agent": "KMQ (K-pop Music Quiz)",
         },
+        responseType: "arraybuffer",
     });
 
     await fs.promises.writeFile(mvOutput, mvResp.data, { encoding: null });

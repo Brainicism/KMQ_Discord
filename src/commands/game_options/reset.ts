@@ -17,18 +17,16 @@ export default class ResetCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
-        minArgCount: 0,
-        maxArgCount: 0,
         arguments: [],
+        maxArgCount: 0,
+        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
-        name: "reset",
         description: state.localizer.translate(
             guildID,
             "command.reset.help.description"
         ),
-        usage: ",reset",
         examples: [
             {
                 example: "`,reset`",
@@ -38,7 +36,9 @@ export default class ResetCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "reset",
         priority: 130,
+        usage: ",reset",
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {

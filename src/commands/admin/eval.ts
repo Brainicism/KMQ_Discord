@@ -28,8 +28,8 @@ export default class EvalCommand implements BaseCommand {
         }));
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: evalString,
             fields: clusterResultFields,
+            title: evalString,
         });
     };
 

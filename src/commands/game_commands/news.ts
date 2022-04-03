@@ -18,14 +18,14 @@ export default class NewsCommand implements BaseCommand {
     aliases = ["updates"];
 
     help = (guildID: string): Help => ({
-        name: "news",
         description: state.localizer.translate(
             guildID,
             "command.news.help.description"
         ),
-        usage: ",news",
         examples: [],
+        name: "news",
         priority: 10,
+        usage: ",news",
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
@@ -38,13 +38,13 @@ export default class NewsCommand implements BaseCommand {
         const news = fs.readFileSync(newsFilePath).toString();
 
         await sendInfoMessage(MessageContext.fromMessage(message), {
+            description: news,
+            footerText: getKmqCurrentVersion(),
+            thumbnailUrl: KmqImages.READING_BOOK,
             title: state.localizer.translate(
                 message.guildID,
                 "command.news.updates.title"
             ),
-            description: news,
-            thumbnailUrl: KmqImages.READING_BOOK,
-            footerText: getKmqCurrentVersion(),
         });
 
         logger.info(`${getDebugLogHeader(message)} | News retrieved.`);

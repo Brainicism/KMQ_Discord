@@ -243,29 +243,29 @@ export default class GuildPreference {
     };
 
     static DEFAULT_OPTIONS = {
+        answerType: DEFAULT_ANSWER_TYPE,
+        artistType: DEFAULT_ARTIST_TYPE,
         beginningYear: DEFAULT_BEGINNING_SEARCH_YEAR,
+        duration: null,
         endYear: DEFAULT_ENDING_SEARCH_YEAR,
+        excludes: null,
+        forcePlaySongID: null,
         gender: DEFAULT_GENDER,
+        goal: null,
+        groups: null,
+        guessModeType: DEFAULT_GUESS_MODE,
+        guessTimeout: null,
+        includes: null,
+        languageType: DEFAULT_LANGUAGE,
         limitEnd: DEFAULT_LIMIT,
         limitStart: 0,
-        seekType: DEFAULT_SEEK,
-        specialType: null,
-        guessModeType: DEFAULT_GUESS_MODE,
-        releaseType: DEFAULT_RELEASE_TYPE,
-        shuffleType: DEFAULT_SHUFFLE,
-        groups: null,
-        excludes: null,
-        includes: null,
-        goal: null,
-        guessTimeout: null,
-        duration: null,
-        artistType: DEFAULT_ARTIST_TYPE,
-        answerType: DEFAULT_ANSWER_TYPE,
-        languageType: DEFAULT_LANGUAGE,
         multiGuessType: DEFAULT_MULTIGUESS_TYPE,
-        subunitPreference: DEFAULT_SUBUNIT_PREFERENCE,
         ostPreference: DEFAULT_OST_PREFERENCE,
-        forcePlaySongID: null,
+        releaseType: DEFAULT_RELEASE_TYPE,
+        seekType: DEFAULT_SEEK,
+        shuffleType: DEFAULT_SHUFFLE,
+        specialType: null,
+        subunitPreference: DEFAULT_SUBUNIT_PREFERENCE,
     };
 
     public gameOptions: GameOptions;
@@ -366,17 +366,17 @@ export default class GuildPreference {
             const presetOptions = Object.entries(this.gameOptions).map(
                 (option) => ({
                     guild_id: this.guildID,
-                    preset_name: presetName,
                     option_name: option[0],
                     option_value: JSON.stringify(option[1]),
+                    preset_name: presetName,
                 })
             );
 
             presetOptions.push({
                 guild_id: this.guildID,
-                preset_name: presetName,
                 option_name: "uuid",
                 option_value: JSON.stringify(oldUUID ?? `KMQ-${uuid.v4()}`),
+                preset_name: presetName,
             });
 
             await dbContext.kmq.transaction(async (trx) => {
@@ -885,8 +885,8 @@ export default class GuildPreference {
     ): Promise<void> {
         const updatedOptions = Object.values(updatedOptionsObjects).map(
             (option) => ({
-                guild_id: this.guildID,
                 client_id: process.env.BOT_CLIENT_ID,
+                guild_id: this.guildID,
                 option_name: option.name,
                 option_value: JSON.stringify(option.value),
             })

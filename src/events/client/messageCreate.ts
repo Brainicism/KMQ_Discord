@@ -29,8 +29,8 @@ const parseMessage = (message: string): ParsedMessage => {
     return {
         action,
         argument,
-        message,
         components,
+        message,
     };
 };
 
@@ -97,9 +97,9 @@ export default async function messageCreateHandler(
                 for (const precheck of invokedCommand.preRunChecks) {
                     if (
                         !(await precheck.checkFn({
-                            message,
-                            gameSession,
                             errorMessage: precheck.errorMessage,
+                            gameSession,
+                            message,
                         }))
                     ) {
                         return;
@@ -115,8 +115,8 @@ export default async function messageCreateHandler(
 
             try {
                 await invokedCommand.call({
-                    gameSessions,
                     channel: textChannel,
+                    gameSessions,
                     message,
                     parsedMessage,
                 });
@@ -133,14 +133,14 @@ export default async function messageCreateHandler(
                 }
 
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
-                        message.guildID,
-                        "misc.failure.command.title"
-                    ),
                     description: state.localizer.translate(
                         message.guildID,
                         "misc.failure.command.description",
                         { debugId }
+                    ),
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "misc.failure.command.title"
                     ),
                 });
             }

@@ -27,10 +27,9 @@ export default async function guildDeleteHandler(
     if (guild instanceof Eris.Guild) {
         await sendInfoMessage(new MessageContext(kmqDebugChannel.id), {
             author: {
-                username: guild.name,
                 avatarUrl: guild.iconURL,
+                username: guild.name,
             },
-            title,
             fields: [
                 {
                     name: "**Member Count**:",
@@ -43,11 +42,12 @@ export default async function guildDeleteHandler(
                 },
             ],
             footerText,
+            title,
         });
     } else {
         await sendInfoMessage(new MessageContext(kmqDebugChannel.id), {
-            title,
             footerText,
+            title,
         });
     }
 }

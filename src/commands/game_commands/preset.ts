@@ -37,32 +37,24 @@ export default class PresetCommand implements BaseCommand {
     aliases = ["presets"];
 
     validations = {
-        minArgCount: 0,
-        maxArgCount: 3,
         arguments: [
             {
+                enums: Object.values(PresetAction),
                 name: "option",
                 type: "enum" as const,
-                enums: Object.values(PresetAction),
             },
         ],
+        maxArgCount: 3,
+        minArgCount: 0,
     };
 
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     help = (guildID: string): Help => ({
-        name: "preset",
         description: state.localizer.translate(
             guildID,
             "command.preset.help.description"
         ),
-        usage: `,preset [list | save | load | delete | export] {preset_name}\n,preset import [${state.localizer.translate(
-            guildID,
-            "command.preset.help.usage.presetIdentifier"
-        )}] [${state.localizer.translate(
-            guildID,
-            "command.preset.help.usage.presetName"
-        )}]`,
         examples: [
             {
                 example: "`,preset list`",
@@ -116,7 +108,15 @@ export default class PresetCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "preset",
         priority: 200,
+        usage: `,preset [list | save | load | delete | export] {preset_name}\n,preset import [${state.localizer.translate(
+            guildID,
+            "command.preset.help.usage.presetIdentifier"
+        )}] [${state.localizer.translate(
+            guildID,
+            "command.preset.help.usage.presetName"
+        )}]`,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
@@ -132,15 +132,15 @@ export default class PresetCommand implements BaseCommand {
 
         const missingPresetMessage = (): void => {
             sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "command.preset.failure.missingName.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "command.preset.failure.missingName.description"
                 ),
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.preset.failure.missingName.title"
+                ),
             });
 
             logger.warn(
@@ -198,10 +198,6 @@ export default class PresetCommand implements BaseCommand {
                 const presetUUID = parsedMessage.components[1];
                 if (!presetUUID) {
                     sendErrorMessage(messageContext, {
-                        title: state.localizer.translate(
-                            message.guildID,
-                            "command.preset.failure.missingIdentifier.title"
-                        ),
                         description: state.localizer.translate(
                             message.guildID,
                             "command.preset.failure.missingIdentifier.description",
@@ -210,6 +206,10 @@ export default class PresetCommand implements BaseCommand {
                             }
                         ),
                         thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                        title: state.localizer.translate(
+                            message.guildID,
+                            "command.preset.failure.missingIdentifier.title"
+                        ),
                     });
 
                     logger.warn(
@@ -252,14 +252,14 @@ export default class PresetCommand implements BaseCommand {
             );
 
             await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.noSuchPreset.title"
-                ),
                 description: state.localizer.translate(
                     messageContext.guildID,
                     "command.preset.failure.noSuchPreset.description",
                     { presetName: `\`${presetName}\`` }
+                ),
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "command.preset.failure.noSuchPreset.title"
                 ),
             });
             return;
@@ -272,16 +272,16 @@ export default class PresetCommand implements BaseCommand {
         );
 
         await sendInfoMessage(messageContext, {
-            title: state.localizer.translate(
-                messageContext.guildID,
-                "command.preset.deleted.title"
-            ),
             description: state.localizer.translate(
                 messageContext.guildID,
                 "command.preset.deleted.description",
                 { presetName: `\`${presetName}\`` }
             ),
             thumbnailUrl: KmqImages.NOT_IMPRESSED,
+            title: state.localizer.translate(
+                messageContext.guildID,
+                "command.preset.deleted.title"
+            ),
         });
     }
 
@@ -309,14 +309,14 @@ export default class PresetCommand implements BaseCommand {
                 );
 
                 await sendErrorMessage(messageContext, {
-                    title: state.localizer.translate(
-                        messageContext.guildID,
-                        "command.preset.failure.noSuchPreset.title"
-                    ),
                     description: state.localizer.translate(
                         messageContext.guildID,
                         "command.preset.failure.noSuchPreset.identifier.description",
                         { presetUUID: `\`${presetUUID}\`` }
+                    ),
+                    title: state.localizer.translate(
+                        messageContext.guildID,
+                        "command.preset.failure.noSuchPreset.title"
                     ),
                 });
                 return;
@@ -355,14 +355,14 @@ export default class PresetCommand implements BaseCommand {
             );
 
             await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.noSuchPreset.title"
-                ),
                 description: state.localizer.translate(
                     messageContext.guildID,
                     "command.preset.failure.noSuchPreset.description",
                     { presetName: `\`${presetName}\`` }
+                ),
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "command.preset.failure.noSuchPreset.title"
                 ),
             });
         }
@@ -382,14 +382,14 @@ export default class PresetCommand implements BaseCommand {
             );
 
             await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.tooMany.title"
-                ),
                 description: state.localizer.translate(
                     messageContext.guildID,
                     "command.preset.failure.tooMany.description",
                     { maxNumPresets: String(MAX_NUM_PRESETS) }
+                ),
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "command.preset.failure.tooMany.title"
                 ),
             });
             return;
@@ -403,14 +403,14 @@ export default class PresetCommand implements BaseCommand {
             );
 
             await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.lengthyName.title"
-                ),
                 description: state.localizer.translate(
                     messageContext.guildID,
                     "command.preset.failure.lengthyName.description",
                     { presetNameMaxLength: String(PRESET_NAME_MAX_LENGTH) }
+                ),
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "command.preset.failure.lengthyName.title"
                 ),
             });
             return;
@@ -424,14 +424,14 @@ export default class PresetCommand implements BaseCommand {
             );
 
             await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.illegalPrefix.title"
-                ),
                 description: state.localizer.translate(
                     messageContext.guildID,
                     "command.preset.failure.illegalPrefix.description",
                     { importPrefix: "`KMQ-`" }
+                ),
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "command.preset.failure.illegalPrefix.title"
                 ),
             });
             return;
@@ -446,10 +446,6 @@ export default class PresetCommand implements BaseCommand {
             );
 
             await sendInfoMessage(messageContext, {
-                title: state.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.saved.title"
-                ),
                 description: state.localizer.translate(
                     messageContext.guildID,
                     "command.preset.savedOrReplaced.description",
@@ -458,6 +454,10 @@ export default class PresetCommand implements BaseCommand {
                     }
                 ),
                 thumbnailUrl: KmqImages.HAPPY,
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "command.preset.saved.title"
+                ),
             });
         } else {
             logger.warn(
@@ -467,20 +467,20 @@ export default class PresetCommand implements BaseCommand {
             );
 
             await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.alreadyExists.title"
-                ),
                 description: state.localizer.translate(
                     messageContext.guildID,
                     "command.preset.failure.alreadyExists.description",
                     {
-                        presetNameFormatted: `\`${presetName}\``,
                         presetDelete: `${process.env.BOT_PREFIX}preset delete`,
                         presetName,
+                        presetNameFormatted: `\`${presetName}\``,
                     }
                 ),
                 thumbnailUrl: KmqImages.DEAD,
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "command.preset.failure.alreadyExists.title"
+                ),
             });
         }
     }
@@ -507,10 +507,6 @@ export default class PresetCommand implements BaseCommand {
         );
 
         await sendInfoMessage(messageContext, {
-            title: state.localizer.translate(
-                messageContext.guildID,
-                "command.preset.replaced.title"
-            ),
             description: state.localizer.translate(
                 messageContext.guildID,
                 "command.preset.savedOrReplaced.description",
@@ -519,6 +515,10 @@ export default class PresetCommand implements BaseCommand {
                 }
             ),
             thumbnailUrl: KmqImages.HAPPY,
+            title: state.localizer.translate(
+                messageContext.guildID,
+                "command.preset.replaced.title"
+            ),
         });
     }
 
@@ -536,16 +536,16 @@ export default class PresetCommand implements BaseCommand {
             );
 
             await sendInfoMessage(messageContext, {
-                title: state.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.noSuchPreset.title"
-                ),
                 description: state.localizer.translate(
                     messageContext.guildID,
                     "command.preset.failure.noSuchPreset.description",
                     { presetName: `\`${presetName}\`` }
                 ),
                 thumbnailUrl: KmqImages.DEAD,
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "command.preset.failure.noSuchPreset.title"
+                ),
             });
             return;
         }
@@ -557,21 +557,21 @@ export default class PresetCommand implements BaseCommand {
         );
 
         await sendInfoMessage(messageContext, {
-            title: state.localizer.translate(
-                messageContext.guildID,
-                "command.preset.exported.title"
-            ),
             description: state.localizer.translate(
                 messageContext.guildID,
                 "command.preset.exported.description",
                 {
-                    presetName: `\`${presetName}\``,
                     presetImport: `${process.env.BOT_PREFIX}preset import`,
-                    presetUUID,
                     presetLoad: `${process.env.BOT_PREFIX}preset load`,
+                    presetName: `\`${presetName}\``,
+                    presetUUID,
                 }
             ),
             thumbnailUrl: KmqImages.THUMBS_UP,
+            title: state.localizer.translate(
+                messageContext.guildID,
+                "command.preset.exported.title"
+            ),
         });
     }
 
@@ -589,20 +589,20 @@ export default class PresetCommand implements BaseCommand {
             );
 
             sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.alreadyExists.title"
-                ),
                 description: state.localizer.translate(
                     messageContext.guildID,
                     "command.preset.failure.alreadyExists.description",
                     {
-                        presetNameFormatted: `\`${presetName}\``,
                         presetDelete: `${process.env.BOT_PREFIX}preset delete`,
                         presetName,
+                        presetNameFormatted: `\`${presetName}\``,
                     }
                 ),
                 thumbnailUrl: KmqImages.DEAD,
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "command.preset.failure.alreadyExists.title"
+                ),
             });
             return;
         }
@@ -622,14 +622,14 @@ export default class PresetCommand implements BaseCommand {
             );
 
             await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
-                    messageContext.guildID,
-                    "command.preset.failure.noSuchPreset.title"
-                ),
                 description: state.localizer.translate(
                     messageContext.guildID,
                     "command.preset.failure.noSuchPreset.identifer.description",
                     { presetUUID: `\`${presetUUID}\`` }
+                ),
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "command.preset.failure.noSuchPreset.title"
                 ),
             });
             return;
@@ -646,16 +646,16 @@ export default class PresetCommand implements BaseCommand {
                 .filter((option) => option["option_name"] !== "uuid")
                 .map((option) => ({
                     guild_id: messageContext.guildID,
-                    preset_name: presetName,
                     option_name: option["option_name"],
                     option_value: option["option_value"],
+                    preset_name: presetName,
                 }));
 
             preset.push({
                 guild_id: messageContext.guildID,
-                preset_name: presetName,
                 option_name: "uuid",
                 option_value: JSON.stringify(`KMQ-${uuid.v4()}`),
+                preset_name: presetName,
             });
 
             await dbContext
@@ -673,10 +673,6 @@ export default class PresetCommand implements BaseCommand {
         );
 
         sendInfoMessage(messageContext, {
-            title: state.localizer.translate(
-                messageContext.guildID,
-                "command.preset.imported.title"
-            ),
             description: state.localizer.translate(
                 messageContext.guildID,
                 "command.preset.imported.description",
@@ -686,6 +682,10 @@ export default class PresetCommand implements BaseCommand {
                 }
             ),
             thumbnailUrl: KmqImages.THUMBS_UP,
+            title: state.localizer.translate(
+                messageContext.guildID,
+                "command.preset.imported.title"
+            ),
         });
     }
 
@@ -695,10 +695,6 @@ export default class PresetCommand implements BaseCommand {
     ): Promise<void> {
         const presets = await guildPreference.listPresets();
         sendInfoMessage(messageContext, {
-            title: state.localizer.translate(
-                messageContext.guildID,
-                "command.preset.list.title"
-            ),
             description:
                 presets.length > 0
                     ? presets.join("\n")
@@ -717,6 +713,10 @@ export default class PresetCommand implements BaseCommand {
                           { presetLoad: `${process.env.BOT_PREFIX}preset load` }
                       )
                     : null,
+            title: state.localizer.translate(
+                messageContext.guildID,
+                "command.preset.list.title"
+            ),
         });
 
         logger.info(

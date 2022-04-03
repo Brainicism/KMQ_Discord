@@ -21,12 +21,12 @@ export async function sendValidationErrorMessage(
     usage?: string
 ): Promise<void> {
     await sendErrorMessage(MessageContext.fromMessage(message), {
+        description: warning,
+        footerText: usage,
         title: state.localizer.translate(
             message.guildID,
             "misc.failure.validation.title"
         ),
-        description: warning,
-        footerText: usage,
     });
     logger.warn(`${getDebugLogHeader(message)} | ${warning}. val = ${arg}`);
 }
@@ -49,8 +49,8 @@ export default (
                 message.guildID,
                 "misc.failure.validation.numArguments.incorrect",
                 {
-                    help: `${process.env.BOT_PREFIX}help`,
                     command: parsedMessage.action,
+                    help: `${process.env.BOT_PREFIX}help`,
                 }
             ),
             args,
@@ -89,8 +89,8 @@ export default (
                             message.guildID,
                             "misc.failure.validation.number.min",
                             {
-                                min: `\`${validation.minValue}\``,
                                 argument: `\`${validation.name}\``,
+                                min: `\`${validation.minValue}\``,
                             }
                         ),
                         arg,
@@ -106,8 +106,8 @@ export default (
                             message.guildID,
                             "misc.failure.validation.number.max",
                             {
-                                max: `\`${validation.maxValue}\``,
                                 argument: `\`${validation.name}\``,
+                                max: `\`${validation.maxValue}\``,
                             }
                         ),
                         arg,

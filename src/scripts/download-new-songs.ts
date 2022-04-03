@@ -140,8 +140,8 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
                 await db
                     .kmq("dead_links")
                     .insert({
-                        vlink: id,
                         reason: `Failed to load video: error = ${playabilityStatus.reason}`,
+                        vlink: id,
                     })
                     .onConflict("vlink")
                     .ignore();
@@ -162,8 +162,8 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
             await db
                 .kmq("dead_links")
                 .insert({
-                    vlink: id,
                     reason: `Failed to retrieve video metadata. error = ${e}`,
+                    vlink: id,
                 })
                 .onConflict("vlink")
                 .ignore();
@@ -183,7 +183,7 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
 
                 await db
                     .kmq("cached_song_duration")
-                    .insert({ vlink: id, duration })
+                    .insert({ duration, vlink: id })
                     .onConflict(["vlink"])
                     .merge();
                 resolve();

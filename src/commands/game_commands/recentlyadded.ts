@@ -31,12 +31,10 @@ export default class RecentlyAddedCommand implements BaseCommand {
     aliases = ["recent"];
 
     help = (guildID: string): Help => ({
-        name: "recentlyadded",
         description: state.localizer.translate(
             guildID,
             "command.recentlyadded.help.description"
         ),
-        usage: ",recentlyadded",
         examples: [
             {
                 example: "`,recentlyadded`",
@@ -46,7 +44,9 @@ export default class RecentlyAddedCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "recentlyadded",
         priority: 30,
+        usage: ",recentlyadded",
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
@@ -72,21 +72,22 @@ export default class RecentlyAddedCommand implements BaseCommand {
 
         if (newSongs.length === 0) {
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "command.recentlyadded.failure.noSongs.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "command.recentlyadded.failure.noSongs.description"
                 ),
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.recentlyadded.failure.noSongs.title"
+                ),
             });
             return;
         }
 
         const locale = getGuildLocale(message.guildID);
         const fields = newSongs.map((song) => ({
+            inline: true,
             name: `"${getLocalizedSongName(
                 song,
                 locale
@@ -102,21 +103,20 @@ export default class RecentlyAddedCommand implements BaseCommand {
                 message.guildID,
                 "misc.views"
             )}](https://youtu.be/${song.youtubeLink})`,
-            inline: true,
         }));
 
         const embedFieldSubsets = chunkArray(fields, FIELDS_PER_EMBED);
         const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
             (embedFieldsSubset) => ({
-                title: state.localizer.translate(
-                    message.guildID,
-                    "command.recentlyadded.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "command.recentlyadded.description"
                 ),
                 fields: embedFieldsSubset,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.recentlyadded.title"
+                ),
             })
         );
 

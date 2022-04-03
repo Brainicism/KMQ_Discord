@@ -84,6 +84,7 @@
         "eslint-plugin-jsdoc": "^37.7.1",
         "eslint-plugin-only-warn": "^1.0.3",
         "eslint-plugin-simple-import-sort": "^7.0.0",
+        "eslint-plugin-sort-keys-fix": "^1.1.2",
         "eslint-plugin-tsdoc": "^0.2.14",
         "prettier": "2.5.1",
         "typescript": "~4.5.5"

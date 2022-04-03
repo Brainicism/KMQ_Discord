@@ -24,14 +24,14 @@ export default class ForceHintCommand implements BaseCommand {
     ];
 
     help = (guildID: string): Help => ({
-        name: "forcehint",
         description: state.localizer.translate(
             guildID,
             "command.forcehint.help.description"
         ),
-        usage: ",forcehint",
         examples: [],
+        name: "forcehint",
         priority: 1009,
+        usage: ",forcehint",
     });
 
     call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
@@ -43,14 +43,14 @@ export default class ForceHintCommand implements BaseCommand {
             return;
         if (message.author.id !== gameSession.owner.id) {
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "command.forcehint.failure.notOwner.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "command.forcehint.failure.notOwner.description",
                     { mentionedUser: getMention(gameSession.owner.id) }
+                ),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.forcehint.failure.notOwner.title"
                 ),
             });
             return;
@@ -59,16 +59,16 @@ export default class ForceHintCommand implements BaseCommand {
         gameRound.hintRequested(message.author.id);
         gameRound.hintUsed = true;
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
-                message.guildID,
-                "command.hint.title"
-            ),
             description: generateHint(
                 message.guildID,
                 guildPreference.gameOptions.guessModeType,
                 gameRound
             ),
             thumbnailUrl: KmqImages.READING_BOOK,
+            title: state.localizer.translate(
+                message.guildID,
+                "command.hint.title"
+            ),
         });
         logger.info(`${getDebugLogHeader(message)} | Owner force-hinted.`);
     };

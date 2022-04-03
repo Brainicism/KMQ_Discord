@@ -39,25 +39,23 @@ const getDaisukiLink = (id: string, isMV: boolean): string => {
 export default class LookupCommand implements BaseCommand {
     aliases = ["songinfo", "songlookup"];
     validations = {
-        minArgCount: 1,
-        maxArgCount: 1,
         arguments: [],
+        maxArgCount: 1,
+        minArgCount: 1,
     };
 
     help = (guildID: string): Help => ({
-        name: "lookup",
         description: state.localizer.translate(
             guildID,
             "command.lookup.help.description"
         ),
-        usage: ",lookup [youtube_id]",
         examples: [
             {
                 example: "`,lookup IHNzOHi8sJs`",
                 explanation: state.localizer.translate(
                     guildID,
                     "command.lookup.help.example.song",
-                    { song: "Ddu-du Ddu-du", artist: "Blackpink" }
+                    { artist: "Blackpink", song: "Ddu-du Ddu-du" }
                 ),
             },
             {
@@ -66,11 +64,13 @@ export default class LookupCommand implements BaseCommand {
                 explanation: state.localizer.translate(
                     guildID,
                     "command.lookup.help.example.song",
-                    { song: "Next Level", artist: "Aespa" }
+                    { artist: "Aespa", song: "Next Level" }
                 ),
             },
         ],
+        name: "lookup",
         priority: 40,
+        usage: ",lookup [youtube_id]",
     });
 
     call = async ({ parsedMessage, message }: CommandArgs): Promise<void> => {
@@ -128,15 +128,15 @@ export default class LookupCommand implements BaseCommand {
         const daisukiSongEntry = daisukiMVEntry || daisukiAudioEntry;
         if (!daisukiSongEntry) {
             await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
-                    guildID,
-                    "command.lookup.notFound.title"
-                ),
                 description: state.localizer.translate(
                     guildID,
                     "command.lookup.notFound.description"
                 ),
                 thumbnailUrl: KmqImages.DEAD,
+                title: state.localizer.translate(
+                    guildID,
+                    "command.lookup.notFound.title"
+                ),
             });
 
             logger.info(
@@ -300,15 +300,15 @@ export default class LookupCommand implements BaseCommand {
         }
 
         sendInfoMessage(messageContext, {
-            title: `${songName} - ${artistName}`,
-            url: `https://youtu.be/${videoID}`,
             description,
-            thumbnailUrl: `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`,
             fields: fields.map((x) => ({
+                inline: true,
                 name: x.name,
                 value: x.value,
-                inline: true,
             })),
+            thumbnailUrl: `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`,
+            title: `${songName} - ${artistName}`,
+            url: `https://youtu.be/${videoID}`,
         });
     };
 }

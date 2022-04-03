@@ -337,10 +337,10 @@ describe("subunits", () => {
 
     describe("include subunits (and the subunit has a collab)", () => {
         it("should match the songs from the group, collabs of that group, and collabs of any subunits of that group", async () => {
-            const artistWithCollabingSubunit = { name: "BIGBANG", id: 28 };
-            const subunitWithCollab = { name: "G-DRAGON", id: 68 };
-            const subunitCollabArtist = { name: "G-DRAGON + TAEYANG", id: 73 };
-            const parentCollabArtist = { name: "BIGBANG + 2NE1", id: 29 };
+            const artistWithCollabingSubunit = { id: 28, name: "BIGBANG" };
+            const subunitWithCollab = { id: 68, name: "G-DRAGON" };
+            const subunitCollabArtist = { id: 73, name: "G-DRAGON + TAEYANG" };
+            const parentCollabArtist = { id: 29, name: "BIGBANG + 2NE1" };
 
             const expectedIds = [
                 artistWithCollabingSubunit.id,

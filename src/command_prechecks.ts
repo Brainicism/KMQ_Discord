@@ -43,13 +43,13 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "misc.preCheck.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     errorMessage ?? "misc.preCheck.differentVC"
+                ),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.preCheck.title"
                 ),
             });
             return false;
@@ -69,13 +69,13 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "misc.preCheck.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     errorMessage ?? "misc.preCheck.debugServer"
+                ),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.preCheck.title"
                 ),
             });
         }
@@ -96,13 +96,13 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "misc.preCheck.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     errorMessage ?? "misc.preCheck.debugChannel"
+                ),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.preCheck.title"
                 ),
             });
         }
@@ -133,13 +133,13 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "misc.preCheck.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     errorMessage ?? "misc.preCheck.competition"
+                ),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.preCheck.title"
                 ),
             });
         }

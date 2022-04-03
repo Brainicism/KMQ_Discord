@@ -83,6 +83,7 @@ export default class Scoreboard {
             .sort((a, b) => b.getScore() - a.getScore())
             .filter((x) => x.shouldIncludeInScoreboard())
             .map((x) => ({
+                inline: false,
                 name: `${x.getRankingPrefix(
                     currentRanking[x.getScore()],
                     inProgress
@@ -96,7 +97,6 @@ export default class Scoreboard {
                         ? ` (+${friendlyFormattedNumber(x.getExpGain())} EXP)`
                         : ""
                 }`,
-                inline: false,
             }));
     }
 
@@ -146,13 +146,14 @@ export default class Scoreboard {
 
         return [
             {
+                inline: false,
                 name: "**Scoreboard**",
                 value: players
                     .slice(0, Math.ceil(players.length / 3))
                     .join("\n"),
-                inline: false,
             },
             {
+                inline: true,
                 name: ZERO_WIDTH_SPACE,
                 value: players
                     .slice(
@@ -160,14 +161,13 @@ export default class Scoreboard {
                         Math.ceil((2 * players.length) / 3)
                     )
                     .join("\n"),
-                inline: true,
             },
             {
+                inline: true,
                 name: ZERO_WIDTH_SPACE,
                 value: players
                     .slice(Math.ceil((2 * players.length) / 3))
                     .join("\n"),
-                inline: true,
             },
         ];
     }

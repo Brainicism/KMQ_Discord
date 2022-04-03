@@ -116,13 +116,13 @@ export default abstract class Session {
                 await this.reloadSongs(guildPreference);
             } catch (err) {
                 await sendErrorMessage(messageContext, {
-                    title: state.localizer.translate(
-                        this.guildID,
-                        "misc.failure.errorSelectingSong.title"
-                    ),
                     description: state.localizer.translate(
                         this.guildID,
                         "misc.failure.errorSelectingSong.description"
+                    ),
+                    title: state.localizer.translate(
+                        this.guildID,
+                        "misc.failure.errorSelectingSong.title"
                     ),
                 });
 
@@ -147,16 +147,16 @@ export default abstract class Session {
             );
 
             await sendInfoMessage(messageContext, {
-                title: state.localizer.translate(
-                    this.guildID,
-                    "misc.uniqueSongsReset.title"
-                ),
                 description: state.localizer.translate(
                     this.guildID,
                     "misc.uniqueSongsReset.description",
                     { totalSongCount: friendlyFormattedNumber(totalSongCount) }
                 ),
                 thumbnailUrl: KmqImages.LISTENING,
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.uniqueSongsReset.title"
+                ),
             });
         }
 
@@ -167,13 +167,13 @@ export default abstract class Session {
 
         if (randomSong === null) {
             sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
-                    this.guildID,
-                    "misc.failure.songQuery.title"
-                ),
                 description: state.localizer.translate(
                     this.guildID,
                     "misc.failure.songQuery.description"
+                ),
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.songQuery.title"
                 ),
             });
             await this.endSession();
@@ -204,13 +204,13 @@ export default abstract class Session {
             );
 
             await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
-                    this.guildID,
-                    "misc.failure.vcJoin.title"
-                ),
                 description: state.localizer.translate(
                     this.guildID,
                     "misc.failure.vcJoin.description"
+                ),
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.vcJoin.title"
                 ),
             });
             return;
@@ -245,15 +245,15 @@ export default abstract class Session {
             this.songMessageIDs.push({
                 messageID: round.endRoundMessageID,
                 song: {
-                    songName: round.song.songName,
-                    originalSongName: round.song.originalSongName,
-                    hangulSongName: round.song.hangulSongName,
-                    originalHangulSongName: round.song.originalHangulSongName,
                     artistName: round.song.artistName,
                     hangulArtistName: round.song.hangulArtistName,
-                    youtubeLink: round.song.youtubeLink,
+                    hangulSongName: round.song.hangulSongName,
+                    originalHangulSongName: round.song.originalHangulSongName,
+                    originalSongName: round.song.originalSongName,
                     publishDate: round.song.publishDate,
+                    songName: round.song.songName,
                     views: round.song.views,
+                    youtubeLink: round.song.youtubeLink,
                 },
             });
         }
@@ -307,27 +307,27 @@ export default abstract class Session {
             ).reduce((total, x) => total + x.size, 0);
 
             await sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: state.localizer.translate(
-                    this.guildID,
-                    "misc.sendingBookmarkedSongs.title"
-                ),
                 description: state.localizer.translate(
                     this.guildID,
                     "misc.sendingBookmarkedSongs.description",
                     {
-                        songs: state.localizer.translateN(
-                            this.guildID,
-                            "misc.plural.song",
-                            bookmarkedSongCount
-                        ),
                         players: state.localizer.translateN(
                             this.guildID,
                             "misc.plural.player",
                             bookmarkedSongsPlayerCount
                         ),
+                        songs: state.localizer.translateN(
+                            this.guildID,
+                            "misc.plural.song",
+                            bookmarkedSongCount
+                        ),
                     }
                 ),
                 thumbnailUrl: KmqImages.READING_BOOK,
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.sendingBookmarkedSongs.title"
+                ),
             });
             await sendBookmarkedSongs(this.guildID, this.bookmarkedSongs);
 
@@ -555,8 +555,8 @@ export default abstract class Session {
             }
 
             this.connection.play(stream, {
-                inputArgs,
                 encoderArgs,
+                inputArgs,
                 opusPassthrough: specialType === null,
             });
         } catch (e) {
@@ -634,13 +634,13 @@ export default abstract class Session {
         });
 
         await sendErrorMessage(messageContext, {
-            title: state.localizer.translate(
-                this.guildID,
-                "misc.failure.songPlaying.title"
-            ),
             description: state.localizer.translate(
                 this.guildID,
                 "misc.failure.songPlaying.description"
+            ),
+            title: state.localizer.translate(
+                this.guildID,
+                "misc.failure.songPlaying.title"
             ),
         });
         this.roundsPlayed--;

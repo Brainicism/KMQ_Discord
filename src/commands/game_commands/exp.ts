@@ -95,8 +95,8 @@ export async function calculateOptionsExpMultiplierInternal(
                 guildPreference.guildID,
                 "command.exp.voteBonus"
             ),
-            name: ExpBonusModifier.VOTE,
             isPenalty: false,
+            name: ExpBonusModifier.VOTE,
         });
     }
 
@@ -107,8 +107,8 @@ export async function calculateOptionsExpMultiplierInternal(
                 guildPreference.guildID,
                 "command.exp.powerHourBonus"
             ),
-            name: ExpBonusModifier.POWER_HOUR,
             isPenalty: false,
+            name: ExpBonusModifier.POWER_HOUR,
         });
     }
 
@@ -119,8 +119,8 @@ export async function calculateOptionsExpMultiplierInternal(
                 guildPreference.guildID,
                 "command.exp.firstGameOfDayBonus"
             ),
-            name: ExpBonusModifier.FIRST_GAME_OF_DAY,
             isPenalty: false,
+            name: ExpBonusModifier.FIRST_GAME_OF_DAY,
         });
     }
 
@@ -130,8 +130,8 @@ export async function calculateOptionsExpMultiplierInternal(
                 guildPreference.guildID,
                 "command.exp.typosAllowedPenalty"
             ),
-            name: ExpBonusModifier.TYPO,
             isPenalty: true,
+            name: ExpBonusModifier.TYPO,
         });
     }
 
@@ -157,8 +157,8 @@ export async function calculateOptionsExpMultiplierInternal(
                 guildPreference.guildID,
                 "command.exp.multipleChoicePenalty"
             ),
-            name: multipleChoicePenalty,
             isPenalty: true,
+            name: multipleChoicePenalty,
         });
     }
 
@@ -169,8 +169,8 @@ export async function calculateOptionsExpMultiplierInternal(
                 guildPreference.guildID,
                 "command.exp.lowSongCountPenalty"
             ),
-            name: ExpBonusModifier.BELOW_SONG_COUNT_THRESHOLD,
             isPenalty: true,
+            name: ExpBonusModifier.BELOW_SONG_COUNT_THRESHOLD,
         });
     }
 
@@ -184,10 +184,10 @@ export async function calculateOptionsExpMultiplierInternal(
                 guildPreference.guildID,
                 "command.exp.artistGroupGuessModePenalty"
             ),
+            isPenalty: true,
             name: guildPreference.isGroupsMode()
                 ? ExpBonusModifier.ARTIST_GUESS_GROUPS_SELECTED
                 : ExpBonusModifier.ARTIST_GUESS,
-            isPenalty: true,
         });
     }
 
@@ -308,14 +308,14 @@ export async function calculateTotalRoundExp(
 
 export default class ExpCommand implements BaseCommand {
     help = (guildID: string): Help => ({
-        name: "exp",
         description: state.localizer.translate(
             guildID,
             "command.exp.help.description"
         ),
-        usage: ",exp",
         examples: [],
+        name: "exp",
         priority: 50,
+        usage: ",exp",
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
@@ -350,15 +350,16 @@ export default class ExpCommand implements BaseCommand {
         );
 
         fields.push({
+            inline: false,
             name: state.localizer.translate(
                 message.guildID,
                 "command.exp.activeModifiers"
             ),
             value: `${modifierText.join("\n")}`,
-            inline: false,
         });
 
         fields.push({
+            inline: false,
             name: state.localizer.translate(
                 message.guildID,
                 "command.exp.bonusArtistsTitle"
@@ -371,7 +372,6 @@ export default class ExpCommand implements BaseCommand {
             ].toFixed(2)}x 📈 \n\`\`\`${[...state.bonusArtists]
                 .filter((x) => !x.includes("+"))
                 .join(", ")}\`\`\``,
-            inline: false,
         });
 
         const bonusExpExplanations = [
@@ -422,6 +422,7 @@ export default class ExpCommand implements BaseCommand {
         ];
 
         fields.push({
+            inline: false,
             name: state.localizer.translate(
                 message.guildID,
                 "command.exp.bonusTitle"
@@ -430,16 +431,15 @@ export default class ExpCommand implements BaseCommand {
                 message.guildID,
                 "command.exp.bonusDescription"
             )}:\n ${bonusExpExplanations.map((x) => `- ${x}`).join("\n")}`,
-            inline: false,
         });
 
         await sendInfoMessage(MessageContext.fromMessage(message), {
+            fields,
+            thumbnailUrl: KmqImages.THUMBS_UP,
             title: state.localizer.translate(
                 message.guildID,
                 "command.exp.title"
             ),
-            fields,
-            thumbnailUrl: KmqImages.THUMBS_UP,
         });
 
         logger.info(

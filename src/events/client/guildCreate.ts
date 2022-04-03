@@ -28,10 +28,9 @@ export default async function guildCreateHandler(
     const joinDate: Date = new Date(guild.joinedAt);
     await sendInfoMessage(new MessageContext(kmqDebugChannel.id), {
         author: {
-            username: guild.name,
             avatarUrl: guild.iconURL,
+            username: guild.name,
         },
-        title: "New Server Joined!",
         fields: [
             { name: "**Member Count**:", value: guild.memberCount.toString() },
             { name: "**Language**:", value: guild.preferredLocale },
@@ -45,5 +44,6 @@ export default async function guildCreateHandler(
         } | Joined at: ${joinDate.toLocaleDateString(
             "en-US"
         )} ${joinDate.toLocaleTimeString("en-US")}`,
+        title: "New Server Joined!",
     });
 }

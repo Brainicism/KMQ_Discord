@@ -14,25 +14,25 @@ interface BotListing {
 }
 
 const BOT_LISTING_SITES: { [siteName: string]: BotListing } = {
-    TOP_GG_TOKEN: {
-        endpoint: "https://top.gg/api/bots/%d/stats",
-        payloadKeyName: "server_count",
-        name: "top.gg",
-    },
     DISCORD_BOTS_GG_TOKEN: {
         endpoint: "https://discord.bots.gg/api/v1/bots/%d/stats",
-        payloadKeyName: "guildCount",
         name: "discord.bots.gg",
+        payloadKeyName: "guildCount",
     },
     DISCORD_BOT_LIST_TOKEN: {
         endpoint: "https://discordbotlist.com/api/v1/bots/%d/stats",
-        payloadKeyName: "guilds",
         name: "discordbotlist.com",
+        payloadKeyName: "guilds",
     },
     KOREAN_BOTS_TOKEN: {
         endpoint: "https://koreanbots.dev/api/v2/bots/%d/stats",
-        payloadKeyName: "servers",
         name: "koreanbots.dev",
+        payloadKeyName: "servers",
+    },
+    TOP_GG_TOKEN: {
+        endpoint: "https://top.gg/api/bots/%d/stats",
+        name: "top.gg",
+        payloadKeyName: "server_count",
     },
 };
 
@@ -49,11 +49,11 @@ export async function userVoted(userID: string): Promise<void> {
     await dbContext
         .kmq("top_gg_user_votes")
         .insert({
-            user_id: userID,
             buff_expiry_date: new Date(
                 Date.now() + VOTE_BONUS_DURATION * 1000 * 60 * 60
             ),
             total_votes: currentVotes + 1,
+            user_id: userID,
         })
         .onConflict("user_id")
         .merge();

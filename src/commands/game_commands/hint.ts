@@ -60,10 +60,6 @@ async function sendHintNotification(
         await sendInfoMessage(
             MessageContext.fromMessage(message),
             {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "command.hint.request.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "command.hint.request.description",
@@ -76,6 +72,10 @@ async function sendHintNotification(
                         }`,
                     }
                 ),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.hint.request.title"
+                ),
             },
             true
         );
@@ -83,10 +83,6 @@ async function sendHintNotification(
         await sendInfoMessage(
             MessageContext.fromMessage(message),
             {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "command.hint.request.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "command.hint.request.description",
@@ -95,6 +91,10 @@ async function sendHintNotification(
                             message.guildID
                         )}`,
                     }
+                ),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.hint.request.title"
                 ),
             },
             true
@@ -118,15 +118,15 @@ export function validHintCheck(
     if (!gameSession || !gameRound) {
         logger.warn(`${getDebugLogHeader(message)} | No active game session`);
         sendErrorMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
-                message.guildID,
-                "command.hint.failure.invalidHintRequest.title"
-            ),
             description: state.localizer.translate(
                 message.guildID,
                 "command.hint.failure.invalidHintRequest.noSongPlaying.description"
             ),
             thumbnailUrl: KmqImages.NOT_IMPRESSED,
+            title: state.localizer.translate(
+                message.guildID,
+                "command.hint.failure.invalidHintRequest.title"
+            ),
         });
         return false;
     }
@@ -137,29 +137,29 @@ export function validHintCheck(
 
         if (eliminationScoreboard.isPlayerEliminated(message.author.id)) {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "command.hint.failure.invalidHintRequest.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "command.hint.failure.invalidHintRequest.eliminated.description"
                 ),
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.hint.failure.invalidHintRequest.title"
+                ),
             });
             return false;
         }
     } else if (guildPreference.isMultipleChoiceMode()) {
         sendErrorMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
-                message.guildID,
-                "command.hint.failure.invalidHintRequest.title"
-            ),
             description: state.localizer.translate(
                 message.guildID,
                 "command.hint.failure.invalidHintRequest.multipleChoice.description"
             ),
             thumbnailUrl: KmqImages.NOT_IMPRESSED,
+            title: state.localizer.translate(
+                message.guildID,
+                "command.hint.failure.invalidHintRequest.title"
+            ),
         });
         return false;
     }
@@ -203,14 +203,14 @@ export default class HintCommand implements BaseCommand {
     ];
 
     help = (guildID: string): Help => ({
-        name: "hint",
         description: state.localizer.translate(
             guildID,
             "command.hint.help.description"
         ),
-        usage: ",hint",
         examples: [],
+        name: "hint",
         priority: 1020,
+        usage: ",hint",
     });
 
     call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
@@ -225,16 +225,16 @@ export default class HintCommand implements BaseCommand {
         if (isHintAvailable(message, gameSession)) {
             gameRound.hintUsed = true;
             await sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "command.hint.title"
-                ),
                 description: generateHint(
                     message.guildID,
                     guildPreference.gameOptions.guessModeType,
                     gameRound
                 ),
                 thumbnailUrl: KmqImages.READING_BOOK,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.hint.title"
+                ),
             });
 
             logger.info(

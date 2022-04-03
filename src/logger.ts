@@ -30,8 +30,8 @@ export function getInternalLogger(): winston.Logger {
     );
 
     return winston.createLogger({
-        level: process.env.DEBUG_LOGGING ? "debug" : "info",
         format: format.combine(format.timestamp(), logFormat),
+        level: process.env.DEBUG_LOGGING ? "debug" : "info",
         transports: [
             new winston.transports.Console({
                 format: format.combine(format.timestamp(), consoleFormat),

@@ -15,17 +15,17 @@ export default class LocalizationManager {
     constructor() {
         this.internalLocalizer = i18next.createInstance().use(Backend);
         this.internalLocalizer.init({
-            preload: Object.values(LocaleType),
-            supportedLngs: Object.values(LocaleType),
-            initImmediate: false,
-            saveMissing: true,
-            fallbackLng: DEFAULT_LOCALE,
-            interpolation: {
-                escapeValue: false,
-            },
             backend: {
                 loadPath: "../i18n/{{lng}}.json",
             },
+            fallbackLng: DEFAULT_LOCALE,
+            initImmediate: false,
+            interpolation: {
+                escapeValue: false,
+            },
+            preload: Object.values(LocaleType),
+            saveMissing: true,
+            supportedLngs: Object.values(LocaleType),
         });
     }
 
@@ -86,8 +86,8 @@ export default class LocalizationManager {
         count: number
     ): string {
         return this.internalLocalizer.t(phrase, {
-            lng: locale,
             count,
+            lng: locale,
         });
     }
 }

@@ -113,9 +113,9 @@ export const checkRestartNotification = async (
             await sendInfoMessage(
                 new MessageContext(gameSession.textChannelID),
                 {
-                    title: `Upcoming Bot Restart in ${timeUntilRestart} Minutes.`,
                     description:
                         "Downtime will be approximately 2 minutes. Please end the current game to ensure your progress is saved!",
+                    title: `Upcoming Bot Restart in ${timeUntilRestart} Minutes.`,
                 }
             );
             serversWarned++;
@@ -163,23 +163,23 @@ async function updateSystemStats(clusterID: number): Promise<void> {
 
     await dbContext.kmq("system_stats").insert({
         cluster_id: clusterID,
+        date: new Date(),
         stat_name: "mean_latency",
         stat_value: meanLatency,
-        date: new Date(),
     });
 
     await dbContext.kmq("system_stats").insert({
         cluster_id: clusterID,
+        date: new Date(),
         stat_name: "min_latency",
         stat_value: minLatency,
-        date: new Date(),
     });
 
     await dbContext.kmq("system_stats").insert({
         cluster_id: clusterID,
+        date: new Date(),
         stat_name: "max_latency",
         stat_value: maxLatency,
-        date: new Date(),
     });
 }
 

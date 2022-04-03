@@ -18,28 +18,23 @@ export default class GuessTimeoutCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
-        minArgCount: 0,
-        maxArgCount: 1,
         arguments: [
             {
+                maxValue: 180,
+                minValue: 2,
                 name: "timer",
                 type: "number" as const,
-                minValue: 2,
-                maxValue: 180,
             },
         ],
+        maxArgCount: 1,
+        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
-        name: "timer",
         description: state.localizer.translate(
             guildID,
             "command.timer.help.description"
         ),
-        usage: `,timer [${state.localizer.translate(
-            guildID,
-            "command.timer.help.usage.seconds"
-        )}]`,
         examples: [
             {
                 example: "`,timer 15`",
@@ -57,7 +52,12 @@ export default class GuessTimeoutCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "timer",
         priority: 110,
+        usage: `,timer [${state.localizer.translate(
+            guildID,
+            "command.timer.help.usage.seconds"
+        )}]`,
     });
 
     call = async ({

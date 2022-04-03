@@ -25,29 +25,27 @@ export default class ArtistTypeCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
-        minArgCount: 0,
-        maxArgCount: 1,
         arguments: [
             {
+                enums: Object.values(ArtistType),
                 name: "artistType",
                 type: "enum" as const,
-                enums: Object.values(ArtistType),
             },
         ],
+        maxArgCount: 1,
+        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
-        name: "artisttype",
         description: state.localizer.translate(
             guildID,
             "command.artisttype.help.description",
             {
-                soloists: `\`${ArtistType.SOLOIST}\``,
-                groups: `\`${ArtistType.GROUP}\``,
                 both: `\`${ArtistType.BOTH}\``,
+                groups: `\`${ArtistType.GROUP}\``,
+                soloists: `\`${ArtistType.SOLOIST}\``,
             }
         ),
-        usage: ",artisttype [soloists | groups | both]",
         examples: [
             {
                 example: "`,artisttype soloists`",
@@ -78,7 +76,9 @@ export default class ArtistTypeCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "artisttype",
         priority: 150,
+        usage: ",artisttype [soloists | groups | both]",
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
@@ -102,18 +102,18 @@ export default class ArtistTypeCommand implements BaseCommand {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "misc.failure.gameOptionConflict.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "misc.failure.gameOptionConflict.description",
                     {
                         optionOne: "`groups`",
-                        optionTwo: "`artisttype`",
                         optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
+                        optionTwo: "`artisttype`",
                     }
+                ),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.failure.gameOptionConflict.title"
                 ),
             });
             return;

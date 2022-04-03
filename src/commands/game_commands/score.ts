@@ -14,28 +14,28 @@ export default class ScoreCommand implements BaseCommand {
     aliases = ["scoreboard", "sb"];
 
     help = (guildID: string): Help => ({
-        name: "score",
         description: state.localizer.translate(
             guildID,
             "command.score.help.description"
         ),
-        usage: ",score",
         examples: [],
+        name: "score",
         priority: 50,
+        usage: ",score",
     });
 
     call = async ({ message, gameSessions }: CommandArgs): Promise<void> => {
         const gameSession = gameSessions[message.guildID];
         if (!gameSession) {
             await sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "misc.failure.game.noneInProgress.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "command.score.failure.noneInProgress.description",
                     { play: `\`${process.env.BOT_PREFIX}play\`` }
+                ),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.failure.game.noneInProgress.title"
                 ),
             });
 

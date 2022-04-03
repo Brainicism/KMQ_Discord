@@ -67,24 +67,16 @@ export default class LeaderboardCommand implements BaseCommand {
     aliases = ["lb"];
 
     validations = {
-        minArgCount: 0,
-        maxArgCount: 3,
         arguments: [],
+        maxArgCount: 3,
+        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
-        name: "leaderboard",
         description: state.localizer.translate(
             guildID,
             "command.leaderboard.help.description"
         ),
-        usage: `,leaderboard {${state.localizer.translate(
-            guildID,
-            "command.leaderboard.help.usage.pageNumber"
-        )}}\n,leaderboard {gamesplayed | songsguessed} {server | game} {daily | weekly | monthly | yearly} {${state.localizer.translate(
-            guildID,
-            "command.leaderboard.help.usage.pageNumber"
-        )}}\n,leaderboard [enroll | unenroll]`,
         examples: [
             {
                 example: "`,leaderboard`",
@@ -143,7 +135,15 @@ export default class LeaderboardCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "leaderboard",
         priority: 50,
+        usage: `,leaderboard {${state.localizer.translate(
+            guildID,
+            "command.leaderboard.help.usage.pageNumber"
+        )}}\n,leaderboard {gamesplayed | songsguessed} {server | game} {daily | weekly | monthly | yearly} {${state.localizer.translate(
+            guildID,
+            "command.leaderboard.help.usage.pageNumber"
+        )}}\n,leaderboard [enroll | unenroll]`,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
@@ -537,14 +537,14 @@ export default class LeaderboardCommand implements BaseCommand {
                                             messageContext.guildID,
                                             "command.leaderboard.levelEntry.permanent",
                                             {
-                                                level: state.localizer.translate(
-                                                    messageContext.guildID,
-                                                    "misc.level"
-                                                ),
                                                 formattedNumber:
                                                     friendlyFormattedNumber(
                                                         player.level
                                                     ),
+                                                level: state.localizer.translate(
+                                                    messageContext.guildID,
+                                                    "misc.level"
+                                                ),
                                                 rankName: getRankNameByLevel(
                                                     player.level,
                                                     messageContext.guildID
@@ -737,22 +737,7 @@ export default class LeaderboardCommand implements BaseCommand {
                         }
 
                         resolve({
-                            title: bold(
-                                state.localizer
-                                    .translate(
-                                        messageContext.guildID,
-                                        "command.leaderboard.title",
-                                        {
-                                            leaderboardScope,
-                                            leaderboardDuration,
-                                            leaderboardType,
-                                        }
-                                    )
-                                    .trimEnd()
-                            ),
                             fields,
-                            timestamp: new Date(),
-                            thumbnail: { url: KmqImages.THUMBS_UP },
                             footer: {
                                 text: state.localizer.translate(
                                     messageContext.guildID,
@@ -762,6 +747,21 @@ export default class LeaderboardCommand implements BaseCommand {
                                     }
                                 ),
                             },
+                            thumbnail: { url: KmqImages.THUMBS_UP },
+                            timestamp: new Date(),
+                            title: bold(
+                                state.localizer
+                                    .translate(
+                                        messageContext.guildID,
+                                        "command.leaderboard.title",
+                                        {
+                                            leaderboardDuration,
+                                            leaderboardScope,
+                                            leaderboardType,
+                                        }
+                                    )
+                                    .trimEnd()
+                            ),
                         });
                     })
             );
@@ -780,31 +780,31 @@ export default class LeaderboardCommand implements BaseCommand {
 
         if (alreadyEnrolled) {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "command.leaderboard.failure.alreadyEnrolled.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "command.leaderboard.failure.alreadyEnrolled.description"
+                ),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.leaderboard.failure.alreadyEnrolled.title"
                 ),
             });
             return;
         }
 
         await dbContext.kmq("leaderboard_enrollment").insert({
-            player_id: message.author.id,
             display_name: getUserTag(message.author),
+            player_id: message.author.id,
         });
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
-                message.guildID,
-                "command.leaderboard.enrolled.title"
-            ),
             description: state.localizer.translate(
                 message.guildID,
                 "command.leaderboard.enrolled.description"
+            ),
+            title: state.localizer.translate(
+                message.guildID,
+                "command.leaderboard.enrolled.title"
             ),
         });
     }
@@ -818,13 +818,13 @@ export default class LeaderboardCommand implements BaseCommand {
             .del();
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
-                message.guildID,
-                "command.leaderboard.unenrolled.title"
-            ),
             description: state.localizer.translate(
                 message.guildID,
                 "command.leaderboard.unenrolled.description"
+            ),
+            title: state.localizer.translate(
+                message.guildID,
+                "command.leaderboard.unenrolled.title"
             ),
         });
     }
@@ -844,15 +844,15 @@ export default class LeaderboardCommand implements BaseCommand {
         if (scope === LeaderboardScope.GAME) {
             if (!state.gameSessions[message.guildID]) {
                 sendErrorMessage(messageContext, {
-                    title: state.localizer.translate(
-                        message.guildID,
-                        "misc.failure.game.noneInProgress.title"
-                    ),
                     description: state.localizer.translate(
                         message.guildID,
                         "command.leaderboard.failure.game.noneInProgress.description"
                     ),
                     thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "misc.failure.game.noneInProgress.title"
+                    ),
                 });
                 return;
             }
@@ -864,15 +864,15 @@ export default class LeaderboardCommand implements BaseCommand {
 
             if (participantIDs.length === 0) {
                 sendErrorMessage(messageContext, {
-                    title: state.localizer.translate(
-                        message.guildID,
-                        "command.leaderboard.failure.game.noParticipants.title"
-                    ),
                     description: state.localizer.translate(
                         message.guildID,
                         "command.leaderboard.failure.game.noParticipants.description"
                     ),
                     thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "command.leaderboard.failure.game.noParticipants.title"
+                    ),
                 });
                 return;
             }
@@ -888,30 +888,30 @@ export default class LeaderboardCommand implements BaseCommand {
 
         if (pageCount === 0) {
             sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "command.leaderboard.failure.empty.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "command.leaderboard.failure.empty.description"
                 ),
                 thumbnailUrl: KmqImages.DEAD,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.leaderboard.failure.empty.title"
+                ),
             });
             return;
         }
 
         if (pageOffset > pageCount) {
             sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "command.leaderboard.failure.outOfRange.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "command.leaderboard.failure.outOfRange.description"
                 ),
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.leaderboard.failure.outOfRange.title"
+                ),
             });
             return;
         }

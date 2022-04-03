@@ -118,6 +118,7 @@ export async function sendBeginGameMessage(
     const fields: Eris.EmbedField[] = [];
     if (gameInfoMessage) {
         fields.push({
+            inline: false,
             name: state.localizer.translate(
                 message.guildID,
                 gameInfoMessage.title
@@ -126,14 +127,13 @@ export async function sendBeginGameMessage(
                 message.guildID,
                 gameInfoMessage.message
             ),
-            inline: false,
         });
     }
 
     await sendInfoMessage(MessageContext.fromMessage(message), {
-        title: startTitle,
-        description: gameInstructions,
         color: isBonus ? EMBED_SUCCESS_BONUS_COLOR : null,
+        description: gameInstructions,
+        fields,
         footerText:
             !isBonus && Math.random() < 0.5
                 ? state.localizer.translate(
@@ -145,7 +145,7 @@ export async function sendBeginGameMessage(
                   )
                 : null,
         thumbnailUrl: KmqImages.HAPPY,
-        fields,
+        title: startTitle,
     });
 }
 
@@ -153,24 +153,18 @@ export default class PlayCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
-        minArgCount: 0,
-        maxArgCount: 2,
         arguments: [],
+        maxArgCount: 2,
+        minArgCount: 0,
     };
 
     aliases = ["random", "start", "p"];
 
     help = (guildID: string): Help => ({
-        name: "play",
         description: state.localizer.translate(
             guildID,
             "command.play.help.description"
         ),
-        usage: `,play {classic | elimination | teams}\n,play elimination {${state.localizer.translate(
-            guildID,
-            "command.play.help.usage.lives"
-        )}}`,
-        priority: 1050,
         examples: [
             {
                 example: "`,play`",
@@ -207,6 +201,12 @@ export default class PlayCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "play",
+        priority: 1050,
+        usage: `,play {classic | elimination | teams}\n,play elimination {${state.localizer.translate(
+            guildID,
+            "command.play.help.usage.lives"
+        )}}`,
     });
 
     call = async ({
@@ -223,14 +223,14 @@ export default class PlayCommand implements BaseCommand {
         const timeUntilRestart = await getTimeUntilRestart();
         if (timeUntilRestart) {
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "command.play.failure.botRestarting.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "command.play.failure.botRestarting.description",
                     { timeUntilRestart: `\`${timeUntilRestart}\`` }
+                ),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.play.failure.botRestarting.title"
                 ),
             });
 
@@ -244,14 +244,14 @@ export default class PlayCommand implements BaseCommand {
 
         if (!voiceChannel) {
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "command.play.failure.notInVC.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "command.play.failure.notInVC.description",
                     { play: `\`${process.env.BOT_PREFIX}play\`` }
+                ),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.play.failure.notInVC.title"
                 ),
             });
 
@@ -325,9 +325,9 @@ export default class PlayCommand implements BaseCommand {
                 );
 
                 await sendInfoMessage(messageContext, {
-                    title: startTitle,
                     description: gameInstructions,
                     thumbnailUrl: KmqImages.HAPPY,
+                    title: startTitle,
                 });
             } else {
                 // (1 and 2) CLASSIC, ELIMINATION, and COMPETITION game creation
@@ -361,11 +361,11 @@ export default class PlayCommand implements BaseCommand {
                         message.guildID,
                         "command.play.failure.overrideTeamsOrElimination.description",
                         {
-                            oldGameType: `\`${oldGameType}\``,
-                            end: `\`${prefix}end\``,
-                            playOldGameType: `\`${prefix}play ${oldGameType}\``,
-                            gameSpecificInstructions,
                             begin: `\`${prefix}begin\``,
+                            end: `\`${prefix}end\``,
+                            gameSpecificInstructions,
+                            oldGameType: `\`${oldGameType}\``,
+                            playOldGameType: `\`${prefix}play ${oldGameType}\``,
                         }
                     );
 
@@ -376,9 +376,9 @@ export default class PlayCommand implements BaseCommand {
                     );
 
                     sendErrorMessage(messageContext, {
-                        title: ignoringOldGameTypeTitle,
                         description: oldGameTypeInstructions,
                         thumbnailUrl: KmqImages.DEAD,
+                        title: ignoringOldGameTypeTitle,
                     });
                 }
 
@@ -392,15 +392,15 @@ export default class PlayCommand implements BaseCommand {
 
                     if (!isModerator) {
                         sendErrorMessage(messageContext, {
-                            title: state.localizer.translate(
-                                message.guildID,
-                                "command.play.failure.hiddenGameMode.title"
-                            ),
                             description: state.localizer.translate(
                                 message.guildID,
                                 "command.play.failure.hiddenGameMode.description"
                             ),
                             thumbnailUrl: KmqImages.DEAD,
+                            title: state.localizer.translate(
+                                message.guildID,
+                                "command.play.failure.hiddenGameMode.title"
+                            ),
                         });
                         return;
                     }

@@ -41,37 +41,37 @@ enum HealthIndicator {
 
 const ERIS_INTENTS = Eris.Constants.Intents;
 const options: Options = {
-    whatToLog: {
-        blacklist: ["stats_update"],
-    },
-    path: path.join(__dirname, "./kmq_worker.js"),
-    token: process.env.BOT_TOKEN,
     clientOptions: {
         disableEvents: {
-            GUILD_ROLE_DELETE: true,
             CHANNEL_PINS_UPDATE: true,
-            MESSAGE_UPDATE: true,
+            GUILD_BAN_ADD: true,
+            GUILD_BAN_REMOVE: true,
+            GUILD_ROLE_DELETE: true,
             MESSAGE_DELETE: true,
             MESSAGE_DELETE_BULK: true,
             MESSAGE_REACTION_REMOVE: true,
             MESSAGE_REACTION_REMOVE_ALL: true,
             MESSAGE_REACTION_REMOVE_EMOJI: true,
-            GUILD_BAN_ADD: true,
-            GUILD_BAN_REMOVE: true,
+            MESSAGE_UPDATE: true,
             TYPING_START: true,
         },
-        restMode: true,
-        maxShards: "auto" as const,
-        messageLimit: 0,
         intents:
             ERIS_INTENTS.guilds ^
             ERIS_INTENTS.guildVoiceStates ^
             ERIS_INTENTS.guildMessages ^
             ERIS_INTENTS.guildMessageReactions,
+        maxShards: "auto" as const,
+        messageLimit: 0,
+        restMode: true,
     },
-    fetchTimeout: 5000,
     customClient: KmqClient,
+    fetchTimeout: 5000,
+    path: path.join(__dirname, "./kmq_worker.js"),
+    token: process.env.BOT_TOKEN,
     useCentralRequestHandler: true,
+    whatToLog: {
+        blacklist: ["stats_update"],
+    },
 };
 
 function registerGlobalIntervals(fleet: Fleet): void {
@@ -114,9 +114,9 @@ function registerGlobalIntervals(fleet: Fleet): void {
     // every minute
     schedule.scheduleJob("* * * * *", async () => {
         await dbContext.kmq("system_stats").insert({
+            date: new Date(),
             stat_name: "request_latency",
             stat_value: fleet.eris.requestHandler.latencyRef.latency,
-            date: new Date(),
         });
     });
 }
@@ -198,28 +198,28 @@ async function startWebServer(fleet: Fleet): Promise<void> {
                     healthIndicator = HealthIndicator.WARNING;
                 else healthIndicator = HealthIndicator.HEALTHY;
                 return {
-                    latency: rawShardData.latency,
-                    status: rawShardData.status,
-                    members: rawShardData.members.toLocaleString(),
-                    id: rawShardData.id,
                     guilds: rawShardData.guilds.toLocaleString(),
                     healthIndicator,
+                    id: rawShardData.id,
+                    latency: rawShardData.latency,
+                    members: rawShardData.members.toLocaleString(),
+                    status: rawShardData.status,
                 };
             });
 
             clusterData.push({
-                id: cluster.id,
-                ram: Math.ceil(cluster.ram).toLocaleString(),
+                activeGameSessions: gameplayStats.get(i).activeGameSessions,
+                activePlayers: gameplayStats.get(i).activePlayers,
                 apiLatency: _.mean(
                     cluster.shards.map((x) => x.latency)
                 ).toLocaleString(),
+                id: cluster.id,
+                ram: Math.ceil(cluster.ram).toLocaleString(),
+                shardData,
                 uptime: standardDateFormat(
                     new Date(Date.now() - cluster.uptime)
                 ),
                 voiceConnections: cluster.voice,
-                activeGameSessions: gameplayStats.get(i).activeGameSessions,
-                activePlayers: gameplayStats.get(i).activePlayers,
-                shardData,
             });
         }
 
@@ -242,19 +242,16 @@ async function startWebServer(fleet: Fleet): Promise<void> {
         else loadAvgHealthIndicator = HealthIndicator.HEALTHY;
 
         const overallStatsData = {
-            requestLatency: {
-                latency: requestLatency,
-                healthIndicator: requestLatencyHealthIndicator,
-            },
-            loadAverage: {
-                loadAverage: loadAvg.map((x) => x.toFixed(2)).join(", "),
-                healthIndicator: loadAvgHealthIndicator,
-            },
             cachedUsers: fleetStats.users.toLocaleString(),
-            totalMembers: fleetStats.members.toLocaleString(),
-            totalVoiceConnections: fleetStats.voice,
-            totalRAM: Math.ceil(fleetStats.totalRam).toLocaleString(),
             lastUpdated: new Date(),
+            loadAverage: {
+                healthIndicator: loadAvgHealthIndicator,
+                loadAverage: loadAvg.map((x) => x.toFixed(2)).join(", "),
+            },
+            requestLatency: {
+                healthIndicator: requestLatencyHealthIndicator,
+                latency: requestLatency,
+            },
             shardCount: fleetStats.shardCount,
             totalActiveGameSessions: clusterData.reduce(
                 (x, y) => x + y.activeGameSessions,
@@ -264,6 +261,9 @@ async function startWebServer(fleet: Fleet): Promise<void> {
                 (x, y) => x + y.activePlayers,
                 0
             ),
+            totalMembers: fleetStats.members.toLocaleString(),
+            totalRAM: Math.ceil(fleetStats.totalRam).toLocaleString(),
+            totalVoiceConnections: fleetStats.voice,
         };
 
         return reply.view("../templates/index.ejs", {

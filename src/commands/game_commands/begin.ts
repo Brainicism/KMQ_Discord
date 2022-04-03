@@ -30,14 +30,14 @@ export default class BeginCommand implements BaseCommand {
         const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
         if (teamScoreboard.getNumTeams() === 0) {
             sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
-                    messageContext.guildID,
-                    "command.begin.ignored.title"
-                ),
                 description: state.localizer.translate(
                     messageContext.guildID,
                     "command.begin.ignored.noTeam.description",
                     { join: `${process.env.BOT_PREFIX}join` }
+                ),
+                title: state.localizer.translate(
+                    messageContext.guildID,
+                    "command.begin.ignored.title"
                 ),
             });
             return false;
@@ -71,9 +71,9 @@ export default class BeginCommand implements BaseCommand {
 
             const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
             participants = teamScoreboard.getPlayers().map((player) => ({
+                discriminator: player.name.split("#")[1],
                 id: player.id,
                 username: player.name.split("#")[0],
-                discriminator: player.name.split("#")[1],
             }));
 
             sendBeginGameMessage(

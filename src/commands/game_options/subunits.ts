@@ -25,25 +25,23 @@ export default class SubunitsCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
-        minArgCount: 0,
-        maxArgCount: 1,
         arguments: [
             {
+                enums: Object.values(SubunitsPreference),
                 name: "subunitPreference",
                 type: "enum" as const,
-                enums: Object.values(SubunitsPreference),
             },
         ],
+        maxArgCount: 1,
+        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
-        name: "subunits",
         description: state.localizer.translate(
             guildID,
             "command.subunits.help.description",
             { groups: `\`${process.env.BOT_PREFIX}groups\`` }
         ),
-        usage: ",subunits [include | exclude]",
         examples: [
             {
                 example: "`,subunits include`",
@@ -74,7 +72,9 @@ export default class SubunitsCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "subunits",
         priority: 130,
+        usage: ",subunits [include | exclude]",
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

@@ -14,14 +14,14 @@ export default class OptionsCommand implements BaseCommand {
     aliases = ["settings"];
 
     help = (guildID: string): Help => ({
-        name: "options",
         description: state.localizer.translate(
             guildID,
             "command.options.help.description"
         ),
-        usage: ",options",
         examples: [],
+        name: "options",
         priority: 50,
+        usage: ",options",
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {

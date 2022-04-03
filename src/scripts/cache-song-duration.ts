@@ -32,8 +32,8 @@ async function cacheSongDuration(db: DatabaseContext): Promise<void> {
             );
 
             await db.kmq("cached_song_duration").insert({
-                vlink,
                 duration: songDuration,
+                vlink,
             });
             cachedSongs++;
             if (cachedSongs % 100 === 0) {

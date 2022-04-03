@@ -25,24 +25,22 @@ export default class LanguageCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
-        minArgCount: 0,
-        maxArgCount: 1,
         arguments: [
             {
+                enums: Object.values(LanguageType),
                 name: "language",
                 type: "enum" as const,
-                enums: Object.values(LanguageType),
             },
         ],
+        maxArgCount: 1,
+        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
-        name: "language",
         description: state.localizer.translate(
             guildID,
             "command.language.help.description"
         ),
-        usage: ",language [korean | all]",
         examples: [
             {
                 example: "`,language korean`",
@@ -67,7 +65,9 @@ export default class LanguageCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "language",
         priority: 150,
+        usage: ",language [korean | all]",
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

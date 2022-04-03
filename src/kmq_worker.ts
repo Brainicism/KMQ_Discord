@@ -25,18 +25,18 @@ const logger = new IPCLogger("kmq");
 config({ path: path.resolve(__dirname, "../.env") });
 
 const state: State = {
-    gameSessions: {},
-    client: null,
     aliases: {
         artist: {},
         song: {},
     },
-    processStartTime: Date.now(),
-    ipc: null,
-    rateLimiter: new RateLimiter(15, 30),
     bonusArtists: new Set<string>(),
+    client: null,
+    gameSessions: {},
+    ipc: null,
     locales: {},
     localizer: null,
+    processStartTime: Date.now(),
+    rateLimiter: new RateLimiter(15, 30),
 };
 
 export { state };
@@ -70,8 +70,8 @@ export class BotWorker extends BaseClusterWorker {
                 ).length;
 
                 return {
-                    activePlayers,
                     activeGameSessions,
+                    activePlayers,
                 };
             }
 
