@@ -1,5 +1,6 @@
 import i18next from "i18next";
 import Backend from "i18next-fs-backend";
+import path from "path";
 
 import { getGuildLocale } from "./discord_utils";
 
@@ -16,7 +17,7 @@ export default class LocalizationManager {
         this.internalLocalizer = i18next.createInstance().use(Backend);
         this.internalLocalizer.init({
             backend: {
-                loadPath: "../i18n/{{lng}}.json",
+                loadPath: path.join(__dirname, "../../i18n/{{lng}}.json"),
             },
             fallbackLng: DEFAULT_LOCALE,
             initImmediate: false,
