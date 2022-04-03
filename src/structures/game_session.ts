@@ -280,9 +280,11 @@ export default class GameSession extends Session {
             return;
         }
 
-        this.round.interactionMarkAnswers(guessResult.correctGuessers?.length);
+        const round = this.round;
 
-        const timePlayed = Date.now() - this.round.startedAt;
+        round.interactionMarkAnswers(guessResult.correctGuessers?.length);
+
+        const timePlayed = Date.now() - round.startedAt;
         if (guessResult.correct) {
             // update guessing streaks
             if (
@@ -317,10 +319,10 @@ export default class GameSession extends Session {
         }
 
         this.incrementSongStats(
-            this.round.song.youtubeLink,
+            round.song.youtubeLink,
             guessResult.correct,
-            this.round.skipAchieved,
-            this.round.hintUsed,
+            round.skipAchieved,
+            round.hintUsed,
             timePlayed
         );
 
@@ -337,7 +339,7 @@ export default class GameSession extends Session {
             );
 
             // if message fails to send, no ID is returned
-            this.round.endRoundMessageID = endRoundMessage?.id;
+            round.endRoundMessageID = endRoundMessage?.id;
         }
 
         super.endRound(guildPreference, messageContext);
@@ -458,8 +460,6 @@ export default class GameSession extends Session {
             });
         }
 
-        await sendEndGameMessage(this);
-
         // commit guild's game session
         const sessionLength = (Date.now() - this.startedAt) / (1000 * 60);
         const averageGuessTime =
@@ -485,7 +485,8 @@ export default class GameSession extends Session {
             await this.storeSongStats();
         }
 
-        super.endSession();
+        await super.endSession();
+        await sendEndGameMessage(this);
 
         logger.info(
             `gid: ${this.guildID} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}. gameType = ${this.gameType}`
