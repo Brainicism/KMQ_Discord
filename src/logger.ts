@@ -1,10 +1,10 @@
-/* eslint-disable quote-props */
+import { isMaster } from "cluster";
 import { config } from "dotenv";
 import { resolve } from "path";
-import { isMaster } from "cluster";
-import winston from "winston";
 import path from "path";
+import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
+
 import { EnvType } from "./types";
 
 config({ path: resolve(__dirname, "../.env") });
@@ -30,8 +30,8 @@ export function getInternalLogger(): winston.Logger {
     );
 
     return winston.createLogger({
-        level: process.env.DEBUG_LOGGING ? "debug" : "info",
         format: format.combine(format.timestamp(), logFormat),
+        level: process.env.DEBUG_LOGGING ? "debug" : "info",
         transports: [
             new winston.transports.Console({
                 format: format.combine(format.timestamp(), consoleFormat),

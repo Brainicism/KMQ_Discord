@@ -1,14 +1,14 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import { getGuildPreference } from "../../helpers/game_utils";
-import { IPCLogger } from "../../logger";
+import CommandPrechecks from "../../command_prechecks";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
-import CommandPrechecks from "../../command_prechecks";
+import { getGuildPreference } from "../../helpers/game_utils";
 import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import { GameOption } from "../../types";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("language");
 
@@ -25,24 +25,22 @@ export default class LanguageCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
-        minArgCount: 0,
-        maxArgCount: 1,
         arguments: [
             {
+                enums: Object.values(LanguageType),
                 name: "language",
                 type: "enum" as const,
-                enums: Object.values(LanguageType),
             },
         ],
+        maxArgCount: 1,
+        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
-        name: "language",
         description: state.localizer.translate(
             guildID,
             "command.language.help.description"
         ),
-        usage: ",language [korean | all]",
         examples: [
             {
                 example: "`,language korean`",
@@ -67,7 +65,9 @@ export default class LanguageCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "language",
         priority: 150,
+        usage: ",language [korean | all]",
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

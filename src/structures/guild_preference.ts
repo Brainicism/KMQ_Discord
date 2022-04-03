@@ -1,32 +1,32 @@
 import _ from "lodash";
 import * as uuid from "uuid";
+
 import {
-    DEFAULT_BEGINNING_SEARCH_YEAR,
-    DEFAULT_ENDING_SEARCH_YEAR,
-} from "../commands/game_options/cutoff";
-import { DEFAULT_LIMIT } from "../commands/game_options/limit";
-import { Gender, DEFAULT_GENDER } from "../commands/game_options/gender";
-import { SeekType, DEFAULT_SEEK } from "../commands/game_options/seek";
-import { ShuffleType, DEFAULT_SHUFFLE } from "../commands/game_options/shuffle";
-import {
-    GuessModeType,
-    DEFAULT_GUESS_MODE,
-} from "../commands/game_options/guessmode";
-import { IPCLogger } from "../logger";
-import dbContext from "../database_context";
+    AnswerType,
+    DEFAULT_ANSWER_TYPE,
+} from "../commands/game_options/answer";
 import {
     ArtistType,
     DEFAULT_ARTIST_TYPE,
 } from "../commands/game_options/artisttype";
 import {
+    DEFAULT_BEGINNING_SEARCH_YEAR,
+    DEFAULT_ENDING_SEARCH_YEAR,
+} from "../commands/game_options/cutoff";
+import { DEFAULT_GENDER, Gender } from "../commands/game_options/gender";
+import {
+    DEFAULT_GUESS_MODE,
+    GuessModeType,
+} from "../commands/game_options/guessmode";
+import {
     DEFAULT_LANGUAGE,
     LanguageType,
 } from "../commands/game_options/language";
+import { DEFAULT_LIMIT } from "../commands/game_options/limit";
 import {
-    DEFAULT_SUBUNIT_PREFERENCE,
-    SubunitsPreference,
-} from "../commands/game_options/subunits";
-import { GameOption, MatchedArtist } from "../types";
+    DEFAULT_MULTIGUESS_TYPE,
+    MultiGuessType,
+} from "../commands/game_options/multiguess";
 import {
     DEFAULT_OST_PREFERENCE,
     OstPreference,
@@ -35,16 +35,17 @@ import {
     DEFAULT_RELEASE_TYPE,
     ReleaseType,
 } from "../commands/game_options/release";
-import {
-    DEFAULT_MULTIGUESS_TYPE,
-    MultiGuessType,
-} from "../commands/game_options/multiguess";
-import { state } from "../kmq_worker";
+import { DEFAULT_SEEK, SeekType } from "../commands/game_options/seek";
+import { DEFAULT_SHUFFLE, ShuffleType } from "../commands/game_options/shuffle";
 import { SpecialType } from "../commands/game_options/special";
 import {
-    AnswerType,
-    DEFAULT_ANSWER_TYPE,
-} from "../commands/game_options/answer";
+    DEFAULT_SUBUNIT_PREFERENCE,
+    SubunitsPreference,
+} from "../commands/game_options/subunits";
+import dbContext from "../database_context";
+import { state } from "../kmq_worker";
+import { IPCLogger } from "../logger";
+import { GameOption, MatchedArtist } from "../types";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("guild_preference");
@@ -242,29 +243,29 @@ export default class GuildPreference {
     };
 
     static DEFAULT_OPTIONS = {
+        answerType: DEFAULT_ANSWER_TYPE,
+        artistType: DEFAULT_ARTIST_TYPE,
         beginningYear: DEFAULT_BEGINNING_SEARCH_YEAR,
+        duration: null,
         endYear: DEFAULT_ENDING_SEARCH_YEAR,
+        excludes: null,
+        forcePlaySongID: null,
         gender: DEFAULT_GENDER,
+        goal: null,
+        groups: null,
+        guessModeType: DEFAULT_GUESS_MODE,
+        guessTimeout: null,
+        includes: null,
+        languageType: DEFAULT_LANGUAGE,
         limitEnd: DEFAULT_LIMIT,
         limitStart: 0,
-        seekType: DEFAULT_SEEK,
-        specialType: null,
-        guessModeType: DEFAULT_GUESS_MODE,
-        releaseType: DEFAULT_RELEASE_TYPE,
-        shuffleType: DEFAULT_SHUFFLE,
-        groups: null,
-        excludes: null,
-        includes: null,
-        goal: null,
-        guessTimeout: null,
-        duration: null,
-        artistType: DEFAULT_ARTIST_TYPE,
-        answerType: DEFAULT_ANSWER_TYPE,
-        languageType: DEFAULT_LANGUAGE,
         multiGuessType: DEFAULT_MULTIGUESS_TYPE,
-        subunitPreference: DEFAULT_SUBUNIT_PREFERENCE,
         ostPreference: DEFAULT_OST_PREFERENCE,
-        forcePlaySongID: null,
+        releaseType: DEFAULT_RELEASE_TYPE,
+        seekType: DEFAULT_SEEK,
+        shuffleType: DEFAULT_SHUFFLE,
+        specialType: null,
+        subunitPreference: DEFAULT_SUBUNIT_PREFERENCE,
     };
 
     public gameOptions: GameOptions;
@@ -365,17 +366,17 @@ export default class GuildPreference {
             const presetOptions = Object.entries(this.gameOptions).map(
                 (option) => ({
                     guild_id: this.guildID,
-                    preset_name: presetName,
                     option_name: option[0],
                     option_value: JSON.stringify(option[1]),
+                    preset_name: presetName,
                 })
             );
 
             presetOptions.push({
                 guild_id: this.guildID,
-                preset_name: presetName,
                 option_name: "uuid",
                 option_value: JSON.stringify(oldUUID ?? `KMQ-${uuid.v4()}`),
+                preset_name: presetName,
             });
 
             await dbContext.kmq.transaction(async (trx) => {
@@ -884,8 +885,8 @@ export default class GuildPreference {
     ): Promise<void> {
         const updatedOptions = Object.values(updatedOptionsObjects).map(
             (option) => ({
-                guild_id: this.guildID,
                 client_id: process.env.BOT_CLIENT_ID,
+                guild_id: this.guildID,
                 option_name: option.name,
                 option_value: JSON.stringify(option.value),
             })

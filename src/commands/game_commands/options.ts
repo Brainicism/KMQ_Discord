@@ -1,12 +1,12 @@
 import {
-    sendOptionsMessage,
     getDebugLogHeader,
+    sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
+import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import { state } from "../../kmq_worker";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("options");
 
@@ -14,14 +14,14 @@ export default class OptionsCommand implements BaseCommand {
     aliases = ["settings"];
 
     help = (guildID: string): Help => ({
-        name: "options",
         description: state.localizer.translate(
             guildID,
             "command.options.help.description"
         ),
-        usage: ",options",
         examples: [],
+        name: "options",
         priority: 50,
+        usage: ",options",
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {

@@ -6,7 +6,9 @@
         "eslint-plugin-tsdoc",
         "jsdoc",
         "only-warn",
-        "import"
+        "import",
+        "simple-import-sort",
+        "sort-keys-fix"
     ],
     "parserOptions": {
         "project": "./tsconfig.json"
@@ -136,8 +138,11 @@
         "quote-props": [
             "off"
         ],
+        "sort-keys-fix/sort-keys-fix": ["warn"],
+        "simple-import-sort/imports": ["warn"],
+        "simple-import-sort/exports": ["warn"],
         "padding-line-between-statements": [
-            "error",
+            "warn",
             {
                 "blankLine": "always",
                 "prev": "block-like",

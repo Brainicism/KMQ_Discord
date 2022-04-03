@@ -2,19 +2,26 @@
 import Eris from "eris";
 import _ from "lodash";
 import * as uuid from "uuid";
+
+import { calculateTotalRoundExp } from "../commands/game_commands/exp";
+import { getRankNameByLevel } from "../commands/game_commands/profile";
+import { AnswerType } from "../commands/game_options/answer";
+import { GuessModeType } from "../commands/game_options/guessmode";
+import { MultiGuessType } from "../commands/game_options/multiguess";
+import { KmqImages } from "../constants";
 import dbContext from "../database_context";
 import {
+    getCurrentVoiceMembers,
     getDebugLogHeader,
-    sendInfoMessage,
+    getGuildLocale,
+    getMention,
     getNumParticipants,
     getUserVoiceChannel,
     sendEndGameMessage,
-    getCurrentVoiceMembers,
-    tryInteractionAcknowledge,
-    tryCreateInteractionErrorAcknowledgement,
-    getMention,
-    getGuildLocale,
     sendEndRoundMessage,
+    sendInfoMessage,
+    tryCreateInteractionErrorAcknowledgement,
+    tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
 import {
     getGuildPreference,
@@ -25,33 +32,27 @@ import {
     userBonusIsActive,
 } from "../helpers/game_utils";
 import {
+    chooseRandom,
+    chunkArray,
+    codeLine,
     delay,
     getOrdinalNum,
     setDifference,
-    codeLine,
-    chunkArray,
-    chooseRandom,
 } from "../helpers/utils";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
-import { QueriedSong, GameType } from "../types";
+import Player from "../structures/player";
+import { GameType, QueriedSong } from "../types";
+import EliminationPlayer from "./elimination_player";
+import EliminationScoreboard from "./elimination_scoreboard";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
-import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
-import EliminationScoreboard from "./elimination_scoreboard";
-import TeamScoreboard from "./team_scoreboard";
-import { GuessModeType } from "../commands/game_options/guessmode";
-import { getRankNameByLevel } from "../commands/game_commands/profile";
-import EliminationPlayer from "./elimination_player";
-import { KmqImages } from "../constants";
-import MessageContext from "./message_context";
 import KmqMember from "./kmq_member";
-import { MultiGuessType } from "../commands/game_options/multiguess";
-import { AnswerType } from "../commands/game_options/answer";
-import { calculateTotalRoundExp } from "../commands/game_commands/exp";
-import Player from "../structures/player";
-import Session, { SONG_START_DELAY } from "./session";
+import MessageContext from "./message_context";
 import Round from "./round";
+import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
+import Session, { SONG_START_DELAY } from "./session";
+import TeamScoreboard from "./team_scoreboard";
 
 const MULTIGUESS_DELAY = 1500;
 
@@ -193,19 +194,19 @@ export default class GameSession extends Session {
                 const id = uuid.v4();
                 this.round.interactionIncorrectAnswerUUIDs[id] = 0;
                 buttons.push({
-                    type: 2,
-                    style: 1,
-                    label: choice.substring(0, 70),
                     custom_id: id,
+                    label: choice.substring(0, 70),
+                    style: 1,
+                    type: 2,
                 });
             }
 
             this.round.interactionCorrectAnswerUUID = uuid.v4();
             buttons.push({
-                type: 2,
-                style: 1,
-                label: correctChoice.substring(0, 70),
                 custom_id: this.round.interactionCorrectAnswerUUID,
+                label: correctChoice.substring(0, 70),
+                style: 1,
+                type: 2,
             });
 
             buttons = _.shuffle(buttons);
@@ -215,21 +216,21 @@ export default class GameSession extends Session {
                 case AnswerType.MULTIPLE_CHOICE_EASY:
                     components = [
                         {
-                            type: 1,
                             components: buttons,
+                            type: 1,
                         },
                     ];
                     break;
                 case AnswerType.MULTIPLE_CHOICE_MED:
                     components = chunkArray(buttons, 3).map((x) => ({
-                        type: 1,
                         components: x,
+                        type: 1,
                     }));
                     break;
                 case AnswerType.MULTIPLE_CHOICE_HARD:
                     components = chunkArray(buttons, 4).map((x) => ({
-                        type: 1,
                         components: x,
+                        type: 1,
                     }));
                     break;
                 default:
@@ -241,6 +242,8 @@ export default class GameSession extends Session {
             this.round.interactionMessage = await sendInfoMessage(
                 new MessageContext(this.textChannelID),
                 {
+                    components,
+                    thumbnailUrl: KmqImages.LISTENING,
                     title: state.localizer.translate(
                         this.guildID,
                         "misc.interaction.guess.title",
@@ -258,8 +261,6 @@ export default class GameSession extends Session {
                                       ),
                         }
                     ),
-                    components,
-                    thumbnailUrl: KmqImages.LISTENING,
                 }
             );
         }
@@ -292,8 +293,8 @@ export default class GameSession extends Session {
                 this.lastGuesser.userID !== guessResult.correctGuessers[0].id
             ) {
                 this.lastGuesser = {
-                    userID: guessResult.correctGuessers[0].id,
                     streak: 1,
+                    userID: guessResult.correctGuessers[0].id,
                 };
             } else {
                 this.lastGuesser.streak++;
@@ -367,8 +368,8 @@ export default class GameSession extends Session {
                         .getPlayers()
                         .sort((a, b) => b.getScore() - a.getScore())
                         .map((x) => ({
-                            name: x.name,
                             id: x.id,
+                            name: x.name,
                             score: x.getDisplayedScore(),
                         }))
                 )
@@ -423,10 +424,6 @@ export default class GameSession extends Session {
                         this.guildID,
                         "misc.levelUp.entry",
                         {
-                            user: getMention(leveledUpPlayer.userID),
-                            startLevel: codeLine(
-                                String(leveledUpPlayer.startLevel)
-                            ),
                             endLevel: codeLine(
                                 String(leveledUpPlayer.endLevel)
                             ),
@@ -436,6 +433,10 @@ export default class GameSession extends Session {
                                     this.guildID
                                 )
                             ),
+                            startLevel: codeLine(
+                                String(leveledUpPlayer.startLevel)
+                            ),
+                            user: getMention(leveledUpPlayer.userID),
                         }
                     )
                 )
@@ -451,12 +452,12 @@ export default class GameSession extends Session {
             }
 
             sendInfoMessage(new MessageContext(this.textChannelID), {
+                description: levelUpMessages.join("\n"),
+                thumbnailUrl: KmqImages.THUMBS_UP,
                 title: state.localizer.translate(
                     this.guildID,
                     "misc.levelUp.title"
                 ),
-                description: levelUpMessages.join("\n"),
-                thumbnailUrl: KmqImages.THUMBS_UP,
             });
         }
 
@@ -469,14 +470,14 @@ export default class GameSession extends Session {
                 : -1;
 
         await dbContext.kmq("game_sessions").insert({
-            start_date: new Date(this.startedAt),
+            avg_guess_time: averageGuessTime,
+            correct_guesses: this.correctGuesses,
             guild_id: this.guildID,
             num_participants: this.scoreboard.getPlayers().map((x) => x.inVC)
                 .length,
-            avg_guess_time: averageGuessTime,
-            session_length: sessionLength,
             rounds_played: this.roundsPlayed,
-            correct_guesses: this.correctGuesses,
+            session_length: sessionLength,
+            start_date: new Date(this.startedAt),
         });
 
         // commit session's song plays and correct guesses
@@ -607,20 +608,20 @@ export default class GameSession extends Session {
         );
 
         sendInfoMessage(new MessageContext(this.textChannelID), {
-            title: state.localizer.translate(
-                this.guildID,
-                "misc.gameOwnerChanged.title"
-            ),
             description: state.localizer.translate(
                 this.guildID,
                 "misc.gameOwnerChanged.description",
                 {
-                    newGameOwner: getMention(this.owner.id),
                     forcehintCommand: `\`${process.env.BOT_PREFIX}forcehint\``,
                     forceskipCommand: `\`${process.env.BOT_PREFIX}forceskip\``,
+                    newGameOwner: getMention(this.owner.id),
                 }
             ),
             thumbnailUrl: KmqImages.LISTENING,
+            title: state.localizer.translate(
+                this.guildID,
+                "misc.gameOwnerChanged.title"
+            ),
         });
     }
 
@@ -867,9 +868,9 @@ export default class GameSession extends Session {
         await dbContext
             .kmq("player_stats")
             .insert({
-                player_id: userID,
                 first_play: currentDateString,
                 last_active: currentDateString,
+                player_id: userID,
             })
             .onConflict("player_id")
             .ignore();
@@ -946,9 +947,9 @@ export default class GameSession extends Session {
         if (level !== newLevel) {
             logger.info(`${userID} has leveled from ${level} to ${newLevel}`);
             return {
-                userID,
-                startLevel: level,
                 endLevel: newLevel,
+                startLevel: level,
+                userID,
             };
         }
 
@@ -969,11 +970,11 @@ export default class GameSession extends Session {
         levelsGained: number
     ): Promise<void> {
         await dbContext.kmq("player_game_session_stats").insert({
-            player_id: userID,
             date: new Date(),
-            songs_guessed: score,
             exp_gained: expGain,
             levels_gained: levelsGained,
+            player_id: userID,
+            songs_guessed: score,
         });
     }
 
@@ -995,11 +996,11 @@ export default class GameSession extends Session {
         if (!(vlink in this.songStats)) {
             this.songStats[vlink] = {
                 correctGuesses: 0,
+                hintCount: 0,
                 roundsPlayed: 0,
                 skipCount: 0,
-                hintCount: 0,
-                timeToGuess: 0,
                 timePlayed: 0,
+                timeToGuess: 0,
             };
         }
 
@@ -1027,13 +1028,13 @@ export default class GameSession extends Session {
             await dbContext
                 .kmq("song_metadata")
                 .insert({
-                    vlink,
                     correct_guesses: 0,
+                    hint_count: 0,
                     rounds_played: 0,
                     skip_count: 0,
-                    hint_count: 0,
-                    time_to_guess_ms: 0,
                     time_played_ms: 0,
+                    time_to_guess_ms: 0,
+                    vlink,
                 })
                 .onConflict("vlink")
                 .ignore();
@@ -1125,12 +1126,12 @@ export default class GameSession extends Session {
                 }
 
                 return {
+                    expGain,
                     player: correctGuesser,
                     pointsEarned:
                         idx === 0
                             ? correctGuesser.pointsAwarded
                             : correctGuesser.pointsAwarded / 2,
-                    expGain,
                     streak,
                 };
             })
@@ -1139,9 +1140,9 @@ export default class GameSession extends Session {
         this.round.playerRoundResults = playerRoundResults;
         const scoreboardUpdatePayload: SuccessfulGuessResult[] =
             playerRoundResults.map((x) => ({
-                userID: x.player.id,
                 expGain: x.expGain,
                 pointsEarned: x.pointsEarned,
+                userID: x.player.id,
             }));
 
         await this.scoreboard.update(scoreboardUpdatePayload);

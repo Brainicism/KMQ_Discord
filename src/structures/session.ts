@@ -1,6 +1,10 @@
 import Eris from "eris";
 import fs from "fs";
-import { IPCLogger } from "../logger";
+
+import { SeekType } from "../commands/game_options/seek";
+import { specialFfmpegArgs } from "../commands/game_options/special";
+import { KmqImages } from "../constants";
+import dbContext from "../database_context";
 import {
     getDebugLogHeader,
     getGuildLocale,
@@ -10,7 +14,15 @@ import {
     tryCreateInteractionErrorAcknowledgement,
     tryCreateInteractionSuccessAcknowledgement,
 } from "../helpers/discord_utils";
-import dbContext from "../database_context";
+import {
+    ensureVoiceConnection,
+    getGuildPreference,
+    getLocalizedSongName,
+} from "../helpers/game_utils";
+import { deleteGameSession } from "../helpers/management_utils";
+import { bold, friendlyFormattedNumber } from "../helpers/utils";
+import { state } from "../kmq_worker";
+import { IPCLogger } from "../logger";
 import { QueriedSong } from "../types";
 import { GuessResult } from "./game_session";
 import GuildPreference from "./guild_preference";
@@ -18,17 +30,6 @@ import KmqMember from "./kmq_member";
 import MessageContext from "./message_context";
 import Round from "./round";
 import SongSelector from "./song_selector";
-import { deleteGameSession } from "../helpers/management_utils";
-import {
-    ensureVoiceConnection,
-    getGuildPreference,
-    getLocalizedSongName,
-} from "../helpers/game_utils";
-import { state } from "../kmq_worker";
-import { KmqImages } from "../constants";
-import { bold, friendlyFormattedNumber } from "../helpers/utils";
-import { SeekType } from "../commands/game_options/seek";
-import { specialFfmpegArgs } from "../commands/game_options/special";
 
 export const SONG_START_DELAY = 3000;
 const BOOKMARK_MESSAGE_SIZE = 10;
@@ -115,13 +116,13 @@ export default abstract class Session {
                 await this.reloadSongs(guildPreference);
             } catch (err) {
                 await sendErrorMessage(messageContext, {
-                    title: state.localizer.translate(
-                        this.guildID,
-                        "misc.failure.errorSelectingSong.title"
-                    ),
                     description: state.localizer.translate(
                         this.guildID,
                         "misc.failure.errorSelectingSong.description"
+                    ),
+                    title: state.localizer.translate(
+                        this.guildID,
+                        "misc.failure.errorSelectingSong.title"
                     ),
                 });
 
@@ -146,16 +147,16 @@ export default abstract class Session {
             );
 
             await sendInfoMessage(messageContext, {
-                title: state.localizer.translate(
-                    this.guildID,
-                    "misc.uniqueSongsReset.title"
-                ),
                 description: state.localizer.translate(
                     this.guildID,
                     "misc.uniqueSongsReset.description",
                     { totalSongCount: friendlyFormattedNumber(totalSongCount) }
                 ),
                 thumbnailUrl: KmqImages.LISTENING,
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.uniqueSongsReset.title"
+                ),
             });
         }
 
@@ -166,13 +167,13 @@ export default abstract class Session {
 
         if (randomSong === null) {
             sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
-                    this.guildID,
-                    "misc.failure.songQuery.title"
-                ),
                 description: state.localizer.translate(
                     this.guildID,
                     "misc.failure.songQuery.description"
+                ),
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.songQuery.title"
                 ),
             });
             await this.endSession();
@@ -203,13 +204,13 @@ export default abstract class Session {
             );
 
             await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
-                    this.guildID,
-                    "misc.failure.vcJoin.title"
-                ),
                 description: state.localizer.translate(
                     this.guildID,
                     "misc.failure.vcJoin.description"
+                ),
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.vcJoin.title"
                 ),
             });
             return;
@@ -244,15 +245,15 @@ export default abstract class Session {
             this.songMessageIDs.push({
                 messageID: round.endRoundMessageID,
                 song: {
-                    songName: round.song.songName,
-                    originalSongName: round.song.originalSongName,
-                    hangulSongName: round.song.hangulSongName,
-                    originalHangulSongName: round.song.originalHangulSongName,
                     artistName: round.song.artistName,
                     hangulArtistName: round.song.hangulArtistName,
-                    youtubeLink: round.song.youtubeLink,
+                    hangulSongName: round.song.hangulSongName,
+                    originalHangulSongName: round.song.originalHangulSongName,
+                    originalSongName: round.song.originalSongName,
                     publishDate: round.song.publishDate,
+                    songName: round.song.songName,
                     views: round.song.views,
+                    youtubeLink: round.song.youtubeLink,
                 },
             });
         }
@@ -306,27 +307,27 @@ export default abstract class Session {
             ).reduce((total, x) => total + x.size, 0);
 
             await sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: state.localizer.translate(
-                    this.guildID,
-                    "misc.sendingBookmarkedSongs.title"
-                ),
                 description: state.localizer.translate(
                     this.guildID,
                     "misc.sendingBookmarkedSongs.description",
                     {
-                        songs: state.localizer.translateN(
-                            this.guildID,
-                            "misc.plural.song",
-                            bookmarkedSongCount
-                        ),
                         players: state.localizer.translateN(
                             this.guildID,
                             "misc.plural.player",
                             bookmarkedSongsPlayerCount
                         ),
+                        songs: state.localizer.translateN(
+                            this.guildID,
+                            "misc.plural.song",
+                            bookmarkedSongCount
+                        ),
                     }
                 ),
                 thumbnailUrl: KmqImages.READING_BOOK,
+                title: state.localizer.translate(
+                    this.guildID,
+                    "misc.sendingBookmarkedSongs.title"
+                ),
             });
             await sendBookmarkedSongs(this.guildID, this.bookmarkedSongs);
 
@@ -554,8 +555,8 @@ export default abstract class Session {
             }
 
             this.connection.play(stream, {
-                inputArgs,
                 encoderArgs,
+                inputArgs,
                 opusPassthrough: specialType === null,
             });
         } catch (e) {
@@ -633,13 +634,13 @@ export default abstract class Session {
         });
 
         await sendErrorMessage(messageContext, {
-            title: state.localizer.translate(
-                this.guildID,
-                "misc.failure.songPlaying.title"
-            ),
             description: state.localizer.translate(
                 this.guildID,
                 "misc.failure.songPlaying.description"
+            ),
+            title: state.localizer.translate(
+                this.guildID,
+                "misc.failure.songPlaying.title"
             ),
         });
         this.roundsPlayed--;

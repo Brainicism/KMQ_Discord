@@ -1,10 +1,10 @@
-import Scoreboard, {
-    SuccessfulGuessResult,
-    SCOREBOARD_FIELD_CUTOFF,
-} from "./scoreboard";
-import Player from "./player";
-import Team from "./team";
 import { IPCLogger } from "../logger";
+import Player from "./player";
+import Scoreboard, {
+    SCOREBOARD_FIELD_CUTOFF,
+    SuccessfulGuessResult,
+} from "./scoreboard";
+import Team from "./team";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("team_scoreboard");

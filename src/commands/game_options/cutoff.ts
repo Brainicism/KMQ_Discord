@@ -1,15 +1,15 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import CommandPrechecks from "../../command_prechecks";
 import {
-    sendOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
+    sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
-import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import { GameOption } from "../../types";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("cutoff");
 
@@ -20,31 +20,29 @@ export default class CutoffCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
-        minArgCount: 0,
-        maxArgCount: 2,
         arguments: [
             {
+                maxValue: DEFAULT_ENDING_SEARCH_YEAR,
+                minValue: DEFAULT_BEGINNING_SEARCH_YEAR,
                 name: "cutoff_start",
                 type: "number" as const,
-                minValue: DEFAULT_BEGINNING_SEARCH_YEAR,
-                maxValue: DEFAULT_ENDING_SEARCH_YEAR,
             },
             {
+                maxValue: DEFAULT_ENDING_SEARCH_YEAR,
+                minValue: DEFAULT_BEGINNING_SEARCH_YEAR,
                 name: "cutoff_end",
                 type: "number" as const,
-                minValue: DEFAULT_BEGINNING_SEARCH_YEAR,
-                maxValue: DEFAULT_ENDING_SEARCH_YEAR,
             },
         ],
+        maxArgCount: 2,
+        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
-        name: "cutoff",
         description: state.localizer.translate(
             guildID,
             "command.cutoff.help.description"
         ),
-        usage: ",cutoff [year_start] {year_end}",
         examples: [
             {
                 example: "`,cutoff 2015`",
@@ -83,7 +81,9 @@ export default class CutoffCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "cutoff",
         priority: 140,
+        usage: ",cutoff [year_start] {year_end}",
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
@@ -116,13 +116,13 @@ export default class CutoffCommand implements BaseCommand {
             const endYear = yearRange[1];
             if (endYear < startYear) {
                 await sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
-                        message.guildID,
-                        "command.cutoff.failure.invalidEndYear.title"
-                    ),
                     description: state.localizer.translate(
                         message.guildID,
                         "command.cutoff.failure.invalidEndYear.description"
+                    ),
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "command.cutoff.failure.invalidEndYear.title"
                     ),
                 });
                 return;

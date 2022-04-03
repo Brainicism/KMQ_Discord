@@ -1,35 +1,36 @@
 import Eris from "eris";
 import os from "os";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+
+import { KmqImages } from "../../constants";
+import dbContext from "../../database_context";
 import {
     getDebugLogHeader,
     sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
-import dbContext from "../../database_context";
-import { IPCLogger } from "../../logger";
-import { KmqImages } from "../../constants";
-import MessageContext from "../../structures/message_context";
-import { state } from "../../kmq_worker";
+import { getKmqCurrentVersion } from "../../helpers/game_utils";
 import {
     friendlyFormattedDate,
     friendlyFormattedNumber,
     measureExecutionTime,
 } from "../../helpers/utils";
-import { getKmqCurrentVersion } from "../../helpers/game_utils";
+import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("stats");
 
 export default class StatsCommand implements BaseCommand {
     help = (guildID: string): Help => ({
-        name: "stats",
         description: state.localizer.translate(
             guildID,
             "command.stats.help.description"
         ),
-        usage: ",stats",
         examples: [],
+        name: "stats",
         priority: 1,
+        usage: ",stats",
     });
 
     call = async ({ message, channel }: CommandArgs): Promise<void> => {
@@ -48,13 +49,13 @@ export default class StatsCommand implements BaseCommand {
         } catch (e) {
             logger.error(`Error retrieving stats via IPC. err = ${e}`);
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "command.stats.failure.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "command.stats.failure.description"
+                ),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.stats.failure.title"
                 ),
             });
             return;
@@ -230,10 +231,6 @@ export default class StatsCommand implements BaseCommand {
 
         logger.info(`${getDebugLogHeader(message)} | Stats retrieved`);
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
-                message.guildID,
-                "command.stats.title"
-            ),
             description: state.localizer.translate(
                 message.guildID,
                 "command.stats.description",
@@ -246,8 +243,12 @@ export default class StatsCommand implements BaseCommand {
                 message.guildID,
                 "command.stats.footer"
             )}`,
-            timestamp: new Date(),
             thumbnailUrl: KmqImages.READING_BOOK,
+            timestamp: new Date(),
+            title: state.localizer.translate(
+                message.guildID,
+                "command.stats.title"
+            ),
         });
     };
 }

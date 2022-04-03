@@ -1,8 +1,8 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import { getDebugLogHeader } from "../../helpers/discord_utils";
-import { IPCLogger } from "../../logger";
 import CommandPrechecks from "../../command_prechecks";
+import { getDebugLogHeader } from "../../helpers/discord_utils";
 import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("end");
 
@@ -15,14 +15,14 @@ export default class EndCommand implements BaseCommand {
     ];
 
     help = (guildID: string): Help => ({
-        name: "end",
         description: state.localizer.translate(
             guildID,
             "command.end.help.description"
         ),
-        usage: ",end",
         examples: [],
+        name: "end",
         priority: 1020,
+        usage: ",end",
     });
 
     call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {

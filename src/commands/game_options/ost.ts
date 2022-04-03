@@ -1,14 +1,14 @@
+import CommandPrechecks from "../../command_prechecks";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
-import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import { GameOption } from "../../types";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("ost");
 
@@ -26,24 +26,22 @@ export default class OstCommand implements BaseCommand {
     aliases = ["osts"];
 
     validations = {
-        minArgCount: 0,
-        maxArgCount: 1,
         arguments: [
             {
+                enums: Object.values(OstPreference),
                 name: "ostPreference",
                 type: "enum" as const,
-                enums: Object.values(OstPreference),
             },
         ],
+        maxArgCount: 1,
+        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
-        name: "ost",
         description: state.localizer.translate(
             guildID,
             "command.ost.help.description"
         ),
-        usage: ",ost [include | exclude | exclusive]",
         examples: [
             {
                 example: "`,ost include`",
@@ -75,7 +73,9 @@ export default class OstCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "ost",
         priority: 130,
+        usage: ",ost [include | exclude | exclusive]",
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

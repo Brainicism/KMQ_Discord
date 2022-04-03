@@ -2,6 +2,7 @@
 import Eris from "eris";
 import fs from "fs";
 import path from "path";
+
 import BaseCommand from "./commands/interfaces/base_command";
 import { IPCLogger } from "./logger";
 

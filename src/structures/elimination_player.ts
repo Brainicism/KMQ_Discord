@@ -1,7 +1,7 @@
-import Player from "./player";
 import { getUserTag } from "../helpers/discord_utils";
 import { state } from "../kmq_worker";
 import { DEFAULT_LIVES } from "./elimination_scoreboard";
+import Player from "./player";
 
 export default class EliminationPlayer extends Player {
     // this.score => the player's lives

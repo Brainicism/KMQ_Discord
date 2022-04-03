@@ -1,15 +1,15 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import CommandPrechecks from "../../command_prechecks";
 import {
-    sendOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
+    sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
-import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import { GameOption } from "../../types";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("gender");
 
@@ -26,40 +26,38 @@ export default class GenderCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
-        minArgCount: 0,
-        maxArgCount: 3,
         arguments: [
             {
+                enums: Object.values(Gender),
                 name: "gender_1",
                 type: "enum" as const,
-                enums: Object.values(Gender),
             },
             {
+                enums: Object.values(Gender).slice(0, 3),
                 name: "gender_2",
                 type: "enum" as const,
-                enums: Object.values(Gender).slice(0, 3),
             },
             {
+                enums: Object.values(Gender).slice(0, 3),
                 name: "gender_3",
                 type: "enum" as const,
-                enums: Object.values(Gender).slice(0, 3),
             },
         ],
+        maxArgCount: 3,
+        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
-        name: "gender",
         description: state.localizer.translate(
             guildID,
             "command.gender.help.description",
             {
-                male: `\`${Gender.MALE}\``,
-                female: `\`${Gender.FEMALE}\``,
                 coed: `\`${Gender.COED}\``,
+                female: `\`${Gender.FEMALE}\``,
                 genderAlternating: `\`${process.env.BOT_PREFIX}gender alternating\``,
+                male: `\`${Gender.MALE}\``,
             }
         ),
-        usage: ",gender [gender_1 | alternating] {gender_2} {gender_3}",
         examples: [
             {
                 example: "`,gender female`",
@@ -97,7 +95,9 @@ export default class GenderCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "gender",
         priority: 150,
+        usage: ",gender [gender_1 | alternating] {gender_2} {gender_3}",
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
@@ -125,18 +125,18 @@ export default class GenderCommand implements BaseCommand {
                 );
 
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
-                        message.guildID,
-                        "misc.failure.gameOptionConflict.title"
-                    ),
                     description: state.localizer.translate(
                         message.guildID,
                         "misc.failure.gameOptionConflict.description",
                         {
                             optionOne: "`groups`",
-                            optionTwo: "`gender`",
                             optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
+                            optionTwo: "`gender`",
                         }
+                    ),
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "misc.failure.gameOptionConflict.title"
                     ),
                 });
                 return;
@@ -149,16 +149,16 @@ export default class GenderCommand implements BaseCommand {
                 guildPreference.getGroupIDs().length === 1
             ) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
-                        message.guildID,
-                        "command.gender.warning.gameOption.title"
-                    ),
                     description: state.localizer.translate(
                         message.guildID,
                         "command.gender.warning.gameOption.description",
                         {
                             alternatingGenderCommand: `\`${process.env.BOT_PREFIX}gender alternating\``,
                         }
+                    ),
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "command.gender.warning.gameOption.title"
                     ),
                 });
             }

@@ -1,24 +1,25 @@
-import _ from "lodash";
-import Eris from "eris";
 import levenshtien from "damerau-levenshtein";
-import { GuessModeType } from "../commands/game_options/guessmode";
-import { state } from "../kmq_worker";
-import KmqMember from "./kmq_member";
+import Eris from "eris";
+import _ from "lodash";
+
 import {
     ExpBonusModifier,
     ExpBonusModifierValues,
 } from "../commands/game_commands/exp";
-import { PlayerRoundResult, QueriedSong } from "../types";
-import Round, { MAX_RUNNERS_UP } from "./round";
-import MessageContext from "./message_context";
+import { GuessModeType } from "../commands/game_options/guessmode";
 import {
     EMBED_ERROR_COLOR,
     EMBED_SUCCESS_BONUS_COLOR,
     EMBED_SUCCESS_COLOR,
     getMention,
 } from "../helpers/discord_utils";
-import { UniqueSongCounter } from "./song_selector";
 import { friendlyFormattedNumber } from "../helpers/utils";
+import { state } from "../kmq_worker";
+import { PlayerRoundResult, QueriedSong } from "../types";
+import KmqMember from "./kmq_member";
+import MessageContext from "./message_context";
+import Round, { MAX_RUNNERS_UP } from "./round";
+import { UniqueSongCounter } from "./song_selector";
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
 const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\(\)\+\u200B]/g;
@@ -165,8 +166,8 @@ export default class GameRound extends Round {
         this.correctGuessers = [];
         this.finished = false;
         this.hints = {
-            songHint: generateHint(song.songName),
             artistHint: generateHint(song.artistName),
+            songHint: generateHint(song.songName),
         };
         this.interactionCorrectAnswerUUID = null;
         this.interactionIncorrectAnswerUUIDs = {};
@@ -288,9 +289,7 @@ export default class GameRound extends Round {
     async interactionMarkAnswers(correctGuesses: number): Promise<void> {
         if (!this.interactionMessage) return;
         await this.interactionMessage.edit({
-            embeds: this.interactionMessage.embeds,
             components: this.interactionComponents.map((x) => ({
-                type: 1,
                 components: x.components.map((y) => {
                     const z = y as Eris.InteractionButton;
                     const noGuesses =
@@ -314,14 +313,16 @@ export default class GameRound extends Round {
                     }
 
                     return {
-                        label,
                         custom_id: z.custom_id,
+                        disabled: true,
+                        label,
                         style,
                         type: 2,
-                        disabled: true,
                     };
                 }),
+                type: 1,
             })),
+            embeds: this.interactionMessage.embeds,
         });
     }
 

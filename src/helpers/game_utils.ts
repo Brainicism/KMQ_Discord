@@ -1,18 +1,19 @@
-import _ from "lodash";
 import { execSync } from "child_process";
+import _ from "lodash";
+
+import { AnswerType } from "../commands/game_options/answer";
+import { Gender } from "../commands/game_options/gender";
+import { GuessModeType } from "../commands/game_options/guessmode";
 import dbContext from "../database_context";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
-import GuildPreference from "../structures/guild_preference";
-import { MatchedArtist, QueriedSong } from "../types";
-import { Gender } from "../commands/game_options/gender";
-import { GuessModeType } from "../commands/game_options/guessmode";
 import { cleanArtistName, cleanSongName } from "../structures/game_round";
-import { AnswerType } from "../commands/game_options/answer";
+import GuildPreference from "../structures/guild_preference";
+import Session from "../structures/session";
 import SongSelector from "../structures/song_selector";
+import { MatchedArtist, QueriedSong } from "../types";
 import { LocaleType } from "./localization_manager";
 import { containsHangul, md5Hash } from "./utils";
-import Session from "../structures/session";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -107,7 +108,7 @@ export async function getGuildPreference(
         await dbContext
             .kmq("game_options")
             .select("*")
-            .where({ guild_id: guildID, client_id: process.env.BOT_CLIENT_ID })
+            .where({ client_id: process.env.BOT_CLIENT_ID, guild_id: guildID })
     )
         .map((x) => ({ [x["option_name"]]: JSON.parse(x["option_value"]) }))
         .reduce((total, curr) => Object.assign(total, curr), {});
@@ -174,8 +175,8 @@ export async function getMatchingGroupNames(
     );
 
     const result: GroupMatchResults = {
-        unmatchedGroups: unrecognizedGroups,
         matchedGroups: matchingGroups,
+        unmatchedGroups: unrecognizedGroups,
     };
 
     if (result.unmatchedGroups.length > 0 && !aliasApplied) {

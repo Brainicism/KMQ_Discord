@@ -1,14 +1,14 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import { IPCLogger } from "../../logger";
-import { getGuildPreference } from "../../helpers/game_utils";
-import {
-    sendOptionsMessage,
-    getDebugLogHeader,
-} from "../../helpers/discord_utils";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import {
+    getDebugLogHeader,
+    sendOptionsMessage,
+} from "../../helpers/discord_utils";
+import { getGuildPreference } from "../../helpers/game_utils";
 import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import { GameOption } from "../../types";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("shuffle");
 
@@ -23,19 +23,18 @@ export default class ShuffleCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
-        minArgCount: 0,
-        maxArgCount: 1,
         arguments: [
             {
+                enums: Object.values(ShuffleType),
                 name: "shuffleType",
                 type: "enum" as const,
-                enums: Object.values(ShuffleType),
             },
         ],
+        maxArgCount: 1,
+        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
-        name: "shuffle",
         description: state.localizer.translate(
             guildID,
             "command.shuffle.help.description",
@@ -44,7 +43,6 @@ export default class ShuffleCommand implements BaseCommand {
                 shuffle: `\`${ShuffleType.UNIQUE}\``,
             }
         ),
-        usage: ",shuffle [random | unique]",
         examples: [
             {
                 example: "`,shuffle random`",
@@ -69,7 +67,9 @@ export default class ShuffleCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "shuffle",
         priority: 110,
+        usage: ",shuffle [random | unique]",
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

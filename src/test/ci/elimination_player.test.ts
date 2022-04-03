@@ -1,4 +1,5 @@
 import assert from "assert";
+
 import EliminationPlayer from "../../structures/elimination_player";
 
 let player: EliminationPlayer;
