@@ -40,14 +40,14 @@ export default class ForceSkipCommand implements BaseCommand {
         const gameSession = gameSessions[message.guildID];
         if (
             !gameSession ||
-            !gameSession.gameRound ||
+            !gameSession.round ||
             !areUserAndBotInSameVoiceChannel(message)
         ) {
             logger.warn(
                 `${getDebugLogHeader(
                     message
-                )} | Invalid force-skip. !gameSession: ${!gameSession}. !gameSession.gameRound: ${
-                    gameSession && !gameSession.gameRound
+                )} | Invalid force-skip. !gameSession: ${!gameSession}. !gameSession.round: ${
+                    gameSession && !gameSession.round
                 }. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(
                     message
                 )}`
@@ -55,7 +55,7 @@ export default class ForceSkipCommand implements BaseCommand {
             return;
         }
 
-        if (gameSession.gameRound.skipAchieved) {
+        if (gameSession.round.skipAchieved) {
             // song already being skipped
             return;
         }
@@ -75,7 +75,7 @@ export default class ForceSkipCommand implements BaseCommand {
             return;
         }
 
-        gameSession.gameRound.skipAchieved = true;
+        gameSession.round.skipAchieved = true;
         sendInfoMessage(
             MessageContext.fromMessage(message),
             {
@@ -94,9 +94,9 @@ export default class ForceSkipCommand implements BaseCommand {
         );
 
         await gameSession.endRound(
-            { correct: false },
             guildPreference,
-            MessageContext.fromMessage(message)
+            MessageContext.fromMessage(message),
+            { correct: false }
         );
 
         await gameSession.startRound(

@@ -11,6 +11,8 @@ import { state } from "../../kmq_worker";
 const logger = new IPCLogger("options");
 
 export default class OptionsCommand implements BaseCommand {
+    aliases = ["settings"];
+
     help = (guildID: string): Help => ({
         name: "options",
         description: state.localizer.translate(

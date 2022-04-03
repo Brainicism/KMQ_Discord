@@ -90,7 +90,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
         await guildPreference.setGuessTimeout(time);
         if (
             gameSession &&
-            gameSession.gameRound &&
+            gameSession.round &&
             gameSession.connection.playing
         ) {
             // Timer can start mid-song, starting when the user enters the command

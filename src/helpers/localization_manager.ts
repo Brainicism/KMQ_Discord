@@ -29,7 +29,7 @@ export default class LocalizationManager {
     }
 
     /**
-     * Translate the given phrase using locale configuration
+     * Wrapper for translateByLocale
      * @param guildID - The guild ID associated with the guild receiving the string
      * @param phrase - The phrase to translate
      * @param replace - Replacements to be applied to the phrase
@@ -40,22 +40,52 @@ export default class LocalizationManager {
         phrase: string,
         replace: { [key: string]: string } = {}
     ): string {
+        return this.translateByLocale(getGuildLocale(guildID), phrase, replace);
+    }
+
+    /**
+     * Translate the given phrase using locale configuration
+     * @param locale - The locale to translate to
+     * @param phrase - The phrase to translate
+     * @param replace - Replacements to be applied to the phrase
+     * @returns The translated phrase
+     */
+    translateByLocale(
+        locale: LocaleType,
+        phrase: string,
+        replace: { [key: string]: string } = {}
+    ): string {
         return this.internalLocalizer.t(phrase, {
-            lng: getGuildLocale(guildID),
+            lng: locale,
             replace,
         });
     }
 
     /**
-     * Translate with plural condition the given phrase and count using locale configuration
+     * Wrapper for translateNByLocale
      * @param guildID - The guild ID associated with the guild receiving the string
      * @param phrase - The phrase to translate
      * @param count - The number which decides whether to select singular or plural
      * @returns The translated phrase
      */
     translateN(guildID: string, phrase: string, count: number): string {
+        return this.translateNByLocale(getGuildLocale(guildID), phrase, count);
+    }
+
+    /**
+     * Translate with plural condition the given phrase and count using locale configuration
+     * @param locale - The locale to translate to
+     * @param phrase - The phrase to translate
+     * @param count - The number which decides whether to select singular or plural
+     * @returns The translated phrase
+     */
+    translateNByLocale(
+        locale: LocaleType,
+        phrase: string,
+        count: number
+    ): string {
         return this.internalLocalizer.t(phrase, {
-            lng: getGuildLocale(guildID),
+            lng: locale,
             count,
         });
     }

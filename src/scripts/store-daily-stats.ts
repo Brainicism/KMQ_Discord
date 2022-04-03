@@ -14,7 +14,7 @@ const storeDailyStats = async (serverCount: number): Promise<void> => {
             .count("* as count")
     )[0].count;
 
-    const recentGameRounds = (
+    const recentRounds = (
         await dbContext
             .kmq("game_sessions")
             .where("start_date", ">", dateThreshold)
@@ -40,7 +40,7 @@ const storeDailyStats = async (serverCount: number): Promise<void> => {
     await dbContext.kmq("daily_stats").insert({
         date: dateThreshold,
         gameSessions: recentGameSessions,
-        roundsPlayed: recentGameRounds,
+        roundsPlayed: recentRounds,
         players: recentPlayers,
         newPlayers,
         serverCount,

@@ -25,7 +25,7 @@ export default async function interactionCreateHandler(
 ): Promise<void> {
     if (interaction instanceof Eris.ComponentInteraction) {
         const gameSession = state.gameSessions[interaction.guildID];
-        if (!gameSession || !gameSession.gameRound) {
+        if (!gameSession || !gameSession.round) {
             tryInteractionAcknowledge(interaction);
             return;
         }
