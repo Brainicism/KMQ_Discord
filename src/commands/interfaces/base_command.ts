@@ -1,4 +1,5 @@
 import Eris from "eris";
+
 import { PrecheckArgs } from "../../command_prechecks";
 import GameSession from "../../structures/game_session";
 import { GuildTextableMessage, ParsedMessage } from "../../types";

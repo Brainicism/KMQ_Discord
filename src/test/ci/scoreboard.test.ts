@@ -1,8 +1,9 @@
 import assert from "assert";
+
 import GuildPreference from "../../structures/guild_preference";
+import Player from "../../structures/player";
 import Scoreboard from "../../structures/scoreboard";
 import { GameOption } from "../../types";
-import Player from "../../structures/player";
 
 const userIDs = ["12345", "23456", "34567"];
 

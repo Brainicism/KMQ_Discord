@@ -1,32 +1,32 @@
 import _ from "lodash";
 import * as uuid from "uuid";
+
 import {
-    DEFAULT_BEGINNING_SEARCH_YEAR,
-    DEFAULT_ENDING_SEARCH_YEAR,
-} from "../commands/game_options/cutoff";
-import { DEFAULT_LIMIT } from "../commands/game_options/limit";
-import { Gender, DEFAULT_GENDER } from "../commands/game_options/gender";
-import { SeekType, DEFAULT_SEEK } from "../commands/game_options/seek";
-import { ShuffleType, DEFAULT_SHUFFLE } from "../commands/game_options/shuffle";
-import {
-    GuessModeType,
-    DEFAULT_GUESS_MODE,
-} from "../commands/game_options/guessmode";
-import { IPCLogger } from "../logger";
-import dbContext from "../database_context";
+    AnswerType,
+    DEFAULT_ANSWER_TYPE,
+} from "../commands/game_options/answer";
 import {
     ArtistType,
     DEFAULT_ARTIST_TYPE,
 } from "../commands/game_options/artisttype";
 import {
+    DEFAULT_BEGINNING_SEARCH_YEAR,
+    DEFAULT_ENDING_SEARCH_YEAR,
+} from "../commands/game_options/cutoff";
+import { DEFAULT_GENDER, Gender } from "../commands/game_options/gender";
+import {
+    DEFAULT_GUESS_MODE,
+    GuessModeType,
+} from "../commands/game_options/guessmode";
+import {
     DEFAULT_LANGUAGE,
     LanguageType,
 } from "../commands/game_options/language";
+import { DEFAULT_LIMIT } from "../commands/game_options/limit";
 import {
-    DEFAULT_SUBUNIT_PREFERENCE,
-    SubunitsPreference,
-} from "../commands/game_options/subunits";
-import { GameOption, MatchedArtist } from "../types";
+    DEFAULT_MULTIGUESS_TYPE,
+    MultiGuessType,
+} from "../commands/game_options/multiguess";
 import {
     DEFAULT_OST_PREFERENCE,
     OstPreference,
@@ -35,16 +35,17 @@ import {
     DEFAULT_RELEASE_TYPE,
     ReleaseType,
 } from "../commands/game_options/release";
-import {
-    DEFAULT_MULTIGUESS_TYPE,
-    MultiGuessType,
-} from "../commands/game_options/multiguess";
-import { state } from "../kmq_worker";
+import { DEFAULT_SEEK, SeekType } from "../commands/game_options/seek";
+import { DEFAULT_SHUFFLE, ShuffleType } from "../commands/game_options/shuffle";
 import { SpecialType } from "../commands/game_options/special";
 import {
-    AnswerType,
-    DEFAULT_ANSWER_TYPE,
-} from "../commands/game_options/answer";
+    DEFAULT_SUBUNIT_PREFERENCE,
+    SubunitsPreference,
+} from "../commands/game_options/subunits";
+import dbContext from "../database_context";
+import { state } from "../kmq_worker";
+import { IPCLogger } from "../logger";
+import { GameOption, MatchedArtist } from "../types";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("guild_preference");

@@ -1,24 +1,25 @@
-import _ from "lodash";
-import Eris from "eris";
 import levenshtien from "damerau-levenshtein";
-import { GuessModeType } from "../commands/game_options/guessmode";
-import { state } from "../kmq_worker";
-import KmqMember from "./kmq_member";
+import Eris from "eris";
+import _ from "lodash";
+
 import {
     ExpBonusModifier,
     ExpBonusModifierValues,
 } from "../commands/game_commands/exp";
-import { PlayerRoundResult, QueriedSong } from "../types";
-import Round, { MAX_RUNNERS_UP } from "./round";
-import MessageContext from "./message_context";
+import { GuessModeType } from "../commands/game_options/guessmode";
 import {
     EMBED_ERROR_COLOR,
     EMBED_SUCCESS_BONUS_COLOR,
     EMBED_SUCCESS_COLOR,
     getMention,
 } from "../helpers/discord_utils";
-import { UniqueSongCounter } from "./song_selector";
 import { friendlyFormattedNumber } from "../helpers/utils";
+import { state } from "../kmq_worker";
+import { PlayerRoundResult, QueriedSong } from "../types";
+import KmqMember from "./kmq_member";
+import MessageContext from "./message_context";
+import Round, { MAX_RUNNERS_UP } from "./round";
+import { UniqueSongCounter } from "./song_selector";
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
 const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\(\)\+\u200B]/g;

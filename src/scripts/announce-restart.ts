@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import { execSync } from "child_process";
 import { program } from "commander";
+
 import dbContext from "../database_context";
 
 program

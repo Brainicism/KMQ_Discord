@@ -1,22 +1,23 @@
 import * as uuid from "uuid";
+
+import CommandPrechecks from "../../command_prechecks";
+import { KmqImages } from "../../constants";
+import dbContext from "../../database_context";
 import {
     getDebugLogHeader,
     sendErrorMessage,
     sendInfoMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
+import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
 import GuildPreference, {
     GameOptionInternalToGameOption,
 } from "../../structures/guild_preference";
-import { KmqImages } from "../../constants";
-import dbContext from "../../database_context";
-import CommandPrechecks from "../../command_prechecks";
+import MessageContext from "../../structures/message_context";
 import { GameOption } from "../../types";
-import { state } from "../../kmq_worker";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("preset");
 const PRESET_NAME_MAX_LENGTH = 25;

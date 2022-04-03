@@ -1,10 +1,11 @@
 import Eris from "eris";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { sendInfoMessage } from "../../helpers/discord_utils";
-import { IPCLogger } from "../../logger";
-import { state } from "../../kmq_worker";
-import MessageContext from "../../structures/message_context";
+
 import CommandPrechecks from "../../command_prechecks";
+import { sendInfoMessage } from "../../helpers/discord_utils";
+import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 
 const logger = new IPCLogger("eval");
 

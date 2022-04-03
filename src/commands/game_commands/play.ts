@@ -1,35 +1,36 @@
 import Eris from "eris";
-import GameSession from "../../structures/game_session";
+
+import CommandPrechecks from "../../command_prechecks";
+import { KmqImages } from "../../constants";
+import dbContext from "../../database_context";
 import {
-    sendErrorMessage,
+    EMBED_SUCCESS_BONUS_COLOR,
+    getCurrentVoiceMembers,
     getDebugLogHeader,
+    getMention,
+    getUserVoiceChannel,
+    sendErrorMessage,
     sendInfoMessage,
     voicePermissionsCheck,
-    getUserVoiceChannel,
-    getCurrentVoiceMembers,
-    EMBED_SUCCESS_BONUS_COLOR,
-    getMention,
 } from "../../helpers/discord_utils";
-import {
-    deleteGameSession,
-    getTimeUntilRestart,
-} from "../../helpers/management_utils";
 import {
     activeBonusUsers,
     getGuildPreference,
     isPowerHour,
 } from "../../helpers/game_utils";
+import {
+    deleteGameSession,
+    getTimeUntilRestart,
+} from "../../helpers/management_utils";
 import { chooseWeightedRandom, isWeekend } from "../../helpers/utils";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import dbContext from "../../database_context";
-import { IPCLogger } from "../../logger";
-import { GameInfoMessage, GameType, GuildTextableMessage } from "../../types";
-import { KmqImages } from "../../constants";
-import MessageContext from "../../structures/message_context";
-import KmqMember from "../../structures/kmq_member";
-import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
 import { DEFAULT_LIVES } from "../../structures/elimination_scoreboard";
+import GameSession from "../../structures/game_session";
+import KmqMember from "../../structures/kmq_member";
+import MessageContext from "../../structures/message_context";
+import { GameInfoMessage, GameType, GuildTextableMessage } from "../../types";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("play");
 

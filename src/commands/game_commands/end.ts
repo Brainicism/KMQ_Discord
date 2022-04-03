@@ -1,8 +1,8 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import { getDebugLogHeader } from "../../helpers/discord_utils";
-import { IPCLogger } from "../../logger";
 import CommandPrechecks from "../../command_prechecks";
+import { getDebugLogHeader } from "../../helpers/discord_utils";
 import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("end");
 

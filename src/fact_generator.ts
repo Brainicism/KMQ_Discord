@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-underscore-dangle */
 import { URL } from "url";
+
 import dbContext from "./database_context";
+import { getGuildLocale } from "./helpers/discord_utils";
+import { LocaleType } from "./helpers/localization_manager";
 import {
     chooseRandom,
+    friendlyFormattedNumber,
     getOrdinalNum,
     weekOfYear,
-    friendlyFormattedNumber,
 } from "./helpers/utils";
-import { LocaleType } from "./helpers/localization_manager";
 import { state } from "./kmq_worker";
-import { getGuildLocale } from "./helpers/discord_utils";
 import { IPCLogger } from "./logger";
 
 const logger = new IPCLogger("fact_generator");

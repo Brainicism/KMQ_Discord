@@ -1,8 +1,9 @@
 import assert from "assert";
+
 import GuildPreference from "../../structures/guild_preference";
+import Player from "../../structures/player";
 import Team from "../../structures/team";
 import TeamScoreboard from "../../structures/team_scoreboard";
-import Player from "../../structures/player";
 import { GameOption } from "../../types";
 
 const FIRST_TEAM_NAME = "kmq team";

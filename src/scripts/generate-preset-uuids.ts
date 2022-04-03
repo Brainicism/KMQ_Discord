@@ -1,4 +1,5 @@
 import * as uuid from "uuid";
+
 import { getNewConnection } from "../database_context";
 import { IPCLogger } from "../logger";
 

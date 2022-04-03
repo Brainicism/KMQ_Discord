@@ -1,7 +1,6 @@
 import { getVideoID } from "ytdl-core";
-import { LocaleType } from "../../helpers/localization_manager";
-import BaseCommand, { Help, CommandArgs } from "../interfaces/base_command";
-import { state } from "../../kmq_worker";
+
+import { KmqImages } from "../../constants";
 import dbContext from "../../database_context";
 import {
     getDebugLogHeader,
@@ -9,21 +8,23 @@ import {
     sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
-import MessageContext from "../../structures/message_context";
-import {
-    friendlyFormattedDate,
-    friendlyFormattedNumber,
-} from "../../helpers/utils";
-import { IPCLogger } from "../../logger";
-import { sendValidationErrorMessage } from "../../helpers/validate";
-import { QueriedSong } from "../../types";
 import {
     getGuildPreference,
     getLocalizedArtistName,
     getLocalizedSongName,
 } from "../../helpers/game_utils";
+import { LocaleType } from "../../helpers/localization_manager";
+import {
+    friendlyFormattedDate,
+    friendlyFormattedNumber,
+} from "../../helpers/utils";
+import { sendValidationErrorMessage } from "../../helpers/validate";
+import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
 import SongSelector from "../../structures/song_selector";
-import { KmqImages } from "../../constants";
+import { QueriedSong } from "../../types";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("lookup");
 

@@ -1,14 +1,14 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { KmqImages } from "../../constants";
+import dbContext from "../../database_context";
 import {
     getDebugLogHeader,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
+import { DEFAULT_LOCALE, LocaleType } from "../../helpers/localization_manager";
+import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import { LocaleType, DEFAULT_LOCALE } from "../../helpers/localization_manager";
-import dbContext from "../../database_context";
-import { state } from "../../kmq_worker";
-import { KmqImages } from "../../constants";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("locale");
 

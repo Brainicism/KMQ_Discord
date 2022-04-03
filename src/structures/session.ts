@@ -1,6 +1,10 @@
 import Eris from "eris";
 import fs from "fs";
-import { IPCLogger } from "../logger";
+
+import { SeekType } from "../commands/game_options/seek";
+import { specialFfmpegArgs } from "../commands/game_options/special";
+import { KmqImages } from "../constants";
+import dbContext from "../database_context";
 import {
     getDebugLogHeader,
     getGuildLocale,
@@ -10,7 +14,15 @@ import {
     tryCreateInteractionErrorAcknowledgement,
     tryCreateInteractionSuccessAcknowledgement,
 } from "../helpers/discord_utils";
-import dbContext from "../database_context";
+import {
+    ensureVoiceConnection,
+    getGuildPreference,
+    getLocalizedSongName,
+} from "../helpers/game_utils";
+import { deleteGameSession } from "../helpers/management_utils";
+import { bold, friendlyFormattedNumber } from "../helpers/utils";
+import { state } from "../kmq_worker";
+import { IPCLogger } from "../logger";
 import { QueriedSong } from "../types";
 import { GuessResult } from "./game_session";
 import GuildPreference from "./guild_preference";
@@ -18,17 +30,6 @@ import KmqMember from "./kmq_member";
 import MessageContext from "./message_context";
 import Round from "./round";
 import SongSelector from "./song_selector";
-import { deleteGameSession } from "../helpers/management_utils";
-import {
-    ensureVoiceConnection,
-    getGuildPreference,
-    getLocalizedSongName,
-} from "../helpers/game_utils";
-import { state } from "../kmq_worker";
-import { KmqImages } from "../constants";
-import { bold, friendlyFormattedNumber } from "../helpers/utils";
-import { SeekType } from "../commands/game_options/seek";
-import { specialFfmpegArgs } from "../commands/game_options/special";
 
 export const SONG_START_DELAY = 3000;
 const BOOKMARK_MESSAGE_SIZE = 10;

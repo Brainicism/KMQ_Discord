@@ -1,21 +1,22 @@
 import assert from "assert";
-import sinon from "sinon";
-import { describe } from "mocha";
 import { EmbedGenerator } from "eris-pagination";
+import { describe } from "mocha";
+import sinon from "sinon";
+
 import LeaderboardCommand, {
-    LeaderboardType,
-    LeaderboardScope,
-    LeaderboardDuration,
     ENTRIES_PER_PAGE,
+    LeaderboardDuration,
+    LeaderboardScope,
+    LeaderboardType,
 } from "../../commands/game_commands/leaderboard";
 import dbContext from "../../database_context";
-import MessageContext from "../../structures/message_context";
-import KmqMember from "../../structures/kmq_member";
+import * as discordUtils from "../../helpers/discord_utils";
+import { state } from "../../kmq_worker";
 import GameSession from "../../structures/game_session";
+import KmqMember from "../../structures/kmq_member";
+import MessageContext from "../../structures/message_context";
 import Player from "../../structures/player";
 import { GameType } from "../../types";
-import { state } from "../../kmq_worker";
-import * as discordUtils from "../../helpers/discord_utils";
 
 const sandbox = sinon.createSandbox();
 

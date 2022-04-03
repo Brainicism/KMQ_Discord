@@ -1,19 +1,19 @@
+import CommandPrechecks from "../../command_prechecks";
+import { GROUP_LIST_URL } from "../../constants";
 import {
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     getGuildPreference,
     getMatchingGroupNames,
 } from "../../helpers/game_utils";
-import { IPCLogger } from "../../logger";
-import { GameOption, MatchedArtist } from "../../types";
-import MessageContext from "../../structures/message_context";
-import { GROUP_LIST_URL } from "../../constants";
-import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import { GameOption, MatchedArtist } from "../../types";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("remove");
 

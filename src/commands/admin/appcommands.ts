@@ -1,4 +1,5 @@
 import Eris from "eris";
+
 import CommandPrechecks from "../../command_prechecks";
 import {
     BOOKMARK_COMMAND_NAME,

@@ -1,6 +1,7 @@
+import { config } from "dotenv";
 import { Knex, knex } from "knex";
 import { resolve } from "path";
-import { config } from "dotenv";
+
 import { EnvType } from "./types";
 
 config({ path: resolve(__dirname, "../.env") });

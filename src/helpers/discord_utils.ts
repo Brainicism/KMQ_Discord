@@ -1,55 +1,56 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
+import axios from "axios";
 import Eris from "eris";
 import EmbedPaginator from "eris-pagination";
-import axios from "axios";
-import GuildPreference from "../structures/guild_preference";
-import GameSession from "../structures/game_session";
-import { IPCLogger } from "../logger";
-import {
-    getAvailableSongCount,
-    getKmqCurrentVersion,
-    userBonusIsActive,
-    getLocalizedSongName,
-    getLocalizedArtistName,
-} from "./game_utils";
+
+import { REVIEW_LINK, VOTE_LINK } from "../commands/game_commands/vote";
+import { GuessModeType } from "../commands/game_options/guessmode";
+import { KmqImages } from "../constants";
+import dbContext from "../database_context";
 import { getFact } from "../fact_generator";
+import { state } from "../kmq_worker";
+import { IPCLogger } from "../logger";
+import EliminationScoreboard from "../structures/elimination_scoreboard";
+import GameRound from "../structures/game_round";
+import GameSession from "../structures/game_session";
+import GuildPreference from "../structures/guild_preference";
+import MessageContext from "../structures/message_context";
+import Round from "../structures/round";
+import Scoreboard from "../structures/scoreboard";
+import Session from "../structures/session";
+import { UniqueSongCounter } from "../structures/song_selector";
+import TeamScoreboard from "../structures/team_scoreboard";
 import {
+    ConflictingGameOptions,
     EmbedPayload,
+    GameInfoMessage,
     GameOption,
     GameOptionCommand,
-    PriorityGameOption,
-    ConflictingGameOptions,
-    GuildTextableMessage,
-    GameInfoMessage,
     GameType,
+    GuildTextableMessage,
+    PriorityGameOption,
     QueriedSong,
 } from "../types";
 import {
-    chunkArray,
+    getAvailableSongCount,
+    getKmqCurrentVersion,
+    getLocalizedArtistName,
+    getLocalizedSongName,
+    userBonusIsActive,
+} from "./game_utils";
+import { DEFAULT_LOCALE, LocaleType } from "./localization_manager";
+import {
     bold,
-    underline,
-    italicize,
-    strikethrough,
     chooseWeightedRandom,
-    getOrdinalNum,
-    friendlyFormattedNumber,
+    chunkArray,
     delay,
+    friendlyFormattedNumber,
+    getOrdinalNum,
+    italicize,
     standardDateFormat,
+    strikethrough,
+    underline,
 } from "./utils";
-import { state } from "../kmq_worker";
-import Scoreboard from "../structures/scoreboard";
-import GameRound from "../structures/game_round";
-import dbContext from "../database_context";
-import EliminationScoreboard from "../structures/elimination_scoreboard";
-import TeamScoreboard from "../structures/team_scoreboard";
-import { KmqImages } from "../constants";
-import MessageContext from "../structures/message_context";
-import { GuessModeType } from "../commands/game_options/guessmode";
-import { REVIEW_LINK, VOTE_LINK } from "../commands/game_commands/vote";
-import { UniqueSongCounter } from "../structures/song_selector";
-import { LocaleType, DEFAULT_LOCALE } from "./localization_manager";
-import Round from "../structures/round";
-import Session from "../structures/session";
 
 const logger = new IPCLogger("discord_utils");
 export const EMBED_ERROR_COLOR = 0xed4245; // Red

@@ -1,28 +1,29 @@
 import Eris from "eris";
+
+import { KmqImages } from "../../constants";
 import dbContext from "../../database_context";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import { IPCLogger } from "../../logger";
 import {
+    EmbedGenerator,
     getDebugLogHeader,
     getUserTag,
     sendErrorMessage,
     sendInfoMessage,
-    sendPaginationedEmbed,
-    EmbedGenerator,
     sendMessage,
+    sendPaginationedEmbed,
 } from "../../helpers/discord_utils";
-import { getRankNameByLevel } from "./profile";
 import {
+    arrayToString,
+    bold,
     chooseRandom,
     friendlyFormattedNumber,
-    bold,
-    arrayToString,
 } from "../../helpers/utils";
-import { state } from "../../kmq_worker";
-import { GuildTextableMessage, EnvType } from "../../types";
-import { KmqImages } from "../../constants";
-import MessageContext from "../../structures/message_context";
 import { sendValidationErrorMessage } from "../../helpers/validate";
+import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import { EnvType, GuildTextableMessage } from "../../types";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { getRankNameByLevel } from "./profile";
 
 const logger = new IPCLogger("leaderboard");
 

@@ -1,8 +1,8 @@
-import Player from "./player";
-import { bold, friendlyFormattedNumber } from "../helpers/utils";
 import { getMention } from "../helpers/discord_utils";
-import GuildPreference from "./guild_preference";
+import { bold, friendlyFormattedNumber } from "../helpers/utils";
 import { state } from "../kmq_worker";
+import GuildPreference from "./guild_preference";
+import Player from "./player";
 
 export const SCOREBOARD_FIELD_CUTOFF = 6;
 

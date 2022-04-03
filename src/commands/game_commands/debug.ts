@@ -1,21 +1,22 @@
 import Eris from "eris";
 import * as uuid from "uuid";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+
+import { KmqImages } from "../../constants";
 import {
     getDebugChannel,
-    sendInfoMessage,
-    getUserVoiceChannel,
     getDebugLogHeader,
     getGuildLocale,
+    getUserVoiceChannel,
+    sendInfoMessage,
 } from "../../helpers/discord_utils";
 import {
-    getGuildPreference,
     getAvailableSongCount,
+    getGuildPreference,
 } from "../../helpers/game_utils";
 import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
-import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 
 const logger = new IPCLogger("debug");
 

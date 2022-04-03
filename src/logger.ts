@@ -1,9 +1,10 @@
 /* eslint-disable quote-props */
+import { isMaster } from "cluster";
 import { config } from "dotenv";
 import { resolve } from "path";
-import { isMaster } from "cluster";
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
+
 import { EnvType } from "./types";
 
 config({ path: resolve(__dirname, "../.env") });

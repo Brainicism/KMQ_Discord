@@ -1,12 +1,12 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
+    getDebugLogHeader,
     sendInfoMessage,
     sendScoreboardMessage,
-    getDebugLogHeader,
 } from "../../helpers/discord_utils";
+import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import { state } from "../../kmq_worker";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("score");
 

@@ -1,21 +1,22 @@
 import assert from "assert";
-import sinon from "sinon";
-import { Gender } from "../../commands/game_options/gender";
-import { OstPreference } from "../../commands/game_options/ost";
-import { ReleaseType } from "../../commands/game_options/release";
-import { SubunitsPreference } from "../../commands/game_options/subunits";
-import GuildPreference from "../../structures/guild_preference";
-import SongSelector, {
-    LAST_PLAYED_SONG_QUEUE_SIZE,
-} from "../../structures/song_selector";
 import _ from "lodash";
+import sinon from "sinon";
+
 import { ArtistType } from "../../commands/game_options/artisttype";
-import { getMatchingGroupNames } from "../../helpers/game_utils";
+import { Gender } from "../../commands/game_options/gender";
 import {
     FOREIGN_LANGUAGE_TAGS,
     LanguageType,
 } from "../../commands/game_options/language";
+import { OstPreference } from "../../commands/game_options/ost";
+import { ReleaseType } from "../../commands/game_options/release";
 import { ShuffleType } from "../../commands/game_options/shuffle";
+import { SubunitsPreference } from "../../commands/game_options/subunits";
+import { getMatchingGroupNames } from "../../helpers/game_utils";
+import GuildPreference from "../../structures/guild_preference";
+import SongSelector, {
+    LAST_PLAYED_SONG_QUEUE_SIZE,
+} from "../../structures/song_selector";
 
 async function getMockGuildPreference(): Promise<GuildPreference> {
     const guildPreference = new GuildPreference("test");

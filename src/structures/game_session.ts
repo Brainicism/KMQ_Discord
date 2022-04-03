@@ -2,19 +2,26 @@
 import Eris from "eris";
 import _ from "lodash";
 import * as uuid from "uuid";
+
+import { calculateTotalRoundExp } from "../commands/game_commands/exp";
+import { getRankNameByLevel } from "../commands/game_commands/profile";
+import { AnswerType } from "../commands/game_options/answer";
+import { GuessModeType } from "../commands/game_options/guessmode";
+import { MultiGuessType } from "../commands/game_options/multiguess";
+import { KmqImages } from "../constants";
 import dbContext from "../database_context";
 import {
+    getCurrentVoiceMembers,
     getDebugLogHeader,
-    sendInfoMessage,
+    getGuildLocale,
+    getMention,
     getNumParticipants,
     getUserVoiceChannel,
     sendEndGameMessage,
-    getCurrentVoiceMembers,
-    tryInteractionAcknowledge,
-    tryCreateInteractionErrorAcknowledgement,
-    getMention,
-    getGuildLocale,
     sendEndRoundMessage,
+    sendInfoMessage,
+    tryCreateInteractionErrorAcknowledgement,
+    tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
 import {
     getGuildPreference,
@@ -25,33 +32,27 @@ import {
     userBonusIsActive,
 } from "../helpers/game_utils";
 import {
+    chooseRandom,
+    chunkArray,
+    codeLine,
     delay,
     getOrdinalNum,
     setDifference,
-    codeLine,
-    chunkArray,
-    chooseRandom,
 } from "../helpers/utils";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
-import { QueriedSong, GameType } from "../types";
+import Player from "../structures/player";
+import { GameType, QueriedSong } from "../types";
+import EliminationPlayer from "./elimination_player";
+import EliminationScoreboard from "./elimination_scoreboard";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
-import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
-import EliminationScoreboard from "./elimination_scoreboard";
-import TeamScoreboard from "./team_scoreboard";
-import { GuessModeType } from "../commands/game_options/guessmode";
-import { getRankNameByLevel } from "../commands/game_commands/profile";
-import EliminationPlayer from "./elimination_player";
-import { KmqImages } from "../constants";
-import MessageContext from "./message_context";
 import KmqMember from "./kmq_member";
-import { MultiGuessType } from "../commands/game_options/multiguess";
-import { AnswerType } from "../commands/game_options/answer";
-import { calculateTotalRoundExp } from "../commands/game_commands/exp";
-import Player from "../structures/player";
-import Session, { SONG_START_DELAY } from "./session";
+import MessageContext from "./message_context";
 import Round from "./round";
+import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
+import Session, { SONG_START_DELAY } from "./session";
+import TeamScoreboard from "./team_scoreboard";
 
 const MULTIGUESS_DELAY = 1500;
 

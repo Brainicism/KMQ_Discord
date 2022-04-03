@@ -1,10 +1,11 @@
 import { execSync } from "child_process";
-import { IPCLogger } from "../../logger";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
-import MessageContext from "../../structures/message_context";
-import { state } from "../../kmq_worker";
+
 import CommandPrechecks from "../../command_prechecks";
+import { sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
+import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 
 const logger = new IPCLogger("reload");
 

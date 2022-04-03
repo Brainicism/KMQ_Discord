@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import assert from "assert";
+
 import {
     ExpBonusModifier,
     ExpBonusModifierValues,

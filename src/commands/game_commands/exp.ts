@@ -1,26 +1,27 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import Eris from "eris";
+
+import { KmqImages } from "../../constants";
 import {
     getDebugLogHeader,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
-import { isWeekend } from "../../helpers/utils";
 import {
-    getGuildPreference,
     getAvailableSongCount,
-    userBonusIsActive,
+    getGuildPreference,
     isFirstGameOfDay,
     isPowerHour,
+    userBonusIsActive,
 } from "../../helpers/game_utils";
+import { isWeekend } from "../../helpers/utils";
+import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
+import GameRound from "../../structures/game_round";
+import GuildPreference from "../../structures/guild_preference";
+import MessageContext from "../../structures/message_context";
 import { AnswerType } from "../game_options/answer";
 import { GuessModeType } from "../game_options/guessmode";
-import { KmqImages } from "../../constants";
-import { state } from "../../kmq_worker";
-import GuildPreference from "../../structures/guild_preference";
-import GameRound from "../../structures/game_round";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("exp");
 export const PARTICIPANT_MODIFIER_MAX_PARTICIPANTS = 6;

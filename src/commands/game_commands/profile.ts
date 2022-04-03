@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import Eris from "eris";
+
 import dbContext from "../../database_context";
 import {
     fetchUser,
@@ -9,16 +10,16 @@ import {
     sendInfoMessage,
     tryCreateInteractionErrorAcknowledgement,
 } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import { IPCLogger } from "../../logger";
 import {
     friendlyFormattedDate,
-    romanize,
     friendlyFormattedNumber,
+    romanize,
 } from "../../helpers/utils";
+import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
 import { CUM_EXP_TABLE } from "../../structures/game_session";
 import MessageContext from "../../structures/message_context";
-import { state } from "../../kmq_worker";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("profile");
 

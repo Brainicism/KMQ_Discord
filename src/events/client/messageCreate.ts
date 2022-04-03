@@ -1,16 +1,17 @@
 import Eris from "eris";
 import * as uuid from "uuid";
-import { IPCLogger } from "../../logger";
+
 import {
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { state } from "../../kmq_worker";
 import validate from "../../helpers/validate";
-import { EnvType, GuildTextableMessage, ParsedMessage } from "../../types";
+import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
+import { EnvType, GuildTextableMessage, ParsedMessage } from "../../types";
 
 const logger = new IPCLogger("messageCreate");
 

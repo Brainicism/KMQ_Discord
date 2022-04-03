@@ -1,20 +1,20 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import CommandPrechecks from "../../command_prechecks";
+import { GROUP_LIST_URL } from "../../constants";
 import {
-    sendOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
+    sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import {
     getGuildPreference,
     getMatchingGroupNames,
 } from "../../helpers/game_utils";
-import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
-import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
-import { GROUP_LIST_URL } from "../../constants";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import { GameOption } from "../../types";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("groups");
 

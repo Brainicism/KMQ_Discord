@@ -1,21 +1,21 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import GameSession from "../../structures/game_session";
-import TeamScoreboard from "../../structures/team_scoreboard";
-import Player from "../../structures/player";
-import { GuildTextableMessage, ParsedMessage, GameType } from "../../types";
+import CommandPrechecks from "../../command_prechecks";
+import { KmqImages } from "../../constants";
 import {
+    getDebugLogHeader,
+    getMention,
     getUserTag,
     sendErrorMessage,
     sendInfoMessage,
-    getMention,
-    getDebugLogHeader,
 } from "../../helpers/discord_utils";
-import { KmqImages } from "../../constants";
 import { bold } from "../../helpers/utils";
 import { state } from "../../kmq_worker";
-import MessageContext from "../../structures/message_context";
-import CommandPrechecks from "../../command_prechecks";
 import { IPCLogger } from "../../logger";
+import GameSession from "../../structures/game_session";
+import MessageContext from "../../structures/message_context";
+import Player from "../../structures/player";
+import TeamScoreboard from "../../structures/team_scoreboard";
+import { GameType, GuildTextableMessage, ParsedMessage } from "../../types";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 
 const logger = new IPCLogger("join");
 

@@ -1,23 +1,23 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import CommandPrechecks from "../../command_prechecks";
+import { KmqImages } from "../../constants";
 import {
     getDebugLogHeader,
     getMajorityCount,
     sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
-import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
-import { KmqImages } from "../../constants";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { GuessModeType } from "../game_options/guessmode";
 import { codeLine } from "../../helpers/utils";
-import { GuildTextableMessage, GameType } from "../../types";
-import GameSession from "../../structures/game_session";
-import EliminationScoreboard from "../../structures/elimination_scoreboard";
-import GuildPreference from "../../structures/guild_preference";
-import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
+import EliminationScoreboard from "../../structures/elimination_scoreboard";
 import GameRound from "../../structures/game_round";
+import GameSession from "../../structures/game_session";
+import GuildPreference from "../../structures/guild_preference";
+import MessageContext from "../../structures/message_context";
+import { GameType, GuildTextableMessage } from "../../types";
+import { GuessModeType } from "../game_options/guessmode";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("hint");
 

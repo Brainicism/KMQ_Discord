@@ -1,18 +1,18 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
-import { getGuildPreference } from "../../helpers/game_utils";
-import { sendBeginGameMessage } from "./play";
-import { GameType } from "../../types";
-import TeamScoreboard from "../../structures/team_scoreboard";
+import CommandPrechecks from "../../command_prechecks";
 import {
     getDebugLogHeader,
-    sendErrorMessage,
     getUserVoiceChannel,
+    sendErrorMessage,
 } from "../../helpers/discord_utils";
-import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
-import GameSession from "../../structures/game_session";
+import { getGuildPreference } from "../../helpers/game_utils";
 import { state } from "../../kmq_worker";
-import CommandPrechecks from "../../command_prechecks";
+import { IPCLogger } from "../../logger";
+import GameSession from "../../structures/game_session";
+import MessageContext from "../../structures/message_context";
+import TeamScoreboard from "../../structures/team_scoreboard";
+import { GameType } from "../../types";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import { sendBeginGameMessage } from "./play";
 
 const logger = new IPCLogger("begin");
 

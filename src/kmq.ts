@@ -1,32 +1,33 @@
-import _ from "lodash";
 import { isMaster } from "cluster";
-import os from "os";
 import { config } from "dotenv";
-import path from "path";
-import { Fleet, Options, Stats } from "eris-fleet";
-import fs from "fs";
-import Eris from "eris";
-import schedule from "node-schedule";
-import fastify from "fastify";
-import pointOfView from "point-of-view";
 import ejs from "ejs";
+import Eris from "eris";
+import { Fleet, Options, Stats } from "eris-fleet";
+import fastify from "fastify";
 import fastifyResponseCaching from "fastify-response-caching";
-import { getInternalLogger } from "./logger";
-import { clearRestartNotification } from "./helpers/management_utils";
-import storeDailyStats from "./scripts/store-daily-stats";
+import fs from "fs";
+import _ from "lodash";
+import schedule from "node-schedule";
+import os from "os";
+import path from "path";
+import pointOfView from "point-of-view";
+
+import { KmqImages } from "./constants";
 import dbContext from "./database_context";
-import { EnvType } from "./types";
-import { seedAndDownloadNewSongs } from "./seed/seed_db";
+import { userVoted } from "./helpers/bot_listing_manager";
 import {
     EMBED_ERROR_COLOR,
     EMBED_SUCCESS_COLOR,
     sendDebugAlertWebhook,
 } from "./helpers/discord_utils";
-import { KmqImages } from "./constants";
-import KmqClient from "./kmq_client";
-import backupKmqDatabase from "./scripts/backup-kmq-database";
-import { userVoted } from "./helpers/bot_listing_manager";
+import { clearRestartNotification } from "./helpers/management_utils";
 import { standardDateFormat } from "./helpers/utils";
+import KmqClient from "./kmq_client";
+import { getInternalLogger } from "./logger";
+import backupKmqDatabase from "./scripts/backup-kmq-database";
+import storeDailyStats from "./scripts/store-daily-stats";
+import { seedAndDownloadNewSongs } from "./seed/seed_db";
+import { EnvType } from "./types";
 
 const logger = getInternalLogger();
 

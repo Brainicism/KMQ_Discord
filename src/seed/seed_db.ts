@@ -1,16 +1,17 @@
 import Axios from "axios";
-import fs from "fs";
 import { execSync } from "child_process";
 import { program } from "commander";
 import { config } from "dotenv";
+import fs from "fs";
+import _ from "lodash";
 import path from "path";
+
+import { DatabaseContext, getNewConnection } from "../database_context";
+import { parseJsonFile } from "../helpers/utils";
 import { IPCLogger } from "../logger";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
-import { DatabaseContext, getNewConnection } from "../database_context";
-import { generateKmqDataTables, loadStoredProcedures } from "./bootstrap";
 import { EnvType } from "../types";
-import _ from "lodash";
-import { parseJsonFile } from "../helpers/utils";
+import { generateKmqDataTables, loadStoredProcedures } from "./bootstrap";
 
 config({ path: path.resolve(__dirname, "../../.env") });
 const SQL_DUMP_EXPIRY = 10;

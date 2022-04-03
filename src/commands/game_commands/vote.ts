@@ -1,16 +1,16 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import { IPCLogger } from "../../logger";
-import {
-    getDebugLogHeader,
-    sendInfoMessage,
-    EMBED_SUCCESS_BONUS_COLOR,
-} from "../../helpers/discord_utils";
-import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
 import dbContext from "../../database_context";
-import { bold } from "../../helpers/utils";
+import {
+    EMBED_SUCCESS_BONUS_COLOR,
+    getDebugLogHeader,
+    sendInfoMessage,
+} from "../../helpers/discord_utils";
 import { userBonusIsActive } from "../../helpers/game_utils";
+import { bold } from "../../helpers/utils";
 import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("vote");
 
