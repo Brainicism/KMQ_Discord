@@ -1,4 +1,5 @@
 import i18next from "i18next";
+import path from "path";
 import Backend from "i18next-fs-backend";
 import { getGuildLocale } from "./discord_utils";
 
@@ -23,7 +24,7 @@ export default class LocalizationManager {
                 escapeValue: false,
             },
             backend: {
-                loadPath: "../i18n/{{lng}}.json",
+                loadPath: path.join(__dirname, "../../i18n/{{lng}}.json"),
             },
         });
     }

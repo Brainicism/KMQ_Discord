@@ -3,6 +3,7 @@ import { config } from "dotenv";
 import { resolve } from "path";
 import { isMaster } from "cluster";
 import winston from "winston";
+import path from "path";
 import DailyRotateFile from "winston-daily-rotate-file";
 import { EnvType } from "./types";
 
@@ -37,12 +38,12 @@ export function getInternalLogger(): winston.Logger {
                 silent: process.env.NODE_ENV === EnvType.TEST,
             }),
             new DailyRotateFile({
-                filename: "../logs/error.log",
+                filename: path.join(__dirname, "../logs/error.log"),
                 level: "error",
                 maxFiles: "14d",
             }),
             new DailyRotateFile({
-                filename: "../logs/combined.log",
+                filename: path.join(__dirname, "../logs/combined.log"),
                 maxFiles: "14d",
             }),
         ],
