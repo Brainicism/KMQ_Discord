@@ -35,6 +35,7 @@ export interface QueriedSong {
     members?: Gender;
     artistID?: number;
     isSolo?: string;
+    rank?: number;
     views?: number;
     tags?: string;
     language?: string;

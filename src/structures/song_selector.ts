@@ -240,6 +240,7 @@ export default class SongSelector {
             "tags",
             "members",
             "views",
+            "rank",
             "vtype",
         ];
     }
@@ -395,6 +396,12 @@ export default class SongSelector {
             .andWhere("publishedon", ">=", `${gameOptions.beginningYear}-01-01`)
             .andWhere("publishedon", "<=", `${gameOptions.endYear}-12-31`)
             .orderBy("views", "DESC");
+
+        queryBuilder = queryBuilder.andWhere(
+            "rank",
+            "<=",
+            process.env.AUDIO_SONGS_PER_ARTIST
+        );
 
         let result: Array<QueriedSong> = await queryBuilder;
 
