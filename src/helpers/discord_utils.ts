@@ -1024,7 +1024,8 @@ export async function sendOptionsMessage(
 
     if (
         premiumRequest &&
-        !gameSessions[messageContext.guildID]?.isPremiumGame()
+        gameSessions[messageContext.guildID] &&
+        !gameSessions[messageContext.guildID].isPremiumGame()
     ) {
         priorityOptions =
             italicize(
