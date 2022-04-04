@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+
 import { DatabaseContext, getNewConnection } from "../database_context";
 import { getAudioDurationInSeconds } from "../helpers/utils";
 import { IPCLogger } from "../logger";
@@ -31,8 +32,8 @@ async function cacheSongDuration(db: DatabaseContext): Promise<void> {
             );
 
             await db.kmq("cached_song_duration").insert({
-                vlink,
                 duration: songDuration,
+                vlink,
             });
             cachedSongs++;
             if (cachedSongs % 100 === 0) {

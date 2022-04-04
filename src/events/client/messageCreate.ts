@@ -1,16 +1,17 @@
 import Eris from "eris";
 import * as uuid from "uuid";
-import { IPCLogger } from "../../logger";
+
 import {
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { state } from "../../kmq_worker";
 import validate from "../../helpers/validate";
-import { GuildTextableMessage, ParsedMessage } from "../../types";
+import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
+import { EnvType, GuildTextableMessage, ParsedMessage } from "../../types";
 
 const logger = new IPCLogger("messageCreate");
 
@@ -28,8 +29,8 @@ const parseMessage = (message: string): ParsedMessage => {
     return {
         action,
         argument,
-        message,
         components,
+        message,
     };
 };
 
@@ -96,9 +97,9 @@ export default async function messageCreateHandler(
                 for (const precheck of invokedCommand.preRunChecks) {
                     if (
                         !(await precheck.checkFn({
-                            message,
-                            gameSession,
                             errorMessage: precheck.errorMessage,
+                            gameSession,
+                            message,
                         }))
                     ) {
                         return;
@@ -114,8 +115,8 @@ export default async function messageCreateHandler(
 
             try {
                 await invokedCommand.call({
-                    gameSessions,
                     channel: textChannel,
+                    gameSessions,
                     message,
                     parsedMessage,
                 });
@@ -127,20 +128,24 @@ export default async function messageCreateHandler(
                     }) | ${debugId} | ${JSON.stringify(e)}`
                 );
 
+                if (process.env.NODE_ENV === EnvType.DEV) {
+                    logger.error(e.stack);
+                }
+
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
-                        message.guildID,
-                        "misc.failure.command.title"
-                    ),
                     description: state.localizer.translate(
                         message.guildID,
                         "misc.failure.command.description",
                         { debugId }
                     ),
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "misc.failure.command.title"
+                    ),
                 });
             }
         }
-    } else if (state.gameSessions[message.guildID]?.gameRound) {
+    } else if (state.gameSessions[message.guildID]?.round) {
         const gameSession = state.gameSessions[message.guildID];
         gameSession.guessSong(
             MessageContext.fromMessage(message),

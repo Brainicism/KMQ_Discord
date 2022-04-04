@@ -1,21 +1,22 @@
 import assert from "assert";
-import sinon from "sinon";
-import { describe } from "mocha";
 import { EmbedGenerator } from "eris-pagination";
+import { describe } from "mocha";
+import sinon from "sinon";
+
 import LeaderboardCommand, {
-    LeaderboardType,
-    LeaderboardScope,
-    LeaderboardDuration,
     ENTRIES_PER_PAGE,
+    LeaderboardDuration,
+    LeaderboardScope,
+    LeaderboardType,
 } from "../../commands/game_commands/leaderboard";
 import dbContext from "../../database_context";
-import MessageContext from "../../structures/message_context";
-import KmqMember from "../../structures/kmq_member";
+import * as discordUtils from "../../helpers/discord_utils";
+import { state } from "../../kmq_worker";
 import GameSession from "../../structures/game_session";
+import KmqMember from "../../structures/kmq_member";
+import MessageContext from "../../structures/message_context";
 import Player from "../../structures/player";
 import { GameType } from "../../types";
-import { state } from "../../kmq_worker";
-import * as discordUtils from "../../helpers/discord_utils";
 
 const sandbox = sinon.createSandbox();
 
@@ -46,11 +47,11 @@ const INITIAL_TOTAL_ENTRIES = ENTRIES_PER_PAGE * 5;
 
 function generatePlayerStats(numberPlayers: number, offset = 0): any {
     return [...Array(numberPlayers).keys()].map((i) => ({
+        exp: i + 1,
+        games_played: i,
+        level: i,
         player_id: String(i + offset),
         songs_guessed: i,
-        games_played: i,
-        exp: i + 1,
-        level: i,
     }));
 }
 
@@ -338,56 +339,56 @@ describe("getLeaderboardEmbeds", () => {
 
             const rows = [
                 {
-                    player_id: "0",
                     date,
-                    songs_guessed: 1,
                     exp_gained: 1,
                     levels_gained: 1,
-                },
-                {
                     player_id: "0",
-                    date: secondAgo,
                     songs_guessed: 1,
-                    exp_gained: 1,
-                    levels_gained: 1,
                 },
                 {
+                    date: secondAgo,
+                    exp_gained: 1,
+                    levels_gained: 1,
+                    player_id: "0",
+                    songs_guessed: 1,
+                },
+                {
+                    date: secondAgo,
+                    exp_gained: 1,
+                    levels_gained: 1,
                     player_id: "1",
-                    date: secondAgo,
                     songs_guessed: 1,
-                    exp_gained: 1,
-                    levels_gained: 1,
                 },
                 {
-                    player_id: "2",
                     date: yesterday,
-                    songs_guessed: 1,
                     exp_gained: 1,
                     levels_gained: 1,
+                    player_id: "2",
+                    songs_guessed: 1,
                 },
                 {
-                    player_id: "3",
                     date: lastWeek,
-                    songs_guessed: 1,
                     exp_gained: 1,
                     levels_gained: 1,
+                    player_id: "3",
+                    songs_guessed: 1,
                 },
                 {
-                    player_id: "4",
                     date: lastMonth,
-                    songs_guessed: 1,
                     exp_gained: 1,
                     levels_gained: 1,
+                    player_id: "4",
+                    songs_guessed: 1,
                 },
             ];
 
             for (let i = 5; i < INITIAL_TOTAL_ENTRIES; i++) {
                 rows.push({
-                    player_id: String(i),
                     date,
-                    songs_guessed: i,
                     exp_gained: 1,
                     levels_gained: 1,
+                    player_id: String(i),
+                    songs_guessed: i,
                 });
             }
 
@@ -667,13 +668,13 @@ describe("getLeaderboardEmbeds", () => {
                 const rows = [];
                 for (let i = 0; i < 10; i++) {
                     rows.push({
-                        player_id: "1",
                         date: new Date(
                             new Date(date).setMinutes(INITIAL_MINUTE - i)
                         ),
-                        songs_guessed: i,
                         exp_gained: 1,
                         levels_gained: 1,
+                        player_id: "1",
+                        songs_guessed: i,
                     });
                 }
 
@@ -705,13 +706,13 @@ describe("getLeaderboardEmbeds", () => {
                 const rows = [];
                 for (let i = 0; i < 10; i++) {
                     rows.push({
-                        player_id: "1",
                         date: new Date(
                             new Date(date).setMinutes(INITIAL_MINUTE - i)
                         ),
-                        songs_guessed: i,
                         exp_gained: 1,
                         levels_gained: 1,
+                        player_id: "1",
+                        songs_guessed: i,
                     });
                 }
 

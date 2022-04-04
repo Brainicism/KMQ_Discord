@@ -1,9 +1,10 @@
 import Eris from "eris";
-import { IPCLogger } from "../../logger";
-import { getDebugChannel, sendInfoMessage } from "../../helpers/discord_utils";
-import MessageContext from "../../structures/message_context";
+
 import LocaleTypeCommand from "../../commands/game_commands/locale";
+import { getDebugChannel, sendInfoMessage } from "../../helpers/discord_utils";
 import { LocaleType } from "../../helpers/localization_manager";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
 
 const logger = new IPCLogger("guildCreate");
 
@@ -27,10 +28,9 @@ export default async function guildCreateHandler(
     const joinDate: Date = new Date(guild.joinedAt);
     await sendInfoMessage(new MessageContext(kmqDebugChannel.id), {
         author: {
-            username: guild.name,
             avatarUrl: guild.iconURL,
+            username: guild.name,
         },
-        title: "New Server Joined!",
         fields: [
             { name: "**Member Count**:", value: guild.memberCount.toString() },
             { name: "**Language**:", value: guild.preferredLocale },
@@ -44,5 +44,6 @@ export default async function guildCreateHandler(
         } | Joined at: ${joinDate.toLocaleDateString(
             "en-US"
         )} ${joinDate.toLocaleTimeString("en-US")}`,
+        title: "New Server Joined!",
     });
 }

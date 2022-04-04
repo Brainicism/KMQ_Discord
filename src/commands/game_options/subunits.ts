@@ -1,14 +1,14 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import { IPCLogger } from "../../logger";
-import { getGuildPreference } from "../../helpers/game_utils";
-import {
-    sendOptionsMessage,
-    getDebugLogHeader,
-} from "../../helpers/discord_utils";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import {
+    getDebugLogHeader,
+    sendOptionsMessage,
+} from "../../helpers/discord_utils";
+import { getGuildPreference } from "../../helpers/game_utils";
 import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import { GameOption } from "../../types";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("subunits");
 
@@ -25,25 +25,23 @@ export default class SubunitsCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
-        minArgCount: 0,
-        maxArgCount: 1,
         arguments: [
             {
+                enums: Object.values(SubunitsPreference),
                 name: "subunitPreference",
                 type: "enum" as const,
-                enums: Object.values(SubunitsPreference),
             },
         ],
+        maxArgCount: 1,
+        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
-        name: "subunits",
         description: state.localizer.translate(
             guildID,
             "command.subunits.help.description",
             { groups: `\`${process.env.BOT_PREFIX}groups\`` }
         ),
-        usage: ",subunits [include | exclude]",
         examples: [
             {
                 example: "`,subunits include`",
@@ -74,7 +72,9 @@ export default class SubunitsCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "subunits",
         priority: 130,
+        usage: ",subunits [include | exclude]",
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

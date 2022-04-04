@@ -1,13 +1,14 @@
 import Eris from "eris";
-import MessageContext from "../../structures/message_context";
-import KmqMember from "../../structures/kmq_member";
+
+import { handleProfileInteraction } from "../../commands/game_commands/profile";
 import {
     getUserTag,
-    tryInteractionAcknowledge,
     tryCreateInteractionErrorAcknowledgement,
+    tryInteractionAcknowledge,
 } from "../../helpers/discord_utils";
 import { state } from "../../kmq_worker";
-import { handleProfileInteraction } from "../../commands/game_commands/profile";
+import KmqMember from "../../structures/kmq_member";
+import MessageContext from "../../structures/message_context";
 
 export const BOOKMARK_COMMAND_NAME = "Bookmark Song";
 export const PROFILE_COMMAND_NAME = "Profile";
@@ -25,7 +26,7 @@ export default async function interactionCreateHandler(
 ): Promise<void> {
     if (interaction instanceof Eris.ComponentInteraction) {
         const gameSession = state.gameSessions[interaction.guildID];
-        if (!gameSession || !gameSession.gameRound) {
+        if (!gameSession || !gameSession.round) {
             tryInteractionAcknowledge(interaction);
             return;
         }

@@ -1,19 +1,19 @@
+import CommandPrechecks from "../../command_prechecks";
+import { GROUP_LIST_URL } from "../../constants";
 import {
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     getGuildPreference,
     getMatchingGroupNames,
 } from "../../helpers/game_utils";
-import { IPCLogger } from "../../logger";
-import { GameOption, MatchedArtist } from "../../types";
-import MessageContext from "../../structures/message_context";
-import { GROUP_LIST_URL } from "../../constants";
-import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import { GameOption, MatchedArtist } from "../../types";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("remove");
 
@@ -37,31 +37,37 @@ export default class RemoveCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
-        minArgCount: 2,
         arguments: [
             {
+                enums: Object.values(RemoveType),
                 name: "option",
                 type: "enum" as const,
-                enums: Object.values(RemoveType),
             },
         ],
+        minArgCount: 2,
     };
 
     help = (guildID: string): Help => ({
-        name: "remove",
+        actionRowComponents: [
+            {
+                label: state.localizer.translate(
+                    guildID,
+                    "misc.interaction.fullGroupsList"
+                ),
+                style: 5 as const,
+                type: 2 as const,
+                url: GROUP_LIST_URL,
+            },
+        ],
         description: state.localizer.translate(
             guildID,
             "command.remove.help.description",
             {
-                groups: `\`${process.env.BOT_PREFIX}groups\``,
                 exclude: `\`${process.env.BOT_PREFIX}exclude\``,
+                groups: `\`${process.env.BOT_PREFIX}groups\``,
                 include: `\`${process.env.BOT_PREFIX}include\``,
             }
         ),
-        usage: `,remove [groups | exclude | include] [${state.localizer.translate(
-            guildID,
-            "misc.listOfGroups"
-        )}]`,
         examples: [
             {
                 example: "`,remove groups twice, red velvet`",
@@ -81,10 +87,10 @@ export default class RemoveCommand implements BaseCommand {
                     guildID,
                     "command.remove.help.example.exclude",
                     {
-                        groupOne: "BESTie",
-                        groupTwo: "Dia",
-                        groupThree: "iKON",
                         exclude: `\`${process.env.BOT_PREFIX}exclude\``,
+                        groupOne: "BESTie",
+                        groupThree: "iKON",
+                        groupTwo: "Dia",
                     }
                 ),
             },
@@ -100,18 +106,12 @@ export default class RemoveCommand implements BaseCommand {
                 ),
             },
         ],
-        actionRowComponents: [
-            {
-                style: 5 as const,
-                url: GROUP_LIST_URL,
-                type: 2 as const,
-                label: state.localizer.translate(
-                    guildID,
-                    "misc.interaction.fullGroupsList"
-                ),
-            },
-        ],
+        name: "remove",
         priority: 200,
+        usage: `,remove [groups | exclude | include] [${state.localizer.translate(
+            guildID,
+            "misc.listOfGroups"
+        )}]`,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
@@ -138,13 +138,13 @@ export default class RemoveCommand implements BaseCommand {
 
         if (!currentMatchedArtists) {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "command.remove.failure.noGroupsSelected.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "command.remove.failure.noGroupsSelected.description"
+                ),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.remove.failure.noGroupsSelected.title"
                 ),
             });
             return;
@@ -175,22 +175,22 @@ export default class RemoveCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "misc.failure.unrecognizedGroups.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "misc.failure.unrecognizedGroups.description",
                     {
+                        helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         matchedGroupsAction: state.localizer.translate(
                             message.guildID,
                             "command.remove.failure.unrecognizedGroups.removed"
                         ),
-                        helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
-                        unmatchedGroups: unmatchedGroups.join(", "),
                         solution: "",
+                        unmatchedGroups: unmatchedGroups.join(", "),
                     }
+                ),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.failure.unrecognizedGroups.title"
                 ),
             });
         }

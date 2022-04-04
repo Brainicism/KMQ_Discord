@@ -1,4 +1,5 @@
 import Eris from "eris";
+
 import CommandPrechecks from "../../command_prechecks";
 import {
     BOOKMARK_COMMAND_NAME,
@@ -20,15 +21,15 @@ export enum AppCommandsAction {
 
 export default class AppCommandsCommand implements BaseCommand {
     validations = {
-        minArgCount: 1,
-        maxArgCount: 1,
         arguments: [
             {
+                enums: Object.values(AppCommandsAction),
                 name: "action",
                 type: "enum" as const,
-                enums: Object.values(AppCommandsAction),
             },
         ],
+        maxArgCount: 1,
+        minArgCount: 1,
     };
 
     preRunChecks = [{ checkFn: CommandPrechecks.debugChannelPrecheck }];
@@ -76,8 +77,8 @@ export default class AppCommandsCommand implements BaseCommand {
             }
 
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: "Application Commands Reloaded",
                 description: "Yay.",
+                title: "Application Commands Reloaded",
             });
         } else {
             const commands = await state.client.getCommands();
@@ -109,8 +110,8 @@ export default class AppCommandsCommand implements BaseCommand {
             }
 
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: "Commands Deleted",
                 description: "No!!",
+                title: "Commands Deleted",
             });
         }
     };

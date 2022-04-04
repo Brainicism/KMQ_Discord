@@ -1,24 +1,22 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import MessageContext from "../../structures/message_context";
-import { isUserPremium } from "../../helpers/game_utils";
-import { sendInfoMessage } from "../../helpers/discord_utils";
-import { state } from "../../kmq_worker";
 import { KmqImages } from "../../constants";
+import { sendInfoMessage } from "../../helpers/discord_utils";
+import { isUserPremium } from "../../helpers/game_utils";
+import { state } from "../../kmq_worker";
+import MessageContext from "../../structures/message_context";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 export default class PremiumCommand implements BaseCommand {
     validations = {
-        minArgCount: 0,
-        maxArgCount: 0,
         arguments: [],
+        maxArgCount: 0,
+        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
-        name: "premium",
         description: state.localizer.translate(
             guildID,
             "commands.premium.help.description"
         ),
-        usage: ",premium",
         examples: [
             {
                 example: "`,premium`",
@@ -28,18 +26,14 @@ export default class PremiumCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "premium",
         priority: 50,
+        usage: ",premium",
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         const premiumMember = await isUserPremium(message.author.id);
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
-                message.guildID,
-                premiumMember
-                    ? "commands.premium.title.premium"
-                    : "commands.premium.title.nonPremium"
-            ),
             description: `${state.localizer.translate(
                 message.guildID,
                 premiumMember
@@ -82,6 +76,12 @@ export default class PremiumCommand implements BaseCommand {
                 },
             ],
             thumbnailUrl: KmqImages.HAPPY,
+            title: state.localizer.translate(
+                message.guildID,
+                premiumMember
+                    ? "commands.premium.title.premium"
+                    : "commands.premium.title.nonPremium"
+            ),
         });
     };
 }

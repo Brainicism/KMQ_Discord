@@ -1,8 +1,9 @@
-import fs from "fs";
-import path from "path";
 import { program } from "commander";
 import { config } from "dotenv";
+import fs from "fs";
 import _ from "lodash";
+import path from "path";
+
 import { getNewConnection } from "../database_context";
 import { IPCLogger } from "../logger";
 

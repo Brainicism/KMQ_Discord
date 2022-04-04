@@ -1,14 +1,15 @@
 import Eris, { GuildTextableChannel } from "eris";
-import { Campaign } from "patreon-discord";
 import { IPC } from "eris-fleet/dist/util/IPC";
-import GameSession from "./structures/game_session";
+import { Campaign } from "patreon-discord";
+
 import { Gender } from "./commands/game_options/gender";
-import KmqMember from "./structures/kmq_member";
-import KmqClient from "./kmq_client";
-import RateLimiter from "./rate_limiter";
 import LocalizationManager, {
     LocaleType,
 } from "./helpers/localization_manager";
+import KmqClient from "./kmq_client";
+import RateLimiter from "./rate_limiter";
+import GameSession from "./structures/game_session";
+import KmqMember from "./structures/kmq_member";
 
 export type GuildTextableMessage = Eris.Message<GuildTextableChannel>;
 

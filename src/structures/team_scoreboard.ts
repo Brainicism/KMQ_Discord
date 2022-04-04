@@ -1,10 +1,10 @@
-import Scoreboard, {
-    SuccessfulGuessResult,
-    SCOREBOARD_FIELD_CUTOFF,
-} from "./scoreboard";
-import Player from "./player";
-import Team from "./team";
 import { IPCLogger } from "../logger";
+import Player from "./player";
+import Scoreboard, {
+    SCOREBOARD_FIELD_CUTOFF,
+    SuccessfulGuessResult,
+} from "./scoreboard";
+import Team from "./team";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("team_scoreboard");
@@ -24,9 +24,7 @@ export default class TeamScoreboard extends Scoreboard {
      * Updates the scoreboard with information about correct guessers
      * @param guessResults - Objects containing the user ID, points earned, and EXP gain
      */
-    async updateScoreboard(
-        guessResults: Array<SuccessfulGuessResult>
-    ): Promise<void> {
+    async update(guessResults: Array<SuccessfulGuessResult>): Promise<void> {
         const previousRoundRanking = this.getScoreToRankingMap();
         for (const player of Object.values(this.players)) {
             player.setPreviousRanking(previousRoundRanking[player.getScore()]);

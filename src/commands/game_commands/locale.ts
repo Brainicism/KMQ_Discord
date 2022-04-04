@@ -1,14 +1,14 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { KmqImages } from "../../constants";
+import dbContext from "../../database_context";
 import {
     getDebugLogHeader,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
+import { DEFAULT_LOCALE, LocaleType } from "../../helpers/localization_manager";
+import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import { LocaleType, DEFAULT_LOCALE } from "../../helpers/localization_manager";
-import dbContext from "../../database_context";
-import { state } from "../../kmq_worker";
-import { KmqImages } from "../../constants";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("locale");
 
@@ -25,19 +25,18 @@ export default class LocaleTypeCommand implements BaseCommand {
     aliases = ["botlanguage"];
 
     validations = {
-        minArgCount: 0,
-        maxArgCount: 1,
         arguments: [
             {
+                enums: Object.values(LocaleArgument),
                 name: "localeType",
                 type: "enum" as const,
-                enums: Object.values(LocaleArgument),
             },
         ],
+        maxArgCount: 1,
+        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
-        name: "locale",
         description: state.localizer.translate(
             guildID,
             "command.locale.help.description",
@@ -46,10 +45,6 @@ export default class LocaleTypeCommand implements BaseCommand {
                 korean: `\`${LocaleArgument.KOREAN}\``,
             }
         ),
-        usage: `,locale [${state.localizer.translate(
-            guildID,
-            "command.locale.help.usage.language"
-        )}]`,
         examples: [
             {
                 example: "`,locale english`",
@@ -91,7 +86,12 @@ export default class LocaleTypeCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "locale",
         priority: 30,
+        usage: `,locale [${state.localizer.translate(
+            guildID,
+            "command.locale.help.usage.language"
+        )}]`,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
@@ -119,11 +119,6 @@ export default class LocaleTypeCommand implements BaseCommand {
         await LocaleTypeCommand.updateLocale(message.guildID, language);
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
-                message.guildID,
-                "command.options.updated",
-                { presetOrOption: "Locale" }
-            ),
             description: state.localizer.translate(
                 message.guildID,
                 "command.locale.updatedDescription",
@@ -135,6 +130,11 @@ export default class LocaleTypeCommand implements BaseCommand {
                 }
             ),
             thumbnailUrl: KmqImages.THUMBS_UP,
+            title: state.localizer.translate(
+                message.guildID,
+                "command.options.updated",
+                { presetOrOption: "Locale" }
+            ),
         });
 
         logger.info(

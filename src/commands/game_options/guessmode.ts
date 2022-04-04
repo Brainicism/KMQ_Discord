@@ -1,14 +1,14 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import { IPCLogger } from "../../logger";
-import { getGuildPreference } from "../../helpers/game_utils";
-import {
-    sendOptionsMessage,
-    getDebugLogHeader,
-} from "../../helpers/discord_utils";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import {
+    getDebugLogHeader,
+    sendOptionsMessage,
+} from "../../helpers/discord_utils";
+import { getGuildPreference } from "../../helpers/game_utils";
 import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import { GameOption } from "../../types";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("guessmode");
 
@@ -26,24 +26,22 @@ export default class GuessModeCommand implements BaseCommand {
     aliases = ["mode"];
 
     validations = {
-        minArgCount: 0,
-        maxArgCount: 1,
         arguments: [
             {
+                enums: Object.values(GuessModeType),
                 name: "guessModeType",
                 type: "enum" as const,
-                enums: Object.values(GuessModeType),
             },
         ],
+        maxArgCount: 1,
+        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
-        name: "guessmode",
         description: state.localizer.translate(
             guildID,
             "command.guessmode.help.description"
         ),
-        usage: ",guessmode [song | artist | both]",
         examples: [
             {
                 example: "`,guessmode song`",
@@ -77,7 +75,9 @@ export default class GuessModeCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "guessmode",
         priority: 130,
+        usage: ",guessmode [song | artist | both]",
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

@@ -1,21 +1,22 @@
 import assert from "assert";
-import sinon from "sinon";
-import { Gender } from "../../commands/game_options/gender";
-import { OstPreference } from "../../commands/game_options/ost";
-import { ReleaseType } from "../../commands/game_options/release";
-import { SubunitsPreference } from "../../commands/game_options/subunits";
-import GuildPreference from "../../structures/guild_preference";
-import SongSelector, {
-    LAST_PLAYED_SONG_QUEUE_SIZE,
-} from "../../structures/song_selector";
 import _ from "lodash";
+import sinon from "sinon";
+
 import { ArtistType } from "../../commands/game_options/artisttype";
-import { getMatchingGroupNames } from "../../helpers/game_utils";
+import { Gender } from "../../commands/game_options/gender";
 import {
     FOREIGN_LANGUAGE_TAGS,
     LanguageType,
 } from "../../commands/game_options/language";
+import { OstPreference } from "../../commands/game_options/ost";
+import { ReleaseType } from "../../commands/game_options/release";
 import { ShuffleType } from "../../commands/game_options/shuffle";
+import { SubunitsPreference } from "../../commands/game_options/subunits";
+import { getMatchingGroupNames } from "../../helpers/game_utils";
+import GuildPreference from "../../structures/guild_preference";
+import SongSelector, {
+    LAST_PLAYED_SONG_QUEUE_SIZE,
+} from "../../structures/song_selector";
 
 async function getMockGuildPreference(): Promise<GuildPreference> {
     const guildPreference = new GuildPreference("test");
@@ -350,10 +351,10 @@ describe("subunits", () => {
 
     describe("include subunits (and the subunit has a collab)", () => {
         it("should match the songs from the group, collabs of that group, and collabs of any subunits of that group", async () => {
-            const artistWithCollabingSubunit = { name: "BIGBANG", id: 28 };
-            const subunitWithCollab = { name: "G-DRAGON", id: 68 };
-            const subunitCollabArtist = { name: "G-DRAGON + TAEYANG", id: 73 };
-            const parentCollabArtist = { name: "BIGBANG + 2NE1", id: 29 };
+            const artistWithCollabingSubunit = { id: 28, name: "BIGBANG" };
+            const subunitWithCollab = { id: 68, name: "G-DRAGON" };
+            const subunitCollabArtist = { id: 73, name: "G-DRAGON + TAEYANG" };
+            const parentCollabArtist = { id: 29, name: "BIGBANG + 2NE1" };
 
             const expectedIds = [
                 artistWithCollabingSubunit.id,

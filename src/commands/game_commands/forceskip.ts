@@ -1,18 +1,18 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import CommandPrechecks from "../../command_prechecks";
+import { KmqImages } from "../../constants";
 import {
-    sendErrorMessage,
     areUserAndBotInSameVoiceChannel,
-    getDebugLogHeader,
     EMBED_SUCCESS_COLOR,
-    sendInfoMessage,
+    getDebugLogHeader,
     getMention,
+    sendErrorMessage,
+    sendInfoMessage,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
+import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import { KmqImages } from "../../constants";
-import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("forceskip");
 
@@ -25,14 +25,14 @@ export default class ForceSkipCommand implements BaseCommand {
     ];
 
     help = (guildID: string): Help => ({
-        name: "forceskip",
         description: state.localizer.translate(
             guildID,
             "command.forceskip.help.description"
         ),
-        usage: ",forceskip",
         examples: [],
+        name: "forceskip",
         priority: 1009,
+        usage: ",forceskip",
     });
 
     call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
@@ -40,14 +40,14 @@ export default class ForceSkipCommand implements BaseCommand {
         const gameSession = gameSessions[message.guildID];
         if (
             !gameSession ||
-            !gameSession.gameRound ||
+            !gameSession.round ||
             !areUserAndBotInSameVoiceChannel(message)
         ) {
             logger.warn(
                 `${getDebugLogHeader(
                     message
-                )} | Invalid force-skip. !gameSession: ${!gameSession}. !gameSession.gameRound: ${
-                    gameSession && !gameSession.gameRound
+                )} | Invalid force-skip. !gameSession: ${!gameSession}. !gameSession.round: ${
+                    gameSession && !gameSession.round
                 }. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(
                     message
                 )}`
@@ -55,48 +55,48 @@ export default class ForceSkipCommand implements BaseCommand {
             return;
         }
 
-        if (gameSession.gameRound.skipAchieved) {
+        if (gameSession.round.skipAchieved) {
             // song already being skipped
             return;
         }
 
         if (message.author.id !== gameSession.owner.id) {
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "command.forceskip.failure.notOwner.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "command.forceskip.failure.notOwner.description",
                     { mentionedUser: getMention(gameSession.owner.id) }
                 ),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.forceskip.failure.notOwner.title"
+                ),
             });
             return;
         }
 
-        gameSession.gameRound.skipAchieved = true;
+        gameSession.round.skipAchieved = true;
         sendInfoMessage(
             MessageContext.fromMessage(message),
             {
                 color: EMBED_SUCCESS_COLOR,
-                title: state.localizer.translate(
-                    message.guildID,
-                    "command.skip.success.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "command.forceskip.description"
                 ),
                 thumbnailUrl: KmqImages.NOT_IMPRESSED,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.skip.success.title"
+                ),
             },
             true
         );
 
         await gameSession.endRound(
-            { correct: false },
             guildPreference,
-            MessageContext.fromMessage(message)
+            MessageContext.fromMessage(message),
+            { correct: false }
         );
 
         await gameSession.startRound(

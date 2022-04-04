@@ -1,5 +1,7 @@
 import i18next from "i18next";
 import Backend from "i18next-fs-backend";
+import path from "path";
+
 import { getGuildLocale } from "./discord_utils";
 
 export enum LocaleType {
@@ -14,22 +16,22 @@ export default class LocalizationManager {
     constructor() {
         this.internalLocalizer = i18next.createInstance().use(Backend);
         this.internalLocalizer.init({
-            preload: Object.values(LocaleType),
-            supportedLngs: Object.values(LocaleType),
-            initImmediate: false,
-            saveMissing: true,
+            backend: {
+                loadPath: path.join(__dirname, "../../i18n/{{lng}}.json"),
+            },
             fallbackLng: DEFAULT_LOCALE,
+            initImmediate: false,
             interpolation: {
                 escapeValue: false,
             },
-            backend: {
-                loadPath: "../i18n/{{lng}}.json",
-            },
+            preload: Object.values(LocaleType),
+            saveMissing: true,
+            supportedLngs: Object.values(LocaleType),
         });
     }
 
     /**
-     * Translate the given phrase using locale configuration
+     * Wrapper for translateByLocale
      * @param guildID - The guild ID associated with the guild receiving the string
      * @param phrase - The phrase to translate
      * @param replace - Replacements to be applied to the phrase
@@ -40,23 +42,53 @@ export default class LocalizationManager {
         phrase: string,
         replace: { [key: string]: string } = {}
     ): string {
+        return this.translateByLocale(getGuildLocale(guildID), phrase, replace);
+    }
+
+    /**
+     * Translate the given phrase using locale configuration
+     * @param locale - The locale to translate to
+     * @param phrase - The phrase to translate
+     * @param replace - Replacements to be applied to the phrase
+     * @returns The translated phrase
+     */
+    translateByLocale(
+        locale: LocaleType,
+        phrase: string,
+        replace: { [key: string]: string } = {}
+    ): string {
         return this.internalLocalizer.t(phrase, {
-            lng: getGuildLocale(guildID),
+            lng: locale,
             replace,
         });
     }
 
     /**
-     * Translate with plural condition the given phrase and count using locale configuration
+     * Wrapper for translateNByLocale
      * @param guildID - The guild ID associated with the guild receiving the string
      * @param phrase - The phrase to translate
      * @param count - The number which decides whether to select singular or plural
      * @returns The translated phrase
      */
     translateN(guildID: string, phrase: string, count: number): string {
+        return this.translateNByLocale(getGuildLocale(guildID), phrase, count);
+    }
+
+    /**
+     * Translate with plural condition the given phrase and count using locale configuration
+     * @param locale - The locale to translate to
+     * @param phrase - The phrase to translate
+     * @param count - The number which decides whether to select singular or plural
+     * @returns The translated phrase
+     */
+    translateNByLocale(
+        locale: LocaleType,
+        phrase: string,
+        count: number
+    ): string {
         return this.internalLocalizer.t(phrase, {
-            lng: getGuildLocale(guildID),
             count,
+            lng: locale,
         });
     }
 }

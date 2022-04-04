@@ -1,7 +1,7 @@
 import dbContext from "../database_context";
+import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
 import { addPremium, removePremium } from "./game_utils";
-import { state } from "../kmq_worker";
 
 const logger = new IPCLogger("patreon_manager");
 
@@ -50,8 +50,8 @@ export default async function updatePremiumUsers(): Promise<void> {
     const patrons: Array<Patron> = fetchedPatrons
         .filter((x: PatronResponse) => !!x.discord_user_id)
         .map((x: PatronResponse) => ({
-            discordID: x.discord_user_id,
             activePatron: x.patron_status === PatronState.ACTIVE,
+            discordID: x.discord_user_id,
             firstSubscribed: x.pledge_relationship_start,
         }));
 

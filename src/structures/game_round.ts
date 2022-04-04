@@ -1,14 +1,25 @@
-import _ from "lodash";
-import Eris from "eris";
 import levenshtien from "damerau-levenshtein";
-import { GuessModeType } from "../commands/game_options/guessmode";
-import { state } from "../kmq_worker";
-import KmqMember from "./kmq_member";
+import Eris from "eris";
+import _ from "lodash";
+
 import {
     ExpBonusModifier,
     ExpBonusModifierValues,
 } from "../commands/game_commands/exp";
-import { QueriedSong } from "../types";
+import { GuessModeType } from "../commands/game_options/guessmode";
+import {
+    EMBED_ERROR_COLOR,
+    EMBED_SUCCESS_BONUS_COLOR,
+    EMBED_SUCCESS_COLOR,
+    getMention,
+} from "../helpers/discord_utils";
+import { friendlyFormattedNumber } from "../helpers/utils";
+import { state } from "../kmq_worker";
+import { PlayerRoundResult, QueriedSong } from "../types";
+import KmqMember from "./kmq_member";
+import MessageContext from "./message_context";
+import Round, { MAX_RUNNERS_UP } from "./round";
+import { UniqueSongCounter } from "./song_selector";
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
 const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\(\)\+\u200B]/g;
@@ -91,24 +102,9 @@ function generateHint(name: string): string {
     return hiddenName;
 }
 
-export default class GameRound {
-    /** The song associated with the round */
-    public readonly song: QueriedSong;
-
-    /** The potential song aliases */
-    public readonly songAliases: string[];
-
-    /** The potential artist aliases */
-    public readonly artistAliases: string[];
-
-    /** Timestamp of the creation of the GameRound in epoch milliseconds */
-    public readonly startedAt: number;
-
+export default class GameRound extends Round {
     /** Round bonus modifier */
     public bonusModifier: number;
-
-    /** List of players who have opted to skip the current GameRound */
-    public skippers: Set<string>;
 
     /** List of players who requested a hint */
     public hintRequesters: Set<string>;
@@ -118,15 +114,6 @@ export default class GameRound {
 
     /** List of players who guessed correctly */
     public readonly correctGuessers: Array<KmqMember>;
-
-    /** Whether the GameRound has been skipped */
-    public skipAchieved: boolean;
-
-    /** Timestamp of the last time the GameRound was interacted with in epoch milliseconds */
-    public lastActive: number;
-
-    /**  Whether the song has been guessed yet */
-    public finished: boolean;
 
     /** The accepted answers for the song name */
     public readonly acceptedSongAnswers: Array<string>;
@@ -146,18 +133,20 @@ export default class GameRound {
     /** List of players who incorrectly guessed in the multiple choice */
     public incorrectMCGuessers: Set<string>;
 
-    /** List of players who incorrectly guessed in the multiple choice */
+    /** Interactable components attached to this round's message */
     public interactionComponents: Array<Eris.ActionRow>;
 
-    /** List of players who incorrectly guessed in the multiple choice */
+    /** The message containing this round's interactable components */
     public interactionMessage: Eris.Message<Eris.TextableChannel>;
+
+    /** Info about the players that won this GameRound */
+    public playerRoundResults: Array<PlayerRoundResult>;
 
     /** The base EXP for this GameRound */
     private baseExp: number;
 
     constructor(song: QueriedSong) {
-        this.song = song;
-        this.songAliases = state.aliases.song[song.youtubeLink] || [];
+        super(song);
         this.acceptedSongAnswers = [song.songName, ...this.songAliases];
         if (song.hangulSongName) {
             this.acceptedSongAnswers.push(song.hangulSongName);
@@ -170,27 +159,22 @@ export default class GameRound {
             );
         }
 
-        this.artistAliases = artistNames.flatMap(
-            (x) => state.aliases.artist[x] || []
-        );
         this.acceptedArtistAnswers = [...artistNames, ...this.artistAliases];
 
-        this.skipAchieved = false;
-        this.startedAt = Date.now();
-        this.skippers = new Set();
         this.hintUsed = false;
         this.hintRequesters = new Set();
         this.correctGuessers = [];
         this.finished = false;
         this.hints = {
-            songHint: generateHint(song.songName),
             artistHint: generateHint(song.artistName),
+            songHint: generateHint(song.songName),
         };
         this.interactionCorrectAnswerUUID = null;
         this.interactionIncorrectAnswerUUIDs = {};
         this.incorrectMCGuessers = new Set();
         this.interactionComponents = [];
         this.interactionMessage = null;
+        this.playerRoundResults = [];
         this.bonusModifier =
             Math.random() < 0.01
                 ? _.sample([
@@ -208,22 +192,6 @@ export default class GameRound {
                       ],
                   ])
                 : 1;
-    }
-
-    /**
-     * Adds a skip vote for the specified user
-     * @param userID - the Discord user ID of the player skipping
-     */
-    userSkipped(userID: string): void {
-        this.skippers.add(userID);
-    }
-
-    /**
-     * Gets the number of players who have opted to skip the GameRound
-     * @returns the number of skippers
-     */
-    getNumSkippers(): number {
-        return this.skippers.size;
     }
 
     /**
@@ -321,9 +289,7 @@ export default class GameRound {
     async interactionMarkAnswers(correctGuesses: number): Promise<void> {
         if (!this.interactionMessage) return;
         await this.interactionMessage.edit({
-            embeds: this.interactionMessage.embeds,
             components: this.interactionComponents.map((x) => ({
-                type: 1,
                 components: x.components.map((y) => {
                     const z = y as Eris.InteractionButton;
                     const noGuesses =
@@ -347,14 +313,16 @@ export default class GameRound {
                     }
 
                     return {
-                        label,
                         custom_id: z.custom_id,
+                        disabled: true,
+                        label,
                         style,
                         type: 2,
-                        disabled: true,
                     };
                 }),
+                type: 1,
             })),
+            embeds: this.interactionMessage.embeds,
         });
     }
 
@@ -382,6 +350,109 @@ export default class GameRound {
 
     isBonusArtist(): boolean {
         return state.bonusArtists.has(this.song.artistName);
+    }
+
+    getEndRoundDescription(
+        messageContext: MessageContext,
+        uniqueSongCounter: UniqueSongCounter,
+        playerRoundResults: Array<PlayerRoundResult>
+    ): string {
+        let correctDescription = "";
+        if (this.bonusModifier > 1 || this.isBonusArtist()) {
+            let bonusType: string;
+            if (this.isBonusArtist() && this.bonusModifier > 1) {
+                bonusType = state.localizer.translate(
+                    messageContext.guildID,
+                    "misc.inGame.bonusExpArtistRound"
+                );
+            } else if (this.bonusModifier > 1) {
+                bonusType = state.localizer.translate(
+                    messageContext.guildID,
+                    "misc.inGame.bonusExpRound"
+                );
+            } else {
+                bonusType = state.localizer.translate(
+                    messageContext.guildID,
+                    "misc.inGame.bonusArtistRound"
+                );
+            }
+
+            correctDescription += `⭐__**${bonusType}**__⭐\n`;
+        }
+
+        const correctGuess = playerRoundResults.length > 0;
+        if (correctGuess) {
+            const correctGuesser = `${getMention(
+                playerRoundResults[0].player.id
+            )} ${
+                playerRoundResults[0].streak >= 5
+                    ? `(🔥 ${friendlyFormattedNumber(
+                          playerRoundResults[0].streak
+                      )})`
+                    : ""
+            }`;
+
+            correctDescription += state.localizer.translate(
+                messageContext.guildID,
+                "misc.inGame.correctGuess",
+                {
+                    correctGuesser,
+                    expGain: friendlyFormattedNumber(
+                        playerRoundResults[0].expGain
+                    ),
+                }
+            );
+            if (playerRoundResults.length > 1) {
+                const runnersUp = playerRoundResults.slice(1);
+                let runnersUpDescription = runnersUp
+                    .map(
+                        (x) =>
+                            `${getMention(
+                                x.player.id
+                            )} (+${friendlyFormattedNumber(x.expGain)} EXP)`
+                    )
+                    .slice(0, MAX_RUNNERS_UP)
+                    .join("\n");
+
+                if (runnersUp.length >= MAX_RUNNERS_UP) {
+                    runnersUpDescription += `\n${state.localizer.translate(
+                        messageContext.guildID,
+                        "misc.andManyOthers"
+                    )}`;
+                }
+
+                correctDescription += `\n\n**${state.localizer.translate(
+                    messageContext.guildID,
+                    "misc.inGame.runnersUp"
+                )}**\n${runnersUpDescription}`;
+            }
+        }
+
+        if (!correctGuess) {
+            correctDescription = state.localizer.translate(
+                messageContext.guildID,
+                "misc.inGame.noCorrectGuesses"
+            );
+        }
+
+        const uniqueSongMessage = this.getUniqueSongCounterMessage(
+            messageContext,
+            uniqueSongCounter
+        );
+
+        return `${correctDescription}\n${uniqueSongMessage}`;
+    }
+
+    getEndRoundColor(correctGuess: boolean, userBonusActive: boolean): number {
+        if (correctGuess) {
+            if (userBonusActive) {
+                return EMBED_SUCCESS_BONUS_COLOR;
+            }
+
+            return EMBED_SUCCESS_COLOR;
+        }
+
+        return EMBED_ERROR_COLOR;
     }
 
     /**

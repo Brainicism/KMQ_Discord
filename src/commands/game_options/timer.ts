@@ -1,14 +1,14 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import CommandPrechecks from "../../command_prechecks";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
-import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import { GameOption } from "../../types";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("guessTimeout");
 
@@ -18,28 +18,23 @@ export default class GuessTimeoutCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
-        minArgCount: 0,
-        maxArgCount: 1,
         arguments: [
             {
+                maxValue: 180,
+                minValue: 2,
                 name: "timer",
                 type: "number" as const,
-                minValue: 2,
-                maxValue: 180,
             },
         ],
+        maxArgCount: 1,
+        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
-        name: "timer",
         description: state.localizer.translate(
             guildID,
             "command.timer.help.description"
         ),
-        usage: `,timer [${state.localizer.translate(
-            guildID,
-            "command.timer.help.usage.seconds"
-        )}]`,
         examples: [
             {
                 example: "`,timer 15`",
@@ -57,7 +52,12 @@ export default class GuessTimeoutCommand implements BaseCommand {
                 ),
             },
         ],
+        name: "timer",
         priority: 110,
+        usage: `,timer [${state.localizer.translate(
+            guildID,
+            "command.timer.help.usage.seconds"
+        )}]`,
     });
 
     call = async ({
@@ -90,7 +90,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
         await guildPreference.setGuessTimeout(time);
         if (
             gameSession &&
-            gameSession.gameRound &&
+            gameSession.round &&
             gameSession.connection.playing
         ) {
             // Timer can start mid-song, starting when the user enters the command

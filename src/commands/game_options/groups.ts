@@ -1,20 +1,20 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import CommandPrechecks from "../../command_prechecks";
+import { GROUP_LIST_URL } from "../../constants";
 import {
-    sendOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
+    sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import {
     getGuildPreference,
     getMatchingGroupNames,
 } from "../../helpers/game_utils";
-import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
-import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
-import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
-import { GROUP_LIST_URL } from "../../constants";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import { GameOption } from "../../types";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 
 const logger = new IPCLogger("groups");
 
@@ -24,7 +24,17 @@ export default class GroupsCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     help = (guildID: string): Help => ({
-        name: "groups",
+        actionRowComponents: [
+            {
+                label: state.localizer.translate(
+                    guildID,
+                    "misc.interaction.fullGroupsList"
+                ),
+                style: 5 as const,
+                type: 2 as const,
+                url: GROUP_LIST_URL,
+            },
+        ],
         description: state.localizer.translate(
             guildID,
             "command.groups.help.description",
@@ -32,7 +42,6 @@ export default class GroupsCommand implements BaseCommand {
                 groupList: GROUP_LIST_URL,
             }
         ),
-        usage: ",groups [group1],{group2}",
         examples: [
             {
                 example: "`,groups blackpink`",
@@ -51,8 +60,8 @@ export default class GroupsCommand implements BaseCommand {
                     "command.groups.help.example.multipleGroups",
                     {
                         groupOne: "Blackpink",
-                        groupTwo: "BTS",
                         groupThree: "Red Velvet",
+                        groupTwo: "BTS",
                     }
                 ),
             },
@@ -64,18 +73,9 @@ export default class GroupsCommand implements BaseCommand {
                 ),
             },
         ],
-        actionRowComponents: [
-            {
-                style: 5 as const,
-                url: GROUP_LIST_URL,
-                type: 2 as const,
-                label: state.localizer.translate(
-                    guildID,
-                    "misc.interaction.fullGroupsList"
-                ),
-            },
-        ],
+        name: "groups",
         priority: 135,
+        usage: ",groups [group1],{group2}",
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
@@ -122,20 +122,15 @@ export default class GroupsCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "misc.failure.unrecognizedGroups.title"
-                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "misc.failure.unrecognizedGroups.description",
                     {
+                        helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         matchedGroupsAction: state.localizer.translate(
                             message.guildID,
                             "misc.failure.unrecognizedGroups.added"
                         ),
-                        helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
-                        unmatchedGroups: unmatchedGroups.join(", "),
                         solution: state.localizer.translate(
                             message.guildID,
                             "misc.failure.unrecognizedGroups.solution",
@@ -143,9 +138,14 @@ export default class GroupsCommand implements BaseCommand {
                                 command: `\`${process.env.BOT_PREFIX}add groups\``,
                             }
                         ),
+                        unmatchedGroups: unmatchedGroups.join(", "),
                     }
                 ),
                 footerText: groupsWarning,
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.failure.unrecognizedGroups.title"
+                ),
             });
         }
 
@@ -160,14 +160,14 @@ export default class GroupsCommand implements BaseCommand {
             );
             if (intersection.size > 0) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
-                        message.guildID,
-                        "misc.failure.groupsExcludeConflict.title"
-                    ),
                     description: state.localizer.translate(
                         message.guildID,
                         "misc.failure.groupsExcludeConflict.description",
                         {
+                            allowOrPrevent: state.localizer.translate(
+                                message.guildID,
+                                "misc.failure.groupsExcludeConflict.allow"
+                            ),
                             conflictingOptionOne: "`exclude`",
                             conflictingOptionTwo: "`groups`",
                             groupsList: [...intersection]
@@ -175,11 +175,11 @@ export default class GroupsCommand implements BaseCommand {
                                 .join(", "),
                             solutionStepOne: `\`${process.env.BOT_PREFIX}remove exclude\``,
                             solutionStepTwo: `\`${process.env.BOT_PREFIX}groups\``,
-                            allowOrPrevent: state.localizer.translate(
-                                message.guildID,
-                                "misc.failure.groupsExcludeConflict.allow"
-                            ),
                         }
+                    ),
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "misc.failure.groupsExcludeConflict.title"
                     ),
                 });
                 return;

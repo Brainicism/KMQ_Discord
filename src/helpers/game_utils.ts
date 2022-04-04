@@ -1,18 +1,19 @@
-import _ from "lodash";
 import { execSync } from "child_process";
+import _ from "lodash";
+
+import { AnswerType } from "../commands/game_options/answer";
+import { Gender } from "../commands/game_options/gender";
+import { GuessModeType } from "../commands/game_options/guessmode";
 import dbContext from "../database_context";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
-import GameSession from "../structures/game_session";
-import GuildPreference from "../structures/guild_preference";
-import { MatchedArtist, QueriedSong } from "../types";
-import { Gender } from "../commands/game_options/gender";
-import { GuessModeType } from "../commands/game_options/guessmode";
 import { cleanArtistName, cleanSongName } from "../structures/game_round";
-import { AnswerType } from "../commands/game_options/answer";
-import { Patron, PATREON_SUPPORTER_BADGE } from "./patreon_manager";
+import GuildPreference from "../structures/guild_preference";
+import Session from "../structures/session";
 import SongSelector from "../structures/song_selector";
+import { MatchedArtist, QueriedSong } from "../types";
 import { LocaleType } from "./localization_manager";
+import { PATREON_SUPPORTER_BADGE, Patron } from "./patreon_manager";
 import { containsHangul, md5Hash } from "./utils";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
@@ -26,19 +27,17 @@ interface GroupMatchResults {
 
 /**
  * Joins the VoiceChannel specified by GameSession, and stores the VoiceConnection
- * @param gameSession - The active GameSession
+ * @param session - The active Session
  */
-export async function ensureVoiceConnection(
-    gameSession: GameSession
-): Promise<void> {
+export async function ensureVoiceConnection(session: Session): Promise<void> {
     const { client } = state;
-    if (gameSession.connection && gameSession.connection.ready) return;
-    const connection = await client.joinVoiceChannel(
-        gameSession.voiceChannelID,
-        { opusOnly: true, selfDeaf: true }
-    );
+    if (session.connection && session.connection.ready) return;
+    const connection = await client.joinVoiceChannel(session.voiceChannelID, {
+        opusOnly: true,
+        selfDeaf: true,
+    });
 
-    gameSession.connection = connection;
+    session.connection = connection;
 }
 
 /**
@@ -112,7 +111,7 @@ export async function getGuildPreference(
         await dbContext
             .kmq("game_options")
             .select("*")
-            .where({ guild_id: guildID, client_id: process.env.BOT_CLIENT_ID })
+            .where({ client_id: process.env.BOT_CLIENT_ID, guild_id: guildID })
     )
         .map((x) => ({ [x["option_name"]]: JSON.parse(x["option_value"]) }))
         .reduce((total, curr) => Object.assign(total, curr), {});
@@ -179,8 +178,8 @@ export async function getMatchingGroupNames(
     );
 
     const result: GroupMatchResults = {
-        unmatchedGroups: unrecognizedGroups,
         matchedGroups: matchingGroups,
+        unmatchedGroups: unrecognizedGroups,
     };
 
     if (result.unmatchedGroups.length > 0 && !aliasApplied) {
@@ -434,9 +433,9 @@ export async function addPremium(patrons: Array<Patron>): Promise<void> {
             .kmq("premium_users")
             .insert(
                 patrons.map((x) => ({
-                    user_id: x.discordID,
                     active: x.activePatron,
                     first_subscribed: x.firstSubscribed,
+                    user_id: x.discordID,
                 }))
             )
             .onConflict("user_id")
@@ -447,8 +446,8 @@ export async function addPremium(patrons: Array<Patron>): Promise<void> {
             .kmq("badges")
             .insert(
                 patrons.map((x) => ({
-                    user_id: x.discordID,
                     badge_name: PATREON_SUPPORTER_BADGE,
+                    user_id: x.discordID,
                 }))
             )
             .onConflict(["user_id", "badge_name"])

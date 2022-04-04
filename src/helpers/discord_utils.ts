@@ -1,58 +1,59 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
+import axios from "axios";
 import Eris from "eris";
 import EmbedPaginator from "eris-pagination";
-import axios from "axios";
-import GuildPreference from "../structures/guild_preference";
-import GameSession from "../structures/game_session";
-import { IPCLogger } from "../logger";
-import {
-    getAvailableSongCount,
-    getKmqCurrentVersion,
-    userBonusIsActive,
-    getLocalizedSongName,
-    getLocalizedArtistName,
-    isPremiumRequest,
-} from "./game_utils";
+
+import { REVIEW_LINK, VOTE_LINK } from "../commands/game_commands/vote";
+import { GuessModeType } from "../commands/game_options/guessmode";
+import { KmqImages } from "../constants";
+import dbContext from "../database_context";
 import { getFact } from "../fact_generator";
+import { state } from "../kmq_worker";
+import { IPCLogger } from "../logger";
+import EliminationScoreboard from "../structures/elimination_scoreboard";
+import GameRound from "../structures/game_round";
+import GameSession from "../structures/game_session";
+import GuildPreference from "../structures/guild_preference";
+import MessageContext from "../structures/message_context";
+import Round from "../structures/round";
+import Scoreboard from "../structures/scoreboard";
+import Session from "../structures/session";
+import { UniqueSongCounter } from "../structures/song_selector";
+import TeamScoreboard from "../structures/team_scoreboard";
 import {
+    ConflictingGameOptions,
     EmbedPayload,
+    GameInfoMessage,
     GameOption,
     GameOptionCommand,
-    PriorityGameOption,
-    ConflictingGameOptions,
-    GuildTextableMessage,
-    PlayerRoundResult,
-    GameInfoMessage,
     GameType,
+    GuildTextableMessage,
+    PriorityGameOption,
     QueriedSong,
 } from "../types";
 import {
-    chunkArray,
-    codeLine,
+    getAvailableSongCount,
+    getKmqCurrentVersion,
+    getLocalizedArtistName,
+    getLocalizedSongName,
+    isPremiumRequest,
+    userBonusIsActive,
+} from "./game_utils";
+import { DEFAULT_LOCALE, LocaleType } from "./localization_manager";
+import {
     bold,
-    underline,
-    italicize,
-    strikethrough,
     chooseWeightedRandom,
-    getOrdinalNum,
-    friendlyFormattedNumber,
+    chunkArray,
     delay,
+    friendlyFormattedNumber,
+    getOrdinalNum,
+    italicize,
     standardDateFormat,
+    strikethrough,
+    underline,
 } from "./utils";
-import { state } from "../kmq_worker";
-import Scoreboard from "../structures/scoreboard";
-import GameRound from "../structures/game_round";
-import dbContext from "../database_context";
-import EliminationScoreboard from "../structures/elimination_scoreboard";
-import TeamScoreboard from "../structures/team_scoreboard";
-import { KmqImages } from "../constants";
-import MessageContext from "../structures/message_context";
-import { GuessModeType } from "../commands/game_options/guessmode";
-import { REVIEW_LINK, VOTE_LINK } from "../commands/game_commands/vote";
-import { UniqueSongCounter } from "../structures/song_selector";
-import { LocaleType, DEFAULT_LOCALE } from "./localization_manager";
 
-const logger = new IPCLogger("utils");
+const logger = new IPCLogger("discord_utils");
 export const EMBED_ERROR_COLOR = 0xed4245; // Red
 export const EMBED_SUCCESS_COLOR = 0x57f287; // Green
 export const EMBED_SUCCESS_BONUS_COLOR = 0xfee75c; // Gold
@@ -69,7 +70,6 @@ const REQUIRED_VOICE_PERMISSIONS = [
 ];
 
 const MAX_SCOREBOARD_PLAYERS = 30;
-const MAX_RUNNERS_UP = 30;
 const MAX_INTERACTION_RESPONSE_TIME = 3 * 1000;
 
 export type EmbedGenerator = () => Promise<Eris.EmbedOptions>;
@@ -131,10 +131,10 @@ function missingPermissionsText(
         guildID,
         "misc.failure.missingPermissionsText",
         {
+            helpCommand: `\`${process.env.BOT_PREFIX}help\``,
             missingPermissions: missingPermissions.join(", "),
             permissionsLink:
                 "https://support.discord.com/hc/en-us/articles/206029707-How-do-I-set-up-Permissions-",
-            helpCommand: `\`${process.env.BOT_PREFIX}help\``,
         }
     );
 }
@@ -263,14 +263,14 @@ export async function textPermissionsCheck(
             )} | Missing SEND_MESSAGES permissions`
         );
         const embed = {
-            title: state.localizer.translate(
-                guildID,
-                "misc.failure.missingPermissions.title"
-            ),
             description: state.localizer.translate(
                 guildID,
                 "misc.failure.missingPermissions.description",
                 { channelName: `#${channel.name}` }
+            ),
+            title: state.localizer.translate(
+                guildID,
+                "misc.failure.missingPermissions.title"
             ),
         };
 
@@ -490,16 +490,16 @@ export async function sendErrorMessage(
     return sendMessage(
         messageContext.textChannelID,
         {
+            components: embedPayload.components,
             embeds: [
                 {
-                    color: embedPayload.color || EMBED_ERROR_COLOR,
                     author: author
                         ? {
-                              name: author.username,
                               icon_url: author.avatarUrl,
+                              name: author.username,
                           }
                         : null,
-                    title: bold(embedPayload.title),
+                    color: embedPayload.color || EMBED_ERROR_COLOR,
                     description: embedPayload.description,
                     footer: embedPayload.footerText
                         ? {
@@ -509,9 +509,9 @@ export async function sendErrorMessage(
                     thumbnail: embedPayload.thumbnailUrl
                         ? { url: embedPayload.thumbnailUrl }
                         : { url: KmqImages.DEAD },
+                    title: bold(embedPayload.title),
                 },
             ],
-            components: embedPayload.components,
         },
         null,
         messageContext.author.id
@@ -535,13 +535,13 @@ export async function sendInfoMessage(
 ): Promise<Eris.Message<Eris.TextableChannel>> {
     if (embedPayload.description && embedPayload.description.length > 2048) {
         return sendErrorMessage(messageContext, {
-            title: state.localizer.translate(
-                messageContext.guildID,
-                "misc.failure.error"
-            ),
             description: state.localizer.translate(
                 messageContext.guildID,
                 "misc.failure.messageTooLong"
+            ),
+            title: state.localizer.translate(
+                messageContext.guildID,
+                "misc.failure.error"
             ),
         });
     }
@@ -552,15 +552,13 @@ export async function sendInfoMessage(
             : messageContext.author;
 
     const embed: Eris.EmbedOptions = {
-        color: embedPayload.color,
         author: author
             ? {
-                  name: author.username,
                   icon_url: author.avatarUrl,
+                  name: author.username,
               }
             : null,
-        title: boldTitle ? bold(embedPayload.title) : embedPayload.title,
-        url: embedPayload.url,
+        color: embedPayload.color,
         description: embedPayload.description,
         fields: embedPayload.fields,
         footer: embedPayload.footerText
@@ -572,25 +570,96 @@ export async function sendInfoMessage(
             ? { url: embedPayload.thumbnailUrl }
             : null,
         timestamp: embedPayload.timestamp,
+        title: boldTitle ? bold(embedPayload.title) : embedPayload.title,
+        url: embedPayload.url,
     };
 
     return sendMessage(
         messageContext.textChannelID,
         {
+            components: embedPayload.components,
+            content,
             embeds: [embed],
             messageReference:
                 reply && messageContext.referencedMessageID
                     ? {
-                          messageID: messageContext.referencedMessageID,
                           failIfNotExists: false,
+                          messageID: messageContext.referencedMessageID,
                       }
                     : null,
-            components: embedPayload.components,
-            content,
         },
         null,
         messageContext.author.id
     );
+}
+
+function getAliasFooter(
+    round: Round,
+    guessModeType: GuessModeType,
+    locale: LocaleType
+): string {
+    const aliases: Array<string> = [];
+    if (guessModeType === GuessModeType.ARTIST) {
+        if (round.song.hangulArtistName) {
+            if (locale === LocaleType.KO) {
+                aliases.push(round.song.artistName);
+            } else {
+                aliases.push(round.song.hangulArtistName);
+            }
+        }
+
+        aliases.push(...round.artistAliases);
+    } else {
+        if (round.song.hangulSongName) {
+            if (locale === LocaleType.KO) {
+                aliases.push(round.song.originalSongName);
+            } else {
+                aliases.push(round.song.originalHangulSongName);
+            }
+        }
+
+        aliases.push(...round.songAliases);
+    }
+
+    if (aliases.length === 0) {
+        return "";
+    }
+
+    const aliasesText = state.localizer.translateByLocale(
+        locale,
+        "misc.inGame.aliases"
+    );
+
+    return `${aliasesText}: ${aliases.join(", ")}`;
+}
+
+function getDurationFooter(
+    locale: LocaleType,
+    timeRemaining: number,
+    nonEmptyFooter: boolean
+): string {
+    if (!timeRemaining) {
+        return "";
+    }
+
+    let durationText = "";
+    if (nonEmptyFooter) {
+        durationText += "\n";
+    }
+
+    durationText +=
+        timeRemaining > 0
+            ? `⏰ ${state.localizer.translateNByLocale(
+                  locale,
+                  "misc.plural.minute",
+                  Math.ceil(timeRemaining)
+              )}`
+            : `⏰ ${state.localizer.translateByLocale(
+                  locale,
+                  "misc.timeFinished"
+              )}!`;
+
+    return durationText;
 }
 
 /**
@@ -598,9 +667,8 @@ export async function sendInfoMessage(
  * other game related information
  * @param messageContext - An object to pass along relevant parts of Eris.Message
  * @param scoreboard - The GameSession's corresponding Scoreboard
- * @param gameRound - The GameSession's corresponding GameRound
+ * @param session - The session generating this end round message
  * @param guessModeType - The type of guess mode
- * @param playerRoundResults - The player round results
  * @param isMultipleChoiceMode  - Whether the game is in multiple choice mode
  * @param timeRemaining - The time remaining for the duration option
  * @param uniqueSongCounter - The unique song counter
@@ -608,150 +676,15 @@ export async function sendInfoMessage(
 export async function sendEndRoundMessage(
     messageContext: MessageContext,
     scoreboard: Scoreboard,
-    gameRound: GameRound,
+    session: Session,
     guessModeType: GuessModeType,
-    playerRoundResults: Array<PlayerRoundResult>,
     isMultipleChoiceMode: boolean,
     timeRemaining?: number,
     uniqueSongCounter?: UniqueSongCounter
 ): Promise<Eris.Message<Eris.TextableChannel>> {
-    const footer: Eris.EmbedFooterOptions = {
-        text: "",
-    };
-
-    const aliasesText = state.localizer.translate(
-        messageContext.guildID,
-        "misc.inGame.aliases"
-    );
-
-    const locale = getGuildLocale(messageContext.guildID);
-    const aliases: Array<string> = [];
-    if (guessModeType === GuessModeType.ARTIST) {
-        if (gameRound.song.hangulArtistName) {
-            if (locale === LocaleType.KO) {
-                aliases.push(gameRound.song.artistName);
-            } else {
-                aliases.push(gameRound.song.hangulArtistName);
-            }
-        }
-
-        aliases.push(...gameRound.artistAliases);
-    } else {
-        if (gameRound.song.hangulSongName) {
-            if (locale === LocaleType.KO) {
-                aliases.push(gameRound.song.originalSongName);
-            } else {
-                aliases.push(gameRound.song.originalHangulSongName);
-            }
-        }
-
-        aliases.push(...gameRound.songAliases);
-    }
-
-    if (aliases.length > 0) {
-        footer.text = `${aliasesText}: ${aliases.join(", ")}`;
-    }
-
-    if (timeRemaining) {
-        if (footer.text) {
-            footer.text += "\n";
-        }
-
-        footer.text +=
-            timeRemaining > 0
-                ? `⏰ ${state.localizer.translateN(
-                      messageContext.guildID,
-                      "misc.plural.minute",
-                      Math.ceil(timeRemaining)
-                  )}`
-                : `⏰ ${state.localizer.translate(
-                      messageContext.guildID,
-                      "misc.timeFinished"
-                  )}!`;
-    }
-
-    const fact = Math.random() <= 0.05 ? getFact(messageContext.guildID) : null;
-
-    const correctGuess = playerRoundResults.length > 0;
-    let correctDescription = "";
-    if (gameRound.bonusModifier > 1 || gameRound.isBonusArtist()) {
-        let bonusType: string;
-        if (gameRound.isBonusArtist() && gameRound.bonusModifier > 1) {
-            bonusType = state.localizer.translate(
-                messageContext.guildID,
-                "misc.inGame.bonusExpArtistRound"
-            );
-        } else if (gameRound.bonusModifier > 1) {
-            bonusType = state.localizer.translate(
-                messageContext.guildID,
-                "misc.inGame.bonusExpRound"
-            );
-        } else {
-            bonusType = state.localizer.translate(
-                messageContext.guildID,
-                "misc.inGame.bonusArtistRound"
-            );
-        }
-
-        correctDescription += `⭐__**${bonusType}**__⭐\n`;
-    }
-
-    if (correctGuess) {
-        const correctGuesser = `${getMention(
-            playerRoundResults[0].player.id
-        )} ${
-            playerRoundResults[0].streak >= 5
-                ? `(🔥 ${friendlyFormattedNumber(
-                      playerRoundResults[0].streak
-                  )})`
-                : ""
-        }`;
-
-        correctDescription += state.localizer.translate(
-            messageContext.guildID,
-            "misc.inGame.correctGuess",
-            {
-                correctGuesser,
-                expGain: friendlyFormattedNumber(playerRoundResults[0].expGain),
-            }
-        );
-        if (playerRoundResults.length > 1) {
-            const runnersUp = playerRoundResults.slice(1);
-            let runnersUpDescription = runnersUp
-                .map(
-                    (x) =>
-                        `${getMention(x.player.id)} (+${friendlyFormattedNumber(
-                            x.expGain
-                        )} EXP)`
-                )
-                .slice(0, MAX_RUNNERS_UP)
-                .join("\n");
-
-            if (runnersUp.length >= MAX_RUNNERS_UP) {
-                runnersUpDescription += `\n${state.localizer.translate(
-                    messageContext.guildID,
-                    "misc.andManyOthers"
-                )}`;
-            }
-
-            correctDescription += `\n\n**${state.localizer.translate(
-                messageContext.guildID,
-                "misc.inGame.runnersUp"
-            )}**\n${runnersUpDescription}`;
-        }
-    }
-
-    if (!correctGuess) {
-        correctDescription = state.localizer.translate(
-            messageContext.guildID,
-            "misc.inGame.noCorrectGuesses"
-        );
-    }
-
     const useLargerScoreboard = scoreboard.shouldUseLargerScoreboard();
-
     let scoreboardTitle = "";
-    if (scoreboard.getWinners().length > 0 && !useLargerScoreboard) {
+    if (!useLargerScoreboard) {
         scoreboardTitle = "\n\n";
         scoreboardTitle += bold(
             state.localizer.translate(
@@ -761,23 +694,15 @@ export async function sendEndRoundMessage(
         );
     }
 
-    let uniqueSongMessage = "";
-    if (uniqueSongCounter && uniqueSongCounter.uniqueSongsPlayed > 0) {
-        uniqueSongMessage = "\n";
-        uniqueSongMessage += state.localizer.translate(
-            messageContext.guildID,
-            "misc.inGame.uniqueSongsPlayed",
-            {
-                uniqueSongCount: codeLine(
-                    `${friendlyFormattedNumber(
-                        uniqueSongCounter.uniqueSongsPlayed
-                    )}/${friendlyFormattedNumber(uniqueSongCounter.totalSongs)}`
-                ),
-            }
-        );
-    }
+    const round = session.round;
+    const playerRoundResults =
+        round instanceof GameRound ? round.playerRoundResults : [];
 
-    const description = `${correctDescription}\n${uniqueSongMessage} ${scoreboardTitle}`;
+    const description = `${round.getEndRoundDescription(
+        messageContext,
+        uniqueSongCounter,
+        playerRoundResults
+    )}${scoreboardTitle}`;
 
     let fields: Array<{ name: string; value: string; inline: boolean }>;
     let roundResultIDs: Array<string>;
@@ -805,8 +730,10 @@ export async function sendEndRoundMessage(
         );
     }
 
+    const fact = Math.random() <= 0.05 ? getFact(messageContext.guildID) : null;
     if (fact) {
         fields.push({
+            inline: false,
             name: underline(
                 state.localizer.translate(
                     messageContext.guildID,
@@ -814,52 +741,56 @@ export async function sendEndRoundMessage(
                 )
             ),
             value: fact,
-            inline: false,
         });
     }
 
-    let color: number;
-    if (correctGuess) {
-        if (await userBonusIsActive(playerRoundResults[0].player.id)) {
-            color = EMBED_SUCCESS_BONUS_COLOR;
-        } else {
-            color = EMBED_SUCCESS_COLOR;
-        }
-    } else {
-        color = EMBED_ERROR_COLOR;
-    }
+    const correctGuess = playerRoundResults.length > 0;
+    const locale = getGuildLocale(messageContext.guildID);
 
     const songAndArtist = bold(
         `"${getLocalizedSongName(
-            gameRound.song,
+            round.song,
             locale
-        )}" - ${getLocalizedArtistName(gameRound.song, locale)}`
+        )}" - ${getLocalizedArtistName(round.song, locale)}`
     );
 
-    const embed = {
-        color,
-        title: `${songAndArtist} (${gameRound.song.publishDate.getFullYear()})`,
-        url: `https://youtu.be/${gameRound.song.youtubeLink}`,
+    const embed: EmbedPayload = {
+        color: round.getEndRoundColor(
+            correctGuess,
+            await userBonusIsActive(
+                playerRoundResults[0]?.player.id ?? messageContext.author.id
+            )
+        ),
         description,
         fields,
+        title: `${songAndArtist} (${round.song.publishDate.getFullYear()})`,
+        url: `https://youtu.be/${round.song.youtubeLink}`,
     };
 
-    const thumbnailUrl = `https://img.youtube.com/vi/${gameRound.song.youtubeLink}/hqdefault.jpg`;
-    const footerText = `${friendlyFormattedNumber(
-        gameRound.song.views
-    )} ${state.localizer.translate(messageContext.guildID, "misc.views")}${
-        footer.text ? `\n${footer.text}` : ""
-    }`;
+    const views = `${friendlyFormattedNumber(
+        round.song.views
+    )} ${state.localizer.translate(messageContext.guildID, "misc.views")}\n`;
 
-    if (isMultipleChoiceMode && gameRound.interactionMessage) {
-        embed["thumbnail"] = { url: thumbnailUrl };
-        embed["footer"] = { text: footerText };
-        await gameRound.interactionMessage.edit({ embeds: [embed] });
-        return gameRound.interactionMessage;
+    const aliases = getAliasFooter(round, guessModeType, locale);
+    const duration = getDurationFooter(
+        locale,
+        timeRemaining,
+        [views, aliases].every((x) => x.length > 0)
+    );
+
+    const footerText = `${views}${aliases}${duration}`;
+    const thumbnailUrl = `https://img.youtube.com/vi/${round.song.youtubeLink}/hqdefault.jpg`;
+    if (round instanceof GameRound) {
+        if (isMultipleChoiceMode && round.interactionMessage) {
+            embed["thumbnail"] = { url: thumbnailUrl };
+            embed["footer"] = { text: footerText };
+            await round.interactionMessage.edit({ embeds: [embed as Object] });
+            return round.interactionMessage;
+        }
     }
 
-    embed["thumbnailUrl"] = thumbnailUrl;
-    embed["footerText"] = footerText;
+    embed.thumbnailUrl = thumbnailUrl;
+    embed.footerText = footerText;
     return sendInfoMessage(
         messageContext,
         embed,
@@ -889,10 +820,10 @@ export async function sendOptionsMessage(
         await sendInfoMessage(
             messageContext,
             {
-                title: "[DEBUG] Force Play Mode Active",
                 description: `Force playing video ID: ${guildPreference.gameOptions.forcePlaySongID}`,
                 footerText,
                 thumbnailUrl: KmqImages.READING_BOOK,
+                title: "[DEBUG] Force Play Mode Active",
             },
             true
         );
@@ -911,14 +842,14 @@ export async function sendOptionsMessage(
 
     if (totalSongs === null) {
         sendErrorMessage(messageContext, {
-            title: state.localizer.translate(
-                messageContext.guildID,
-                "misc.failure.retrievingSongData.title"
-            ),
             description: state.localizer.translate(
                 messageContext.guildID,
                 "misc.failure.retrievingSongData.description",
                 { helpCommand: `\`${process.env.BOT_PREFIX}help\`` }
+            ),
+            title: state.localizer.translate(
+                messageContext.guildID,
+                "misc.failure.retrievingSongData.title"
             ),
         });
         return;
@@ -943,8 +874,8 @@ export async function sendOptionsMessage(
             messageContext.guildID,
             "misc.formattedLimit",
             {
-                limitStart: getOrdinalNum(visibleLimitStart),
                 limitEnd: getOrdinalNum(visibleLimitEnd),
+                limitStart: getOrdinalNum(visibleLimitStart),
                 songCount: friendlyFormattedNumber(totalSongs.count),
             }
         );
@@ -1085,10 +1016,10 @@ export async function sendOptionsMessage(
         "command.options.overview",
         {
             limit: bold(limit),
+            priorityOptions,
             totalSongs: bold(
                 friendlyFormattedNumber(totalSongs.countBeforeLimit)
             ),
-            priorityOptions,
         }
     );
 
@@ -1100,6 +1031,7 @@ export async function sendOptionsMessage(
     // Split non-priority options into three fields
     const fields = [
         {
+            inline: true,
             name: ZERO_WIDTH_SPACE,
             value: fieldOptions
                 .slice(0, Math.ceil(fieldOptions.length / 3))
@@ -1110,9 +1042,9 @@ export async function sendOptionsMessage(
                         )}: ${optionStrings[option]}`
                 )
                 .join("\n"),
-            inline: true,
         },
         {
+            inline: true,
             name: ZERO_WIDTH_SPACE,
             value: fieldOptions
                 .slice(
@@ -1126,9 +1058,9 @@ export async function sendOptionsMessage(
                         )}: ${optionStrings[option]}`
                 )
                 .join("\n"),
-            inline: true,
         },
         {
+            inline: true,
             name: ZERO_WIDTH_SPACE,
             value: fieldOptions
                 .slice(Math.ceil((2 * fieldOptions.length) / 3))
@@ -1139,7 +1071,6 @@ export async function sendOptionsMessage(
                         )}: ${optionStrings[option]}`
                 )
                 .join("\n"),
-            inline: true,
         },
     ];
 
@@ -1189,12 +1120,12 @@ export async function sendOptionsMessage(
     await sendInfoMessage(
         messageContext,
         {
-            title,
+            color: premiumRequest ? EMBED_SUCCESS_BONUS_COLOR : null,
             description: priorityOptions,
             fields,
             footerText,
             thumbnailUrl: KmqImages.LISTENING,
-            color: premiumRequest ? EMBED_SUCCESS_BONUS_COLOR : null,
+            title,
         },
         true
     );
@@ -1217,12 +1148,12 @@ export async function sendEndGameMessage(
 
     if (gameSession.scoreboard.getWinners().length === 0) {
         await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
+            footerText,
+            thumbnailUrl: KmqImages.NOT_IMPRESSED,
             title: state.localizer.translate(
                 gameSession.guildID,
                 "misc.inGame.noWinners"
             ),
-            footerText,
-            thumbnailUrl: KmqImages.NOT_IMPRESSED,
         });
     } else {
         const winners = gameSession.scoreboard.getWinners();
@@ -1249,6 +1180,7 @@ export async function sendEndGameMessage(
 
         if (endGameMessage) {
             fields.push({
+                inline: false,
                 name: state.localizer.translate(
                     gameSession.guildID,
                     endGameMessage.title
@@ -1257,7 +1189,6 @@ export async function sendEndGameMessage(
                     gameSession.guildID,
                     endGameMessage.message
                 ),
-                inline: false,
             });
         }
 
@@ -1267,6 +1198,43 @@ export async function sendEndGameMessage(
                 (await userBonusIsActive(winners[0].id))
                     ? EMBED_SUCCESS_BONUS_COLOR
                     : EMBED_SUCCESS_COLOR,
+            components: [
+                {
+                    components: [
+                        {
+                            emoji: { name: "✅" },
+                            label: state.localizer.translate(
+                                gameSession.guildID,
+                                "misc.interaction.vote"
+                            ),
+                            style: 5,
+                            type: 2 as const,
+                            url: VOTE_LINK,
+                        },
+                        {
+                            emoji: { name: "📖" },
+                            label: state.localizer.translate(
+                                gameSession.guildID,
+                                "misc.interaction.leaveReview"
+                            ),
+                            style: 5,
+                            type: 2 as const,
+                            url: REVIEW_LINK,
+                        },
+                        {
+                            emoji: { name: "🎵" },
+                            label: state.localizer.translate(
+                                gameSession.guildID,
+                                "misc.interaction.officialKmqServer"
+                            ),
+                            style: 5,
+                            type: 2,
+                            url: "https://discord.gg/RCuzwYV",
+                        },
+                    ],
+                    type: 1,
+                },
+            ],
             description: !useLargerScoreboard
                 ? bold(
                       state.localizer.translate(
@@ -1275,49 +1243,12 @@ export async function sendEndGameMessage(
                       )
                   )
                 : null,
+            fields,
+            footerText,
             thumbnailUrl: winners[0].getAvatarURL(),
             title: `🎉 ${gameSession.scoreboard.getWinnerMessage(
                 gameSession.guildID
             )} 🎉`,
-            fields,
-            footerText,
-            components: [
-                {
-                    type: 1,
-                    components: [
-                        {
-                            style: 5,
-                            url: VOTE_LINK,
-                            type: 2 as const,
-                            emoji: { name: "✅" },
-                            label: state.localizer.translate(
-                                gameSession.guildID,
-                                "misc.interaction.vote"
-                            ),
-                        },
-                        {
-                            style: 5,
-                            url: REVIEW_LINK,
-                            type: 2 as const,
-                            emoji: { name: "📖" },
-                            label: state.localizer.translate(
-                                gameSession.guildID,
-                                "misc.interaction.leaveReview"
-                            ),
-                        },
-                        {
-                            style: 5,
-                            url: "https://discord.gg/RCuzwYV",
-                            type: 2,
-                            emoji: { name: "🎵" },
-                            label: state.localizer.translate(
-                                gameSession.guildID,
-                                "misc.interaction.officialKmqServer"
-                            ),
-                        },
-                    ],
-                },
-            ],
         });
     }
 }
@@ -1346,7 +1277,7 @@ export async function sendPaginationedEmbed(
             return EmbedPaginator.createPaginationEmbed(
                 message,
                 embeds,
-                { timeout: 60000, startPage, cycling: true },
+                { cycling: true, startPage, timeout: 60000 },
                 components
             );
         }
@@ -1363,7 +1294,7 @@ export async function sendPaginationedEmbed(
 
     return sendMessage(
         message.channel.id,
-        { embeds: [embed], components },
+        { components, embeds: [embed] },
         null,
         message.author.id
     );
@@ -1428,14 +1359,14 @@ export async function sendScoreboardMessage(
     const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map(
         (winnersFieldSubset) => ({
             color: EMBED_SUCCESS_COLOR,
-            title: state.localizer.translate(
-                message.guildID,
-                "command.score.scoreboardTitle"
-            ),
             fields: winnersFieldSubset,
             footer: {
                 text: footerText,
             },
+            title: state.localizer.translate(
+                message.guildID,
+                "command.score.scoreboardTitle"
+            ),
         })
     );
 
@@ -1558,13 +1489,13 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
         );
 
         sendErrorMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
-                message.guildID,
-                "misc.failure.missingPermissions.title"
-            ),
             description: missingPermissionsText(
                 message.guildID,
                 missingPermissions
+            ),
+            title: state.localizer.translate(
+                message.guildID,
+                "misc.failure.missingPermissions.title"
             ),
         });
         return false;
@@ -1577,13 +1508,13 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
     if (channelFull) {
         logger.warn(`${getDebugLogHeader(messageContext)} | Channel full`);
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
-                message.guildID,
-                "misc.failure.vcFull.title"
-            ),
             description: state.localizer.translate(
                 message.guildID,
                 "misc.failure.vcFull.description"
+            ),
+            title: state.localizer.translate(
+                message.guildID,
+                "misc.failure.vcFull.title"
             ),
         });
         return false;
@@ -1598,13 +1529,13 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
         );
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
-                message.guildID,
-                "misc.failure.afkChannel.title"
-            ),
             description: state.localizer.translate(
                 message.guildID,
                 "misc.failure.afkChannel.description"
+            ),
+            title: state.localizer.translate(
+                message.guildID,
+                "misc.failure.afkChannel.title"
             ),
         });
         return false;
@@ -1674,16 +1605,16 @@ export function sendDebugAlertWebhook(
 ): void {
     if (!process.env.ALERT_WEBHOOK_URL) return;
     axios.post(process.env.ALERT_WEBHOOK_URL, {
+        avatar_url: avatarUrl,
         embeds: [
             {
-                title,
-                description,
                 color,
+                description,
+                title,
             },
         ],
-        username: "Kimiqo",
-        avatar_url: avatarUrl,
         footerText: getKmqCurrentVersion(),
+        username: "Kimiqo",
     });
 }
 
@@ -1705,6 +1636,7 @@ export async function sendBookmarkedSongs(
             value: string;
             inline: boolean;
         }> = [...songs].map((song) => ({
+            inline: false,
             name: `${bold(
                 `"${getLocalizedSongName(
                     song[1],
@@ -1717,21 +1649,14 @@ export async function sendBookmarkedSongs(
                 guildID,
                 "misc.views"
             )}](https://youtu.be/${song[1].youtubeLink})`,
-            inline: false,
         }));
 
         for (const fields of chunkArray(allEmbedFields, 25)) {
             const embed: Eris.EmbedOptions = {
                 author: {
-                    name: "Kimiqo",
                     icon_url: KmqImages.READING_BOOK,
+                    name: "Kimiqo",
                 },
-                title: bold(
-                    state.localizer.translate(
-                        guildID,
-                        "misc.interaction.bookmarked.message.title"
-                    )
-                ),
                 fields,
                 footer: {
                     text: state.localizer.translate(
@@ -1740,6 +1665,12 @@ export async function sendBookmarkedSongs(
                         { date: standardDateFormat(new Date()) }
                     ),
                 },
+                title: bold(
+                    state.localizer.translate(
+                        guildID,
+                        "misc.interaction.bookmarked.message.title"
+                    )
+                ),
             };
 
             await sendDmMessage(userID, { embeds: [embed] });
@@ -1815,16 +1746,16 @@ export async function tryCreateInteractionSuccessAcknowledgement(
         await interaction.createMessage({
             embeds: [
                 {
+                    author: {
+                        icon_url: interaction.member?.avatarURL,
+                        name: interaction.member?.username,
+                    },
                     color: (await userBonusIsActive(interaction.member?.id))
                         ? EMBED_SUCCESS_BONUS_COLOR
                         : EMBED_SUCCESS_COLOR,
-                    author: {
-                        name: interaction.member?.username,
-                        icon_url: interaction.member?.avatarURL,
-                    },
-                    title: bold(title),
                     description,
                     thumbnail: { url: KmqImages.THUMBS_UP },
+                    title: bold(title),
                 },
             ],
             flags: 64,
@@ -1851,19 +1782,19 @@ export async function tryCreateInteractionErrorAcknowledgement(
         await interaction.createMessage({
             embeds: [
                 {
-                    color: EMBED_ERROR_COLOR,
                     author: {
-                        name: interaction.member?.username,
                         icon_url: interaction.member?.avatarURL,
+                        name: interaction.member?.username,
                     },
+                    color: EMBED_ERROR_COLOR,
+                    description,
+                    thumbnail: { url: KmqImages.DEAD },
                     title: bold(
                         state.localizer.translate(
                             interaction.guildID,
                             "misc.interaction.title.failure"
                         )
                     ),
-                    description,
-                    thumbnail: { url: KmqImages.DEAD },
                 },
             ],
             flags: 64,
@@ -1896,9 +1827,9 @@ export function sendPowerHourNotification(): void {
     sendInfoMessage(
         new MessageContext(process.env.POWER_HOUR_NOTIFICATION_CHANNEL_ID),
         {
-            title: "⬆️ KMQ Power Hour Starts Now! ⬆️",
             description: "Earn 2x EXP for the next hour!",
             thumbnailUrl: KmqImages.LISTENING,
+            title: "⬆️ KMQ Power Hour Starts Now! ⬆️",
         },
         false,
         true,

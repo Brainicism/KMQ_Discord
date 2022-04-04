@@ -1,4 +1,5 @@
 import * as uuid from "uuid";
+
 import { getNewConnection } from "../database_context";
 import { IPCLogger } from "../logger";
 
@@ -34,9 +35,9 @@ async function generatePresetUUIDs(): Promise<void> {
     for (const preset of presetsWithoutUUID) {
         await db.kmq("game_option_presets").insert({
             guild_id: preset.guild_id,
-            preset_name: preset.preset_name,
             option_name: "uuid",
             option_value: JSON.stringify(`KMQ-${uuid.v4()}`),
+            preset_name: preset.preset_name,
         });
     }
 }
