@@ -545,6 +545,7 @@
             "notSet": "Not set",
             "overview": "Now playing the top {{limit}} out of {{totalSongs}} available songs from the following game options:\n\n{{priorityOptions}}",
             "perCommandHelp": "Looking for information on how to use a command? Check out \"{{helpCommand}} [command]\" to learn more.",
+            "premiumOptionsNonPremiumGame": "Note: active game is not premium",
             "preset": "Preset",
             "reset": "{{presetOrOption}} Reset",
             "timer": "{{timerInSeconds}} sec",

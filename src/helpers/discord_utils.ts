@@ -945,8 +945,7 @@ export async function sendOptionsMessage(
 
     const { gameSessions } = state;
     const isEliminationMode =
-        gameSessions[messageContext.guildID] &&
-        gameSessions[messageContext.guildID].gameType === GameType.ELIMINATION;
+        gameSessions[messageContext.guildID]?.gameType === GameType.ELIMINATION;
 
     // Special case: ,goal is conflicting only when current game is elimination
     if (guildPreference.isGoalSet()) {
@@ -1022,6 +1021,21 @@ export async function sendOptionsMessage(
             ),
         }
     );
+
+    if (
+        premiumRequest &&
+        !gameSessions[messageContext.guildID]?.isPremiumGame()
+    ) {
+        priorityOptions =
+            italicize(
+                state.localizer.translate(
+                    messageContext.guildID,
+                    "command.options.premiumOptionsNonPremiumGame"
+                )
+            ) +
+            "\n\n" +
+            priorityOptions;
+    }
 
     const fieldOptions = Object.keys(GameOptionCommand).filter(
         (option) => !PriorityGameOption.includes(option as GameOption)
