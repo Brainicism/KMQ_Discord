@@ -43,16 +43,16 @@ export async function ensureVoiceConnection(
 
 /**
  * @param guildPreference - The GuildPreference
- * @param premium - Whether to include premium songs
+ * @param isPremium - Whether to include premium songs
  * @returns an object containing the total number of available songs before and after limit based on the GameOptions
  */
 export async function getAvailableSongCount(
     guildPreference: GuildPreference,
-    premium: boolean
+    isPremium: boolean
 ): Promise<{ count: number; countBeforeLimit: number }> {
     try {
         const { songs, countBeforeLimit } =
-            await SongSelector.getFilteredSongList(guildPreference, premium);
+            await SongSelector.getFilteredSongList(guildPreference, isPremium);
 
         return {
             count: songs.size,

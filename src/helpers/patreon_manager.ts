@@ -65,6 +65,7 @@ export default async function updatePremiumUsers(): Promise<void> {
                 .kmq("premium_users")
                 .select("user_id")
                 .whereNotIn("user_id", activePatronIDs)
+                .whereNot("source", "=", "loyalty")
         ).map((x) => x.user_id)
     );
     addPremium(patrons);

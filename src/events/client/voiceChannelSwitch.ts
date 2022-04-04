@@ -31,7 +31,6 @@ export default async function voiceChannelSwitchHandler(
         return;
     }
 
-    const oldPremiumState = gameSession.isPremiumGame();
     if (member.id !== process.env.BOT_CLIENT_ID) {
         await gameSession.setPlayerInVC(
             member.id,
@@ -43,6 +42,7 @@ export default async function voiceChannelSwitchHandler(
         gameSession.syncAllVoiceMembers();
     }
 
+    const oldPremiumState = gameSession.isPremiumGame();
     if (oldPremiumState !== gameSession.isPremiumGame()) {
         gameSession.updatePremiumStatus();
     }

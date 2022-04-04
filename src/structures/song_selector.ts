@@ -217,11 +217,11 @@ export default class SongSelector {
 
     async reloadSongs(
         guildPreference: GuildPreference,
-        premium: boolean
+        isPremium: boolean
     ): Promise<void> {
         this.filteredSongs = await SongSelector.getFilteredSongList(
             guildPreference,
-            premium
+            isPremium
         );
     }
 
@@ -257,7 +257,7 @@ export default class SongSelector {
      */
     static async getFilteredSongList(
         guildPreference: GuildPreference,
-        premium: boolean
+        premium: boolean = false
     ): Promise<{ songs: Set<QueriedSong>; countBeforeLimit: number }> {
         let queryBuilder = dbContext
             .kmq("available_songs")
