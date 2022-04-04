@@ -1,5 +1,5 @@
-import { bold, chooseRandom } from "../helpers/utils";
 import Player from "./player";
+import { bold, chooseRandom } from "../helpers/utils";
 
 export default class Team extends Player {
     private players: { [userID: string]: Player };

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import assert from "assert";
-
 import {
     ExpBonusModifier,
     ExpBonusModifierValues,
@@ -17,15 +16,15 @@ describe("constructor defaults", () => {
     describe("artist/song names without aliases", () => {
         it("adds the corresponding name as a correct answer", () => {
             gameRound = new GameRound({
-                artistName: "Jisoo",
-                hangulArtistName: "지수",
+                songName: "Song1",
+                originalSongName: "Song1",
                 hangulSongName: "노래1",
                 originalHangulSongName: "노래1",
-                originalSongName: "Song1",
-                publishDate: new Date(),
-                songName: "Song1",
-                views: 1000000,
+                artistName: "Jisoo",
+                hangulArtistName: "지수",
                 youtubeLink: "abcde",
+                publishDate: new Date(),
+                views: 1000000,
             });
 
             assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
@@ -43,15 +42,15 @@ describe("constructor defaults", () => {
     describe("artist collabs", () => {
         it("should record them as two separate artists", () => {
             gameRound = new GameRound({
-                artistName: "IU + Blackpink",
-                hangulArtistName: "아이유+블랙핑크",
+                songName: "Poggers Song",
+                originalSongName: "Poggers Song",
                 hangulSongName: "리그마 포트나이트",
                 originalHangulSongName: "리그마 포트나이트",
-                originalSongName: "Poggers Song",
-                publishDate: new Date(),
-                songName: "Poggers Song",
-                views: 69420,
+                artistName: "IU + Blackpink",
+                hangulArtistName: "아이유+블랙핑크",
                 youtubeLink: "abcde",
+                publishDate: new Date(),
+                views: 69420,
             });
 
             assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
@@ -66,15 +65,15 @@ describe("constructor defaults", () => {
     describe("artist name has trailing or leading spaces", () => {
         it("should remove them", () => {
             gameRound = new GameRound({
-                artistName: " Blackpink + IU             ",
-                hangulArtistName: "   블랙핑크+아이유                ",
+                songName: "Lovesick Girls",
+                originalSongName: "Lovesick Girls",
                 hangulSongName: "상사병에 걸린 소녀들",
                 originalHangulSongName: "상사병에 걸린 소녀들",
-                originalSongName: "Lovesick Girls",
-                publishDate: new Date(),
-                songName: "Lovesick Girls",
-                views: 123456789,
+                artistName: " Blackpink + IU             ",
+                hangulArtistName: "   블랙핑크+아이유                ",
                 youtubeLink: "abcde",
+                publishDate: new Date(),
+                views: 123456789,
             });
 
             assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
@@ -101,15 +100,15 @@ describe("constructor defaults", () => {
                     ];
 
                     gameRound = new GameRound({
-                        artistName: "A really epic person",
-                        hangulArtistName: "정말 서사시인",
+                        songName: "A really epic song",
+                        originalSongName: "A really epic song",
                         hangulSongName: "정말 서사시 노래",
                         originalHangulSongName: "정말 서사시 노래",
-                        originalSongName: "A really epic song",
-                        publishDate: new Date(),
-                        songName: "A really epic song",
-                        views: 2,
+                        artistName: "A really epic person",
+                        hangulArtistName: "정말 서사시인",
                         youtubeLink: "abcde",
+                        publishDate: new Date(),
+                        views: 2,
                     });
 
                     assert.deepStrictEqual(gameRound.acceptedSongAnswers, [
@@ -131,15 +130,15 @@ describe("constructor defaults", () => {
                     ];
 
                     gameRound = new GameRound({
-                        artistName: "Person2",
-                        hangulArtistName: "2인칭",
+                        songName: "A really epic song",
+                        originalSongName: "A really epic song",
                         hangulSongName: "정말 서사시 노래",
                         originalHangulSongName: "정말 서사시 노래",
-                        originalSongName: "A really epic song",
-                        publishDate: new Date(),
-                        songName: "A really epic song",
-                        views: 5,
+                        artistName: "Person2",
+                        hangulArtistName: "2인칭",
                         youtubeLink: "abcde",
+                        publishDate: new Date(),
+                        views: 5,
                     });
 
                     assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
@@ -202,15 +201,15 @@ describe("clean song/artist name", () => {
 describe("skipping", () => {
     beforeEach(() => {
         gameRound = new GameRound({
-            artistName: "5",
-            hangulArtistName: "6",
+            songName: "1",
+            originalSongName: "2",
             hangulSongName: "3",
             originalHangulSongName: "4",
-            originalSongName: "2",
-            publishDate: new Date(2015, 0),
-            songName: "1",
-            views: 123,
+            artistName: "5",
+            hangulArtistName: "6",
             youtubeLink: "7",
+            publishDate: new Date(2015, 0),
+            views: 123,
         });
     });
 
@@ -255,15 +254,15 @@ describe("skipping", () => {
 describe("check guess", () => {
     beforeEach(() => {
         gameRound = new GameRound({
-            artistName: "artist",
-            hangulArtistName: "예술가",
+            songName: "very cool song",
+            originalSongName: "very cool song",
             hangulSongName: "매우 시원한 노래",
             originalHangulSongName: "매우 시원한 노래",
-            originalSongName: "very cool song",
-            publishDate: new Date(2015, 0),
-            songName: "very cool song",
-            views: 3141592653589,
+            artistName: "artist",
+            hangulArtistName: "예술가",
             youtubeLink: "a1b2c3",
+            publishDate: new Date(2015, 0),
+            views: 3141592653589,
         });
     });
 
@@ -503,15 +502,15 @@ describe("getExpReward", () => {
     const exp = 500;
     beforeEach(() => {
         gameRound = new GameRound({
-            artistName: "artist",
-            hangulArtistName: "예술가",
+            songName: "very cool song",
+            originalSongName: "very cool song",
             hangulSongName: "매우 시원한 노래",
             originalHangulSongName: "매우 시원한 노래",
-            originalSongName: "very cool song",
-            publishDate: new Date(2015),
-            songName: "very cool song",
-            views: 246810121416,
+            artistName: "artist",
+            hangulArtistName: "예술가",
             youtubeLink: "a1b2c3",
+            publishDate: new Date(2015),
+            views: 246810121416,
         });
     });
 

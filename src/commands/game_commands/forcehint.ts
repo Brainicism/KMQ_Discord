@@ -1,17 +1,17 @@
-import CommandPrechecks from "../../command_prechecks";
-import { KmqImages } from "../../constants";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
-    getDebugLogHeader,
-    getMention,
     sendErrorMessage,
+    getDebugLogHeader,
     sendInfoMessage,
+    getMention,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { KmqImages } from "../../constants";
 import { generateHint, validHintCheck } from "./hint";
+import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("forcehint");
 
@@ -24,14 +24,14 @@ export default class ForceHintCommand implements BaseCommand {
     ];
 
     help = (guildID: string): Help => ({
+        name: "forcehint",
         description: state.localizer.translate(
             guildID,
             "command.forcehint.help.description"
         ),
-        examples: [],
-        name: "forcehint",
-        priority: 1009,
         usage: ",forcehint",
+        examples: [],
+        priority: 1009,
     });
 
     call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
@@ -43,14 +43,14 @@ export default class ForceHintCommand implements BaseCommand {
             return;
         if (message.author.id !== gameSession.owner.id) {
             await sendErrorMessage(MessageContext.fromMessage(message), {
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.forcehint.failure.notOwner.title"
+                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "command.forcehint.failure.notOwner.description",
                     { mentionedUser: getMention(gameSession.owner.id) }
-                ),
-                title: state.localizer.translate(
-                    message.guildID,
-                    "command.forcehint.failure.notOwner.title"
                 ),
             });
             return;
@@ -59,16 +59,16 @@ export default class ForceHintCommand implements BaseCommand {
         gameRound.hintRequested(message.author.id);
         gameRound.hintUsed = true;
         await sendInfoMessage(MessageContext.fromMessage(message), {
+            title: state.localizer.translate(
+                message.guildID,
+                "command.hint.title"
+            ),
             description: generateHint(
                 message.guildID,
                 guildPreference.gameOptions.guessModeType,
                 gameRound
             ),
             thumbnailUrl: KmqImages.READING_BOOK,
-            title: state.localizer.translate(
-                message.guildID,
-                "command.hint.title"
-            ),
         });
         logger.info(`${getDebugLogHeader(message)} | Owner force-hinted.`);
     };

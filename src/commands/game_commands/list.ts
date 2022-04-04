@@ -4,11 +4,11 @@ import {
     sendInfoMessage,
     sendMessage,
 } from "../../helpers/discord_utils";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("list");
 
@@ -30,22 +30,24 @@ enum ListType {
 
 export default class ListCommand implements BaseCommand {
     validations = {
+        minArgCount: 1,
+        maxArgCount: 1,
         arguments: [
             {
-                enums: Object.values(ListType),
                 name: "option",
                 type: "enum" as const,
+                enums: Object.values(ListType),
             },
         ],
-        maxArgCount: 1,
-        minArgCount: 1,
     };
 
     help = (guildID: string): Help => ({
+        name: "list",
         description: state.localizer.translate(
             guildID,
             "command.list.help.description"
         ),
+        usage: ",list [groups | exclude | include]",
         examples: [
             {
                 example: "`,list groups`",
@@ -72,9 +74,7 @@ export default class ListCommand implements BaseCommand {
                 ),
             },
         ],
-        name: "list",
         priority: 200,
-        usage: ",list [groups | exclude | include]",
     });
 
     call = async ({
@@ -124,8 +124,8 @@ export default class ListCommand implements BaseCommand {
                         ),
                     },
                     {
-                        file: Buffer.from(`${optionValue}\n`),
                         name: "groups.txt",
+                        file: Buffer.from(`${optionValue}\n`),
                     }
                 );
             } catch (e) {
@@ -136,21 +136,20 @@ export default class ListCommand implements BaseCommand {
                 );
 
                 await sendErrorMessage(MessageContext.fromMessage(message), {
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "command.list.failure.groupsInFile.noFilePermissions.title"
+                    ),
                     description: state.localizer.translate(
                         message.guildID,
                         "command.list.failure.groupsInFile.noFilePermissions.description",
                         { attachFile: "ATTACH_FILE" }
-                    ),
-                    title: state.localizer.translate(
-                        message.guildID,
-                        "command.list.failure.groupsInFile.noFilePermissions.title"
                     ),
                 });
                 return;
             }
         } else {
             await sendInfoMessage(MessageContext.fromMessage(message), {
-                description: optionValue,
                 title: state.localizer.translate(
                     message.guildID,
                     "command.list.currentValue.title",
@@ -158,6 +157,7 @@ export default class ListCommand implements BaseCommand {
                         optionListed: `\`${optionListed}\``,
                     }
                 ),
+                description: optionValue,
             });
         }
 

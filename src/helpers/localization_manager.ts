@@ -1,7 +1,6 @@
 import i18next from "i18next";
-import Backend from "i18next-fs-backend";
 import path from "path";
-
+import Backend from "i18next-fs-backend";
 import { getGuildLocale } from "./discord_utils";
 
 export enum LocaleType {
@@ -16,17 +15,17 @@ export default class LocalizationManager {
     constructor() {
         this.internalLocalizer = i18next.createInstance().use(Backend);
         this.internalLocalizer.init({
-            backend: {
-                loadPath: path.join(__dirname, "../../i18n/{{lng}}.json"),
-            },
-            fallbackLng: DEFAULT_LOCALE,
+            preload: Object.values(LocaleType),
+            supportedLngs: Object.values(LocaleType),
             initImmediate: false,
+            saveMissing: true,
+            fallbackLng: DEFAULT_LOCALE,
             interpolation: {
                 escapeValue: false,
             },
-            preload: Object.values(LocaleType),
-            saveMissing: true,
-            supportedLngs: Object.values(LocaleType),
+            backend: {
+                loadPath: path.join(__dirname, "../../i18n/{{lng}}.json"),
+            },
         });
     }
 
@@ -87,8 +86,8 @@ export default class LocalizationManager {
         count: number
     ): string {
         return this.internalLocalizer.t(phrase, {
-            count,
             lng: locale,
+            count,
         });
     }
 }

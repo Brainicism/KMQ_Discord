@@ -1,10 +1,10 @@
-import { CommandValidations } from "../commands/interfaces/base_command";
-import { state } from "../kmq_worker";
-import { IPCLogger } from "../logger";
-import MessageContext from "../structures/message_context";
-import { GuildTextableMessage, ParsedMessage } from "../types";
 import { getDebugLogHeader, sendErrorMessage } from "./discord_utils";
+import { GuildTextableMessage, ParsedMessage } from "../types";
+import { CommandValidations } from "../commands/interfaces/base_command";
+import { IPCLogger } from "../logger";
 import { arrayToString } from "./utils";
+import MessageContext from "../structures/message_context";
+import { state } from "../kmq_worker";
 
 const logger = new IPCLogger("validate");
 
@@ -21,12 +21,12 @@ export async function sendValidationErrorMessage(
     usage?: string
 ): Promise<void> {
     await sendErrorMessage(MessageContext.fromMessage(message), {
-        description: warning,
-        footerText: usage,
         title: state.localizer.translate(
             message.guildID,
             "misc.failure.validation.title"
         ),
+        description: warning,
+        footerText: usage,
     });
     logger.warn(`${getDebugLogHeader(message)} | ${warning}. val = ${arg}`);
 }
@@ -49,8 +49,8 @@ export default (
                 message.guildID,
                 "misc.failure.validation.numArguments.incorrect",
                 {
-                    command: parsedMessage.action,
                     help: `${process.env.BOT_PREFIX}help`,
+                    command: parsedMessage.action,
                 }
             ),
             args,
@@ -89,8 +89,8 @@ export default (
                             message.guildID,
                             "misc.failure.validation.number.min",
                             {
-                                argument: `\`${validation.name}\``,
                                 min: `\`${validation.minValue}\``,
+                                argument: `\`${validation.name}\``,
                             }
                         ),
                         arg,
@@ -106,8 +106,8 @@ export default (
                             message.guildID,
                             "misc.failure.validation.number.max",
                             {
-                                argument: `\`${validation.name}\``,
                                 max: `\`${validation.maxValue}\``,
+                                argument: `\`${validation.name}\``,
                             }
                         ),
                         arg,

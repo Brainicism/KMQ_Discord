@@ -1,19 +1,18 @@
 import assert from "assert";
 import { describe } from "mocha";
 import sinon from "sinon";
-
-import { OstPreference } from "../../commands/game_options/ost";
-import { ReleaseType } from "../../commands/game_options/release";
-import { SubunitsPreference } from "../../commands/game_options/subunits";
-import * as discordUtils from "../../helpers/discord_utils";
+import GuildPreference from "../../structures/guild_preference";
 import {
     cleanupInactiveGameSessions,
     getAvailableSongCount,
     getMatchingGroupNames,
 } from "../../helpers/game_utils";
+import { SubunitsPreference } from "../../commands/game_options/subunits";
 import { state } from "../../kmq_worker";
 import GameSession from "../../structures/game_session";
-import GuildPreference from "../../structures/guild_preference";
+import { OstPreference } from "../../commands/game_options/ost";
+import { ReleaseType } from "../../commands/game_options/release";
+import * as discordUtils from "../../helpers/discord_utils";
 
 const sandbox = sinon.createSandbox();
 

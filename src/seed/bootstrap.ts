@@ -1,13 +1,12 @@
-import { execSync } from "child_process";
-import { config } from "dotenv";
 import fs from "fs";
 import path from "path";
-
-import { DatabaseContext, getNewConnection } from "../database_context";
+import { config } from "dotenv";
+import { execSync } from "child_process";
+import { updateKpopDatabase } from "./seed_db";
 import { IPCLogger } from "../logger";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
+import { DatabaseContext, getNewConnection } from "../database_context";
 import { EnvType } from "../types";
-import { updateKpopDatabase } from "./seed_db";
 
 const logger = new IPCLogger("bootstrap");
 

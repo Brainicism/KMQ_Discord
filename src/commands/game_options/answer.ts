@@ -1,14 +1,14 @@
-import CommandPrechecks from "../../command_prechecks";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
-    getDebugLogHeader,
     sendOptionsMessage,
+    getDebugLogHeader,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
 import { GameOption } from "../../types";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import MessageContext from "../../structures/message_context";
+import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("answer");
 
@@ -26,29 +26,31 @@ export default class AnswerCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
+        minArgCount: 0,
+        maxArgCount: 1,
         arguments: [
             {
-                enums: Object.values(AnswerType),
                 name: "answerType",
                 type: "enum" as const,
+                enums: Object.values(AnswerType),
             },
         ],
-        maxArgCount: 1,
-        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
+        name: "answer",
         description: state.localizer.translate(
             guildID,
             "command.answer.help.description",
             {
-                easy: `\`${AnswerType.MULTIPLE_CHOICE_EASY}\``,
-                hard: `\`${AnswerType.MULTIPLE_CHOICE_HARD}\``,
-                medium: `\`${AnswerType.MULTIPLE_CHOICE_MED}\``,
                 typing: `\`${AnswerType.TYPING}\``,
                 typingtypos: `\`${AnswerType.TYPING_TYPOS}\``,
+                easy: `\`${AnswerType.MULTIPLE_CHOICE_EASY}\``,
+                medium: `\`${AnswerType.MULTIPLE_CHOICE_MED}\``,
+                hard: `\`${AnswerType.MULTIPLE_CHOICE_HARD}\``,
             }
         ),
+        usage: ",answer [typing | typingtypos | easy | medium | hard]",
         examples: [
             {
                 example: "`,answer typing`",
@@ -89,9 +91,7 @@ export default class AnswerCommand implements BaseCommand {
                 ),
             },
         ],
-        name: "answer",
         priority: 150,
-        usage: ",answer [typing | typingtypos | easy | medium | hard]",
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

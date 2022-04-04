@@ -1,14 +1,13 @@
 import Eris from "eris";
-
-import { handleProfileInteraction } from "../../commands/game_commands/profile";
+import MessageContext from "../../structures/message_context";
+import KmqMember from "../../structures/kmq_member";
 import {
     getUserTag,
-    tryCreateInteractionErrorAcknowledgement,
     tryInteractionAcknowledge,
+    tryCreateInteractionErrorAcknowledgement,
 } from "../../helpers/discord_utils";
 import { state } from "../../kmq_worker";
-import KmqMember from "../../structures/kmq_member";
-import MessageContext from "../../structures/message_context";
+import { handleProfileInteraction } from "../../commands/game_commands/profile";
 
 export const BOOKMARK_COMMAND_NAME = "Bookmark Song";
 export const PROFILE_COMMAND_NAME = "Profile";

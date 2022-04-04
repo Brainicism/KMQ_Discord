@@ -1,27 +1,26 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import Eris from "eris";
-
-import { KmqImages } from "../../constants";
 import {
     getDebugLogHeader,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import { isWeekend } from "../../helpers/utils";
 import {
-    getAvailableSongCount,
     getGuildPreference,
+    getAvailableSongCount,
+    userBonusIsActive,
     isFirstGameOfDay,
     isPowerHour,
-    userBonusIsActive,
 } from "../../helpers/game_utils";
-import { isWeekend } from "../../helpers/utils";
-import { state } from "../../kmq_worker";
-import { IPCLogger } from "../../logger";
-import GameRound from "../../structures/game_round";
-import GuildPreference from "../../structures/guild_preference";
-import MessageContext from "../../structures/message_context";
 import { AnswerType } from "../game_options/answer";
 import { GuessModeType } from "../game_options/guessmode";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { KmqImages } from "../../constants";
+import { state } from "../../kmq_worker";
+import GuildPreference from "../../structures/guild_preference";
+import GameRound from "../../structures/game_round";
 
 const logger = new IPCLogger("exp");
 export const PARTICIPANT_MODIFIER_MAX_PARTICIPANTS = 6;
@@ -95,8 +94,8 @@ export async function calculateOptionsExpMultiplierInternal(
                 guildPreference.guildID,
                 "command.exp.voteBonus"
             ),
-            isPenalty: false,
             name: ExpBonusModifier.VOTE,
+            isPenalty: false,
         });
     }
 
@@ -107,8 +106,8 @@ export async function calculateOptionsExpMultiplierInternal(
                 guildPreference.guildID,
                 "command.exp.powerHourBonus"
             ),
-            isPenalty: false,
             name: ExpBonusModifier.POWER_HOUR,
+            isPenalty: false,
         });
     }
 
@@ -119,8 +118,8 @@ export async function calculateOptionsExpMultiplierInternal(
                 guildPreference.guildID,
                 "command.exp.firstGameOfDayBonus"
             ),
-            isPenalty: false,
             name: ExpBonusModifier.FIRST_GAME_OF_DAY,
+            isPenalty: false,
         });
     }
 
@@ -130,8 +129,8 @@ export async function calculateOptionsExpMultiplierInternal(
                 guildPreference.guildID,
                 "command.exp.typosAllowedPenalty"
             ),
-            isPenalty: true,
             name: ExpBonusModifier.TYPO,
+            isPenalty: true,
         });
     }
 
@@ -157,8 +156,8 @@ export async function calculateOptionsExpMultiplierInternal(
                 guildPreference.guildID,
                 "command.exp.multipleChoicePenalty"
             ),
-            isPenalty: true,
             name: multipleChoicePenalty,
+            isPenalty: true,
         });
     }
 
@@ -169,8 +168,8 @@ export async function calculateOptionsExpMultiplierInternal(
                 guildPreference.guildID,
                 "command.exp.lowSongCountPenalty"
             ),
-            isPenalty: true,
             name: ExpBonusModifier.BELOW_SONG_COUNT_THRESHOLD,
+            isPenalty: true,
         });
     }
 
@@ -184,10 +183,10 @@ export async function calculateOptionsExpMultiplierInternal(
                 guildPreference.guildID,
                 "command.exp.artistGroupGuessModePenalty"
             ),
-            isPenalty: true,
             name: guildPreference.isGroupsMode()
                 ? ExpBonusModifier.ARTIST_GUESS_GROUPS_SELECTED
                 : ExpBonusModifier.ARTIST_GUESS,
+            isPenalty: true,
         });
     }
 
@@ -308,14 +307,14 @@ export async function calculateTotalRoundExp(
 
 export default class ExpCommand implements BaseCommand {
     help = (guildID: string): Help => ({
+        name: "exp",
         description: state.localizer.translate(
             guildID,
             "command.exp.help.description"
         ),
-        examples: [],
-        name: "exp",
-        priority: 50,
         usage: ",exp",
+        examples: [],
+        priority: 50,
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
@@ -350,16 +349,15 @@ export default class ExpCommand implements BaseCommand {
         );
 
         fields.push({
-            inline: false,
             name: state.localizer.translate(
                 message.guildID,
                 "command.exp.activeModifiers"
             ),
             value: `${modifierText.join("\n")}`,
+            inline: false,
         });
 
         fields.push({
-            inline: false,
             name: state.localizer.translate(
                 message.guildID,
                 "command.exp.bonusArtistsTitle"
@@ -372,6 +370,7 @@ export default class ExpCommand implements BaseCommand {
             ].toFixed(2)}x 📈 \n\`\`\`${[...state.bonusArtists]
                 .filter((x) => !x.includes("+"))
                 .join(", ")}\`\`\``,
+            inline: false,
         });
 
         const bonusExpExplanations = [
@@ -422,7 +421,6 @@ export default class ExpCommand implements BaseCommand {
         ];
 
         fields.push({
-            inline: false,
             name: state.localizer.translate(
                 message.guildID,
                 "command.exp.bonusTitle"
@@ -431,15 +429,16 @@ export default class ExpCommand implements BaseCommand {
                 message.guildID,
                 "command.exp.bonusDescription"
             )}:\n ${bonusExpExplanations.map((x) => `- ${x}`).join("\n")}`,
+            inline: false,
         });
 
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            fields,
-            thumbnailUrl: KmqImages.THUMBS_UP,
             title: state.localizer.translate(
                 message.guildID,
                 "command.exp.title"
             ),
+            fields,
+            thumbnailUrl: KmqImages.THUMBS_UP,
         });
 
         logger.info(

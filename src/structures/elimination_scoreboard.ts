@@ -1,5 +1,5 @@
-import EliminationPlayer from "./elimination_player";
 import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
+import EliminationPlayer from "./elimination_player";
 
 export const DEFAULT_LIVES = 10;
 

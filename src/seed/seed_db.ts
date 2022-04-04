@@ -1,17 +1,16 @@
 import Axios from "axios";
+import fs from "fs";
 import { execSync } from "child_process";
 import { program } from "commander";
 import { config } from "dotenv";
-import fs from "fs";
-import _ from "lodash";
 import path from "path";
-
-import { DatabaseContext, getNewConnection } from "../database_context";
-import { parseJsonFile } from "../helpers/utils";
 import { IPCLogger } from "../logger";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
-import { EnvType } from "../types";
+import { DatabaseContext, getNewConnection } from "../database_context";
 import { generateKmqDataTables, loadStoredProcedures } from "./bootstrap";
+import { EnvType } from "../types";
+import _ from "lodash";
+import { parseJsonFile } from "../helpers/utils";
 
 config({ path: path.resolve(__dirname, "../../.env") });
 const SQL_DUMP_EXPIRY = 10;
@@ -60,17 +59,17 @@ const downloadDb = async (): Promise<void> => {
     const mvOutput = `${databaseDownloadDir}/mv-download.zip`;
     const audioOutput = `${databaseDownloadDir}/audio-download.zip`;
     const mvResp = await Axios.get(mvFileUrl, {
+        responseType: "arraybuffer",
         headers: {
             "User-Agent": "KMQ (K-pop Music Quiz)",
         },
-        responseType: "arraybuffer",
     });
 
     const audioResp = await Axios.get(audioFileUrl, {
+        responseType: "arraybuffer",
         headers: {
             "User-Agent": "KMQ (K-pop Music Quiz)",
         },
-        responseType: "arraybuffer",
     });
 
     await fs.promises.writeFile(mvOutput, mvResp.data, { encoding: null });

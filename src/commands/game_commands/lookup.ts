@@ -1,6 +1,7 @@
 import { getVideoID } from "ytdl-core";
-
-import { KmqImages } from "../../constants";
+import { LocaleType } from "../../helpers/localization_manager";
+import BaseCommand, { Help, CommandArgs } from "../interfaces/base_command";
+import { state } from "../../kmq_worker";
 import dbContext from "../../database_context";
 import {
     getDebugLogHeader,
@@ -8,23 +9,21 @@ import {
     sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
+import MessageContext from "../../structures/message_context";
+import {
+    friendlyFormattedDate,
+    friendlyFormattedNumber,
+} from "../../helpers/utils";
+import { IPCLogger } from "../../logger";
+import { sendValidationErrorMessage } from "../../helpers/validate";
+import { QueriedSong } from "../../types";
 import {
     getGuildPreference,
     getLocalizedArtistName,
     getLocalizedSongName,
 } from "../../helpers/game_utils";
-import { LocaleType } from "../../helpers/localization_manager";
-import {
-    friendlyFormattedDate,
-    friendlyFormattedNumber,
-} from "../../helpers/utils";
-import { sendValidationErrorMessage } from "../../helpers/validate";
-import { state } from "../../kmq_worker";
-import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
 import SongSelector from "../../structures/song_selector";
-import { QueriedSong } from "../../types";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { KmqImages } from "../../constants";
 
 const logger = new IPCLogger("lookup");
 
@@ -39,23 +38,25 @@ const getDaisukiLink = (id: string, isMV: boolean): string => {
 export default class LookupCommand implements BaseCommand {
     aliases = ["songinfo", "songlookup"];
     validations = {
-        arguments: [],
-        maxArgCount: 1,
         minArgCount: 1,
+        maxArgCount: 1,
+        arguments: [],
     };
 
     help = (guildID: string): Help => ({
+        name: "lookup",
         description: state.localizer.translate(
             guildID,
             "command.lookup.help.description"
         ),
+        usage: ",lookup [youtube_id]",
         examples: [
             {
                 example: "`,lookup IHNzOHi8sJs`",
                 explanation: state.localizer.translate(
                     guildID,
                     "command.lookup.help.example.song",
-                    { artist: "Blackpink", song: "Ddu-du Ddu-du" }
+                    { song: "Ddu-du Ddu-du", artist: "Blackpink" }
                 ),
             },
             {
@@ -64,13 +65,11 @@ export default class LookupCommand implements BaseCommand {
                 explanation: state.localizer.translate(
                     guildID,
                     "command.lookup.help.example.song",
-                    { artist: "Aespa", song: "Next Level" }
+                    { song: "Next Level", artist: "Aespa" }
                 ),
             },
         ],
-        name: "lookup",
         priority: 40,
-        usage: ",lookup [youtube_id]",
     });
 
     call = async ({ parsedMessage, message }: CommandArgs): Promise<void> => {
@@ -128,15 +127,15 @@ export default class LookupCommand implements BaseCommand {
         const daisukiSongEntry = daisukiMVEntry || daisukiAudioEntry;
         if (!daisukiSongEntry) {
             await sendErrorMessage(messageContext, {
+                title: state.localizer.translate(
+                    guildID,
+                    "command.lookup.notFound.title"
+                ),
                 description: state.localizer.translate(
                     guildID,
                     "command.lookup.notFound.description"
                 ),
                 thumbnailUrl: KmqImages.DEAD,
-                title: state.localizer.translate(
-                    guildID,
-                    "command.lookup.notFound.title"
-                ),
             });
 
             logger.info(
@@ -300,15 +299,15 @@ export default class LookupCommand implements BaseCommand {
         }
 
         sendInfoMessage(messageContext, {
-            description,
-            fields: fields.map((x) => ({
-                inline: true,
-                name: x.name,
-                value: x.value,
-            })),
-            thumbnailUrl: `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`,
             title: `${songName} - ${artistName}`,
             url: `https://youtu.be/${videoID}`,
+            description,
+            thumbnailUrl: `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`,
+            fields: fields.map((x) => ({
+                name: x.name,
+                value: x.value,
+                inline: true,
+            })),
         });
     };
 }
