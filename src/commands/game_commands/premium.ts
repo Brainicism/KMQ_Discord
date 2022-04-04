@@ -15,14 +15,14 @@ export default class PremiumCommand implements BaseCommand {
     help = (guildID: string): Help => ({
         description: state.localizer.translate(
             guildID,
-            "commands.premium.help.description"
+            "command.premium.help.description"
         ),
         examples: [
             {
                 example: "`,premium`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "commands.premium.help.example"
+                    "command.premium.help.example"
                 ),
             },
         ],
@@ -37,41 +37,41 @@ export default class PremiumCommand implements BaseCommand {
             description: `${state.localizer.translate(
                 message.guildID,
                 premiumMember
-                    ? "commands.premium.description.premium"
-                    : "commands.premium.description.nonPremium"
+                    ? "command.premium.status.description.premium"
+                    : "command.premium.status.description.nonPremium"
             )}\n\n${state.localizer.translate(
                 message.guildID,
-                "commands.premium.description.connectionReminder"
+                "command.premium.status.description.connectionReminder"
             )}`,
             fields: [
                 {
                     name: state.localizer.translate(
                         message.guildID,
-                        "commands.premium.perks.moreSongs.title"
+                        "command.premium.status.perks.moreSongs.title"
                     ),
                     value: state.localizer.translate(
                         message.guildID,
-                        "commands.premium.perks.moreSongs.description"
+                        "command.premium.status.perks.moreSongs.description"
                     ),
                 },
                 {
                     name: state.localizer.translate(
                         message.guildID,
-                        "commands.premium.perks.special.title"
+                        "command.premium.status.perks.special.title"
                     ),
                     value: state.localizer.translate(
                         message.guildID,
-                        "commands.premium.perks.special.description"
+                        "command.premium.status.perks.special.description"
                     ),
                 },
                 {
                     name: state.localizer.translate(
                         message.guildID,
-                        "commands.premium.perks.badge.title"
+                        "command.premium.status.perks.badge.title"
                     ),
                     value: state.localizer.translate(
                         message.guildID,
-                        "commands.premium.perks.badge.description"
+                        "command.premium.status.perks.badge.description"
                     ),
                 },
             ],
@@ -79,8 +79,8 @@ export default class PremiumCommand implements BaseCommand {
             title: state.localizer.translate(
                 message.guildID,
                 premiumMember
-                    ? "commands.premium.title.premium"
-                    : "commands.premium.title.nonPremium"
+                    ? "command.premium.status.title.premium"
+                    : "command.premium.status.title.nonPremium"
             ),
         });
     };
