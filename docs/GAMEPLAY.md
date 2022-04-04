@@ -211,13 +211,6 @@ To keep things fair, switching teams mid-game forfeits your current points and E
 
 ![teams](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/teams.png)
 
-# KMQ Premium
-Support us by helping pay for the bot's hosting through a [monthly Patreon subscription](https://www.patreon.com/kmq).
-
-In return, get access to:
-* More songs (up to 25 b-side tracks per artist, up from 10)
-* `,special` in any Discord server
-
 # Full Command List
 Use `,help [command_name]` for more details for any of the following commands:
 
@@ -241,7 +234,6 @@ Use `,help [command_name]` for more details for any of the following commands:
 - `,exp`: Show your current bonus EXP modifiers
 - `,locale`: Change the language of the bot
 - `,lookup`: Get information about the given song (whether it's available in KMQ, aliases, etc.)
-- `,premium`: Learn about [KMQ Premium](#kmq-premium)
 
 ## Game Option Commands
 - `,limit`: Set a maximum number of results in the song query. This effectively sets the "top `x` number of songs" based on the selected filters
@@ -257,7 +249,7 @@ Use `,help [command_name]` for more details for any of the following commands:
 - `,multiguess`: Choose whether to allow multiple players to guess correctly in a round
 - `,shuffle`: Choose whether songs should play in "true" random order or in uniquely random order.
 - `,seek`: Choose whether each song starts from the beginning, middle, or a random point
-- `,special`: Modify how each song sounds, such as playing it in reverse, changing its pitch, etc. ([KMQ Premium](#kmq-premium) only)
+- `,special`: Modify how each song sounds, such as playing it in reverse, changing its pitch, etc.
 - `,guessmode`: Choose whether to guess based on song name, artist name, or both
 - `,goal`: Specify a number of points to be reached before a winner is selected and the game ends
 - `,timer`: Specify how many songs each songs played before it's automatically skipped
