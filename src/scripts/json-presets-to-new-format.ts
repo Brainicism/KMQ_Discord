@@ -13,9 +13,9 @@ async function exportJsonPresetsToNewTable(db: DatabaseContext): Promise<void> {
             try {
                 const presetOptions = Object.entries(options).map((option) => ({
                     guild_id: guildID,
+                    preset_name: presetName,
                     option_name: option[0],
                     option_value: JSON.stringify(option[1]),
-                    preset_name: presetName,
                 }));
 
                 await db.kmq.transaction(async (trx) => {

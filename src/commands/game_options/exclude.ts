@@ -1,20 +1,20 @@
-import CommandPrechecks from "../../command_prechecks";
-import { GROUP_LIST_URL } from "../../constants";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
+    sendOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
-    sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import {
     getGuildPreference,
     getMatchingGroupNames,
 } from "../../helpers/game_utils";
-import { setIntersection } from "../../helpers/utils";
-import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
 import { GameOption } from "../../types";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import MessageContext from "../../structures/message_context";
+import { setIntersection } from "../../helpers/utils";
+import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
+import { GROUP_LIST_URL } from "../../constants";
 
 const logger = new IPCLogger("excludes");
 
@@ -24,17 +24,7 @@ export default class ExcludeCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     help = (guildID: string): Help => ({
-        actionRowComponents: [
-            {
-                label: state.localizer.translate(
-                    guildID,
-                    "misc.interaction.fullGroupsList"
-                ),
-                style: 5 as const,
-                type: 2 as const,
-                url: GROUP_LIST_URL,
-            },
-        ],
+        name: "exclude",
         description: state.localizer.translate(
             guildID,
             "command.exclude.help.description",
@@ -42,6 +32,7 @@ export default class ExcludeCommand implements BaseCommand {
                 groupList: GROUP_LIST_URL,
             }
         ),
+        usage: ",exclude [group1],{group2}",
         examples: [
             {
                 example: "`,exclude blackpink`",
@@ -60,8 +51,8 @@ export default class ExcludeCommand implements BaseCommand {
                     "command.exclude.help.example.multipleGroups",
                     {
                         groupOne: "Blackpink",
-                        groupThree: "Red Velvet",
                         groupTwo: "BTS",
+                        groupThree: "Red Velvet",
                     }
                 ),
             },
@@ -73,9 +64,18 @@ export default class ExcludeCommand implements BaseCommand {
                 ),
             },
         ],
-        name: "exclude",
+        actionRowComponents: [
+            {
+                style: 5 as const,
+                url: GROUP_LIST_URL,
+                type: 2 as const,
+                label: state.localizer.translate(
+                    guildID,
+                    "misc.interaction.fullGroupsList"
+                ),
+            },
+        ],
         priority: 130,
-        usage: ",exclude [group1],{group2}",
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
@@ -122,15 +122,20 @@ export default class ExcludeCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.failure.unrecognizedGroups.title"
+                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "misc.failure.unrecognizedGroups.description",
                     {
-                        helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         matchedGroupsAction: state.localizer.translate(
                             message.guildID,
                             "command.exclude.failure.unrecognizedGroups.excluded"
                         ),
+                        helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
+                        unmatchedGroups: `${unmatchedGroups.join(", ")}`,
                         solution: state.localizer.translate(
                             message.guildID,
                             "misc.failure.unrecognizedGroups.solution",
@@ -138,14 +143,9 @@ export default class ExcludeCommand implements BaseCommand {
                                 command: `\`${process.env.BOT_PREFIX}add exclude\``,
                             }
                         ),
-                        unmatchedGroups: `${unmatchedGroups.join(", ")}`,
                     }
                 ),
                 footerText: excludeWarning,
-                title: state.localizer.translate(
-                    message.guildID,
-                    "misc.failure.unrecognizedGroups.title"
-                ),
             });
         }
 
@@ -160,14 +160,14 @@ export default class ExcludeCommand implements BaseCommand {
             );
             if (intersection.size > 0) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "misc.failure.groupsExcludeConflict.title"
+                    ),
                     description: state.localizer.translate(
                         message.guildID,
                         "misc.failure.groupsExcludeConflict.description",
                         {
-                            allowOrPrevent: state.localizer.translate(
-                                message.guildID,
-                                "misc.failure.groupsExcludeConflict.prevent"
-                            ),
                             conflictingOptionOne: "`exclude`",
                             conflictingOptionTwo: "`groups`",
                             groupsList: [...intersection]
@@ -175,11 +175,11 @@ export default class ExcludeCommand implements BaseCommand {
                                 .join(", "),
                             solutionStepOne: `\`${process.env.BOT_PREFIX}remove groups\``,
                             solutionStepTwo: `\`${process.env.BOT_PREFIX}exclude\``,
+                            allowOrPrevent: state.localizer.translate(
+                                message.guildID,
+                                "misc.failure.groupsExcludeConflict.prevent"
+                            ),
                         }
-                    ),
-                    title: state.localizer.translate(
-                        message.guildID,
-                        "misc.failure.groupsExcludeConflict.title"
                     ),
                 });
             }

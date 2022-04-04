@@ -1,13 +1,9 @@
 import { config } from "dotenv";
+import path from "path";
 import { BaseClusterWorker } from "eris-fleet";
 import schedule from "node-schedule";
-import path from "path";
-
-import EvalCommand from "./commands/admin/eval";
-import ReloadCommand from "./commands/admin/reload";
-import dbContext from "./database_context";
-import BotListingManager from "./helpers/bot_listing_manager";
-import LocalizationManager from "./helpers/localization_manager";
+import { IPCLogger } from "./logger";
+import { EnvType, State } from "./types";
 import {
     registerClientEvents,
     registerIntervals,
@@ -15,28 +11,31 @@ import {
     reloadCaches,
     updateBotStatus,
 } from "./helpers/management_utils";
-import KmqClient from "./kmq_client";
-import { IPCLogger } from "./logger";
+import BotListingManager from "./helpers/bot_listing_manager";
 import RateLimiter from "./rate_limiter";
-import { EnvType, State } from "./types";
+import dbContext from "./database_context";
+import KmqClient from "./kmq_client";
+import ReloadCommand from "./commands/admin/reload";
+import EvalCommand from "./commands/admin/eval";
+import LocalizationManager from "./helpers/localization_manager";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("kmq");
 config({ path: path.resolve(__dirname, "../.env") });
 
 const state: State = {
+    gameSessions: {},
+    client: null,
     aliases: {
         artist: {},
         song: {},
     },
-    bonusArtists: new Set<string>(),
-    client: null,
-    gameSessions: {},
+    processStartTime: Date.now(),
     ipc: null,
+    rateLimiter: new RateLimiter(15, 30),
+    bonusArtists: new Set<string>(),
     locales: {},
     localizer: null,
-    processStartTime: Date.now(),
-    rateLimiter: new RateLimiter(15, 30),
 };
 
 export { state };
@@ -70,8 +69,8 @@ export class BotWorker extends BaseClusterWorker {
                 ).length;
 
                 return {
-                    activeGameSessions,
                     activePlayers,
+                    activeGameSessions,
                 };
             }
 

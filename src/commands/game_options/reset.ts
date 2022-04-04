@@ -1,15 +1,15 @@
-import CommandPrechecks from "../../command_prechecks";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { IPCLogger } from "../../logger";
+import { getGuildPreference } from "../../helpers/game_utils";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
-import { state } from "../../kmq_worker";
-import { IPCLogger } from "../../logger";
-import { GameOptionInternalToGameOption } from "../../structures/guild_preference";
 import MessageContext from "../../structures/message_context";
+import CommandPrechecks from "../../command_prechecks";
+import { GameOptionInternalToGameOption } from "../../structures/guild_preference";
 import { GameOption } from "../../types";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("reset");
 
@@ -17,16 +17,18 @@ export default class ResetCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
-        arguments: [],
-        maxArgCount: 0,
         minArgCount: 0,
+        maxArgCount: 0,
+        arguments: [],
     };
 
     help = (guildID: string): Help => ({
+        name: "reset",
         description: state.localizer.translate(
             guildID,
             "command.reset.help.description"
         ),
+        usage: ",reset",
         examples: [
             {
                 example: "`,reset`",
@@ -36,9 +38,7 @@ export default class ResetCommand implements BaseCommand {
                 ),
             },
         ],
-        name: "reset",
         priority: 130,
-        usage: ",reset",
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {

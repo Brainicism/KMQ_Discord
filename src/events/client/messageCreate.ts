@@ -1,17 +1,16 @@
 import Eris from "eris";
 import * as uuid from "uuid";
-
+import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import validate from "../../helpers/validate";
 import { state } from "../../kmq_worker";
-import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
+import validate from "../../helpers/validate";
 import { EnvType, GuildTextableMessage, ParsedMessage } from "../../types";
+import MessageContext from "../../structures/message_context";
 
 const logger = new IPCLogger("messageCreate");
 
@@ -29,8 +28,8 @@ const parseMessage = (message: string): ParsedMessage => {
     return {
         action,
         argument,
-        components,
         message,
+        components,
     };
 };
 
@@ -97,9 +96,9 @@ export default async function messageCreateHandler(
                 for (const precheck of invokedCommand.preRunChecks) {
                     if (
                         !(await precheck.checkFn({
-                            errorMessage: precheck.errorMessage,
-                            gameSession,
                             message,
+                            gameSession,
+                            errorMessage: precheck.errorMessage,
                         }))
                     ) {
                         return;
@@ -115,8 +114,8 @@ export default async function messageCreateHandler(
 
             try {
                 await invokedCommand.call({
-                    channel: textChannel,
                     gameSessions,
+                    channel: textChannel,
                     message,
                     parsedMessage,
                 });
@@ -133,14 +132,14 @@ export default async function messageCreateHandler(
                 }
 
                 sendErrorMessage(MessageContext.fromMessage(message), {
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "misc.failure.command.title"
+                    ),
                     description: state.localizer.translate(
                         message.guildID,
                         "misc.failure.command.description",
                         { debugId }
-                    ),
-                    title: state.localizer.translate(
-                        message.guildID,
-                        "misc.failure.command.title"
                     ),
                 });
             }

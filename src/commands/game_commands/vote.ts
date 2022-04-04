@@ -1,16 +1,16 @@
-import { KmqImages } from "../../constants";
-import dbContext from "../../database_context";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { IPCLogger } from "../../logger";
 import {
-    EMBED_SUCCESS_BONUS_COLOR,
     getDebugLogHeader,
     sendInfoMessage,
+    EMBED_SUCCESS_BONUS_COLOR,
 } from "../../helpers/discord_utils";
-import { userBonusIsActive } from "../../helpers/game_utils";
-import { bold } from "../../helpers/utils";
-import { state } from "../../kmq_worker";
-import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { KmqImages } from "../../constants";
+import dbContext from "../../database_context";
+import { bold } from "../../helpers/utils";
+import { userBonusIsActive } from "../../helpers/game_utils";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("vote");
 
@@ -24,14 +24,14 @@ export default class VoteCommand implements BaseCommand {
     aliases = ["v", "voted"];
 
     help = (guildID: string): Help => ({
+        name: "vote",
         description: state.localizer.translate(
             guildID,
             "command.vote.help.description"
         ),
-        examples: [],
-        name: "vote",
-        priority: 60,
         usage: ",vote",
+        examples: [],
+        priority: 60,
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
@@ -137,43 +137,6 @@ export default class VoteCommand implements BaseCommand {
             MessageContext.fromMessage(message),
             {
                 color: boostActive ? EMBED_SUCCESS_BONUS_COLOR : null,
-                components: [
-                    {
-                        components: [
-                            {
-                                emoji: { name: "✅" },
-                                label: state.localizer.translate(
-                                    message.guildID,
-                                    "misc.interaction.vote"
-                                ),
-                                style: 5,
-                                type: 2 as const,
-                                url: VOTE_LINK,
-                            },
-                            {
-                                emoji: { name: "📖" },
-                                label: state.localizer.translate(
-                                    message.guildID,
-                                    "misc.interaction.leaveReview"
-                                ),
-                                style: 5,
-                                type: 2 as const,
-                                url: REVIEW_LINK,
-                            },
-                        ],
-                        type: 1,
-                    },
-                ],
-                description: `${voteStatusString}\n\n${state.localizer.translate(
-                    message.guildID,
-                    "command.vote.description",
-                    {
-                        reviewLink: REVIEW_LINK,
-                        voteLink: VOTE_LINK,
-                        voteResetDuration: String(VOTE_RESET_DURATION),
-                    }
-                )} `,
-                thumbnailUrl: KmqImages.THUMBS_UP,
                 title: boostActive
                     ? state.localizer.translate(
                           message.guildID,
@@ -183,6 +146,43 @@ export default class VoteCommand implements BaseCommand {
                           message.guildID,
                           "command.vote.boost.inactive"
                       ),
+                description: `${voteStatusString}\n\n${state.localizer.translate(
+                    message.guildID,
+                    "command.vote.description",
+                    {
+                        voteLink: VOTE_LINK,
+                        voteResetDuration: String(VOTE_RESET_DURATION),
+                        reviewLink: REVIEW_LINK,
+                    }
+                )} `,
+                thumbnailUrl: KmqImages.THUMBS_UP,
+                components: [
+                    {
+                        type: 1,
+                        components: [
+                            {
+                                style: 5,
+                                url: VOTE_LINK,
+                                type: 2 as const,
+                                emoji: { name: "✅" },
+                                label: state.localizer.translate(
+                                    message.guildID,
+                                    "misc.interaction.vote"
+                                ),
+                            },
+                            {
+                                style: 5,
+                                url: REVIEW_LINK,
+                                type: 2 as const,
+                                emoji: { name: "📖" },
+                                label: state.localizer.translate(
+                                    message.guildID,
+                                    "misc.interaction.leaveReview"
+                                ),
+                            },
+                        ],
+                    },
+                ],
             },
             true
         );
