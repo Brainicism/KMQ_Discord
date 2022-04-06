@@ -1,8 +1,8 @@
-import { getMention } from "../helpers/discord_utils";
-import { bold, friendlyFormattedNumber } from "../helpers/utils";
-import { state } from "../kmq_worker";
-import GuildPreference from "./guild_preference";
 import Player from "./player";
+import { bold, friendlyFormattedNumber } from "../helpers/utils";
+import { getMention } from "../helpers/discord_utils";
+import GuildPreference from "./guild_preference";
+import { state } from "../kmq_worker";
 
 export const SCOREBOARD_FIELD_CUTOFF = 6;
 
@@ -83,7 +83,6 @@ export default class Scoreboard {
             .sort((a, b) => b.getScore() - a.getScore())
             .filter((x) => x.shouldIncludeInScoreboard())
             .map((x) => ({
-                inline: false,
                 name: `${x.getRankingPrefix(
                     currentRanking[x.getScore()],
                     inProgress
@@ -97,6 +96,7 @@ export default class Scoreboard {
                         ? ` (+${friendlyFormattedNumber(x.getExpGain())} EXP)`
                         : ""
                 }`,
+                inline: false,
             }));
     }
 
@@ -146,14 +146,13 @@ export default class Scoreboard {
 
         return [
             {
-                inline: false,
                 name: "**Scoreboard**",
                 value: players
                     .slice(0, Math.ceil(players.length / 3))
                     .join("\n"),
+                inline: false,
             },
             {
-                inline: true,
                 name: ZERO_WIDTH_SPACE,
                 value: players
                     .slice(
@@ -161,13 +160,14 @@ export default class Scoreboard {
                         Math.ceil((2 * players.length) / 3)
                     )
                     .join("\n"),
+                inline: true,
             },
             {
-                inline: true,
                 name: ZERO_WIDTH_SPACE,
                 value: players
                     .slice(Math.ceil((2 * players.length) / 3))
                     .join("\n"),
+                inline: true,
             },
         ];
     }

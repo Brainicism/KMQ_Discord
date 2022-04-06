@@ -1,7 +1,6 @@
 import Eris from "eris";
-
-import { checkBotIsAlone } from "../../helpers/discord_utils";
 import { state } from "../../kmq_worker";
+import { checkBotIsAlone } from "../../helpers/discord_utils";
 
 /**
  * Handles the 'voiceChannelSwitch' event

@@ -1,15 +1,15 @@
-import CommandPrechecks from "../../command_prechecks";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
 import { GameOption } from "../../types";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import MessageContext from "../../structures/message_context";
+import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("duration");
 
@@ -22,28 +22,33 @@ export default class DurationCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
+        minArgCount: 0,
+        maxArgCount: 2,
         arguments: [
             {
-                maxValue: 600,
-                minValue: 2,
                 name: "duration",
                 type: "number" as const,
+                minValue: 2,
+                maxValue: 600,
             },
             {
-                enums: Object.values(DurationAction),
                 name: "action",
                 type: "enum" as const,
+                enums: Object.values(DurationAction),
             },
         ],
-        maxArgCount: 2,
-        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
+        name: "duration",
         description: state.localizer.translate(
             guildID,
             "command.duration.help.description"
         ),
+        usage: `,duration [${state.localizer.translate(
+            guildID,
+            "command.duration.help.usage.minutes"
+        )}]`,
         examples: [
             {
                 example: "`,duration 15`",
@@ -83,12 +88,7 @@ export default class DurationCommand implements BaseCommand {
                 ),
             },
         ],
-        name: "duration",
         priority: 110,
-        usage: `,duration [${state.localizer.translate(
-            guildID,
-            "command.duration.help.usage.minutes"
-        )}]`,
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
@@ -118,13 +118,13 @@ export default class DurationCommand implements BaseCommand {
             } else if (action === DurationAction.REMOVE) {
                 if (!guildPreference.isDurationSet()) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        description: state.localizer.translate(
-                            message.guildID,
-                            "command.duration.failure.removingDuration.notSet.description"
-                        ),
                         title: state.localizer.translate(
                             message.guildID,
                             "command.duration.failure.removingDuration.title"
+                        ),
+                        description: state.localizer.translate(
+                            message.guildID,
+                            "command.duration.failure.removingDuration.notSet.description"
                         ),
                     });
                     return;
@@ -133,13 +133,13 @@ export default class DurationCommand implements BaseCommand {
                 duration = currentDuration - durationDelta;
                 if (duration < 2) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        description: state.localizer.translate(
-                            message.guildID,
-                            "command.duration.failure.removingDuration.tooShort.description"
-                        ),
                         title: state.localizer.translate(
                             message.guildID,
                             "command.duration.failure.removingDuration.title"
+                        ),
+                        description: state.localizer.translate(
+                            message.guildID,
+                            "command.duration.failure.removingDuration.tooShort.description"
                         ),
                     });
                     return;

@@ -1,14 +1,14 @@
-import CommandPrechecks from "../../command_prechecks";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
-    getDebugLogHeader,
     sendOptionsMessage,
+    getDebugLogHeader,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
 import { GameOption } from "../../types";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import MessageContext from "../../structures/message_context";
+import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("seek");
 
@@ -24,22 +24,24 @@ export default class SeekCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
+        minArgCount: 0,
+        maxArgCount: 1,
         arguments: [
             {
-                enums: Object.values(SeekType),
                 name: "seekType",
                 type: "enum" as const,
+                enums: Object.values(SeekType),
             },
         ],
-        maxArgCount: 1,
-        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
+        name: "seek",
         description: state.localizer.translate(
             guildID,
             "command.seek.help.description"
         ),
+        usage: ",seek [beginning | middle | random]",
         examples: [
             {
                 example: "`,seek random`",
@@ -73,9 +75,7 @@ export default class SeekCommand implements BaseCommand {
                 ),
             },
         ],
-        name: "seek",
         priority: 130,
-        usage: ",seek [beginning | middle | random]",
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

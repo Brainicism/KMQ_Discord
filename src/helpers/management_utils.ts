@@ -1,36 +1,24 @@
 /* eslint-disable global-require */
 /* eslint-disable import/no-dynamic-require */
-import _ from "lodash";
 import schedule from "node-schedule";
-
-import dbContext from "../database_context";
-import channelDeleteHandler from "../events/client/channelDelete";
-import connectHandler from "../events/client/connect";
-import debugHandler from "../events/client/debug";
-import disconnectHandler from "../events/client/disconnect";
-import errorHandler from "../events/client/error";
-import guildAvailableHandler from "../events/client/guildAvailable";
-import guildCreateHandler from "../events/client/guildCreate";
-import guildDeleteHandler from "../events/client/guildDelete";
-import interactionCreateHandler from "../events/client/interactionCreate";
+import _ from "lodash";
+import { IPCLogger } from "../logger";
+import { state } from "../kmq_worker";
+import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
 import messageCreateHandler from "../events/client/messageCreate";
+import voiceChannelLeaveHandler from "../events/client/voiceChannelLeave";
+import voiceChannelSwitchHandler from "../events/client/voiceChannelSwitch";
+import voiceChannelJoinHandler from "../events/client/voiceChannelJoin";
+import connectHandler from "../events/client/connect";
+import errorHandler from "../events/client/error";
+import warnHandler from "../events/client/warn";
 import shardDisconnectHandler from "../events/client/shardDisconnect";
 import shardReadyHandler from "../events/client/shardReady";
 import shardResumeHandler from "../events/client/shardResume";
-import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
-import voiceChannelJoinHandler from "../events/client/voiceChannelJoin";
-import voiceChannelLeaveHandler from "../events/client/voiceChannelLeave";
-import voiceChannelSwitchHandler from "../events/client/voiceChannelSwitch";
-import warnHandler from "../events/client/warn";
-import SIGINTHandler from "../events/process/SIGINT";
-import uncaughtExceptionHandler from "../events/process/uncaughtException";
+import disconnectHandler from "../events/client/disconnect";
 import unhandledRejectionHandler from "../events/process/unhandledRejection";
-import { reloadFactCache } from "../fact_generator";
-import { state } from "../kmq_worker";
-import { IPCLogger } from "../logger";
-import MessageContext from "../structures/message_context";
-import { EnvType } from "../types";
-import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
+import uncaughtExceptionHandler from "../events/process/uncaughtException";
+import SIGINTHandler from "../events/process/SIGINT";
 import {
     cleanupInactiveGameSessions,
     getMatchingGroupNames,
@@ -38,7 +26,18 @@ import {
 } from "./game_utils";
 import { LocaleType } from "./localization_manager";
 import updatePremiumUsers from "./patreon_manager";
+import dbContext from "../database_context";
+import debugHandler from "../events/client/debug";
+import guildCreateHandler from "../events/client/guildCreate";
+import guildDeleteHandler from "../events/client/guildDelete";
+import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
+import guildAvailableHandler from "../events/client/guildAvailable";
+import interactionCreateHandler from "../events/client/interactionCreate";
 import { chooseRandom, isWeekend } from "./utils";
+import { reloadFactCache } from "../fact_generator";
+import MessageContext from "../structures/message_context";
+import { EnvType } from "../types";
+import channelDeleteHandler from "../events/client/channelDelete";
 
 const logger = new IPCLogger("management_utils");
 
@@ -114,9 +113,9 @@ export const checkRestartNotification = async (
             await sendInfoMessage(
                 new MessageContext(gameSession.textChannelID),
                 {
+                    title: `Upcoming Bot Restart in ${timeUntilRestart} Minutes.`,
                     description:
                         "Downtime will be approximately 2 minutes. Please end the current game to ensure your progress is saved!",
-                    title: `Upcoming Bot Restart in ${timeUntilRestart} Minutes.`,
                 }
             );
             serversWarned++;
@@ -164,23 +163,23 @@ async function updateSystemStats(clusterID: number): Promise<void> {
 
     await dbContext.kmq("system_stats").insert({
         cluster_id: clusterID,
-        date: new Date(),
         stat_name: "mean_latency",
         stat_value: meanLatency,
+        date: new Date(),
     });
 
     await dbContext.kmq("system_stats").insert({
         cluster_id: clusterID,
-        date: new Date(),
         stat_name: "min_latency",
         stat_value: minLatency,
+        date: new Date(),
     });
 
     await dbContext.kmq("system_stats").insert({
         cluster_id: clusterID,
-        date: new Date(),
         stat_name: "max_latency",
         stat_value: maxLatency,
+        date: new Date(),
     });
 }
 

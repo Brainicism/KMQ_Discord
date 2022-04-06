@@ -1,6 +1,5 @@
 import assert from "assert";
 import sinon from "sinon";
-
 import {
     calculateOptionsExpMultiplierInternal,
     calculateRoundExpMultiplier,
@@ -333,15 +332,15 @@ describe("calculateRoundExpMultiplier", () => {
     let gameRound: GameRound;
     beforeEach(() => {
         gameRound = new GameRound({
-            artistName: "x",
-            hangulArtistName: "x",
+            songName: "x",
+            originalSongName: "x",
             hangulSongName: "x",
             originalHangulSongName: "x",
-            originalSongName: "x",
-            publishDate: new Date(),
-            songName: "x",
-            views: 1,
+            artistName: "x",
+            hangulArtistName: "x",
             youtubeLink: "x",
+            publishDate: new Date(),
+            views: 1,
         });
         gameRound.bonusModifier = 1;
         guildPreference = GuildPreference.fromGuild("123");

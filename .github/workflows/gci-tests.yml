@@ -60,6 +60,7 @@ jobs:
                   echo "DB_HOST=127.0.0.1" >> .env
                   echo "DB_PORT=$DB_PORT" >> .env
                   echo "DB_PORT=3306" >> .env
+                  echo "AUDIO_SONGS_PER_ARTIST=10" >> .env
               shell: bash
             - name: Wait for MySQL server to start
               run: |

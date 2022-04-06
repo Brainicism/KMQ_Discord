@@ -1,19 +1,19 @@
-import CommandPrechecks from "../../command_prechecks";
-import { GROUP_LIST_URL } from "../../constants";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
+    sendOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
-    sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import {
     getGuildPreference,
     getMatchingGroupNames,
 } from "../../helpers/game_utils";
-import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
 import { GameOption } from "../../types";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import MessageContext from "../../structures/message_context";
+import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
+import { GROUP_LIST_URL } from "../../constants";
 
 const logger = new IPCLogger("includes");
 
@@ -23,26 +23,17 @@ export default class IncludeCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     help = (guildID: string): Help => ({
-        actionRowComponents: [
-            {
-                label: state.localizer.translate(
-                    guildID,
-                    "misc.interaction.fullGroupsList"
-                ),
-                style: 5 as const,
-                type: 2 as const,
-                url: GROUP_LIST_URL,
-            },
-        ],
+        name: "include",
         description: state.localizer.translate(
             guildID,
             "command.include.help.description",
             {
-                artisttype: "`artisttype`",
                 gender: "`gender`",
+                artisttype: "`artisttype`",
                 groupList: GROUP_LIST_URL,
             }
         ),
+        usage: ",include [group1],{group2}",
         examples: [
             {
                 example: "`,include blackpink`",
@@ -59,8 +50,8 @@ export default class IncludeCommand implements BaseCommand {
                     "command.include.help.example.multipleGroups",
                     {
                         groupOne: "Blackpink",
-                        groupThree: "Red Velvet",
                         groupTwo: "BTS",
+                        groupThree: "Red Velvet",
                     }
                 ),
             },
@@ -72,9 +63,18 @@ export default class IncludeCommand implements BaseCommand {
                 ),
             },
         ],
-        name: "include",
+        actionRowComponents: [
+            {
+                style: 5 as const,
+                url: GROUP_LIST_URL,
+                type: 2 as const,
+                label: state.localizer.translate(
+                    guildID,
+                    "misc.interaction.fullGroupsList"
+                ),
+            },
+        ],
         priority: 130,
-        usage: ",include [group1],{group2}",
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
@@ -112,18 +112,18 @@ export default class IncludeCommand implements BaseCommand {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.failure.gameOptionConflict.title"
+                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "misc.failure.gameOptionConflict.description",
                     {
                         optionOne: "`groups`",
-                        optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
                         optionTwo: "`include`",
+                        optionOneCommand: `\`${process.env.BOT_PREFIX}groups\``,
                     }
-                ),
-                title: state.localizer.translate(
-                    message.guildID,
-                    "misc.failure.gameOptionConflict.title"
                 ),
             });
             return;
@@ -147,15 +147,20 @@ export default class IncludeCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.failure.unrecognizedGroups.title"
+                ),
                 description: state.localizer.translate(
                     message.guildID,
                     "misc.failure.unrecognizedGroups.description",
                     {
-                        helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         matchedGroupsAction: state.localizer.translate(
                             message.guildID,
                             "command.include.failure.unrecognizedGroups.included"
                         ),
+                        helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
+                        unmatchedGroups: unmatchedGroups.join(", "),
                         solution: state.localizer.translate(
                             message.guildID,
                             "misc.failure.unrecognizedGroups.solution",
@@ -163,14 +168,9 @@ export default class IncludeCommand implements BaseCommand {
                                 command: `\`${process.env.BOT_PREFIX}add include\``,
                             }
                         ),
-                        unmatchedGroups: unmatchedGroups.join(", "),
                     }
                 ),
                 footerText: includeWarning,
-                title: state.localizer.translate(
-                    message.guildID,
-                    "misc.failure.unrecognizedGroups.title"
-                ),
             });
         }
 

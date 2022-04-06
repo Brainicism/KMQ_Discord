@@ -1,9 +1,8 @@
 import assert from "assert";
-
 import GuildPreference from "../../structures/guild_preference";
-import Player from "../../structures/player";
 import Team from "../../structures/team";
 import TeamScoreboard from "../../structures/team_scoreboard";
+import Player from "../../structures/player";
 import { GameOption } from "../../types";
 
 const FIRST_TEAM_NAME = "kmq team";
@@ -85,7 +84,7 @@ describe("score/exp updating", () => {
             it("should increment the user's score/exp, team score should be player's score, no bonus exp since 1 team", async () => {
                 for (let i = 0; i < 20; i++) {
                     await scoreboard.update([
-                        { expGain: 50, pointsEarned: 1, userID: USER_IDS[0] },
+                        { userID: USER_IDS[0], pointsEarned: 1, expGain: 50 },
                     ]);
 
                     assert.strictEqual(
@@ -123,14 +122,14 @@ describe("score/exp updating", () => {
             it("should increment each user's score, team score should be sum of its players' scores", async () => {
                 for (let i = 0; i < 20; i++) {
                     await scoreboard.update([
-                        { expGain: 50, pointsEarned: 1, userID: USER_IDS[0] },
+                        { userID: USER_IDS[0], pointsEarned: 1, expGain: 50 },
                     ]);
                     if (i % 2 === 0) {
                         await scoreboard.update([
                             {
-                                expGain: 50,
-                                pointsEarned: 1,
                                 userID: USER_IDS[1],
+                                pointsEarned: 1,
+                                expGain: 50,
                             },
                         ]);
                     }
@@ -184,14 +183,14 @@ describe("score/exp updating", () => {
             it("should increment each user's score", async () => {
                 for (let i = 0; i < 20; i++) {
                     await scoreboard.update([
-                        { expGain: 50, pointsEarned: 1, userID: USER_IDS[0] },
+                        { userID: USER_IDS[0], pointsEarned: 1, expGain: 50 },
                     ]);
                     if (i === 0) {
                         await scoreboard.update([
                             {
-                                expGain: 50,
-                                pointsEarned: 1,
                                 userID: USER_IDS[1],
+                                pointsEarned: 1,
+                                expGain: 50,
                             },
                         ]);
                     }
@@ -199,9 +198,9 @@ describe("score/exp updating", () => {
                     if (i % 10 === 0) {
                         await scoreboard.update([
                             {
-                                expGain: 50,
-                                pointsEarned: 1,
                                 userID: USER_IDS[2],
+                                pointsEarned: 1,
+                                expGain: 50,
                             },
                         ]);
                     }
@@ -263,9 +262,9 @@ describe("score/exp updating", () => {
             );
 
             await scoreboard.update([
-                { expGain: 50, pointsEarned: 1, userID: USER_IDS[0] },
-                { expGain: 25, pointsEarned: 1, userID: USER_IDS[1] },
-                { expGain: 12, pointsEarned: 1, userID: USER_IDS[2] },
+                { userID: USER_IDS[0], pointsEarned: 1, expGain: 50 },
+                { userID: USER_IDS[1], pointsEarned: 1, expGain: 25 },
+                { userID: USER_IDS[2], pointsEarned: 1, expGain: 12 },
             ]);
         });
 
@@ -317,7 +316,7 @@ describe("winner detection", () => {
     describe("single player, single team, has score", () => {
         it("should return the team", async () => {
             await scoreboard.update([
-                { expGain: 0, pointsEarned: 10, userID: USER_IDS[0] },
+                { userID: USER_IDS[0], pointsEarned: 10, expGain: 0 },
             ]);
             assert.strictEqual(scoreboard.getWinners().length, 1);
             assert.strictEqual(
@@ -335,11 +334,11 @@ describe("winner detection", () => {
     describe("multiple players, single team, has different scores", () => {
         it("should return the team", async () => {
             await scoreboard.update([
-                { expGain: 0, pointsEarned: 10, userID: USER_IDS[0] },
+                { userID: USER_IDS[0], pointsEarned: 10, expGain: 0 },
             ]);
 
             await scoreboard.update([
-                { expGain: 0, pointsEarned: 15, userID: USER_IDS[1] },
+                { userID: USER_IDS[1], pointsEarned: 15, expGain: 0 },
             ]);
             assert.strictEqual(scoreboard.getWinners().length, 1);
             assert.strictEqual(
@@ -357,19 +356,19 @@ describe("winner detection", () => {
     describe("multiple players, multiple teams, has different scores", () => {
         it("should return the team with most points", async () => {
             await scoreboard.update([
-                { expGain: 0, pointsEarned: 10, userID: USER_IDS[0] },
+                { userID: USER_IDS[0], pointsEarned: 10, expGain: 0 },
             ]);
 
             await scoreboard.update([
-                { expGain: 0, pointsEarned: 15, userID: USER_IDS[1] },
+                { userID: USER_IDS[1], pointsEarned: 15, expGain: 0 },
             ]);
 
             await scoreboard.update([
-                { expGain: 0, pointsEarned: 15, userID: USER_IDS[2] },
+                { userID: USER_IDS[2], pointsEarned: 15, expGain: 0 },
             ]);
 
             await scoreboard.update([
-                { expGain: 0, pointsEarned: 15, userID: USER_IDS[3] },
+                { userID: USER_IDS[3], pointsEarned: 15, expGain: 0 },
             ]);
             assert.strictEqual(scoreboard.getWinners().length, 1);
             assert.strictEqual(
@@ -382,19 +381,19 @@ describe("winner detection", () => {
     describe("multiple players, multiple teams, tied score", () => {
         it("should return the two tied teams", async () => {
             await scoreboard.update([
-                { expGain: 0, pointsEarned: 5, userID: USER_IDS[0] },
+                { userID: USER_IDS[0], pointsEarned: 5, expGain: 0 },
             ]);
 
             await scoreboard.update([
-                { expGain: 0, pointsEarned: 7, userID: USER_IDS[1] },
+                { userID: USER_IDS[1], pointsEarned: 7, expGain: 0 },
             ]);
 
             await scoreboard.update([
-                { expGain: 0, pointsEarned: 7, userID: USER_IDS[2] },
+                { userID: USER_IDS[2], pointsEarned: 7, expGain: 0 },
             ]);
 
             await scoreboard.update([
-                { expGain: 0, pointsEarned: 5, userID: USER_IDS[3] },
+                { userID: USER_IDS[3], pointsEarned: 5, expGain: 0 },
             ]);
 
             assert.deepStrictEqual(scoreboard.getWinners(), [
@@ -447,11 +446,11 @@ describe("game finished", () => {
         describe("first place is not equal/above the goal", () => {
             it("should return false", async () => {
                 await scoreboard.update([
-                    { expGain: 0, pointsEarned: 2, userID: USER_IDS[0] },
+                    { userID: USER_IDS[0], pointsEarned: 2, expGain: 0 },
                 ]);
 
                 await scoreboard.update([
-                    { expGain: 0, pointsEarned: 4, userID: USER_IDS[1] },
+                    { userID: USER_IDS[1], pointsEarned: 4, expGain: 0 },
                 ]);
 
                 assert.strictEqual(
@@ -464,11 +463,11 @@ describe("game finished", () => {
         describe("first place is equal/above the goal", () => {
             it("should return true", async () => {
                 await scoreboard.update([
-                    { expGain: 0, pointsEarned: 5, userID: USER_IDS[0] },
+                    { userID: USER_IDS[0], pointsEarned: 5, expGain: 0 },
                 ]);
 
                 await scoreboard.update([
-                    { expGain: 0, pointsEarned: 4, userID: USER_IDS[1] },
+                    { userID: USER_IDS[1], pointsEarned: 4, expGain: 0 },
                 ]);
 
                 assert.strictEqual(

@@ -1,23 +1,22 @@
 import Eris from "eris";
 import * as uuid from "uuid";
-
-import { KmqImages } from "../../constants";
+import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import {
     getDebugChannel,
+    sendInfoMessage,
+    getUserVoiceChannel,
     getDebugLogHeader,
     getGuildLocale,
-    getUserVoiceChannel,
-    sendInfoMessage,
 } from "../../helpers/discord_utils";
 import {
-    getAvailableSongCount,
     getGuildPreference,
     isPremiumRequest,
+    getAvailableSongCount,
 } from "../../helpers/game_utils";
 import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
+import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 
 const logger = new IPCLogger("debug");
 
@@ -38,29 +37,29 @@ export default class DebugCommand implements BaseCommand {
 
         const fields: Array<Eris.EmbedField> = [];
         fields.push({
-            inline: false,
             name: "Guild Preference",
             value: JSON.stringify(guildPreference.gameOptions),
+            inline: false,
         });
 
         fields.push({
-            inline: false,
             name: "Song Count",
             value: `${songCount.count.toString()}/${songCount.countBeforeLimit.toString()}`,
+            inline: false,
         });
 
         fields.push({
-            inline: false,
             name: "Text Permissions",
             value: JSON.stringify(
                 channel.permissionsOf(process.env.BOT_CLIENT_ID).json
             ),
+            inline: false,
         });
 
         fields.push({
-            inline: false,
             name: "Locale",
             value: getGuildLocale(message.guildID),
+            inline: false,
         });
 
         const voiceChannel = getUserVoiceChannel(
@@ -69,16 +68,20 @@ export default class DebugCommand implements BaseCommand {
 
         if (voiceChannel) {
             fields.push({
-                inline: false,
                 name: "Voice Permissions",
                 value: JSON.stringify(
                     voiceChannel.permissionsOf(process.env.BOT_CLIENT_ID).json
                 ),
+                inline: false,
             });
         }
 
         const debugID = uuid.v4();
         await sendInfoMessage(MessageContext.fromMessage(message), {
+            title: state.localizer.translate(
+                message.guildID,
+                "command.debug.title"
+            ),
             description: state.localizer.translate(
                 message.guildID,
                 "command.debug.description",
@@ -87,17 +90,13 @@ export default class DebugCommand implements BaseCommand {
                 }
             ),
             thumbnailUrl: KmqImages.READING_BOOK,
-            title: state.localizer.translate(
-                message.guildID,
-                "command.debug.title"
-            ),
         });
 
         await sendInfoMessage(new MessageContext(debugChannel.id), {
-            fields,
-            footerText: debugID,
-            timestamp: new Date(),
             title: `Debug Details for User: ${message.author.id}, Guild: ${message.guildID}`,
+            footerText: debugID,
+            fields,
+            timestamp: new Date(),
         });
 
         logger.info(`${getDebugLogHeader(message)} | Debug info retrieved.`);

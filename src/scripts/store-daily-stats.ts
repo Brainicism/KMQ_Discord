@@ -40,9 +40,9 @@ const storeDailyStats = async (serverCount: number): Promise<void> => {
     await dbContext.kmq("daily_stats").insert({
         date: dateThreshold,
         gameSessions: recentGameSessions,
-        newPlayers,
-        players: recentPlayers,
         roundsPlayed: recentRounds,
+        players: recentPlayers,
+        newPlayers,
         serverCount,
     });
 };

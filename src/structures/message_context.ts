@@ -1,5 +1,4 @@
 import Eris from "eris";
-
 import { getUserTag } from "../helpers/discord_utils";
 import { state } from "../kmq_worker";
 import KmqMember from "./kmq_member";

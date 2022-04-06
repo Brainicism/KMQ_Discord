@@ -1,36 +1,10 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import axios from "axios";
 import Eris from "eris";
 import EmbedPaginator from "eris-pagination";
-
-import { REVIEW_LINK, VOTE_LINK } from "../commands/game_commands/vote";
-import { GuessModeType } from "../commands/game_options/guessmode";
-import { KmqImages } from "../constants";
-import dbContext from "../database_context";
-import { getFact } from "../fact_generator";
-import { state } from "../kmq_worker";
-import { IPCLogger } from "../logger";
-import EliminationScoreboard from "../structures/elimination_scoreboard";
-import GameRound from "../structures/game_round";
-import GameSession from "../structures/game_session";
+import axios from "axios";
 import GuildPreference from "../structures/guild_preference";
-import MessageContext from "../structures/message_context";
-import Round from "../structures/round";
-import Scoreboard from "../structures/scoreboard";
-import Session from "../structures/session";
-import { UniqueSongCounter } from "../structures/song_selector";
-import TeamScoreboard from "../structures/team_scoreboard";
-import {
-    ConflictingGameOptions,
-    EmbedPayload,
-    GameInfoMessage,
-    GameOption,
-    GameOptionCommand,
-    GameType,
-    GuildTextableMessage,
-    PriorityGameOption,
-    QueriedSong,
-} from "../types";
+import GameSession from "../structures/game_session";
+import { IPCLogger } from "../logger";
 import {
     getAvailableSongCount,
     getKmqCurrentVersion,
@@ -39,19 +13,44 @@ import {
     isPremiumRequest,
     userBonusIsActive,
 } from "./game_utils";
-import { DEFAULT_LOCALE, LocaleType } from "./localization_manager";
+import { getFact } from "../fact_generator";
 import {
-    bold,
-    chooseWeightedRandom,
+    EmbedPayload,
+    GameOption,
+    GameOptionCommand,
+    PriorityGameOption,
+    ConflictingGameOptions,
+    GuildTextableMessage,
+    GameInfoMessage,
+    GameType,
+    QueriedSong,
+} from "../types";
+import {
     chunkArray,
-    delay,
-    friendlyFormattedNumber,
-    getOrdinalNum,
-    italicize,
-    standardDateFormat,
-    strikethrough,
+    bold,
     underline,
+    italicize,
+    strikethrough,
+    chooseWeightedRandom,
+    getOrdinalNum,
+    friendlyFormattedNumber,
+    delay,
+    standardDateFormat,
 } from "./utils";
+import { state } from "../kmq_worker";
+import Scoreboard from "../structures/scoreboard";
+import GameRound from "../structures/game_round";
+import dbContext from "../database_context";
+import EliminationScoreboard from "../structures/elimination_scoreboard";
+import TeamScoreboard from "../structures/team_scoreboard";
+import { KmqImages } from "../constants";
+import MessageContext from "../structures/message_context";
+import { GuessModeType } from "../commands/game_options/guessmode";
+import { REVIEW_LINK, VOTE_LINK } from "../commands/game_commands/vote";
+import { UniqueSongCounter } from "../structures/song_selector";
+import { LocaleType, DEFAULT_LOCALE } from "./localization_manager";
+import Round from "../structures/round";
+import Session from "../structures/session";
 
 const logger = new IPCLogger("discord_utils");
 export const EMBED_ERROR_COLOR = 0xed4245; // Red
@@ -131,10 +130,10 @@ function missingPermissionsText(
         guildID,
         "misc.failure.missingPermissionsText",
         {
-            helpCommand: `\`${process.env.BOT_PREFIX}help\``,
             missingPermissions: missingPermissions.join(", "),
             permissionsLink:
                 "https://support.discord.com/hc/en-us/articles/206029707-How-do-I-set-up-Permissions-",
+            helpCommand: `\`${process.env.BOT_PREFIX}help\``,
         }
     );
 }
@@ -263,14 +262,14 @@ export async function textPermissionsCheck(
             )} | Missing SEND_MESSAGES permissions`
         );
         const embed = {
+            title: state.localizer.translate(
+                guildID,
+                "misc.failure.missingPermissions.title"
+            ),
             description: state.localizer.translate(
                 guildID,
                 "misc.failure.missingPermissions.description",
                 { channelName: `#${channel.name}` }
-            ),
-            title: state.localizer.translate(
-                guildID,
-                "misc.failure.missingPermissions.title"
             ),
         };
 
@@ -490,16 +489,16 @@ export async function sendErrorMessage(
     return sendMessage(
         messageContext.textChannelID,
         {
-            components: embedPayload.components,
             embeds: [
                 {
+                    color: embedPayload.color || EMBED_ERROR_COLOR,
                     author: author
                         ? {
-                              icon_url: author.avatarUrl,
                               name: author.username,
+                              icon_url: author.avatarUrl,
                           }
                         : null,
-                    color: embedPayload.color || EMBED_ERROR_COLOR,
+                    title: bold(embedPayload.title),
                     description: embedPayload.description,
                     footer: embedPayload.footerText
                         ? {
@@ -509,9 +508,9 @@ export async function sendErrorMessage(
                     thumbnail: embedPayload.thumbnailUrl
                         ? { url: embedPayload.thumbnailUrl }
                         : { url: KmqImages.DEAD },
-                    title: bold(embedPayload.title),
                 },
             ],
+            components: embedPayload.components,
         },
         null,
         messageContext.author.id
@@ -535,13 +534,13 @@ export async function sendInfoMessage(
 ): Promise<Eris.Message<Eris.TextableChannel>> {
     if (embedPayload.description && embedPayload.description.length > 2048) {
         return sendErrorMessage(messageContext, {
-            description: state.localizer.translate(
-                messageContext.guildID,
-                "misc.failure.messageTooLong"
-            ),
             title: state.localizer.translate(
                 messageContext.guildID,
                 "misc.failure.error"
+            ),
+            description: state.localizer.translate(
+                messageContext.guildID,
+                "misc.failure.messageTooLong"
             ),
         });
     }
@@ -552,13 +551,15 @@ export async function sendInfoMessage(
             : messageContext.author;
 
     const embed: Eris.EmbedOptions = {
+        color: embedPayload.color,
         author: author
             ? {
-                  icon_url: author.avatarUrl,
                   name: author.username,
+                  icon_url: author.avatarUrl,
               }
             : null,
-        color: embedPayload.color,
+        title: boldTitle ? bold(embedPayload.title) : embedPayload.title,
+        url: embedPayload.url,
         description: embedPayload.description,
         fields: embedPayload.fields,
         footer: embedPayload.footerText
@@ -570,23 +571,21 @@ export async function sendInfoMessage(
             ? { url: embedPayload.thumbnailUrl }
             : null,
         timestamp: embedPayload.timestamp,
-        title: boldTitle ? bold(embedPayload.title) : embedPayload.title,
-        url: embedPayload.url,
     };
 
     return sendMessage(
         messageContext.textChannelID,
         {
-            components: embedPayload.components,
-            content,
             embeds: [embed],
             messageReference:
                 reply && messageContext.referencedMessageID
                     ? {
-                          failIfNotExists: false,
                           messageID: messageContext.referencedMessageID,
+                          failIfNotExists: false,
                       }
                     : null,
+            components: embedPayload.components,
+            content,
         },
         null,
         messageContext.author.id
@@ -733,7 +732,6 @@ export async function sendEndRoundMessage(
     const fact = Math.random() <= 0.05 ? getFact(messageContext.guildID) : null;
     if (fact) {
         fields.push({
-            inline: false,
             name: underline(
                 state.localizer.translate(
                     messageContext.guildID,
@@ -741,6 +739,7 @@ export async function sendEndRoundMessage(
                 )
             ),
             value: fact,
+            inline: false,
         });
     }
 
@@ -761,10 +760,10 @@ export async function sendEndRoundMessage(
                 playerRoundResults[0]?.player.id ?? messageContext.author.id
             )
         ),
-        description,
-        fields,
         title: `${songAndArtist} (${round.song.publishDate.getFullYear()})`,
         url: `https://youtu.be/${round.song.youtubeLink}`,
+        description,
+        fields,
     };
 
     const views = `${friendlyFormattedNumber(
@@ -820,10 +819,10 @@ export async function sendOptionsMessage(
         await sendInfoMessage(
             messageContext,
             {
+                title: "[DEBUG] Force Play Mode Active",
                 description: `Force playing video ID: ${guildPreference.gameOptions.forcePlaySongID}`,
                 footerText,
                 thumbnailUrl: KmqImages.READING_BOOK,
-                title: "[DEBUG] Force Play Mode Active",
             },
             true
         );
@@ -842,14 +841,14 @@ export async function sendOptionsMessage(
 
     if (totalSongs === null) {
         sendErrorMessage(messageContext, {
+            title: state.localizer.translate(
+                messageContext.guildID,
+                "misc.failure.retrievingSongData.title"
+            ),
             description: state.localizer.translate(
                 messageContext.guildID,
                 "misc.failure.retrievingSongData.description",
                 { helpCommand: `\`${process.env.BOT_PREFIX}help\`` }
-            ),
-            title: state.localizer.translate(
-                messageContext.guildID,
-                "misc.failure.retrievingSongData.title"
             ),
         });
         return;
@@ -874,8 +873,8 @@ export async function sendOptionsMessage(
             messageContext.guildID,
             "misc.formattedLimit",
             {
-                limitEnd: getOrdinalNum(visibleLimitEnd),
                 limitStart: getOrdinalNum(visibleLimitStart),
+                limitEnd: getOrdinalNum(visibleLimitEnd),
                 songCount: friendlyFormattedNumber(totalSongs.count),
             }
         );
@@ -1015,10 +1014,10 @@ export async function sendOptionsMessage(
         "command.options.overview",
         {
             limit: bold(limit),
-            priorityOptions,
             totalSongs: bold(
                 friendlyFormattedNumber(totalSongs.countBeforeLimit)
             ),
+            priorityOptions,
         }
     );
 
@@ -1046,7 +1045,6 @@ export async function sendOptionsMessage(
     // Split non-priority options into three fields
     const fields = [
         {
-            inline: true,
             name: ZERO_WIDTH_SPACE,
             value: fieldOptions
                 .slice(0, Math.ceil(fieldOptions.length / 3))
@@ -1057,9 +1055,9 @@ export async function sendOptionsMessage(
                         )}: ${optionStrings[option]}`
                 )
                 .join("\n"),
+            inline: true,
         },
         {
-            inline: true,
             name: ZERO_WIDTH_SPACE,
             value: fieldOptions
                 .slice(
@@ -1073,9 +1071,9 @@ export async function sendOptionsMessage(
                         )}: ${optionStrings[option]}`
                 )
                 .join("\n"),
+            inline: true,
         },
         {
-            inline: true,
             name: ZERO_WIDTH_SPACE,
             value: fieldOptions
                 .slice(Math.ceil((2 * fieldOptions.length) / 3))
@@ -1086,6 +1084,7 @@ export async function sendOptionsMessage(
                         )}: ${optionStrings[option]}`
                 )
                 .join("\n"),
+            inline: true,
         },
     ];
 
@@ -1136,11 +1135,11 @@ export async function sendOptionsMessage(
         messageContext,
         {
             color: premiumRequest ? EMBED_SUCCESS_BONUS_COLOR : null,
+            title,
             description: priorityOptions,
             fields,
             footerText,
             thumbnailUrl: KmqImages.LISTENING,
-            title,
         },
         true
     );
@@ -1163,12 +1162,12 @@ export async function sendEndGameMessage(
 
     if (gameSession.scoreboard.getWinners().length === 0) {
         await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
-            footerText,
-            thumbnailUrl: KmqImages.NOT_IMPRESSED,
             title: state.localizer.translate(
                 gameSession.guildID,
                 "misc.inGame.noWinners"
             ),
+            footerText,
+            thumbnailUrl: KmqImages.NOT_IMPRESSED,
         });
     } else {
         const winners = gameSession.scoreboard.getWinners();
@@ -1195,7 +1194,6 @@ export async function sendEndGameMessage(
 
         if (endGameMessage) {
             fields.push({
-                inline: false,
                 name: state.localizer.translate(
                     gameSession.guildID,
                     endGameMessage.title
@@ -1204,6 +1202,7 @@ export async function sendEndGameMessage(
                     gameSession.guildID,
                     endGameMessage.message
                 ),
+                inline: false,
             });
         }
 
@@ -1213,43 +1212,6 @@ export async function sendEndGameMessage(
                 (await userBonusIsActive(winners[0].id))
                     ? EMBED_SUCCESS_BONUS_COLOR
                     : EMBED_SUCCESS_COLOR,
-            components: [
-                {
-                    components: [
-                        {
-                            emoji: { name: "✅" },
-                            label: state.localizer.translate(
-                                gameSession.guildID,
-                                "misc.interaction.vote"
-                            ),
-                            style: 5,
-                            type: 2 as const,
-                            url: VOTE_LINK,
-                        },
-                        {
-                            emoji: { name: "📖" },
-                            label: state.localizer.translate(
-                                gameSession.guildID,
-                                "misc.interaction.leaveReview"
-                            ),
-                            style: 5,
-                            type: 2 as const,
-                            url: REVIEW_LINK,
-                        },
-                        {
-                            emoji: { name: "🎵" },
-                            label: state.localizer.translate(
-                                gameSession.guildID,
-                                "misc.interaction.officialKmqServer"
-                            ),
-                            style: 5,
-                            type: 2,
-                            url: "https://discord.gg/RCuzwYV",
-                        },
-                    ],
-                    type: 1,
-                },
-            ],
             description: !useLargerScoreboard
                 ? bold(
                       state.localizer.translate(
@@ -1258,12 +1220,49 @@ export async function sendEndGameMessage(
                       )
                   )
                 : null,
-            fields,
-            footerText,
             thumbnailUrl: winners[0].getAvatarURL(),
             title: `🎉 ${gameSession.scoreboard.getWinnerMessage(
                 gameSession.guildID
             )} 🎉`,
+            fields,
+            footerText,
+            components: [
+                {
+                    type: 1,
+                    components: [
+                        {
+                            style: 5,
+                            url: VOTE_LINK,
+                            type: 2 as const,
+                            emoji: { name: "✅" },
+                            label: state.localizer.translate(
+                                gameSession.guildID,
+                                "misc.interaction.vote"
+                            ),
+                        },
+                        {
+                            style: 5,
+                            url: REVIEW_LINK,
+                            type: 2 as const,
+                            emoji: { name: "📖" },
+                            label: state.localizer.translate(
+                                gameSession.guildID,
+                                "misc.interaction.leaveReview"
+                            ),
+                        },
+                        {
+                            style: 5,
+                            url: "https://discord.gg/RCuzwYV",
+                            type: 2,
+                            emoji: { name: "🎵" },
+                            label: state.localizer.translate(
+                                gameSession.guildID,
+                                "misc.interaction.officialKmqServer"
+                            ),
+                        },
+                    ],
+                },
+            ],
         });
     }
 }
@@ -1292,7 +1291,7 @@ export async function sendPaginationedEmbed(
             return EmbedPaginator.createPaginationEmbed(
                 message,
                 embeds,
-                { cycling: true, startPage, timeout: 60000 },
+                { timeout: 60000, startPage, cycling: true },
                 components
             );
         }
@@ -1309,7 +1308,7 @@ export async function sendPaginationedEmbed(
 
     return sendMessage(
         message.channel.id,
-        { components, embeds: [embed] },
+        { embeds: [embed], components },
         null,
         message.author.id
     );
@@ -1374,14 +1373,14 @@ export async function sendScoreboardMessage(
     const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map(
         (winnersFieldSubset) => ({
             color: EMBED_SUCCESS_COLOR,
-            fields: winnersFieldSubset,
-            footer: {
-                text: footerText,
-            },
             title: state.localizer.translate(
                 message.guildID,
                 "command.score.scoreboardTitle"
             ),
+            fields: winnersFieldSubset,
+            footer: {
+                text: footerText,
+            },
         })
     );
 
@@ -1504,13 +1503,13 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
         );
 
         sendErrorMessage(MessageContext.fromMessage(message), {
-            description: missingPermissionsText(
-                message.guildID,
-                missingPermissions
-            ),
             title: state.localizer.translate(
                 message.guildID,
                 "misc.failure.missingPermissions.title"
+            ),
+            description: missingPermissionsText(
+                message.guildID,
+                missingPermissions
             ),
         });
         return false;
@@ -1523,13 +1522,13 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
     if (channelFull) {
         logger.warn(`${getDebugLogHeader(messageContext)} | Channel full`);
         sendInfoMessage(MessageContext.fromMessage(message), {
-            description: state.localizer.translate(
-                message.guildID,
-                "misc.failure.vcFull.description"
-            ),
             title: state.localizer.translate(
                 message.guildID,
                 "misc.failure.vcFull.title"
+            ),
+            description: state.localizer.translate(
+                message.guildID,
+                "misc.failure.vcFull.description"
             ),
         });
         return false;
@@ -1544,13 +1543,13 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
         );
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            description: state.localizer.translate(
-                message.guildID,
-                "misc.failure.afkChannel.description"
-            ),
             title: state.localizer.translate(
                 message.guildID,
                 "misc.failure.afkChannel.title"
+            ),
+            description: state.localizer.translate(
+                message.guildID,
+                "misc.failure.afkChannel.description"
             ),
         });
         return false;
@@ -1620,16 +1619,16 @@ export function sendDebugAlertWebhook(
 ): void {
     if (!process.env.ALERT_WEBHOOK_URL) return;
     axios.post(process.env.ALERT_WEBHOOK_URL, {
-        avatar_url: avatarUrl,
         embeds: [
             {
-                color,
-                description,
                 title,
+                description,
+                color,
             },
         ],
-        footerText: getKmqCurrentVersion(),
         username: "Kimiqo",
+        avatar_url: avatarUrl,
+        footerText: getKmqCurrentVersion(),
     });
 }
 
@@ -1651,7 +1650,6 @@ export async function sendBookmarkedSongs(
             value: string;
             inline: boolean;
         }> = [...songs].map((song) => ({
-            inline: false,
             name: `${bold(
                 `"${getLocalizedSongName(
                     song[1],
@@ -1664,14 +1662,21 @@ export async function sendBookmarkedSongs(
                 guildID,
                 "misc.views"
             )}](https://youtu.be/${song[1].youtubeLink})`,
+            inline: false,
         }));
 
         for (const fields of chunkArray(allEmbedFields, 25)) {
             const embed: Eris.EmbedOptions = {
                 author: {
-                    icon_url: KmqImages.READING_BOOK,
                     name: "Kimiqo",
+                    icon_url: KmqImages.READING_BOOK,
                 },
+                title: bold(
+                    state.localizer.translate(
+                        guildID,
+                        "misc.interaction.bookmarked.message.title"
+                    )
+                ),
                 fields,
                 footer: {
                     text: state.localizer.translate(
@@ -1680,12 +1685,6 @@ export async function sendBookmarkedSongs(
                         { date: standardDateFormat(new Date()) }
                     ),
                 },
-                title: bold(
-                    state.localizer.translate(
-                        guildID,
-                        "misc.interaction.bookmarked.message.title"
-                    )
-                ),
             };
 
             await sendDmMessage(userID, { embeds: [embed] });
@@ -1761,16 +1760,16 @@ export async function tryCreateInteractionSuccessAcknowledgement(
         await interaction.createMessage({
             embeds: [
                 {
-                    author: {
-                        icon_url: interaction.member?.avatarURL,
-                        name: interaction.member?.username,
-                    },
                     color: (await userBonusIsActive(interaction.member?.id))
                         ? EMBED_SUCCESS_BONUS_COLOR
                         : EMBED_SUCCESS_COLOR,
+                    author: {
+                        name: interaction.member?.username,
+                        icon_url: interaction.member?.avatarURL,
+                    },
+                    title: bold(title),
                     description,
                     thumbnail: { url: KmqImages.THUMBS_UP },
-                    title: bold(title),
                 },
             ],
             flags: 64,
@@ -1797,19 +1796,19 @@ export async function tryCreateInteractionErrorAcknowledgement(
         await interaction.createMessage({
             embeds: [
                 {
-                    author: {
-                        icon_url: interaction.member?.avatarURL,
-                        name: interaction.member?.username,
-                    },
                     color: EMBED_ERROR_COLOR,
-                    description,
-                    thumbnail: { url: KmqImages.DEAD },
+                    author: {
+                        name: interaction.member?.username,
+                        icon_url: interaction.member?.avatarURL,
+                    },
                     title: bold(
                         state.localizer.translate(
                             interaction.guildID,
                             "misc.interaction.title.failure"
                         )
                     ),
+                    description,
+                    thumbnail: { url: KmqImages.DEAD },
                 },
             ],
             flags: 64,
@@ -1842,9 +1841,9 @@ export function sendPowerHourNotification(): void {
     sendInfoMessage(
         new MessageContext(process.env.POWER_HOUR_NOTIFICATION_CHANNEL_ID),
         {
+            title: "⬆️ KMQ Power Hour Starts Now! ⬆️",
             description: "Earn 2x EXP for the next hour!",
             thumbnailUrl: KmqImages.LISTENING,
-            title: "⬆️ KMQ Power Hour Starts Now! ⬆️",
         },
         false,
         true,

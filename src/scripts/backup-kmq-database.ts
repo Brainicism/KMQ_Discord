@@ -1,8 +1,7 @@
-import { exec, execSync } from "child_process";
-import { program } from "commander";
 import fs from "fs";
 import { join } from "path";
-
+import { exec, execSync } from "child_process";
+import { program } from "commander";
 import { standardDateFormat } from "../helpers/utils";
 import { IPCLogger } from "../logger";
 

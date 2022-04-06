@@ -1,4 +1,4 @@
-import CommandPrechecks from "../../command_prechecks";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     sendErrorMessage,
@@ -8,9 +8,9 @@ import { getGuildPreference, isUserPremium } from "../../helpers/game_utils";
 import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
 import GuildPreference from "../../structures/guild_preference";
-import MessageContext from "../../structures/message_context";
 import { GameOption } from "../../types";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import MessageContext from "../../structures/message_context";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("special");
 
@@ -26,34 +26,34 @@ export enum SpecialType {
 
 export const specialFfmpegArgs = {
     [SpecialType.REVERSE]: (seek: number) => ({
-        encoderArgs: ["-af", "areverse"],
         inputArgs: ["-ss", seek.toString()],
+        encoderArgs: ["-af", "areverse"],
     }),
     [SpecialType.SLOW]: (seek: number) => ({
-        encoderArgs: ["-af", "rubberband=tempo=0.5"],
         inputArgs: ["-ss", seek.toString()],
+        encoderArgs: ["-af", "rubberband=tempo=0.5"],
     }),
     [SpecialType.FAST]: (seek: number) => ({
-        encoderArgs: ["-af", "rubberband=tempo=1.5"],
         inputArgs: ["-ss", seek.toString()],
+        encoderArgs: ["-af", "rubberband=tempo=1.5"],
     }),
     [SpecialType.FASTER]: (seek: number) => ({
-        encoderArgs: ["-af", "rubberband=tempo=2"],
         inputArgs: ["-ss", seek.toString()],
+        encoderArgs: ["-af", "rubberband=tempo=2"],
     }),
     [SpecialType.LOW_PITCH]: (seek: number) => ({
-        encoderArgs: ["-af", "rubberband=pitch=0.840896"],
         // 3 semitones lower
         inputArgs: ["-ss", seek.toString()],
+        encoderArgs: ["-af", "rubberband=pitch=0.840896"],
     }),
     [SpecialType.HIGH_PITCH]: (seek: number) => ({
-        encoderArgs: ["-af", "rubberband=pitch=1.25992"],
         // 4 semitones higher
         inputArgs: ["-ss", seek.toString()],
+        encoderArgs: ["-af", "rubberband=pitch=1.25992"],
     }),
     [SpecialType.NIGHTCORE]: (seek: number) => ({
-        encoderArgs: ["-af", "rubberband=pitch=1.25992:tempo=1.25"],
         inputArgs: ["-ss", seek.toString()],
+        encoderArgs: ["-af", "rubberband=pitch=1.25992:tempo=1.25"],
     }),
 };
 
@@ -90,22 +90,24 @@ export default class SpecialCommand implements BaseCommand {
     ];
 
     validations = {
+        minArgCount: 0,
+        maxArgCount: 1,
         arguments: [
             {
-                enums: Object.values(SpecialType),
                 name: "specialType",
                 type: "enum" as const,
+                enums: Object.values(SpecialType),
             },
         ],
-        maxArgCount: 1,
-        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
+        name: "special",
         description: state.localizer.translate(
             guildID,
             "command.special.help.description"
         ),
+        usage: ",special [reverse | slow | fast | faster | lowpitch | highpitch | nightcore]",
         examples: [
             {
                 example: "`,special reverse`",
@@ -164,9 +166,7 @@ export default class SpecialCommand implements BaseCommand {
                 ),
             },
         ],
-        name: "special",
         priority: 130,
-        usage: ",special [reverse | slow | fast | faster | lowpitch | highpitch | nightcore]",
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

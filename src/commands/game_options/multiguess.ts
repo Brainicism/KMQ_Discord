@@ -1,14 +1,14 @@
-import CommandPrechecks from "../../command_prechecks";
+import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import { getGuildPreference } from "../../helpers/game_utils";
+import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
-import { state } from "../../kmq_worker";
-import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
 import { GameOption } from "../../types";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import MessageContext from "../../structures/message_context";
+import CommandPrechecks from "../../command_prechecks";
+import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("multiguess");
 
@@ -23,23 +23,25 @@ export default class MultiGuessCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
     validations = {
+        minArgCount: 0,
+        maxArgCount: 1,
         arguments: [
             {
-                enums: Object.values(MultiGuessType),
                 name: "multiguess_type",
                 type: "enum" as const,
+                enums: Object.values(MultiGuessType),
             },
         ],
-        maxArgCount: 1,
-        minArgCount: 0,
     };
 
     help = (guildID: string): Help => ({
+        name: "multiguess",
         description: state.localizer.translate(
             guildID,
             "command.multiguess.help.description",
             { on: `\`${MultiGuessType.ON}\`` }
         ),
+        usage: ",multiguess [on | off]",
         examples: [
             {
                 example: "`,multiguess on`",
@@ -64,9 +66,7 @@ export default class MultiGuessCommand implements BaseCommand {
                 ),
             },
         ],
-        name: "multiguess",
         priority: 150,
-        usage: ",multiguess [on | off]",
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {

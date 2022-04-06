@@ -1,22 +1,21 @@
 import assert from "assert";
-import _ from "lodash";
 import sinon from "sinon";
-
-import { ArtistType } from "../../commands/game_options/artisttype";
 import { Gender } from "../../commands/game_options/gender";
-import {
-    FOREIGN_LANGUAGE_TAGS,
-    LanguageType,
-} from "../../commands/game_options/language";
 import { OstPreference } from "../../commands/game_options/ost";
 import { ReleaseType } from "../../commands/game_options/release";
-import { ShuffleType } from "../../commands/game_options/shuffle";
 import { SubunitsPreference } from "../../commands/game_options/subunits";
-import { getMatchingGroupNames } from "../../helpers/game_utils";
 import GuildPreference from "../../structures/guild_preference";
 import SongSelector, {
     LAST_PLAYED_SONG_QUEUE_SIZE,
 } from "../../structures/song_selector";
+import _ from "lodash";
+import { ArtistType } from "../../commands/game_options/artisttype";
+import { getMatchingGroupNames } from "../../helpers/game_utils";
+import {
+    FOREIGN_LANGUAGE_TAGS,
+    LanguageType,
+} from "../../commands/game_options/language";
+import { ShuffleType } from "../../commands/game_options/shuffle";
 
 async function getMockGuildPreference(): Promise<GuildPreference> {
     const guildPreference = new GuildPreference("test");
@@ -244,7 +243,7 @@ describe("getFilteredSongList", () => {
 
                 assert.strictEqual(
                     Array.from(songs).every(
-                        (song) => song.publishDate <= new Date("2015-12-31")
+                        (song) => song.publishDate < new Date("2016-01-01")
                     ),
                     true
                 );
@@ -264,7 +263,7 @@ describe("getFilteredSongList", () => {
                     Array.from(songs).every(
                         (song) =>
                             song.publishDate >= new Date("2008-01-01") &&
-                            song.publishDate <= new Date("2018-12-31")
+                            song.publishDate < new Date("2019-01-01")
                     ),
                     true
                 );
@@ -284,7 +283,7 @@ describe("getFilteredSongList", () => {
                     Array.from(songs).every(
                         (song) =>
                             song.publishDate >= new Date("2017-01-01") &&
-                            song.publishDate <= new Date("2017-12-31")
+                            song.publishDate < new Date("2018-01-01")
                     ),
                     true
                 );
@@ -351,10 +350,10 @@ describe("subunits", () => {
 
     describe("include subunits (and the subunit has a collab)", () => {
         it("should match the songs from the group, collabs of that group, and collabs of any subunits of that group", async () => {
-            const artistWithCollabingSubunit = { id: 28, name: "BIGBANG" };
-            const subunitWithCollab = { id: 68, name: "G-DRAGON" };
-            const subunitCollabArtist = { id: 73, name: "G-DRAGON + TAEYANG" };
-            const parentCollabArtist = { id: 29, name: "BIGBANG + 2NE1" };
+            const artistWithCollabingSubunit = { name: "BIGBANG", id: 28 };
+            const subunitWithCollab = { name: "G-DRAGON", id: 68 };
+            const subunitCollabArtist = { name: "G-DRAGON + TAEYANG", id: 73 };
+            const parentCollabArtist = { name: "BIGBANG + 2NE1", id: 29 };
 
             const expectedIds = [
                 artistWithCollabingSubunit.id,

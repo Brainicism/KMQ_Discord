@@ -1,14 +1,14 @@
-import dbContext from "./database_context";
 import {
     areUserAndBotInSameVoiceChannel,
     getDebugLogHeader,
     sendErrorMessage,
 } from "./helpers/discord_utils";
-import { state } from "./kmq_worker";
-import { IPCLogger } from "./logger";
 import GameSession from "./structures/game_session";
 import MessageContext from "./structures/message_context";
 import { GameType, GuildTextableMessage } from "./types";
+import { IPCLogger } from "./logger";
+import dbContext from "./database_context";
+import { state } from "./kmq_worker";
 
 const logger = new IPCLogger("command_prechecks");
 export interface PrecheckArgs {
@@ -43,13 +43,13 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                description: state.localizer.translate(
-                    message.guildID,
-                    errorMessage ?? "misc.preCheck.differentVC"
-                ),
                 title: state.localizer.translate(
                     message.guildID,
                     "misc.preCheck.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    errorMessage ?? "misc.preCheck.differentVC"
                 ),
             });
             return false;
@@ -69,13 +69,13 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                description: state.localizer.translate(
-                    message.guildID,
-                    errorMessage ?? "misc.preCheck.debugServer"
-                ),
                 title: state.localizer.translate(
                     message.guildID,
                     "misc.preCheck.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    errorMessage ?? "misc.preCheck.debugServer"
                 ),
             });
         }
@@ -96,13 +96,13 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                description: state.localizer.translate(
-                    message.guildID,
-                    errorMessage ?? "misc.preCheck.debugChannel"
-                ),
                 title: state.localizer.translate(
                     message.guildID,
                     "misc.preCheck.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    errorMessage ?? "misc.preCheck.debugChannel"
                 ),
             });
         }
@@ -133,13 +133,13 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                description: state.localizer.translate(
-                    message.guildID,
-                    errorMessage ?? "misc.preCheck.competition"
-                ),
                 title: state.localizer.translate(
                     message.guildID,
                     "misc.preCheck.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    errorMessage ?? "misc.preCheck.competition"
                 ),
             });
         }

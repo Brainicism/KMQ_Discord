@@ -1,13 +1,12 @@
-import { exec } from "child_process";
-import ffmpeg from "fluent-ffmpeg";
-import fs from "fs";
-import path from "path";
 import ytdl from "ytdl-core";
-
-import { DatabaseContext, getNewConnection } from "../database_context";
-import { getAudioDurationInSeconds, retryJob } from "../helpers/utils";
-import { IPCLogger } from "../logger";
+import fs from "fs";
+import ffmpeg from "fluent-ffmpeg";
+import path from "path";
+import { exec } from "child_process";
 import { QueriedSong } from "../types";
+import { IPCLogger } from "../logger";
+import { DatabaseContext, getNewConnection } from "../database_context";
+import { retryJob, getAudioDurationInSeconds } from "../helpers/utils";
 
 const logger = new IPCLogger("download-new-songs");
 const TARGET_AVERAGE_VOLUME = -30;
@@ -140,8 +139,8 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
                 await db
                     .kmq("dead_links")
                     .insert({
-                        reason: `Failed to load video: error = ${playabilityStatus.reason}`,
                         vlink: id,
+                        reason: `Failed to load video: error = ${playabilityStatus.reason}`,
                     })
                     .onConflict("vlink")
                     .ignore();
@@ -162,8 +161,8 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
             await db
                 .kmq("dead_links")
                 .insert({
-                    reason: `Failed to retrieve video metadata. error = ${e}`,
                     vlink: id,
+                    reason: `Failed to retrieve video metadata. error = ${e}`,
                 })
                 .onConflict("vlink")
                 .ignore();
@@ -183,7 +182,7 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
 
                 await db
                     .kmq("cached_song_duration")
-                    .insert({ duration, vlink: id })
+                    .insert({ vlink: id, duration })
                     .onConflict(["vlink"])
                     .merge();
                 resolve();
