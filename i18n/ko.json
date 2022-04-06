@@ -545,6 +545,7 @@
             "notSet": "설정되지 않음",
             "overview": "이제 다음 게임 옵션에서 사용 가능한 노래 {{totalSongs}}개 중 상위 {{limit}}개를 재생합니다.\n\n{{priorityOptions}}",
             "perCommandHelp": "명령 사용 방법에 대한 정보를 찾고 계십니까? (자세한 내용은 \"{{helpCommand}} [명령]\"을 확인하세요.)",
+            "premiumOptionsNonPremiumGame": "주의: 액티브 게임은 프리미엄이 아닙니다",
             "preset": "사전 설정",
             "reset": "{{presetOrOption}}으로 재설정합니다.",
             "timer": "{{timerInSeconds}}초",
@@ -614,6 +615,37 @@
             },
             "typeGuess": "노래를 듣고 추측을 입력하십시오!",
             "voteReminder": "투표로 더 많은 경험치를 얻으세요. ({{vote}} 참조)"
+        },
+        "premium": {
+            "help": {
+                "description": "현재 회원인지 여부를 포함하여 KMQ 프리미엄에 대해 자세히 알아보십시오.",
+                "example": "귀하의 프리미엄 상태를 보여줍니다."
+            },
+            "status": {
+                "description": {
+                    "connectionReminder": "[여기](https://www.patreon.com/settings/apps)에서 디스코드 계정을 연결하여 혜택을 받으세요.",
+                    "nonPremium": "여기에서 [KMQ 프리미엄](https://www.patreon.com/kmq)을 구독하세요.",
+                    "premium": "귀하는 이미 [KMQ 프리미엄](https://www.patreon.com/kmq)이 있습니다."
+                },
+                "perks": {
+                    "badge": {
+                        "description": "프로필에 전용 배지를 사용하여 KMQ에 대한 도움을 과시하세요.",
+                        "title": "프리미엄 서포터 배지!"
+                    },
+                    "moreSongs": {
+                        "description": "모든 아티스트의 상위 25개 b-side에 액세스 (최대 10개)하세요.",
+                        "title": "노래 더!"
+                    },
+                    "special": {
+                        "description": "어디서든 노래 재생 속도를 변경하세요!",
+                        "title": "모든 서버에서 `,special`을 입력하세요!"
+                    }
+                },
+                "title": {
+                    "nonPremium": "KMQ 프리미엄을 구독하세요!",
+                    "premium": "KMQ를 지원해주셔서 감사합니다!"
+                }
+            }
         },
         "preset": {
             "deleted": {
@@ -848,7 +880,7 @@
         },
         "special": {
             "help": {
-                "description": "아직 발표되지 않았지만 KMQ 서버를 확인하여 사용해 보세요! (수정된 오디오로 특수 모드를 재생합니다.)",
+                "description": "노래 재생 속도를 수정합니다. 공식 KMQ 서버 이외에는 프리미엄 플레이어(`,premium` 참조)만 이 명령을 사용할 수 있습니다.",
                 "example": {
                     "fast": "빠른 속도로 노래를 재생합니다.",
                     "faster": "더 빠른 속도로 노래를 재생합니다.",
@@ -1120,7 +1152,7 @@
             },
             "likeKmq": {
                 "title": "KMQ처럼?",
-                "vote": "투표를 하고 (경험치 2배 획득, `,vote` 참조) [Top.GG!](https://top.gg/bot/508759831755096074)에 리뷰를 남겨주세요."
+                "vote": "투표를 하고 (경험치 2배 획득, `,vote` 참조) [top.gg!](https://top.gg/bot/508759831755096074)에 리뷰를 남겨주세요."
             },
             "wrongSongName": {
                 "aliases.": "노래 이름에 대한 제안이 있으십니까? (공식 KMQ 서버에서 알려주세요!)",

@@ -24,6 +24,8 @@ import {
     getMatchingGroupNames,
     isPowerHour,
 } from "./game_utils";
+import { LocaleType } from "./localization_manager";
+import updatePremiumUsers from "./patreon_manager";
 import dbContext from "../database_context";
 import debugHandler from "../events/client/debug";
 import guildCreateHandler from "../events/client/guildCreate";
@@ -36,7 +38,6 @@ import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
 import { EnvType } from "../types";
 import channelDeleteHandler from "../events/client/channelDelete";
-import { LocaleType } from "./localization_manager";
 
 const logger = new IPCLogger("management_utils");
 
@@ -332,6 +333,8 @@ export function registerIntervals(clusterID: number): void {
         clearInactiveVoiceConnections();
         // Store per-cluster stats
         await updateSystemStats(clusterID);
+        // Sync state with Patreon subscribers
+        updatePremiumUsers();
     });
 
     // Every minute

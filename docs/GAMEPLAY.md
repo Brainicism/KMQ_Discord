@@ -2,7 +2,7 @@
 
 ## [Click here to join our official Discord server!](https://discord.gg/R55g4CRESW)
 
-## [You can invite the bot here](http://invite.kpop.gg).
+## [You can invite the bot here.](http://invite.kpop.gg)
 
 Welcome to KMQ, the K-Pop song guessing game. Type `,play` while in a voice channel to begin a game of KMQ! The bot will automatically start playing a random song, and the first person to type in the correct guess will win a point.
 
@@ -211,7 +211,6 @@ To keep things fair, switching teams mid-game forfeits your current points and E
 
 ![teams](https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/teams.png)
 
-
 # Full Command List
 Use `,help [command_name]` for more details for any of the following commands:
 
@@ -230,7 +229,7 @@ Use `,help [command_name]` for more details for any of the following commands:
 - `,score`: Show the current game's scoreboard with EXP gained
 - `,list`: Show the currently selected groups for `,groups`, `,include`, or `,exclude`
 - `,preset`: Quickly save, load, and export game options as presets (even across servers!)
-- `,vote`: Show your current 2x bonus EXP modifier status from voting for the bot on [top.gg](https://top.gg/bot/508759831755096074/vote). Thanks for supporting KMQ!
+- `,vote`: Show your current 2x bonus EXP modifier status from voting for the bot on [top.gg](https://top.gg/bot/508759831755096074/vote)
 - `,recentlyadded`: See a list of songs added to KMQ in the past 2 weeks
 - `,exp`: Show your current bonus EXP modifiers
 - `,locale`: Change the language of the bot
@@ -250,6 +249,7 @@ Use `,help [command_name]` for more details for any of the following commands:
 - `,multiguess`: Choose whether to allow multiple players to guess correctly in a round
 - `,shuffle`: Choose whether songs should play in "true" random order or in uniquely random order.
 - `,seek`: Choose whether each song starts from the beginning, middle, or a random point
+- `,special`: Modify how each song sounds, such as playing it in reverse, changing its pitch, etc.
 - `,guessmode`: Choose whether to guess based on song name, artist name, or both
 - `,goal`: Specify a number of points to be reached before a winner is selected and the game ends
 - `,timer`: Specify how many songs each songs played before it's automatically skipped

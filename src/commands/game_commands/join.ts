@@ -10,6 +10,7 @@ import {
     getMention,
     getDebugLogHeader,
 } from "../../helpers/discord_utils";
+import { isFirstGameOfDay, isUserPremium } from "../../helpers/game_utils";
 import { KmqImages } from "../../constants";
 import { bold } from "../../helpers/utils";
 import { state } from "../../kmq_worker";
@@ -34,14 +35,14 @@ export default class JoinCommand implements BaseCommand {
             return;
         }
 
-        JoinCommand.joinTeamsGame(message, parsedMessage, gameSession);
+        await JoinCommand.joinTeamsGame(message, parsedMessage, gameSession);
     };
 
-    static joinTeamsGame(
+    static async joinTeamsGame(
         message: GuildTextableMessage,
         parsedMessage: ParsedMessage,
         gameSession: GameSession
-    ): void {
+    ): Promise<void> {
         if (parsedMessage.components.length === 0) {
             logger.warn(`${getDebugLogHeader(message)} | Missing team name.`);
             sendErrorMessage(MessageContext.fromMessage(message), {
@@ -122,7 +123,12 @@ export default class JoinCommand implements BaseCommand {
         if (!teamScoreboard.hasTeam(teamName)) {
             teamScoreboard.addTeam(
                 teamName,
-                Player.fromUserID(message.author.id)
+                Player.fromUserID(
+                    message.author.id,
+                    0,
+                    await isFirstGameOfDay(message.author.id),
+                    await isUserPremium(message.author.id)
+                )
             );
             const teamNameWithCleanEmojis = teamName.replace(
                 /(<a?)(:[a-zA-Z0-9]+:)([0-9]+>)/gm,
@@ -183,7 +189,12 @@ export default class JoinCommand implements BaseCommand {
 
             teamScoreboard.addTeamPlayer(
                 team.id,
-                Player.fromUserID(message.author.id)
+                Player.fromUserID(
+                    message.author.id,
+                    0,
+                    await isFirstGameOfDay(message.author.id),
+                    await isUserPremium(message.author.id)
+                )
             );
 
             sendInfoMessage(MessageContext.fromMessage(message), {

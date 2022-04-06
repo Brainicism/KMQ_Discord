@@ -11,6 +11,7 @@ import { cleanArtistName, cleanSongName } from "../structures/game_round";
 import { AnswerType } from "../commands/game_options/answer";
 import SongSelector from "../structures/song_selector";
 import { LocaleType } from "./localization_manager";
+import { PATREON_SUPPORTER_BADGE, Patron } from "./patreon_manager";
 import { containsHangul, md5Hash } from "./utils";
 import Session from "../structures/session";
 
@@ -40,14 +41,16 @@ export async function ensureVoiceConnection(session: Session): Promise<void> {
 
 /**
  * @param guildPreference - The GuildPreference
+ * @param isPremium - Whether to include premium songs
  * @returns an object containing the total number of available songs before and after limit based on the GameOptions
  */
 export async function getAvailableSongCount(
-    guildPreference: GuildPreference
+    guildPreference: GuildPreference,
+    isPremium: boolean
 ): Promise<{ count: number; countBeforeLimit: number }> {
     try {
         const { songs, countBeforeLimit } =
-            await SongSelector.getFilteredSongList(guildPreference);
+            await SongSelector.getFilteredSongList(guildPreference, isPremium);
 
         return {
             count: songs.size,
@@ -406,6 +409,85 @@ export async function getMultipleChoiceOptions(
     }
 
     return result;
+}
+
+/**
+ * @param userID - The user ID
+ * @returns whether the player has premium status
+ */
+export async function isUserPremium(userID: string): Promise<boolean> {
+    return !!(await dbContext
+        .kmq("premium_users")
+        .where("user_id", "=", userID)
+        .andWhere("active", "=", true)
+        .first());
+}
+
+/**
+ * @param patrons - The users to grant premium membership
+ */
+export async function addPremium(patrons: Array<Patron>): Promise<void> {
+    dbContext.kmq.transaction(async (trx) => {
+        dbContext
+            .kmq("premium_users")
+            .insert(
+                patrons.map((x) => ({
+                    active: x.activePatron,
+                    first_subscribed: x.firstSubscribed,
+                    user_id: x.discordID,
+                }))
+            )
+            .onConflict("user_id")
+            .merge()
+            .transacting(trx);
+
+        dbContext
+            .kmq("badges")
+            .insert(
+                patrons.map((x) => ({
+                    badge_name: PATREON_SUPPORTER_BADGE,
+                    user_id: x.discordID,
+                }))
+            )
+            .onConflict(["user_id", "badge_name"])
+            .ignore()
+            .transacting(trx);
+    });
+}
+
+/**
+ * @param userIDs - The users to revoke premium membership from
+ */
+export async function removePremium(userIDs: string[]): Promise<void> {
+    dbContext.kmq.transaction(async (trx) => {
+        dbContext
+            .kmq("premium_users")
+            .whereIn("user_id", userIDs)
+            .update({ active: false })
+            .transacting(trx);
+
+        dbContext
+            .kmq("badges")
+            .whereIn("user_id", userIDs)
+            .andWhere("badge_name", "=", PATREON_SUPPORTER_BADGE)
+            .del()
+            .transacting(trx);
+    });
+}
+
+/**
+ * @param guildID - The guild ID
+ * @param playerID - The player ID
+ * @returns whether the current game is a premium game, or the player is premium
+ */
+export async function isPremiumRequest(
+    guildID: string,
+    playerID: string
+): Promise<boolean> {
+    return (
+        state.gameSessions[guildID]?.isPremiumGame() ??
+        (await isUserPremium(playerID))
+    );
 }
 
 /**

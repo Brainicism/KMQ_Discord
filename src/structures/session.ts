@@ -407,7 +407,10 @@ export default abstract class Session {
     }
 
     async reloadSongs(guildPreference: GuildPreference): Promise<void> {
-        await this.songSelector.reloadSongs(guildPreference);
+        await this.songSelector.reloadSongs(
+            guildPreference,
+            state.gameSessions[this.guildID]?.isPremiumGame() ?? false
+        );
     }
 
     /**

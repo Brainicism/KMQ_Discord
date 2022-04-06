@@ -215,9 +215,13 @@ export default class SongSelector {
         return this.filteredSongs.songs.size;
     }
 
-    async reloadSongs(guildPreference: GuildPreference): Promise<void> {
+    async reloadSongs(
+        guildPreference: GuildPreference,
+        isPremium: boolean
+    ): Promise<void> {
         this.filteredSongs = await SongSelector.getFilteredSongList(
-            guildPreference
+            guildPreference,
+            isPremium
         );
     }
 
@@ -237,8 +241,8 @@ export default class SongSelector {
             "members",
             "id_artist as artistID",
             "issolo as isSolo",
-            "tags",
             "members",
+            "tags",
             "views",
             "rank",
             "vtype",
@@ -248,10 +252,12 @@ export default class SongSelector {
     /**
      * Returns a list of songs from the data store, narrowed down by the specified game options
      * @param guildPreference - The GuildPreference
+     * @param premium - Whether the game is premium
      * @returns a list of songs, as well as the number of songs before the filter option was applied
      */
     static async getFilteredSongList(
-        guildPreference: GuildPreference
+        guildPreference: GuildPreference,
+        premium: boolean = false
     ): Promise<{ songs: Set<QueriedSong>; countBeforeLimit: number }> {
         let queryBuilder = dbContext
             .kmq("available_songs")
@@ -400,7 +406,9 @@ export default class SongSelector {
         queryBuilder = queryBuilder.andWhere(
             "rank",
             "<=",
-            process.env.AUDIO_SONGS_PER_ARTIST
+            premium
+                ? process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST
+                : process.env.AUDIO_SONGS_PER_ARTIST
         );
 
         let result: Array<QueriedSong> = await queryBuilder;

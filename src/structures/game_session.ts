@@ -2,6 +2,8 @@
 import Eris from "eris";
 import _ from "lodash";
 import * as uuid from "uuid";
+
+import { resetSpecial } from "../commands/game_options/special";
 import dbContext from "../database_context";
 import {
     getDebugLogHeader,
@@ -22,6 +24,7 @@ import {
     getLocalizedSongName,
     getMultipleChoiceOptions,
     isFirstGameOfDay,
+    isUserPremium,
     userBonusIsActive,
 } from "../helpers/game_utils";
 import {
@@ -700,6 +703,37 @@ export default class GameSession extends Session {
     }
 
     /**
+     * The game has changed its premium state, so update filtered songs/remove ,special
+     */
+    async updatePremiumStatus(): Promise<void> {
+        await this.reloadSongs(await getGuildPreference(this.guildID));
+
+        const guildPreference = await getGuildPreference(this.guildID);
+        if (
+            !this.isPremiumGame() &&
+            this.guildID !== process.env.DEBUG_SERVER_ID &&
+            guildPreference.gameOptions.specialType
+        ) {
+            await resetSpecial(
+                guildPreference,
+                new MessageContext(this.textChannelID),
+                true
+            );
+        }
+    }
+
+    /**
+     * Whether the current game has premium features
+     * @returns whether the game is premium
+     */
+    isPremiumGame(): boolean {
+        return this.scoreboard
+            .getPlayers()
+            .filter((x) => x.inVC)
+            .some((x) => x.premium);
+    }
+
+    /**
      * Update whether a player is in VC
      * @param userID - The Discord user ID of the player to update
      * @param inVC - Whether the player is currently in the voice channel
@@ -721,12 +755,14 @@ export default class GameSession extends Session {
                           (
                               this.scoreboard as EliminationScoreboard
                           ).getLivesOfWeakestPlayer(),
-                          await isFirstGameOfDay(userID)
+                          await isFirstGameOfDay(userID),
+                          await isUserPremium(userID)
                       )
                     : Player.fromUserID(
                           userID,
                           0,
-                          await isFirstGameOfDay(userID)
+                          await isFirstGameOfDay(userID),
+                          await isUserPremium(userID)
                       )
             );
         }
@@ -757,15 +793,17 @@ export default class GameSession extends Session {
             (x) => x !== process.env.BOT_CLIENT_ID
         )) {
             const firstGameOfDay = await isFirstGameOfDay(player);
+            const premium = await isUserPremium(player);
             this.scoreboard.addPlayer(
                 this.gameType === GameType.ELIMINATION
                     ? EliminationPlayer.fromUserID(
                           player,
                           (this.scoreboard as EliminationScoreboard)
                               .startingLives,
-                          firstGameOfDay
+                          firstGameOfDay,
+                          premium
                       )
-                    : Player.fromUserID(player, 0, firstGameOfDay)
+                    : Player.fromUserID(player, 0, firstGameOfDay, premium)
             );
         }
     }

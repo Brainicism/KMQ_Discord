@@ -10,6 +10,7 @@ import {
 } from "../../helpers/discord_utils";
 import {
     getGuildPreference,
+    isPremiumRequest,
     getAvailableSongCount,
 } from "../../helpers/game_utils";
 import { state } from "../../kmq_worker";
@@ -28,7 +29,12 @@ export default class DebugCommand implements BaseCommand {
         }
 
         const guildPreference = await getGuildPreference(message.guildID);
-        const songCount = await getAvailableSongCount(guildPreference);
+
+        const songCount = await getAvailableSongCount(
+            guildPreference,
+            await isPremiumRequest(message.guildID, message.author.id)
+        );
+
         const fields: Array<Eris.EmbedField> = [];
         fields.push({
             name: "Guild Preference",

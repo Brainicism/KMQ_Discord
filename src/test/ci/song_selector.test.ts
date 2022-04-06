@@ -43,7 +43,8 @@ describe("getFilteredSongList", () => {
                 ]) {
                     await guildPreference.setGender([gender]);
                     const { songs } = await SongSelector.getFilteredSongList(
-                        guildPreference
+                        guildPreference,
+                        true
                     );
 
                     assert.strictEqual(
@@ -62,7 +63,8 @@ describe("getFilteredSongList", () => {
                 const genderSetting = [Gender.MALE, Gender.FEMALE];
                 await guildPreference.setGender(genderSetting);
                 const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
+                    guildPreference,
+                    true
                 );
 
                 assert.strictEqual(
@@ -85,7 +87,8 @@ describe("getFilteredSongList", () => {
                 const selectedArtist = { id: 208, name: "Twice" };
                 await guildPreference.setGroups([selectedArtist]);
                 const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
+                    guildPreference,
+                    true
                 );
 
                 assert.strictEqual(
@@ -107,7 +110,8 @@ describe("getFilteredSongList", () => {
 
                 await guildPreference.setGroups(selectedArtists);
                 const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
+                    guildPreference,
+                    true
                 );
 
                 assert.strictEqual(
@@ -132,7 +136,8 @@ describe("getFilteredSongList", () => {
                 await guildPreference.setGender([Gender.FEMALE]);
                 await guildPreference.setIncludes(includedArtists);
                 const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
+                    guildPreference,
+                    true
                 );
 
                 assert.strictEqual(
@@ -160,7 +165,8 @@ describe("getFilteredSongList", () => {
                 await guildPreference.setGender([Gender.FEMALE]);
                 await guildPreference.setExcludes(excludeArtists);
                 const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
+                    guildPreference,
+                    true
                 );
 
                 assert.strictEqual(
@@ -182,7 +188,8 @@ describe("getFilteredSongList", () => {
             it("should only return the songs by soloists", async () => {
                 await guildPreference.setArtistType(ArtistType.SOLOIST);
                 const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
+                    guildPreference,
+                    true
                 );
 
                 assert.strictEqual(
@@ -196,7 +203,8 @@ describe("getFilteredSongList", () => {
             it("should only return the songs by groups", async () => {
                 await guildPreference.setArtistType(ArtistType.GROUP);
                 const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
+                    guildPreference,
+                    true
                 );
 
                 assert.strictEqual(
@@ -212,7 +220,8 @@ describe("getFilteredSongList", () => {
             it("should only return the songs published in or after 2016", async () => {
                 await guildPreference.setBeginningCutoffYear(2016);
                 const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
+                    guildPreference,
+                    true
                 );
 
                 assert.strictEqual(
@@ -228,7 +237,8 @@ describe("getFilteredSongList", () => {
             it("should only return the songs published in or before 2015", async () => {
                 await guildPreference.setEndCutoffYear(2015);
                 const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
+                    guildPreference,
+                    true
                 );
 
                 assert.strictEqual(
@@ -245,7 +255,8 @@ describe("getFilteredSongList", () => {
                 await guildPreference.setBeginningCutoffYear(2008);
                 await guildPreference.setEndCutoffYear(2018);
                 const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
+                    guildPreference,
+                    true
                 );
 
                 assert.strictEqual(
@@ -264,7 +275,8 @@ describe("getFilteredSongList", () => {
                 await guildPreference.setBeginningCutoffYear(2017);
                 await guildPreference.setEndCutoffYear(2017);
                 const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
+                    guildPreference,
+                    true
                 );
 
                 assert.strictEqual(
@@ -290,7 +302,8 @@ describe("subunits", () => {
                 SubunitsPreference.EXCLUDE
             );
             const { songs } = await SongSelector.getFilteredSongList(
-                guildPreference
+                guildPreference,
+                true
             );
 
             assert.strictEqual(
@@ -310,7 +323,8 @@ describe("subunits", () => {
             );
 
             const { songs } = await SongSelector.getFilteredSongList(
-                guildPreference
+                guildPreference,
+                true
             );
 
             const expectedSubunitIds = [17, 43, 105, 248];
@@ -357,7 +371,8 @@ describe("subunits", () => {
             );
 
             const { songs } = await SongSelector.getFilteredSongList(
-                guildPreference
+                guildPreference,
+                true
             );
 
             assert.strictEqual(unmatchedGroups.length, 0);
@@ -378,7 +393,8 @@ describe("subunits", () => {
             it("should only return songs, not including OSTs", async () => {
                 await guildPreference.setOstPreference(OstPreference.EXCLUDE);
                 const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
+                    guildPreference,
+                    true
                 );
 
                 assert.strictEqual(
@@ -392,7 +408,8 @@ describe("subunits", () => {
             it("should only return songs including OSTs", async () => {
                 await guildPreference.setOstPreference(OstPreference.INCLUDE);
                 const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
+                    guildPreference,
+                    true
                 );
 
                 // should have both non osts and osts
@@ -411,7 +428,8 @@ describe("subunits", () => {
             it("should only return songs which are exclusively OSTs", async () => {
                 await guildPreference.setOstPreference(OstPreference.EXCLUSIVE);
                 const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
+                    guildPreference,
+                    true
                 );
 
                 assert.strictEqual(
@@ -433,7 +451,8 @@ describe("subunits", () => {
                 const expectedSongCount = limit;
                 await guildPreference.setLimit(0, limit);
                 const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
+                    guildPreference,
+                    true
                 );
 
                 assert.strictEqual(songs.size, expectedSongCount);
@@ -446,7 +465,8 @@ describe("subunits", () => {
             it("should only return the korean songs", async () => {
                 await guildPreference.setLanguageType(LanguageType.KOREAN);
                 const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
+                    guildPreference,
+                    true
                 );
 
                 // there are no songs with language tags
@@ -467,7 +487,8 @@ describe("subunits", () => {
             it("should return all songs regardless of language", async () => {
                 await guildPreference.setLanguageType(LanguageType.ALL);
                 const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
+                    guildPreference,
+                    true
                 );
 
                 // there is atleast one song of each language
@@ -488,7 +509,8 @@ describe("subunits", () => {
             it("should return main music videos only", async () => {
                 await guildPreference.setReleaseType(ReleaseType.OFFICIAL);
                 const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
+                    guildPreference,
+                    true
                 );
 
                 assert.strictEqual(
@@ -502,7 +524,8 @@ describe("subunits", () => {
             it("should return music videos and audio-only", async () => {
                 await guildPreference.setReleaseType(ReleaseType.ALL);
                 const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
+                    guildPreference,
+                    true
                 );
 
                 assert.strictEqual(
@@ -523,7 +546,8 @@ describe("subunits", () => {
                 const songLink = "9bZkp7q19f0";
                 await guildPreference.setForcePlaySong(songLink);
                 const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
+                    guildPreference,
+                    true
                 );
 
                 assert.strictEqual(songs.size, 1);
@@ -535,10 +559,51 @@ describe("subunits", () => {
             it("should not match anything", async () => {
                 await guildPreference.setForcePlaySong("oppa gangnam style");
                 const { songs } = await SongSelector.getFilteredSongList(
-                    guildPreference
+                    guildPreference,
+                    true
                 );
 
                 assert.strictEqual(songs.size, 0);
+            });
+        });
+    });
+
+    describe("premium", () => {
+        describe("non-premium songs", () => {
+            it("should only return non-premium songs", async () => {
+                const isPremium = false;
+                const { songs } = await SongSelector.getFilteredSongList(
+                    guildPreference,
+                    isPremium
+                );
+
+                assert.strictEqual(
+                    Array.from(songs).every(
+                        (song) =>
+                            song.rank <=
+                            Number(process.env.AUDIO_SONGS_PER_ARTIST)
+                    ),
+                    true
+                );
+            });
+        });
+
+        describe("premium songs", () => {
+            it("should return premium and non-premium songs", async () => {
+                const isPremium = true;
+                const { songs } = await SongSelector.getFilteredSongList(
+                    guildPreference,
+                    isPremium
+                );
+
+                assert.strictEqual(
+                    Array.from(songs).every(
+                        (song) =>
+                            song.rank <=
+                            Number(process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST)
+                    ),
+                    true
+                );
             });
         });
     });
@@ -554,7 +619,10 @@ describe("selectRandomSong", function () {
             it("should only return female/coed songs", async () => {
                 const femaleOrCoedSongs = [];
                 const filteredSongs = (
-                    await SongSelector.getFilteredSongList(guildPreference)
+                    await SongSelector.getFilteredSongList(
+                        guildPreference,
+                        true
+                    )
                 ).songs;
 
                 for (let i = 0; i < 10; i++) {
@@ -581,7 +649,10 @@ describe("selectRandomSong", function () {
             it("should only return male/coed songs", async () => {
                 const maleOrCoedSongs = [];
                 const filteredSongs = (
-                    await SongSelector.getFilteredSongList(guildPreference)
+                    await SongSelector.getFilteredSongList(
+                        guildPreference,
+                        true
+                    )
                 ).songs;
 
                 for (let i = 0; i < 10; i++) {
@@ -609,7 +680,10 @@ describe("selectRandomSong", function () {
                 const numIgnored = 10;
                 await guildPreference.setLimit(0, 100);
                 const filteredSongs = (
-                    await SongSelector.getFilteredSongList(guildPreference)
+                    await SongSelector.getFilteredSongList(
+                        guildPreference,
+                        true
+                    )
                 ).songs;
 
                 const ignoredSongs = new Set(
@@ -650,7 +724,7 @@ describe("queryRandomSong", () => {
 
     describe("normal case", () => {
         it("should return the random song, and add to last played history", async () => {
-            await songSelector.reloadSongs(guildPreference);
+            await songSelector.reloadSongs(guildPreference, true);
             const song = await songSelector.queryRandomSong(guildPreference);
             assert(song);
             assert.strictEqual(songSelector.lastPlayedSongs.length, 1);
@@ -664,7 +738,7 @@ describe("queryRandomSong", () => {
     describe("selected song set smaller than last played history threshold", () => {
         it("should return null, and NOT add to last played history", async () => {
             await guildPreference.setLimit(0, 0);
-            await songSelector.reloadSongs(guildPreference);
+            await songSelector.reloadSongs(guildPreference, true);
             const song = await songSelector.queryRandomSong(guildPreference);
             assert.strictEqual(song, null);
             assert.strictEqual(songSelector.lastPlayedSongs.length, 0);
@@ -674,7 +748,7 @@ describe("queryRandomSong", () => {
     describe("unique shuffle mode", () => {
         it("should return the random song, and add to last played history, and unique song history", async () => {
             await guildPreference.setShuffleType(ShuffleType.UNIQUE);
-            await songSelector.reloadSongs(guildPreference);
+            await songSelector.reloadSongs(guildPreference, true);
             const song = await songSelector.queryRandomSong(guildPreference);
             assert(song);
             assert.strictEqual(songSelector.lastPlayedSongs.length, 1);
@@ -709,7 +783,7 @@ describe("checkUniqueSongQueue", () => {
     describe("non-unique shuffle mode", () => {
         it("should return false", async () => {
             await guildPreference.setShuffleType(ShuffleType.RANDOM);
-            await songSelector.reloadSongs(guildPreference);
+            await songSelector.reloadSongs(guildPreference, true);
             assert.strictEqual(
                 songSelector.checkUniqueSongQueue(guildPreference),
                 false
@@ -725,7 +799,7 @@ describe("checkUniqueSongQueue", () => {
                     const numberSongs = 5;
                     await guildPreference.setShuffleType(ShuffleType.UNIQUE);
                     await guildPreference.setLimit(0, numberSongs);
-                    await songSelector.reloadSongs(guildPreference);
+                    await songSelector.reloadSongs(guildPreference, true);
 
                     // play all songs but one
                     for (let i = 0; i < numberSongs - 1; i++) {
@@ -751,7 +825,7 @@ describe("checkUniqueSongQueue", () => {
                             ShuffleType.UNIQUE
                         );
                         await guildPreference.setLimit(0, numberSongs);
-                        await songSelector.reloadSongs(guildPreference);
+                        await songSelector.reloadSongs(guildPreference, true);
 
                         // play all songs
                         for (let i = 0; i < numberSongs; i++) {
@@ -784,7 +858,7 @@ describe("checkUniqueSongQueue", () => {
                             ShuffleType.UNIQUE
                         );
                         await guildPreference.setLimit(0, numberSongs);
-                        await songSelector.reloadSongs(guildPreference);
+                        await songSelector.reloadSongs(guildPreference, true);
 
                         // play all songs but one
                         for (let i = 0; i < numberSongs - 1; i++) {
@@ -823,7 +897,7 @@ describe("checkUniqueSongQueue", () => {
                     const numberOfResets = 50;
                     await guildPreference.setShuffleType(ShuffleType.UNIQUE);
                     await guildPreference.setLimit(0, numberSongs);
-                    await songSelector.reloadSongs(guildPreference);
+                    await songSelector.reloadSongs(guildPreference, true);
 
                     // play all songs but one
                     for (let i = 0; i < numberSongs * numberOfResets; i++) {
@@ -859,7 +933,7 @@ describe("checkUniqueSongQueue", () => {
                     const newNumberSongs = numberSongs / 2;
                     await guildPreference.setShuffleType(ShuffleType.UNIQUE);
                     await guildPreference.setLimit(0, numberSongs);
-                    await songSelector.reloadSongs(guildPreference);
+                    await songSelector.reloadSongs(guildPreference, true);
 
                     // play more than enough songs for the new selected song set, but not enough for current
                     const songs = [...songSelector.getSongs().songs]
@@ -875,7 +949,7 @@ describe("checkUniqueSongQueue", () => {
 
                     // reload for new selected song set
                     await guildPreference.setLimit(0, newNumberSongs);
-                    await songSelector.reloadSongs(guildPreference);
+                    await songSelector.reloadSongs(guildPreference, true);
 
                     // expect unique song queue to have been reset
                     assert.strictEqual(
@@ -892,7 +966,7 @@ describe("checkUniqueSongQueue", () => {
                     const newNumberSongs = numberSongs + 1;
                     await guildPreference.setShuffleType(ShuffleType.UNIQUE);
                     await guildPreference.setLimit(0, numberSongs);
-                    await songSelector.reloadSongs(guildPreference);
+                    await songSelector.reloadSongs(guildPreference, true);
                     let songs = [...songSelector.getSongs().songs].map(
                         (x) => x.youtubeLink
                     );
@@ -909,7 +983,7 @@ describe("checkUniqueSongQueue", () => {
 
                     // update to superset song set
                     await guildPreference.setLimit(0, newNumberSongs);
-                    await songSelector.reloadSongs(guildPreference);
+                    await songSelector.reloadSongs(guildPreference, true);
                     assert.strictEqual(
                         songSelector.checkUniqueSongQueue(guildPreference),
                         false
@@ -936,7 +1010,7 @@ describe("checkUniqueSongQueue", () => {
                     const numberSongs = 10;
                     await guildPreference.setShuffleType(ShuffleType.UNIQUE);
                     await guildPreference.setLimit(0, numberSongs);
-                    await songSelector.reloadSongs(guildPreference);
+                    await songSelector.reloadSongs(guildPreference, true);
                     const songs = [...songSelector.getSongs().songs].map(
                         (x) => x.youtubeLink
                     );
@@ -981,7 +1055,7 @@ describe("checkLastPlayedSongs", () => {
 
     describe("empty last played history", () => {
         it("should not change", async () => {
-            await songSelector.reloadSongs(guildPreference);
+            await songSelector.reloadSongs(guildPreference, true);
             songSelector.lastPlayedSongs = [];
             songSelector.checkLastPlayedSongs();
             assert.strictEqual(songSelector.lastPlayedSongs.length, 0);
@@ -992,7 +1066,7 @@ describe("checkLastPlayedSongs", () => {
         it("should reset to zero", async () => {
             const numSongs = LAST_PLAYED_SONG_QUEUE_SIZE - 1;
             await guildPreference.setLimit(0, numSongs);
-            await songSelector.reloadSongs(guildPreference);
+            await songSelector.reloadSongs(guildPreference, true);
             const songs = [...songSelector.getSongs().songs].map(
                 (x) => x.youtubeLink
             );
@@ -1009,7 +1083,7 @@ describe("checkLastPlayedSongs", () => {
             it("should not change", async () => {
                 const numSongs = LAST_PLAYED_SONG_QUEUE_SIZE + 5;
                 await guildPreference.setLimit(0, numSongs);
-                await songSelector.reloadSongs(guildPreference);
+                await songSelector.reloadSongs(guildPreference, true);
                 const songs = [...songSelector.getSongs().songs].map(
                     (x) => x.youtubeLink
                 );
@@ -1033,7 +1107,7 @@ describe("checkLastPlayedSongs", () => {
                 it("should shift the queue", async () => {
                     const numSongs = 100;
                     await guildPreference.setLimit(0, numSongs);
-                    await songSelector.reloadSongs(guildPreference);
+                    await songSelector.reloadSongs(guildPreference, true);
                     const songs = [...songSelector.getSongs().songs].map(
                         (x) => x.youtubeLink
                     );
@@ -1059,7 +1133,7 @@ describe("checkLastPlayedSongs", () => {
                 it("should purge only half of the queue", async () => {
                     const numSongs = LAST_PLAYED_SONG_QUEUE_SIZE * 1.5;
                     await guildPreference.setLimit(0, numSongs);
-                    await songSelector.reloadSongs(guildPreference);
+                    await songSelector.reloadSongs(guildPreference, true);
                     const songs = [...songSelector.getSongs().songs].map(
                         (x) => x.youtubeLink
                     );

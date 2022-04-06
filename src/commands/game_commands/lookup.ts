@@ -21,6 +21,7 @@ import {
     getGuildPreference,
     getLocalizedArtistName,
     getLocalizedSongName,
+    isPremiumRequest,
 } from "../../helpers/game_utils";
 import SongSelector from "../../structures/song_selector";
 import { KmqImages } from "../../constants";
@@ -195,7 +196,8 @@ export default class LookupCommand implements BaseCommand {
             includedInOptions = [
                 ...(
                     await SongSelector.getFilteredSongList(
-                        await getGuildPreference(guildID)
+                        await getGuildPreference(guildID),
+                        await isPremiumRequest(guildID, message.author.id)
                     )
                 ).songs,
             ]

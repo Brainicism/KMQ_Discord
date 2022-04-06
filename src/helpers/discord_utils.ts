@@ -8,9 +8,10 @@ import { IPCLogger } from "../logger";
 import {
     getAvailableSongCount,
     getKmqCurrentVersion,
-    userBonusIsActive,
-    getLocalizedSongName,
     getLocalizedArtistName,
+    getLocalizedSongName,
+    isPremiumRequest,
+    userBonusIsActive,
 } from "./game_utils";
 import { getFact } from "../fact_generator";
 import {
@@ -828,7 +829,16 @@ export async function sendOptionsMessage(
         return;
     }
 
-    const totalSongs = await getAvailableSongCount(guildPreference);
+    const premiumRequest = await isPremiumRequest(
+        messageContext.guildID,
+        messageContext.author.id
+    );
+
+    const totalSongs = await getAvailableSongCount(
+        guildPreference,
+        premiumRequest
+    );
+
     if (totalSongs === null) {
         sendErrorMessage(messageContext, {
             title: state.localizer.translate(
@@ -934,8 +944,7 @@ export async function sendOptionsMessage(
 
     const { gameSessions } = state;
     const isEliminationMode =
-        gameSessions[messageContext.guildID] &&
-        gameSessions[messageContext.guildID].gameType === GameType.ELIMINATION;
+        gameSessions[messageContext.guildID]?.gameType === GameType.ELIMINATION;
 
     // Special case: ,goal is conflicting only when current game is elimination
     if (guildPreference.isGoalSet()) {
@@ -1011,6 +1020,22 @@ export async function sendOptionsMessage(
             priorityOptions,
         }
     );
+
+    if (
+        premiumRequest &&
+        gameSessions[messageContext.guildID] &&
+        !gameSessions[messageContext.guildID].isPremiumGame()
+    ) {
+        priorityOptions =
+            italicize(
+                state.localizer.translate(
+                    messageContext.guildID,
+                    "command.options.premiumOptionsNonPremiumGame"
+                )
+            ) +
+            "\n\n" +
+            priorityOptions;
+    }
 
     const fieldOptions = Object.keys(GameOptionCommand).filter(
         (option) => !PriorityGameOption.includes(option as GameOption)
@@ -1109,6 +1134,7 @@ export async function sendOptionsMessage(
     await sendInfoMessage(
         messageContext,
         {
+            color: premiumRequest ? EMBED_SUCCESS_BONUS_COLOR : null,
             title,
             description: priorityOptions,
             fields,

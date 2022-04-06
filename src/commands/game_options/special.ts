@@ -1,14 +1,16 @@
 import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
-    sendOptionsMessage,
     getDebugLogHeader,
+    sendErrorMessage,
+    sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
+import { getGuildPreference, isUserPremium } from "../../helpers/game_utils";
+import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
+import GuildPreference from "../../structures/guild_preference";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("special");
 
@@ -54,6 +56,28 @@ export const specialFfmpegArgs = {
         encoderArgs: ["-af", "rubberband=pitch=1.25992:tempo=1.25"],
     }),
 };
+
+/**
+ * @param guildPreference - The guild preference
+ * @param messageContext - The message context
+ * @param premiumEnded - Whether reset was caused by premium ending
+ */
+export async function resetSpecial(
+    guildPreference: GuildPreference,
+    messageContext: MessageContext,
+    premiumEnded: boolean
+): Promise<void> {
+    await guildPreference.reset(GameOption.SPECIAL_TYPE);
+    sendOptionsMessage(messageContext, guildPreference, [
+        { option: GameOption.SPECIAL_TYPE, reset: true },
+    ]);
+
+    logger.info(
+        `${getDebugLogHeader(
+            messageContext
+        )} | Special reset. Reset caused by premium ending = ${premiumEnded}`
+    );
+}
 
 export default class SpecialCommand implements BaseCommand {
     preRunChecks = [
@@ -148,6 +172,11 @@ export default class SpecialCommand implements BaseCommand {
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
+            resetSpecial(
+                guildPreference,
+                MessageContext.fromMessage(message),
+                false
+            );
             await guildPreference.reset(GameOption.SPECIAL_TYPE);
             await sendOptionsMessage(
                 MessageContext.fromMessage(message),
@@ -155,6 +184,18 @@ export default class SpecialCommand implements BaseCommand {
                 [{ option: GameOption.SPECIAL_TYPE, reset: true }]
             );
             logger.info(`${getDebugLogHeader(message)} | Special reset.`);
+            return;
+        }
+
+        if (
+            process.env.DEBUG_SERVER_ID !== message.guildID &&
+            !(await isUserPremium(message.author.id))
+        ) {
+            sendErrorMessage(MessageContext.fromMessage(message), {
+                description:
+                    "This option can only be used by premium KMQ supporters, or in the official KMQ server.",
+                title: "Premium Option",
+            });
             return;
         }
 
