@@ -342,7 +342,7 @@ export default class GameSession extends Session {
             round.endRoundMessageID = endRoundMessage?.id;
         }
 
-        super.endRound(guildPreference, messageContext);
+        await super.endRound(guildPreference, messageContext);
 
         if (this.scoreboard.gameFinished(guildPreference)) {
             this.endSession();

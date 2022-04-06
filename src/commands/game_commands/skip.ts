@@ -147,7 +147,7 @@ export default class SkipCommand implements BaseCommand {
         if (isSkipMajority(message, gameSession)) {
             gameSession.round.skipAchieved = true;
             sendSkipMessage(message, gameSession.round);
-            gameSession.endRound(
+            await gameSession.endRound(
                 guildPreference,
                 MessageContext.fromMessage(message),
                 { correct: false }
