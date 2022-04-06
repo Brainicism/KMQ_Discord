@@ -233,7 +233,7 @@ describe("getFilteredSongList", () => {
 
                 assert.strictEqual(
                     Array.from(songs).every(
-                        (song) => song.publishDate <= new Date("2015-12-31")
+                        (song) => song.publishDate < new Date("2016-01-01")
                     ),
                     true
                 );
@@ -252,7 +252,7 @@ describe("getFilteredSongList", () => {
                     Array.from(songs).every(
                         (song) =>
                             song.publishDate >= new Date("2008-01-01") &&
-                            song.publishDate <= new Date("2018-12-31")
+                            song.publishDate < new Date("2019-01-01")
                     ),
                     true
                 );
@@ -271,7 +271,7 @@ describe("getFilteredSongList", () => {
                     Array.from(songs).every(
                         (song) =>
                             song.publishDate >= new Date("2017-01-01") &&
-                            song.publishDate <= new Date("2017-12-31")
+                            song.publishDate < new Date("2018-01-01")
                     ),
                     true
                 );
