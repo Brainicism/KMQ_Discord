@@ -11,6 +11,7 @@ import { IPCLogger } from "./logger";
 import dbContext from "./database_context";
 import { state } from "./kmq_worker";
 import MusicSession from "./structures/music_session";
+import { getTimeUntilRestart } from "./helpers/management_utils";
 
 const logger = new IPCLogger("command_prechecks");
 export interface PrecheckArgs {
@@ -177,5 +178,29 @@ export default class CommandPrechecks {
         }
 
         return isModerator;
+    }
+
+    static async notRestartingPrecheck(
+        precheckArgs: PrecheckArgs
+    ): Promise<boolean> {
+        const timeUntilRestart = await getTimeUntilRestart();
+        if (timeUntilRestart) {
+            const { message } = precheckArgs;
+            await sendErrorMessage(MessageContext.fromMessage(message), {
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.play.failure.botRestarting.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "command.play.failure.botRestarting.description",
+                    { timeUntilRestart: `\`${timeUntilRestart}\`` }
+                ),
+            });
+
+            return false;
+        }
+
+        return true;
     }
 }

@@ -18,9 +18,9 @@ import { chooseWeightedRandom } from "../../helpers/utils";
 import dbContext from "../../database_context";
 import Eris from "eris";
 import { KmqImages } from "../../constants";
-import { getTimeUntilRestart } from "../../helpers/management_utils";
 import Session from "../../structures/session";
 import GameSession from "../../structures/game_session";
+import CommandPrechecks from "../../command_prechecks";
 
 const logger = new IPCLogger("music");
 
@@ -73,6 +73,8 @@ export async function sendBeginMusicSessionMessage(
 }
 
 export default class MusicCommand implements BaseCommand {
+    preRunChecks = [{ checkFn: CommandPrechecks.notRestartingPrecheck }];
+
     validations = {
         minArgCount: 0,
         maxArgCount: 0,
@@ -116,28 +118,6 @@ export default class MusicCommand implements BaseCommand {
         const textChannel = channel;
         const gameOwner = KmqMember.fromUser(message.author);
         const voiceChannel = getUserVoiceChannel(messageContext);
-        const timeUntilRestart = await getTimeUntilRestart();
-        if (timeUntilRestart) {
-            await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
-                    message.guildID,
-                    "command.play.failure.botRestarting.title"
-                ),
-                description: state.localizer.translate(
-                    message.guildID,
-                    "command.play.failure.botRestarting.description",
-                    { timeUntilRestart: `\`${timeUntilRestart}\`` }
-                ),
-            });
-
-            logger.warn(
-                `${getDebugLogHeader(
-                    message
-                )} | Attempted to start music session before restart.`
-            );
-            return;
-        }
-
         if (!voiceChannel) {
             await sendErrorMessage(messageContext, {
                 title: state.localizer.translate(
