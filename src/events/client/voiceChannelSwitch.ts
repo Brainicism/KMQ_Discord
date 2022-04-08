@@ -32,25 +32,23 @@ export default async function voiceChannelSwitchHandler(
         return;
     }
 
-    if (!session.finished) {
-        if (session instanceof GameSession) {
-            const oldPremiumState = session.isPremiumGame();
-            if (member.id !== process.env.BOT_CLIENT_ID) {
-                await session.setPlayerInVC(
-                    member.id,
-                    newChannel.id === session.voiceChannelID
-                );
-            } else {
-                // Bot was moved to another VC
-                session.voiceChannelID = newChannel.id;
-                session.syncAllVoiceMembers();
-            }
-
-            if (oldPremiumState !== session.isPremiumGame()) {
-                session.updatePremiumStatus();
-            }
+    if (session instanceof GameSession) {
+        const oldPremiumState = session.isPremiumGame();
+        if (member.id !== process.env.BOT_CLIENT_ID) {
+            await session.setPlayerInVC(
+                member.id,
+                newChannel.id === session.voiceChannelID
+            );
+        } else {
+            // Bot was moved to another VC
+            session.voiceChannelID = newChannel.id;
+            session.syncAllVoiceMembers();
         }
 
-        session.updateOwner();
+        if (oldPremiumState !== session.isPremiumGame()) {
+            session.updatePremiumStatus();
+        }
     }
+
+    session.updateOwner();
 }
