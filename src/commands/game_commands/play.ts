@@ -30,7 +30,6 @@ import KmqMember from "../../structures/kmq_member";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import { DEFAULT_LIVES } from "../../structures/elimination_scoreboard";
-import Session from "../../structures/session";
 
 const logger = new IPCLogger("play");
 
@@ -41,7 +40,7 @@ const logger = new IPCLogger("play");
  * @param messageContext - The original message that triggered the command
  * @param participants - The list of participants
  */
-export async function sendBeginGameMessage(
+export async function sendBeginGameSessionMessage(
     textChannelName: string,
     voiceChannelName: string,
     messageContext: MessageContext,
@@ -214,9 +213,9 @@ export default class PlayCommand implements BaseCommand {
     }: CommandArgs): Promise<void> => {
         const messageContext = MessageContext.fromMessage(message);
         const guildID = message.guildID;
-        const existingGameSession = Session.getSession(guildID) as GameSession;
         const guildPreference = await getGuildPreference(guildID);
         const voiceChannel = getUserVoiceChannel(messageContext);
+        const gameSessions = state.gameSessions;
 
         const timeUntilRestart = await getTimeUntilRestart();
         if (timeUntilRestart) {
@@ -235,7 +234,7 @@ export default class PlayCommand implements BaseCommand {
             logger.warn(
                 `${getDebugLogHeader(
                     message
-                )} | Attempted to start game before restart.`
+                )} | Attempted to start game session before restart.`
             );
             return;
         }
@@ -268,8 +267,8 @@ export default class PlayCommand implements BaseCommand {
             GameType.CLASSIC;
 
         if (
-            existingGameSession &&
-            !existingGameSession.sessionInitialized &&
+            gameSessions[message.guildID] &&
+            !gameSessions[message.guildID].sessionInitialized &&
             gameType === GameType.TEAMS
         ) {
             // User sent ,play teams twice, reset the GameSession
@@ -283,7 +282,10 @@ export default class PlayCommand implements BaseCommand {
 
         const prefix = process.env.BOT_PREFIX;
 
-        if (!existingGameSession || !existingGameSession.sessionInitialized) {
+        if (
+            !gameSessions[message.guildID] ||
+            !gameSessions[message.guildID].sessionInitialized
+        ) {
             // (1) No game session exists yet (create ELIMINATION, TEAMS, CLASSIC, or COMPETITION game), or
             // (2) User attempting to ,play after a ,play teams that didn't start, start CLASSIC game
             const textChannel = channel;
@@ -325,9 +327,9 @@ export default class PlayCommand implements BaseCommand {
                 });
             } else {
                 // (1 and 2) CLASSIC, ELIMINATION, and COMPETITION game creation
-                if (existingGameSession) {
+                if (gameSessions[message.guildID]) {
                     // (2) Let the user know they're starting a non-teams game
-                    const oldGameType = existingGameSession.gameType;
+                    const oldGameType = gameSessions[message.guildID].gameType;
                     const ignoringOldGameTypeTitle = state.localizer.translate(
                         guildID,
                         "command.play.failure.overrideTeamsOrElimination.title",
@@ -422,7 +424,7 @@ export default class PlayCommand implements BaseCommand {
                     lives
                 );
 
-                await sendBeginGameMessage(
+                await sendBeginGameSessionMessage(
                     textChannel.name,
                     voiceChannel.name,
                     messageContext,
@@ -435,8 +437,8 @@ export default class PlayCommand implements BaseCommand {
             }
 
             // prevent any duplicate game sessions
-            if (existingGameSession) {
-                existingGameSession.endSession();
+            if (gameSessions[message.guildID]) {
+                gameSessions[message.guildID].endSession();
             }
 
             state.gameSessions[guildID] = gameSession;

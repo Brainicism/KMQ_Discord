@@ -31,14 +31,14 @@ const logger = new IPCLogger("music");
  * @param message - The original message that triggered the command
  * @param participants - The list of participants
  */
-export async function sendBeginGameMessage(
+export async function sendBeginMusicSessionMessage(
     textChannelName: string,
     voiceChannelName: string,
     message: GuildTextableMessage
 ): Promise<void> {
     const startTitle = state.localizer.translate(
         message.guildID,
-        "command.play.gameStarting",
+        "command.music.musicStarting",
         {
             textChannelName,
             voiceChannelName,
@@ -133,7 +133,7 @@ export default class MusicCommand implements BaseCommand {
             logger.warn(
                 `${getDebugLogHeader(
                     message
-                )} | Attempted to start game before restart.`
+                )} | Attempted to start music session before restart.`
             );
             return;
         }
@@ -168,7 +168,7 @@ export default class MusicCommand implements BaseCommand {
             gameOwner
         );
 
-        await sendBeginGameMessage(
+        await sendBeginMusicSessionMessage(
             textChannel.name,
             voiceChannel.name,
             message

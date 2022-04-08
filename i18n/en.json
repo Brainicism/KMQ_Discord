@@ -529,6 +529,13 @@
                 }
             }
         },
+        "music": {
+            "help": {
+                "description": "Stream songs from the current options. Only available to KMQ Premium users.",
+                "example": "Music will start playing in the current voice channel."
+            },
+            "musicStarting": "Music Starting in #{{textChannelName}} in 🔊 {{voiceChannelName}}"
+        },
         "news": {
             "help": {
                 "description": "Displays the latest updates to KMQ."

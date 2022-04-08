@@ -1,6 +1,6 @@
 import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { sendBeginGameMessage } from "./play";
+import { sendBeginGameSessionMessage } from "./play";
 import { GameType } from "../../types";
 import TeamScoreboard from "../../structures/team_scoreboard";
 import {
@@ -71,7 +71,7 @@ export default class BeginCommand implements BaseCommand {
                 discriminator: player.name.split("#")[1],
             }));
 
-            sendBeginGameMessage(
+            sendBeginGameSessionMessage(
                 channel.name,
                 getUserVoiceChannel(messageContext).name,
                 messageContext,
