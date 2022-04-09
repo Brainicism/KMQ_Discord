@@ -49,7 +49,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("guild_preference");
 
-interface GameOptions {
+export interface GameOptions {
     beginningYear: number;
     endYear: number;
     gender: Array<Gender>;

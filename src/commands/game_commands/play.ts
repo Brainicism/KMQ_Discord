@@ -9,6 +9,10 @@ import {
     getCurrentVoiceMembers,
     EMBED_SUCCESS_BONUS_COLOR,
     getMention,
+    getFormattedLimit,
+    generateOptionsMessage,
+    generateEmbed,
+    ZERO_WIDTH_SPACE,
 } from "../../helpers/discord_utils";
 import {
     deleteGameSession,
@@ -16,10 +20,17 @@ import {
 } from "../../helpers/management_utils";
 import {
     activeBonusUsers,
+    getAvailableSongCount,
     getGuildPreference,
     isPowerHour,
+    isPremiumRequest,
 } from "../../helpers/game_utils";
-import { chooseWeightedRandom, isWeekend } from "../../helpers/utils";
+import {
+    bold,
+    chooseWeightedRandom,
+    friendlyFormattedNumber,
+    isWeekend,
+} from "../../helpers/utils";
 import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import dbContext from "../../database_context";
 import { IPCLogger } from "../../logger";
@@ -30,6 +41,7 @@ import KmqMember from "../../structures/kmq_member";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import { DEFAULT_LIVES } from "../../structures/elimination_scoreboard";
+import GuildPreference from "src/structures/guild_preference";
 
 const logger = new IPCLogger("play");
 
@@ -39,6 +51,7 @@ const logger = new IPCLogger("play");
  * @param voiceChannelName - The name of the voice channel to join
  * @param message - The original message that triggered the command
  * @param participants - The list of participants
+ * @param guildPreference - The guild preferences
  */
 export async function sendBeginGameMessage(
     textChannelName: string,
@@ -48,7 +61,8 @@ export async function sendBeginGameMessage(
         id: string;
         username: string;
         discriminator: string;
-    }>
+    }>,
+    guildPreference: GuildPreference
 ): Promise<void> {
     let gameInstructions = state.localizer.translate(
         message.guildID,
@@ -101,6 +115,22 @@ export async function sendBeginGameMessage(
         )} ⬆️**`;
     }
 
+    const premiumRequest = await isPremiumRequest(
+        message.guildID,
+        message.author.id
+    );
+
+    const totalSongs = await getAvailableSongCount(
+        guildPreference,
+        premiumRequest
+    );
+
+    const limit = getFormattedLimit(
+        message.guildID,
+        guildPreference.gameOptions,
+        totalSongs
+    );
+
     const startTitle = state.localizer.translate(
         message.guildID,
         "command.play.gameStarting",
@@ -129,23 +159,52 @@ export async function sendBeginGameMessage(
         });
     }
 
-    await sendInfoMessage(MessageContext.fromMessage(message), {
-        title: startTitle,
-        description: gameInstructions,
-        color: isBonus ? EMBED_SUCCESS_BONUS_COLOR : null,
-        footerText:
-            !isBonus && Math.random() < 0.5
-                ? state.localizer.translate(
-                      message.guildID,
-                      "command.play.voteReminder",
-                      {
-                          vote: `${process.env.BOT_PREFIX}vote`,
-                      }
-                  )
-                : null,
-        thumbnailUrl: KmqImages.HAPPY,
-        fields,
+    fields.push({
+        name: ZERO_WIDTH_SPACE,
+        value: state.localizer.translate(
+            message.guildID,
+            "command.options.overview",
+            {
+                limit: bold(limit),
+                totalSongs: bold(
+                    friendlyFormattedNumber(totalSongs.countBeforeLimit)
+                ),
+            }
+        ),
     });
+
+    const messageContext = MessageContext.fromMessage(message);
+    const optionsEmbedPayload = await generateOptionsMessage(
+        messageContext,
+        guildPreference,
+        null
+    );
+
+    optionsEmbedPayload.footerText =
+        !isBonus && Math.random() < 0.5
+            ? state.localizer.translate(
+                  message.guildID,
+                  "command.play.voteReminder",
+                  {
+                      vote: `${process.env.BOT_PREFIX}vote`,
+                  }
+              )
+            : null;
+
+    await sendInfoMessage(
+        messageContext,
+        {
+            title: startTitle,
+            description: gameInstructions,
+            color: isBonus ? EMBED_SUCCESS_BONUS_COLOR : null,
+            thumbnailUrl: KmqImages.HAPPY,
+            fields,
+        },
+        false,
+        true,
+        undefined,
+        [generateEmbed(messageContext, optionsEmbedPayload)]
+    );
 }
 
 export default class PlayCommand implements BaseCommand {
@@ -431,7 +490,8 @@ export default class PlayCommand implements BaseCommand {
                     textChannel.name,
                     voiceChannel.name,
                     message,
-                    getCurrentVoiceMembers(voiceChannel.id)
+                    getCurrentVoiceMembers(voiceChannel.id),
+                    guildPreference
                 );
                 gameSession.startRound(guildPreference, messageContext);
                 logger.info(
