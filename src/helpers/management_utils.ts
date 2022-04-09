@@ -133,12 +133,19 @@ function clearInactiveVoiceConnections(): void {
         state.client.voiceConnections.keys()
     ) as Array<string>;
 
-    const activeVoiceChannelGuildIDs = Object.values(state.gameSessions).map(
-        (x) => x.guildID
+    const activeGameVoiceChannelGuildIDs = new Set(
+        Object.values(state.gameSessions).map((x) => x.guildID)
+    );
+
+    const activeMusicVoiceChannelGuildIDs = new Set(
+        Object.values(state.musicSessions).map((x) => x.guildID)
     );
 
     for (const existingVoiceChannelGuildID of existingVoiceChannelGuildIDs) {
-        if (!activeVoiceChannelGuildIDs.includes(existingVoiceChannelGuildID)) {
+        if (
+            !activeGameVoiceChannelGuildIDs.has(existingVoiceChannelGuildID) &&
+            !activeMusicVoiceChannelGuildIDs.has(existingVoiceChannelGuildID)
+        ) {
             const voiceChannelID = state.client.voiceConnections.get(
                 existingVoiceChannelGuildID
             ).channelID;
