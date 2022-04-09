@@ -823,17 +823,6 @@ export default class GuildPreference {
      */
     async setShuffleType(shuffleType: ShuffleType): Promise<void> {
         this.gameOptions.shuffleType = shuffleType;
-
-        // Doesn't actually modify list of available_songs, but we need to
-        // reset lastPlayedSongsQueue when changing shuffling modes
-        await this.updateGuildPreferences([
-            { name: GameOptionInternal.SHUFFLE_TYPE, value: shuffleType },
-        ]);
-    }
-
-    /** @returns whether the current shuffle type is UNIQUE */
-    isShuffleUnique(): boolean {
-        return this.gameOptions.shuffleType === ShuffleType.UNIQUE;
     }
 
     /**
