@@ -1,4 +1,4 @@
-/* eslint-disable quote-props */
+/* eslint-disable no-console */
 import { config } from "dotenv";
 import { resolve } from "path";
 import { isMaster } from "cluster";
