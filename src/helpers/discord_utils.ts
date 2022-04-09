@@ -847,8 +847,9 @@ export async function sendOptionsMessage(
         return;
     }
 
+    const guildID = messageContext.guildID;
     const premiumRequest = await isPremiumRequest(
-        messageContext.guildID,
+        guildID,
         messageContext.author.id
     );
 
@@ -860,11 +861,11 @@ export async function sendOptionsMessage(
     if (totalSongs === null) {
         sendErrorMessage(messageContext, {
             title: state.localizer.translate(
-                messageContext.guildID,
+                guildID,
                 "misc.failure.retrievingSongData.title"
             ),
             description: state.localizer.translate(
-                messageContext.guildID,
+                guildID,
                 "misc.failure.retrievingSongData.description",
                 { helpCommand: `\`${process.env.BOT_PREFIX}help\`` }
             ),
@@ -887,15 +888,11 @@ export async function sendOptionsMessage(
     if (gameOptions.limitStart === 0) {
         limit = friendlyFormattedNumber(visibleLimitEnd);
     } else {
-        limit = state.localizer.translate(
-            messageContext.guildID,
-            "misc.formattedLimit",
-            {
-                limitStart: getOrdinalNum(visibleLimitStart),
-                limitEnd: getOrdinalNum(visibleLimitEnd),
-                songCount: friendlyFormattedNumber(totalSongs.count),
-            }
-        );
+        limit = state.localizer.translate(guildID, "misc.formattedLimit", {
+            limitStart: getOrdinalNum(visibleLimitStart),
+            limitEnd: getOrdinalNum(visibleLimitEnd),
+            songCount: friendlyFormattedNumber(totalSongs.count),
+        });
     }
 
     // Store the VALUE of ,[option]: [VALUE] into optionStrings
@@ -925,21 +922,15 @@ export async function sendOptionsMessage(
     optionStrings[GameOption.GUESS_MODE_TYPE] = gameOptions.guessModeType;
     optionStrings[GameOption.SPECIAL_TYPE] = gameOptions.specialType;
     optionStrings[GameOption.TIMER] = guildPreference.isGuessTimeoutSet()
-        ? state.localizer.translate(
-              messageContext.guildID,
-              "command.options.timer",
-              {
-                  timerInSeconds: String(gameOptions.guessTimeout),
-              }
-          )
+        ? state.localizer.translate(guildID, "command.options.timer", {
+              timerInSeconds: String(gameOptions.guessTimeout),
+          })
         : null;
 
     optionStrings[GameOption.DURATION] = guildPreference.isDurationSet()
-        ? state.localizer.translate(
-              messageContext.guildID,
-              "command.options.duration",
-              { durationInMinutes: String(gameOptions.duration) }
-          )
+        ? state.localizer.translate(guildID, "command.options.duration", {
+              durationInMinutes: String(gameOptions.duration),
+          })
         : null;
 
     optionStrings[GameOption.EXCLUDE] = guildPreference.isExcludesMode()
@@ -957,12 +948,13 @@ export async function sendOptionsMessage(
         `${strikethrough(commandValue)} (\`${
             process.env.BOT_PREFIX
         }${conflictingOption}\` ${italicize(
-            state.localizer.translate(messageContext.guildID, "misc.conflict")
+            state.localizer.translate(guildID, "misc.conflict")
         )})`;
 
-    const { gameSessions } = state;
+    const session = Session.getSession(guildID);
     const isEliminationMode =
-        gameSessions[messageContext.guildID]?.gameType === GameType.ELIMINATION;
+        session instanceof GameSession &&
+        session.gameType === GameType.ELIMINATION;
 
     // Special case: goal is conflicting only when current game is elimination
     if (guildPreference.isGoalSet()) {
@@ -971,6 +963,37 @@ export async function sendOptionsMessage(
             optionStrings[GameOption.GOAL] = generateConflictingCommandEntry(
                 optionStrings[GameOption.GOAL],
                 `play ${GameType.ELIMINATION}`
+            );
+        }
+    }
+
+    // Special case: disable these options in a music session
+    if (session instanceof MusicSession) {
+        optionStrings[GameOption.GUESS_MODE_TYPE] = String(
+            gameOptions.guessModeType
+        );
+        optionStrings[GameOption.SEEK_TYPE] = String(gameOptions.seekType);
+        optionStrings[GameOption.MULTIGUESS] = String(
+            gameOptions.multiGuessType
+        );
+        optionStrings[GameOption.ANSWER_TYPE] = String(gameOptions.answerType);
+
+        const conflictingOptions = [
+            GameOption.GUESS_MODE_TYPE,
+            GameOption.SEEK_TYPE,
+            GameOption.MULTIGUESS,
+            GameOption.ANSWER_TYPE,
+        ];
+
+        if (guildPreference.isGoalSet()) {
+            optionStrings[GameOption.GOAL] = String(gameOptions.goal);
+            conflictingOptions.push(GameOption.GOAL);
+        }
+
+        for (const option of conflictingOptions) {
+            optionStrings[option] = generateConflictingCommandEntry(
+                optionStrings[option],
+                "listen"
             );
         }
     }
@@ -1003,10 +1026,7 @@ export async function sendOptionsMessage(
         optionStrings[option] =
             optionStrings[option] ||
             italicize(
-                state.localizer.translate(
-                    messageContext.guildID,
-                    "command.options.notSet"
-                )
+                state.localizer.translate(guildID, "command.options.notSet")
             );
     }
 
@@ -1041,8 +1061,8 @@ export async function sendOptionsMessage(
 
     if (
         premiumRequest &&
-        gameSessions[messageContext.guildID] &&
-        !gameSessions[messageContext.guildID].isPremiumGame()
+        session instanceof GameSession &&
+        !session.isPremiumGame()
     ) {
         priorityOptions =
             italicize(
