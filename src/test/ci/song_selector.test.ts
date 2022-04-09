@@ -723,39 +723,28 @@ describe("queryRandomSong", () => {
     });
 
     describe("normal case", () => {
-        it("should return the random song, and add to last played history", async () => {
+        it("should return the random song", async () => {
             await songSelector.reloadSongs(guildPreference, true);
-            const song = await songSelector.queryRandomSong(guildPreference);
+            const song = await songSelector.queryRandomSong();
             assert(song);
-            assert.strictEqual(songSelector.lastPlayedSongs.length, 1);
-            assert.strictEqual(
-                songSelector.lastPlayedSongs[0],
-                song.youtubeLink
-            );
         });
     });
 
     describe("selected song set smaller than last played history threshold", () => {
-        it("should return null, and NOT add to last played history", async () => {
+        it("should return null", async () => {
             await guildPreference.setLimit(0, 0);
             await songSelector.reloadSongs(guildPreference, true);
-            const song = await songSelector.queryRandomSong(guildPreference);
+            const song = await songSelector.queryRandomSong();
             assert.strictEqual(song, null);
-            assert.strictEqual(songSelector.lastPlayedSongs.length, 0);
         });
     });
 
     describe("unique shuffle mode", () => {
-        it("should return the random song, and add to last played history, and unique song history", async () => {
-            await guildPreference.setShuffleType(ShuffleType.UNIQUE);
+        it("should return the random song, and add it to the unique song history", async () => {
+            await guildPreference.setShuffleType(ShuffleType.RANDOM);
             await songSelector.reloadSongs(guildPreference, true);
-            const song = await songSelector.queryRandomSong(guildPreference);
+            const song = await songSelector.queryRandomSong();
             assert(song);
-            assert.strictEqual(songSelector.lastPlayedSongs.length, 1);
-            assert.strictEqual(
-                songSelector.lastPlayedSongs[0],
-                song.youtubeLink
-            );
 
             assert.strictEqual(songSelector.uniqueSongsPlayed.size, 1);
             assert.strictEqual(
@@ -780,35 +769,21 @@ describe("checkUniqueSongQueue", () => {
         sandbox.restore();
     });
 
-    describe("non-unique shuffle mode", () => {
-        it("should return false", async () => {
-            await guildPreference.setShuffleType(ShuffleType.RANDOM);
-            await songSelector.reloadSongs(guildPreference, true);
-            assert.strictEqual(
-                songSelector.checkUniqueSongQueue(guildPreference),
-                false
-            );
-            assert.strictEqual(resetSpy.called, true);
-        });
-    });
-
-    describe("unique shiffle mode", () => {
+    describe("random shuffle mode", () => {
         describe("selected songs doesn't change midway", () => {
             describe("not all songs have been played yet", () => {
                 it("should not reset the unique song queue", async () => {
                     const numberSongs = 5;
-                    await guildPreference.setShuffleType(ShuffleType.UNIQUE);
+                    await guildPreference.setShuffleType(ShuffleType.RANDOM);
                     await guildPreference.setLimit(0, numberSongs);
                     await songSelector.reloadSongs(guildPreference, true);
 
                     // play all songs but one
                     for (let i = 0; i < numberSongs - 1; i++) {
-                        assert(
-                            await songSelector.queryRandomSong(guildPreference)
-                        );
+                        assert(await songSelector.queryRandomSong());
 
                         assert.strictEqual(
-                            songSelector.checkUniqueSongQueue(guildPreference),
+                            songSelector.checkUniqueSongQueue(),
                             false
                         );
                     }
@@ -822,32 +797,26 @@ describe("checkUniqueSongQueue", () => {
                     it("should reset the unique song queue, queryRandomSong should not return null ", async () => {
                         const numberSongs = LAST_PLAYED_SONG_QUEUE_SIZE + 1;
                         await guildPreference.setShuffleType(
-                            ShuffleType.UNIQUE
+                            ShuffleType.RANDOM
                         );
                         await guildPreference.setLimit(0, numberSongs);
                         await songSelector.reloadSongs(guildPreference, true);
 
                         // play all songs
                         for (let i = 0; i < numberSongs; i++) {
-                            assert(
-                                await songSelector.queryRandomSong(
-                                    guildPreference
-                                )
-                            );
+                            assert(await songSelector.queryRandomSong());
                         }
 
                         assert.strictEqual(resetSpy.called, false);
 
                         assert.strictEqual(
-                            songSelector.checkUniqueSongQueue(guildPreference),
+                            songSelector.checkUniqueSongQueue(),
                             true
                         );
 
                         assert.strictEqual(resetSpy.called, true);
                         // play the first song after reset
-                        assert(
-                            await songSelector.queryRandomSong(guildPreference)
-                        );
+                        assert(await songSelector.queryRandomSong());
                     });
                 });
 
@@ -855,35 +824,27 @@ describe("checkUniqueSongQueue", () => {
                     it("should reset the unique song queue", async () => {
                         const numberSongs = 5;
                         await guildPreference.setShuffleType(
-                            ShuffleType.UNIQUE
+                            ShuffleType.RANDOM
                         );
                         await guildPreference.setLimit(0, numberSongs);
                         await songSelector.reloadSongs(guildPreference, true);
 
                         // play all songs but one
                         for (let i = 0; i < numberSongs - 1; i++) {
-                            assert(
-                                await songSelector.queryRandomSong(
-                                    guildPreference
-                                )
-                            );
+                            assert(await songSelector.queryRandomSong());
 
                             assert.strictEqual(
-                                songSelector.checkUniqueSongQueue(
-                                    guildPreference
-                                ),
+                                songSelector.checkUniqueSongQueue(),
                                 false
                             );
                         }
 
                         assert.strictEqual(resetSpy.called, false);
                         // play the last song
-                        assert(
-                            await songSelector.queryRandomSong(guildPreference)
-                        );
+                        assert(await songSelector.queryRandomSong());
 
                         assert.strictEqual(
-                            songSelector.checkUniqueSongQueue(guildPreference),
+                            songSelector.checkUniqueSongQueue(),
                             true
                         );
                         assert.strictEqual(resetSpy.called, true);
@@ -895,27 +856,21 @@ describe("checkUniqueSongQueue", () => {
                 it("should reset the unique song queue several times", async () => {
                     const numberSongs = 5;
                     const numberOfResets = 50;
-                    await guildPreference.setShuffleType(ShuffleType.UNIQUE);
+                    await guildPreference.setShuffleType(ShuffleType.RANDOM);
                     await guildPreference.setLimit(0, numberSongs);
                     await songSelector.reloadSongs(guildPreference, true);
 
                     // play all songs but one
                     for (let i = 0; i < numberSongs * numberOfResets; i++) {
-                        assert(
-                            await songSelector.queryRandomSong(guildPreference)
-                        );
+                        assert(await songSelector.queryRandomSong());
                         if (i > 0 && (i + 1) % numberSongs === 0) {
                             assert.strictEqual(
-                                songSelector.checkUniqueSongQueue(
-                                    guildPreference
-                                ),
+                                songSelector.checkUniqueSongQueue(),
                                 true
                             );
                         } else {
                             assert.strictEqual(
-                                songSelector.checkUniqueSongQueue(
-                                    guildPreference
-                                ),
+                                songSelector.checkUniqueSongQueue(),
                                 false
                             );
                         }
@@ -931,7 +886,7 @@ describe("checkUniqueSongQueue", () => {
                 it("should reset the unique song queue", async () => {
                     const numberSongs = 10;
                     const newNumberSongs = numberSongs / 2;
-                    await guildPreference.setShuffleType(ShuffleType.UNIQUE);
+                    await guildPreference.setShuffleType(ShuffleType.RANDOM);
                     await guildPreference.setLimit(0, numberSongs);
                     await songSelector.reloadSongs(guildPreference, true);
 
@@ -942,7 +897,7 @@ describe("checkUniqueSongQueue", () => {
 
                     songSelector.uniqueSongsPlayed = new Set(songs);
                     assert.strictEqual(
-                        songSelector.checkUniqueSongQueue(guildPreference),
+                        songSelector.checkUniqueSongQueue(),
                         false
                     );
                     assert.strictEqual(resetSpy.called, false);
@@ -953,7 +908,7 @@ describe("checkUniqueSongQueue", () => {
 
                     // expect unique song queue to have been reset
                     assert.strictEqual(
-                        songSelector.checkUniqueSongQueue(guildPreference),
+                        songSelector.checkUniqueSongQueue(),
                         true
                     );
                     assert.strictEqual(resetSpy.called, true);
@@ -964,7 +919,7 @@ describe("checkUniqueSongQueue", () => {
                 it("should reset the unique song queue", async () => {
                     const numberSongs = 10;
                     const newNumberSongs = numberSongs + 1;
-                    await guildPreference.setShuffleType(ShuffleType.UNIQUE);
+                    await guildPreference.setShuffleType(ShuffleType.RANDOM);
                     await guildPreference.setLimit(0, numberSongs);
                     await songSelector.reloadSongs(guildPreference, true);
                     let songs = [...songSelector.getSongs().songs].map(
@@ -977,7 +932,7 @@ describe("checkUniqueSongQueue", () => {
                     );
 
                     assert.strictEqual(
-                        songSelector.checkUniqueSongQueue(guildPreference),
+                        songSelector.checkUniqueSongQueue(),
                         false
                     );
 
@@ -985,7 +940,7 @@ describe("checkUniqueSongQueue", () => {
                     await guildPreference.setLimit(0, newNumberSongs);
                     await songSelector.reloadSongs(guildPreference, true);
                     assert.strictEqual(
-                        songSelector.checkUniqueSongQueue(guildPreference),
+                        songSelector.checkUniqueSongQueue(),
                         false
                     );
                     assert.strictEqual(resetSpy.called, false);
@@ -998,7 +953,7 @@ describe("checkUniqueSongQueue", () => {
 
                     // expect unique song queue to have been reset
                     assert.strictEqual(
-                        songSelector.checkUniqueSongQueue(guildPreference),
+                        songSelector.checkUniqueSongQueue(),
                         true
                     );
                     assert.strictEqual(resetSpy.called, true);
@@ -1008,7 +963,7 @@ describe("checkUniqueSongQueue", () => {
             describe("unique song history has songs not in the current selected song set", () => {
                 it("should reset the unique song queue", async () => {
                     const numberSongs = 10;
-                    await guildPreference.setShuffleType(ShuffleType.UNIQUE);
+                    await guildPreference.setShuffleType(ShuffleType.RANDOM);
                     await guildPreference.setLimit(0, numberSongs);
                     await songSelector.reloadSongs(guildPreference, true);
                     const songs = [...songSelector.getSongs().songs].map(
@@ -1025,7 +980,7 @@ describe("checkUniqueSongQueue", () => {
                     );
 
                     assert.strictEqual(
-                        songSelector.checkUniqueSongQueue(guildPreference),
+                        songSelector.checkUniqueSongQueue(),
                         false
                     );
                     assert.strictEqual(resetSpy.called, false);
@@ -1036,122 +991,10 @@ describe("checkUniqueSongQueue", () => {
                     );
 
                     assert.strictEqual(
-                        songSelector.checkUniqueSongQueue(guildPreference),
+                        songSelector.checkUniqueSongQueue(),
                         true
                     );
                     assert.strictEqual(resetSpy.called, true);
-                });
-            });
-        });
-    });
-});
-
-describe("checkLastPlayedSongs", () => {
-    let songSelector: SongSelector;
-
-    beforeEach(async () => {
-        songSelector = new SongSelector();
-    });
-
-    describe("empty last played history", () => {
-        it("should not change", async () => {
-            await songSelector.reloadSongs(guildPreference, true);
-            songSelector.lastPlayedSongs = [];
-            songSelector.checkLastPlayedSongs();
-            assert.strictEqual(songSelector.lastPlayedSongs.length, 0);
-        });
-    });
-
-    describe("selected song set smaller than last played history threshold", () => {
-        it("should reset to zero", async () => {
-            const numSongs = LAST_PLAYED_SONG_QUEUE_SIZE - 1;
-            await guildPreference.setLimit(0, numSongs);
-            await songSelector.reloadSongs(guildPreference, true);
-            const songs = [...songSelector.getSongs().songs].map(
-                (x) => x.youtubeLink
-            );
-
-            const songsPlayed = songs.slice(0, numSongs / 2);
-            songSelector.lastPlayedSongs = songsPlayed;
-            songSelector.checkLastPlayedSongs();
-            assert.strictEqual(songSelector.lastPlayedSongs.length, 0);
-        });
-    });
-
-    describe("selected song set larger than last played history threshold", () => {
-        describe("last played history smaller than threshold", () => {
-            it("should not change", async () => {
-                const numSongs = LAST_PLAYED_SONG_QUEUE_SIZE + 5;
-                await guildPreference.setLimit(0, numSongs);
-                await songSelector.reloadSongs(guildPreference, true);
-                const songs = [...songSelector.getSongs().songs].map(
-                    (x) => x.youtubeLink
-                );
-
-                const songsPlayed = songs.slice(
-                    0,
-                    LAST_PLAYED_SONG_QUEUE_SIZE - 1
-                );
-
-                songSelector.lastPlayedSongs = songsPlayed;
-                songSelector.checkLastPlayedSongs();
-                assert.strictEqual(
-                    songSelector.lastPlayedSongs.length,
-                    songsPlayed.length
-                );
-            });
-        });
-
-        describe("last played history equal to threshold", () => {
-            describe("selected song set is large", () => {
-                it("should shift the queue", async () => {
-                    const numSongs = 100;
-                    await guildPreference.setLimit(0, numSongs);
-                    await songSelector.reloadSongs(guildPreference, true);
-                    const songs = [...songSelector.getSongs().songs].map(
-                        (x) => x.youtubeLink
-                    );
-
-                    songSelector.lastPlayedSongs = songs.slice(
-                        0,
-                        LAST_PLAYED_SONG_QUEUE_SIZE
-                    );
-                    songSelector.checkLastPlayedSongs();
-                    assert.strictEqual(
-                        songSelector.lastPlayedSongs.length,
-                        LAST_PLAYED_SONG_QUEUE_SIZE - 1
-                    );
-
-                    assert.strictEqual(
-                        songSelector.lastPlayedSongs[0],
-                        songs[1]
-                    );
-                });
-            });
-
-            describe("selected song set is small", () => {
-                it("should purge only half of the queue", async () => {
-                    const numSongs = LAST_PLAYED_SONG_QUEUE_SIZE * 1.5;
-                    await guildPreference.setLimit(0, numSongs);
-                    await songSelector.reloadSongs(guildPreference, true);
-                    const songs = [...songSelector.getSongs().songs].map(
-                        (x) => x.youtubeLink
-                    );
-
-                    songSelector.lastPlayedSongs = songs.slice(
-                        0,
-                        LAST_PLAYED_SONG_QUEUE_SIZE
-                    );
-                    songSelector.checkLastPlayedSongs();
-                    assert.strictEqual(
-                        songSelector.lastPlayedSongs.length,
-                        LAST_PLAYED_SONG_QUEUE_SIZE / 2 - 1
-                    );
-
-                    assert.strictEqual(
-                        songSelector.lastPlayedSongs[0],
-                        songs[LAST_PLAYED_SONG_QUEUE_SIZE / 2 + 1]
-                    );
                 });
             });
         });
