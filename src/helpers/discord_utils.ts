@@ -57,8 +57,6 @@ export const EMBED_ERROR_COLOR = 0xed4245; // Red
 export const EMBED_SUCCESS_COLOR = 0x57f287; // Green
 export const EMBED_SUCCESS_BONUS_COLOR = 0xfee75c; // Gold
 
-export const ZERO_WIDTH_SPACE = "​";
-
 const EMBED_FIELDS_PER_PAGE = 20;
 const REQUIRED_TEXT_PERMISSIONS = [
     "addReactions" as const,
@@ -819,7 +817,7 @@ export async function sendEndRoundMessage(
 }
 
 /**
- * Sends an embed displaying the currently selected GameOptions
+ * Get a sentence describing the current limit
  * @param guildID - The ID of the guild where the limit is sent
  * @param gameOptions - The game options
  * @param totalSongs - The song count
@@ -1036,33 +1034,44 @@ export async function generateOptionsMessage(
         }
     }
 
+    const optionsOverview = state.localizer.translate(
+        messageContext.guildID,
+        "command.options.overview",
+        {
+            limit: bold(limit),
+            totalSongs: bold(
+                friendlyFormattedNumber(totalSongs.countBeforeLimit)
+            ),
+        }
+    );
+
     // Options excluded from embed fields since they are of higher importance (shown above them as part of the embed description)
-    let priorityOptions = PriorityGameOption.map(
+    const priorityOptions = PriorityGameOption.map(
         (option) =>
             `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${
                 optionStrings[option]
             }`
     ).join("\n");
 
+    let nonPremiumGameWarning = "";
     if (
         premiumRequest &&
         gameSessions[messageContext.guildID] &&
         !gameSessions[messageContext.guildID].isPremiumGame()
     ) {
-        priorityOptions =
-            italicize(
-                state.localizer.translate(
-                    messageContext.guildID,
-                    "command.options.premiumOptionsNonPremiumGame"
-                )
-            ) +
-            "\n\n" +
-            priorityOptions;
+        nonPremiumGameWarning = italicize(
+            state.localizer.translate(
+                messageContext.guildID,
+                "command.options.premiumOptionsNonPremiumGame"
+            )
+        );
     }
 
     const fieldOptions = Object.keys(GameOptionCommand).filter(
         (option) => !PriorityGameOption.includes(option as GameOption)
     );
+
+    const ZERO_WIDTH_SPACE = "​";
 
     // Split non-priority options into three fields
     const fields = [
@@ -1153,10 +1162,19 @@ export async function generateOptionsMessage(
                   );
     }
 
+    let description = "";
+    if (nonPremiumGameWarning) {
+        description = nonPremiumGameWarning + "\n\n";
+    }
+
+    description += optionsOverview;
+    description += "\n\n";
+    description += priorityOptions;
+
     return {
         color: premiumRequest ? EMBED_SUCCESS_BONUS_COLOR : null,
         title,
-        description: priorityOptions,
+        description,
         fields,
         footerText,
     };

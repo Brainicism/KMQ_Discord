@@ -9,10 +9,8 @@ import {
     getCurrentVoiceMembers,
     EMBED_SUCCESS_BONUS_COLOR,
     getMention,
-    getFormattedLimit,
     generateOptionsMessage,
     generateEmbed,
-    ZERO_WIDTH_SPACE,
 } from "../../helpers/discord_utils";
 import {
     deleteGameSession,
@@ -20,17 +18,10 @@ import {
 } from "../../helpers/management_utils";
 import {
     activeBonusUsers,
-    getAvailableSongCount,
     getGuildPreference,
     isPowerHour,
-    isPremiumRequest,
 } from "../../helpers/game_utils";
-import {
-    bold,
-    chooseWeightedRandom,
-    friendlyFormattedNumber,
-    isWeekend,
-} from "../../helpers/utils";
+import { chooseWeightedRandom, isWeekend } from "../../helpers/utils";
 import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import dbContext from "../../database_context";
 import { IPCLogger } from "../../logger";
@@ -41,7 +32,7 @@ import KmqMember from "../../structures/kmq_member";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import { DEFAULT_LIVES } from "../../structures/elimination_scoreboard";
-import GuildPreference from "src/structures/guild_preference";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("play");
 
@@ -51,7 +42,7 @@ const logger = new IPCLogger("play");
  * @param voiceChannelName - The name of the voice channel to join
  * @param message - The original message that triggered the command
  * @param participants - The list of participants
- * @param guildPreference - The guild preferences
+ * @param guildPreference - The guild's game preferences
  */
 export async function sendBeginGameMessage(
     textChannelName: string,
@@ -115,22 +106,6 @@ export async function sendBeginGameMessage(
         )} ⬆️**`;
     }
 
-    const premiumRequest = await isPremiumRequest(
-        message.guildID,
-        message.author.id
-    );
-
-    const totalSongs = await getAvailableSongCount(
-        guildPreference,
-        premiumRequest
-    );
-
-    const limit = getFormattedLimit(
-        message.guildID,
-        guildPreference.gameOptions,
-        totalSongs
-    );
-
     const startTitle = state.localizer.translate(
         message.guildID,
         "command.play.gameStarting",
@@ -159,20 +134,6 @@ export async function sendBeginGameMessage(
         });
     }
 
-    fields.push({
-        name: ZERO_WIDTH_SPACE,
-        value: state.localizer.translate(
-            message.guildID,
-            "command.options.overview",
-            {
-                limit: bold(limit),
-                totalSongs: bold(
-                    friendlyFormattedNumber(totalSongs.countBeforeLimit)
-                ),
-            }
-        ),
-    });
-
     const messageContext = MessageContext.fromMessage(message);
     const optionsEmbedPayload = await generateOptionsMessage(
         messageContext,
@@ -180,16 +141,15 @@ export async function sendBeginGameMessage(
         null
     );
 
-    optionsEmbedPayload.footerText =
-        !isBonus && Math.random() < 0.5
-            ? state.localizer.translate(
-                  message.guildID,
-                  "command.play.voteReminder",
-                  {
-                      vote: `${process.env.BOT_PREFIX}vote`,
-                  }
-              )
-            : null;
+    if (!isBonus && Math.random() < 0.5) {
+        optionsEmbedPayload.footerText = state.localizer.translate(
+            message.guildID,
+            "command.play.voteReminder",
+            {
+                vote: `${process.env.BOT_PREFIX}vote`,
+            }
+        );
+    }
 
     await sendInfoMessage(
         messageContext,
