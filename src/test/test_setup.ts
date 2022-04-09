@@ -104,7 +104,7 @@ before(async function () {
 after(async function () {
     this.timeout(20000);
     sandbox.restore();
-    console.log("Rolling back migrations...");
+    logger.info("Rolling back migrations...");
     await dbContext.kmq.migrate.rollback(
         {
             directory: kmqKnexConfig.migrations.directory,
@@ -112,7 +112,7 @@ after(async function () {
         true
     );
 
-    console.log("Test re-applying migrations...");
+    logger.info("Test re-applying migrations...");
     await dbContext.kmq.migrate.latest({
         directory: kmqKnexConfig.migrations.directory,
     });

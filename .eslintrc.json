@@ -131,7 +131,7 @@
             "off"
         ],
         "no-console": [
-            "off"
+            "error"
         ],
         "quote-props": [
             "off"
