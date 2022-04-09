@@ -14,6 +14,8 @@ const logger = new IPCLogger("shuffle");
 
 export enum ShuffleType {
     RANDOM = "random",
+    WEIGHTED_EASY = "weighted_easy",
+    WEIGHTED_HARD = "weighted_hard",
 }
 
 export const DEFAULT_SHUFFLE = ShuffleType.RANDOM;
@@ -86,7 +88,7 @@ export default class ShuffleCommand implements BaseCommand {
         const shuffleType =
             parsedMessage.components[0].toLowerCase() as ShuffleType;
 
-        guildPreference.setShuffleType(shuffleType);
+        await guildPreference.setShuffleType(shuffleType);
         await sendOptionsMessage(
             MessageContext.fromMessage(message),
             guildPreference,

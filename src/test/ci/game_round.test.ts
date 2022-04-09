@@ -32,6 +32,7 @@ describe("constructor defaults", () => {
                 views: 1000000,
                 tags: "",
                 vtype: "main",
+                selectionWeight: 1,
             });
 
             assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
@@ -64,6 +65,7 @@ describe("constructor defaults", () => {
                 views: 69420,
                 tags: "",
                 vtype: "main",
+                selectionWeight: 1,
             });
 
             assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
@@ -93,6 +95,7 @@ describe("constructor defaults", () => {
                 views: 123456789,
                 tags: "",
                 vtype: "main",
+                selectionWeight: 1,
             });
 
             assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
@@ -134,6 +137,7 @@ describe("constructor defaults", () => {
                         views: 2,
                         tags: "",
                         vtype: "main",
+                        selectionWeight: 1,
                     });
 
                     assert.deepStrictEqual(gameRound.acceptedSongAnswers, [
@@ -170,6 +174,7 @@ describe("constructor defaults", () => {
                         views: 5,
                         tags: "",
                         vtype: "main",
+                        selectionWeight: 1,
                     });
 
                     assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
@@ -247,6 +252,7 @@ describe("skipping", () => {
             views: 123,
             tags: "",
             vtype: "main",
+            selectionWeight: 1,
         });
     });
 
@@ -306,6 +312,7 @@ describe("check guess", () => {
             views: 3141592653589,
             tags: "",
             vtype: "main",
+            selectionWeight: 1,
         });
     });
 
@@ -560,6 +567,7 @@ describe("getExpReward", () => {
             views: 246810121416,
             tags: "",
             vtype: "main",
+            selectionWeight: 1,
         });
     });
 
