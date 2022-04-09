@@ -104,18 +104,31 @@ export function getDebugLogHeader(
         | Eris.ComponentInteraction
         | Eris.CommandInteraction
 ): string {
-    if (context instanceof Eris.Message) {
-        return `gid: ${context.guildID}, uid: ${context.author.id}, tid: ${context.channel.id}`;
+    const session = Session.getSession(context.guildID);
+    let sessionType: string;
+    if (session) {
+        if (session instanceof GameSession) {
+            sessionType = "GameSession";
+        } else if (session instanceof MusicSession) {
+            sessionType = "MusicSession";
+        }
+    } else {
+        sessionType = "No active session";
     }
 
-    if (
+    let header: string;
+    if (context instanceof Eris.Message) {
+        header = `gid: ${context.guildID}, uid: ${context.author.id}, tid: ${context.channel.id}`;
+    } else if (
         context instanceof Eris.ComponentInteraction ||
         context instanceof Eris.CommandInteraction
     ) {
-        return `gid: ${context.guildID}, uid: ${context.member?.id}, tid: ${context.channel.id}`;
+        header = `gid: ${context.guildID}, uid: ${context.member?.id}, tid: ${context.channel.id}`;
+    } else {
+        header = `gid: ${context.guildID}, tid: ${context.textChannelID}`;
     }
 
-    return `gid: ${context.guildID}, tid: ${context.textChannelID}`;
+    return `${header} | sessionType = ${sessionType}`;
 }
 
 /**
