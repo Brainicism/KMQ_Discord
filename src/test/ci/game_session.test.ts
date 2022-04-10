@@ -39,7 +39,7 @@ describe("startRound", function () {
         );
 
         prepareRoundSpy = sinon.spy(gameSession, <any>"prepareRound");
-        playSongSpy = sinon.spy(gameSession, <any>"playSong");
+        playSongSpy = sinon.stub(gameSession, <any>"playSong");
         ensureVoiceConnectionSpy = sinon.spy(
             game_utils,
             "ensureVoiceConnection"
