@@ -14,8 +14,6 @@ import { LocaleType } from "./localization_manager";
 import { PATREON_SUPPORTER_BADGE, Patron } from "./patreon_manager";
 import { containsHangul, md5Hash } from "./utils";
 import Session from "../structures/session";
-import MusicSession from "../structures/music_session";
-import { SeekType } from "../commands/game_options/seek";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 30;
 
@@ -100,18 +98,11 @@ export async function getGuildPreference(
         .select("*")
         .where("guild_id", "=", guildID);
 
-    const session = Session.getSession(guildID);
-
     if (guildPreferences.length === 0) {
         const guildPreference = GuildPreference.fromGuild(guildID);
         await dbContext
             .kmq("guilds")
             .insert({ guild_id: guildID, join_date: new Date() });
-
-        if (session instanceof MusicSession) {
-            guildPreference.gameOptions.seekType = SeekType.BEGINNING;
-        }
-
         return guildPreference;
     }
 
@@ -124,16 +115,10 @@ export async function getGuildPreference(
         .map((x) => ({ [x["option_name"]]: JSON.parse(x["option_value"]) }))
         .reduce((total, curr) => Object.assign(total, curr), {});
 
-    const guildPreference = GuildPreference.fromGuild(
+    return GuildPreference.fromGuild(
         guildPreferences[0].guild_id,
         gameOptionPairs
     );
-
-    if (session instanceof MusicSession) {
-        guildPreference.gameOptions.seekType = SeekType.BEGINNING;
-    }
-
-    return guildPreference;
 }
 
 /**

@@ -30,6 +30,7 @@ import { KmqImages } from "../constants";
 import { bold, friendlyFormattedNumber } from "../helpers/utils";
 import { SeekType } from "../commands/game_options/seek";
 import { specialFfmpegArgs } from "../commands/game_options/special";
+import MusicSession from "./music_session";
 
 export const SONG_START_DELAY = 3000;
 const BOOKMARK_MESSAGE_SIZE = 10;
@@ -536,7 +537,11 @@ export default abstract class Session {
         const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${round.song.youtubeLink}.ogg`;
 
         let seekLocation: number;
-        const seekType = guildPreference.gameOptions.seekType;
+        const seekType =
+            this instanceof MusicSession
+                ? SeekType.BEGINNING
+                : guildPreference.gameOptions.seekType;
+
         if (seekType === SeekType.BEGINNING) {
             seekLocation = 0;
         } else {
