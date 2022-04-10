@@ -14,10 +14,9 @@ const logger = new IPCLogger("shuffle");
 
 export enum ShuffleType {
     RANDOM = "random",
-    UNIQUE = "unique",
 }
 
-export const DEFAULT_SHUFFLE = ShuffleType.UNIQUE;
+export const DEFAULT_SHUFFLE = ShuffleType.RANDOM;
 
 export default class ShuffleCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
@@ -41,7 +40,6 @@ export default class ShuffleCommand implements BaseCommand {
             "command.shuffle.help.description",
             {
                 random: `\`${ShuffleType.RANDOM}\``,
-                shuffle: `\`${ShuffleType.UNIQUE}\``,
             }
         ),
         usage: ",shuffle [random | unique]",
