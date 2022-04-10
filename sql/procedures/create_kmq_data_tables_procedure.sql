@@ -95,5 +95,8 @@ BEGIN
 
 	RENAME TABLE available_songs TO old, available_songs_temp TO available_songs;
 	DROP TABLE old;
+
+	/* de-duplicate conflicting names */
+	UPDATE kpop_videos.app_kpop_group SET name = concat(name, " (", fname, ")") WHERE name in (SELECT LOWER(name) as name FROM kpop_videos.app_kpop_group GROUP BY LOWER(name) HAVING count(*) > 1);
 END //
 DELIMITER ;
