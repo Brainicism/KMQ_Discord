@@ -106,8 +106,8 @@ export default class MusicCommand implements BaseCommand {
             guildID,
             "command.music.help.description"
         ),
-        usage: "music",
-        // priority: 1050,
+        usage: ",music",
+        priority: 1050,
         examples: [
             {
                 example: "`,music`",
