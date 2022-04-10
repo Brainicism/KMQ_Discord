@@ -13,7 +13,7 @@ import {
 } from "../helpers/discord_utils";
 import dbContext from "../database_context";
 import { QueriedSong } from "../types";
-import { GuessResult } from "./game_session";
+import GameSession, { GuessResult } from "./game_session";
 import GuildPreference from "./guild_preference";
 import KmqMember from "./kmq_member";
 import MessageContext from "./message_context";
@@ -411,9 +411,15 @@ export default abstract class Session {
     }
 
     async reloadSongs(guildPreference: GuildPreference): Promise<void> {
+        const session = Session.getSession(guildPreference.guildID);
+        if (!session) {
+            return;
+        }
+
         await this.songSelector.reloadSongs(
             guildPreference,
-            state.gameSessions[this.guildID]?.isPremiumGame() ?? false
+            session instanceof MusicSession ||
+                (session instanceof GameSession && session.isPremiumGame())
         );
     }
 

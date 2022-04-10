@@ -94,7 +94,10 @@ export async function sendBeginMusicSessionMessage(
 }
 
 export default class MusicCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.notRestartingPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.notRestartingPrecheck },
+        { checkFn: CommandPrechecks.premiumPrecheck },
+    ];
 
     validations = {
         minArgCount: 0,

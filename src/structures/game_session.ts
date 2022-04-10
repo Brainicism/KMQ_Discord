@@ -585,6 +585,10 @@ export default class GameSession extends Session {
 
     /** Updates owner to the first player to join the game that didn't leave VC */
     updateOwner(): void {
+        if (this.finished) {
+            return;
+        }
+
         const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID).filter(
             (x) => x.id !== process.env.BOT_CLIENT_ID
         );
@@ -687,9 +691,8 @@ export default class GameSession extends Session {
      * The game has changed its premium state, so update filtered songs/remove ,special
      */
     async updatePremiumStatus(): Promise<void> {
-        await this.reloadSongs(await getGuildPreference(this.guildID));
-
         const guildPreference = await getGuildPreference(this.guildID);
+        await this.reloadSongs(guildPreference);
         if (
             !this.isPremiumGame() &&
             this.guildID !== process.env.DEBUG_SERVER_ID &&

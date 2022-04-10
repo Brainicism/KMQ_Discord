@@ -12,6 +12,7 @@ import dbContext from "./database_context";
 import { state } from "./kmq_worker";
 import MusicSession from "./structures/music_session";
 import { getTimeUntilRestart } from "./helpers/management_utils";
+import { isUserPremium } from "./helpers/game_utils";
 
 const logger = new IPCLogger("command_prechecks");
 export interface PrecheckArgs {
@@ -202,5 +203,27 @@ export default class CommandPrechecks {
         }
 
         return true;
+    }
+
+    static async premiumPrecheck(precheckArgs: PrecheckArgs): Promise<boolean> {
+        const { message } = precheckArgs;
+        const premium = await isUserPremium(message.author.id);
+        if (premium) {
+            return true;
+        }
+
+        await sendErrorMessage(MessageContext.fromMessage(message), {
+            title: state.localizer.translate(
+                message.guildID,
+                "misc.preCheck.title"
+            ),
+            description: state.localizer.translate(
+                message.guildID,
+                "misc.preCheck.notPremium",
+                { premium: `\`${process.env.BOT_PREFIX}premium\`` }
+            ),
+        });
+
+        return false;
     }
 }

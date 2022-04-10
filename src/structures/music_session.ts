@@ -12,11 +12,16 @@ import GuildPreference from "./guild_preference";
 import MessageContext from "./message_context";
 import { GuessResult } from "./game_session";
 import { IPCLogger } from "../logger";
+import { isUserPremium } from "../helpers/game_utils";
 
 const logger = new IPCLogger("music_session");
 
 export default class MusicSession extends Session {
     updateOwner(): void {
+        if (this.finished) {
+            return;
+        }
+
         const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID).filter(
             (x) => x.id !== process.env.BOT_CLIENT_ID
         );
@@ -88,6 +93,19 @@ export default class MusicSession extends Session {
 
     getListeners(): number {
         return getCurrentVoiceMembers(this.voiceChannelID).length;
+    }
+
+    /**
+     * At least one premium member required to use a music session
+     */
+    verifyPremium(): void {
+        if (
+            !getCurrentVoiceMembers(this.voiceChannelID).some((x) =>
+                isUserPremium(x.id)
+            )
+        ) {
+            this.endSession();
+        }
     }
 
     /**

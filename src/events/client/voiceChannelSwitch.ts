@@ -2,6 +2,7 @@ import Eris from "eris";
 import { checkBotIsAlone } from "../../helpers/discord_utils";
 import Session from "../../structures/session";
 import GameSession from "../../structures/game_session";
+import MusicSession from "../../structures/music_session";
 
 /**
  * Handles the 'voiceChannelSwitch' event
@@ -42,13 +43,16 @@ export default async function voiceChannelSwitchHandler(
         } else {
             // Bot was moved to another VC
             session.voiceChannelID = newChannel.id;
-            session.syncAllVoiceMembers();
+            await session.syncAllVoiceMembers();
         }
 
         if (oldPremiumState !== session.isPremiumGame()) {
             session.updatePremiumStatus();
         }
-    }
 
-    session.updateOwner();
+        session.updateOwner();
+    } else if (session instanceof MusicSession) {
+        session.updateOwner();
+        session.verifyPremium();
+    }
 }

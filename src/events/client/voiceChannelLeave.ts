@@ -2,6 +2,7 @@ import Eris from "eris";
 import { checkBotIsAlone } from "../../helpers/discord_utils";
 import Session from "../../structures/session";
 import GameSession from "../../structures/game_session";
+import MusicSession from "../../structures/music_session";
 
 /**
  * Handles the 'voiceChannelLeave' event
@@ -27,12 +28,15 @@ export default async function voiceChannelLeaveHandler(
         return;
     }
 
-    session.updateOwner();
     if (session instanceof GameSession) {
         const oldPremiumState = session.isPremiumGame();
         await session.setPlayerInVC(member.id, false);
         if (oldPremiumState !== session.isPremiumGame()) {
             await session.updatePremiumStatus();
         }
+    } else if (session instanceof MusicSession) {
+        session.verifyPremium();
     }
+
+    session.updateOwner();
 }
