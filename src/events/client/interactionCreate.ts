@@ -71,8 +71,8 @@ export default async function interactionCreateHandler(
             Eris.Constants.ApplicationCommandTypes.MESSAGE
         ) {
             if (interaction.data.name === BOOKMARK_COMMAND_NAME) {
-                const gameSession = state.gameSessions[interaction.guildID];
-                if (!gameSession) {
+                const session = Session.getSession(interaction.guildID);
+                if (!session) {
                     tryCreateInteractionErrorAcknowledgement(
                         interaction,
                         state.localizer.translate(
@@ -83,7 +83,7 @@ export default async function interactionCreateHandler(
                     return;
                 }
 
-                gameSession.handleBookmarkInteraction(interaction);
+                session.handleBookmarkInteraction(interaction);
             } else if (interaction.data.name === PROFILE_COMMAND_NAME) {
                 const messageId = interaction.data.target_id;
                 const authorId =
