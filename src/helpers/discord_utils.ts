@@ -1068,12 +1068,16 @@ export async function generateOptionsMessage(
     );
 
     // Options excluded from embed fields since they are of higher importance (shown above them as part of the embed description)
-    const priorityOptions = PriorityGameOption.map(
-        (option) =>
-            `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${
-                optionStrings[option]
-            }`
-    ).join("\n");
+    const priorityOptions = PriorityGameOption.filter(
+        (option) => optionStrings[option]
+    )
+        .map(
+            (option) =>
+                `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${
+                    optionStrings[option]
+                }`
+        )
+        .join("\n");
 
     let nonPremiumGameWarning = "";
     if (
