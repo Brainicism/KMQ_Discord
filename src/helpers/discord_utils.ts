@@ -1049,6 +1049,7 @@ export async function generateOptionsMessage(
             GameOption.MULTIGUESS,
             GameOption.ANSWER_TYPE,
             GameOption.GOAL,
+            GameOption.SPECIAL_TYPE,
         ];
 
         for (const option of disabledOptions) {
