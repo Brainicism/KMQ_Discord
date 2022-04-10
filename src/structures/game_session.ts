@@ -172,7 +172,6 @@ export default class GameSession extends Session {
         }
 
         await super.startRound(guildPreference, messageContext);
-
         if (guildPreference.isMultipleChoiceMode()) {
             const locale = getGuildLocale(this.guildID);
             const randomSong = this.round.song;

@@ -66,7 +66,7 @@ export default abstract class Session {
     /** Whether the GameSession is active yet */
     public sessionInitialized: boolean;
 
-    protected songSelector: SongSelector;
+    public songSelector: SongSelector;
 
     /** The number of Rounds played */
     protected roundsPlayed: number;
@@ -109,7 +109,6 @@ export default abstract class Session {
         messageContext: MessageContext
     ): Promise<void> {
         this.sessionInitialized = true;
-
         if (this.songSelector.getSongs() === null) {
             try {
                 await this.reloadSongs(guildPreference);
@@ -544,6 +543,7 @@ export default abstract class Session {
         );
         this.connection.removeAllListeners();
         this.connection.stopPlaying();
+
         try {
             let inputArgs = ["-ss", seekLocation.toString()];
             let encoderArgs = [];
