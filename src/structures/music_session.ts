@@ -21,6 +21,11 @@ export default class MusicSession extends Session {
             (x) => x.id !== process.env.BOT_CLIENT_ID
         );
 
+        const voiceMemberIDs = new Set(voiceMembers.map((x) => x.id));
+        if (voiceMemberIDs.has(this.owner.id) || voiceMemberIDs.size === 0) {
+            return;
+        }
+
         this.owner = KmqMember.fromUser(chooseRandom(voiceMembers));
 
         super.updateOwner();
