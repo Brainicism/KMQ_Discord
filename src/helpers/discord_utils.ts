@@ -875,6 +875,7 @@ export function getFormattedLimit(
  * @param preset - Specifies whether the GameOptions were modified by a preset
  * @param allReset - Specifies whether all GameOptions were reset
  * @param footerText - The footer text
+ * @param isMusicSession - Whether the session is a MusicSession
  *  @returns an embed of current game options
  */
 export async function generateOptionsMessage(
@@ -883,7 +884,8 @@ export async function generateOptionsMessage(
     updatedOptions?: { option: GameOption; reset: boolean }[],
     preset = false,
     allReset = false,
-    footerText?: string
+    footerText?: string,
+    isMusicSession = false
 ): Promise<EmbedPayload> {
     if (guildPreference.gameOptions.forcePlaySongID) {
         await sendInfoMessage(
@@ -1042,7 +1044,7 @@ export async function generateOptionsMessage(
     }
 
     // Special case: disable these options in a music session
-    if (session instanceof MusicSession) {
+    if (session instanceof MusicSession || isMusicSession) {
         const disabledOptions = [
             GameOption.GUESS_MODE_TYPE,
             GameOption.SEEK_TYPE,
