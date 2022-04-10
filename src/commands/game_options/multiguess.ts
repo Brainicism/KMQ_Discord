@@ -20,7 +20,10 @@ export enum MultiGuessType {
 export const DEFAULT_MULTIGUESS_TYPE = MultiGuessType.ON;
 
 export default class MultiGuessCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notMusicPrecheck },
+    ];
 
     validations = {
         minArgCount: 0,

@@ -21,7 +21,10 @@ export enum SeekType {
 export const DEFAULT_SEEK = SeekType.RANDOM;
 
 export default class SeekCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notMusicPrecheck },
+    ];
 
     validations = {
         minArgCount: 0,
