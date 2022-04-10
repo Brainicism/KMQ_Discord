@@ -80,7 +80,8 @@ export default class BeginCommand implements BaseCommand {
                 channel.name,
                 getUserVoiceChannel(MessageContext.fromMessage(message)).name,
                 message,
-                participants
+                participants,
+                guildPreference
             );
 
             gameSession.startRound(
