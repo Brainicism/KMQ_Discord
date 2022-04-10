@@ -2,6 +2,7 @@
 import Eris from "eris";
 import EmbedPaginator from "eris-pagination";
 import axios from "axios";
+import * as uuid from "uuid";
 import GuildPreference, { GameOptions } from "../structures/guild_preference";
 import GameSession from "../structures/game_session";
 import { IPCLogger } from "../logger";
@@ -52,6 +53,7 @@ import { LocaleType, DEFAULT_LOCALE } from "./localization_manager";
 import Round from "../structures/round";
 import Session from "../structures/session";
 import MusicSession from "../structures/music_session";
+import MusicRound from "../structures/music_round";
 
 const logger = new IPCLogger("discord_utils");
 export const EMBED_ERROR_COLOR = 0xed4245; // Red
@@ -822,6 +824,33 @@ export async function sendRoundMessage(
             await round.interactionMessage.edit({ embeds: [embed as Object] });
             return round.interactionMessage;
         }
+    }
+
+    if (round instanceof MusicRound) {
+        const buttons: Array<Eris.InteractionButton> = [];
+        round.interactionSkipUUID = uuid.v4();
+        buttons.push({
+            type: 2,
+            style: 1,
+            label: state.localizer.translate(
+                messageContext.guildID,
+                "misc.skip"
+            ),
+            custom_id: round.interactionSkipUUID,
+        });
+
+        buttons.push({
+            type: 2,
+            style: 1,
+            label: state.localizer.translate(
+                messageContext.guildID,
+                "misc.bookmark"
+            ),
+            custom_id: "bookmark",
+        });
+
+        round.interactionComponents = [{ type: 1, components: buttons }];
+        embed.components = round.interactionComponents;
     }
 
     embed.thumbnailUrl = thumbnailUrl;

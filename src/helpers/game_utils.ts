@@ -15,7 +15,7 @@ import { PATREON_SUPPORTER_BADGE, Patron } from "./patreon_manager";
 import { containsHangul, md5Hash } from "./utils";
 import Session from "../structures/session";
 
-const GAME_SESSION_INACTIVE_THRESHOLD = 30;
+const GAME_SESSION_INACTIVE_THRESHOLD = 10;
 
 const logger = new IPCLogger("game_utils");
 

@@ -17,6 +17,7 @@ import EliminationScoreboard from "../../structures/elimination_scoreboard";
 import { state } from "../../kmq_worker";
 import Round from "../../structures/round";
 import Session from "../../structures/session";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("skip");
 
@@ -51,10 +52,7 @@ async function sendSkipMessage(
 ): Promise<void> {
     await sendInfoMessage(MessageContext.fromMessage(message), {
         color: EMBED_SUCCESS_COLOR,
-        title: state.localizer.translate(
-            message.guildID,
-            "command.skip.success.title"
-        ),
+        title: state.localizer.translate(message.guildID, "misc.skip"),
         description: state.localizer.translate(
             message.guildID,
             "command.skip.success.description",
@@ -68,10 +66,13 @@ async function sendSkipMessage(
     });
 }
 
-function isSkipMajority(
-    message: GuildTextableMessage,
-    session: Session
-): boolean {
+/**
+ * Whether there are enough votes to skip the song
+ * @param guildID - The guild's ID
+ * @param session - The current session
+ * @returns whether the song has enough votes to be skipped
+ */
+export function isSkipMajority(guildID: string, session: Session): boolean {
     if (session instanceof GameSession) {
         const gameSession = session as GameSession;
         if (gameSession.gameType === GameType.ELIMINATION) {
@@ -87,7 +88,27 @@ function isSkipMajority(
         }
     }
 
-    return session.round.getSkipCount() >= getMajorityCount(message.guildID);
+    return session.round.getSkipCount() >= getMajorityCount(guildID);
+}
+
+/**
+ * Skip the current song (end the current round and start a new one)
+ * @param messageContext - The context that triggered skipping
+ * @param session - The current session
+ * @param guildPreference - The guild's preference
+ */
+export async function skipSong(
+    messageContext: MessageContext,
+    session: Session,
+    guildPreference: GuildPreference
+): Promise<void> {
+    logger.info(
+        `${getDebugLogHeader(messageContext)} | Skip majority achieved.`
+    );
+    session.round.skipAchieved = true;
+    await session.endRound(guildPreference, messageContext, { correct: false });
+
+    session.startRound(guildPreference, messageContext);
 }
 
 export default class SkipCommand implements BaseCommand {
@@ -120,7 +141,6 @@ export default class SkipCommand implements BaseCommand {
 
         const session = Session.getSession(message.guildID);
         if (
-            !session ||
             !session.round ||
             session.round.skipAchieved ||
             session.round.finished
@@ -149,23 +169,12 @@ export default class SkipCommand implements BaseCommand {
         session.round.userSkipped(message.author.id);
         logger.info(`${getDebugLogHeader(message)} | User skipped`);
 
-        const guildPreference = await getGuildPreference(message.guildID);
-        if (isSkipMajority(message, session)) {
-            session.round.skipAchieved = true;
+        if (isSkipMajority(message.guildID, session)) {
             sendSkipMessage(message, session.round);
-            await session.endRound(
-                guildPreference,
+            skipSong(
                 MessageContext.fromMessage(message),
-                { correct: false }
-            );
-
-            session.startRound(
-                guildPreference,
-                MessageContext.fromMessage(message)
-            );
-
-            logger.info(
-                `${getDebugLogHeader(message)} | Skip majority achieved.`
+                session,
+                await getGuildPreference(message.guildID)
             );
         } else {
             logger.info(`${getDebugLogHeader(message)} | Skip vote received.`);

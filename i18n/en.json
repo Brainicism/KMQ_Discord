@@ -873,8 +873,7 @@
                 "description": "Vote to skip the current song. A song is skipped when majority of participants vote to skip it."
             },
             "success": {
-                "description": "{{skipCounter}} skips achieved, skipping...",
-                "title": "Skip"
+                "description": "{{skipCounter}} skips achieved, skipping..."
             },
             "vote": {
                 "description": "{{skipCounter}} skip requests received.",
@@ -1013,6 +1012,7 @@
         "andManyOthers": "and many others...",
         "artist": "artist",
         "artistAliases": "Artist Aliases",
+        "bookmark": "Bookmark",
         "classic": {
             "yourScore": "Your score is {{score}}."
         },
@@ -1252,6 +1252,7 @@
             "description": "Sending {{songs}} to {{players}}.\n\nBookmark songs during the game by right-clicking the song message and selecting `Apps > Bookmark Song`",
             "title": "Sending Bookmarked Songs..."
         },
+        "skip": "Skip",
         "song": "song",
         "songAliases": "Song Aliases",
         "team": {

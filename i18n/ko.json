@@ -873,8 +873,7 @@
                 "description": "현재 노래를 건너뛰려면 투표하세요. (대다수의 참가자가 건너뛰기로 투표하면 노래를 건너뜁니다.)"
             },
             "success": {
-                "description": "{{skipCounter}} 건너뛰기 요청이 수락되었습니다!",
-                "title": "건너뛰기"
+                "description": "{{skipCounter}} 건너뛰기 요청이 수락되었습니다!"
             },
             "vote": {
                 "description": "{{skipCounter}} 건너뛰기가 요청되었습니다!",
@@ -1013,6 +1012,7 @@
         "andManyOthers": "그리고 많은 다른 사람들...",
         "artist": "아티스트",
         "artistAliases": "아티스트 별칭",
+        "bookmark": "북마크",
         "classic": {
             "yourScore": "당신의 점수는 {{score}}점 입니다."
         },
@@ -1252,6 +1252,7 @@
             "description": "{{players}}에게 {{songs}}을(를) 보냅니다.\n\n노래 메시지를 마우스 오른쪽 버튼으로 클릭하고 `앱 > Bookmark Song`를 선택하여 게임 중에 노래를 북마크하세요.",
             "title": "북마크된 노래를 보내는 중..."
         },
+        "skip": "건너뛰기",
         "song": "노래",
         "songAliases": "노래 별칭",
         "team": {
