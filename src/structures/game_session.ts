@@ -340,10 +340,10 @@ export default class GameSession extends Session {
                 this.songSelector.getUniqueSongCounter(guildPreference)
             );
 
-            // if message fails to send, no ID is returned
             round.roundMessageID = endRoundMessage?.id;
         }
 
+        this.updateBookmarkSongList();
         await super.endRound(guildPreference, messageContext);
 
         if (this.scoreboard.gameFinished(guildPreference)) {
@@ -616,16 +616,12 @@ export default class GameSession extends Session {
         interaction: Eris.ComponentInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        if (!this.round) {
-            return;
-        }
-
         if (
-            !getCurrentVoiceMembers(this.voiceChannelID)
-                .map((x) => x.id)
-                .includes(interaction.member.id)
+            !this.handleInSessionInteractionFailures(
+                interaction,
+                messageContext
+            )
         ) {
-            tryInteractionAcknowledge(interaction);
             return;
         }
 
@@ -635,17 +631,6 @@ export default class GameSession extends Session {
                 state.localizer.translate(
                     this.guildID,
                     "misc.failure.interaction.alreadyEliminated"
-                )
-            );
-            return;
-        }
-
-        if (!this.round.isValidInteractionGuess(interaction.data.custom_id)) {
-            tryCreateInteractionErrorAcknowledgement(
-                interaction,
-                state.localizer.translate(
-                    this.guildID,
-                    "misc.failure.interaction.optionFromPreviousRound"
                 )
             );
             return;

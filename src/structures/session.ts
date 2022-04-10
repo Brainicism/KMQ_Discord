@@ -2,6 +2,7 @@ import Eris from "eris";
 import fs from "fs";
 import { IPCLogger } from "../logger";
 import {
+    getCurrentVoiceMembers,
     getDebugLogHeader,
     getGuildLocale,
     getMention,
@@ -10,6 +11,7 @@ import {
     sendInfoMessage,
     tryCreateInteractionErrorAcknowledgement,
     tryCreateInteractionSuccessAcknowledgement,
+    tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
 import dbContext from "../database_context";
 import { QueriedSong } from "../types";
@@ -233,29 +235,7 @@ export default abstract class Session {
             return;
         }
 
-        const round = this.round;
         this.round = null;
-
-        if (Object.keys(this.songMessageIDs).length === BOOKMARK_MESSAGE_SIZE) {
-            this.songMessageIDs.shift();
-        }
-
-        if (round.roundMessageID) {
-            this.songMessageIDs.push({
-                messageID: round.roundMessageID,
-                song: {
-                    songName: round.song.songName,
-                    originalSongName: round.song.originalSongName,
-                    hangulSongName: round.song.hangulSongName,
-                    originalHangulSongName: round.song.originalHangulSongName,
-                    artistName: round.song.artistName,
-                    hangulArtistName: round.song.hangulArtistName,
-                    youtubeLink: round.song.youtubeLink,
-                    publishDate: round.song.publishDate,
-                    views: round.song.views,
-                },
-            });
-        }
 
         // cleanup
         this.stopGuessTimeout();
@@ -481,9 +461,15 @@ export default abstract class Session {
     }
 
     async handleBookmarkInteraction(
-        interaction: Eris.CommandInteraction
+        interaction: Eris.CommandInteraction | Eris.ComponentInteraction
     ): Promise<void> {
-        const song = this.getSongFromMessageID(interaction.data.target_id);
+        let song: QueriedSong;
+        if (interaction instanceof Eris.CommandInteraction) {
+            song = this.getSongFromMessageID(interaction.data.target_id);
+        } else if (interaction instanceof Eris.ComponentInteraction) {
+            song = this.getSongFromMessageID(interaction.message.id);
+        }
+
         if (!song) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
@@ -651,6 +637,59 @@ export default abstract class Session {
             count: selectedSongs.songs.size,
             countBeforeLimit: selectedSongs.countBeforeLimit,
         };
+    }
+
+    /**
+     * Handles common reasons for why an interaction would not succeed in a session
+     * @param interaction - The interaction
+     * @param _messageContext - Unused
+     * @returns whether to continue with handling the interaction
+     */
+    protected handleInSessionInteractionFailures(
+        interaction: Eris.ComponentInteraction,
+        _messageContext: MessageContext
+    ): boolean {
+        if (!this.round) {
+            return false;
+        }
+
+        if (
+            !getCurrentVoiceMembers(this.voiceChannelID)
+                .map((x) => x.id)
+                .includes(interaction.member.id)
+        ) {
+            tryInteractionAcknowledge(interaction);
+            return false;
+        }
+
+        if (!this.round.isValidInteraction(interaction.data.custom_id)) {
+            tryCreateInteractionErrorAcknowledgement(
+                interaction,
+                state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.interaction.optionFromPreviousRound"
+                )
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    protected updateBookmarkSongList(): void {
+        const round = this.round;
+        if (!round) return;
+
+        if (Object.keys(this.songMessageIDs).length === BOOKMARK_MESSAGE_SIZE) {
+            this.songMessageIDs.shift();
+        }
+
+        if (round.roundMessageID) {
+            this.songMessageIDs.push({
+                messageID: round.roundMessageID,
+                song: round.song,
+            });
+        }
     }
 
     /**

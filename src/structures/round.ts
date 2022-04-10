@@ -1,3 +1,4 @@
+import Eris from "eris";
 import { PlayerRoundResult, QueriedSong } from "../types";
 import { state } from "../kmq_worker";
 import { UniqueSongCounter } from "./song_selector";
@@ -35,6 +36,12 @@ export default abstract class Round {
     /** Whether the Round has been skipped */
     public skipAchieved: boolean;
 
+    /** Interactable components attached to this round's message */
+    public interactionComponents: Array<Eris.ActionRow>;
+
+    /** The message containing this round's interactable components */
+    public interactionMessage: Eris.Message<Eris.TextableChannel>;
+
     constructor(song: QueriedSong) {
         this.song = song;
         this.songAliases = state.aliases.song[song.youtubeLink] || [];
@@ -46,6 +53,7 @@ export default abstract class Round {
         this.roundMessageID = null;
         this.skippers = new Set();
         this.skipAchieved = false;
+        this.interactionComponents = [];
     }
 
     abstract getEndRoundDescription(
@@ -53,10 +61,13 @@ export default abstract class Round {
         uniqueSongCounter: UniqueSongCounter,
         playerRoundResults: Array<PlayerRoundResult>
     ): string;
+
     abstract getEndRoundColor(
         correctGuess: boolean,
         userBonusActive: boolean
     ): number;
+
+    abstract isValidInteraction(interactionUUID: string): boolean;
 
     /**
      * Adds a skip vote for the specified user
