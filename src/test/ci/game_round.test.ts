@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import assert from "assert";
+import { Gender } from "../../commands/game_options/gender";
 import {
     ExpBonusModifier,
     ExpBonusModifierValues,
@@ -24,7 +25,13 @@ describe("constructor defaults", () => {
                 hangulArtistName: "지수",
                 youtubeLink: "abcde",
                 publishDate: new Date(),
+                members: Gender.FEMALE,
+                artistID: 1,
+                isSolo: "y",
+                rank: 0,
                 views: 1000000,
+                tags: "",
+                vtype: "main",
             });
 
             assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
@@ -50,7 +57,13 @@ describe("constructor defaults", () => {
                 hangulArtistName: "아이유+블랙핑크",
                 youtubeLink: "abcde",
                 publishDate: new Date(),
+                members: Gender.FEMALE,
+                artistID: 2,
+                isSolo: "n",
+                rank: 10,
                 views: 69420,
+                tags: "",
+                vtype: "main",
             });
 
             assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
@@ -73,7 +86,13 @@ describe("constructor defaults", () => {
                 hangulArtistName: "   블랙핑크+아이유                ",
                 youtubeLink: "abcde",
                 publishDate: new Date(),
+                members: Gender.FEMALE,
+                artistID: 3,
+                isSolo: "y",
+                rank: 0,
                 views: 123456789,
+                tags: "",
+                vtype: "main",
             });
 
             assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
@@ -108,7 +127,13 @@ describe("constructor defaults", () => {
                         hangulArtistName: "정말 서사시인",
                         youtubeLink: "abcde",
                         publishDate: new Date(),
+                        members: Gender.MALE,
+                        artistID: 4,
+                        isSolo: "y",
+                        rank: 0,
                         views: 2,
+                        tags: "",
+                        vtype: "main",
                     });
 
                     assert.deepStrictEqual(gameRound.acceptedSongAnswers, [
@@ -138,7 +163,13 @@ describe("constructor defaults", () => {
                         hangulArtistName: "2인칭",
                         youtubeLink: "abcde",
                         publishDate: new Date(),
+                        members: Gender.FEMALE,
+                        artistID: 4,
+                        isSolo: "y",
+                        rank: 0,
                         views: 5,
+                        tags: "",
+                        vtype: "main",
                     });
 
                     assert.deepStrictEqual(gameRound.acceptedArtistAnswers, [
@@ -209,7 +240,13 @@ describe("skipping", () => {
             hangulArtistName: "6",
             youtubeLink: "7",
             publishDate: new Date(2015, 0),
+            members: Gender.COED,
+            artistID: 4,
+            isSolo: "n",
+            rank: 0,
             views: 123,
+            tags: "",
+            vtype: "main",
         });
     });
 
@@ -262,7 +299,13 @@ describe("check guess", () => {
             hangulArtistName: "예술가",
             youtubeLink: "a1b2c3",
             publishDate: new Date(2015, 0),
+            members: Gender.MALE,
+            artistID: 4,
+            isSolo: "n",
+            rank: 0,
             views: 3141592653589,
+            tags: "",
+            vtype: "main",
         });
     });
 
@@ -510,7 +553,13 @@ describe("getExpReward", () => {
             hangulArtistName: "예술가",
             youtubeLink: "a1b2c3",
             publishDate: new Date(2015),
+            members: Gender.FEMALE,
+            artistID: 4,
+            isSolo: "y",
+            rank: 2,
             views: 246810121416,
+            tags: "",
+            vtype: "main",
         });
     });
 

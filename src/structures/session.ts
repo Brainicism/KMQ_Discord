@@ -240,17 +240,7 @@ export default abstract class Session {
         if (round.endRoundMessageID) {
             this.songMessageIDs.push({
                 messageID: round.endRoundMessageID,
-                song: {
-                    songName: round.song.songName,
-                    originalSongName: round.song.originalSongName,
-                    hangulSongName: round.song.hangulSongName,
-                    originalHangulSongName: round.song.originalHangulSongName,
-                    artistName: round.song.artistName,
-                    hangulArtistName: round.song.hangulArtistName,
-                    youtubeLink: round.song.youtubeLink,
-                    publishDate: round.song.publishDate,
-                    views: round.song.views,
-                },
+                song: round.song,
             });
         }
 

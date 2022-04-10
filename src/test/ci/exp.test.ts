@@ -14,6 +14,7 @@ import * as game_utils from "../../helpers/game_utils";
 import * as utils from "../../helpers/utils";
 import GameRound from "../../structures/game_round";
 import GuildPreference from "../../structures/guild_preference";
+import { Gender } from "../../commands/game_options/gender";
 
 let guildPreference: GuildPreference;
 const sandbox = sinon.createSandbox();
@@ -340,7 +341,13 @@ describe("calculateRoundExpMultiplier", () => {
             hangulArtistName: "x",
             youtubeLink: "x",
             publishDate: new Date(),
+            members: Gender.FEMALE,
+            artistID: 1,
+            isSolo: "y",
+            rank: 0,
             views: 1,
+            tags: "",
+            vtype: "main",
         });
         gameRound.bonusModifier = 1;
         guildPreference = GuildPreference.fromGuild("123");
