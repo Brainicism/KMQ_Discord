@@ -1,5 +1,7 @@
 import {
     EMBED_SUCCESS_BONUS_COLOR,
+    generateEmbed,
+    generateOptionsMessage,
     getDebugLogHeader,
     getUserVoiceChannel,
     sendErrorMessage,
@@ -13,7 +15,7 @@ import { state } from "../../kmq_worker";
 import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import KmqMember from "../../structures/kmq_member";
-import { GameInfoMessage, GuildTextableMessage } from "../../types";
+import { GameInfoMessage } from "../../types";
 import { chooseWeightedRandom } from "../../helpers/utils";
 import dbContext from "../../database_context";
 import Eris from "eris";
@@ -21,6 +23,7 @@ import { KmqImages } from "../../constants";
 import Session from "../../structures/session";
 import GameSession from "../../structures/game_session";
 import CommandPrechecks from "../../command_prechecks";
+import GuildPreference from "src/structures/guild_preference";
 
 const logger = new IPCLogger("music");
 
@@ -28,16 +31,17 @@ const logger = new IPCLogger("music");
  * Sends the beginning of game session message
  * @param textChannelName - The name of the text channel to send the message to
  * @param voiceChannelName - The name of the voice channel to join
- * @param message - The original message that triggered the command
- * @param participants - The list of participants
+ * @param messageContext - The original message that triggered the command
+ * @param guildPreference - The guild's preferences
  */
 export async function sendBeginMusicSessionMessage(
     textChannelName: string,
     voiceChannelName: string,
-    message: GuildTextableMessage
+    messageContext: MessageContext,
+    guildPreference: GuildPreference
 ): Promise<void> {
     const startTitle = state.localizer.translate(
-        message.guildID,
+        messageContext.guildID,
         "command.music.musicStarting",
         {
             textChannelName,
@@ -53,23 +57,36 @@ export async function sendBeginMusicSessionMessage(
     if (gameInfoMessage) {
         fields.push({
             name: state.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 gameInfoMessage.title
             ),
             value: state.localizer.translate(
-                message.guildID,
+                messageContext.guildID,
                 gameInfoMessage.message
             ),
             inline: false,
         });
     }
 
-    await sendInfoMessage(MessageContext.fromMessage(message), {
-        title: startTitle,
-        color: EMBED_SUCCESS_BONUS_COLOR,
-        thumbnailUrl: KmqImages.HAPPY,
-        fields,
-    });
+    const optionsEmbedPayload = await generateOptionsMessage(
+        messageContext,
+        guildPreference,
+        null
+    );
+
+    await sendInfoMessage(
+        messageContext,
+        {
+            title: startTitle,
+            color: EMBED_SUCCESS_BONUS_COLOR,
+            thumbnailUrl: KmqImages.HAPPY,
+            fields,
+        },
+        false,
+        true,
+        undefined,
+        [generateEmbed(messageContext, optionsEmbedPayload)]
+    );
 }
 
 export default class MusicCommand implements BaseCommand {
@@ -151,7 +168,8 @@ export default class MusicCommand implements BaseCommand {
         await sendBeginMusicSessionMessage(
             textChannel.name,
             voiceChannel.name,
-            message
+            messageContext,
+            guildPreference
         );
 
         musicSession.startRound(guildPreference, messageContext);
