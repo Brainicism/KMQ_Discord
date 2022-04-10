@@ -168,7 +168,12 @@ export default class MusicSession extends Session {
                     ),
                     state.localizer.translate(
                         guildID,
-                        "command.skip.vote.description"
+                        "command.skip.vote.description",
+                        {
+                            skipCounter: `${this.round.getSkipCount()}/${getMajorityCount(
+                                guildID
+                            )}`,
+                        }
                     )
                 );
 
