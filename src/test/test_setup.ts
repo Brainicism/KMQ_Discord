@@ -111,7 +111,6 @@ after(async function () {
         },
         true
     );
-
     logger.info("Test re-applying migrations...");
     await dbContext.kmq.migrate.latest({
         directory: kmqKnexConfig.migrations.directory,
