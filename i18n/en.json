@@ -549,6 +549,7 @@
             "help": {
                 "description": "Displays the current game options."
             },
+            "musicSessionNotAvailable": "Some options are not available during a music session",
             "notSet": "Not set",
             "overview": "Now playing the top {{limit}} out of {{totalSongs}} available songs from the following options:\n\n{{priorityOptions}}",
             "perCommandHelp": "Looking for information on how to use a command? Check out \"{{helpCommand}} [command]\" to learn more.",

@@ -967,37 +967,6 @@ export async function sendOptionsMessage(
         }
     }
 
-    // Special case: disable these options in a music session
-    if (session instanceof MusicSession) {
-        optionStrings[GameOption.GUESS_MODE_TYPE] = String(
-            gameOptions.guessModeType
-        );
-        optionStrings[GameOption.SEEK_TYPE] = String(gameOptions.seekType);
-        optionStrings[GameOption.MULTIGUESS] = String(
-            gameOptions.multiGuessType
-        );
-        optionStrings[GameOption.ANSWER_TYPE] = String(gameOptions.answerType);
-
-        const conflictingOptions = [
-            GameOption.GUESS_MODE_TYPE,
-            GameOption.SEEK_TYPE,
-            GameOption.MULTIGUESS,
-            GameOption.ANSWER_TYPE,
-        ];
-
-        if (guildPreference.isGoalSet()) {
-            optionStrings[GameOption.GOAL] = String(gameOptions.goal);
-            conflictingOptions.push(GameOption.GOAL);
-        }
-
-        for (const option of conflictingOptions) {
-            optionStrings[option] = generateConflictingCommandEntry(
-                optionStrings[option],
-                "listen"
-            );
-        }
-    }
-
     const gameOptionConflictCheckMap = [
         {
             conflictCheck: guildPreference.isGroupsMode.bind(guildPreference),
@@ -1039,13 +1008,32 @@ export async function sendOptionsMessage(
         }
     }
 
+    // Special case: disable these options in a music session
+    if (session instanceof MusicSession) {
+        const disabledOptions = [
+            GameOption.GUESS_MODE_TYPE,
+            GameOption.SEEK_TYPE,
+            GameOption.MULTIGUESS,
+            GameOption.ANSWER_TYPE,
+            GameOption.GOAL,
+        ];
+
+        for (const option of disabledOptions) {
+            optionStrings[option] = null;
+        }
+    }
+
     // Options excluded from embed fields since they are of higher importance (shown above them as part of the embed description)
-    let priorityOptions = PriorityGameOption.map(
-        (option) =>
-            `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${
-                optionStrings[option]
-            }`
-    ).join("\n");
+    let priorityOptions = PriorityGameOption.filter(
+        (option) => optionStrings[option as GameOption]
+    )
+        .map(
+            (option) =>
+                `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${
+                    optionStrings[option]
+                }`
+        )
+        .join("\n");
 
     priorityOptions = state.localizer.translate(
         messageContext.guildID,
@@ -1075,9 +1063,9 @@ export async function sendOptionsMessage(
             priorityOptions;
     }
 
-    const fieldOptions = Object.keys(GameOptionCommand).filter(
-        (option) => !PriorityGameOption.includes(option as GameOption)
-    );
+    const fieldOptions = Object.keys(GameOptionCommand)
+        .filter((option) => optionStrings[option as GameOption])
+        .filter((option) => !PriorityGameOption.includes(option as GameOption));
 
     const ZERO_WIDTH_SPACE = "​";
     // Split non-priority options into three fields
@@ -1136,6 +1124,11 @@ export async function sendOptionsMessage(
             messageContext.guildID,
             "command.options.perCommandHelp",
             { helpCommand: `${process.env.BOT_PREFIX}help` }
+        );
+    } else if (session instanceof MusicSession) {
+        footerText = state.localizer.translate(
+            messageContext.guildID,
+            "command.options.musicSessionNotAvailable"
         );
     }
 
