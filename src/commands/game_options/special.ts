@@ -87,6 +87,7 @@ export default class SpecialCommand implements BaseCommand {
                 "This is an unreleased game option, and can only be used on the official KMQ server",
         },
         { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notMusicPrecheck },
     ];
 
     validations = {

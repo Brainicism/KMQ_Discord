@@ -1050,6 +1050,7 @@ export async function generateOptionsMessage(
             GameOption.ANSWER_TYPE,
             GameOption.GOAL,
             GameOption.SPECIAL_TYPE,
+            GameOption.TIMER,
         ];
 
         for (const option of disabledOptions) {

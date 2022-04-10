@@ -364,7 +364,11 @@ export default abstract class Session {
         messageContext: MessageContext,
         guildPreference: GuildPreference
     ): Promise<void> {
-        if (!guildPreference.isGuessTimeoutSet()) return;
+        if (
+            this instanceof MusicSession ||
+            !guildPreference.isGuessTimeoutSet()
+        )
+            return;
 
         const time = guildPreference.gameOptions.guessTimeout;
         this.guessTimeoutFunc = setTimeout(async () => {
@@ -574,7 +578,11 @@ export default abstract class Session {
         try {
             let inputArgs = ["-ss", seekLocation.toString()];
             let encoderArgs = [];
-            const specialType = guildPreference.gameOptions.specialType;
+            const specialType =
+                this instanceof MusicSession
+                    ? null
+                    : guildPreference.gameOptions.specialType;
+
             if (specialType) {
                 const ffmpegArgs = specialFfmpegArgs[specialType](seekLocation);
                 inputArgs = ffmpegArgs.inputArgs;
