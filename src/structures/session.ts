@@ -138,7 +138,7 @@ export default abstract class Session {
             }
         }
 
-        if (this.songSelector.checkUniqueSongQueue(guildPreference)) {
+        if (this.songSelector.checkUniqueSongQueue()) {
             const totalSongCount = this.songSelector.getCurrentSongCount();
             logger.info(
                 `${getDebugLogHeader(
@@ -161,9 +161,7 @@ export default abstract class Session {
         }
 
         this.songSelector.checkAlternatingGender(guildPreference);
-        const randomSong = await this.songSelector.queryRandomSong(
-            guildPreference
-        );
+        const randomSong = await this.songSelector.queryRandomSong();
 
         if (randomSong === null) {
             sendErrorMessage(messageContext, {

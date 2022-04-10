@@ -485,7 +485,7 @@ export async function isPremiumRequest(
     playerID: string
 ): Promise<boolean> {
     return (
-        state.gameSessions[guildID]?.isPremiumGame() ??
+        state.gameSessions[guildID]?.isPremiumGame() ||
         (await isUserPremium(playerID))
     );
 }

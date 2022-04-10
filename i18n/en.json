@@ -551,7 +551,7 @@
             },
             "musicSessionNotAvailable": "Some options are not available during a music session",
             "notSet": "Not set",
-            "overview": "Now playing the top {{limit}} out of {{totalSongs}} available songs from the following options:\n\n{{priorityOptions}}",
+            "overview": "Now playing the top {{limit}} out of {{totalSongs}} available songs from the following options:",
             "perCommandHelp": "Looking for information on how to use a command? Check out \"{{helpCommand}} [command]\" to learn more.",
             "premiumOptionsNonPremiumGame": "Note: active game is not premium",
             "preset": "Preset",
@@ -861,11 +861,10 @@
         },
         "shuffle": {
             "help": {
-                "description": "Choose whether songs are played in truly random order ({{random}}) or randomly but uniquely until all songs are played ({{shuffle}}).",
+                "description": "Choose how songs are shuffled.",
                 "example": {
                     "random": "Songs will play randomly",
-                    "reset": "Reset to the default shuffle mode of {{defaultShuffle}}",
-                    "unique": "Every song will play once before any are repeated"
+                    "reset": "Reset to the default shuffle mode of {{defaultShuffle}}"
                 }
             }
         },

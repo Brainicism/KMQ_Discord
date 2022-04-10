@@ -551,7 +551,7 @@
             },
             "musicSessionNotAvailable": "음악 세션 중에는 일부 옵션을 사용할 수 없습니다",
             "notSet": "설정되지 않음",
-            "overview": "이제 다음 옵션에서 사용 가능한 노래 {{totalSongs}}개 중 상위 {{limit}}개를 재생합니다.\n\n{{priorityOptions}}",
+            "overview": "이제 다음 옵션에서 사용 가능한 노래 {{totalSongs}}개 중 상위 {{limit}}개를 재생합니다:",
             "perCommandHelp": "명령 사용 방법에 대한 정보를 찾고 계십니까? (자세한 내용은 \"{{helpCommand}} [명령]\"을 확인하세요.)",
             "premiumOptionsNonPremiumGame": "주의: 액티브 게임은 프리미엄이 아닙니다",
             "preset": "사전 설정",
@@ -861,11 +861,10 @@
         },
         "shuffle": {
             "help": {
-                "description": "노래가 완전히 무작위로 재생되는지 ({{random}}) 아니면 모든 노래가 재생될 때까지 무작위로 재생되는지 ({{shuffle}}) 선택하십시오.",
+                "description": "노래가 완전히 무작위로 재생되는지 .",
                 "example": {
                     "random": "노래는 무작위로 재생됩니다.",
-                    "reset": "{{defaultShuffle}}의 기본 셔플 모드로 재설정합니다.",
-                    "unique": "모든 노래는 반복되기 전에 한 번 재생됩니다."
+                    "reset": "{{defaultShuffle}}의 기본 셔플 모드로 재설정합니다."
                 }
             }
         },
