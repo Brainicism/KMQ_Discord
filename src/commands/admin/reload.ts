@@ -28,7 +28,7 @@ export default class ReloadCommand implements BaseCommand {
         ],
     };
 
-    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+    call = ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         try {
             execSync("npx tsc");
         } catch (e) {

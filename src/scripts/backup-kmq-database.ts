@@ -62,7 +62,7 @@ function importKmqDatabase(fileWithPath: string): void {
     logger.info("Finished import");
 }
 
-(async () => {
+(() => {
     if (require.main === module) {
         if (options.import) {
             importKmqDatabase(options.import);

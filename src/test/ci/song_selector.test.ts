@@ -540,7 +540,7 @@ describe("subunits", () => {
         });
     });
 
-    describe("force play", async () => {
+    describe("force play", () => {
         describe("forced song exists", () => {
             it("should match that exact one song", async () => {
                 const songLink = "9bZkp7q19f0";
@@ -627,7 +627,7 @@ describe("selectRandomSong", function () {
 
                 for (let i = 0; i < 10; i++) {
                     femaleOrCoedSongs.push(
-                        await SongSelector.selectRandomSong(
+                        SongSelector.selectRandomSong(
                             filteredSongs,
                             new Set(
                                 femaleOrCoedSongs.map((x) => x.youtubeLink)
@@ -657,7 +657,7 @@ describe("selectRandomSong", function () {
 
                 for (let i = 0; i < 10; i++) {
                     maleOrCoedSongs.push(
-                        await SongSelector.selectRandomSong(
+                        SongSelector.selectRandomSong(
                             filteredSongs,
                             new Set(maleOrCoedSongs.map((x) => x.youtubeLink)),
                             Gender.MALE
@@ -693,7 +693,7 @@ describe("selectRandomSong", function () {
                 const selectedSongs = [];
                 for (let i = 0; i < filteredSongs.size - numIgnored; i++) {
                     selectedSongs.push(
-                        await SongSelector.selectRandomSong(
+                        SongSelector.selectRandomSong(
                             filteredSongs,
                             new Set([...ignoredSongs, ...selectedSongs])
                         )
@@ -718,14 +718,14 @@ describe("selectRandomSong", function () {
 describe("queryRandomSong", () => {
     let songSelector: SongSelector;
 
-    beforeEach(async () => {
+    beforeEach(() => {
         songSelector = new SongSelector();
     });
 
     describe("normal case", () => {
         it("should return the random song", async () => {
             await songSelector.reloadSongs(guildPreference, true);
-            const song = await songSelector.queryRandomSong();
+            const song = songSelector.queryRandomSong();
             assert(song);
         });
     });
@@ -734,16 +734,16 @@ describe("queryRandomSong", () => {
         it("should return null", async () => {
             await guildPreference.setLimit(0, 0);
             await songSelector.reloadSongs(guildPreference, true);
-            const song = await songSelector.queryRandomSong();
+            const song = songSelector.queryRandomSong();
             assert.strictEqual(song, null);
         });
     });
 
     describe("unique shuffle mode", () => {
         it("should return the random song, and add it to the unique song history", async () => {
-            await guildPreference.setShuffleType(ShuffleType.RANDOM);
+            guildPreference.setShuffleType(ShuffleType.RANDOM);
             await songSelector.reloadSongs(guildPreference, true);
-            const song = await songSelector.queryRandomSong();
+            const song = songSelector.queryRandomSong();
             assert(song);
 
             assert.strictEqual(songSelector.uniqueSongsPlayed.size, 1);
@@ -760,7 +760,7 @@ describe("checkUniqueSongQueue", () => {
     const sandbox = sinon.createSandbox();
     let resetSpy: sinon.SinonSpy;
 
-    beforeEach(async () => {
+    beforeEach(() => {
         songSelector = new SongSelector();
         resetSpy = sandbox.spy(songSelector, "resetUniqueSongs");
     });
@@ -774,13 +774,13 @@ describe("checkUniqueSongQueue", () => {
             describe("not all songs have been played yet", () => {
                 it("should not reset the unique song queue", async () => {
                     const numberSongs = 5;
-                    await guildPreference.setShuffleType(ShuffleType.RANDOM);
+                    guildPreference.setShuffleType(ShuffleType.RANDOM);
                     await guildPreference.setLimit(0, numberSongs);
                     await songSelector.reloadSongs(guildPreference, true);
 
                     // play all songs but one
                     for (let i = 0; i < numberSongs - 1; i++) {
-                        assert(await songSelector.queryRandomSong());
+                        assert(songSelector.queryRandomSong());
 
                         assert.strictEqual(
                             songSelector.checkUniqueSongQueue(),
@@ -796,15 +796,13 @@ describe("checkUniqueSongQueue", () => {
                 describe("limit greater than LAST_PLAYED_SONG_QUEUE_SIZE (Bug #1158)", () => {
                     it("should reset the unique song queue, queryRandomSong should not return null ", async () => {
                         const numberSongs = LAST_PLAYED_SONG_QUEUE_SIZE + 1;
-                        await guildPreference.setShuffleType(
-                            ShuffleType.RANDOM
-                        );
+                        guildPreference.setShuffleType(ShuffleType.RANDOM);
                         await guildPreference.setLimit(0, numberSongs);
                         await songSelector.reloadSongs(guildPreference, true);
 
                         // play all songs
                         for (let i = 0; i < numberSongs; i++) {
-                            assert(await songSelector.queryRandomSong());
+                            assert(songSelector.queryRandomSong());
                         }
 
                         assert.strictEqual(resetSpy.called, false);
@@ -816,22 +814,20 @@ describe("checkUniqueSongQueue", () => {
 
                         assert.strictEqual(resetSpy.called, true);
                         // play the first song after reset
-                        assert(await songSelector.queryRandomSong());
+                        assert(songSelector.queryRandomSong());
                     });
                 });
 
                 describe("limit smaller than LAST_PLAYED_SONG_QUEUE_SIZE", () => {
                     it("should reset the unique song queue", async () => {
                         const numberSongs = 5;
-                        await guildPreference.setShuffleType(
-                            ShuffleType.RANDOM
-                        );
+                        guildPreference.setShuffleType(ShuffleType.RANDOM);
                         await guildPreference.setLimit(0, numberSongs);
                         await songSelector.reloadSongs(guildPreference, true);
 
                         // play all songs but one
                         for (let i = 0; i < numberSongs - 1; i++) {
-                            assert(await songSelector.queryRandomSong());
+                            assert(songSelector.queryRandomSong());
 
                             assert.strictEqual(
                                 songSelector.checkUniqueSongQueue(),
@@ -841,7 +837,7 @@ describe("checkUniqueSongQueue", () => {
 
                         assert.strictEqual(resetSpy.called, false);
                         // play the last song
-                        assert(await songSelector.queryRandomSong());
+                        assert(songSelector.queryRandomSong());
 
                         assert.strictEqual(
                             songSelector.checkUniqueSongQueue(),
@@ -856,13 +852,13 @@ describe("checkUniqueSongQueue", () => {
                 it("should reset the unique song queue several times", async () => {
                     const numberSongs = 5;
                     const numberOfResets = 50;
-                    await guildPreference.setShuffleType(ShuffleType.RANDOM);
+                    guildPreference.setShuffleType(ShuffleType.RANDOM);
                     await guildPreference.setLimit(0, numberSongs);
                     await songSelector.reloadSongs(guildPreference, true);
 
                     // play all songs but one
                     for (let i = 0; i < numberSongs * numberOfResets; i++) {
-                        assert(await songSelector.queryRandomSong());
+                        assert(songSelector.queryRandomSong());
                         if (i > 0 && (i + 1) % numberSongs === 0) {
                             assert.strictEqual(
                                 songSelector.checkUniqueSongQueue(),
@@ -886,7 +882,7 @@ describe("checkUniqueSongQueue", () => {
                 it("should reset the unique song queue", async () => {
                     const numberSongs = 10;
                     const newNumberSongs = numberSongs / 2;
-                    await guildPreference.setShuffleType(ShuffleType.RANDOM);
+                    guildPreference.setShuffleType(ShuffleType.RANDOM);
                     await guildPreference.setLimit(0, numberSongs);
                     await songSelector.reloadSongs(guildPreference, true);
 
@@ -919,7 +915,7 @@ describe("checkUniqueSongQueue", () => {
                 it("should reset the unique song queue", async () => {
                     const numberSongs = 10;
                     const newNumberSongs = numberSongs + 1;
-                    await guildPreference.setShuffleType(ShuffleType.RANDOM);
+                    guildPreference.setShuffleType(ShuffleType.RANDOM);
                     await guildPreference.setLimit(0, numberSongs);
                     await songSelector.reloadSongs(guildPreference, true);
                     let songs = [...songSelector.getSongs().songs].map(
@@ -963,7 +959,7 @@ describe("checkUniqueSongQueue", () => {
             describe("unique song history has songs not in the current selected song set", () => {
                 it("should reset the unique song queue", async () => {
                     const numberSongs = 10;
-                    await guildPreference.setShuffleType(ShuffleType.RANDOM);
+                    guildPreference.setShuffleType(ShuffleType.RANDOM);
                     await guildPreference.setLimit(0, numberSongs);
                     await songSelector.reloadSongs(guildPreference, true);
                     const songs = [...songSelector.getSongs().songs].map(
@@ -1004,7 +1000,7 @@ describe("checkUniqueSongQueue", () => {
 describe("checkAlternatingGender", () => {
     let songSelector: SongSelector;
 
-    beforeEach(async () => {
+    beforeEach(() => {
         songSelector = new SongSelector();
     });
 

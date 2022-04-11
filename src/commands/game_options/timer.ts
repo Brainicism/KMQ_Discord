@@ -68,7 +68,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
         const gameSession = gameSessions[message.guildID];
         if (parsedMessage.components.length === 0) {
-            await guildPreference.reset(GameOption.TIMER);
+            guildPreference.reset(GameOption.TIMER);
             if (gameSession) {
                 gameSession.stopGuessTimeout();
             }

@@ -73,7 +73,7 @@ export default class ShuffleCommand implements BaseCommand {
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            await guildPreference.reset(GameOption.SHUFFLE_TYPE);
+            guildPreference.reset(GameOption.SHUFFLE_TYPE);
             await sendOptionsMessage(
                 MessageContext.fromMessage(message),
                 guildPreference,
@@ -86,7 +86,7 @@ export default class ShuffleCommand implements BaseCommand {
         const shuffleType =
             parsedMessage.components[0].toLowerCase() as ShuffleType;
 
-        await guildPreference.setShuffleType(shuffleType);
+        guildPreference.setShuffleType(shuffleType);
         await sendOptionsMessage(
             MessageContext.fromMessage(message),
             guildPreference,

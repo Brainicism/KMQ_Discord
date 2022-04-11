@@ -62,12 +62,12 @@ export const specialFfmpegArgs = {
  * @param messageContext - The message context
  * @param premiumEnded - Whether reset was caused by premium ending
  */
-export async function resetSpecial(
+export function resetSpecial(
     guildPreference: GuildPreference,
     messageContext: MessageContext,
     premiumEnded: boolean
-): Promise<void> {
-    await guildPreference.reset(GameOption.SPECIAL_TYPE);
+): void {
+    guildPreference.reset(GameOption.SPECIAL_TYPE);
     sendOptionsMessage(messageContext, guildPreference, [
         { option: GameOption.SPECIAL_TYPE, reset: true },
     ]);
@@ -177,7 +177,7 @@ export default class SpecialCommand implements BaseCommand {
                 MessageContext.fromMessage(message),
                 false
             );
-            await guildPreference.reset(GameOption.SPECIAL_TYPE);
+            guildPreference.reset(GameOption.SPECIAL_TYPE);
             await sendOptionsMessage(
                 MessageContext.fromMessage(message),
                 guildPreference,

@@ -81,7 +81,7 @@ export default class SeekCommand implements BaseCommand {
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            await guildPreference.reset(GameOption.SEEK_TYPE);
+            guildPreference.reset(GameOption.SEEK_TYPE);
             await sendOptionsMessage(
                 MessageContext.fromMessage(message),
                 guildPreference,

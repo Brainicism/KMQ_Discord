@@ -81,7 +81,7 @@ export default class GroupsCommand implements BaseCommand {
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            await guildPreference.reset(GameOption.GROUPS);
+            guildPreference.reset(GameOption.GROUPS);
             await sendOptionsMessage(
                 MessageContext.fromMessage(message),
                 guildPreference,

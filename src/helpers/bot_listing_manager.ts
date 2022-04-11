@@ -61,7 +61,7 @@ export async function userVoted(userID: string): Promise<void> {
 }
 
 export default class BotListingManager {
-    async start(): Promise<void> {
+    start(): void {
         if (process.env.NODE_ENV === EnvType.PROD) {
             setInterval(() => {
                 this.postStats();
@@ -69,7 +69,7 @@ export default class BotListingManager {
         }
     }
 
-    private async postStats(): Promise<void> {
+    private postStats(): void {
         for (const siteConfigKeyName of Object.keys(BOT_LISTING_SITES).filter(
             (x) => x in process.env
         )) {

@@ -16,7 +16,7 @@ export const PROFILE_COMMAND_NAME = "Profile";
  * Handles the 'interactionCreate' event
  * @param interaction - The originating Interaction
  */
-export default async function interactionCreateHandler(
+export default function interactionCreateHandler(
     interaction:
         | Eris.PingInteraction
         | Eris.CommandInteraction
