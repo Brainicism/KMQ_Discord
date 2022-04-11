@@ -470,10 +470,10 @@ export default class GuildPreference {
         ]);
     }
 
-    reset(gameOption: GameOption): void {
+    async reset(gameOption: GameOption): Promise<void> {
         if (gameOption in this.resetArgs) {
             const resetArg = this.resetArgs[gameOption];
-            resetArg.setter.bind(this)(...resetArg.default);
+            await resetArg.setter.bind(this)(...resetArg.default);
         }
     }
 

@@ -78,7 +78,7 @@ export default class LimitCommand implements BaseCommand {
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            guildPreference.reset(GameOption.LIMIT);
+            await guildPreference.reset(GameOption.LIMIT);
             await sendOptionsMessage(
                 MessageContext.fromMessage(message),
                 guildPreference,

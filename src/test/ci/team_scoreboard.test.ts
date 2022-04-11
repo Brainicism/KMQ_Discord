@@ -427,8 +427,8 @@ describe("game finished", () => {
     });
 
     describe("goal is not set", () => {
-        it("should return false", () => {
-            guildPreference.reset(GameOption.GOAL);
+        it("should return false", async () => {
+            await guildPreference.reset(GameOption.GOAL);
             assert.strictEqual(scoreboard.gameFinished(guildPreference), false);
         });
     });

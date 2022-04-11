@@ -75,7 +75,7 @@ export default class ReleaseCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
 
         if (parsedMessage.components.length === 0) {
-            guildPreference.reset(GameOption.RELEASE_TYPE);
+            await guildPreference.reset(GameOption.RELEASE_TYPE);
             await sendOptionsMessage(
                 MessageContext.fromMessage(message),
                 guildPreference,

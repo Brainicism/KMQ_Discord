@@ -18,7 +18,7 @@ export default class ForcePlayCommand implements BaseCommand {
         const guildPreference = await getGuildPreference(message.guildID);
 
         if (parsedMessage.components.length === 0) {
-            guildPreference.reset(GameOption.FORCE_PLAY_SONG);
+            await guildPreference.reset(GameOption.FORCE_PLAY_SONG);
             await sendOptionsMessage(
                 MessageContext.fromMessage(message),
                 guildPreference,

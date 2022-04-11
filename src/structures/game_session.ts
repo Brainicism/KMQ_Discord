@@ -713,7 +713,7 @@ export default class GameSession extends Session {
             this.guildID !== process.env.DEBUG_SERVER_ID &&
             guildPreference.gameOptions.specialType
         ) {
-            resetSpecial(
+            await resetSpecial(
                 guildPreference,
                 new MessageContext(this.textChannelID),
                 true

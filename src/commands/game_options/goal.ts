@@ -65,7 +65,7 @@ export default class GoalCommand implements BaseCommand {
     }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            guildPreference.reset(GameOption.GOAL);
+            await guildPreference.reset(GameOption.GOAL);
             await sendOptionsMessage(
                 MessageContext.fromMessage(message),
                 guildPreference,
