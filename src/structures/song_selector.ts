@@ -17,7 +17,7 @@ import { chooseWeightedRandom, setDifference } from "../helpers/utils";
 import { ShuffleType } from "../commands/game_options/shuffle";
 
 export const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
-export const SELECTION_WEIGHT_VALUES_HARD = [1, 10, 100, 1000, 10000];
+export const SELECTION_WEIGHT_VALUES_HARD = [1, 2, 4, 8, 16];
 export const SELECTION_WEIGHT_VALUES_EASY = [
     ...SELECTION_WEIGHT_VALUES_HARD,
 ].reverse();
