@@ -1045,10 +1045,34 @@ export async function generateOptionsMessage(
         }
     );
 
+    const GAMEPLAY_HELP_URL =
+        "https://brainicism.github.io/KMQ_Discord/GAMEPLAY";
+
+    const commandNameToHelp = {
+        [GameOption.LIMIT]: "limit-beginning_limit-end_limit",
+        [GameOption.GROUPS]: "groups-group_1-group_2-group_3-",
+        [GameOption.GENDER]: "gender-gender_1--alternating-gender_2-gender_3",
+        [GameOption.CUTOFF]: "cutoff-beginning_year-end_year",
+        [GameOption.SEEK_TYPE]: "seek-seek_type",
+        [GameOption.GUESS_MODE_TYPE]: "guessmode-guess_mode_type",
+        [GameOption.EXCLUDE]: "exclude-group_1-group_2-group_3-",
+        [GameOption.GOAL]: "goal-goal",
+        [GameOption.TIMER]: "timer-time-seconds",
+    };
+
+    const commandNames = GameOptionCommand;
+    for (const command in commandNames) {
+        if (commandNameToHelp[command]) {
+            commandNames[
+                command
+            ] = `[${commandNames[command]}](${GAMEPLAY_HELP_URL}#${commandNameToHelp[command]})`;
+        }
+    }
+
     // Options excluded from embed fields since they are of higher importance (shown above them as part of the embed description)
     const priorityOptions = PriorityGameOption.map(
         (option) =>
-            `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${
+            `${bold(process.env.BOT_PREFIX + commandNames[option])}: ${
                 optionStrings[option]
             }`
     ).join("\n");
@@ -1067,7 +1091,7 @@ export async function generateOptionsMessage(
         );
     }
 
-    const fieldOptions = Object.keys(GameOptionCommand).filter(
+    const fieldOptions = Object.keys(commandNames).filter(
         (option) => !PriorityGameOption.includes(option as GameOption)
     );
 
@@ -1082,7 +1106,7 @@ export async function generateOptionsMessage(
                 .map(
                     (option) =>
                         `${bold(
-                            process.env.BOT_PREFIX + GameOptionCommand[option]
+                            process.env.BOT_PREFIX + commandNames[option]
                         )}: ${optionStrings[option]}`
                 )
                 .join("\n"),
@@ -1098,7 +1122,7 @@ export async function generateOptionsMessage(
                 .map(
                     (option) =>
                         `${bold(
-                            process.env.BOT_PREFIX + GameOptionCommand[option]
+                            process.env.BOT_PREFIX + commandNames[option]
                         )}: ${optionStrings[option]}`
                 )
                 .join("\n"),
@@ -1111,7 +1135,7 @@ export async function generateOptionsMessage(
                 .map(
                     (option) =>
                         `${bold(
-                            process.env.BOT_PREFIX + GameOptionCommand[option]
+                            process.env.BOT_PREFIX + commandNames[option]
                         )}: ${optionStrings[option]}`
                 )
                 .join("\n"),
@@ -1174,6 +1198,7 @@ export async function generateOptionsMessage(
     return {
         color: premiumRequest ? EMBED_SUCCESS_BONUS_COLOR : null,
         title,
+        url: `${GAMEPLAY_HELP_URL}#game-option-commands`,
         description,
         fields,
         footerText,
