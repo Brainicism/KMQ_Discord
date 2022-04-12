@@ -302,7 +302,7 @@ export async function clearRestartNotification(): Promise<void> {
  * */
 export function registerIntervals(clusterID: number): void {
     // Everyday at 12am UTC => 7pm EST
-    schedule.scheduleJob("0 0 * * *", async () => {
+    schedule.scheduleJob("0 0 * * *", () => {
         // New fun facts
         reloadFactCache();
         // New bonus groups
@@ -310,7 +310,7 @@ export function registerIntervals(clusterID: number): void {
     });
 
     // Every hour
-    schedule.scheduleJob("0 * * * *", async () => {
+    schedule.scheduleJob("0 * * * *", () => {
         if (!isPowerHour() || isWeekend()) return;
         if (!state.client.guilds.has(process.env.DEBUG_SERVER_ID)) return;
         // Ping a role in KMQ server notifying of power hour
@@ -350,7 +350,7 @@ export function registerIntervals(clusterID: number): void {
 }
 
 /** Reloads caches */
-export async function reloadCaches(): Promise<void> {
+export function reloadCaches(): void {
     reloadAliases();
     reloadFactCache();
     reloadBonusGroups();

@@ -86,7 +86,7 @@ export default class ShuffleCommand implements BaseCommand {
         const shuffleType =
             parsedMessage.components[0].toLowerCase() as ShuffleType;
 
-        await guildPreference.setShuffleType(shuffleType);
+        guildPreference.setShuffleType(shuffleType);
         await sendOptionsMessage(
             MessageContext.fromMessage(message),
             guildPreference,

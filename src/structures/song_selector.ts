@@ -89,19 +89,19 @@ export default class SongSelector {
         }
     }
 
-    async queryRandomSong(): Promise<QueriedSong> {
+    queryRandomSong(): QueriedSong {
         const selectedSongs = this.getSongs().songs;
         let randomSong: QueriedSong;
         const ignoredSongs = new Set([...this.uniqueSongsPlayed]);
 
         if (this.lastAlternatingGender) {
-            randomSong = await SongSelector.selectRandomSong(
+            randomSong = SongSelector.selectRandomSong(
                 selectedSongs,
                 ignoredSongs,
                 this.lastAlternatingGender
             );
         } else {
-            randomSong = await SongSelector.selectRandomSong(
+            randomSong = SongSelector.selectRandomSong(
                 selectedSongs,
                 ignoredSongs
             );
@@ -121,12 +121,13 @@ export default class SongSelector {
      * @param filteredSongs - The filtered songs to select from
      * @param ignoredSongs - The union of last played songs and unique songs to not select from
      * @param alternatingGender - The gender to limit selecting from if ,gender alternating
+     * @returns the Queried Song
      */
-    static async selectRandomSong(
+    static selectRandomSong(
         filteredSongs: Set<QueriedSong>,
         ignoredSongs?: Set<string>,
         alternatingGender?: Gender
-    ): Promise<QueriedSong> {
+    ): QueriedSong {
         let queriedSongList = [...filteredSongs];
         if (ignoredSongs) {
             queriedSongList = queriedSongList.filter(

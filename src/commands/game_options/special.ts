@@ -172,7 +172,7 @@ export default class SpecialCommand implements BaseCommand {
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            resetSpecial(
+            await resetSpecial(
                 guildPreference,
                 MessageContext.fromMessage(message),
                 false

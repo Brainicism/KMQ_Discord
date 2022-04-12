@@ -1022,13 +1022,13 @@ export default class GameSession extends Session {
      * @param hintRequested - Whether the players received a hint
      * @param timePlayed - How long the song played for
      */
-    private async incrementSongStats(
+    private incrementSongStats(
         vlink: string,
         correct: boolean,
         skipped: boolean,
         hintRequested: boolean,
         timePlayed: number
-    ): Promise<void> {
+    ): void {
         if (!(vlink in this.songStats)) {
             this.songStats[vlink] = {
                 correctGuesses: 0,
@@ -1181,6 +1181,6 @@ export default class GameSession extends Session {
                 pointsEarned: x.pointsEarned,
             }));
 
-        await this.scoreboard.update(scoreboardUpdatePayload);
+        this.scoreboard.update(scoreboardUpdatePayload);
     }
 }

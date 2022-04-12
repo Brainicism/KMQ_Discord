@@ -159,7 +159,7 @@ export default abstract class Session {
         }
 
         this.songSelector.checkAlternatingGender(guildPreference);
-        const randomSong = await this.songSelector.queryRandomSong();
+        const randomSong = this.songSelector.queryRandomSong();
 
         if (randomSong === null) {
             sendErrorMessage(messageContext, {
@@ -221,7 +221,7 @@ export default abstract class Session {
      * @param _messageContext - unused
      * @param _guessResult - unused
      */
-    async endRound(
+    endRound(
         guildPreference: GuildPreference,
         _messageContext?: MessageContext,
         _guessResult?: GuessResult
@@ -440,7 +440,7 @@ export default abstract class Session {
             : null;
     }
 
-    async handleBookmarkInteraction(
+    handleBookmarkInteraction(
         interaction: Eris.CommandInteraction
     ): Promise<void> {
         const song = this.getSongFromMessageID(interaction.data.target_id);
@@ -581,7 +581,7 @@ export default abstract class Session {
             );
         });
 
-        this.connection.once("error", async (err) => {
+        this.connection.once("error", (err) => {
             // replace listener with no-op to catch any exceptions thrown after this event
             this.connection.removeAllListeners("error");
             this.connection.on("error", () => {});

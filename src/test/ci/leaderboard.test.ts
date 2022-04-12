@@ -560,7 +560,7 @@ describe("getLeaderboardEmbeds", () => {
         });
 
         describe("game leaderboard", () => {
-            beforeEach(async () => {
+            beforeEach(() => {
                 sandbox
                     .stub(discordUtils, "getCurrentVoiceMembers")
                     .callsFake((_voiceChannelID) => []);

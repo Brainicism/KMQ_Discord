@@ -7,8 +7,8 @@ const logger = new IPCLogger("unavailableGuildCreate");
  * Handles the 'unavailableGuildCreate' event
  * @param guild - the guild object
  */
-export default async function unavailableGuildCreateHandler(
+export default function unavailableGuildCreateHandler(
     guild: Eris.UnavailableGuild
-): Promise<void> {
+): void {
     logger.info(`Guild now unavailable. gid = ${guild.id}`);
 }

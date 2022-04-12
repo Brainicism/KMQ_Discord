@@ -145,7 +145,7 @@ export default class LeaderboardCommand implements BaseCommand {
         priority: 50,
     });
 
-    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+    call = ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         if (parsedMessage.components.length === 0) {
             LeaderboardCommand.showLeaderboard(
                 message,
