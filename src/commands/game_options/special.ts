@@ -194,4 +194,11 @@ export default class SpecialCommand implements BaseCommand {
             await guildPreference.reset(GameOption.SPECIAL_TYPE);
         }
     };
+
+    isUsingPremiumOption = (guildPreference: GuildPreference): boolean => {
+        return (
+            guildPreference.guildID !== process.env.DEBUG_SERVER_ID &&
+            guildPreference.gameOptions.specialType !== null
+        );
+    };
 }

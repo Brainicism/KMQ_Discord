@@ -126,4 +126,10 @@ export default class ShuffleCommand implements BaseCommand {
     resetPremium = async (guildPreference: GuildPreference): Promise<void> => {
         await guildPreference.reset(GameOption.SHUFFLE_TYPE);
     };
+
+    isUsingPremiumOption = (guildPreference: GuildPreference): boolean => {
+        return PREMIUM_SHUFFLE_TYPES.includes(
+            guildPreference.gameOptions.shuffleType
+        );
+    };
 }
