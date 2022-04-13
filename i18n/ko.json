@@ -645,6 +645,11 @@
                     "nonPremium": "KMQ 프리미엄을 구독하세요!",
                     "premium": "KMQ를 지원해주셔서 감사합니다!"
                 }
+            },
+            "option": {
+                "title": "프리미엄 옵션",
+                "description": "이 옵션은 프리미엄 KMQ 서포터에게만 제공됩니다.",
+                "description_kmq_server": "이 옵션은 프리미엄 KMQ 서포터 또는 공식 KMQ 서버에서만 사용할 수 있습니다."
             }
         },
         "preset": {

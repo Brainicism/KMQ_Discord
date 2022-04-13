@@ -645,6 +645,11 @@
                     "nonPremium": "Subscribe to KMQ Premium!",
                     "premium": "Thanks for supporting KMQ!"
                 }
+            },
+            "option": {
+                "title": "Premium Option",
+                "description": "This option can only be used by premium KMQ supporters.",
+                "description_kmq_server": "This option can only be used by premium KMQ supporters, or in the official KMQ server."
             }
         },
         "preset": {

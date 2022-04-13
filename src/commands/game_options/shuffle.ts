@@ -98,9 +98,14 @@ export default class ShuffleCommand implements BaseCommand {
         if (PREMIUM_SHUFFLE_TYPES.includes(shuffleType)) {
             if (!(await isUserPremium(message.author.id))) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    description:
-                        "This option can only be used by premium KMQ supporters.",
-                    title: "Premium Option",
+                    description: state.localizer.translate(
+                        message.guildID,
+                        "command.premium.option.description"
+                    ),
+                    title: state.localizer.translate(
+                        message.guildID,
+                        "command.premium.option.title"
+                    ),
                 });
                 return;
             }

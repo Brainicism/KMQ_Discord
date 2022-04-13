@@ -164,9 +164,14 @@ export default class SpecialCommand implements BaseCommand {
             !(await isUserPremium(message.author.id))
         ) {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                description:
-                    "This option can only be used by premium KMQ supporters, or in the official KMQ server.",
-                title: "Premium Option",
+                description: state.localizer.translate(
+                    message.guildID,
+                    "command.premium.option.description_kmq_server"
+                ),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.premium.option.title"
+                ),
             });
             return;
         }
