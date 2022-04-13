@@ -1,14 +1,16 @@
 import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
-import { getGuildPreference } from "../../helpers/game_utils";
+import { getGuildPreference, isUserPremium } from "../../helpers/game_utils";
 import {
     sendOptionsMessage,
     getDebugLogHeader,
+    sendErrorMessage,
 } from "../../helpers/discord_utils";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("shuffle");
 
@@ -17,6 +19,11 @@ export enum ShuffleType {
     WEIGHTED_EASY = "weighted_easy",
     WEIGHTED_HARD = "weighted_hard",
 }
+
+const PREMIUM_SHUFFLE_TYPES = [
+    ShuffleType.WEIGHTED_EASY,
+    ShuffleType.WEIGHTED_HARD,
+];
 
 export const DEFAULT_SHUFFLE = ShuffleType.RANDOM;
 
@@ -88,6 +95,17 @@ export default class ShuffleCommand implements BaseCommand {
         const shuffleType =
             parsedMessage.components[0].toLowerCase() as ShuffleType;
 
+        if (PREMIUM_SHUFFLE_TYPES.includes(shuffleType)) {
+            if (!(await isUserPremium(message.author.id))) {
+                sendErrorMessage(MessageContext.fromMessage(message), {
+                    description:
+                        "This option can only be used by premium KMQ supporters.",
+                    title: "Premium Option",
+                });
+                return;
+            }
+        }
+
         await guildPreference.setShuffleType(shuffleType);
         await sendOptionsMessage(
             MessageContext.fromMessage(message),
@@ -98,5 +116,9 @@ export default class ShuffleCommand implements BaseCommand {
         logger.info(
             `${getDebugLogHeader(message)} | Shuffle set to ${shuffleType}`
         );
+    };
+
+    resetPremium = async (guildPreference: GuildPreference): Promise<void> => {
+        await guildPreference.reset(GameOption.SHUFFLE_TYPE);
     };
 }

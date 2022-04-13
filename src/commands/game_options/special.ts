@@ -56,29 +56,6 @@ export const specialFfmpegArgs = {
         encoderArgs: ["-af", "rubberband=pitch=1.25992:tempo=1.25"],
     }),
 };
-
-/**
- * @param guildPreference - The guild preference
- * @param messageContext - The message context
- * @param premiumEnded - Whether reset was caused by premium ending
- */
-export async function resetSpecial(
-    guildPreference: GuildPreference,
-    messageContext: MessageContext,
-    premiumEnded: boolean
-): Promise<void> {
-    await guildPreference.reset(GameOption.SPECIAL_TYPE);
-    sendOptionsMessage(messageContext, guildPreference, [
-        { option: GameOption.SPECIAL_TYPE, reset: true },
-    ]);
-
-    logger.info(
-        `${getDebugLogHeader(
-            messageContext
-        )} | Special reset. Reset caused by premium ending = ${premiumEnded}`
-    );
-}
-
 export default class SpecialCommand implements BaseCommand {
     preRunChecks = [
         {
@@ -172,11 +149,6 @@ export default class SpecialCommand implements BaseCommand {
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
-            await resetSpecial(
-                guildPreference,
-                MessageContext.fromMessage(message),
-                false
-            );
             await guildPreference.reset(GameOption.SPECIAL_TYPE);
             await sendOptionsMessage(
                 MessageContext.fromMessage(message),
@@ -210,5 +182,9 @@ export default class SpecialCommand implements BaseCommand {
         logger.info(
             `${getDebugLogHeader(message)} | Special type set to ${specialType}`
         );
+    };
+
+    resetPremium = async (guildPreference: GuildPreference): Promise<void> => {
+        await guildPreference.reset(GameOption.SPECIAL_TYPE);
     };
 }
