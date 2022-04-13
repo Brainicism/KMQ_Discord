@@ -190,6 +190,8 @@ export default class SpecialCommand implements BaseCommand {
     };
 
     resetPremium = async (guildPreference: GuildPreference): Promise<void> => {
-        await guildPreference.reset(GameOption.SPECIAL_TYPE);
+        if (guildPreference.guildID !== process.env.DEBUG_SERVER_ID) {
+            await guildPreference.reset(GameOption.SPECIAL_TYPE);
+        }
     };
 }
