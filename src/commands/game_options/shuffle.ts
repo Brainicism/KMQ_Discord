@@ -18,6 +18,7 @@ export enum ShuffleType {
     RANDOM = "random",
     WEIGHTED_EASY = "weighted_easy",
     WEIGHTED_HARD = "weighted_hard",
+    POPULARITY = "popularity",
 }
 
 const PREMIUM_SHUFFLE_TYPES = [
@@ -51,7 +52,7 @@ export default class ShuffleCommand implements BaseCommand {
                 random: `\`${ShuffleType.RANDOM}\``,
             }
         ),
-        usage: ",shuffle [random | unique]",
+        usage: ",shuffle [random | popularity]",
         examples: [
             {
                 example: "`,shuffle random`",
@@ -61,10 +62,10 @@ export default class ShuffleCommand implements BaseCommand {
                 ),
             },
             {
-                example: "`,shuffle unique`",
+                example: "`,shuffle popularity`",
                 explanation: state.localizer.translate(
                     guildID,
-                    "command.shuffle.help.example.unique"
+                    "command.shuffle.help.example.popularity"
                 ),
             },
             {
