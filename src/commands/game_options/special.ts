@@ -163,6 +163,12 @@ export default class SpecialCommand implements BaseCommand {
             process.env.DEBUG_SERVER_ID !== message.guildID &&
             !(await isUserPremium(message.author.id))
         ) {
+            logger.info(
+                `${getDebugLogHeader(
+                    message
+                )} | Non-premium user attempted to use premium special option`
+            );
+
             sendErrorMessage(MessageContext.fromMessage(message), {
                 description: state.localizer.translate(
                     message.guildID,
@@ -193,5 +199,12 @@ export default class SpecialCommand implements BaseCommand {
         if (guildPreference.guildID !== process.env.DEBUG_SERVER_ID) {
             await guildPreference.reset(GameOption.SPECIAL_TYPE);
         }
+    };
+
+    isUsingPremiumOption = (guildPreference: GuildPreference): boolean => {
+        return (
+            guildPreference.guildID !== process.env.DEBUG_SERVER_ID &&
+            guildPreference.gameOptions.specialType !== null
+        );
     };
 }

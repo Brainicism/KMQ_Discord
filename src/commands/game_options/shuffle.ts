@@ -97,6 +97,12 @@ export default class ShuffleCommand implements BaseCommand {
 
         if (PREMIUM_SHUFFLE_TYPES.includes(shuffleType)) {
             if (!(await isUserPremium(message.author.id))) {
+                logger.info(
+                    `${getDebugLogHeader(
+                        message
+                    )} | Non-premium user attempted to use shuffle option = ${shuffleType}`
+                );
+
                 sendErrorMessage(MessageContext.fromMessage(message), {
                     description: state.localizer.translate(
                         message.guildID,
@@ -125,5 +131,11 @@ export default class ShuffleCommand implements BaseCommand {
 
     resetPremium = async (guildPreference: GuildPreference): Promise<void> => {
         await guildPreference.reset(GameOption.SHUFFLE_TYPE);
+    };
+
+    isUsingPremiumOption = (guildPreference: GuildPreference): boolean => {
+        return PREMIUM_SHUFFLE_TYPES.includes(
+            guildPreference.gameOptions.shuffleType
+        );
     };
 }
