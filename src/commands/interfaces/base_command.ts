@@ -50,4 +50,5 @@ export default interface BaseCommand {
         errorMessage?: string;
     }>;
     resetPremium?: (guildPreference: GuildPreference) => Promise<void>;
+    isUsingPremiumOption?: (guildPreference: GuildPreference) => boolean;
 }
