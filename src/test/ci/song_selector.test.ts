@@ -16,6 +16,7 @@ import {
     LanguageType,
 } from "../../commands/game_options/language";
 import { ShuffleType } from "../../commands/game_options/shuffle";
+import { QueriedSong } from "../../types";
 
 async function getMockGuildPreference(): Promise<GuildPreference> {
     const guildPreference = new GuildPreference("test");
@@ -824,6 +825,24 @@ describe("queryRandomSong", () => {
                 [...songSelector.uniqueSongsPlayed][0],
                 song.youtubeLink
             );
+        });
+    });
+
+    describe("popularity shuffle mode", () => {
+        it("should have descending views", async () => {
+            const limit = 100;
+            await guildPreference.setShuffleType(ShuffleType.POPULARITY);
+            await guildPreference.setLimit(0, limit);
+            await songSelector.reloadSongs(guildPreference, true);
+
+            const songs: Array<QueriedSong> = [];
+            for (let i = 0; i < limit; i++) {
+                songs.push(songSelector.queryRandomSong(guildPreference));
+            }
+
+            for (let i = 1; i < songs.length - 1; i++) {
+                assert.ok(songs[i - 1].views > songs[i].views);
+            }
         });
     });
 });

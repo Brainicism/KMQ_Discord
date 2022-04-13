@@ -266,7 +266,7 @@ Use `,help [command_name]` for more details for any of the following commands:
 -   `,subunits`: Choose whether to automatically include a group's subunits when using `,groups`
 -   `,ost`: Include, exclude, or exclusively play OST music videos
 -   `,multiguess`: Choose whether to allow multiple players to guess correctly in a round
--   `,shuffle`: Choose whether songs should play in "true" random order or in uniquely random order.
+-   `,shuffle`: Choose whether songs should play in random order, or based on popularity.
 -   `,seek`: Choose whether each song starts from the beginning, middle, or a random point
 -   `,special`: Modify how each song sounds, such as playing it in reverse, changing its pitch, etc.
 -   `,guessmode`: Choose whether to guess based on song name, artist name, or both

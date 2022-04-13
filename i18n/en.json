@@ -865,6 +865,7 @@
                 "description": "Choose how songs are shuffled.",
                 "example": {
                     "random": "Songs will play randomly",
+                    "popularity": "Songs will play based on descending popularity",
                     "reset": "Reset to the default shuffle mode of {{defaultShuffle}}"
                 }
             }

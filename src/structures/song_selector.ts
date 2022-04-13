@@ -4,6 +4,7 @@ import dbContext from "../database_context";
 import { SubunitsPreference } from "../commands/game_options/subunits";
 import { ArtistType } from "../commands/game_options/artisttype";
 import { Gender } from "../commands/game_options/gender";
+import { IPCLogger } from "../logger";
 import {
     LanguageType,
     FOREIGN_LANGUAGE_TAGS,
@@ -26,6 +27,8 @@ export interface UniqueSongCounter {
     uniqueSongsPlayed: number;
     totalSongs: number;
 }
+
+const logger = new IPCLogger("song_selector");
 
 export default class SongSelector {
     /** List of songs matching the user's game options */
@@ -163,12 +166,21 @@ export default class SongSelector {
             return null;
         }
 
-        if (shuffleType === ShuffleType.RANDOM) {
-            return queriedSongList[
-                Math.floor(Math.random() * queriedSongList.length)
-            ];
-        } else {
-            return chooseWeightedRandom(queriedSongList, "selectionWeight");
+        switch (shuffleType) {
+            case ShuffleType.POPULARITY:
+                return queriedSongList[0];
+            case ShuffleType.WEIGHTED_EASY:
+            case ShuffleType.WEIGHTED_HARD:
+                return chooseWeightedRandom(queriedSongList, "selectionWeight");
+            case ShuffleType.RANDOM:
+                return queriedSongList[
+                    Math.floor(Math.random() * queriedSongList.length)
+                ];
+            default:
+                logger.error(`Unexpected ShuffleType: ${shuffleType}`);
+                return queriedSongList[
+                    Math.floor(Math.random() * queriedSongList.length)
+                ];
         }
     }
 
