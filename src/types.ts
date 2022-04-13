@@ -32,7 +32,7 @@ export interface QueriedSong {
     artistName: string;
     hangulArtistName?: string;
     youtubeLink: string;
-    publishDate: Date;
+    publishDate?: Date;
     members: Gender;
     artistID: number;
     isSolo: string;
@@ -40,6 +40,7 @@ export interface QueriedSong {
     views: number;
     tags: string;
     vtype: string;
+    selectionWeight: number;
 }
 
 export interface EmbedPayload {

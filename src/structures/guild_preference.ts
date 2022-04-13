@@ -821,8 +821,11 @@ export default class GuildPreference {
      * Sets the shuffle type option value
      * @param shuffleType - The shuffle type
      */
-    setShuffleType(shuffleType: ShuffleType): void {
+    async setShuffleType(shuffleType: ShuffleType): Promise<void> {
         this.gameOptions.shuffleType = shuffleType;
+        await this.updateGuildPreferences([
+            { name: GameOptionInternal.SHUFFLE_TYPE, value: shuffleType },
+        ]);
     }
 
     /**

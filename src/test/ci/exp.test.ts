@@ -348,6 +348,7 @@ describe("calculateRoundExpMultiplier", () => {
             views: 1,
             tags: "",
             vtype: "main",
+            selectionWeight: 1,
         });
         gameRound.bonusModifier = 1;
         guildPreference = GuildPreference.fromGuild("123");

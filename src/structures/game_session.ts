@@ -3,7 +3,6 @@ import Eris from "eris";
 import _ from "lodash";
 import * as uuid from "uuid";
 
-import { resetSpecial } from "../commands/game_options/special";
 import dbContext from "../database_context";
 import {
     getDebugLogHeader,
@@ -705,19 +704,20 @@ export default class GameSession extends Session {
      * The game has changed its premium state, so update filtered songs/remove ,special
      */
     async updatePremiumStatus(): Promise<void> {
-        await this.reloadSongs(await getGuildPreference(this.guildID));
-
         const guildPreference = await getGuildPreference(this.guildID);
-        if (
-            !this.isPremiumGame() &&
-            this.guildID !== process.env.DEBUG_SERVER_ID &&
-            guildPreference.gameOptions.specialType
-        ) {
-            await resetSpecial(
-                guildPreference,
-                new MessageContext(this.textChannelID),
-                true
-            );
+        await this.reloadSongs(guildPreference);
+
+        if (!this.isPremiumGame()) {
+            for (const [commandName, command] of Object.entries(
+                state.client.commands
+            )) {
+                if (command.resetPremium) {
+                    logger.info(
+                        `gid: ${this.guildID} | Resetting premium for game option: ${commandName}`
+                    );
+                    await command.resetPremium(guildPreference);
+                }
+            }
         }
     }
 

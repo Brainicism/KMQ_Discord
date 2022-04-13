@@ -1,6 +1,7 @@
 import Eris from "eris";
 import { PrecheckArgs } from "../../command_prechecks";
 import GameSession from "../../structures/game_session";
+import GuildPreference from "../../structures/guild_preference";
 import { GuildTextableMessage, ParsedMessage } from "../../types";
 
 export interface CommandArgs {
@@ -48,4 +49,5 @@ export default interface BaseCommand {
         checkFn: (precheckArgs: PrecheckArgs) => boolean | Promise<boolean>;
         errorMessage?: string;
     }>;
+    resetPremium?: (guildPreference: GuildPreference) => Promise<void>;
 }

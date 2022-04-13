@@ -621,6 +621,11 @@
                 "description": "현재 회원인지 여부를 포함하여 KMQ 프리미엄에 대해 자세히 알아보십시오.",
                 "example": "귀하의 프리미엄 상태를 보여줍니다."
             },
+            "option": {
+                "description": "이 옵션은 프리미엄 KMQ 서포터에게만 제공됩니다.",
+                "description_kmq_server": "이 옵션은 프리미엄 KMQ 서포터 또는 공식 KMQ 서버에서만 사용할 수 있습니다.",
+                "title": "프리미엄 옵션"
+            },
             "status": {
                 "description": {
                     "connectionReminder": "[여기](https://www.patreon.com/settings/apps)에서 디스코드 계정을 연결하여 혜택을 받으세요.",

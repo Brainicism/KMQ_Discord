@@ -159,7 +159,7 @@ export default abstract class Session {
         }
 
         this.songSelector.checkAlternatingGender(guildPreference);
-        const randomSong = this.songSelector.queryRandomSong();
+        const randomSong = this.songSelector.queryRandomSong(guildPreference);
 
         if (randomSong === null) {
             sendErrorMessage(messageContext, {
