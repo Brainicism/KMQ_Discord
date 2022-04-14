@@ -81,7 +81,7 @@
                 "example": {
                     "reset": "{{defaultBeginningSearchYear}}의 기본 년도 범위를 {{defaultEndSearchYear}}로 재설정합니다.",
                     "singleCutoff": "{{year}}년 이후에 발매된 노래 재생합니다.",
-                    "twoCutoffs": "{{beginningYear}}~{{endYear}}년 사이에 출시된 노래 재생합니다."
+                    "twoCutoffs": "{{beginningYear}}~{{endYear}}년 사이에 발매된 노래 재생합니다."
                 }
             }
         },
@@ -171,7 +171,7 @@
                 }
             },
             "help": {
-                "description": "게임을 시작한 사람은 강제로 힌트를 요청 할 수 있으며 과반수는 필요하지 않습니다."
+                "description": "게임을 시작한 사람은 현재 노래를 강제로 암시할 수 있으며 과반수는 필요하지 않습니다."
             }
         },
         "forceskip": {
@@ -383,7 +383,7 @@
                     }
                 },
                 "outOfRange": {
-                    "description": "순위표는 여기까지 표시되지 않습니다.",
+                    "description": "순위표는 여기까지 오지 않습니다.",
                     "title": "😐"
                 }
             },
@@ -798,7 +798,7 @@
                 "description": "지난 2주 동안 KMQ에 추가된 노래를 봅니다.",
                 "example": "최근에 추가한 노래 표시"
             },
-            "released": "출시 된",
+            "released": "발매 된",
             "title": "최근 추가된 노래"
         },
         "release": {
@@ -851,22 +851,22 @@
         },
         "seek": {
             "help": {
-                "description": "각 노래를 처음부터 재생할지, 중간에서 재생할지 또는 임의 지점에서 재생할지 선택합니다.",
+                "description": "각 노래를 처음, 중간 또는 임의의 지점에서 재생할지 여부를 선택합니다.",
                 "example": {
                     "beginning": "처음부터 노래가 재생됩니다.",
                     "middle": "중간 지점부터 노래가 재생됩니다.",
-                    "random": "임의의 지점에서 노래가 재생됩니다.",
-                    "reset": "{{defaultSeek}}의 기본으로 재설정합니다."
+                    "random": "중간에 임의의 지점에서 시작하여 노래가 재생됩니다.",
+                    "reset": "{{defaultSeek}}의 기본 탐색으로 재설정합니다."
                 }
             }
         },
         "shuffle": {
             "help": {
-                "description": "노래를 섞는 방법을 선택합니다.",
+                "description": "노래가 완전히 무작위로 재생되는지 .",
                 "example": {
-                    "popularity": "인기 (내림차순)에 따라 노래가 재생됩니다.",
-                    "random": "노래가 무작위로 재생됩니다.",
-                    "reset": "{{defaultShuffle}}의 기본으로 재설정합니다."
+                    "popularity": "조회수 순으로 재생되는 곡.",
+                    "random": "노래는 무작위로 재생됩니다.",
+                    "reset": "{{defaultShuffle}}의 기본 셔플 모드로 재설정합니다."
                 }
             }
         },
@@ -958,7 +958,7 @@
             },
             "description": "[top.gg]({{voteLink}})에서 KMQ에 투표하면 1시간 동안 경험치가 2배 지급됩니다! ({{voteResetDuration}}시간마다 한 번씩 투표할 수 있습니다.\n\n[리뷰]({{reviewLink}})도 남겨주시면 감사하겠습니다.)",
             "help": {
-                "description": "1시간 동안 경험치 2배를 받기 위해 투표하는 방법 보여줍니다."
+                "description": "1시간 동안 경험치 2배를 받기 위해 투표하는 방법에 대한 지침을 보여줍니다."
             },
             "timeLeft": "{{time}} 남았습니다.",
             "unavailable": {
@@ -991,7 +991,7 @@
             "mostViewedVideo": "재미있는 사실: {{hyperlink}}은(는) 총 유튜브 조회수는 {{views}}회로 {{ordinalNum}}번째로 가장 많이 본 동영상입니다!",
             "mvViewMilestone": "재미있는 사실: {{hyperlink}}이(가) 최근 유튜브에서 {{view}}회를 도달했습니다!",
             "newMV": "신곡 알림: 최근에 공개된 이 뮤직 비디오 {{hyperlink}}(을)를 확인하세요.",
-            "oldMV": "재미있는 사실: {{hyperlink}}가 {{year}}년에 출시되었습니다!",
+            "oldMV": "재미있는 사실: {{hyperlink}}가 {{year}}년에 발매되었습니다!",
             "recentGaonWeekly": "재미있는 사실: {{songName}}은(는) 지난 주 가온 주간 차트에서 {{ordinalNum}}번째로 가장 높은 차트를 기록한 곡입니다!",
             "recentMusicShowWin": "재미있는 사실: {{winDate}}의 {{musicShow}}에서 {{hyperlink}}가 최근 우승했습니다.",
             "viewsByArtistType": "재미있는 사실: 유튜브의 모든 K-POP 뮤직 비디오에 대한 총 조회수는 {{totalViews}}회이며, 그 중 {{groupViews}}회 ({{groupProportion}}%)가 그룹에서 발생한 반면 {{soloViews}}회 ({{soloProportion}}%)는 솔로 아티스트에서 발생했습니다.",
@@ -1243,7 +1243,7 @@
             "differentVC": "이 명령어를 사용하려면 봇과 동일한 음성 채널에 있어야 합니다.",
             "title": "잠시만 기다려주십시오..."
         },
-        "releaseDate": "출시 날짜",
+        "releaseDate": "발매 날짜",
         "sendingBookmarkedSongs": {
             "description": "{{players}}에게 {{songs}}을(를) 보냅니다.\n\n노래 메시지를 마우스 오른쪽 버튼으로 클릭하고 `앱 > Bookmark Song`를 선택하여 게임 중에 노래를 북마크하세요.",
             "title": "북마크된 노래를 보내는 중..."
