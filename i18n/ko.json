@@ -383,7 +383,7 @@
                     }
                 },
                 "outOfRange": {
-                    "description": "순위표는 여기까지 오지 않습니다.",
+                    "description": "순위표는 여기까지 표시되지 않습니다.",
                     "title": "😐"
                 }
             },
