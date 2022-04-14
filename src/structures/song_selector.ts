@@ -4,6 +4,7 @@ import dbContext from "../database_context";
 import { SubunitsPreference } from "../commands/game_options/subunits";
 import { ArtistType } from "../commands/game_options/artisttype";
 import { Gender } from "../commands/game_options/gender";
+import { IPCLogger } from "../logger";
 import {
     LanguageType,
     FOREIGN_LANGUAGE_TAGS,
@@ -13,14 +14,21 @@ import {
     ReleaseType,
     NON_OFFICIAL_VIDEO_TAGS,
 } from "../commands/game_options/release";
-import { setDifference } from "../helpers/utils";
+import { chooseWeightedRandom, setDifference } from "../helpers/utils";
+import { ShuffleType } from "../commands/game_options/shuffle";
 
 export const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
+export const SELECTION_WEIGHT_VALUES_HARD = [1, 2, 4, 8, 16];
+export const SELECTION_WEIGHT_VALUES_EASY = [
+    ...SELECTION_WEIGHT_VALUES_HARD,
+].reverse();
 
 export interface UniqueSongCounter {
     uniqueSongsPlayed: number;
     totalSongs: number;
 }
+
+const logger = new IPCLogger("song_selector");
 
 export default class SongSelector {
     /** List of songs matching the user's game options */
@@ -89,21 +97,24 @@ export default class SongSelector {
         }
     }
 
-    async queryRandomSong(): Promise<QueriedSong> {
+    queryRandomSong(guildPreference: GuildPreference): QueriedSong {
         const selectedSongs = this.getSongs().songs;
         let randomSong: QueriedSong;
         const ignoredSongs = new Set([...this.uniqueSongsPlayed]);
 
         if (this.lastAlternatingGender) {
-            randomSong = await SongSelector.selectRandomSong(
+            randomSong = SongSelector.selectRandomSong(
                 selectedSongs,
                 ignoredSongs,
-                this.lastAlternatingGender
+                this.lastAlternatingGender,
+                guildPreference.gameOptions.shuffleType
             );
         } else {
-            randomSong = await SongSelector.selectRandomSong(
+            randomSong = SongSelector.selectRandomSong(
                 selectedSongs,
-                ignoredSongs
+                ignoredSongs,
+                null,
+                guildPreference.gameOptions.shuffleType
             );
         }
 
@@ -121,12 +132,15 @@ export default class SongSelector {
      * @param filteredSongs - The filtered songs to select from
      * @param ignoredSongs - The union of last played songs and unique songs to not select from
      * @param alternatingGender - The gender to limit selecting from if ,gender alternating
+     * @param shuffleType - The shuffle type
+     * @returns the QueriedSong
      */
-    static async selectRandomSong(
+    static selectRandomSong(
         filteredSongs: Set<QueriedSong>,
         ignoredSongs?: Set<string>,
-        alternatingGender?: Gender
-    ): Promise<QueriedSong> {
+        alternatingGender?: Gender,
+        shuffleType?: ShuffleType
+    ): QueriedSong {
         let queriedSongList = [...filteredSongs];
         if (ignoredSongs) {
             queriedSongList = queriedSongList.filter(
@@ -152,9 +166,22 @@ export default class SongSelector {
             return null;
         }
 
-        return queriedSongList[
-            Math.floor(Math.random() * queriedSongList.length)
-        ];
+        switch (shuffleType) {
+            case ShuffleType.POPULARITY:
+                return queriedSongList[0];
+            case ShuffleType.WEIGHTED_EASY:
+            case ShuffleType.WEIGHTED_HARD:
+                return chooseWeightedRandom(queriedSongList, "selectionWeight");
+            case ShuffleType.RANDOM:
+                return queriedSongList[
+                    Math.floor(Math.random() * queriedSongList.length)
+                ];
+            default:
+                logger.error(`Unexpected ShuffleType: ${shuffleType}`);
+                return queriedSongList[
+                    Math.floor(Math.random() * queriedSongList.length)
+                ];
+        }
     }
 
     /**
@@ -372,6 +399,31 @@ export default class SongSelector {
 
         const count = result.length;
         result = result.slice(gameOptions.limitStart, gameOptions.limitEnd);
+        const shuffleType = gameOptions.shuffleType;
+        let selectionWeightValues: Array<number>;
+
+        switch (shuffleType) {
+            case ShuffleType.WEIGHTED_EASY:
+                selectionWeightValues = SELECTION_WEIGHT_VALUES_EASY;
+                break;
+            case ShuffleType.WEIGHTED_HARD:
+                selectionWeightValues = SELECTION_WEIGHT_VALUES_HARD;
+                break;
+            default:
+                selectionWeightValues = [1];
+                break;
+        }
+
+        result = result.map((song, index) => ({
+            ...song,
+            selectionWeight:
+                selectionWeightValues[
+                    Math.floor(
+                        (index / result.length) * selectionWeightValues.length
+                    )
+                ],
+        }));
+
         return {
             songs: new Set(result),
             countBeforeLimit: count,

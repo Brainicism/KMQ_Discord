@@ -20,6 +20,7 @@ import {
     activeBonusUsers,
     getGuildPreference,
     isPowerHour,
+    isPremiumRequest,
 } from "../../helpers/game_utils";
 import { chooseWeightedRandom, isWeekend } from "../../helpers/utils";
 import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
@@ -279,6 +280,27 @@ export default class PlayCommand implements BaseCommand {
 
         if (!voicePermissionsCheck(message)) {
             return;
+        }
+
+        // check for invalid premium game options
+        const premiumRequest = await isPremiumRequest(
+            guildPreference.guildID,
+            message.author.id
+        );
+
+        if (!premiumRequest) {
+            for (const [commandName, command] of Object.entries(
+                state.client.commands
+            )) {
+                if (command.isUsingPremiumOption) {
+                    if (command.isUsingPremiumOption(guildPreference)) {
+                        logger.info(
+                            `Session started by non-premium request, clearing premium option: ${commandName}`
+                        );
+                        await command.resetPremium(guildPreference);
+                    }
+                }
+            }
         }
 
         const gameType =

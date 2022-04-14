@@ -625,6 +625,11 @@
                 "description": "Find out more about KMQ Premium including whether you're currently a member.",
                 "example": "Shows your premium status."
             },
+            "option": {
+                "description": "This option can only be used by premium KMQ supporters.",
+                "description_kmq_server": "This option can only be used by premium KMQ supporters, or in the official KMQ server.",
+                "title": "Premium Option"
+            },
             "status": {
                 "description": {
                     "connectionReminder": "Make sure to connect your Discord account [here](https://www.patreon.com/settings/apps) to receive your perks.",
@@ -863,6 +868,7 @@
             "help": {
                 "description": "Choose how songs are shuffled.",
                 "example": {
+                    "popularity": "Songs will play based on descending popularity",
                     "random": "Songs will play randomly",
                     "reset": "Reset to the default shuffle mode of {{defaultShuffle}}"
                 }

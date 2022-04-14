@@ -70,7 +70,7 @@ export default abstract class Session {
     /** Whether the GameSession is active yet */
     public sessionInitialized: boolean;
 
-    protected songSelector: SongSelector;
+    public songSelector: SongSelector;
 
     /** The number of Rounds played */
     protected roundsPlayed: number;
@@ -113,7 +113,6 @@ export default abstract class Session {
         messageContext: MessageContext
     ): Promise<void> {
         this.sessionInitialized = true;
-
         if (this.songSelector.getSongs() === null) {
             try {
                 await this.reloadSongs(guildPreference);
@@ -164,7 +163,7 @@ export default abstract class Session {
         }
 
         this.songSelector.checkAlternatingGender(guildPreference);
-        const randomSong = await this.songSelector.queryRandomSong();
+        const randomSong = this.songSelector.queryRandomSong(guildPreference);
 
         if (randomSong === null) {
             sendErrorMessage(messageContext, {
@@ -226,7 +225,7 @@ export default abstract class Session {
      * @param _messageContext - unused
      * @param _guessResult - unused
      */
-    async endRound(
+    endRound(
         guildPreference: GuildPreference,
         _messageContext?: MessageContext,
         _guessResult?: GuessResult
@@ -235,7 +234,19 @@ export default abstract class Session {
             return;
         }
 
+        const round = this.round;
         this.round = null;
+
+        if (Object.keys(this.songMessageIDs).length === BOOKMARK_MESSAGE_SIZE) {
+            this.songMessageIDs.shift();
+        }
+
+        if (round.roundMessageID) {
+            this.songMessageIDs.push({
+                messageID: round.roundMessageID,
+                song: round.song,
+            });
+        }
 
         // cleanup
         this.stopGuessTimeout();
@@ -460,7 +471,7 @@ export default abstract class Session {
             : null;
     }
 
-    async handleBookmarkInteraction(
+    handleBookmarkInteraction(
         interaction: Eris.CommandInteraction | Eris.ComponentInteraction
     ): Promise<void> {
         let song: QueriedSong;
@@ -567,6 +578,7 @@ export default abstract class Session {
         );
         this.connection.removeAllListeners();
         this.connection.stopPlaying();
+
         try {
             let inputArgs = ["-ss", seekLocation.toString()];
             let encoderArgs = [];
@@ -618,7 +630,7 @@ export default abstract class Session {
             );
         });
 
-        this.connection.once("error", async (err) => {
+        this.connection.once("error", (err) => {
             // replace listener with no-op to catch any exceptions thrown after this event
             this.connection.removeAllListeners("error");
             this.connection.on("error", () => {});

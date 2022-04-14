@@ -101,7 +101,7 @@ export default class MusicSession extends Session {
         super.endRound(guildPreference, messageContext, guessResult);
     }
 
-    async endSession(): Promise<void> {
+    endSession(): Promise<void> {
         if (this.finished) {
             return;
         }

@@ -12,6 +12,12 @@
         "project": "./tsconfig.json"
     },
     "rules": {
+        "@typescript-eslint/await-thenable": [
+            "error"
+        ],
+        "@typescript-eslint/require-await": [
+            "error"
+        ],
         "@typescript-eslint/indent": [
             "off"
         ],

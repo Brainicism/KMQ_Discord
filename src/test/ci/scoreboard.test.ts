@@ -17,9 +17,9 @@ let guildPreference: GuildPreference;
 describe("score/exp updating", () => {
     describe("single player scoreboard", () => {
         describe("user guesses correctly multiple times", () => {
-            it("should increment the user's score/EXP", async () => {
+            it("should increment the user's score/EXP", () => {
                 for (let i = 0; i < 20; i++) {
-                    await scoreboard.update([
+                    scoreboard.update([
                         { userID: userIDs[0], pointsEarned: 1, expGain: 50 },
                     ]);
 
@@ -46,13 +46,13 @@ describe("score/exp updating", () => {
 
     describe("multi player scoreboard", () => {
         describe("both users guess correctly multiple times", () => {
-            it("should increment each user's score", async () => {
+            it("should increment each user's score", () => {
                 for (let i = 0; i < 20; i++) {
-                    await scoreboard.update([
+                    scoreboard.update([
                         { userID: userIDs[0], pointsEarned: 1, expGain: 50 },
                     ]);
                     if (i % 2 === 0) {
-                        await scoreboard.update([
+                        scoreboard.update([
                             {
                                 userID: userIDs[1],
                                 pointsEarned: 1,
@@ -86,8 +86,8 @@ describe("score/exp updating", () => {
     });
 
     describe("multiguess", () => {
-        it("should increment the score and EXP of every player", async () => {
-            await scoreboard.update([
+        it("should increment the score and EXP of every player", () => {
+            scoreboard.update([
                 { userID: userIDs[0], pointsEarned: 1, expGain: 50 },
                 { userID: userIDs[1], pointsEarned: 1, expGain: 25 },
             ]);
@@ -99,7 +99,7 @@ describe("score/exp updating", () => {
     });
 
     describe("position changes", () => {
-        it("should return the correct ranking of every player", async () => {
+        it("should return the correct ranking of every player", () => {
             const players = {
                 ohmiID: new Player("", "ohmiID", "", 2),
                 12345: new Player("", "12345", "", 2),
@@ -129,7 +129,7 @@ describe("score/exp updating", () => {
             });
         });
 
-        it("should return the same ranking when all players have the same score", async () => {
+        it("should return the same ranking when all players have the same score", () => {
             const players = {
                 ohmiID: new Player("", "ohmiID", "", 2),
                 12345: new Player("", "12345", "", 2),
@@ -144,7 +144,7 @@ describe("score/exp updating", () => {
             });
         });
 
-        it("should return different rankings when all players have different scores", async () => {
+        it("should return different rankings when all players have different scores", () => {
             const players = {
                 ohmiID: new Player("", "ohmiID", "", 1),
                 12345: new Player("", "12345", "", 2),
@@ -242,20 +242,20 @@ describe("winner detection", () => {
 
     describe("single player, has score", () => {
         const userID = "12345";
-        it("should return the single player", async () => {
-            await scoreboard.update([{ userID, pointsEarned: 10, expGain: 0 }]);
+        it("should return the single player", () => {
+            scoreboard.update([{ userID, pointsEarned: 10, expGain: 0 }]);
             assert.strictEqual(scoreboard.getWinners().length, 1);
             assert.strictEqual(scoreboard.getWinners()[0].id, userID);
         });
     });
 
     describe("multiple players, has different scores", () => {
-        it("should return the player with most points", async () => {
-            await scoreboard.update([
+        it("should return the player with most points", () => {
+            scoreboard.update([
                 { userID: userIDs[0], pointsEarned: 10, expGain: 0 },
             ]);
 
-            await scoreboard.update([
+            scoreboard.update([
                 { userID: userIDs[1], pointsEarned: 15, expGain: 0 },
             ]);
             assert.strictEqual(scoreboard.getWinners().length, 1);
@@ -264,16 +264,16 @@ describe("winner detection", () => {
     });
 
     describe("multiple players, tied score", () => {
-        it("should return the two tied players", async () => {
-            await scoreboard.update([
+        it("should return the two tied players", () => {
+            scoreboard.update([
                 { userID: userIDs[0], pointsEarned: 5, expGain: 0 },
             ]);
 
-            await scoreboard.update([
+            scoreboard.update([
                 { userID: userIDs[1], pointsEarned: 7, expGain: 0 },
             ]);
 
-            await scoreboard.update([
+            scoreboard.update([
                 { userID: userIDs[2], pointsEarned: 7, expGain: 0 },
             ]);
             assert.strictEqual(scoreboard.getWinners().length, 2);
@@ -292,8 +292,8 @@ describe("game finished", () => {
     });
 
     describe("goal is not set", () => {
-        it("should return false", () => {
-            guildPreference.reset(GameOption.GOAL);
+        it("should return false", async () => {
+            await guildPreference.reset(GameOption.GOAL);
             assert.strictEqual(scoreboard.gameFinished(guildPreference), false);
         });
     });
@@ -309,12 +309,12 @@ describe("game finished", () => {
         });
 
         describe("first place is not equal/above the goal", () => {
-            it("should return false", async () => {
-                await scoreboard.update([
+            it("should return false", () => {
+                scoreboard.update([
                     { userID: userIDs[0], pointsEarned: 2, expGain: 0 },
                 ]);
 
-                await scoreboard.update([
+                scoreboard.update([
                     { userID: userIDs[1], pointsEarned: 4, expGain: 0 },
                 ]);
 
@@ -326,12 +326,12 @@ describe("game finished", () => {
         });
 
         describe("first place is equal/above the goal", () => {
-            it("should return true", async () => {
-                await scoreboard.update([
+            it("should return true", () => {
+                scoreboard.update([
                     { userID: userIDs[0], pointsEarned: 5, expGain: 0 },
                 ]);
 
-                await scoreboard.update([
+                scoreboard.update([
                     { userID: userIDs[1], pointsEarned: 4, expGain: 0 },
                 ]);
 

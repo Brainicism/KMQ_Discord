@@ -31,7 +31,7 @@ export default class PremiumCommand implements BaseCommand {
         usage: ",premium",
     });
 
-    call = async ({}: CommandArgs): Promise<void> => {
+    call = ({}: CommandArgs): Promise<void> => {
         // Temporarily disable premium command
         return;
         // call = async ({ message }: CommandArgs): Promise<void> => {

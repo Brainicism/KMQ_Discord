@@ -3,7 +3,6 @@ import Eris from "eris";
 import _ from "lodash";
 import * as uuid from "uuid";
 
-import { resetSpecial } from "../commands/game_options/special";
 import dbContext from "../database_context";
 import {
     getDebugLogHeader,
@@ -171,7 +170,6 @@ export default class GameSession extends Session {
         }
 
         await super.startRound(guildPreference, messageContext);
-
         if (guildPreference.isMultipleChoiceMode()) {
             const locale = getGuildLocale(this.guildID);
             const randomSong = this.round.song;
@@ -678,16 +676,18 @@ export default class GameSession extends Session {
     async updatePremiumStatus(): Promise<void> {
         const guildPreference = await getGuildPreference(this.guildID);
         await this.reloadSongs(guildPreference);
-        if (
-            !this.isPremiumGame() &&
-            this.guildID !== process.env.DEBUG_SERVER_ID &&
-            guildPreference.gameOptions.specialType
-        ) {
-            await resetSpecial(
-                guildPreference,
-                new MessageContext(this.textChannelID),
-                true
-            );
+
+        if (!this.isPremiumGame()) {
+            for (const [commandName, command] of Object.entries(
+                state.client.commands
+            )) {
+                if (command.resetPremium) {
+                    logger.info(
+                        `gid: ${this.guildID} | Resetting premium for game option: ${commandName}`
+                    );
+                    await command.resetPremium(guildPreference);
+                }
+            }
         }
     }
 
@@ -992,13 +992,13 @@ export default class GameSession extends Session {
      * @param hintRequested - Whether the players received a hint
      * @param timePlayed - How long the song played for
      */
-    private async incrementSongStats(
+    private incrementSongStats(
         vlink: string,
         correct: boolean,
         skipped: boolean,
         hintRequested: boolean,
         timePlayed: number
-    ): Promise<void> {
+    ): void {
         if (!(vlink in this.songStats)) {
             this.songStats[vlink] = {
                 correctGuesses: 0,
@@ -1151,6 +1151,6 @@ export default class GameSession extends Session {
                 pointsEarned: x.pointsEarned,
             }));
 
-        await this.scoreboard.update(scoreboardUpdatePayload);
+        this.scoreboard.update(scoreboardUpdatePayload);
     }
 }

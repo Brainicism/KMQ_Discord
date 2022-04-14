@@ -34,14 +34,14 @@ export interface QueriedSong {
     hangulArtistName?: string;
     youtubeLink: string;
     publishDate?: Date;
-    members?: Gender;
-    artistID?: number;
-    isSolo?: string;
-    rank?: number;
-    views?: number;
-    tags?: string;
-    language?: string;
-    vtype?: string;
+    members: Gender;
+    artistID: number;
+    isSolo: string;
+    rank: number;
+    views: number;
+    tags: string;
+    vtype: string;
+    selectionWeight: number;
 }
 
 export interface EmbedPayload {

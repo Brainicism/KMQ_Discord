@@ -174,7 +174,7 @@ export default class GuildPreference {
     resetArgs: {
         [gameOption in GameOption]?: {
             default: Array<any>;
-            setter: (...args) => Promise<void>;
+            setter: ((...args) => Promise<void>) | ((...args) => void);
         };
     } = {
         [GameOption.LIMIT]: {
@@ -473,7 +473,7 @@ export default class GuildPreference {
     async reset(gameOption: GameOption): Promise<void> {
         if (gameOption in this.resetArgs) {
             const resetArg = this.resetArgs[gameOption];
-            resetArg.setter.bind(this)(...resetArg.default);
+            await resetArg.setter.bind(this)(...resetArg.default);
         }
     }
 
@@ -823,6 +823,9 @@ export default class GuildPreference {
      */
     async setShuffleType(shuffleType: ShuffleType): Promise<void> {
         this.gameOptions.shuffleType = shuffleType;
+        await this.updateGuildPreferences([
+            { name: GameOptionInternal.SHUFFLE_TYPE, value: shuffleType },
+        ]);
     }
 
     /**
