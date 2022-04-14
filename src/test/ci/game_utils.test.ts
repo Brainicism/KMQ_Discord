@@ -279,7 +279,11 @@ describe("song query", () => {
         it("should return the expected song count", async () => {
             const limit = 50;
             await guildPreference.setLimit(0, limit);
-            const songCount = await getAvailableSongCount(guildPreference);
+            const songCount = await getAvailableSongCount(
+                guildPreference,
+                true
+            );
+
             assert.strictEqual(songCount.count, limit);
             assert.strictEqual(songCount.countBeforeLimit > 0, true);
         });

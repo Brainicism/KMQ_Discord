@@ -2,15 +2,16 @@
 import Eris from "eris";
 import EmbedPaginator from "eris-pagination";
 import axios from "axios";
-import GuildPreference from "../structures/guild_preference";
+import GuildPreference, { GameOptions } from "../structures/guild_preference";
 import GameSession from "../structures/game_session";
 import { IPCLogger } from "../logger";
 import {
     getAvailableSongCount,
     getKmqCurrentVersion,
-    userBonusIsActive,
-    getLocalizedSongName,
     getLocalizedArtistName,
+    getLocalizedSongName,
+    isPremiumRequest,
+    userBonusIsActive,
 } from "./game_utils";
 import { getFact } from "../fact_generator";
 import {
@@ -55,6 +56,7 @@ const logger = new IPCLogger("discord_utils");
 export const EMBED_ERROR_COLOR = 0xed4245; // Red
 export const EMBED_SUCCESS_COLOR = 0x57f287; // Green
 export const EMBED_SUCCESS_BONUS_COLOR = 0xfee75c; // Gold
+
 const EMBED_FIELDS_PER_PAGE = 20;
 const REQUIRED_TEXT_PERMISSIONS = [
     "addReactions" as const,
@@ -517,39 +519,23 @@ export async function sendErrorMessage(
 }
 
 /**
- * Sends an info embed with the specified title/description/footer text
+ * Create and return a Discord embed with the specified payload
  * @param messageContext - An object containing relevant parts of Eris.Message
  * @param embedPayload - What to include in the message
- * @param reply - Whether to reply to the given message
  * @param boldTitle - Whether to bold the title
- * @param content - Plain text content
+ *  @returns a Discord embed
  */
-export async function sendInfoMessage(
+export function generateEmbed(
     messageContext: MessageContext,
     embedPayload: EmbedPayload,
-    reply = false,
-    boldTitle = true,
-    content?: string
-): Promise<Eris.Message<Eris.TextableChannel>> {
-    if (embedPayload.description && embedPayload.description.length > 2048) {
-        return sendErrorMessage(messageContext, {
-            title: state.localizer.translate(
-                messageContext.guildID,
-                "misc.failure.error"
-            ),
-            description: state.localizer.translate(
-                messageContext.guildID,
-                "misc.failure.messageTooLong"
-            ),
-        });
-    }
-
+    boldTitle = true
+): Eris.EmbedOptions {
     const author =
         embedPayload.author == null || embedPayload.author
             ? embedPayload.author
             : messageContext.author;
 
-    const embed: Eris.EmbedOptions = {
+    return {
         color: embedPayload.color,
         author: author
             ? {
@@ -571,11 +557,44 @@ export async function sendInfoMessage(
             : null,
         timestamp: embedPayload.timestamp,
     };
+}
+
+/**
+ * Sends an info embed with the specified title/description/footer text
+ * @param messageContext - An object containing relevant parts of Eris.Message
+ * @param embedPayload - What to include in the message
+ * @param reply - Whether to reply to the given message
+ * @param boldTitle - Whether to bold the title
+ * @param content - Plain text content
+ * @param additionalEmbeds - Additional embeds to include in the message
+ */
+export async function sendInfoMessage(
+    messageContext: MessageContext,
+    embedPayload: EmbedPayload,
+    reply = false,
+    boldTitle = true,
+    content?: string,
+    additionalEmbeds: Array<Eris.EmbedOptions> = []
+): Promise<Eris.Message<Eris.TextableChannel>> {
+    if (embedPayload.description && embedPayload.description.length > 2048) {
+        return sendErrorMessage(messageContext, {
+            title: state.localizer.translate(
+                messageContext.guildID,
+                "misc.failure.error"
+            ),
+            description: state.localizer.translate(
+                messageContext.guildID,
+                "misc.failure.messageTooLong"
+            ),
+        });
+    }
+
+    const embed = generateEmbed(messageContext, embedPayload, boldTitle);
 
     return sendMessage(
         messageContext.textChannelID,
         {
-            embeds: [embed],
+            embeds: [embed, ...additionalEmbeds],
             messageReference:
                 reply && messageContext.referencedMessageID
                     ? {
@@ -798,22 +817,56 @@ export async function sendEndRoundMessage(
 }
 
 /**
- * Sends an embed displaying the currently selected GameOptions
+ * Get a sentence describing the current limit
+ * @param guildID - The ID of the guild where the limit is sent
+ * @param gameOptions - The game options
+ * @param totalSongs - The song count
+ *  @returns a string describing the limit
+ */
+export function getFormattedLimit(
+    guildID: string,
+    gameOptions: GameOptions,
+    totalSongs: { count: number; countBeforeLimit: number }
+): string {
+    const visibleLimitEnd = Math.min(
+        totalSongs.countBeforeLimit,
+        gameOptions.limitEnd
+    );
+
+    const visibleLimitStart = Math.min(
+        totalSongs.countBeforeLimit,
+        gameOptions.limitStart
+    );
+
+    if (gameOptions.limitStart === 0) {
+        return friendlyFormattedNumber(visibleLimitEnd);
+    }
+
+    return state.localizer.translate(guildID, "misc.formattedLimit", {
+        limitStart: getOrdinalNum(visibleLimitStart),
+        limitEnd: getOrdinalNum(visibleLimitEnd),
+        songCount: friendlyFormattedNumber(totalSongs.count),
+    });
+}
+
+/**
+ * Creates an embed displaying the currently selected GameOptions
  * @param messageContext - The Message Context
  * @param guildPreference - The corresponding GuildPreference
  * @param updatedOptions - The GameOptions which were modified
  * @param preset - Specifies whether the GameOptions were modified by a preset
  * @param allReset - Specifies whether all GameOptions were reset
  * @param footerText - The footer text
+ *  @returns an embed of current game options
  */
-export async function sendOptionsMessage(
+export async function generateOptionsMessage(
     messageContext: MessageContext,
     guildPreference: GuildPreference,
     updatedOptions?: { option: GameOption; reset: boolean }[],
     preset = false,
     allReset = false,
     footerText?: string
-): Promise<void> {
+): Promise<EmbedPayload> {
     if (guildPreference.gameOptions.forcePlaySongID) {
         await sendInfoMessage(
             messageContext,
@@ -828,7 +881,16 @@ export async function sendOptionsMessage(
         return;
     }
 
-    const totalSongs = await getAvailableSongCount(guildPreference);
+    const premiumRequest = await isPremiumRequest(
+        messageContext.guildID,
+        messageContext.author.id
+    );
+
+    const totalSongs = await getAvailableSongCount(
+        guildPreference,
+        premiumRequest
+    );
+
     if (totalSongs === null) {
         sendErrorMessage(messageContext, {
             title: state.localizer.translate(
@@ -845,30 +907,11 @@ export async function sendOptionsMessage(
     }
 
     const gameOptions = guildPreference.gameOptions;
-    const visibleLimitEnd = Math.min(
-        totalSongs.countBeforeLimit,
-        gameOptions.limitEnd
+    const limit = getFormattedLimit(
+        messageContext.guildID,
+        gameOptions,
+        totalSongs
     );
-
-    const visibleLimitStart = Math.min(
-        totalSongs.countBeforeLimit,
-        gameOptions.limitStart
-    );
-
-    let limit: string;
-    if (gameOptions.limitStart === 0) {
-        limit = friendlyFormattedNumber(visibleLimitEnd);
-    } else {
-        limit = state.localizer.translate(
-            messageContext.guildID,
-            "misc.formattedLimit",
-            {
-                limitStart: getOrdinalNum(visibleLimitStart),
-                limitEnd: getOrdinalNum(visibleLimitEnd),
-                songCount: friendlyFormattedNumber(totalSongs.count),
-            }
-        );
-    }
 
     // Store the VALUE of ,[option]: [VALUE] into optionStrings
     // Null optionStrings values are set to "Not set" below
@@ -934,8 +977,7 @@ export async function sendOptionsMessage(
 
     const { gameSessions } = state;
     const isEliminationMode =
-        gameSessions[messageContext.guildID] &&
-        gameSessions[messageContext.guildID].gameType === GameType.ELIMINATION;
+        gameSessions[messageContext.guildID]?.gameType === GameType.ELIMINATION;
 
     // Special case: ,goal is conflicting only when current game is elimination
     if (guildPreference.isGoalSet()) {
@@ -992,15 +1034,7 @@ export async function sendOptionsMessage(
         }
     }
 
-    // Options excluded from embed fields since they are of higher importance (shown above them as part of the embed description)
-    let priorityOptions = PriorityGameOption.map(
-        (option) =>
-            `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${
-                optionStrings[option]
-            }`
-    ).join("\n");
-
-    priorityOptions = state.localizer.translate(
+    const optionsOverview = state.localizer.translate(
         messageContext.guildID,
         "command.options.overview",
         {
@@ -1008,15 +1042,37 @@ export async function sendOptionsMessage(
             totalSongs: bold(
                 friendlyFormattedNumber(totalSongs.countBeforeLimit)
             ),
-            priorityOptions,
         }
     );
+
+    // Options excluded from embed fields since they are of higher importance (shown above them as part of the embed description)
+    const priorityOptions = PriorityGameOption.map(
+        (option) =>
+            `${bold(process.env.BOT_PREFIX + GameOptionCommand[option])}: ${
+                optionStrings[option]
+            }`
+    ).join("\n");
+
+    let nonPremiumGameWarning = "";
+    if (
+        premiumRequest &&
+        gameSessions[messageContext.guildID] &&
+        !gameSessions[messageContext.guildID].isPremiumGame()
+    ) {
+        nonPremiumGameWarning = italicize(
+            state.localizer.translate(
+                messageContext.guildID,
+                "command.options.premiumOptionsNonPremiumGame"
+            )
+        );
+    }
 
     const fieldOptions = Object.keys(GameOptionCommand).filter(
         (option) => !PriorityGameOption.includes(option as GameOption)
     );
 
     const ZERO_WIDTH_SPACE = "​";
+
     // Split non-priority options into three fields
     const fields = [
         {
@@ -1106,17 +1162,51 @@ export async function sendOptionsMessage(
                   );
     }
 
-    await sendInfoMessage(
+    let description = "";
+    if (nonPremiumGameWarning) {
+        description = nonPremiumGameWarning + "\n\n";
+    }
+
+    description += optionsOverview;
+    description += "\n\n";
+    description += priorityOptions;
+
+    return {
+        color: premiumRequest ? EMBED_SUCCESS_BONUS_COLOR : null,
+        title,
+        description,
+        fields,
+        footerText,
+    };
+}
+
+/**
+ * Sends an embed displaying the currently selected GameOptions
+ * @param messageContext - The Message Context
+ * @param guildPreference - The corresponding GuildPreference
+ * @param updatedOptions - The GameOptions which were modified
+ * @param preset - Specifies whether the GameOptions were modified by a preset
+ * @param allReset - Specifies whether all GameOptions were reset
+ * @param footerText - The footer text
+ */
+export async function sendOptionsMessage(
+    messageContext: MessageContext,
+    guildPreference: GuildPreference,
+    updatedOptions?: { option: GameOption; reset: boolean }[],
+    preset = false,
+    allReset = false,
+    footerText?: string
+): Promise<void> {
+    const optionsEmbed = generateOptionsMessage(
         messageContext,
-        {
-            title,
-            description: priorityOptions,
-            fields,
-            footerText,
-            thumbnailUrl: KmqImages.LISTENING,
-        },
-        true
+        guildPreference,
+        updatedOptions,
+        preset,
+        allReset,
+        footerText
     );
+
+    await sendInfoMessage(messageContext, await optionsEmbed, true);
 }
 
 /**

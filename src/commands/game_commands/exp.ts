@@ -14,6 +14,7 @@ import {
     userBonusIsActive,
     isFirstGameOfDay,
     isPowerHour,
+    isPremiumRequest,
 } from "../../helpers/game_utils";
 import { AnswerType } from "../game_options/answer";
 import { GuessModeType } from "../game_options/guessmode";
@@ -161,7 +162,13 @@ export async function calculateOptionsExpMultiplierInternal(
         });
     }
 
-    const totalSongs = (await getAvailableSongCount(guildPreference)).count;
+    const totalSongs = (
+        await getAvailableSongCount(
+            guildPreference,
+            await isPremiumRequest(guildPreference.guildID, playerID)
+        )
+    ).count;
+
     if (totalSongs < 10) {
         modifiers.push({
             displayName: state.localizer.translate(

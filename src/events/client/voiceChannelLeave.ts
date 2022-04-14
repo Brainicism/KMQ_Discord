@@ -7,13 +7,13 @@ import { checkBotIsAlone } from "../../helpers/discord_utils";
  * @param member - The member that left the voice channel
  * @param oldChannel - The voice channel the member left
  */
-export default function voiceChannelLeaveHandler(
+export default async function voiceChannelLeaveHandler(
     member: Eris.Member,
     oldChannel: Eris.VoiceChannel
-): void {
+): Promise<void> {
     const guildID = oldChannel.guild.id;
     const gameSession = state.gameSessions[guildID];
-    if (!gameSession) {
+    if (!gameSession || gameSession.finished) {
         return;
     }
 
@@ -26,8 +26,10 @@ export default function voiceChannelLeaveHandler(
         return;
     }
 
-    if (!gameSession.finished) {
-        gameSession.updateOwner();
-        gameSession.setPlayerInVC(member.id, false);
+    gameSession.updateOwner();
+    const oldPremiumState = gameSession.isPremiumGame();
+    await gameSession.setPlayerInVC(member.id, false);
+    if (oldPremiumState !== gameSession.isPremiumGame()) {
+        await gameSession.updatePremiumStatus();
     }
 }

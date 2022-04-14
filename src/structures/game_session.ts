@@ -2,6 +2,7 @@
 import Eris from "eris";
 import _ from "lodash";
 import * as uuid from "uuid";
+
 import dbContext from "../database_context";
 import {
     getDebugLogHeader,
@@ -22,6 +23,7 @@ import {
     getLocalizedSongName,
     getMultipleChoiceOptions,
     isFirstGameOfDay,
+    isUserPremium,
     userBonusIsActive,
 } from "../helpers/game_utils";
 import {
@@ -169,7 +171,6 @@ export default class GameSession extends Session {
         }
 
         await super.startRound(guildPreference, messageContext);
-
         if (guildPreference.isMultipleChoiceMode()) {
             const locale = getGuildLocale(this.guildID);
             const randomSong = this.round.song;
@@ -342,7 +343,7 @@ export default class GameSession extends Session {
             round.endRoundMessageID = endRoundMessage?.id;
         }
 
-        super.endRound(guildPreference, messageContext);
+        await super.endRound(guildPreference, messageContext);
 
         if (this.scoreboard.gameFinished(guildPreference)) {
             this.endSession();
@@ -700,6 +701,38 @@ export default class GameSession extends Session {
     }
 
     /**
+     * The game has changed its premium state, so update filtered songs/remove ,special
+     */
+    async updatePremiumStatus(): Promise<void> {
+        const guildPreference = await getGuildPreference(this.guildID);
+        await this.reloadSongs(guildPreference);
+
+        if (!this.isPremiumGame()) {
+            for (const [commandName, command] of Object.entries(
+                state.client.commands
+            )) {
+                if (command.resetPremium) {
+                    logger.info(
+                        `gid: ${this.guildID} | Resetting premium for game option: ${commandName}`
+                    );
+                    await command.resetPremium(guildPreference);
+                }
+            }
+        }
+    }
+
+    /**
+     * Whether the current game has premium features
+     * @returns whether the game is premium
+     */
+    isPremiumGame(): boolean {
+        return this.scoreboard
+            .getPlayers()
+            .filter((x) => x.inVC)
+            .some((x) => x.premium);
+    }
+
+    /**
      * Update whether a player is in VC
      * @param userID - The Discord user ID of the player to update
      * @param inVC - Whether the player is currently in the voice channel
@@ -721,12 +754,14 @@ export default class GameSession extends Session {
                           (
                               this.scoreboard as EliminationScoreboard
                           ).getLivesOfWeakestPlayer(),
-                          await isFirstGameOfDay(userID)
+                          await isFirstGameOfDay(userID),
+                          await isUserPremium(userID)
                       )
                     : Player.fromUserID(
                           userID,
                           0,
-                          await isFirstGameOfDay(userID)
+                          await isFirstGameOfDay(userID),
+                          await isUserPremium(userID)
                       )
             );
         }
@@ -757,15 +792,17 @@ export default class GameSession extends Session {
             (x) => x !== process.env.BOT_CLIENT_ID
         )) {
             const firstGameOfDay = await isFirstGameOfDay(player);
+            const premium = await isUserPremium(player);
             this.scoreboard.addPlayer(
                 this.gameType === GameType.ELIMINATION
                     ? EliminationPlayer.fromUserID(
                           player,
                           (this.scoreboard as EliminationScoreboard)
                               .startingLives,
-                          firstGameOfDay
+                          firstGameOfDay,
+                          premium
                       )
-                    : Player.fromUserID(player, 0, firstGameOfDay)
+                    : Player.fromUserID(player, 0, firstGameOfDay, premium)
             );
         }
     }
@@ -985,13 +1022,13 @@ export default class GameSession extends Session {
      * @param hintRequested - Whether the players received a hint
      * @param timePlayed - How long the song played for
      */
-    private async incrementSongStats(
+    private incrementSongStats(
         vlink: string,
         correct: boolean,
         skipped: boolean,
         hintRequested: boolean,
         timePlayed: number
-    ): Promise<void> {
+    ): void {
         if (!(vlink in this.songStats)) {
             this.songStats[vlink] = {
                 correctGuesses: 0,
@@ -1144,6 +1181,6 @@ export default class GameSession extends Session {
                 pointsEarned: x.pointsEarned,
             }));
 
-        await this.scoreboard.update(scoreboardUpdatePayload);
+        this.scoreboard.update(scoreboardUpdatePayload);
     }
 }

@@ -82,7 +82,7 @@ function registerGlobalIntervals(fleet: Fleet): void {
     });
 
     // everyday at 12am UTC => 7pm EST
-    schedule.scheduleJob("0 0 * * *", async () => {
+    schedule.scheduleJob("0 0 * * *", () => {
         storeDailyStats(fleet.stats?.guilds);
     });
 

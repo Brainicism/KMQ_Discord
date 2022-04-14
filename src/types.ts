@@ -1,5 +1,7 @@
 import Eris, { GuildTextableChannel } from "eris";
 import { IPC } from "eris-fleet/dist/util/IPC";
+import { Campaign } from "patreon-discord";
+
 import GameSession from "./structures/game_session";
 import { Gender } from "./commands/game_options/gender";
 import KmqMember from "./structures/kmq_member";
@@ -31,14 +33,14 @@ export interface QueriedSong {
     hangulArtistName?: string;
     youtubeLink: string;
     publishDate?: Date;
-    members?: Gender;
-    artistID?: number;
-    isSolo?: string;
-    rank?: number;
-    views?: number;
-    tags?: string;
-    language?: string;
-    vtype?: string;
+    members: Gender;
+    artistID: number;
+    isSolo: string;
+    rank: number;
+    views: number;
+    tags: string;
+    vtype: string;
+    selectionWeight: number;
 }
 
 export interface EmbedPayload {
@@ -76,6 +78,7 @@ export interface State {
     bonusArtists: Set<string>;
     locales: { [guildID: string]: LocaleType };
     localizer: LocalizationManager;
+    patreonCampaign: Campaign;
 }
 
 export enum GameOption {

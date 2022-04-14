@@ -145,7 +145,7 @@ export default class LeaderboardCommand implements BaseCommand {
         priority: 50,
     });
 
-    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+    call = ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         if (parsedMessage.components.length === 0) {
             LeaderboardCommand.showLeaderboard(
                 message,
@@ -515,8 +515,9 @@ export default class LeaderboardCommand implements BaseCommand {
                                         )
                                         .first();
 
-                                    const medalIcon =
-                                        ["🥇", "🥈", "🥉"][rank] || "";
+                                    const displayedRank =
+                                        ["🥇", "🥈", "🥉"][rank] ||
+                                        `${rank + 1}.`;
 
                                     const displayName = enrolledPlayer
                                         ? enrolledPlayer.display_name
@@ -628,7 +629,7 @@ export default class LeaderboardCommand implements BaseCommand {
                                     }
 
                                     return {
-                                        name: `${medalIcon} ${displayName}`,
+                                        name: `${displayedRank} ${displayName}`,
                                         value,
                                     };
                                 })

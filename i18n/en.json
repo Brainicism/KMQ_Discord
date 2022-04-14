@@ -543,8 +543,9 @@
                 "description": "Displays the current game options."
             },
             "notSet": "Not set",
-            "overview": "Now playing the top {{limit}} out of {{totalSongs}} available songs from the following game options:\n\n{{priorityOptions}}",
+            "overview": "Now playing the top {{limit}} out of {{totalSongs}} available songs from the following game options:",
             "perCommandHelp": "Looking for information on how to use a command? Check out \"{{helpCommand}} [command]\" to learn more.",
+            "premiumOptionsNonPremiumGame": "Note: active game is not premium",
             "preset": "Preset",
             "reset": "{{presetOrOption}} Reset",
             "timer": "{{timerInSeconds}} sec",
@@ -614,6 +615,42 @@
             },
             "typeGuess": "Listen to the song and type your guess!",
             "voteReminder": "Psst. Earn more EXP by voting (see {{vote}})"
+        },
+        "premium": {
+            "help": {
+                "description": "Find out more about KMQ Premium including whether you're currently a member.",
+                "example": "Shows your premium status."
+            },
+            "option": {
+                "description": "This option can only be used by premium KMQ supporters.",
+                "description_kmq_server": "This option can only be used by premium KMQ supporters, or in the official KMQ server.",
+                "title": "Premium Option"
+            },
+            "status": {
+                "description": {
+                    "connectionReminder": "Make sure to connect your Discord account [here](https://www.patreon.com/settings/apps) to receive your perks.",
+                    "nonPremium": "Subscribe to [KMQ Premium](https://www.patreon.com/kmq) here.",
+                    "premium": "You have [KMQ Premium](https://www.patreon.com/kmq)."
+                },
+                "perks": {
+                    "badge": {
+                        "description": "Show off your dedication to KMQ with an exclusive badge on your profile",
+                        "title": "Premium Supporter Badge!"
+                    },
+                    "moreSongs": {
+                        "description": "Gain access to the top 25 b-sides for every artist (up from 10)",
+                        "title": "More songs!"
+                    },
+                    "special": {
+                        "description": "Change song playback speed anywhere you play!",
+                        "title": "`,special` in every server!"
+                    }
+                },
+                "title": {
+                    "nonPremium": "Subscribe to KMQ Premium!",
+                    "premium": "Thanks for supporting KMQ!"
+                }
+            }
         },
         "preset": {
             "deleted": {
@@ -825,11 +862,11 @@
         },
         "shuffle": {
             "help": {
-                "description": "Choose whether songs are played in truly random order ({{random}}) or randomly but uniquely until all songs are played ({{shuffle}}).",
+                "description": "Choose how songs are shuffled.",
                 "example": {
+                    "popularity": "Songs will play based on descending popularity",
                     "random": "Songs will play randomly",
-                    "reset": "Reset to the default shuffle mode of {{defaultShuffle}}",
-                    "unique": "Every song will play once before any are repeated"
+                    "reset": "Reset to the default shuffle mode of {{defaultShuffle}}"
                 }
             }
         },
@@ -848,7 +885,7 @@
         },
         "special": {
             "help": {
-                "description": "Hey. This hasn't been announced yet, but check out the KMQ server to try it out! Play a special mode with modified audio.",
+                "description": "Modify the song playback speed. Only premium players (see `,premium`) can use this command outside of the official KMQ server.",
                 "example": {
                     "fast": "Plays the song at a fast speed",
                     "faster": "Plays the song at a faster speed",
@@ -1120,7 +1157,7 @@
             },
             "likeKmq": {
                 "title": "Like KMQ?",
-                "vote": "Give us a vote (and get 2x exp, see `,vote`) and leave a review on [Top.GG!](https://top.gg/bot/508759831755096074)"
+                "vote": "Give us a vote (and get 2x exp, see `,vote`) and leave a review on [top.gg!](https://top.gg/bot/508759831755096074)"
             },
             "wrongSongName": {
                 "aliases.": "Have a suggestion for an alternate song name? Tell us on the official KMQ server!",

@@ -23,5 +23,7 @@ declare namespace NodeJS {
         DEBUG_LOGGING?: boolean;
         POWER_HOUR_NOTIFICATION_CHANNEL_ID?: string;
         POWER_HOUR_NOTIFICATION_ROLE_ID?: string;
+        PATREON_CREATOR_ACCESS_TOKEN?: string;
+        PATREON_CAMPAIGN_ID?: string;
     }
 }

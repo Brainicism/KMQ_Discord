@@ -162,16 +162,20 @@ export function chooseRandom(list: Array<any>): any {
  * Requires some list element to have a "weight" property for weighting to function
  * From: https://stackoverflow.com/a/55671924
  * @param list - List of arbitrary elements
+ * @param weightKey - The name of the key to be sorted on
  * @returns the randomly selected element
  */
-export function chooseWeightedRandom(list: Array<any>): any {
+export function chooseWeightedRandom(
+    list: Array<any>,
+    weightKey = "weight"
+): any {
     const weights = [];
     for (let i = 0; i < list.length; i++) {
         const previousWeight = weights[i - 1] || 0;
-        if (!list[i].weight) {
+        if (!list[i][weightKey]) {
             weights[i] = 1 + previousWeight;
         } else {
-            weights[i] = list[i].weight + previousWeight;
+            weights[i] = list[i][weightKey] + previousWeight;
         }
     }
 

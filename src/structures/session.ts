@@ -66,7 +66,7 @@ export default abstract class Session {
     /** Whether the GameSession is active yet */
     public sessionInitialized: boolean;
 
-    protected songSelector: SongSelector;
+    public songSelector: SongSelector;
 
     /** The number of Rounds played */
     protected roundsPlayed: number;
@@ -109,7 +109,6 @@ export default abstract class Session {
         messageContext: MessageContext
     ): Promise<void> {
         this.sessionInitialized = true;
-
         if (this.songSelector.getSongs() === null) {
             try {
                 await this.reloadSongs(guildPreference);
@@ -137,7 +136,7 @@ export default abstract class Session {
             }
         }
 
-        if (this.songSelector.checkUniqueSongQueue(guildPreference)) {
+        if (this.songSelector.checkUniqueSongQueue()) {
             const totalSongCount = this.songSelector.getCurrentSongCount();
             logger.info(
                 `${getDebugLogHeader(
@@ -160,9 +159,7 @@ export default abstract class Session {
         }
 
         this.songSelector.checkAlternatingGender(guildPreference);
-        const randomSong = await this.songSelector.queryRandomSong(
-            guildPreference
-        );
+        const randomSong = this.songSelector.queryRandomSong(guildPreference);
 
         if (randomSong === null) {
             sendErrorMessage(messageContext, {
@@ -224,7 +221,7 @@ export default abstract class Session {
      * @param _messageContext - unused
      * @param _guessResult - unused
      */
-    async endRound(
+    endRound(
         guildPreference: GuildPreference,
         _messageContext?: MessageContext,
         _guessResult?: GuessResult
@@ -243,17 +240,7 @@ export default abstract class Session {
         if (round.endRoundMessageID) {
             this.songMessageIDs.push({
                 messageID: round.endRoundMessageID,
-                song: {
-                    songName: round.song.songName,
-                    originalSongName: round.song.originalSongName,
-                    hangulSongName: round.song.hangulSongName,
-                    originalHangulSongName: round.song.originalHangulSongName,
-                    artistName: round.song.artistName,
-                    hangulArtistName: round.song.hangulArtistName,
-                    youtubeLink: round.song.youtubeLink,
-                    publishDate: round.song.publishDate,
-                    views: round.song.views,
-                },
+                song: round.song,
             });
         }
 
@@ -407,7 +394,10 @@ export default abstract class Session {
     }
 
     async reloadSongs(guildPreference: GuildPreference): Promise<void> {
-        await this.songSelector.reloadSongs(guildPreference);
+        await this.songSelector.reloadSongs(
+            guildPreference,
+            state.gameSessions[this.guildID]?.isPremiumGame() ?? false
+        );
     }
 
     /**
@@ -450,7 +440,7 @@ export default abstract class Session {
             : null;
     }
 
-    async handleBookmarkInteraction(
+    handleBookmarkInteraction(
         interaction: Eris.CommandInteraction
     ): Promise<void> {
         const song = this.getSongFromMessageID(interaction.data.target_id);
@@ -543,6 +533,7 @@ export default abstract class Session {
         );
         this.connection.removeAllListeners();
         this.connection.stopPlaying();
+
         try {
             let inputArgs = ["-ss", seekLocation.toString()];
             let encoderArgs = [];
@@ -590,7 +581,7 @@ export default abstract class Session {
             );
         });
 
-        this.connection.once("error", async (err) => {
+        this.connection.once("error", (err) => {
             // replace listener with no-op to catch any exceptions thrown after this event
             this.connection.removeAllListeners("error");
             this.connection.on("error", () => {});

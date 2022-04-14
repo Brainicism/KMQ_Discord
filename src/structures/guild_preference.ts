@@ -49,7 +49,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("guild_preference");
 
-interface GameOptions {
+export interface GameOptions {
     beginningYear: number;
     endYear: number;
     gender: Array<Gender>;
@@ -174,7 +174,7 @@ export default class GuildPreference {
     resetArgs: {
         [gameOption in GameOption]?: {
             default: Array<any>;
-            setter: (...args) => Promise<void>;
+            setter: ((...args) => Promise<void>) | ((...args) => void);
         };
     } = {
         [GameOption.LIMIT]: {
@@ -473,7 +473,7 @@ export default class GuildPreference {
     async reset(gameOption: GameOption): Promise<void> {
         if (gameOption in this.resetArgs) {
             const resetArg = this.resetArgs[gameOption];
-            resetArg.setter.bind(this)(...resetArg.default);
+            await resetArg.setter.bind(this)(...resetArg.default);
         }
     }
 
@@ -823,17 +823,9 @@ export default class GuildPreference {
      */
     async setShuffleType(shuffleType: ShuffleType): Promise<void> {
         this.gameOptions.shuffleType = shuffleType;
-
-        // Doesn't actually modify list of available_songs, but we need to
-        // reset lastPlayedSongsQueue when changing shuffling modes
         await this.updateGuildPreferences([
             { name: GameOptionInternal.SHUFFLE_TYPE, value: shuffleType },
         ]);
-    }
-
-    /** @returns whether the current shuffle type is UNIQUE */
-    isShuffleUnique(): boolean {
-        return this.gameOptions.shuffleType === ShuffleType.UNIQUE;
     }
 
     /**

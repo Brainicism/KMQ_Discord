@@ -15,7 +15,7 @@ export default async function voiceChannelSwitchHandler(
 ): Promise<void> {
     const guildID = oldChannel.guild.id;
     const gameSession = state.gameSessions[guildID];
-    if (!gameSession) {
+    if (!gameSession || gameSession.finished) {
         return;
     }
 
@@ -31,18 +31,21 @@ export default async function voiceChannelSwitchHandler(
         return;
     }
 
-    if (!gameSession.finished) {
-        if (member.id !== process.env.BOT_CLIENT_ID) {
-            await gameSession.setPlayerInVC(
-                member.id,
-                newChannel.id === gameSession.voiceChannelID
-            );
-        } else {
-            // Bot was moved to another VC
-            gameSession.voiceChannelID = newChannel.id;
-            gameSession.syncAllVoiceMembers();
-        }
-
-        gameSession.updateOwner();
+    if (member.id !== process.env.BOT_CLIENT_ID) {
+        await gameSession.setPlayerInVC(
+            member.id,
+            newChannel.id === gameSession.voiceChannelID
+        );
+    } else {
+        // Bot was moved to another VC
+        gameSession.voiceChannelID = newChannel.id;
+        gameSession.syncAllVoiceMembers();
     }
+
+    const oldPremiumState = gameSession.isPremiumGame();
+    if (oldPremiumState !== gameSession.isPremiumGame()) {
+        gameSession.updatePremiumStatus();
+    }
+
+    gameSession.updateOwner();
 }

@@ -24,6 +24,7 @@ jobs:
             DB_USER_CI: root
             DB_PORT: 3306
             AUDIO_SONGS_PER_ARTIST: 10
+            PREMIUM_AUDIO_SONGS_PER_ARTIST: 25
         steps:
             - name: Checkout KMQ_Discord
               uses: actions/checkout@v2
@@ -59,6 +60,7 @@ jobs:
                   echo "DB_HOST=127.0.0.1" >> .env
                   echo "DB_PORT=$DB_PORT" >> .env
                   echo "DB_PORT=3306" >> .env
+                  echo "BOT_CLIENT_ID=123" >> .env
                   echo "AUDIO_SONGS_PER_ARTIST=10" >> .env
               shell: bash
             - name: Wait for MySQL server to start

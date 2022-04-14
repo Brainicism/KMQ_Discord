@@ -1,14 +1,16 @@
 import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import {
-    sendOptionsMessage,
     getDebugLogHeader,
+    sendErrorMessage,
+    sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
+import { getGuildPreference, isUserPremium } from "../../helpers/game_utils";
+import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
+import GuildPreference from "../../structures/guild_preference";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
 
 const logger = new IPCLogger("special");
 
@@ -54,7 +56,6 @@ export const specialFfmpegArgs = {
         encoderArgs: ["-af", "rubberband=pitch=1.25992:tempo=1.25"],
     }),
 };
-
 export default class SpecialCommand implements BaseCommand {
     preRunChecks = [
         {
@@ -158,6 +159,29 @@ export default class SpecialCommand implements BaseCommand {
             return;
         }
 
+        if (
+            process.env.DEBUG_SERVER_ID !== message.guildID &&
+            !(await isUserPremium(message.author.id))
+        ) {
+            logger.info(
+                `${getDebugLogHeader(
+                    message
+                )} | Non-premium user attempted to use premium special option`
+            );
+
+            sendErrorMessage(MessageContext.fromMessage(message), {
+                description: state.localizer.translate(
+                    message.guildID,
+                    "command.premium.option.description_kmq_server"
+                ),
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.premium.option.title"
+                ),
+            });
+            return;
+        }
+
         const specialType = parsedMessage.components[0] as SpecialType;
         await guildPreference.setSpecialType(specialType);
         await sendOptionsMessage(
@@ -168,6 +192,19 @@ export default class SpecialCommand implements BaseCommand {
 
         logger.info(
             `${getDebugLogHeader(message)} | Special type set to ${specialType}`
+        );
+    };
+
+    resetPremium = async (guildPreference: GuildPreference): Promise<void> => {
+        if (guildPreference.guildID !== process.env.DEBUG_SERVER_ID) {
+            await guildPreference.reset(GameOption.SPECIAL_TYPE);
+        }
+    };
+
+    isUsingPremiumOption = (guildPreference: GuildPreference): boolean => {
+        return (
+            guildPreference.guildID !== process.env.DEBUG_SERVER_ID &&
+            guildPreference.gameOptions.specialType !== null
         );
     };
 }

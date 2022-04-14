@@ -24,6 +24,8 @@ import {
     getMatchingGroupNames,
     isPowerHour,
 } from "./game_utils";
+import { LocaleType } from "./localization_manager";
+import updatePremiumUsers from "./patreon_manager";
 import dbContext from "../database_context";
 import debugHandler from "../events/client/debug";
 import guildCreateHandler from "../events/client/guildCreate";
@@ -36,7 +38,6 @@ import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
 import { EnvType } from "../types";
 import channelDeleteHandler from "../events/client/channelDelete";
-import { LocaleType } from "./localization_manager";
 
 const logger = new IPCLogger("management_utils");
 
@@ -301,7 +302,7 @@ export async function clearRestartNotification(): Promise<void> {
  * */
 export function registerIntervals(clusterID: number): void {
     // Everyday at 12am UTC => 7pm EST
-    schedule.scheduleJob("0 0 * * *", async () => {
+    schedule.scheduleJob("0 0 * * *", () => {
         // New fun facts
         reloadFactCache();
         // New bonus groups
@@ -309,7 +310,7 @@ export function registerIntervals(clusterID: number): void {
     });
 
     // Every hour
-    schedule.scheduleJob("0 * * * *", async () => {
+    schedule.scheduleJob("0 * * * *", () => {
         if (!isPowerHour() || isWeekend()) return;
         if (!state.client.guilds.has(process.env.DEBUG_SERVER_ID)) return;
         // Ping a role in KMQ server notifying of power hour
@@ -332,6 +333,8 @@ export function registerIntervals(clusterID: number): void {
         clearInactiveVoiceConnections();
         // Store per-cluster stats
         await updateSystemStats(clusterID);
+        // Sync state with Patreon subscribers
+        updatePremiumUsers();
     });
 
     // Every minute
@@ -347,7 +350,7 @@ export function registerIntervals(clusterID: number): void {
 }
 
 /** Reloads caches */
-export async function reloadCaches(): Promise<void> {
+export function reloadCaches(): void {
     reloadAliases();
     reloadFactCache();
     reloadBonusGroups();

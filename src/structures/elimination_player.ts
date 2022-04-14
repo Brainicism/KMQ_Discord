@@ -9,7 +9,8 @@ export default class EliminationPlayer extends Player {
     static fromUserID(
         userID: string,
         score = DEFAULT_LIVES,
-        firstGameOfDay = false
+        firstGameOfDay = false,
+        premium = false
     ): EliminationPlayer {
         const user = state.client.users.get(userID);
 
@@ -18,7 +19,8 @@ export default class EliminationPlayer extends Player {
             user.id,
             user.avatarURL,
             score,
-            firstGameOfDay
+            firstGameOfDay,
+            premium
         );
     }
 
