@@ -363,22 +363,3 @@ export function reloadCaches(): void {
     reloadBonusGroups();
     reloadLocales();
 }
-
-/**
- * Deletes the GameSession corresponding to a given guild ID
- * @param guildID - The guild ID
- */
-export function deleteSession(guildID: string): void {
-    const isGameSession = guildID in state.gameSessions;
-    const isMusicSession = guildID in state.musicSessions;
-    if (!isGameSession && !isMusicSession) {
-        logger.debug(`gid: ${guildID} | Session already ended`);
-        return;
-    }
-
-    if (isGameSession) {
-        delete state.gameSessions[guildID];
-    } else if (isMusicSession) {
-        delete state.musicSessions[guildID];
-    }
-}

@@ -21,7 +21,6 @@ import KmqMember from "./kmq_member";
 import MessageContext from "./message_context";
 import Round from "./round";
 import SongSelector from "./song_selector";
-import { deleteSession } from "../helpers/management_utils";
 import {
     ensureVoiceConnection,
     getGuildPreference,
@@ -111,6 +110,25 @@ export default abstract class Session {
 
     static getSession(guildID: string): Session {
         return state.gameSessions[guildID] ?? state.musicSessions[guildID];
+    }
+
+    /**
+     * Deletes the GameSession corresponding to a given guild ID
+     * @param guildID - The guild ID
+     */
+    static deleteSession(guildID: string): void {
+        const isGameSession = guildID in state.gameSessions;
+        const isMusicSession = guildID in state.musicSessions;
+        if (!isGameSession && !isMusicSession) {
+            logger.debug(`gid: ${guildID} | Session already ended`);
+            return;
+        }
+
+        if (isGameSession) {
+            delete state.gameSessions[guildID];
+        } else if (isMusicSession) {
+            delete state.musicSessions[guildID];
+        }
     }
 
     /**
@@ -275,7 +293,7 @@ export default abstract class Session {
      * Ends the current GameSession
      */
     async endSession(): Promise<void> {
-        deleteSession(this.guildID);
+        Session.deleteSession(this.guildID);
         await this.endRound(
             await getGuildPreference(this.guildID),
             new MessageContext(this.textChannelID, null, this.guildID),

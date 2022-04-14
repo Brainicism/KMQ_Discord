@@ -1,5 +1,6 @@
 import Eris from "eris";
 import GameSession from "../../structures/game_session";
+import Session from "../../structures/session";
 import {
     sendErrorMessage,
     getDebugLogHeader,
@@ -12,10 +13,7 @@ import {
     generateOptionsMessage,
     generateEmbed,
 } from "../../helpers/discord_utils";
-import {
-    deleteSession,
-    getTimeUntilRestart,
-} from "../../helpers/management_utils";
+import { getTimeUntilRestart } from "../../helpers/management_utils";
 import {
     activeBonusUsers,
     getGuildPreference,
@@ -313,7 +311,7 @@ export default class PlayCommand implements BaseCommand {
             gameType === GameType.TEAMS
         ) {
             // User sent ,play teams twice, reset the GameSession
-            deleteSession(guildID);
+            Session.deleteSession(guildID);
             logger.info(
                 `${getDebugLogHeader(
                     message
