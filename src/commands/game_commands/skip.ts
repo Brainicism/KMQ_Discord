@@ -74,13 +74,12 @@ async function sendSkipMessage(
  */
 export function isSkipMajority(guildID: string, session: Session): boolean {
     if (session instanceof GameSession) {
-        const gameSession = session as GameSession;
-        if (gameSession.gameType === GameType.ELIMINATION) {
+        if (session.gameType === GameType.ELIMINATION) {
             return (
-                gameSession.round.getSkipCount() >=
+                session.round.getSkipCount() >=
                 Math.floor(
                     (
-                        gameSession.scoreboard as EliminationScoreboard
+                        session.scoreboard as EliminationScoreboard
                     ).getAlivePlayersCount() * 0.5
                 ) +
                     1
@@ -149,11 +148,10 @@ export default class SkipCommand implements BaseCommand {
         }
 
         if (session instanceof GameSession) {
-            const gameSession = session as GameSession;
-            if (gameSession.gameType === GameType.ELIMINATION) {
+            if (session.gameType === GameType.ELIMINATION) {
                 if (
                     !(
-                        gameSession.scoreboard as EliminationScoreboard
+                        session.scoreboard as EliminationScoreboard
                     ).isPlayerEliminated(message.author.id)
                 ) {
                     logger.info(
@@ -161,7 +159,7 @@ export default class SkipCommand implements BaseCommand {
                             message
                         )} | User skipped, elimination mode`
                     );
-                    gameSession.round.userSkipped(message.author.id);
+                    session.round.userSkipped(message.author.id);
                 }
             }
         }

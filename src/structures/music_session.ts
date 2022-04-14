@@ -113,10 +113,6 @@ export default class MusicSession extends Session {
         super.endSession();
     }
 
-    getListeners(): number {
-        return getCurrentVoiceMembers(this.voiceChannelID).length;
-    }
-
     async handleButtonInteraction(
         interaction: Eris.ComponentInteraction,
         messageContext: MessageContext
