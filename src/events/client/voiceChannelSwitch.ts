@@ -33,8 +33,8 @@ export default async function voiceChannelSwitchHandler(
         return;
     }
 
+    const oldPremiumState = session.isPremium();
     if (session instanceof GameSession) {
-        const oldPremiumState = session.isPremiumGame();
         if (member.id !== process.env.BOT_CLIENT_ID) {
             await session.setPlayerInVC(
                 member.id,
@@ -45,14 +45,14 @@ export default async function voiceChannelSwitchHandler(
             session.voiceChannelID = newChannel.id;
             await session.syncAllVoiceMembers();
         }
+    }
 
-        if (oldPremiumState !== session.isPremiumGame()) {
-            session.updatePremiumStatus();
-        }
+    session.updateOwner();
 
-        session.updateOwner();
-    } else if (session instanceof MusicSession) {
-        session.updateOwner();
-        session.verifyPremium();
+    if (
+        oldPremiumState !== session.isPremium() ||
+        session instanceof MusicSession
+    ) {
+        session.updatePremiumStatus();
     }
 }

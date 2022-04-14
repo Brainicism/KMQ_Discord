@@ -1,6 +1,7 @@
 import Eris from "eris";
 import GameSession from "../../structures/game_session";
 import Session from "../../structures/session";
+import MusicSession from "../../structures/music_session";
 
 /**
  * @param member - The member that joined the voice channel
@@ -22,11 +23,15 @@ export default async function voiceChannelJoinHandler(
         return;
     }
 
+    const oldPremiumState = session.isPremium();
     if (session instanceof GameSession) {
-        const oldPremiumState = session.isPremiumGame();
         await session.setPlayerInVC(member.id, true);
-        if (oldPremiumState !== session.isPremiumGame()) {
-            session.updatePremiumStatus();
-        }
+    }
+
+    if (
+        oldPremiumState !== session.isPremium() ||
+        session instanceof MusicSession
+    ) {
+        session.updatePremiumStatus();
     }
 }

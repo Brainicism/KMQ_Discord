@@ -185,16 +185,13 @@ export default class MusicSession extends Session {
     }
 
     /**
-     * At least one premium member required to use a music session
+     * Whether the current music session has premium features
+     * @returns whether the session is premium
      */
-    verifyPremium(): void {
-        if (
-            !getCurrentVoiceMembers(this.voiceChannelID).some((x) =>
-                isUserPremium(x.id)
-            )
-        ) {
-            this.endSession();
-        }
+    isPremium(): boolean {
+        return getCurrentVoiceMembers(this.voiceChannelID).some((x) =>
+            isUserPremium(x.id)
+        );
     }
 
     /**

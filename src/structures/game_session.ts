@@ -671,31 +671,10 @@ export default class GameSession extends Session {
     }
 
     /**
-     * The game has changed its premium state, so update filtered songs/remove ,special
+     * Whether the current game session has premium features
+     * @returns whether the session is premium
      */
-    async updatePremiumStatus(): Promise<void> {
-        const guildPreference = await getGuildPreference(this.guildID);
-        await this.reloadSongs(guildPreference);
-
-        if (!this.isPremiumGame()) {
-            for (const [commandName, command] of Object.entries(
-                state.client.commands
-            )) {
-                if (command.resetPremium) {
-                    logger.info(
-                        `gid: ${this.guildID} | Resetting premium for game option: ${commandName}`
-                    );
-                    await command.resetPremium(guildPreference);
-                }
-            }
-        }
-    }
-
-    /**
-     * Whether the current game has premium features
-     * @returns whether the game is premium
-     */
-    isPremiumGame(): boolean {
+    isPremium(): boolean {
         return this.scoreboard
             .getPlayers()
             .filter((x) => x.inVC)

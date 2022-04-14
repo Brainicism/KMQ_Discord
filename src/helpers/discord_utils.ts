@@ -1116,7 +1116,7 @@ export async function generateOptionsMessage(
     if (
         premiumRequest &&
         session instanceof GameSession &&
-        !session.isPremiumGame()
+        !session.isPremium()
     ) {
         nonPremiumGameWarning = italicize(
             state.localizer.translate(

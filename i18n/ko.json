@@ -531,10 +531,10 @@
         },
         "music": {
             "help": {
-                "description": "Stream songs from the current options. Only available to KMQ Premium users.",
-                "example": "Music will start playing in the current voice channel."
+                "description": "현재 옵션에서 노래를 스트리밍합니다. KMQ 프리미엄 사용자만 사용할 수 있습니다.",
+                "example": "현재 음성 채널에서 음악이 재생되기 시작합니다."
             },
-            "musicStarting": "Music Starting in #{{textChannelName}} in 🔊 {{voiceChannelName}}"
+            "musicStarting": "🔊 {{voiceChannelName}}의 {{textChannelName}}에서 시작하는 음악"
         },
         "news": {
             "help": {

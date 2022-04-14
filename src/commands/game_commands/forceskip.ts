@@ -51,8 +51,7 @@ export default class ForceSkipCommand implements BaseCommand {
         if (
             !session.round ||
             session.round.skipAchieved ||
-            session.round.finished ||
-            !areUserAndBotInSameVoiceChannel(message)
+            session.round.finished
         ) {
             return;
         }

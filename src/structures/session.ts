@@ -104,6 +104,16 @@ export default abstract class Session {
     }
 
     /**
+     * Whether the current session has premium features
+     * @returns whether the session is premium
+     */
+    abstract isPremium(): boolean;
+
+    static getSession(guildID: string): Session {
+        return state.gameSessions[guildID] ?? state.musicSessions[guildID];
+    }
+
+    /**
      * Starting a new Round
      * @param guildPreference - The guild's GuildPreference
      * @param messageContext - An object containing relevant parts of Eris.Message
@@ -410,7 +420,7 @@ export default abstract class Session {
         await this.songSelector.reloadSongs(
             guildPreference,
             session instanceof MusicSession ||
-                (session instanceof GameSession && session.isPremiumGame())
+                (session instanceof GameSession && session.isPremium())
         );
     }
 
@@ -516,8 +526,25 @@ export default abstract class Session {
         return this.roundsPlayed;
     }
 
-    static getSession(guildID: string): Session {
-        return state.gameSessions[guildID] ?? state.musicSessions[guildID];
+    /**
+     * The game has changed its premium state, so update filtered songs and reset premium options if non-premium
+     */
+    async updatePremiumStatus(): Promise<void> {
+        const guildPreference = await getGuildPreference(this.guildID);
+        await this.reloadSongs(guildPreference);
+
+        if (!this.isPremium()) {
+            for (const [commandName, command] of Object.entries(
+                state.client.commands
+            )) {
+                if (command.resetPremium) {
+                    logger.info(
+                        `gid: ${this.guildID} | Resetting premium for game option: ${commandName}`
+                    );
+                    await command.resetPremium(guildPreference);
+                }
+            }
+        }
     }
 
     /**
