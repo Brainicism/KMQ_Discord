@@ -978,7 +978,7 @@
             "historicalGaonWeekly": "재미있는 사실: 이번 주 {{year}}에 {{songName}}이(가) 가온 주간 차트에서 1위를 차지했습니다!",
             "hyperlinkGenerator": "[\"{{songName}}\" - {{artistName}}]({{url}})",
             "mostActiveYear": "재미있는 사실: {{year}}년은 {{num}}개의 뮤직 비디오가 공개되어 K-POP에서 {{ordinalNum}}번째로 활발한 해였습니다!",
-            "mostAnnualAwardShowWins": "재미있는 사실: {{artistName}은(는) {{wins}}번의 수상으로 {{ordinalNum}}번째로 많은 연간 상을 수상했습니다!",
+            "mostAnnualAwardShowWins": "재미있는 사실: {{artistName}}은(는) {{wins}}번의 수상으로 {{ordinalNum}}번째로 많은 연간 상을 수상했습니다!",
             "mostDebuts": "재미있는 사실: {{year}}년은 {{num}}개의 그룹이 데뷔로 {{ordinalNum}}번째로 많은 데뷔를 했습니다!",
             "mostGaonAppearances": "재미있는 사실: {{artistName}}은(는) {{appearances}}번의 출연으로 가온 디지털 주간 차트에서 {{ordinalNum}}위를 기록했습니다!",
             "mostGaonFirsts": "재미있는 사실: {{artistName}}은(는) 가온 디지털 주간 차트에서 {{firstPlaceCount}}번 1위를 차지하여 가장 많은 {{ordinalNum}}위를 차지했습니다!",
