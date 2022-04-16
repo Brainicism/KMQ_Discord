@@ -139,7 +139,7 @@ export default class SongSelector {
         filteredSongs: Set<QueriedSong>,
         ignoredSongs?: Set<string>,
         alternatingGender?: Gender,
-        shuffleType?: ShuffleType
+        shuffleType = ShuffleType.RANDOM
     ): QueriedSong {
         let queriedSongList = [...filteredSongs];
         if (ignoredSongs) {

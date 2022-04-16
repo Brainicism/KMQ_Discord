@@ -10,6 +10,7 @@ import * as game_utils from "../../helpers/game_utils";
 import * as utils from "../../helpers/utils";
 import Eris, { Collection } from "eris";
 import KmqClient from "../../kmq_client";
+import Session from "../../structures/session";
 
 describe("startRound", function () {
     let gameSession: GameSession;
@@ -38,6 +39,7 @@ describe("startRound", function () {
             GameType.CLASSIC
         );
 
+        sandbox.stub(Session, "getSession").callsFake(() => gameSession);
         prepareRoundSpy = sinon.spy(gameSession, <any>"prepareRound");
         playSongSpy = sinon.stub(gameSession, <any>"playSong");
         ensureVoiceConnectionSpy = sinon.spy(

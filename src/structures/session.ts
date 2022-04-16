@@ -432,7 +432,9 @@ export default abstract class Session {
     async reloadSongs(guildPreference: GuildPreference): Promise<void> {
         const session = Session.getSession(guildPreference.guildID);
         if (!session) {
-            return;
+            throw new Error(
+                `Session doesn't exist for guild ID: ${guildPreference.guildID}`
+            );
         }
 
         await this.songSelector.reloadSongs(
