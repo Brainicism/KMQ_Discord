@@ -226,4 +226,35 @@ export default class CommandPrechecks {
 
         return false;
     }
+
+    static async premiumOrDebugServerPrecheck(
+        precheckArgs: PrecheckArgs
+    ): Promise<boolean> {
+        const { message } = precheckArgs;
+        const premium = await isUserPremium(message.author.id);
+        const isDebugServer = process.env.DEBUG_SERVER_ID === message.guildID;
+        if (premium || isDebugServer) {
+            return true;
+        }
+
+        logger.warn(
+            `${getDebugLogHeader(
+                message
+            )} | User attempted to use a command only usable in the debug server/for premium users`
+        );
+
+        sendErrorMessage(MessageContext.fromMessage(message), {
+            title: state.localizer.translate(
+                message.guildID,
+                "misc.preCheck.title"
+            ),
+            description: state.localizer.translate(
+                message.guildID,
+                "misc.preCheck.premiumOrDebugServer",
+                { premium: `\`${process.env.BOT_PREFIX}premium\`` }
+            ),
+        });
+
+        return false;
+    }
 }

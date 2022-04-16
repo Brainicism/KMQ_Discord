@@ -1251,6 +1251,7 @@
             "differentVC": "You must be in the same voice channel as the bot to use this command.",
             "notMusicSession": "You can't do that while in a music session.",
             "notPremium": "You need KMQ Premium to use this command (see {{premium}}).",
+            "premiumOrDebugChannel": "This command only works in the official KMQ server or for KMQ Premium members (see {{premium}}).",
             "title": "Wait..."
         },
         "releaseDate": "Release Date",

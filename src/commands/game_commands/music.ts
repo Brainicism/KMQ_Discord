@@ -114,7 +114,7 @@ export default class MusicCommand implements BaseCommand {
             "command.music.help.description"
         ),
         usage: ",music",
-        priority: 1050,
+        priority: 1040,
         examples: [
             {
                 example: "`,music`",

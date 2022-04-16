@@ -60,7 +60,7 @@ export default class SpecialCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
         { checkFn: CommandPrechecks.notMusicPrecheck },
-        { checkFn: CommandPrechecks.premiumPrecheck },
+        { checkFn: CommandPrechecks.premiumOrDebugServerPrecheck },
     ];
 
     validations = {
