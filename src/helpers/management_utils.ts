@@ -133,12 +133,19 @@ function clearInactiveVoiceConnections(): void {
         state.client.voiceConnections.keys()
     ) as Array<string>;
 
-    const activeVoiceChannelGuildIDs = Object.values(state.gameSessions).map(
-        (x) => x.guildID
+    const activeGameVoiceChannelGuildIDs = new Set(
+        Object.values(state.gameSessions).map((x) => x.guildID)
+    );
+
+    const activeMusicVoiceChannelGuildIDs = new Set(
+        Object.values(state.musicSessions).map((x) => x.guildID)
     );
 
     for (const existingVoiceChannelGuildID of existingVoiceChannelGuildIDs) {
-        if (!activeVoiceChannelGuildIDs.includes(existingVoiceChannelGuildID)) {
+        if (
+            !activeGameVoiceChannelGuildIDs.has(existingVoiceChannelGuildID) &&
+            !activeMusicVoiceChannelGuildIDs.has(existingVoiceChannelGuildID)
+        ) {
             const voiceChannelID = state.client.voiceConnections.get(
                 existingVoiceChannelGuildID
             ).channelID;
@@ -355,17 +362,4 @@ export function reloadCaches(): void {
     reloadFactCache();
     reloadBonusGroups();
     reloadLocales();
-}
-
-/**
- * Deletes the GameSession corresponding to a given guild ID
- * @param guildID - The guild ID
- */
-export function deleteGameSession(guildID: string): void {
-    if (!(guildID in state.gameSessions)) {
-        logger.debug(`gid: ${guildID} | GameSession already ended`);
-        return;
-    }
-
-    delete state.gameSessions[guildID];
 }

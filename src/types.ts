@@ -10,6 +10,7 @@ import RateLimiter from "./rate_limiter";
 import LocalizationManager, {
     LocaleType,
 } from "./helpers/localization_manager";
+import MusicSession from "./structures/music_session";
 
 export type GuildTextableMessage = Eris.Message<GuildTextableChannel>;
 
@@ -67,6 +68,7 @@ export interface GameInfoMessage {
 
 export interface State {
     gameSessions: { [guildID: string]: GameSession };
+    musicSessions: { [guildID: string]: MusicSession };
     client: KmqClient;
     aliases: {
         artist: { [artistName: string]: Array<string> };

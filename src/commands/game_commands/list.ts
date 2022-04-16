@@ -120,7 +120,7 @@ export default class ListCommand implements BaseCommand {
                     {
                         content: state.localizer.translate(
                             message.guildID,
-                            "command.list.failure.groupsInFile"
+                            "command.list.failure.groupsInFile.description"
                         ),
                     },
                     {

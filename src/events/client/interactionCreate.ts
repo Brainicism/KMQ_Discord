@@ -8,6 +8,9 @@ import {
 } from "../../helpers/discord_utils";
 import { state } from "../../kmq_worker";
 import { handleProfileInteraction } from "../../commands/game_commands/profile";
+import Session from "../../structures/session";
+import GameSession from "../../structures/game_session";
+import MusicSession from "../../structures/music_session";
 
 export const BOOKMARK_COMMAND_NAME = "Bookmark Song";
 export const PROFILE_COMMAND_NAME = "Profile";
@@ -16,7 +19,7 @@ export const PROFILE_COMMAND_NAME = "Profile";
  * Handles the 'interactionCreate' event
  * @param interaction - The originating Interaction
  */
-export default function interactionCreateHandler(
+export default async function interactionCreateHandler(
     interaction:
         | Eris.PingInteraction
         | Eris.CommandInteraction
@@ -24,8 +27,11 @@ export default function interactionCreateHandler(
         | Eris.UnknownInteraction
 ): Promise<void> {
     if (interaction instanceof Eris.ComponentInteraction) {
-        const gameSession = state.gameSessions[interaction.guildID];
-        if (!gameSession || !gameSession.round) {
+        const session = Session.getSession(interaction.guildID);
+        if (
+            !session ||
+            (!session.round && interaction.data.custom_id !== "bookmark")
+        ) {
             tryInteractionAcknowledge(interaction);
             return;
         }
@@ -41,10 +47,14 @@ export default function interactionCreateHandler(
             interaction.guildID
         );
 
-        gameSession.handleMultipleChoiceInteraction(
-            interaction,
-            messageContext
-        );
+        if (session instanceof GameSession) {
+            session.handleMultipleChoiceInteraction(
+                interaction,
+                messageContext
+            );
+        } else if (session instanceof MusicSession) {
+            await session.handleButtonInteraction(interaction, messageContext);
+        }
     } else if (interaction instanceof Eris.CommandInteraction) {
         if (
             interaction.data.type ===
@@ -61,8 +71,8 @@ export default function interactionCreateHandler(
             Eris.Constants.ApplicationCommandTypes.MESSAGE
         ) {
             if (interaction.data.name === BOOKMARK_COMMAND_NAME) {
-                const gameSession = state.gameSessions[interaction.guildID];
-                if (!gameSession) {
+                const session = Session.getSession(interaction.guildID);
+                if (!session) {
                     tryCreateInteractionErrorAcknowledgement(
                         interaction,
                         state.localizer.translate(
@@ -73,7 +83,7 @@ export default function interactionCreateHandler(
                     return;
                 }
 
-                gameSession.handleBookmarkInteraction(interaction);
+                session.handleBookmarkInteraction(interaction);
             } else if (interaction.data.name === PROFILE_COMMAND_NAME) {
                 const messageId = interaction.data.target_id;
                 const authorId =

@@ -23,7 +23,10 @@ export enum AnswerType {
 export const DEFAULT_ANSWER_TYPE = AnswerType.TYPING;
 
 export default class AnswerCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notMusicPrecheck },
+    ];
 
     validations = {
         minArgCount: 0,

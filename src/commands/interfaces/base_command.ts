@@ -1,11 +1,9 @@
 import Eris from "eris";
 import { PrecheckArgs } from "../../command_prechecks";
-import GameSession from "../../structures/game_session";
 import GuildPreference from "../../structures/guild_preference";
 import { GuildTextableMessage, ParsedMessage } from "../../types";
 
 export interface CommandArgs {
-    gameSessions: { [guildID: string]: GameSession };
     message: GuildTextableMessage;
     channel: Eris.TextChannel;
     parsedMessage: ParsedMessage;

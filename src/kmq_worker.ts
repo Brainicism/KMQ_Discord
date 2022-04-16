@@ -20,6 +20,7 @@ import KmqClient from "./kmq_client";
 import ReloadCommand from "./commands/admin/reload";
 import EvalCommand from "./commands/admin/eval";
 import LocalizationManager from "./helpers/localization_manager";
+import Session from "./structures/session";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("kmq");
@@ -27,6 +28,7 @@ config({ path: path.resolve(__dirname, "../.env") });
 
 const state: State = {
     gameSessions: {},
+    musicSessions: {},
     client: null,
     aliases: {
         artist: {},
@@ -87,9 +89,9 @@ export class BotWorker extends BaseClusterWorker {
 
         const endSessionPromises = Object.keys(state.gameSessions).map(
             async (guildID) => {
-                const gameSession = state.gameSessions[guildID];
-                logger.debug(`gid: ${guildID} | Forcing game session end`);
-                await gameSession.endSession();
+                const session = Session.getSession(guildID);
+                logger.debug(`gid: ${guildID} | Forcing session end`);
+                await session.endSession();
             }
         );
 

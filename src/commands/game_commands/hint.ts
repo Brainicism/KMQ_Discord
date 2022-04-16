@@ -18,6 +18,7 @@ import GuildPreference from "../../structures/guild_preference";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import GameRound from "../../structures/game_round";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("hint");
 
@@ -198,8 +199,9 @@ export default class HintCommand implements BaseCommand {
     aliases = ["h"];
 
     preRunChecks = [
-        { checkFn: CommandPrechecks.inGameCommandPrecheck },
+        { checkFn: CommandPrechecks.inSessionCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notMusicPrecheck },
     ];
 
     help = (guildID: string): Help => ({
@@ -213,8 +215,8 @@ export default class HintCommand implements BaseCommand {
         priority: 1020,
     });
 
-    call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
-        const gameSession = gameSessions[message.guildID];
+    call = async ({ message }: CommandArgs): Promise<void> => {
+        const gameSession = Session.getSession(message.guildID) as GameSession;
         const gameRound = gameSession?.round;
         const guildPreference = await getGuildPreference(message.guildID);
         if (!validHintCheck(gameSession, guildPreference, gameRound, message))

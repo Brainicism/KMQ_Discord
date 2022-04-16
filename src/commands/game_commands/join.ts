@@ -17,20 +17,20 @@ import { state } from "../../kmq_worker";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import { IPCLogger } from "../../logger";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("join");
 
 export default class JoinCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notMusicPrecheck },
+    ];
 
     aliases = ["j"];
 
-    call = async ({
-        message,
-        gameSessions,
-        parsedMessage,
-    }: CommandArgs): Promise<void> => {
-        const gameSession = gameSessions[message.guildID];
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
+        const gameSession = Session.getSession(message.guildID) as GameSession;
         if (!gameSession || gameSession.gameType !== GameType.TEAMS) {
             return;
         }

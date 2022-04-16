@@ -21,7 +21,10 @@ export enum GuessModeType {
 export const DEFAULT_GUESS_MODE = GuessModeType.SONG_NAME;
 
 export default class GuessModeCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notMusicPrecheck },
+    ];
 
     aliases = ["mode"];
 
