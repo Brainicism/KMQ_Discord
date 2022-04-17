@@ -3,7 +3,7 @@ import Eris from "eris";
 import EmbedPaginator from "eris-pagination";
 import axios from "axios";
 import * as uuid from "uuid";
-import GuildPreference, { GameOptions } from "../structures/guild_preference";
+import GuildPreference from "../structures/guild_preference";
 import GameSession from "../structures/game_session";
 import { IPCLogger } from "../logger";
 import {
@@ -45,7 +45,6 @@ import { KmqImages } from "../constants";
 import MessageContext from "../structures/message_context";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { REVIEW_LINK, VOTE_LINK } from "../commands/game_commands/vote";
-import { UniqueSongCounter } from "../structures/song_selector";
 import { LocaleType, DEFAULT_LOCALE } from "./localization_manager";
 import Round from "../structures/round";
 import Session from "../structures/session";
@@ -54,6 +53,8 @@ import MusicRound from "../structures/music_round";
 import EmbedPayload from "../interfaces/embed_payload";
 import GameInfoMessage from "../interfaces/game_info_message";
 import QueriedSong from "../interfaces/queried_song";
+import GameOptions from "../interfaces/game_options";
+import UniqueSongCounter from "../interfaces/unique_song_counter";
 
 const logger = new IPCLogger("discord_utils");
 export const EMBED_ERROR_COLOR = 0xed4245; // Red

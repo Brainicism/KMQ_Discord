@@ -1,10 +1,10 @@
 import Eris from "eris";
 import { state } from "../kmq_worker";
-import { UniqueSongCounter } from "./song_selector";
 import MessageContext from "./message_context";
 import { codeLine, friendlyFormattedNumber } from "../helpers/utils";
 import QueriedSong from "../interfaces/queried_song";
 import PlayerRoundResult from "../interfaces/player_round_result";
+import UniqueSongCounter from "../interfaces/unique_song_counter";
 
 export const MAX_RUNNERS_UP = 30;
 export const MAX_SCOREBOARD_PLAYERS = 30;

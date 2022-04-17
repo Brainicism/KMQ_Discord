@@ -3,14 +3,9 @@ import { bold, friendlyFormattedNumber } from "../helpers/utils";
 import { getMention } from "../helpers/discord_utils";
 import GuildPreference from "./guild_preference";
 import { state } from "../kmq_worker";
+import SuccessfulGuessResult from "../interfaces/success_guess_result";
 
 export const SCOREBOARD_FIELD_CUTOFF = 6;
-
-export interface SuccessfulGuessResult {
-    userID: string;
-    pointsEarned: number;
-    expGain: number;
-}
 
 export default class Scoreboard {
     /** Mapping of Discord user ID to Player */
