@@ -10,11 +10,16 @@ import { GameOption, GameType } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import Session from "../../structures/session";
+import GameSession from "../../structures/game_session";
 
 const logger = new IPCLogger("goal");
 
 export default class GoalCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notMusicPrecheck },
+    ];
 
     validations = {
         minArgCount: 0,
@@ -58,11 +63,7 @@ export default class GoalCommand implements BaseCommand {
         priority: 120,
     });
 
-    call = async ({
-        message,
-        parsedMessage,
-        gameSessions,
-    }: CommandArgs): Promise<void> => {
+    call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await getGuildPreference(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.GOAL);
@@ -75,7 +76,7 @@ export default class GoalCommand implements BaseCommand {
             return;
         }
 
-        const gameSession = gameSessions[message.guildID];
+        const gameSession = Session.getSession(message.guildID) as GameSession;
         const userGoal = parseInt(parsedMessage.components[0]);
         if (gameSession) {
             if (

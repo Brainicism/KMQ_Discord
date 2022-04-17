@@ -15,7 +15,7 @@ import { PATREON_SUPPORTER_BADGE, Patron } from "./patreon_manager";
 import { containsHangul, md5Hash } from "./utils";
 import Session from "../structures/session";
 
-const GAME_SESSION_INACTIVE_THRESHOLD = 30;
+const GAME_SESSION_INACTIVE_THRESHOLD = 10;
 
 const logger = new IPCLogger("game_utils");
 
@@ -478,14 +478,14 @@ export function removePremium(userIDs: string[]): void {
 /**
  * @param guildID - The guild ID
  * @param playerID - The player ID
- * @returns whether the current game is a premium game, or the player is premium
+ * @returns whether the current game is a premium game/music session, or the player is premium
  */
 export async function isPremiumRequest(
     guildID: string,
     playerID: string
 ): Promise<boolean> {
     return (
-        state.gameSessions[guildID]?.isPremiumGame() ||
+        Session.getSession(guildID)?.isPremium() ||
         (await isUserPremium(playerID))
     );
 }

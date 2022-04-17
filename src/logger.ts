@@ -5,7 +5,6 @@ import { isMaster } from "cluster";
 import winston from "winston";
 import path from "path";
 import DailyRotateFile from "winston-daily-rotate-file";
-import { EnvType } from "./types";
 
 config({ path: resolve(__dirname, "../.env") });
 
@@ -35,7 +34,6 @@ export function getInternalLogger(): winston.Logger {
         transports: [
             new winston.transports.Console({
                 format: format.combine(format.timestamp(), consoleFormat),
-                silent: process.env.NODE_ENV === EnvType.TEST,
             }),
             new DailyRotateFile({
                 filename: path.join(__dirname, "../logs/error.log"),

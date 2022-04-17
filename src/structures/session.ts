@@ -2,23 +2,25 @@ import Eris from "eris";
 import fs from "fs";
 import { IPCLogger } from "../logger";
 import {
+    getCurrentVoiceMembers,
     getDebugLogHeader,
     getGuildLocale,
+    getMention,
     sendBookmarkedSongs,
     sendErrorMessage,
     sendInfoMessage,
     tryCreateInteractionErrorAcknowledgement,
     tryCreateInteractionSuccessAcknowledgement,
+    tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
 import dbContext from "../database_context";
 import { QueriedSong } from "../types";
-import { GuessResult } from "./game_session";
+import GameSession, { GuessResult } from "./game_session";
 import GuildPreference from "./guild_preference";
 import KmqMember from "./kmq_member";
 import MessageContext from "./message_context";
 import Round from "./round";
 import SongSelector from "./song_selector";
-import { deleteGameSession } from "../helpers/management_utils";
 import {
     ensureVoiceConnection,
     getGuildPreference,
@@ -29,6 +31,7 @@ import { KmqImages } from "../constants";
 import { bold, friendlyFormattedNumber } from "../helpers/utils";
 import { SeekType } from "../commands/game_options/seek";
 import { specialFfmpegArgs } from "../commands/game_options/special";
+import MusicSession from "./music_session";
 
 export const SONG_START_DELAY = 3000;
 const BOOKMARK_MESSAGE_SIZE = 10;
@@ -97,6 +100,35 @@ export default abstract class Session {
         this.songMessageIDs = [];
         this.bookmarkedSongs = {};
         this.songSelector = new SongSelector();
+    }
+
+    /**
+     * Whether the current session has premium features
+     * @returns whether the session is premium
+     */
+    abstract isPremium(): boolean;
+
+    static getSession(guildID: string): Session {
+        return state.gameSessions[guildID] ?? state.musicSessions[guildID];
+    }
+
+    /**
+     * Deletes the GameSession corresponding to a given guild ID
+     * @param guildID - The guild ID
+     */
+    static deleteSession(guildID: string): void {
+        const isGameSession = guildID in state.gameSessions;
+        const isMusicSession = guildID in state.musicSessions;
+        if (!isGameSession && !isMusicSession) {
+            logger.debug(`gid: ${guildID} | Session already ended`);
+            return;
+        }
+
+        if (isGameSession) {
+            delete state.gameSessions[guildID];
+        } else if (isMusicSession) {
+            delete state.musicSessions[guildID];
+        }
     }
 
     /**
@@ -237,9 +269,9 @@ export default abstract class Session {
             this.songMessageIDs.shift();
         }
 
-        if (round.endRoundMessageID) {
+        if (round.roundMessageID) {
             this.songMessageIDs.push({
-                messageID: round.endRoundMessageID,
+                messageID: round.roundMessageID,
                 song: round.song,
             });
         }
@@ -261,7 +293,7 @@ export default abstract class Session {
      * Ends the current GameSession
      */
     async endSession(): Promise<void> {
-        deleteGameSession(this.guildID);
+        Session.deleteSession(this.guildID);
         await this.endRound(
             await getGuildPreference(this.guildID),
             new MessageContext(this.textChannelID, null, this.guildID),
@@ -351,7 +383,11 @@ export default abstract class Session {
         messageContext: MessageContext,
         guildPreference: GuildPreference
     ): Promise<void> {
-        if (!guildPreference.isGuessTimeoutSet()) return;
+        if (
+            this instanceof MusicSession ||
+            !guildPreference.isGuessTimeoutSet()
+        )
+            return;
 
         const time = guildPreference.gameOptions.guessTimeout;
         this.guessTimeoutFunc = setTimeout(async () => {
@@ -394,9 +430,17 @@ export default abstract class Session {
     }
 
     async reloadSongs(guildPreference: GuildPreference): Promise<void> {
+        const session = Session.getSession(guildPreference.guildID);
+        if (!session) {
+            throw new Error(
+                `Session doesn't exist for guild ID: ${guildPreference.guildID}`
+            );
+        }
+
         await this.songSelector.reloadSongs(
             guildPreference,
-            state.gameSessions[this.guildID]?.isPremiumGame() ?? false
+            session instanceof MusicSession ||
+                (session instanceof GameSession && session.isPremium())
         );
     }
 
@@ -430,8 +474,25 @@ export default abstract class Session {
         this.bookmarkedSongs[userID].set(song.youtubeLink, song);
     }
 
-    /** Updates owner to the first player to join the game that didn't leave VC */
-    abstract updateOwner(): Promise<void>;
+    /** Sends a message notifying who the new owner is */
+    updateOwner(): void {
+        sendInfoMessage(new MessageContext(this.textChannelID), {
+            title: state.localizer.translate(
+                this.guildID,
+                "misc.gameOwnerChanged.title"
+            ),
+            description: state.localizer.translate(
+                this.guildID,
+                "misc.gameOwnerChanged.description",
+                {
+                    newGameOwner: getMention(this.owner.id),
+                    forcehintCommand: `\`${process.env.BOT_PREFIX}forcehint\``,
+                    forceskipCommand: `\`${process.env.BOT_PREFIX}forceskip\``,
+                }
+            ),
+            thumbnailUrl: KmqImages.LISTENING,
+        });
+    }
 
     getRemainingDuration(guildPreference: GuildPreference): number {
         const currGameLength = (Date.now() - this.startedAt) / 60000;
@@ -441,9 +502,15 @@ export default abstract class Session {
     }
 
     handleBookmarkInteraction(
-        interaction: Eris.CommandInteraction
+        interaction: Eris.CommandInteraction | Eris.ComponentInteraction
     ): Promise<void> {
-        const song = this.getSongFromMessageID(interaction.data.target_id);
+        let song: QueriedSong;
+        if (interaction instanceof Eris.CommandInteraction) {
+            song = this.getSongFromMessageID(interaction.data.target_id);
+        } else if (interaction instanceof Eris.ComponentInteraction) {
+            song = this.getSongFromMessageID(interaction.message.id);
+        }
+
         if (!song) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
@@ -480,6 +547,27 @@ export default abstract class Session {
     }
 
     /**
+     * The game has changed its premium state, so update filtered songs and reset premium options if non-premium
+     */
+    async updatePremiumStatus(): Promise<void> {
+        const guildPreference = await getGuildPreference(this.guildID);
+        await this.reloadSongs(guildPreference);
+
+        if (!this.isPremium()) {
+            for (const [commandName, command] of Object.entries(
+                state.client.commands
+            )) {
+                if (command.resetPremium) {
+                    logger.info(
+                        `gid: ${this.guildID} | Resetting premium for game option: ${commandName}`
+                    );
+                    await command.resetPremium(guildPreference);
+                }
+            }
+        }
+    }
+
+    /**
      * Prepares a new Round
      * @param randomSong - The queried song
      * @returns the new Round
@@ -503,7 +591,11 @@ export default abstract class Session {
         const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${round.song.youtubeLink}.ogg`;
 
         let seekLocation: number;
-        const seekType = guildPreference.gameOptions.seekType;
+        const seekType =
+            this instanceof MusicSession
+                ? SeekType.BEGINNING
+                : guildPreference.gameOptions.seekType;
+
         if (seekType === SeekType.BEGINNING) {
             seekLocation = 0;
         } else {
@@ -537,7 +629,11 @@ export default abstract class Session {
         try {
             let inputArgs = ["-ss", seekLocation.toString()];
             let encoderArgs = [];
-            const specialType = guildPreference.gameOptions.specialType;
+            const specialType =
+                this instanceof MusicSession
+                    ? null
+                    : guildPreference.gameOptions.specialType;
+
             if (specialType) {
                 const ffmpegArgs = specialFfmpegArgs[specialType](seekLocation);
                 inputArgs = ffmpegArgs.inputArgs;
@@ -600,6 +696,59 @@ export default abstract class Session {
             count: selectedSongs.songs.size,
             countBeforeLimit: selectedSongs.countBeforeLimit,
         };
+    }
+
+    /**
+     * Handles common reasons for why an interaction would not succeed in a session
+     * @param interaction - The interaction
+     * @param _messageContext - Unused
+     * @returns whether to continue with handling the interaction
+     */
+    protected handleInSessionInteractionFailures(
+        interaction: Eris.ComponentInteraction,
+        _messageContext: MessageContext
+    ): boolean {
+        if (!this.round) {
+            return false;
+        }
+
+        if (
+            !getCurrentVoiceMembers(this.voiceChannelID)
+                .map((x) => x.id)
+                .includes(interaction.member.id)
+        ) {
+            tryInteractionAcknowledge(interaction);
+            return false;
+        }
+
+        if (!this.round.isValidInteraction(interaction.data.custom_id)) {
+            tryCreateInteractionErrorAcknowledgement(
+                interaction,
+                state.localizer.translate(
+                    this.guildID,
+                    "misc.failure.interaction.optionFromPreviousRound"
+                )
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    protected updateBookmarkSongList(): void {
+        const round = this.round;
+        if (!round) return;
+
+        if (Object.keys(this.songMessageIDs).length === BOOKMARK_MESSAGE_SIZE) {
+            this.songMessageIDs.shift();
+        }
+
+        if (round.roundMessageID) {
+            this.songMessageIDs.push({
+                messageID: round.roundMessageID,
+                song: round.song,
+            });
+        }
     }
 
     /**

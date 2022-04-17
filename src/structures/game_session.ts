@@ -15,7 +15,7 @@ import {
     tryCreateInteractionErrorAcknowledgement,
     getMention,
     getGuildLocale,
-    sendEndRoundMessage,
+    sendRoundMessage,
 } from "../helpers/discord_utils";
 import {
     getGuildPreference,
@@ -32,7 +32,6 @@ import {
     setDifference,
     codeLine,
     chunkArray,
-    chooseRandom,
 } from "../helpers/utils";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
@@ -329,7 +328,7 @@ export default class GameSession extends Session {
 
         const remainingDuration = this.getRemainingDuration(guildPreference);
         if (messageContext) {
-            const endRoundMessage = await sendEndRoundMessage(
+            const endRoundMessage = await sendRoundMessage(
                 messageContext,
                 this.scoreboard,
                 this,
@@ -339,10 +338,10 @@ export default class GameSession extends Session {
                 this.songSelector.getUniqueSongCounter(guildPreference)
             );
 
-            // if message fails to send, no ID is returned
-            round.endRoundMessageID = endRoundMessage?.id;
+            round.roundMessageID = endRoundMessage?.id;
         }
 
+        this.updateBookmarkSongList();
         await super.endRound(guildPreference, messageContext);
 
         if (this.scoreboard.gameFinished(guildPreference)) {
@@ -583,8 +582,15 @@ export default class GameSession extends Session {
     }
 
     /** Updates owner to the first player to join the game that didn't leave VC */
-    updateOwner(): Promise<void> {
-        const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID);
+    updateOwner(): void {
+        if (this.finished) {
+            return;
+        }
+
+        const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID).filter(
+            (x) => x.id !== process.env.BOT_CLIENT_ID
+        );
+
         const voiceMemberIDs = new Set(voiceMembers.map((x) => x.id));
         if (voiceMemberIDs.has(this.owner.id) || voiceMemberIDs.size === 0) {
             return;
@@ -594,51 +600,26 @@ export default class GameSession extends Session {
             .getPlayerIDs()
             .filter((p) => voiceMemberIDs.has(p));
 
-        let newOwnerID: string;
-        if (participantsInVC.length > 0) {
-            // Pick the first participant still in VC
-            newOwnerID = participantsInVC[0];
-        } else {
-            // The VC only contains members who haven't participated yet
-            newOwnerID = chooseRandom(voiceMembers).id;
-        }
+        // Pick the first participant still in VC
+        const newOwnerID = participantsInVC[0];
 
         this.owner = KmqMember.fromUser(
             voiceMembers.find((x) => x.id === newOwnerID)
         );
 
-        sendInfoMessage(new MessageContext(this.textChannelID), {
-            title: state.localizer.translate(
-                this.guildID,
-                "misc.gameOwnerChanged.title"
-            ),
-            description: state.localizer.translate(
-                this.guildID,
-                "misc.gameOwnerChanged.description",
-                {
-                    newGameOwner: getMention(this.owner.id),
-                    forcehintCommand: `\`${process.env.BOT_PREFIX}forcehint\``,
-                    forceskipCommand: `\`${process.env.BOT_PREFIX}forceskip\``,
-                }
-            ),
-            thumbnailUrl: KmqImages.LISTENING,
-        });
+        super.updateOwner();
     }
 
     async handleMultipleChoiceInteraction(
         interaction: Eris.ComponentInteraction,
         messageContext: MessageContext
     ): Promise<void> {
-        if (!this.round) {
-            return;
-        }
-
         if (
-            !getCurrentVoiceMembers(this.voiceChannelID)
-                .map((x) => x.id)
-                .includes(interaction.member.id)
+            !this.handleInSessionInteractionFailures(
+                interaction,
+                messageContext
+            )
         ) {
-            tryInteractionAcknowledge(interaction);
             return;
         }
 
@@ -648,17 +629,6 @@ export default class GameSession extends Session {
                 state.localizer.translate(
                     this.guildID,
                     "misc.failure.interaction.alreadyEliminated"
-                )
-            );
-            return;
-        }
-
-        if (!this.round.isValidInteractionGuess(interaction.data.custom_id)) {
-            tryCreateInteractionErrorAcknowledgement(
-                interaction,
-                state.localizer.translate(
-                    this.guildID,
-                    "misc.failure.interaction.optionFromPreviousRound"
                 )
             );
             return;
@@ -701,31 +671,10 @@ export default class GameSession extends Session {
     }
 
     /**
-     * The game has changed its premium state, so update filtered songs/remove ,special
+     * Whether the current game session has premium features
+     * @returns whether the session is premium
      */
-    async updatePremiumStatus(): Promise<void> {
-        const guildPreference = await getGuildPreference(this.guildID);
-        await this.reloadSongs(guildPreference);
-
-        if (!this.isPremiumGame()) {
-            for (const [commandName, command] of Object.entries(
-                state.client.commands
-            )) {
-                if (command.resetPremium) {
-                    logger.info(
-                        `gid: ${this.guildID} | Resetting premium for game option: ${commandName}`
-                    );
-                    await command.resetPremium(guildPreference);
-                }
-            }
-        }
-    }
-
-    /**
-     * Whether the current game has premium features
-     * @returns whether the game is premium
-     */
-    isPremiumGame(): boolean {
+    isPremium(): boolean {
         return this.scoreboard
             .getPlayers()
             .filter((x) => x.inVC)

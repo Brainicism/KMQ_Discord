@@ -1,3 +1,4 @@
+import Eris from "eris";
 import { PlayerRoundResult, QueriedSong } from "../types";
 import { state } from "../kmq_worker";
 import { UniqueSongCounter } from "./song_selector";
@@ -27,13 +28,19 @@ export default abstract class Round {
     public finished: boolean;
 
     /**  The Discord ID of the end round message */
-    public endRoundMessageID: string;
+    public roundMessageID: string;
 
     /** List of players who have opted to skip the current Round */
     public skippers: Set<string>;
 
     /** Whether the Round has been skipped */
     public skipAchieved: boolean;
+
+    /** Interactable components attached to this round's message */
+    public interactionComponents: Array<Eris.ActionRow>;
+
+    /** The message containing this round's interactable components */
+    public interactionMessage: Eris.Message<Eris.TextableChannel>;
 
     constructor(song: QueriedSong) {
         this.song = song;
@@ -43,9 +50,10 @@ export default abstract class Round {
             (x) => state.aliases.artist[x] || []
         );
         this.startedAt = Date.now();
-        this.endRoundMessageID = null;
+        this.roundMessageID = null;
         this.skippers = new Set();
         this.skipAchieved = false;
+        this.interactionComponents = [];
     }
 
     abstract getEndRoundDescription(
@@ -53,10 +61,13 @@ export default abstract class Round {
         uniqueSongCounter: UniqueSongCounter,
         playerRoundResults: Array<PlayerRoundResult>
     ): string;
+
     abstract getEndRoundColor(
         correctGuess: boolean,
         userBonusActive: boolean
     ): number;
+
+    abstract isValidInteraction(interactionUUID: string): boolean;
 
     /**
      * Adds a skip vote for the specified user

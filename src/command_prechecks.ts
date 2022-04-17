@@ -3,27 +3,36 @@ import {
     getDebugLogHeader,
     sendErrorMessage,
 } from "./helpers/discord_utils";
+import Session from "./structures/session";
 import GameSession from "./structures/game_session";
 import MessageContext from "./structures/message_context";
 import { GameType, GuildTextableMessage } from "./types";
 import { IPCLogger } from "./logger";
 import dbContext from "./database_context";
 import { state } from "./kmq_worker";
+import MusicSession from "./structures/music_session";
+import { getTimeUntilRestart } from "./helpers/management_utils";
+import { isUserPremium } from "./helpers/game_utils";
 
 const logger = new IPCLogger("command_prechecks");
 export interface PrecheckArgs {
     message: GuildTextableMessage;
-    gameSession: GameSession;
+    session: Session;
     errorMessage?: string;
 }
 
 export default class CommandPrechecks {
-    static inGameCommandPrecheck(precheckArgs: PrecheckArgs): boolean {
-        const { message, gameSession, errorMessage } = precheckArgs;
-        if (!gameSession) {
+    static inSessionCommandPrecheck(precheckArgs: PrecheckArgs): boolean {
+        const { message, session, errorMessage } = precheckArgs;
+        if (!session) {
             return false;
         }
 
+        if (session instanceof MusicSession) {
+            return areUserAndBotInSameVoiceChannel(message);
+        }
+
+        const gameSession = session as GameSession;
         if (!areUserAndBotInSameVoiceChannel(message)) {
             if (
                 gameSession.gameType === GameType.ELIMINATION ||
@@ -52,6 +61,26 @@ export default class CommandPrechecks {
                     errorMessage ?? "misc.preCheck.differentVC"
                 ),
             });
+            return false;
+        }
+
+        return true;
+    }
+
+    static notMusicPrecheck(precheckArgs: PrecheckArgs): boolean {
+        const { session, message } = precheckArgs;
+        if (session && !(session instanceof GameSession)) {
+            sendErrorMessage(MessageContext.fromMessage(message), {
+                title: state.localizer.translate(
+                    message.guildID,
+                    "misc.preCheck.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "misc.preCheck.notMusicSession"
+                ),
+            });
+
             return false;
         }
 
@@ -113,8 +142,13 @@ export default class CommandPrechecks {
     static async competitionPrecheck(
         precheckArgs: PrecheckArgs
     ): Promise<boolean> {
-        const { message, gameSession, errorMessage } = precheckArgs;
-        if (!gameSession || gameSession.gameType !== GameType.COMPETITION) {
+        const { message, session, errorMessage } = precheckArgs;
+        const gameSession = session as GameSession;
+        if (
+            !session ||
+            session instanceof MusicSession ||
+            gameSession.gameType !== GameType.COMPETITION
+        ) {
             return true;
         }
 
@@ -145,5 +179,82 @@ export default class CommandPrechecks {
         }
 
         return isModerator;
+    }
+
+    static async notRestartingPrecheck(
+        precheckArgs: PrecheckArgs
+    ): Promise<boolean> {
+        const timeUntilRestart = await getTimeUntilRestart();
+        if (timeUntilRestart) {
+            const { message } = precheckArgs;
+            await sendErrorMessage(MessageContext.fromMessage(message), {
+                title: state.localizer.translate(
+                    message.guildID,
+                    "command.play.failure.botRestarting.title"
+                ),
+                description: state.localizer.translate(
+                    message.guildID,
+                    "command.play.failure.botRestarting.description",
+                    { timeUntilRestart: `\`${timeUntilRestart}\`` }
+                ),
+            });
+
+            return false;
+        }
+
+        return true;
+    }
+
+    static async premiumPrecheck(precheckArgs: PrecheckArgs): Promise<boolean> {
+        const { message } = precheckArgs;
+        const premium = await isUserPremium(message.author.id);
+        if (premium) {
+            return true;
+        }
+
+        await sendErrorMessage(MessageContext.fromMessage(message), {
+            title: state.localizer.translate(
+                message.guildID,
+                "misc.preCheck.title"
+            ),
+            description: state.localizer.translate(
+                message.guildID,
+                "misc.preCheck.notPremium",
+                { premium: `\`${process.env.BOT_PREFIX}premium\`` }
+            ),
+        });
+
+        return false;
+    }
+
+    static async premiumOrDebugServerPrecheck(
+        precheckArgs: PrecheckArgs
+    ): Promise<boolean> {
+        const { message } = precheckArgs;
+        const premium = await isUserPremium(message.author.id);
+        const isDebugServer = process.env.DEBUG_SERVER_ID === message.guildID;
+        if (premium || isDebugServer) {
+            return true;
+        }
+
+        logger.warn(
+            `${getDebugLogHeader(
+                message
+            )} | User attempted to use a command only usable in the debug server/for premium users`
+        );
+
+        sendErrorMessage(MessageContext.fromMessage(message), {
+            title: state.localizer.translate(
+                message.guildID,
+                "misc.preCheck.title"
+            ),
+            description: state.localizer.translate(
+                message.guildID,
+                "misc.preCheck.premiumOrDebugServer",
+                { premium: `\`${process.env.BOT_PREFIX}premium\`` }
+            ),
+        });
+
+        return false;
     }
 }

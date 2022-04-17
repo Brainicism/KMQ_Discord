@@ -132,12 +132,6 @@ export default class GameRound extends Round {
     /** List of players who incorrectly guessed in the multiple choice */
     public incorrectMCGuessers: Set<string>;
 
-    /** Interactable components attached to this round's message */
-    public interactionComponents: Array<Eris.ActionRow>;
-
-    /** The message containing this round's interactable components */
-    public interactionMessage: Eris.Message<Eris.TextableChannel>;
-
     /** Info about the players that won this GameRound */
     public playerRoundResults: Array<PlayerRoundResult>;
 
@@ -171,7 +165,6 @@ export default class GameRound extends Round {
         this.interactionCorrectAnswerUUID = null;
         this.interactionIncorrectAnswerUUIDs = {};
         this.incorrectMCGuessers = new Set();
-        this.interactionComponents = [];
         this.interactionMessage = null;
         this.playerRoundResults = [];
         this.bonusModifier =
@@ -327,9 +320,9 @@ export default class GameRound extends Round {
 
     /**
      * @param interactionUUID - the UUID of an interaction
-     * @returns true if the given UUID is one of the guesses of the current game round
+     * @returns true if the given UUID is one of the interactions (i.e. guesses) of the current game round
      */
-    isValidInteractionGuess(interactionUUID: string): boolean {
+    isValidInteraction(interactionUUID: string): boolean {
         return (
             interactionUUID === this.interactionCorrectAnswerUUID ||
             Object.keys(this.interactionIncorrectAnswerUUIDs).includes(

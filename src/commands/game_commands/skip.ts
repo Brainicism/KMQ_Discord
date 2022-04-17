@@ -16,6 +16,8 @@ import CommandPrechecks from "../../command_prechecks";
 import EliminationScoreboard from "../../structures/elimination_scoreboard";
 import { state } from "../../kmq_worker";
 import Round from "../../structures/round";
+import Session from "../../structures/session";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("skip");
 
@@ -50,10 +52,7 @@ async function sendSkipMessage(
 ): Promise<void> {
     await sendInfoMessage(MessageContext.fromMessage(message), {
         color: EMBED_SUCCESS_COLOR,
-        title: state.localizer.translate(
-            message.guildID,
-            "command.skip.success.title"
-        ),
+        title: state.localizer.translate(message.guildID, "misc.skip"),
         description: state.localizer.translate(
             message.guildID,
             "command.skip.success.description",
@@ -67,25 +66,54 @@ async function sendSkipMessage(
     });
 }
 
-function isSkipMajority(
-    message: GuildTextableMessage,
-    gameSession: GameSession
-): boolean {
-    return gameSession.gameType === GameType.ELIMINATION
-        ? gameSession.round.getSkipCount() >=
-              Math.floor(
-                  (
-                      gameSession.scoreboard as EliminationScoreboard
-                  ).getAlivePlayersCount() * 0.5
-              ) +
-                  1
-        : gameSession.round.getSkipCount() >= getMajorityCount(message.guildID);
+/**
+ * Whether there are enough votes to skip the song
+ * @param guildID - The guild's ID
+ * @param session - The current session
+ * @returns whether the song has enough votes to be skipped
+ */
+export function isSkipMajority(guildID: string, session: Session): boolean {
+    if (session instanceof GameSession) {
+        if (session.gameType === GameType.ELIMINATION) {
+            return (
+                session.round.getSkipCount() >=
+                Math.floor(
+                    (
+                        session.scoreboard as EliminationScoreboard
+                    ).getAlivePlayersCount() * 0.5
+                ) +
+                    1
+            );
+        }
+    }
+
+    return session.round.getSkipCount() >= getMajorityCount(guildID);
+}
+
+/**
+ * Skip the current song (end the current round and start a new one)
+ * @param messageContext - The context that triggered skipping
+ * @param session - The current session
+ * @param guildPreference - The guild's preference
+ */
+export async function skipSong(
+    messageContext: MessageContext,
+    session: Session,
+    guildPreference: GuildPreference
+): Promise<void> {
+    logger.info(
+        `${getDebugLogHeader(messageContext)} | Skip majority achieved.`
+    );
+    session.round.skipAchieved = true;
+    await session.endRound(guildPreference, messageContext, { correct: false });
+
+    session.startRound(guildPreference, messageContext);
 }
 
 export default class SkipCommand implements BaseCommand {
     aliases = ["s"];
     preRunChecks = [
-        { checkFn: CommandPrechecks.inGameCommandPrecheck },
+        { checkFn: CommandPrechecks.inSessionCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
     ];
 
@@ -100,72 +128,57 @@ export default class SkipCommand implements BaseCommand {
         priority: 1010,
     });
 
-    call = async ({ gameSessions, message }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
-        const gameSession = gameSessions[message.guildID];
-        if (
-            !gameSession ||
-            !gameSession.round ||
-            gameSession.round.finished ||
-            !areUserAndBotInSameVoiceChannel(message)
-        ) {
+    call = async ({ message }: CommandArgs): Promise<void> => {
+        if (!areUserAndBotInSameVoiceChannel(message)) {
             logger.warn(
                 `${getDebugLogHeader(
                     message
-                )} | Invalid skip. !gameSession: ${!gameSession}. !gameSession.round: ${
-                    gameSession && !gameSession.round
-                }. !areUserAndBotInSameVoiceChannel: ${!areUserAndBotInSameVoiceChannel(
-                    message
-                )}`
+                )} | Invalid skip. User and bot are not in the same voice channel.`
             );
             return;
         }
 
-        if (gameSession.gameType === GameType.ELIMINATION) {
-            if (
-                !(
-                    gameSession.scoreboard as EliminationScoreboard
-                ).isPlayerEliminated(message.author.id)
-            ) {
-                logger.info(
-                    `${getDebugLogHeader(
-                        message
-                    )} | User skipped, elimination mode`
-                );
-                gameSession.round.userSkipped(message.author.id);
+        const session = Session.getSession(message.guildID);
+        if (
+            !session.round ||
+            session.round.skipAchieved ||
+            session.round.finished
+        ) {
+            return;
+        }
+
+        if (session instanceof GameSession) {
+            if (session.gameType === GameType.ELIMINATION) {
+                if (
+                    !(
+                        session.scoreboard as EliminationScoreboard
+                    ).isPlayerEliminated(message.author.id)
+                ) {
+                    logger.info(
+                        `${getDebugLogHeader(
+                            message
+                        )} | User skipped, elimination mode`
+                    );
+                    session.round.userSkipped(message.author.id);
+                }
             }
-        } else {
-            gameSession.round.userSkipped(message.author.id);
-            logger.info(`${getDebugLogHeader(message)} | User skipped`);
         }
 
-        if (gameSession.round.skipAchieved) {
-            // song already being skipped
-            return;
-        }
+        session.round.userSkipped(message.author.id);
+        logger.info(`${getDebugLogHeader(message)} | User skipped`);
 
-        if (isSkipMajority(message, gameSession)) {
-            gameSession.round.skipAchieved = true;
-            sendSkipMessage(message, gameSession.round);
-            await gameSession.endRound(
-                guildPreference,
+        if (isSkipMajority(message.guildID, session)) {
+            sendSkipMessage(message, session.round);
+            skipSong(
                 MessageContext.fromMessage(message),
-                { correct: false }
-            );
-
-            gameSession.startRound(
-                guildPreference,
-                MessageContext.fromMessage(message)
-            );
-
-            logger.info(
-                `${getDebugLogHeader(message)} | Skip majority achieved.`
+                session,
+                await getGuildPreference(message.guildID)
             );
         } else {
             logger.info(`${getDebugLogHeader(message)} | Skip vote received.`);
-            await sendSkipNotification(message, gameSession.round);
+            await sendSkipNotification(message, session.round);
         }
 
-        gameSession.lastActiveNow();
+        session.lastActiveNow();
     };
 }

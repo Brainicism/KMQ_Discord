@@ -11,6 +11,8 @@ import { state } from "../../kmq_worker";
 import validate from "../../helpers/validate";
 import { EnvType, GuildTextableMessage, ParsedMessage } from "../../types";
 import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import GameSession from "../../structures/game_session";
 
 const logger = new IPCLogger("messageCreate");
 
@@ -50,17 +52,14 @@ export default async function messageCreateHandler(
 
     const parsedMessage = parseMessage(message.content) || null;
     const textChannel = message.channel as Eris.TextChannel;
+    const messageContext = MessageContext.fromMessage(message);
     if (
         message.mentions.includes(state.client.user) &&
         message.content.split(" ").length === 1
     ) {
         // Any message that mentions the bot sends the current options
         const guildPreference = await getGuildPreference(message.guildID);
-        sendOptionsMessage(
-            MessageContext.fromMessage(message),
-            guildPreference,
-            null
-        );
+        sendOptionsMessage(messageContext, guildPreference, null);
         return;
     }
 
@@ -68,6 +67,7 @@ export default async function messageCreateHandler(
         ? state.client.commands[parsedMessage.action]
         : null;
 
+    const session = Session.getSession(message.guildID);
     if (invokedCommand) {
         if (!state.rateLimiter.check(message.author.id)) {
             logger.error(
@@ -90,14 +90,12 @@ export default async function messageCreateHandler(
                     : null
             )
         ) {
-            const { gameSessions } = state;
-            const gameSession = gameSessions[message.guildID];
             if (invokedCommand.preRunChecks) {
                 for (const precheck of invokedCommand.preRunChecks) {
                     if (
                         !(await precheck.checkFn({
                             message,
-                            gameSession,
+                            session,
                             errorMessage: precheck.errorMessage,
                         }))
                     ) {
@@ -114,7 +112,6 @@ export default async function messageCreateHandler(
 
             try {
                 await invokedCommand.call({
-                    gameSessions,
                     channel: textChannel,
                     message,
                     parsedMessage,
@@ -131,7 +128,7 @@ export default async function messageCreateHandler(
                     logger.error(e.stack);
                 }
 
-                sendErrorMessage(MessageContext.fromMessage(message), {
+                sendErrorMessage(messageContext, {
                     title: state.localizer.translate(
                         message.guildID,
                         "misc.failure.command.title"
@@ -144,11 +141,7 @@ export default async function messageCreateHandler(
                 });
             }
         }
-    } else if (state.gameSessions[message.guildID]?.round) {
-        const gameSession = state.gameSessions[message.guildID];
-        gameSession.guessSong(
-            MessageContext.fromMessage(message),
-            message.content
-        );
+    } else if (session instanceof GameSession && session.round) {
+        session.guessSong(messageContext, message.content);
     }
 }

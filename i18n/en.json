@@ -529,6 +529,13 @@
                 }
             }
         },
+        "music": {
+            "help": {
+                "description": "Stream songs from the current options. Only available to KMQ Premium users.",
+                "example": "Music will start playing in the current voice channel."
+            },
+            "musicStarting": "Music Starting in #{{textChannelName}} in 🔊 {{voiceChannelName}}"
+        },
         "news": {
             "help": {
                 "description": "Displays the latest updates to KMQ."
@@ -542,8 +549,9 @@
             "help": {
                 "description": "Displays the current game options."
             },
+            "musicSessionNotAvailable": "Some options are not available during a music session",
             "notSet": "Not set",
-            "overview": "Now playing the top {{limit}} out of {{totalSongs}} available songs from the following game options:",
+            "overview": "Now playing the top {{limit}} out of {{totalSongs}} available songs from the following options:",
             "perCommandHelp": "Looking for information on how to use a command? Check out \"{{helpCommand}} [command]\" to learn more.",
             "premiumOptionsNonPremiumGame": "Note: active game is not premium",
             "preset": "Preset",
@@ -579,10 +587,6 @@
                 "hiddenGameMode": {
                     "description": "You do not have permission to use this command.",
                     "title": "Hidden Game Mode"
-                },
-                "notInVC": {
-                    "description": "Send {{play}} again when you are in a voice channel.",
-                    "title": "Join a Voice Channel"
                 },
                 "overrideTeamsOrElimination": {
                     "description": "If you meant to start a {{oldGameType}} game, {{end}} this game, call {{playOldGameType}}, {{gameSpecificInstructions}}, and then call {{begin}}.",
@@ -638,7 +642,7 @@
                         "title": "Premium Supporter Badge!"
                     },
                     "moreSongs": {
-                        "description": "Gain access to the top 25 b-sides for every artist (up from 10)",
+                        "description": "Gain access to the top 50 b-sides for every artist (up from 10)",
                         "title": "More songs!"
                     },
                     "special": {
@@ -875,8 +879,7 @@
                 "description": "Vote to skip the current song. A song is skipped when majority of participants vote to skip it."
             },
             "success": {
-                "description": "{{skipCounter}} skips achieved, skipping...",
-                "title": "Skip"
+                "description": "{{skipCounter}} skips achieved, skipping..."
             },
             "vote": {
                 "description": "{{skipCounter}} skip requests received.",
@@ -1015,6 +1018,7 @@
         "andManyOthers": "and many others...",
         "artist": "artist",
         "artistAliases": "Artist Aliases",
+        "bookmark": "Bookmark",
         "classic": {
             "yourScore": "Your score is {{score}}."
         },
@@ -1065,6 +1069,10 @@
                 "title": "Missing Permissions"
             },
             "missingPermissionsText": "Ensure that the bot has the following permissions: {{missingPermissions}}\n\nSee the following link for details: {{permissionsLink}}. If you are still having issues, join the official KMQ server found in {{helpCommand}}",
+            "notInVC": {
+                "description": "Send {{command}} again when you are in a voice channel.",
+                "title": "Join a Voice Channel"
+            },
             "retrievingSongData": {
                 "description": "Try again in a bit, or report this error to the official KMQ server found in {{helpCommand}}.",
                 "title": "Error Retrieving Song Data"
@@ -1160,7 +1168,7 @@
                 "vote": "Give us a vote (and get 2x exp, see `,vote`) and leave a review on [top.gg!](https://top.gg/bot/508759831755096074)"
             },
             "wrongSongName": {
-                "aliases.": "Have a suggestion for an alternate song name? Tell us on the official KMQ server!",
+                "aliases": "Have a suggestion for an alternate song name? Tell us on the official KMQ server!",
                 "title": "Wrong Song Name?"
             }
         },
@@ -1241,6 +1249,9 @@
             "debugChannel": "You can't do that in this channel.",
             "debugServer": "You can't do that in this server.",
             "differentVC": "You must be in the same voice channel as the bot to use this command.",
+            "notMusicSession": "You can't do that while in a music session.",
+            "notPremium": "You need KMQ Premium to use this command (see {{premium}}).",
+            "premiumOrDebugChannel": "This command only works in the official KMQ server or for KMQ Premium members (see {{premium}}).",
             "title": "Wait..."
         },
         "releaseDate": "Release Date",
@@ -1248,6 +1259,7 @@
             "description": "Sending {{songs}} to {{players}}.\n\nBookmark songs during the game by right-clicking the song message and selecting `Apps > Bookmark Song`",
             "title": "Sending Bookmarked Songs..."
         },
+        "skip": "Skip",
         "song": "song",
         "songAliases": "Song Aliases",
         "team": {

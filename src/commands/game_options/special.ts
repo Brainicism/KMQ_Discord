@@ -58,12 +58,9 @@ export const specialFfmpegArgs = {
 };
 export default class SpecialCommand implements BaseCommand {
     preRunChecks = [
-        {
-            checkFn: CommandPrechecks.debugServerPrecheck,
-            errorMessage:
-                "This is an unreleased game option, and can only be used on the official KMQ server",
-        },
         { checkFn: CommandPrechecks.competitionPrecheck },
+        { checkFn: CommandPrechecks.notMusicPrecheck },
+        { checkFn: CommandPrechecks.premiumOrDebugServerPrecheck },
     ];
 
     validations = {

@@ -1,5 +1,7 @@
 import Eris from "eris";
-import { state } from "../../kmq_worker";
+import GameSession from "../../structures/game_session";
+import Session from "../../structures/session";
+import MusicSession from "../../structures/music_session";
 
 /**
  * @param member - The member that joined the voice channel
@@ -9,21 +11,27 @@ export default async function voiceChannelJoinHandler(
     member: Eris.Member,
     newChannel: Eris.VoiceChannel
 ): Promise<void> {
-    const gameSession = state.gameSessions[newChannel.guild.id];
-    if (!gameSession || gameSession.finished) {
+    const session = Session.getSession(newChannel.guild.id);
+    if (!session || session.finished) {
         return;
     }
 
     if (
-        newChannel.id !== gameSession.voiceChannelID ||
+        newChannel.id !== session.voiceChannelID ||
         member.id === process.env.BOT_CLIENT_ID
     ) {
         return;
     }
 
-    const oldPremiumState = gameSession.isPremiumGame();
-    await gameSession.setPlayerInVC(member.id, true);
-    if (oldPremiumState !== gameSession.isPremiumGame()) {
-        gameSession.updatePremiumStatus();
+    const oldPremiumState = session.isPremium();
+    if (session instanceof GameSession) {
+        await session.setPlayerInVC(member.id, true);
+    }
+
+    if (
+        oldPremiumState !== session.isPremium() ||
+        session instanceof MusicSession
+    ) {
+        session.updatePremiumStatus();
     }
 }
