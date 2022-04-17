@@ -4,7 +4,7 @@ import {
     getDebugLogHeader,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { isWeekend } from "../../helpers/utils";
@@ -22,6 +22,8 @@ import { KmqImages } from "../../constants";
 import { state } from "../../kmq_worker";
 import GuildPreference from "../../structures/guild_preference";
 import GameRound from "../../structures/game_round";
+import CommandArgs from "../../interfaces/command_args";
+import HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("exp");
 export const PARTICIPANT_MODIFIER_MAX_PARTICIPANTS = 6;
@@ -313,7 +315,7 @@ export async function calculateTotalRoundExp(
 }
 
 export default class ExpCommand implements BaseCommand {
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "exp",
         description: state.localizer.translate(
             guildID,

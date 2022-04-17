@@ -1,4 +1,5 @@
 import dbContext from "../database_context";
+import Patron from "../interfaces/patron";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
 import { addPremium, removePremium } from "./game_utils";
@@ -11,12 +12,6 @@ interface PatronResponse {
     patron_status: string;
     discord_user_id: string;
     pledge_relationship_start?: Date;
-}
-
-export interface Patron {
-    discordID: string;
-    activePatron: boolean;
-    firstSubscribed?: Date;
 }
 
 enum PatronState {

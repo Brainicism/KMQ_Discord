@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
@@ -8,6 +8,7 @@ import MessageContext from "../../structures/message_context";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { GameOption } from "../../types";
 import CommandPrechecks from "../../command_prechecks";
+import CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("forceplay");
 

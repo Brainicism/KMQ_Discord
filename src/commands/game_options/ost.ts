@@ -3,12 +3,14 @@ import {
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import HelpDocumentation from "../../interfaces/help";
+import CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("ost");
 
@@ -37,7 +39,7 @@ export default class OstCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "ost",
         description: state.localizer.translate(
             guildID,

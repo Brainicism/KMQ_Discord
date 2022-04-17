@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
@@ -10,6 +10,8 @@ import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import Session from "../../structures/session";
+import HelpDocumentation from "../../interfaces/help";
+import CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("guessTimeout");
 
@@ -34,7 +36,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "timer",
         description: state.localizer.translate(
             guildID,

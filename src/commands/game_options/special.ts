@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     sendErrorMessage,
@@ -11,6 +11,8 @@ import GuildPreference from "../../structures/guild_preference";
 import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import CommandArgs from "../../interfaces/command_args";
+import HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("special");
 
@@ -75,7 +77,7 @@ export default class SpecialCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "special",
         description: state.localizer.translate(
             guildID,

@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     sendErrorMessage,
@@ -10,6 +10,8 @@ import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import HelpDocumentation from "../../interfaces/help";
+import CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("limit");
 
@@ -37,7 +39,7 @@ export default class LimitCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "limit",
         description: state.localizer.translate(
             guildID,

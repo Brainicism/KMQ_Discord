@@ -1,6 +1,6 @@
 import Eris from "eris";
 import os from "os";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     sendErrorMessage,
@@ -17,11 +17,13 @@ import {
     measureExecutionTime,
 } from "../../helpers/utils";
 import { getKmqCurrentVersion } from "../../helpers/game_utils";
+import CommandArgs from "../../interfaces/command_args";
+import HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("stats");
 
 export default class StatsCommand implements BaseCommand {
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "stats",
         description: state.localizer.translate(
             guildID,

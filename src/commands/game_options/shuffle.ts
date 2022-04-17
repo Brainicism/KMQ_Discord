@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import { getGuildPreference, isUserPremium } from "../../helpers/game_utils";
 import {
@@ -11,6 +11,8 @@ import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import GuildPreference from "../../structures/guild_preference";
+import CommandArgs from "../../interfaces/command_args";
+import HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("shuffle");
 
@@ -43,7 +45,7 @@ export default class ShuffleCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "shuffle",
         description: state.localizer.translate(
             guildID,

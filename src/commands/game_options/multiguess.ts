@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import {
@@ -9,6 +9,8 @@ import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import CommandArgs from "../../interfaces/command_args";
+import HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("multiguess");
 
@@ -37,7 +39,7 @@ export default class MultiGuessCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "multiguess",
         description: state.localizer.translate(
             guildID,

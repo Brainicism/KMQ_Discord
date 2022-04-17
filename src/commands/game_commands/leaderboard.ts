@@ -1,6 +1,6 @@
 import Eris from "eris";
 import dbContext from "../../database_context";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -23,6 +23,8 @@ import { GuildTextableMessage, EnvType } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import { sendValidationErrorMessage } from "../../helpers/validate";
+import CommandArgs from "../../interfaces/command_args";
+import HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("leaderboard");
 
@@ -71,7 +73,7 @@ export default class LeaderboardCommand implements BaseCommand {
         arguments: [],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "leaderboard",
         description: state.localizer.translate(
             guildID,

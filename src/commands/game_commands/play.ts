@@ -21,7 +21,7 @@ import {
     isPremiumRequest,
 } from "../../helpers/game_utils";
 import { chooseWeightedRandom, isWeekend } from "../../helpers/utils";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import dbContext from "../../database_context";
 import { IPCLogger } from "../../logger";
 import { GameType } from "../../types";
@@ -33,6 +33,8 @@ import { state } from "../../kmq_worker";
 import { DEFAULT_LIVES } from "../../structures/elimination_scoreboard";
 import GuildPreference from "../../structures/guild_preference";
 import GameInfoMessage from "../../interfaces/game_info_message";
+import CommandArgs from "../../interfaces/command_args";
+import HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("play");
 
@@ -176,7 +178,7 @@ export default class PlayCommand implements BaseCommand {
 
     aliases = ["random", "start", "p"];
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "play",
         description: state.localizer.translate(
             guildID,

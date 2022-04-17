@@ -1,47 +1,12 @@
-import Eris from "eris";
-import ParsedMessage from "../../interfaces/parsed_message";
+import CallFunc from "../../interfaces/call_func";
+import CommandValidations from "../../interfaces/command_validations";
+import HelpDocumentation from "../../interfaces/help";
 import PrecheckArgs from "../../interfaces/precheck_args";
 import GuildPreference from "../../structures/guild_preference";
-import { GuildTextableMessage } from "../../types";
-
-export interface CommandArgs {
-    message: GuildTextableMessage;
-    channel: Eris.TextChannel;
-    parsedMessage: ParsedMessage;
-}
-
-export interface CommandValidations {
-    minArgCount: number;
-    maxArgCount?: number;
-    arguments: Array<{
-        type: "number" | "boolean" | "enum" | "char";
-        name: string;
-        minValue?: number;
-        maxValue?: number;
-        enums?: Array<string>;
-    }>;
-}
-
-export interface CallFunc {
-    (args: CommandArgs): Promise<void>;
-}
-
-export interface Help {
-    name: string;
-    description: string;
-    usage: string;
-    examples: Array<{ example: string; explanation: string }>;
-    actionRowComponents?: Eris.ActionRowComponents[];
-    priority?: number;
-}
-
-export interface HelpFunc {
-    (guildID: string): Help;
-}
 
 export default interface BaseCommand {
     call: CallFunc;
-    help?: HelpFunc;
+    help?: (guildID: string) => HelpDocumentation;
     aliases?: Array<string>;
     validations?: CommandValidations;
     preRunChecks?: Array<{
