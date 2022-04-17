@@ -3,23 +3,18 @@ import {
     getDebugLogHeader,
     sendErrorMessage,
 } from "./helpers/discord_utils";
-import Session from "./structures/session";
 import GameSession from "./structures/game_session";
 import MessageContext from "./structures/message_context";
-import { GameType, GuildTextableMessage } from "./types";
+import { GameType } from "./types";
 import { IPCLogger } from "./logger";
 import dbContext from "./database_context";
 import { state } from "./kmq_worker";
 import MusicSession from "./structures/music_session";
 import { getTimeUntilRestart } from "./helpers/management_utils";
 import { isUserPremium } from "./helpers/game_utils";
+import PrecheckArgs from "./interfaces/precheck_args";
 
 const logger = new IPCLogger("command_prechecks");
-export interface PrecheckArgs {
-    message: GuildTextableMessage;
-    session: Session;
-    errorMessage?: string;
-}
 
 export default class CommandPrechecks {
     static inSessionCommandPrecheck(precheckArgs: PrecheckArgs): boolean {

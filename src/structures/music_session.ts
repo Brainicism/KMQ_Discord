@@ -1,6 +1,5 @@
 import Eris from "eris";
 import { chooseRandom, delay } from "../helpers/utils";
-import { QueriedSong } from "../types";
 import {
     getCurrentVoiceMembers,
     sendRoundMessage,
@@ -20,6 +19,7 @@ import { isUserPremium } from "../helpers/game_utils";
 import { isSkipMajority, skipSong } from "../commands/game_commands/skip";
 import { state } from "../kmq_worker";
 import { getGuildPreference } from "../helpers/game_utils";
+import QueriedSong from "../interfaces/queried_song";
 
 const logger = new IPCLogger("music_session");
 

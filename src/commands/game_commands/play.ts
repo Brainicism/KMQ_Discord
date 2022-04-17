@@ -24,7 +24,7 @@ import { chooseWeightedRandom, isWeekend } from "../../helpers/utils";
 import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import dbContext from "../../database_context";
 import { IPCLogger } from "../../logger";
-import { GameInfoMessage, GameType } from "../../types";
+import { GameType } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
@@ -32,6 +32,7 @@ import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import { DEFAULT_LIVES } from "../../structures/elimination_scoreboard";
 import GuildPreference from "../../structures/guild_preference";
+import GameInfoMessage from "../../interfaces/game_info_message";
 
 const logger = new IPCLogger("play");
 

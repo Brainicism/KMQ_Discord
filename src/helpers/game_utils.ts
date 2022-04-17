@@ -4,7 +4,6 @@ import dbContext from "../database_context";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
 import GuildPreference from "../structures/guild_preference";
-import { MatchedArtist, QueriedSong } from "../types";
 import { Gender } from "../commands/game_options/gender";
 import { GuessModeType } from "../commands/game_options/guessmode";
 import { cleanArtistName, cleanSongName } from "../structures/game_round";
@@ -14,6 +13,8 @@ import { LocaleType } from "./localization_manager";
 import { PATREON_SUPPORTER_BADGE, Patron } from "./patreon_manager";
 import { containsHangul, md5Hash } from "./utils";
 import Session from "../structures/session";
+import MatchedArtist from "../interfaces/matched_artist";
+import QueriedSong from "../interfaces/queried_song";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 10;
 

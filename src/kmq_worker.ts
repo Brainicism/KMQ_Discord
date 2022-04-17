@@ -5,7 +5,7 @@ import path from "path";
 import { Campaign } from "patreon-discord";
 
 import { IPCLogger } from "./logger";
-import { EnvType, State } from "./types";
+import { EnvType } from "./types";
 import {
     registerClientEvents,
     registerIntervals,
@@ -21,6 +21,7 @@ import ReloadCommand from "./commands/admin/reload";
 import EvalCommand from "./commands/admin/eval";
 import LocalizationManager from "./helpers/localization_manager";
 import Session from "./structures/session";
+import { State } from "./interfaces/state";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("kmq");

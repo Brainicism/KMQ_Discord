@@ -2,7 +2,7 @@ import BaseCommand, { CommandArgs } from "../interfaces/base_command";
 import GameSession from "../../structures/game_session";
 import TeamScoreboard from "../../structures/team_scoreboard";
 import Player from "../../structures/player";
-import { GuildTextableMessage, ParsedMessage, GameType } from "../../types";
+import { GuildTextableMessage, GameType } from "../../types";
 import {
     getUserTag,
     sendErrorMessage,
@@ -18,6 +18,7 @@ import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import { IPCLogger } from "../../logger";
 import Session from "../../structures/session";
+import ParsedMessage from "../../interfaces/parsed_message";
 
 const logger = new IPCLogger("join");
 

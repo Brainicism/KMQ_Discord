@@ -1,87 +1,6 @@
 import Eris, { GuildTextableChannel } from "eris";
-import { IPC } from "eris-fleet/dist/util/IPC";
-import { Campaign } from "patreon-discord";
-
-import GameSession from "./structures/game_session";
-import { Gender } from "./commands/game_options/gender";
-import KmqMember from "./structures/kmq_member";
-import KmqClient from "./kmq_client";
-import RateLimiter from "./rate_limiter";
-import LocalizationManager, {
-    LocaleType,
-} from "./helpers/localization_manager";
-import MusicSession from "./structures/music_session";
 
 export type GuildTextableMessage = Eris.Message<GuildTextableChannel>;
-
-export interface MatchedArtist {
-    id: number;
-    name: string;
-}
-export interface ParsedMessage {
-    action: string;
-    argument: string;
-    message: string;
-    components: Array<string>;
-}
-
-export interface QueriedSong {
-    songName: string;
-    originalSongName: string;
-    hangulSongName?: string;
-    originalHangulSongName?: string;
-    artistName: string;
-    hangulArtistName?: string;
-    youtubeLink: string;
-    publishDate?: Date;
-    members: Gender;
-    artistID: number;
-    isSolo: string;
-    rank: number;
-    views: number;
-    tags: string;
-    vtype: string;
-    selectionWeight: number;
-}
-
-export interface EmbedPayload {
-    title: string;
-    url?: string;
-    description?: string;
-    footerText?: string;
-    thumbnailUrl?: string;
-    timestamp?: Date;
-    fields?: Eris.EmbedField[];
-    author?: {
-        username: string;
-        avatarUrl: string;
-    };
-    color?: number;
-    components?: Eris.ActionRow[];
-}
-
-export interface GameInfoMessage {
-    title: string;
-    message: string;
-    weight: number;
-}
-
-export interface State {
-    gameSessions: { [guildID: string]: GameSession };
-    musicSessions: { [guildID: string]: MusicSession };
-    client: KmqClient;
-    aliases: {
-        artist: { [artistName: string]: Array<string> };
-        song: { [songName: string]: Array<string> };
-    };
-    processStartTime: number;
-    ipc: IPC;
-    rateLimiter: RateLimiter;
-    bonusArtists: Set<string>;
-    locales: { [guildID: string]: LocaleType };
-    localizer: LocalizationManager;
-    patreonCampaign: Campaign;
-}
 
 export enum GameOption {
     LIMIT = "Limit",
@@ -152,13 +71,6 @@ export enum EnvType {
     DRY_RUN = "dry-run",
     CI = "ci",
     TEST = "test",
-}
-
-export interface PlayerRoundResult {
-    player: KmqMember;
-    streak: number;
-    expGain: number;
-    pointsEarned: number;
 }
 
 export enum GameType {

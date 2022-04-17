@@ -15,7 +15,6 @@ import { state } from "../../kmq_worker";
 import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import KmqMember from "../../structures/kmq_member";
-import { GameInfoMessage } from "../../types";
 import { chooseWeightedRandom } from "../../helpers/utils";
 import dbContext from "../../database_context";
 import Eris from "eris";
@@ -24,6 +23,7 @@ import Session from "../../structures/session";
 import GameSession from "../../structures/game_session";
 import CommandPrechecks from "../../command_prechecks";
 import GuildPreference from "src/structures/guild_preference";
+import GameInfoMessage from "../../interfaces/game_info_message";
 
 const logger = new IPCLogger("music");
 

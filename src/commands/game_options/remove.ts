@@ -9,11 +9,12 @@ import {
     getMatchingGroupNames,
 } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
-import { GameOption, MatchedArtist } from "../../types";
+import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import { GROUP_LIST_URL } from "../../constants";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import MatchedArtist from "../../interfaces/matched_artist";
 
 const logger = new IPCLogger("remove");
 

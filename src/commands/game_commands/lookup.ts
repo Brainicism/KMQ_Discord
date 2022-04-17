@@ -16,7 +16,6 @@ import {
 } from "../../helpers/utils";
 import { IPCLogger } from "../../logger";
 import { sendValidationErrorMessage } from "../../helpers/validate";
-import { QueriedSong } from "../../types";
 import {
     getGuildPreference,
     getLocalizedArtistName,
@@ -25,6 +24,7 @@ import {
 } from "../../helpers/game_utils";
 import SongSelector from "../../structures/song_selector";
 import { KmqImages } from "../../constants";
+import QueriedSong from "../../interfaces/queried_song";
 
 const logger = new IPCLogger("lookup");
 

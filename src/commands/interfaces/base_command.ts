@@ -1,7 +1,8 @@
 import Eris from "eris";
-import { PrecheckArgs } from "../../command_prechecks";
+import ParsedMessage from "../../interfaces/parsed_message";
+import PrecheckArgs from "../../interfaces/precheck_args";
 import GuildPreference from "../../structures/guild_preference";
-import { GuildTextableMessage, ParsedMessage } from "../../types";
+import { GuildTextableMessage } from "../../types";
 
 export interface CommandArgs {
     message: GuildTextableMessage;

@@ -35,7 +35,7 @@ import {
 } from "../helpers/utils";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
-import { QueriedSong, GameType } from "../types";
+import { GameType } from "../types";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
 import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
@@ -53,6 +53,7 @@ import { calculateTotalRoundExp } from "../commands/game_commands/exp";
 import Player from "../structures/player";
 import Session, { SONG_START_DELAY } from "./session";
 import Round from "./round";
+import QueriedSong from "../interfaces/queried_song";
 
 const MULTIGUESS_DELAY = 1500;
 

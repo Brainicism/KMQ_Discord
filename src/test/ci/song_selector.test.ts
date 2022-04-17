@@ -16,7 +16,7 @@ import {
     LanguageType,
 } from "../../commands/game_options/language";
 import { ShuffleType } from "../../commands/game_options/shuffle";
-import { QueriedSong } from "../../types";
+import QueriedSong from "../../interfaces/queried_song";
 
 async function getMockGuildPreference(): Promise<GuildPreference> {
     const guildPreference = new GuildPreference("test");

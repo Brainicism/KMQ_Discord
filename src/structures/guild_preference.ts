@@ -26,7 +26,7 @@ import {
     DEFAULT_SUBUNIT_PREFERENCE,
     SubunitsPreference,
 } from "../commands/game_options/subunits";
-import { GameOption, MatchedArtist } from "../types";
+import { GameOption } from "../types";
 import {
     DEFAULT_OST_PREFERENCE,
     OstPreference,
@@ -45,6 +45,7 @@ import {
     DEFAULT_ANSWER_TYPE,
 } from "../commands/game_options/answer";
 import Session from "./session";
+import MatchedArtist from "../interfaces/matched_artist";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("guild_preference");

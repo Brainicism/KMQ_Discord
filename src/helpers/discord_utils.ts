@@ -16,15 +16,12 @@ import {
 } from "./game_utils";
 import { getFact } from "../fact_generator";
 import {
-    EmbedPayload,
     GameOption,
     GameOptionCommand,
     PriorityGameOption,
     ConflictingGameOptions,
     GuildTextableMessage,
-    GameInfoMessage,
     GameType,
-    QueriedSong,
 } from "../types";
 import {
     chunkArray,
@@ -54,6 +51,9 @@ import Round from "../structures/round";
 import Session from "../structures/session";
 import MusicSession from "../structures/music_session";
 import MusicRound from "../structures/music_round";
+import EmbedPayload from "../interfaces/embed_payload";
+import GameInfoMessage from "../interfaces/game_info_message";
+import QueriedSong from "../interfaces/queried_song";
 
 const logger = new IPCLogger("discord_utils");
 export const EMBED_ERROR_COLOR = 0xed4245; // Red

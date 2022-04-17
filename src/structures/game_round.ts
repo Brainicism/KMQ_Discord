@@ -8,7 +8,6 @@ import {
     ExpBonusModifier,
     ExpBonusModifierValues,
 } from "../commands/game_commands/exp";
-import { PlayerRoundResult, QueriedSong } from "../types";
 import Round, { MAX_RUNNERS_UP } from "./round";
 import MessageContext from "./message_context";
 import {
@@ -19,6 +18,8 @@ import {
 } from "../helpers/discord_utils";
 import { UniqueSongCounter } from "./song_selector";
 import { friendlyFormattedNumber } from "../helpers/utils";
+import PlayerRoundResult from "../interfaces/player_round_result";
+import QueriedSong from "../interfaces/queried_song";
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
 const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\(\)\+\u200B]/g;

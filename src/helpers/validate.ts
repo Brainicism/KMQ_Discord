@@ -1,10 +1,11 @@
 import { getDebugLogHeader, sendErrorMessage } from "./discord_utils";
-import { GuildTextableMessage, ParsedMessage } from "../types";
+import { GuildTextableMessage } from "../types";
 import { CommandValidations } from "../commands/interfaces/base_command";
 import { IPCLogger } from "../logger";
 import { arrayToString } from "./utils";
 import MessageContext from "../structures/message_context";
 import { state } from "../kmq_worker";
+import ParsedMessage from "../interfaces/parsed_message";
 
 const logger = new IPCLogger("validate");
 

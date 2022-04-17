@@ -1,4 +1,3 @@
-import { QueriedSong } from "../types";
 import GuildPreference from "./guild_preference";
 import dbContext from "../database_context";
 import { SubunitsPreference } from "../commands/game_options/subunits";
@@ -16,6 +15,7 @@ import {
 } from "../commands/game_options/release";
 import { chooseWeightedRandom, setDifference } from "../helpers/utils";
 import { ShuffleType } from "../commands/game_options/shuffle";
+import QueriedSong from "../interfaces/queried_song";
 
 export const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
 export const SELECTION_WEIGHT_VALUES_HARD = [1, 2, 4, 8, 16];
