@@ -8,7 +8,7 @@ import GameSession from "../structures/game_session";
 import MusicSession from "../structures/music_session";
 import { Campaign } from "patreon-discord";
 
-export interface State {
+export default interface State {
     gameSessions: { [guildID: string]: GameSession };
     musicSessions: { [guildID: string]: MusicSession };
     client: KmqClient;
