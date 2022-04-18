@@ -38,8 +38,6 @@ import { GameOption } from "../enums/game_option_name";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("guild_preference");
 
-type NewType = OstPreference;
-
 type GameOptionValue =
     | number
     | Array<Gender>
@@ -54,7 +52,7 @@ type GameOptionValue =
     | LanguageType
     | MultiGuessType
     | SubunitsPreference
-    | NewType
+    | OstPreference
     | string;
 
 const enum GameOptionInternal {

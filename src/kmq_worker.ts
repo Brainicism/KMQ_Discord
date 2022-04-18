@@ -20,7 +20,7 @@ import ReloadCommand from "./commands/admin/reload";
 import EvalCommand from "./commands/admin/eval";
 import LocalizationManager from "./helpers/localization_manager";
 import Session from "./structures/session";
-import { State } from "./interfaces/state";
+import State from "./interfaces/state";
 import { EnvType } from "./enums/env_type";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -1,13 +1,13 @@
 import { IPC } from "eris-fleet";
-import LocalizationManager from "../helpers/localization_manager";
 import { LocaleType } from "../enums/locale_type";
+import LocalizationManager from "../helpers/localization_manager";
 import KmqClient from "../kmq_client";
 import RateLimiter from "../rate_limiter";
 import GameSession from "../structures/game_session";
 import MusicSession from "../structures/music_session";
 import { Campaign } from "patreon-discord";
 
-export interface State {
+export default interface State {
     gameSessions: { [guildID: string]: GameSession };
     musicSessions: { [guildID: string]: MusicSession };
     client: KmqClient;
