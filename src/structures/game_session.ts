@@ -41,14 +41,11 @@ import GuildPreference from "./guild_preference";
 import Scoreboard from "./scoreboard";
 import EliminationScoreboard from "./elimination_scoreboard";
 import TeamScoreboard from "./team_scoreboard";
-import { GuessModeType } from "../commands/game_options/guessmode";
 import { getRankNameByLevel } from "../commands/game_commands/profile";
 import EliminationPlayer from "./elimination_player";
 import { KmqImages } from "../constants";
 import MessageContext from "./message_context";
 import KmqMember from "./kmq_member";
-import { MultiGuessType } from "../commands/game_options/multiguess";
-import { AnswerType } from "../commands/game_options/answer";
 import { calculateTotalRoundExp } from "../commands/game_commands/exp";
 import Player from "../structures/player";
 import Session, { SONG_START_DELAY } from "./session";
@@ -56,6 +53,9 @@ import Round from "./round";
 import QueriedSong from "../interfaces/queried_song";
 import GuessResult from "../interfaces/guess_result";
 import SuccessfulGuessResult from "../interfaces/success_guess_result";
+import { GuessModeType } from "../enums/option_types/guess_mode_type";
+import { AnswerType } from "../enums/option_types/answer_type";
+import { MultiGuessType } from "../enums/option_types/multiguess_type";
 
 const MULTIGUESS_DELAY = 1500;
 

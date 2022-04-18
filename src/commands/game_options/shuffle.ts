@@ -13,15 +13,9 @@ import { state } from "../../kmq_worker";
 import GuildPreference from "../../structures/guild_preference";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
+import { ShuffleType } from "../../enums/option_types/shuffle_type";
 
 const logger = new IPCLogger("shuffle");
-
-export enum ShuffleType {
-    RANDOM = "random",
-    WEIGHTED_EASY = "weighted_easy",
-    WEIGHTED_HARD = "weighted_hard",
-    POPULARITY = "popularity",
-}
 
 const PREMIUM_SHUFFLE_TYPES = [
     ShuffleType.WEIGHTED_EASY,

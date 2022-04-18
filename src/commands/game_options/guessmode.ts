@@ -11,14 +11,9 @@ import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
+import { GuessModeType } from "../../enums/option_types/guess_mode_type";
 
 const logger = new IPCLogger("guessmode");
-
-export enum GuessModeType {
-    SONG_NAME = "song",
-    ARTIST = "artist",
-    BOTH = "both",
-}
 
 export const DEFAULT_GUESS_MODE = GuessModeType.SONG_NAME;
 

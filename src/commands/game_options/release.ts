@@ -11,13 +11,10 @@ import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
+import { ReleaseType } from "../../enums/option_types/release_type";
 
 const logger = new IPCLogger("release");
 
-export enum ReleaseType {
-    OFFICIAL = "official",
-    ALL = "all",
-}
 export const NON_OFFICIAL_VIDEO_TAGS = ["c", "d", "a", "r", "v", "x", "p"];
 export const DEFAULT_RELEASE_TYPE = ReleaseType.OFFICIAL;
 

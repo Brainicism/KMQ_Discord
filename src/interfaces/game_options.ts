@@ -1,15 +1,15 @@
-import { AnswerType } from "../commands/game_options/answer";
-import { ArtistType } from "../commands/game_options/artisttype";
-import { Gender } from "../commands/game_options/gender";
-import { GuessModeType } from "../commands/game_options/guessmode";
-import { LanguageType } from "../commands/game_options/language";
-import { MultiGuessType } from "../commands/game_options/multiguess";
-import { OstPreference } from "../commands/game_options/ost";
-import { ReleaseType } from "../commands/game_options/release";
-import { SeekType } from "../commands/game_options/seek";
-import { ShuffleType } from "../commands/game_options/shuffle";
-import { SpecialType } from "../commands/game_options/special";
-import { SubunitsPreference } from "../commands/game_options/subunits";
+import { AnswerType } from "../enums/option_types/answer_type";
+import { ArtistType } from "../enums/option_types/artist_type";
+import { Gender } from "../enums/option_types/gender";
+import { GuessModeType } from "../enums/option_types/guess_mode_type";
+import { LanguageType } from "../enums/option_types/language_type";
+import { MultiGuessType } from "../enums/option_types/multiguess_type";
+import { OstPreference } from "../enums/option_types/ost_preference";
+import { ReleaseType } from "../enums/option_types/release_type";
+import { SeekType } from "../enums/option_types/seek_type";
+import { ShuffleType } from "../enums/option_types/shuffle_type";
+import { SpecialType } from "../enums/option_types/special_type";
+import { SubunitsPreference } from "../enums/option_types/subunit_preference";
 import MatchedArtist from "./matched_artist";
 
 export default interface GameOptions {

@@ -28,11 +28,11 @@ import {
 import { state } from "../kmq_worker";
 import { KmqImages } from "../constants";
 import { bold, friendlyFormattedNumber } from "../helpers/utils";
-import { SeekType } from "../commands/game_options/seek";
 import { specialFfmpegArgs } from "../commands/game_options/special";
 import MusicSession from "./music_session";
 import QueriedSong from "../interfaces/queried_song";
 import GuessResult from "../interfaces/guess_result";
+import { SeekType } from "../enums/option_types/seek_type";
 
 export const SONG_START_DELAY = 3000;
 const BOOKMARK_MESSAGE_SIZE = 10;

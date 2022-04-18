@@ -11,14 +11,9 @@ import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import HelpDocumentation from "../../interfaces/help";
 import CommandArgs from "../../interfaces/command_args";
+import { OstPreference } from "../../enums/option_types/ost_preference";
 
 const logger = new IPCLogger("ost");
-
-export enum OstPreference {
-    INCLUDE = "include",
-    EXCLUDE = "exclude",
-    EXCLUSIVE = "exclusive",
-}
 
 export const DEFAULT_OST_PREFERENCE = OstPreference.EXCLUDE;
 

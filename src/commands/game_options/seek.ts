@@ -11,14 +11,9 @@ import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
+import { SeekType } from "../../enums/option_types/seek_type";
 
 const logger = new IPCLogger("seek");
-
-export enum SeekType {
-    BEGINNING = "beginning",
-    RANDOM = "random",
-    MIDDLE = "middle",
-}
 
 export const DEFAULT_SEEK = SeekType.RANDOM;
 

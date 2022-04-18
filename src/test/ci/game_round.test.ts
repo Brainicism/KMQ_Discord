@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import assert from "assert";
-import { Gender } from "../../commands/game_options/gender";
 import {
     ExpBonusModifier,
     ExpBonusModifierValues,
 } from "../../commands/game_commands/exp";
-import { GuessModeType } from "../../commands/game_options/guessmode";
+import { Gender } from "../../enums/option_types/gender";
+import { GuessModeType } from "../../enums/option_types/guess_mode_type";
 import { state } from "../../kmq_worker";
 import GameRound, {
     cleanArtistName,

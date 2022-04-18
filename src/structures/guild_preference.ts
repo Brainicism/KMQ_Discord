@@ -5,51 +5,40 @@ import {
     DEFAULT_ENDING_SEARCH_YEAR,
 } from "../commands/game_options/cutoff";
 import { DEFAULT_LIMIT } from "../commands/game_options/limit";
-import { Gender, DEFAULT_GENDER } from "../commands/game_options/gender";
-import { SeekType, DEFAULT_SEEK } from "../commands/game_options/seek";
-import { ShuffleType, DEFAULT_SHUFFLE } from "../commands/game_options/shuffle";
-import {
-    GuessModeType,
-    DEFAULT_GUESS_MODE,
-} from "../commands/game_options/guessmode";
+import { DEFAULT_GENDER } from "../commands/game_options/gender";
+import { DEFAULT_SEEK } from "../commands/game_options/seek";
+import { DEFAULT_SHUFFLE } from "../commands/game_options/shuffle";
+import { DEFAULT_GUESS_MODE } from "../commands/game_options/guessmode";
 import { IPCLogger } from "../logger";
 import dbContext from "../database_context";
-import {
-    ArtistType,
-    DEFAULT_ARTIST_TYPE,
-} from "../commands/game_options/artisttype";
-import {
-    DEFAULT_LANGUAGE,
-    LanguageType,
-} from "../commands/game_options/language";
-import {
-    DEFAULT_SUBUNIT_PREFERENCE,
-    SubunitsPreference,
-} from "../commands/game_options/subunits";
+import { DEFAULT_ARTIST_TYPE } from "../commands/game_options/artisttype";
+import { DEFAULT_LANGUAGE } from "../commands/game_options/language";
+import { DEFAULT_SUBUNIT_PREFERENCE } from "../commands/game_options/subunits";
 import { GameOption } from "../types";
-import {
-    DEFAULT_OST_PREFERENCE,
-    OstPreference,
-} from "../commands/game_options/ost";
-import {
-    DEFAULT_RELEASE_TYPE,
-    ReleaseType,
-} from "../commands/game_options/release";
-import {
-    DEFAULT_MULTIGUESS_TYPE,
-    MultiGuessType,
-} from "../commands/game_options/multiguess";
-import { SpecialType } from "../commands/game_options/special";
-import {
-    AnswerType,
-    DEFAULT_ANSWER_TYPE,
-} from "../commands/game_options/answer";
+import { DEFAULT_OST_PREFERENCE } from "../commands/game_options/ost";
+import { DEFAULT_RELEASE_TYPE } from "../commands/game_options/release";
+import { DEFAULT_MULTIGUESS_TYPE } from "../commands/game_options/multiguess";
+import { DEFAULT_ANSWER_TYPE } from "../commands/game_options/answer";
 import Session from "./session";
 import MatchedArtist from "../interfaces/matched_artist";
 import GameOptions from "../interfaces/game_options";
+import { SpecialType } from "../enums/option_types/special_type";
+import { ReleaseType } from "../enums/option_types/release_type";
+import { AnswerType } from "../enums/option_types/answer_type";
+import { MultiGuessType } from "../enums/option_types/multiguess_type";
+import { SubunitsPreference } from "../enums/option_types/subunit_preference";
+import { OstPreference } from "../enums/option_types/ost_preference";
+import { LanguageType } from "../enums/option_types/language_type";
+import { ShuffleType } from "../enums/option_types/shuffle_type";
+import { GuessModeType } from "../enums/option_types/guess_mode_type";
+import { ArtistType } from "../enums/option_types/artist_type";
+import { Gender } from "../enums/option_types/gender";
+import { SeekType } from "../enums/option_types/seek_type";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("guild_preference");
+
+type NewType = OstPreference;
 
 type GameOptionValue =
     | number
@@ -65,7 +54,7 @@ type GameOptionValue =
     | LanguageType
     | MultiGuessType
     | SubunitsPreference
-    | OstPreference
+    | NewType
     | string;
 
 const enum GameOptionInternal {

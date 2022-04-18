@@ -11,13 +11,9 @@ import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
+import { LanguageType } from "../../enums/option_types/language_type";
 
 const logger = new IPCLogger("language");
-
-export enum LanguageType {
-    KOREAN = "korean",
-    ALL = "all",
-}
 
 export const DEFAULT_LANGUAGE = LanguageType.ALL;
 

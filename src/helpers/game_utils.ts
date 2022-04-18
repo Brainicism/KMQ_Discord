@@ -4,10 +4,7 @@ import dbContext from "../database_context";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
 import GuildPreference from "../structures/guild_preference";
-import { Gender } from "../commands/game_options/gender";
-import { GuessModeType } from "../commands/game_options/guessmode";
 import { cleanArtistName, cleanSongName } from "../structures/game_round";
-import { AnswerType } from "../commands/game_options/answer";
 import SongSelector from "../structures/song_selector";
 import { LocaleType } from "./localization_manager";
 import { PATREON_SUPPORTER_BADGE } from "./patreon_manager";
@@ -16,6 +13,9 @@ import Session from "../structures/session";
 import MatchedArtist from "../interfaces/matched_artist";
 import QueriedSong from "../interfaces/queried_song";
 import Patron from "../interfaces/patron";
+import { GuessModeType } from "../enums/option_types/guess_mode_type";
+import { AnswerType } from "../enums/option_types/answer_type";
+import { Gender } from "../enums/option_types/gender";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 10;
 

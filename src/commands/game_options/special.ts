@@ -13,18 +13,9 @@ import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
+import { SpecialType } from "../../enums/option_types/special_type";
 
 const logger = new IPCLogger("special");
-
-export enum SpecialType {
-    REVERSE = "reverse",
-    SLOW = "slow",
-    FAST = "fast",
-    FASTER = "faster",
-    LOW_PITCH = "lowpitch",
-    HIGH_PITCH = "highpitch",
-    NIGHTCORE = "nightcore",
-}
 
 export const specialFfmpegArgs = {
     [SpecialType.REVERSE]: (seek: number) => ({

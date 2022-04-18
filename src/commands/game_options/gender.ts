@@ -12,15 +12,9 @@ import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
+import { Gender } from "../../enums/option_types/gender";
 
 const logger = new IPCLogger("gender");
-
-export enum Gender {
-    MALE = "male",
-    FEMALE = "female",
-    COED = "coed",
-    ALTERNATING = "alternating",
-}
 
 export const DEFAULT_GENDER = [Gender.FEMALE, Gender.MALE, Gender.COED];
 

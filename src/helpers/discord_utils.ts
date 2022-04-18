@@ -43,7 +43,6 @@ import EliminationScoreboard from "../structures/elimination_scoreboard";
 import TeamScoreboard from "../structures/team_scoreboard";
 import { KmqImages } from "../constants";
 import MessageContext from "../structures/message_context";
-import { GuessModeType } from "../commands/game_options/guessmode";
 import { REVIEW_LINK, VOTE_LINK } from "../commands/game_commands/vote";
 import { LocaleType, DEFAULT_LOCALE } from "./localization_manager";
 import Round from "../structures/round";
@@ -55,6 +54,7 @@ import GameInfoMessage from "../interfaces/game_info_message";
 import QueriedSong from "../interfaces/queried_song";
 import GameOptions from "../interfaces/game_options";
 import UniqueSongCounter from "../interfaces/unique_song_counter";
+import { GuessModeType } from "../enums/option_types/guess_mode_type";
 
 const logger = new IPCLogger("discord_utils");
 export const EMBED_ERROR_COLOR = 0xed4245; // Red

@@ -1,7 +1,6 @@
 import _ from "lodash";
 import Eris from "eris";
 import levenshtien from "damerau-levenshtein";
-import { GuessModeType } from "../commands/game_options/guessmode";
 import { state } from "../kmq_worker";
 import KmqMember from "./kmq_member";
 import {
@@ -20,6 +19,7 @@ import { friendlyFormattedNumber } from "../helpers/utils";
 import PlayerRoundResult from "../interfaces/player_round_result";
 import QueriedSong from "../interfaces/queried_song";
 import UniqueSongCounter from "../interfaces/unique_song_counter";
+import { GuessModeType } from "../enums/option_types/guess_mode_type";
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
 const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\(\)\+\u200B]/g;

@@ -11,13 +11,9 @@ import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
+import { SubunitsPreference } from "../../enums/option_types/subunit_preference";
 
 const logger = new IPCLogger("subunits");
-
-export enum SubunitsPreference {
-    INCLUDE = "include",
-    EXCLUDE = "exclude",
-}
 
 export const DEFAULT_SUBUNIT_PREFERENCE = SubunitsPreference.INCLUDE;
 

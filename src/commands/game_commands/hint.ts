@@ -9,7 +9,6 @@ import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { GuessModeType } from "../game_options/guessmode";
 import { codeLine } from "../../helpers/utils";
 import { GuildTextableMessage, GameType } from "../../types";
 import GameSession from "../../structures/game_session";
@@ -21,6 +20,7 @@ import GameRound from "../../structures/game_round";
 import Session from "../../structures/session";
 import HelpDocumentation from "../../interfaces/help";
 import CommandArgs from "../../interfaces/command_args";
+import { GuessModeType } from "../../enums/option_types/guess_mode_type";
 
 const logger = new IPCLogger("hint");
 

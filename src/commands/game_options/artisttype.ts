@@ -12,14 +12,9 @@ import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import HelpDocumentation from "../../interfaces/help";
 import CommandArgs from "../../interfaces/command_args";
+import { ArtistType } from "../../enums/option_types/artist_type";
 
 const logger = new IPCLogger("artisttype");
-
-export enum ArtistType {
-    SOLOIST = "soloists",
-    GROUP = "groups",
-    BOTH = "both",
-}
 
 export const DEFAULT_ARTIST_TYPE = ArtistType.BOTH;
 

@@ -16,14 +16,14 @@ import {
     isPowerHour,
     isPremiumRequest,
 } from "../../helpers/game_utils";
-import { AnswerType } from "../game_options/answer";
-import { GuessModeType } from "../game_options/guessmode";
 import { KmqImages } from "../../constants";
 import { state } from "../../kmq_worker";
 import GuildPreference from "../../structures/guild_preference";
 import GameRound from "../../structures/game_round";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
+import { AnswerType } from "../../enums/option_types/answer_type";
+import { GuessModeType } from "../../enums/option_types/guess_mode_type";
 
 const logger = new IPCLogger("exp");
 export const PARTICIPANT_MODIFIER_MAX_PARTICIPANTS = 6;

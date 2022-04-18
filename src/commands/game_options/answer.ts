@@ -11,16 +11,9 @@ import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import HelpDocumentation from "../../interfaces/help";
 import CommandArgs from "../../interfaces/command_args";
+import { AnswerType } from "../../enums/option_types/answer_type";
 
 const logger = new IPCLogger("answer");
-
-export enum AnswerType {
-    TYPING = "typing",
-    TYPING_TYPOS = "typingtypos",
-    MULTIPLE_CHOICE_EASY = "easy",
-    MULTIPLE_CHOICE_MED = "medium",
-    MULTIPLE_CHOICE_HARD = "hard",
-}
 
 export const DEFAULT_ANSWER_TYPE = AnswerType.TYPING;
 

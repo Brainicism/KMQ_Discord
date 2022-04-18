@@ -11,13 +11,9 @@ import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
+import { MultiGuessType } from "../../enums/option_types/multiguess_type";
 
 const logger = new IPCLogger("multiguess");
-
-export enum MultiGuessType {
-    ON = "on",
-    OFF = "off",
-}
 
 export const DEFAULT_MULTIGUESS_TYPE = MultiGuessType.ON;
 
