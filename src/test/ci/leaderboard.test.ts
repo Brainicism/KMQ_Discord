@@ -3,9 +3,6 @@ import sinon from "sinon";
 import { describe } from "mocha";
 import { EmbedGenerator } from "eris-pagination";
 import LeaderboardCommand, {
-    LeaderboardType,
-    LeaderboardScope,
-    LeaderboardDuration,
     ENTRIES_PER_PAGE,
 } from "../../commands/game_commands/leaderboard";
 import dbContext from "../../database_context";
@@ -16,6 +13,9 @@ import Player from "../../structures/player";
 import { GameType } from "../../types";
 import { state } from "../../kmq_worker";
 import * as discordUtils from "../../helpers/discord_utils";
+import { LeaderboardType } from "../../enums/option_types/leaderboard_type";
+import { LeaderboardScope } from "../../enums/option_types/leaderboard_scope";
+import { LeaderboardDuration } from "../../enums/option_types/leaderboard_duration";
 
 const sandbox = sinon.createSandbox();
 

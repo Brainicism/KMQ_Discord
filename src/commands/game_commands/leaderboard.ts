@@ -25,34 +25,13 @@ import MessageContext from "../../structures/message_context";
 import { sendValidationErrorMessage } from "../../helpers/validate";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
+import { LeaderboardScope } from "../../enums/option_types/leaderboard_scope";
+import { LeaderboardDuration } from "../../enums/option_types/leaderboard_duration";
+import { LeaderboardType } from "../../enums/option_types/leaderboard_type";
 
 const logger = new IPCLogger("leaderboard");
 
 export const ENTRIES_PER_PAGE = 10;
-
-export enum LeaderboardType {
-    EXP = "exp",
-    GAMES_PLAYED = "gamesplayed",
-    SONGS_GUESSED = "songsguessed",
-}
-
-export enum LeaderboardScope {
-    GLOBAL = "global",
-    SERVER = "server",
-    GAME = "game",
-}
-
-export enum LeaderboardDuration {
-    TODAY = "today",
-    DAILY = "daily",
-    WEEK = "week",
-    WEEKLY = "weekly",
-    MONTH = "month",
-    MONTHLY = "monthly",
-    YEAR = "year",
-    YEARLY = "yearly",
-    ALL_TIME = "alltime",
-}
 
 enum LeaderboardAction {
     ENROLL = "enroll",
