@@ -9,7 +9,7 @@ import CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("reload");
 
-export enum ReloadType {
+enum ReloadType {
     CLUSTER = "cluster",
     ALL = "all",
 }

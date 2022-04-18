@@ -1,5 +1,5 @@
 import { getVideoID } from "ytdl-core";
-import { LocaleType } from "../../helpers/localization_manager";
+import { LocaleType } from "../../enums/locale_type";
 import BaseCommand from "../interfaces/base_command";
 import { state } from "../../kmq_worker";
 import dbContext from "../../database_context";

@@ -14,7 +14,7 @@ import BaseCommand from "../interfaces/base_command";
 
 const logger = new IPCLogger("app_commands");
 
-export enum AppCommandsAction {
+enum AppCommandsAction {
     RELOAD = "reload",
     DELETE = "delete",
 }

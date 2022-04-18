@@ -5,7 +5,8 @@ import {
 } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import { LocaleType, DEFAULT_LOCALE } from "../../helpers/localization_manager";
+import { LocaleType } from "../../enums/locale_type";
+import { DEFAULT_LOCALE } from "../../helpers/localization_manager";
 import dbContext from "../../database_context";
 import { state } from "../../kmq_worker";
 import { KmqImages } from "../../constants";

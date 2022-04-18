@@ -24,31 +24,11 @@ import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
 import { AnswerType } from "../../enums/option_types/answer_type";
 import { GuessModeType } from "../../enums/option_types/guess_mode_type";
+import { ExpBonusModifier } from "../../enums/exp_bonus_modifier";
 
 const logger = new IPCLogger("exp");
 export const PARTICIPANT_MODIFIER_MAX_PARTICIPANTS = 6;
 export const GUESS_STREAK_THRESHOLD = 5;
-
-export enum ExpBonusModifier {
-    POWER_HOUR,
-    BONUS_ARTIST,
-    VOTE,
-    GUESS_STREAK,
-    QUICK_GUESS,
-    MC_GUESS_EASY,
-    MC_GUESS_MEDIUM,
-    MC_GUESS_HARD,
-    ARTIST_GUESS,
-    ARTIST_GUESS_GROUPS_SELECTED,
-    RANDOM_GUESS_BONUS_COMMON,
-    RANDOM_GUESS_BONUS_RARE,
-    RANDOM_GUESS_BONUS_EPIC,
-    RANDOM_GUESS_BONUS_LEGENDARY,
-    BELOW_SONG_COUNT_THRESHOLD,
-    TYPO,
-    HINT_USED,
-    FIRST_GAME_OF_DAY,
-}
 
 export const ExpBonusModifierValues = {
     [ExpBonusModifier.POWER_HOUR]: 2,

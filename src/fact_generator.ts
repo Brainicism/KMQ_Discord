@@ -8,7 +8,7 @@ import {
     weekOfYear,
     friendlyFormattedNumber,
 } from "./helpers/utils";
-import { LocaleType } from "./helpers/localization_manager";
+import { LocaleType } from "./enums/locale_type";
 import { state } from "./kmq_worker";
 import { getGuildLocale } from "./helpers/discord_utils";
 import { IPCLogger } from "./logger";

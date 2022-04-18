@@ -3,7 +3,7 @@ import { IPCLogger } from "../../logger";
 import { getDebugChannel, sendInfoMessage } from "../../helpers/discord_utils";
 import MessageContext from "../../structures/message_context";
 import LocaleTypeCommand from "../../commands/game_commands/locale";
-import { LocaleType } from "../../helpers/localization_manager";
+import { LocaleType } from "../../enums/locale_type";
 
 const logger = new IPCLogger("guildCreate");
 

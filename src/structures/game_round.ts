@@ -3,10 +3,8 @@ import Eris from "eris";
 import levenshtien from "damerau-levenshtein";
 import { state } from "../kmq_worker";
 import KmqMember from "./kmq_member";
-import {
-    ExpBonusModifier,
-    ExpBonusModifierValues,
-} from "../commands/game_commands/exp";
+import { ExpBonusModifierValues } from "../commands/game_commands/exp";
+import { ExpBonusModifier } from "../enums/exp_bonus_modifier";
 import Round, { MAX_RUNNERS_UP } from "./round";
 import MessageContext from "./message_context";
 import {

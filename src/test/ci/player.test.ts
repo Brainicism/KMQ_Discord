@@ -1,8 +1,6 @@
 import assert from "assert";
-import {
-    ExpBonusModifier,
-    ExpBonusModifierValues,
-} from "../../commands/game_commands/exp";
+import { ExpBonusModifierValues } from "../../commands/game_commands/exp";
+import { ExpBonusModifier } from "../../enums/exp_bonus_modifier";
 import Player from "../../structures/player";
 
 let player: Player;

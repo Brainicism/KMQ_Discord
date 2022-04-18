@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import assert from "assert";
-import {
-    ExpBonusModifier,
-    ExpBonusModifierValues,
-} from "../../commands/game_commands/exp";
+import { ExpBonusModifierValues } from "../../commands/game_commands/exp";
+import { ExpBonusModifier } from "../../enums/exp_bonus_modifier";
 import { Gender } from "../../enums/option_types/gender";
 import { GuessModeType } from "../../enums/option_types/guess_mode_type";
 import { state } from "../../kmq_worker";

@@ -6,7 +6,7 @@ import { IPCLogger } from "../logger";
 import GuildPreference from "../structures/guild_preference";
 import { cleanArtistName, cleanSongName } from "../structures/game_round";
 import SongSelector from "../structures/song_selector";
-import { LocaleType } from "./localization_manager";
+import { LocaleType } from "../enums/locale_type";
 import { PATREON_SUPPORTER_BADGE } from "./patreon_manager";
 import { containsHangul, md5Hash } from "./utils";
 import Session from "../structures/session";

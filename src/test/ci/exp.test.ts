@@ -1,9 +1,9 @@
 import assert from "assert";
 import sinon from "sinon";
+import { ExpBonusModifier } from "../../enums/exp_bonus_modifier";
 import {
     calculateOptionsExpMultiplierInternal,
     calculateRoundExpMultiplier,
-    ExpBonusModifier,
     ExpBonusModifierValues,
     participantExpScalingModifier,
 } from "../../commands/game_commands/exp";

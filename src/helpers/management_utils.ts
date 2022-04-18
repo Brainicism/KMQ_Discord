@@ -24,7 +24,7 @@ import {
     getMatchingGroupNames,
     isPowerHour,
 } from "./game_utils";
-import { LocaleType } from "./localization_manager";
+import { LocaleType } from "../enums/locale_type";
 import updatePremiumUsers from "./patreon_manager";
 import dbContext from "../database_context";
 import debugHandler from "../events/client/debug";

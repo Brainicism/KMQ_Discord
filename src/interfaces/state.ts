@@ -1,7 +1,6 @@
 import { IPC } from "eris-fleet";
-import LocalizationManager, {
-    LocaleType,
-} from "../helpers/localization_manager";
+import LocalizationManager from "../helpers/localization_manager";
+import { LocaleType } from "../enums/locale_type";
 import KmqClient from "../kmq_client";
 import RateLimiter from "../rate_limiter";
 import GameSession from "../structures/game_session";
