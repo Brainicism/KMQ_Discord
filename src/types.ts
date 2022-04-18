@@ -1,30 +1,7 @@
 import Eris, { GuildTextableChannel } from "eris";
+import { GameOption } from "./enums/game_option_name";
 
 export type GuildTextableMessage = Eris.Message<GuildTextableChannel>;
-
-export enum GameOption {
-    LIMIT = "Limit",
-    GROUPS = "Groups",
-    GENDER = "Gender",
-    CUTOFF = "Cutoff",
-    ARTIST_TYPE = "Artist Type",
-    ANSWER_TYPE = "Answer Type",
-    RELEASE_TYPE = "Release Type",
-    LANGUAGE_TYPE = "Language Type",
-    SUBUNIT_PREFERENCE = "Subunit Preference",
-    OST_PREFERENCE = "OST Preference",
-    MULTIGUESS = "Multiguess",
-    SHUFFLE_TYPE = "Shuffle",
-    SEEK_TYPE = "Seek Type",
-    SPECIAL_TYPE = "Special Type",
-    GUESS_MODE_TYPE = "Guess Mode",
-    GOAL = "Goal",
-    TIMER = "Timer",
-    DURATION = "Duration",
-    EXCLUDE = "Exclude",
-    INCLUDE = "Include",
-    FORCE_PLAY_SONG = "Force Play Song",
-}
 
 export const GameOptionCommand: { [option: string]: string } = {
     [GameOption.LIMIT]: "limit",
@@ -64,18 +41,3 @@ export const ConflictingGameOptions: { [option: string]: Array<GameOption> } = {
         GameOption.ARTIST_TYPE,
     ],
 };
-
-export enum EnvType {
-    PROD = "production",
-    DEV = "development",
-    DRY_RUN = "dry-run",
-    CI = "ci",
-    TEST = "test",
-}
-
-export enum GameType {
-    CLASSIC = "classic",
-    ELIMINATION = "elimination",
-    TEAMS = "teams",
-    COMPETITION = "competition",
-}

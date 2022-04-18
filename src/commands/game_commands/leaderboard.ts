@@ -19,7 +19,7 @@ import {
     arrayToString,
 } from "../../helpers/utils";
 import { state } from "../../kmq_worker";
-import { GuildTextableMessage, EnvType } from "../../types";
+import { GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import { sendValidationErrorMessage } from "../../helpers/validate";
@@ -28,6 +28,7 @@ import HelpDocumentation from "../../interfaces/help";
 import { LeaderboardScope } from "../../enums/option_types/leaderboard_scope";
 import { LeaderboardDuration } from "../../enums/option_types/leaderboard_duration";
 import { LeaderboardType } from "../../enums/option_types/leaderboard_type";
+import { EnvType } from "../../enums/env_type";
 
 const logger = new IPCLogger("leaderboard");
 

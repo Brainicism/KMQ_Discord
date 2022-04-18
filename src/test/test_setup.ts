@@ -5,7 +5,6 @@ import kmqKnexConfig from "../config/knexfile_kmq";
 import dbContext from "../database_context";
 import Player from "../structures/player";
 import EliminationPlayer from "../structures/elimination_player";
-import { EnvType } from "../types";
 import { execSync } from "child_process";
 import { IPCLogger } from "../logger";
 import { state } from "../kmq_worker";
@@ -14,6 +13,7 @@ import { DEFAULT_LIVES } from "../structures/elimination_scoreboard";
 import { databaseDownloadDir } from "../seed/seed_db";
 import path from "path";
 import { getNewConnection } from "../database_context";
+import { EnvType } from "../enums/env_type";
 
 const logger = new IPCLogger("test_setup");
 const sandbox = sinon.createSandbox();

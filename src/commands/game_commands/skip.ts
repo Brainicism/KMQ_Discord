@@ -9,7 +9,7 @@ import {
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
-import { GuildTextableMessage, GameType } from "../../types";
+import { GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
@@ -20,6 +20,7 @@ import Session from "../../structures/session";
 import GuildPreference from "../../structures/guild_preference";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
+import { GameType } from "../../enums/game_type";
 
 const logger = new IPCLogger("skip");
 

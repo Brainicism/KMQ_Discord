@@ -15,7 +15,7 @@ import GuildPreference, {
 import { KmqImages } from "../../constants";
 import dbContext from "../../database_context";
 import CommandPrechecks from "../../command_prechecks";
-import { GameOption } from "../../types";
+import { GameOption } from "../../enums/game_option_name";
 import { state } from "../../kmq_worker";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";

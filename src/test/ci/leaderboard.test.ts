@@ -10,12 +10,12 @@ import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
 import GameSession from "../../structures/game_session";
 import Player from "../../structures/player";
-import { GameType } from "../../types";
 import { state } from "../../kmq_worker";
 import * as discordUtils from "../../helpers/discord_utils";
 import { LeaderboardType } from "../../enums/option_types/leaderboard_type";
 import { LeaderboardScope } from "../../enums/option_types/leaderboard_scope";
 import { LeaderboardDuration } from "../../enums/option_types/leaderboard_duration";
+import { GameType } from "../../enums/game_type";
 
 const sandbox = sinon.createSandbox();
 

@@ -36,8 +36,8 @@ import interactionCreateHandler from "../events/client/interactionCreate";
 import { chooseRandom, isWeekend } from "./utils";
 import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
-import { EnvType } from "../types";
 import channelDeleteHandler from "../events/client/channelDelete";
+import { EnvType } from "../enums/env_type";
 
 const logger = new IPCLogger("management_utils");
 

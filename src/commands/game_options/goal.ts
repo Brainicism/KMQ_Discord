@@ -6,7 +6,6 @@ import {
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
-import { GameOption, GameType } from "../../types";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
@@ -14,6 +13,8 @@ import Session from "../../structures/session";
 import GameSession from "../../structures/game_session";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
+import { GameOption } from "../../enums/game_option_name";
+import { GameType } from "../../enums/game_type";
 
 const logger = new IPCLogger("goal");
 

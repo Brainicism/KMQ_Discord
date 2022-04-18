@@ -35,7 +35,6 @@ import {
 } from "../helpers/utils";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
-import { GameType } from "../types";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
 import Scoreboard from "./scoreboard";
@@ -56,6 +55,7 @@ import SuccessfulGuessResult from "../interfaces/success_guess_result";
 import { GuessModeType } from "../enums/option_types/guess_mode_type";
 import { AnswerType } from "../enums/option_types/answer_type";
 import { MultiGuessType } from "../enums/option_types/multiguess_type";
+import { GameType } from "../enums/game_type";
 
 const MULTIGUESS_DELAY = 1500;
 

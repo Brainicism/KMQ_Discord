@@ -9,7 +9,6 @@ import {
     getMatchingGroupNames,
 } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -17,6 +16,7 @@ import { state } from "../../kmq_worker";
 import { GROUP_LIST_URL } from "../../constants";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
+import { GameOption } from "../../enums/game_option_name";
 
 const logger = new IPCLogger("groups");
 

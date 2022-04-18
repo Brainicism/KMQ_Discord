@@ -16,12 +16,10 @@ import {
 } from "./game_utils";
 import { getFact } from "../fact_generator";
 import {
-    GameOption,
     GameOptionCommand,
     PriorityGameOption,
     ConflictingGameOptions,
     GuildTextableMessage,
-    GameType,
 } from "../types";
 import {
     chunkArray,
@@ -55,6 +53,8 @@ import QueriedSong from "../interfaces/queried_song";
 import GameOptions from "../interfaces/game_options";
 import UniqueSongCounter from "../interfaces/unique_song_counter";
 import { GuessModeType } from "../enums/option_types/guess_mode_type";
+import { GameOption } from "../enums/game_option_name";
+import { GameType } from "../enums/game_type";
 
 const logger = new IPCLogger("discord_utils");
 export const EMBED_ERROR_COLOR = 0xed4245; // Red

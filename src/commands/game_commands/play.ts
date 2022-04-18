@@ -24,7 +24,7 @@ import { chooseWeightedRandom, isWeekend } from "../../helpers/utils";
 import BaseCommand from "../interfaces/base_command";
 import dbContext from "../../database_context";
 import { IPCLogger } from "../../logger";
-import { GameType } from "../../types";
+import { GameType } from "../../enums/game_type";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";

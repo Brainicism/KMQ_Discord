@@ -9,11 +9,12 @@ import {
 import { getGuildPreference } from "../../helpers/game_utils";
 import { state } from "../../kmq_worker";
 import validate from "../../helpers/validate";
-import { EnvType, GuildTextableMessage } from "../../types";
+import { GuildTextableMessage } from "../../types";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import GameSession from "../../structures/game_session";
 import ParsedMessage from "../../interfaces/parsed_message";
+import { EnvType } from "../../enums/env_type";
 
 const logger = new IPCLogger("messageCreate");
 

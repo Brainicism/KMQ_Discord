@@ -1,7 +1,7 @@
 import BaseCommand from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { sendBeginGameSessionMessage } from "./play";
-import { GameType } from "../../types";
+import { GameType } from "../../enums/game_type";
 import TeamScoreboard from "../../structures/team_scoreboard";
 import {
     getDebugLogHeader,

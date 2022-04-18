@@ -1,6 +1,6 @@
 import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
-import { EnvType } from "../../types";
+import { EnvType } from "../../enums/env_type";
 
 const logger = new IPCLogger("unhandledRejection");
 

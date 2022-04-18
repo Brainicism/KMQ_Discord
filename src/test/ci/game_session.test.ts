@@ -3,7 +3,7 @@ import GameSession from "../../structures/game_session";
 import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
 import sinon from "sinon";
-import { GameType } from "../../types";
+import { GameType } from "../../enums/game_type";
 import { state } from "../../kmq_worker";
 import * as discord_utils from "../../helpers/discord_utils";
 import * as game_utils from "../../helpers/game_utils";

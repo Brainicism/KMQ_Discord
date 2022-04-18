@@ -5,7 +5,7 @@ import {
 import { getGuildPreference } from "../../helpers/game_utils";
 import BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
+import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";

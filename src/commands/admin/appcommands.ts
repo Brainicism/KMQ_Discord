@@ -9,7 +9,7 @@ import CommandArgs from "../../interfaces/command_args";
 import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import { EnvType } from "../../types";
+import { EnvType } from "../../enums/env_type";
 import BaseCommand from "../interfaces/base_command";
 
 const logger = new IPCLogger("app_commands");
