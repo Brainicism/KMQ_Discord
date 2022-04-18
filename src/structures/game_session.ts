@@ -51,13 +51,14 @@ import { MultiGuessType } from "../commands/game_options/multiguess";
 import { AnswerType } from "../commands/game_options/answer";
 import { calculateTotalRoundExp } from "../commands/game_commands/exp";
 import Player from "../structures/player";
-import Session, { SONG_START_DELAY } from "./session";
+import Session from "./session";
 import Round from "./round";
 import QueriedSong from "../interfaces/queried_song";
 import GuessResult from "../interfaces/guess_result";
 import SuccessfulGuessResult from "../interfaces/success_guess_result";
 
 const MULTIGUESS_DELAY = 1500;
+const SONG_START_DELAY = 3000;
 
 const logger = new IPCLogger("game_session");
 
@@ -157,11 +158,15 @@ export default class GameSession extends Session {
         guildPreference: GuildPreference,
         messageContext: MessageContext
     ): Promise<void> {
-        await delay(
-            this.multiguessDelayIsActive(guildPreference)
-                ? SONG_START_DELAY - MULTIGUESS_DELAY
-                : SONG_START_DELAY
-        );
+        if (this.sessionInitialized) {
+            // Only add a delay if the game has already started
+            await delay(
+                this.multiguessDelayIsActive(guildPreference)
+                    ? SONG_START_DELAY - MULTIGUESS_DELAY
+                    : SONG_START_DELAY
+            );
+        }
+
         if (this.finished || this.round) {
             return;
         }
