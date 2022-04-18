@@ -13,6 +13,6 @@ export default function unhandledRejectionHandler(reason: Error): void {
         `Cluster Unhandled Rejection at: Reason: ${reason}. Trace: ${reason.stack}`
     );
     if (process.env.NODE_ENV === EnvType.CI) {
-        state.ipc.admiralBroadcast("abort");
+        state.ipc.sendToAdmiral("abort");
     }
 }
