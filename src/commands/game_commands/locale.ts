@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     sendInfoMessage,
@@ -9,6 +9,8 @@ import { LocaleType, DEFAULT_LOCALE } from "../../helpers/localization_manager";
 import dbContext from "../../database_context";
 import { state } from "../../kmq_worker";
 import { KmqImages } from "../../constants";
+import HelpDocumentation from "../../interfaces/help";
+import CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("locale");
 
@@ -36,7 +38,7 @@ export default class LocaleTypeCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "locale",
         description: state.localizer.translate(
             guildID,

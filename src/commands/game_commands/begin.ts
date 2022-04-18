@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { sendBeginGameSessionMessage } from "./play";
 import { GameType } from "../../types";
@@ -14,6 +14,7 @@ import GameSession from "../../structures/game_session";
 import { state } from "../../kmq_worker";
 import CommandPrechecks from "../../command_prechecks";
 import Session from "../../structures/session";
+import CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("begin");
 

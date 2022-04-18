@@ -5,7 +5,7 @@ import {
     sendInfoMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
@@ -17,6 +17,8 @@ import dbContext from "../../database_context";
 import CommandPrechecks from "../../command_prechecks";
 import { GameOption } from "../../types";
 import { state } from "../../kmq_worker";
+import CommandArgs from "../../interfaces/command_args";
+import HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("preset");
 const PRESET_NAME_MAX_LENGTH = 25;
@@ -49,7 +51,7 @@ export default class PresetCommand implements BaseCommand {
 
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "preset",
         description: state.localizer.translate(
             guildID,

@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import {
     sendScoreboardMessage,
     getDebugLogHeader,
@@ -8,6 +8,8 @@ import { state } from "../../kmq_worker";
 import CommandPrechecks from "../../command_prechecks";
 import Session from "../../structures/session";
 import GameSession from "../../structures/game_session";
+import CommandArgs from "../../interfaces/command_args";
+import HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("score");
 
@@ -16,7 +18,7 @@ export default class ScoreCommand implements BaseCommand {
 
     preRunChecks = [{ checkFn: CommandPrechecks.notMusicPrecheck }];
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "score",
         description: state.localizer.translate(
             guildID,

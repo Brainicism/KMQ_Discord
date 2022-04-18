@@ -1,6 +1,6 @@
 import Eris from "eris";
 import * as uuid from "uuid";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import {
     getDebugChannel,
     sendInfoMessage,
@@ -17,6 +17,7 @@ import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
+import CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("debug");
 

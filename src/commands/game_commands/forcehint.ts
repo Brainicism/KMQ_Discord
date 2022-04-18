@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import {
     sendErrorMessage,
     getDebugLogHeader,
@@ -14,6 +14,8 @@ import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import Session from "../../structures/session";
 import GameSession from "src/structures/game_session";
+import CommandArgs from "../../interfaces/command_args";
+import HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("forcehint");
 
@@ -26,7 +28,7 @@ export default class ForceHintCommand implements BaseCommand {
         { checkFn: CommandPrechecks.notMusicPrecheck },
     ];
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "forcehint",
         description: state.localizer.translate(
             guildID,

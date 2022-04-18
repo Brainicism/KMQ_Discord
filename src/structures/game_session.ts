@@ -35,10 +35,10 @@ import {
 } from "../helpers/utils";
 import { state } from "../kmq_worker";
 import { IPCLogger } from "../logger";
-import { QueriedSong, GameType } from "../types";
+import { GameType } from "../types";
 import GameRound from "./game_round";
 import GuildPreference from "./guild_preference";
-import Scoreboard, { SuccessfulGuessResult } from "./scoreboard";
+import Scoreboard from "./scoreboard";
 import EliminationScoreboard from "./elimination_scoreboard";
 import TeamScoreboard from "./team_scoreboard";
 import { GuessModeType } from "../commands/game_options/guessmode";
@@ -53,6 +53,9 @@ import { calculateTotalRoundExp } from "../commands/game_commands/exp";
 import Player from "../structures/player";
 import Session, { SONG_START_DELAY } from "./session";
 import Round from "./round";
+import QueriedSong from "../interfaces/queried_song";
+import GuessResult from "../interfaces/guess_result";
+import SuccessfulGuessResult from "../interfaces/success_guess_result";
 
 const MULTIGUESS_DELAY = 1500;
 
@@ -79,12 +82,6 @@ interface LevelUpResult {
 interface LastGuesser {
     userID: string;
     streak: number;
-}
-
-export interface GuessResult {
-    correct: boolean;
-    error?: boolean;
-    correctGuessers?: Array<KmqMember>;
 }
 
 export default class GameSession extends Session {

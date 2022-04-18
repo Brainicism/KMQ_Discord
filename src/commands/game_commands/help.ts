@@ -1,5 +1,5 @@
 import Eris, { EmbedOptions } from "eris";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import {
     sendErrorMessage,
     getDebugLogHeader,
@@ -13,6 +13,8 @@ import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import KmqClient from "../../kmq_client";
 import { state } from "../../kmq_worker";
+import CommandArgs from "../../interfaces/command_args";
+import HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("help");
 export const placeholder = /,/g;
@@ -220,7 +222,7 @@ const helpMessage = async (
 };
 
 export default class HelpCommand implements BaseCommand {
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "help",
         description: state.localizer.translate(
             guildID,

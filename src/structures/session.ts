@@ -14,8 +14,7 @@ import {
     tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
 import dbContext from "../database_context";
-import { QueriedSong } from "../types";
-import GameSession, { GuessResult } from "./game_session";
+import GameSession from "./game_session";
 import GuildPreference from "./guild_preference";
 import KmqMember from "./kmq_member";
 import MessageContext from "./message_context";
@@ -32,6 +31,8 @@ import { bold, friendlyFormattedNumber } from "../helpers/utils";
 import { SeekType } from "../commands/game_options/seek";
 import { specialFfmpegArgs } from "../commands/game_options/special";
 import MusicSession from "./music_session";
+import QueriedSong from "../interfaces/queried_song";
+import GuessResult from "../interfaces/guess_result";
 
 export const SONG_START_DELAY = 3000;
 const BOOKMARK_MESSAGE_SIZE = 10;

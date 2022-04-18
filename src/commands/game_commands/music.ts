@@ -12,10 +12,9 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import MusicSession from "../../structures/music_session";
 import MessageContext from "../../structures/message_context";
 import { state } from "../../kmq_worker";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import KmqMember from "../../structures/kmq_member";
-import { GameInfoMessage } from "../../types";
 import { chooseWeightedRandom } from "../../helpers/utils";
 import dbContext from "../../database_context";
 import Eris from "eris";
@@ -24,6 +23,9 @@ import Session from "../../structures/session";
 import GameSession from "../../structures/game_session";
 import CommandPrechecks from "../../command_prechecks";
 import GuildPreference from "src/structures/guild_preference";
+import GameInfoMessage from "../../interfaces/game_info_message";
+import HelpDocumentation from "../../interfaces/help";
+import CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("music");
 
@@ -107,7 +109,7 @@ export default class MusicCommand implements BaseCommand {
 
     aliases = ["radio", "listen"];
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "music",
         description: state.localizer.translate(
             guildID,

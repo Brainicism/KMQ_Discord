@@ -1,4 +1,3 @@
-import { QueriedSong } from "../types";
 import GuildPreference from "./guild_preference";
 import dbContext from "../database_context";
 import { SubunitsPreference } from "../commands/game_options/subunits";
@@ -16,17 +15,14 @@ import {
 } from "../commands/game_options/release";
 import { chooseWeightedRandom, setDifference } from "../helpers/utils";
 import { ShuffleType } from "../commands/game_options/shuffle";
+import QueriedSong from "../interfaces/queried_song";
+import UniqueSongCounter from "../interfaces/unique_song_counter";
 
 export const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
 export const SELECTION_WEIGHT_VALUES_HARD = [1, 2, 4, 8, 16];
 export const SELECTION_WEIGHT_VALUES_EASY = [
     ...SELECTION_WEIGHT_VALUES_HARD,
 ].reverse();
-
-export interface UniqueSongCounter {
-    uniqueSongsPlayed: number;
-    totalSongs: number;
-}
 
 const logger = new IPCLogger("song_selector");
 

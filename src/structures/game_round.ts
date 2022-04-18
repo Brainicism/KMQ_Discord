@@ -8,7 +8,6 @@ import {
     ExpBonusModifier,
     ExpBonusModifierValues,
 } from "../commands/game_commands/exp";
-import { PlayerRoundResult, QueriedSong } from "../types";
 import Round, { MAX_RUNNERS_UP } from "./round";
 import MessageContext from "./message_context";
 import {
@@ -17,8 +16,10 @@ import {
     EMBED_SUCCESS_COLOR,
     getMention,
 } from "../helpers/discord_utils";
-import { UniqueSongCounter } from "./song_selector";
 import { friendlyFormattedNumber } from "../helpers/utils";
+import PlayerRoundResult from "../interfaces/player_round_result";
+import QueriedSong from "../interfaces/queried_song";
+import UniqueSongCounter from "../interfaces/unique_song_counter";
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
 const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\(\)\+\u200B]/g;
@@ -28,7 +29,7 @@ const CHARACTER_REPLACEMENTS = [
     { pattern: /&/g, replacement: "and" },
 ];
 
-export interface GuessCorrectness {
+interface GuessCorrectness {
     exact: boolean;
     similar: boolean;
 }

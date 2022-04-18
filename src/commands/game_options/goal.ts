@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
@@ -12,6 +12,8 @@ import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import Session from "../../structures/session";
 import GameSession from "../../structures/game_session";
+import CommandArgs from "../../interfaces/command_args";
+import HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("goal");
 
@@ -33,7 +35,7 @@ export default class GoalCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "goal",
         description: state.localizer.translate(
             guildID,

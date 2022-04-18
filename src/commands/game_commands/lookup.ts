@@ -1,6 +1,6 @@
 import { getVideoID } from "ytdl-core";
 import { LocaleType } from "../../helpers/localization_manager";
-import BaseCommand, { Help, CommandArgs } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import { state } from "../../kmq_worker";
 import dbContext from "../../database_context";
 import {
@@ -16,7 +16,6 @@ import {
 } from "../../helpers/utils";
 import { IPCLogger } from "../../logger";
 import { sendValidationErrorMessage } from "../../helpers/validate";
-import { QueriedSong } from "../../types";
 import {
     getGuildPreference,
     getLocalizedArtistName,
@@ -25,6 +24,9 @@ import {
 } from "../../helpers/game_utils";
 import SongSelector from "../../structures/song_selector";
 import { KmqImages } from "../../constants";
+import QueriedSong from "../../interfaces/queried_song";
+import HelpDocumentation from "../../interfaces/help";
+import CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("lookup");
 
@@ -44,7 +46,7 @@ export default class LookupCommand implements BaseCommand {
         arguments: [],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "lookup",
         description: state.localizer.translate(
             guildID,

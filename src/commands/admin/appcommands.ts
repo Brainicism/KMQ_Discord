@@ -5,11 +5,12 @@ import {
     PROFILE_COMMAND_NAME,
 } from "../../events/client/interactionCreate";
 import { sendInfoMessage } from "../../helpers/discord_utils";
+import CommandArgs from "../../interfaces/command_args";
 import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { EnvType } from "../../types";
-import BaseCommand, { CommandArgs } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 
 const logger = new IPCLogger("app_commands");
 

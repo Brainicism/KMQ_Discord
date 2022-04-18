@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -11,6 +11,8 @@ import dbContext from "../../database_context";
 import { bold } from "../../helpers/utils";
 import { userBonusIsActive } from "../../helpers/game_utils";
 import { state } from "../../kmq_worker";
+import CommandArgs from "../../interfaces/command_args";
+import HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("vote");
 
@@ -23,7 +25,7 @@ export const REVIEW_LINK = "https://top.gg/bot/508759831755096074#reviews";
 export default class VoteCommand implements BaseCommand {
     aliases = ["v", "voted"];
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "vote",
         description: state.localizer.translate(
             guildID,

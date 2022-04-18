@@ -1,9 +1,11 @@
 // import { KmqImages } from "../../constants";
 // import { sendInfoMessage } from "../../helpers/discord_utils";
 // import { isUserPremium } from "../../helpers/game_utils";
+import CommandArgs from "../../interfaces/command_args";
+import HelpDocumentation from "../../interfaces/help";
 import { state } from "../../kmq_worker";
 // import MessageContext from "../../structures/message_context";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 
 export default class PremiumCommand implements BaseCommand {
     validations = {
@@ -12,7 +14,7 @@ export default class PremiumCommand implements BaseCommand {
         minArgCount: 0,
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         description: state.localizer.translate(
             guildID,
             "command.premium.help.description"

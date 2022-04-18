@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import {
     sendOptionsMessage,
     getDebugLogHeader,
@@ -15,6 +15,8 @@ import { setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import { GROUP_LIST_URL } from "../../constants";
+import CommandArgs from "../../interfaces/command_args";
+import HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("groups");
 
@@ -23,7 +25,7 @@ export default class GroupsCommand implements BaseCommand {
 
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "groups",
         description: state.localizer.translate(
             guildID,

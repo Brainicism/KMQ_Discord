@@ -3,17 +3,20 @@ import {
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import {
     getGuildPreference,
     getMatchingGroupNames,
 } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
-import { GameOption, MatchedArtist } from "../../types";
+import { GameOption } from "../../types";
 import MessageContext from "../../structures/message_context";
 import { GROUP_LIST_URL } from "../../constants";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import MatchedArtist from "../../interfaces/matched_artist";
+import CommandArgs from "../../interfaces/command_args";
+import HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("remove");
 
@@ -47,7 +50,7 @@ export default class RemoveCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "remove",
         description: state.localizer.translate(
             guildID,

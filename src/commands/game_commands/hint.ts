@@ -1,4 +1,4 @@
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     getMajorityCount,
@@ -19,6 +19,8 @@ import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import GameRound from "../../structures/game_round";
 import Session from "../../structures/session";
+import HelpDocumentation from "../../interfaces/help";
+import CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("hint");
 
@@ -204,7 +206,7 @@ export default class HintCommand implements BaseCommand {
         { checkFn: CommandPrechecks.notMusicPrecheck },
     ];
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "hint",
         description: state.localizer.translate(
             guildID,

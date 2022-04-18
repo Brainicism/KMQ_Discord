@@ -9,7 +9,7 @@ import {
     sendInfoMessage,
     tryCreateInteractionErrorAcknowledgement,
 } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import {
     friendlyFormattedDate,
@@ -19,6 +19,8 @@ import {
 import { CUM_EXP_TABLE } from "../../structures/game_session";
 import MessageContext from "../../structures/message_context";
 import { state } from "../../kmq_worker";
+import HelpDocumentation from "../../interfaces/help";
+import CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("profile");
 
@@ -262,7 +264,7 @@ async function getProfileFields(
 }
 
 export default class ProfileCommand implements BaseCommand {
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "profile",
         description: state.localizer.translate(
             guildID,

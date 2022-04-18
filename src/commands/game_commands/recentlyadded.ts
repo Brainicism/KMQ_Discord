@@ -1,6 +1,5 @@
 import { EmbedOptions } from "eris";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
-import { QueriedSong } from "../../types";
+import BaseCommand from "../interfaces/base_command";
 import dbContext from "../../database_context";
 import {
     getDebugLogHeader,
@@ -21,6 +20,9 @@ import { KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { state } from "../../kmq_worker";
+import QueriedSong from "../../interfaces/queried_song";
+import CommandArgs from "../../interfaces/command_args";
+import HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("recentlyadded");
 
@@ -29,7 +31,7 @@ const FIELDS_PER_EMBED = 9;
 export default class RecentlyAddedCommand implements BaseCommand {
     aliases = ["recent"];
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "recentlyadded",
         description: state.localizer.translate(
             guildID,

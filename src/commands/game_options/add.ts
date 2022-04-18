@@ -3,7 +3,7 @@ import {
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import BaseCommand, { CommandArgs, Help } from "../interfaces/base_command";
+import BaseCommand from "../interfaces/base_command";
 import {
     getGuildPreference,
     getMatchingGroupNames,
@@ -15,6 +15,8 @@ import { setIntersection } from "../../helpers/utils";
 import { GROUP_LIST_URL } from "../../constants";
 import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
+import HelpDocumentation from "../../interfaces/help";
+import CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("add");
 
@@ -48,7 +50,7 @@ export default class AddCommand implements BaseCommand {
         ],
     };
 
-    help = (guildID: string): Help => ({
+    help = (guildID: string): HelpDocumentation => ({
         name: "add",
         description: state.localizer.translate(
             guildID,
