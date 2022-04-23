@@ -28,7 +28,6 @@ import {
 import State from "../state";
 import { KmqImages, specialFfmpegArgs } from "../constants";
 import { bold, friendlyFormattedNumber } from "../helpers/utils";
-import MusicSession from "./music_session";
 import type QueriedSong from "../interfaces/queried_song";
 import type GuessResult from "../interfaces/guess_result";
 import { SeekType } from "../enums/option_types/seek_type";
@@ -128,6 +127,10 @@ export default abstract class Session {
         } else if (isMusicSession) {
             delete State.musicSessions[guildID];
         }
+    }
+
+    isMusicSession() {
+        return false;
     }
 
     /**
@@ -382,10 +385,7 @@ export default abstract class Session {
         messageContext: MessageContext,
         guildPreference: GuildPreference
     ): Promise<void> {
-        if (
-            this instanceof MusicSession ||
-            !guildPreference.isGuessTimeoutSet()
-        )
+        if (this.isMusicSession() || !guildPreference.isGuessTimeoutSet())
             return;
 
         const time = guildPreference.gameOptions.guessTimeout;
@@ -438,7 +438,7 @@ export default abstract class Session {
 
         await this.songSelector.reloadSongs(
             guildPreference,
-            session instanceof MusicSession ||
+            this.isMusicSession() ||
                 (session instanceof GameSession && session.isPremium())
         );
     }
@@ -590,10 +590,9 @@ export default abstract class Session {
         const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${round.song.youtubeLink}.ogg`;
 
         let seekLocation: number;
-        const seekType =
-            this instanceof MusicSession
-                ? SeekType.BEGINNING
-                : guildPreference.gameOptions.seekType;
+        const seekType = this.isMusicSession()
+            ? SeekType.BEGINNING
+            : guildPreference.gameOptions.seekType;
 
         if (seekType === SeekType.BEGINNING) {
             seekLocation = 0;
@@ -628,10 +627,9 @@ export default abstract class Session {
         try {
             let inputArgs = ["-ss", seekLocation.toString()];
             let encoderArgs = [];
-            const specialType =
-                this instanceof MusicSession
-                    ? null
-                    : guildPreference.gameOptions.specialType;
+            const specialType = this.isMusicSession()
+                ? null
+                : guildPreference.gameOptions.specialType;
 
             if (specialType) {
                 const ffmpegArgs = specialFfmpegArgs[specialType](seekLocation);

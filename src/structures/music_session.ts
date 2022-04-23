@@ -57,6 +57,10 @@ export default class MusicSession extends Session {
         super.updateOwner();
     }
 
+    isMusicSession(): boolean {
+        return true;
+    }
+
     /**
      * Starting a new MusicRound
      * @param guildPreference - The guild's GuildPreference

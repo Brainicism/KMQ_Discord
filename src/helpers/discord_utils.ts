@@ -55,7 +55,6 @@ import UniqueSongCounter from "../interfaces/unique_song_counter";
 import { GuessModeType } from "../enums/option_types/guess_mode_type";
 import { GameOption } from "../enums/game_option_name";
 import { GameType } from "../enums/game_type";
-import MusicSession from "../structures/music_session";
 
 const logger = new IPCLogger("discord_utils");
 export const EMBED_ERROR_COLOR = 0xed4245; // Red
@@ -112,10 +111,10 @@ export function getDebugLogHeader(
     const session = Session.getSession(context.guildID);
     let sessionType: string;
     if (session) {
-        if (session instanceof GameSession) {
-            sessionType = "GameSession";
-        } else if (session instanceof MusicSession) {
+        if (session.isMusicSession()) {
             sessionType = "MusicSession";
+        } else {
+            sessionType = "GameSession";
         }
     } else {
         sessionType = "No active session";
@@ -716,7 +715,7 @@ export async function sendRoundMessage(
     timeRemaining?: number,
     uniqueSongCounter?: UniqueSongCounter
 ): Promise<Eris.Message<Eris.TextableChannel>> {
-    const isMusicSession = session instanceof MusicSession;
+    const isMusicSession = session.isMusicSession();
     const useLargerScoreboard =
         !isMusicSession && scoreboard.shouldUseLargerScoreboard();
 
@@ -1075,7 +1074,7 @@ export async function generateOptionsMessage(
     }
 
     // Special case: disable these options in a music session
-    if (session instanceof MusicSession || isMusicSession) {
+    if (isMusicSession) {
         const disabledOptions = [
             GameOption.GUESS_MODE_TYPE,
             GameOption.SEEK_TYPE,
@@ -1191,7 +1190,7 @@ export async function generateOptionsMessage(
             "command.options.perCommandHelp",
             { helpCommand: `${process.env.BOT_PREFIX}help` }
         );
-    } else if (session instanceof MusicSession) {
+    } else if (isMusicSession) {
         footerText = State.localizer.translate(
             messageContext.guildID,
             "command.options.musicSessionNotAvailable"
