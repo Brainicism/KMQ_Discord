@@ -1,4 +1,5 @@
-import { Knex, knex } from "knex";
+import type { Knex} from "knex";
+import { knex } from "knex";
 import { resolve } from "path";
 import { config } from "dotenv";
 import { EnvType } from "./enums/env_type";

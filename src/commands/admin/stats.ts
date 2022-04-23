@@ -1,6 +1,6 @@
-import Eris from "eris";
+import type Eris from "eris";
 import os from "os";
-import BaseCommand from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     sendErrorMessage,
@@ -17,8 +17,8 @@ import {
     measureExecutionTime,
 } from "../../helpers/utils";
 import { getKmqCurrentVersion } from "../../helpers/game_utils";
-import CommandArgs from "../../interfaces/command_args";
-import HelpDocumentation from "../../interfaces/help";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("stats");
 

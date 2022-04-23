@@ -6,7 +6,7 @@ import SongSelector, {
 } from "../../structures/song_selector";
 import _ from "lodash";
 import { getMatchingGroupNames } from "../../helpers/game_utils";
-import QueriedSong from "../../interfaces/queried_song";
+import type QueriedSong from "../../interfaces/queried_song";
 import { SubunitsPreference } from "../../enums/option_types/subunit_preference";
 import { OstPreference } from "../../enums/option_types/ost_preference";
 import { ReleaseType } from "../../enums/option_types/release_type";

@@ -1,4 +1,4 @@
-import Eris from "eris";
+import type Eris from "eris";
 
 export default interface EmbedPayload {
     title: string;

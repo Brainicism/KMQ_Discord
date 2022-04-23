@@ -1,5 +1,6 @@
-import Eris, { EmbedOptions } from "eris";
-import BaseCommand from "../interfaces/base_command";
+import type { EmbedOptions } from "eris";
+import type Eris from "eris";
+import type BaseCommand from "../interfaces/base_command";
 import {
     sendErrorMessage,
     getDebugLogHeader,
@@ -8,13 +9,13 @@ import {
 } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
 import { chunkArray } from "../../helpers/utils";
-import { GuildTextableMessage } from "../../types";
+import type { GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import KmqClient from "../../kmq_client";
 import State from "../../state";
-import CommandArgs from "../../interfaces/command_args";
-import HelpDocumentation from "../../interfaces/help";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("help");
 export const placeholder = /,/g;

@@ -12,20 +12,20 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import MusicSession from "../../structures/music_session";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
-import BaseCommand from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import KmqMember from "../../structures/kmq_member";
 import { chooseWeightedRandom } from "../../helpers/utils";
 import dbContext from "../../database_context";
-import Eris from "eris";
+import type Eris from "eris";
 import { KmqImages } from "../../constants";
 import Session from "../../structures/session";
 import GameSession from "../../structures/game_session";
 import CommandPrechecks from "../../command_prechecks";
-import GuildPreference from "src/structures/guild_preference";
-import GameInfoMessage from "../../interfaces/game_info_message";
-import HelpDocumentation from "../../interfaces/help";
-import CommandArgs from "../../interfaces/command_args";
+import type GuildPreference from "src/structures/guild_preference";
+import type GameInfoMessage from "../../interfaces/game_info_message";
+import type HelpDocumentation from "../../interfaces/help";
+import type CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("music");
 

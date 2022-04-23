@@ -3,7 +3,7 @@ import { bold, friendlyFormattedNumber } from "../helpers/utils";
 import { getMention } from "../helpers/discord_utils";
 import type GuildPreference from "./guild_preference";
 import State from "../state";
-import SuccessfulGuessResult from "../interfaces/success_guess_result";
+import type SuccessfulGuessResult from "../interfaces/success_guess_result";
 
 export const SCOREBOARD_FIELD_CUTOFF = 6;
 

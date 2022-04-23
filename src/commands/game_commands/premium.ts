@@ -1,11 +1,11 @@
 // import { KmqImages } from "../../constants";
 // import { sendInfoMessage } from "../../helpers/discord_utils";
 // import { isUserPremium } from "../../helpers/game_utils";
-import CommandArgs from "../../interfaces/command_args";
-import HelpDocumentation from "../../interfaces/help";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 import State from "../../state";
 // import MessageContext from "../../structures/message_context";
-import BaseCommand from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
 
 export default class PremiumCommand implements BaseCommand {
     validations = {

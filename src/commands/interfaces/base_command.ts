@@ -1,7 +1,7 @@
-import CallFunc from "../../interfaces/call_func";
-import CommandValidations from "../../interfaces/command_validations";
-import HelpDocumentation from "../../interfaces/help";
-import PrecheckArgs from "../../interfaces/precheck_args";
+import type CallFunc from "../../interfaces/call_func";
+import type CommandValidations from "../../interfaces/command_validations";
+import type HelpDocumentation from "../../interfaces/help";
+import type PrecheckArgs from "../../interfaces/precheck_args";
 import type GuildPreference from "../../structures/guild_preference";
 
 export default interface BaseCommand {

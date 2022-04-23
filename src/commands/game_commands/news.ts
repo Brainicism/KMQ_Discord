@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import BaseCommand from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -10,8 +10,8 @@ import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
 import { getKmqCurrentVersion } from "../../helpers/game_utils";
-import CommandArgs from "../../interfaces/command_args";
-import HelpDocumentation from "../../interfaces/help";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("news");
 

@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/dot-notation */
-import Eris from "eris";
+import type Eris from "eris";
 import {
     getDebugLogHeader,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
-import BaseCommand from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { isWeekend } from "../../helpers/utils";
@@ -20,8 +20,8 @@ import { KmqImages } from "../../constants";
 import State from "../../state";
 import type GuildPreference from "../../structures/guild_preference";
 import type GameRound from "../../structures/game_round";
-import CommandArgs from "../../interfaces/command_args";
-import HelpDocumentation from "../../interfaces/help";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 import { AnswerType } from "../../enums/option_types/answer_type";
 import { GuessModeType } from "../../enums/option_types/guess_mode_type";
 import { ExpBonusModifier } from "../../enums/exp_bonus_modifier";

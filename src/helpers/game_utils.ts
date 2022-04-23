@@ -10,12 +10,12 @@ import { LocaleType } from "../enums/locale_type";
 import { PATREON_SUPPORTER_BADGE } from "./patreon_manager";
 import { containsHangul, md5Hash } from "./utils";
 import Session from "../structures/session";
-import MatchedArtist from "../interfaces/matched_artist";
-import QueriedSong from "../interfaces/queried_song";
-import Patron from "../interfaces/patron";
+import type MatchedArtist from "../interfaces/matched_artist";
+import type QueriedSong from "../interfaces/queried_song";
+import type Patron from "../interfaces/patron";
 import { GuessModeType } from "../enums/option_types/guess_mode_type";
 import { AnswerType } from "../enums/option_types/answer_type";
-import { Gender } from "../enums/option_types/gender";
+import type { Gender } from "../enums/option_types/gender";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 10;
 

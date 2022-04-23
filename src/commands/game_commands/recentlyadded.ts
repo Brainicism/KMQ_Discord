@@ -1,5 +1,5 @@
-import { EmbedOptions } from "eris";
-import BaseCommand from "../interfaces/base_command";
+import type { EmbedOptions } from "eris";
+import type BaseCommand from "../interfaces/base_command";
 import dbContext from "../../database_context";
 import {
     getDebugLogHeader,
@@ -20,9 +20,9 @@ import { KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
-import QueriedSong from "../../interfaces/queried_song";
-import CommandArgs from "../../interfaces/command_args";
-import HelpDocumentation from "../../interfaces/help";
+import type QueriedSong from "../../interfaces/queried_song";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("recentlyadded");
 

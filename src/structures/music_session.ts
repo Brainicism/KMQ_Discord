@@ -1,4 +1,4 @@
-import Eris from "eris";
+import type Eris from "eris";
 import { chooseRandom } from "../helpers/utils";
 import {
     getCurrentVoiceMembers,
@@ -8,7 +8,7 @@ import {
     getDebugLogHeader,
 } from "../helpers/discord_utils";
 import KmqMember from "./kmq_member";
-import Round from "./round";
+import type Round from "./round";
 import Session from "./session";
 import MusicRound from "./music_round";
 import type GuildPreference from "./guild_preference";
@@ -18,7 +18,7 @@ import { isUserPremium } from "../helpers/game_utils";
 import { isSkipMajority, skipSong } from "../commands/game_commands/skip";
 import State from "../state";
 import { getGuildPreference } from "../helpers/game_utils";
-import QueriedSong from "../interfaces/queried_song";
+import type QueriedSong from "../interfaces/queried_song";
 import type GuessResult from "../interfaces/guess_result";
 
 const logger = new IPCLogger("music_session");

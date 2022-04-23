@@ -1,4 +1,4 @@
-import BaseCommand from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     getMajorityCount,
@@ -10,16 +10,16 @@ import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { codeLine } from "../../helpers/utils";
-import { GuildTextableMessage } from "../../types";
-import GameSession from "../../structures/game_session";
-import EliminationScoreboard from "../../structures/elimination_scoreboard";
-import GuildPreference from "../../structures/guild_preference";
+import type { GuildTextableMessage } from "../../types";
+import type GameSession from "../../structures/game_session";
+import type EliminationScoreboard from "../../structures/elimination_scoreboard";
+import type GuildPreference from "../../structures/guild_preference";
 import CommandPrechecks from "../../command_prechecks";
 import State from "../../state";
-import GameRound from "../../structures/game_round";
+import type GameRound from "../../structures/game_round";
 import Session from "../../structures/session";
-import HelpDocumentation from "../../interfaces/help";
-import CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
+import type CommandArgs from "../../interfaces/command_args";
 import { GuessModeType } from "../../enums/option_types/guess_mode_type";
 import { GameType } from "../../enums/game_type";
 

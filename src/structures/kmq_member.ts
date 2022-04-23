@@ -1,4 +1,4 @@
-import Eris from "eris";
+import type Eris from "eris";
 import { getUserTag } from "../helpers/discord_utils";
 
 export default class KmqMember {

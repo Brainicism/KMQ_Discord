@@ -1,4 +1,4 @@
-import BaseCommand from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
 import {
     sendOptionsMessage,
     getDebugLogHeader,
@@ -14,8 +14,8 @@ import { setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
 import State from "../../state";
 import { GROUP_LIST_URL } from "../../constants";
-import CommandArgs from "../../interfaces/command_args";
-import HelpDocumentation from "../../interfaces/help";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 import { GameOption } from "../../enums/game_option_name";
 
 const logger = new IPCLogger("groups");

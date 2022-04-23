@@ -1,5 +1,5 @@
 import dbContext from "../database_context";
-import QueriedSong from "../interfaces/queried_song";
+import type QueriedSong from "../interfaces/queried_song";
 import { IPCLogger } from "../logger";
 
 const logger = new IPCLogger("get-unclean-song-names");

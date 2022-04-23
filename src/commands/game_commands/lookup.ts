@@ -1,6 +1,6 @@
 import { getVideoID } from "ytdl-core";
 import { LocaleType } from "../../enums/locale_type";
-import BaseCommand from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
 import State from "../../state";
 import dbContext from "../../database_context";
 import {
@@ -24,9 +24,9 @@ import {
 } from "../../helpers/game_utils";
 import SongSelector from "../../structures/song_selector";
 import { KmqImages } from "../../constants";
-import QueriedSong from "../../interfaces/queried_song";
-import HelpDocumentation from "../../interfaces/help";
-import CommandArgs from "../../interfaces/command_args";
+import type QueriedSong from "../../interfaces/queried_song";
+import type HelpDocumentation from "../../interfaces/help";
+import type CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("lookup");
 

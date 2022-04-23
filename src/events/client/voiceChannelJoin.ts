@@ -1,4 +1,4 @@
-import Eris from "eris";
+import type Eris from "eris";
 import GameSession from "../../structures/game_session";
 import Session from "../../structures/session";
 import MusicSession from "../../structures/music_session";

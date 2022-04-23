@@ -1,4 +1,4 @@
-import { Gender } from "../enums/option_types/gender";
+import type { Gender } from "../enums/option_types/gender";
 
 export default interface QueriedSong {
     songName: string;

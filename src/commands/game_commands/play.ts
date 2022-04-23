@@ -1,4 +1,4 @@
-import Eris from "eris";
+import type Eris from "eris";
 import GameSession from "../../structures/game_session";
 import Session from "../../structures/session";
 import {
@@ -21,7 +21,7 @@ import {
     isPremiumRequest,
 } from "../../helpers/game_utils";
 import { chooseWeightedRandom, isWeekend } from "../../helpers/utils";
-import BaseCommand from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
 import dbContext from "../../database_context";
 import { IPCLogger } from "../../logger";
 import { GameType } from "../../enums/game_type";
@@ -31,10 +31,10 @@ import KmqMember from "../../structures/kmq_member";
 import CommandPrechecks from "../../command_prechecks";
 import State from "../../state";
 import { DEFAULT_LIVES } from "../../structures/elimination_scoreboard";
-import GuildPreference from "../../structures/guild_preference";
-import GameInfoMessage from "../../interfaces/game_info_message";
-import CommandArgs from "../../interfaces/command_args";
-import HelpDocumentation from "../../interfaces/help";
+import type GuildPreference from "../../structures/guild_preference";
+import type GameInfoMessage from "../../interfaces/game_info_message";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("play");
 

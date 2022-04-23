@@ -1,4 +1,4 @@
-import Eris from "eris";
+import type Eris from "eris";
 import { EMBED_SUCCESS_BONUS_COLOR } from "../helpers/discord_utils";
 import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "../interfaces/queried_song";

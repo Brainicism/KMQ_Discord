@@ -1,4 +1,4 @@
-import Eris from "eris";
+import type Eris from "eris";
 import { checkBotIsAlone } from "../../helpers/discord_utils";
 import Session from "../../structures/session";
 import GameSession from "../../structures/game_session";

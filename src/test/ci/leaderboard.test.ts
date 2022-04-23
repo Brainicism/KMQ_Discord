@@ -1,7 +1,7 @@
 import assert from "assert";
 import sinon from "sinon";
 import { describe } from "mocha";
-import { EmbedGenerator } from "eris-pagination";
+import type { EmbedGenerator } from "eris-pagination";
 import LeaderboardCommand, {
     ENTRIES_PER_PAGE,
 } from "../../commands/game_commands/leaderboard";

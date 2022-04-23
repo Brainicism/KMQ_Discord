@@ -1,6 +1,6 @@
-import Eris from "eris";
+import type Eris from "eris";
 import * as uuid from "uuid";
-import BaseCommand from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
 import {
     getDebugChannel,
     sendInfoMessage,
@@ -17,7 +17,7 @@ import State from "../../state";
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
-import CommandArgs from "../../interfaces/command_args";
+import type CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("debug");
 

@@ -4,9 +4,10 @@ import ffmpeg from "fluent-ffmpeg";
 import path from "path";
 import { exec } from "child_process";
 import { IPCLogger } from "../logger";
-import { DatabaseContext, getNewConnection } from "../database_context";
+import type { DatabaseContext} from "../database_context";
+import { getNewConnection } from "../database_context";
 import { retryJob, getAudioDurationInSeconds } from "../helpers/utils";
-import QueriedSong from "../interfaces/queried_song";
+import type QueriedSong from "../interfaces/queried_song";
 
 const logger = new IPCLogger("download-new-songs");
 const TARGET_AVERAGE_VOLUME = -30;

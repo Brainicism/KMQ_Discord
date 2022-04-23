@@ -1,8 +1,8 @@
-import BaseCommand from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { sendBeginGameSessionMessage } from "./play";
 import { GameType } from "../../enums/game_type";
-import TeamScoreboard from "../../structures/team_scoreboard";
+import type TeamScoreboard from "../../structures/team_scoreboard";
 import {
     getDebugLogHeader,
     sendErrorMessage,
@@ -10,11 +10,11 @@ import {
 } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import GameSession from "../../structures/game_session";
+import type GameSession from "../../structures/game_session";
 import State from "../../state";
 import CommandPrechecks from "../../command_prechecks";
 import Session from "../../structures/session";
-import CommandArgs from "../../interfaces/command_args";
+import type CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("begin");
 
