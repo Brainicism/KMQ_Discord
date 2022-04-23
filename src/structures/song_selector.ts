@@ -1,22 +1,17 @@
-import GuildPreference from "./guild_preference";
+import type GuildPreference from "./guild_preference";
 import dbContext from "../database_context";
-import { SubunitsPreference } from "../commands/game_options/subunits";
-import { ArtistType } from "../commands/game_options/artisttype";
-import { Gender } from "../commands/game_options/gender";
 import { IPCLogger } from "../logger";
-import {
-    LanguageType,
-    FOREIGN_LANGUAGE_TAGS,
-} from "../commands/game_options/language";
-import { OstPreference } from "../commands/game_options/ost";
-import {
-    ReleaseType,
-    NON_OFFICIAL_VIDEO_TAGS,
-} from "../commands/game_options/release";
 import { chooseWeightedRandom, setDifference } from "../helpers/utils";
-import { ShuffleType } from "../commands/game_options/shuffle";
 import QueriedSong from "../interfaces/queried_song";
 import UniqueSongCounter from "../interfaces/unique_song_counter";
+import { Gender } from "../enums/option_types/gender";
+import { ShuffleType } from "../enums/option_types/shuffle_type";
+import { SubunitsPreference } from "../enums/option_types/subunit_preference";
+import { ArtistType } from "../enums/option_types/artist_type";
+import { OstPreference } from "../enums/option_types/ost_preference";
+import { LanguageType } from "../enums/option_types/language_type";
+import { ReleaseType } from "../enums/option_types/release_type";
+import { FOREIGN_LANGUAGE_TAGS, NON_OFFICIAL_VIDEO_TAGS } from "../constants";
 
 export const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
 export const SELECTION_WEIGHT_VALUES_HARD = [1, 2, 4, 8, 16];

@@ -5,9 +5,10 @@ import {
 } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import { LocaleType, DEFAULT_LOCALE } from "../../helpers/localization_manager";
+import { LocaleType } from "../../enums/locale_type";
+import { DEFAULT_LOCALE } from "../../helpers/localization_manager";
 import dbContext from "../../database_context";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import { KmqImages } from "../../constants";
 import HelpDocumentation from "../../interfaces/help";
 import CommandArgs from "../../interfaces/command_args";
@@ -40,7 +41,7 @@ export default class LocaleTypeCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "locale",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.locale.help.description",
             {
@@ -48,18 +49,18 @@ export default class LocaleTypeCommand implements BaseCommand {
                 korean: `\`${LocaleArgument.KOREAN}\``,
             }
         ),
-        usage: `,locale [${state.localizer.translate(
+        usage: `,locale [${State.localizer.translate(
             guildID,
             "command.locale.help.usage.language"
         )}]`,
         examples: [
             {
                 example: "`,locale english`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.locale.help.example.toEnglish",
                     {
-                        english: state.localizer.translate(
+                        english: State.localizer.translate(
                             guildID,
                             "command.locale.language.en"
                         ),
@@ -68,11 +69,11 @@ export default class LocaleTypeCommand implements BaseCommand {
             },
             {
                 example: "`,locale korean`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.locale.help.example.toKorean",
                     {
-                        korean: state.localizer.translate(
+                        korean: State.localizer.translate(
                             guildID,
                             "command.locale.language.ko"
                         ),
@@ -81,11 +82,11 @@ export default class LocaleTypeCommand implements BaseCommand {
             },
             {
                 example: "`,locale`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.locale.help.example.reset",
                     {
-                        defaultLocale: state.localizer.translate(
+                        defaultLocale: State.localizer.translate(
                             guildID,
                             `command.locale.language.${DEFAULT_LOCALE}`
                         ),
@@ -121,16 +122,16 @@ export default class LocaleTypeCommand implements BaseCommand {
         await LocaleTypeCommand.updateLocale(message.guildID, language);
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
+            title: State.localizer.translate(
                 message.guildID,
                 "command.options.updated",
                 { presetOrOption: "Locale" }
             ),
-            description: state.localizer.translate(
+            description: State.localizer.translate(
                 message.guildID,
                 "command.locale.updatedDescription",
                 {
-                    language: state.localizer.translate(
+                    language: State.localizer.translate(
                         message.guildID,
                         `command.locale.language.${language}`
                     ),
@@ -149,15 +150,15 @@ export default class LocaleTypeCommand implements BaseCommand {
         locale: LocaleType
     ): Promise<void> {
         if (locale !== DEFAULT_LOCALE) {
-            state.locales[guildID] = locale;
+            State.locales[guildID] = locale;
             await dbContext
                 .kmq("locale")
                 .insert({ guild_id: guildID, locale })
                 .onConflict("guild_id")
                 .merge();
         } else {
-            if (state.locales[guildID]) {
-                delete state.locales[guildID];
+            if (State.locales[guildID]) {
+                delete State.locales[guildID];
                 await dbContext
                     .kmq("locale")
                     .where({ guild_id: guildID })

@@ -8,8 +8,8 @@ import {
     weekOfYear,
     friendlyFormattedNumber,
 } from "./helpers/utils";
-import { LocaleType } from "./helpers/localization_manager";
-import { state } from "./kmq_worker";
+import { LocaleType } from "./enums/locale_type";
+import State from "./state";
 import { getGuildLocale } from "./helpers/discord_utils";
 import { IPCLogger } from "./logger";
 
@@ -194,7 +194,7 @@ async function recentMusicVideos(lng: LocaleType): Promise<string[]> {
     }
 
     return result.map((x) =>
-        state.localizer.internalLocalizer.t("fact.fun.newMV", {
+        State.localizer.internalLocalizer.t("fact.fun.newMV", {
             hyperlink: generateSongArtistHyperlink(
                 lng,
                 x["name"],
@@ -231,7 +231,7 @@ async function recentMilestone(lng: LocaleType): Promise<string[]> {
     }
 
     return result.map((x) =>
-        state.localizer.internalLocalizer.t("fact.fun.mvViewMilestone", {
+        State.localizer.internalLocalizer.t("fact.fun.mvViewMilestone", {
             hyperlink: generateSongArtistHyperlink(
                 lng,
                 x["song_name"],
@@ -271,7 +271,7 @@ async function recentMusicShowWin(lng: LocaleType): Promise<string[]> {
     }
 
     return result.map((x) =>
-        state.localizer.internalLocalizer.t("fact.fun.recentMusicShowWin", {
+        State.localizer.internalLocalizer.t("fact.fun.recentMusicShowWin", {
             hyperlink: generateSongArtistHyperlink(
                 lng,
                 x["winning_song"],
@@ -299,9 +299,9 @@ async function musicShowWins(lng: LocaleType): Promise<string[]> {
         .limit(25);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostMusicShowWins", {
+        State.localizer.internalLocalizer.t("fact.fun.mostMusicShowWins", {
             artist: x["artist_name"],
-            ordinalNum: state.localizer.internalLocalizer.t(
+            ordinalNum: State.localizer.internalLocalizer.t(
                 getOrdinalNum(idx + 1),
                 { lng }
             ),
@@ -325,9 +325,9 @@ async function mostViewedGroups(lng: LocaleType): Promise<string[]> {
         .limit(25);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostViewedGroup", {
+        State.localizer.internalLocalizer.t("fact.fun.mostViewedGroup", {
             artist: x["artist_name"],
-            ordinalNum: state.localizer.internalLocalizer.t(
+            ordinalNum: State.localizer.internalLocalizer.t(
                 getOrdinalNum(idx + 1),
                 { lng }
             ),
@@ -351,9 +351,9 @@ async function mostLikedGroups(lng: LocaleType): Promise<string[]> {
         .orderBy("total_likes", "DESC");
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostLikedGroup", {
+        State.localizer.internalLocalizer.t("fact.fun.mostLikedGroup", {
             artist: x["artist_name"],
-            ordinalNum: state.localizer.internalLocalizer.t(
+            ordinalNum: State.localizer.internalLocalizer.t(
                 getOrdinalNum(idx + 1),
                 { lng }
             ),
@@ -380,14 +380,14 @@ async function mostViewedVideo(lng: LocaleType): Promise<string[]> {
         .limit(25);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostViewedVideo", {
+        State.localizer.internalLocalizer.t("fact.fun.mostViewedVideo", {
             hyperlink: generateSongArtistHyperlink(
                 lng,
                 x["song_name"],
                 x["artist_name"],
                 x["link"]
             ),
-            ordinalNum: state.localizer.internalLocalizer.t(
+            ordinalNum: State.localizer.internalLocalizer.t(
                 getOrdinalNum(idx + 1),
                 { lng }
             ),
@@ -413,14 +413,14 @@ async function mostLikedVideo(lng: LocaleType): Promise<string[]> {
         .limit(25);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostLikedVideo", {
+        State.localizer.internalLocalizer.t("fact.fun.mostLikedVideo", {
             hyperlink: generateSongArtistHyperlink(
                 lng,
                 x["song_name"],
                 x["artist_name"],
                 x["link"]
             ),
-            ordinalNum: state.localizer.internalLocalizer.t(
+            ordinalNum: State.localizer.internalLocalizer.t(
                 getOrdinalNum(idx + 1),
                 { lng }
             ),
@@ -448,9 +448,9 @@ async function mostViewedEntertainmentCompany(
         .limit(15);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.companyByArtistViews", {
+        State.localizer.internalLocalizer.t("fact.fun.companyByArtistViews", {
             name: x["name"],
-            ordinalNum: state.localizer.internalLocalizer.t(
+            ordinalNum: State.localizer.internalLocalizer.t(
                 getOrdinalNum(idx + 1),
                 { lng }
             ),
@@ -476,9 +476,9 @@ async function mostArtistsEntertainmentCompany(
         .limit(15);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.companyByArtistCount", {
+        State.localizer.internalLocalizer.t("fact.fun.companyByArtistCount", {
             company: x["name"],
-            ordinalNum: state.localizer.internalLocalizer.t(
+            ordinalNum: State.localizer.internalLocalizer.t(
                 getOrdinalNum(idx + 1),
                 { lng }
             ),
@@ -502,9 +502,9 @@ async function mostMusicVideos(lng: LocaleType): Promise<string[]> {
         .limit(25);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostMVs", {
+        State.localizer.internalLocalizer.t("fact.fun.mostMVs", {
             artist: x["artist_name"],
-            ordinalNum: state.localizer.internalLocalizer.t(
+            ordinalNum: State.localizer.internalLocalizer.t(
                 getOrdinalNum(idx + 1),
                 { lng }
             ),
@@ -525,9 +525,9 @@ async function yearWithMostDebuts(lng: LocaleType): Promise<string[]> {
         .limit(15);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostDebuts", {
+        State.localizer.internalLocalizer.t("fact.fun.mostDebuts", {
             year: x["formation_year"],
-            ordinalNum: state.localizer.internalLocalizer.t(
+            ordinalNum: State.localizer.internalLocalizer.t(
                 getOrdinalNum(idx + 1),
                 { lng }
             ),
@@ -552,9 +552,9 @@ async function yearWithMostReleases(lng: LocaleType): Promise<string[]> {
         .limit(15);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostActiveYear", {
+        State.localizer.internalLocalizer.t("fact.fun.mostActiveYear", {
             year: String(x["release_year"]),
-            ordinalNum: state.localizer.internalLocalizer.t(
+            ordinalNum: State.localizer.internalLocalizer.t(
                 getOrdinalNum(idx + 1),
                 { lng }
             ),
@@ -590,7 +590,7 @@ async function viewsByGender(lng: LocaleType): Promise<string[]> {
     }
 
     return [
-        state.localizer.internalLocalizer.t("fact.fun.viewsByGender", {
+        State.localizer.internalLocalizer.t("fact.fun.viewsByGender", {
             totalViews: friendlyFormattedNumber(totalViews),
             maleViews: data.male.views,
             maleProportion: data.male.proportion,
@@ -617,9 +617,9 @@ async function mostViewedSoloArtist(lng: LocaleType): Promise<string[]> {
         .limit(25);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostViewedSoloist", {
+        State.localizer.internalLocalizer.t("fact.fun.mostViewedSoloist", {
             artist: x["artist_name"],
-            ordinalNum: state.localizer.internalLocalizer.t(
+            ordinalNum: State.localizer.internalLocalizer.t(
                 getOrdinalNum(idx + 1),
                 { lng }
             ),
@@ -654,7 +654,7 @@ async function viewsBySolo(lng: LocaleType): Promise<string[]> {
     };
 
     return [
-        state.localizer.internalLocalizer.t("fact.fun.viewsByArtistType", {
+        State.localizer.internalLocalizer.t("fact.fun.viewsByArtistType", {
             totalViews: friendlyFormattedNumber(totalViews),
             groupViews: data.group.views,
             groupProportion: data.group.proportion,
@@ -679,7 +679,7 @@ async function songReleaseAnniversaries(lng: LocaleType): Promise<string[]> {
         .limit(25);
 
     return result.map((x) =>
-        state.localizer.internalLocalizer.t("fact.fun.oldMV", {
+        State.localizer.internalLocalizer.t("fact.fun.oldMV", {
             hyperlink: generateSongArtistHyperlink(
                 lng,
                 x["song_name_en"],
@@ -708,7 +708,7 @@ async function songGuessRate(lng: LocaleType): Promise<string[]> {
         .limit(100);
 
     return result.map((x) =>
-        state.localizer.internalLocalizer.t("fact.kmq.guessRate", {
+        State.localizer.internalLocalizer.t("fact.kmq.guessRate", {
             hyperlink: generateSongArtistHyperlink(
                 lng,
                 x["song_name_en"],
@@ -745,7 +745,7 @@ async function bigThreeDominance(lng: LocaleType): Promise<string[]> {
 
     const proportion = (100 * bigThreeViews) / totalViewsResult[0].total_views;
     return [
-        state.localizer.internalLocalizer.t("fact.fun.bigThreeDominance", {
+        State.localizer.internalLocalizer.t("fact.fun.bigThreeDominance", {
             bigThreeViews: friendlyFormattedNumber(bigThreeViews),
             proportion: proportion.toFixed(2),
             lng,
@@ -762,7 +762,7 @@ async function fanclubName(lng: LocaleType): Promise<Array<string>> {
         .limit(10);
 
     return result.map((x) =>
-        state.localizer.internalLocalizer.t("fact.fun.fanclubName", {
+        State.localizer.internalLocalizer.t("fact.fun.fanclubName", {
             name: x["name"],
             fanclub: x["fanclub"],
             lng,
@@ -783,7 +783,7 @@ async function closeBirthdays(lng: LocaleType): Promise<Array<string>> {
         .limit(10);
 
     return result.map((x) =>
-        state.localizer.internalLocalizer.t("fact.fun.birthday", {
+        State.localizer.internalLocalizer.t("fact.fun.birthday", {
             name: x["name"],
             formattedDate: x["formatted_bday"],
             lng,
@@ -806,7 +806,7 @@ async function longestGame(lng: LocaleType): Promise<string[]> {
     if (result.length === 0) return [];
     const longestKmqGame = result[0];
     return [
-        state.localizer.internalLocalizer.t("fact.kmq.longestGame", {
+        State.localizer.internalLocalizer.t("fact.kmq.longestGame", {
             sessionLength: friendlyFormattedNumber(
                 longestKmqGame.session_length
             ),
@@ -832,7 +832,7 @@ async function mostGames(lng: LocaleType): Promise<string[]> {
     if (result.length === 0) return [];
     const mostGamesPlayed = result[0];
     return [
-        state.localizer.internalLocalizer.t("fact.kmq.mostActiveServer", {
+        State.localizer.internalLocalizer.t("fact.kmq.mostActiveServer", {
             gamesPlayed: friendlyFormattedNumber(mostGamesPlayed.games_played),
             songsGuessed: friendlyFormattedNumber(
                 mostGamesPlayed.songs_guessed
@@ -852,7 +852,7 @@ async function mostCorrectGuessed(lng: LocaleType): Promise<string[]> {
     if (result.length === 0) return [];
     const mostGamesPlayed = result[0];
     return [
-        state.localizer.internalLocalizer.t(
+        State.localizer.internalLocalizer.t(
             "fact.kmq.mostCorrectGuessesServer",
             {
                 gamesPlayed: friendlyFormattedNumber(
@@ -873,7 +873,7 @@ async function globalTotalGames(lng: LocaleType): Promise<string[]> {
     if (result.length === 0) return [];
     const totalGamesPlayed = result[0].count as number;
     return [
-        state.localizer.internalLocalizer.t("fact.kmq.totalGames", {
+        State.localizer.internalLocalizer.t("fact.kmq.totalGames", {
             totalGamesPlayed: friendlyFormattedNumber(totalGamesPlayed),
             lng,
         }),
@@ -891,7 +891,7 @@ async function recentGameSessions(lng: LocaleType): Promise<string[]> {
     if (result.length === 0) return [];
     const recentSessions = result[0].count as number;
     return [
-        state.localizer.internalLocalizer.t("fact.kmq.recentSessions", {
+        State.localizer.internalLocalizer.t("fact.kmq.recentSessions", {
             recentSessions: friendlyFormattedNumber(recentSessions),
             lng,
         }),
@@ -909,7 +909,7 @@ async function recentGames(lng: LocaleType): Promise<string[]> {
     if (result.length === 0) return [];
     const recentGameCount = result[0].count as number;
     return [
-        state.localizer.internalLocalizer.t("fact.kmq.recentGameCount", {
+        State.localizer.internalLocalizer.t("fact.kmq.recentGameCount", {
             recentGameCount: friendlyFormattedNumber(recentGameCount),
             lng,
         }),
@@ -930,10 +930,10 @@ async function recentUniquePlayers(lng: LocaleType): Promise<string[]> {
         if (result.length === 0) return [];
         const recentActivePlayers = result[0].count as number;
         output.push(
-            state.localizer.internalLocalizer.t("fact.kmq.uniquePlayers", {
+            State.localizer.internalLocalizer.t("fact.kmq.uniquePlayers", {
                 recentActivePlayers:
                     friendlyFormattedNumber(recentActivePlayers),
-                xDays: state.localizer.internalLocalizer.t("misc.plural.day", {
+                xDays: State.localizer.internalLocalizer.t("misc.plural.day", {
                     count: interval,
                     lng,
                 }),
@@ -954,7 +954,7 @@ async function mostSongsGuessedPlayer(lng: LocaleType): Promise<string[]> {
 
     if (result.length === 0) return [];
     return [
-        state.localizer.internalLocalizer.t(
+        State.localizer.internalLocalizer.t(
             "fact.kmq.mostActivePlayerSongsGuessed",
             {
                 songsGuessed: friendlyFormattedNumber(result[0].songs_guessed),
@@ -973,7 +973,7 @@ async function mostGamesPlayedPlayer(lng: LocaleType): Promise<string[]> {
 
     if (result.length === 0) return [];
     return [
-        state.localizer.internalLocalizer.t(
+        State.localizer.internalLocalizer.t(
             "fact.kmq.mostActivePlayerGamesPlayed",
             {
                 gamesPlayed: friendlyFormattedNumber(result[0].games_played),
@@ -991,9 +991,9 @@ async function mostGaonFirsts(lng: LocaleType): Promise<string[]> {
         .limit(25);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostGaonFirsts", {
+        State.localizer.internalLocalizer.t("fact.fun.mostGaonFirsts", {
             artistName: x["artist_name"],
-            ordinalNum: state.localizer.internalLocalizer.t(
+            ordinalNum: State.localizer.internalLocalizer.t(
                 getOrdinalNum(idx + 1),
                 { lng }
             ),
@@ -1011,9 +1011,9 @@ async function mostGaonAppearances(lng: LocaleType): Promise<string[]> {
         .limit(25);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.mostGaonAppearances", {
+        State.localizer.internalLocalizer.t("fact.fun.mostGaonAppearances", {
             artistName: x["artist_name"],
-            ordinalNum: state.localizer.internalLocalizer.t(
+            ordinalNum: State.localizer.internalLocalizer.t(
                 getOrdinalNum(idx + 1),
                 { lng }
             ),
@@ -1031,11 +1031,11 @@ async function mostAnnualAwardShowWins(lng: LocaleType): Promise<string[]> {
         .limit(25);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t(
+        State.localizer.internalLocalizer.t(
             "fact.fun.mostAnnualAwardShowWins",
             {
                 artistName: x["artist_name"],
-                ordinalNum: state.localizer.internalLocalizer.t(
+                ordinalNum: State.localizer.internalLocalizer.t(
                     getOrdinalNum(idx + 1),
                     { lng }
                 ),
@@ -1072,7 +1072,7 @@ async function historicalGaonWeekly(lng: LocaleType): Promise<Array<string>> {
     );
 
     return parsedResults.map((x) =>
-        state.localizer.internalLocalizer.t("fact.fun.historicalGaonWeekly", {
+        State.localizer.internalLocalizer.t("fact.fun.historicalGaonWeekly", {
             year: x[0].year,
             songName: generateSongArtistHyperlink(
                 lng,
@@ -1098,13 +1098,13 @@ async function recentGaonWeekly(lng: LocaleType): Promise<Array<string>> {
     );
 
     return parsedResult.slice(0, 10).map((x, idx) =>
-        state.localizer.internalLocalizer.t("fact.fun.recentGaonWeekly", {
+        State.localizer.internalLocalizer.t("fact.fun.recentGaonWeekly", {
             songName: generateSongArtistHyperlink(
                 lng,
                 x["songName"],
                 x["artistName"]
             ),
-            ordinalNum: state.localizer.internalLocalizer.t(
+            ordinalNum: State.localizer.internalLocalizer.t(
                 getOrdinalNum(idx + 1),
                 { lng }
             ),
@@ -1121,10 +1121,10 @@ async function topLeveledPlayers(lng: LocaleType): Promise<Array<string>> {
         .limit(10);
 
     return result.map((x, idx) =>
-        state.localizer.internalLocalizer.t(
+        State.localizer.internalLocalizer.t(
             "fact.kmq.highestLeveledPlayerStats",
             {
-                ordinalNum: state.localizer.internalLocalizer.t(
+                ordinalNum: State.localizer.internalLocalizer.t(
                     getOrdinalNum(idx + 1),
                     { lng }
                 ),
@@ -1159,7 +1159,7 @@ function generateSongArtistHyperlink(
         url = searchUrl.toString();
     }
 
-    return state.localizer.internalLocalizer.t("fact.fun.hyperlinkGenerator", {
+    return State.localizer.internalLocalizer.t("fact.fun.hyperlinkGenerator", {
         songName,
         artistName,
         url,

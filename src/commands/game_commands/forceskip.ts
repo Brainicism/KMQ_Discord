@@ -12,7 +12,7 @@ import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import Session from "../../structures/session";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
@@ -29,7 +29,7 @@ export default class ForceSkipCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "forceskip",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.forceskip.help.description"
         ),
@@ -60,11 +60,11 @@ export default class ForceSkipCommand implements BaseCommand {
 
         if (message.author.id !== session.owner.id) {
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "command.forceskip.failure.notOwner.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "command.forceskip.failure.notOwner.description",
                     { mentionedUser: getMention(session.owner.id) }
@@ -78,8 +78,8 @@ export default class ForceSkipCommand implements BaseCommand {
             MessageContext.fromMessage(message),
             {
                 color: EMBED_SUCCESS_COLOR,
-                title: state.localizer.translate(message.guildID, "misc.skip"),
-                description: state.localizer.translate(
+                title: State.localizer.translate(message.guildID, "misc.skip"),
+                description: State.localizer.translate(
                     message.guildID,
                     "command.forceskip.description"
                 ),

@@ -1,10 +1,10 @@
 import Eris from "eris";
-import { state } from "../kmq_worker";
-import MessageContext from "./message_context";
+import State from "../state";
+import type MessageContext from "./message_context";
 import { codeLine, friendlyFormattedNumber } from "../helpers/utils";
-import QueriedSong from "../interfaces/queried_song";
-import PlayerRoundResult from "../interfaces/player_round_result";
-import UniqueSongCounter from "../interfaces/unique_song_counter";
+import type QueriedSong from "../interfaces/queried_song";
+import type PlayerRoundResult from "../interfaces/player_round_result";
+import type UniqueSongCounter from "../interfaces/unique_song_counter";
 
 export const MAX_RUNNERS_UP = 30;
 export const MAX_SCOREBOARD_PLAYERS = 30;
@@ -45,10 +45,10 @@ export default abstract class Round {
 
     constructor(song: QueriedSong) {
         this.song = song;
-        this.songAliases = state.aliases.song[song.youtubeLink] || [];
+        this.songAliases = State.aliases.song[song.youtubeLink] || [];
         const artistNames = song.artistName.split("+").map((x) => x.trim());
         this.artistAliases = artistNames.flatMap(
-            (x) => state.aliases.artist[x] || []
+            (x) => State.aliases.artist[x] || []
         );
         this.startedAt = Date.now();
         this.roundMessageID = null;
@@ -94,7 +94,7 @@ export default abstract class Round {
             return "";
         }
 
-        const uniqueSongMessage = state.localizer.translate(
+        const uniqueSongMessage = State.localizer.translate(
             messageContext.guildID,
             "misc.inGame.uniqueSongsPlayed",
             {

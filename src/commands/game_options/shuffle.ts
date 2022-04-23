@@ -6,29 +6,22 @@ import {
     getDebugLogHeader,
     sendErrorMessage,
 } from "../../helpers/discord_utils";
-import { GameOption } from "../../types";
+import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import GuildPreference from "../../structures/guild_preference";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
+import { ShuffleType } from "../../enums/option_types/shuffle_type";
+import { DEFAULT_SHUFFLE } from "../../constants";
 
 const logger = new IPCLogger("shuffle");
-
-export enum ShuffleType {
-    RANDOM = "random",
-    WEIGHTED_EASY = "weighted_easy",
-    WEIGHTED_HARD = "weighted_hard",
-    POPULARITY = "popularity",
-}
 
 const PREMIUM_SHUFFLE_TYPES = [
     ShuffleType.WEIGHTED_EASY,
     ShuffleType.WEIGHTED_HARD,
 ];
-
-export const DEFAULT_SHUFFLE = ShuffleType.RANDOM;
 
 export default class ShuffleCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
@@ -47,7 +40,7 @@ export default class ShuffleCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "shuffle",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.shuffle.help.description",
             {
@@ -58,21 +51,21 @@ export default class ShuffleCommand implements BaseCommand {
         examples: [
             {
                 example: "`,shuffle random`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.shuffle.help.example.random"
                 ),
             },
             {
                 example: "`,shuffle popularity`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.shuffle.help.example.popularity"
                 ),
             },
             {
                 example: "`,shuffle`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.shuffle.help.example.reset",
                     { defaultShuffle: `\`${DEFAULT_SHUFFLE}\`` }
@@ -107,11 +100,11 @@ export default class ShuffleCommand implements BaseCommand {
                 );
 
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    description: state.localizer.translate(
+                    description: State.localizer.translate(
                         message.guildID,
                         "command.premium.option.description"
                     ),
-                    title: state.localizer.translate(
+                    title: State.localizer.translate(
                         message.guildID,
                         "command.premium.option.title"
                     ),

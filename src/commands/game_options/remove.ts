@@ -9,11 +9,11 @@ import {
     getMatchingGroupNames,
 } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
+import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import { GROUP_LIST_URL } from "../../constants";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import MatchedArtist from "../../interfaces/matched_artist";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
@@ -52,7 +52,7 @@ export default class RemoveCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "remove",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.remove.help.description",
             {
@@ -61,14 +61,14 @@ export default class RemoveCommand implements BaseCommand {
                 include: `\`${process.env.BOT_PREFIX}include\``,
             }
         ),
-        usage: `,remove [groups | exclude | include] [${state.localizer.translate(
+        usage: `,remove [groups | exclude | include] [${State.localizer.translate(
             guildID,
             "misc.listOfGroups"
         )}]`,
         examples: [
             {
                 example: "`,remove groups twice, red velvet`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.remove.help.example.groups",
                     {
@@ -80,7 +80,7 @@ export default class RemoveCommand implements BaseCommand {
             },
             {
                 example: "`,remove exclude BESTie, Dia, iKON`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.remove.help.example.exclude",
                     {
@@ -93,7 +93,7 @@ export default class RemoveCommand implements BaseCommand {
             },
             {
                 example: "`,remove include exo`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.remove.help.example.include",
                     {
@@ -108,7 +108,7 @@ export default class RemoveCommand implements BaseCommand {
                 style: 5 as const,
                 url: GROUP_LIST_URL,
                 type: 2 as const,
-                label: state.localizer.translate(
+                label: State.localizer.translate(
                     guildID,
                     "misc.interaction.fullGroupsList"
                 ),
@@ -141,11 +141,11 @@ export default class RemoveCommand implements BaseCommand {
 
         if (!currentMatchedArtists) {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "command.remove.failure.noGroupsSelected.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "command.remove.failure.noGroupsSelected.description"
                 ),
@@ -178,15 +178,15 @@ export default class RemoveCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "misc.failure.unrecognizedGroups.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "misc.failure.unrecognizedGroups.description",
                     {
-                        matchedGroupsAction: state.localizer.translate(
+                        matchedGroupsAction: State.localizer.translate(
                             message.guildID,
                             "command.remove.failure.unrecognizedGroups.removed"
                         ),

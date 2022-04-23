@@ -1,7 +1,7 @@
 import assert from "assert";
 import sinon from "sinon";
 import BeginCommand from "../../commands/game_commands/begin";
-import { GameType } from "../../types";
+import { GameType } from "../../enums/game_type";
 import GameSession from "../../structures/game_session";
 import KmqMember from "../../structures/kmq_member";
 import Player from "../../structures/player";

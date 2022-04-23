@@ -7,13 +7,14 @@ import {
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import validate from "../../helpers/validate";
-import { EnvType, GuildTextableMessage } from "../../types";
+import { GuildTextableMessage } from "../../types";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import GameSession from "../../structures/game_session";
 import ParsedMessage from "../../interfaces/parsed_message";
+import { EnvType } from "../../enums/env_type";
 
 const logger = new IPCLogger("messageCreate");
 
@@ -46,7 +47,7 @@ export default async function messageCreateHandler(
     if (message.author.id === process.env.BOT_CLIENT_ID || message.author.bot)
         return;
     if (!isGuildMessage(message)) return;
-    if (state.client.unavailableGuilds.has(message.guildID)) {
+    if (State.client.unavailableGuilds.has(message.guildID)) {
         logger.warn(`Server was unavailable. id = ${message.guildID}`);
         return;
     }
@@ -55,7 +56,7 @@ export default async function messageCreateHandler(
     const textChannel = message.channel as Eris.TextChannel;
     const messageContext = MessageContext.fromMessage(message);
     if (
-        message.mentions.includes(state.client.user) &&
+        message.mentions.includes(State.client.user) &&
         message.content.split(" ").length === 1
     ) {
         // Any message that mentions the bot sends the current options
@@ -65,16 +66,16 @@ export default async function messageCreateHandler(
     }
 
     const invokedCommand = parsedMessage
-        ? state.client.commands[parsedMessage.action]
+        ? State.client.commands[parsedMessage.action]
         : null;
 
     const session = Session.getSession(message.guildID);
     if (invokedCommand) {
-        if (!state.rateLimiter.check(message.author.id)) {
+        if (!State.rateLimiter.check(message.author.id)) {
             logger.error(
                 `User ${
                     message.author.id
-                } is being rate limited. ${state.rateLimiter.timeRemaining(
+                } is being rate limited. ${State.rateLimiter.timeRemaining(
                     message.author.id
                 )}ms remaining.`
             );
@@ -130,11 +131,11 @@ export default async function messageCreateHandler(
                 }
 
                 sendErrorMessage(messageContext, {
-                    title: state.localizer.translate(
+                    title: State.localizer.translate(
                         message.guildID,
                         "misc.failure.command.title"
                     ),
-                    description: state.localizer.translate(
+                    description: State.localizer.translate(
                         message.guildID,
                         "misc.failure.command.description",
                         { debugId }

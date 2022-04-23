@@ -5,7 +5,6 @@ import path from "path";
 import { Campaign } from "patreon-discord";
 
 import { IPCLogger } from "./logger";
-import { EnvType } from "./types";
 import {
     registerClientEvents,
     registerIntervals,
@@ -14,37 +13,18 @@ import {
     updateBotStatus,
 } from "./helpers/management_utils";
 import BotListingManager from "./helpers/bot_listing_manager";
-import RateLimiter from "./rate_limiter";
 import dbContext from "./database_context";
-import KmqClient from "./kmq_client";
+import type KmqClient from "./kmq_client";
 import ReloadCommand from "./commands/admin/reload";
 import EvalCommand from "./commands/admin/eval";
 import LocalizationManager from "./helpers/localization_manager";
 import Session from "./structures/session";
-import State from "./interfaces/state";
+import { EnvType } from "./enums/env_type";
+import State from "./state";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("kmq");
 config({ path: path.resolve(__dirname, "../.env") });
-
-const state: State = {
-    gameSessions: {},
-    musicSessions: {},
-    client: null,
-    aliases: {
-        artist: {},
-        song: {},
-    },
-    processStartTime: Date.now(),
-    ipc: null,
-    rateLimiter: new RateLimiter(15, 30),
-    bonusArtists: new Set<string>(),
-    locales: {},
-    localizer: null,
-    patreonCampaign: null,
-};
-
-export { state };
 
 export class BotWorker extends BaseClusterWorker {
     handleCommand = async (commandName: string): Promise<any> => {
@@ -63,7 +43,7 @@ export class BotWorker extends BaseClusterWorker {
                 ReloadCommand.reloadCommands();
                 return null;
             case "game_session_stats": {
-                const activePlayers = Object.values(state.gameSessions).reduce(
+                const activePlayers = Object.values(State.gameSessions).reduce(
                     (total, curr) =>
                         total +
                         curr.scoreboard
@@ -74,7 +54,7 @@ export class BotWorker extends BaseClusterWorker {
                 );
 
                 const activeGameSessions = Object.keys(
-                    state.gameSessions
+                    State.gameSessions
                 ).length;
 
                 return {
@@ -91,7 +71,7 @@ export class BotWorker extends BaseClusterWorker {
     shutdown = async (done): Promise<void> => {
         logger.debug("SHUTDOWN received, cleaning up...");
 
-        const endSessionPromises = Object.keys(state.gameSessions).map(
+        const endSessionPromises = Object.keys(State.gameSessions).map(
             async (guildID) => {
                 const session = Session.getSession(guildID);
                 logger.debug(`gid: ${guildID} | Forcing session end`);
@@ -111,9 +91,9 @@ export class BotWorker extends BaseClusterWorker {
 
     constructor(setup) {
         super(setup);
-        state.ipc = this.ipc;
-        state.client = this.bot as KmqClient;
-        state.localizer = new LocalizationManager();
+        State.ipc = this.ipc;
+        State.client = this.bot as KmqClient;
+        State.localizer = new LocalizationManager();
         logger.info(
             `Started worker ID: ${this.workerID} on cluster ID: ${this.clusterID}`
         );
@@ -137,7 +117,7 @@ export class BotWorker extends BaseClusterWorker {
                 process.env.PATREON_CAMPAIGN_ID
             ) {
                 logger.info("Initializing Patreon manager...");
-                state.patreonCampaign = new Campaign({
+                State.patreonCampaign = new Campaign({
                     campaignId: process.env.PATREON_CAMPAIGN_ID,
                     patreonToken: process.env.PATREON_CREATOR_ACCESS_TOKEN,
                 });
@@ -150,7 +130,7 @@ export class BotWorker extends BaseClusterWorker {
             )
         ) {
             logger.info("Dry run finished successfully.");
-            state.ipc.totalShutdown();
+            State.ipc.totalShutdown();
             return;
         }
 
@@ -160,10 +140,10 @@ export class BotWorker extends BaseClusterWorker {
         logger.info("Updating bot's status..");
         updateBotStatus();
         logger.info(
-            `Logged in as ${state.client.user.username}#${
-                state.client.user.discriminator
+            `Logged in as ${State.client.user.username}#${
+                State.client.user.discriminator
             }! in '${process.env.NODE_ENV}' mode (${
-                (Date.now() - state.processStartTime) / 1000
+                (Date.now() - State.processStartTime) / 1000
             }s)`
         );
     }

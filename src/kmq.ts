@@ -15,7 +15,7 @@ import { getInternalLogger } from "./logger";
 import { clearRestartNotification } from "./helpers/management_utils";
 import storeDailyStats from "./scripts/store-daily-stats";
 import dbContext from "./database_context";
-import { EnvType } from "./types";
+import { EnvType } from "./enums/env_type";
 import { seedAndDownloadNewSongs } from "./seed/seed_db";
 import {
     EMBED_ERROR_COLOR,

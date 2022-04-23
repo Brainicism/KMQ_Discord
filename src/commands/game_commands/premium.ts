@@ -3,7 +3,7 @@
 // import { isUserPremium } from "../../helpers/game_utils";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 // import MessageContext from "../../structures/message_context";
 import BaseCommand from "../interfaces/base_command";
 
@@ -15,14 +15,14 @@ export default class PremiumCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.premium.help.description"
         ),
         examples: [
             {
                 example: "`,premium`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.premium.help.example"
                 ),
@@ -39,49 +39,49 @@ export default class PremiumCommand implements BaseCommand {
         // call = async ({ message }: CommandArgs): Promise<void> => {
         // const premiumMember = await isUserPremium(message.author.id);
         // sendInfoMessage(MessageContext.fromMessage(message), {
-        //     description: `${state.localizer.translate(
+        //     description: `${State.localizer.translate(
         //         message.guildID,
         //         premiumMember
         //             ? "command.premium.status.description.premium"
         //             : "command.premium.status.description.nonPremium"
-        //     )}\n\n${state.localizer.translate(
+        //     )}\n\n${State.localizer.translate(
         //         message.guildID,
         //         "command.premium.status.description.connectionReminder"
         //     )}`,
         //     fields: [
         //         {
-        //             name: state.localizer.translate(
+        //             name: State.localizer.translate(
         //                 message.guildID,
         //                 "command.premium.status.perks.moreSongs.title"
         //             ),
-        //             value: state.localizer.translate(
+        //             value: State.localizer.translate(
         //                 message.guildID,
         //                 "command.premium.status.perks.moreSongs.description"
         //             ),
         //         },
         //         {
-        //             name: state.localizer.translate(
+        //             name: State.localizer.translate(
         //                 message.guildID,
         //                 "command.premium.status.perks.special.title"
         //             ),
-        //             value: state.localizer.translate(
+        //             value: State.localizer.translate(
         //                 message.guildID,
         //                 "command.premium.status.perks.special.description"
         //             ),
         //         },
         //         {
-        //             name: state.localizer.translate(
+        //             name: State.localizer.translate(
         //                 message.guildID,
         //                 "command.premium.status.perks.badge.title"
         //             ),
-        //             value: state.localizer.translate(
+        //             value: State.localizer.translate(
         //                 message.guildID,
         //                 "command.premium.status.perks.badge.description"
         //             ),
         //         },
         //     ],
         //     thumbnailUrl: KmqImages.HAPPY,
-        //     title: state.localizer.translate(
+        //     title: State.localizer.translate(
         //         message.guildID,
         //         premiumMember
         //             ? "command.premium.status.title.premium"

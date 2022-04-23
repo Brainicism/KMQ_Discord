@@ -1,4 +1,4 @@
-import Session from "../structures/session";
+import type Session from "../structures/session";
 import { GuildTextableMessage } from "../types";
 
 export default interface PrecheckArgs {

@@ -5,24 +5,15 @@ import {
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
+import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import HelpDocumentation from "../../interfaces/help";
 import CommandArgs from "../../interfaces/command_args";
+import { AnswerType } from "../../enums/option_types/answer_type";
 
 const logger = new IPCLogger("answer");
-
-export enum AnswerType {
-    TYPING = "typing",
-    TYPING_TYPOS = "typingtypos",
-    MULTIPLE_CHOICE_EASY = "easy",
-    MULTIPLE_CHOICE_MED = "medium",
-    MULTIPLE_CHOICE_HARD = "hard",
-}
-
-export const DEFAULT_ANSWER_TYPE = AnswerType.TYPING;
 
 export default class AnswerCommand implements BaseCommand {
     preRunChecks = [
@@ -44,7 +35,7 @@ export default class AnswerCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "answer",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.answer.help.description",
             {
@@ -59,21 +50,21 @@ export default class AnswerCommand implements BaseCommand {
         examples: [
             {
                 example: "`,answer typing`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.answer.help.example.typing"
                 ),
             },
             {
                 example: "`,answer typingtypos`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.answer.help.example.typingTypos"
                 ),
             },
             {
                 example: "`,answer easy`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
                     { optionCount: String(4), penalty: "0.25x" }
@@ -81,7 +72,7 @@ export default class AnswerCommand implements BaseCommand {
             },
             {
                 example: "`,answer medium`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
                     { optionCount: String(6), penalty: "0.5x" }
@@ -89,7 +80,7 @@ export default class AnswerCommand implements BaseCommand {
             },
             {
                 example: "`,answer hard`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
                     { optionCount: String(8), penalty: "0.75x" }

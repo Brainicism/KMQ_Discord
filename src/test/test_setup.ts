@@ -5,15 +5,15 @@ import kmqKnexConfig from "../config/knexfile_kmq";
 import dbContext from "../database_context";
 import Player from "../structures/player";
 import EliminationPlayer from "../structures/elimination_player";
-import { EnvType } from "../types";
 import { execSync } from "child_process";
 import { IPCLogger } from "../logger";
-import { state } from "../kmq_worker";
+import State from "../state";
 import LocalizationManager from "../helpers/localization_manager";
 import { DEFAULT_LIVES } from "../structures/elimination_scoreboard";
 import { databaseDownloadDir } from "../seed/seed_db";
 import path from "path";
 import { getNewConnection } from "../database_context";
+import { EnvType } from "../enums/env_type";
 
 const logger = new IPCLogger("test_setup");
 const sandbox = sinon.createSandbox();
@@ -25,7 +25,7 @@ before(async function () {
     }
 
     this.timeout(20000);
-    state.localizer = new LocalizationManager();
+    State.localizer = new LocalizationManager();
     sandbox.stub(discordUtils, "sendErrorMessage");
     sandbox.stub(discordUtils, "sendInfoMessage");
     sandbox

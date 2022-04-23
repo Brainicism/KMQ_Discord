@@ -3,7 +3,7 @@
 import schedule from "node-schedule";
 import _ from "lodash";
 import { IPCLogger } from "../logger";
-import { state } from "../kmq_worker";
+import State from "../state";
 import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
 import messageCreateHandler from "../events/client/messageCreate";
 import voiceChannelLeaveHandler from "../events/client/voiceChannelLeave";
@@ -24,7 +24,7 @@ import {
     getMatchingGroupNames,
     isPowerHour,
 } from "./game_utils";
-import { LocaleType } from "./localization_manager";
+import { LocaleType } from "../enums/locale_type";
 import updatePremiumUsers from "./patreon_manager";
 import dbContext from "../database_context";
 import debugHandler from "../events/client/debug";
@@ -36,8 +36,8 @@ import interactionCreateHandler from "../events/client/interactionCreate";
 import { chooseRandom, isWeekend } from "./utils";
 import { reloadFactCache } from "../fact_generator";
 import MessageContext from "../structures/message_context";
-import { EnvType } from "../types";
 import channelDeleteHandler from "../events/client/channelDelete";
+import { EnvType } from "../enums/env_type";
 
 const logger = new IPCLogger("management_utils");
 
@@ -45,7 +45,7 @@ const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
 
 /** Registers listeners on client events */
 export function registerClientEvents(): void {
-    const { client } = state;
+    const { client } = State;
     // remove listeners registered by eris-fleet, handle on cluster instead
     client.removeAllListeners("warn");
     client.removeAllListeners("error");
@@ -108,7 +108,7 @@ export const checkRestartNotification = async (
 ): Promise<void> => {
     let serversWarned = 0;
     if (RESTART_WARNING_INTERVALS.has(timeUntilRestart)) {
-        for (const gameSession of Object.values(state.gameSessions)) {
+        for (const gameSession of Object.values(State.gameSessions)) {
             if (gameSession.finished) continue;
             await sendInfoMessage(
                 new MessageContext(gameSession.textChannelID),
@@ -130,15 +130,15 @@ export const checkRestartNotification = async (
 /** Clear inactive voice connections */
 function clearInactiveVoiceConnections(): void {
     const existingVoiceChannelGuildIDs = Array.from(
-        state.client.voiceConnections.keys()
+        State.client.voiceConnections.keys()
     ) as Array<string>;
 
     const activeGameVoiceChannelGuildIDs = new Set(
-        Object.values(state.gameSessions).map((x) => x.guildID)
+        Object.values(State.gameSessions).map((x) => x.guildID)
     );
 
     const activeMusicVoiceChannelGuildIDs = new Set(
-        Object.values(state.musicSessions).map((x) => x.guildID)
+        Object.values(State.musicSessions).map((x) => x.guildID)
     );
 
     for (const existingVoiceChannelGuildID of existingVoiceChannelGuildIDs) {
@@ -146,21 +146,21 @@ function clearInactiveVoiceConnections(): void {
             !activeGameVoiceChannelGuildIDs.has(existingVoiceChannelGuildID) &&
             !activeMusicVoiceChannelGuildIDs.has(existingVoiceChannelGuildID)
         ) {
-            const voiceChannelID = state.client.voiceConnections.get(
+            const voiceChannelID = State.client.voiceConnections.get(
                 existingVoiceChannelGuildID
             ).channelID;
 
             logger.info(
                 `gid: ${existingVoiceChannelGuildID}, vid: ${voiceChannelID} | Disconnected inactive voice connection`
             );
-            state.client.voiceConnections.leave(existingVoiceChannelGuildID);
+            State.client.voiceConnections.leave(existingVoiceChannelGuildID);
         }
     }
 }
 
 /* Updates system statistics */
 async function updateSystemStats(clusterID: number): Promise<void> {
-    const { client } = state;
+    const { client } = State;
     const latencies = client.shards.map((x) => x.latency);
     const meanLatency = _.mean(latencies);
     const maxLatency = _.max(latencies);
@@ -192,7 +192,7 @@ async function updateSystemStats(clusterID: number): Promise<void> {
 
 /** Updates the bot's song listening status */
 export async function updateBotStatus(): Promise<void> {
-    const { client } = state;
+    const { client } = State;
     const timeUntilRestart = await getTimeUntilRestart();
     if (timeUntilRestart) {
         client.editStatus("dnd", {
@@ -255,8 +255,8 @@ export async function reloadAliases(): Promise<void> {
             .filter((x: string) => x);
     }
 
-    state.aliases.artist = artistAliases;
-    state.aliases.song = songAliases;
+    State.aliases.artist = artistAliases;
+    State.aliases.song = songAliases;
     logger.info("Reloaded alias data");
 }
 
@@ -279,7 +279,7 @@ export async function reloadBonusGroups(): Promise<void> {
             .limit(bonusGroupCount)
     ).map((x) => x.name);
 
-    state.bonusArtists = new Set(
+    State.bonusArtists = new Set(
         (await getMatchingGroupNames(artistNameQuery)).matchedGroups.map(
             (x) => x.name
         )
@@ -289,7 +289,7 @@ export async function reloadBonusGroups(): Promise<void> {
 async function reloadLocales(): Promise<void> {
     const updatedLocales = await dbContext.kmq("locale").select("*");
     for (const l of updatedLocales) {
-        state.locales[l.guild_id] = l.locale as LocaleType;
+        State.locales[l.guild_id] = l.locale as LocaleType;
     }
 }
 
@@ -319,7 +319,7 @@ export function registerIntervals(clusterID: number): void {
     // Every hour
     schedule.scheduleJob("0 * * * *", () => {
         if (!isPowerHour() || isWeekend()) return;
-        if (!state.client.guilds.has(process.env.DEBUG_SERVER_ID)) return;
+        if (!State.client.guilds.has(process.env.DEBUG_SERVER_ID)) return;
         // Ping a role in KMQ server notifying of power hour
         sendPowerHourNotification();
     });

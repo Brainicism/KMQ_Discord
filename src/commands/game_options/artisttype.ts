@@ -6,22 +6,15 @@ import {
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
+import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import HelpDocumentation from "../../interfaces/help";
 import CommandArgs from "../../interfaces/command_args";
+import { ArtistType } from "../../enums/option_types/artist_type";
 
 const logger = new IPCLogger("artisttype");
-
-export enum ArtistType {
-    SOLOIST = "soloists",
-    GROUP = "groups",
-    BOTH = "both",
-}
-
-export const DEFAULT_ARTIST_TYPE = ArtistType.BOTH;
 
 export default class ArtistTypeCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
@@ -40,7 +33,7 @@ export default class ArtistTypeCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "artisttype",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.artisttype.help.description",
             {
@@ -53,28 +46,28 @@ export default class ArtistTypeCommand implements BaseCommand {
         examples: [
             {
                 example: "`,artisttype soloists`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.soloists"
                 ),
             },
             {
                 example: "`,artisttype groups`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.groups"
                 ),
             },
             {
                 example: "`,artisttype both`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.both"
                 ),
             },
             {
                 example: "`,artisttype`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.reset"
                 ),
@@ -104,11 +97,11 @@ export default class ArtistTypeCommand implements BaseCommand {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "misc.failure.gameOptionConflict.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "misc.failure.gameOptionConflict.description",
                     {

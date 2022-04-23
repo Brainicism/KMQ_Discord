@@ -5,22 +5,16 @@ import {
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { GameOption } from "../../types";
+import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
+import { MultiGuessType } from "../../enums/option_types/multiguess_type";
+import { DEFAULT_MULTIGUESS_TYPE } from "../../constants";
 
 const logger = new IPCLogger("multiguess");
-
-export enum MultiGuessType {
-    ON = "on",
-    OFF = "off",
-}
-
-export const DEFAULT_MULTIGUESS_TYPE = MultiGuessType.ON;
-
 export default class MultiGuessCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
@@ -41,7 +35,7 @@ export default class MultiGuessCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "multiguess",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.multiguess.help.description",
             { on: `\`${MultiGuessType.ON}\`` }
@@ -50,21 +44,21 @@ export default class MultiGuessCommand implements BaseCommand {
         examples: [
             {
                 example: "`,multiguess on`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.multiguess.help.example.on"
                 ),
             },
             {
                 example: "`,multiguess off`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.multiguess.help.example.off"
                 ),
             },
             {
                 example: "`,multiguess`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.multiguess.help.example.reset",
                     { defaultMultiguess: `\`${DEFAULT_MULTIGUESS_TYPE}\`` }

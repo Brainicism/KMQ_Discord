@@ -6,7 +6,7 @@ import {
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { GameOption } from "../../types";
+import { GameOption } from "../../enums/game_option_name";
 import CommandPrechecks from "../../command_prechecks";
 import CommandArgs from "../../interfaces/command_args";
 

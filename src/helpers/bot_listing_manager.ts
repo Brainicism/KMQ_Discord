@@ -1,9 +1,9 @@
 import Axios from "axios";
 import { IPCLogger } from "../logger";
-import { state } from "../kmq_worker";
+import State from "../state";
 import dbContext from "../database_context";
-import { EnvType } from "../types";
 import { VOTE_BONUS_DURATION } from "../commands/game_commands/vote";
+import { EnvType } from "../enums/env_type";
 
 const logger = new IPCLogger("bot_stats_poster");
 interface BotListing {
@@ -80,7 +80,7 @@ export default class BotListingManager {
     // eslint-disable-next-line class-methods-use-this
     private async postStat(siteConfigKeyName: string): Promise<void> {
         const botListing = BOT_LISTING_SITES[siteConfigKeyName];
-        const { ipc } = state;
+        const { ipc } = State;
         try {
             await Axios.post(
                 botListing.endpoint.replace("%d", process.env.BOT_CLIENT_ID),

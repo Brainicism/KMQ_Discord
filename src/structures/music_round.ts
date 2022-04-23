@@ -1,9 +1,9 @@
 import Eris from "eris";
 import { EMBED_SUCCESS_BONUS_COLOR } from "../helpers/discord_utils";
-import PlayerRoundResult from "../interfaces/player_round_result";
-import QueriedSong from "../interfaces/queried_song";
-import UniqueSongCounter from "../interfaces/unique_song_counter";
-import MessageContext from "./message_context";
+import type PlayerRoundResult from "../interfaces/player_round_result";
+import type QueriedSong from "../interfaces/queried_song";
+import type UniqueSongCounter from "../interfaces/unique_song_counter";
+import type MessageContext from "./message_context";
 import Round from "./round";
 
 export default class MusicRound extends Round {

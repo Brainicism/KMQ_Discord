@@ -15,24 +15,22 @@ import {
 } from "../helpers/discord_utils";
 import dbContext from "../database_context";
 import GameSession from "./game_session";
-import GuildPreference from "./guild_preference";
-import KmqMember from "./kmq_member";
+import type GuildPreference from "./guild_preference";
+import type KmqMember from "./kmq_member";
 import MessageContext from "./message_context";
-import Round from "./round";
+import type Round from "./round";
 import SongSelector from "./song_selector";
 import {
     ensureVoiceConnection,
     getGuildPreference,
     getLocalizedSongName,
 } from "../helpers/game_utils";
-import { state } from "../kmq_worker";
-import { KmqImages } from "../constants";
+import State from "../state";
+import { KmqImages, specialFfmpegArgs } from "../constants";
 import { bold, friendlyFormattedNumber } from "../helpers/utils";
-import { SeekType } from "../commands/game_options/seek";
-import { specialFfmpegArgs } from "../commands/game_options/special";
-import MusicSession from "./music_session";
-import QueriedSong from "../interfaces/queried_song";
-import GuessResult from "../interfaces/guess_result";
+import type QueriedSong from "../interfaces/queried_song";
+import type GuessResult from "../interfaces/guess_result";
+import { SeekType } from "../enums/option_types/seek_type";
 
 const BOOKMARK_MESSAGE_SIZE = 10;
 
@@ -109,7 +107,7 @@ export default abstract class Session {
     abstract isPremium(): boolean;
 
     static getSession(guildID: string): Session {
-        return state.gameSessions[guildID] ?? state.musicSessions[guildID];
+        return State.gameSessions[guildID] ?? State.musicSessions[guildID];
     }
 
     /**
@@ -117,18 +115,22 @@ export default abstract class Session {
      * @param guildID - The guild ID
      */
     static deleteSession(guildID: string): void {
-        const isGameSession = guildID in state.gameSessions;
-        const isMusicSession = guildID in state.musicSessions;
+        const isGameSession = guildID in State.gameSessions;
+        const isMusicSession = guildID in State.musicSessions;
         if (!isGameSession && !isMusicSession) {
             logger.debug(`gid: ${guildID} | Session already ended`);
             return;
         }
 
         if (isGameSession) {
-            delete state.gameSessions[guildID];
+            delete State.gameSessions[guildID];
         } else if (isMusicSession) {
-            delete state.musicSessions[guildID];
+            delete State.musicSessions[guildID];
         }
+    }
+
+    isMusicSession(): boolean {
+        return false;
     }
 
     /**
@@ -146,11 +148,11 @@ export default abstract class Session {
                 await this.reloadSongs(guildPreference);
             } catch (err) {
                 await sendErrorMessage(messageContext, {
-                    title: state.localizer.translate(
+                    title: State.localizer.translate(
                         this.guildID,
                         "misc.failure.errorSelectingSong.title"
                     ),
-                    description: state.localizer.translate(
+                    description: State.localizer.translate(
                         this.guildID,
                         "misc.failure.errorSelectingSong.description"
                     ),
@@ -177,11 +179,11 @@ export default abstract class Session {
             );
 
             await sendInfoMessage(messageContext, {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     this.guildID,
                     "misc.uniqueSongsReset.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     this.guildID,
                     "misc.uniqueSongsReset.description",
                     { totalSongCount: friendlyFormattedNumber(totalSongCount) }
@@ -195,11 +197,11 @@ export default abstract class Session {
 
         if (randomSong === null) {
             sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     this.guildID,
                     "misc.failure.songQuery.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     this.guildID,
                     "misc.failure.songQuery.description"
                 ),
@@ -211,7 +213,7 @@ export default abstract class Session {
         // create a new round with randomly chosen song
         this.round = this.prepareRound(randomSong);
 
-        const voiceChannel = state.client.getChannel(
+        const voiceChannel = State.client.getChannel(
             this.voiceChannelID
         ) as Eris.VoiceChannel;
 
@@ -232,11 +234,11 @@ export default abstract class Session {
             );
 
             await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     this.guildID,
                     "misc.failure.vcJoin.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     this.guildID,
                     "misc.failure.vcJoin.description"
                 ),
@@ -300,12 +302,12 @@ export default abstract class Session {
             { correct: false }
         );
 
-        const voiceConnection = state.client.voiceConnections.get(this.guildID);
+        const voiceConnection = State.client.voiceConnections.get(this.guildID);
 
         // leave voice channel
         if (voiceConnection && voiceConnection.channelID) {
             voiceConnection.stopPlaying();
-            const voiceChannel = state.client.getChannel(
+            const voiceChannel = State.client.getChannel(
                 voiceConnection.channelID
             ) as Eris.VoiceChannel;
 
@@ -325,20 +327,20 @@ export default abstract class Session {
             ).reduce((total, x) => total + x.size, 0);
 
             await sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     this.guildID,
                     "misc.sendingBookmarkedSongs.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     this.guildID,
                     "misc.sendingBookmarkedSongs.description",
                     {
-                        songs: state.localizer.translateN(
+                        songs: State.localizer.translateN(
                             this.guildID,
                             "misc.plural.song",
                             bookmarkedSongCount
                         ),
-                        players: state.localizer.translateN(
+                        players: State.localizer.translateN(
                             this.guildID,
                             "misc.plural.player",
                             bookmarkedSongsPlayerCount
@@ -383,10 +385,7 @@ export default abstract class Session {
         messageContext: MessageContext,
         guildPreference: GuildPreference
     ): Promise<void> {
-        if (
-            this instanceof MusicSession ||
-            !guildPreference.isGuessTimeoutSet()
-        )
+        if (this.isMusicSession() || !guildPreference.isGuessTimeoutSet())
             return;
 
         const time = guildPreference.gameOptions.guessTimeout;
@@ -439,7 +438,7 @@ export default abstract class Session {
 
         await this.songSelector.reloadSongs(
             guildPreference,
-            session instanceof MusicSession ||
+            this.isMusicSession() ||
                 (session instanceof GameSession && session.isPremium())
         );
     }
@@ -477,11 +476,11 @@ export default abstract class Session {
     /** Sends a message notifying who the new owner is */
     updateOwner(): void {
         sendInfoMessage(new MessageContext(this.textChannelID), {
-            title: state.localizer.translate(
+            title: State.localizer.translate(
                 this.guildID,
                 "misc.gameOwnerChanged.title"
             ),
-            description: state.localizer.translate(
+            description: State.localizer.translate(
                 this.guildID,
                 "misc.gameOwnerChanged.description",
                 {
@@ -514,7 +513,7 @@ export default abstract class Session {
         if (!song) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                state.localizer.translate(
+                State.localizer.translate(
                     this.guildID,
                     "misc.failure.interaction.invalidBookmark",
                     { BOOKMARK_MESSAGE_SIZE: String(BOOKMARK_MESSAGE_SIZE) }
@@ -525,11 +524,11 @@ export default abstract class Session {
 
         tryCreateInteractionSuccessAcknowledgement(
             interaction,
-            state.localizer.translate(
+            State.localizer.translate(
                 this.guildID,
                 "misc.interaction.bookmarked.title"
             ),
-            state.localizer.translate(
+            State.localizer.translate(
                 this.guildID,
                 "misc.interaction.bookmarked.description",
                 {
@@ -555,7 +554,7 @@ export default abstract class Session {
 
         if (!this.isPremium()) {
             for (const [commandName, command] of Object.entries(
-                state.client.commands
+                State.client.commands
             )) {
                 if (command.resetPremium) {
                     logger.info(
@@ -591,10 +590,9 @@ export default abstract class Session {
         const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${round.song.youtubeLink}.ogg`;
 
         let seekLocation: number;
-        const seekType =
-            this instanceof MusicSession
-                ? SeekType.BEGINNING
-                : guildPreference.gameOptions.seekType;
+        const seekType = this.isMusicSession()
+            ? SeekType.BEGINNING
+            : guildPreference.gameOptions.seekType;
 
         if (seekType === SeekType.BEGINNING) {
             seekLocation = 0;
@@ -629,10 +627,9 @@ export default abstract class Session {
         try {
             let inputArgs = ["-ss", seekLocation.toString()];
             let encoderArgs = [];
-            const specialType =
-                this instanceof MusicSession
-                    ? null
-                    : guildPreference.gameOptions.specialType;
+            const specialType = this.isMusicSession()
+                ? null
+                : guildPreference.gameOptions.specialType;
 
             if (specialType) {
                 const ffmpegArgs = specialFfmpegArgs[specialType](seekLocation);
@@ -724,7 +721,7 @@ export default abstract class Session {
         if (!this.round.isValidInteraction(interaction.data.custom_id)) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                state.localizer.translate(
+                State.localizer.translate(
                     this.guildID,
                     "misc.failure.interaction.optionFromPreviousRound"
                 )
@@ -773,11 +770,11 @@ export default abstract class Session {
         });
 
         await sendErrorMessage(messageContext, {
-            title: state.localizer.translate(
+            title: State.localizer.translate(
                 this.guildID,
                 "misc.failure.songPlaying.title"
             ),
-            description: state.localizer.translate(
+            description: State.localizer.translate(
                 this.guildID,
                 "misc.failure.songPlaying.description"
             ),

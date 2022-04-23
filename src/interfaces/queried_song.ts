@@ -1,4 +1,4 @@
-import { Gender } from "../commands/game_options/gender";
+import { Gender } from "../enums/option_types/gender";
 
 export default interface QueriedSong {
     songName: string;

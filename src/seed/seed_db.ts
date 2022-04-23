@@ -8,9 +8,9 @@ import { IPCLogger } from "../logger";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import { DatabaseContext, getNewConnection } from "../database_context";
 import { generateKmqDataTables, loadStoredProcedures } from "./bootstrap";
-import { EnvType } from "../types";
 import _ from "lodash";
 import { parseJsonFile } from "../helpers/utils";
+import { EnvType } from "../enums/env_type";
 
 config({ path: path.resolve(__dirname, "../../.env") });
 const SQL_DUMP_EXPIRY = 10;

@@ -6,10 +6,10 @@ import {
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
+import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import HelpDocumentation from "../../interfaces/help";
 import CommandArgs from "../../interfaces/command_args";
 
@@ -43,18 +43,18 @@ export default class DurationCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "duration",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.duration.help.description"
         ),
-        usage: `,duration [${state.localizer.translate(
+        usage: `,duration [${State.localizer.translate(
             guildID,
             "command.duration.help.usage.minutes"
         )}]`,
         examples: [
             {
                 example: "`,duration 15`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.duration.help.example.set",
                     {
@@ -64,7 +64,7 @@ export default class DurationCommand implements BaseCommand {
             },
             {
                 example: "`,duration 5 add`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.duration.help.example.increment",
                     {
@@ -74,7 +74,7 @@ export default class DurationCommand implements BaseCommand {
             },
             {
                 example: "`,duration 5 remove`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.duration.help.example.decrement",
                     {
@@ -84,7 +84,7 @@ export default class DurationCommand implements BaseCommand {
             },
             {
                 example: "`,duration`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.duration.help.example.reset"
                 ),
@@ -120,11 +120,11 @@ export default class DurationCommand implements BaseCommand {
             } else if (action === DurationAction.REMOVE) {
                 if (!guildPreference.isDurationSet()) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: state.localizer.translate(
+                        title: State.localizer.translate(
                             message.guildID,
                             "command.duration.failure.removingDuration.title"
                         ),
-                        description: state.localizer.translate(
+                        description: State.localizer.translate(
                             message.guildID,
                             "command.duration.failure.removingDuration.notSet.description"
                         ),
@@ -135,11 +135,11 @@ export default class DurationCommand implements BaseCommand {
                 duration = currentDuration - durationDelta;
                 if (duration < 2) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: state.localizer.translate(
+                        title: State.localizer.translate(
                             message.guildID,
                             "command.duration.failure.removingDuration.title"
                         ),
-                        description: state.localizer.translate(
+                        description: State.localizer.translate(
                             message.guildID,
                             "command.duration.failure.removingDuration.tooShort.description"
                         ),

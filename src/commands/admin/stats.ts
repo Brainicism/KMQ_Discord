@@ -10,7 +10,7 @@ import dbContext from "../../database_context";
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import {
     friendlyFormattedDate,
     friendlyFormattedNumber,
@@ -25,7 +25,7 @@ const logger = new IPCLogger("stats");
 export default class StatsCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "stats",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.stats.help.description"
         ),
@@ -35,12 +35,12 @@ export default class StatsCommand implements BaseCommand {
     });
 
     call = async ({ message, channel }: CommandArgs): Promise<void> => {
-        const fleetStats = await state.ipc.getStats();
+        const fleetStats = await State.ipc.getStats();
         let gameSessionStats;
         try {
             gameSessionStats = Array.from(
                 (
-                    (await state.ipc.allClustersCommand(
+                    (await State.ipc.allClustersCommand(
                         "game_session_stats",
                         true,
                         5000
@@ -50,11 +50,11 @@ export default class StatsCommand implements BaseCommand {
         } catch (e) {
             logger.error(`Error retrieving stats via IPC. err = ${e}`);
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "command.stats.failure.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "command.stats.failure.description"
                 ),
@@ -143,66 +143,66 @@ export default class StatsCommand implements BaseCommand {
         )["stat_value"];
 
         const gameStatistics = {
-            [state.localizer.translate(
+            [State.localizer.translate(
                 message.guildID,
                 "command.stats.game.activeGameSessions"
             )]: activeGameSessions,
-            [state.localizer.translate(
+            [State.localizer.translate(
                 message.guildID,
                 "command.stats.game.activePlayers"
             )]: activePlayers,
-            [state.localizer.translate(
+            [State.localizer.translate(
                 message.guildID,
                 "command.stats.game.recentGameSessions"
             )]: `${friendlyFormattedNumber(
                 Number(recentGameSessions)
             )} | ${friendlyFormattedNumber(Number(totalGameSessions))}`,
-            [state.localizer.translate(
+            [State.localizer.translate(
                 message.guildID,
                 "command.stats.game.recentGameRounds"
             )]: `${friendlyFormattedNumber(
                 recentGameRounds
             )} | ${friendlyFormattedNumber(totalGameRounds)}`,
-            [state.localizer.translate(
+            [State.localizer.translate(
                 message.guildID,
                 "command.stats.game.recentPlayers"
             )]: `${friendlyFormattedNumber(
                 Number(recentPlayers)
             )} | ${friendlyFormattedNumber(Number(totalPlayers))}`,
-            [state.localizer.translate(
+            [State.localizer.translate(
                 message.guildID,
                 "command.stats.game.latestSongUpdate"
             )]: friendlyFormattedDate(latestAvailableSong, message.guildID),
         };
 
         const systemStatistics = {
-            [state.localizer.translate(
+            [State.localizer.translate(
                 message.guildID,
                 "command.stats.system.loadAverage"
             )]: os
                 .loadavg()
                 .map((x) => x.toFixed(2))
                 .toString(),
-            [state.localizer.translate(
+            [State.localizer.translate(
                 message.guildID,
                 "command.stats.system.memoryUsage"
             )]: `${fleetStats.totalRam.toFixed(2)} MB`,
-            [state.localizer.translate(
+            [State.localizer.translate(
                 message.guildID,
                 "command.stats.system.apiLatency"
             )]: `${channel.guild.shard.latency} ms`,
-            [state.localizer.translate(
+            [State.localizer.translate(
                 message.guildID,
                 "command.stats.system.requestLatency"
             )]: `${requestLatency} ms`,
-            [state.localizer.translate(
+            [State.localizer.translate(
                 message.guildID,
                 "command.stats.system.databaseLatency"
             )]: `${mysqlLatency.toFixed(2)} ms`,
-            [state.localizer.translate(
+            [State.localizer.translate(
                 message.guildID,
                 "command.stats.system.uptime"
-            )]: state.localizer.translateN(
+            )]: State.localizer.translateN(
                 message.guildID,
                 "misc.plural.hour",
                 Number((process.uptime() / (60 * 60)).toFixed(2))
@@ -211,7 +211,7 @@ export default class StatsCommand implements BaseCommand {
 
         const fields: Array<Eris.EmbedField> = [
             {
-                name: state.localizer.translate(
+                name: State.localizer.translate(
                     message.guildID,
                     "command.stats.game.title"
                 ),
@@ -220,7 +220,7 @@ export default class StatsCommand implements BaseCommand {
                     .join("\n")}\`\`\``,
             },
             {
-                name: state.localizer.translate(
+                name: State.localizer.translate(
                     message.guildID,
                     "command.stats.system.title"
                 ),
@@ -232,11 +232,11 @@ export default class StatsCommand implements BaseCommand {
 
         logger.info(`${getDebugLogHeader(message)} | Stats retrieved`);
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
+            title: State.localizer.translate(
                 message.guildID,
                 "command.stats.title"
             ),
-            description: state.localizer.translate(
+            description: State.localizer.translate(
                 message.guildID,
                 "command.stats.description",
                 {
@@ -244,7 +244,7 @@ export default class StatsCommand implements BaseCommand {
                 }
             ),
             fields,
-            footerText: `${getKmqCurrentVersion()} | ${state.localizer.translate(
+            footerText: `${getKmqCurrentVersion()} | ${State.localizer.translate(
                 message.guildID,
                 "command.stats.footer"
             )}`,

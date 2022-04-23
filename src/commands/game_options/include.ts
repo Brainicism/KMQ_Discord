@@ -9,10 +9,10 @@ import {
     getMatchingGroupNames,
 } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
-import { GameOption } from "../../types";
+import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import { GROUP_LIST_URL } from "../../constants";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
@@ -26,7 +26,7 @@ export default class IncludeCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "include",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.include.help.description",
             {
@@ -39,7 +39,7 @@ export default class IncludeCommand implements BaseCommand {
         examples: [
             {
                 example: "`,include blackpink`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.include.help.example.singleGroup",
                     { group: "Blackpink" }
@@ -47,7 +47,7 @@ export default class IncludeCommand implements BaseCommand {
             },
             {
                 example: "`,include blackpink, bts, red velvet`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.include.help.example.multipleGroups",
                     {
@@ -59,7 +59,7 @@ export default class IncludeCommand implements BaseCommand {
             },
             {
                 example: "`,include`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.include.help.example.reset"
                 ),
@@ -70,7 +70,7 @@ export default class IncludeCommand implements BaseCommand {
                 style: 5 as const,
                 url: GROUP_LIST_URL,
                 type: 2 as const,
-                label: state.localizer.translate(
+                label: State.localizer.translate(
                     guildID,
                     "misc.interaction.fullGroupsList"
                 ),
@@ -95,7 +95,7 @@ export default class IncludeCommand implements BaseCommand {
         let includeWarning = "";
         if (parsedMessage.components.length > 1) {
             if (["add", "remove"].includes(parsedMessage.components[0])) {
-                includeWarning = state.localizer.translate(
+                includeWarning = State.localizer.translate(
                     message.guildID,
                     "misc.warning.addRemoveOrdering.footer",
                     {
@@ -114,11 +114,11 @@ export default class IncludeCommand implements BaseCommand {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "misc.failure.gameOptionConflict.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "misc.failure.gameOptionConflict.description",
                     {
@@ -149,21 +149,21 @@ export default class IncludeCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "misc.failure.unrecognizedGroups.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "misc.failure.unrecognizedGroups.description",
                     {
-                        matchedGroupsAction: state.localizer.translate(
+                        matchedGroupsAction: State.localizer.translate(
                             message.guildID,
                             "command.include.failure.unrecognizedGroups.included"
                         ),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: unmatchedGroups.join(", "),
-                        solution: state.localizer.translate(
+                        solution: State.localizer.translate(
                             message.guildID,
                             "misc.failure.unrecognizedGroups.solution",
                             {

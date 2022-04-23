@@ -1,20 +1,20 @@
 import assert from "assert";
 import sinon from "sinon";
+import { ExpBonusModifier } from "../../enums/exp_bonus_modifier";
 import {
     calculateOptionsExpMultiplierInternal,
     calculateRoundExpMultiplier,
-    ExpBonusModifier,
     ExpBonusModifierValues,
     participantExpScalingModifier,
 } from "../../commands/game_commands/exp";
 import * as exp from "../../commands/game_commands/exp";
-import { AnswerType } from "../../commands/game_options/answer";
-import { GuessModeType } from "../../commands/game_options/guessmode";
 import * as game_utils from "../../helpers/game_utils";
 import * as utils from "../../helpers/utils";
 import GameRound from "../../structures/game_round";
 import GuildPreference from "../../structures/guild_preference";
-import { Gender } from "../../commands/game_options/gender";
+import { AnswerType } from "../../enums/option_types/answer_type";
+import { GuessModeType } from "../../enums/option_types/guess_mode_type";
+import { Gender } from "../../enums/option_types/gender";
 
 let guildPreference: GuildPreference;
 const sandbox = sinon.createSandbox();

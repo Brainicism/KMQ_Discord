@@ -1,8 +1,8 @@
-import Player from "./player";
+import type Player from "./player";
 import { bold, friendlyFormattedNumber } from "../helpers/utils";
 import { getMention } from "../helpers/discord_utils";
-import GuildPreference from "./guild_preference";
-import { state } from "../kmq_worker";
+import type GuildPreference from "./guild_preference";
+import State from "../state";
 import SuccessfulGuessResult from "../interfaces/success_guess_result";
 
 export const SCOREBOARD_FIELD_CUTOFF = 6;
@@ -38,7 +38,7 @@ export default class Scoreboard {
         let winnerStr = "";
 
         if (this.firstPlace.length === 1) {
-            return state.localizer.translate(
+            return State.localizer.translate(
                 guildID,
                 "misc.inGame.winMessage",
                 { playerName: this.firstPlace[0].name }

@@ -5,21 +5,16 @@ import {
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { GameOption } from "../../types";
+import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
+import { ReleaseType } from "../../enums/option_types/release_type";
+import { DEFAULT_RELEASE_TYPE } from "../../constants";
 
 const logger = new IPCLogger("release");
-
-export enum ReleaseType {
-    OFFICIAL = "official",
-    ALL = "all",
-}
-export const NON_OFFICIAL_VIDEO_TAGS = ["c", "d", "a", "r", "v", "x", "p"];
-export const DEFAULT_RELEASE_TYPE = ReleaseType.OFFICIAL;
 
 export default class ReleaseCommand implements BaseCommand {
     aliases = ["releases", "videotype"];
@@ -40,7 +35,7 @@ export default class ReleaseCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "release",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.release.help.description"
         ),
@@ -48,7 +43,7 @@ export default class ReleaseCommand implements BaseCommand {
         examples: [
             {
                 example: "`,release official`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.release.help.example.official",
                     { official: `\`${ReleaseType.OFFICIAL}\`` }
@@ -56,14 +51,14 @@ export default class ReleaseCommand implements BaseCommand {
             },
             {
                 example: "`,release all`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.release.help.example.all"
                 ),
             },
             {
                 example: "`,release`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.release.help.example.reset",
                     { defaultRelease: `\`${DEFAULT_RELEASE_TYPE}\`` }

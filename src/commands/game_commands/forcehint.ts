@@ -11,7 +11,7 @@ import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
 import { generateHint, validHintCheck } from "./hint";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import Session from "../../structures/session";
 import GameSession from "src/structures/game_session";
 import CommandArgs from "../../interfaces/command_args";
@@ -30,7 +30,7 @@ export default class ForceHintCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "forcehint",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.forcehint.help.description"
         ),
@@ -48,11 +48,11 @@ export default class ForceHintCommand implements BaseCommand {
             return;
         if (message.author.id !== gameSession.owner.id) {
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "command.forcehint.failure.notOwner.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "command.forcehint.failure.notOwner.description",
                     { mentionedUser: getMention(gameSession.owner.id) }
@@ -64,7 +64,7 @@ export default class ForceHintCommand implements BaseCommand {
         gameRound.hintRequested(message.author.id);
         gameRound.hintUsed = true;
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
+            title: State.localizer.translate(
                 message.guildID,
                 "command.hint.title"
             ),

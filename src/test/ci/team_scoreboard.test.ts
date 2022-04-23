@@ -3,7 +3,7 @@ import GuildPreference from "../../structures/guild_preference";
 import Team from "../../structures/team";
 import TeamScoreboard from "../../structures/team_scoreboard";
 import Player from "../../structures/player";
-import { GameOption } from "../../types";
+import { GameOption } from "../../enums/game_option_name";
 
 const FIRST_TEAM_NAME = "kmq team";
 const SECOND_TEAM_NAME = "not kmqer";

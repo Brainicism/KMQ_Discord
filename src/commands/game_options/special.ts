@@ -5,59 +5,18 @@ import {
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { getGuildPreference, isUserPremium } from "../../helpers/game_utils";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import { IPCLogger } from "../../logger";
-import GuildPreference from "../../structures/guild_preference";
-import { GameOption } from "../../types";
+import type GuildPreference from "../../structures/guild_preference";
+import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
+import { SpecialType } from "../../enums/option_types/special_type";
 
 const logger = new IPCLogger("special");
 
-export enum SpecialType {
-    REVERSE = "reverse",
-    SLOW = "slow",
-    FAST = "fast",
-    FASTER = "faster",
-    LOW_PITCH = "lowpitch",
-    HIGH_PITCH = "highpitch",
-    NIGHTCORE = "nightcore",
-}
-
-export const specialFfmpegArgs = {
-    [SpecialType.REVERSE]: (seek: number) => ({
-        inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "areverse"],
-    }),
-    [SpecialType.SLOW]: (seek: number) => ({
-        inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=tempo=0.5"],
-    }),
-    [SpecialType.FAST]: (seek: number) => ({
-        inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=tempo=1.5"],
-    }),
-    [SpecialType.FASTER]: (seek: number) => ({
-        inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=tempo=2"],
-    }),
-    [SpecialType.LOW_PITCH]: (seek: number) => ({
-        // 3 semitones lower
-        inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=pitch=0.840896"],
-    }),
-    [SpecialType.HIGH_PITCH]: (seek: number) => ({
-        // 4 semitones higher
-        inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=pitch=1.25992"],
-    }),
-    [SpecialType.NIGHTCORE]: (seek: number) => ({
-        inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=pitch=1.25992:tempo=1.25"],
-    }),
-};
 export default class SpecialCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
@@ -79,7 +38,7 @@ export default class SpecialCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "special",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.special.help.description"
         ),
@@ -87,56 +46,56 @@ export default class SpecialCommand implements BaseCommand {
         examples: [
             {
                 example: "`,special reverse`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.special.help.example.reverse"
                 ),
             },
             {
                 example: "`,special slow`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.special.help.example.slow"
                 ),
             },
             {
                 example: "`,special fast`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.special.help.example.fast"
                 ),
             },
             {
                 example: "`,special faster`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.special.help.example.faster"
                 ),
             },
             {
                 example: "`,special lowpitch`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.special.help.example.lowPitch"
                 ),
             },
             {
                 example: "`,special highpitch`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.special.help.example.highPitch"
                 ),
             },
             {
                 example: "`,special nightcore`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.special.help.example.nightcore"
                 ),
             },
             {
                 example: "`,special`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.special.help.example.reset"
                 ),
@@ -169,11 +128,11 @@ export default class SpecialCommand implements BaseCommand {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "command.premium.option.description_kmq_server"
                 ),
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "command.premium.option.title"
                 ),

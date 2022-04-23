@@ -2,11 +2,7 @@ import i18next from "i18next";
 import path from "path";
 import Backend from "i18next-fs-backend";
 import { getGuildLocale } from "./discord_utils";
-
-export enum LocaleType {
-    EN = "en",
-    KO = "ko",
-}
+import { LocaleType } from "../enums/locale_type";
 
 export const DEFAULT_LOCALE = LocaleType.EN;
 

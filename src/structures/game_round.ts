@@ -1,15 +1,12 @@
 import _ from "lodash";
 import Eris from "eris";
 import levenshtien from "damerau-levenshtein";
-import { GuessModeType } from "../commands/game_options/guessmode";
-import { state } from "../kmq_worker";
+import State from "../state";
 import KmqMember from "./kmq_member";
-import {
-    ExpBonusModifier,
-    ExpBonusModifierValues,
-} from "../commands/game_commands/exp";
+import { ExpBonusModifierValues } from "../commands/game_commands/exp";
+import { ExpBonusModifier } from "../enums/exp_bonus_modifier";
 import Round, { MAX_RUNNERS_UP } from "./round";
-import MessageContext from "./message_context";
+import type MessageContext from "./message_context";
 import {
     EMBED_ERROR_COLOR,
     EMBED_SUCCESS_BONUS_COLOR,
@@ -17,9 +14,10 @@ import {
     getMention,
 } from "../helpers/discord_utils";
 import { friendlyFormattedNumber } from "../helpers/utils";
-import PlayerRoundResult from "../interfaces/player_round_result";
+import type PlayerRoundResult from "../interfaces/player_round_result";
 import QueriedSong from "../interfaces/queried_song";
 import UniqueSongCounter from "../interfaces/unique_song_counter";
+import { GuessModeType } from "../enums/option_types/guess_mode_type";
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
 const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\(\)\+\u200B]/g;
@@ -212,7 +210,7 @@ export default class GameRound extends Round {
         if (!this.correctGuessers.some((x) => x.id === userID)) {
             this.correctGuessers.push(
                 KmqMember.fromUser(
-                    state.client.users.get(userID),
+                    State.client.users.get(userID),
                     pointsAwarded
                 )
             );
@@ -342,7 +340,7 @@ export default class GameRound extends Round {
     }
 
     isBonusArtist(): boolean {
-        return state.bonusArtists.has(this.song.artistName);
+        return State.bonusArtists.has(this.song.artistName);
     }
 
     getEndRoundDescription(
@@ -354,17 +352,17 @@ export default class GameRound extends Round {
         if (this.bonusModifier > 1 || this.isBonusArtist()) {
             let bonusType: string;
             if (this.isBonusArtist() && this.bonusModifier > 1) {
-                bonusType = state.localizer.translate(
+                bonusType = State.localizer.translate(
                     messageContext.guildID,
                     "misc.inGame.bonusExpArtistRound"
                 );
             } else if (this.bonusModifier > 1) {
-                bonusType = state.localizer.translate(
+                bonusType = State.localizer.translate(
                     messageContext.guildID,
                     "misc.inGame.bonusExpRound"
                 );
             } else {
-                bonusType = state.localizer.translate(
+                bonusType = State.localizer.translate(
                     messageContext.guildID,
                     "misc.inGame.bonusArtistRound"
                 );
@@ -385,7 +383,7 @@ export default class GameRound extends Round {
                     : ""
             }`;
 
-            correctDescription += state.localizer.translate(
+            correctDescription += State.localizer.translate(
                 messageContext.guildID,
                 "misc.inGame.correctGuess",
                 {
@@ -408,13 +406,13 @@ export default class GameRound extends Round {
                     .join("\n");
 
                 if (runnersUp.length >= MAX_RUNNERS_UP) {
-                    runnersUpDescription += `\n${state.localizer.translate(
+                    runnersUpDescription += `\n${State.localizer.translate(
                         messageContext.guildID,
                         "misc.andManyOthers"
                     )}`;
                 }
 
-                correctDescription += `\n\n**${state.localizer.translate(
+                correctDescription += `\n\n**${State.localizer.translate(
                     messageContext.guildID,
                     "misc.inGame.runnersUp"
                 )}**\n${runnersUpDescription}`;
@@ -422,7 +420,7 @@ export default class GameRound extends Round {
         }
 
         if (!correctGuess) {
-            correctDescription = state.localizer.translate(
+            correctDescription = State.localizer.translate(
                 messageContext.guildID,
                 "misc.inGame.noCorrectGuesses"
             );

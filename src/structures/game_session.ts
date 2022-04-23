@@ -33,32 +33,32 @@ import {
     codeLine,
     chunkArray,
 } from "../helpers/utils";
-import { state } from "../kmq_worker";
+import State from "../state";
+
 import { IPCLogger } from "../logger";
-import { GameType } from "../types";
 import GameRound from "./game_round";
-import GuildPreference from "./guild_preference";
+import type GuildPreference from "./guild_preference";
 import Scoreboard from "./scoreboard";
 import EliminationScoreboard from "./elimination_scoreboard";
 import TeamScoreboard from "./team_scoreboard";
-import { GuessModeType } from "../commands/game_options/guessmode";
 import { getRankNameByLevel } from "../commands/game_commands/profile";
 import EliminationPlayer from "./elimination_player";
-import { KmqImages } from "../constants";
+import { KmqImages, SONG_START_DELAY } from "../constants";
 import MessageContext from "./message_context";
 import KmqMember from "./kmq_member";
-import { MultiGuessType } from "../commands/game_options/multiguess";
-import { AnswerType } from "../commands/game_options/answer";
 import { calculateTotalRoundExp } from "../commands/game_commands/exp";
 import Player from "../structures/player";
 import Session from "./session";
-import Round from "./round";
-import QueriedSong from "../interfaces/queried_song";
-import GuessResult from "../interfaces/guess_result";
+import type Round from "./round";
+import type QueriedSong from "../interfaces/queried_song";
+import type GuessResult from "../interfaces/guess_result";
 import SuccessfulGuessResult from "../interfaces/success_guess_result";
+import { GuessModeType } from "../enums/option_types/guess_mode_type";
+import { AnswerType } from "../enums/option_types/answer_type";
+import { MultiGuessType } from "../enums/option_types/multiguess_type";
+import { GameType } from "../enums/game_type";
 
 const MULTIGUESS_DELAY = 1500;
-const SONG_START_DELAY = 3000;
 
 const logger = new IPCLogger("game_session");
 
@@ -243,18 +243,18 @@ export default class GameSession extends Session {
             this.round.interactionMessage = await sendInfoMessage(
                 new MessageContext(this.textChannelID),
                 {
-                    title: state.localizer.translate(
+                    title: State.localizer.translate(
                         this.guildID,
                         "misc.interaction.guess.title",
                         {
                             songOrArtist:
                                 guildPreference.gameOptions.guessModeType ===
                                 GuessModeType.ARTIST
-                                    ? state.localizer.translate(
+                                    ? State.localizer.translate(
                                           this.guildID,
                                           "misc.artist"
                                       )
-                                    : state.localizer.translate(
+                                    : State.localizer.translate(
                                           this.guildID,
                                           "misc.song"
                                       ),
@@ -421,7 +421,7 @@ export default class GameSession extends Session {
                         b.endLevel - b.startLevel - (a.endLevel - a.startLevel)
                 )
                 .map((leveledUpPlayer) =>
-                    state.localizer.translate(
+                    State.localizer.translate(
                         this.guildID,
                         "misc.levelUp.entry",
                         {
@@ -445,7 +445,7 @@ export default class GameSession extends Session {
 
             if (leveledUpPlayers.length > 10) {
                 levelUpMessages.push(
-                    state.localizer.translate(
+                    State.localizer.translate(
                         this.guildID,
                         "misc.andManyOthers"
                     )
@@ -453,7 +453,7 @@ export default class GameSession extends Session {
             }
 
             sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     this.guildID,
                     "misc.levelUp.title"
                 ),
@@ -628,7 +628,7 @@ export default class GameSession extends Session {
         if (this.round.incorrectMCGuessers.has(interaction.member.id)) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                state.localizer.translate(
+                State.localizer.translate(
                     this.guildID,
                     "misc.failure.interaction.alreadyEliminated"
                 )
@@ -641,7 +641,7 @@ export default class GameSession extends Session {
         ) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                state.localizer.translate(
+                State.localizer.translate(
                     this.guildID,
                     "misc.failure.interaction.eliminated"
                 )

@@ -9,18 +9,19 @@ import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
 import { getGuildPreference } from "../../helpers/game_utils";
-import { GuessModeType } from "../game_options/guessmode";
 import { codeLine } from "../../helpers/utils";
-import { GuildTextableMessage, GameType } from "../../types";
+import { GuildTextableMessage } from "../../types";
 import GameSession from "../../structures/game_session";
 import EliminationScoreboard from "../../structures/elimination_scoreboard";
 import GuildPreference from "../../structures/guild_preference";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import GameRound from "../../structures/game_round";
 import Session from "../../structures/session";
 import HelpDocumentation from "../../interfaces/help";
 import CommandArgs from "../../interfaces/command_args";
+import { GuessModeType } from "../../enums/option_types/guess_mode_type";
+import { GameType } from "../../enums/game_type";
 
 const logger = new IPCLogger("hint");
 
@@ -63,11 +64,11 @@ async function sendHintNotification(
         await sendInfoMessage(
             MessageContext.fromMessage(message),
             {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "command.hint.request.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "command.hint.request.description",
                     {
@@ -86,11 +87,11 @@ async function sendHintNotification(
         await sendInfoMessage(
             MessageContext.fromMessage(message),
             {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "command.hint.request.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "command.hint.request.description",
                     {
@@ -121,11 +122,11 @@ export function validHintCheck(
     if (!gameSession || !gameRound) {
         logger.warn(`${getDebugLogHeader(message)} | No active game session`);
         sendErrorMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
+            title: State.localizer.translate(
                 message.guildID,
                 "command.hint.failure.invalidHintRequest.title"
             ),
-            description: state.localizer.translate(
+            description: State.localizer.translate(
                 message.guildID,
                 "command.hint.failure.invalidHintRequest.noSongPlaying.description"
             ),
@@ -140,11 +141,11 @@ export function validHintCheck(
 
         if (eliminationScoreboard.isPlayerEliminated(message.author.id)) {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "command.hint.failure.invalidHintRequest.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "command.hint.failure.invalidHintRequest.eliminated.description"
                 ),
@@ -154,11 +155,11 @@ export function validHintCheck(
         }
     } else if (guildPreference.isMultipleChoiceMode()) {
         sendErrorMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
+            title: State.localizer.translate(
                 message.guildID,
                 "command.hint.failure.invalidHintRequest.title"
             ),
-            description: state.localizer.translate(
+            description: State.localizer.translate(
                 message.guildID,
                 "command.hint.failure.invalidHintRequest.multipleChoice.description"
             ),
@@ -183,14 +184,14 @@ export function generateHint(
 ): string {
     switch (guessMode) {
         case GuessModeType.ARTIST:
-            return `${state.localizer.translate(
+            return `${State.localizer.translate(
                 guildID,
                 "command.hint.artistName"
             )}: ${codeLine(gameRound.hints.artistHint)}`;
         case GuessModeType.SONG_NAME:
         case GuessModeType.BOTH:
         default:
-            return `${state.localizer.translate(
+            return `${State.localizer.translate(
                 guildID,
                 "command.hint.songName"
             )}: ${codeLine(gameRound.hints.songHint)}`;
@@ -208,7 +209,7 @@ export default class HintCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "hint",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.hint.help.description"
         ),
@@ -229,7 +230,7 @@ export default class HintCommand implements BaseCommand {
         if (isHintAvailable(message, gameSession)) {
             gameRound.hintUsed = true;
             await sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "command.hint.title"
                 ),

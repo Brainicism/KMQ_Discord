@@ -11,15 +11,15 @@ import KmqMember from "./kmq_member";
 import Round from "./round";
 import Session from "./session";
 import MusicRound from "./music_round";
-import GuildPreference from "./guild_preference";
-import MessageContext from "./message_context";
+import type GuildPreference from "./guild_preference";
+import type MessageContext from "./message_context";
 import { IPCLogger } from "../logger";
 import { isUserPremium } from "../helpers/game_utils";
 import { isSkipMajority, skipSong } from "../commands/game_commands/skip";
-import { state } from "../kmq_worker";
+import State from "../state";
 import { getGuildPreference } from "../helpers/game_utils";
 import QueriedSong from "../interfaces/queried_song";
-import GuessResult from "../interfaces/guess_result";
+import type GuessResult from "../interfaces/guess_result";
 
 const logger = new IPCLogger("music_session");
 
@@ -54,6 +54,10 @@ export default class MusicSession extends Session {
         this.owner = KmqMember.fromUser(chooseRandom(voiceMembers));
 
         super.updateOwner();
+    }
+
+    isMusicSession(): boolean {
+        return true;
     }
 
     /**
@@ -137,8 +141,8 @@ export default class MusicSession extends Session {
                 await this.round.interactionSuccessfulSkip();
                 await tryCreateInteractionSuccessAcknowledgement(
                     interaction,
-                    state.localizer.translate(guildID, "misc.skip"),
-                    state.localizer.translate(
+                    State.localizer.translate(guildID, "misc.skip"),
+                    State.localizer.translate(
                         guildID,
                         "command.skip.success.description",
                         {
@@ -157,11 +161,11 @@ export default class MusicSession extends Session {
             } else {
                 tryCreateInteractionSuccessAcknowledgement(
                     interaction,
-                    state.localizer.translate(
+                    State.localizer.translate(
                         guildID,
                         "command.skip.vote.title"
                     ),
-                    state.localizer.translate(
+                    State.localizer.translate(
                         guildID,
                         "command.skip.vote.description",
                         {
