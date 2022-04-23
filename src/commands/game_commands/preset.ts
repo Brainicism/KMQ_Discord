@@ -5,20 +5,19 @@ import {
     sendInfoMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import BaseCommand from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import GuildPreference, {
-    GameOptionInternalToGameOption,
-} from "../../structures/guild_preference";
+import type GuildPreference from "../../structures/guild_preference";
+import { GameOptionInternalToGameOption } from "../../structures/guild_preference";
 import { KmqImages } from "../../constants";
 import dbContext from "../../database_context";
 import CommandPrechecks from "../../command_prechecks";
-import { GameOption } from "../../enums/game_option_name";
+import type { GameOption } from "../../enums/game_option_name";
 import State from "../../state";
-import CommandArgs from "../../interfaces/command_args";
-import HelpDocumentation from "../../interfaces/help";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("preset");
 const PRESET_NAME_MAX_LENGTH = 25;

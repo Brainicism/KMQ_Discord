@@ -1,5 +1,5 @@
 import _ from "lodash";
-import Eris from "eris";
+import type Eris from "eris";
 import levenshtien from "damerau-levenshtein";
 import State from "../state";
 import KmqMember from "./kmq_member";
@@ -15,8 +15,8 @@ import {
 } from "../helpers/discord_utils";
 import { friendlyFormattedNumber } from "../helpers/utils";
 import type PlayerRoundResult from "../interfaces/player_round_result";
-import QueriedSong from "../interfaces/queried_song";
-import UniqueSongCounter from "../interfaces/unique_song_counter";
+import type QueriedSong from "../interfaces/queried_song";
+import type UniqueSongCounter from "../interfaces/unique_song_counter";
 import { GuessModeType } from "../enums/option_types/guess_mode_type";
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape

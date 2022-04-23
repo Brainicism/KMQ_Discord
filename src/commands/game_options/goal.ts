@@ -1,4 +1,4 @@
-import BaseCommand from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
@@ -10,9 +10,9 @@ import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import State from "../../state";
 import Session from "../../structures/session";
-import GameSession from "../../structures/game_session";
-import CommandArgs from "../../interfaces/command_args";
-import HelpDocumentation from "../../interfaces/help";
+import type GameSession from "../../structures/game_session";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 import { GameOption } from "../../enums/game_option_name";
 import { GameType } from "../../enums/game_type";
 

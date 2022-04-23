@@ -5,7 +5,7 @@ import { GameType } from "../../enums/game_type";
 import GameSession from "../../structures/game_session";
 import KmqMember from "../../structures/kmq_member";
 import Player from "../../structures/player";
-import TeamScoreboard from "../../structures/team_scoreboard";
+import type TeamScoreboard from "../../structures/team_scoreboard";
 import MessageContext from "../../structures/message_context";
 import * as discordUtils from "../../helpers/discord_utils";
 

@@ -1,4 +1,4 @@
-import BaseCommand from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import { getGuildPreference } from "../../helpers/game_utils";
 import {
@@ -8,10 +8,10 @@ import {
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import { GameOptionInternalToGameOption } from "../../structures/guild_preference";
-import { GameOption } from "../../enums/game_option_name";
+import type { GameOption } from "../../enums/game_option_name";
 import State from "../../state";
-import HelpDocumentation from "../../interfaces/help";
-import CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
+import type CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("reset");
 

@@ -1,5 +1,5 @@
 import dbContext from "../database_context";
-import Patron from "../interfaces/patron";
+import type Patron from "../interfaces/patron";
 import State from "../state";
 import { IPCLogger } from "../logger";
 import { addPremium, removePremium } from "./game_utils";

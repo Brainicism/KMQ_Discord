@@ -1,6 +1,6 @@
 import Scoreboard from "./scoreboard";
 import type EliminationPlayer from "./elimination_player";
-import SuccessfulGuessResult from "../interfaces/success_guess_result";
+import type SuccessfulGuessResult from "../interfaces/success_guess_result";
 
 export const DEFAULT_LIVES = 10;
 

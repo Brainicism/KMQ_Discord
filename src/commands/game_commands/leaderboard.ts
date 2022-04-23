@@ -1,14 +1,14 @@
-import Eris from "eris";
+import type Eris from "eris";
 import dbContext from "../../database_context";
-import BaseCommand from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
+import type { EmbedGenerator } from "../../helpers/discord_utils";
 import {
     getDebugLogHeader,
     getUserTag,
     sendErrorMessage,
     sendInfoMessage,
     sendPaginationedEmbed,
-    EmbedGenerator,
     sendMessage,
 } from "../../helpers/discord_utils";
 import { getRankNameByLevel } from "./profile";
@@ -19,12 +19,12 @@ import {
     arrayToString,
 } from "../../helpers/utils";
 import State from "../../state";
-import { GuildTextableMessage } from "../../types";
+import type { GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import { sendValidationErrorMessage } from "../../helpers/validate";
-import CommandArgs from "../../interfaces/command_args";
-import HelpDocumentation from "../../interfaces/help";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 import { LeaderboardScope } from "../../enums/option_types/leaderboard_scope";
 import { LeaderboardDuration } from "../../enums/option_types/leaderboard_duration";
 import { LeaderboardType } from "../../enums/option_types/leaderboard_type";

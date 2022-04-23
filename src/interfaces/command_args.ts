@@ -1,6 +1,6 @@
-import Eris from "eris";
-import { GuildTextableMessage } from "../types";
-import ParsedMessage from "./parsed_message";
+import type Eris from "eris";
+import type { GuildTextableMessage } from "../types";
+import type ParsedMessage from "./parsed_message";
 
 export default interface CommandArgs {
     message: GuildTextableMessage;

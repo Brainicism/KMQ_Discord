@@ -1,6 +1,6 @@
 import assert from "assert";
 import GuildPreference from "../../structures/guild_preference";
-import Team from "../../structures/team";
+import type Team from "../../structures/team";
 import TeamScoreboard from "../../structures/team_scoreboard";
 import Player from "../../structures/player";
 import { GameOption } from "../../enums/game_option_name";

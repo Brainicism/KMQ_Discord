@@ -1,4 +1,4 @@
-import BaseCommand from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
 import {
     sendErrorMessage,
     areUserAndBotInSameVoiceChannel,
@@ -14,8 +14,8 @@ import { KmqImages } from "../../constants";
 import CommandPrechecks from "../../command_prechecks";
 import State from "../../state";
 import Session from "../../structures/session";
-import CommandArgs from "../../interfaces/command_args";
-import HelpDocumentation from "../../interfaces/help";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("forceskip");
 

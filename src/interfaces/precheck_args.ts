@@ -1,5 +1,5 @@
 import type Session from "../structures/session";
-import { GuildTextableMessage } from "../types";
+import type { GuildTextableMessage } from "../types";
 
 export default interface PrecheckArgs {
     message: GuildTextableMessage;

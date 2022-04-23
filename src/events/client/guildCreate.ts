@@ -1,4 +1,4 @@
-import Eris from "eris";
+import type Eris from "eris";
 import { IPCLogger } from "../../logger";
 import { getDebugChannel, sendInfoMessage } from "../../helpers/discord_utils";
 import MessageContext from "../../structures/message_context";

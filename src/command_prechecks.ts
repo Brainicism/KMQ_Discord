@@ -11,7 +11,7 @@ import State from "./state";
 import MusicSession from "./structures/music_session";
 import { getTimeUntilRestart } from "./helpers/management_utils";
 import { isUserPremium } from "./helpers/game_utils";
-import PrecheckArgs from "./interfaces/precheck_args";
+import type PrecheckArgs from "./interfaces/precheck_args";
 import { GameType } from "./enums/game_type";
 
 const logger = new IPCLogger("command_prechecks");

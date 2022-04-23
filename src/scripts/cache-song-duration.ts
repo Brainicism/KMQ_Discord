@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
-import { DatabaseContext, getNewConnection } from "../database_context";
+import type { DatabaseContext } from "../database_context";
+import { getNewConnection } from "../database_context";
 import { getAudioDurationInSeconds } from "../helpers/utils";
 import { IPCLogger } from "../logger";
 

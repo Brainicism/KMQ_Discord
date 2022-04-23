@@ -3,7 +3,7 @@ import {
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import BaseCommand from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
 import {
     getGuildPreference,
     getMatchingGroupNames,
@@ -14,9 +14,9 @@ import MessageContext from "../../structures/message_context";
 import { GROUP_LIST_URL } from "../../constants";
 import CommandPrechecks from "../../command_prechecks";
 import State from "../../state";
-import MatchedArtist from "../../interfaces/matched_artist";
-import CommandArgs from "../../interfaces/command_args";
-import HelpDocumentation from "../../interfaces/help";
+import type MatchedArtist from "../../interfaces/matched_artist";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("remove");
 

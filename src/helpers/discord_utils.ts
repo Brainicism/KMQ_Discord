@@ -15,11 +15,11 @@ import {
     userBonusIsActive,
 } from "./game_utils";
 import { getFact } from "../fact_generator";
+import type { GuildTextableMessage } from "../types";
 import {
     GameOptionCommand,
     PriorityGameOption,
     ConflictingGameOptions,
-    GuildTextableMessage,
 } from "../types";
 import {
     chunkArray,
@@ -47,11 +47,11 @@ import { DEFAULT_LOCALE } from "./localization_manager";
 import type Round from "../structures/round";
 import Session from "../structures/session";
 import MusicRound from "../structures/music_round";
-import EmbedPayload from "../interfaces/embed_payload";
-import GameInfoMessage from "../interfaces/game_info_message";
-import QueriedSong from "../interfaces/queried_song";
-import GameOptions from "../interfaces/game_options";
-import UniqueSongCounter from "../interfaces/unique_song_counter";
+import type EmbedPayload from "../interfaces/embed_payload";
+import type GameInfoMessage from "../interfaces/game_info_message";
+import type QueriedSong from "../interfaces/queried_song";
+import type GameOptions from "../interfaces/game_options";
+import type UniqueSongCounter from "../interfaces/unique_song_counter";
 import { GuessModeType } from "../enums/option_types/guess_mode_type";
 import { GameOption } from "../enums/game_option_name";
 import { GameType } from "../enums/game_type";

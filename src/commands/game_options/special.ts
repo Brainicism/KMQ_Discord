@@ -1,4 +1,4 @@
-import BaseCommand from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     sendErrorMessage,
@@ -11,8 +11,8 @@ import type GuildPreference from "../../structures/guild_preference";
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import CommandArgs from "../../interfaces/command_args";
-import HelpDocumentation from "../../interfaces/help";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
 import { SpecialType } from "../../enums/option_types/special_type";
 
 const logger = new IPCLogger("special");

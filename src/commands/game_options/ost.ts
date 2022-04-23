@@ -3,14 +3,14 @@ import {
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
-import BaseCommand from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import State from "../../state";
-import HelpDocumentation from "../../interfaces/help";
-import CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
+import type CommandArgs from "../../interfaces/command_args";
 import { OstPreference } from "../../enums/option_types/ost_preference";
 import { DEFAULT_OST_PREFERENCE } from "../../constants";
 

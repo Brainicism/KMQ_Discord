@@ -1,4 +1,5 @@
-import Eris, { GuildTextableChannel } from "eris";
+import type { GuildTextableChannel } from "eris";
+import type Eris from "eris";
 import { GameOption } from "./enums/game_option_name";
 
 export type GuildTextableMessage = Eris.Message<GuildTextableChannel>;

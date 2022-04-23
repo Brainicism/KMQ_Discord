@@ -1,4 +1,4 @@
-import Eris from "eris";
+import type Eris from "eris";
 import { getUserTag } from "../helpers/discord_utils";
 import State from "../state";
 import KmqMember from "./kmq_member";

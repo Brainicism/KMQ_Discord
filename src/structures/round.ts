@@ -1,4 +1,4 @@
-import Eris from "eris";
+import type Eris from "eris";
 import State from "../state";
 import type MessageContext from "./message_context";
 import { codeLine, friendlyFormattedNumber } from "../helpers/utils";

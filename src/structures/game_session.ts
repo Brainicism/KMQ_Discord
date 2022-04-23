@@ -1,5 +1,5 @@
 /* eslint-disable no-return-assign */
-import Eris from "eris";
+import type Eris from "eris";
 import _ from "lodash";
 import * as uuid from "uuid";
 
@@ -52,7 +52,7 @@ import Session from "./session";
 import type Round from "./round";
 import type QueriedSong from "../interfaces/queried_song";
 import type GuessResult from "../interfaces/guess_result";
-import SuccessfulGuessResult from "../interfaces/success_guess_result";
+import type SuccessfulGuessResult from "../interfaces/success_guess_result";
 import { GuessModeType } from "../enums/option_types/guess_mode_type";
 import { AnswerType } from "../enums/option_types/answer_type";
 import { MultiGuessType } from "../enums/option_types/multiguess_type";

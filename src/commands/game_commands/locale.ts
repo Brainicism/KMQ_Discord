@@ -1,4 +1,4 @@
-import BaseCommand from "../interfaces/base_command";
+import type BaseCommand from "../interfaces/base_command";
 import {
     getDebugLogHeader,
     sendInfoMessage,
@@ -10,8 +10,8 @@ import { DEFAULT_LOCALE } from "../../helpers/localization_manager";
 import dbContext from "../../database_context";
 import State from "../../state";
 import { KmqImages } from "../../constants";
-import HelpDocumentation from "../../interfaces/help";
-import CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
+import type CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("locale");
 
