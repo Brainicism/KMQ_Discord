@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { isMaster } from "cluster";
+import isMaster from "cluster";
 import os from "os";
 import { config } from "dotenv";
 import path from "path";
