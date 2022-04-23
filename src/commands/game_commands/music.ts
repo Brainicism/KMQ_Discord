@@ -196,9 +196,8 @@ export default class MusicCommand implements BaseCommand {
             guildPreference
         );
 
+        state.musicSessions[guildID] = musicSession;
         musicSession.startRound(guildPreference, messageContext);
         logger.info(`${getDebugLogHeader(message)} | Music session starting`);
-
-        state.musicSessions[guildID] = musicSession;
     };
 }

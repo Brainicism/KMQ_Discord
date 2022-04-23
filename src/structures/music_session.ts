@@ -1,5 +1,5 @@
 import Eris from "eris";
-import { chooseRandom, delay } from "../helpers/utils";
+import { chooseRandom } from "../helpers/utils";
 import {
     getCurrentVoiceMembers,
     sendRoundMessage,
@@ -9,7 +9,7 @@ import {
 } from "../helpers/discord_utils";
 import KmqMember from "./kmq_member";
 import Round from "./round";
-import Session, { SONG_START_DELAY } from "./session";
+import Session from "./session";
 import MusicRound from "./music_round";
 import GuildPreference from "./guild_preference";
 import MessageContext from "./message_context";
@@ -65,7 +65,6 @@ export default class MusicSession extends Session {
         guildPreference: GuildPreference,
         messageContext: MessageContext
     ): Promise<void> {
-        await delay(SONG_START_DELAY);
         if (this.finished || this.round) {
             return;
         }

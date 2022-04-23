@@ -588,11 +588,8 @@
                     "description": "You do not have permission to use this command.",
                     "title": "Hidden Game Mode"
                 },
-                "overrideTeamsOrElimination": {
+                "overrideTeams": {
                     "description": "If you meant to start a {{oldGameType}} game, {{end}} this game, call {{playOldGameType}}, {{gameSpecificInstructions}}, and then call {{begin}}.",
-                    "elimination": {
-                        "join": "{{join}} the game"
-                    },
                     "teams": {
                         "join": "`{{join}} [team name]` a team"
                     },
