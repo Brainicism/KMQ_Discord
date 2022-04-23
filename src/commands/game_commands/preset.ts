@@ -10,9 +10,7 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import type GuildPreference from "../../structures/guild_preference";
-import {
-    GameOptionInternalToGameOption,
-} from "../../structures/guild_preference";
+import { GameOptionInternalToGameOption } from "../../structures/guild_preference";
 import { KmqImages } from "../../constants";
 import dbContext from "../../database_context";
 import CommandPrechecks from "../../command_prechecks";

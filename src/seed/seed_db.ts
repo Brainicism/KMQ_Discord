@@ -6,7 +6,7 @@ import { config } from "dotenv";
 import path from "path";
 import { IPCLogger } from "../logger";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
-import type { DatabaseContext} from "../database_context";
+import type { DatabaseContext } from "../database_context";
 import { getNewConnection } from "../database_context";
 import { generateKmqDataTables, loadStoredProcedures } from "./bootstrap";
 import _ from "lodash";

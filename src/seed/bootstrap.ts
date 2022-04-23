@@ -5,7 +5,7 @@ import { execSync } from "child_process";
 import { updateKpopDatabase } from "./seed_db";
 import { IPCLogger } from "../logger";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
-import type { DatabaseContext} from "../database_context";
+import type { DatabaseContext } from "../database_context";
 import { getNewConnection } from "../database_context";
 import { EnvType } from "../enums/env_type";
 

@@ -2,8 +2,7 @@ import type Eris from "eris";
 import dbContext from "../../database_context";
 import type BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
-import type {
-    EmbedGenerator} from "../../helpers/discord_utils";
+import type { EmbedGenerator } from "../../helpers/discord_utils";
 import {
     getDebugLogHeader,
     getUserTag,

@@ -15,12 +15,11 @@ import {
     userBonusIsActive,
 } from "./game_utils";
 import { getFact } from "../fact_generator";
-import type {
-    GuildTextableMessage} from "../types";
+import type { GuildTextableMessage } from "../types";
 import {
     GameOptionCommand,
     PriorityGameOption,
-    ConflictingGameOptions
+    ConflictingGameOptions,
 } from "../types";
 import {
     chunkArray,

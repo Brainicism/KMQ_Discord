@@ -1,4 +1,4 @@
-import type { Knex} from "knex";
+import type { Knex } from "knex";
 import { knex } from "knex";
 import { resolve } from "path";
 import { config } from "dotenv";
