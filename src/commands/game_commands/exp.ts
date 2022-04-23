@@ -18,8 +18,8 @@ import {
 } from "../../helpers/game_utils";
 import { KmqImages } from "../../constants";
 import { state } from "../../kmq_worker";
-import GuildPreference from "../../structures/guild_preference";
-import GameRound from "../../structures/game_round";
+import type GuildPreference from "../../structures/guild_preference";
+import type GameRound from "../../structures/game_round";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
 import { AnswerType } from "../../enums/option_types/answer_type";

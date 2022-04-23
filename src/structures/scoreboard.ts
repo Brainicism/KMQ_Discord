@@ -1,7 +1,7 @@
-import Player from "./player";
+import type Player from "./player";
 import { bold, friendlyFormattedNumber } from "../helpers/utils";
 import { getMention } from "../helpers/discord_utils";
-import GuildPreference from "./guild_preference";
+import type GuildPreference from "./guild_preference";
 import { state } from "../kmq_worker";
 import SuccessfulGuessResult from "../interfaces/success_guess_result";
 

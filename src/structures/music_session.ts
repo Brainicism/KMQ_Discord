@@ -1,4 +1,5 @@
 import Eris from "eris";
+import Session from "./session";
 import { chooseRandom, delay } from "../helpers/utils";
 import {
     getCurrentVoiceMembers,
@@ -8,18 +9,17 @@ import {
     getDebugLogHeader,
 } from "../helpers/discord_utils";
 import KmqMember from "./kmq_member";
-import Round from "./round";
-import Session from "./session";
+import type Round from "./round";
 import MusicRound from "./music_round";
-import GuildPreference from "./guild_preference";
-import MessageContext from "./message_context";
+import type GuildPreference from "./guild_preference";
+import type MessageContext from "./message_context";
 import { IPCLogger } from "../logger";
 import { isUserPremium } from "../helpers/game_utils";
 import { isSkipMajority, skipSong } from "../commands/game_commands/skip";
 import { state } from "../kmq_worker";
 import { getGuildPreference } from "../helpers/game_utils";
 import QueriedSong from "../interfaces/queried_song";
-import GuessResult from "../interfaces/guess_result";
+import type GuessResult from "../interfaces/guess_result";
 import { SONG_START_DELAY } from "../constants";
 
 const logger = new IPCLogger("music_session");

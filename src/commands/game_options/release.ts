@@ -16,8 +16,6 @@ import { DEFAULT_RELEASE_TYPE } from "../../constants";
 
 const logger = new IPCLogger("release");
 
-export const NON_OFFICIAL_VIDEO_TAGS = ["c", "d", "a", "r", "v", "x", "p"];
-
 export default class ReleaseCommand implements BaseCommand {
     aliases = ["releases", "videotype"];
 

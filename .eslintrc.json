@@ -35,7 +35,7 @@
             "warn"
         ],
         "import/no-cycle": [
-            "off"
+            "warn"
         ],
         "jsdoc/require-jsdoc": [
             "warn",

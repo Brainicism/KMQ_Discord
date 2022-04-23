@@ -1,8 +1,6 @@
-import GuildPreference from "./guild_preference";
+import type GuildPreference from "./guild_preference";
 import dbContext from "../database_context";
 import { IPCLogger } from "../logger";
-import { FOREIGN_LANGUAGE_TAGS } from "../commands/game_options/language";
-import { NON_OFFICIAL_VIDEO_TAGS } from "../commands/game_options/release";
 import { chooseWeightedRandom, setDifference } from "../helpers/utils";
 import QueriedSong from "../interfaces/queried_song";
 import UniqueSongCounter from "../interfaces/unique_song_counter";
@@ -13,6 +11,7 @@ import { ArtistType } from "../enums/option_types/artist_type";
 import { OstPreference } from "../enums/option_types/ost_preference";
 import { LanguageType } from "../enums/option_types/language_type";
 import { ReleaseType } from "../enums/option_types/release_type";
+import { FOREIGN_LANGUAGE_TAGS, NON_OFFICIAL_VIDEO_TAGS } from "../constants";
 
 export const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
 export const SELECTION_WEIGHT_VALUES_HARD = [1, 2, 4, 8, 16];

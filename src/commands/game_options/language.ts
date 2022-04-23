@@ -15,8 +15,6 @@ import { LanguageType } from "../../enums/option_types/language_type";
 
 const logger = new IPCLogger("language");
 
-// z = chinese, j = japanese, e = english, s = spanish
-export const FOREIGN_LANGUAGE_TAGS = ["z", "j", "e", "s"];
 export default class LanguageCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 

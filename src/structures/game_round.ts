@@ -6,7 +6,7 @@ import KmqMember from "./kmq_member";
 import { ExpBonusModifierValues } from "../commands/game_commands/exp";
 import { ExpBonusModifier } from "../enums/exp_bonus_modifier";
 import Round, { MAX_RUNNERS_UP } from "./round";
-import MessageContext from "./message_context";
+import type MessageContext from "./message_context";
 import {
     EMBED_ERROR_COLOR,
     EMBED_SUCCESS_BONUS_COLOR,
@@ -14,7 +14,7 @@ import {
     getMention,
 } from "../helpers/discord_utils";
 import { friendlyFormattedNumber } from "../helpers/utils";
-import PlayerRoundResult from "../interfaces/player_round_result";
+import type PlayerRoundResult from "../interfaces/player_round_result";
 import QueriedSong from "../interfaces/queried_song";
 import UniqueSongCounter from "../interfaces/unique_song_counter";
 import { GuessModeType } from "../enums/option_types/guess_mode_type";

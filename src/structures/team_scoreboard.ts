@@ -1,5 +1,5 @@
 import Scoreboard, { SCOREBOARD_FIELD_CUTOFF } from "./scoreboard";
-import Player from "./player";
+import type Player from "./player";
 import Team from "./team";
 import { IPCLogger } from "../logger";
 import SuccessfulGuessResult from "../interfaces/success_guess_result";

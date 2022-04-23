@@ -26,9 +26,8 @@ import {
     getLocalizedSongName,
 } from "../helpers/game_utils";
 import { state } from "../kmq_worker";
-import { KmqImages } from "../constants";
+import { KmqImages, specialFfmpegArgs } from "../constants";
 import { bold, friendlyFormattedNumber } from "../helpers/utils";
-import { specialFfmpegArgs } from "../commands/game_options/special";
 import MusicSession from "./music_session";
 import type QueriedSong from "../interfaces/queried_song";
 import type GuessResult from "../interfaces/guess_result";

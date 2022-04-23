@@ -34,9 +34,10 @@ import {
     chunkArray,
 } from "../helpers/utils";
 import { state } from "../kmq_worker";
+
 import { IPCLogger } from "../logger";
 import GameRound from "./game_round";
-import GuildPreference from "./guild_preference";
+import type GuildPreference from "./guild_preference";
 import Scoreboard from "./scoreboard";
 import EliminationScoreboard from "./elimination_scoreboard";
 import TeamScoreboard from "./team_scoreboard";
@@ -48,9 +49,9 @@ import KmqMember from "./kmq_member";
 import { calculateTotalRoundExp } from "../commands/game_commands/exp";
 import Player from "../structures/player";
 import Session from "./session";
-import Round from "./round";
-import QueriedSong from "../interfaces/queried_song";
-import GuessResult from "../interfaces/guess_result";
+import type Round from "./round";
+import type QueriedSong from "../interfaces/queried_song";
+import type GuessResult from "../interfaces/guess_result";
 import SuccessfulGuessResult from "../interfaces/success_guess_result";
 import { GuessModeType } from "../enums/option_types/guess_mode_type";
 import { AnswerType } from "../enums/option_types/answer_type";

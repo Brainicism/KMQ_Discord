@@ -7,7 +7,7 @@ import {
 import { getGuildPreference, isUserPremium } from "../../helpers/game_utils";
 import { state } from "../../kmq_worker";
 import { IPCLogger } from "../../logger";
-import GuildPreference from "../../structures/guild_preference";
+import type GuildPreference from "../../structures/guild_preference";
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
@@ -17,38 +17,6 @@ import { SpecialType } from "../../enums/option_types/special_type";
 
 const logger = new IPCLogger("special");
 
-export const specialFfmpegArgs = {
-    [SpecialType.REVERSE]: (seek: number) => ({
-        inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "areverse"],
-    }),
-    [SpecialType.SLOW]: (seek: number) => ({
-        inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=tempo=0.5"],
-    }),
-    [SpecialType.FAST]: (seek: number) => ({
-        inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=tempo=1.5"],
-    }),
-    [SpecialType.FASTER]: (seek: number) => ({
-        inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=tempo=2"],
-    }),
-    [SpecialType.LOW_PITCH]: (seek: number) => ({
-        // 3 semitones lower
-        inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=pitch=0.840896"],
-    }),
-    [SpecialType.HIGH_PITCH]: (seek: number) => ({
-        // 4 semitones higher
-        inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=pitch=1.25992"],
-    }),
-    [SpecialType.NIGHTCORE]: (seek: number) => ({
-        inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "rubberband=pitch=1.25992:tempo=1.25"],
-    }),
-};
 export default class SpecialCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },

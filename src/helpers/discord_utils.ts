@@ -3,7 +3,7 @@ import Eris from "eris";
 import EmbedPaginator from "eris-pagination";
 import axios from "axios";
 import * as uuid from "uuid";
-import GuildPreference from "../structures/guild_preference";
+import type GuildPreference from "../structures/guild_preference";
 import GameSession from "../structures/game_session";
 import { IPCLogger } from "../logger";
 import {
@@ -34,19 +34,18 @@ import {
     standardDateFormat,
 } from "./utils";
 import { state } from "../kmq_worker";
-import Scoreboard from "../structures/scoreboard";
+import type Scoreboard from "../structures/scoreboard";
 import GameRound from "../structures/game_round";
 import dbContext from "../database_context";
-import EliminationScoreboard from "../structures/elimination_scoreboard";
+import type EliminationScoreboard from "../structures/elimination_scoreboard";
 import TeamScoreboard from "../structures/team_scoreboard";
 import { KmqImages } from "../constants";
 import MessageContext from "../structures/message_context";
 import { REVIEW_LINK, VOTE_LINK } from "../commands/game_commands/vote";
 import { LocaleType } from "../enums/locale_type";
 import { DEFAULT_LOCALE } from "./localization_manager";
-import Round from "../structures/round";
+import type Round from "../structures/round";
 import Session from "../structures/session";
-import MusicSession from "../structures/music_session";
 import MusicRound from "../structures/music_round";
 import EmbedPayload from "../interfaces/embed_payload";
 import GameInfoMessage from "../interfaces/game_info_message";
@@ -56,6 +55,7 @@ import UniqueSongCounter from "../interfaces/unique_song_counter";
 import { GuessModeType } from "../enums/option_types/guess_mode_type";
 import { GameOption } from "../enums/game_option_name";
 import { GameType } from "../enums/game_type";
+import MusicSession from "../structures/music_session";
 
 const logger = new IPCLogger("discord_utils");
 export const EMBED_ERROR_COLOR = 0xed4245; // Red
