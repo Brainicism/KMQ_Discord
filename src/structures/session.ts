@@ -129,7 +129,7 @@ export default abstract class Session {
         }
     }
 
-    isMusicSession() {
+    isMusicSession(): boolean {
         return false;
     }
 

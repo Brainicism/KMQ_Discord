@@ -13,7 +13,6 @@ import {
     updateBotStatus,
 } from "./helpers/management_utils";
 import BotListingManager from "./helpers/bot_listing_manager";
-import RateLimiter from "./rate_limiter";
 import dbContext from "./database_context";
 import type KmqClient from "./kmq_client";
 import ReloadCommand from "./commands/admin/reload";
@@ -26,7 +25,6 @@ import State from "./state";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("kmq");
 config({ path: path.resolve(__dirname, "../.env") });
-1;
 
 export class BotWorker extends BaseClusterWorker {
     handleCommand = async (commandName: string): Promise<any> => {
