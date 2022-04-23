@@ -124,7 +124,7 @@ function getGroupNamesString(
         .join(spaceDelimiter ? ", " : ",");
 
     if (truncate && displayedGroupNames.length > 200) {
-        displayedGroupNames = `${displayedGroupNames.substr(
+        displayedGroupNames = `${displayedGroupNames.substring(
             0,
             200
         )} and many others...`;

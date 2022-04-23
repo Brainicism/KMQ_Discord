@@ -6,12 +6,14 @@
         "eslint-plugin-tsdoc",
         "jsdoc",
         "only-warn",
-        "import"
+        "import",
+        "deprecation"
     ],
     "parserOptions": {
         "project": "./tsconfig.json"
     },
     "rules": {
+        "deprecation/deprecation": "warn",
         "@typescript-eslint/await-thenable": [
             "error"
         ],

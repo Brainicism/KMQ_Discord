@@ -66,7 +66,7 @@ export default class JoinCommand implements BaseCommand {
         // Ignore: \ _ * ~ | `
         const teamName = parsedMessage.argument
             .replace(/\\|_|\*|~|\||`/gm, "")
-            .substr(0, 128);
+            .substring(0, 128);
 
         // Don't allow emojis that aren't in this server
         // Emojis are of the format: <(a if animated):(alphanumeric):(number)>

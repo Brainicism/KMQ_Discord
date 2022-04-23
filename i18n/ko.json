@@ -588,11 +588,8 @@
                     "description": "이 명령어를 사용할 권한이 없습니다.",
                     "title": "숨겨진 게임 모드"
                 },
-                "overrideTeamsOrElimination": {
+                "overrideTeams": {
                     "description": "{{oldGameType}} 게임, 이 게임을 {{end}} 시작하려면 {{playOldGameType}}, {{gameSpecificInstructions}}를 호출한 다음 {{begin}}를 호출하세요.",
-                    "elimination": {
-                        "join": "{{join}} 게임에 입장하였습니다."
-                    },
                     "teams": {
                         "join": "`{{join}} [팀 이름]` 팀에 입장하셨습니다."
                     },

@@ -30,7 +30,10 @@ export class BotWorker extends BaseClusterWorker {
     handleCommand = async (commandName: string): Promise<any> => {
         logger.debug(`Received cluster command: ${commandName}`);
         if (commandName.startsWith("eval")) {
-            const evalString = commandName.substr(commandName.indexOf("|") + 1);
+            const evalString = commandName.substring(
+                commandName.indexOf("|") + 1
+            );
+
             const evalResult = await EvalCommand.eval(evalString);
             return evalResult;
         }

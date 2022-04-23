@@ -158,11 +158,15 @@ export default class GameSession extends Session {
         guildPreference: GuildPreference,
         messageContext: MessageContext
     ): Promise<void> {
-        await delay(
-            this.multiguessDelayIsActive(guildPreference)
-                ? SONG_START_DELAY - MULTIGUESS_DELAY
-                : SONG_START_DELAY
-        );
+        if (this.sessionInitialized) {
+            // Only add a delay if the game has already started
+            await delay(
+                this.multiguessDelayIsActive(guildPreference)
+                    ? SONG_START_DELAY - MULTIGUESS_DELAY
+                    : SONG_START_DELAY
+            );
+        }
+
         if (this.finished || this.round) {
             return;
         }

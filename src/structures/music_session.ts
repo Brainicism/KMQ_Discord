@@ -1,6 +1,5 @@
 import Eris from "eris";
-import Session from "./session";
-import { chooseRandom, delay } from "../helpers/utils";
+import { chooseRandom } from "../helpers/utils";
 import {
     getCurrentVoiceMembers,
     sendRoundMessage,
@@ -9,7 +8,8 @@ import {
     getDebugLogHeader,
 } from "../helpers/discord_utils";
 import KmqMember from "./kmq_member";
-import type Round from "./round";
+import Round from "./round";
+import Session from "./session";
 import MusicRound from "./music_round";
 import type GuildPreference from "./guild_preference";
 import type MessageContext from "./message_context";
@@ -20,7 +20,6 @@ import State from "../state";
 import { getGuildPreference } from "../helpers/game_utils";
 import QueriedSong from "../interfaces/queried_song";
 import type GuessResult from "../interfaces/guess_result";
-import { SONG_START_DELAY } from "../constants";
 
 const logger = new IPCLogger("music_session");
 
@@ -70,7 +69,6 @@ export default class MusicSession extends Session {
         guildPreference: GuildPreference,
         messageContext: MessageContext
     ): Promise<void> {
-        await delay(SONG_START_DELAY);
         if (this.finished || this.round) {
             return;
         }
