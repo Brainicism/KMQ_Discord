@@ -12,10 +12,9 @@ import { state } from "../../kmq_worker";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
 import { GuessModeType } from "../../enums/option_types/guess_mode_type";
+import { DEFAULT_GUESS_MODE } from "../../constants";
 
 const logger = new IPCLogger("guessmode");
-
-export const DEFAULT_GUESS_MODE = GuessModeType.SONG_NAME;
 
 export default class GuessModeCommand implements BaseCommand {
     preRunChecks = [

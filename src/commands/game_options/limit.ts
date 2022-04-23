@@ -12,10 +12,9 @@ import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import HelpDocumentation from "../../interfaces/help";
 import CommandArgs from "../../interfaces/command_args";
+import { DEFAULT_LIMIT } from "../../constants";
 
 const logger = new IPCLogger("limit");
-
-export const DEFAULT_LIMIT = 500;
 
 export default class LimitCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];

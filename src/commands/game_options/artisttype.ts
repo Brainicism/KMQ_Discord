@@ -16,8 +16,6 @@ import { ArtistType } from "../../enums/option_types/artist_type";
 
 const logger = new IPCLogger("artisttype");
 
-export const DEFAULT_ARTIST_TYPE = ArtistType.BOTH;
-
 export default class ArtistTypeCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 

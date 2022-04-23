@@ -12,10 +12,9 @@ import { state } from "../../kmq_worker";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
 import { SubunitsPreference } from "../../enums/option_types/subunit_preference";
+import { DEFAULT_SUBUNIT_PREFERENCE } from "../../constants";
 
 const logger = new IPCLogger("subunits");
-
-export const DEFAULT_SUBUNIT_PREFERENCE = SubunitsPreference.INCLUDE;
 
 export default class SubunitsCommand implements BaseCommand {
     aliases = ["subunit", "su"];

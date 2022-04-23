@@ -12,10 +12,9 @@ import { state } from "../../kmq_worker";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
 import { SeekType } from "../../enums/option_types/seek_type";
+import { DEFAULT_SEEK } from "../../constants";
 
 const logger = new IPCLogger("seek");
-
-export const DEFAULT_SEEK = SeekType.RANDOM;
 
 export default class SeekCommand implements BaseCommand {
     preRunChecks = [

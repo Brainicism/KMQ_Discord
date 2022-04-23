@@ -12,11 +12,11 @@ import { state } from "../../kmq_worker";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
 import { ReleaseType } from "../../enums/option_types/release_type";
+import { DEFAULT_RELEASE_TYPE } from "../../constants";
 
 const logger = new IPCLogger("release");
 
 export const NON_OFFICIAL_VIDEO_TAGS = ["c", "d", "a", "r", "v", "x", "p"];
-export const DEFAULT_RELEASE_TYPE = ReleaseType.OFFICIAL;
 
 export default class ReleaseCommand implements BaseCommand {
     aliases = ["releases", "videotype"];

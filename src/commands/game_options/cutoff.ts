@@ -12,11 +12,12 @@ import CommandPrechecks from "../../command_prechecks";
 import { state } from "../../kmq_worker";
 import HelpDocumentation from "../../interfaces/help";
 import CommandArgs from "../../interfaces/command_args";
+import {
+    DEFAULT_BEGINNING_SEARCH_YEAR,
+    DEFAULT_ENDING_SEARCH_YEAR,
+} from "../../constants";
 
 const logger = new IPCLogger("cutoff");
-
-export const DEFAULT_BEGINNING_SEARCH_YEAR = 1990;
-export const DEFAULT_ENDING_SEARCH_YEAR = new Date().getFullYear();
 
 export default class CutoffCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];

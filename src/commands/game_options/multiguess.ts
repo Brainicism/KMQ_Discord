@@ -12,11 +12,9 @@ import { state } from "../../kmq_worker";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
 import { MultiGuessType } from "../../enums/option_types/multiguess_type";
+import { DEFAULT_MULTIGUESS_TYPE } from "../../constants";
 
 const logger = new IPCLogger("multiguess");
-
-export const DEFAULT_MULTIGUESS_TYPE = MultiGuessType.ON;
-
 export default class MultiGuessCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },

@@ -15,10 +15,10 @@ import {
 } from "../helpers/discord_utils";
 import dbContext from "../database_context";
 import GameSession from "./game_session";
-import GuildPreference from "./guild_preference";
-import KmqMember from "./kmq_member";
+import type GuildPreference from "./guild_preference";
+import type KmqMember from "./kmq_member";
 import MessageContext from "./message_context";
-import Round from "./round";
+import type Round from "./round";
 import SongSelector from "./song_selector";
 import {
     ensureVoiceConnection,
@@ -30,11 +30,10 @@ import { KmqImages } from "../constants";
 import { bold, friendlyFormattedNumber } from "../helpers/utils";
 import { specialFfmpegArgs } from "../commands/game_options/special";
 import MusicSession from "./music_session";
-import QueriedSong from "../interfaces/queried_song";
-import GuessResult from "../interfaces/guess_result";
+import type QueriedSong from "../interfaces/queried_song";
+import type GuessResult from "../interfaces/guess_result";
 import { SeekType } from "../enums/option_types/seek_type";
 
-export const SONG_START_DELAY = 3000;
 const BOOKMARK_MESSAGE_SIZE = 10;
 
 const logger = new IPCLogger("session");

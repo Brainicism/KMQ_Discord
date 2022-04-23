@@ -12,10 +12,9 @@ import { state } from "../../kmq_worker";
 import HelpDocumentation from "../../interfaces/help";
 import CommandArgs from "../../interfaces/command_args";
 import { OstPreference } from "../../enums/option_types/ost_preference";
+import { DEFAULT_OST_PREFERENCE } from "../../constants";
 
 const logger = new IPCLogger("ost");
-
-export const DEFAULT_OST_PREFERENCE = OstPreference.EXCLUDE;
 
 export default class OstCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];

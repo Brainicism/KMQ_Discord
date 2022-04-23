@@ -14,6 +14,7 @@ import GuildPreference from "../../structures/guild_preference";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
 import { ShuffleType } from "../../enums/option_types/shuffle_type";
+import { DEFAULT_SHUFFLE } from "../../constants";
 
 const logger = new IPCLogger("shuffle");
 
@@ -21,8 +22,6 @@ const PREMIUM_SHUFFLE_TYPES = [
     ShuffleType.WEIGHTED_EASY,
     ShuffleType.WEIGHTED_HARD,
 ];
-
-export const DEFAULT_SHUFFLE = ShuffleType.RANDOM;
 
 export default class ShuffleCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];

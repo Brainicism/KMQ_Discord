@@ -16,8 +16,6 @@ import { Gender } from "../../enums/option_types/gender";
 
 const logger = new IPCLogger("gender");
 
-export const DEFAULT_GENDER = [Gender.FEMALE, Gender.MALE, Gender.COED];
-
 export default class GenderCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 

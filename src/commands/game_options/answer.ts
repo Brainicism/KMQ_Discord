@@ -15,8 +15,6 @@ import { AnswerType } from "../../enums/option_types/answer_type";
 
 const logger = new IPCLogger("answer");
 
-export const DEFAULT_ANSWER_TYPE = AnswerType.TYPING;
-
 export default class AnswerCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },

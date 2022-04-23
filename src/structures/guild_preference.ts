@@ -1,23 +1,7 @@
 import _ from "lodash";
 import * as uuid from "uuid";
-import {
-    DEFAULT_BEGINNING_SEARCH_YEAR,
-    DEFAULT_ENDING_SEARCH_YEAR,
-} from "../commands/game_options/cutoff";
-import { DEFAULT_LIMIT } from "../commands/game_options/limit";
-import { DEFAULT_GENDER } from "../commands/game_options/gender";
-import { DEFAULT_SEEK } from "../commands/game_options/seek";
-import { DEFAULT_SHUFFLE } from "../commands/game_options/shuffle";
-import { DEFAULT_GUESS_MODE } from "../commands/game_options/guessmode";
 import { IPCLogger } from "../logger";
 import dbContext from "../database_context";
-import { DEFAULT_ARTIST_TYPE } from "../commands/game_options/artisttype";
-import { DEFAULT_LANGUAGE } from "../commands/game_options/language";
-import { DEFAULT_SUBUNIT_PREFERENCE } from "../commands/game_options/subunits";
-import { DEFAULT_OST_PREFERENCE } from "../commands/game_options/ost";
-import { DEFAULT_RELEASE_TYPE } from "../commands/game_options/release";
-import { DEFAULT_MULTIGUESS_TYPE } from "../commands/game_options/multiguess";
-import { DEFAULT_ANSWER_TYPE } from "../commands/game_options/answer";
 import Session from "./session";
 import MatchedArtist from "../interfaces/matched_artist";
 import GameOptions from "../interfaces/game_options";
@@ -34,6 +18,22 @@ import { ArtistType } from "../enums/option_types/artist_type";
 import { Gender } from "../enums/option_types/gender";
 import { SeekType } from "../enums/option_types/seek_type";
 import { GameOption } from "../enums/game_option_name";
+import {
+    DEFAULT_ANSWER_TYPE,
+    DEFAULT_ARTIST_TYPE,
+    DEFAULT_BEGINNING_SEARCH_YEAR,
+    DEFAULT_ENDING_SEARCH_YEAR,
+    DEFAULT_GENDER,
+    DEFAULT_GUESS_MODE,
+    DEFAULT_LANGUAGE,
+    DEFAULT_LIMIT,
+    DEFAULT_MULTIGUESS_TYPE,
+    DEFAULT_OST_PREFERENCE,
+    DEFAULT_RELEASE_TYPE,
+    DEFAULT_SEEK,
+    DEFAULT_SHUFFLE,
+    DEFAULT_SUBUNIT_PREFERENCE,
+} from "../constants";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("guild_preference");

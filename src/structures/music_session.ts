@@ -9,7 +9,7 @@ import {
 } from "../helpers/discord_utils";
 import KmqMember from "./kmq_member";
 import Round from "./round";
-import Session, { SONG_START_DELAY } from "./session";
+import Session from "./session";
 import MusicRound from "./music_round";
 import GuildPreference from "./guild_preference";
 import MessageContext from "./message_context";
@@ -20,6 +20,7 @@ import { state } from "../kmq_worker";
 import { getGuildPreference } from "../helpers/game_utils";
 import QueriedSong from "../interfaces/queried_song";
 import GuessResult from "../interfaces/guess_result";
+import { SONG_START_DELAY } from "../constants";
 
 const logger = new IPCLogger("music_session");
 
