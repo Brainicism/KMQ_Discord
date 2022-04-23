@@ -14,7 +14,7 @@ import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import type EliminationScoreboard from "../../structures/elimination_scoreboard";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import type Round from "../../structures/round";
 import Session from "../../structures/session";
 import type GuildPreference from "../../structures/guild_preference";
@@ -31,11 +31,11 @@ async function sendSkipNotification(
     await sendInfoMessage(
         MessageContext.fromMessage(message),
         {
-            title: state.localizer.translate(
+            title: State.localizer.translate(
                 message.guildID,
                 "command.skip.vote.title"
             ),
-            description: state.localizer.translate(
+            description: State.localizer.translate(
                 message.guildID,
                 "command.skip.vote.description",
                 {
@@ -55,8 +55,8 @@ async function sendSkipMessage(
 ): Promise<void> {
     await sendInfoMessage(MessageContext.fromMessage(message), {
         color: EMBED_SUCCESS_COLOR,
-        title: state.localizer.translate(message.guildID, "misc.skip"),
-        description: state.localizer.translate(
+        title: State.localizer.translate(message.guildID, "misc.skip"),
+        description: State.localizer.translate(
             message.guildID,
             "command.skip.success.description",
             {
@@ -122,7 +122,7 @@ export default class SkipCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "skip",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.skip.help.description"
         ),

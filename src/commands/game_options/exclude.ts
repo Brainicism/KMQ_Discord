@@ -13,7 +13,7 @@ import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import { GROUP_LIST_URL } from "../../constants";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
@@ -27,7 +27,7 @@ export default class ExcludeCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "exclude",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.exclude.help.description",
             {
@@ -38,7 +38,7 @@ export default class ExcludeCommand implements BaseCommand {
         examples: [
             {
                 example: "`,exclude blackpink`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.exclude.help.example.singleGroup",
                     {
@@ -48,7 +48,7 @@ export default class ExcludeCommand implements BaseCommand {
             },
             {
                 example: "`,exclude blackpink, bts, red velvet`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.exclude.help.example.multipleGroups",
                     {
@@ -60,7 +60,7 @@ export default class ExcludeCommand implements BaseCommand {
             },
             {
                 example: "`,exclude`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.exclude.help.example.reset"
                 ),
@@ -71,7 +71,7 @@ export default class ExcludeCommand implements BaseCommand {
                 style: 5 as const,
                 url: GROUP_LIST_URL,
                 type: 2 as const,
-                label: state.localizer.translate(
+                label: State.localizer.translate(
                     guildID,
                     "misc.interaction.fullGroupsList"
                 ),
@@ -96,7 +96,7 @@ export default class ExcludeCommand implements BaseCommand {
         let excludeWarning = "";
         if (parsedMessage.components.length > 1) {
             if (["add", "remove"].includes(parsedMessage.components[0])) {
-                excludeWarning = state.localizer.translate(
+                excludeWarning = State.localizer.translate(
                     message.guildID,
                     "misc.warning.addRemoveOrdering.footer",
                     {
@@ -124,21 +124,21 @@ export default class ExcludeCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "misc.failure.unrecognizedGroups.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "misc.failure.unrecognizedGroups.description",
                     {
-                        matchedGroupsAction: state.localizer.translate(
+                        matchedGroupsAction: State.localizer.translate(
                             message.guildID,
                             "command.exclude.failure.unrecognizedGroups.excluded"
                         ),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: `${unmatchedGroups.join(", ")}`,
-                        solution: state.localizer.translate(
+                        solution: State.localizer.translate(
                             message.guildID,
                             "misc.failure.unrecognizedGroups.solution",
                             {
@@ -162,11 +162,11 @@ export default class ExcludeCommand implements BaseCommand {
             );
             if (intersection.size > 0) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
+                    title: State.localizer.translate(
                         message.guildID,
                         "misc.failure.groupsExcludeConflict.title"
                     ),
-                    description: state.localizer.translate(
+                    description: State.localizer.translate(
                         message.guildID,
                         "misc.failure.groupsExcludeConflict.description",
                         {
@@ -177,7 +177,7 @@ export default class ExcludeCommand implements BaseCommand {
                                 .join(", "),
                             solutionStepOne: `\`${process.env.BOT_PREFIX}remove groups\``,
                             solutionStepTwo: `\`${process.env.BOT_PREFIX}exclude\``,
-                            allowOrPrevent: state.localizer.translate(
+                            allowOrPrevent: State.localizer.translate(
                                 message.guildID,
                                 "misc.failure.groupsExcludeConflict.prevent"
                             ),

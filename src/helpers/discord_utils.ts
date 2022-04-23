@@ -33,7 +33,7 @@ import {
     delay,
     standardDateFormat,
 } from "./utils";
-import { state } from "../kmq_worker";
+import State from "../state";
 import type Scoreboard from "../structures/scoreboard";
 import GameRound from "../structures/game_round";
 import dbContext from "../database_context";
@@ -145,7 +145,7 @@ function missingPermissionsText(
     guildID: string,
     missingPermissions: string[]
 ): string {
-    return state.localizer.translate(
+    return State.localizer.translate(
         guildID,
         "misc.failure.missingPermissionsText",
         {
@@ -168,7 +168,7 @@ export async function fetchUser(
     silentErrors = false
 ): Promise<Eris.User> {
     let user: Eris.User = null;
-    const { client, ipc } = state;
+    const { client, ipc } = State;
 
     // fetch via cache
     user = client.users.get(userID);
@@ -212,7 +212,7 @@ export async function fetchUser(
  */
 async function fetchChannel(textChannelID: string): Promise<Eris.TextChannel> {
     let channel: Eris.TextChannel = null;
-    const { client, ipc } = state;
+    const { client, ipc } = State;
 
     // fetch via cache
     channel = client.getChannel(textChannelID) as Eris.TextChannel;
@@ -281,11 +281,11 @@ export async function textPermissionsCheck(
             )} | Missing SEND_MESSAGES permissions`
         );
         const embed = {
-            title: state.localizer.translate(
+            title: State.localizer.translate(
                 guildID,
                 "misc.failure.missingPermissions.title"
             ),
-            description: state.localizer.translate(
+            description: State.localizer.translate(
                 guildID,
                 "misc.failure.missingPermissions.description",
                 { channelName: `#${channel.name}` }
@@ -433,7 +433,7 @@ export async function sendMessage(
     }
 
     try {
-        return await state.client.createMessage(
+        return await State.client.createMessage(
             textChannelID,
             messageContent,
             file
@@ -466,7 +466,7 @@ async function sendDmMessage(
     userID: string,
     messageContent: Eris.AdvancedMessageContent
 ): Promise<Eris.Message> {
-    const { client } = state;
+    const { client } = State;
     let dmChannel: Eris.PrivateChannel;
     try {
         dmChannel = await client.getDMChannel(userID);
@@ -596,11 +596,11 @@ export async function sendInfoMessage(
 ): Promise<Eris.Message<Eris.TextableChannel>> {
     if (embedPayload.description && embedPayload.description.length > 2048) {
         return sendErrorMessage(messageContext, {
-            title: state.localizer.translate(
+            title: State.localizer.translate(
                 messageContext.guildID,
                 "misc.failure.error"
             ),
-            description: state.localizer.translate(
+            description: State.localizer.translate(
                 messageContext.guildID,
                 "misc.failure.messageTooLong"
             ),
@@ -660,7 +660,7 @@ function getAliasFooter(
         return "";
     }
 
-    const aliasesText = state.localizer.translateByLocale(
+    const aliasesText = State.localizer.translateByLocale(
         locale,
         "misc.inGame.aliases"
     );
@@ -684,12 +684,12 @@ function getDurationFooter(
 
     durationText +=
         timeRemaining > 0
-            ? `⏰ ${state.localizer.translateNByLocale(
+            ? `⏰ ${State.localizer.translateNByLocale(
                   locale,
                   "misc.plural.minute",
                   Math.ceil(timeRemaining)
               )}`
-            : `⏰ ${state.localizer.translateByLocale(
+            : `⏰ ${State.localizer.translateByLocale(
                   locale,
                   "misc.timeFinished"
               )}!`;
@@ -724,7 +724,7 @@ export async function sendRoundMessage(
     if (!isMusicSession && !useLargerScoreboard) {
         scoreboardTitle = "\n\n";
         scoreboardTitle += bold(
-            state.localizer.translate(
+            State.localizer.translate(
                 messageContext.guildID,
                 "command.score.scoreboardTitle"
             )
@@ -773,7 +773,7 @@ export async function sendRoundMessage(
     if (fact) {
         fields.push({
             name: underline(
-                state.localizer.translate(
+                State.localizer.translate(
                     messageContext.guildID,
                     "misc.gameMessages.didYouKnow.title"
                 )
@@ -808,7 +808,7 @@ export async function sendRoundMessage(
 
     const views = `${friendlyFormattedNumber(
         round.song.views
-    )} ${state.localizer.translate(messageContext.guildID, "misc.views")}\n`;
+    )} ${State.localizer.translate(messageContext.guildID, "misc.views")}\n`;
 
     const aliases = getAliasFooter(round, guessModeType, locale);
     const duration = getDurationFooter(
@@ -834,7 +834,7 @@ export async function sendRoundMessage(
         buttons.push({
             type: 2,
             style: 1,
-            label: state.localizer.translate(
+            label: State.localizer.translate(
                 messageContext.guildID,
                 "misc.skip"
             ),
@@ -844,7 +844,7 @@ export async function sendRoundMessage(
         buttons.push({
             type: 2,
             style: 1,
-            label: state.localizer.translate(
+            label: State.localizer.translate(
                 messageContext.guildID,
                 "misc.bookmark"
             ),
@@ -891,7 +891,7 @@ export function getFormattedLimit(
         return friendlyFormattedNumber(visibleLimitEnd);
     }
 
-    return state.localizer.translate(guildID, "misc.formattedLimit", {
+    return State.localizer.translate(guildID, "misc.formattedLimit", {
         limitStart: getOrdinalNum(visibleLimitStart),
         limitEnd: getOrdinalNum(visibleLimitEnd),
         songCount: friendlyFormattedNumber(totalSongs.count),
@@ -945,11 +945,11 @@ export async function generateOptionsMessage(
 
     if (totalSongs === null) {
         sendErrorMessage(messageContext, {
-            title: state.localizer.translate(
+            title: State.localizer.translate(
                 guildID,
                 "misc.failure.retrievingSongData.title"
             ),
-            description: state.localizer.translate(
+            description: State.localizer.translate(
                 guildID,
                 "misc.failure.retrievingSongData.description",
                 { helpCommand: `\`${process.env.BOT_PREFIX}help\`` }
@@ -988,13 +988,13 @@ export async function generateOptionsMessage(
     optionStrings[GameOption.GUESS_MODE_TYPE] = gameOptions.guessModeType;
     optionStrings[GameOption.SPECIAL_TYPE] = gameOptions.specialType;
     optionStrings[GameOption.TIMER] = guildPreference.isGuessTimeoutSet()
-        ? state.localizer.translate(guildID, "command.options.timer", {
+        ? State.localizer.translate(guildID, "command.options.timer", {
               timerInSeconds: String(gameOptions.guessTimeout),
           })
         : null;
 
     optionStrings[GameOption.DURATION] = guildPreference.isDurationSet()
-        ? state.localizer.translate(guildID, "command.options.duration", {
+        ? State.localizer.translate(guildID, "command.options.duration", {
               durationInMinutes: String(gameOptions.duration),
           })
         : null;
@@ -1014,7 +1014,7 @@ export async function generateOptionsMessage(
         `${strikethrough(commandValue)} (\`${
             process.env.BOT_PREFIX
         }${conflictingOption}\` ${italicize(
-            state.localizer.translate(guildID, "misc.conflict")
+            State.localizer.translate(guildID, "misc.conflict")
         )})`;
 
     const session = Session.getSession(guildID);
@@ -1061,7 +1061,7 @@ export async function generateOptionsMessage(
         optionStrings[option] =
             optionStrings[option] ||
             italicize(
-                state.localizer.translate(guildID, "command.options.notSet")
+                State.localizer.translate(guildID, "command.options.notSet")
             );
     }
 
@@ -1091,7 +1091,7 @@ export async function generateOptionsMessage(
         }
     }
 
-    const optionsOverview = state.localizer.translate(
+    const optionsOverview = State.localizer.translate(
         messageContext.guildID,
         "command.options.overview",
         {
@@ -1121,7 +1121,7 @@ export async function generateOptionsMessage(
         !session.isPremium()
     ) {
         nonPremiumGameWarning = italicize(
-            state.localizer.translate(
+            State.localizer.translate(
                 messageContext.guildID,
                 "command.options.premiumOptionsNonPremiumGame"
             )
@@ -1186,13 +1186,13 @@ export async function generateOptionsMessage(
         updatedOptions[0] &&
         updatedOptions[0].reset
     ) {
-        footerText = state.localizer.translate(
+        footerText = State.localizer.translate(
             messageContext.guildID,
             "command.options.perCommandHelp",
             { helpCommand: `${process.env.BOT_PREFIX}help` }
         );
     } else if (session instanceof MusicSession) {
-        footerText = state.localizer.translate(
+        footerText = State.localizer.translate(
             messageContext.guildID,
             "command.options.musicSessionNotAvailable"
         );
@@ -1200,13 +1200,13 @@ export async function generateOptionsMessage(
 
     let title = "";
     if (updatedOptions === null || allReset) {
-        title = state.localizer.translate(
+        title = State.localizer.translate(
             messageContext.guildID,
             "command.options.title"
         );
     } else {
         if (preset) {
-            title = state.localizer.translate(
+            title = State.localizer.translate(
                 messageContext.guildID,
                 "command.options.preset"
             );
@@ -1216,12 +1216,12 @@ export async function generateOptionsMessage(
 
         title =
             updatedOptions[0] && updatedOptions[0].reset
-                ? state.localizer.translate(
+                ? State.localizer.translate(
                       messageContext.guildID,
                       "command.options.reset",
                       { presetOrOption: title }
                   )
-                : state.localizer.translate(
+                : State.localizer.translate(
                       messageContext.guildID,
                       "command.options.updated",
                       { presetOrOption: title }
@@ -1282,7 +1282,7 @@ export async function sendOptionsMessage(
 export async function sendEndGameMessage(
     gameSession: GameSession
 ): Promise<void> {
-    const footerText = state.localizer.translate(
+    const footerText = State.localizer.translate(
         gameSession.guildID,
         "misc.inGame.songsCorrectlyGuessed",
         {
@@ -1292,7 +1292,7 @@ export async function sendEndGameMessage(
 
     if (gameSession.scoreboard.getWinners().length === 0) {
         await sendInfoMessage(new MessageContext(gameSession.textChannelID), {
-            title: state.localizer.translate(
+            title: State.localizer.translate(
                 gameSession.guildID,
                 "misc.inGame.noWinners"
             ),
@@ -1324,11 +1324,11 @@ export async function sendEndGameMessage(
 
         if (endGameMessage) {
             fields.push({
-                name: state.localizer.translate(
+                name: State.localizer.translate(
                     gameSession.guildID,
                     endGameMessage.title
                 ),
-                value: state.localizer.translate(
+                value: State.localizer.translate(
                     gameSession.guildID,
                     endGameMessage.message
                 ),
@@ -1344,7 +1344,7 @@ export async function sendEndGameMessage(
                     : EMBED_SUCCESS_COLOR,
             description: !useLargerScoreboard
                 ? bold(
-                      state.localizer.translate(
+                      State.localizer.translate(
                           gameSession.guildID,
                           "command.score.scoreboardTitle"
                       )
@@ -1365,7 +1365,7 @@ export async function sendEndGameMessage(
                             url: VOTE_LINK,
                             type: 2 as const,
                             emoji: { name: "✅" },
-                            label: state.localizer.translate(
+                            label: State.localizer.translate(
                                 gameSession.guildID,
                                 "misc.interaction.vote"
                             ),
@@ -1375,7 +1375,7 @@ export async function sendEndGameMessage(
                             url: REVIEW_LINK,
                             type: 2 as const,
                             emoji: { name: "📖" },
-                            label: state.localizer.translate(
+                            label: State.localizer.translate(
                                 gameSession.guildID,
                                 "misc.interaction.leaveReview"
                             ),
@@ -1385,7 +1385,7 @@ export async function sendEndGameMessage(
                             url: "https://discord.gg/RCuzwYV",
                             type: 2,
                             emoji: { name: "🎵" },
-                            label: state.localizer.translate(
+                            label: State.localizer.translate(
                                 gameSession.guildID,
                                 "misc.interaction.officialKmqServer"
                             ),
@@ -1458,7 +1458,7 @@ export async function sendScoreboardMessage(
         EMBED_FIELDS_PER_PAGE
     );
 
-    let footerText = state.localizer.translate(
+    let footerText = State.localizer.translate(
         message.guildID,
         "misc.classic.yourScore",
         {
@@ -1472,7 +1472,7 @@ export async function sendScoreboardMessage(
         const eliminationScoreboard =
             gameSession.scoreboard as EliminationScoreboard;
 
-        footerText = state.localizer.translate(
+        footerText = State.localizer.translate(
             message.guildID,
             "misc.elimination.yourLives",
             {
@@ -1483,7 +1483,7 @@ export async function sendScoreboardMessage(
         );
     } else if (gameSession.gameType === GameType.TEAMS) {
         const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
-        footerText = state.localizer.translate(
+        footerText = State.localizer.translate(
             message.guildID,
             "misc.team.yourTeamScore",
             {
@@ -1493,7 +1493,7 @@ export async function sendScoreboardMessage(
             }
         );
         footerText += "\n";
-        footerText += state.localizer.translate(
+        footerText += State.localizer.translate(
             message.guildID,
             "misc.team.yourScore",
             { score: String(teamScoreboard.getPlayerScore(message.author.id)) }
@@ -1503,7 +1503,7 @@ export async function sendScoreboardMessage(
     const embeds: Array<Eris.EmbedOptions> = winnersFieldSubsets.map(
         (winnersFieldSubset) => ({
             color: EMBED_SUCCESS_COLOR,
-            title: state.localizer.translate(
+            title: State.localizer.translate(
                 message.guildID,
                 "command.score.scoreboardTitle"
             ),
@@ -1522,7 +1522,7 @@ export async function sendScoreboardMessage(
  * @param message - The Message object
  */
 export function disconnectVoiceConnection(message: GuildTextableMessage): void {
-    state.client.closeVoiceConnection(message.guildID);
+    State.client.closeVoiceConnection(message.guildID);
 }
 
 /**
@@ -1532,7 +1532,7 @@ export function disconnectVoiceConnection(message: GuildTextableMessage): void {
 export function getVoiceConnection(
     message: Eris.Message
 ): Eris.VoiceConnection {
-    const voiceConnection = state.client.voiceConnections.get(message.guildID);
+    const voiceConnection = State.client.voiceConnections.get(message.guildID);
     return voiceConnection;
 }
 
@@ -1543,7 +1543,7 @@ export function getVoiceConnection(
 export function areUserAndBotInSameVoiceChannel(
     message: Eris.Message
 ): boolean {
-    const botVoiceConnection = state.client.voiceConnections.get(
+    const botVoiceConnection = State.client.voiceConnections.get(
         message.guildID
     );
 
@@ -1561,13 +1561,13 @@ export function areUserAndBotInSameVoiceChannel(
 export function getUserVoiceChannel(
     messageContext: MessageContext
 ): Eris.VoiceChannel {
-    const member = state.client.guilds
+    const member = State.client.guilds
         .get(messageContext.guildID)
         .members.get(messageContext.author.id);
 
     const voiceChannelID = member.voiceState.channelID;
     if (!voiceChannelID) return null;
-    return state.client.getChannel(voiceChannelID) as Eris.VoiceChannel;
+    return State.client.getChannel(voiceChannelID) as Eris.VoiceChannel;
 }
 
 /**
@@ -1575,7 +1575,7 @@ export function getUserVoiceChannel(
  * @returns the voice channel that the message's author is in
  */
 export function getVoiceChannel(voiceChannelID: string): Eris.VoiceChannel {
-    const voiceChannel = state.client.getChannel(
+    const voiceChannel = State.client.getChannel(
         voiceChannelID
     ) as Eris.VoiceChannel;
 
@@ -1633,7 +1633,7 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
         );
 
         sendErrorMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
+            title: State.localizer.translate(
                 message.guildID,
                 "misc.failure.missingPermissions.title"
             ),
@@ -1652,11 +1652,11 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
     if (channelFull) {
         logger.warn(`${getDebugLogHeader(messageContext)} | Channel full`);
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
+            title: State.localizer.translate(
                 message.guildID,
                 "misc.failure.vcFull.title"
             ),
-            description: state.localizer.translate(
+            description: State.localizer.translate(
                 message.guildID,
                 "misc.failure.vcFull.description"
             ),
@@ -1673,11 +1673,11 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
         );
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
+            title: State.localizer.translate(
                 message.guildID,
                 "misc.failure.afkChannel.title"
             ),
-            description: state.localizer.translate(
+            description: State.localizer.translate(
                 message.guildID,
                 "misc.failure.afkChannel.description"
             ),
@@ -1693,9 +1693,9 @@ export function voicePermissionsCheck(message: GuildTextableMessage): boolean {
  * @returns whether the bot is alone 😔
  */
 export function checkBotIsAlone(guildID: string): boolean {
-    const voiceConnection = state.client.voiceConnections.get(guildID);
+    const voiceConnection = State.client.voiceConnections.get(guildID);
     if (!voiceConnection || !voiceConnection.channelID) return true;
-    const channel = state.client.getChannel(
+    const channel = State.client.getChannel(
         voiceConnection.channelID
     ) as Eris.VoiceChannel;
 
@@ -1714,7 +1714,7 @@ export function checkBotIsAlone(guildID: string): boolean {
 export function getDebugChannel(): Promise<Eris.TextChannel> {
     if (!process.env.DEBUG_SERVER_ID || !process.env.DEBUG_TEXT_CHANNEL_ID)
         return null;
-    const debugGuild = state.client.guilds.get(process.env.DEBUG_SERVER_ID);
+    const debugGuild = State.client.guilds.get(process.env.DEBUG_SERVER_ID);
     if (!debugGuild) return null;
     return fetchChannel(process.env.DEBUG_TEXT_CHANNEL_ID);
 }
@@ -1725,7 +1725,7 @@ export function getDebugChannel(): Promise<Eris.TextChannel> {
  */
 export function getMajorityCount(guildID: string): number {
     const voiceChannelID =
-        state.client.voiceConnections.get(guildID)?.channelID;
+        State.client.voiceConnections.get(guildID)?.channelID;
 
     if (voiceChannelID) {
         return Math.floor(getNumParticipants(voiceChannelID) * 0.5) + 1;
@@ -1788,7 +1788,7 @@ export async function sendBookmarkedSongs(
             )} (${standardDateFormat(song[1].publishDate)})`,
             value: `[${friendlyFormattedNumber(
                 song[1].views
-            )} ${state.localizer.translate(
+            )} ${State.localizer.translate(
                 guildID,
                 "misc.views"
             )}](https://youtu.be/${song[1].youtubeLink})`,
@@ -1802,14 +1802,14 @@ export async function sendBookmarkedSongs(
                     icon_url: KmqImages.READING_BOOK,
                 },
                 title: bold(
-                    state.localizer.translate(
+                    State.localizer.translate(
                         guildID,
                         "misc.interaction.bookmarked.message.title"
                     )
                 ),
                 fields,
                 footer: {
-                    text: state.localizer.translate(
+                    text: State.localizer.translate(
                         guildID,
                         "misc.interaction.bookmarked.message.playedOn",
                         { date: standardDateFormat(new Date()) }
@@ -1932,7 +1932,7 @@ export async function tryCreateInteractionErrorAcknowledgement(
                         icon_url: interaction.member?.avatarURL,
                     },
                     title: bold(
-                        state.localizer.translate(
+                        State.localizer.translate(
                             interaction.guildID,
                             "misc.interaction.title.failure"
                         )
@@ -1953,7 +1953,7 @@ export async function tryCreateInteractionErrorAcknowledgement(
  * @returns the locale associated with the given guild
  */
 export function getGuildLocale(guildID: string): LocaleType {
-    return state.locales[guildID] ?? DEFAULT_LOCALE;
+    return State.locales[guildID] ?? DEFAULT_LOCALE;
 }
 
 /**

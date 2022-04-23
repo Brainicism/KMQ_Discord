@@ -6,7 +6,7 @@ import {
 } from "../../events/client/interactionCreate";
 import { sendInfoMessage } from "../../helpers/discord_utils";
 import CommandArgs from "../../interfaces/command_args";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { EnvType } from "../../enums/env_type";
@@ -39,23 +39,23 @@ export default class AppCommandsCommand implements BaseCommand {
         if (artistType === AppCommandsAction.RELOAD) {
             if (process.env.NODE_ENV === EnvType.PROD) {
                 logger.info("Creating global application commands...");
-                await state.client.createCommand({
+                await State.client.createCommand({
                     name: BOOKMARK_COMMAND_NAME,
                     type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
                 });
 
-                await state.client.createCommand({
+                await State.client.createCommand({
                     name: PROFILE_COMMAND_NAME,
                     type: Eris.Constants.ApplicationCommandTypes.MESSAGE,
                 });
 
-                await state.client.createCommand({
+                await State.client.createCommand({
                     name: PROFILE_COMMAND_NAME,
                     type: Eris.Constants.ApplicationCommandTypes.USER,
                 });
             } else if (process.env.NODE_ENV === EnvType.DEV) {
                 logger.info("Creating guild application commands...");
-                const debugServer = state.client.guilds.get(
+                const debugServer = State.client.guilds.get(
                     process.env.DEBUG_SERVER_ID
                 );
 
@@ -81,20 +81,20 @@ export default class AppCommandsCommand implements BaseCommand {
                 description: "Yay.",
             });
         } else {
-            const commands = await state.client.getCommands();
+            const commands = await State.client.getCommands();
             for (const command of commands) {
                 logger.info(
                     `Deleting global application command: ${command.id}`
                 );
-                await state.client.deleteCommand(command.id);
+                await State.client.deleteCommand(command.id);
             }
 
-            const debugServer = state.client.guilds.get(
+            const debugServer = State.client.guilds.get(
                 process.env.DEBUG_SERVER_ID
             );
 
             if (!debugServer) return;
-            const guildCommands = await state.client.getGuildCommands(
+            const guildCommands = await State.client.getGuildCommands(
                 debugServer.id
             );
 
@@ -103,7 +103,7 @@ export default class AppCommandsCommand implements BaseCommand {
                     `Deleting guild application command: ${command.id}`
                 );
 
-                await state.client.deleteGuildCommand(
+                await State.client.deleteGuildCommand(
                     debugServer.id,
                     command.id
                 );

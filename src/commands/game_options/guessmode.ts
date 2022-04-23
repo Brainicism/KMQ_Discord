@@ -8,7 +8,7 @@ import {
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
 import { GuessModeType } from "../../enums/option_types/guess_mode_type";
@@ -38,7 +38,7 @@ export default class GuessModeCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "guessmode",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.guessmode.help.description"
         ),
@@ -46,28 +46,28 @@ export default class GuessModeCommand implements BaseCommand {
         examples: [
             {
                 example: "`,guessmode song`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.guessmode.help.example.song"
                 ),
             },
             {
                 example: "`,guessmode artist`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.guessmode.help.example.artist"
                 ),
             },
             {
                 example: "`,guessmode both`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.guessmode.help.example.both"
                 ),
             },
             {
                 example: "`,guessmode`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.guessmode.help.example.reset",
                     {

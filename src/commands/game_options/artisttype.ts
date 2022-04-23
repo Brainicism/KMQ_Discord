@@ -9,7 +9,7 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import HelpDocumentation from "../../interfaces/help";
 import CommandArgs from "../../interfaces/command_args";
 import { ArtistType } from "../../enums/option_types/artist_type";
@@ -33,7 +33,7 @@ export default class ArtistTypeCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "artisttype",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.artisttype.help.description",
             {
@@ -46,28 +46,28 @@ export default class ArtistTypeCommand implements BaseCommand {
         examples: [
             {
                 example: "`,artisttype soloists`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.soloists"
                 ),
             },
             {
                 example: "`,artisttype groups`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.groups"
                 ),
             },
             {
                 example: "`,artisttype both`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.both"
                 ),
             },
             {
                 example: "`,artisttype`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.reset"
                 ),
@@ -97,11 +97,11 @@ export default class ArtistTypeCommand implements BaseCommand {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "misc.failure.gameOptionConflict.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "misc.failure.gameOptionConflict.description",
                     {

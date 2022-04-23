@@ -1,6 +1,6 @@
 import dbContext from "../database_context";
 import Patron from "../interfaces/patron";
-import { state } from "../kmq_worker";
+import State from "../state";
 import { IPCLogger } from "../logger";
 import { addPremium, removePremium } from "./game_utils";
 
@@ -24,7 +24,7 @@ enum PatronState {
  */
 export default async function updatePremiumUsers(): Promise<void> {
     if (
-        !state.patreonCampaign ||
+        !State.patreonCampaign ||
         !process.env.PATREON_CREATOR_ACCESS_TOKEN ||
         !process.env.PATREON_CAMPAIGN_ID
     ) {
@@ -33,7 +33,7 @@ export default async function updatePremiumUsers(): Promise<void> {
 
     let fetchedPatrons: Array<PatronResponse>;
     try {
-        fetchedPatrons = await state.patreonCampaign.fetchPatrons([
+        fetchedPatrons = await State.patreonCampaign.fetchPatrons([
             PatronState.ACTIVE,
             PatronState.DECLINED,
         ]);

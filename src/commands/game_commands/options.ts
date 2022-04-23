@@ -6,7 +6,7 @@ import BaseCommand from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
 
@@ -17,7 +17,7 @@ export default class OptionsCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "options",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.options.help.description"
         ),

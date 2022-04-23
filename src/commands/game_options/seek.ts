@@ -8,7 +8,7 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
 import { SeekType } from "../../enums/option_types/seek_type";
@@ -36,7 +36,7 @@ export default class SeekCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "seek",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.seek.help.description"
         ),
@@ -44,28 +44,28 @@ export default class SeekCommand implements BaseCommand {
         examples: [
             {
                 example: "`,seek random`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.seek.help.example.random"
                 ),
             },
             {
                 example: "`,seek middle`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.seek.help.example.middle"
                 ),
             },
             {
                 example: "`,seek beginning`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.seek.help.example.beginning"
                 ),
             },
             {
                 example: "`,seek`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.seek.help.example.reset",
                     {

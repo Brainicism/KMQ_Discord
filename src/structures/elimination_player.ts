@@ -1,6 +1,6 @@
 import Player from "./player";
 import { getUserTag } from "../helpers/discord_utils";
-import { state } from "../kmq_worker";
+import State from "../state";
 import { DEFAULT_LIVES } from "./elimination_scoreboard";
 
 export default class EliminationPlayer extends Player {
@@ -12,7 +12,7 @@ export default class EliminationPlayer extends Player {
         firstGameOfDay = false,
         premium = false
     ): EliminationPlayer {
-        const user = state.client.users.get(userID);
+        const user = State.client.users.get(userID);
 
         return new EliminationPlayer(
             getUserTag(user),

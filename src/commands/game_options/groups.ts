@@ -12,7 +12,7 @@ import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import { GROUP_LIST_URL } from "../../constants";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
@@ -27,7 +27,7 @@ export default class GroupsCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "groups",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.groups.help.description",
             {
@@ -38,7 +38,7 @@ export default class GroupsCommand implements BaseCommand {
         examples: [
             {
                 example: "`,groups blackpink`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.groups.help.example.singleGroup",
                     {
@@ -48,7 +48,7 @@ export default class GroupsCommand implements BaseCommand {
             },
             {
                 example: "`,groups blackpink, bts, red velvet`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.groups.help.example.multipleGroups",
                     {
@@ -60,7 +60,7 @@ export default class GroupsCommand implements BaseCommand {
             },
             {
                 example: "`,groups`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.groups.help.example.reset"
                 ),
@@ -71,7 +71,7 @@ export default class GroupsCommand implements BaseCommand {
                 style: 5 as const,
                 url: GROUP_LIST_URL,
                 type: 2 as const,
-                label: state.localizer.translate(
+                label: State.localizer.translate(
                     guildID,
                     "misc.interaction.fullGroupsList"
                 ),
@@ -96,7 +96,7 @@ export default class GroupsCommand implements BaseCommand {
         let groupsWarning = "";
         if (parsedMessage.components.length > 1) {
             if (["add", "remove"].includes(parsedMessage.components[0])) {
-                groupsWarning = state.localizer.translate(
+                groupsWarning = State.localizer.translate(
                     message.guildID,
                     "misc.warning.addRemoveOrdering.footer",
                     {
@@ -124,21 +124,21 @@ export default class GroupsCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "misc.failure.unrecognizedGroups.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "misc.failure.unrecognizedGroups.description",
                     {
-                        matchedGroupsAction: state.localizer.translate(
+                        matchedGroupsAction: State.localizer.translate(
                             message.guildID,
                             "misc.failure.unrecognizedGroups.added"
                         ),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: unmatchedGroups.join(", "),
-                        solution: state.localizer.translate(
+                        solution: State.localizer.translate(
                             message.guildID,
                             "misc.failure.unrecognizedGroups.solution",
                             {
@@ -162,11 +162,11 @@ export default class GroupsCommand implements BaseCommand {
             );
             if (intersection.size > 0) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
+                    title: State.localizer.translate(
                         message.guildID,
                         "misc.failure.groupsExcludeConflict.title"
                     ),
-                    description: state.localizer.translate(
+                    description: State.localizer.translate(
                         message.guildID,
                         "misc.failure.groupsExcludeConflict.description",
                         {
@@ -177,7 +177,7 @@ export default class GroupsCommand implements BaseCommand {
                                 .join(", "),
                             solutionStepOne: `\`${process.env.BOT_PREFIX}remove exclude\``,
                             solutionStepTwo: `\`${process.env.BOT_PREFIX}groups\``,
-                            allowOrPrevent: state.localizer.translate(
+                            allowOrPrevent: State.localizer.translate(
                                 message.guildID,
                                 "misc.failure.groupsExcludeConflict.allow"
                             ),

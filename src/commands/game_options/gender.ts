@@ -9,7 +9,7 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
 import { Gender } from "../../enums/option_types/gender";
@@ -43,7 +43,7 @@ export default class GenderCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "gender",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.gender.help.description",
             {
@@ -57,35 +57,35 @@ export default class GenderCommand implements BaseCommand {
         examples: [
             {
                 example: "`,gender female`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.gender.help.example.female"
                 ),
             },
             {
                 example: "`,gender male female`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.gender.help.example.maleFemale"
                 ),
             },
             {
                 example: "`,gender coed`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.gender.help.example.coed"
                 ),
             },
             {
                 example: "`,gender`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.gender.help.example.reset"
                 ),
             },
             {
                 example: "`,gender alternating`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.gender.help.example.alternating"
                 ),
@@ -119,11 +119,11 @@ export default class GenderCommand implements BaseCommand {
                 );
 
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
+                    title: State.localizer.translate(
                         message.guildID,
                         "misc.failure.gameOptionConflict.title"
                     ),
-                    description: state.localizer.translate(
+                    description: State.localizer.translate(
                         message.guildID,
                         "misc.failure.gameOptionConflict.description",
                         {
@@ -143,11 +143,11 @@ export default class GenderCommand implements BaseCommand {
                 guildPreference.getGroupIDs().length === 1
             ) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
+                    title: State.localizer.translate(
                         message.guildID,
                         "command.gender.warning.gameOption.title"
                     ),
-                    description: state.localizer.translate(
+                    description: State.localizer.translate(
                         message.guildID,
                         "command.gender.warning.gameOption.description",
                         {

@@ -13,7 +13,7 @@ import {
 import { isFirstGameOfDay, isUserPremium } from "../../helpers/game_utils";
 import { KmqImages } from "../../constants";
 import { bold } from "../../helpers/utils";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import { IPCLogger } from "../../logger";
@@ -49,11 +49,11 @@ export default class JoinCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             logger.warn(`${getDebugLogHeader(message)} | Missing team name.`);
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "command.join.failure.joinError.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "command.join.failure.joinError.noTeamName.description",
                     { joinCommand: `${process.env.BOT_PREFIX}join` }
@@ -77,17 +77,17 @@ export default class JoinCommand implements BaseCommand {
                 .join("");
 
             if (
-                !state.client.guilds
+                !State.client.guilds
                     .get(message.guildID)
                     .emojis.map((e) => e.id)
                     .includes(emojiID)
             ) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
+                    title: State.localizer.translate(
                         message.guildID,
                         "command.join.failure.joinError.invalidTeamName.title"
                     ),
-                    description: state.localizer.translate(
+                    description: State.localizer.translate(
                         message.guildID,
                         "command.join.failure.joinError.badEmojis.description"
                     ),
@@ -110,11 +110,11 @@ export default class JoinCommand implements BaseCommand {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "command.join.failure.joinError.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "command.join.failure.joinError.invalidCharacters.description"
                 ),
@@ -139,11 +139,11 @@ export default class JoinCommand implements BaseCommand {
             );
 
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "command.join.team.new"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "command.join.team.join",
                     {
@@ -152,7 +152,7 @@ export default class JoinCommand implements BaseCommand {
                         joinCommand: `${process.env.BOT_PREFIX}join`,
                         teamNameWithCleanEmojis,
                         startGameInstructions: !gameSession.sessionInitialized
-                            ? state.localizer.translate(
+                            ? State.localizer.translate(
                                   message.guildID,
                                   "command.join.team.startGameInstructions",
                                   {
@@ -172,11 +172,11 @@ export default class JoinCommand implements BaseCommand {
             const team = teamScoreboard.getTeam(teamName);
             if (team.hasPlayer(message.author.id)) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
+                    title: State.localizer.translate(
                         message.guildID,
                         "command.join.failure.joinError.title"
                     ),
-                    description: state.localizer.translate(
+                    description: State.localizer.translate(
                         message.guildID,
                         "command.join.failure.joinError.alreadyInTeam.description"
                     ),
@@ -201,7 +201,7 @@ export default class JoinCommand implements BaseCommand {
             );
 
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "command.join.playerJoinedTeam.title",
                     {
@@ -210,12 +210,12 @@ export default class JoinCommand implements BaseCommand {
                     }
                 ),
                 description: !gameSession.sessionInitialized
-                    ? state.localizer.translate(
+                    ? State.localizer.translate(
                           message.guildID,
                           "command.join.playerJoinedTeam.beforeGameStart.description",
                           { beginCommand: `\`${process.env.BOT_PREFIX}begin\`` }
                       )
-                    : state.localizer.translate(
+                    : State.localizer.translate(
                           message.guildID,
                           "command.join.playerJoinedTeam.afterGameStart.description",
                           {

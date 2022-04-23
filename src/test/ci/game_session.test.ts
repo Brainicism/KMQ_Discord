@@ -4,7 +4,7 @@ import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
 import sinon from "sinon";
 import { GameType } from "../../enums/game_type";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import * as discord_utils from "../../helpers/discord_utils";
 import * as game_utils from "../../helpers/game_utils";
 import * as utils from "../../helpers/utils";
@@ -27,7 +27,7 @@ describe("startRound", function () {
         voiceChannelStub.voiceMembers = new Collection(Eris.Member);
         const x = sinon.createStubInstance(KmqClient);
         x.getChannel.callsFake(() => voiceChannelStub);
-        state.client = x;
+        State.client = x;
         sandbox.stub(discord_utils, "getNumParticipants").callsFake(() => 1);
         sandbox.stub(discord_utils, "getDebugLogHeader").callsFake(() => "");
 

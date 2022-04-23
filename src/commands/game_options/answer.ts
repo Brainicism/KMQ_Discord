@@ -8,7 +8,7 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import HelpDocumentation from "../../interfaces/help";
 import CommandArgs from "../../interfaces/command_args";
 import { AnswerType } from "../../enums/option_types/answer_type";
@@ -35,7 +35,7 @@ export default class AnswerCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "answer",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.answer.help.description",
             {
@@ -50,21 +50,21 @@ export default class AnswerCommand implements BaseCommand {
         examples: [
             {
                 example: "`,answer typing`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.answer.help.example.typing"
                 ),
             },
             {
                 example: "`,answer typingtypos`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.answer.help.example.typingTypos"
                 ),
             },
             {
                 example: "`,answer easy`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
                     { optionCount: String(4), penalty: "0.25x" }
@@ -72,7 +72,7 @@ export default class AnswerCommand implements BaseCommand {
             },
             {
                 example: "`,answer medium`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
                     { optionCount: String(6), penalty: "0.5x" }
@@ -80,7 +80,7 @@ export default class AnswerCommand implements BaseCommand {
             },
             {
                 example: "`,answer hard`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
                     { optionCount: String(8), penalty: "0.75x" }

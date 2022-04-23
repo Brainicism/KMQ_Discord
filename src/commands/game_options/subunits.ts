@@ -8,7 +8,7 @@ import {
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
 import { SubunitsPreference } from "../../enums/option_types/subunit_preference";
@@ -35,7 +35,7 @@ export default class SubunitsCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "subunits",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.subunits.help.description",
             { groups: `\`${process.env.BOT_PREFIX}groups\`` }
@@ -44,7 +44,7 @@ export default class SubunitsCommand implements BaseCommand {
         examples: [
             {
                 example: "`,subunits include`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.subunits.help.example.include",
                     {
@@ -57,14 +57,14 @@ export default class SubunitsCommand implements BaseCommand {
             },
             {
                 example: "`,subunits exclude`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.subunits.help.example.exclude"
                 ),
             },
             {
                 example: "`,subunits`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.subunits.help.example.reset",
                     { defaultSubunit: `\`${DEFAULT_SUBUNIT_PREFERENCE}\`` }

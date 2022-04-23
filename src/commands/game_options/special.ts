@@ -5,7 +5,7 @@ import {
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { getGuildPreference, isUserPremium } from "../../helpers/game_utils";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import { IPCLogger } from "../../logger";
 import type GuildPreference from "../../structures/guild_preference";
 import { GameOption } from "../../enums/game_option_name";
@@ -38,7 +38,7 @@ export default class SpecialCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "special",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.special.help.description"
         ),
@@ -46,56 +46,56 @@ export default class SpecialCommand implements BaseCommand {
         examples: [
             {
                 example: "`,special reverse`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.special.help.example.reverse"
                 ),
             },
             {
                 example: "`,special slow`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.special.help.example.slow"
                 ),
             },
             {
                 example: "`,special fast`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.special.help.example.fast"
                 ),
             },
             {
                 example: "`,special faster`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.special.help.example.faster"
                 ),
             },
             {
                 example: "`,special lowpitch`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.special.help.example.lowPitch"
                 ),
             },
             {
                 example: "`,special highpitch`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.special.help.example.highPitch"
                 ),
             },
             {
                 example: "`,special nightcore`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.special.help.example.nightcore"
                 ),
             },
             {
                 example: "`,special`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.special.help.example.reset"
                 ),
@@ -128,11 +128,11 @@ export default class SpecialCommand implements BaseCommand {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "command.premium.option.description_kmq_server"
                 ),
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "command.premium.option.title"
                 ),

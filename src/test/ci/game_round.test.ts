@@ -4,7 +4,7 @@ import { ExpBonusModifierValues } from "../../commands/game_commands/exp";
 import { ExpBonusModifier } from "../../enums/exp_bonus_modifier";
 import { Gender } from "../../enums/option_types/gender";
 import { GuessModeType } from "../../enums/option_types/guess_mode_type";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import GameRound, {
     cleanArtistName,
     cleanSongName,
@@ -107,14 +107,14 @@ describe("constructor defaults", () => {
 
     describe("aliases", () => {
         beforeEach(() => {
-            state.aliases.artist = {};
-            state.aliases.song = {};
+            State.aliases.artist = {};
+            State.aliases.song = {};
         });
 
         describe("song aliases", () => {
             describe("song has an alias", () => {
                 it("records the aliases as an accepted answer", () => {
-                    state.aliases.song["abcde"] = [
+                    State.aliases.song["abcde"] = [
                         "An epic song",
                         "A good song",
                     ];
@@ -151,7 +151,7 @@ describe("constructor defaults", () => {
         describe("artist aliases", () => {
             describe("artist has an alias", () => {
                 it("records the aliases as an accepted answer", () => {
-                    state.aliases.artist["Person2"] = [
+                    State.aliases.artist["Person2"] = [
                         "Person Two",
                         "Person Too",
                     ];

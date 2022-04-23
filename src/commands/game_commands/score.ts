@@ -4,7 +4,7 @@ import {
     getDebugLogHeader,
 } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import CommandPrechecks from "../../command_prechecks";
 import Session from "../../structures/session";
 import GameSession from "../../structures/game_session";
@@ -20,7 +20,7 @@ export default class ScoreCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "score",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.score.help.description"
         ),

@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { execSync } from "child_process";
 import dbContext from "../database_context";
-import { state } from "../kmq_worker";
+import State from "../state";
 import { IPCLogger } from "../logger";
 import GuildPreference from "../structures/guild_preference";
 import { cleanArtistName, cleanSongName } from "../structures/game_round";
@@ -31,7 +31,7 @@ interface GroupMatchResults {
  * @param session - The active Session
  */
 export async function ensureVoiceConnection(session: Session): Promise<void> {
-    const { client } = state;
+    const { client } = State;
     if (session.connection && session.connection.ready) return;
     const connection = await client.joinVoiceChannel(session.voiceChannelID, {
         opusOnly: true,
@@ -66,7 +66,7 @@ export async function getAvailableSongCount(
 
 /** Cleans up inactive GameSessions */
 export async function cleanupInactiveGameSessions(): Promise<void> {
-    const { gameSessions } = state;
+    const { gameSessions } = State;
     const currentDate = Date.now();
     let inactiveSessions = 0;
     const totalSessions = Object.keys(gameSessions).length;
@@ -188,7 +188,7 @@ export async function getMatchingGroupNames(
         // apply artist aliases for unmatched groups
         for (let i = 0; i < result.unmatchedGroups.length; i++) {
             const groupName = result.unmatchedGroups[i];
-            const matchingAlias = Object.entries(state.aliases.artist).find(
+            const matchingAlias = Object.entries(State.aliases.artist).find(
                 (artistAliasTuple) =>
                     artistAliasTuple[1]
                         .map((x) => cleanArtistName(x))

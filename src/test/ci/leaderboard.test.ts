@@ -10,7 +10,7 @@ import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
 import GameSession from "../../structures/game_session";
 import Player from "../../structures/player";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import * as discordUtils from "../../helpers/discord_utils";
 import { LeaderboardType } from "../../enums/option_types/leaderboard_type";
 import { LeaderboardScope } from "../../enums/option_types/leaderboard_scope";
@@ -240,7 +240,7 @@ describe("getLeaderboardEmbeds", () => {
 
                 sandbox.restore();
 
-                state.gameSessions = { [SERVER_ID]: gameSession };
+                State.gameSessions = { [SERVER_ID]: gameSession };
                 const statsRows = [];
 
                 statsRows.push(...generatePlayerStats(INITIAL_TOTAL_ENTRIES));
@@ -574,7 +574,7 @@ describe("getLeaderboardEmbeds", () => {
 
                 sandbox.restore();
 
-                state.gameSessions = { [SERVER_ID]: gameSession };
+                State.gameSessions = { [SERVER_ID]: gameSession };
 
                 // Player with id 0 is not in game
                 [...Array(INITIAL_TOTAL_ENTRIES).keys()]

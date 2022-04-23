@@ -9,7 +9,7 @@ import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import { GameOptionInternalToGameOption } from "../../structures/guild_preference";
 import { GameOption } from "../../enums/game_option_name";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import HelpDocumentation from "../../interfaces/help";
 import CommandArgs from "../../interfaces/command_args";
 
@@ -26,7 +26,7 @@ export default class ResetCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "reset",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.reset.help.description"
         ),
@@ -34,7 +34,7 @@ export default class ResetCommand implements BaseCommand {
         examples: [
             {
                 example: "`,reset`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.reset.help.example.reset"
                 ),

@@ -9,7 +9,7 @@ import {
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import GuildPreference from "../../structures/guild_preference";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
@@ -40,7 +40,7 @@ export default class ShuffleCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "shuffle",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.shuffle.help.description",
             {
@@ -51,21 +51,21 @@ export default class ShuffleCommand implements BaseCommand {
         examples: [
             {
                 example: "`,shuffle random`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.shuffle.help.example.random"
                 ),
             },
             {
                 example: "`,shuffle popularity`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.shuffle.help.example.popularity"
                 ),
             },
             {
                 example: "`,shuffle`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.shuffle.help.example.reset",
                     { defaultShuffle: `\`${DEFAULT_SHUFFLE}\`` }
@@ -100,11 +100,11 @@ export default class ShuffleCommand implements BaseCommand {
                 );
 
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    description: state.localizer.translate(
+                    description: State.localizer.translate(
                         message.guildID,
                         "command.premium.option.description"
                     ),
-                    title: state.localizer.translate(
+                    title: State.localizer.translate(
                         message.guildID,
                         "command.premium.option.title"
                     ),

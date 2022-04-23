@@ -13,7 +13,7 @@ import {
     isPremiumRequest,
     getAvailableSongCount,
 } from "../../helpers/game_utils";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
@@ -79,11 +79,11 @@ export default class DebugCommand implements BaseCommand {
 
         const debugID = uuid.v4();
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
+            title: State.localizer.translate(
                 message.guildID,
                 "command.debug.title"
             ),
-            description: state.localizer.translate(
+            description: State.localizer.translate(
                 message.guildID,
                 "command.debug.description",
                 {

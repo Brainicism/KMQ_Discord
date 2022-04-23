@@ -1,6 +1,6 @@
 import Eris from "eris";
 import { getUserTag } from "../helpers/discord_utils";
-import { state } from "../kmq_worker";
+import State from "../state";
 import KmqMember from "./kmq_member";
 
 export default class MessageContext {
@@ -25,7 +25,7 @@ export default class MessageContext {
         this.textChannelID = textChannelID;
         this.author = author;
         if (!author) {
-            const clientUser = state.client.user;
+            const clientUser = State.client.user;
             this.author = new KmqMember(
                 clientUser.username,
                 getUserTag(clientUser),

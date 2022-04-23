@@ -11,7 +11,7 @@ import {
 import { getGuildPreference } from "../../helpers/game_utils";
 import MusicSession from "../../structures/music_session";
 import MessageContext from "../../structures/message_context";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
 import KmqMember from "../../structures/kmq_member";
@@ -42,7 +42,7 @@ export async function sendBeginMusicSessionMessage(
     messageContext: MessageContext,
     guildPreference: GuildPreference
 ): Promise<void> {
-    const startTitle = state.localizer.translate(
+    const startTitle = State.localizer.translate(
         messageContext.guildID,
         "command.music.musicStarting",
         {
@@ -58,11 +58,11 @@ export async function sendBeginMusicSessionMessage(
     const fields: Eris.EmbedField[] = [];
     if (gameInfoMessage) {
         fields.push({
-            name: state.localizer.translate(
+            name: State.localizer.translate(
                 messageContext.guildID,
                 gameInfoMessage.title
             ),
-            value: state.localizer.translate(
+            value: State.localizer.translate(
                 messageContext.guildID,
                 gameInfoMessage.message
             ),
@@ -111,7 +111,7 @@ export default class MusicCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "music",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.music.help.description"
         ),
@@ -120,7 +120,7 @@ export default class MusicCommand implements BaseCommand {
         examples: [
             {
                 example: "`,music`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.music.help.example"
                 ),
@@ -161,11 +161,11 @@ export default class MusicCommand implements BaseCommand {
         const voiceChannel = getUserVoiceChannel(messageContext);
         if (!voiceChannel) {
             await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "misc.failure.notInVC.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "misc.failure.notInVC.description",
                     { command: `\`${process.env.BOT_PREFIX}music\`` }
@@ -199,6 +199,6 @@ export default class MusicCommand implements BaseCommand {
         musicSession.startRound(guildPreference, messageContext);
         logger.info(`${getDebugLogHeader(message)} | Music session starting`);
 
-        state.musicSessions[guildID] = musicSession;
+        State.musicSessions[guildID] = musicSession;
     };
 }

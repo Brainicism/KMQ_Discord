@@ -2,7 +2,7 @@ import { ExpBonusModifierValues } from "../commands/game_commands/exp";
 import { ExpBonusModifier } from "../enums/exp_bonus_modifier";
 import { getMention } from "../helpers/discord_utils";
 import { bold } from "../helpers/utils";
-import { state } from "../kmq_worker";
+import State from "../state";
 
 export default class Player {
     /** The Discord username of the player sans discriminator,
@@ -58,7 +58,7 @@ export default class Player {
         firstGameOfDay = false,
         premium = false
     ): Player {
-        const user = state.client.users.get(userID);
+        const user = State.client.users.get(userID);
 
         return new Player(
             user.username,

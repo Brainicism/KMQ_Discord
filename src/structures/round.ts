@@ -1,5 +1,5 @@
 import Eris from "eris";
-import { state } from "../kmq_worker";
+import State from "../state";
 import type MessageContext from "./message_context";
 import { codeLine, friendlyFormattedNumber } from "../helpers/utils";
 import type QueriedSong from "../interfaces/queried_song";
@@ -45,10 +45,10 @@ export default abstract class Round {
 
     constructor(song: QueriedSong) {
         this.song = song;
-        this.songAliases = state.aliases.song[song.youtubeLink] || [];
+        this.songAliases = State.aliases.song[song.youtubeLink] || [];
         const artistNames = song.artistName.split("+").map((x) => x.trim());
         this.artistAliases = artistNames.flatMap(
-            (x) => state.aliases.artist[x] || []
+            (x) => State.aliases.artist[x] || []
         );
         this.startedAt = Date.now();
         this.roundMessageID = null;
@@ -94,7 +94,7 @@ export default abstract class Round {
             return "";
         }
 
-        const uniqueSongMessage = state.localizer.translate(
+        const uniqueSongMessage = State.localizer.translate(
             messageContext.guildID,
             "misc.inGame.uniqueSongsPlayed",
             {

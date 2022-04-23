@@ -7,7 +7,7 @@ import Player from "../structures/player";
 import EliminationPlayer from "../structures/elimination_player";
 import { execSync } from "child_process";
 import { IPCLogger } from "../logger";
-import { state } from "../kmq_worker";
+import State from "../state";
 import LocalizationManager from "../helpers/localization_manager";
 import { DEFAULT_LIVES } from "../structures/elimination_scoreboard";
 import { databaseDownloadDir } from "../seed/seed_db";
@@ -25,7 +25,7 @@ before(async function () {
     }
 
     this.timeout(20000);
-    state.localizer = new LocalizationManager();
+    State.localizer = new LocalizationManager();
     sandbox.stub(discordUtils, "sendErrorMessage");
     sandbox.stub(discordUtils, "sendInfoMessage");
     sandbox

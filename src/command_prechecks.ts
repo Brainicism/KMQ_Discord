@@ -7,7 +7,7 @@ import GameSession from "./structures/game_session";
 import MessageContext from "./structures/message_context";
 import { IPCLogger } from "./logger";
 import dbContext from "./database_context";
-import { state } from "./kmq_worker";
+import State from "./state";
 import MusicSession from "./structures/music_session";
 import { getTimeUntilRestart } from "./helpers/management_utils";
 import { isUserPremium } from "./helpers/game_utils";
@@ -47,11 +47,11 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "misc.preCheck.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     errorMessage ?? "misc.preCheck.differentVC"
                 ),
@@ -66,11 +66,11 @@ export default class CommandPrechecks {
         const { session, message } = precheckArgs;
         if (session && !(session instanceof GameSession)) {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "misc.preCheck.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "misc.preCheck.notMusicSession"
                 ),
@@ -93,11 +93,11 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "misc.preCheck.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     errorMessage ?? "misc.preCheck.debugServer"
                 ),
@@ -120,11 +120,11 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "misc.preCheck.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     errorMessage ?? "misc.preCheck.debugChannel"
                 ),
@@ -162,11 +162,11 @@ export default class CommandPrechecks {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "misc.preCheck.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     errorMessage ?? "misc.preCheck.competition"
                 ),
@@ -183,11 +183,11 @@ export default class CommandPrechecks {
         if (timeUntilRestart) {
             const { message } = precheckArgs;
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "command.play.failure.botRestarting.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "command.play.failure.botRestarting.description",
                     { timeUntilRestart: `\`${timeUntilRestart}\`` }
@@ -208,11 +208,11 @@ export default class CommandPrechecks {
         }
 
         await sendErrorMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
+            title: State.localizer.translate(
                 message.guildID,
                 "misc.preCheck.title"
             ),
-            description: state.localizer.translate(
+            description: State.localizer.translate(
                 message.guildID,
                 "misc.preCheck.notPremium",
                 { premium: `\`${process.env.BOT_PREFIX}premium\`` }
@@ -239,11 +239,11 @@ export default class CommandPrechecks {
         );
 
         sendErrorMessage(MessageContext.fromMessage(message), {
-            title: state.localizer.translate(
+            title: State.localizer.translate(
                 message.guildID,
                 "misc.preCheck.title"
             ),
-            description: state.localizer.translate(
+            description: State.localizer.translate(
                 message.guildID,
                 "misc.preCheck.premiumOrDebugServer",
                 { premium: `\`${process.env.BOT_PREFIX}premium\`` }

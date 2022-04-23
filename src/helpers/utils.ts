@@ -4,7 +4,7 @@ import { exec } from "child_process";
 import moment from "moment-timezone";
 import crypto from "crypto";
 import _ from "lodash";
-import { state } from "../kmq_worker";
+import State from "../state";
 import LocalizationManager from "./localization_manager";
 import { IPCLogger } from "../logger";
 
@@ -207,7 +207,7 @@ export function friendlyFormattedDate(date: Date, guildID: string): string {
     if (guildID === null) {
         localizer = new LocalizationManager();
     } else {
-        localizer = state.localizer;
+        localizer = State.localizer;
     }
 
     const timeDiffSeconds = (Date.now() - date.getTime()) / 1000;

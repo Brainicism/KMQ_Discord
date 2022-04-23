@@ -33,7 +33,7 @@ import {
     codeLine,
     chunkArray,
 } from "../helpers/utils";
-import { state } from "../kmq_worker";
+import State from "../state";
 
 import { IPCLogger } from "../logger";
 import GameRound from "./game_round";
@@ -239,18 +239,18 @@ export default class GameSession extends Session {
             this.round.interactionMessage = await sendInfoMessage(
                 new MessageContext(this.textChannelID),
                 {
-                    title: state.localizer.translate(
+                    title: State.localizer.translate(
                         this.guildID,
                         "misc.interaction.guess.title",
                         {
                             songOrArtist:
                                 guildPreference.gameOptions.guessModeType ===
                                 GuessModeType.ARTIST
-                                    ? state.localizer.translate(
+                                    ? State.localizer.translate(
                                           this.guildID,
                                           "misc.artist"
                                       )
-                                    : state.localizer.translate(
+                                    : State.localizer.translate(
                                           this.guildID,
                                           "misc.song"
                                       ),
@@ -417,7 +417,7 @@ export default class GameSession extends Session {
                         b.endLevel - b.startLevel - (a.endLevel - a.startLevel)
                 )
                 .map((leveledUpPlayer) =>
-                    state.localizer.translate(
+                    State.localizer.translate(
                         this.guildID,
                         "misc.levelUp.entry",
                         {
@@ -441,7 +441,7 @@ export default class GameSession extends Session {
 
             if (leveledUpPlayers.length > 10) {
                 levelUpMessages.push(
-                    state.localizer.translate(
+                    State.localizer.translate(
                         this.guildID,
                         "misc.andManyOthers"
                     )
@@ -449,7 +449,7 @@ export default class GameSession extends Session {
             }
 
             sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     this.guildID,
                     "misc.levelUp.title"
                 ),
@@ -624,7 +624,7 @@ export default class GameSession extends Session {
         if (this.round.incorrectMCGuessers.has(interaction.member.id)) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                state.localizer.translate(
+                State.localizer.translate(
                     this.guildID,
                     "misc.failure.interaction.alreadyEliminated"
                 )
@@ -637,7 +637,7 @@ export default class GameSession extends Session {
         ) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                state.localizer.translate(
+                State.localizer.translate(
                     this.guildID,
                     "misc.failure.interaction.eliminated"
                 )

@@ -6,7 +6,7 @@ import {
     tryInteractionAcknowledge,
     tryCreateInteractionErrorAcknowledgement,
 } from "../../helpers/discord_utils";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import { handleProfileInteraction } from "../../commands/game_commands/profile";
 import Session from "../../structures/session";
 import GameSession from "../../structures/game_session";
@@ -75,7 +75,7 @@ export default async function interactionCreateHandler(
                 if (!session) {
                     tryCreateInteractionErrorAcknowledgement(
                         interaction,
-                        state.localizer.translate(
+                        State.localizer.translate(
                             interaction.guildID,
                             "misc.failure.interaction.bookmarkOutsideGame"
                         )

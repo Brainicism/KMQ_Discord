@@ -8,7 +8,7 @@ import BaseCommand from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import CommandArgs from "../../interfaces/command_args";
 import HelpDocumentation from "../../interfaces/help";
 
@@ -45,7 +45,7 @@ export default class ListCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "list",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.list.help.description"
         ),
@@ -53,7 +53,7 @@ export default class ListCommand implements BaseCommand {
         examples: [
             {
                 example: "`,list groups`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.list.help.example.groups",
                     { groups: `\`${process.env.BOT_PREFIX}groups\`` }
@@ -61,7 +61,7 @@ export default class ListCommand implements BaseCommand {
             },
             {
                 example: "`,list exclude`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.list.help.example.exclude",
                     { exclude: `\`${process.env.BOT_PREFIX}exclude\`` }
@@ -69,7 +69,7 @@ export default class ListCommand implements BaseCommand {
             },
             {
                 example: "`,list include`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.list.help.example.include",
                     { include: `\`${process.env.BOT_PREFIX}include\`` }
@@ -110,7 +110,7 @@ export default class ListCommand implements BaseCommand {
 
         optionValue =
             optionValue ||
-            state.localizer.translate(
+            State.localizer.translate(
                 message.guildID,
                 "command.list.currentValue.nothingSelected"
             );
@@ -120,7 +120,7 @@ export default class ListCommand implements BaseCommand {
                 sendMessage(
                     channel.id,
                     {
-                        content: state.localizer.translate(
+                        content: State.localizer.translate(
                             message.guildID,
                             "command.list.failure.groupsInFile.description"
                         ),
@@ -138,11 +138,11 @@ export default class ListCommand implements BaseCommand {
                 );
 
                 await sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: state.localizer.translate(
+                    title: State.localizer.translate(
                         message.guildID,
                         "command.list.failure.groupsInFile.noFilePermissions.title"
                     ),
-                    description: state.localizer.translate(
+                    description: State.localizer.translate(
                         message.guildID,
                         "command.list.failure.groupsInFile.noFilePermissions.description",
                         { attachFile: "ATTACH_FILE" }
@@ -152,7 +152,7 @@ export default class ListCommand implements BaseCommand {
             }
         } else {
             await sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "command.list.currentValue.title",
                     {

@@ -1,7 +1,7 @@
 import { getVideoID } from "ytdl-core";
 import { LocaleType } from "../../enums/locale_type";
 import BaseCommand from "../interfaces/base_command";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import dbContext from "../../database_context";
 import {
     getDebugLogHeader,
@@ -48,7 +48,7 @@ export default class LookupCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "lookup",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.lookup.help.description"
         ),
@@ -56,7 +56,7 @@ export default class LookupCommand implements BaseCommand {
         examples: [
             {
                 example: "`,lookup IHNzOHi8sJs`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.lookup.help.example.song",
                     { song: "Ddu-du Ddu-du", artist: "Blackpink" }
@@ -65,7 +65,7 @@ export default class LookupCommand implements BaseCommand {
             {
                 example:
                     "`,lookup https://www.youtube.com/watch?v=4TWR90KJl84`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.lookup.help.example.song",
                     { song: "Next Level", artist: "Aespa" }
@@ -95,7 +95,7 @@ export default class LookupCommand implements BaseCommand {
         } catch {
             await sendValidationErrorMessage(
                 message,
-                state.localizer.translate(
+                State.localizer.translate(
                     guildID,
                     "command.lookup.validation.invalidYouTubeID"
                 ),
@@ -130,11 +130,11 @@ export default class LookupCommand implements BaseCommand {
         const daisukiSongEntry = daisukiMVEntry || daisukiAudioEntry;
         if (!daisukiSongEntry) {
             await sendErrorMessage(messageContext, {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     guildID,
                     "command.lookup.notFound.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     guildID,
                     "command.lookup.notFound.description"
                 ),
@@ -166,16 +166,16 @@ export default class LookupCommand implements BaseCommand {
         let includedInOptions = false;
 
         if (kmqSongEntry) {
-            description = state.localizer.translate(
+            description = State.localizer.translate(
                 guildID,
                 "command.lookup.inKMQ",
                 { link: daisukiLink }
             );
             songName = getLocalizedSongName(kmqSongEntry, locale);
             artistName = getLocalizedArtistName(kmqSongEntry, locale);
-            songAliases = state.aliases.song[videoID]?.join(", ");
+            songAliases = State.aliases.song[videoID]?.join(", ");
             artistAliases =
-                state.aliases.artist[kmqSongEntry.artistName]?.join(", ");
+                State.aliases.artist[kmqSongEntry.artistName]?.join(", ");
             views = kmqSongEntry.views;
             publishDate = kmqSongEntry.publishDate;
 
@@ -212,7 +212,7 @@ export default class LookupCommand implements BaseCommand {
                 )} | KMQ song lookup. videoID = ${videoID}. Included in options = ${includedInOptions}.`
             );
         } else {
-            description = state.localizer.translate(
+            description = State.localizer.translate(
                 guildID,
                 "command.lookup.notInKMQ",
                 { link: daisukiLink }
@@ -241,7 +241,7 @@ export default class LookupCommand implements BaseCommand {
                 : daisukiSongEntry.kname;
 
             artistAliases =
-                state.aliases.artist[artistNameQuery.name]?.join(", ");
+                State.aliases.artist[artistNameQuery.name]?.join(", ");
 
             views = daisukiSongEntry.views;
             publishDate = new Date(daisukiSongEntry.publishedon);
@@ -253,7 +253,7 @@ export default class LookupCommand implements BaseCommand {
             );
         }
 
-        const viewsString = state.localizer.translate(guildID, "misc.views");
+        const viewsString = State.localizer.translate(guildID, "misc.views");
 
         const fields = [
             {
@@ -261,40 +261,40 @@ export default class LookupCommand implements BaseCommand {
                 value: friendlyFormattedNumber(views),
             },
             {
-                name: state.localizer.translate(guildID, "misc.releaseDate"),
+                name: State.localizer.translate(guildID, "misc.releaseDate"),
                 value: friendlyFormattedDate(publishDate, guildID),
             },
             {
-                name: state.localizer.translate(guildID, "misc.songAliases"),
+                name: State.localizer.translate(guildID, "misc.songAliases"),
                 value:
                     songAliases ||
-                    state.localizer.translate(guildID, "misc.none"),
+                    State.localizer.translate(guildID, "misc.none"),
             },
             {
-                name: state.localizer.translate(guildID, "misc.artistAliases"),
+                name: State.localizer.translate(guildID, "misc.artistAliases"),
                 value:
                     artistAliases ||
-                    state.localizer.translate(guildID, "misc.none"),
+                    State.localizer.translate(guildID, "misc.none"),
             },
         ];
 
         if (kmqSongEntry) {
             fields.push(
                 {
-                    name: state.localizer.translate(guildID, "misc.duration"),
+                    name: State.localizer.translate(guildID, "misc.duration"),
                     value:
                         songDuration ||
-                        state.localizer.translate(
+                        State.localizer.translate(
                             guildID,
                             "misc.notApplicable"
                         ),
                 },
                 {
-                    name: state.localizer.translate(
+                    name: State.localizer.translate(
                         guildID,
                         "command.lookup.inCurrentGameOptions"
                     ),
-                    value: state.localizer.translate(
+                    value: State.localizer.translate(
                         guildID,
                         includedInOptions ? "misc.yes" : "misc.no"
                     ),

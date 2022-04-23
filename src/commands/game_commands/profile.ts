@@ -18,7 +18,7 @@ import {
 } from "../../helpers/utils";
 import { CUM_EXP_TABLE } from "../../structures/game_session";
 import MessageContext from "../../structures/message_context";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import HelpDocumentation from "../../interfaces/help";
 import CommandArgs from "../../interfaces/command_args";
 
@@ -57,7 +57,7 @@ export function getRankNameByLevel(level: number, guildID: string): string {
     if (levelsPastMaxRank >= 0) {
         // add roman numeral suffix for every 5 levels above max rank title
         const stepsAboveMaxRank = Math.floor(levelsPastMaxRank / 5) + 1;
-        return `${state.localizer.translate(
+        return `${State.localizer.translate(
             guildID,
             highestRankTitle.title
         )} ${romanize(stepsAboveMaxRank + 1)}`;
@@ -66,10 +66,10 @@ export function getRankNameByLevel(level: number, guildID: string): string {
     for (let i = RANK_TITLES.length - 1; i >= 0; i--) {
         const rankTitle = RANK_TITLES[i];
         if (level >= rankTitle.req)
-            return state.localizer.translate(guildID, rankTitle.title);
+            return State.localizer.translate(guildID, rankTitle.title);
     }
 
-    return state.localizer.translate(guildID, RANK_TITLES[0].title);
+    return State.localizer.translate(guildID, RANK_TITLES[0].title);
 }
 
 async function getProfileFields(
@@ -161,7 +161,7 @@ async function getProfileFields(
 
     const fields: Array<Eris.EmbedField> = [
         {
-            name: state.localizer.translate(guildID, "misc.level"),
+            name: State.localizer.translate(guildID, "misc.level"),
             value: `${friendlyFormattedNumber(level)} (${getRankNameByLevel(
                 level,
                 guildID
@@ -169,7 +169,7 @@ async function getProfileFields(
             inline: true,
         },
         {
-            name: state.localizer.translate(
+            name: State.localizer.translate(
                 guildID,
                 "command.profile.experience"
             ),
@@ -179,7 +179,7 @@ async function getProfileFields(
             inline: true,
         },
         {
-            name: state.localizer.translate(
+            name: State.localizer.translate(
                 guildID,
                 "command.profile.overallRank"
             ),
@@ -189,7 +189,7 @@ async function getProfileFields(
             inline: true,
         },
         {
-            name: state.localizer.translate(
+            name: State.localizer.translate(
                 guildID,
                 "command.profile.songsGuessed"
             ),
@@ -201,7 +201,7 @@ async function getProfileFields(
             inline: true,
         },
         {
-            name: state.localizer.translate(
+            name: State.localizer.translate(
                 guildID,
                 "command.profile.gamesPlayed"
             ),
@@ -213,7 +213,7 @@ async function getProfileFields(
             inline: true,
         },
         {
-            name: state.localizer.translate(
+            name: State.localizer.translate(
                 guildID,
                 "command.profile.firstPlayed"
             ),
@@ -221,7 +221,7 @@ async function getProfileFields(
             inline: true,
         },
         {
-            name: state.localizer.translate(
+            name: State.localizer.translate(
                 guildID,
                 "command.profile.lastActive"
             ),
@@ -229,7 +229,7 @@ async function getProfileFields(
             inline: true,
         },
         {
-            name: state.localizer.translate(
+            name: State.localizer.translate(
                 guildID,
                 "command.profile.timesVoted"
             ),
@@ -249,12 +249,12 @@ async function getProfileFields(
             })
             .orderBy("badges.priority", "desc")
     )
-        .map((x) => state.localizer.translate(guildID, x["badge_name"]))
+        .map((x) => State.localizer.translate(guildID, x["badge_name"]))
         .join("\n");
 
     if (badges) {
         fields.push({
-            name: state.localizer.translate(guildID, "command.profile.badges"),
+            name: State.localizer.translate(guildID, "command.profile.badges"),
             value: badges,
             inline: false,
         });
@@ -266,25 +266,25 @@ async function getProfileFields(
 export default class ProfileCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "profile",
-        description: state.localizer.translate(
+        description: State.localizer.translate(
             guildID,
             "command.profile.help.description"
         ),
-        usage: `,profile { @${state.localizer.translate(
+        usage: `,profile { @${State.localizer.translate(
             guildID,
             "command.profile.help.usage.mention"
         )} }`,
         examples: [
             {
                 example: "`,profile`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.profile.help.example.self"
                 ),
             },
             {
                 example: "`,profile @FortnitePlayer`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.profile.help.example.otherPlayerMention",
                     {
@@ -294,7 +294,7 @@ export default class ProfileCommand implements BaseCommand {
             },
             {
                 example: "`,profile 141734249702096896`",
-                explanation: state.localizer.translate(
+                explanation: State.localizer.translate(
                     guildID,
                     "command.profile.help.example.otherPlayerID"
                 ),
@@ -322,11 +322,11 @@ export default class ProfileCommand implements BaseCommand {
 
                 if (!requestedPlayer) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: state.localizer.translate(
+                        title: State.localizer.translate(
                             message.guildID,
                             "command.profile.failure.notFound.title"
                         ),
-                        description: state.localizer.translate(
+                        description: State.localizer.translate(
                             message.guildID,
                             "command.profile.failure.notFound.description",
                             {
@@ -339,11 +339,11 @@ export default class ProfileCommand implements BaseCommand {
             }
         } else {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "command.profile.failure.notFound.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "command.profile.failure.notFound.badUsage.description",
                     { profileHelp: `\`${process.env.BOT_PREFIX}help profile\`` }
@@ -356,11 +356,11 @@ export default class ProfileCommand implements BaseCommand {
 
         if (fields.length === 0) {
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: state.localizer.translate(
+                title: State.localizer.translate(
                     message.guildID,
                     "command.profile.failure.notFound.title"
                 ),
-                description: state.localizer.translate(
+                description: State.localizer.translate(
                     message.guildID,
                     "misc.interaction.profile.noStats"
                 ),
@@ -395,11 +395,11 @@ export async function handleProfileInteraction(
     interaction: Eris.CommandInteraction,
     userId: string
 ): Promise<void> {
-    const user = await state.ipc.fetchUser(userId);
+    const user = await State.ipc.fetchUser(userId);
     if (!user) {
         tryCreateInteractionErrorAcknowledgement(
             interaction,
-            state.localizer.translate(
+            State.localizer.translate(
                 interaction.guildID,
                 "misc.interaction.profile.inaccessible",
                 {
@@ -420,7 +420,7 @@ export async function handleProfileInteraction(
     if (fields.length === 0) {
         tryCreateInteractionErrorAcknowledgement(
             interaction,
-            state.localizer.translate(
+            State.localizer.translate(
                 interaction.guildID,
                 "misc.interaction.profile.noStats"
             )

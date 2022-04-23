@@ -3,7 +3,7 @@ import { IPCLogger } from "../../logger";
 import BaseCommand from "../interfaces/base_command";
 import { sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import MessageContext from "../../structures/message_context";
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import CommandPrechecks from "../../command_prechecks";
 import CommandArgs from "../../interfaces/command_args";
 
@@ -43,7 +43,7 @@ export default class ReloadCommand implements BaseCommand {
 
         const reloadType = parsedMessage.components[0] as ReloadType;
         if (reloadType === ReloadType.ALL) {
-            state.ipc.allClustersCommand("reload_commands");
+            State.ipc.allClustersCommand("reload_commands");
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: "Reloading All Clusters",
                 description: "See logs for completion status",
@@ -60,6 +60,6 @@ export default class ReloadCommand implements BaseCommand {
 
     static reloadCommands(): void {
         logger.info("Reloading all commands");
-        state.client.reloadCommands();
+        State.client.reloadCommands();
     }
 }

@@ -1,4 +1,4 @@
-import { state } from "../../kmq_worker";
+import State from "../../state";
 import { IPCLogger } from "../../logger";
 import { EnvType } from "../../enums/env_type";
 
@@ -13,6 +13,6 @@ export default function unhandledRejectionHandler(reason: Error): void {
         `Cluster Unhandled Rejection at: Reason: ${reason}. Trace: ${reason.stack}`
     );
     if (process.env.NODE_ENV === EnvType.CI) {
-        state.ipc.admiralBroadcast("abort");
+        State.ipc.admiralBroadcast("abort");
     }
 }
