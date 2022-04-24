@@ -17,6 +17,7 @@ import { GROUP_LIST_URL } from "../../constants";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("excludes");
 
@@ -85,6 +86,7 @@ export default class ExcludeCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.EXCLUDE);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.EXCLUDE, reset: true }]
@@ -195,6 +197,7 @@ export default class ExcludeCommand implements BaseCommand {
 
         await guildPreference.setExcludes(matchedGroups);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.EXCLUDE, reset: false }]

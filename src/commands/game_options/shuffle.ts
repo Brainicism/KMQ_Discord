@@ -15,6 +15,7 @@ import type HelpDocumentation from "../../interfaces/help";
 import { ShuffleType } from "../../enums/option_types/shuffle_type";
 import { DEFAULT_SHUFFLE } from "../../constants";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("shuffle");
 
@@ -80,6 +81,7 @@ export default class ShuffleCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.SHUFFLE_TYPE);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.SHUFFLE_TYPE, reset: true }]
@@ -115,6 +117,7 @@ export default class ShuffleCommand implements BaseCommand {
 
         await guildPreference.setShuffleType(shuffleType);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.SHUFFLE_TYPE, reset: false }]

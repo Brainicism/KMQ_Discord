@@ -144,6 +144,7 @@ export async function sendBeginGameSessionMessage(
     }
 
     const optionsEmbedPayload = await generateOptionsMessage(
+        Session.getSession(guildID),
         messageContext,
         guildPreference,
         null

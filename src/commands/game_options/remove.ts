@@ -17,6 +17,7 @@ import type MatchedArtist from "../../interfaces/matched_artist";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("remove");
 
@@ -206,6 +207,7 @@ export default class RemoveCommand implements BaseCommand {
             case RemoveType.ARTISTS:
                 await guildPreference.setGroups(remainingGroups);
                 await sendOptionsMessage(
+                    Session.getSession(message.guildID),
                     MessageContext.fromMessage(message),
                     guildPreference,
                     [{ option: GameOption.GROUPS, reset: false }]
@@ -221,6 +223,7 @@ export default class RemoveCommand implements BaseCommand {
             case RemoveType.INCLUDES:
                 await guildPreference.setIncludes(remainingGroups);
                 await sendOptionsMessage(
+                    Session.getSession(message.guildID),
                     MessageContext.fromMessage(message),
                     guildPreference,
                     [{ option: GameOption.INCLUDE, reset: false }]
@@ -236,6 +239,7 @@ export default class RemoveCommand implements BaseCommand {
             case RemoveType.EXCLUDES:
                 await guildPreference.setExcludes(remainingGroups);
                 await sendOptionsMessage(
+                    Session.getSession(message.guildID),
                     MessageContext.fromMessage(message),
                     guildPreference,
                     [{ option: GameOption.EXCLUDE, reset: false }]

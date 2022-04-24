@@ -13,6 +13,7 @@ import type CommandArgs from "../../interfaces/command_args";
 import { OstPreference } from "../../enums/option_types/ost_preference";
 import { DEFAULT_OST_PREFERENCE } from "../../constants";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("ost");
 
@@ -80,6 +81,7 @@ export default class OstCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.OST_PREFERENCE);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.OST_PREFERENCE, reset: true }]
@@ -96,6 +98,7 @@ export default class OstCommand implements BaseCommand {
 
         await guildPreference.setOstPreference(ostPreference);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.OST_PREFERENCE, reset: false }]

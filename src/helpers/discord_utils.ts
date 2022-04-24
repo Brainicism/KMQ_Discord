@@ -50,7 +50,7 @@ import {
 import MessageContext from "../structures/message_context";
 import { LocaleType } from "../enums/locale_type";
 import type Round from "../structures/round";
-import Session from "../structures/session";
+import type Session from "../structures/session";
 import MusicRound from "../structures/music_round";
 import type EmbedPayload from "../interfaces/embed_payload";
 import type GameInfoMessage from "../interfaces/game_info_message";
@@ -90,7 +90,7 @@ export function getDebugLogHeader(
         | Eris.ComponentInteraction
         | Eris.CommandInteraction
 ): string {
-    const session = Session.getSession(context.guildID);
+    const session = null;
     let sessionType: string;
     if (session) {
         if (session.isMusicSession()) {
@@ -888,23 +888,23 @@ export function getFormattedLimit(
 
 /**
  * Creates an embed displaying the currently selected GameOptions
+ * @param session - The session
  * @param messageContext - The Message Context
  * @param guildPreference - The corresponding GuildPreference
  * @param updatedOptions - The GameOptions which were modified
  * @param preset - Specifies whether the GameOptions were modified by a preset
  * @param allReset - Specifies whether all GameOptions were reset
  * @param footerText - The footer text
- * @param isMusicSession - Whether the session is a MusicSession
  *  @returns an embed of current game options
  */
 export async function generateOptionsMessage(
+    session: Session,
     messageContext: MessageContext,
     guildPreference: GuildPreference,
     updatedOptions?: { option: GameOption; reset: boolean }[],
     preset = false,
     allReset = false,
-    footerText?: string,
-    isMusicSession = false
+    footerText?: string
 ): Promise<EmbedPayload> {
     if (guildPreference.gameOptions.forcePlaySongID) {
         await sendInfoMessage(
@@ -921,7 +921,6 @@ export async function generateOptionsMessage(
     }
 
     const guildID = messageContext.guildID;
-    const session = Session.getSession(guildID);
     const premiumRequest = await isPremiumRequest(
         session,
         messageContext.author.id
@@ -1073,7 +1072,7 @@ export async function generateOptionsMessage(
     }
 
     // Special case: disable these options in a music session
-    if (isMusicSession) {
+    if (session?.isMusicSession()) {
         const disabledOptions = [
             GameOption.GUESS_MODE_TYPE,
             GameOption.SEEK_TYPE,
@@ -1113,7 +1112,7 @@ export async function generateOptionsMessage(
         .join("\n");
 
     let nonPremiumGameWarning = "";
-    if (premiumRequest && session?.isGameSession() && !session.isPremium()) {
+    if (premiumRequest && session.isGameSession() && !session.isPremium()) {
         nonPremiumGameWarning = italicize(
             LocalizationManager.localizer.translate(
                 messageContext.guildID,
@@ -1185,7 +1184,7 @@ export async function generateOptionsMessage(
             "command.options.perCommandHelp",
             { helpCommand: `${process.env.BOT_PREFIX}help` }
         );
-    } else if (isMusicSession) {
+    } else if (session.isMusicSession()) {
         footerText = LocalizationManager.localizer.translate(
             messageContext.guildID,
             "command.options.musicSessionNotAvailable"
@@ -1242,6 +1241,7 @@ export async function generateOptionsMessage(
 
 /**
  * Sends an embed displaying the currently selected GameOptions
+ * @param session - The session
  * @param messageContext - The Message Context
  * @param guildPreference - The corresponding GuildPreference
  * @param updatedOptions - The GameOptions which were modified
@@ -1250,6 +1250,7 @@ export async function generateOptionsMessage(
  * @param footerText - The footer text
  */
 export async function sendOptionsMessage(
+    session: Session,
     messageContext: MessageContext,
     guildPreference: GuildPreference,
     updatedOptions?: { option: GameOption; reset: boolean }[],
@@ -1258,6 +1259,7 @@ export async function sendOptionsMessage(
     footerText?: string
 ): Promise<void> {
     const optionsEmbed = generateOptionsMessage(
+        session,
         messageContext,
         guildPreference,
         updatedOptions,

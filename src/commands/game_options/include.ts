@@ -16,6 +16,7 @@ import { GROUP_LIST_URL } from "../../constants";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("includes");
 
@@ -84,6 +85,7 @@ export default class IncludeCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.INCLUDE);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.INCLUDE, reset: true }]
@@ -183,6 +185,7 @@ export default class IncludeCommand implements BaseCommand {
 
         await guildPreference.setIncludes(matchedGroups);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.INCLUDE, reset: false }]

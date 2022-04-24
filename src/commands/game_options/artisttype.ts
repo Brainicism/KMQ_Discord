@@ -13,6 +13,7 @@ import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
 import { ArtistType } from "../../enums/option_types/artist_type";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("artisttype");
 
@@ -81,6 +82,7 @@ export default class ArtistTypeCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.ARTIST_TYPE);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.ARTIST_TYPE, reset: true }]
@@ -117,6 +119,7 @@ export default class ArtistTypeCommand implements BaseCommand {
         const artistType = parsedMessage.components[0] as ArtistType;
         await guildPreference.setArtistType(artistType);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.ARTIST_TYPE, reset: false }]

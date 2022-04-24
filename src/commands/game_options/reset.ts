@@ -12,6 +12,7 @@ import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
 import LocalizationManager from "../../helpers/localization_manager";
 import { GameOptionInternalToGameOption } from "../../constants";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("reset");
 
@@ -51,6 +52,7 @@ export default class ResetCommand implements BaseCommand {
         );
 
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             resetOptions.map((x) => ({

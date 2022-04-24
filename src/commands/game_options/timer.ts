@@ -76,6 +76,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
             }
 
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.TIMER, reset: true }]
@@ -100,6 +101,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
         }
 
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.TIMER, reset: false }]

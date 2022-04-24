@@ -9,6 +9,7 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import { GameOption } from "../../enums/game_option_name";
 import CommandPrechecks from "../../command_prechecks";
 import type CommandArgs from "../../interfaces/command_args";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("forceplay");
 
@@ -21,6 +22,7 @@ export default class ForcePlayCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.FORCE_PLAY_SONG);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.FORCE_PLAY_SONG, reset: true }]
@@ -35,6 +37,7 @@ export default class ForcePlayCommand implements BaseCommand {
         const forcePlaySongID = parsedMessage.components[0];
         await guildPreference.setForcePlaySong(forcePlaySongID);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.FORCE_PLAY_SONG, reset: false }]

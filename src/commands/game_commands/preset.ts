@@ -17,6 +17,7 @@ import type { GameOption } from "../../enums/game_option_name";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("preset");
 const PRESET_NAME_MAX_LENGTH = 25;
@@ -338,6 +339,7 @@ export default class PresetCommand implements BaseCommand {
             );
 
             sendOptionsMessage(
+                Session.getSession(guildID),
                 messageContext,
                 guildPreference,
                 loadResult[1].map((x) => ({

@@ -70,13 +70,13 @@ export async function sendBeginMusicSessionMessage(
     }
 
     const optionsEmbedPayload = await generateOptionsMessage(
+        Session.getSession(messageContext.guildID),
         messageContext,
         guildPreference,
         null,
         false,
         false,
-        null,
-        true
+        null
     );
 
     await sendInfoMessage(

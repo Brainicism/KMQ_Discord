@@ -13,6 +13,7 @@ import type HelpDocumentation from "../../interfaces/help";
 import { SeekType } from "../../enums/option_types/seek_type";
 import { DEFAULT_SEEK } from "../../constants";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("seek");
 
@@ -82,6 +83,7 @@ export default class SeekCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.SEEK_TYPE);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.SEEK_TYPE, reset: true }]
@@ -93,6 +95,7 @@ export default class SeekCommand implements BaseCommand {
         const seekType = parsedMessage.components[0] as SeekType;
         await guildPreference.setSeekType(seekType);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.SEEK_TYPE, reset: false }]
