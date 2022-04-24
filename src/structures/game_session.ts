@@ -42,7 +42,7 @@ import EliminationScoreboard from "./elimination_scoreboard";
 import TeamScoreboard from "./team_scoreboard";
 import { getRankNameByLevel } from "../commands/game_commands/profile";
 import EliminationPlayer from "./elimination_player";
-import { KmqImages, SONG_START_DELAY } from "../constants";
+import { CUM_EXP_TABLE, KmqImages, SONG_START_DELAY } from "../constants";
 import MessageContext from "./message_context";
 import KmqMember from "./kmq_member";
 import { calculateTotalRoundExp } from "../commands/game_commands/exp";
@@ -60,18 +60,6 @@ import { GameType } from "../enums/game_type";
 const MULTIGUESS_DELAY = 1500;
 
 const logger = new IPCLogger("game_session");
-
-const EXP_TABLE = [...Array(1000).keys()].map((level) => {
-    if (level === 0 || level === 1) return 0;
-    return 10 * level ** 2 + 200 * level - 200;
-});
-
-export const CUM_EXP_TABLE = EXP_TABLE.map(
-    (
-        (sum) => (value) =>
-            (sum += value)
-    )(0)
-);
 
 interface LevelUpResult {
     userID: string;

@@ -16,11 +16,11 @@ import {
     romanize,
     friendlyFormattedNumber,
 } from "../../helpers/utils";
-import { CUM_EXP_TABLE } from "../../structures/game_session";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
 import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
+import { CUM_EXP_TABLE } from "../../constants";
 
 const logger = new IPCLogger("profile");
 
