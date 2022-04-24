@@ -1,4 +1,3 @@
-/* eslint-disable import/no-dynamic-require */
 import Eris from "eris";
 import fs from "fs";
 import path from "path";

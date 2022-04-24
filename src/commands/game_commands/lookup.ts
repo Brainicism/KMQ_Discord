@@ -27,6 +27,7 @@ import type QueriedSong from "../../interfaces/queried_song";
 import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("lookup");
 
@@ -195,11 +196,12 @@ export default class LookupCommand implements BaseCommand {
                 }${seconds}`;
             }
 
+            const session = Session.getSession(guildID);
             includedInOptions = [
                 ...(
                     await SongSelector.getFilteredSongList(
                         await getGuildPreference(guildID),
-                        await isPremiumRequest(guildID, message.author.id)
+                        await isPremiumRequest(session, message.author.id)
                     )
                 ).songs,
             ]

@@ -3,7 +3,6 @@ import {
     sendErrorMessage,
     getDebugLogHeader,
     sendInfoMessage,
-    getMention,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
@@ -16,6 +15,7 @@ import type GameSession from "src/structures/game_session";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import LocalizationManager from "../../helpers/localization_manager";
+import { getMention } from "../../helpers/utils";
 
 const logger = new IPCLogger("forcehint");
 

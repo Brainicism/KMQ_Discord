@@ -2,10 +2,8 @@ import type Eris from "eris";
 import dbContext from "../../database_context";
 import type BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
-import type { EmbedGenerator } from "../../helpers/discord_utils";
 import {
     getDebugLogHeader,
-    getUserTag,
     sendErrorMessage,
     sendInfoMessage,
     sendPaginationedEmbed,
@@ -19,7 +17,7 @@ import {
     arrayToString,
 } from "../../helpers/utils";
 import State from "../../state";
-import type { GuildTextableMessage } from "../../types";
+import type { EmbedGenerator, GuildTextableMessage } from "../../types";
 import { KmqImages, LEADERBOARD_ENTRIES_PER_PAGE } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import { sendValidationErrorMessage } from "../../helpers/validate";
@@ -30,6 +28,7 @@ import { LeaderboardDuration } from "../../enums/option_types/leaderboard_durati
 import { LeaderboardType } from "../../enums/option_types/leaderboard_type";
 import { EnvType } from "../../enums/env_type";
 import LocalizationManager from "../../helpers/localization_manager";
+import { getUserTag } from "../../helpers/utils";
 
 const logger = new IPCLogger("leaderboard");
 

@@ -18,6 +18,7 @@ import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import type CommandArgs from "../../interfaces/command_args";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("debug");
 
@@ -31,9 +32,10 @@ export default class DebugCommand implements BaseCommand {
 
         const guildPreference = await getGuildPreference(message.guildID);
 
+        const session = Session.getSession(message.guildID);
         const songCount = await getAvailableSongCount(
             guildPreference,
-            await isPremiumRequest(message.guildID, message.author.id)
+            await isPremiumRequest(session, message.author.id)
         );
 
         const fields: Array<Eris.EmbedField> = [];
