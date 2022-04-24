@@ -50,7 +50,7 @@ import {
 import MessageContext from "../structures/message_context";
 import { LocaleType } from "../enums/locale_type";
 import type Round from "../structures/round";
-import type Session from "../structures/session";
+import Session from "../structures/session";
 import MusicRound from "../structures/music_round";
 import type EmbedPayload from "../interfaces/embed_payload";
 import type GameInfoMessage from "../interfaces/game_info_message";
@@ -90,7 +90,7 @@ export function getDebugLogHeader(
         | Eris.ComponentInteraction
         | Eris.CommandInteraction
 ): string {
-    const session = null;
+    const session = Session.getSession(context.guildID);
     let sessionType: string;
     if (session) {
         if (session.isMusicSession()) {
@@ -1112,7 +1112,7 @@ export async function generateOptionsMessage(
         .join("\n");
 
     let nonPremiumGameWarning = "";
-    if (premiumRequest && session.isGameSession() && !session.isPremium()) {
+    if (premiumRequest && session?.isGameSession() && !session?.isPremium()) {
         nonPremiumGameWarning = italicize(
             LocalizationManager.localizer.translate(
                 messageContext.guildID,
@@ -1184,7 +1184,7 @@ export async function generateOptionsMessage(
             "command.options.perCommandHelp",
             { helpCommand: `${process.env.BOT_PREFIX}help` }
         );
-    } else if (session.isMusicSession()) {
+    } else if (session?.isMusicSession()) {
         footerText = LocalizationManager.localizer.translate(
             messageContext.guildID,
             "command.options.musicSessionNotAvailable"
