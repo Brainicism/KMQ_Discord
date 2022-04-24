@@ -1,10 +1,10 @@
-import { execSync } from "child_process";
 import { IPCLogger } from "../../logger";
-import type BaseCommand from "../interfaces/base_command";
+import { execSync } from "child_process";
 import { sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
+import CommandPrechecks from "../../command_prechecks";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
-import CommandPrechecks from "../../command_prechecks";
+import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("reload");

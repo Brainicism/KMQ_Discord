@@ -1,22 +1,22 @@
 import * as uuid from "uuid";
+import { GameOptionInternalToGameOption, KmqImages } from "../../constants";
+import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
     sendErrorMessage,
     sendInfoMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import type BaseCommand from "../interfaces/base_command";
-import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
-import GuildPreference from "../../structures/guild_preference";
-import { GameOptionInternalToGameOption, KmqImages } from "../../constants";
-import dbContext from "../../database_context";
 import CommandPrechecks from "../../command_prechecks";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import dbContext from "../../database_context";
 import type { GameOption } from "../../enums/game_option_name";
+import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
-import LocalizationManager from "../../helpers/localization_manager";
-import Session from "../../structures/session";
 
 const logger = new IPCLogger("preset");
 const PRESET_NAME_MAX_LENGTH = 25;

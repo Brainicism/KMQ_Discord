@@ -1,21 +1,21 @@
-import type { EmbedOptions } from "eris";
-import type Eris from "eris";
-import type BaseCommand from "../interfaces/base_command";
-import {
-    sendErrorMessage,
-    getDebugLogHeader,
-    sendPaginationedEmbed,
-    sendInfoMessage,
-} from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
-import { chunkArray } from "../../helpers/utils";
-import type { GuildTextableMessage } from "../../types";
 import { KmqImages } from "../../constants";
-import MessageContext from "../../structures/message_context";
+import { chunkArray } from "../../helpers/utils";
+import {
+    getDebugLogHeader,
+    sendErrorMessage,
+    sendInfoMessage,
+    sendPaginationedEmbed,
+} from "../../helpers/discord_utils";
 import KmqClient from "../../kmq_client";
-import type CommandArgs from "../../interfaces/command_args";
-import type HelpDocumentation from "../../interfaces/help";
 import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import type { EmbedOptions } from "eris";
+import type { GuildTextableMessage } from "../../types";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type Eris from "eris";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("help");
 const placeholder = /,/g;

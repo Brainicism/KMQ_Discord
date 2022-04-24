@@ -1,10 +1,10 @@
 /* eslint-disable no-console */
 import { config } from "dotenv";
 import { resolve } from "path";
-import isMaster from "cluster";
-import winston from "winston";
-import path from "path";
 import DailyRotateFile from "winston-daily-rotate-file";
+import isMaster from "cluster";
+import path from "path";
+import winston from "winston";
 
 config({ path: resolve(__dirname, "../.env") });
 

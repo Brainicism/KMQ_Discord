@@ -1,24 +1,24 @@
-import type Eris from "eris";
 import * as uuid from "uuid";
-import type BaseCommand from "../interfaces/base_command";
-import {
-    getDebugChannel,
-    sendInfoMessage,
-    getUserVoiceChannel,
-    getDebugLogHeader,
-} from "../../helpers/discord_utils";
-import {
-    isPremiumRequest,
-    getAvailableSongCount,
-} from "../../helpers/game_utils";
-import State from "../../state";
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
-import MessageContext from "../../structures/message_context";
-import type CommandArgs from "../../interfaces/command_args";
-import LocalizationManager from "../../helpers/localization_manager";
-import Session from "../../structures/session";
+import {
+    getAvailableSongCount,
+    isPremiumRequest,
+} from "../../helpers/game_utils";
+import {
+    getDebugChannel,
+    getDebugLogHeader,
+    getUserVoiceChannel,
+    sendInfoMessage,
+} from "../../helpers/discord_utils";
 import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import State from "../../state";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type Eris from "eris";
 
 const logger = new IPCLogger("debug");
 

@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/dot-notation */
-import assert from "assert";
-import { ExpBonusModifierValues } from "../../constants";
 import { ExpBonusModifier } from "../../enums/exp_bonus_modifier";
+import { ExpBonusModifierValues } from "../../constants";
 import { Gender } from "../../enums/option_types/gender";
 import { GuessModeType } from "../../enums/option_types/guess_mode_type";
-import State from "../../state";
 import GameRound, {
     cleanArtistName,
     cleanSongName,
 } from "../../structures/game_round";
+import State from "../../state";
+import assert from "assert";
 
 let gameRound: GameRound;
 describe("constructor defaults", () => {

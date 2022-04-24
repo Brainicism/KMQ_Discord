@@ -1,10 +1,3 @@
-import type BaseCommand from "../interfaces/base_command";
-import { IPCLogger } from "../../logger";
-import {
-    getDebugLogHeader,
-    sendInfoMessage,
-} from "../../helpers/discord_utils";
-import MessageContext from "../../structures/message_context";
 import {
     EMBED_SUCCESS_BONUS_COLOR,
     KmqImages,
@@ -13,12 +6,19 @@ import {
     VOTE_LINK,
     VOTE_RESET_DURATION,
 } from "../../constants";
-import dbContext from "../../database_context";
+import { IPCLogger } from "../../logger";
 import { bold } from "../../helpers/utils";
+import {
+    getDebugLogHeader,
+    sendInfoMessage,
+} from "../../helpers/discord_utils";
 import { userBonusIsActive } from "../../helpers/game_utils";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import dbContext from "../../database_context";
+import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
-import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("vote");
 

@@ -1,9 +1,9 @@
+import { DEFAULT_LOCALE } from "../constants";
+import { LocaleType } from "../enums/locale_type";
+import Backend from "i18next-fs-backend";
+import State from "../state";
 import i18next from "i18next";
 import path from "path";
-import Backend from "i18next-fs-backend";
-import { LocaleType } from "../enums/locale_type";
-import { DEFAULT_LOCALE } from "../constants";
-import State from "../state";
 
 export default class LocalizationManager {
     static localizer = new LocalizationManager();

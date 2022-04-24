@@ -1,9 +1,9 @@
-import fs from "fs";
-import { join } from "path";
+import { IPCLogger } from "../logger";
 import { exec, execSync } from "child_process";
+import { join } from "path";
 import { program } from "commander";
 import { standardDateFormat } from "../helpers/utils";
-import { IPCLogger } from "../logger";
+import fs from "fs";
 
 const BACKUP_TTL = 30;
 

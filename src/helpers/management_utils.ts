@@ -1,43 +1,43 @@
 /* eslint-disable global-require */
 /* eslint-disable import/no-dynamic-require */
-import schedule from "node-schedule";
-import _ from "lodash";
+import { EnvType } from "../enums/env_type";
 import { IPCLogger } from "../logger";
-import State from "../state";
-import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
-import messageCreateHandler from "../events/client/messageCreate";
-import voiceChannelLeaveHandler from "../events/client/voiceChannelLeave";
-import voiceChannelSwitchHandler from "../events/client/voiceChannelSwitch";
-import voiceChannelJoinHandler from "../events/client/voiceChannelJoin";
-import connectHandler from "../events/client/connect";
-import errorHandler from "../events/client/error";
-import warnHandler from "../events/client/warn";
-import shardDisconnectHandler from "../events/client/shardDisconnect";
-import shardReadyHandler from "../events/client/shardReady";
-import shardResumeHandler from "../events/client/shardResume";
-import disconnectHandler from "../events/client/disconnect";
-import unhandledRejectionHandler from "../events/process/unhandledRejection";
-import uncaughtExceptionHandler from "../events/process/uncaughtException";
-import SIGINTHandler from "../events/process/SIGINT";
+import { chooseRandom, isWeekend } from "./utils";
 import {
     cleanupInactiveGameSessions,
     getMatchingGroupNames,
     isPowerHour,
 } from "./game_utils";
-import type { LocaleType } from "../enums/locale_type";
-import updatePremiumUsers from "./patreon_manager";
+import { reloadFactCache } from "../fact_generator";
+import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
+import MessageContext from "../structures/message_context";
+import SIGINTHandler from "../events/process/SIGINT";
+import State from "../state";
+import _ from "lodash";
+import channelDeleteHandler from "../events/client/channelDelete";
+import connectHandler from "../events/client/connect";
 import dbContext from "../database_context";
 import debugHandler from "../events/client/debug";
+import disconnectHandler from "../events/client/disconnect";
+import errorHandler from "../events/client/error";
+import guildAvailableHandler from "../events/client/guildAvailable";
 import guildCreateHandler from "../events/client/guildCreate";
 import guildDeleteHandler from "../events/client/guildDelete";
-import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
-import guildAvailableHandler from "../events/client/guildAvailable";
 import interactionCreateHandler from "../events/client/interactionCreate";
-import { chooseRandom, isWeekend } from "./utils";
-import { reloadFactCache } from "../fact_generator";
-import MessageContext from "../structures/message_context";
-import channelDeleteHandler from "../events/client/channelDelete";
-import { EnvType } from "../enums/env_type";
+import messageCreateHandler from "../events/client/messageCreate";
+import schedule from "node-schedule";
+import shardDisconnectHandler from "../events/client/shardDisconnect";
+import shardReadyHandler from "../events/client/shardReady";
+import shardResumeHandler from "../events/client/shardResume";
+import unavailableGuildCreateHandler from "../events/client/unavailableGuildCreate";
+import uncaughtExceptionHandler from "../events/process/uncaughtException";
+import unhandledRejectionHandler from "../events/process/unhandledRejection";
+import updatePremiumUsers from "./patreon_manager";
+import voiceChannelJoinHandler from "../events/client/voiceChannelJoin";
+import voiceChannelLeaveHandler from "../events/client/voiceChannelLeave";
+import voiceChannelSwitchHandler from "../events/client/voiceChannelSwitch";
+import warnHandler from "../events/client/warn";
+import type { LocaleType } from "../enums/locale_type";
 
 const logger = new IPCLogger("management_utils");
 

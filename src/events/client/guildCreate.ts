@@ -1,9 +1,9 @@
-import type Eris from "eris";
 import { IPCLogger } from "../../logger";
-import { getDebugChannel, sendInfoMessage } from "../../helpers/discord_utils";
-import MessageContext from "../../structures/message_context";
-import LocaleTypeCommand from "../../commands/game_commands/locale";
 import { LocaleType } from "../../enums/locale_type";
+import { getDebugChannel, sendInfoMessage } from "../../helpers/discord_utils";
+import LocaleTypeCommand from "../../commands/game_commands/locale";
+import MessageContext from "../../structures/message_context";
+import type Eris from "eris";
 
 const logger = new IPCLogger("guildCreate");
 

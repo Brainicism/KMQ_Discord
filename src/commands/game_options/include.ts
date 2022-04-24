@@ -1,20 +1,20 @@
-import type BaseCommand from "../interfaces/base_command";
+import { GROUP_LIST_URL } from "../../constants";
+import { GameOption } from "../../enums/game_option_name";
+import { IPCLogger } from "../../logger";
 import {
-    sendOptionsMessage,
     getDebugLogHeader,
     sendErrorMessage,
+    sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { getMatchingGroupNames } from "../../helpers/game_utils";
-import { IPCLogger } from "../../logger";
-import { GameOption } from "../../enums/game_option_name";
-import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { GROUP_LIST_URL } from "../../constants";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
-import LocalizationManager from "../../helpers/localization_manager";
-import Session from "../../structures/session";
-import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("includes");
 

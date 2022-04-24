@@ -1,6 +1,6 @@
-import assert from "assert";
 import Player from "../../structures/player";
 import Team from "../../structures/team";
+import assert from "assert";
 
 let team: Team;
 let goodPlayer: Player;

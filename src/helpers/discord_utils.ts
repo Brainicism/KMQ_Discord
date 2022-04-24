@@ -1,11 +1,35 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import Eris from "eris";
-import EmbedPaginator from "eris-pagination";
-import axios from "axios";
 import * as uuid from "uuid";
-import type GuildPreference from "../structures/guild_preference";
-import type GameSession from "../structures/game_session";
+import {
+    ConflictingGameOptions,
+    GameOptionCommand,
+    PriorityGameOption,
+} from "../types";
+import {
+    EMBED_ERROR_COLOR,
+    EMBED_SUCCESS_BONUS_COLOR,
+    EMBED_SUCCESS_COLOR,
+    KmqImages,
+    REVIEW_LINK,
+    VOTE_LINK,
+} from "../constants";
+import { GameOption } from "../enums/game_option_name";
+import { GameType } from "../enums/game_type";
+import { GuessModeType } from "../enums/option_types/guess_mode_type";
 import { IPCLogger } from "../logger";
+import { LocaleType } from "../enums/locale_type";
+import {
+    bold,
+    chooseWeightedRandom,
+    chunkArray,
+    delay,
+    friendlyFormattedNumber,
+    getOrdinalNum,
+    italicize,
+    standardDateFormat,
+    strikethrough,
+    underline,
+} from "./utils";
 import {
     getAvailableSongCount,
     getKmqCurrentVersion,
@@ -15,52 +39,28 @@ import {
     userBonusIsActive,
 } from "./game_utils";
 import { getFact } from "../fact_generator";
-import type { EmbedGenerator, GuildTextableMessage } from "../types";
-import {
-    GameOptionCommand,
-    PriorityGameOption,
-    ConflictingGameOptions,
-} from "../types";
-import {
-    chunkArray,
-    bold,
-    underline,
-    italicize,
-    strikethrough,
-    chooseWeightedRandom,
-    getOrdinalNum,
-    friendlyFormattedNumber,
-    delay,
-    standardDateFormat,
-} from "./utils";
-import State from "../state";
-import type Scoreboard from "../structures/scoreboard";
+import EmbedPaginator from "eris-pagination";
+import Eris from "eris";
 import GameRound from "../structures/game_round";
-import dbContext from "../database_context";
-import type EliminationScoreboard from "../structures/elimination_scoreboard";
-import TeamScoreboard from "../structures/team_scoreboard";
-import {
-    EMBED_ERROR_COLOR,
-    EMBED_SUCCESS_BONUS_COLOR,
-    EMBED_SUCCESS_COLOR,
-    KmqImages,
-    REVIEW_LINK,
-    VOTE_LINK,
-} from "../constants";
+import LocalizationManager from "./localization_manager";
 import MessageContext from "../structures/message_context";
-import { LocaleType } from "../enums/locale_type";
-import type Round from "../structures/round";
-import type Session from "../structures/session";
 import MusicRound from "../structures/music_round";
+import State from "../state";
+import TeamScoreboard from "../structures/team_scoreboard";
+import axios from "axios";
+import dbContext from "../database_context";
+import type { EmbedGenerator, GuildTextableMessage } from "../types";
+import type EliminationScoreboard from "../structures/elimination_scoreboard";
 import type EmbedPayload from "../interfaces/embed_payload";
 import type GameInfoMessage from "../interfaces/game_info_message";
-import type QueriedSong from "../interfaces/queried_song";
 import type GameOptions from "../interfaces/game_options";
+import type GameSession from "../structures/game_session";
+import type GuildPreference from "../structures/guild_preference";
+import type QueriedSong from "../interfaces/queried_song";
+import type Round from "../structures/round";
+import type Scoreboard from "../structures/scoreboard";
+import type Session from "../structures/session";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
-import { GuessModeType } from "../enums/option_types/guess_mode_type";
-import { GameOption } from "../enums/game_option_name";
-import { GameType } from "../enums/game_type";
-import LocalizationManager from "./localization_manager";
 
 const logger = new IPCLogger("discord_utils");
 

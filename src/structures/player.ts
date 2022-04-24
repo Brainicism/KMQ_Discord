@@ -1,7 +1,7 @@
-import { ExpBonusModifierValues } from "../constants";
 import { ExpBonusModifier } from "../enums/exp_bonus_modifier";
-import { getMention } from "../helpers/utils";
+import { ExpBonusModifierValues } from "../constants";
 import { bold } from "../helpers/utils";
+import { getMention } from "../helpers/utils";
 import State from "../state";
 
 export default class Player {

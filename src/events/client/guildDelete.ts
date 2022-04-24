@@ -1,6 +1,6 @@
-import Eris from "eris";
 import { IPCLogger } from "../../logger";
 import { getDebugChannel, sendInfoMessage } from "../../helpers/discord_utils";
+import Eris from "eris";
 import MessageContext from "../../structures/message_context";
 
 const logger = new IPCLogger("guildDelete");

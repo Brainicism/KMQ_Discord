@@ -1,6 +1,11 @@
-import Eris from "eris";
-import fs from "fs";
 import { IPCLogger } from "../logger";
+import { KmqImages, specialFfmpegArgs } from "../constants";
+import { SeekType } from "../enums/option_types/seek_type";
+import { bold, friendlyFormattedNumber } from "../helpers/utils";
+import {
+    ensureVoiceConnection,
+    getLocalizedSongName,
+} from "../helpers/game_utils";
 import {
     getCurrentVoiceMembers,
     getDebugLogHeader,
@@ -11,26 +16,21 @@ import {
     tryCreateInteractionSuccessAcknowledgement,
     tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
-import dbContext from "../database_context";
-import type GameSession from "./game_session";
-import GuildPreference from "./guild_preference";
-import type KmqMember from "./kmq_member";
-import MessageContext from "./message_context";
-import type Round from "./round";
-import SongSelector from "./song_selector";
-import {
-    ensureVoiceConnection,
-    getLocalizedSongName,
-} from "../helpers/game_utils";
-import State from "../state";
-import { KmqImages, specialFfmpegArgs } from "../constants";
-import { bold, friendlyFormattedNumber } from "../helpers/utils";
-import type QueriedSong from "../interfaces/queried_song";
-import type GuessResult from "../interfaces/guess_result";
-import { SeekType } from "../enums/option_types/seek_type";
-import type MusicSession from "./music_session";
-import LocalizationManager from "../helpers/localization_manager";
 import { getMention } from "../helpers/utils";
+import Eris from "eris";
+import GuildPreference from "./guild_preference";
+import LocalizationManager from "../helpers/localization_manager";
+import MessageContext from "./message_context";
+import SongSelector from "./song_selector";
+import State from "../state";
+import dbContext from "../database_context";
+import fs from "fs";
+import type GameSession from "./game_session";
+import type GuessResult from "../interfaces/guess_result";
+import type KmqMember from "./kmq_member";
+import type MusicSession from "./music_session";
+import type QueriedSong from "../interfaces/queried_song";
+import type Round from "./round";
 
 const BOOKMARK_MESSAGE_SIZE = 10;
 

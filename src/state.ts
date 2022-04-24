@@ -1,11 +1,11 @@
-import type { IPC } from "eris-fleet";
-import type KmqClient from "./kmq_client";
-import RateLimiter from "./rate_limiter";
-import type GameSession from "./structures/game_session";
-import type MusicSession from "./structures/music_session";
-import type { Campaign } from "patreon-discord";
-import type { LocaleType } from "./enums/locale_type";
 import { DEFAULT_LOCALE } from "./constants";
+import RateLimiter from "./rate_limiter";
+import type { Campaign } from "patreon-discord";
+import type { IPC } from "eris-fleet";
+import type { LocaleType } from "./enums/locale_type";
+import type GameSession from "./structures/game_session";
+import type KmqClient from "./kmq_client";
+import type MusicSession from "./structures/music_session";
 
 export default class State {
     static gameSessions: { [guildID: string]: GameSession } = {};

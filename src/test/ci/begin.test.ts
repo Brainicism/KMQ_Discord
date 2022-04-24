@@ -1,14 +1,14 @@
+import * as discordUtils from "../../helpers/discord_utils";
+import { GameType } from "../../enums/game_type";
+import BeginCommand from "../../commands/game_commands/begin";
+import GameSession from "../../structures/game_session";
+import GuildPreference from "../../structures/guild_preference";
+import KmqMember from "../../structures/kmq_member";
+import MessageContext from "../../structures/message_context";
+import Player from "../../structures/player";
 import assert from "assert";
 import sinon from "sinon";
-import BeginCommand from "../../commands/game_commands/begin";
-import { GameType } from "../../enums/game_type";
-import GameSession from "../../structures/game_session";
-import KmqMember from "../../structures/kmq_member";
-import Player from "../../structures/player";
 import type TeamScoreboard from "../../structures/team_scoreboard";
-import MessageContext from "../../structures/message_context";
-import * as discordUtils from "../../helpers/discord_utils";
-import GuildPreference from "../../structures/guild_preference";
 
 const sandbox = sinon.createSandbox();
 const gameStarter = new KmqMember("jisoo", "jisoo#4747", "url", "123");

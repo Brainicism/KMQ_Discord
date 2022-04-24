@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/dot-notation */
-import type Eris from "eris";
-import dbContext from "../../database_context";
+import { CUM_EXP_TABLE } from "../../constants";
+import { IPCLogger } from "../../logger";
 import {
     fetchUser,
     getDebugLogHeader,
@@ -8,20 +8,20 @@ import {
     sendInfoMessage,
     tryCreateInteractionErrorAcknowledgement,
 } from "../../helpers/discord_utils";
-import type BaseCommand from "../interfaces/base_command";
-import { IPCLogger } from "../../logger";
 import {
     friendlyFormattedDate,
-    romanize,
     friendlyFormattedNumber,
+    romanize,
 } from "../../helpers/utils";
+import { getUserTag } from "../../helpers/utils";
+import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
-import type HelpDocumentation from "../../interfaces/help";
+import dbContext from "../../database_context";
+import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
-import { CUM_EXP_TABLE } from "../../constants";
-import LocalizationManager from "../../helpers/localization_manager";
-import { getUserTag } from "../../helpers/utils";
+import type Eris from "eris";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("profile");
 

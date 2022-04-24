@@ -1,16 +1,16 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
-import sinon from "sinon";
 import * as discordUtils from "../helpers/discord_utils";
-import kmqKnexConfig from "../config/knexfile_kmq";
-import dbContext from "../database_context";
-import Player from "../structures/player";
-import EliminationPlayer from "../structures/elimination_player";
-import { execSync } from "child_process";
-import { IPCLogger } from "../logger";
-import path from "path";
-import { getNewConnection } from "../database_context";
-import { EnvType } from "../enums/env_type";
 import { DATABASE_DOWNLOAD_DIR, ELIMINATION_DEFAULT_LIVES } from "../constants";
+import { EnvType } from "../enums/env_type";
+import { IPCLogger } from "../logger";
+import { execSync } from "child_process";
+import { getNewConnection } from "../database_context";
+import EliminationPlayer from "../structures/elimination_player";
+import Player from "../structures/player";
+import dbContext from "../database_context";
+import kmqKnexConfig from "../config/knexfile_kmq";
+import path from "path";
+import sinon from "sinon";
 
 const logger = new IPCLogger("test_setup");
 const sandbox = sinon.createSandbox();

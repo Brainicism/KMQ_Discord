@@ -1,5 +1,5 @@
-import type Eris from "eris";
 import Session from "../../structures/session";
+import type Eris from "eris";
 
 /**
  * @param member - The member that joined the voice channel

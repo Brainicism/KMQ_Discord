@@ -1,5 +1,5 @@
-import assert from "assert";
 import EliminationPlayer from "../../structures/elimination_player";
+import assert from "assert";
 
 let player: EliminationPlayer;
 describe("decrement lives", () => {

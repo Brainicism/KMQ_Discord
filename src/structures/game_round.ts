@@ -1,17 +1,3 @@
-import _ from "lodash";
-import type Eris from "eris";
-import levenshtien from "damerau-levenshtein";
-import State from "../state";
-import KmqMember from "./kmq_member";
-import { ExpBonusModifier } from "../enums/exp_bonus_modifier";
-import Round from "./round";
-import type MessageContext from "./message_context";
-import { friendlyFormattedNumber } from "../helpers/utils";
-import type PlayerRoundResult from "../interfaces/player_round_result";
-import type QueriedSong from "../interfaces/queried_song";
-import type UniqueSongCounter from "../interfaces/unique_song_counter";
-import { GuessModeType } from "../enums/option_types/guess_mode_type";
-import LocalizationManager from "../helpers/localization_manager";
 import {
     EMBED_ERROR_COLOR,
     EMBED_SUCCESS_BONUS_COLOR,
@@ -19,7 +5,21 @@ import {
     ExpBonusModifierValues,
     ROUND_MAX_RUNNERS_UP,
 } from "../constants";
+import { ExpBonusModifier } from "../enums/exp_bonus_modifier";
+import { GuessModeType } from "../enums/option_types/guess_mode_type";
+import { friendlyFormattedNumber } from "../helpers/utils";
 import { getMention } from "../helpers/utils";
+import KmqMember from "./kmq_member";
+import LocalizationManager from "../helpers/localization_manager";
+import Round from "./round";
+import State from "../state";
+import _ from "lodash";
+import levenshtien from "damerau-levenshtein";
+import type Eris from "eris";
+import type MessageContext from "./message_context";
+import type PlayerRoundResult from "../interfaces/player_round_result";
+import type QueriedSong from "../interfaces/queried_song";
+import type UniqueSongCounter from "../interfaces/unique_song_counter";
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
 const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\(\)\+\u200B]/g;

@@ -1,24 +1,24 @@
-import type Eris from "eris";
+import { IPCLogger } from "../logger";
 import { chooseRandom } from "../helpers/utils";
 import {
     getCurrentVoiceMembers,
+    getDebugLogHeader,
+    getMajorityCount,
     sendRoundMessage,
     tryCreateInteractionSuccessAcknowledgement,
-    getMajorityCount,
-    getDebugLogHeader,
 } from "../helpers/discord_utils";
+import { isSkipMajority, skipSong } from "../commands/game_commands/skip";
+import { isUserPremium } from "../helpers/game_utils";
 import KmqMember from "./kmq_member";
-import type Round from "./round";
-import Session from "./session";
+import LocalizationManager from "../helpers/localization_manager";
 import MusicRound from "./music_round";
+import Session from "./session";
+import type Eris from "eris";
+import type GuessResult from "../interfaces/guess_result";
 import type GuildPreference from "./guild_preference";
 import type MessageContext from "./message_context";
-import { IPCLogger } from "../logger";
-import { isUserPremium } from "../helpers/game_utils";
-import { isSkipMajority, skipSong } from "../commands/game_commands/skip";
 import type QueriedSong from "../interfaces/queried_song";
-import type GuessResult from "../interfaces/guess_result";
-import LocalizationManager from "../helpers/localization_manager";
+import type Round from "./round";
 
 const logger = new IPCLogger("music_session");
 

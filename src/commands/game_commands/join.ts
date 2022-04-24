@@ -1,26 +1,26 @@
-import type BaseCommand from "../interfaces/base_command";
-import type GameSession from "../../structures/game_session";
-import type TeamScoreboard from "../../structures/team_scoreboard";
-import Player from "../../structures/player";
-import type { GuildTextableMessage } from "../../types";
-import {
-    sendErrorMessage,
-    sendInfoMessage,
-    getDebugLogHeader,
-} from "../../helpers/discord_utils";
-import { isFirstGameOfDay, isUserPremium } from "../../helpers/game_utils";
+import { GameType } from "../../enums/game_type";
+import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import { bold } from "../../helpers/utils";
-import State from "../../state";
-import MessageContext from "../../structures/message_context";
-import CommandPrechecks from "../../command_prechecks";
-import { IPCLogger } from "../../logger";
-import Session from "../../structures/session";
-import type ParsedMessage from "../../interfaces/parsed_message";
-import type CommandArgs from "../../interfaces/command_args";
-import { GameType } from "../../enums/game_type";
-import LocalizationManager from "../../helpers/localization_manager";
+import {
+    getDebugLogHeader,
+    sendErrorMessage,
+    sendInfoMessage,
+} from "../../helpers/discord_utils";
 import { getMention, getUserTag } from "../../helpers/utils";
+import { isFirstGameOfDay, isUserPremium } from "../../helpers/game_utils";
+import CommandPrechecks from "../../command_prechecks";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Player from "../../structures/player";
+import Session from "../../structures/session";
+import State from "../../state";
+import type { GuildTextableMessage } from "../../types";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type GameSession from "../../structures/game_session";
+import type ParsedMessage from "../../interfaces/parsed_message";
+import type TeamScoreboard from "../../structures/team_scoreboard";
 
 const logger = new IPCLogger("join");
 

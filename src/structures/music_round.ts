@@ -1,10 +1,10 @@
-import type Eris from "eris";
 import { EMBED_SUCCESS_BONUS_COLOR } from "../constants";
+import Round from "./round";
+import type Eris from "eris";
+import type MessageContext from "./message_context";
 import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "../interfaces/queried_song";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
-import type MessageContext from "./message_context";
-import Round from "./round";
 
 export default class MusicRound extends Round {
     /** UUID associated with skip interaction custom_id */

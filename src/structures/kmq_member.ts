@@ -1,5 +1,5 @@
-import type Eris from "eris";
 import { getUserTag } from "../helpers/utils";
+import type Eris from "eris";
 
 export default class KmqMember {
     /** The username */

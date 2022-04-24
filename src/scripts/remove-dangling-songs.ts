@@ -1,10 +1,10 @@
+import { IPCLogger } from "../logger";
+import { config } from "dotenv";
+import { getNewConnection } from "../database_context";
+import { program } from "commander";
+import _ from "lodash";
 import fs from "fs";
 import path from "path";
-import { program } from "commander";
-import { config } from "dotenv";
-import _ from "lodash";
-import { getNewConnection } from "../database_context";
-import { IPCLogger } from "../logger";
 
 const logger = new IPCLogger("remove-dangling-songs");
 
