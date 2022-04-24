@@ -2,7 +2,6 @@ import _ from "lodash";
 import * as uuid from "uuid";
 import { IPCLogger } from "../logger";
 import dbContext from "../database_context";
-import Session from "./session";
 import type MatchedArtist from "../interfaces/matched_artist";
 import type GameOptions from "../interfaces/game_options";
 import type { SpecialType } from "../enums/option_types/special_type";
@@ -179,12 +178,17 @@ export default class GuildPreference {
         forcePlaySongID: null,
     };
 
+    /** The GuildPreference's respective GameOptions */
     public gameOptions: GameOptions;
 
     /** The Discord Guild ID */
     public readonly guildID: string;
 
-    /** The GuildPreference's respective GameOptions */
+    /** Callback to reload songs */
+    public reloadSongCallback: () => Promise<void>;
+
+    /** The guild preference cache */
+    private static guildPreferencesCache = {};
 
     constructor(guildID: string, options?: GameOptions) {
         this.guildID = guildID;
@@ -213,6 +217,10 @@ export default class GuildPreference {
     }
 
     static async getGuildPreference(guildID: string): Promise<GuildPreference> {
+        if (guildID in GuildPreference.guildPreferencesCache) {
+            return GuildPreference.guildPreferencesCache[guildID];
+        }
+
         const guildPreferences = await dbContext
             .kmq("guilds")
             .select("*")
@@ -235,10 +243,13 @@ export default class GuildPreference {
             .map((x) => ({ [x["option_name"]]: JSON.parse(x["option_value"]) }))
             .reduce((total, curr) => Object.assign(total, curr), {});
 
-        return GuildPreference.fromGuild(
+        const guildPreference = GuildPreference.fromGuild(
             guildPreferences[0].guild_id,
             gameOptionPairs
         );
+
+        GuildPreference.guildPreferencesCache[guildID] = guildPreference;
+        return guildPreference;
     }
 
     /**
@@ -832,9 +843,9 @@ export default class GuildPreference {
                 .merge()
                 .transacting(trx);
         });
-        const session = Session.getSession(this.guildID);
-        if (session) {
-            await session.reloadSongs(this);
+
+        if (this.reloadSongCallback) {
+            await this.reloadSongCallback();
         }
     }
 

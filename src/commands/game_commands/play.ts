@@ -381,6 +381,7 @@ export default class PlayCommand implements BaseCommand {
             );
 
             gameSession = new GameSession(
+                guildPreference,
                 textChannel.id,
                 voiceChannel.id,
                 textChannel.guild.id,
@@ -480,6 +481,7 @@ export default class PlayCommand implements BaseCommand {
             }
 
             gameSession = new GameSession(
+                guildPreference,
                 textChannel.id,
                 voiceChannel.id,
                 textChannel.guild.id,
@@ -505,7 +507,7 @@ export default class PlayCommand implements BaseCommand {
                 guildPreference
             );
 
-            await gameSession.startRound(guildPreference, messageContext);
+            await gameSession.startRound(messageContext);
         }
     };
 }

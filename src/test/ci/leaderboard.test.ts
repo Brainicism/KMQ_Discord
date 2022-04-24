@@ -15,6 +15,7 @@ import { LeaderboardScope } from "../../enums/option_types/leaderboard_scope";
 import { LeaderboardDuration } from "../../enums/option_types/leaderboard_duration";
 import { GameType } from "../../enums/game_type";
 import { LEADERBOARD_ENTRIES_PER_PAGE } from "../../constants";
+import GuildPreference from "../../structures/guild_preference";
 
 const sandbox = sinon.createSandbox();
 
@@ -42,6 +43,14 @@ const lastWeek = new Date(new Date(date).setDate(INITIAL_DAY - 7));
 const lastMonth = new Date(new Date(date).setMonth(INITIAL_MONTH - 1));
 
 const INITIAL_TOTAL_ENTRIES = LEADERBOARD_ENTRIES_PER_PAGE * 5;
+
+function getMockGuildPreference(): GuildPreference {
+    const guildPreference = new GuildPreference("test");
+    sinon.stub(guildPreference, "updateGuildPreferences");
+    return guildPreference;
+}
+
+let guildPreference: GuildPreference;
 
 function generatePlayerStats(numberPlayers: number, offset = 0): any {
     return [...Array(numberPlayers).keys()].map((i) => ({
@@ -227,6 +236,7 @@ describe("getLeaderboardEmbeds", () => {
         describe("game leaderboard", () => {
             beforeEach(async () => {
                 await dbContext.kmq("player_stats").del();
+                guildPreference = getMockGuildPreference();
             });
 
             it("should match the number of pages and embeds", async () => {
@@ -234,6 +244,7 @@ describe("getLeaderboardEmbeds", () => {
                     .stub(discordUtils, "getCurrentVoiceMembers")
                     .callsFake((_voiceChannelID) => []);
                 const gameSession = new GameSession(
+                    guildPreference,
                     "",
                     "",
                     SERVER_ID,
@@ -586,6 +597,7 @@ describe("getLeaderboardEmbeds", () => {
                     .stub(discordUtils, "getCurrentVoiceMembers")
                     .callsFake((_voiceChannelID) => []);
                 const gameSession = new GameSession(
+                    guildPreference,
                     "",
                     "",
                     SERVER_ID,

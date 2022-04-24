@@ -14,7 +14,6 @@ import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import LocalizationManager from "../../helpers/localization_manager";
 import { getMention } from "../../helpers/utils";
-import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("forceskip");
 
@@ -46,10 +45,6 @@ export default class ForceSkipCommand implements BaseCommand {
             );
             return;
         }
-
-        const guildPreference = await GuildPreference.getGuildPreference(
-            message.guildID
-        );
 
         const session = Session.getSession(message.guildID);
         if (
@@ -93,16 +88,11 @@ export default class ForceSkipCommand implements BaseCommand {
             true
         );
 
-        await session.endRound(
-            guildPreference,
-            MessageContext.fromMessage(message),
-            { correct: false }
-        );
+        await session.endRound(MessageContext.fromMessage(message), {
+            correct: false,
+        });
 
-        await session.startRound(
-            guildPreference,
-            MessageContext.fromMessage(message)
-        );
+        await session.startRound(MessageContext.fromMessage(message));
         session.lastActiveNow();
         logger.info(`${getDebugLogHeader(message)} | Owner force-skipped.`);
     };

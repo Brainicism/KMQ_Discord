@@ -13,7 +13,6 @@ import CommandPrechecks from "../../command_prechecks";
 import type EliminationScoreboard from "../../structures/elimination_scoreboard";
 import type Round from "../../structures/round";
 import Session from "../../structures/session";
-import GuildPreference from "../../structures/guild_preference";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import { GameType } from "../../enums/game_type";
@@ -97,20 +96,18 @@ export function isSkipMajority(guildID: string, session: Session): boolean {
  * Skip the current song (end the current round and start a new one)
  * @param messageContext - The context that triggered skipping
  * @param session - The current session
- * @param guildPreference - The guild's preference
  */
 export async function skipSong(
     messageContext: MessageContext,
-    session: Session,
-    guildPreference: GuildPreference
+    session: Session
 ): Promise<void> {
     logger.info(
         `${getDebugLogHeader(messageContext)} | Skip majority achieved.`
     );
     session.round.skipAchieved = true;
-    await session.endRound(guildPreference, messageContext, { correct: false });
+    await session.endRound(messageContext, { correct: false });
 
-    session.startRound(guildPreference, messageContext);
+    session.startRound(messageContext);
 }
 
 export default class SkipCommand implements BaseCommand {
@@ -172,11 +169,7 @@ export default class SkipCommand implements BaseCommand {
 
         if (isSkipMajority(message.guildID, session)) {
             sendSkipMessage(message, session.round);
-            skipSong(
-                MessageContext.fromMessage(message),
-                session,
-                await GuildPreference.getGuildPreference(message.guildID)
-            );
+            skipSong(MessageContext.fromMessage(message), session);
         } else {
             logger.info(`${getDebugLogHeader(message)} | Skip vote received.`);
             await sendSkipNotification(message, session.round);

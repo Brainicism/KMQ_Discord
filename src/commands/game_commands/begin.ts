@@ -83,7 +83,7 @@ export default class BeginCommand implements BaseCommand {
                 guildPreference
             );
 
-            gameSession.startRound(guildPreference, messageContext);
+            gameSession.startRound(messageContext);
 
             logger.info(
                 `${getDebugLogHeader(message)} | Teams game session starting)`

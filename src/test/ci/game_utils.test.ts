@@ -289,12 +289,21 @@ describe("song query", () => {
         });
     });
 
-    describe("cleanupInactiveGameSessions", () => {
+    describe("cleanupInactiveGameSessions", async () => {
         const guildId = "123";
         sandbox
             .stub(discordUtils, "getCurrentVoiceMembers")
             .callsFake((_voiceChannelID) => []);
-        const gameSession = new GameSession(null, null, guildId, null, null);
+        guildPreference = await getMockGuildPreference();
+        const gameSession = new GameSession(
+            guildPreference,
+            null,
+            null,
+            guildId,
+            null,
+            null
+        );
+
         sandbox.restore();
         const endSandbox = sinon.createSandbox();
         const endSessionStub = sandbox.stub(gameSession, "endSession");

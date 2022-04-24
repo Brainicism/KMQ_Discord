@@ -8,9 +8,16 @@ import Player from "../../structures/player";
 import type TeamScoreboard from "../../structures/team_scoreboard";
 import MessageContext from "../../structures/message_context";
 import * as discordUtils from "../../helpers/discord_utils";
+import GuildPreference from "../../structures/guild_preference";
 
 const sandbox = sinon.createSandbox();
 const gameStarter = new KmqMember("jisoo", "jisoo#4747", "url", "123");
+
+function getMockGuildPreference(): GuildPreference {
+    const guildPreference = new GuildPreference("test");
+    sinon.stub(guildPreference, "updateGuildPreferences");
+    return guildPreference;
+}
 
 describe("begin command", () => {
     describe("can start", () => {
@@ -24,7 +31,9 @@ describe("begin command", () => {
             sandbox
                 .stub(discordUtils, "getCurrentVoiceMembers")
                 .callsFake((_voiceChannelID) => []);
+
             const gameSession = new GameSession(
+                getMockGuildPreference(),
                 null,
                 null,
                 null,
@@ -52,6 +61,7 @@ describe("begin command", () => {
                 .stub(discordUtils, "getCurrentVoiceMembers")
                 .callsFake((_voiceChannelID) => []);
             const gameSession = new GameSession(
+                getMockGuildPreference(),
                 null,
                 null,
                 null,

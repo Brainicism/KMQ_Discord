@@ -12,6 +12,14 @@ import Eris, { Collection } from "eris";
 import KmqClient from "../../kmq_client";
 import Session from "../../structures/session";
 
+function getMockGuildPreference(): GuildPreference {
+    const guildPreference = new GuildPreference("test");
+    sinon.stub(guildPreference, "updateGuildPreferences");
+    return guildPreference;
+}
+
+let guildPreference: GuildPreference;
+
 describe("startRound", function () {
     let gameSession: GameSession;
     let prepareRoundSpy: sinon.SinonSpy;
@@ -22,7 +30,7 @@ describe("startRound", function () {
     const sandbox = sinon.createSandbox();
     beforeEach(() => {
         sandbox.stub(utils, "delay");
-
+        guildPreference = getMockGuildPreference();
         voiceChannelStub = sinon.createStubInstance(Eris.VoiceChannel);
         voiceChannelStub.voiceMembers = new Collection(Eris.Member);
         const x = sinon.createStubInstance(KmqClient);
@@ -32,6 +40,7 @@ describe("startRound", function () {
         sandbox.stub(discord_utils, "getDebugLogHeader").callsFake(() => "");
 
         gameSession = new GameSession(
+            guildPreference,
             "123",
             "123",
             "123",
@@ -56,9 +65,8 @@ describe("startRound", function () {
 
     describe("happy path", () => {
         it("should start the round successfully", async () => {
-            const guildPreference = new GuildPreference("test");
             voiceChannelStub.voiceMembers.add({ id: "1" } as any);
-            await gameSession.startRound(guildPreference, null);
+            await gameSession.startRound(null);
             assert.ok(prepareRoundSpy.called);
             assert.ok(ensureVoiceConnectionSpy.called);
             assert.ok(playSongSpy.called);
