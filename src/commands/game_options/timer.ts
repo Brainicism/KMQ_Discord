@@ -3,7 +3,6 @@ import {
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
@@ -12,6 +11,7 @@ import Session from "../../structures/session";
 import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
 import LocalizationManager from "../../helpers/localization_manager";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("guessTimeout");
 
@@ -67,7 +67,10 @@ export default class GuessTimeoutCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         const session = Session.getSession(message.guildID);
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.TIMER);

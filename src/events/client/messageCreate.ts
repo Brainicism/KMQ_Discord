@@ -6,7 +6,6 @@ import {
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
 import State from "../../state";
 import validate from "../../helpers/validate";
 import type { GuildTextableMessage } from "../../types";
@@ -15,6 +14,7 @@ import Session from "../../structures/session";
 import type ParsedMessage from "../../interfaces/parsed_message";
 import { EnvType } from "../../enums/env_type";
 import LocalizationManager from "../../helpers/localization_manager";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("messageCreate");
 
@@ -60,7 +60,10 @@ export default async function messageCreateHandler(
         message.content.split(" ").length === 1
     ) {
         // Any message that mentions the bot sends the current options
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         sendOptionsMessage(
             Session.getSession(message.guildID),
             messageContext,

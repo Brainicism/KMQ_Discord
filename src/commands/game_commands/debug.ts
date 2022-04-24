@@ -8,7 +8,6 @@ import {
     getDebugLogHeader,
 } from "../../helpers/discord_utils";
 import {
-    getGuildPreference,
     isPremiumRequest,
     getAvailableSongCount,
 } from "../../helpers/game_utils";
@@ -19,6 +18,7 @@ import MessageContext from "../../structures/message_context";
 import type CommandArgs from "../../interfaces/command_args";
 import LocalizationManager from "../../helpers/localization_manager";
 import Session from "../../structures/session";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("debug");
 
@@ -30,7 +30,9 @@ export default class DebugCommand implements BaseCommand {
             return;
         }
 
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
 
         const session = Session.getSession(message.guildID);
         const songCount = await getAvailableSongCount(

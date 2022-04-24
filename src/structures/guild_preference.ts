@@ -212,6 +212,35 @@ export default class GuildPreference {
         return gameOptions;
     }
 
+    static async getGuildPreference(guildID: string): Promise<GuildPreference> {
+        const guildPreferences = await dbContext
+            .kmq("guilds")
+            .select("*")
+            .where("guild_id", "=", guildID);
+
+        if (guildPreferences.length === 0) {
+            const guildPreference = GuildPreference.fromGuild(guildID);
+            await dbContext
+                .kmq("guilds")
+                .insert({ guild_id: guildID, join_date: new Date() });
+            return guildPreference;
+        }
+
+        const gameOptionPairs = (
+            await dbContext.kmq("game_options").select("*").where({
+                guild_id: guildID,
+                client_id: process.env.BOT_CLIENT_ID,
+            })
+        )
+            .map((x) => ({ [x["option_name"]]: JSON.parse(x["option_value"]) }))
+            .reduce((total, curr) => Object.assign(total, curr), {});
+
+        return GuildPreference.fromGuild(
+            guildPreferences[0].guild_id,
+            gameOptionPairs
+        );
+    }
+
     /**
      * Constructs a GuildPreference from a JSON payload
      * @param guildID - The guild ID

@@ -11,12 +11,11 @@ import KmqMember from "./kmq_member";
 import type Round from "./round";
 import Session from "./session";
 import MusicRound from "./music_round";
-import type GuildPreference from "./guild_preference";
+import GuildPreference from "./guild_preference";
 import type MessageContext from "./message_context";
 import { IPCLogger } from "../logger";
 import { isUserPremium } from "../helpers/game_utils";
 import { isSkipMajority, skipSong } from "../commands/game_commands/skip";
-import { getGuildPreference } from "../helpers/game_utils";
 import type QueriedSong from "../interfaces/queried_song";
 import type GuessResult from "../interfaces/guess_result";
 import LocalizationManager from "../helpers/localization_manager";
@@ -159,7 +158,7 @@ export default class MusicSession extends Session {
                 skipSong(
                     messageContext,
                     this,
-                    await getGuildPreference(guildID)
+                    await GuildPreference.getGuildPreference(guildID)
                 );
             } else {
                 tryCreateInteractionSuccessAcknowledgement(

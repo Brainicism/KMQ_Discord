@@ -1,6 +1,5 @@
 import type BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
-import { getGuildPreference } from "../../helpers/game_utils";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
@@ -13,6 +12,7 @@ import type CommandArgs from "../../interfaces/command_args";
 import LocalizationManager from "../../helpers/localization_manager";
 import { GameOptionInternalToGameOption } from "../../constants";
 import Session from "../../structures/session";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("reset");
 
@@ -45,7 +45,10 @@ export default class ResetCommand implements BaseCommand {
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         const resetOptions = await guildPreference.resetToDefault();
         logger.info(
             `${getDebugLogHeader(message)} | Reset to default guild preferences`

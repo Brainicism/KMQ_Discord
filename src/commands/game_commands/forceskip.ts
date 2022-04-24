@@ -5,7 +5,6 @@ import {
     getDebugLogHeader,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { EMBED_SUCCESS_COLOR, KmqImages } from "../../constants";
@@ -15,6 +14,7 @@ import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import LocalizationManager from "../../helpers/localization_manager";
 import { getMention } from "../../helpers/utils";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("forceskip");
 
@@ -47,7 +47,10 @@ export default class ForceSkipCommand implements BaseCommand {
             return;
         }
 
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         const session = Session.getSession(message.guildID);
         if (
             !session.round ||

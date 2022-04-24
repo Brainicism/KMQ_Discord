@@ -1,6 +1,5 @@
 import type BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
-import { getGuildPreference } from "../../helpers/game_utils";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
@@ -14,6 +13,7 @@ import { ReleaseType } from "../../enums/option_types/release_type";
 import { DEFAULT_RELEASE_TYPE } from "../../constants";
 import LocalizationManager from "../../helpers/localization_manager";
 import Session from "../../structures/session";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("release");
 
@@ -70,7 +70,9 @@ export default class ReleaseCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
 
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.RELEASE_TYPE);

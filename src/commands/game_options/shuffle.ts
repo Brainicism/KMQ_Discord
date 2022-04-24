@@ -1,6 +1,6 @@
 import type BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
-import { getGuildPreference, isUserPremium } from "../../helpers/game_utils";
+import { isUserPremium } from "../../helpers/game_utils";
 import {
     sendOptionsMessage,
     getDebugLogHeader,
@@ -9,7 +9,7 @@ import {
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import type GuildPreference from "../../structures/guild_preference";
+import GuildPreference from "../../structures/guild_preference";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import { ShuffleType } from "../../enums/option_types/shuffle_type";
@@ -77,7 +77,10 @@ export default class ShuffleCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.SHUFFLE_TYPE);
             await sendOptionsMessage(

@@ -6,10 +6,9 @@ import {
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import type BaseCommand from "../interfaces/base_command";
-import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import type GuildPreference from "../../structures/guild_preference";
+import GuildPreference from "../../structures/guild_preference";
 import { GameOptionInternalToGameOption, KmqImages } from "../../constants";
 import dbContext from "../../database_context";
 import CommandPrechecks from "../../command_prechecks";
@@ -120,7 +119,10 @@ export default class PresetCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         const presetAction =
             (parsedMessage.components[0] as PresetAction) || null;
 

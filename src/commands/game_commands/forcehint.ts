@@ -4,7 +4,6 @@ import {
     getDebugLogHeader,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
@@ -16,6 +15,7 @@ import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import LocalizationManager from "../../helpers/localization_manager";
 import { getMention } from "../../helpers/utils";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("forcehint");
 
@@ -42,7 +42,9 @@ export default class ForceHintCommand implements BaseCommand {
     call = async ({ message }: CommandArgs): Promise<void> => {
         const gameSession = Session.getSession(message.guildID) as GameSession;
         const gameRound = gameSession?.round;
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
 
         if (!validHintCheck(gameSession, guildPreference, gameRound, message))
             return;

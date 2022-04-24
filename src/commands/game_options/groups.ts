@@ -4,10 +4,7 @@ import {
     getDebugLogHeader,
     sendErrorMessage,
 } from "../../helpers/discord_utils";
-import {
-    getGuildPreference,
-    getMatchingGroupNames,
-} from "../../helpers/game_utils";
+import { getMatchingGroupNames } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
@@ -18,6 +15,7 @@ import type HelpDocumentation from "../../interfaces/help";
 import { GameOption } from "../../enums/game_option_name";
 import LocalizationManager from "../../helpers/localization_manager";
 import Session from "../../structures/session";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("groups");
 
@@ -82,7 +80,10 @@ export default class GroupsCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.GROUPS);
             await sendOptionsMessage(

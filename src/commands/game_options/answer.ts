@@ -3,7 +3,6 @@ import {
     sendOptionsMessage,
     getDebugLogHeader,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
@@ -13,6 +12,7 @@ import type CommandArgs from "../../interfaces/command_args";
 import { AnswerType } from "../../enums/option_types/answer_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import Session from "../../structures/session";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("answer");
 
@@ -92,7 +92,10 @@ export default class AnswerCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.ANSWER_TYPE);
             await sendOptionsMessage(
