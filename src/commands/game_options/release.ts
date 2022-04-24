@@ -8,11 +8,11 @@ import {
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import State from "../../state";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import { ReleaseType } from "../../enums/option_types/release_type";
 import { DEFAULT_RELEASE_TYPE } from "../../constants";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("release");
 
@@ -35,7 +35,7 @@ export default class ReleaseCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "release",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.release.help.description"
         ),
@@ -43,7 +43,7 @@ export default class ReleaseCommand implements BaseCommand {
         examples: [
             {
                 example: "`,release official`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.release.help.example.official",
                     { official: `\`${ReleaseType.OFFICIAL}\`` }
@@ -51,14 +51,14 @@ export default class ReleaseCommand implements BaseCommand {
             },
             {
                 example: "`,release all`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.release.help.example.all"
                 ),
             },
             {
                 example: "`,release`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.release.help.example.reset",
                     { defaultRelease: `\`${DEFAULT_RELEASE_TYPE}\`` }

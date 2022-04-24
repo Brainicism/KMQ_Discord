@@ -5,7 +5,6 @@ import {
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import { getGuildPreference, isUserPremium } from "../../helpers/game_utils";
-import State from "../../state";
 import { IPCLogger } from "../../logger";
 import type GuildPreference from "../../structures/guild_preference";
 import { GameOption } from "../../enums/game_option_name";
@@ -14,6 +13,7 @@ import CommandPrechecks from "../../command_prechecks";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import { SpecialType } from "../../enums/option_types/special_type";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("special");
 
@@ -38,7 +38,7 @@ export default class SpecialCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "special",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.special.help.description"
         ),
@@ -46,56 +46,56 @@ export default class SpecialCommand implements BaseCommand {
         examples: [
             {
                 example: "`,special reverse`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.special.help.example.reverse"
                 ),
             },
             {
                 example: "`,special slow`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.special.help.example.slow"
                 ),
             },
             {
                 example: "`,special fast`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.special.help.example.fast"
                 ),
             },
             {
                 example: "`,special faster`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.special.help.example.faster"
                 ),
             },
             {
                 example: "`,special lowpitch`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.special.help.example.lowPitch"
                 ),
             },
             {
                 example: "`,special highpitch`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.special.help.example.highPitch"
                 ),
             },
             {
                 example: "`,special nightcore`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.special.help.example.nightcore"
                 ),
             },
             {
                 example: "`,special`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.special.help.example.reset"
                 ),
@@ -128,11 +128,11 @@ export default class SpecialCommand implements BaseCommand {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                description: State.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.premium.option.description_kmq_server"
                 ),
-                title: State.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.premium.option.title"
                 ),

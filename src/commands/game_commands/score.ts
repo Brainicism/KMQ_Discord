@@ -4,12 +4,12 @@ import {
     getDebugLogHeader,
 } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
-import State from "../../state";
 import CommandPrechecks from "../../command_prechecks";
 import Session from "../../structures/session";
 import type GameSession from "../../structures/game_session";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("score");
 
@@ -20,7 +20,7 @@ export default class ScoreCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "score",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.score.help.description"
         ),

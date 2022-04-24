@@ -9,9 +9,9 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import State from "../../state";
 import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("duration");
 
@@ -43,18 +43,18 @@ export default class DurationCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "duration",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.duration.help.description"
         ),
-        usage: `,duration [${State.localizer.translate(
+        usage: `,duration [${LocalizationManager.localizer.translate(
             guildID,
             "command.duration.help.usage.minutes"
         )}]`,
         examples: [
             {
                 example: "`,duration 15`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.duration.help.example.set",
                     {
@@ -64,7 +64,7 @@ export default class DurationCommand implements BaseCommand {
             },
             {
                 example: "`,duration 5 add`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.duration.help.example.increment",
                     {
@@ -74,7 +74,7 @@ export default class DurationCommand implements BaseCommand {
             },
             {
                 example: "`,duration 5 remove`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.duration.help.example.decrement",
                     {
@@ -84,7 +84,7 @@ export default class DurationCommand implements BaseCommand {
             },
             {
                 example: "`,duration`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.duration.help.example.reset"
                 ),
@@ -120,11 +120,11 @@ export default class DurationCommand implements BaseCommand {
             } else if (action === DurationAction.REMOVE) {
                 if (!guildPreference.isDurationSet()) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: State.localizer.translate(
+                        title: LocalizationManager.localizer.translate(
                             message.guildID,
                             "command.duration.failure.removingDuration.title"
                         ),
-                        description: State.localizer.translate(
+                        description: LocalizationManager.localizer.translate(
                             message.guildID,
                             "command.duration.failure.removingDuration.notSet.description"
                         ),
@@ -135,11 +135,11 @@ export default class DurationCommand implements BaseCommand {
                 duration = currentDuration - durationDelta;
                 if (duration < 2) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: State.localizer.translate(
+                        title: LocalizationManager.localizer.translate(
                             message.guildID,
                             "command.duration.failure.removingDuration.title"
                         ),
-                        description: State.localizer.translate(
+                        description: LocalizationManager.localizer.translate(
                             message.guildID,
                             "command.duration.failure.removingDuration.tooShort.description"
                         ),

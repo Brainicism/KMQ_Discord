@@ -6,6 +6,8 @@ import { DEFAULT_LOCALE } from "../constants";
 import State from "../state";
 
 export default class LocalizationManager {
+    static localizer = new LocalizationManager();
+
     internalLocalizer: typeof i18next;
     constructor() {
         this.internalLocalizer = i18next.createInstance().use(Backend);

@@ -93,7 +93,7 @@ export class BotWorker extends BaseClusterWorker {
         super(setup);
         State.ipc = this.ipc;
         State.client = this.bot as KmqClient;
-        State.localizer = new LocalizationManager();
+        LocalizationManager.localizer = new LocalizationManager();
         logger.info(
             `Started worker ID: ${this.workerID} on cluster ID: ${this.clusterID}`
         );

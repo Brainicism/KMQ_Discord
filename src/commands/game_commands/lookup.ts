@@ -26,6 +26,7 @@ import { KmqImages } from "../../constants";
 import type QueriedSong from "../../interfaces/queried_song";
 import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("lookup");
 
@@ -47,7 +48,7 @@ export default class LookupCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "lookup",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.lookup.help.description"
         ),
@@ -55,7 +56,7 @@ export default class LookupCommand implements BaseCommand {
         examples: [
             {
                 example: "`,lookup IHNzOHi8sJs`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.lookup.help.example.song",
                     { song: "Ddu-du Ddu-du", artist: "Blackpink" }
@@ -64,7 +65,7 @@ export default class LookupCommand implements BaseCommand {
             {
                 example:
                     "`,lookup https://www.youtube.com/watch?v=4TWR90KJl84`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.lookup.help.example.song",
                     { song: "Next Level", artist: "Aespa" }
@@ -94,7 +95,7 @@ export default class LookupCommand implements BaseCommand {
         } catch {
             await sendValidationErrorMessage(
                 message,
-                State.localizer.translate(
+                LocalizationManager.localizer.translate(
                     guildID,
                     "command.lookup.validation.invalidYouTubeID"
                 ),
@@ -129,11 +130,11 @@ export default class LookupCommand implements BaseCommand {
         const daisukiSongEntry = daisukiMVEntry || daisukiAudioEntry;
         if (!daisukiSongEntry) {
             await sendErrorMessage(messageContext, {
-                title: State.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     guildID,
                     "command.lookup.notFound.title"
                 ),
-                description: State.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     guildID,
                     "command.lookup.notFound.description"
                 ),
@@ -165,7 +166,7 @@ export default class LookupCommand implements BaseCommand {
         let includedInOptions = false;
 
         if (kmqSongEntry) {
-            description = State.localizer.translate(
+            description = LocalizationManager.localizer.translate(
                 guildID,
                 "command.lookup.inKMQ",
                 { link: daisukiLink }
@@ -211,7 +212,7 @@ export default class LookupCommand implements BaseCommand {
                 )} | KMQ song lookup. videoID = ${videoID}. Included in options = ${includedInOptions}.`
             );
         } else {
-            description = State.localizer.translate(
+            description = LocalizationManager.localizer.translate(
                 guildID,
                 "command.lookup.notInKMQ",
                 { link: daisukiLink }
@@ -252,7 +253,10 @@ export default class LookupCommand implements BaseCommand {
             );
         }
 
-        const viewsString = State.localizer.translate(guildID, "misc.views");
+        const viewsString = LocalizationManager.localizer.translate(
+            guildID,
+            "misc.views"
+        );
 
         const fields = [
             {
@@ -260,40 +264,58 @@ export default class LookupCommand implements BaseCommand {
                 value: friendlyFormattedNumber(views),
             },
             {
-                name: State.localizer.translate(guildID, "misc.releaseDate"),
+                name: LocalizationManager.localizer.translate(
+                    guildID,
+                    "misc.releaseDate"
+                ),
                 value: friendlyFormattedDate(publishDate, guildID),
             },
             {
-                name: State.localizer.translate(guildID, "misc.songAliases"),
+                name: LocalizationManager.localizer.translate(
+                    guildID,
+                    "misc.songAliases"
+                ),
                 value:
                     songAliases ||
-                    State.localizer.translate(guildID, "misc.none"),
+                    LocalizationManager.localizer.translate(
+                        guildID,
+                        "misc.none"
+                    ),
             },
             {
-                name: State.localizer.translate(guildID, "misc.artistAliases"),
+                name: LocalizationManager.localizer.translate(
+                    guildID,
+                    "misc.artistAliases"
+                ),
                 value:
                     artistAliases ||
-                    State.localizer.translate(guildID, "misc.none"),
+                    LocalizationManager.localizer.translate(
+                        guildID,
+                        "misc.none"
+                    ),
             },
         ];
 
         if (kmqSongEntry) {
             fields.push(
                 {
-                    name: State.localizer.translate(guildID, "misc.duration"),
+                    name: LocalizationManager.localizer.translate(
+                        guildID,
+                        "misc.duration"
+                    ),
                     value:
                         songDuration ||
-                        State.localizer.translate(
+                        LocalizationManager.localizer.translate(
                             guildID,
                             "misc.notApplicable"
                         ),
                 },
                 {
-                    name: State.localizer.translate(
+                    name: LocalizationManager.localizer.translate(
                         guildID,
                         "command.lookup.inCurrentGameOptions"
                     ),
-                    value: State.localizer.translate(
+                    value: LocalizationManager.localizer.translate(
                         guildID,
                         includedInOptions ? "misc.yes" : "misc.no"
                     ),

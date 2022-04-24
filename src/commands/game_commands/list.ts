@@ -8,9 +8,9 @@ import type BaseCommand from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import State from "../../state";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("list");
 
@@ -45,7 +45,7 @@ export default class ListCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "list",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.list.help.description"
         ),
@@ -53,7 +53,7 @@ export default class ListCommand implements BaseCommand {
         examples: [
             {
                 example: "`,list groups`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.list.help.example.groups",
                     { groups: `\`${process.env.BOT_PREFIX}groups\`` }
@@ -61,7 +61,7 @@ export default class ListCommand implements BaseCommand {
             },
             {
                 example: "`,list exclude`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.list.help.example.exclude",
                     { exclude: `\`${process.env.BOT_PREFIX}exclude\`` }
@@ -69,7 +69,7 @@ export default class ListCommand implements BaseCommand {
             },
             {
                 example: "`,list include`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.list.help.example.include",
                     { include: `\`${process.env.BOT_PREFIX}include\`` }
@@ -110,7 +110,7 @@ export default class ListCommand implements BaseCommand {
 
         optionValue =
             optionValue ||
-            State.localizer.translate(
+            LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.list.currentValue.nothingSelected"
             );
@@ -120,7 +120,7 @@ export default class ListCommand implements BaseCommand {
                 sendMessage(
                     channel.id,
                     {
-                        content: State.localizer.translate(
+                        content: LocalizationManager.localizer.translate(
                             message.guildID,
                             "command.list.failure.groupsInFile.description"
                         ),
@@ -138,11 +138,11 @@ export default class ListCommand implements BaseCommand {
                 );
 
                 await sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: State.localizer.translate(
+                    title: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.list.failure.groupsInFile.noFilePermissions.title"
                     ),
-                    description: State.localizer.translate(
+                    description: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.list.failure.groupsInFile.noFilePermissions.description",
                         { attachFile: "ATTACH_FILE" }
@@ -152,7 +152,7 @@ export default class ListCommand implements BaseCommand {
             }
         } else {
             await sendInfoMessage(MessageContext.fromMessage(message), {
-                title: State.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.list.currentValue.title",
                     {

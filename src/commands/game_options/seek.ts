@@ -8,11 +8,11 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import State from "../../state";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import { SeekType } from "../../enums/option_types/seek_type";
 import { DEFAULT_SEEK } from "../../constants";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("seek");
 
@@ -36,7 +36,7 @@ export default class SeekCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "seek",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.seek.help.description"
         ),
@@ -44,28 +44,28 @@ export default class SeekCommand implements BaseCommand {
         examples: [
             {
                 example: "`,seek random`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.seek.help.example.random"
                 ),
             },
             {
                 example: "`,seek middle`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.seek.help.example.middle"
                 ),
             },
             {
                 example: "`,seek beginning`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.seek.help.example.beginning"
                 ),
             },
             {
                 example: "`,seek`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.seek.help.example.reset",
                     {

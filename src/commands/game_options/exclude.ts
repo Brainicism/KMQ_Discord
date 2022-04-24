@@ -13,10 +13,10 @@ import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
-import State from "../../state";
 import { GROUP_LIST_URL } from "../../constants";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("excludes");
 
@@ -27,7 +27,7 @@ export default class ExcludeCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "exclude",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.exclude.help.description",
             {
@@ -38,7 +38,7 @@ export default class ExcludeCommand implements BaseCommand {
         examples: [
             {
                 example: "`,exclude blackpink`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.exclude.help.example.singleGroup",
                     {
@@ -48,7 +48,7 @@ export default class ExcludeCommand implements BaseCommand {
             },
             {
                 example: "`,exclude blackpink, bts, red velvet`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.exclude.help.example.multipleGroups",
                     {
@@ -60,7 +60,7 @@ export default class ExcludeCommand implements BaseCommand {
             },
             {
                 example: "`,exclude`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.exclude.help.example.reset"
                 ),
@@ -71,7 +71,7 @@ export default class ExcludeCommand implements BaseCommand {
                 style: 5 as const,
                 url: GROUP_LIST_URL,
                 type: 2 as const,
-                label: State.localizer.translate(
+                label: LocalizationManager.localizer.translate(
                     guildID,
                     "misc.interaction.fullGroupsList"
                 ),
@@ -96,7 +96,7 @@ export default class ExcludeCommand implements BaseCommand {
         let excludeWarning = "";
         if (parsedMessage.components.length > 1) {
             if (["add", "remove"].includes(parsedMessage.components[0])) {
-                excludeWarning = State.localizer.translate(
+                excludeWarning = LocalizationManager.localizer.translate(
                     message.guildID,
                     "misc.warning.addRemoveOrdering.footer",
                     {
@@ -124,21 +124,22 @@ export default class ExcludeCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: State.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "misc.failure.unrecognizedGroups.title"
                 ),
-                description: State.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "misc.failure.unrecognizedGroups.description",
                     {
-                        matchedGroupsAction: State.localizer.translate(
-                            message.guildID,
-                            "command.exclude.failure.unrecognizedGroups.excluded"
-                        ),
+                        matchedGroupsAction:
+                            LocalizationManager.localizer.translate(
+                                message.guildID,
+                                "command.exclude.failure.unrecognizedGroups.excluded"
+                            ),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: `${unmatchedGroups.join(", ")}`,
-                        solution: State.localizer.translate(
+                        solution: LocalizationManager.localizer.translate(
                             message.guildID,
                             "misc.failure.unrecognizedGroups.solution",
                             {
@@ -162,11 +163,11 @@ export default class ExcludeCommand implements BaseCommand {
             );
             if (intersection.size > 0) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: State.localizer.translate(
+                    title: LocalizationManager.localizer.translate(
                         message.guildID,
                         "misc.failure.groupsExcludeConflict.title"
                     ),
-                    description: State.localizer.translate(
+                    description: LocalizationManager.localizer.translate(
                         message.guildID,
                         "misc.failure.groupsExcludeConflict.description",
                         {
@@ -177,10 +178,11 @@ export default class ExcludeCommand implements BaseCommand {
                                 .join(", "),
                             solutionStepOne: `\`${process.env.BOT_PREFIX}remove groups\``,
                             solutionStepTwo: `\`${process.env.BOT_PREFIX}exclude\``,
-                            allowOrPrevent: State.localizer.translate(
-                                message.guildID,
-                                "misc.failure.groupsExcludeConflict.prevent"
-                            ),
+                            allowOrPrevent:
+                                LocalizationManager.localizer.translate(
+                                    message.guildID,
+                                    "misc.failure.groupsExcludeConflict.prevent"
+                                ),
                         }
                     ),
                 });

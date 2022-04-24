@@ -8,10 +8,10 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import State from "../../state";
 import Session from "../../structures/session";
 import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("guessTimeout");
 
@@ -38,18 +38,18 @@ export default class GuessTimeoutCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "timer",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.timer.help.description"
         ),
-        usage: `,timer [${State.localizer.translate(
+        usage: `,timer [${LocalizationManager.localizer.translate(
             guildID,
             "command.timer.help.usage.seconds"
         )}]`,
         examples: [
             {
                 example: "`,timer 15`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.timer.help.example.set",
                     { timer: String(15) }
@@ -57,7 +57,7 @@ export default class GuessTimeoutCommand implements BaseCommand {
             },
             {
                 example: "`,timer`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.timer.help.example.reset"
                 ),

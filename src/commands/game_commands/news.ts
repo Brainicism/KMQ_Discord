@@ -8,10 +8,10 @@ import {
 } from "../../helpers/discord_utils";
 import { KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
-import State from "../../state";
 import { getKmqCurrentVersion } from "../../helpers/game_utils";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("news");
 
@@ -20,7 +20,7 @@ export default class NewsCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "news",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.news.help.description"
         ),
@@ -39,7 +39,7 @@ export default class NewsCommand implements BaseCommand {
         const news = fs.readFileSync(newsFilePath).toString();
 
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: State.localizer.translate(
+            title: LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.news.updates.title"
             ),

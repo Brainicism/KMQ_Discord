@@ -8,11 +8,11 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import State from "../../state";
 import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
 import { OstPreference } from "../../enums/option_types/ost_preference";
 import { DEFAULT_OST_PREFERENCE } from "../../constants";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("ost");
 
@@ -35,7 +35,7 @@ export default class OstCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "ost",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.ost.help.description"
         ),
@@ -43,28 +43,28 @@ export default class OstCommand implements BaseCommand {
         examples: [
             {
                 example: "`,ost include`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.ost.help.example.include"
                 ),
             },
             {
                 example: "`,ost exclude`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.ost.help.example.exclude"
                 ),
             },
             {
                 example: "`,ost exclusive`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.ost.help.example.exclusive"
                 ),
             },
             {
                 example: "`,ost`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.ost.help.example.reset",
                     { defaultOst: `\`${DEFAULT_OST_PREFERENCE}\`` }

@@ -81,3 +81,15 @@ export const specialFfmpegArgs = {
 export const FOREIGN_LANGUAGE_TAGS = ["z", "j", "e", "s"];
 export const NON_OFFICIAL_VIDEO_TAGS = ["c", "d", "a", "r", "v", "x", "p"];
 export const DEFAULT_LOCALE = LocaleType.EN;
+
+const EXP_TABLE = [...Array(1000).keys()].map((level) => {
+    if (level === 0 || level === 1) return 0;
+    return 10 * level ** 2 + 200 * level - 200;
+});
+
+export const CUM_EXP_TABLE = EXP_TABLE.map(
+    (
+        (sum) => (value) =>
+            (sum += value)
+    )(0)
+);

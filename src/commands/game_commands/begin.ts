@@ -11,7 +11,7 @@ import {
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import type GameSession from "../../structures/game_session";
-import State from "../../state";
+import LocalizationManager from "../../helpers/localization_manager";
 import CommandPrechecks from "../../command_prechecks";
 import Session from "../../structures/session";
 import type CommandArgs from "../../interfaces/command_args";
@@ -35,11 +35,11 @@ export default class BeginCommand implements BaseCommand {
         const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
         if (teamScoreboard.getNumTeams() === 0) {
             sendErrorMessage(messageContext, {
-                title: State.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     messageContext.guildID,
                     "command.begin.ignored.title"
                 ),
-                description: State.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     messageContext.guildID,
                     "command.begin.ignored.noTeam.description",
                     { join: `${process.env.BOT_PREFIX}join` }

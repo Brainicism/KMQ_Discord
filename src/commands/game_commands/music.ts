@@ -25,6 +25,7 @@ import type GuildPreference from "src/structures/guild_preference";
 import type GameInfoMessage from "../../interfaces/game_info_message";
 import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("music");
 
@@ -41,7 +42,7 @@ export async function sendBeginMusicSessionMessage(
     messageContext: MessageContext,
     guildPreference: GuildPreference
 ): Promise<void> {
-    const startTitle = State.localizer.translate(
+    const startTitle = LocalizationManager.localizer.translate(
         messageContext.guildID,
         "command.music.musicStarting",
         {
@@ -57,11 +58,11 @@ export async function sendBeginMusicSessionMessage(
     const fields: Eris.EmbedField[] = [];
     if (gameInfoMessage) {
         fields.push({
-            name: State.localizer.translate(
+            name: LocalizationManager.localizer.translate(
                 messageContext.guildID,
                 gameInfoMessage.title
             ),
-            value: State.localizer.translate(
+            value: LocalizationManager.localizer.translate(
                 messageContext.guildID,
                 gameInfoMessage.message
             ),
@@ -110,7 +111,7 @@ export default class MusicCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "music",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.music.help.description"
         ),
@@ -119,7 +120,7 @@ export default class MusicCommand implements BaseCommand {
         examples: [
             {
                 example: "`,music`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.music.help.example"
                 ),
@@ -160,11 +161,11 @@ export default class MusicCommand implements BaseCommand {
         const voiceChannel = getUserVoiceChannel(messageContext);
         if (!voiceChannel) {
             await sendErrorMessage(messageContext, {
-                title: State.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "misc.failure.notInVC.title"
                 ),
-                description: State.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "misc.failure.notInVC.description",
                     { command: `\`${process.env.BOT_PREFIX}music\`` }

@@ -31,6 +31,7 @@ import type QueriedSong from "../interfaces/queried_song";
 import type GuessResult from "../interfaces/guess_result";
 import { SeekType } from "../enums/option_types/seek_type";
 import type MusicSession from "./music_session";
+import LocalizationManager from "../helpers/localization_manager";
 
 const BOOKMARK_MESSAGE_SIZE = 10;
 
@@ -152,11 +153,11 @@ export default abstract class Session {
                 await this.reloadSongs(guildPreference);
             } catch (err) {
                 await sendErrorMessage(messageContext, {
-                    title: State.localizer.translate(
+                    title: LocalizationManager.localizer.translate(
                         this.guildID,
                         "misc.failure.errorSelectingSong.title"
                     ),
-                    description: State.localizer.translate(
+                    description: LocalizationManager.localizer.translate(
                         this.guildID,
                         "misc.failure.errorSelectingSong.description"
                     ),
@@ -183,11 +184,11 @@ export default abstract class Session {
             );
 
             await sendInfoMessage(messageContext, {
-                title: State.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     this.guildID,
                     "misc.uniqueSongsReset.title"
                 ),
-                description: State.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     this.guildID,
                     "misc.uniqueSongsReset.description",
                     { totalSongCount: friendlyFormattedNumber(totalSongCount) }
@@ -201,11 +202,11 @@ export default abstract class Session {
 
         if (randomSong === null) {
             sendErrorMessage(messageContext, {
-                title: State.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     this.guildID,
                     "misc.failure.songQuery.title"
                 ),
-                description: State.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     this.guildID,
                     "misc.failure.songQuery.description"
                 ),
@@ -238,11 +239,11 @@ export default abstract class Session {
             );
 
             await sendErrorMessage(messageContext, {
-                title: State.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     this.guildID,
                     "misc.failure.vcJoin.title"
                 ),
-                description: State.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     this.guildID,
                     "misc.failure.vcJoin.description"
                 ),
@@ -331,20 +332,20 @@ export default abstract class Session {
             ).reduce((total, x) => total + x.size, 0);
 
             await sendInfoMessage(new MessageContext(this.textChannelID), {
-                title: State.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     this.guildID,
                     "misc.sendingBookmarkedSongs.title"
                 ),
-                description: State.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     this.guildID,
                     "misc.sendingBookmarkedSongs.description",
                     {
-                        songs: State.localizer.translateN(
+                        songs: LocalizationManager.localizer.translateN(
                             this.guildID,
                             "misc.plural.song",
                             bookmarkedSongCount
                         ),
-                        players: State.localizer.translateN(
+                        players: LocalizationManager.localizer.translateN(
                             this.guildID,
                             "misc.plural.player",
                             bookmarkedSongsPlayerCount
@@ -480,11 +481,11 @@ export default abstract class Session {
     /** Sends a message notifying who the new owner is */
     updateOwner(): void {
         sendInfoMessage(new MessageContext(this.textChannelID), {
-            title: State.localizer.translate(
+            title: LocalizationManager.localizer.translate(
                 this.guildID,
                 "misc.gameOwnerChanged.title"
             ),
-            description: State.localizer.translate(
+            description: LocalizationManager.localizer.translate(
                 this.guildID,
                 "misc.gameOwnerChanged.description",
                 {
@@ -517,7 +518,7 @@ export default abstract class Session {
         if (!song) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                State.localizer.translate(
+                LocalizationManager.localizer.translate(
                     this.guildID,
                     "misc.failure.interaction.invalidBookmark",
                     { BOOKMARK_MESSAGE_SIZE: String(BOOKMARK_MESSAGE_SIZE) }
@@ -528,11 +529,11 @@ export default abstract class Session {
 
         tryCreateInteractionSuccessAcknowledgement(
             interaction,
-            State.localizer.translate(
+            LocalizationManager.localizer.translate(
                 this.guildID,
                 "misc.interaction.bookmarked.title"
             ),
-            State.localizer.translate(
+            LocalizationManager.localizer.translate(
                 this.guildID,
                 "misc.interaction.bookmarked.description",
                 {
@@ -733,7 +734,7 @@ export default abstract class Session {
         if (!this.round.isValidInteraction(interaction.data.custom_id)) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
-                State.localizer.translate(
+                LocalizationManager.localizer.translate(
                     this.guildID,
                     "misc.failure.interaction.optionFromPreviousRound"
                 )
@@ -782,11 +783,11 @@ export default abstract class Session {
         });
 
         await sendErrorMessage(messageContext, {
-            title: State.localizer.translate(
+            title: LocalizationManager.localizer.translate(
                 this.guildID,
                 "misc.failure.songPlaying.title"
             ),
-            description: State.localizer.translate(
+            description: LocalizationManager.localizer.translate(
                 this.guildID,
                 "misc.failure.songPlaying.description"
             ),

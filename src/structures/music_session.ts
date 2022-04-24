@@ -16,10 +16,10 @@ import type MessageContext from "./message_context";
 import { IPCLogger } from "../logger";
 import { isUserPremium } from "../helpers/game_utils";
 import { isSkipMajority, skipSong } from "../commands/game_commands/skip";
-import State from "../state";
 import { getGuildPreference } from "../helpers/game_utils";
 import type QueriedSong from "../interfaces/queried_song";
 import type GuessResult from "../interfaces/guess_result";
+import LocalizationManager from "../helpers/localization_manager";
 
 const logger = new IPCLogger("music_session");
 
@@ -141,8 +141,11 @@ export default class MusicSession extends Session {
                 await this.round.interactionSuccessfulSkip();
                 await tryCreateInteractionSuccessAcknowledgement(
                     interaction,
-                    State.localizer.translate(guildID, "misc.skip"),
-                    State.localizer.translate(
+                    LocalizationManager.localizer.translate(
+                        guildID,
+                        "misc.skip"
+                    ),
+                    LocalizationManager.localizer.translate(
                         guildID,
                         "command.skip.success.description",
                         {
@@ -161,11 +164,11 @@ export default class MusicSession extends Session {
             } else {
                 tryCreateInteractionSuccessAcknowledgement(
                     interaction,
-                    State.localizer.translate(
+                    LocalizationManager.localizer.translate(
                         guildID,
                         "command.skip.vote.title"
                     ),
-                    State.localizer.translate(
+                    LocalizationManager.localizer.translate(
                         guildID,
                         "command.skip.vote.description",
                         {

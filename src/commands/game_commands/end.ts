@@ -2,10 +2,10 @@ import type BaseCommand from "../interfaces/base_command";
 import { getDebugLogHeader } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
 import CommandPrechecks from "../../command_prechecks";
-import State from "../../state";
 import Session from "../../structures/session";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("end");
 
@@ -19,7 +19,7 @@ export default class EndCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "end",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.end.help.description"
         ),

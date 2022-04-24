@@ -8,13 +8,13 @@ import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import State from "../../state";
 import Session from "../../structures/session";
 import type GameSession from "../../structures/game_session";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import { GameOption } from "../../enums/game_option_name";
 import { GameType } from "../../enums/game_type";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("goal");
 
@@ -38,18 +38,18 @@ export default class GoalCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "goal",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.goal.help.description"
         ),
-        usage: `,goal [${State.localizer.translate(
+        usage: `,goal [${LocalizationManager.localizer.translate(
             guildID,
             "command.goal.help.usage.points"
         )}]`,
         examples: [
             {
                 example: "`,goal 30`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.goal.help.example.set",
                     { goal: String(30) }
@@ -57,7 +57,7 @@ export default class GoalCommand implements BaseCommand {
             },
             {
                 example: "`,goal`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.goal.help.example.reset"
                 ),
@@ -91,11 +91,11 @@ export default class GoalCommand implements BaseCommand {
                 );
 
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: State.localizer.translate(
+                    title: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.goal.failure.goalExceeded.title"
                     ),
-                    description: State.localizer.translate(
+                    description: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.goal.failure.goalExceeded.description"
                     ),
@@ -113,11 +113,11 @@ export default class GoalCommand implements BaseCommand {
                 );
 
                 sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: State.localizer.translate(
+                    title: LocalizationManager.localizer.translate(
                         message.guildID,
                         "misc.failure.gameOptionConflict.title"
                     ),
-                    description: State.localizer.translate(
+                    description: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.goal.failure.gameOptionConflict.description",
                         {

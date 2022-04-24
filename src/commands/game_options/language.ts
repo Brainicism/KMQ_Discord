@@ -8,10 +8,10 @@ import {
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import State from "../../state";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import { LanguageType } from "../../enums/option_types/language_type";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("language");
 
@@ -32,7 +32,7 @@ export default class LanguageCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "language",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.language.help.description"
         ),
@@ -40,21 +40,21 @@ export default class LanguageCommand implements BaseCommand {
         examples: [
             {
                 example: "`,language korean`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.language.help.example.korean"
                 ),
             },
             {
                 example: "`,language all`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.language.help.example.all"
                 ),
             },
             {
                 example: "`,language`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.language.help.example.reset",
                     { defaultLanguage: `\`${LanguageType.ALL}\`` }
