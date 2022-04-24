@@ -32,11 +32,8 @@ function generateKnexContext(
 
 export class DatabaseContext {
     public kmq: Knex;
-
     public kpopVideos: Knex;
-
     public kpopVideosValidation: Knex;
-
     public agnostic: Knex;
 
     constructor() {

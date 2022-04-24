@@ -41,7 +41,6 @@ const getDaisukiLink = (id: string, isMV: boolean): string => {
 
 export default class LookupCommand implements BaseCommand {
     aliases = ["songinfo", "songlookup"];
-
     validations = {
         minArgCount: 1,
         maxArgCount: 1,

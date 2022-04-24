@@ -1,8 +1,6 @@
 export default class RateLimiter {
     public limitMap: { [userID: string]: Array<number> };
-
     private queueCapacity: number;
-
     private queueExpiryTime: number;
 
     constructor(queueCapacity: number, queueExpiryTime: number) {

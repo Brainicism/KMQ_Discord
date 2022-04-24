@@ -52,7 +52,6 @@ export function getInternalLogger(): winston.Logger {
  */
 export class IPCLogger {
     private category: string;
-
     private logger: winston.Logger;
 
     constructor(category: string) {

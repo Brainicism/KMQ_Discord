@@ -112,7 +112,6 @@ export async function skipSong(
 
 export default class SkipCommand implements BaseCommand {
     aliases = ["s"];
-
     preRunChecks = [
         { checkFn: CommandPrechecks.inSessionCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
