@@ -53,7 +53,7 @@ export default class KmqClient extends Eris.Client {
                 }
 
                 try {
-                    // eslint-disable-next-line global-require
+                    // eslint-disable-next-line global-require,import/no-dynamic-require
                     const command = require(commandFilePath);
                     const commandName = path.parse(commandFile).name;
                     // eslint-disable-next-line new-cap

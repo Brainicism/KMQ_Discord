@@ -5,10 +5,9 @@ import {
     ExpBonusModifierValues,
     ROUND_MAX_RUNNERS_UP,
 } from "../constants";
-import { ExpBonusModifier } from "../enums/exp_bonus_modifier";
-import { GuessModeType } from "../enums/option_types/guess_mode_type";
-import { friendlyFormattedNumber } from "../helpers/utils";
-import { getMention } from "../helpers/utils";
+import { friendlyFormattedNumber, getMention } from "../helpers/utils";
+import ExpBonusModifier from "../enums/exp_bonus_modifier";
+import GuessModeType from "../enums/option_types/guess_mode_type";
 import KmqMember from "./kmq_member";
 import LocalizationManager from "../helpers/localization_manager";
 import Round from "./round";

@@ -2,7 +2,6 @@ import {
     DEFAULT_BEGINNING_SEARCH_YEAR,
     DEFAULT_ENDING_SEARCH_YEAR,
 } from "../../constants";
-import { GameOption } from "../../enums/game_option_name";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -10,6 +9,7 @@ import {
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
@@ -118,7 +118,9 @@ export default class CutoffCommand implements BaseCommand {
         const yearRange = parsedMessage.components;
         const startYear = yearRange[0];
         if (yearRange.length === 1) {
-            await guildPreference.setBeginningCutoffYear(parseInt(startYear));
+            await guildPreference.setBeginningCutoffYear(
+                parseInt(startYear, 10)
+            );
             await guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
         } else if (yearRange.length === 2) {
             const endYear = yearRange[1];
@@ -136,8 +138,10 @@ export default class CutoffCommand implements BaseCommand {
                 return;
             }
 
-            await guildPreference.setBeginningCutoffYear(parseInt(startYear));
-            await guildPreference.setEndCutoffYear(parseInt(endYear));
+            await guildPreference.setBeginningCutoffYear(
+                parseInt(startYear, 10)
+            );
+            await guildPreference.setEndCutoffYear(parseInt(endYear, 10));
         }
 
         await sendOptionsMessage(

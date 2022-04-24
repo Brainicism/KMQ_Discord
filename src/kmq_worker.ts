@@ -4,7 +4,6 @@ import { config } from "dotenv";
 import path from "path";
 import schedule from "node-schedule";
 
-import { EnvType } from "./enums/env_type";
 import { IPCLogger } from "./logger";
 import {
     registerClientEvents,
@@ -14,6 +13,7 @@ import {
     updateBotStatus,
 } from "./helpers/management_utils";
 import BotListingManager from "./helpers/bot_listing_manager";
+import EnvType from "./enums/env_type";
 import EvalCommand from "./commands/admin/eval";
 import LocalizationManager from "./helpers/localization_manager";
 import ReloadCommand from "./commands/admin/reload";
@@ -26,7 +26,7 @@ import type KmqClient from "./kmq_client";
 const logger = new IPCLogger("kmq");
 config({ path: path.resolve(__dirname, "../.env") });
 
-export class BotWorker extends BaseClusterWorker {
+export default class BotWorker extends BaseClusterWorker {
     handleCommand = async (commandName: string): Promise<any> => {
         logger.debug(`Received cluster command: ${commandName}`);
         if (commandName.startsWith("eval")) {

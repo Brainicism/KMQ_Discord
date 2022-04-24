@@ -1,11 +1,11 @@
 import * as uuid from "uuid";
-import { EnvType } from "../../enums/env_type";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
+import EnvType from "../../enums/env_type";
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";

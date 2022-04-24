@@ -1,6 +1,5 @@
 import { SCOREBOARD_FIELD_CUTOFF } from "../constants";
-import { bold, friendlyFormattedNumber } from "../helpers/utils";
-import { getMention } from "../helpers/utils";
+import { bold, friendlyFormattedNumber, getMention } from "../helpers/utils";
 import LocalizationManager from "../helpers/localization_manager";
 import type GuildPreference from "./guild_preference";
 import type Player from "./player";
@@ -61,6 +60,7 @@ export default class Scoreboard {
         winnerStr += "win!";
         return winnerStr;
     }
+
     /**
      * @param showExp - Whether to display the EXP gained in the game for each player
      * @param inProgress - Whether the game is in progress

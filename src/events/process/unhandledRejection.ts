@@ -1,5 +1,5 @@
-import { EnvType } from "../../enums/env_type";
 import { IPCLogger } from "../../logger";
+import EnvType from "../../enums/env_type";
 import State from "../../state";
 
 const logger = new IPCLogger("unhandledRejection");

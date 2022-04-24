@@ -1,10 +1,10 @@
 import { DEFAULT_LOCALE, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { LocaleType } from "../../enums/locale_type";
 import {
     getDebugLogHeader,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
@@ -156,14 +156,9 @@ export default class LocaleTypeCommand implements BaseCommand {
                 .insert({ guild_id: guildID, locale })
                 .onConflict("guild_id")
                 .merge();
-        } else {
-            if (State.locales[guildID]) {
-                delete State.locales[guildID];
-                await dbContext
-                    .kmq("locale")
-                    .where({ guild_id: guildID })
-                    .del();
-            }
+        } else if (State.locales[guildID]) {
+            delete State.locales[guildID];
+            await dbContext.kmq("locale").where({ guild_id: guildID }).del();
         }
     }
 }

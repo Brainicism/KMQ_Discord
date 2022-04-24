@@ -9,9 +9,9 @@ import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
-import type { GameOption } from "../../enums/game_option_name";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
+import type GameOption from "../../enums/game_option_name";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("reset");

@@ -1,4 +1,4 @@
-export enum GameOption {
+enum GameOption {
     LIMIT = "Limit",
     GROUPS = "Groups",
     GENDER = "Gender",
@@ -21,3 +21,5 @@ export enum GameOption {
     INCLUDE = "Include",
     FORCE_PLAY_SONG = "Force Play Song",
 }
+
+export default GameOption;

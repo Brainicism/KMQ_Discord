@@ -1,4 +1,4 @@
-export enum LeaderboardDuration {
+enum LeaderboardDuration {
     TODAY = "today",
     DAILY = "daily",
     WEEK = "week",
@@ -9,3 +9,5 @@ export enum LeaderboardDuration {
     YEARLY = "yearly",
     ALL_TIME = "alltime",
 }
+
+export default LeaderboardDuration;

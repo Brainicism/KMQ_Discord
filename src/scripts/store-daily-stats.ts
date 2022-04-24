@@ -47,4 +47,4 @@ const storeDailyStats = async (serverCount: number): Promise<void> => {
     });
 };
 
-export { storeDailyStats as default };
+export default storeDailyStats;

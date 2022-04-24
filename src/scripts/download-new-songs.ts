@@ -27,7 +27,7 @@ async function clearPartiallyCachedSongs(): Promise<void> {
         return;
     }
 
-    const endingWithPartRegex = new RegExp("\\.part$");
+    const endingWithPartRegex = /\.part$/;
     const partFiles = files.filter((file) => file.match(endingWithPartRegex));
     for (const partFile of partFiles) {
         try {

@@ -1,6 +1,6 @@
 {
     "extends": [
-        "airbnb-typescript/base", "prettier"
+        "airbnb-base","airbnb-typescript/base", "prettier"
     ],
     "plugins": [
         "eslint-plugin-tsdoc",
@@ -14,15 +14,13 @@
         "project": "./tsconfig.json"
     },
     "rules": {
+        "import/order": ["off"],
         "deprecation/deprecation": "warn",
         "@typescript-eslint/await-thenable": [
             "error"
         ],
         "@typescript-eslint/require-await": [
             "error"
-        ],
-        "@typescript-eslint/indent": [
-            "off"
         ],
         "@typescript-eslint/quotes": [
             "warn",
@@ -59,9 +57,6 @@
         "tsdoc/syntax": [
             "warn"
         ],
-        "lines-between-class-members": [
-            "off"
-        ],
         "max-len": [
             "warn",
             {
@@ -89,13 +84,8 @@
         "no-async-promise-executor": [
             "off"
         ],
-        "@typescript-eslint/lines-between-class-members": [
-            "off"
-        ],
+        "lines-between-class-members": ["warn", "always",  { "exceptAfterSingleLine": true }],
         "no-param-reassign": [
-            "off"
-        ],
-        "object-curly-newline": [
             "off"
         ],
         "@typescript-eslint/no-unused-vars": [
@@ -123,32 +113,17 @@
         "func-names": [
             "off"
         ],
-        "no-bitwise": [
-            "off"
-        ],
         "@typescript-eslint/dot-notation": [
             "off"
         ],
         "no-multi-str": [
             "off"
         ],
-        "no-multi-spaces": [
+        "no-console": [
             "warn"
         ],
-        "radix": [
-            "off"
-        ],
-        "no-lonely-if": [
-            "off"
-        ],
-        "no-console": [
-            "error"
-        ],
-        "quote-props": [
-            "off"
-        ],
         "padding-line-between-statements": [
-            "error",
+            "warn",
             {
                 "blankLine": "always",
                 "prev": "block-like",
@@ -179,6 +154,8 @@
                 "prev": "*",
                 "next": "function"
             }
-        ]
+        ],
+        "no-bitwise": ["off"],
+        "class-methods-use-this": ["off"]
     }
 }

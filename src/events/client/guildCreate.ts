@@ -1,6 +1,6 @@
 import { IPCLogger } from "../../logger";
-import { LocaleType } from "../../enums/locale_type";
 import { getDebugChannel, sendInfoMessage } from "../../helpers/discord_utils";
+import LocaleType from "../../enums/locale_type";
 import LocaleTypeCommand from "../../commands/game_commands/locale";
 import MessageContext from "../../structures/message_context";
 import type Eris from "eris";

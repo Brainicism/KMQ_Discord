@@ -1,9 +1,8 @@
 /* eslint-disable no-console */
 import { config } from "dotenv";
-import { resolve } from "path";
 import DailyRotateFile from "winston-daily-rotate-file";
 import isMaster from "cluster";
-import path from "path";
+import path, { resolve } from "path";
 import winston from "winston";
 
 config({ path: resolve(__dirname, "../.env") });
@@ -53,7 +52,9 @@ export function getInternalLogger(): winston.Logger {
  */
 export class IPCLogger {
     private category: string;
+
     private logger: winston.Logger;
+
     constructor(category: string) {
         this.category = category;
         this.logger = getInternalLogger();

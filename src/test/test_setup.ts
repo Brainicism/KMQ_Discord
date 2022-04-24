@@ -1,13 +1,12 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import * as discordUtils from "../helpers/discord_utils";
 import { DATABASE_DOWNLOAD_DIR, ELIMINATION_DEFAULT_LIVES } from "../constants";
-import { EnvType } from "../enums/env_type";
 import { IPCLogger } from "../logger";
 import { execSync } from "child_process";
-import { getNewConnection } from "../database_context";
 import EliminationPlayer from "../structures/elimination_player";
+import EnvType from "../enums/env_type";
 import Player from "../structures/player";
-import dbContext from "../database_context";
+import dbContext, { getNewConnection } from "../database_context";
 import kmqKnexConfig from "../config/knexfile_kmq";
 import path from "path";
 import sinon from "sinon";

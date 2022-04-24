@@ -1,7 +1,5 @@
 import { DEFAULT_SHUFFLE } from "../../constants";
-import { GameOption } from "../../enums/game_option_name";
 import { IPCLogger } from "../../logger";
-import { ShuffleType } from "../../enums/option_types/shuffle_type";
 import {
     getDebugLogHeader,
     sendErrorMessage,
@@ -9,10 +7,12 @@ import {
 } from "../../helpers/discord_utils";
 import { isUserPremium } from "../../helpers/game_utils";
 import CommandPrechecks from "../../command_prechecks";
+import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import ShuffleType from "../../enums/option_types/shuffle_type";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -135,9 +135,6 @@ export default class ShuffleCommand implements BaseCommand {
         await guildPreference.reset(GameOption.SHUFFLE_TYPE);
     };
 
-    isUsingPremiumOption = (guildPreference: GuildPreference): boolean => {
-        return PREMIUM_SHUFFLE_TYPES.includes(
-            guildPreference.gameOptions.shuffleType
-        );
-    };
+    isUsingPremiumOption = (guildPreference: GuildPreference): boolean =>
+        PREMIUM_SHUFFLE_TYPES.includes(guildPreference.gameOptions.shuffleType);
 }

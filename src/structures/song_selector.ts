@@ -1,18 +1,18 @@
-import { ArtistType } from "../enums/option_types/artist_type";
 import {
     FOREIGN_LANGUAGE_TAGS,
     NON_OFFICIAL_VIDEO_TAGS,
     SELECTION_WEIGHT_VALUES_EASY,
     SELECTION_WEIGHT_VALUES_HARD,
 } from "../constants";
-import { Gender } from "../enums/option_types/gender";
 import { IPCLogger } from "../logger";
-import { LanguageType } from "../enums/option_types/language_type";
-import { OstPreference } from "../enums/option_types/ost_preference";
-import { ReleaseType } from "../enums/option_types/release_type";
-import { ShuffleType } from "../enums/option_types/shuffle_type";
-import { SubunitsPreference } from "../enums/option_types/subunit_preference";
 import { chooseWeightedRandom, setDifference } from "../helpers/utils";
+import ArtistType from "../enums/option_types/artist_type";
+import Gender from "../enums/option_types/gender";
+import LanguageType from "../enums/option_types/language_type";
+import OstPreference from "../enums/option_types/ost_preference";
+import ReleaseType from "../enums/option_types/release_type";
+import ShuffleType from "../enums/option_types/shuffle_type";
+import SubunitsPreference from "../enums/option_types/subunit_preference";
 import dbContext from "../database_context";
 import type GuildPreference from "./guild_preference";
 import type QueriedSong from "../interfaces/queried_song";
@@ -316,31 +316,22 @@ export default class SongSelector {
                                 : "n"
                         );
                     }
+                } else if (
+                    gameOptions.subunitPreference === SubunitsPreference.EXCLUDE
+                ) {
+                    this.whereIn("id_artist", guildPreference.getGroupIDs());
                 } else {
-                    if (
-                        gameOptions.subunitPreference ===
-                        SubunitsPreference.EXCLUDE
-                    ) {
-                        this.whereIn(
-                            "id_artist",
-                            guildPreference.getGroupIDs()
-                        );
-                    } else {
-                        this.andWhere(function () {
-                            this.whereIn(
-                                "id_artist",
+                    this.andWhere(function () {
+                        this.whereIn("id_artist", guildPreference.getGroupIDs())
+                            .orWhereIn(
+                                "id_parent_artist",
                                 guildPreference.getGroupIDs()
                             )
-                                .orWhereIn(
-                                    "id_parent_artist",
-                                    guildPreference.getGroupIDs()
-                                )
-                                .orWhereIn(
-                                    "id_artist",
-                                    collabGroupContainingSubunit
-                                );
-                        });
-                    }
+                            .orWhereIn(
+                                "id_artist",
+                                collabGroupContainingSubunit
+                            );
+                    });
                 }
             });
         });

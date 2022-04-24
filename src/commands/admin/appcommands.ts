@@ -1,8 +1,8 @@
 import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
-import { EnvType } from "../../enums/env_type";
 import { IPCLogger } from "../../logger";
 import { sendInfoMessage } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import EnvType from "../../enums/env_type";
 import Eris from "eris";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";

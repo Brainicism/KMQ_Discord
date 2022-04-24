@@ -1,13 +1,10 @@
 /* eslint-disable @typescript-eslint/dot-notation */
-import { AnswerType } from "../../enums/option_types/answer_type";
-import { ExpBonusModifier } from "../../enums/exp_bonus_modifier";
 import {
     ExpBonusModifierValues,
     GUESS_STREAK_THRESHOLD,
     KmqImages,
     PARTICIPANT_MODIFIER_MAX_PARTICIPANTS,
 } from "../../constants";
-import { GuessModeType } from "../../enums/option_types/guess_mode_type";
 import { IPCLogger } from "../../logger";
 import {
     getAvailableSongCount,
@@ -21,6 +18,9 @@ import {
     sendInfoMessage,
 } from "../../helpers/discord_utils";
 import { isWeekend } from "../../helpers/utils";
+import AnswerType from "../../enums/option_types/answer_type";
+import ExpBonusModifier from "../../enums/exp_bonus_modifier";
+import GuessModeType from "../../enums/option_types/guess_mode_type";
 import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";

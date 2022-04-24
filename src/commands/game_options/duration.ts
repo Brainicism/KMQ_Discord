@@ -1,4 +1,3 @@
-import { GameOption } from "../../enums/game_option_name";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -6,6 +5,7 @@ import {
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
@@ -112,7 +112,7 @@ export default class DurationCommand implements BaseCommand {
         }
 
         let duration: number;
-        const durationDelta = parseInt(parsedMessage.components[0]);
+        const durationDelta = parseInt(parsedMessage.components[0], 10);
         if (parsedMessage.components[1]) {
             const action = parsedMessage.components[1] as DurationAction;
             const currentDuration = guildPreference.gameOptions.duration;
@@ -153,7 +153,7 @@ export default class DurationCommand implements BaseCommand {
                 }
             }
         } else {
-            duration = parseInt(parsedMessage.components[0]);
+            duration = parseInt(parsedMessage.components[0], 10);
         }
 
         await guildPreference.setDuration(duration);

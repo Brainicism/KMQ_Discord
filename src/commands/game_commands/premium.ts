@@ -33,9 +33,11 @@ export default class PremiumCommand implements BaseCommand {
         usage: ",premium",
     });
 
+    // eslint-disable-next-line no-empty-pattern, arrow-body-style
     call = ({}: CommandArgs): Promise<void> => {
+        return null;
         // Temporarily disable premium command
-        return;
+
         // call = async ({ message }: CommandArgs): Promise<void> => {
         // const premiumMember = await isUserPremium(message.author.id);
         // sendInfoMessage(MessageContext.fromMessage(message), {

@@ -3,14 +3,17 @@ import {
     EMBED_SUCCESS_BONUS_COLOR,
     KmqImages,
 } from "../../constants";
-import { GameType } from "../../enums/game_type";
 import { IPCLogger } from "../../logger";
 import {
     activeBonusUsers,
     isPowerHour,
     isPremiumRequest,
 } from "../../helpers/game_utils";
-import { chooseWeightedRandom, isWeekend } from "../../helpers/utils";
+import {
+    chooseWeightedRandom,
+    getMention,
+    isWeekend,
+} from "../../helpers/utils";
 import {
     generateEmbed,
     generateOptionsMessage,
@@ -21,10 +24,10 @@ import {
     sendInfoMessage,
     voicePermissionsCheck,
 } from "../../helpers/discord_utils";
-import { getMention } from "../../helpers/utils";
 import { getTimeUntilRestart } from "../../helpers/management_utils";
 import CommandPrechecks from "../../command_prechecks";
 import GameSession from "../../structures/game_session";
+import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
 import LocalizationManager from "../../helpers/localization_manager";
@@ -473,10 +476,12 @@ export default class PlayCommand implements BaseCommand {
             if (gameType === GameType.ELIMINATION) {
                 lives =
                     parsedMessage.components.length > 1 &&
-                    Number.isInteger(parseInt(parsedMessage.components[1])) &&
-                    parseInt(parsedMessage.components[1]) > 0 &&
-                    parseInt(parsedMessage.components[1]) <= 10000
-                        ? parseInt(parsedMessage.components[1])
+                    Number.isInteger(
+                        parseInt(parsedMessage.components[1], 10)
+                    ) &&
+                    parseInt(parsedMessage.components[1], 10) > 0 &&
+                    parseInt(parsedMessage.components[1], 10) <= 10000
+                        ? parseInt(parsedMessage.components[1], 10)
                         : ELIMINATION_DEFAULT_LIVES;
             }
 

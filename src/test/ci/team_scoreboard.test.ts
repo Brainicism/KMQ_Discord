@@ -1,4 +1,4 @@
-import { GameOption } from "../../enums/game_option_name";
+import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import Player from "../../structures/player";
 import TeamScoreboard from "../../structures/team_scoreboard";

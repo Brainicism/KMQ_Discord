@@ -82,7 +82,7 @@ export default (
                 }
 
                 // parse as integer for now, might cause problems later?
-                const intArg = parseInt(arg);
+                const intArg = parseInt(arg, 10);
                 if ("minValue" in validation && intArg < validation.minValue) {
                     sendValidationErrorMessage(
                         message,

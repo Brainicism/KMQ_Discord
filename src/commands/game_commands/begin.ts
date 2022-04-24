@@ -1,4 +1,3 @@
-import { GameType } from "../../enums/game_type";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -7,6 +6,7 @@ import {
 } from "../../helpers/discord_utils";
 import { sendBeginGameSessionMessage } from "./play";
 import CommandPrechecks from "../../command_prechecks";
+import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
@@ -62,14 +62,8 @@ export default class BeginCommand implements BaseCommand {
         );
 
         if (!gameSession.sessionInitialized) {
-            let participants: Array<{
-                id: string;
-                username: string;
-                discriminator: string;
-            }>;
-
             const teamScoreboard = gameSession.scoreboard as TeamScoreboard;
-            participants = teamScoreboard.getPlayers().map((player) => ({
+            const participants = teamScoreboard.getPlayers().map((player) => ({
                 id: player.id,
                 username: player.name.split("#")[0],
                 discriminator: player.name.split("#")[1],

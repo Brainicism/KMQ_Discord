@@ -1,7 +1,6 @@
-import { ExpBonusModifier } from "../enums/exp_bonus_modifier";
 import { ExpBonusModifierValues } from "../constants";
-import { bold } from "../helpers/utils";
-import { getMention } from "../helpers/utils";
+import { bold, getMention } from "../helpers/utils";
+import ExpBonusModifier from "../enums/exp_bonus_modifier";
 import State from "../state";
 
 export default class Player {
@@ -174,6 +173,8 @@ export default class Player {
         if (currentRank > previousRank) {
             return `↓ ${displayedRank}`;
         }
+
+        return displayedRank;
     }
 
     /**
