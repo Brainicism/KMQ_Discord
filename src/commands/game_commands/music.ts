@@ -130,7 +130,7 @@ export default class MusicCommand implements BaseCommand {
     resetPremium = async (guildPreference: GuildPreference): Promise<void> => {
         const guildID = guildPreference.guildID;
         const session = Session.getSession(guildID);
-        if (!session || session?.isGameSession()) {
+        if (!session || session.isGameSession()) {
             return;
         }
 
