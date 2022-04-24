@@ -16,7 +16,10 @@ const logger = new IPCLogger("score");
 export default class ScoreCommand implements BaseCommand {
     aliases = ["scoreboard", "sb"];
 
-    preRunChecks = [{ checkFn: CommandPrechecks.notMusicPrecheck }];
+    preRunChecks = [
+        { checkFn: CommandPrechecks.inSessionCommandPrecheck },
+        { checkFn: CommandPrechecks.notMusicPrecheck },
+    ];
 
     help = (guildID: string): HelpDocumentation => ({
         name: "score",
