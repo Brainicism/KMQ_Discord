@@ -895,7 +895,6 @@ export function getFormattedLimit(
  * @param preset - Specifies whether the GameOptions were modified by a preset
  * @param allReset - Specifies whether all GameOptions were reset
  * @param footerText - The footer text
- * @param isMusicSession - Whether the session is a MusicSession
  *  @returns an embed of current game options
  */
 export async function generateOptionsMessage(
@@ -1073,7 +1072,7 @@ export async function generateOptionsMessage(
     }
 
     // Special case: disable these options in a music session
-    if (session.isMusicSession()) {
+    if (session?.isMusicSession()) {
         const disabledOptions = [
             GameOption.GUESS_MODE_TYPE,
             GameOption.SEEK_TYPE,
@@ -1113,7 +1112,7 @@ export async function generateOptionsMessage(
         .join("\n");
 
     let nonPremiumGameWarning = "";
-    if (premiumRequest && session?.isGameSession() && !session.isPremium()) {
+    if (premiumRequest && session.isGameSession() && !session.isPremium()) {
         nonPremiumGameWarning = italicize(
             LocalizationManager.localizer.translate(
                 messageContext.guildID,
