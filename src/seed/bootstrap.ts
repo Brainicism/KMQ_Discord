@@ -2,7 +2,11 @@ import fs from "fs";
 import path from "path";
 import { config } from "dotenv";
 import { execSync } from "child_process";
-import { updateKpopDatabase } from "./seed_db";
+import {
+    generateKmqDataTables,
+    loadStoredProcedures,
+    updateKpopDatabase,
+} from "./seed_db";
 import { IPCLogger } from "../logger";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import type { DatabaseContext } from "../database_context";
@@ -81,35 +85,6 @@ async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
     return (
         (await db.kmq("available_songs").count("* as count").first()).count >=
         SONG_DOWNLOAD_THRESHOLD
-    );
-}
-
-/**
- * Reloads all existing stored procedures
- */
-export function loadStoredProcedures(): void {
-    const storedProcedureDefinitions = fs
-        .readdirSync(path.join(__dirname, "../../sql/procedures"))
-        .map((x) => path.join(__dirname, "../../sql/procedures", x));
-
-    for (const storedProcedureDefinition of storedProcedureDefinitions) {
-        execSync(
-            `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq < ${storedProcedureDefinition}`
-        );
-    }
-}
-
-// eslint-disable-next-line import/prefer-default-export
-/**
- * Re-creates the KMQ data tables
- * @param db - The database context
- */
-export async function generateKmqDataTables(
-    db: DatabaseContext
-): Promise<void> {
-    logger.info("Re-creating KMQ data tables view...");
-    await db.kmq.raw(
-        `CALL CreateKmqDataTables(${process.env.PREMIUM_AUDIO_SONGS_PER_ARTIST});`
     );
 }
 

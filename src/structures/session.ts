@@ -4,7 +4,6 @@ import { IPCLogger } from "../logger";
 import {
     getCurrentVoiceMembers,
     getDebugLogHeader,
-    getMention,
     sendBookmarkedSongs,
     sendErrorMessage,
     sendInfoMessage,
@@ -32,6 +31,7 @@ import type GuessResult from "../interfaces/guess_result";
 import { SeekType } from "../enums/option_types/seek_type";
 import type MusicSession from "./music_session";
 import LocalizationManager from "../helpers/localization_manager";
+import { getMention } from "../helpers/utils";
 
 const BOOKMARK_MESSAGE_SIZE = 10;
 

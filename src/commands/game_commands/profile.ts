@@ -4,7 +4,6 @@ import dbContext from "../../database_context";
 import {
     fetchUser,
     getDebugLogHeader,
-    getUserTag,
     sendErrorMessage,
     sendInfoMessage,
     tryCreateInteractionErrorAcknowledgement,
@@ -22,6 +21,7 @@ import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
 import { CUM_EXP_TABLE } from "../../constants";
 import LocalizationManager from "../../helpers/localization_manager";
+import { getUserTag } from "../../helpers/utils";
 
 const logger = new IPCLogger("profile");
 

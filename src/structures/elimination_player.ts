@@ -1,7 +1,7 @@
 import Player from "./player";
-import { getUserTag } from "../helpers/discord_utils";
 import State from "../state";
 import { ELIMINATION_DEFAULT_LIVES } from "../constants";
+import { getUserTag } from "../helpers/utils";
 
 export default class EliminationPlayer extends Player {
     // this.score => the player's lives

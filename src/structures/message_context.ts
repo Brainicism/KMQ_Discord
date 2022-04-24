@@ -1,5 +1,5 @@
 import type Eris from "eris";
-import { getUserTag } from "../helpers/discord_utils";
+import { getUserTag } from "../helpers/utils";
 import State from "../state";
 import KmqMember from "./kmq_member";
 

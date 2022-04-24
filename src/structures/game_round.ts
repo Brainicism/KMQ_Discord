@@ -6,7 +6,6 @@ import KmqMember from "./kmq_member";
 import { ExpBonusModifier } from "../enums/exp_bonus_modifier";
 import Round from "./round";
 import type MessageContext from "./message_context";
-import { getMention } from "../helpers/discord_utils";
 import { friendlyFormattedNumber } from "../helpers/utils";
 import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "../interfaces/queried_song";
@@ -20,6 +19,7 @@ import {
     ExpBonusModifierValues,
     ROUND_MAX_RUNNERS_UP,
 } from "../constants";
+import { getMention } from "../helpers/utils";
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
 const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\(\)\+\u200B]/g;

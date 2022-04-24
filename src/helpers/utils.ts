@@ -402,3 +402,22 @@ export function containsHangul(s: string): boolean {
         s
     );
 }
+
+/**
+ * @param user - The user (must be some object with username and discriminator fields)
+ * @returns the user's Discord tag
+ */
+export function getUserTag(user: {
+    username: string;
+    discriminator: string;
+}): string {
+    return `${user.username}#${user.discriminator}`;
+}
+
+/**
+ * @param userID - The user ID
+ * @returns a clickable mention to user
+ */
+export function getMention(userID: string): string {
+    return `<@${userID}>`;
+}

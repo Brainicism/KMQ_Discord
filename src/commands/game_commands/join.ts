@@ -4,10 +4,8 @@ import type TeamScoreboard from "../../structures/team_scoreboard";
 import Player from "../../structures/player";
 import type { GuildTextableMessage } from "../../types";
 import {
-    getUserTag,
     sendErrorMessage,
     sendInfoMessage,
-    getMention,
     getDebugLogHeader,
 } from "../../helpers/discord_utils";
 import { isFirstGameOfDay, isUserPremium } from "../../helpers/game_utils";
@@ -22,6 +20,7 @@ import type ParsedMessage from "../../interfaces/parsed_message";
 import type CommandArgs from "../../interfaces/command_args";
 import { GameType } from "../../enums/game_type";
 import LocalizationManager from "../../helpers/localization_manager";
+import { getMention, getUserTag } from "../../helpers/utils";
 
 const logger = new IPCLogger("join");
 

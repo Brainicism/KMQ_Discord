@@ -31,6 +31,7 @@ import { AnswerType } from "../../enums/option_types/answer_type";
 import { GuessModeType } from "../../enums/option_types/guess_mode_type";
 import { ExpBonusModifier } from "../../enums/exp_bonus_modifier";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("exp");
 
@@ -127,10 +128,11 @@ export async function calculateOptionsExpMultiplierInternal(
         });
     }
 
+    const session = Session.getSession(guildPreference.guildID);
     const totalSongs = (
         await getAvailableSongCount(
             guildPreference,
-            await isPremiumRequest(guildPreference.guildID, playerID)
+            await isPremiumRequest(session, playerID)
         )
     ).count;
 

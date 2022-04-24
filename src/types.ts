@@ -3,6 +3,7 @@ import type Eris from "eris";
 import { GameOption } from "./enums/game_option_name";
 
 export type GuildTextableMessage = Eris.Message<GuildTextableChannel>;
+export type EmbedGenerator = () => Promise<Eris.EmbedOptions>;
 
 export const GameOptionCommand: { [option: string]: string } = {
     [GameOption.LIMIT]: "limit",

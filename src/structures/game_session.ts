@@ -13,7 +13,6 @@ import {
     getCurrentVoiceMembers,
     tryInteractionAcknowledge,
     tryCreateInteractionErrorAcknowledgement,
-    getMention,
     sendRoundMessage,
 } from "../helpers/discord_utils";
 import {
@@ -57,6 +56,7 @@ import { AnswerType } from "../enums/option_types/answer_type";
 import { MultiGuessType } from "../enums/option_types/multiguess_type";
 import { GameType } from "../enums/game_type";
 import LocalizationManager from "../helpers/localization_manager";
+import { getMention } from "../helpers/utils";
 
 const MULTIGUESS_DELAY = 1500;
 

@@ -8,7 +8,6 @@ import {
     voicePermissionsCheck,
     getUserVoiceChannel,
     getCurrentVoiceMembers,
-    getMention,
     generateOptionsMessage,
     generateEmbed,
 } from "../../helpers/discord_utils";
@@ -38,6 +37,7 @@ import type GameInfoMessage from "../../interfaces/game_info_message";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import LocalizationManager from "../../helpers/localization_manager";
+import { getMention } from "../../helpers/utils";
 
 const logger = new IPCLogger("play");
 
@@ -298,7 +298,7 @@ export default class PlayCommand implements BaseCommand {
 
         // check for invalid premium game options
         const premiumRequest = await isPremiumRequest(
-            guildID,
+            gameSessions[guildID],
             message.author.id
         );
 

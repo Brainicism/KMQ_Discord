@@ -15,7 +15,7 @@ import {
     userBonusIsActive,
 } from "./game_utils";
 import { getFact } from "../fact_generator";
-import type { GuildTextableMessage } from "../types";
+import type { EmbedGenerator, GuildTextableMessage } from "../types";
 import {
     GameOptionCommand,
     PriorityGameOption,
@@ -78,27 +78,6 @@ const REQUIRED_VOICE_PERMISSIONS = [
 
 const MAX_SCOREBOARD_PLAYERS = 30;
 const MAX_INTERACTION_RESPONSE_TIME = 3 * 1000;
-
-export type EmbedGenerator = () => Promise<Eris.EmbedOptions>;
-
-/**
- * @param user - The user (must be some object with username and discriminator fields)
- * @returns the user's Discord tag
- */
-export function getUserTag(user: {
-    username: string;
-    discriminator: string;
-}): string {
-    return `${user.username}#${user.discriminator}`;
-}
-
-/**
- * @param userID - The user ID
- * @returns a clickable mention to user
- */
-export function getMention(userID: string): string {
-    return `<@${userID}>`;
-}
 
 /**
  * @param context - The object that initiated the workflow
@@ -942,8 +921,9 @@ export async function generateOptionsMessage(
     }
 
     const guildID = messageContext.guildID;
+    const session = Session.getSession(guildID);
     const premiumRequest = await isPremiumRequest(
-        guildID,
+        session,
         messageContext.author.id
     );
 
@@ -1034,7 +1014,6 @@ export async function generateOptionsMessage(
             LocalizationManager.localizer.translate(guildID, "misc.conflict")
         )})`;
 
-    const session = Session.getSession(guildID);
     const isEliminationMode =
         session?.isGameSession() && session.gameType === GameType.ELIMINATION;
 

@@ -8,7 +8,7 @@ import { cleanArtistName, cleanSongName } from "../structures/game_round";
 import SongSelector from "../structures/song_selector";
 import { LocaleType } from "../enums/locale_type";
 import { containsHangul, md5Hash } from "./utils";
-import Session from "../structures/session";
+import type Session from "../structures/session";
 import type MatchedArtist from "../interfaces/matched_artist";
 import type QueriedSong from "../interfaces/queried_song";
 import type Patron from "../interfaces/patron";
@@ -478,18 +478,15 @@ export function removePremium(userIDs: string[]): void {
 }
 
 /**
- * @param guildID - The guild ID
+ * @param session - The session
  * @param playerID - The player ID
  * @returns whether the current game is a premium game/music session, or the player is premium
  */
 export async function isPremiumRequest(
-    guildID: string,
+    session: Session,
     playerID: string
 ): Promise<boolean> {
-    return (
-        Session.getSession(guildID)?.isPremium() ||
-        (await isUserPremium(playerID))
-    );
+    return session?.isPremium() || (await isUserPremium(playerID));
 }
 
 /**

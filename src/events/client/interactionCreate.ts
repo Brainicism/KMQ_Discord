@@ -2,7 +2,6 @@ import Eris from "eris";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
 import {
-    getUserTag,
     tryInteractionAcknowledge,
     tryCreateInteractionErrorAcknowledgement,
 } from "../../helpers/discord_utils";
@@ -10,6 +9,7 @@ import { handleProfileInteraction } from "../../commands/game_commands/profile";
 import Session from "../../structures/session";
 import LocalizationManager from "../../helpers/localization_manager";
 import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
+import { getUserTag } from "../../helpers/utils";
 
 /**
  * Handles the 'interactionCreate' event

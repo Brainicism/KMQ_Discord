@@ -1,6 +1,6 @@
 import { ExpBonusModifierValues } from "../constants";
 import { ExpBonusModifier } from "../enums/exp_bonus_modifier";
-import { getMention } from "../helpers/discord_utils";
+import { getMention } from "../helpers/utils";
 import { bold } from "../helpers/utils";
 import State from "../state";
 
