@@ -13,6 +13,7 @@ import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
 import { DEFAULT_LIMIT } from "../../constants";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("limit");
 
@@ -81,6 +82,7 @@ export default class LimitCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.LIMIT);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.LIMIT, reset: true }]
@@ -127,6 +129,7 @@ export default class LimitCommand implements BaseCommand {
 
         await guildPreference.setLimit(limitStart, limitEnd);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.LIMIT, reset: false }]

@@ -12,6 +12,7 @@ import CommandPrechecks from "../../command_prechecks";
 import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("duration");
 
@@ -98,6 +99,7 @@ export default class DurationCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.DURATION);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.DURATION, reset: true }]
@@ -153,6 +155,7 @@ export default class DurationCommand implements BaseCommand {
 
         await guildPreference.setDuration(duration);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.DURATION, reset: false }]

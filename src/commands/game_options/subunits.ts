@@ -13,6 +13,7 @@ import type HelpDocumentation from "../../interfaces/help";
 import { SubunitsPreference } from "../../enums/option_types/subunit_preference";
 import { DEFAULT_SUBUNIT_PREFERENCE } from "../../constants";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("subunits");
 
@@ -80,6 +81,7 @@ export default class SubunitsCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.SUBUNIT_PREFERENCE);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.SUBUNIT_PREFERENCE, reset: true }]
@@ -96,6 +98,7 @@ export default class SubunitsCommand implements BaseCommand {
 
         await guildPreference.setSubunitPreference(subunitPreference);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.SUBUNIT_PREFERENCE, reset: false }]

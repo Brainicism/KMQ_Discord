@@ -14,6 +14,7 @@ import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import { SpecialType } from "../../enums/option_types/special_type";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("special");
 
@@ -109,6 +110,7 @@ export default class SpecialCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.SPECIAL_TYPE);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.SPECIAL_TYPE, reset: true }]
@@ -143,6 +145,7 @@ export default class SpecialCommand implements BaseCommand {
         const specialType = parsedMessage.components[0] as SpecialType;
         await guildPreference.setSpecialType(specialType);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.SPECIAL_TYPE, reset: false }]

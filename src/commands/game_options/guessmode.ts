@@ -13,6 +13,7 @@ import type HelpDocumentation from "../../interfaces/help";
 import { GuessModeType } from "../../enums/option_types/guess_mode_type";
 import { DEFAULT_GUESS_MODE } from "../../constants";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("guessmode");
 
@@ -85,6 +86,7 @@ export default class GuessModeCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.GUESS_MODE_TYPE);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.GUESS_MODE_TYPE, reset: true }]
@@ -101,6 +103,7 @@ export default class GuessModeCommand implements BaseCommand {
 
         await guildPreference.setGuessModeType(modeType);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.GUESS_MODE_TYPE, reset: false }]

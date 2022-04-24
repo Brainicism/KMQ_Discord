@@ -13,6 +13,7 @@ import type HelpDocumentation from "../../interfaces/help";
 import { ReleaseType } from "../../enums/option_types/release_type";
 import { DEFAULT_RELEASE_TYPE } from "../../constants";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("release");
 
@@ -74,6 +75,7 @@ export default class ReleaseCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.RELEASE_TYPE);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.RELEASE_TYPE, reset: true }]
@@ -87,6 +89,7 @@ export default class ReleaseCommand implements BaseCommand {
 
         await guildPreference.setReleaseType(releaseType);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.RELEASE_TYPE, reset: false }]

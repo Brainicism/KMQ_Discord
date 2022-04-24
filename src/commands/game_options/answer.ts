@@ -12,6 +12,7 @@ import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
 import { AnswerType } from "../../enums/option_types/answer_type";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("answer");
 
@@ -95,6 +96,7 @@ export default class AnswerCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.ANSWER_TYPE);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.ANSWER_TYPE, reset: true }]
@@ -106,6 +108,7 @@ export default class AnswerCommand implements BaseCommand {
         const answerType = parsedMessage.components[0] as AnswerType;
         await guildPreference.setAnswerType(answerType);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.ANSWER_TYPE, reset: false }]

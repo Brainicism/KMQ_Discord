@@ -17,6 +17,7 @@ import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import { GameOption } from "../../enums/game_option_name";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("groups");
 
@@ -85,6 +86,7 @@ export default class GroupsCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.GROUPS);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.GROUPS, reset: true }]
@@ -196,6 +198,7 @@ export default class GroupsCommand implements BaseCommand {
 
         await guildPreference.setGroups(matchedGroups);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.GROUPS, reset: false }]

@@ -13,6 +13,7 @@ import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import { Gender } from "../../enums/option_types/gender";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("gender");
 
@@ -101,6 +102,7 @@ export default class GenderCommand implements BaseCommand {
         if (selectedGenders.length === 0) {
             await guildPreference.reset(GameOption.GENDER);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.GENDER, reset: true }]
@@ -163,6 +165,7 @@ export default class GenderCommand implements BaseCommand {
         }
 
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.GENDER, reset: false }]

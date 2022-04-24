@@ -16,6 +16,7 @@ import {
     DEFAULT_ENDING_SEARCH_YEAR,
 } from "../../constants";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("cutoff");
 
@@ -97,6 +98,7 @@ export default class CutoffCommand implements BaseCommand {
             );
             await guildPreference.setEndCutoffYear(DEFAULT_ENDING_SEARCH_YEAR);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.CUTOFF, reset: true }]
@@ -136,6 +138,7 @@ export default class CutoffCommand implements BaseCommand {
         }
 
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.CUTOFF, reset: false }]

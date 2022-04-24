@@ -13,6 +13,7 @@ import type HelpDocumentation from "../../interfaces/help";
 import { MultiGuessType } from "../../enums/option_types/multiguess_type";
 import { DEFAULT_MULTIGUESS_TYPE } from "../../constants";
 import LocalizationManager from "../../helpers/localization_manager";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("multiguess");
 export default class MultiGuessCommand implements BaseCommand {
@@ -73,6 +74,7 @@ export default class MultiGuessCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.MULTIGUESS);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.MULTIGUESS, reset: true }]
@@ -87,6 +89,7 @@ export default class MultiGuessCommand implements BaseCommand {
         const multiGuessType = parsedMessage.components[0] as MultiGuessType;
         await guildPreference.setMultiGuessType(multiGuessType);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.MULTIGUESS, reset: false }]

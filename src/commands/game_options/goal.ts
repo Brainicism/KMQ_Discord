@@ -71,6 +71,7 @@ export default class GoalCommand implements BaseCommand {
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.GOAL);
             await sendOptionsMessage(
+                Session.getSession(message.guildID),
                 MessageContext.fromMessage(message),
                 guildPreference,
                 [{ option: GameOption.GOAL, reset: true }]
@@ -134,6 +135,7 @@ export default class GoalCommand implements BaseCommand {
 
         await guildPreference.setGoal(userGoal);
         await sendOptionsMessage(
+            Session.getSession(message.guildID),
             MessageContext.fromMessage(message),
             guildPreference,
             [{ option: GameOption.GOAL, reset: false }]

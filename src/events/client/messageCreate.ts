@@ -61,7 +61,12 @@ export default async function messageCreateHandler(
     ) {
         // Any message that mentions the bot sends the current options
         const guildPreference = await getGuildPreference(message.guildID);
-        sendOptionsMessage(messageContext, guildPreference, null);
+        sendOptionsMessage(
+            Session.getSession(message.guildID),
+            messageContext,
+            guildPreference,
+            null
+        );
         return;
     }
 
