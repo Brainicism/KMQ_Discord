@@ -7,7 +7,6 @@ import {
     sendInfoMessage,
     voicePermissionsCheck,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
 import MusicSession from "../../structures/music_session";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
@@ -20,7 +19,7 @@ import type Eris from "eris";
 import { EMBED_SUCCESS_BONUS_COLOR, KmqImages } from "../../constants";
 import Session from "../../structures/session";
 import CommandPrechecks from "../../command_prechecks";
-import type GuildPreference from "src/structures/guild_preference";
+import GuildPreference from "../../structures/guild_preference";
 import type GameInfoMessage from "../../interfaces/game_info_message";
 import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
@@ -154,7 +153,10 @@ export default class MusicCommand implements BaseCommand {
             return;
         }
 
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         const textChannel = channel;
         const gameOwner = KmqMember.fromUser(message.author);
         const voiceChannel = getUserVoiceChannel(messageContext);

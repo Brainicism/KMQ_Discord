@@ -5,12 +5,12 @@ import {
     sendMessage,
 } from "../../helpers/discord_utils";
 import type BaseCommand from "../interfaces/base_command";
-import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import LocalizationManager from "../../helpers/localization_manager";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("list");
 
@@ -84,7 +84,10 @@ export default class ListCommand implements BaseCommand {
         parsedMessage,
         channel,
     }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         const optionListed = parsedMessage.components[0] as ListType;
         let optionValue: string;
         switch (optionListed) {

@@ -4,7 +4,6 @@ import {
     getDebugLogHeader,
     sendErrorMessage,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
@@ -14,6 +13,7 @@ import type HelpDocumentation from "../../interfaces/help";
 import { Gender } from "../../enums/option_types/gender";
 import LocalizationManager from "../../helpers/localization_manager";
 import Session from "../../structures/session";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("gender");
 
@@ -96,7 +96,10 @@ export default class GenderCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         const selectedGenders = parsedMessage.components as Array<Gender>;
 
         if (selectedGenders.length === 0) {

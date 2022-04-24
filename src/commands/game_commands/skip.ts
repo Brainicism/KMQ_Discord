@@ -5,7 +5,6 @@ import {
     sendInfoMessage,
     getMajorityCount,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import type { GuildTextableMessage } from "../../types";
 import { EMBED_SUCCESS_COLOR, KmqImages } from "../../constants";
@@ -14,7 +13,7 @@ import CommandPrechecks from "../../command_prechecks";
 import type EliminationScoreboard from "../../structures/elimination_scoreboard";
 import type Round from "../../structures/round";
 import Session from "../../structures/session";
-import type GuildPreference from "../../structures/guild_preference";
+import GuildPreference from "../../structures/guild_preference";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import { GameType } from "../../enums/game_type";
@@ -176,7 +175,7 @@ export default class SkipCommand implements BaseCommand {
             skipSong(
                 MessageContext.fromMessage(message),
                 session,
-                await getGuildPreference(message.guildID)
+                await GuildPreference.getGuildPreference(message.guildID)
             );
         } else {
             logger.info(`${getDebugLogHeader(message)} | Skip vote received.`);

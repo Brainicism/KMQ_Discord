@@ -8,12 +8,11 @@ import {
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
-import { getGuildPreference } from "../../helpers/game_utils";
 import { codeLine } from "../../helpers/utils";
 import type { GuildTextableMessage } from "../../types";
 import type GameSession from "../../structures/game_session";
 import type EliminationScoreboard from "../../structures/elimination_scoreboard";
-import type GuildPreference from "../../structures/guild_preference";
+import GuildPreference from "../../structures/guild_preference";
 import CommandPrechecks from "../../command_prechecks";
 import type GameRound from "../../structures/game_round";
 import Session from "../../structures/session";
@@ -221,7 +220,10 @@ export default class HintCommand implements BaseCommand {
     call = async ({ message }: CommandArgs): Promise<void> => {
         const gameSession = Session.getSession(message.guildID) as GameSession;
         const gameRound = gameSession?.round;
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         if (!validHintCheck(gameSession, guildPreference, gameRound, message))
             return;
 

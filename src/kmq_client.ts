@@ -59,7 +59,9 @@ export default class KmqClient extends Eris.Client {
                     // eslint-disable-next-line new-cap
                     commandMap[commandName] = new command.default();
                 } catch (e) {
-                    throw new Error(`Failed to load file: ${commandFilePath}`);
+                    throw new Error(
+                        `Failed to load file: ${commandFilePath}. ${e}`
+                    );
                 }
             }
 

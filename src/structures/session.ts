@@ -13,14 +13,13 @@ import {
 } from "../helpers/discord_utils";
 import dbContext from "../database_context";
 import type GameSession from "./game_session";
-import type GuildPreference from "./guild_preference";
+import GuildPreference from "./guild_preference";
 import type KmqMember from "./kmq_member";
 import MessageContext from "./message_context";
 import type Round from "./round";
 import SongSelector from "./song_selector";
 import {
     ensureVoiceConnection,
-    getGuildPreference,
     getLocalizedSongName,
 } from "../helpers/game_utils";
 import State from "../state";
@@ -302,7 +301,7 @@ export default abstract class Session {
     async endSession(): Promise<void> {
         Session.deleteSession(this.guildID);
         await this.endRound(
-            await getGuildPreference(this.guildID),
+            await GuildPreference.getGuildPreference(this.guildID),
             new MessageContext(this.textChannelID, null, this.guildID),
             { correct: false }
         );
@@ -409,7 +408,7 @@ export default abstract class Session {
             );
 
             this.startRound(
-                await getGuildPreference(this.guildID),
+                await GuildPreference.getGuildPreference(this.guildID),
                 messageContext
             );
         }, time * 1000);
@@ -557,7 +556,10 @@ export default abstract class Session {
      * The game has changed its premium state, so update filtered songs and reset premium options if non-premium
      */
     async updatePremiumStatus(): Promise<void> {
-        const guildPreference = await getGuildPreference(this.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            this.guildID
+        );
+
         await this.reloadSongs(guildPreference);
 
         if (!this.isPremium()) {
@@ -682,7 +684,7 @@ export default abstract class Session {
             );
 
             this.startRound(
-                await getGuildPreference(this.guildID),
+                await GuildPreference.getGuildPreference(this.guildID),
                 messageContext
             );
         });

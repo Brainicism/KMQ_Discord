@@ -3,13 +3,13 @@ import {
     getDebugLogHeader,
 } from "../../helpers/discord_utils";
 import type BaseCommand from "../interfaces/base_command";
-import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import LocalizationManager from "../../helpers/localization_manager";
 import Session from "../../structures/session";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("options");
 
@@ -28,7 +28,10 @@ export default class OptionsCommand implements BaseCommand {
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         await sendOptionsMessage(
             Session.getSession(message.guildID),
             MessageContext.fromMessage(message),

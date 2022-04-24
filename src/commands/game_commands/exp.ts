@@ -9,7 +9,6 @@ import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { isWeekend } from "../../helpers/utils";
 import {
-    getGuildPreference,
     getAvailableSongCount,
     userBonusIsActive,
     isFirstGameOfDay,
@@ -23,7 +22,7 @@ import {
     PARTICIPANT_MODIFIER_MAX_PARTICIPANTS,
 } from "../../constants";
 import State from "../../state";
-import type GuildPreference from "../../structures/guild_preference";
+import GuildPreference from "../../structures/guild_preference";
 import type GameRound from "../../structures/game_round";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -293,7 +292,10 @@ export default class ExpCommand implements BaseCommand {
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         const voteBonusActive = await userBonusIsActive(message.author.id);
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         const fields: Array<Eris.EmbedField> = [];
 
         const activeModifiers = await calculateOptionsExpMultiplierInternal(

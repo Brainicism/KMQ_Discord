@@ -14,7 +14,6 @@ import {
 import { getTimeUntilRestart } from "../../helpers/management_utils";
 import {
     activeBonusUsers,
-    getGuildPreference,
     isPowerHour,
     isPremiumRequest,
 } from "../../helpers/game_utils";
@@ -32,7 +31,7 @@ import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
 import CommandPrechecks from "../../command_prechecks";
 import State from "../../state";
-import type GuildPreference from "../../structures/guild_preference";
+import GuildPreference from "../../structures/guild_preference";
 import type GameInfoMessage from "../../interfaces/game_info_message";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -248,7 +247,10 @@ export default class PlayCommand implements BaseCommand {
     }: CommandArgs): Promise<void> => {
         const messageContext = MessageContext.fromMessage(message);
         const guildID = message.guildID;
-        const guildPreference = await getGuildPreference(guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            guildID
+        );
+
         const voiceChannel = getUserVoiceChannel(messageContext);
         const gameSessions = State.gameSessions;
 

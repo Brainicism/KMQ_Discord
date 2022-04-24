@@ -1,5 +1,4 @@
 import type BaseCommand from "../interfaces/base_command";
-import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -14,6 +13,7 @@ import { MultiGuessType } from "../../enums/option_types/multiguess_type";
 import { DEFAULT_MULTIGUESS_TYPE } from "../../constants";
 import LocalizationManager from "../../helpers/localization_manager";
 import Session from "../../structures/session";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("multiguess");
 export default class MultiGuessCommand implements BaseCommand {
@@ -70,7 +70,10 @@ export default class MultiGuessCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.MULTIGUESS);
             await sendOptionsMessage(

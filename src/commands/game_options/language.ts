@@ -1,5 +1,4 @@
 import type BaseCommand from "../interfaces/base_command";
-import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -13,6 +12,7 @@ import type HelpDocumentation from "../../interfaces/help";
 import { LanguageType } from "../../enums/option_types/language_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import Session from "../../structures/session";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("language");
 
@@ -66,7 +66,10 @@ export default class LanguageCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.LANGUAGE_TYPE);
             await sendOptionsMessage(

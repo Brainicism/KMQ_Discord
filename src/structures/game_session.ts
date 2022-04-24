@@ -16,7 +16,6 @@ import {
     sendRoundMessage,
 } from "../helpers/discord_utils";
 import {
-    getGuildPreference,
     getLocalizedArtistName,
     getLocalizedSongName,
     getMultipleChoiceOptions,
@@ -35,7 +34,7 @@ import State from "../state";
 
 import { IPCLogger } from "../logger";
 import GameRound from "./game_round";
-import type GuildPreference from "./guild_preference";
+import GuildPreference from "./guild_preference";
 import Scoreboard from "./scoreboard";
 import EliminationScoreboard from "./elimination_scoreboard";
 import TeamScoreboard from "./team_scoreboard";
@@ -470,7 +469,10 @@ export default class GameSession extends Session {
         });
 
         // commit session's song plays and correct guesses
-        const guildPreference = await getGuildPreference(this.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            this.guildID
+        );
+
         if (!guildPreference.isMultipleChoiceMode()) {
             await this.storeSongStats();
         }
@@ -497,7 +499,9 @@ export default class GameSession extends Session {
         if (!this.round) return;
         if (!this.guessEligible(messageContext)) return;
 
-        const guildPreference = await getGuildPreference(this.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            this.guildID
+        );
 
         const pointsEarned = this.checkGuess(
             messageContext.author.id,
@@ -560,7 +564,7 @@ export default class GameSession extends Session {
                 );
 
                 this.startRound(
-                    await getGuildPreference(this.guildID),
+                    await GuildPreference.getGuildPreference(this.guildID),
                     messageContext
                 );
             }
@@ -651,7 +655,7 @@ export default class GameSession extends Session {
 
         tryInteractionAcknowledge(interaction);
 
-        const guildPreference = await getGuildPreference(
+        const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID
         );
 

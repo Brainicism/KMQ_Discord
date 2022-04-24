@@ -4,9 +4,9 @@ import {
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { getGuildPreference, isUserPremium } from "../../helpers/game_utils";
+import { isUserPremium } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
-import type GuildPreference from "../../structures/guild_preference";
+import GuildPreference from "../../structures/guild_preference";
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
@@ -106,7 +106,10 @@ export default class SpecialCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.SPECIAL_TYPE);
             await sendOptionsMessage(

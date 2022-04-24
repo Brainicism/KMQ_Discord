@@ -1,6 +1,5 @@
 import type BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
-import { getGuildPreference } from "../../helpers/game_utils";
 import {
     sendOptionsMessage,
     getDebugLogHeader,
@@ -14,6 +13,7 @@ import { SubunitsPreference } from "../../enums/option_types/subunit_preference"
 import { DEFAULT_SUBUNIT_PREFERENCE } from "../../constants";
 import LocalizationManager from "../../helpers/localization_manager";
 import Session from "../../structures/session";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("subunits");
 
@@ -76,7 +76,9 @@ export default class SubunitsCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
 
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.SUBUNIT_PREFERENCE);

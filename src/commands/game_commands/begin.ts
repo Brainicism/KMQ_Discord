@@ -1,5 +1,4 @@
 import type BaseCommand from "../interfaces/base_command";
-import { getGuildPreference } from "../../helpers/game_utils";
 import { sendBeginGameSessionMessage } from "./play";
 import { GameType } from "../../enums/game_type";
 import type TeamScoreboard from "../../structures/team_scoreboard";
@@ -15,6 +14,7 @@ import LocalizationManager from "../../helpers/localization_manager";
 import CommandPrechecks from "../../command_prechecks";
 import Session from "../../structures/session";
 import type CommandArgs from "../../interfaces/command_args";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("begin");
 
@@ -57,7 +57,10 @@ export default class BeginCommand implements BaseCommand {
         const messageContext = MessageContext.fromMessage(message);
 
         if (!BeginCommand.canStart(gameSession, messageContext)) return;
-        const guildPreference = await getGuildPreference(guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            guildID
+        );
+
         if (!gameSession.sessionInitialized) {
             let participants: Array<{
                 id: string;

@@ -16,7 +16,6 @@ import {
 import { IPCLogger } from "../../logger";
 import { sendValidationErrorMessage } from "../../helpers/validate";
 import {
-    getGuildPreference,
     getLocalizedArtistName,
     getLocalizedSongName,
     isPremiumRequest,
@@ -28,6 +27,7 @@ import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
 import LocalizationManager from "../../helpers/localization_manager";
 import Session from "../../structures/session";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("lookup");
 
@@ -200,7 +200,7 @@ export default class LookupCommand implements BaseCommand {
             includedInOptions = [
                 ...(
                     await SongSelector.getFilteredSongList(
-                        await getGuildPreference(guildID),
+                        await GuildPreference.getGuildPreference(guildID),
                         await isPremiumRequest(session, message.author.id)
                     )
                 ).songs,

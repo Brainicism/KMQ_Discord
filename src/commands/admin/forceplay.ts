@@ -5,11 +5,11 @@ import {
 } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import { getGuildPreference } from "../../helpers/game_utils";
 import { GameOption } from "../../enums/game_option_name";
 import CommandPrechecks from "../../command_prechecks";
 import type CommandArgs from "../../interfaces/command_args";
 import Session from "../../structures/session";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("forceplay");
 
@@ -17,7 +17,9 @@ export default class ForcePlayCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.debugChannelPrecheck }];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
 
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.FORCE_PLAY_SONG);

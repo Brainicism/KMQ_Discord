@@ -3,7 +3,6 @@ import {
     sendOptionsMessage,
     getDebugLogHeader,
 } from "../../helpers/discord_utils";
-import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
@@ -14,6 +13,7 @@ import { SeekType } from "../../enums/option_types/seek_type";
 import { DEFAULT_SEEK } from "../../constants";
 import LocalizationManager from "../../helpers/localization_manager";
 import Session from "../../structures/session";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("seek");
 
@@ -79,7 +79,10 @@ export default class SeekCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         if (parsedMessage.components.length === 0) {
             await guildPreference.reset(GameOption.SEEK_TYPE);
             await sendOptionsMessage(

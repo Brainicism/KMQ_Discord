@@ -4,10 +4,7 @@ import {
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import type BaseCommand from "../interfaces/base_command";
-import {
-    getGuildPreference,
-    getMatchingGroupNames,
-} from "../../helpers/game_utils";
+import { getMatchingGroupNames } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
@@ -18,6 +15,7 @@ import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
 import LocalizationManager from "../../helpers/localization_manager";
 import Session from "../../structures/session";
+import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("add");
 
@@ -119,7 +117,10 @@ export default class AddCommand implements BaseCommand {
     });
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
-        const guildPreference = await getGuildPreference(message.guildID);
+        const guildPreference = await GuildPreference.getGuildPreference(
+            message.guildID
+        );
+
         const optionListed = parsedMessage.components[0] as AddType;
         let groupNamesString: string;
         switch (optionListed) {
