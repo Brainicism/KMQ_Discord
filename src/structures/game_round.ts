@@ -435,6 +435,7 @@ export default class GameRound extends Round {
         return `${correctDescription}\n${uniqueSongMessage}`;
     }
 
+    // eslint-disable-next-line class-methods-use-this
     getEndRoundColor(correctGuess: boolean, userBonusActive: boolean): number {
         if (correctGuess) {
             if (userBonusActive) {

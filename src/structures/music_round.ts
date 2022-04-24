@@ -26,6 +26,7 @@ export default class MusicRound extends Round {
         );
     }
 
+    // eslint-disable-next-line class-methods-use-this
     getEndRoundColor(_correctGuess: boolean, userBonusActive: boolean): number {
         if (userBonusActive) {
             return EMBED_SUCCESS_BONUS_COLOR;

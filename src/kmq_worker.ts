@@ -27,6 +27,7 @@ const logger = new IPCLogger("kmq");
 config({ path: path.resolve(__dirname, "../.env") });
 
 export default class BotWorker extends BaseClusterWorker {
+    // eslint-disable-next-line class-methods-use-this
     handleCommand = async (commandName: string): Promise<any> => {
         logger.debug(`Received cluster command: ${commandName}`);
         if (commandName.startsWith("eval")) {
@@ -68,6 +69,7 @@ export default class BotWorker extends BaseClusterWorker {
         }
     };
 
+    // eslint-disable-next-line class-methods-use-this
     shutdown = async (done): Promise<void> => {
         logger.debug("SHUTDOWN received, cleaning up...");
 

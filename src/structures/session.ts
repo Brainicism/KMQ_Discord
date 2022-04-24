@@ -142,10 +142,12 @@ export default abstract class Session {
         }
     }
 
+    // eslint-disable-next-line class-methods-use-this
     isMusicSession(): this is MusicSession {
         return false;
     }
 
+    // eslint-disable-next-line class-methods-use-this
     isGameSession(): this is GameSession {
         return false;
     }

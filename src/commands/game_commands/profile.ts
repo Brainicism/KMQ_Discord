@@ -12,7 +12,8 @@ import {
     friendlyFormattedDate,
     friendlyFormattedNumber,
     getUserTag,
- romanize } from "../../helpers/utils";
+    romanize,
+} from "../../helpers/utils";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";

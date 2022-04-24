@@ -156,6 +156,6 @@
             }
         ],
         "no-bitwise": ["off"],
-        "class-methods-use-this": ["off"]
+        "class-methods-use-this": ["warn", { "exceptMethods": ["call", "help", "resetPremium", "isUsingPremiumOption"] }]
     }
 }

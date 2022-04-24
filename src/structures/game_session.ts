@@ -143,6 +143,7 @@ export default class GameSession extends Session {
         this.syncAllVoiceMembers();
     }
 
+    // eslint-disable-next-line class-methods-use-this
     sessionName(): string {
         return "Game Session";
     }
@@ -569,6 +570,7 @@ export default class GameSession extends Session {
         return this.correctGuesses;
     }
 
+    // eslint-disable-next-line class-methods-use-this
     isGameSession(): this is GameSession {
         return true;
     }

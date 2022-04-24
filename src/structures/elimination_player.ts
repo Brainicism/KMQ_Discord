@@ -4,8 +4,6 @@ import Player from "./player";
 import State from "../state";
 
 export default class EliminationPlayer extends Player {
-    // this.score => the player's lives
-
     static fromUserID(
         userID: string,
         score = ELIMINATION_DEFAULT_LIVES,
@@ -49,6 +47,7 @@ export default class EliminationPlayer extends Player {
     /**
      * @returns whether to include this player in the scoreboard
      */
+    // eslint-disable-next-line class-methods-use-this
     shouldIncludeInScoreboard(): boolean {
         return true;
     }
