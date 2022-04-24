@@ -20,7 +20,7 @@ import {
 } from "../../helpers/utils";
 import State from "../../state";
 import type { GuildTextableMessage } from "../../types";
-import { KmqImages } from "../../constants";
+import { KmqImages, LEADERBOARD_ENTRIES_PER_PAGE } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import { sendValidationErrorMessage } from "../../helpers/validate";
 import type CommandArgs from "../../interfaces/command_args";
@@ -32,8 +32,6 @@ import { EnvType } from "../../enums/env_type";
 import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("leaderboard");
-
-export const ENTRIES_PER_PAGE = 10;
 
 enum LeaderboardAction {
     ENROLL = "enroll",
@@ -391,7 +389,7 @@ export default class LeaderboardCommand implements BaseCommand {
                     .clone()
                     .countDistinct("player_id AS count")
                     .first()
-            )["count"] as number) / ENTRIES_PER_PAGE
+            )["count"] as number) / LEADERBOARD_ENTRIES_PER_PAGE
         );
 
         switch (type) {
@@ -456,7 +454,7 @@ export default class LeaderboardCommand implements BaseCommand {
         }
 
         for (let i = 0; i < pageCount; i++) {
-            const offset = i * ENTRIES_PER_PAGE;
+            const offset = i * LEADERBOARD_ENTRIES_PER_PAGE;
             embedsFns.push(
                 // eslint-disable-next-line @typescript-eslint/no-loop-func
                 () =>
@@ -467,19 +465,19 @@ export default class LeaderboardCommand implements BaseCommand {
                                 topPlayers = await topPlayersQuery
                                     .orderBy("exp", "DESC")
                                     .offset(offset)
-                                    .limit(ENTRIES_PER_PAGE);
+                                    .limit(LEADERBOARD_ENTRIES_PER_PAGE);
                                 break;
                             case LeaderboardType.GAMES_PLAYED:
                                 topPlayers = await topPlayersQuery
                                     .orderBy("game_count", "DESC")
                                     .offset(offset)
-                                    .limit(ENTRIES_PER_PAGE);
+                                    .limit(LEADERBOARD_ENTRIES_PER_PAGE);
                                 break;
                             case LeaderboardType.SONGS_GUESSED:
                                 topPlayers = await topPlayersQuery
                                     .orderBy("songs_guessed", "DESC")
                                     .offset(offset)
-                                    .limit(ENTRIES_PER_PAGE);
+                                    .limit(LEADERBOARD_ENTRIES_PER_PAGE);
                                 break;
                             default:
                                 break;

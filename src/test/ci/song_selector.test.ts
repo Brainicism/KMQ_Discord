@@ -1,9 +1,7 @@
 import assert from "assert";
 import sinon from "sinon";
 import GuildPreference from "../../structures/guild_preference";
-import SongSelector, {
-    LAST_PLAYED_SONG_QUEUE_SIZE,
-} from "../../structures/song_selector";
+import SongSelector from "../../structures/song_selector";
 import _ from "lodash";
 import { getMatchingGroupNames } from "../../helpers/game_utils";
 import type QueriedSong from "../../interfaces/queried_song";
@@ -14,7 +12,10 @@ import { Gender } from "../../enums/option_types/gender";
 import { ArtistType } from "../../enums/option_types/artist_type";
 import { ShuffleType } from "../../enums/option_types/shuffle_type";
 import { LanguageType } from "../../enums/option_types/language_type";
-import { FOREIGN_LANGUAGE_TAGS } from "../../constants";
+import {
+    FOREIGN_LANGUAGE_TAGS,
+    LAST_PLAYED_SONG_QUEUE_SIZE,
+} from "../../constants";
 
 async function getMockGuildPreference(): Promise<GuildPreference> {
     const guildPreference = new GuildPreference("test");

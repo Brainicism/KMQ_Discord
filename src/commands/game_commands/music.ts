@@ -1,5 +1,4 @@
 import {
-    EMBED_SUCCESS_BONUS_COLOR,
     generateEmbed,
     generateOptionsMessage,
     getDebugLogHeader,
@@ -18,7 +17,7 @@ import KmqMember from "../../structures/kmq_member";
 import { chooseWeightedRandom } from "../../helpers/utils";
 import dbContext from "../../database_context";
 import type Eris from "eris";
-import { KmqImages } from "../../constants";
+import { EMBED_SUCCESS_BONUS_COLOR, KmqImages } from "../../constants";
 import Session from "../../structures/session";
 import CommandPrechecks from "../../command_prechecks";
 import type GuildPreference from "src/structures/guild_preference";

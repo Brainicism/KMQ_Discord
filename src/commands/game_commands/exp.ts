@@ -16,7 +16,12 @@ import {
     isPowerHour,
     isPremiumRequest,
 } from "../../helpers/game_utils";
-import { KmqImages } from "../../constants";
+import {
+    ExpBonusModifierValues,
+    GUESS_STREAK_THRESHOLD,
+    KmqImages,
+    PARTICIPANT_MODIFIER_MAX_PARTICIPANTS,
+} from "../../constants";
 import State from "../../state";
 import type GuildPreference from "../../structures/guild_preference";
 import type GameRound from "../../structures/game_round";
@@ -28,29 +33,6 @@ import { ExpBonusModifier } from "../../enums/exp_bonus_modifier";
 import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("exp");
-export const PARTICIPANT_MODIFIER_MAX_PARTICIPANTS = 6;
-export const GUESS_STREAK_THRESHOLD = 5;
-
-export const ExpBonusModifierValues = {
-    [ExpBonusModifier.POWER_HOUR]: 2,
-    [ExpBonusModifier.BONUS_ARTIST]: 2,
-    [ExpBonusModifier.VOTE]: 2,
-    [ExpBonusModifier.GUESS_STREAK]: 1.2,
-    [ExpBonusModifier.QUICK_GUESS]: 1.1,
-    [ExpBonusModifier.MC_GUESS_EASY]: 0.25,
-    [ExpBonusModifier.MC_GUESS_MEDIUM]: 0.5,
-    [ExpBonusModifier.MC_GUESS_HARD]: 0.75,
-    [ExpBonusModifier.ARTIST_GUESS]: 0.3,
-    [ExpBonusModifier.ARTIST_GUESS_GROUPS_SELECTED]: 0,
-    [ExpBonusModifier.RANDOM_GUESS_BONUS_COMMON]: 2,
-    [ExpBonusModifier.RANDOM_GUESS_BONUS_RARE]: 5,
-    [ExpBonusModifier.RANDOM_GUESS_BONUS_EPIC]: 10,
-    [ExpBonusModifier.RANDOM_GUESS_BONUS_LEGENDARY]: 50,
-    [ExpBonusModifier.BELOW_SONG_COUNT_THRESHOLD]: 0,
-    [ExpBonusModifier.TYPO]: 0.8,
-    [ExpBonusModifier.HINT_USED]: 0.5,
-    [ExpBonusModifier.FIRST_GAME_OF_DAY]: 1.5,
-};
 
 interface ExpModifier {
     displayName: string;

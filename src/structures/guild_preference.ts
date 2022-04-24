@@ -33,6 +33,7 @@ import {
     DEFAULT_SEEK,
     DEFAULT_SHUFFLE,
     DEFAULT_SUBUNIT_PREFERENCE,
+    GameOptionInternal,
 } from "../constants";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -54,58 +55,6 @@ type GameOptionValue =
     | SubunitsPreference
     | OstPreference
     | string;
-
-const enum GameOptionInternal {
-    BEGINNING_YEAR = "beginningYear",
-    END_YEAR = "endYear",
-    GENDER = "gender",
-    LIMIT_START = "limitStart",
-    LIMIT_END = "limitEnd",
-    SEEK_TYPE = "seekType",
-    SPECIAL_TYPE = "specialType",
-    GUESS_MODE_TYPE = "guessModeType",
-    RELEASE_TYPE = "releaseType",
-    ARTIST_TYPE = "artistType",
-    ANSWER_TYPE = "answerType",
-    SHUFFLE_TYPE = "shuffleType",
-    GROUPS = "groups",
-    EXCLUDES = "excludes",
-    INCLUDES = "includes",
-    GOAL = "goal",
-    GUESS_TIMEOUT = "guessTimeout",
-    DURATION = "duration",
-    LANGUAGE_TYPE = "languageType",
-    MULTI_GUESS_TYPE = "multiGuessType",
-    SUBUNIT_PREFERENCE = "subunitPreference",
-    OST_PREFERENCE = "ostPreference",
-    FORCE_PLAY_SONG = "forcePlaySongID",
-}
-
-export const GameOptionInternalToGameOption: { [option: string]: string } = {
-    [GameOptionInternal.BEGINNING_YEAR]: GameOption.CUTOFF,
-    [GameOptionInternal.END_YEAR]: GameOption.CUTOFF,
-    [GameOptionInternal.GENDER]: GameOption.GENDER,
-    [GameOptionInternal.LIMIT_START]: GameOption.LIMIT,
-    [GameOptionInternal.LIMIT_END]: GameOption.LIMIT,
-    [GameOptionInternal.SEEK_TYPE]: GameOption.SEEK_TYPE,
-    [GameOptionInternal.SPECIAL_TYPE]: GameOption.SPECIAL_TYPE,
-    [GameOptionInternal.GUESS_MODE_TYPE]: GameOption.GUESS_MODE_TYPE,
-    [GameOptionInternal.RELEASE_TYPE]: GameOption.RELEASE_TYPE,
-    [GameOptionInternal.ARTIST_TYPE]: GameOption.ARTIST_TYPE,
-    [GameOptionInternal.ANSWER_TYPE]: GameOption.ANSWER_TYPE,
-    [GameOptionInternal.SHUFFLE_TYPE]: GameOption.SHUFFLE_TYPE,
-    [GameOptionInternal.GROUPS]: GameOption.GROUPS,
-    [GameOptionInternal.EXCLUDES]: GameOption.EXCLUDE,
-    [GameOptionInternal.INCLUDES]: GameOption.INCLUDE,
-    [GameOptionInternal.GOAL]: GameOption.GOAL,
-    [GameOptionInternal.GUESS_TIMEOUT]: GameOption.TIMER,
-    [GameOptionInternal.DURATION]: GameOption.DURATION,
-    [GameOptionInternal.LANGUAGE_TYPE]: GameOption.LANGUAGE_TYPE,
-    [GameOptionInternal.MULTI_GUESS_TYPE]: GameOption.MULTIGUESS,
-    [GameOptionInternal.SUBUNIT_PREFERENCE]: GameOption.SUBUNIT_PREFERENCE,
-    [GameOptionInternal.OST_PREFERENCE]: GameOption.OST_PREFERENCE,
-    [GameOptionInternal.FORCE_PLAY_SONG]: GameOption.FORCE_PLAY_SONG,
-};
 
 /**
  * @param groups - The artists to combine into a string

@@ -1,8 +1,9 @@
-import Scoreboard, { SCOREBOARD_FIELD_CUTOFF } from "./scoreboard";
+import Scoreboard from "./scoreboard";
 import type Player from "./player";
 import Team from "./team";
 import { IPCLogger } from "../logger";
 import type SuccessfulGuessResult from "../interfaces/success_guess_result";
+import { SCOREBOARD_FIELD_CUTOFF } from "../constants";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("team_scoreboard");

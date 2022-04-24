@@ -6,8 +6,6 @@ import { addPremium, removePremium } from "./game_utils";
 
 const logger = new IPCLogger("patreon_manager");
 
-export const PATREON_SUPPORTER_BADGE = "🎧 Premium Supporter";
-
 interface PatronResponse {
     patron_status: string;
     discord_user_id: string;

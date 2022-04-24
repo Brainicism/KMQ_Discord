@@ -18,7 +18,7 @@ import type HelpDocumentation from "../../interfaces/help";
 import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("help");
-export const placeholder = /,/g;
+const placeholder = /,/g;
 const FIELDS_PER_EMBED = 6;
 
 const helpMessage = async (

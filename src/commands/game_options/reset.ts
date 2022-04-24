@@ -7,11 +7,11 @@ import {
 } from "../../helpers/discord_utils";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import { GameOptionInternalToGameOption } from "../../structures/guild_preference";
 import type { GameOption } from "../../enums/game_option_name";
 import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
 import LocalizationManager from "../../helpers/localization_manager";
+import { GameOptionInternalToGameOption } from "../../constants";
 
 const logger = new IPCLogger("reset");
 

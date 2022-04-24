@@ -12,6 +12,7 @@ import { generateKmqDataTables, loadStoredProcedures } from "./bootstrap";
 import _ from "lodash";
 import { parseJsonFile } from "../helpers/utils";
 import { EnvType } from "../enums/env_type";
+import { DATABASE_DOWNLOAD_DIR } from "../constants";
 
 config({ path: path.resolve(__dirname, "../../.env") });
 const SQL_DUMP_EXPIRY = 10;
@@ -23,12 +24,9 @@ const frozenDaisukiColumnNamesPath = path.join(
 );
 
 const logger = new IPCLogger("seed_db");
-export const databaseDownloadDir = path.join(
-    __dirname,
-    "../../sql_dumps/daisuki"
-);
-if (!fs.existsSync(databaseDownloadDir)) {
-    fs.mkdirSync(databaseDownloadDir);
+
+if (!fs.existsSync(DATABASE_DOWNLOAD_DIR)) {
+    fs.mkdirSync(DATABASE_DOWNLOAD_DIR);
 }
 
 program
@@ -57,8 +55,8 @@ async function getOverrideQueries(db: DatabaseContext): Promise<Array<string>> {
 }
 
 const downloadDb = async (): Promise<void> => {
-    const mvOutput = `${databaseDownloadDir}/mv-download.zip`;
-    const audioOutput = `${databaseDownloadDir}/audio-download.zip`;
+    const mvOutput = `${DATABASE_DOWNLOAD_DIR}/mv-download.zip`;
+    const audioOutput = `${DATABASE_DOWNLOAD_DIR}/audio-download.zip`;
     const mvResp = await Axios.get(mvFileUrl, {
         responseType: "arraybuffer",
         headers: {
@@ -81,13 +79,13 @@ const downloadDb = async (): Promise<void> => {
 };
 
 async function extractDb(): Promise<void> {
-    await fs.promises.mkdir(`${databaseDownloadDir}/`, { recursive: true });
+    await fs.promises.mkdir(`${DATABASE_DOWNLOAD_DIR}/`, { recursive: true });
     execSync(
-        `unzip -oq ${databaseDownloadDir}/mv-download.zip -d ${databaseDownloadDir}/`
+        `unzip -oq ${DATABASE_DOWNLOAD_DIR}/mv-download.zip -d ${DATABASE_DOWNLOAD_DIR}/`
     );
 
     execSync(
-        `unzip -oq ${databaseDownloadDir}/audio-download.zip -d ${databaseDownloadDir}/`
+        `unzip -oq ${DATABASE_DOWNLOAD_DIR}/audio-download.zip -d ${DATABASE_DOWNLOAD_DIR}/`
     );
     logger.info("Extracted Daisuki database");
 }
@@ -247,7 +245,7 @@ async function validateSqlDump(
 
 async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
     const sqlFiles = (
-        await fs.promises.readdir(`${databaseDownloadDir}`)
+        await fs.promises.readdir(`${DATABASE_DOWNLOAD_DIR}`)
     ).filter((x) => x.endsWith(".sql"));
 
     const mvSeedFile = sqlFiles
@@ -259,12 +257,12 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
         .slice(-1)[0];
 
     const mvSeedFilePath = bootstrap
-        ? `${databaseDownloadDir}/bootstrap.sql`
-        : `${databaseDownloadDir}/${mvSeedFile}`;
+        ? `${DATABASE_DOWNLOAD_DIR}/bootstrap.sql`
+        : `${DATABASE_DOWNLOAD_DIR}/${mvSeedFile}`;
 
     const audioSeedFilePath = bootstrap
-        ? `${databaseDownloadDir}/bootstrap-audio.sql`
-        : `${databaseDownloadDir}/${audioSeedFile}`;
+        ? `${DATABASE_DOWNLOAD_DIR}/bootstrap-audio.sql`
+        : `${DATABASE_DOWNLOAD_DIR}/${audioSeedFile}`;
 
     logger.info(
         `Validating SQL dump (${path.basename(
@@ -304,7 +302,7 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function hasRecentDump(): Promise<boolean> {
-    const dumpPath = `${databaseDownloadDir}/sql`;
+    const dumpPath = `${DATABASE_DOWNLOAD_DIR}/sql`;
     let files: string[];
     try {
         files = await fs.promises.readdir(dumpPath);
@@ -330,7 +328,7 @@ async function hasRecentDump(): Promise<boolean> {
 function pruneSqlDumps(): void {
     try {
         execSync(
-            `find ${databaseDownloadDir} -mindepth 1 -name "*backup_*" -mtime +${SQL_DUMP_EXPIRY} -delete`
+            `find ${DATABASE_DOWNLOAD_DIR} -mindepth 1 -name "*backup_*" -mtime +${SQL_DUMP_EXPIRY} -delete`
         );
         logger.info("Finished pruning old SQL dumps");
     } catch (err) {

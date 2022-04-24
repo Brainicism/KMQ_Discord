@@ -7,11 +7,10 @@ import Player from "../structures/player";
 import EliminationPlayer from "../structures/elimination_player";
 import { execSync } from "child_process";
 import { IPCLogger } from "../logger";
-import { DEFAULT_LIVES } from "../structures/elimination_scoreboard";
-import { databaseDownloadDir } from "../seed/seed_db";
 import path from "path";
 import { getNewConnection } from "../database_context";
 import { EnvType } from "../enums/env_type";
+import { DATABASE_DOWNLOAD_DIR, ELIMINATION_DEFAULT_LIVES } from "../constants";
 
 const logger = new IPCLogger("test_setup");
 const sandbox = sinon.createSandbox();
@@ -33,7 +32,12 @@ before(async function () {
         .stub(EliminationPlayer, "fromUserID")
         .callsFake(
             (id, score) =>
-                new EliminationPlayer("", id, "", score ?? DEFAULT_LIVES)
+                new EliminationPlayer(
+                    "",
+                    id,
+                    "",
+                    score ?? ELIMINATION_DEFAULT_LIVES
+                )
         );
 
     const db = getNewConnection();
@@ -50,8 +54,8 @@ before(async function () {
 
     logger.info("Setting up test Daisuki database");
     // import frozen db dump
-    const mvSeedFilePath = `${databaseDownloadDir}/bootstrap.sql`;
-    const mvAudioSeedFilePath = `${databaseDownloadDir}/bootstrap-audio.sql`;
+    const mvSeedFilePath = `${DATABASE_DOWNLOAD_DIR}/bootstrap.sql`;
+    const mvAudioSeedFilePath = `${DATABASE_DOWNLOAD_DIR}/bootstrap-audio.sql`;
     execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_test < ${mvSeedFilePath}`
     );

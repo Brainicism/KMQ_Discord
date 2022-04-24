@@ -8,7 +8,6 @@ import {
     voicePermissionsCheck,
     getUserVoiceChannel,
     getCurrentVoiceMembers,
-    EMBED_SUCCESS_BONUS_COLOR,
     getMention,
     generateOptionsMessage,
     generateEmbed,
@@ -25,12 +24,15 @@ import type BaseCommand from "../interfaces/base_command";
 import dbContext from "../../database_context";
 import { IPCLogger } from "../../logger";
 import { GameType } from "../../enums/game_type";
-import { KmqImages } from "../../constants";
+import {
+    ELIMINATION_DEFAULT_LIVES,
+    EMBED_SUCCESS_BONUS_COLOR,
+    KmqImages,
+} from "../../constants";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
 import CommandPrechecks from "../../command_prechecks";
 import State from "../../state";
-import { DEFAULT_LIVES } from "../../structures/elimination_scoreboard";
 import type GuildPreference from "../../structures/guild_preference";
 import type GameInfoMessage from "../../interfaces/game_info_message";
 import type CommandArgs from "../../interfaces/command_args";
@@ -224,7 +226,7 @@ export default class PlayCommand implements BaseCommand {
                     guildID,
                     "command.play.help.example.elimination",
                     {
-                        lives: `\`${DEFAULT_LIVES}\``,
+                        lives: `\`${ELIMINATION_DEFAULT_LIVES}\``,
                     }
                 ),
             },
@@ -471,7 +473,7 @@ export default class PlayCommand implements BaseCommand {
                     parseInt(parsedMessage.components[1]) > 0 &&
                     parseInt(parsedMessage.components[1]) <= 10000
                         ? parseInt(parsedMessage.components[1])
-                        : DEFAULT_LIVES;
+                        : ELIMINATION_DEFAULT_LIVES;
             }
 
             gameSession = new GameSession(

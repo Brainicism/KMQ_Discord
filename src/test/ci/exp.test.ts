@@ -4,10 +4,8 @@ import { ExpBonusModifier } from "../../enums/exp_bonus_modifier";
 import {
     calculateOptionsExpMultiplierInternal,
     calculateRoundExpMultiplier,
-    ExpBonusModifierValues,
     participantExpScalingModifier,
 } from "../../commands/game_commands/exp";
-import * as exp from "../../commands/game_commands/exp";
 import * as game_utils from "../../helpers/game_utils";
 import * as utils from "../../helpers/utils";
 import GameRound from "../../structures/game_round";
@@ -15,6 +13,11 @@ import GuildPreference from "../../structures/guild_preference";
 import { AnswerType } from "../../enums/option_types/answer_type";
 import { GuessModeType } from "../../enums/option_types/guess_mode_type";
 import { Gender } from "../../enums/option_types/gender";
+import {
+    ExpBonusModifierValues,
+    GUESS_STREAK_THRESHOLD,
+    PARTICIPANT_MODIFIER_MAX_PARTICIPANTS,
+} from "../../constants";
 
 let guildPreference: GuildPreference;
 const sandbox = sinon.createSandbox();
@@ -369,11 +372,7 @@ describe("calculateRoundExpMultiplier", () => {
                 1
             );
 
-            for (
-                let i = 2;
-                i <= exp.PARTICIPANT_MODIFIER_MAX_PARTICIPANTS;
-                i++
-            ) {
+            for (let i = 2; i <= PARTICIPANT_MODIFIER_MAX_PARTICIPANTS; i++) {
                 const newRoundExp = calculateRoundExpMultiplier(
                     gameRound,
                     i,
@@ -388,7 +387,7 @@ describe("calculateRoundExpMultiplier", () => {
 
             const finalRoundExp = calculateRoundExpMultiplier(
                 gameRound,
-                exp.PARTICIPANT_MODIFIER_MAX_PARTICIPANTS + 1,
+                PARTICIPANT_MODIFIER_MAX_PARTICIPANTS + 1,
                 0,
                 1000,
                 1
@@ -434,7 +433,7 @@ describe("calculateRoundExpMultiplier", () => {
                 1
             );
 
-            for (let i = 2; i < exp.GUESS_STREAK_THRESHOLD; i++) {
+            for (let i = 2; i < GUESS_STREAK_THRESHOLD; i++) {
                 const newRoundExp = calculateRoundExpMultiplier(
                     gameRound,
                     1,
@@ -450,7 +449,7 @@ describe("calculateRoundExpMultiplier", () => {
             const finalRoundExp = calculateRoundExpMultiplier(
                 gameRound,
                 1,
-                exp.GUESS_STREAK_THRESHOLD,
+                GUESS_STREAK_THRESHOLD,
                 1000,
                 1
             );
@@ -539,11 +538,10 @@ describe("calculateRoundExpMultiplier", () => {
     describe("everything", () => {
         it("should apply all modifiers", () => {
             const roundBonus = 50;
-            const numParticipants =
-                exp.PARTICIPANT_MODIFIER_MAX_PARTICIPANTS - 1;
+            const numParticipants = PARTICIPANT_MODIFIER_MAX_PARTICIPANTS - 1;
 
             const place = 7;
-            const guessStreak = exp.GUESS_STREAK_THRESHOLD + 1;
+            const guessStreak = GUESS_STREAK_THRESHOLD + 1;
             gameRound.bonusModifier = roundBonus;
             sandbox.stub(gameRound, "isBonusArtist").callsFake(() => true);
             const expModifier = calculateRoundExpMultiplier(

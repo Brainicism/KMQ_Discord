@@ -1,9 +1,5 @@
 import Eris from "eris";
 import CommandPrechecks from "../../command_prechecks";
-import {
-    BOOKMARK_COMMAND_NAME,
-    PROFILE_COMMAND_NAME,
-} from "../../events/client/interactionCreate";
 import { sendInfoMessage } from "../../helpers/discord_utils";
 import type CommandArgs from "../../interfaces/command_args";
 import State from "../../state";
@@ -11,6 +7,7 @@ import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { EnvType } from "../../enums/env_type";
 import type BaseCommand from "../interfaces/base_command";
+import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
 
 const logger = new IPCLogger("app_commands");
 

@@ -39,9 +39,15 @@ import GameRound from "../structures/game_round";
 import dbContext from "../database_context";
 import type EliminationScoreboard from "../structures/elimination_scoreboard";
 import TeamScoreboard from "../structures/team_scoreboard";
-import { KmqImages } from "../constants";
+import {
+    EMBED_ERROR_COLOR,
+    EMBED_SUCCESS_BONUS_COLOR,
+    EMBED_SUCCESS_COLOR,
+    KmqImages,
+    REVIEW_LINK,
+    VOTE_LINK,
+} from "../constants";
 import MessageContext from "../structures/message_context";
-import { REVIEW_LINK, VOTE_LINK } from "../commands/game_commands/vote";
 import { LocaleType } from "../enums/locale_type";
 import type Round from "../structures/round";
 import Session from "../structures/session";
@@ -57,9 +63,6 @@ import { GameType } from "../enums/game_type";
 import LocalizationManager from "./localization_manager";
 
 const logger = new IPCLogger("discord_utils");
-export const EMBED_ERROR_COLOR = 0xed4245; // Red
-export const EMBED_SUCCESS_COLOR = 0x57f287; // Green
-export const EMBED_SUCCESS_BONUS_COLOR = 0xfee75c; // Gold
 
 const EMBED_FIELDS_PER_PAGE = 20;
 const REQUIRED_TEXT_PERMISSIONS = [
