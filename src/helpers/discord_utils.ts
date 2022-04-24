@@ -50,7 +50,7 @@ import {
 import MessageContext from "../structures/message_context";
 import { LocaleType } from "../enums/locale_type";
 import type Round from "../structures/round";
-import Session from "../structures/session";
+import type Session from "../structures/session";
 import MusicRound from "../structures/music_round";
 import type EmbedPayload from "../interfaces/embed_payload";
 import type GameInfoMessage from "../interfaces/game_info_message";
@@ -90,18 +90,6 @@ export function getDebugLogHeader(
         | Eris.ComponentInteraction
         | Eris.CommandInteraction
 ): string {
-    const session = Session.getSession(context.guildID);
-    let sessionType: string;
-    if (session) {
-        if (session.isMusicSession()) {
-            sessionType = "MusicSession";
-        } else {
-            sessionType = "GameSession";
-        }
-    } else {
-        sessionType = "No active session";
-    }
-
     let header: string;
     if (context instanceof Eris.Message) {
         header = `gid: ${context.guildID}, uid: ${context.author.id}, tid: ${context.channel.id}`;
@@ -114,7 +102,7 @@ export function getDebugLogHeader(
         header = `gid: ${context.guildID}, tid: ${context.textChannelID}`;
     }
 
-    return `${header} | sessionType = ${sessionType}`;
+    return header;
 }
 
 /**

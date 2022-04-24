@@ -506,9 +506,6 @@ export default class PlayCommand implements BaseCommand {
             );
 
             await gameSession.startRound(guildPreference, messageContext);
-            logger.info(
-                `${getDebugLogHeader(message)} | Game session starting`
-            );
         }
     };
 }

@@ -136,6 +136,10 @@ export default class GameSession extends Session {
         this.syncAllVoiceMembers();
     }
 
+    sessionName(): string {
+        return "Game Session";
+    }
+
     /**
      * Starting a new GameRound
      * @param guildPreference - The guild's GuildPreference

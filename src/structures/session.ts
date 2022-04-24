@@ -106,6 +106,8 @@ export default abstract class Session {
      */
     abstract isPremium(): boolean;
 
+    abstract sessionName(): string;
+
     static getSession(guildID: string): Session {
         return State.gameSessions[guildID] ?? State.musicSessions[guildID];
     }
@@ -146,6 +148,14 @@ export default abstract class Session {
         guildPreference: GuildPreference,
         messageContext: MessageContext
     ): Promise<void> {
+        if (!this.sessionInitialized) {
+            logger.info(
+                `${getDebugLogHeader(
+                    messageContext
+                )} | ${this.sessionName()} starting`
+            );
+        }
+
         this.sessionInitialized = true;
         if (this.songSelector.getSongs() === null) {
             try {
