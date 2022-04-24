@@ -1,5 +1,4 @@
 import type BaseCommand from "../interfaces/base_command";
-import GameSession from "../../structures/game_session";
 import {
     areUserAndBotInSameVoiceChannel,
     getDebugLogHeader,
@@ -76,7 +75,7 @@ async function sendSkipMessage(
  * @returns whether the song has enough votes to be skipped
  */
 export function isSkipMajority(guildID: string, session: Session): boolean {
-    if (session instanceof GameSession) {
+    if (session.isGameSession()) {
         if (session.gameType === GameType.ELIMINATION) {
             return (
                 session.round.getSkipCount() >=
@@ -150,7 +149,7 @@ export default class SkipCommand implements BaseCommand {
             return;
         }
 
-        if (session instanceof GameSession) {
+        if (session.isGameSession()) {
             if (session.gameType === GameType.ELIMINATION) {
                 if (
                     !(

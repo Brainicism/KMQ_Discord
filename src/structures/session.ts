@@ -4,7 +4,6 @@ import { IPCLogger } from "../logger";
 import {
     getCurrentVoiceMembers,
     getDebugLogHeader,
-    getGuildLocale,
     getMention,
     sendBookmarkedSongs,
     sendErrorMessage,
@@ -14,7 +13,7 @@ import {
     tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
 import dbContext from "../database_context";
-import GameSession from "./game_session";
+import type GameSession from "./game_session";
 import type GuildPreference from "./guild_preference";
 import type KmqMember from "./kmq_member";
 import MessageContext from "./message_context";
@@ -31,6 +30,7 @@ import { bold, friendlyFormattedNumber } from "../helpers/utils";
 import type QueriedSong from "../interfaces/queried_song";
 import type GuessResult from "../interfaces/guess_result";
 import { SeekType } from "../enums/option_types/seek_type";
+import type MusicSession from "./music_session";
 
 const BOOKMARK_MESSAGE_SIZE = 10;
 
@@ -129,7 +129,11 @@ export default abstract class Session {
         }
     }
 
-    isMusicSession(): boolean {
+    isMusicSession(): this is MusicSession {
+        return false;
+    }
+
+    isGameSession(): this is GameSession {
         return false;
     }
 
@@ -439,7 +443,7 @@ export default abstract class Session {
         await this.songSelector.reloadSongs(
             guildPreference,
             this.isMusicSession() ||
-                (session instanceof GameSession && session.isPremium())
+                (session.isGameSession() && session.isPremium())
         );
     }
 
@@ -533,7 +537,10 @@ export default abstract class Session {
                 "misc.interaction.bookmarked.description",
                 {
                     songName: bold(
-                        getLocalizedSongName(song, getGuildLocale(this.guildID))
+                        getLocalizedSongName(
+                            song,
+                            State.getGuildLocale(this.guildID)
+                        )
                     ),
                 }
             )
@@ -565,6 +572,11 @@ export default abstract class Session {
             }
         }
     }
+
+    abstract handleComponentInteraction(
+        _interaction: Eris.ComponentInteraction,
+        _messageContext: MessageContext
+    );
 
     /**
      * Prepares a new Round

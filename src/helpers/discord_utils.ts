@@ -4,7 +4,7 @@ import EmbedPaginator from "eris-pagination";
 import axios from "axios";
 import * as uuid from "uuid";
 import type GuildPreference from "../structures/guild_preference";
-import GameSession from "../structures/game_session";
+import type GameSession from "../structures/game_session";
 import { IPCLogger } from "../logger";
 import {
     getAvailableSongCount,
@@ -43,7 +43,6 @@ import { KmqImages } from "../constants";
 import MessageContext from "../structures/message_context";
 import { REVIEW_LINK, VOTE_LINK } from "../commands/game_commands/vote";
 import { LocaleType } from "../enums/locale_type";
-import { DEFAULT_LOCALE } from "./localization_manager";
 import type Round from "../structures/round";
 import Session from "../structures/session";
 import MusicRound from "../structures/music_round";
@@ -783,7 +782,7 @@ export async function sendRoundMessage(
     }
 
     const correctGuess = playerRoundResults.length > 0;
-    const locale = getGuildLocale(messageContext.guildID);
+    const locale = State.getGuildLocale(messageContext.guildID);
 
     const songAndArtist = bold(
         `"${getLocalizedSongName(
@@ -1018,8 +1017,7 @@ export async function generateOptionsMessage(
 
     const session = Session.getSession(guildID);
     const isEliminationMode =
-        session instanceof GameSession &&
-        session.gameType === GameType.ELIMINATION;
+        session?.isGameSession() && session.gameType === GameType.ELIMINATION;
 
     // Special case: goal is conflicting only when current game is elimination
     if (guildPreference.isGoalSet()) {
@@ -1114,11 +1112,7 @@ export async function generateOptionsMessage(
         .join("\n");
 
     let nonPremiumGameWarning = "";
-    if (
-        premiumRequest &&
-        session instanceof GameSession &&
-        !session.isPremium()
-    ) {
+    if (premiumRequest && session?.isGameSession() && !session.isPremium()) {
         nonPremiumGameWarning = italicize(
             State.localizer.translate(
                 messageContext.guildID,
@@ -1772,7 +1766,7 @@ export async function sendBookmarkedSongs(
         [userID: string]: Map<string, QueriedSong>;
     }
 ): Promise<void> {
-    const locale = getGuildLocale(guildID);
+    const locale = State.getGuildLocale(guildID);
     for (const [userID, songs] of Object.entries(bookmarkedSongs)) {
         const allEmbedFields: Array<{
             name: string;
@@ -1945,14 +1939,6 @@ export async function tryCreateInteractionErrorAcknowledgement(
     } catch (err) {
         interactionRejectionHandler(interaction, err);
     }
-}
-
-/**
- * @param guildID - The guild ID
- * @returns the locale associated with the given guild
- */
-export function getGuildLocale(guildID: string): LocaleType {
-    return State.locales[guildID] ?? DEFAULT_LOCALE;
 }
 
 /**

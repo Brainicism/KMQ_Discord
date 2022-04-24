@@ -1,3 +1,4 @@
+import { LocaleType } from "./enums/locale_type";
 import { AnswerType } from "./enums/option_types/answer_type";
 import { ArtistType } from "./enums/option_types/artist_type";
 import { Gender } from "./enums/option_types/gender";
@@ -79,3 +80,4 @@ export const specialFfmpegArgs = {
 // z = chinese, j = japanese, e = english, s = spanish
 export const FOREIGN_LANGUAGE_TAGS = ["z", "j", "e", "s"];
 export const NON_OFFICIAL_VIDEO_TAGS = ["c", "d", "a", "r", "v", "x", "p"];
+export const DEFAULT_LOCALE = LocaleType.EN;

@@ -20,7 +20,6 @@ import dbContext from "../../database_context";
 import type Eris from "eris";
 import { KmqImages } from "../../constants";
 import Session from "../../structures/session";
-import GameSession from "../../structures/game_session";
 import CommandPrechecks from "../../command_prechecks";
 import type GuildPreference from "src/structures/guild_preference";
 import type GameInfoMessage from "../../interfaces/game_info_message";
@@ -131,7 +130,7 @@ export default class MusicCommand implements BaseCommand {
     resetPremium = async (guildPreference: GuildPreference): Promise<void> => {
         const guildID = guildPreference.guildID;
         const session = Session.getSession(guildID);
-        if (!session || session instanceof GameSession) {
+        if (!session || session.isGameSession()) {
             return;
         }
 
@@ -147,7 +146,7 @@ export default class MusicCommand implements BaseCommand {
         const messageContext = MessageContext.fromMessage(message);
         const guildID = message.guildID;
         const session = Session.getSession(guildID);
-        if (session instanceof GameSession) {
+        if (session?.isGameSession()) {
             sendErrorMessage(messageContext, {
                 title: "command.music.failure.existingGameSession.title",
                 description: "command.music.failure.existingGameSession.title",
@@ -189,6 +188,7 @@ export default class MusicCommand implements BaseCommand {
             gameOwner
         );
 
+        State.musicSessions[guildID] = musicSession;
         await sendBeginMusicSessionMessage(
             textChannel.name,
             voiceChannel.name,
@@ -198,6 +198,5 @@ export default class MusicCommand implements BaseCommand {
 
         musicSession.startRound(guildPreference, messageContext);
         logger.info(`${getDebugLogHeader(message)} | Music session starting`);
-        State.musicSessions[guildID] = musicSession;
     };
 }

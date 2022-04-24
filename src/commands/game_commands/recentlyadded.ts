@@ -5,7 +5,6 @@ import {
     getDebugLogHeader,
     sendPaginationedEmbed,
     sendInfoMessage,
-    getGuildLocale,
 } from "../../helpers/discord_utils";
 import {
     standardDateFormat,
@@ -86,7 +85,7 @@ export default class RecentlyAddedCommand implements BaseCommand {
             return;
         }
 
-        const locale = getGuildLocale(message.guildID);
+        const locale = State.getGuildLocale(message.guildID);
         const fields = newSongs.map((song) => ({
             name: `"${getLocalizedSongName(
                 song,

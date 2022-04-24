@@ -1,8 +1,6 @@
 import type Eris from "eris";
 import { checkBotIsAlone } from "../../helpers/discord_utils";
 import Session from "../../structures/session";
-import GameSession from "../../structures/game_session";
-import MusicSession from "../../structures/music_session";
 
 /**
  * Handles the 'voiceChannelLeave' event
@@ -29,16 +27,13 @@ export default async function voiceChannelLeaveHandler(
     }
 
     const oldPremiumState = session.isPremium();
-    if (session instanceof GameSession) {
+    if (session.isGameSession()) {
         await session.setPlayerInVC(member.id, false);
     }
 
     session.updateOwner();
 
-    if (
-        oldPremiumState !== session.isPremium() ||
-        session instanceof MusicSession
-    ) {
+    if (oldPremiumState !== session.isPremium() || session.isMusicSession()) {
         await session.updatePremiumStatus();
     }
 }

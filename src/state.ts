@@ -6,6 +6,7 @@ import type MusicSession from "./structures/music_session";
 import type { Campaign } from "patreon-discord";
 import LocalizationManager from "./helpers/localization_manager";
 import type { LocaleType } from "./enums/locale_type";
+import { DEFAULT_LOCALE } from "./constants";
 
 export default class State {
     static gameSessions: { [guildID: string]: GameSession } = {};
@@ -25,4 +26,8 @@ export default class State {
     static patreonCampaign: Campaign;
     static localizer = new LocalizationManager();
     static locales: { [guildID: string]: LocaleType } = {};
+
+    static getGuildLocale(guildID: string): LocaleType {
+        return State.locales[guildID] ?? DEFAULT_LOCALE;
+    }
 }

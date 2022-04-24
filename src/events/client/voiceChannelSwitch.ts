@@ -1,8 +1,6 @@
 import type Eris from "eris";
 import { checkBotIsAlone } from "../../helpers/discord_utils";
 import Session from "../../structures/session";
-import GameSession from "../../structures/game_session";
-import MusicSession from "../../structures/music_session";
 
 /**
  * Handles the 'voiceChannelSwitch' event
@@ -34,7 +32,7 @@ export default async function voiceChannelSwitchHandler(
     }
 
     const oldPremiumState = session.isPremium();
-    if (session instanceof GameSession) {
+    if (session.isGameSession()) {
         if (member.id !== process.env.BOT_CLIENT_ID) {
             await session.setPlayerInVC(
                 member.id,
@@ -49,10 +47,7 @@ export default async function voiceChannelSwitchHandler(
 
     session.updateOwner();
 
-    if (
-        oldPremiumState !== session.isPremium() ||
-        session instanceof MusicSession
-    ) {
+    if (oldPremiumState !== session.isPremium() || session.isMusicSession()) {
         session.updatePremiumStatus();
     }
 }
