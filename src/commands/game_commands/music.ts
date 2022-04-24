@@ -184,6 +184,7 @@ export default class MusicCommand implements BaseCommand {
         }
 
         const musicSession = new MusicSession(
+            guildPreference,
             textChannel.id,
             voiceChannel.id,
             guildID,
@@ -198,6 +199,6 @@ export default class MusicCommand implements BaseCommand {
             guildPreference
         );
 
-        musicSession.startRound(guildPreference, messageContext);
+        musicSession.startRound(messageContext);
     };
 }

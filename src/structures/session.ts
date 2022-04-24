@@ -69,6 +69,9 @@ export default abstract class Session {
 
     public songSelector: SongSelector;
 
+    /** The guild preference */
+    protected guildPreference: GuildPreference;
+
     /** The number of Rounds played */
     protected roundsPlayed: number;
 
@@ -82,11 +85,20 @@ export default abstract class Session {
     private guessTimeoutFunc: NodeJS.Timer;
 
     constructor(
+        guildPreference: GuildPreference,
         textChannelID: string,
         voiceChannelID: string,
         guildID: string,
         gameSessionCreator: KmqMember
     ) {
+        this.guildPreference = guildPreference;
+        this.guildPreference.reloadSongCallback = async () => {
+            logger.info(
+                `gid: ${this.guildID} | Game options modified, songs reloaded`
+            );
+            await this.reloadSongs(this.guildPreference);
+        };
+
         this.textChannelID = textChannelID;
         this.voiceChannelID = voiceChannelID;
         this.guildID = guildID;
@@ -141,13 +153,9 @@ export default abstract class Session {
 
     /**
      * Starting a new Round
-     * @param guildPreference - The guild's GuildPreference
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
-    async startRound(
-        guildPreference: GuildPreference,
-        messageContext: MessageContext
-    ): Promise<void> {
+    async startRound(messageContext: MessageContext): Promise<void> {
         if (!this.sessionInitialized) {
             logger.info(
                 `${getDebugLogHeader(
@@ -159,7 +167,7 @@ export default abstract class Session {
         this.sessionInitialized = true;
         if (this.songSelector.getSongs() === null) {
             try {
-                await this.reloadSongs(guildPreference);
+                await this.reloadSongs(this.guildPreference);
             } catch (err) {
                 await sendErrorMessage(messageContext, {
                     title: LocalizationManager.localizer.translate(
@@ -176,7 +184,7 @@ export default abstract class Session {
                     `${getDebugLogHeader(
                         messageContext
                     )} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(
-                        guildPreference
+                        this.guildPreference
                     )}`
                 );
                 await this.endSession();
@@ -206,8 +214,10 @@ export default abstract class Session {
             });
         }
 
-        this.songSelector.checkAlternatingGender(guildPreference);
-        const randomSong = this.songSelector.queryRandomSong(guildPreference);
+        this.songSelector.checkAlternatingGender(this.guildPreference);
+        const randomSong = this.songSelector.queryRandomSong(
+            this.guildPreference
+        );
 
         if (randomSong === null) {
             sendErrorMessage(messageContext, {
@@ -260,17 +270,15 @@ export default abstract class Session {
             return;
         }
 
-        this.playSong(guildPreference, messageContext);
+        this.playSong(messageContext);
     }
 
     /**
      * Ends an active Round
-     * @param guildPreference - The GuildPreference
      * @param _messageContext - unused
      * @param _guessResult - unused
      */
     endRound(
-        guildPreference: GuildPreference,
         _messageContext?: MessageContext,
         _guessResult?: GuessResult
     ): Promise<void> {
@@ -298,7 +306,10 @@ export default abstract class Session {
         if (this.finished) return;
         this.roundsPlayed++;
         // check if duration has been reached
-        const remainingDuration = this.getRemainingDuration(guildPreference);
+        const remainingDuration = this.getRemainingDuration(
+            this.guildPreference
+        );
+
         if (remainingDuration && remainingDuration < 0) {
             logger.info(`gid: ${this.guildID} | Game session duration reached`);
             this.endSession();
@@ -311,7 +322,6 @@ export default abstract class Session {
     async endSession(): Promise<void> {
         Session.deleteSession(this.guildID);
         await this.endRound(
-            await GuildPreference.getGuildPreference(this.guildID),
             new MessageContext(this.textChannelID, null, this.guildID),
             { correct: false }
         );
@@ -395,14 +405,11 @@ export default abstract class Session {
      * @param messageContext - An object containing relevant parts of Eris.Message
      * @param guildPreference - The GuildPreference
      */
-    startGuessTimeout(
-        messageContext: MessageContext,
-        guildPreference: GuildPreference
-    ): Promise<void> {
-        if (this.isMusicSession() || !guildPreference.isGuessTimeoutSet())
+    startGuessTimeout(messageContext: MessageContext): Promise<void> {
+        if (this.isMusicSession() || !this.guildPreference.isGuessTimeoutSet())
             return;
 
-        const time = guildPreference.gameOptions.guessTimeout;
+        const time = this.guildPreference.gameOptions.guessTimeout;
         this.guessTimeoutFunc = setTimeout(async () => {
             if (this.finished || !this.round || this.round.finished) return;
             logger.info(
@@ -412,15 +419,11 @@ export default abstract class Session {
             );
 
             await this.endRound(
-                guildPreference,
                 new MessageContext(this.textChannelID, null, this.guildID),
                 { correct: false }
             );
 
-            this.startRound(
-                await GuildPreference.getGuildPreference(this.guildID),
-                messageContext
-            );
+            this.startRound(messageContext);
         }, time * 1000);
     }
 
@@ -600,13 +603,9 @@ export default abstract class Session {
 
     /**
      * Begin playing the Round's song in the VoiceChannel, listen on VoiceConnection events
-     * @param guildPreference - The guild's GuildPreference
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
-    protected async playSong(
-        guildPreference: GuildPreference,
-        messageContext: MessageContext
-    ): Promise<void> {
+    protected async playSong(messageContext: MessageContext): Promise<void> {
         const { round } = this;
         if (round === null) {
             return;
@@ -617,7 +616,7 @@ export default abstract class Session {
         let seekLocation: number;
         const seekType = this.isMusicSession()
             ? SeekType.BEGINNING
-            : guildPreference.gameOptions.seekType;
+            : this.guildPreference.gameOptions.seekType;
 
         if (seekType === SeekType.BEGINNING) {
             seekLocation = 0;
@@ -643,7 +642,7 @@ export default abstract class Session {
             `${getDebugLogHeader(
                 messageContext
             )} | Playing song in voice connection. seek = ${seekType}. song = ${this.getDebugSongDetails()}. guess mode = ${
-                guildPreference.gameOptions.guessModeType
+                this.guildPreference.gameOptions.guessModeType
             }`
         );
         this.connection.removeAllListeners();
@@ -654,7 +653,7 @@ export default abstract class Session {
             let encoderArgs = [];
             const specialType = this.isMusicSession()
                 ? null
-                : guildPreference.gameOptions.specialType;
+                : this.guildPreference.gameOptions.specialType;
 
             if (specialType) {
                 const ffmpegArgs = specialFfmpegArgs[specialType](seekLocation);
@@ -669,11 +668,11 @@ export default abstract class Session {
             });
         } catch (e) {
             logger.error(`Erroring playing on voice connection. err = ${e}`);
-            await this.errorRestartRound(guildPreference);
+            await this.errorRestartRound();
             return;
         }
 
-        this.startGuessTimeout(messageContext, guildPreference);
+        this.startGuessTimeout(messageContext);
 
         // song finished without being guessed
         this.connection.once("end", async () => {
@@ -688,15 +687,11 @@ export default abstract class Session {
             this.stopGuessTimeout();
 
             await this.endRound(
-                guildPreference,
                 new MessageContext(this.textChannelID, null, this.guildID),
                 { correct: false }
             );
 
-            this.startRound(
-                await GuildPreference.getGuildPreference(this.guildID),
-                messageContext
-            );
+            this.startRound(messageContext);
         });
 
         this.connection.once("error", (err) => {
@@ -708,7 +703,7 @@ export default abstract class Session {
                     messageContext
                 )} | Unknown error with stream dispatcher. song = ${this.getDebugSongDetails()}. err = ${err}`
             );
-            this.errorRestartRound(guildPreference);
+            this.errorRestartRound();
         });
     }
 
@@ -783,13 +778,10 @@ export default abstract class Session {
 
     /**
      * Attempt to restart game with different song
-     * @param guildPreference - The GuildPreference
      */
-    private async errorRestartRound(
-        guildPreference: GuildPreference
-    ): Promise<void> {
+    private async errorRestartRound(): Promise<void> {
         const messageContext = new MessageContext(this.textChannelID);
-        await this.endRound(guildPreference, null, {
+        await this.endRound(null, {
             correct: false,
             error: true,
         });
@@ -805,6 +797,6 @@ export default abstract class Session {
             ),
         });
         this.roundsPlayed--;
-        this.startRound(guildPreference, messageContext);
+        this.startRound(messageContext);
     }
 }

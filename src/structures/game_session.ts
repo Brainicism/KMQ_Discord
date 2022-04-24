@@ -104,6 +104,7 @@ export default class GameSession extends Session {
     private lastGuesser: LastGuesser;
 
     constructor(
+        guildPreference: GuildPreference,
         textChannelID: string,
         voiceChannelID: string,
         guildID: string,
@@ -111,7 +112,13 @@ export default class GameSession extends Session {
         gameType: GameType,
         eliminationLives?: number
     ) {
-        super(textChannelID, voiceChannelID, guildID, gameSessionCreator);
+        super(
+            guildPreference,
+            textChannelID,
+            voiceChannelID,
+            guildID,
+            gameSessionCreator
+        );
         this.gameType = gameType;
         this.sessionInitialized = false;
         this.correctGuesses = 0;
@@ -142,17 +149,13 @@ export default class GameSession extends Session {
 
     /**
      * Starting a new GameRound
-     * @param guildPreference - The guild's GuildPreference
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
-    async startRound(
-        guildPreference: GuildPreference,
-        messageContext: MessageContext
-    ): Promise<void> {
+    async startRound(messageContext: MessageContext): Promise<void> {
         if (this.sessionInitialized) {
             // Only add a delay if the game has already started
             await delay(
-                this.multiguessDelayIsActive(guildPreference)
+                this.multiguessDelayIsActive(this.guildPreference)
                     ? SONG_START_DELAY - MULTIGUESS_DELAY
                     : SONG_START_DELAY
             );
@@ -162,19 +165,19 @@ export default class GameSession extends Session {
             return;
         }
 
-        await super.startRound(guildPreference, messageContext);
-        if (guildPreference.isMultipleChoiceMode()) {
+        await super.startRound(messageContext);
+        if (this.guildPreference.isMultipleChoiceMode()) {
             const locale = State.getGuildLocale(this.guildID);
             const randomSong = this.round.song;
             const correctChoice =
-                guildPreference.gameOptions.guessModeType ===
+                this.guildPreference.gameOptions.guessModeType ===
                 GuessModeType.ARTIST
                     ? getLocalizedArtistName(this.round.song, locale)
                     : getLocalizedSongName(this.round.song, locale, false);
 
             const wrongChoices = await getMultipleChoiceOptions(
-                guildPreference.gameOptions.answerType,
-                guildPreference.gameOptions.guessModeType,
+                this.guildPreference.gameOptions.answerType,
+                this.guildPreference.gameOptions.guessModeType,
                 randomSong.members,
                 correctChoice,
                 randomSong.artistID,
@@ -204,7 +207,7 @@ export default class GameSession extends Session {
             buttons = _.shuffle(buttons);
 
             let components: Array<Eris.ActionRow>;
-            switch (guildPreference.gameOptions.answerType) {
+            switch (this.guildPreference.gameOptions.answerType) {
                 case AnswerType.MULTIPLE_CHOICE_EASY:
                     components = [
                         {
@@ -239,8 +242,8 @@ export default class GameSession extends Session {
                         "misc.interaction.guess.title",
                         {
                             songOrArtist:
-                                guildPreference.gameOptions.guessModeType ===
-                                GuessModeType.ARTIST
+                                this.guildPreference.gameOptions
+                                    .guessModeType === GuessModeType.ARTIST
                                     ? LocalizationManager.localizer.translate(
                                           this.guildID,
                                           "misc.artist"
@@ -260,12 +263,10 @@ export default class GameSession extends Session {
 
     /**
      * Ends an active GameRound
-     * @param guildPreference - The GuildPreference
      * @param messageContext - An object containing relevant parts of Eris.Message
      * @param guessResult - Whether the round ended via a correct guess (includes exp gain), or other (timeout, error, etc)
      */
     async endRound(
-        guildPreference: GuildPreference,
         messageContext?: MessageContext,
         guessResult?: GuessResult
     ): Promise<void> {
@@ -295,7 +296,7 @@ export default class GameSession extends Session {
             this.guessTimes.push(timePlayed);
             await this.updateScoreboard(
                 guessResult,
-                guildPreference,
+                this.guildPreference,
                 timePlayed,
                 messageContext
             );
@@ -319,25 +320,28 @@ export default class GameSession extends Session {
             timePlayed
         );
 
-        const remainingDuration = this.getRemainingDuration(guildPreference);
+        const remainingDuration = this.getRemainingDuration(
+            this.guildPreference
+        );
+
         if (messageContext) {
             const endRoundMessage = await sendRoundMessage(
                 messageContext,
                 this.scoreboard,
                 this,
-                guildPreference.gameOptions.guessModeType,
-                guildPreference.isMultipleChoiceMode(),
+                this.guildPreference.gameOptions.guessModeType,
+                this.guildPreference.isMultipleChoiceMode(),
                 remainingDuration,
-                this.songSelector.getUniqueSongCounter(guildPreference)
+                this.songSelector.getUniqueSongCounter(this.guildPreference)
             );
 
             round.roundMessageID = endRoundMessage?.id;
         }
 
         this.updateBookmarkSongList();
-        await super.endRound(guildPreference, messageContext);
+        await super.endRound(messageContext);
 
-        if (this.scoreboard.gameFinished(guildPreference)) {
+        if (this.scoreboard.gameFinished(this.guildPreference)) {
             this.endSession();
         }
     }
@@ -473,11 +477,7 @@ export default class GameSession extends Session {
         });
 
         // commit session's song plays and correct guesses
-        const guildPreference = await GuildPreference.getGuildPreference(
-            this.guildID
-        );
-
-        if (!guildPreference.isMultipleChoiceMode()) {
+        if (!this.guildPreference.isMultipleChoiceMode()) {
             await this.storeSongStats();
         }
 
@@ -503,16 +503,12 @@ export default class GameSession extends Session {
         if (!this.round) return;
         if (!this.guessEligible(messageContext)) return;
 
-        const guildPreference = await GuildPreference.getGuildPreference(
-            this.guildID
-        );
-
         const pointsEarned = this.checkGuess(
             messageContext.author.id,
             guess,
-            guildPreference.gameOptions.guessModeType,
-            guildPreference.isMultipleChoiceMode(),
-            guildPreference.typosAllowed()
+            this.guildPreference.gameOptions.guessModeType,
+            this.guildPreference.isMultipleChoiceMode(),
+            this.guildPreference.typosAllowed()
         );
 
         if (pointsEarned > 0) {
@@ -522,14 +518,14 @@ export default class GameSession extends Session {
 
             this.round.finished = true;
             await delay(
-                this.multiguessDelayIsActive(guildPreference)
+                this.multiguessDelayIsActive(this.guildPreference)
                     ? MULTIGUESS_DELAY
                     : 0
             );
             if (!this.round) return;
 
             // mark round as complete, so no more guesses can go through
-            await this.endRound(guildPreference, messageContext, {
+            await this.endRound(messageContext, {
                 correct: true,
                 correctGuessers: this.round.correctGuessers,
             });
@@ -546,8 +542,8 @@ export default class GameSession extends Session {
                 .where("guild_id", this.guildID)
                 .increment("songs_guessed", 1);
 
-            this.startRound(guildPreference, messageContext);
-        } else if (guildPreference.isMultipleChoiceMode()) {
+            this.startRound(messageContext);
+        } else if (this.guildPreference.isMultipleChoiceMode()) {
             if (!this.round) return;
             if (
                 setDifference(
@@ -562,15 +558,11 @@ export default class GameSession extends Session {
                 ).size === 0
             ) {
                 await this.endRound(
-                    guildPreference,
                     new MessageContext(this.textChannelID, null, this.guildID),
                     { correct: false }
                 );
 
-                this.startRound(
-                    await GuildPreference.getGuildPreference(this.guildID),
-                    messageContext
-                );
+                this.startRound(messageContext);
             }
         }
     }

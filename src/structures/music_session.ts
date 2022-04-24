@@ -11,7 +11,7 @@ import KmqMember from "./kmq_member";
 import type Round from "./round";
 import Session from "./session";
 import MusicRound from "./music_round";
-import GuildPreference from "./guild_preference";
+import type GuildPreference from "./guild_preference";
 import type MessageContext from "./message_context";
 import { IPCLogger } from "../logger";
 import { isUserPremium } from "../helpers/game_utils";
@@ -27,12 +27,19 @@ export default class MusicSession extends Session {
     public round: MusicRound;
 
     constructor(
+        guildPreference: GuildPreference,
         textChannelID: string,
         voiceChannelID: string,
         guildID: string,
         gameSessionCreator: KmqMember
     ) {
-        super(textChannelID, voiceChannelID, guildID, gameSessionCreator);
+        super(
+            guildPreference,
+            textChannelID,
+            voiceChannelID,
+            guildID,
+            gameSessionCreator
+        );
         this.round = null;
     }
 
@@ -65,31 +72,28 @@ export default class MusicSession extends Session {
 
     /**
      * Starting a new MusicRound
-     * @param guildPreference - The guild's GuildPreference
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
-    async startRound(
-        guildPreference: GuildPreference,
-        messageContext: MessageContext
-    ): Promise<void> {
+    async startRound(messageContext: MessageContext): Promise<void> {
         if (this.finished || this.round) {
             return;
         }
 
-        await super.startRound(guildPreference, messageContext);
+        await super.startRound(messageContext);
 
         if (messageContext) {
-            const remainingDuration =
-                this.getRemainingDuration(guildPreference);
+            const remainingDuration = this.getRemainingDuration(
+                this.guildPreference
+            );
 
             const startRoundMessage = await sendRoundMessage(
                 messageContext,
                 null,
                 this,
-                guildPreference.gameOptions.guessModeType,
-                guildPreference.isMultipleChoiceMode(),
+                this.guildPreference.gameOptions.guessModeType,
+                this.guildPreference.isMultipleChoiceMode(),
                 remainingDuration,
-                this.songSelector.getUniqueSongCounter(guildPreference)
+                this.songSelector.getUniqueSongCounter(this.guildPreference)
             );
 
             this.round.interactionMessage = startRoundMessage;
@@ -99,12 +103,11 @@ export default class MusicSession extends Session {
     }
 
     async endRound(
-        guildPreference: GuildPreference,
         messageContext?: MessageContext,
         guessResult?: GuessResult
     ): Promise<void> {
         await this.round?.interactionMarkButtons();
-        super.endRound(guildPreference, messageContext, guessResult);
+        super.endRound(messageContext, guessResult);
     }
 
     endSession(): Promise<void> {
@@ -159,11 +162,7 @@ export default class MusicSession extends Session {
                     )
                 );
 
-                skipSong(
-                    messageContext,
-                    this,
-                    await GuildPreference.getGuildPreference(guildID)
-                );
+                skipSong(messageContext, this);
             } else {
                 tryCreateInteractionSuccessAcknowledgement(
                     interaction,

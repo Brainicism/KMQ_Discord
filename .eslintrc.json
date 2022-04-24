@@ -37,7 +37,7 @@
             "warn"
         ],
         "import/no-cycle": [
-            "off"
+            "warn"
         ],
         "@typescript-eslint/consistent-type-imports": ["warn"],
         "jsdoc/require-jsdoc": [
