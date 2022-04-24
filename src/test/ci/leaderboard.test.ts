@@ -2,9 +2,7 @@ import assert from "assert";
 import sinon from "sinon";
 import { describe } from "mocha";
 import type { EmbedGenerator } from "eris-pagination";
-import LeaderboardCommand, {
-    ENTRIES_PER_PAGE,
-} from "../../commands/game_commands/leaderboard";
+import LeaderboardCommand from "../../commands/game_commands/leaderboard";
 import dbContext from "../../database_context";
 import MessageContext from "../../structures/message_context";
 import KmqMember from "../../structures/kmq_member";
@@ -16,6 +14,7 @@ import { LeaderboardType } from "../../enums/option_types/leaderboard_type";
 import { LeaderboardScope } from "../../enums/option_types/leaderboard_scope";
 import { LeaderboardDuration } from "../../enums/option_types/leaderboard_duration";
 import { GameType } from "../../enums/game_type";
+import { LEADERBOARD_ENTRIES_PER_PAGE } from "../../constants";
 
 const sandbox = sinon.createSandbox();
 
@@ -42,7 +41,7 @@ const yesterday = new Date(new Date(date).setDate(INITIAL_DAY - 1));
 const lastWeek = new Date(new Date(date).setDate(INITIAL_DAY - 7));
 const lastMonth = new Date(new Date(date).setMonth(INITIAL_MONTH - 1));
 
-const INITIAL_TOTAL_ENTRIES = ENTRIES_PER_PAGE * 5;
+const INITIAL_TOTAL_ENTRIES = LEADERBOARD_ENTRIES_PER_PAGE * 5;
 
 function generatePlayerStats(numberPlayers: number, offset = 0): any {
     return [...Array(numberPlayers).keys()].map((i) => ({
@@ -78,7 +77,7 @@ describe("getLeaderboardEmbeds", () => {
 
         describe("fits a page perfectly", () => {
             it("should match the number of pages and embeds", async () => {
-                const totalEntries = ENTRIES_PER_PAGE;
+                const totalEntries = LEADERBOARD_ENTRIES_PER_PAGE;
                 await dbContext
                     .kmq("player_stats")
                     .insert(generatePlayerStats(totalEntries));
@@ -94,7 +93,7 @@ describe("getLeaderboardEmbeds", () => {
                 const fields = await getNumberOfFields(embeds);
                 assert.strictEqual(
                     pageCount,
-                    Math.ceil(totalEntries / ENTRIES_PER_PAGE)
+                    Math.ceil(totalEntries / LEADERBOARD_ENTRIES_PER_PAGE)
                 );
                 assert.strictEqual(fields, totalEntries);
             });
@@ -102,7 +101,7 @@ describe("getLeaderboardEmbeds", () => {
 
         describe("one full page + 1 field", () => {
             it("should match the number of pages and embeds", async () => {
-                const totalEntries = ENTRIES_PER_PAGE + 1;
+                const totalEntries = LEADERBOARD_ENTRIES_PER_PAGE + 1;
                 await dbContext
                     .kmq("player_stats")
                     .insert(generatePlayerStats(totalEntries));
@@ -118,7 +117,7 @@ describe("getLeaderboardEmbeds", () => {
                 const fields = await getNumberOfFields(embeds);
                 assert.strictEqual(
                     pageCount,
-                    Math.ceil(totalEntries / ENTRIES_PER_PAGE)
+                    Math.ceil(totalEntries / LEADERBOARD_ENTRIES_PER_PAGE)
                 );
                 assert.strictEqual(fields, totalEntries);
             });
@@ -126,7 +125,7 @@ describe("getLeaderboardEmbeds", () => {
 
         describe("one field short of a full page", () => {
             it("should match the number of pages and embeds", async () => {
-                const totalEntries = ENTRIES_PER_PAGE - 1;
+                const totalEntries = LEADERBOARD_ENTRIES_PER_PAGE - 1;
                 await dbContext
                     .kmq("player_stats")
                     .insert(generatePlayerStats(totalEntries));
@@ -143,7 +142,7 @@ describe("getLeaderboardEmbeds", () => {
 
                 assert.strictEqual(
                     pageCount,
-                    Math.ceil(totalEntries / ENTRIES_PER_PAGE)
+                    Math.ceil(totalEntries / LEADERBOARD_ENTRIES_PER_PAGE)
                 );
                 assert.strictEqual(fields, totalEntries);
             });
@@ -173,7 +172,9 @@ describe("getLeaderboardEmbeds", () => {
 
                 assert.strictEqual(
                     pageCount,
-                    Math.ceil(INITIAL_TOTAL_ENTRIES / ENTRIES_PER_PAGE)
+                    Math.ceil(
+                        INITIAL_TOTAL_ENTRIES / LEADERBOARD_ENTRIES_PER_PAGE
+                    )
                 );
                 assert.strictEqual(fields, INITIAL_TOTAL_ENTRIES);
             });
@@ -215,7 +216,9 @@ describe("getLeaderboardEmbeds", () => {
 
                 assert.strictEqual(
                     pageCount,
-                    Math.ceil(INITIAL_TOTAL_ENTRIES / ENTRIES_PER_PAGE)
+                    Math.ceil(
+                        INITIAL_TOTAL_ENTRIES / LEADERBOARD_ENTRIES_PER_PAGE
+                    )
                 );
                 assert.strictEqual(fields, INITIAL_TOTAL_ENTRIES);
             });
@@ -269,7 +272,9 @@ describe("getLeaderboardEmbeds", () => {
 
                 assert.strictEqual(
                     pageCount,
-                    Math.ceil(INITIAL_TOTAL_ENTRIES / ENTRIES_PER_PAGE)
+                    Math.ceil(
+                        INITIAL_TOTAL_ENTRIES / LEADERBOARD_ENTRIES_PER_PAGE
+                    )
                 );
                 assert.strictEqual(fields, INITIAL_TOTAL_ENTRIES);
             });
@@ -297,7 +302,9 @@ describe("getLeaderboardEmbeds", () => {
 
                 assert.strictEqual(
                     pageCount,
-                    Math.ceil(INITIAL_TOTAL_ENTRIES / ENTRIES_PER_PAGE)
+                    Math.ceil(
+                        INITIAL_TOTAL_ENTRIES / LEADERBOARD_ENTRIES_PER_PAGE
+                    )
                 );
                 assert.strictEqual(fields, INITIAL_TOTAL_ENTRIES);
             });
@@ -325,7 +332,9 @@ describe("getLeaderboardEmbeds", () => {
 
                 assert.strictEqual(
                     pageCount,
-                    Math.ceil(INITIAL_TOTAL_ENTRIES / ENTRIES_PER_PAGE)
+                    Math.ceil(
+                        INITIAL_TOTAL_ENTRIES / LEADERBOARD_ENTRIES_PER_PAGE
+                    )
                 );
                 assert.strictEqual(fields, INITIAL_TOTAL_ENTRIES);
             });
@@ -413,7 +422,9 @@ describe("getLeaderboardEmbeds", () => {
                     const fields = await getNumberOfFields(embeds);
                     assert.strictEqual(
                         pageCount,
-                        Math.ceil(validEntryCount / ENTRIES_PER_PAGE)
+                        Math.ceil(
+                            validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE
+                        )
                     );
                     assert.strictEqual(fields, validEntryCount);
                 });
@@ -437,7 +448,9 @@ describe("getLeaderboardEmbeds", () => {
 
                     assert.strictEqual(
                         pageCount,
-                        Math.ceil(validEntryCount / ENTRIES_PER_PAGE)
+                        Math.ceil(
+                            validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE
+                        )
                     );
                     assert.strictEqual(fields, validEntryCount);
                 });
@@ -460,7 +473,9 @@ describe("getLeaderboardEmbeds", () => {
 
                     assert.strictEqual(
                         pageCount,
-                        Math.ceil(validEntryCount / ENTRIES_PER_PAGE)
+                        Math.ceil(
+                            validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE
+                        )
                     );
                     assert.strictEqual(fields, validEntryCount);
                 });
@@ -503,7 +518,9 @@ describe("getLeaderboardEmbeds", () => {
 
                     assert.strictEqual(
                         pageCount,
-                        Math.ceil(validEntryCount / ENTRIES_PER_PAGE)
+                        Math.ceil(
+                            validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE
+                        )
                     );
                     assert.strictEqual(fields, validEntryCount);
                 });
@@ -528,7 +545,9 @@ describe("getLeaderboardEmbeds", () => {
 
                     assert.strictEqual(
                         pageCount,
-                        Math.ceil(validEntryCount / ENTRIES_PER_PAGE)
+                        Math.ceil(
+                            validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE
+                        )
                     );
                     assert.strictEqual(fields, validEntryCount);
                 });
@@ -552,7 +571,9 @@ describe("getLeaderboardEmbeds", () => {
 
                     assert.strictEqual(
                         pageCount,
-                        Math.ceil(validEntryCount / ENTRIES_PER_PAGE)
+                        Math.ceil(
+                            validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE
+                        )
                     );
                     assert.strictEqual(fields, validEntryCount);
                 });
@@ -606,7 +627,9 @@ describe("getLeaderboardEmbeds", () => {
 
                     assert.strictEqual(
                         pageCount,
-                        Math.ceil(validEntryCount / ENTRIES_PER_PAGE)
+                        Math.ceil(
+                            validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE
+                        )
                     );
                     assert.strictEqual(fields, validEntryCount);
                 });
@@ -631,7 +654,9 @@ describe("getLeaderboardEmbeds", () => {
 
                     assert.strictEqual(
                         pageCount,
-                        Math.ceil(validEntryCount / ENTRIES_PER_PAGE)
+                        Math.ceil(
+                            validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE
+                        )
                     );
                     assert.strictEqual(fields, validEntryCount);
                 });
@@ -655,7 +680,9 @@ describe("getLeaderboardEmbeds", () => {
 
                     assert.strictEqual(
                         pageCount,
-                        Math.ceil(validEntryCount / ENTRIES_PER_PAGE)
+                        Math.ceil(
+                            validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE
+                        )
                     );
                     assert.strictEqual(fields, validEntryCount);
                 });
@@ -694,7 +721,7 @@ describe("getLeaderboardEmbeds", () => {
 
                 assert.strictEqual(
                     pageCount,
-                    Math.ceil(validEntryCount / ENTRIES_PER_PAGE)
+                    Math.ceil(validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE)
                 );
                 assert.strictEqual(fields, validEntryCount);
             });
@@ -732,7 +759,7 @@ describe("getLeaderboardEmbeds", () => {
 
                 assert.strictEqual(
                     pageCount,
-                    Math.ceil(validEntryCount / ENTRIES_PER_PAGE)
+                    Math.ceil(validEntryCount / LEADERBOARD_ENTRIES_PER_PAGE)
                 );
                 assert.strictEqual(fields, validEntryCount);
             });

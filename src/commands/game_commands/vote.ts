@@ -3,10 +3,16 @@ import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
     sendInfoMessage,
-    EMBED_SUCCESS_BONUS_COLOR,
 } from "../../helpers/discord_utils";
 import MessageContext from "../../structures/message_context";
-import { KmqImages } from "../../constants";
+import {
+    EMBED_SUCCESS_BONUS_COLOR,
+    KmqImages,
+    REVIEW_LINK,
+    VOTE_BONUS_DURATION,
+    VOTE_LINK,
+    VOTE_RESET_DURATION,
+} from "../../constants";
 import dbContext from "../../database_context";
 import { bold } from "../../helpers/utils";
 import { userBonusIsActive } from "../../helpers/game_utils";
@@ -15,12 +21,6 @@ import type HelpDocumentation from "../../interfaces/help";
 import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("vote");
-
-export const VOTE_BONUS_DURATION = 1;
-const VOTE_RESET_DURATION = 12;
-
-export const VOTE_LINK = "https://top.gg/bot/508759831755096074/vote";
-export const REVIEW_LINK = "https://top.gg/bot/508759831755096074#reviews";
 
 export default class VoteCommand implements BaseCommand {
     aliases = ["v", "voted"];

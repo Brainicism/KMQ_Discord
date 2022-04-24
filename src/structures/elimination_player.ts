@@ -1,14 +1,14 @@
 import Player from "./player";
 import { getUserTag } from "../helpers/discord_utils";
 import State from "../state";
-import { DEFAULT_LIVES } from "./elimination_scoreboard";
+import { ELIMINATION_DEFAULT_LIVES } from "../constants";
 
 export default class EliminationPlayer extends Player {
     // this.score => the player's lives
 
     static fromUserID(
         userID: string,
-        score = DEFAULT_LIVES,
+        score = ELIMINATION_DEFAULT_LIVES,
         firstGameOfDay = false,
         premium = false
     ): EliminationPlayer {

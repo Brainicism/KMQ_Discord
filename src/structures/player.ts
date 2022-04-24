@@ -1,4 +1,4 @@
-import { ExpBonusModifierValues } from "../commands/game_commands/exp";
+import { ExpBonusModifierValues } from "../constants";
 import { ExpBonusModifier } from "../enums/exp_bonus_modifier";
 import { getMention } from "../helpers/discord_utils";
 import { bold } from "../helpers/utils";

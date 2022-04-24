@@ -18,12 +18,8 @@ import storeDailyStats from "./scripts/store-daily-stats";
 import dbContext from "./database_context";
 import { EnvType } from "./enums/env_type";
 import { seedAndDownloadNewSongs } from "./seed/seed_db";
-import {
-    EMBED_ERROR_COLOR,
-    EMBED_SUCCESS_COLOR,
-    sendDebugAlertWebhook,
-} from "./helpers/discord_utils";
-import { KmqImages } from "./constants";
+import { sendDebugAlertWebhook } from "./helpers/discord_utils";
+import { EMBED_ERROR_COLOR, EMBED_SUCCESS_COLOR, KmqImages } from "./constants";
 import KmqClient from "./kmq_client";
 import backupKmqDatabase from "./scripts/backup-kmq-database";
 import { userVoted } from "./helpers/bot_listing_manager";

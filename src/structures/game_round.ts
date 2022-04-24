@@ -3,22 +3,23 @@ import type Eris from "eris";
 import levenshtien from "damerau-levenshtein";
 import State from "../state";
 import KmqMember from "./kmq_member";
-import { ExpBonusModifierValues } from "../commands/game_commands/exp";
 import { ExpBonusModifier } from "../enums/exp_bonus_modifier";
-import Round, { MAX_RUNNERS_UP } from "./round";
+import Round from "./round";
 import type MessageContext from "./message_context";
-import {
-    EMBED_ERROR_COLOR,
-    EMBED_SUCCESS_BONUS_COLOR,
-    EMBED_SUCCESS_COLOR,
-    getMention,
-} from "../helpers/discord_utils";
+import { getMention } from "../helpers/discord_utils";
 import { friendlyFormattedNumber } from "../helpers/utils";
 import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "../interfaces/queried_song";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
 import { GuessModeType } from "../enums/option_types/guess_mode_type";
 import LocalizationManager from "../helpers/localization_manager";
+import {
+    EMBED_ERROR_COLOR,
+    EMBED_SUCCESS_BONUS_COLOR,
+    EMBED_SUCCESS_COLOR,
+    ExpBonusModifierValues,
+    ROUND_MAX_RUNNERS_UP,
+} from "../constants";
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
 const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\(\)\+\u200B]/g;
@@ -403,10 +404,10 @@ export default class GameRound extends Round {
                                 x.player.id
                             )} (+${friendlyFormattedNumber(x.expGain)} EXP)`
                     )
-                    .slice(0, MAX_RUNNERS_UP)
+                    .slice(0, ROUND_MAX_RUNNERS_UP)
                     .join("\n");
 
-                if (runnersUp.length >= MAX_RUNNERS_UP) {
+                if (runnersUp.length >= ROUND_MAX_RUNNERS_UP) {
                     runnersUpDescription += `\n${LocalizationManager.localizer.translate(
                         messageContext.guildID,
                         "misc.andManyOthers"

@@ -11,13 +11,12 @@ import { ArtistType } from "../enums/option_types/artist_type";
 import { OstPreference } from "../enums/option_types/ost_preference";
 import { LanguageType } from "../enums/option_types/language_type";
 import { ReleaseType } from "../enums/option_types/release_type";
-import { FOREIGN_LANGUAGE_TAGS, NON_OFFICIAL_VIDEO_TAGS } from "../constants";
-
-export const LAST_PLAYED_SONG_QUEUE_SIZE = 10;
-export const SELECTION_WEIGHT_VALUES_HARD = [1, 2, 4, 8, 16];
-export const SELECTION_WEIGHT_VALUES_EASY = [
-    ...SELECTION_WEIGHT_VALUES_HARD,
-].reverse();
+import {
+    FOREIGN_LANGUAGE_TAGS,
+    NON_OFFICIAL_VIDEO_TAGS,
+    SELECTION_WEIGHT_VALUES_EASY,
+    SELECTION_WEIGHT_VALUES_HARD,
+} from "../constants";
 
 const logger = new IPCLogger("song_selector");
 

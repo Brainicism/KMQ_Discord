@@ -103,9 +103,9 @@ export async function getTimeUntilRestart(): Promise<number> {
  * Sends a warning message to all active GameSessions for impending restarts at predefined intervals
  * @param timeUntilRestart - time until the restart
  */
-export const checkRestartNotification = async (
+export async function checkRestartNotification(
     timeUntilRestart: number
-): Promise<void> => {
+): Promise<void> {
     let serversWarned = 0;
     if (RESTART_WARNING_INTERVALS.has(timeUntilRestart)) {
         for (const gameSession of Object.values(State.gameSessions)) {
@@ -125,7 +125,7 @@ export const checkRestartNotification = async (
             `Impending bot restart in ${timeUntilRestart} minutes. ${serversWarned} servers warned.`
         );
     }
-};
+}
 
 /** Clear inactive voice connections */
 function clearInactiveVoiceConnections(): void {

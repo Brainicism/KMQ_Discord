@@ -7,9 +7,6 @@ import type PlayerRoundResult from "../interfaces/player_round_result";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
 import LocalizationManager from "../helpers/localization_manager";
 
-export const MAX_RUNNERS_UP = 30;
-export const MAX_SCOREBOARD_PLAYERS = 30;
-
 export default abstract class Round {
     /** The song associated with the round */
     public readonly song: QueriedSong;

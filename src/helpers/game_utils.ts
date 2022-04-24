@@ -7,7 +7,6 @@ import GuildPreference from "../structures/guild_preference";
 import { cleanArtistName, cleanSongName } from "../structures/game_round";
 import SongSelector from "../structures/song_selector";
 import { LocaleType } from "../enums/locale_type";
-import { PATREON_SUPPORTER_BADGE } from "./patreon_manager";
 import { containsHangul, md5Hash } from "./utils";
 import Session from "../structures/session";
 import type MatchedArtist from "../interfaces/matched_artist";
@@ -16,6 +15,7 @@ import type Patron from "../interfaces/patron";
 import { GuessModeType } from "../enums/option_types/guess_mode_type";
 import { AnswerType } from "../enums/option_types/answer_type";
 import type { Gender } from "../enums/option_types/gender";
+import { PATREON_SUPPORTER_BADGE } from "../constants";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 10;
 

@@ -2,14 +2,13 @@ import type BaseCommand from "../interfaces/base_command";
 import {
     areUserAndBotInSameVoiceChannel,
     getDebugLogHeader,
-    EMBED_SUCCESS_COLOR,
     sendInfoMessage,
     getMajorityCount,
 } from "../../helpers/discord_utils";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import type { GuildTextableMessage } from "../../types";
-import { KmqImages } from "../../constants";
+import { EMBED_SUCCESS_COLOR, KmqImages } from "../../constants";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import type EliminationScoreboard from "../../structures/elimination_scoreboard";
