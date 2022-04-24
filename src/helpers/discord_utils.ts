@@ -1072,7 +1072,7 @@ export async function generateOptionsMessage(
     }
 
     // Special case: disable these options in a music session
-    if (session.isMusicSession()) {
+    if (session?.isMusicSession()) {
         const disabledOptions = [
             GameOption.GUESS_MODE_TYPE,
             GameOption.SEEK_TYPE,
