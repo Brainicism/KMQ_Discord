@@ -59,6 +59,10 @@ export default class MusicSession extends Session {
         return true;
     }
 
+    sessionName(): string {
+        return "Music Session";
+    }
+
     /**
      * Starting a new MusicRound
      * @param guildPreference - The guild's GuildPreference

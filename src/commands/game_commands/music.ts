@@ -199,6 +199,5 @@ export default class MusicCommand implements BaseCommand {
         );
 
         musicSession.startRound(guildPreference, messageContext);
-        logger.info(`${getDebugLogHeader(message)} | Music session starting`);
     };
 }
