@@ -1,30 +1,35 @@
-import { AnswerType } from "./enums/option_types/answer_type";
-import { ArtistType } from "./enums/option_types/artist_type";
-import { ExpBonusModifier } from "./enums/exp_bonus_modifier";
-import { GameOption } from "./enums/game_option_name";
-import { Gender } from "./enums/option_types/gender";
-import { GuessModeType } from "./enums/option_types/guess_mode_type";
-import { LanguageType } from "./enums/option_types/language_type";
-import { LocaleType } from "./enums/locale_type";
-import { MultiGuessType } from "./enums/option_types/multiguess_type";
-import { OstPreference } from "./enums/option_types/ost_preference";
-import { ReleaseType } from "./enums/option_types/release_type";
-import { SeekType } from "./enums/option_types/seek_type";
-import { ShuffleType } from "./enums/option_types/shuffle_type";
-import { SpecialType } from "./enums/option_types/special_type";
-import { SubunitsPreference } from "./enums/option_types/subunit_preference";
+/* eslint-disable no-return-assign */
+import AnswerType from "./enums/option_types/answer_type";
+import ArtistType from "./enums/option_types/artist_type";
+import ExpBonusModifier from "./enums/exp_bonus_modifier";
+import GameOption from "./enums/game_option_name";
+import Gender from "./enums/option_types/gender";
+import GuessModeType from "./enums/option_types/guess_mode_type";
+import LanguageType from "./enums/option_types/language_type";
+import LocaleType from "./enums/locale_type";
+import MultiGuessType from "./enums/option_types/multiguess_type";
+import OstPreference from "./enums/option_types/ost_preference";
+import ReleaseType from "./enums/option_types/release_type";
+import SeekType from "./enums/option_types/seek_type";
+import ShuffleType from "./enums/option_types/shuffle_type";
+import SpecialType from "./enums/option_types/special_type";
+import SubunitsPreference from "./enums/option_types/subunit_preference";
 import path from "path";
 
-// eslint-disable-next-line import/prefer-default-export
 export class KmqImages {
     public static READING_BOOK =
         "https://kmq.kpop.gg/static/thumbnails/book_bg.png";
+
     public static NOT_IMPRESSED =
         "https://kmq.kpop.gg/static/thumbnails/not_impressed_bg.png";
+
     public static HAPPY = "https://kmq.kpop.gg/static/thumbnails/happy_bg.png";
+
     public static DEAD = "https://kmq.kpop.gg/static/thumbnails/dead_bg.png";
+
     public static LISTENING =
         "https://kmq.kpop.gg/static/thumbnails/listening_bg.png";
+
     public static THUMBS_UP =
         "https://kmq.kpop.gg/static/thumbnails/thumbs_up_bg.png";
 }

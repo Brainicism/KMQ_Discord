@@ -1,6 +1,6 @@
 import { DEFAULT_LOCALE } from "../constants";
-import { LocaleType } from "../enums/locale_type";
 import Backend from "i18next-fs-backend";
+import LocaleType from "../enums/locale_type";
 import State from "../state";
 import i18next from "i18next";
 import path from "path";
@@ -9,6 +9,7 @@ export default class LocalizationManager {
     static localizer = new LocalizationManager();
 
     internalLocalizer: typeof i18next;
+
     constructor() {
         this.internalLocalizer = i18next.createInstance().use(Backend);
         this.internalLocalizer.init({

@@ -1,4 +1,4 @@
-export enum SpecialType {
+enum SpecialType {
     REVERSE = "reverse",
     SLOW = "slow",
     FAST = "fast",
@@ -7,3 +7,5 @@ export enum SpecialType {
     HIGH_PITCH = "highpitch",
     NIGHTCORE = "nightcore",
 }
+
+export default SpecialType;

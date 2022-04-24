@@ -1,5 +1,4 @@
 import { GROUP_LIST_URL } from "../../constants";
-import { GameOption } from "../../enums/game_option_name";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -8,6 +7,7 @@ import {
 } from "../../helpers/discord_utils";
 import { getMatchingGroupNames } from "../../helpers/game_utils";
 import CommandPrechecks from "../../command_prechecks";
+import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";

@@ -1,6 +1,5 @@
 /* eslint-disable global-require */
 /* eslint-disable import/no-dynamic-require */
-import { EnvType } from "../enums/env_type";
 import { IPCLogger } from "../logger";
 import { chooseRandom, isWeekend } from "./utils";
 import {
@@ -10,6 +9,7 @@ import {
 } from "./game_utils";
 import { reloadFactCache } from "../fact_generator";
 import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
+import EnvType from "../enums/env_type";
 import MessageContext from "../structures/message_context";
 import SIGINTHandler from "../events/process/SIGINT";
 import State from "../state";
@@ -37,7 +37,7 @@ import voiceChannelJoinHandler from "../events/client/voiceChannelJoin";
 import voiceChannelLeaveHandler from "../events/client/voiceChannelLeave";
 import voiceChannelSwitchHandler from "../events/client/voiceChannelSwitch";
 import warnHandler from "../events/client/warn";
-import type { LocaleType } from "../enums/locale_type";
+import type LocaleType from "../enums/locale_type";
 
 const logger = new IPCLogger("management_utils");
 

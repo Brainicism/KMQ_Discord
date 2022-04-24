@@ -108,6 +108,7 @@ export default class Team extends Player {
     /**
      * @returns whether to include this team in the scoreboard
      */
+    // eslint-disable-next-line class-methods-use-this
     shouldIncludeInScoreboard(): boolean {
         return true;
     }

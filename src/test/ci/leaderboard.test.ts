@@ -1,14 +1,14 @@
 import * as discordUtils from "../../helpers/discord_utils";
-import { GameType } from "../../enums/game_type";
 import { LEADERBOARD_ENTRIES_PER_PAGE } from "../../constants";
-import { LeaderboardDuration } from "../../enums/option_types/leaderboard_duration";
-import { LeaderboardScope } from "../../enums/option_types/leaderboard_scope";
-import { LeaderboardType } from "../../enums/option_types/leaderboard_type";
 import { describe } from "mocha";
 import GameSession from "../../structures/game_session";
+import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
 import LeaderboardCommand from "../../commands/game_commands/leaderboard";
+import LeaderboardDuration from "../../enums/option_types/leaderboard_duration";
+import LeaderboardScope from "../../enums/option_types/leaderboard_scope";
+import LeaderboardType from "../../enums/option_types/leaderboard_type";
 import MessageContext from "../../structures/message_context";
 import Player from "../../structures/player";
 import State from "../../state";

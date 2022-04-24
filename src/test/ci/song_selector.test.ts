@@ -1,17 +1,17 @@
-import { ArtistType } from "../../enums/option_types/artist_type";
 import {
     FOREIGN_LANGUAGE_TAGS,
     LAST_PLAYED_SONG_QUEUE_SIZE,
 } from "../../constants";
-import { Gender } from "../../enums/option_types/gender";
-import { LanguageType } from "../../enums/option_types/language_type";
-import { OstPreference } from "../../enums/option_types/ost_preference";
-import { ReleaseType } from "../../enums/option_types/release_type";
-import { ShuffleType } from "../../enums/option_types/shuffle_type";
-import { SubunitsPreference } from "../../enums/option_types/subunit_preference";
 import { getMatchingGroupNames } from "../../helpers/game_utils";
+import ArtistType from "../../enums/option_types/artist_type";
+import Gender from "../../enums/option_types/gender";
 import GuildPreference from "../../structures/guild_preference";
+import LanguageType from "../../enums/option_types/language_type";
+import OstPreference from "../../enums/option_types/ost_preference";
+import ReleaseType from "../../enums/option_types/release_type";
+import ShuffleType from "../../enums/option_types/shuffle_type";
 import SongSelector from "../../structures/song_selector";
+import SubunitsPreference from "../../enums/option_types/subunit_preference";
 import _ from "lodash";
 import assert from "assert";
 import sinon from "sinon";
@@ -451,11 +451,9 @@ describe("subunits", () => {
             assert.strictEqual(unmatchedGroups.length, 0);
 
             assert.strictEqual(
-                expectedIds.every((artistId) => {
-                    return Array.from(songs).some(
-                        (song) => song.artistID === artistId
-                    );
-                }),
+                expectedIds.every((artistId) =>
+                    Array.from(songs).some((song) => song.artistID === artistId)
+                ),
                 true
             );
         });
@@ -566,11 +564,11 @@ describe("subunits", () => {
 
                 // there is atleast one song of each language
                 assert.strictEqual(
-                    FOREIGN_LANGUAGE_TAGS.every((languageTag) => {
-                        return Array.from(songs).some((song) => {
-                            return song.tags.split("").includes(languageTag);
-                        });
-                    }),
+                    FOREIGN_LANGUAGE_TAGS.every((languageTag) =>
+                        Array.from(songs).some((song) =>
+                            song.tags.split("").includes(languageTag)
+                        )
+                    ),
                     true
                 );
             });
@@ -682,7 +680,7 @@ describe("subunits", () => {
     });
 });
 
-describe("selectRandomSong", function () {
+describe("selectRandomSong", () => {
     describe("gender override", () => {
         beforeEach(async () => {
             await guildPreference.setGender([Gender.ALTERNATING]);

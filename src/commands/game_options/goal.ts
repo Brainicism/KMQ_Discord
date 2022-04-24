@@ -1,5 +1,3 @@
-import { GameOption } from "../../enums/game_option_name";
-import { GameType } from "../../enums/game_type";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -7,6 +5,8 @@ import {
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import GameOption from "../../enums/game_option_name";
+import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
@@ -84,7 +84,7 @@ export default class GoalCommand implements BaseCommand {
         }
 
         const gameSession = Session.getSession(message.guildID) as GameSession;
-        const userGoal = parseInt(parsedMessage.components[0]);
+        const userGoal = parseInt(parsedMessage.components[0], 10);
         if (gameSession) {
             if (
                 gameSession.scoreboard.getWinners().length > 0 &&

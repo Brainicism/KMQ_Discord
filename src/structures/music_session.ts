@@ -62,10 +62,12 @@ export default class MusicSession extends Session {
         super.updateOwner();
     }
 
+    // eslint-disable-next-line class-methods-use-this
     isMusicSession(): this is MusicSession {
         return true;
     }
 
+    // eslint-disable-next-line class-methods-use-this
     sessionName(): string {
         return "Music Session";
     }
@@ -203,6 +205,7 @@ export default class MusicSession extends Session {
      * @param randomSong - The queried song
      * @returns the new GameRound
      */
+    // eslint-disable-next-line class-methods-use-this
     protected prepareRound(randomSong: QueriedSong): Round {
         return new MusicRound(randomSong);
     }

@@ -1,7 +1,7 @@
-import { EnvType } from "../enums/env_type";
 import { IPCLogger } from "../logger";
 import { VOTE_BONUS_DURATION } from "../constants";
 import Axios from "axios";
+import EnvType from "../enums/env_type";
 import State from "../state";
 import dbContext from "../database_context";
 

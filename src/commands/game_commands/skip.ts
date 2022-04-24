@@ -1,5 +1,4 @@
 import { EMBED_SUCCESS_COLOR, KmqImages } from "../../constants";
-import { GameType } from "../../enums/game_type";
 import { IPCLogger } from "../../logger";
 import {
     areUserAndBotInSameVoiceChannel,
@@ -8,6 +7,7 @@ import {
     sendInfoMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import GameType from "../../enums/game_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";

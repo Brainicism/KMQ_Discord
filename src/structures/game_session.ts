@@ -7,6 +7,7 @@ import {
     chunkArray,
     codeLine,
     delay,
+    getMention,
     getOrdinalNum,
     setDifference,
 } from "../helpers/utils";
@@ -32,23 +33,22 @@ import {
 import State from "../state";
 import dbContext from "../database_context";
 
-import { AnswerType } from "../enums/option_types/answer_type";
 import { CUM_EXP_TABLE, KmqImages, SONG_START_DELAY } from "../constants";
-import { GameType } from "../enums/game_type";
-import { GuessModeType } from "../enums/option_types/guess_mode_type";
 import { IPCLogger } from "../logger";
-import { MultiGuessType } from "../enums/option_types/multiguess_type";
 import { calculateTotalRoundExp } from "../commands/game_commands/exp";
-import { getMention } from "../helpers/utils";
 import { getRankNameByLevel } from "../commands/game_commands/profile";
+import AnswerType from "../enums/option_types/answer_type";
 import EliminationPlayer from "./elimination_player";
 import EliminationScoreboard from "./elimination_scoreboard";
 import GameRound from "./game_round";
+import GameType from "../enums/game_type";
+import GuessModeType from "../enums/option_types/guess_mode_type";
 import GuildPreference from "./guild_preference";
 import KmqMember from "./kmq_member";
 import LocalizationManager from "../helpers/localization_manager";
 import MessageContext from "./message_context";
-import Player from "../structures/player";
+import MultiGuessType from "../enums/option_types/multiguess_type";
+import Player from "./player";
 import Scoreboard from "./scoreboard";
 import Session from "./session";
 import TeamScoreboard from "./team_scoreboard";
@@ -143,6 +143,7 @@ export default class GameSession extends Session {
         this.syncAllVoiceMembers();
     }
 
+    // eslint-disable-next-line class-methods-use-this
     sessionName(): string {
         return "Game Session";
     }
@@ -300,15 +301,13 @@ export default class GameSession extends Session {
                 timePlayed,
                 messageContext
             );
-        } else {
-            if (!guessResult.error) {
-                this.lastGuesser = null;
-                if (this.gameType === GameType.ELIMINATION) {
-                    const eliminationScoreboard = this
-                        .scoreboard as EliminationScoreboard;
+        } else if (!guessResult.error) {
+            this.lastGuesser = null;
+            if (this.gameType === GameType.ELIMINATION) {
+                const eliminationScoreboard = this
+                    .scoreboard as EliminationScoreboard;
 
-                    eliminationScoreboard.decrementAllLives();
-                }
+                eliminationScoreboard.decrementAllLives();
             }
         }
 
@@ -571,6 +570,7 @@ export default class GameSession extends Session {
         return this.correctGuesses;
     }
 
+    // eslint-disable-next-line class-methods-use-this
     isGameSession(): this is GameSession {
         return true;
     }

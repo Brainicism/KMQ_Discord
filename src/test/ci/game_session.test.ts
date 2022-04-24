@@ -1,9 +1,9 @@
 import * as discord_utils from "../../helpers/discord_utils";
 import * as game_utils from "../../helpers/game_utils";
 import * as utils from "../../helpers/utils";
-import { GameType } from "../../enums/game_type";
 import Eris, { Collection } from "eris";
 import GameSession from "../../structures/game_session";
+import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
 import KmqClient from "../../kmq_client";
 import KmqMember from "../../structures/kmq_member";
@@ -20,7 +20,7 @@ function getMockGuildPreference(): GuildPreference {
 
 let guildPreference: GuildPreference;
 
-describe("startRound", function () {
+describe("startRound", () => {
     let gameSession: GameSession;
     let prepareRoundSpy: sinon.SinonSpy;
     let voiceChannelStub: Eris.VoiceChannel;

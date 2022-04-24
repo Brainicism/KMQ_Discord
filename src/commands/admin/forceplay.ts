@@ -1,10 +1,10 @@
-import { GameOption } from "../../enums/game_option_name";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";

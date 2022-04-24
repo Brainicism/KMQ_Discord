@@ -15,6 +15,7 @@ const logger = new IPCLogger("utils");
  * @returns Promise
  */
 export function delay(delayDuration: number): Promise<void> {
+    // eslint-disable-next-line no-promise-executor-return
     return new Promise((resolve) => setTimeout(resolve, delayDuration));
 }
 
@@ -98,7 +99,7 @@ export function getAudioDurationInSeconds(songPath: string): Promise<number> {
                     return;
                 }
 
-                resolve(parseInt(stdout));
+                resolve(parseInt(stdout, 10));
             }
         );
     });

@@ -13,11 +13,7 @@ import {
     REVIEW_LINK,
     VOTE_LINK,
 } from "../constants";
-import { GameOption } from "../enums/game_option_name";
-import { GameType } from "../enums/game_type";
-import { GuessModeType } from "../enums/option_types/guess_mode_type";
 import { IPCLogger } from "../logger";
-import { LocaleType } from "../enums/locale_type";
 import {
     bold,
     chooseWeightedRandom,
@@ -41,7 +37,11 @@ import {
 import { getFact } from "../fact_generator";
 import EmbedPaginator from "eris-pagination";
 import Eris from "eris";
+import GameOption from "../enums/game_option_name";
 import GameRound from "../structures/game_round";
+import GameType from "../enums/game_type";
+import GuessModeType from "../enums/option_types/guess_mode_type";
+import LocaleType from "../enums/locale_type";
 import LocalizationManager from "./localization_manager";
 import MessageContext from "../structures/message_context";
 import MusicRound from "../structures/music_round";
@@ -905,7 +905,7 @@ export async function generateOptionsMessage(
             },
             true
         );
-        return;
+        return null;
     }
 
     const guildID = messageContext.guildID;
@@ -931,7 +931,7 @@ export async function generateOptionsMessage(
                 { helpCommand: `\`${process.env.BOT_PREFIX}help\`` }
             ),
         });
-        return;
+        return null;
     }
 
     const gameOptions = guildPreference.gameOptions;
@@ -1211,7 +1211,7 @@ export async function generateOptionsMessage(
 
     let description = "";
     if (nonPremiumGameWarning) {
-        description = nonPremiumGameWarning + "\n\n";
+        description = `${nonPremiumGameWarning}\n\n`;
     }
 
     description += optionsOverview;

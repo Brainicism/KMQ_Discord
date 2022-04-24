@@ -1,7 +1,6 @@
 import { IPCLogger } from "../logger";
 import { KmqImages, specialFfmpegArgs } from "../constants";
-import { SeekType } from "../enums/option_types/seek_type";
-import { bold, friendlyFormattedNumber } from "../helpers/utils";
+import { bold, friendlyFormattedNumber, getMention } from "../helpers/utils";
 import {
     ensureVoiceConnection,
     getLocalizedSongName,
@@ -16,11 +15,11 @@ import {
     tryCreateInteractionSuccessAcknowledgement,
     tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
-import { getMention } from "../helpers/utils";
 import Eris from "eris";
 import GuildPreference from "./guild_preference";
 import LocalizationManager from "../helpers/localization_manager";
 import MessageContext from "./message_context";
+import SeekType from "../enums/option_types/seek_type";
 import SongSelector from "./song_selector";
 import State from "../state";
 import dbContext from "../database_context";
@@ -143,10 +142,12 @@ export default abstract class Session {
         }
     }
 
+    // eslint-disable-next-line class-methods-use-this
     isMusicSession(): this is MusicSession {
         return false;
     }
 
+    // eslint-disable-next-line class-methods-use-this
     isGameSession(): this is GameSession {
         return false;
     }

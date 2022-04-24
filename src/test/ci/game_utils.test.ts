@@ -1,7 +1,4 @@
 import * as discordUtils from "../../helpers/discord_utils";
-import { OstPreference } from "../../enums/option_types/ost_preference";
-import { ReleaseType } from "../../enums/option_types/release_type";
-import { SubunitsPreference } from "../../enums/option_types/subunit_preference";
 import {
     cleanupInactiveGameSessions,
     getAvailableSongCount,
@@ -10,7 +7,10 @@ import {
 import { describe } from "mocha";
 import GameSession from "../../structures/game_session";
 import GuildPreference from "../../structures/guild_preference";
+import OstPreference from "../../enums/option_types/ost_preference";
+import ReleaseType from "../../enums/option_types/release_type";
 import State from "../../state";
+import SubunitsPreference from "../../enums/option_types/subunit_preference";
 import assert from "assert";
 import sinon from "sinon";
 

@@ -1,7 +1,7 @@
 import * as discordUtils from "../../helpers/discord_utils";
-import { GameType } from "../../enums/game_type";
 import BeginCommand from "../../commands/game_commands/begin";
 import GameSession from "../../structures/game_session";
+import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
 import MessageContext from "../../structures/message_context";

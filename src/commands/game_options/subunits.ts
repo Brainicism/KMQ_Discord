@@ -1,16 +1,16 @@
 import { DEFAULT_SUBUNIT_PREFERENCE } from "../../constants";
-import { GameOption } from "../../enums/game_option_name";
 import { IPCLogger } from "../../logger";
-import { SubunitsPreference } from "../../enums/option_types/subunit_preference";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import SubunitsPreference from "../../enums/option_types/subunit_preference";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";

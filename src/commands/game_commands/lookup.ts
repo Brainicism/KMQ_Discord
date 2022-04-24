@@ -1,6 +1,5 @@
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
-import { LocaleType } from "../../enums/locale_type";
 import {
     friendlyFormattedDate,
     friendlyFormattedNumber,
@@ -18,6 +17,7 @@ import {
 import { getVideoID } from "ytdl-core";
 import { sendValidationErrorMessage } from "../../helpers/validate";
 import GuildPreference from "../../structures/guild_preference";
+import LocaleType from "../../enums/locale_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
@@ -87,7 +87,7 @@ export default class LookupCommand implements BaseCommand {
 
         if (arg.startsWith("youtube.com") || arg.startsWith("youtu.be")) {
             // ytdl::getVideoID() requires URLs start with "https://"
-            arg = "https://" + arg;
+            arg = `https://${arg}`;
         }
 
         let videoID: string;
@@ -180,7 +180,7 @@ export default class LookupCommand implements BaseCommand {
             views = kmqSongEntry.views;
             publishDate = kmqSongEntry.publishDate;
 
-            let durationInSeconds = (
+            const durationInSeconds = (
                 await dbContext
                     .kmq("cached_song_duration")
                     .where("vlink", videoID)

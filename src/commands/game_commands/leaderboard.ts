@@ -1,14 +1,11 @@
-import { EnvType } from "../../enums/env_type";
 import { IPCLogger } from "../../logger";
 import { KmqImages, LEADERBOARD_ENTRIES_PER_PAGE } from "../../constants";
-import { LeaderboardDuration } from "../../enums/option_types/leaderboard_duration";
-import { LeaderboardScope } from "../../enums/option_types/leaderboard_scope";
-import { LeaderboardType } from "../../enums/option_types/leaderboard_type";
 import {
     arrayToString,
     bold,
     chooseRandom,
     friendlyFormattedNumber,
+    getUserTag,
 } from "../../helpers/utils";
 import {
     getDebugLogHeader,
@@ -18,8 +15,11 @@ import {
     sendPaginationedEmbed,
 } from "../../helpers/discord_utils";
 import { getRankNameByLevel } from "./profile";
-import { getUserTag } from "../../helpers/utils";
 import { sendValidationErrorMessage } from "../../helpers/validate";
+import EnvType from "../../enums/env_type";
+import LeaderboardDuration from "../../enums/option_types/leaderboard_duration";
+import LeaderboardScope from "../../enums/option_types/leaderboard_scope";
+import LeaderboardType from "../../enums/option_types/leaderboard_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";

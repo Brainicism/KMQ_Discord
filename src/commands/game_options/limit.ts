@@ -1,5 +1,4 @@
 import { DEFAULT_LIMIT } from "../../constants";
-import { GameOption } from "../../enums/game_option_name";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -7,6 +6,7 @@ import {
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
@@ -98,7 +98,7 @@ export default class LimitCommand implements BaseCommand {
         let limitEnd: number;
         if (parsedMessage.components.length === 1) {
             limitStart = 0;
-            limitEnd = parseInt(parsedMessage.components[0]);
+            limitEnd = parseInt(parsedMessage.components[0], 10);
             if (limitEnd === 0) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
                     title: LocalizationManager.localizer.translate(
@@ -113,8 +113,8 @@ export default class LimitCommand implements BaseCommand {
                 return;
             }
         } else {
-            limitStart = parseInt(parsedMessage.components[0]);
-            limitEnd = parseInt(parsedMessage.components[1]);
+            limitStart = parseInt(parsedMessage.components[0], 10);
+            limitEnd = parseInt(parsedMessage.components[1], 10);
             if (limitEnd <= limitStart) {
                 sendErrorMessage(MessageContext.fromMessage(message), {
                     title: LocalizationManager.localizer.translate(

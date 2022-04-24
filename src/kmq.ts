@@ -1,5 +1,4 @@
 import { EMBED_ERROR_COLOR, EMBED_SUCCESS_COLOR, KmqImages } from "./constants";
-import { EnvType } from "./enums/env_type";
 import { Fleet } from "eris-fleet";
 import { clearRestartNotification } from "./helpers/management_utils";
 import { config } from "dotenv";
@@ -8,6 +7,7 @@ import { seedAndDownloadNewSongs } from "./seed/seed_db";
 import { sendDebugAlertWebhook } from "./helpers/discord_utils";
 import { standardDateFormat } from "./helpers/utils";
 import { userVoted } from "./helpers/bot_listing_manager";
+import EnvType from "./enums/env_type";
 import Eris from "eris";
 import KmqClient from "./kmq_client";
 import _ from "lodash";

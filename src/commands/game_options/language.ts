@@ -1,12 +1,12 @@
-import { GameOption } from "../../enums/game_option_name";
 import { IPCLogger } from "../../logger";
-import { LanguageType } from "../../enums/option_types/language_type";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
+import LanguageType from "../../enums/option_types/language_type";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";

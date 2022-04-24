@@ -1,4 +1,4 @@
-export enum ExpBonusModifier {
+enum ExpBonusModifier {
     POWER_HOUR,
     BONUS_ARTIST,
     VOTE,
@@ -18,3 +18,5 @@ export enum ExpBonusModifier {
     HINT_USED,
     FIRST_GAME_OF_DAY,
 }
+
+export default ExpBonusModifier;

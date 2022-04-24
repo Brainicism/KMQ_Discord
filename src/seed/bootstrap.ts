@@ -1,4 +1,3 @@
-import { EnvType } from "../enums/env_type";
 import { IPCLogger } from "../logger";
 import { config } from "dotenv";
 import { downloadAndConvertSongs } from "../scripts/download-new-songs";
@@ -9,6 +8,7 @@ import {
     updateKpopDatabase,
 } from "./seed_db";
 import { getNewConnection } from "../database_context";
+import EnvType from "../enums/env_type";
 import fs from "fs";
 import path from "path";
 import type { DatabaseContext } from "../database_context";

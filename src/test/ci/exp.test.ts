@@ -1,20 +1,20 @@
 import * as game_utils from "../../helpers/game_utils";
 import * as utils from "../../helpers/utils";
-import { AnswerType } from "../../enums/option_types/answer_type";
-import { ExpBonusModifier } from "../../enums/exp_bonus_modifier";
 import {
     ExpBonusModifierValues,
     GUESS_STREAK_THRESHOLD,
     PARTICIPANT_MODIFIER_MAX_PARTICIPANTS,
 } from "../../constants";
-import { Gender } from "../../enums/option_types/gender";
-import { GuessModeType } from "../../enums/option_types/guess_mode_type";
 import {
     calculateOptionsExpMultiplierInternal,
     calculateRoundExpMultiplier,
     participantExpScalingModifier,
 } from "../../commands/game_commands/exp";
+import AnswerType from "../../enums/option_types/answer_type";
+import ExpBonusModifier from "../../enums/exp_bonus_modifier";
 import GameRound from "../../structures/game_round";
+import Gender from "../../enums/option_types/gender";
+import GuessModeType from "../../enums/option_types/guess_mode_type";
 import GuildPreference from "../../structures/guild_preference";
 import assert from "assert";
 import sinon from "sinon";

@@ -1,6 +1,4 @@
-import { GameOption } from "../../enums/game_option_name";
 import { IPCLogger } from "../../logger";
-import { SpecialType } from "../../enums/option_types/special_type";
 import {
     getDebugLogHeader,
     sendErrorMessage,
@@ -8,10 +6,12 @@ import {
 } from "../../helpers/discord_utils";
 import { isUserPremium } from "../../helpers/game_utils";
 import CommandPrechecks from "../../command_prechecks";
+import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import SpecialType from "../../enums/option_types/special_type";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -165,10 +165,7 @@ export default class SpecialCommand implements BaseCommand {
         }
     };
 
-    isUsingPremiumOption = (guildPreference: GuildPreference): boolean => {
-        return (
-            guildPreference.guildID !== process.env.DEBUG_SERVER_ID &&
-            guildPreference.gameOptions.specialType !== null
-        );
-    };
+    isUsingPremiumOption = (guildPreference: GuildPreference): boolean =>
+        guildPreference.guildID !== process.env.DEBUG_SERVER_ID &&
+        guildPreference.gameOptions.specialType !== null;
 }

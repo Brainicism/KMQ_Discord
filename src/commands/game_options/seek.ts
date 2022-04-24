@@ -1,15 +1,15 @@
 import { DEFAULT_SEEK } from "../../constants";
-import { GameOption } from "../../enums/game_option_name";
 import { IPCLogger } from "../../logger";
-import { SeekType } from "../../enums/option_types/seek_type";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
+import SeekType from "../../enums/option_types/seek_type";
 import Session from "../../structures/session";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
