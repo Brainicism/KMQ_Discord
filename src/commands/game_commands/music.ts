@@ -19,7 +19,7 @@ import type Eris from "eris";
 import { EMBED_SUCCESS_BONUS_COLOR, KmqImages } from "../../constants";
 import Session from "../../structures/session";
 import CommandPrechecks from "../../command_prechecks";
-import GuildPreference from "src/structures/guild_preference";
+import GuildPreference from "../../structures/guild_preference";
 import type GameInfoMessage from "../../interfaces/game_info_message";
 import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
