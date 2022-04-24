@@ -1,34 +1,34 @@
-import type Eris from "eris";
-import dbContext from "../../database_context";
-import type BaseCommand from "../interfaces/base_command";
+import { EnvType } from "../../enums/env_type";
 import { IPCLogger } from "../../logger";
+import { KmqImages, LEADERBOARD_ENTRIES_PER_PAGE } from "../../constants";
+import { LeaderboardDuration } from "../../enums/option_types/leaderboard_duration";
+import { LeaderboardScope } from "../../enums/option_types/leaderboard_scope";
+import { LeaderboardType } from "../../enums/option_types/leaderboard_type";
+import {
+    arrayToString,
+    bold,
+    chooseRandom,
+    friendlyFormattedNumber,
+} from "../../helpers/utils";
 import {
     getDebugLogHeader,
     sendErrorMessage,
     sendInfoMessage,
-    sendPaginationedEmbed,
     sendMessage,
+    sendPaginationedEmbed,
 } from "../../helpers/discord_utils";
 import { getRankNameByLevel } from "./profile";
-import {
-    chooseRandom,
-    friendlyFormattedNumber,
-    bold,
-    arrayToString,
-} from "../../helpers/utils";
-import State from "../../state";
-import type { EmbedGenerator, GuildTextableMessage } from "../../types";
-import { KmqImages, LEADERBOARD_ENTRIES_PER_PAGE } from "../../constants";
-import MessageContext from "../../structures/message_context";
-import { sendValidationErrorMessage } from "../../helpers/validate";
-import type CommandArgs from "../../interfaces/command_args";
-import type HelpDocumentation from "../../interfaces/help";
-import { LeaderboardScope } from "../../enums/option_types/leaderboard_scope";
-import { LeaderboardDuration } from "../../enums/option_types/leaderboard_duration";
-import { LeaderboardType } from "../../enums/option_types/leaderboard_type";
-import { EnvType } from "../../enums/env_type";
-import LocalizationManager from "../../helpers/localization_manager";
 import { getUserTag } from "../../helpers/utils";
+import { sendValidationErrorMessage } from "../../helpers/validate";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import State from "../../state";
+import dbContext from "../../database_context";
+import type { EmbedGenerator, GuildTextableMessage } from "../../types";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type Eris from "eris";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("leaderboard");
 

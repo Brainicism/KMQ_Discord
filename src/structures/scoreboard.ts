@@ -1,10 +1,10 @@
-import type Player from "./player";
-import { bold, friendlyFormattedNumber } from "../helpers/utils";
-import type GuildPreference from "./guild_preference";
-import type SuccessfulGuessResult from "../interfaces/success_guess_result";
-import LocalizationManager from "../helpers/localization_manager";
 import { SCOREBOARD_FIELD_CUTOFF } from "../constants";
+import { bold, friendlyFormattedNumber } from "../helpers/utils";
 import { getMention } from "../helpers/utils";
+import LocalizationManager from "../helpers/localization_manager";
+import type GuildPreference from "./guild_preference";
+import type Player from "./player";
+import type SuccessfulGuessResult from "../interfaces/success_guess_result";
 
 export default class Scoreboard {
     /** Mapping of Discord user ID to Player */

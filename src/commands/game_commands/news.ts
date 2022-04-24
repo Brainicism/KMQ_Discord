@@ -1,17 +1,17 @@
-import fs from "fs";
-import path from "path";
-import type BaseCommand from "../interfaces/base_command";
 import { IPCLogger } from "../../logger";
+import { KmqImages } from "../../constants";
 import {
     getDebugLogHeader,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
-import { KmqImages } from "../../constants";
-import MessageContext from "../../structures/message_context";
 import { getKmqCurrentVersion } from "../../helpers/game_utils";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import fs from "fs";
+import path from "path";
+import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
-import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("news");
 

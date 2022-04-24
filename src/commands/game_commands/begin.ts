@@ -1,20 +1,20 @@
-import type BaseCommand from "../interfaces/base_command";
-import { sendBeginGameSessionMessage } from "./play";
 import { GameType } from "../../enums/game_type";
-import type TeamScoreboard from "../../structures/team_scoreboard";
+import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
-    sendErrorMessage,
     getUserVoiceChannel,
+    sendErrorMessage,
 } from "../../helpers/discord_utils";
-import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
-import type GameSession from "../../structures/game_session";
-import LocalizationManager from "../../helpers/localization_manager";
+import { sendBeginGameSessionMessage } from "./play";
 import CommandPrechecks from "../../command_prechecks";
-import Session from "../../structures/session";
-import type CommandArgs from "../../interfaces/command_args";
 import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type GameSession from "../../structures/game_session";
+import type TeamScoreboard from "../../structures/team_scoreboard";
 
 const logger = new IPCLogger("begin");
 

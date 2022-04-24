@@ -1,33 +1,33 @@
-import { getVideoID } from "ytdl-core";
+import { IPCLogger } from "../../logger";
+import { KmqImages } from "../../constants";
 import { LocaleType } from "../../enums/locale_type";
-import type BaseCommand from "../interfaces/base_command";
-import State from "../../state";
-import dbContext from "../../database_context";
+import {
+    friendlyFormattedDate,
+    friendlyFormattedNumber,
+} from "../../helpers/utils";
 import {
     getDebugLogHeader,
     sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
-import MessageContext from "../../structures/message_context";
-import {
-    friendlyFormattedDate,
-    friendlyFormattedNumber,
-} from "../../helpers/utils";
-import { IPCLogger } from "../../logger";
-import { sendValidationErrorMessage } from "../../helpers/validate";
 import {
     getLocalizedArtistName,
     getLocalizedSongName,
     isPremiumRequest,
 } from "../../helpers/game_utils";
-import SongSelector from "../../structures/song_selector";
-import { KmqImages } from "../../constants";
-import type QueriedSong from "../../interfaces/queried_song";
-import type HelpDocumentation from "../../interfaces/help";
-import type CommandArgs from "../../interfaces/command_args";
-import LocalizationManager from "../../helpers/localization_manager";
-import Session from "../../structures/session";
+import { getVideoID } from "ytdl-core";
+import { sendValidationErrorMessage } from "../../helpers/validate";
 import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import SongSelector from "../../structures/song_selector";
+import State from "../../state";
+import dbContext from "../../database_context";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
+import type QueriedSong from "../../interfaces/queried_song";
 
 const logger = new IPCLogger("lookup");
 

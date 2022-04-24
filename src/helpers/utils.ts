@@ -1,11 +1,11 @@
 /* eslint-disable tsdoc/syntax */
-import fs from "fs";
-import { exec } from "child_process";
-import moment from "moment-timezone";
-import crypto from "crypto";
-import _ from "lodash";
-import LocalizationManager from "./localization_manager";
 import { IPCLogger } from "../logger";
+import { exec } from "child_process";
+import LocalizationManager from "./localization_manager";
+import _ from "lodash";
+import crypto from "crypto";
+import fs from "fs";
+import moment from "moment-timezone";
 
 const logger = new IPCLogger("utils");
 

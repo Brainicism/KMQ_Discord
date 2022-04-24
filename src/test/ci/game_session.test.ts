@@ -1,16 +1,16 @@
-import assert from "assert";
-import GameSession from "../../structures/game_session";
-import GuildPreference from "../../structures/guild_preference";
-import KmqMember from "../../structures/kmq_member";
-import sinon from "sinon";
-import { GameType } from "../../enums/game_type";
-import State from "../../state";
 import * as discord_utils from "../../helpers/discord_utils";
 import * as game_utils from "../../helpers/game_utils";
 import * as utils from "../../helpers/utils";
+import { GameType } from "../../enums/game_type";
 import Eris, { Collection } from "eris";
+import GameSession from "../../structures/game_session";
+import GuildPreference from "../../structures/guild_preference";
 import KmqClient from "../../kmq_client";
+import KmqMember from "../../structures/kmq_member";
 import Session from "../../structures/session";
+import State from "../../state";
+import assert from "assert";
+import sinon from "sinon";
 
 function getMockGuildPreference(): GuildPreference {
     const guildPreference = new GuildPreference("test");

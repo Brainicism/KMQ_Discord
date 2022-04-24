@@ -1,19 +1,19 @@
-import type BaseCommand from "../interfaces/base_command";
+import { DEFAULT_RELEASE_TYPE } from "../../constants";
+import { GameOption } from "../../enums/game_option_name";
 import { IPCLogger } from "../../logger";
+import { ReleaseType } from "../../enums/option_types/release_type";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { GameOption } from "../../enums/game_option_name";
-import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
-import { ReleaseType } from "../../enums/option_types/release_type";
-import { DEFAULT_RELEASE_TYPE } from "../../constants";
-import LocalizationManager from "../../helpers/localization_manager";
-import Session from "../../structures/session";
-import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("release");
 

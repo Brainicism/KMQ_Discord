@@ -1,7 +1,7 @@
-import Player from "./player";
-import State from "../state";
 import { ELIMINATION_DEFAULT_LIVES } from "../constants";
 import { getUserTag } from "../helpers/utils";
+import Player from "./player";
+import State from "../state";
 
 export default class EliminationPlayer extends Player {
     // this.score => the player's lives

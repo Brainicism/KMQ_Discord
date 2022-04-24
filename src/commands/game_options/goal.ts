@@ -1,20 +1,20 @@
-import type BaseCommand from "../interfaces/base_command";
-import {
-    getDebugLogHeader,
-    sendOptionsMessage,
-    sendErrorMessage,
-} from "../../helpers/discord_utils";
-import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
-import CommandPrechecks from "../../command_prechecks";
-import Session from "../../structures/session";
-import type GameSession from "../../structures/game_session";
-import type CommandArgs from "../../interfaces/command_args";
-import type HelpDocumentation from "../../interfaces/help";
 import { GameOption } from "../../enums/game_option_name";
 import { GameType } from "../../enums/game_type";
-import LocalizationManager from "../../helpers/localization_manager";
+import { IPCLogger } from "../../logger";
+import {
+    getDebugLogHeader,
+    sendErrorMessage,
+    sendOptionsMessage,
+} from "../../helpers/discord_utils";
+import CommandPrechecks from "../../command_prechecks";
 import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type GameSession from "../../structures/game_session";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("goal");
 

@@ -1,26 +1,26 @@
-import type BaseCommand from "../interfaces/base_command";
+import { GameType } from "../../enums/game_type";
+import { GuessModeType } from "../../enums/option_types/guess_mode_type";
+import { IPCLogger } from "../../logger";
+import { KmqImages } from "../../constants";
+import { codeLine } from "../../helpers/utils";
 import {
     getDebugLogHeader,
     getMajorityCount,
     sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
-import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
-import { KmqImages } from "../../constants";
-import { codeLine } from "../../helpers/utils";
-import type { GuildTextableMessage } from "../../types";
-import type GameSession from "../../structures/game_session";
-import type EliminationScoreboard from "../../structures/elimination_scoreboard";
-import GuildPreference from "../../structures/guild_preference";
 import CommandPrechecks from "../../command_prechecks";
-import type GameRound from "../../structures/game_round";
-import Session from "../../structures/session";
-import type HelpDocumentation from "../../interfaces/help";
-import type CommandArgs from "../../interfaces/command_args";
-import { GuessModeType } from "../../enums/option_types/guess_mode_type";
-import { GameType } from "../../enums/game_type";
+import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type { GuildTextableMessage } from "../../types";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type EliminationScoreboard from "../../structures/elimination_scoreboard";
+import type GameRound from "../../structures/game_round";
+import type GameSession from "../../structures/game_session";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("hint");
 

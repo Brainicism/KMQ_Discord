@@ -1,42 +1,42 @@
-import type Eris from "eris";
-import GameSession from "../../structures/game_session";
-import Session from "../../structures/session";
 import {
-    sendErrorMessage,
-    getDebugLogHeader,
-    sendInfoMessage,
-    voicePermissionsCheck,
-    getUserVoiceChannel,
-    getCurrentVoiceMembers,
-    generateOptionsMessage,
-    generateEmbed,
-} from "../../helpers/discord_utils";
-import { getTimeUntilRestart } from "../../helpers/management_utils";
+    ELIMINATION_DEFAULT_LIVES,
+    EMBED_SUCCESS_BONUS_COLOR,
+    KmqImages,
+} from "../../constants";
+import { GameType } from "../../enums/game_type";
+import { IPCLogger } from "../../logger";
 import {
     activeBonusUsers,
     isPowerHour,
     isPremiumRequest,
 } from "../../helpers/game_utils";
 import { chooseWeightedRandom, isWeekend } from "../../helpers/utils";
-import type BaseCommand from "../interfaces/base_command";
-import dbContext from "../../database_context";
-import { IPCLogger } from "../../logger";
-import { GameType } from "../../enums/game_type";
 import {
-    ELIMINATION_DEFAULT_LIVES,
-    EMBED_SUCCESS_BONUS_COLOR,
-    KmqImages,
-} from "../../constants";
-import MessageContext from "../../structures/message_context";
-import KmqMember from "../../structures/kmq_member";
-import CommandPrechecks from "../../command_prechecks";
-import State from "../../state";
-import GuildPreference from "../../structures/guild_preference";
-import type GameInfoMessage from "../../interfaces/game_info_message";
-import type CommandArgs from "../../interfaces/command_args";
-import type HelpDocumentation from "../../interfaces/help";
-import LocalizationManager from "../../helpers/localization_manager";
+    generateEmbed,
+    generateOptionsMessage,
+    getCurrentVoiceMembers,
+    getDebugLogHeader,
+    getUserVoiceChannel,
+    sendErrorMessage,
+    sendInfoMessage,
+    voicePermissionsCheck,
+} from "../../helpers/discord_utils";
 import { getMention } from "../../helpers/utils";
+import { getTimeUntilRestart } from "../../helpers/management_utils";
+import CommandPrechecks from "../../command_prechecks";
+import GameSession from "../../structures/game_session";
+import GuildPreference from "../../structures/guild_preference";
+import KmqMember from "../../structures/kmq_member";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import State from "../../state";
+import dbContext from "../../database_context";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type Eris from "eris";
+import type GameInfoMessage from "../../interfaces/game_info_message";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("play");
 

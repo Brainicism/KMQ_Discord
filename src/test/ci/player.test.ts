@@ -1,7 +1,7 @@
-import assert from "assert";
-import { ExpBonusModifierValues } from "../../constants";
 import { ExpBonusModifier } from "../../enums/exp_bonus_modifier";
+import { ExpBonusModifierValues } from "../../constants";
 import Player from "../../structures/player";
+import assert from "assert";
 
 let player: Player;
 beforeEach(() => {

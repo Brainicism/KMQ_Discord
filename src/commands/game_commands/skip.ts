@@ -1,22 +1,22 @@
-import type BaseCommand from "../interfaces/base_command";
+import { EMBED_SUCCESS_COLOR, KmqImages } from "../../constants";
+import { GameType } from "../../enums/game_type";
+import { IPCLogger } from "../../logger";
 import {
     areUserAndBotInSameVoiceChannel,
     getDebugLogHeader,
-    sendInfoMessage,
     getMajorityCount,
+    sendInfoMessage,
 } from "../../helpers/discord_utils";
-import { IPCLogger } from "../../logger";
-import type { GuildTextableMessage } from "../../types";
-import { EMBED_SUCCESS_COLOR, KmqImages } from "../../constants";
-import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import type EliminationScoreboard from "../../structures/elimination_scoreboard";
-import type Round from "../../structures/round";
-import Session from "../../structures/session";
-import type CommandArgs from "../../interfaces/command_args";
-import type HelpDocumentation from "../../interfaces/help";
-import { GameType } from "../../enums/game_type";
 import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type { GuildTextableMessage } from "../../types";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type EliminationScoreboard from "../../structures/elimination_scoreboard";
+import type HelpDocumentation from "../../interfaces/help";
+import type Round from "../../structures/round";
 
 const logger = new IPCLogger("skip");
 

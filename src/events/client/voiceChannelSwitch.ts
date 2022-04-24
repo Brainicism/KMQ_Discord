@@ -1,6 +1,6 @@
-import type Eris from "eris";
 import { checkBotIsAlone } from "../../helpers/discord_utils";
 import Session from "../../structures/session";
+import type Eris from "eris";
 
 /**
  * Handles the 'voiceChannelSwitch' event

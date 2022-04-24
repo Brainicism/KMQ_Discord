@@ -1,15 +1,15 @@
-import Eris from "eris";
-import MessageContext from "../../structures/message_context";
-import KmqMember from "../../structures/kmq_member";
-import {
-    tryInteractionAcknowledge,
-    tryCreateInteractionErrorAcknowledgement,
-} from "../../helpers/discord_utils";
-import { handleProfileInteraction } from "../../commands/game_commands/profile";
-import Session from "../../structures/session";
-import LocalizationManager from "../../helpers/localization_manager";
 import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
 import { getUserTag } from "../../helpers/utils";
+import { handleProfileInteraction } from "../../commands/game_commands/profile";
+import {
+    tryCreateInteractionErrorAcknowledgement,
+    tryInteractionAcknowledge,
+} from "../../helpers/discord_utils";
+import Eris from "eris";
+import KmqMember from "../../structures/kmq_member";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
 
 /**
  * Handles the 'interactionCreate' event

@@ -1,11 +1,11 @@
-import type BaseCommand from "../interfaces/base_command";
-import { getDebugLogHeader } from "../../helpers/discord_utils";
 import { IPCLogger } from "../../logger";
+import { getDebugLogHeader } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import LocalizationManager from "../../helpers/localization_manager";
 import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
-import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("end");
 

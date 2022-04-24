@@ -1,25 +1,25 @@
-import type Eris from "eris";
-import os from "os";
-import type BaseCommand from "../interfaces/base_command";
-import {
-    getDebugLogHeader,
-    sendErrorMessage,
-    sendInfoMessage,
-} from "../../helpers/discord_utils";
-import dbContext from "../../database_context";
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
-import MessageContext from "../../structures/message_context";
-import State from "../../state";
 import {
     friendlyFormattedDate,
     friendlyFormattedNumber,
     measureExecutionTime,
 } from "../../helpers/utils";
+import {
+    getDebugLogHeader,
+    sendErrorMessage,
+    sendInfoMessage,
+} from "../../helpers/discord_utils";
 import { getKmqCurrentVersion } from "../../helpers/game_utils";
-import type CommandArgs from "../../interfaces/command_args";
-import type HelpDocumentation from "../../interfaces/help";
 import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import State from "../../state";
+import dbContext from "../../database_context";
+import os from "os";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type Eris from "eris";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("stats");
 

@@ -1,6 +1,6 @@
-import type { DatabaseContext } from "../database_context";
-import { getNewConnection } from "../database_context";
 import { IPCLogger } from "../logger";
+import { getNewConnection } from "../database_context";
+import type { DatabaseContext } from "../database_context";
 
 const logger = new IPCLogger("json-presets-to-new-format");
 

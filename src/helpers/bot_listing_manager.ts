@@ -1,9 +1,9 @@
-import Axios from "axios";
+import { EnvType } from "../enums/env_type";
 import { IPCLogger } from "../logger";
+import { VOTE_BONUS_DURATION } from "../constants";
+import Axios from "axios";
 import State from "../state";
 import dbContext from "../database_context";
-import { EnvType } from "../enums/env_type";
-import { VOTE_BONUS_DURATION } from "../constants";
 
 const logger = new IPCLogger("bot_stats_poster");
 interface BotListing {

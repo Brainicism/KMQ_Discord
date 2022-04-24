@@ -1,7 +1,7 @@
-import type Eris from "eris";
 import { getUserTag } from "../helpers/utils";
-import State from "../state";
 import KmqMember from "./kmq_member";
+import State from "../state";
+import type Eris from "eris";
 
 export default class MessageContext {
     /** The text channel to send the message to */

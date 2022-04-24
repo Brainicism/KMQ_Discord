@@ -1,17 +1,17 @@
-import fs from "fs";
-import path from "path";
+import { EnvType } from "../enums/env_type";
+import { IPCLogger } from "../logger";
 import { config } from "dotenv";
+import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import { execSync } from "child_process";
 import {
     generateKmqDataTables,
     loadStoredProcedures,
     updateKpopDatabase,
 } from "./seed_db";
-import { IPCLogger } from "../logger";
-import { downloadAndConvertSongs } from "../scripts/download-new-songs";
-import type { DatabaseContext } from "../database_context";
 import { getNewConnection } from "../database_context";
-import { EnvType } from "../enums/env_type";
+import fs from "fs";
+import path from "path";
+import type { DatabaseContext } from "../database_context";
 
 const logger = new IPCLogger("bootstrap");
 

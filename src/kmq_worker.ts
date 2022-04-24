@@ -1,9 +1,10 @@
-import { config } from "dotenv";
 import { BaseClusterWorker } from "eris-fleet";
-import schedule from "node-schedule";
-import path from "path";
 import { Campaign } from "patreon-discord";
+import { config } from "dotenv";
+import path from "path";
+import schedule from "node-schedule";
 
+import { EnvType } from "./enums/env_type";
 import { IPCLogger } from "./logger";
 import {
     registerClientEvents,
@@ -13,14 +14,13 @@ import {
     updateBotStatus,
 } from "./helpers/management_utils";
 import BotListingManager from "./helpers/bot_listing_manager";
-import dbContext from "./database_context";
-import type KmqClient from "./kmq_client";
-import ReloadCommand from "./commands/admin/reload";
 import EvalCommand from "./commands/admin/eval";
 import LocalizationManager from "./helpers/localization_manager";
+import ReloadCommand from "./commands/admin/reload";
 import Session from "./structures/session";
-import { EnvType } from "./enums/env_type";
 import State from "./state";
+import dbContext from "./database_context";
+import type KmqClient from "./kmq_client";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("kmq");

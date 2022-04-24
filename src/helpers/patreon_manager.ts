@@ -1,8 +1,8 @@
-import dbContext from "../database_context";
-import type Patron from "../interfaces/patron";
-import State from "../state";
 import { IPCLogger } from "../logger";
 import { addPremium, removePremium } from "./game_utils";
+import State from "../state";
+import dbContext from "../database_context";
+import type Patron from "../interfaces/patron";
 
 const logger = new IPCLogger("patreon_manager");
 

@@ -1,19 +1,25 @@
 /* eslint-disable no-return-assign */
-import type Eris from "eris";
-import _ from "lodash";
 import * as uuid from "uuid";
+import _ from "lodash";
+import type Eris from "eris";
 
-import dbContext from "../database_context";
 import {
+    chunkArray,
+    codeLine,
+    delay,
+    getOrdinalNum,
+    setDifference,
+} from "../helpers/utils";
+import {
+    getCurrentVoiceMembers,
     getDebugLogHeader,
-    sendInfoMessage,
     getNumParticipants,
     getUserVoiceChannel,
     sendEndGameMessage,
-    getCurrentVoiceMembers,
-    tryInteractionAcknowledge,
-    tryCreateInteractionErrorAcknowledgement,
+    sendInfoMessage,
     sendRoundMessage,
+    tryCreateInteractionErrorAcknowledgement,
+    tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
 import {
     getLocalizedArtistName,
@@ -23,39 +29,33 @@ import {
     isUserPremium,
     userBonusIsActive,
 } from "../helpers/game_utils";
-import {
-    delay,
-    getOrdinalNum,
-    setDifference,
-    codeLine,
-    chunkArray,
-} from "../helpers/utils";
 import State from "../state";
+import dbContext from "../database_context";
 
+import { AnswerType } from "../enums/option_types/answer_type";
+import { CUM_EXP_TABLE, KmqImages, SONG_START_DELAY } from "../constants";
+import { GameType } from "../enums/game_type";
+import { GuessModeType } from "../enums/option_types/guess_mode_type";
 import { IPCLogger } from "../logger";
-import GameRound from "./game_round";
-import GuildPreference from "./guild_preference";
-import Scoreboard from "./scoreboard";
-import EliminationScoreboard from "./elimination_scoreboard";
-import TeamScoreboard from "./team_scoreboard";
+import { MultiGuessType } from "../enums/option_types/multiguess_type";
+import { calculateTotalRoundExp } from "../commands/game_commands/exp";
+import { getMention } from "../helpers/utils";
 import { getRankNameByLevel } from "../commands/game_commands/profile";
 import EliminationPlayer from "./elimination_player";
-import { CUM_EXP_TABLE, KmqImages, SONG_START_DELAY } from "../constants";
-import MessageContext from "./message_context";
+import EliminationScoreboard from "./elimination_scoreboard";
+import GameRound from "./game_round";
+import GuildPreference from "./guild_preference";
 import KmqMember from "./kmq_member";
-import { calculateTotalRoundExp } from "../commands/game_commands/exp";
-import Player from "../structures/player";
-import Session from "./session";
-import type Round from "./round";
-import type QueriedSong from "../interfaces/queried_song";
-import type GuessResult from "../interfaces/guess_result";
-import type SuccessfulGuessResult from "../interfaces/success_guess_result";
-import { GuessModeType } from "../enums/option_types/guess_mode_type";
-import { AnswerType } from "../enums/option_types/answer_type";
-import { MultiGuessType } from "../enums/option_types/multiguess_type";
-import { GameType } from "../enums/game_type";
 import LocalizationManager from "../helpers/localization_manager";
-import { getMention } from "../helpers/utils";
+import MessageContext from "./message_context";
+import Player from "../structures/player";
+import Scoreboard from "./scoreboard";
+import Session from "./session";
+import TeamScoreboard from "./team_scoreboard";
+import type GuessResult from "../interfaces/guess_result";
+import type QueriedSong from "../interfaces/queried_song";
+import type Round from "./round";
+import type SuccessfulGuessResult from "../interfaces/success_guess_result";
 
 const MULTIGUESS_DELAY = 1500;
 

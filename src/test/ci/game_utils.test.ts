@@ -1,18 +1,18 @@
-import assert from "assert";
-import { describe } from "mocha";
-import sinon from "sinon";
-import GuildPreference from "../../structures/guild_preference";
+import * as discordUtils from "../../helpers/discord_utils";
+import { OstPreference } from "../../enums/option_types/ost_preference";
+import { ReleaseType } from "../../enums/option_types/release_type";
+import { SubunitsPreference } from "../../enums/option_types/subunit_preference";
 import {
     cleanupInactiveGameSessions,
     getAvailableSongCount,
     getMatchingGroupNames,
 } from "../../helpers/game_utils";
-import State from "../../state";
+import { describe } from "mocha";
 import GameSession from "../../structures/game_session";
-import * as discordUtils from "../../helpers/discord_utils";
-import { ReleaseType } from "../../enums/option_types/release_type";
-import { OstPreference } from "../../enums/option_types/ost_preference";
-import { SubunitsPreference } from "../../enums/option_types/subunit_preference";
+import GuildPreference from "../../structures/guild_preference";
+import State from "../../state";
+import assert from "assert";
+import sinon from "sinon";
 
 const sandbox = sinon.createSandbox();
 

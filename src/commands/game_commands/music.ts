@@ -1,3 +1,6 @@
+import { EMBED_SUCCESS_BONUS_COLOR, KmqImages } from "../../constants";
+import { IPCLogger } from "../../logger";
+import { chooseWeightedRandom } from "../../helpers/utils";
 import {
     generateEmbed,
     generateOptionsMessage,
@@ -7,23 +10,20 @@ import {
     sendInfoMessage,
     voicePermissionsCheck,
 } from "../../helpers/discord_utils";
-import MusicSession from "../../structures/music_session";
-import MessageContext from "../../structures/message_context";
-import State from "../../state";
-import type BaseCommand from "../interfaces/base_command";
-import { IPCLogger } from "../../logger";
-import KmqMember from "../../structures/kmq_member";
-import { chooseWeightedRandom } from "../../helpers/utils";
-import dbContext from "../../database_context";
-import type Eris from "eris";
-import { EMBED_SUCCESS_BONUS_COLOR, KmqImages } from "../../constants";
-import Session from "../../structures/session";
 import CommandPrechecks from "../../command_prechecks";
 import GuildPreference from "../../structures/guild_preference";
+import KmqMember from "../../structures/kmq_member";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import MusicSession from "../../structures/music_session";
+import Session from "../../structures/session";
+import State from "../../state";
+import dbContext from "../../database_context";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type Eris from "eris";
 import type GameInfoMessage from "../../interfaces/game_info_message";
 import type HelpDocumentation from "../../interfaces/help";
-import type CommandArgs from "../../interfaces/command_args";
-import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("music");
 

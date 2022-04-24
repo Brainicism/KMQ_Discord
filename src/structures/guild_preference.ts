@@ -1,22 +1,5 @@
-import _ from "lodash";
 import * as uuid from "uuid";
-import { IPCLogger } from "../logger";
-import dbContext from "../database_context";
-import type MatchedArtist from "../interfaces/matched_artist";
-import type GameOptions from "../interfaces/game_options";
-import type { SpecialType } from "../enums/option_types/special_type";
-import type { ReleaseType } from "../enums/option_types/release_type";
 import { AnswerType } from "../enums/option_types/answer_type";
-import type { MultiGuessType } from "../enums/option_types/multiguess_type";
-import type { SubunitsPreference } from "../enums/option_types/subunit_preference";
-import type { OstPreference } from "../enums/option_types/ost_preference";
-import type { LanguageType } from "../enums/option_types/language_type";
-import type { ShuffleType } from "../enums/option_types/shuffle_type";
-import type { GuessModeType } from "../enums/option_types/guess_mode_type";
-import type { ArtistType } from "../enums/option_types/artist_type";
-import { Gender } from "../enums/option_types/gender";
-import type { SeekType } from "../enums/option_types/seek_type";
-import { GameOption } from "../enums/game_option_name";
 import {
     DEFAULT_ANSWER_TYPE,
     DEFAULT_ARTIST_TYPE,
@@ -34,6 +17,23 @@ import {
     DEFAULT_SUBUNIT_PREFERENCE,
     GameOptionInternal,
 } from "../constants";
+import { GameOption } from "../enums/game_option_name";
+import { Gender } from "../enums/option_types/gender";
+import { IPCLogger } from "../logger";
+import _ from "lodash";
+import dbContext from "../database_context";
+import type { ArtistType } from "../enums/option_types/artist_type";
+import type { GuessModeType } from "../enums/option_types/guess_mode_type";
+import type { LanguageType } from "../enums/option_types/language_type";
+import type { MultiGuessType } from "../enums/option_types/multiguess_type";
+import type { OstPreference } from "../enums/option_types/ost_preference";
+import type { ReleaseType } from "../enums/option_types/release_type";
+import type { SeekType } from "../enums/option_types/seek_type";
+import type { ShuffleType } from "../enums/option_types/shuffle_type";
+import type { SpecialType } from "../enums/option_types/special_type";
+import type { SubunitsPreference } from "../enums/option_types/subunit_preference";
+import type GameOptions from "../interfaces/game_options";
+import type MatchedArtist from "../interfaces/matched_artist";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("guild_preference");

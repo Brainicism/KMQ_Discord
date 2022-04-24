@@ -1,11 +1,11 @@
-import { getDebugLogHeader, sendErrorMessage } from "./discord_utils";
-import type { GuildTextableMessage } from "../types";
 import { IPCLogger } from "../logger";
 import { arrayToString } from "./utils";
-import MessageContext from "../structures/message_context";
-import type ParsedMessage from "../interfaces/parsed_message";
-import type CommandValidations from "../interfaces/command_validations";
+import { getDebugLogHeader, sendErrorMessage } from "./discord_utils";
 import LocalizationManager from "./localization_manager";
+import MessageContext from "../structures/message_context";
+import type { GuildTextableMessage } from "../types";
+import type CommandValidations from "../interfaces/command_validations";
+import type ParsedMessage from "../interfaces/parsed_message";
 
 const logger = new IPCLogger("validate");
 

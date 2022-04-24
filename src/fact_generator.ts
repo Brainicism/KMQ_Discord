@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-underscore-dangle */
+import { IPCLogger } from "./logger";
+import { LocaleType } from "./enums/locale_type";
 import { URL } from "url";
-import dbContext from "./database_context";
 import {
     chooseRandom,
+    friendlyFormattedNumber,
     getOrdinalNum,
     weekOfYear,
-    friendlyFormattedNumber,
 } from "./helpers/utils";
-import { LocaleType } from "./enums/locale_type";
-import State from "./state";
-import { IPCLogger } from "./logger";
 import LocalizationManager from "./helpers/localization_manager";
+import State from "./state";
+import dbContext from "./database_context";
 
 const logger = new IPCLogger("fact_generator");
 

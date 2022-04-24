@@ -1,20 +1,20 @@
-import Eris from "eris";
 import * as uuid from "uuid";
+import { EnvType } from "../../enums/env_type";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
+import Eris from "eris";
+import GuildPreference from "../../structures/guild_preference";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
 import State from "../../state";
 import validate from "../../helpers/validate";
 import type { GuildTextableMessage } from "../../types";
-import MessageContext from "../../structures/message_context";
-import Session from "../../structures/session";
 import type ParsedMessage from "../../interfaces/parsed_message";
-import { EnvType } from "../../enums/env_type";
-import LocalizationManager from "../../helpers/localization_manager";
-import GuildPreference from "../../structures/guild_preference";
 
 const logger = new IPCLogger("messageCreate");
 

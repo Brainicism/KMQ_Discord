@@ -7,6 +7,7 @@
         "jsdoc",
         "only-warn",
         "import",
+        "sort-imports-es6-autofix",
         "deprecation"
     ],
     "parserOptions": {
@@ -46,6 +47,7 @@
                 "publicOnly": true
             }
         ],
+        "sort-imports-es6-autofix/sort-imports-es6": ["warn"],
         "valid-jsdoc": [
             "warn",
             {

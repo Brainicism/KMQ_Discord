@@ -1,11 +1,11 @@
-import type Eris from "eris";
-import State from "../state";
-import type MessageContext from "./message_context";
 import { codeLine, friendlyFormattedNumber } from "../helpers/utils";
-import type QueriedSong from "../interfaces/queried_song";
-import type PlayerRoundResult from "../interfaces/player_round_result";
-import type UniqueSongCounter from "../interfaces/unique_song_counter";
 import LocalizationManager from "../helpers/localization_manager";
+import State from "../state";
+import type Eris from "eris";
+import type MessageContext from "./message_context";
+import type PlayerRoundResult from "../interfaces/player_round_result";
+import type QueriedSong from "../interfaces/queried_song";
+import type UniqueSongCounter from "../interfaces/unique_song_counter";
 
 export default abstract class Round {
     /** The song associated with the round */

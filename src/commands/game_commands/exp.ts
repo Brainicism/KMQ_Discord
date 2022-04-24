@@ -1,36 +1,36 @@
 /* eslint-disable @typescript-eslint/dot-notation */
-import type Eris from "eris";
-import {
-    getDebugLogHeader,
-    sendInfoMessage,
-} from "../../helpers/discord_utils";
-import type BaseCommand from "../interfaces/base_command";
-import { IPCLogger } from "../../logger";
-import MessageContext from "../../structures/message_context";
-import { isWeekend } from "../../helpers/utils";
-import {
-    getAvailableSongCount,
-    userBonusIsActive,
-    isFirstGameOfDay,
-    isPowerHour,
-    isPremiumRequest,
-} from "../../helpers/game_utils";
+import { AnswerType } from "../../enums/option_types/answer_type";
+import { ExpBonusModifier } from "../../enums/exp_bonus_modifier";
 import {
     ExpBonusModifierValues,
     GUESS_STREAK_THRESHOLD,
     KmqImages,
     PARTICIPANT_MODIFIER_MAX_PARTICIPANTS,
 } from "../../constants";
-import State from "../../state";
-import GuildPreference from "../../structures/guild_preference";
-import type GameRound from "../../structures/game_round";
-import type CommandArgs from "../../interfaces/command_args";
-import type HelpDocumentation from "../../interfaces/help";
-import { AnswerType } from "../../enums/option_types/answer_type";
 import { GuessModeType } from "../../enums/option_types/guess_mode_type";
-import { ExpBonusModifier } from "../../enums/exp_bonus_modifier";
+import { IPCLogger } from "../../logger";
+import {
+    getAvailableSongCount,
+    isFirstGameOfDay,
+    isPowerHour,
+    isPremiumRequest,
+    userBonusIsActive,
+} from "../../helpers/game_utils";
+import {
+    getDebugLogHeader,
+    sendInfoMessage,
+} from "../../helpers/discord_utils";
+import { isWeekend } from "../../helpers/utils";
+import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import State from "../../state";
+import type BaseCommand from "../interfaces/base_command";
+import type CommandArgs from "../../interfaces/command_args";
+import type Eris from "eris";
+import type GameRound from "../../structures/game_round";
+import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("exp");
 
