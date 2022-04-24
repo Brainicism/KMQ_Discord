@@ -12,10 +12,10 @@ import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { KmqImages } from "../../constants";
 import CommandPrechecks from "../../command_prechecks";
-import State from "../../state";
 import Session from "../../structures/session";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("forceskip");
 
@@ -29,7 +29,7 @@ export default class ForceSkipCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "forceskip",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.forceskip.help.description"
         ),
@@ -60,11 +60,11 @@ export default class ForceSkipCommand implements BaseCommand {
 
         if (message.author.id !== session.owner.id) {
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: State.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.forceskip.failure.notOwner.title"
                 ),
-                description: State.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.forceskip.failure.notOwner.description",
                     { mentionedUser: getMention(session.owner.id) }
@@ -78,8 +78,11 @@ export default class ForceSkipCommand implements BaseCommand {
             MessageContext.fromMessage(message),
             {
                 color: EMBED_SUCCESS_COLOR,
-                title: State.localizer.translate(message.guildID, "misc.skip"),
-                description: State.localizer.translate(
+                title: LocalizationManager.localizer.translate(
+                    message.guildID,
+                    "misc.skip"
+                ),
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.forceskip.description"
                 ),

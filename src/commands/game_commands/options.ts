@@ -6,9 +6,9 @@ import type BaseCommand from "../interfaces/base_command";
 import { getGuildPreference } from "../../helpers/game_utils";
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
-import State from "../../state";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("options");
 
@@ -17,7 +17,7 @@ export default class OptionsCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "options",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.options.help.description"
         ),

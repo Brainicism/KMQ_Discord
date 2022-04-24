@@ -14,9 +14,9 @@ import MessageContext from "../../structures/message_context";
 import { setIntersection } from "../../helpers/utils";
 import { GROUP_LIST_URL } from "../../constants";
 import CommandPrechecks from "../../command_prechecks";
-import State from "../../state";
 import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("add");
 
@@ -52,7 +52,7 @@ export default class AddCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "add",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.add.help.description",
             {
@@ -61,14 +61,14 @@ export default class AddCommand implements BaseCommand {
                 include: `\`${process.env.BOT_PREFIX}include\``,
             }
         ),
-        usage: `,add [groups | exclude | include] [${State.localizer.translate(
+        usage: `,add [groups | exclude | include] [${LocalizationManager.localizer.translate(
             guildID,
             "misc.listOfGroups"
         )}]`,
         examples: [
             {
                 example: "`,add groups twice, red velvet`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.add.help.example.groups",
                     {
@@ -80,7 +80,7 @@ export default class AddCommand implements BaseCommand {
             },
             {
                 example: "`,add exclude BESTie, Dia, iKON`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.add.help.example.exclude",
                     {
@@ -93,7 +93,7 @@ export default class AddCommand implements BaseCommand {
             },
             {
                 example: "`,add include exo`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.add.help.example.include",
                     {
@@ -108,7 +108,7 @@ export default class AddCommand implements BaseCommand {
                 style: 5 as const,
                 url: GROUP_LIST_URL,
                 type: 2 as const,
-                label: State.localizer.translate(
+                label: LocalizationManager.localizer.translate(
                     guildID,
                     "misc.interaction.fullGroupsList"
                 ),
@@ -168,18 +168,19 @@ export default class AddCommand implements BaseCommand {
             );
 
             await sendErrorMessage(MessageContext.fromMessage(message), {
-                title: State.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "misc.failure.unrecognizedGroups.title"
                 ),
-                description: State.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "misc.failure.unrecognizedGroups.description",
                     {
-                        matchedGroupsAction: State.localizer.translate(
-                            message.guildID,
-                            "misc.failure.unrecognizedGroups.added"
-                        ),
+                        matchedGroupsAction:
+                            LocalizationManager.localizer.translate(
+                                message.guildID,
+                                "misc.failure.unrecognizedGroups.added"
+                            ),
                         helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
                         unmatchedGroups: unmatchedGroups.join(", "),
                         solution: "",
@@ -207,11 +208,11 @@ export default class AddCommand implements BaseCommand {
                 );
                 if (intersection.size > 0) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: State.localizer.translate(
+                        title: LocalizationManager.localizer.translate(
                             message.guildID,
                             "misc.failure.groupsExcludeConflict.title"
                         ),
-                        description: State.localizer.translate(
+                        description: LocalizationManager.localizer.translate(
                             message.guildID,
                             "misc.failure.groupsExcludeConflict.description",
                             {
@@ -222,10 +223,11 @@ export default class AddCommand implements BaseCommand {
                                     .join(", "),
                                 solutionStepOne: `\`${process.env.BOT_PREFIX}remove exclude\``,
                                 solutionStepTwo: `\`${process.env.BOT_PREFIX}groups\``,
-                                allowOrPrevent: State.localizer.translate(
-                                    message.guildID,
-                                    "misc.failure.groupsExcludeConflict.allow"
-                                ),
+                                allowOrPrevent:
+                                    LocalizationManager.localizer.translate(
+                                        message.guildID,
+                                        "misc.failure.groupsExcludeConflict.allow"
+                                    ),
                             }
                         ),
                     });
@@ -277,11 +279,11 @@ export default class AddCommand implements BaseCommand {
                 );
                 if (intersection.size > 0) {
                     sendErrorMessage(MessageContext.fromMessage(message), {
-                        title: State.localizer.translate(
+                        title: LocalizationManager.localizer.translate(
                             message.guildID,
                             "misc.failure.groupsExcludeConflict.title"
                         ),
-                        description: State.localizer.translate(
+                        description: LocalizationManager.localizer.translate(
                             message.guildID,
                             "misc.failure.groupsExcludeConflict.description",
                             {

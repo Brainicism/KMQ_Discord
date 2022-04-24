@@ -1,9 +1,9 @@
 // import { KmqImages } from "../../constants";
 // import { sendInfoMessage } from "../../helpers/discord_utils";
 // import { isUserPremium } from "../../helpers/game_utils";
+import LocalizationManager from "../../helpers/localization_manager";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
-import State from "../../state";
 // import MessageContext from "../../structures/message_context";
 import type BaseCommand from "../interfaces/base_command";
 
@@ -15,14 +15,14 @@ export default class PremiumCommand implements BaseCommand {
     };
 
     help = (guildID: string): HelpDocumentation => ({
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.premium.help.description"
         ),
         examples: [
             {
                 example: "`,premium`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.premium.help.example"
                 ),
@@ -39,49 +39,49 @@ export default class PremiumCommand implements BaseCommand {
         // call = async ({ message }: CommandArgs): Promise<void> => {
         // const premiumMember = await isUserPremium(message.author.id);
         // sendInfoMessage(MessageContext.fromMessage(message), {
-        //     description: `${State.localizer.translate(
+        //     description: `${LocalizationManager.localizer.translate(
         //         message.guildID,
         //         premiumMember
         //             ? "command.premium.status.description.premium"
         //             : "command.premium.status.description.nonPremium"
-        //     )}\n\n${State.localizer.translate(
+        //     )}\n\n${LocalizationManager.localizer.translate(
         //         message.guildID,
         //         "command.premium.status.description.connectionReminder"
         //     )}`,
         //     fields: [
         //         {
-        //             name: State.localizer.translate(
+        //             name: LocalizationManager.localizer.translate(
         //                 message.guildID,
         //                 "command.premium.status.perks.moreSongs.title"
         //             ),
-        //             value: State.localizer.translate(
+        //             value: LocalizationManager.localizer.translate(
         //                 message.guildID,
         //                 "command.premium.status.perks.moreSongs.description"
         //             ),
         //         },
         //         {
-        //             name: State.localizer.translate(
+        //             name: LocalizationManager.localizer.translate(
         //                 message.guildID,
         //                 "command.premium.status.perks.special.title"
         //             ),
-        //             value: State.localizer.translate(
+        //             value: LocalizationManager.localizer.translate(
         //                 message.guildID,
         //                 "command.premium.status.perks.special.description"
         //             ),
         //         },
         //         {
-        //             name: State.localizer.translate(
+        //             name: LocalizationManager.localizer.translate(
         //                 message.guildID,
         //                 "command.premium.status.perks.badge.title"
         //             ),
-        //             value: State.localizer.translate(
+        //             value: LocalizationManager.localizer.translate(
         //                 message.guildID,
         //                 "command.premium.status.perks.badge.description"
         //             ),
         //         },
         //     ],
         //     thumbnailUrl: KmqImages.HAPPY,
-        //     title: State.localizer.translate(
+        //     title: LocalizationManager.localizer.translate(
         //         message.guildID,
         //         premiumMember
         //             ? "command.premium.status.title.premium"

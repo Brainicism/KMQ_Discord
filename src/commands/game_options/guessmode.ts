@@ -8,11 +8,11 @@ import {
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import State from "../../state";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import { GuessModeType } from "../../enums/option_types/guess_mode_type";
 import { DEFAULT_GUESS_MODE } from "../../constants";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("guessmode");
 
@@ -38,7 +38,7 @@ export default class GuessModeCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "guessmode",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.guessmode.help.description"
         ),
@@ -46,28 +46,28 @@ export default class GuessModeCommand implements BaseCommand {
         examples: [
             {
                 example: "`,guessmode song`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.guessmode.help.example.song"
                 ),
             },
             {
                 example: "`,guessmode artist`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.guessmode.help.example.artist"
                 ),
             },
             {
                 example: "`,guessmode both`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.guessmode.help.example.both"
                 ),
             },
             {
                 example: "`,guessmode`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.guessmode.help.example.reset",
                     {

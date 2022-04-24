@@ -6,9 +6,9 @@ import {
     tryInteractionAcknowledge,
     tryCreateInteractionErrorAcknowledgement,
 } from "../../helpers/discord_utils";
-import State from "../../state";
 import { handleProfileInteraction } from "../../commands/game_commands/profile";
 import Session from "../../structures/session";
+import LocalizationManager from "../../helpers/localization_manager";
 
 export const BOOKMARK_COMMAND_NAME = "Bookmark Song";
 export const PROFILE_COMMAND_NAME = "Profile";
@@ -66,7 +66,7 @@ export default async function interactionCreateHandler(
                 if (!session) {
                     tryCreateInteractionErrorAcknowledgement(
                         interaction,
-                        State.localizer.translate(
+                        LocalizationManager.localizer.translate(
                             interaction.guildID,
                             "misc.failure.interaction.bookmarkOutsideGame"
                         )

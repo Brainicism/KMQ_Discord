@@ -18,6 +18,7 @@ import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "../interfaces/queried_song";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
 import { GuessModeType } from "../enums/option_types/guess_mode_type";
+import LocalizationManager from "../helpers/localization_manager";
 /** List of characters to remove from song/artist names/guesses */
 // eslint-disable-next-line no-useless-escape
 const REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\(\)\+\u200B]/g;
@@ -352,17 +353,17 @@ export default class GameRound extends Round {
         if (this.bonusModifier > 1 || this.isBonusArtist()) {
             let bonusType: string;
             if (this.isBonusArtist() && this.bonusModifier > 1) {
-                bonusType = State.localizer.translate(
+                bonusType = LocalizationManager.localizer.translate(
                     messageContext.guildID,
                     "misc.inGame.bonusExpArtistRound"
                 );
             } else if (this.bonusModifier > 1) {
-                bonusType = State.localizer.translate(
+                bonusType = LocalizationManager.localizer.translate(
                     messageContext.guildID,
                     "misc.inGame.bonusExpRound"
                 );
             } else {
-                bonusType = State.localizer.translate(
+                bonusType = LocalizationManager.localizer.translate(
                     messageContext.guildID,
                     "misc.inGame.bonusArtistRound"
                 );
@@ -383,7 +384,7 @@ export default class GameRound extends Round {
                     : ""
             }`;
 
-            correctDescription += State.localizer.translate(
+            correctDescription += LocalizationManager.localizer.translate(
                 messageContext.guildID,
                 "misc.inGame.correctGuess",
                 {
@@ -406,13 +407,13 @@ export default class GameRound extends Round {
                     .join("\n");
 
                 if (runnersUp.length >= MAX_RUNNERS_UP) {
-                    runnersUpDescription += `\n${State.localizer.translate(
+                    runnersUpDescription += `\n${LocalizationManager.localizer.translate(
                         messageContext.guildID,
                         "misc.andManyOthers"
                     )}`;
                 }
 
-                correctDescription += `\n\n**${State.localizer.translate(
+                correctDescription += `\n\n**${LocalizationManager.localizer.translate(
                     messageContext.guildID,
                     "misc.inGame.runnersUp"
                 )}**\n${runnersUpDescription}`;
@@ -420,7 +421,7 @@ export default class GameRound extends Round {
         }
 
         if (!correctGuess) {
-            correctDescription = State.localizer.translate(
+            correctDescription = LocalizationManager.localizer.translate(
                 messageContext.guildID,
                 "misc.inGame.noCorrectGuesses"
             );

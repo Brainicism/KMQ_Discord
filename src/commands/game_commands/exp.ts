@@ -25,6 +25,7 @@ import type HelpDocumentation from "../../interfaces/help";
 import { AnswerType } from "../../enums/option_types/answer_type";
 import { GuessModeType } from "../../enums/option_types/guess_mode_type";
 import { ExpBonusModifier } from "../../enums/exp_bonus_modifier";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("exp");
 export const PARTICIPANT_MODIFIER_MAX_PARTICIPANTS = 6;
@@ -73,7 +74,7 @@ export async function calculateOptionsExpMultiplierInternal(
     // bonus for voting
     if (voteBonusExp) {
         modifiers.push({
-            displayName: State.localizer.translate(
+            displayName: LocalizationManager.localizer.translate(
                 guildPreference.guildID,
                 "command.exp.voteBonus"
             ),
@@ -85,7 +86,7 @@ export async function calculateOptionsExpMultiplierInternal(
     // power hour bonus
     if (isWeekend() || isPowerHour()) {
         modifiers.push({
-            displayName: State.localizer.translate(
+            displayName: LocalizationManager.localizer.translate(
                 guildPreference.guildID,
                 "command.exp.powerHourBonus"
             ),
@@ -97,7 +98,7 @@ export async function calculateOptionsExpMultiplierInternal(
     const isPlayersFirstGame = await isFirstGameOfDay(playerID);
     if (isPlayersFirstGame) {
         modifiers.push({
-            displayName: State.localizer.translate(
+            displayName: LocalizationManager.localizer.translate(
                 guildPreference.guildID,
                 "command.exp.firstGameOfDayBonus"
             ),
@@ -108,7 +109,7 @@ export async function calculateOptionsExpMultiplierInternal(
 
     if (guildPreference.typosAllowed()) {
         modifiers.push({
-            displayName: State.localizer.translate(
+            displayName: LocalizationManager.localizer.translate(
                 guildPreference.guildID,
                 "command.exp.typosAllowedPenalty"
             ),
@@ -135,7 +136,7 @@ export async function calculateOptionsExpMultiplierInternal(
         }
 
         modifiers.push({
-            displayName: State.localizer.translate(
+            displayName: LocalizationManager.localizer.translate(
                 guildPreference.guildID,
                 "command.exp.multipleChoicePenalty"
             ),
@@ -153,7 +154,7 @@ export async function calculateOptionsExpMultiplierInternal(
 
     if (totalSongs < 10) {
         modifiers.push({
-            displayName: State.localizer.translate(
+            displayName: LocalizationManager.localizer.translate(
                 guildPreference.guildID,
                 "command.exp.lowSongCountPenalty"
             ),
@@ -168,7 +169,7 @@ export async function calculateOptionsExpMultiplierInternal(
         guildPreference.gameOptions.guessModeType === GuessModeType.BOTH
     ) {
         modifiers.push({
-            displayName: State.localizer.translate(
+            displayName: LocalizationManager.localizer.translate(
                 guildPreference.guildID,
                 "command.exp.artistGroupGuessModePenalty"
             ),
@@ -297,7 +298,7 @@ export async function calculateTotalRoundExp(
 export default class ExpCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: "exp",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.exp.help.description"
         ),
@@ -331,14 +332,14 @@ export default class ExpCommand implements BaseCommand {
         );
 
         modifierText.push(
-            `\`${State.localizer.translate(
+            `\`${LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.exp.totalModifier"
             )}:\` **__${totalModifier.toFixed(2)}x__**`
         );
 
         fields.push({
-            name: State.localizer.translate(
+            name: LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.exp.activeModifiers"
             ),
@@ -347,11 +348,11 @@ export default class ExpCommand implements BaseCommand {
         });
 
         fields.push({
-            name: State.localizer.translate(
+            name: LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.exp.bonusArtistsTitle"
             ),
-            value: `\`${State.localizer.translate(
+            value: `\`${LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.exp.bonusArtists"
             )}:\` ${ExpBonusModifierValues[
@@ -363,46 +364,46 @@ export default class ExpCommand implements BaseCommand {
         });
 
         const bonusExpExplanations = [
-            `\`${State.localizer.translate(
+            `\`${LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.exp.explanation.powerHour"
             )}:\` ${ExpBonusModifierValues[ExpBonusModifier.POWER_HOUR].toFixed(
                 2
             )}x 📈`,
-            `\`${State.localizer.translate(
+            `\`${LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.exp.explanation.firstGameOfDay"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.FIRST_GAME_OF_DAY
             ].toFixed(2)}x 📈`,
-            `\`${State.localizer.translate(
+            `\`${LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.exp.explanation.voting"
             )}!:\` ${ExpBonusModifierValues[ExpBonusModifier.VOTE].toFixed(
                 2
             )}x 📈`,
-            `\`${State.localizer.translate(
+            `\`${LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.exp.explanation.streak"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.GUESS_STREAK
             ].toFixed(2)}x 📈`,
-            `\`${State.localizer.translate(
+            `\`${LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.exp.explanation.quickGuess"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.QUICK_GUESS
             ].toFixed(2)}x 📈 `,
-            `\`${State.localizer.translate(
+            `\`${LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.exp.explanation.bonusArtistGuess"
             )}:\` ${ExpBonusModifierValues[
                 ExpBonusModifier.BONUS_ARTIST
             ].toFixed(2)}x 📈 `,
-            `\`${State.localizer.translate(
+            `\`${LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.exp.explanation.rareGuess"
-            )}:\` ${State.localizer.translate(
+            )}:\` ${LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.exp.explanation.rareGuessRange",
                 { rareGuessLowerBound: "2.00x", rareGuessUpperBound: "50.00x" }
@@ -410,11 +411,11 @@ export default class ExpCommand implements BaseCommand {
         ];
 
         fields.push({
-            name: State.localizer.translate(
+            name: LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.exp.bonusTitle"
             ),
-            value: `${State.localizer.translate(
+            value: `${LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.exp.bonusDescription"
             )}:\n ${bonusExpExplanations.map((x) => `- ${x}`).join("\n")}`,
@@ -422,7 +423,7 @@ export default class ExpCommand implements BaseCommand {
         });
 
         await sendInfoMessage(MessageContext.fromMessage(message), {
-            title: State.localizer.translate(
+            title: LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.exp.title"
             ),

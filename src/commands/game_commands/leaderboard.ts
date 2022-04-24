@@ -29,6 +29,7 @@ import { LeaderboardScope } from "../../enums/option_types/leaderboard_scope";
 import { LeaderboardDuration } from "../../enums/option_types/leaderboard_duration";
 import { LeaderboardType } from "../../enums/option_types/leaderboard_type";
 import { EnvType } from "../../enums/env_type";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("leaderboard");
 
@@ -55,70 +56,70 @@ export default class LeaderboardCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "leaderboard",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.leaderboard.help.description"
         ),
-        usage: `,leaderboard {${State.localizer.translate(
+        usage: `,leaderboard {${LocalizationManager.localizer.translate(
             guildID,
             "command.leaderboard.help.usage.pageNumber"
-        )}}\n,leaderboard {gamesplayed | songsguessed} {server | game} {daily | weekly | monthly | yearly} {${State.localizer.translate(
+        )}}\n,leaderboard {gamesplayed | songsguessed} {server | game} {daily | weekly | monthly | yearly} {${LocalizationManager.localizer.translate(
             guildID,
             "command.leaderboard.help.usage.pageNumber"
         )}}\n,leaderboard [enroll | unenroll]`,
         examples: [
             {
                 example: "`,leaderboard`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.global"
                 ),
             },
             {
                 example: "`,leaderboard 3`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.globalPage"
                 ),
             },
             {
                 example: "`,leaderboard game monthly 2`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.gameMonthlyPage"
                 ),
             },
             {
                 example: "`,leaderboard songsguessed server 3`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.serverSongsGuessedPage"
                 ),
             },
             {
                 example: "`,leaderboard enroll`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.enroll"
                 ),
             },
             {
                 example: "`,leaderboard unenroll`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.unenroll"
                 ),
             },
             {
                 example: "`,leaderboard server`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.server"
                 ),
             },
             {
                 example: "`,leaderboard weekly 4`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.leaderboard.help.example.globalWeeklyPage"
                 ),
@@ -182,7 +183,7 @@ export default class LeaderboardCommand implements BaseCommand {
         if (pageOffset === 0 && !type && !scope && !duration) {
             sendValidationErrorMessage(
                 message,
-                State.localizer.translate(
+                LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.leaderboard.validation.firstArg",
                     {
@@ -222,7 +223,7 @@ export default class LeaderboardCommand implements BaseCommand {
         } else if (pageOffset === 0) {
             sendValidationErrorMessage(
                 message,
-                State.localizer.translate(
+                LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.leaderboard.validation.secondArg",
                     {
@@ -259,7 +260,7 @@ export default class LeaderboardCommand implements BaseCommand {
         } else if (pageOffset === 0) {
             sendValidationErrorMessage(
                 message,
-                State.localizer.translate(
+                LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.leaderboard.validation.secondArg",
                     {
@@ -277,7 +278,7 @@ export default class LeaderboardCommand implements BaseCommand {
         if (pageOffset === 0 && parsedMessage.components.length > 3) {
             sendValidationErrorMessage(
                 message,
-                State.localizer.translate(
+                LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.leaderboard.validation.thirdArg"
                 ),
@@ -503,7 +504,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
                                     const displayName = enrolledPlayer
                                         ? enrolledPlayer.display_name
-                                        : State.localizer.translate(
+                                        : LocalizationManager.localizer.translate(
                                               messageContext.guildID,
                                               "command.leaderboard.rankNumber",
                                               {
@@ -515,43 +516,46 @@ export default class LeaderboardCommand implements BaseCommand {
 
                                     let level: string;
                                     if (permanentLb) {
-                                        level = State.localizer.translate(
-                                            messageContext.guildID,
-                                            "command.leaderboard.levelEntry.permanent",
-                                            {
-                                                level: State.localizer.translate(
-                                                    messageContext.guildID,
-                                                    "misc.level"
-                                                ),
-                                                formattedNumber:
-                                                    friendlyFormattedNumber(
-                                                        player.level
+                                        level =
+                                            LocalizationManager.localizer.translate(
+                                                messageContext.guildID,
+                                                "command.leaderboard.levelEntry.permanent",
+                                                {
+                                                    level: LocalizationManager.localizer.translate(
+                                                        messageContext.guildID,
+                                                        "misc.level"
                                                     ),
-                                                rankName: getRankNameByLevel(
-                                                    player.level,
-                                                    messageContext.guildID
-                                                ),
-                                            }
-                                        );
+                                                    formattedNumber:
+                                                        friendlyFormattedNumber(
+                                                            player.level
+                                                        ),
+                                                    rankName:
+                                                        getRankNameByLevel(
+                                                            player.level,
+                                                            messageContext.guildID
+                                                        ),
+                                                }
+                                            );
                                     } else {
                                         const levelPluralized =
-                                            State.localizer.translateN(
+                                            LocalizationManager.localizer.translateN(
                                                 messageContext.guildID,
                                                 "command.leaderboard.level",
                                                 player.level
                                             );
 
-                                        level = State.localizer.translate(
-                                            messageContext.guildID,
-                                            "command.leaderboard.levelEntry.temporary",
-                                            {
-                                                formattedNumber:
-                                                    friendlyFormattedNumber(
-                                                        player.level
-                                                    ),
-                                                levelPluralized,
-                                            }
-                                        );
+                                        level =
+                                            LocalizationManager.localizer.translate(
+                                                messageContext.guildID,
+                                                "command.leaderboard.levelEntry.temporary",
+                                                {
+                                                    formattedNumber:
+                                                        friendlyFormattedNumber(
+                                                            player.level
+                                                        ),
+                                                    levelPluralized,
+                                                }
+                                            );
                                     }
 
                                     let value: string;
@@ -574,7 +578,7 @@ export default class LeaderboardCommand implements BaseCommand {
                                             break;
                                         case LeaderboardType.GAMES_PLAYED: {
                                             const games =
-                                                State.localizer.translate(
+                                                LocalizationManager.localizer.translate(
                                                     messageContext.guildID,
                                                     "command.leaderboard.gamesPlayed",
                                                     {
@@ -591,7 +595,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
                                         case LeaderboardType.SONGS_GUESSED: {
                                             const guesses =
-                                                State.localizer.translate(
+                                                LocalizationManager.localizer.translate(
                                                     messageContext.guildID,
                                                     "command.leaderboard.songsGuessed",
                                                     {
@@ -620,15 +624,16 @@ export default class LeaderboardCommand implements BaseCommand {
                         let leaderboardScope: string;
                         switch (scope) {
                             case LeaderboardScope.GLOBAL:
-                                leaderboardScope = State.localizer.translate(
-                                    messageContext.guildID,
-                                    "command.leaderboard.scope.global"
-                                );
+                                leaderboardScope =
+                                    LocalizationManager.localizer.translate(
+                                        messageContext.guildID,
+                                        "command.leaderboard.scope.global"
+                                    );
                                 break;
                             case LeaderboardScope.SERVER:
                                 if (process.env.NODE_ENV !== EnvType.TEST) {
                                     leaderboardScope =
-                                        State.localizer.translate(
+                                        LocalizationManager.localizer.translate(
                                             messageContext.guildID,
                                             "command.leaderboard.scope.server.withName",
                                             {
@@ -640,7 +645,7 @@ export default class LeaderboardCommand implements BaseCommand {
                                         );
                                 } else {
                                     leaderboardScope =
-                                        State.localizer.translate(
+                                        LocalizationManager.localizer.translate(
                                             messageContext.guildID,
                                             "command.leaderboard.scope.server.noName"
                                         );
@@ -648,10 +653,11 @@ export default class LeaderboardCommand implements BaseCommand {
 
                                 break;
                             case LeaderboardScope.GAME:
-                                leaderboardScope = State.localizer.translate(
-                                    messageContext.guildID,
-                                    "command.leaderboard.scope.currentGame"
-                                );
+                                leaderboardScope =
+                                    LocalizationManager.localizer.translate(
+                                        messageContext.guildID,
+                                        "command.leaderboard.scope.currentGame"
+                                    );
                                 break;
                             default:
                                 break;
@@ -661,37 +667,42 @@ export default class LeaderboardCommand implements BaseCommand {
                         switch (duration) {
                             case LeaderboardDuration.TODAY:
                             case LeaderboardDuration.DAILY:
-                                leaderboardDuration = State.localizer.translate(
-                                    messageContext.guildID,
-                                    "command.leaderboard.duration.daily"
-                                );
+                                leaderboardDuration =
+                                    LocalizationManager.localizer.translate(
+                                        messageContext.guildID,
+                                        "command.leaderboard.duration.daily"
+                                    );
                                 break;
                             case LeaderboardDuration.WEEK:
                             case LeaderboardDuration.WEEKLY:
-                                leaderboardDuration = State.localizer.translate(
-                                    messageContext.guildID,
-                                    "command.leaderboard.duration.weekly"
-                                );
+                                leaderboardDuration =
+                                    LocalizationManager.localizer.translate(
+                                        messageContext.guildID,
+                                        "command.leaderboard.duration.weekly"
+                                    );
                                 break;
                             case LeaderboardDuration.MONTH:
                             case LeaderboardDuration.MONTHLY:
-                                leaderboardDuration = State.localizer.translate(
-                                    messageContext.guildID,
-                                    "command.leaderboard.duration.monthly"
-                                );
+                                leaderboardDuration =
+                                    LocalizationManager.localizer.translate(
+                                        messageContext.guildID,
+                                        "command.leaderboard.duration.monthly"
+                                    );
                                 break;
                             case LeaderboardDuration.YEAR:
                             case LeaderboardDuration.YEARLY:
-                                leaderboardDuration = State.localizer.translate(
-                                    messageContext.guildID,
-                                    "command.leaderboard.duration.yearly"
-                                );
+                                leaderboardDuration =
+                                    LocalizationManager.localizer.translate(
+                                        messageContext.guildID,
+                                        "command.leaderboard.duration.yearly"
+                                    );
                                 break;
                             case LeaderboardDuration.ALL_TIME:
-                                leaderboardDuration = State.localizer.translate(
-                                    messageContext.guildID,
-                                    "command.leaderboard.duration.allTime"
-                                );
+                                leaderboardDuration =
+                                    LocalizationManager.localizer.translate(
+                                        messageContext.guildID,
+                                        "command.leaderboard.duration.allTime"
+                                    );
                                 break;
                             default:
                                 break;
@@ -703,13 +714,13 @@ export default class LeaderboardCommand implements BaseCommand {
                                 leaderboardType = "";
                                 break;
                             case LeaderboardType.GAMES_PLAYED:
-                                leaderboardType = `(${State.localizer.translate(
+                                leaderboardType = `(${LocalizationManager.localizer.translate(
                                     messageContext.guildID,
                                     "command.leaderboard.type.byGamesPlayed"
                                 )})`;
                                 break;
                             case LeaderboardType.SONGS_GUESSED:
-                                leaderboardType = `(${State.localizer.translate(
+                                leaderboardType = `(${LocalizationManager.localizer.translate(
                                     messageContext.guildID,
                                     "command.leaderboard.type.bySongsGuessed"
                                 )})`;
@@ -720,7 +731,7 @@ export default class LeaderboardCommand implements BaseCommand {
 
                         resolve({
                             title: bold(
-                                State.localizer
+                                LocalizationManager.localizer
                                     .translate(
                                         messageContext.guildID,
                                         "command.leaderboard.title",
@@ -736,7 +747,7 @@ export default class LeaderboardCommand implements BaseCommand {
                             timestamp: new Date(),
                             thumbnail: { url: KmqImages.THUMBS_UP },
                             footer: {
-                                text: State.localizer.translate(
+                                text: LocalizationManager.localizer.translate(
                                     messageContext.guildID,
                                     chooseRandom(leaderboardQuotes),
                                     {
@@ -762,11 +773,11 @@ export default class LeaderboardCommand implements BaseCommand {
 
         if (alreadyEnrolled) {
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: State.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.leaderboard.failure.alreadyEnrolled.title"
                 ),
-                description: State.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.leaderboard.failure.alreadyEnrolled.description"
                 ),
@@ -780,11 +791,11 @@ export default class LeaderboardCommand implements BaseCommand {
         });
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: State.localizer.translate(
+            title: LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.leaderboard.enrolled.title"
             ),
-            description: State.localizer.translate(
+            description: LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.leaderboard.enrolled.description"
             ),
@@ -800,11 +811,11 @@ export default class LeaderboardCommand implements BaseCommand {
             .del();
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: State.localizer.translate(
+            title: LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.leaderboard.unenrolled.title"
             ),
-            description: State.localizer.translate(
+            description: LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.leaderboard.unenrolled.description"
             ),
@@ -826,11 +837,11 @@ export default class LeaderboardCommand implements BaseCommand {
         if (scope === LeaderboardScope.GAME) {
             if (!State.gameSessions[message.guildID]) {
                 sendErrorMessage(messageContext, {
-                    title: State.localizer.translate(
+                    title: LocalizationManager.localizer.translate(
                         message.guildID,
                         "misc.failure.game.noneInProgress.title"
                     ),
-                    description: State.localizer.translate(
+                    description: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.leaderboard.failure.game.noneInProgress.description"
                     ),
@@ -846,11 +857,11 @@ export default class LeaderboardCommand implements BaseCommand {
 
             if (participantIDs.length === 0) {
                 sendErrorMessage(messageContext, {
-                    title: State.localizer.translate(
+                    title: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.leaderboard.failure.game.noParticipants.title"
                     ),
-                    description: State.localizer.translate(
+                    description: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.leaderboard.failure.game.noParticipants.description"
                     ),
@@ -870,11 +881,11 @@ export default class LeaderboardCommand implements BaseCommand {
 
         if (pageCount === 0) {
             sendErrorMessage(messageContext, {
-                title: State.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.leaderboard.failure.empty.title"
                 ),
-                description: State.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.leaderboard.failure.empty.description"
                 ),
@@ -885,11 +896,11 @@ export default class LeaderboardCommand implements BaseCommand {
 
         if (pageOffset > pageCount) {
             sendErrorMessage(messageContext, {
-                title: State.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.leaderboard.failure.outOfRange.title"
                 ),
-                description: State.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.leaderboard.failure.outOfRange.description"
                 ),

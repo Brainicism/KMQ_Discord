@@ -9,10 +9,10 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import State from "../../state";
 import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
 import { ArtistType } from "../../enums/option_types/artist_type";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("artisttype");
 
@@ -33,7 +33,7 @@ export default class ArtistTypeCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "artisttype",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.artisttype.help.description",
             {
@@ -46,28 +46,28 @@ export default class ArtistTypeCommand implements BaseCommand {
         examples: [
             {
                 example: "`,artisttype soloists`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.soloists"
                 ),
             },
             {
                 example: "`,artisttype groups`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.groups"
                 ),
             },
             {
                 example: "`,artisttype both`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.both"
                 ),
             },
             {
                 example: "`,artisttype`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.artisttype.help.example.reset"
                 ),
@@ -97,11 +97,11 @@ export default class ArtistTypeCommand implements BaseCommand {
             );
 
             sendErrorMessage(MessageContext.fromMessage(message), {
-                title: State.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "misc.failure.gameOptionConflict.title"
                 ),
-                description: State.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "misc.failure.gameOptionConflict.description",
                     {

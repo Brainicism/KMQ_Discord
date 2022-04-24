@@ -11,6 +11,7 @@ import State from "../../state";
 import { DEFAULT_LOCALE, KmqImages } from "../../constants";
 import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("locale");
 
@@ -40,7 +41,7 @@ export default class LocaleTypeCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "locale",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.locale.help.description",
             {
@@ -48,18 +49,18 @@ export default class LocaleTypeCommand implements BaseCommand {
                 korean: `\`${LocaleArgument.KOREAN}\``,
             }
         ),
-        usage: `,locale [${State.localizer.translate(
+        usage: `,locale [${LocalizationManager.localizer.translate(
             guildID,
             "command.locale.help.usage.language"
         )}]`,
         examples: [
             {
                 example: "`,locale english`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.locale.help.example.toEnglish",
                     {
-                        english: State.localizer.translate(
+                        english: LocalizationManager.localizer.translate(
                             guildID,
                             "command.locale.language.en"
                         ),
@@ -68,11 +69,11 @@ export default class LocaleTypeCommand implements BaseCommand {
             },
             {
                 example: "`,locale korean`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.locale.help.example.toKorean",
                     {
-                        korean: State.localizer.translate(
+                        korean: LocalizationManager.localizer.translate(
                             guildID,
                             "command.locale.language.ko"
                         ),
@@ -81,11 +82,11 @@ export default class LocaleTypeCommand implements BaseCommand {
             },
             {
                 example: "`,locale`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.locale.help.example.reset",
                     {
-                        defaultLocale: State.localizer.translate(
+                        defaultLocale: LocalizationManager.localizer.translate(
                             guildID,
                             `command.locale.language.${DEFAULT_LOCALE}`
                         ),
@@ -121,16 +122,16 @@ export default class LocaleTypeCommand implements BaseCommand {
         await LocaleTypeCommand.updateLocale(message.guildID, language);
 
         sendInfoMessage(MessageContext.fromMessage(message), {
-            title: State.localizer.translate(
+            title: LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.options.updated",
                 { presetOrOption: "Locale" }
             ),
-            description: State.localizer.translate(
+            description: LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.locale.updatedDescription",
                 {
-                    language: State.localizer.translate(
+                    language: LocalizationManager.localizer.translate(
                         message.guildID,
                         `command.locale.language.${language}`
                     ),

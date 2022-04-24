@@ -8,11 +8,11 @@ import {
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import State from "../../state";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import { MultiGuessType } from "../../enums/option_types/multiguess_type";
 import { DEFAULT_MULTIGUESS_TYPE } from "../../constants";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("multiguess");
 export default class MultiGuessCommand implements BaseCommand {
@@ -35,7 +35,7 @@ export default class MultiGuessCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "multiguess",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.multiguess.help.description",
             { on: `\`${MultiGuessType.ON}\`` }
@@ -44,21 +44,21 @@ export default class MultiGuessCommand implements BaseCommand {
         examples: [
             {
                 example: "`,multiguess on`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.multiguess.help.example.on"
                 ),
             },
             {
                 example: "`,multiguess off`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.multiguess.help.example.off"
                 ),
             },
             {
                 example: "`,multiguess`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.multiguess.help.example.reset",
                     { defaultMultiguess: `\`${DEFAULT_MULTIGUESS_TYPE}\`` }

@@ -9,9 +9,9 @@ import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
 import { GameOptionInternalToGameOption } from "../../structures/guild_preference";
 import type { GameOption } from "../../enums/game_option_name";
-import State from "../../state";
 import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("reset");
 
@@ -26,7 +26,7 @@ export default class ResetCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "reset",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.reset.help.description"
         ),
@@ -34,7 +34,7 @@ export default class ResetCommand implements BaseCommand {
         examples: [
             {
                 example: "`,reset`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.reset.help.example.reset"
                 ),

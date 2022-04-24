@@ -9,13 +9,13 @@ import { IPCLogger } from "../../logger";
 import { GameOption } from "../../enums/game_option_name";
 import MessageContext from "../../structures/message_context";
 import CommandPrechecks from "../../command_prechecks";
-import State from "../../state";
 import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
 import {
     DEFAULT_BEGINNING_SEARCH_YEAR,
     DEFAULT_ENDING_SEARCH_YEAR,
 } from "../../constants";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("cutoff");
 
@@ -43,7 +43,7 @@ export default class CutoffCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "cutoff",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.cutoff.help.description"
         ),
@@ -51,7 +51,7 @@ export default class CutoffCommand implements BaseCommand {
         examples: [
             {
                 example: "`,cutoff 2015`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.cutoff.help.example.singleCutoff",
                     {
@@ -61,7 +61,7 @@ export default class CutoffCommand implements BaseCommand {
             },
             {
                 example: "`,cutoff 2015 2018`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.cutoff.help.example.twoCutoffs",
                     {
@@ -72,7 +72,7 @@ export default class CutoffCommand implements BaseCommand {
             },
             {
                 example: "`,cutoff`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.cutoff.help.example.reset",
                     {
@@ -119,11 +119,11 @@ export default class CutoffCommand implements BaseCommand {
             const endYear = yearRange[1];
             if (endYear < startYear) {
                 await sendErrorMessage(MessageContext.fromMessage(message), {
-                    title: State.localizer.translate(
+                    title: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.cutoff.failure.invalidEndYear.title"
                     ),
-                    description: State.localizer.translate(
+                    description: LocalizationManager.localizer.translate(
                         message.guildID,
                         "command.cutoff.failure.invalidEndYear.description"
                     ),

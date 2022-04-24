@@ -22,6 +22,7 @@ import State from "../../state";
 import type QueriedSong from "../../interfaces/queried_song";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("recentlyadded");
 
@@ -32,7 +33,7 @@ export default class RecentlyAddedCommand implements BaseCommand {
 
     help = (guildID: string): HelpDocumentation => ({
         name: "recentlyadded",
-        description: State.localizer.translate(
+        description: LocalizationManager.localizer.translate(
             guildID,
             "command.recentlyadded.help.description"
         ),
@@ -40,7 +41,7 @@ export default class RecentlyAddedCommand implements BaseCommand {
         examples: [
             {
                 example: "`,recentlyadded`",
-                explanation: State.localizer.translate(
+                explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.recentlyadded.help.example"
                 ),
@@ -72,11 +73,11 @@ export default class RecentlyAddedCommand implements BaseCommand {
 
         if (newSongs.length === 0) {
             sendInfoMessage(MessageContext.fromMessage(message), {
-                title: State.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.recentlyadded.failure.noSongs.title"
                 ),
-                description: State.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.recentlyadded.failure.noSongs.description"
                 ),
@@ -91,14 +92,14 @@ export default class RecentlyAddedCommand implements BaseCommand {
                 song,
                 locale
             )}" - ${getLocalizedArtistName(song, locale)}`,
-            value: `${State.localizer.translate(
+            value: `${LocalizationManager.localizer.translate(
                 message.guildID,
                 "command.recentlyadded.released"
             )} ${standardDateFormat(
                 song.publishDate
             )}\n[${friendlyFormattedNumber(
                 song.views
-            )} ${State.localizer.translate(
+            )} ${LocalizationManager.localizer.translate(
                 message.guildID,
                 "misc.views"
             )}](https://youtu.be/${song.youtubeLink})`,
@@ -108,11 +109,11 @@ export default class RecentlyAddedCommand implements BaseCommand {
         const embedFieldSubsets = chunkArray(fields, FIELDS_PER_EMBED);
         const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
             (embedFieldsSubset) => ({
-                title: State.localizer.translate(
+                title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.recentlyadded.title"
                 ),
-                description: State.localizer.translate(
+                description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "command.recentlyadded.description"
                 ),

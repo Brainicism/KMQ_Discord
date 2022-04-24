@@ -14,6 +14,7 @@ import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import type ParsedMessage from "../../interfaces/parsed_message";
 import { EnvType } from "../../enums/env_type";
+import LocalizationManager from "../../helpers/localization_manager";
 
 const logger = new IPCLogger("messageCreate");
 
@@ -130,11 +131,11 @@ export default async function messageCreateHandler(
                 }
 
                 sendErrorMessage(messageContext, {
-                    title: State.localizer.translate(
+                    title: LocalizationManager.localizer.translate(
                         message.guildID,
                         "misc.failure.command.title"
                     ),
-                    description: State.localizer.translate(
+                    description: LocalizationManager.localizer.translate(
                         message.guildID,
                         "misc.failure.command.description",
                         { debugId }
