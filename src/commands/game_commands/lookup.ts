@@ -5,7 +5,6 @@ import State from "../../state";
 import dbContext from "../../database_context";
 import {
     getDebugLogHeader,
-    getGuildLocale,
     sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
@@ -154,7 +153,7 @@ export default class LookupCommand implements BaseCommand {
             !!daisukiMVEntry
         );
 
-        const locale = getGuildLocale(guildID);
+        const locale = State.getGuildLocale(guildID);
         let description: string;
         let songName: string;
         let artistName: string;

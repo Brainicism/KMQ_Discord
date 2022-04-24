@@ -3,12 +3,11 @@ import {
     getDebugLogHeader,
     sendErrorMessage,
 } from "./helpers/discord_utils";
-import GameSession from "./structures/game_session";
+import type GameSession from "./structures/game_session";
 import MessageContext from "./structures/message_context";
 import { IPCLogger } from "./logger";
 import dbContext from "./database_context";
 import State from "./state";
-import MusicSession from "./structures/music_session";
 import { getTimeUntilRestart } from "./helpers/management_utils";
 import { isUserPremium } from "./helpers/game_utils";
 import type PrecheckArgs from "./interfaces/precheck_args";
@@ -23,7 +22,7 @@ export default class CommandPrechecks {
             return false;
         }
 
-        if (session instanceof MusicSession) {
+        if (session.isMusicSession()) {
             return areUserAndBotInSameVoiceChannel(message);
         }
 
@@ -64,7 +63,7 @@ export default class CommandPrechecks {
 
     static notMusicPrecheck(precheckArgs: PrecheckArgs): boolean {
         const { session, message } = precheckArgs;
-        if (session && !(session instanceof GameSession)) {
+        if (session && !session.isGameSession()) {
             sendErrorMessage(MessageContext.fromMessage(message), {
                 title: State.localizer.translate(
                     message.guildID,
@@ -141,7 +140,7 @@ export default class CommandPrechecks {
         const gameSession = session as GameSession;
         if (
             !session ||
-            session instanceof MusicSession ||
+            session.isMusicSession() ||
             gameSession.gameType !== GameType.COMPETITION
         ) {
             return true;

@@ -6,7 +6,6 @@ import {
     sendInfoMessage,
     getUserVoiceChannel,
     getDebugLogHeader,
-    getGuildLocale,
 } from "../../helpers/discord_utils";
 import {
     getGuildPreference,
@@ -59,7 +58,7 @@ export default class DebugCommand implements BaseCommand {
 
         fields.push({
             name: "Locale",
-            value: getGuildLocale(message.guildID),
+            value: State.getGuildLocale(message.guildID),
             inline: false,
         });
 

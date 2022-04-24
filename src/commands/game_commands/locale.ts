@@ -6,10 +6,9 @@ import {
 import { IPCLogger } from "../../logger";
 import MessageContext from "../../structures/message_context";
 import { LocaleType } from "../../enums/locale_type";
-import { DEFAULT_LOCALE } from "../../helpers/localization_manager";
 import dbContext from "../../database_context";
 import State from "../../state";
-import { KmqImages } from "../../constants";
+import { DEFAULT_LOCALE, KmqImages } from "../../constants";
 import type HelpDocumentation from "../../interfaces/help";
 import type CommandArgs from "../../interfaces/command_args";
 

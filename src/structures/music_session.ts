@@ -56,7 +56,7 @@ export default class MusicSession extends Session {
         super.updateOwner();
     }
 
-    isMusicSession(): boolean {
+    isMusicSession(): this is MusicSession {
         return true;
     }
 
@@ -116,7 +116,7 @@ export default class MusicSession extends Session {
         super.endSession();
     }
 
-    async handleButtonInteraction(
+    async handleComponentInteraction(
         interaction: Eris.ComponentInteraction,
         messageContext: MessageContext
     ): Promise<void> {

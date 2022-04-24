@@ -9,8 +9,6 @@ import {
 import State from "../../state";
 import { handleProfileInteraction } from "../../commands/game_commands/profile";
 import Session from "../../structures/session";
-import GameSession from "../../structures/game_session";
-import MusicSession from "../../structures/music_session";
 
 export const BOOKMARK_COMMAND_NAME = "Bookmark Song";
 export const PROFILE_COMMAND_NAME = "Profile";
@@ -47,14 +45,7 @@ export default async function interactionCreateHandler(
             interaction.guildID
         );
 
-        if (session instanceof GameSession) {
-            session.handleMultipleChoiceInteraction(
-                interaction,
-                messageContext
-            );
-        } else if (session instanceof MusicSession) {
-            await session.handleButtonInteraction(interaction, messageContext);
-        }
+        await session.handleComponentInteraction(interaction, messageContext);
     } else if (interaction instanceof Eris.CommandInteraction) {
         if (
             interaction.data.type ===

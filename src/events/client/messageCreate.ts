@@ -12,7 +12,6 @@ import validate from "../../helpers/validate";
 import type { GuildTextableMessage } from "../../types";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
-import GameSession from "../../structures/game_session";
 import type ParsedMessage from "../../interfaces/parsed_message";
 import { EnvType } from "../../enums/env_type";
 
@@ -143,7 +142,7 @@ export default async function messageCreateHandler(
                 });
             }
         }
-    } else if (session instanceof GameSession && session.round) {
+    } else if (session?.isGameSession() && session.round) {
         session.guessSong(messageContext, message.content);
     }
 }

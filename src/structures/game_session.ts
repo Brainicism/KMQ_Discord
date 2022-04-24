@@ -14,7 +14,6 @@ import {
     tryInteractionAcknowledge,
     tryCreateInteractionErrorAcknowledgement,
     getMention,
-    getGuildLocale,
     sendRoundMessage,
 } from "../helpers/discord_utils";
 import {
@@ -173,7 +172,7 @@ export default class GameSession extends Session {
 
         await super.startRound(guildPreference, messageContext);
         if (guildPreference.isMultipleChoiceMode()) {
-            const locale = getGuildLocale(this.guildID);
+            const locale = State.getGuildLocale(this.guildID);
             const randomSong = this.round.song;
             const correctChoice =
                 guildPreference.gameOptions.guessModeType ===
@@ -583,6 +582,10 @@ export default class GameSession extends Session {
         return this.correctGuesses;
     }
 
+    isGameSession(): this is GameSession {
+        return true;
+    }
+
     /** Updates owner to the first player to join the game that didn't leave VC */
     updateOwner(): void {
         if (this.finished) {
@@ -612,8 +615,8 @@ export default class GameSession extends Session {
         super.updateOwner();
     }
 
-    async handleMultipleChoiceInteraction(
-        interaction: Eris.ComponentInteraction,
+    async handleComponentInteraction(
+        interaction: Eris.ComponentInteraction<Eris.TextableChannel>,
         messageContext: MessageContext
     ): Promise<void> {
         if (
