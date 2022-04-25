@@ -9,7 +9,7 @@ const userIDs = ["12345", "23456", "34567"];
 let scoreboard: Scoreboard;
 beforeEach(() => {
     scoreboard = new Scoreboard();
-    userIDs.map((x) => scoreboard.addPlayer(Player.fromUserID(x)));
+    userIDs.map((x) => scoreboard.addPlayer(new Player("a", x, null, 0)));
 });
 
 let guildPreference: GuildPreference;
@@ -168,7 +168,7 @@ describe("score/exp updating", () => {
 
         describe("player moved ahead in ranking", () => {
             it("should show the player has gained ranking", () => {
-                const winningPlayer = Player.fromUserID("ohmi");
+                const winningPlayer = new Player("poggers", "ohmi", null, 0);
                 winningPlayer.setPreviousRanking(
                     previousRanking.indexOf("ohmi")
                 );
@@ -185,7 +185,7 @@ describe("score/exp updating", () => {
 
         describe("player was passed in ranking", () => {
             it("should show the player has lost ranking", () => {
-                const losingPlayer = Player.fromUserID("12345");
+                const losingPlayer = new Player("poggers", "12345", null, 0);
                 losingPlayer.setPreviousRanking(
                     previousRanking.indexOf("12345")
                 );
@@ -202,7 +202,7 @@ describe("score/exp updating", () => {
 
         describe("player didn't change position in ranking", () => {
             it("should not show any ranking change", () => {
-                const samePlayer = Player.fromUserID("jisoo");
+                const samePlayer = new Player("poggers", "jisoo", null, 0);
                 samePlayer.setPreviousRanking(previousRanking.indexOf("jisoo"));
                 assert.strictEqual(
                     samePlayer.getRankingPrefix(
@@ -216,7 +216,7 @@ describe("score/exp updating", () => {
 
         describe("the game has ended", () => {
             it("should not show any ranking change, even if there was one", () => {
-                const winningPlayer = Player.fromUserID("ohmi");
+                const winningPlayer = new Player("poggers", "ohmi", null, 0);
                 winningPlayer.setPreviousRanking(
                     previousRanking.indexOf("ohmi")
                 );
