@@ -1,10 +1,7 @@
-import * as discordUtils from "../helpers/discord_utils";
-import { DATABASE_DOWNLOAD_DIR, ELIMINATION_DEFAULT_LIVES } from "../constants";
+import { DATABASE_DOWNLOAD_DIR } from "../constants";
 import { IPCLogger } from "../logger";
 import { execSync } from "child_process";
-import EliminationPlayer from "../structures/elimination_player";
 import EnvType from "../enums/env_type";
-import Player from "../structures/player";
 import dbContext, { getNewConnection } from "../database_context";
 import kmqKnexConfig from "../config/knexfile_kmq";
 import path from "path";
@@ -20,24 +17,6 @@ before(async function () {
     }
 
     this.timeout(20000);
-    sandbox.stub(discordUtils, "sendErrorMessage");
-    sandbox.stub(discordUtils, "sendInfoMessage");
-    sandbox
-        .stub(Player, "fromUserID")
-        .callsFake((id) => new Player("", id, "", 0));
-
-    sandbox
-        .stub(EliminationPlayer, "fromUserID")
-        .callsFake(
-            (id, score) =>
-                new EliminationPlayer(
-                    "",
-                    id,
-                    "",
-                    score ?? ELIMINATION_DEFAULT_LIVES
-                )
-        );
-
     const db = getNewConnection();
     logger.info("Performing migrations on KMQ database");
     await db.agnostic.raw("DROP DATABASE IF EXISTS kmq_test;");
