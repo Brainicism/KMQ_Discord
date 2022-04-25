@@ -79,12 +79,15 @@ export default class AppCommandsCommand implements BaseCommand {
             });
         } else {
             const commands = await State.client.getCommands();
-            for (const command of commands) {
-                logger.info(
-                    `Deleting global application command: ${command.id}`
-                );
-                await State.client.deleteCommand(command.id);
-            }
+
+            await Promise.allSettled(
+                commands.map(async (command) => {
+                    logger.info(
+                        `Deleting global application command: ${command.id}`
+                    );
+                    await State.client.deleteCommand(command.id);
+                })
+            );
 
             const debugServer = State.client.guilds.get(
                 process.env.DEBUG_SERVER_ID
@@ -95,16 +98,18 @@ export default class AppCommandsCommand implements BaseCommand {
                 debugServer.id
             );
 
-            for (const command of guildCommands) {
-                logger.info(
-                    `Deleting guild application command: ${command.id}`
-                );
+            await Promise.allSettled(
+                guildCommands.map(async (command) => {
+                    logger.info(
+                        `Deleting guild application command: ${command.id}`
+                    );
 
-                await State.client.deleteGuildCommand(
-                    debugServer.id,
-                    command.id
-                );
-            }
+                    await State.client.deleteGuildCommand(
+                        debugServer.id,
+                        command.id
+                    );
+                })
+            );
 
             sendInfoMessage(MessageContext.fromMessage(message), {
                 title: "Commands Deleted",

@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import {
     FOREIGN_LANGUAGE_TAGS,
     LAST_PLAYED_SONG_QUEUE_SIZE,

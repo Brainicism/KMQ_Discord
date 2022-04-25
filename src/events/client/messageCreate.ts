@@ -103,6 +103,7 @@ export default async function messageCreateHandler(
             if (invokedCommand.preRunChecks) {
                 for (const precheck of invokedCommand.preRunChecks) {
                     if (
+                        // eslint-disable-next-line no-await-in-loop
                         !(await precheck.checkFn({
                             message,
                             session,

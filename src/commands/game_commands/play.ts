@@ -317,6 +317,7 @@ export default class PlayCommand implements BaseCommand {
                         logger.info(
                             `Session started by non-premium request, clearing premium option: ${commandName}`
                         );
+                        // eslint-disable-next-line no-await-in-loop
                         await command.resetPremium(guildPreference);
                     }
                 }

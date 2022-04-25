@@ -70,15 +70,18 @@ export async function cleanupInactiveGameSessions(): Promise<void> {
     const currentDate = Date.now();
     let inactiveSessions = 0;
     const totalSessions = Object.keys(gameSessions).length;
-    for (const guildID of Object.keys(gameSessions)) {
-        const gameSession = gameSessions[guildID];
-        const timeDiffMs = currentDate - gameSession.lastActive;
-        const timeDiffMin = timeDiffMs / (1000 * 60);
-        if (timeDiffMin > GAME_SESSION_INACTIVE_THRESHOLD) {
-            inactiveSessions++;
-            await gameSessions[guildID].endSession();
-        }
-    }
+
+    await Promise.allSettled(
+        Object.keys(gameSessions).map(async (guildID) => {
+            const gameSession = gameSessions[guildID];
+            const timeDiffMs = currentDate - gameSession.lastActive;
+            const timeDiffMin = timeDiffMs / (1000 * 60);
+            if (timeDiffMin > GAME_SESSION_INACTIVE_THRESHOLD) {
+                inactiveSessions++;
+                await gameSessions[guildID].endSession();
+            }
+        })
+    );
 
     if (inactiveSessions > 0) {
         logger.info(
