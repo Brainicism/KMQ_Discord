@@ -10,22 +10,29 @@ beforeEach(() => {
     scoreboard = new EliminationScoreboard(DEFAULT_LIVES);
 });
 
+function getMockEliminationPlayer(
+    id: string,
+    lives = DEFAULT_LIVES
+): EliminationPlayer {
+    return new EliminationPlayer("sakura", id, null, lives);
+}
+
 describe("score/exp updating", () => {
     beforeEach(() => {
         scoreboard.addPlayer(
-            EliminationPlayer.fromUserID(userIDs[0], DEFAULT_LIVES)
+            getMockEliminationPlayer(userIDs[0], DEFAULT_LIVES)
         );
 
         scoreboard.addPlayer(
-            EliminationPlayer.fromUserID(userIDs[1], DEFAULT_LIVES)
+            getMockEliminationPlayer(userIDs[1], DEFAULT_LIVES)
         );
 
         scoreboard.addPlayer(
-            EliminationPlayer.fromUserID(userIDs[2], DEFAULT_LIVES)
+            getMockEliminationPlayer(userIDs[2], DEFAULT_LIVES)
         );
 
         scoreboard.addPlayer(
-            EliminationPlayer.fromUserID(userIDs[3], DEFAULT_LIVES)
+            getMockEliminationPlayer(userIDs[3], DEFAULT_LIVES)
         );
     });
 
@@ -156,15 +163,15 @@ describe("score/exp updating", () => {
 describe("winner detection", () => {
     beforeEach(() => {
         scoreboard.addPlayer(
-            EliminationPlayer.fromUserID(userIDs[0], DEFAULT_LIVES)
+            getMockEliminationPlayer(userIDs[0], DEFAULT_LIVES)
         );
 
         scoreboard.addPlayer(
-            EliminationPlayer.fromUserID(userIDs[1], DEFAULT_LIVES)
+            getMockEliminationPlayer(userIDs[1], DEFAULT_LIVES)
         );
 
         scoreboard.addPlayer(
-            EliminationPlayer.fromUserID(userIDs[2], DEFAULT_LIVES)
+            getMockEliminationPlayer(userIDs[2], DEFAULT_LIVES)
         );
     });
 
@@ -235,34 +242,34 @@ describe("winner detection", () => {
 describe("game finished", () => {
     describe("every player is dead", () => {
         it("should return true", () => {
-            scoreboard.addPlayer(EliminationPlayer.fromUserID(userIDs[0], 0));
-            scoreboard.addPlayer(EliminationPlayer.fromUserID(userIDs[1], 0));
-            scoreboard.addPlayer(EliminationPlayer.fromUserID(userIDs[2], 0));
+            scoreboard.addPlayer(getMockEliminationPlayer(userIDs[0], 0));
+            scoreboard.addPlayer(getMockEliminationPlayer(userIDs[1], 0));
+            scoreboard.addPlayer(getMockEliminationPlayer(userIDs[2], 0));
             assert.strictEqual(scoreboard.gameFinished(), true);
         });
     });
 
     describe("one player is left in a multiplayer game", () => {
         it("should return true", () => {
-            scoreboard.addPlayer(EliminationPlayer.fromUserID(userIDs[0], 0));
-            scoreboard.addPlayer(EliminationPlayer.fromUserID(userIDs[1], 0));
-            scoreboard.addPlayer(EliminationPlayer.fromUserID(userIDs[2], 5));
+            scoreboard.addPlayer(getMockEliminationPlayer(userIDs[0], 0));
+            scoreboard.addPlayer(getMockEliminationPlayer(userIDs[1], 0));
+            scoreboard.addPlayer(getMockEliminationPlayer(userIDs[2], 5));
             assert.strictEqual(scoreboard.gameFinished(), true);
         });
     });
 
     describe("one player is left in a single player game", () => {
         it("should return false", () => {
-            scoreboard.addPlayer(EliminationPlayer.fromUserID(userIDs[0], 5));
+            scoreboard.addPlayer(getMockEliminationPlayer(userIDs[0], 5));
             assert.strictEqual(scoreboard.gameFinished(), false);
         });
     });
 
     describe("multiple players are still alive", () => {
         it("should return false", () => {
-            scoreboard.addPlayer(EliminationPlayer.fromUserID(userIDs[0], 5));
-            scoreboard.addPlayer(EliminationPlayer.fromUserID(userIDs[1], 8));
-            scoreboard.addPlayer(EliminationPlayer.fromUserID(userIDs[2], 2));
+            scoreboard.addPlayer(getMockEliminationPlayer(userIDs[0], 5));
+            scoreboard.addPlayer(getMockEliminationPlayer(userIDs[1], 8));
+            scoreboard.addPlayer(getMockEliminationPlayer(userIDs[2], 2));
             assert.strictEqual(scoreboard.gameFinished(), false);
         });
     });
@@ -271,18 +278,18 @@ describe("game finished", () => {
 describe("getLivesOfWeakestPlayer", () => {
     describe("one person is the weakest", () => {
         it("should return the weakest person's number of lives", () => {
-            scoreboard.addPlayer(EliminationPlayer.fromUserID(userIDs[0], 5));
-            scoreboard.addPlayer(EliminationPlayer.fromUserID(userIDs[1], 8));
-            scoreboard.addPlayer(EliminationPlayer.fromUserID(userIDs[2], 2));
+            scoreboard.addPlayer(getMockEliminationPlayer(userIDs[0], 5));
+            scoreboard.addPlayer(getMockEliminationPlayer(userIDs[1], 8));
+            scoreboard.addPlayer(getMockEliminationPlayer(userIDs[2], 2));
             assert.strictEqual(scoreboard.getLivesOfWeakestPlayer(), 2);
         });
     });
 
     describe("tie for the weakest", () => {
         it("should return the number of lives", () => {
-            scoreboard.addPlayer(EliminationPlayer.fromUserID(userIDs[0], 3));
-            scoreboard.addPlayer(EliminationPlayer.fromUserID(userIDs[1], 2));
-            scoreboard.addPlayer(EliminationPlayer.fromUserID(userIDs[2], 2));
+            scoreboard.addPlayer(getMockEliminationPlayer(userIDs[0], 3));
+            scoreboard.addPlayer(getMockEliminationPlayer(userIDs[1], 2));
+            scoreboard.addPlayer(getMockEliminationPlayer(userIDs[2], 2));
             assert.strictEqual(scoreboard.getLivesOfWeakestPlayer(), 2);
         });
     });
@@ -291,7 +298,7 @@ describe("getLivesOfWeakestPlayer", () => {
 describe("starting lives", () => {
     describe("no explicit number of lives set for player", () => {
         it("should default to the scoreboard's default", () => {
-            scoreboard.addPlayer(EliminationPlayer.fromUserID(userIDs[0]));
+            scoreboard.addPlayer(getMockEliminationPlayer(userIDs[0]));
             assert.strictEqual(
                 scoreboard.getPlayerLives(userIDs[0]),
                 DEFAULT_LIVES
@@ -301,7 +308,7 @@ describe("starting lives", () => {
 
     describe("explicit number of lives set for player", () => {
         it("should use the explicitly set number of lives", () => {
-            scoreboard.addPlayer(EliminationPlayer.fromUserID(userIDs[0], 17));
+            scoreboard.addPlayer(getMockEliminationPlayer(userIDs[0], 17));
             assert.strictEqual(scoreboard.getPlayerLives(userIDs[0]), 17);
         });
     });

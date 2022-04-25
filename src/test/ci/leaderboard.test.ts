@@ -260,7 +260,7 @@ describe("getLeaderboardEmbeds", () => {
                 statsRows.push(...generatePlayerStats(INITIAL_TOTAL_ENTRIES));
                 [...Array(INITIAL_TOTAL_ENTRIES).keys()].map((i) =>
                     gameSession.scoreboard.addPlayer(
-                        Player.fromUserID(String(i))
+                        new Player("poggers", i.toString(), null, 0)
                     )
                 );
 
@@ -614,7 +614,7 @@ describe("getLeaderboardEmbeds", () => {
                     .filter((x) => x !== 0)
                     .map((i) =>
                         gameSession.scoreboard.addPlayer(
-                            Player.fromUserID(String(i))
+                            new Player("poggers", i.toString(), null, 0)
                         )
                     );
             });
