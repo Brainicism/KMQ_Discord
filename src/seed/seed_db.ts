@@ -1,7 +1,6 @@
 import { DATABASE_DOWNLOAD_DIR } from "../constants";
 import { IPCLogger } from "../logger";
 import { config } from "dotenv";
-import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import { execSync } from "child_process";
 import { getNewConnection } from "../database_context";
 import { parseJsonFile } from "../helpers/utils";
@@ -9,6 +8,7 @@ import { program } from "commander";
 import Axios from "axios";
 import EnvType from "../enums/env_type";
 import _ from "lodash";
+import downloadAndConvertSongs from "../scripts/download-new-songs";
 import fs from "fs";
 import path from "path";
 import type { DatabaseContext } from "../database_context";
