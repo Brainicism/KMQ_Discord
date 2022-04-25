@@ -89,8 +89,7 @@
         "@typescript-eslint/no-unused-vars": [
             "warn",
             {
-                "argsIgnorePattern": "^_",
-                "varsIgnorePattern":"logger"
+                "argsIgnorePattern": "^_"
             }
         ],
         "@typescript-eslint/member-ordering": [
