@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import * as discordUtils from "../helpers/discord_utils";
 import { DATABASE_DOWNLOAD_DIR, ELIMINATION_DEFAULT_LIVES } from "../constants";
 import { IPCLogger } from "../logger";

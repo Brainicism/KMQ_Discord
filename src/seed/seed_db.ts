@@ -460,5 +460,4 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
     }
 })();
 
-// eslint-disable-next-line import/prefer-default-export
 export { seedAndDownloadNewSongs, updateKpopDatabase };

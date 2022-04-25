@@ -22,7 +22,6 @@ import State from "./state";
 import dbContext from "./database_context";
 import type KmqClient from "./kmq_client";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("kmq");
 config({ path: path.resolve(__dirname, "../.env") });
 
