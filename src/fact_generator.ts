@@ -91,13 +91,15 @@ interface GaonWeeklyEntry {
 }
 
 /**
- * Reloads the fact fcache
+ * Reloads the fact cache
  */
 export async function reloadFactCache(): Promise<void> {
     logger.info("Regenerating fact cache...");
-    for (const locale of Object.values(LocaleType)) {
-        await generateFacts(locale);
-    }
+    await Promise.allSettled(
+        Object.values(LocaleType).map(async (locale) => {
+            await generateFacts(locale);
+        })
+    );
 }
 
 async function resolveFactPromises(
@@ -988,19 +990,18 @@ async function recentGames(lng: LocaleType): Promise<string[]> {
 
 async function recentUniquePlayers(lng: LocaleType): Promise<string[]> {
     const intervals = [1, 7, 30];
-    const output: Array<string> = [];
-    for (const interval of intervals) {
-        const priorDate = new Date();
-        priorDate.setDate(priorDate.getDate() - interval);
-        const result = await dbContext
-            .kmq("player_stats")
-            .count("* as count")
-            .where("last_active", ">", priorDate);
+    return Promise.all(
+        intervals.map(async (interval): Promise<string> => {
+            const priorDate = new Date();
+            priorDate.setDate(priorDate.getDate() - interval);
+            const result = await dbContext
+                .kmq("player_stats")
+                .count("* as count")
+                .where("last_active", ">", priorDate);
 
-        if (result.length === 0) return [];
-        const recentActivePlayers = result[0].count as number;
-        output.push(
-            LocalizationManager.localizer.internalLocalizer.t(
+            if (result.length === 0) return null;
+            const recentActivePlayers = result[0].count as number;
+            return LocalizationManager.localizer.internalLocalizer.t(
                 "fact.kmq.uniquePlayers",
                 {
                     recentActivePlayers:
@@ -1014,11 +1015,9 @@ async function recentUniquePlayers(lng: LocaleType): Promise<string[]> {
                     ),
                     lng,
                 }
-            )
-        );
-    }
-
-    return output;
+            );
+        })
+    );
 }
 
 async function mostSongsGuessedPlayer(lng: LocaleType): Promise<string[]> {

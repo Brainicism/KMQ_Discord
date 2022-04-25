@@ -1801,7 +1801,9 @@ export async function sendBookmarkedSongs(
                 },
             };
 
+            // eslint-disable-next-line no-await-in-loop
             await sendDmMessage(userID, { embeds: [embed] });
+            // eslint-disable-next-line no-await-in-loop
             await delay(1000);
         }
     }

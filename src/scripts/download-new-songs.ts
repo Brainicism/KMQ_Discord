@@ -29,15 +29,18 @@ async function clearPartiallyCachedSongs(): Promise<void> {
 
     const endingWithPartRegex = /\.part$/;
     const partFiles = files.filter((file) => file.match(endingWithPartRegex));
-    for (const partFile of partFiles) {
-        try {
-            await fs.promises.unlink(
-                `${process.env.SONG_DOWNLOAD_DIR}/${partFile}`
-            );
-        } catch (err) {
-            logger.error(err);
-        }
-    }
+
+    await Promise.allSettled(
+        partFiles.map(async (partFile) => {
+            try {
+                await fs.promises.unlink(
+                    `${process.env.SONG_DOWNLOAD_DIR}/${partFile}`
+                );
+            } catch (err) {
+                logger.error(err);
+            }
+        })
+    );
 
     if (partFiles.length) {
         logger.info(`${partFiles.length} stale cached songs deleted.`);
@@ -307,6 +310,7 @@ const downloadNewSongs = async (
             } (${downloadCount + 1}/${songsToDownload.length})`
         );
         try {
+            // eslint-disable-next-line no-await-in-loop
             await retryJob(downloadSong, [db, song.youtubeLink], 1, true, 5000);
         } catch (err) {
             logger.error(
@@ -314,6 +318,7 @@ const downloadNewSongs = async (
             );
             deadLinksSkipped++;
             try {
+                // eslint-disable-next-line no-await-in-loop
                 await fs.promises.unlink(
                     `${process.env.SONG_DOWNLOAD_DIR}/${song.youtubeLink}.mp3.part`
                 );
@@ -330,6 +335,7 @@ const downloadNewSongs = async (
             `Encoding song: '${song.songName}' by ${song.artistName} | ${song.youtubeLink}`
         );
         try {
+            // eslint-disable-next-line no-await-in-loop
             await retryJob(ffmpegOpusJob, [song.youtubeLink], 1, true, 5000);
         } catch (err) {
             logger.error(

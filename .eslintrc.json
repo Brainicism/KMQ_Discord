@@ -72,9 +72,6 @@
                 "message": "Do not use `forEach()`, use `for/of` instead"
             }
         ],
-        "no-await-in-loop": [
-            "off"
-        ],
         "no-continue": [
             "off"
         ],

@@ -372,39 +372,44 @@ export default class GameSession extends Session {
         }
 
         const leveledUpPlayers: Array<LevelUpResult> = [];
+
         // commit player stats
-        for (const participant of this.scoreboard.getPlayerIDs()) {
-            await this.ensurePlayerStat(participant);
-            await GameSession.incrementPlayerGamesPlayed(participant);
-            const playerScore = this.scoreboard.getPlayerScore(participant);
-            if (playerScore > 0) {
-                await GameSession.incrementPlayerSongsGuessed(
-                    participant,
-                    playerScore
-                );
-            }
-
-            const playerExpGain = this.scoreboard.getPlayerExpGain(participant);
-            let levelUpResult: LevelUpResult;
-            if (playerExpGain > 0) {
-                levelUpResult = await GameSession.incrementPlayerExp(
-                    participant,
-                    playerExpGain
-                );
-                if (levelUpResult) {
-                    leveledUpPlayers.push(levelUpResult);
+        await Promise.allSettled(
+            this.scoreboard.getPlayerIDs().map(async (participant) => {
+                await this.ensurePlayerStat(participant);
+                await GameSession.incrementPlayerGamesPlayed(participant);
+                const playerScore = this.scoreboard.getPlayerScore(participant);
+                if (playerScore > 0) {
+                    await GameSession.incrementPlayerSongsGuessed(
+                        participant,
+                        playerScore
+                    );
                 }
-            }
 
-            await GameSession.insertPerSessionStats(
-                participant,
-                playerScore,
-                playerExpGain,
-                levelUpResult
-                    ? levelUpResult.endLevel - levelUpResult.startLevel
-                    : 0
-            );
-        }
+                const playerExpGain =
+                    this.scoreboard.getPlayerExpGain(participant);
+
+                let levelUpResult: LevelUpResult;
+                if (playerExpGain > 0) {
+                    levelUpResult = await GameSession.incrementPlayerExp(
+                        participant,
+                        playerExpGain
+                    );
+                    if (levelUpResult) {
+                        leveledUpPlayers.push(levelUpResult);
+                    }
+                }
+
+                await GameSession.insertPerSessionStats(
+                    participant,
+                    playerScore,
+                    playerExpGain,
+                    levelUpResult
+                        ? levelUpResult.endLevel - levelUpResult.startLevel
+                        : 0
+                );
+            })
+        );
 
         // send level up message
         if (leveledUpPlayers.length > 0) {
@@ -720,34 +725,44 @@ export default class GameSession extends Session {
             this.voiceChannelID
         ).map((x) => x.id);
 
-        for (const player of this.scoreboard
-            .getPlayerIDs()
-            .filter((x) => !currentVoiceMembers.includes(x))) {
-            await this.setPlayerInVC(player, false);
-        }
+        await Promise.allSettled(
+            this.scoreboard
+                .getPlayerIDs()
+                .filter((x) => !currentVoiceMembers.includes(x))
+                .map(async (player) => {
+                    await this.setPlayerInVC(player, false);
+                })
+        );
 
         if (this.gameType === GameType.TEAMS) {
             // Players join teams manually with ,join
             return;
         }
 
-        for (const player of currentVoiceMembers.filter(
-            (x) => x !== process.env.BOT_CLIENT_ID
-        )) {
-            const firstGameOfDay = await isFirstGameOfDay(player);
-            const premium = await isUserPremium(player);
-            this.scoreboard.addPlayer(
-                this.gameType === GameType.ELIMINATION
-                    ? EliminationPlayer.fromUserID(
-                          player,
-                          (this.scoreboard as EliminationScoreboard)
-                              .startingLives,
-                          firstGameOfDay,
-                          premium
-                      )
-                    : Player.fromUserID(player, 0, firstGameOfDay, premium)
-            );
-        }
+        await Promise.allSettled(
+            currentVoiceMembers
+                .filter((x) => x !== process.env.BOT_CLIENT_ID)
+                .map(async (player) => {
+                    const firstGameOfDay = await isFirstGameOfDay(player);
+                    const premium = await isUserPremium(player);
+                    this.scoreboard.addPlayer(
+                        this.gameType === GameType.ELIMINATION
+                            ? EliminationPlayer.fromUserID(
+                                  player,
+                                  (this.scoreboard as EliminationScoreboard)
+                                      .startingLives,
+                                  firstGameOfDay,
+                                  premium
+                              )
+                            : Player.fromUserID(
+                                  player,
+                                  0,
+                                  firstGameOfDay,
+                                  premium
+                              )
+                    );
+                })
+        );
     }
 
     /**
@@ -1003,37 +1018,45 @@ export default class GameSession extends Session {
      * Stores song metadata in the database
      */
     private async storeSongStats(): Promise<void> {
-        for (const vlink of Object.keys(this.songStats)) {
-            await dbContext
-                .kmq("song_metadata")
-                .insert({
-                    vlink,
-                    correct_guesses: 0,
-                    rounds_played: 0,
-                    skip_count: 0,
-                    hint_count: 0,
-                    time_to_guess_ms: 0,
-                    time_played_ms: 0,
-                })
-                .onConflict("vlink")
-                .ignore();
+        await Promise.allSettled(
+            Object.keys(this.songStats).map(async (vlink) => {
+                await dbContext
+                    .kmq("song_metadata")
+                    .insert({
+                        vlink,
+                        correct_guesses: 0,
+                        rounds_played: 0,
+                        skip_count: 0,
+                        hint_count: 0,
+                        time_to_guess_ms: 0,
+                        time_played_ms: 0,
+                    })
+                    .onConflict("vlink")
+                    .ignore();
 
-            await dbContext
-                .kmq("song_metadata")
-                .where("vlink", "=", vlink)
-                .increment(
-                    "correct_guesses",
-                    this.songStats[vlink].correctGuesses
-                )
-                .increment("rounds_played", this.songStats[vlink].roundsPlayed)
-                .increment("skip_count", this.songStats[vlink].skipCount)
-                .increment("hint_count", this.songStats[vlink].hintCount)
-                .increment(
-                    "time_to_guess_ms",
-                    this.songStats[vlink].timeToGuess
-                )
-                .increment("time_played_ms", this.songStats[vlink].timePlayed);
-        }
+                await dbContext
+                    .kmq("song_metadata")
+                    .where("vlink", "=", vlink)
+                    .increment(
+                        "correct_guesses",
+                        this.songStats[vlink].correctGuesses
+                    )
+                    .increment(
+                        "rounds_played",
+                        this.songStats[vlink].roundsPlayed
+                    )
+                    .increment("skip_count", this.songStats[vlink].skipCount)
+                    .increment("hint_count", this.songStats[vlink].hintCount)
+                    .increment(
+                        "time_to_guess_ms",
+                        this.songStats[vlink].timeToGuess
+                    )
+                    .increment(
+                        "time_played_ms",
+                        this.songStats[vlink].timePlayed
+                    );
+            })
+        );
     }
 
     /**

@@ -31,14 +31,17 @@ async function generatePresetUUIDs(): Promise<void> {
             presetsWithoutUUID.length
         } presets.`
     );
-    for (const preset of presetsWithoutUUID) {
-        await db.kmq("game_option_presets").insert({
-            guild_id: preset.guild_id,
-            preset_name: preset.preset_name,
-            option_name: "uuid",
-            option_value: JSON.stringify(`KMQ-${uuid.v4()}`),
-        });
-    }
+
+    await Promise.allSettled(
+        presetsWithoutUUID.map(async (preset) => {
+            await db.kmq("game_option_presets").insert({
+                guild_id: preset.guild_id,
+                preset_name: preset.preset_name,
+                option_name: "uuid",
+                option_value: JSON.stringify(`KMQ-${uuid.v4()}`),
+            });
+        })
+    );
 }
 
 (async () => {

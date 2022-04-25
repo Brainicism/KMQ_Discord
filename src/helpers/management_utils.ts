@@ -1,7 +1,7 @@
 /* eslint-disable global-require */
 /* eslint-disable import/no-dynamic-require */
 import { IPCLogger } from "../logger";
-import { chooseRandom, isWeekend } from "./utils";
+import { chooseRandom, delay, isWeekend } from "./utils";
 import {
     cleanupInactiveGameSessions,
     getMatchingGroupNames,
@@ -110,6 +110,7 @@ export async function checkRestartNotification(
     if (RESTART_WARNING_INTERVALS.has(timeUntilRestart)) {
         for (const gameSession of Object.values(State.gameSessions)) {
             if (gameSession.finished) continue;
+            // eslint-disable-next-line no-await-in-loop
             await sendInfoMessage(
                 new MessageContext(gameSession.textChannelID),
                 {
@@ -118,6 +119,8 @@ export async function checkRestartNotification(
                         "Downtime will be approximately 2 minutes. Please end the current game to ensure your progress is saved!",
                 }
             );
+            // eslint-disable-next-line no-await-in-loop
+            await delay(200);
             serversWarned++;
         }
 

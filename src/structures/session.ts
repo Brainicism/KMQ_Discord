@@ -577,16 +577,18 @@ export default abstract class Session {
         await this.reloadSongs(guildPreference);
 
         if (!this.isPremium()) {
-            for (const [commandName, command] of Object.entries(
-                State.client.commands
-            )) {
-                if (command.resetPremium) {
-                    logger.info(
-                        `gid: ${this.guildID} | Resetting premium for game option: ${commandName}`
-                    );
-                    await command.resetPremium(guildPreference);
-                }
-            }
+            await Promise.allSettled(
+                Object.entries(State.client.commands).map(
+                    async ([commandName, command]) => {
+                        if (command.resetPremium) {
+                            logger.info(
+                                `gid: ${this.guildID} | Resetting premium for game option: ${commandName}`
+                            );
+                            await command.resetPremium(guildPreference);
+                        }
+                    }
+                )
+            );
         }
     }
 

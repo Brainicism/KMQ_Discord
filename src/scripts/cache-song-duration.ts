@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../logger";
 import { getAudioDurationInSeconds } from "../helpers/utils";
 import { getNewConnection } from "../database_context";

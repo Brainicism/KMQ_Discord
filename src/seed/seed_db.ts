@@ -120,16 +120,18 @@ async function extractDb(): Promise<void> {
 
 async function recordDaisukiTableSchema(db: DatabaseContext): Promise<void> {
     const frozenTableColumnNames = {};
-    for (const table of ["app_kpop", "app_kpop_audio", "app_kpop_group"]) {
-        const commaSeparatedColumnNames = (
-            await db.agnostic.raw(
-                `SELECT group_concat(COLUMN_NAME) as x FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'kpop_videos' AND TABLE_NAME = '${table}';`
-            )
-        )[0][0]["x"];
+    await Promise.allSettled(
+        ["app_kpop", "app_kpop_audio", "app_kpop_group"].map(async (table) => {
+            const commaSeparatedColumnNames = (
+                await db.agnostic.raw(
+                    `SELECT group_concat(COLUMN_NAME) as x FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'kpop_videos' AND TABLE_NAME = '${table}';`
+                )
+            )[0][0]["x"];
 
-        const columnNames = _.sortBy(commaSeparatedColumnNames.split(","));
-        frozenTableColumnNames[table] = columnNames;
-    }
+            const columnNames = _.sortBy(commaSeparatedColumnNames.split(","));
+            frozenTableColumnNames[table] = columnNames;
+        })
+    );
 
     fs.writeFileSync(
         frozenDaisukiColumnNamesPath,
@@ -142,30 +144,38 @@ async function validateDaisukiTableSchema(
     frozenSchema: any
 ): Promise<void> {
     const outputMessages = [];
-    for (const table of ["app_kpop", "app_kpop_audio", "app_kpop_group"]) {
-        const commaSeparatedColumnNames = (
-            await db.agnostic.raw(
-                `SELECT group_concat(COLUMN_NAME) as x FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'kpop_videos_validation' AND TABLE_NAME = '${table}';`
-            )
-        )[0][0]["x"];
+    await Promise.allSettled(
+        ["app_kpop", "app_kpop_audio", "app_kpop_group"].map(async (table) => {
+            const commaSeparatedColumnNames = (
+                await db.agnostic.raw(
+                    `SELECT group_concat(COLUMN_NAME) as x FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'kpop_videos_validation' AND TABLE_NAME = '${table}';`
+                )
+            )[0][0]["x"];
 
-        const columnNames = _.sortBy(commaSeparatedColumnNames.split(","));
-        if (!_.isEqual(frozenSchema[table], columnNames)) {
-            const removedColumns = _.difference(
-                columnNames,
-                frozenSchema[table]
-            );
-
-            const addedColumns = _.difference(frozenSchema[table], columnNames);
-            if (removedColumns.length > 0) {
-                outputMessages.push(
-                    `__${table}__\nAdded columns: ${JSON.stringify(
-                        addedColumns
-                    )}.\nRemoved Columns: ${JSON.stringify(removedColumns)}\n`
+            const columnNames = _.sortBy(commaSeparatedColumnNames.split(","));
+            if (!_.isEqual(frozenSchema[table], columnNames)) {
+                const removedColumns = _.difference(
+                    columnNames,
+                    frozenSchema[table]
                 );
+
+                const addedColumns = _.difference(
+                    frozenSchema[table],
+                    columnNames
+                );
+
+                if (removedColumns.length > 0) {
+                    outputMessages.push(
+                        `__${table}__\nAdded columns: ${JSON.stringify(
+                            addedColumns
+                        )}.\nRemoved Columns: ${JSON.stringify(
+                            removedColumns
+                        )}\n`
+                    );
+                }
             }
-        }
-    }
+        })
+    );
 
     if (outputMessages.length > 0) {
         outputMessages.unshift("Daisuki schema has changed.");
@@ -229,9 +239,11 @@ async function validateSqlDump(
         logger.info("Validating overrides");
         const overrideQueries = await getOverrideQueries(db);
 
-        for (const overrideQuery of overrideQueries) {
-            await db.kpopVideosValidation.raw(overrideQuery);
-        }
+        await Promise.allSettled(
+            overrideQueries.map(async (overrideQuery) => {
+                await db.kpopVideosValidation.raw(overrideQuery);
+            })
+        );
 
         if (!bootstrap) {
             logger.info("Validating creation of data tables");
@@ -319,9 +331,12 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
     logger.info("Performing data overrides");
 
     const overrideQueries = await getOverrideQueries(db);
-    for (const overrideQuery of overrideQueries) {
-        await db.kpopVideos.raw(overrideQuery);
-    }
+
+    await Promise.allSettled(
+        overrideQueries.map(async (overrideQuery) => {
+            await db.kpopVideos.raw(overrideQuery);
+        })
+    );
 
     logger.info(
         "Imported database dump successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing"
