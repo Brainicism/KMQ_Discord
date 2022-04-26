@@ -1,7 +1,7 @@
 /* eslint-disable global-require */
 /* eslint-disable import/no-dynamic-require */
 import { IPCLogger } from "../logger";
-import { chooseRandom, delay, isWeekend } from "./utils";
+import { chooseRandom, delay, isPrimaryInstance, isWeekend } from "./utils";
 import {
     cleanupInactiveGameSessions,
     getMatchingGroupNames,
@@ -341,10 +341,14 @@ export function registerIntervals(clusterID: number): void {
         reloadAliases();
         // Cleanup inactive Discord voice connections
         clearInactiveVoiceConnections();
-        // Store per-cluster stats
-        await updateSystemStats(clusterID);
-        // Sync state with Patreon subscribers
-        updatePremiumUsers();
+
+        if (isPrimaryInstance()) {
+            // Store per-cluster stats
+            await updateSystemStats(clusterID);
+
+            // Sync state with Patreon subscribers
+            updatePremiumUsers();
+        }
     });
 
     // Every minute

@@ -6,6 +6,7 @@ import _ from "lodash";
 import crypto from "crypto";
 import fs from "fs";
 import moment from "moment-timezone";
+import path from "path";
 
 const logger = new IPCLogger("utils");
 
@@ -421,4 +422,18 @@ export function getUserTag(user: {
  */
 export function getMention(userID: string): string {
     return `<@${userID}>`;
+}
+
+/**
+ * @returns whether this instance should skip metrics posting
+ */
+export function isPrimaryInstance(): boolean {
+    return fs.existsSync(path.join(__dirname, "../../data/primary"));
+}
+
+/**
+ * @returns whether this instance should skip seed
+ */
+export function shouldSkipSeed(): boolean {
+    return fs.existsSync(path.join(__dirname, "../../data/skip_seed"));
 }
