@@ -3,9 +3,13 @@ import { Fleet } from "eris-fleet";
 import { clearRestartNotification } from "./helpers/management_utils";
 import { config } from "dotenv";
 import { getInternalLogger } from "./logger";
+import {
+    isPrimaryInstance,
+    shouldSkipSeed,
+    standardDateFormat,
+} from "./helpers/utils";
 import { seedAndDownloadNewSongs } from "./seed/seed_db";
 import { sendDebugAlertWebhook } from "./helpers/discord_utils";
-import { standardDateFormat } from "./helpers/utils";
 import { userVoted } from "./helpers/bot_listing_manager";
 import EnvType from "./enums/env_type";
 import Eris from "eris";
@@ -16,7 +20,6 @@ import dbContext from "./database_context";
 import ejs from "ejs";
 import fastify from "fastify";
 import fastifyResponseCaching from "fastify-response-caching";
-import fs from "fs";
 import isMaster from "cluster";
 import os from "os";
 import path from "path";
@@ -80,17 +83,16 @@ function registerGlobalIntervals(fleet: Fleet): void {
 
     // everyday at 12am UTC => 7pm EST
     schedule.scheduleJob("0 0 * * *", () => {
-        storeDailyStats(fleet.stats?.guilds);
+        if (isPrimaryInstance()) {
+            logger.info("Saving daily stats");
+            storeDailyStats(fleet.stats?.guilds);
+        }
     });
 
     // every hour
     schedule.scheduleJob("15 * * * *", async () => {
         if (process.env.NODE_ENV !== EnvType.PROD) return;
-        const overrideFileExists = fs.existsSync(
-            path.join(__dirname, "../data/skip_seed")
-        );
-
-        if (overrideFileExists) {
+        if (!isPrimaryInstance() || shouldSkipSeed()) {
             logger.info("Skipping scheduled Daisuki database seed");
             return;
         }
@@ -111,11 +113,13 @@ function registerGlobalIntervals(fleet: Fleet): void {
 
     // every minute
     schedule.scheduleJob("* * * * *", async () => {
-        await dbContext.kmq("system_stats").insert({
-            stat_name: "request_latency",
-            stat_value: fleet.eris.requestHandler.latencyRef.latency,
-            date: new Date(),
-        });
+        if (isPrimaryInstance()) {
+            await dbContext.kmq("system_stats").insert({
+                stat_name: "request_latency",
+                stat_value: fleet.eris.requestHandler.latencyRef.latency,
+                date: new Date(),
+            });
+        }
     });
 }
 

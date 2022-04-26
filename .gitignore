@@ -10,6 +10,7 @@ tmp/
 tsconfig.tsbuildinfo
 version
 data/skip_seed
+data/skip_metrics
 *.validation.sql
 *.test.sql
 data/group_list.txt
