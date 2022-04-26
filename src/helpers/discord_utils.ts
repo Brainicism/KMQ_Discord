@@ -564,6 +564,9 @@ export async function sendInfoMessage(
     additionalEmbeds: Array<Eris.EmbedOptions> = []
 ): Promise<Eris.Message<Eris.TextableChannel>> {
     if (embedPayload.description && embedPayload.description.length > 2048) {
+        logger.error(
+            `Message was too long. message = ${embedPayload.description}`
+        );
         return sendErrorMessage(messageContext, {
             title: LocalizationManager.localizer.translate(
                 messageContext.guildID,

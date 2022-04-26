@@ -86,14 +86,16 @@ function registerGlobalIntervals(fleet: Fleet): void {
     // every hour
     schedule.scheduleJob("15 * * * *", async () => {
         if (process.env.NODE_ENV !== EnvType.PROD) return;
-        logger.info("Performing regularly scheduled Daisuki database seed");
         const overrideFileExists = fs.existsSync(
             path.join(__dirname, "../data/skip_seed")
         );
 
         if (overrideFileExists) {
+            logger.info("Skipping scheduled Daisuki database seed");
             return;
         }
+
+        logger.info("Performing regularly scheduled Daisuki database seed");
 
         try {
             await seedAndDownloadNewSongs(dbContext);
@@ -118,15 +120,15 @@ function registerGlobalIntervals(fleet: Fleet): void {
 }
 
 function registerProcessEvents(fleet: Fleet): void {
-    process.on("unhandledRejection", (error: Error) => {
+    process.on("unhandledRejection", (err: Error) => {
         logger.error(
-            `Admiral Unhandled Rejection at: Reason: ${error.message}. Trace: ${error.stack}`
+            `Admiral Unhandled Rejection | Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`
         );
     });
 
     process.on("uncaughtException", (err: Error) => {
         logger.error(
-            `Admiral Uncaught Exception. Reason: ${err}. Trace: ${err.stack}`
+            `Admiral Uncaught Exception | Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`
         );
     });
 
