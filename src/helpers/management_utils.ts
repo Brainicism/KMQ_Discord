@@ -240,9 +240,21 @@ export async function reloadAliases(): Promise<void> {
 
     const artistAliasMapping = await dbContext
         .kmq("available_songs")
-        .distinct(["artist_name_en", "artist_aliases"])
-        .select(["artist_name_en", "artist_aliases"])
-        .where("artist_aliases", "<>", "");
+        .distinct([
+            "artist_name_en",
+            "artist_aliases",
+            "previous_name_en",
+            "previous_name_ko",
+        ])
+        .select([
+            "artist_name_en",
+            "artist_aliases",
+            "previous_name_en",
+            "previous_name_ko",
+        ])
+        .where("artist_aliases", "<>", "")
+        .orWhere("previous_name_en", "<>", "")
+        .orWhere("previous_name_ko", "<>", "");
 
     const songAliases = {};
     for (const mapping of songAliasMapping) {
@@ -253,9 +265,17 @@ export async function reloadAliases(): Promise<void> {
 
     const artistAliases = {};
     for (const mapping of artistAliasMapping) {
-        artistAliases[mapping["artist_name_en"]] = mapping["artist_aliases"]
+        const aliases: Array<string> = mapping["artist_aliases"]
             .split(";")
             .filter((x: string) => x);
+
+        const previousNameEn = mapping["previous_name_en"];
+        const previousNameKo = mapping["previous_name_ko"];
+
+        if (previousNameEn) aliases.push(previousNameEn);
+        if (previousNameKo) aliases.push(previousNameKo);
+
+        artistAliases[mapping["artist_name_en"]] = aliases;
     }
 
     State.aliases.artist = artistAliases;
