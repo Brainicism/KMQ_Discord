@@ -158,7 +158,7 @@ export default class MusicCommand implements BaseCommand {
         );
 
         const textChannel = channel;
-        const gameOwner = KmqMember.fromUser(message.author);
+        const gameOwner = new KmqMember(message.author.id);
         const voiceChannel = getUserVoiceChannel(messageContext);
         if (!voiceChannel) {
             await sendErrorMessage(messageContext, {

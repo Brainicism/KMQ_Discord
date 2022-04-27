@@ -1,5 +1,4 @@
 import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
-import { getUserTag } from "../../helpers/utils";
 import { handleProfileInteraction } from "../../commands/game_commands/profile";
 import {
     tryCreateInteractionErrorAcknowledgement,
@@ -34,12 +33,7 @@ export default async function interactionCreateHandler(
 
         const messageContext = new MessageContext(
             interaction.channel.id,
-            new KmqMember(
-                interaction.member.username,
-                getUserTag(interaction.member),
-                interaction.member.avatarURL,
-                interaction.member.id
-            ),
+            new KmqMember(interaction.member.id),
             interaction.guildID
         );
 

@@ -602,9 +602,7 @@ export default class GameSession extends Session {
         // Pick the first participant still in VC
         const newOwnerID = participantsInVC[0];
 
-        this.owner = KmqMember.fromUser(
-            voiceMembers.find((x) => x.id === newOwnerID)
-        );
+        this.owner = new KmqMember(newOwnerID);
 
         super.updateOwner();
     }
