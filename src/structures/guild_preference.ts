@@ -845,7 +845,13 @@ export default class GuildPreference {
         });
 
         if (this.reloadSongCallback) {
-            await this.reloadSongCallback();
+            try {
+                await this.reloadSongCallback();
+            } catch (e) {
+                logger.error(
+                    `gid: ${this.guildID} | reloadSongCallback unexpectedly failed, session might not exist?`
+                );
+            }
         }
     }
 
