@@ -30,9 +30,9 @@ describe("startRound", () => {
     beforeEach(() => {
         sandbox.stub(utils, "delay");
         guildPreference = getMockGuildPreference();
-        voiceChannelStub = sinon.createStubInstance(Eris.VoiceChannel);
+        voiceChannelStub = sandbox.createStubInstance(Eris.VoiceChannel);
         voiceChannelStub.voiceMembers = new Collection(Eris.Member);
-        const x = sinon.createStubInstance(KmqClient);
+        const x = sandbox.createStubInstance(KmqClient);
         x.getChannel.callsFake(() => voiceChannelStub);
         State.client = x;
         sandbox.stub(discord_utils, "getNumParticipants").callsFake(() => 1);
@@ -47,14 +47,14 @@ describe("startRound", () => {
         );
 
         sandbox.stub(Session, "getSession").callsFake(() => musicSession);
-        prepareRoundSpy = sinon.spy(musicSession, <any>"prepareRound");
-        playSongSpy = sinon.stub(musicSession, <any>"playSong");
-        ensureVoiceConnectionSpy = sinon.spy(
+        prepareRoundSpy = sandbox.spy(musicSession, <any>"prepareRound");
+        playSongSpy = sandbox.stub(musicSession, <any>"playSong");
+        ensureVoiceConnectionSpy = sandbox.spy(
             game_utils,
             "ensureVoiceConnection"
         );
 
-        endSessionStub = sinon.stub(musicSession, "endSession");
+        endSessionStub = sandbox.stub(musicSession, "endSession");
     });
 
     afterEach(() => {
