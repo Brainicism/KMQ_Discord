@@ -44,7 +44,7 @@ describe("startRound", () => {
             "123",
             "123",
             "123",
-            new KmqMember("jisoo", "jisoo#4747", "url", "123"),
+            new KmqMember("123"),
             GameType.CLASSIC
         );
 

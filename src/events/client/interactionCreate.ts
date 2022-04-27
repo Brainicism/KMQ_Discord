@@ -34,12 +34,7 @@ export default async function interactionCreateHandler(
 
         const messageContext = new MessageContext(
             interaction.channel.id,
-            new KmqMember(
-                interaction.member.username,
-                getUserTag(interaction.member),
-                interaction.member.avatarURL,
-                interaction.member.id
-            ),
+            new KmqMember(interaction.member.id),
             interaction.guildID
         );
 

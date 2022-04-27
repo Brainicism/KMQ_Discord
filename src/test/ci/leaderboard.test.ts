@@ -20,7 +20,7 @@ import type { EmbedGenerator } from "eris-pagination";
 const sandbox = sinon.createSandbox();
 
 const SERVER_ID = "0";
-const gameStarter = new KmqMember("jisoo", "jisoo#4747", "url", "123");
+const gameStarter = new KmqMember("123");
 const messageContext = new MessageContext("", gameStarter, SERVER_ID, "");
 
 const INITIAL_MONTH = 5;

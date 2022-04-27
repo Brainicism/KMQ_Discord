@@ -365,7 +365,7 @@ export default class PlayCommand implements BaseCommand {
         // (1) No game session exists yet (create ELIMINATION, TEAMS, CLASSIC, or COMPETITION game), or
         // (2) User attempting to ,play after a ,play teams that didn't start, start CLASSIC game
         const textChannel = channel;
-        const gameOwner = KmqMember.fromUser(message.author);
+        const gameOwner = new KmqMember(message.author.id);
         let gameSession: GameSession;
 
         if (gameType === GameType.TEAMS) {

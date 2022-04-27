@@ -57,7 +57,7 @@ export default class MusicSession extends Session {
             return;
         }
 
-        this.owner = KmqMember.fromUser(chooseRandom(voiceMembers));
+        this.owner = new KmqMember(chooseRandom(voiceMembers).id);
 
         super.updateOwner();
     }

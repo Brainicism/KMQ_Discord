@@ -154,7 +154,7 @@ export function weekOfYear(dateObj?: Date): number {
  * @param list - List of arbitrary elements
  * @returns the randomly selected element
  */
-export function chooseRandom(list: Array<any>): any {
+export function chooseRandom<T>(list: Array<T>): T {
     return list[Math.floor(Math.random() * list.length)] || null;
 }
 
