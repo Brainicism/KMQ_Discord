@@ -209,12 +209,7 @@ export default class GameRound extends Round {
      */
     userCorrect(userID: string, pointsAwarded: number): void {
         if (!this.correctGuessers.some((x) => x.id === userID)) {
-            this.correctGuessers.push(
-                KmqMember.fromUser(
-                    State.client.users.get(userID),
-                    pointsAwarded
-                )
-            );
+            this.correctGuessers.push(new KmqMember(userID, pointsAwarded));
         }
     }
 

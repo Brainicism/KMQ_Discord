@@ -11,7 +11,7 @@ import sinon from "sinon";
 import type TeamScoreboard from "../../structures/team_scoreboard";
 
 const sandbox = sinon.createSandbox();
-const gameStarter = new KmqMember("jisoo", "jisoo#4747", "url", "123");
+const gameStarter = new KmqMember("123");
 
 function getMockGuildPreference(): GuildPreference {
     const guildPreference = new GuildPreference("test");
