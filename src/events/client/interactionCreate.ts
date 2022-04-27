@@ -1,5 +1,4 @@
 import { BOOKMARK_COMMAND_NAME, PROFILE_COMMAND_NAME } from "../../constants";
-import { getUserTag } from "../../helpers/utils";
 import { handleProfileInteraction } from "../../commands/game_commands/profile";
 import {
     tryCreateInteractionErrorAcknowledgement,

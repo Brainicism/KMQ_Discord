@@ -1,4 +1,3 @@
-import { getUserTag } from "../helpers/utils";
 import KmqMember from "./kmq_member";
 import State from "../state";
 import type Eris from "eris";

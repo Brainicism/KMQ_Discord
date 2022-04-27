@@ -311,9 +311,11 @@ describe("song query", () => {
             endSandbox.restore();
         });
 
-        State.gameSessions = {
-            [guildId]: gameSession,
-        };
+        beforeEach(() => {
+            State.gameSessions = {
+                [guildId]: gameSession,
+            };
+        });
 
         describe("no inactive gamesessions", () => {
             it("should not clean up", async () => {
