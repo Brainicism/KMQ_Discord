@@ -127,14 +127,14 @@ export default async function messageCreateHandler(
                     message,
                     parsedMessage,
                 });
-            } catch (e) {
+            } catch (err) {
                 const debugId = uuid.v4();
                 logger.error(
-                    `Error while invoking command (${parsedMessage.action}) | ${debugId} | ${e}`
+                    `Error while invoking command (${parsedMessage.action}) | ${debugId} | Exception Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`
                 );
 
                 if (process.env.NODE_ENV === EnvType.DEV) {
-                    logger.error(e.stack);
+                    logger.error(err.stack);
                 }
 
                 sendErrorMessage(messageContext, {
