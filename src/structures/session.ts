@@ -321,6 +321,7 @@ export default abstract class Session {
      * Ends the current GameSession
      */
     async endSession(): Promise<void> {
+        this.guildPreference.reloadSongCallback = null;
         Session.deleteSession(this.guildID);
         await this.endRound(
             new MessageContext(this.textChannelID, null, this.guildID),

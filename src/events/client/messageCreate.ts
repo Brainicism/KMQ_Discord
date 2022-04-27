@@ -130,9 +130,7 @@ export default async function messageCreateHandler(
             } catch (e) {
                 const debugId = uuid.v4();
                 logger.error(
-                    `Error while invoking command (${
-                        parsedMessage.action
-                    }) | ${debugId} | ${JSON.stringify(e)}`
+                    `Error while invoking command (${parsedMessage.action}) | ${debugId} | ${e}`
                 );
 
                 if (process.env.NODE_ENV === EnvType.DEV) {
