@@ -455,7 +455,6 @@ export default class LeaderboardCommand implements BaseCommand {
         for (let i = 0; i < pageCount; i++) {
             const offset = i * LEADERBOARD_ENTRIES_PER_PAGE;
             embedsFns.push(
-                // eslint-disable-next-line @typescript-eslint/no-loop-func
                 () =>
                     new Promise(async (resolve) => {
                         let topPlayers;
