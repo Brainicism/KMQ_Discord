@@ -359,8 +359,9 @@ const downloadNewSongs = async (
  * @param limit - The limit specified for downloading songs
  * @returns - the number of songs downloaded
  */
-// eslint-disable-next-line import/prefer-default-export
-export async function downloadAndConvertSongs(limit?: number): Promise<number> {
+export default async function downloadAndConvertSongs(
+    limit?: number
+): Promise<number> {
     const db = getNewConnection();
     try {
         if (!fs.existsSync(process.env.SONG_DOWNLOAD_DIR)) {

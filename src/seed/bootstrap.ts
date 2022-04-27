@@ -1,6 +1,5 @@
 import { IPCLogger } from "../logger";
 import { config } from "dotenv";
-import { downloadAndConvertSongs } from "../scripts/download-new-songs";
 import { execSync } from "child_process";
 import {
     generateKmqDataTables,
@@ -9,6 +8,7 @@ import {
 } from "./seed_db";
 import { getNewConnection } from "../database_context";
 import EnvType from "../enums/env_type";
+import downloadAndConvertSongs from "../scripts/download-new-songs";
 import fs from "fs";
 import path from "path";
 import type { DatabaseContext } from "../database_context";
