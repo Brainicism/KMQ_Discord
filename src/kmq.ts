@@ -16,11 +16,11 @@ import Eris from "eris";
 import KmqClient from "./kmq_client";
 import _ from "lodash";
 import backupKmqDatabase from "./scripts/backup-kmq-database";
+import cluster from "cluster";
 import dbContext from "./database_context";
 import ejs from "ejs";
 import fastify from "fastify";
 import fastifyResponseCaching from "fastify-response-caching";
-import isMaster from "cluster";
 import os from "os";
 import path from "path";
 import pointOfView from "point-of-view";
@@ -191,8 +191,8 @@ async function startWebServer(fleet: Fleet): Promise<void> {
 
         const clusterData = [];
         for (let i = 0; i < fleetStats.clusters.length; i++) {
-            const cluster = fleetStats.clusters[i];
-            const shardData = cluster.shards.map((rawShardData) => {
+            const fleetCluster = fleetStats.clusters[i];
+            const shardData = fleetCluster.shards.map((rawShardData) => {
                 let healthIndicator: HealthIndicator;
                 if (rawShardData.ready === false)
                     healthIndicator = HealthIndicator.UNHEALTHY;
@@ -210,15 +210,15 @@ async function startWebServer(fleet: Fleet): Promise<void> {
             });
 
             clusterData.push({
-                id: cluster.id,
-                ram: Math.ceil(cluster.ram).toLocaleString(),
+                id: fleetCluster.id,
+                ram: Math.ceil(fleetCluster.ram).toLocaleString(),
                 apiLatency: _.mean(
-                    cluster.shards.map((x) => x.latency)
+                    fleetCluster.shards.map((x) => x.latency)
                 ).toLocaleString(),
                 uptime: standardDateFormat(
-                    new Date(Date.now() - cluster.uptime)
+                    new Date(Date.now() - fleetCluster.uptime)
                 ),
-                voiceConnections: cluster.voice,
+                voiceConnections: fleetCluster.voice,
                 activeGameSessions: gameplayStats.get(i).activeGameSessions,
                 activePlayers: gameplayStats.get(i).activePlayers,
                 shardData,
@@ -296,7 +296,7 @@ async function startWebServer(fleet: Fleet): Promise<void> {
         process.exit(1);
     }
 
-    if (isMaster) {
+    if (cluster.isPrimary) {
         fleet.on("log", (m) => logger.info(m));
         fleet.on("debug", (m) => logger.debug(m));
         fleet.eris.on("debug", (m) => logger.debug(m));
