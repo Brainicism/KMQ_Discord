@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import { DATABASE_DOWNLOAD_DIR } from "../constants";
 import { IPCLogger } from "../logger";
 import { config } from "dotenv";
@@ -26,6 +27,59 @@ const logger = new IPCLogger("seed_db");
 
 if (!fs.existsSync(DATABASE_DOWNLOAD_DIR)) {
     fs.mkdirSync(DATABASE_DOWNLOAD_DIR);
+}
+
+/**
+ * @param db - The database context
+ * @param databaseName - The database name
+ * @returns whether the database exists
+ */
+export async function databaseExists(
+    db: DatabaseContext,
+    databaseName: string
+): Promise<boolean> {
+    return (
+        (
+            await db
+                .agnostic("information_schema.schemata")
+                .where("schema_name", "=", databaseName)
+        ).length === 1
+    );
+}
+
+/**
+ * @param db - The database context
+ * @param databaseName - The database name
+ * @param tableName - The table name
+ * @returns whether the table exists
+ */
+export async function tableExists(
+    db: DatabaseContext,
+    databaseName: string,
+    tableName: string
+): Promise<boolean> {
+    return (
+        (
+            await db
+                .agnostic("information_schema.tables")
+                .where("table_schema", "=", databaseName)
+                .where("table_name", "=", tableName)
+                .count("* as count")
+                .first()
+        ).count === 1
+    );
+}
+
+async function listTables(
+    db: DatabaseContext,
+    databaseName: string
+): Promise<Array<string>> {
+    return (
+        await db
+            .agnostic("information_schema.tables")
+            .where("table_schema", "=", databaseName)
+            .select("table_name")
+    ).map((x) => x["table_name"]);
 }
 
 program
@@ -284,6 +338,7 @@ async function validateSqlDump(
 }
 
 async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
+    // validating SQL dump
     const sqlFiles = (
         await fs.promises.readdir(`${DATABASE_DOWNLOAD_DIR}`)
     ).filter((x) => x.endsWith(".sql"));
@@ -309,27 +364,63 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
             mvSeedFilePath
         )} and ${path.basename(audioSeedFilePath)})`
     );
+
     await validateSqlDump(db, mvSeedFilePath, audioSeedFilePath, bootstrap);
-    logger.info("Dropping K-Pop video database");
-    await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos;");
-    logger.info("Creating K-Pop video database");
-    await db.agnostic.raw("CREATE DATABASE kpop_videos;");
-    logger.info("Seeding K-Pop video database");
+
+    // importing dump into temporary database
+    logger.info("Dropping K-Pop video temporary database");
+    await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_tmp;");
+    logger.info("Creating K-Pop video temporary database");
+    await db.agnostic.raw("CREATE DATABASE kpop_videos_tmp;");
+    logger.info("Seeding K-Pop video temporary database");
     execSync(
-        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${mvSeedFilePath}`
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_tmp < ${mvSeedFilePath}`
     );
 
     execSync(
-        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos < ${audioSeedFilePath}`
+        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_tmp < ${audioSeedFilePath}`
     );
 
+    // update table using data from temporary database, without downtime
+    logger.info("Updating K-pop database from temporary database");
+    for (const tableName of await listTables(db, "kpop_videos_tmp")) {
+        const kpopVideoTableExists = await tableExists(
+            db,
+            "kpop_videos",
+            tableName
+        );
+
+        if (!(await databaseExists(db, "kpop_videos"))) {
+            logger.info("Database 'kpop_videos' doesn't exist, creating...");
+            await db.agnostic.raw("CREATE DATABASE kpop_videos;");
+        }
+
+        if (kpopVideoTableExists) {
+            logger.info(`Table '${tableName}' exists, updating...`);
+            await db.kpopVideos.raw("DROP TABLE IF EXISTS kpop_videos.old;");
+            await db.kpopVideos.raw(
+                `RENAME TABLE kpop_videos.${tableName} TO old, kpop_videos_tmp.${tableName} TO kpop_videos.${tableName};`
+            );
+        } else {
+            logger.info(`Table '${tableName} doesn't exist, creating...`);
+
+            await db.agnostic.raw(
+                `ALTER TABLE kpop_videos_tmp.${tableName} RENAME kpop_videos.${tableName}`
+            );
+        }
+    }
+
+    await db.kpopVideos.raw("DROP TABLE IF EXISTS kpop_videos.old;");
+    await db.agnostic.raw("DROP DATABASE IF EXISTS kpop_videos_tmp;");
+
+    // freeze table schema
     if (!fs.existsSync(frozenDaisukiColumnNamesPath)) {
         logger.info("Frozen Daisuki schema doesn't exist... creating");
         await recordDaisukiTableSchema(db);
     }
 
+    // override queries
     logger.info("Performing data overrides");
-
     const overrideQueries = await getOverrideQueries(db);
 
     await Promise.allSettled(
