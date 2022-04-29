@@ -272,11 +272,13 @@ describe("command prechecks", () => {
             GameType.CLASSIC
         );
 
+        afterEach(() => {
+            delete process.env.DEBUG_SERVER_ID;
+        });
+
         describe("message originates in debug server", () => {
             it("should return true", () => {
-                sandbox
-                    .stub(process.env, "DEBUG_SERVER_ID")
-                    .value(debugServerId);
+                process.env.DEBUG_SERVER_ID = debugServerId;
                 stubMessage.guildID = debugServerId;
 
                 assert.strictEqual(
@@ -292,10 +294,7 @@ describe("command prechecks", () => {
         describe("message does not originate in debug server", () => {
             it("should return false", () => {
                 stubMessage.guildID = "5";
-
-                sandbox
-                    .stub(process.env, "DEBUG_SERVER_ID")
-                    .value(debugServerId);
+                process.env.DEBUG_SERVER_ID = debugServerId;
                 sandbox.stub(stubMessage, "guildID").value("123456");
                 assert.strictEqual(
                     CommandPrechecks.debugServerPrecheck({
@@ -319,11 +318,13 @@ describe("command prechecks", () => {
             GameType.CLASSIC
         );
 
+        afterEach(() => {
+            delete process.env.DEBUG_TEXT_CHANNEL_ID;
+        });
+
         describe("message originates in debug channel", () => {
             it("should return true", () => {
-                sandbox
-                    .stub(process.env, "DEBUG_TEXT_CHANNEL_ID")
-                    .value(debugChannelId);
+                process.env.DEBUG_TEXT_CHANNEL_ID = debugChannelId;
 
                 assert.strictEqual(
                     CommandPrechecks.debugChannelPrecheck({
@@ -341,9 +342,7 @@ describe("command prechecks", () => {
 
         describe("message does not originate in debug channel", () => {
             it("should return true", () => {
-                sandbox
-                    .stub(process.env, "DEBUG_TEXT_CHANNEL_ID")
-                    .value(debugChannelId);
+                process.env.DEBUG_TEXT_CHANNEL_ID = debugChannelId;
 
                 assert.strictEqual(
                     CommandPrechecks.debugChannelPrecheck({
@@ -465,6 +464,10 @@ describe("command prechecks", () => {
             GameType.CLASSIC
         );
 
+        afterEach(() => {
+            delete process.env.DEBUG_SERVER_ID;
+        });
+
         describe("user is premium", () => {
             it("should return true", async () => {
                 sandbox
@@ -487,9 +490,7 @@ describe("command prechecks", () => {
 
         describe("message originates in debug server", () => {
             it("should return true", async () => {
-                sandbox
-                    .stub(process.env, "DEBUG_SERVER_ID")
-                    .value(debugServerId);
+                process.env.DEBUG_SERVER_ID = debugServerId;
 
                 assert.strictEqual(
                     await CommandPrechecks.premiumOrDebugServerPrecheck({
@@ -508,7 +509,7 @@ describe("command prechecks", () => {
 
         describe("user is not premiun, nor does message originate in debug server", () => {
             it("should return false", async () => {
-                sandbox.stub(process.env, "DEBUG_SERVER_ID").value("abc");
+                process.env.DEBUG_SERVER_ID = "abc";
                 sandbox
                     .stub(game_utils, "isUserPremium")
                     .callsFake(() => Promise.resolve(false));
