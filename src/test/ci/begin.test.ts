@@ -10,9 +10,6 @@ import assert from "assert";
 import sinon from "sinon";
 import type TeamScoreboard from "../../structures/team_scoreboard";
 
-const sandbox = sinon.createSandbox();
-const gameStarter = new KmqMember("123");
-
 function getMockGuildPreference(): GuildPreference {
     const guildPreference = new GuildPreference("test");
     sinon.stub(guildPreference, "updateGuildPreferences");
@@ -20,6 +17,9 @@ function getMockGuildPreference(): GuildPreference {
 }
 
 describe("begin command", () => {
+    const sandbox = sinon.createSandbox();
+    const gameStarter = new KmqMember("123");
+
     describe("can start", () => {
         describe("game session is null", () => {
             it("should return false", () => {

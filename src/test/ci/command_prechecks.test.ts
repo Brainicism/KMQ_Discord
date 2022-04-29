@@ -11,9 +11,8 @@ import MusicSession from "../../structures/music_session";
 import assert from "assert";
 import sinon from "sinon";
 
-const sandbox = sinon.createSandbox();
-
 describe("command prechecks", () => {
+    const sandbox = sinon.createSandbox();
     beforeEach(() => {
         sandbox.stub(discord_utils, "getDebugLogHeader").callsFake(() => "");
         sandbox.stub(discord_utils, "sendErrorMessage");
