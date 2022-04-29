@@ -1,11 +1,13 @@
 import { IPCLogger } from "../logger";
 import { config } from "dotenv";
-import { execSync } from "child_process";
 import {
+    databaseExists,
     generateKmqDataTables,
     loadStoredProcedures,
+    tableExists,
     updateKpopDatabase,
 } from "./seed_db";
+import { execSync } from "child_process";
 import { getNewConnection } from "../database_context";
 import EnvType from "../enums/env_type";
 import downloadAndConvertSongs from "../scripts/download-new-songs";
@@ -18,19 +20,6 @@ const logger = new IPCLogger("bootstrap");
 const SONG_DOWNLOAD_THRESHOLD = 5;
 
 config({ path: path.resolve(__dirname, "../../.env") });
-
-async function tableExists(
-    db: DatabaseContext,
-    tableName: string
-): Promise<boolean> {
-    return (
-        (
-            await db
-                .agnostic("information_schema.schemata")
-                .where("schema_name", "=", tableName)
-        ).length === 1
-    );
-}
 
 function hasRequiredEnvironmentVariables(): boolean {
     const requiredEnvVariables = [
@@ -59,26 +48,22 @@ function hasRequiredEnvironmentVariables(): boolean {
 }
 
 async function kmqDatabaseExists(db: DatabaseContext): Promise<boolean> {
-    const kmqExists = await tableExists(db, "kmq");
-    const kmqTestExists = await tableExists(db, "kmq_test");
+    const kmqExists = await databaseExists(db, "kmq");
+    const kmqTestExists = await databaseExists(db, "kmq_test");
     return kmqExists && kmqTestExists;
 }
 
 async function kpopDataDatabaseExists(db: DatabaseContext): Promise<boolean> {
-    const kpopVideosExists = await tableExists(db, "kpop_videos");
+    const kpopVideosExists = await databaseExists(db, "kpop_videos");
     return kpopVideosExists;
 }
 
 async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
-    const availableSongsTableExists =
-        (
-            await db
-                .agnostic("information_schema.tables")
-                .where("table_schema", "=", "kmq")
-                .where("table_name", "=", "available_songs")
-                .count("* as count")
-                .first()
-        ).count === 1;
+    const availableSongsTableExists = await tableExists(
+        db,
+        "kmq",
+        "available_songs"
+    );
 
     if (!availableSongsTableExists) return false;
 
