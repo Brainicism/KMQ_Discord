@@ -17,61 +17,67 @@ function getMockGuildPreference(): GuildPreference {
     return guildPreference;
 }
 
-let guildPreference: GuildPreference;
+describe("music session", () => {
+    let guildPreference: GuildPreference;
+    describe("startRound", () => {
+        let musicSession: MusicSession;
+        let prepareRoundSpy: sinon.SinonSpy;
+        let voiceChannelStub: Eris.VoiceChannel;
+        let playSongSpy: sinon.SinonSpy;
+        let ensureVoiceConnectionSpy: sinon.SinonSpy;
+        let endSessionStub: sinon.SinonSpy;
+        const sandbox = sinon.createSandbox();
+        beforeEach(() => {
+            sandbox.stub(utils, "delay");
+            guildPreference = getMockGuildPreference();
+            voiceChannelStub = sandbox.createStubInstance(Eris.VoiceChannel);
+            voiceChannelStub.voiceMembers = new Collection(Eris.Member);
+            const x = sandbox.createStubInstance(KmqClient);
+            x.getChannel.callsFake(() => voiceChannelStub);
+            State.client = x;
+            sandbox
+                .stub(discord_utils, "getNumParticipants")
+                .callsFake(() => 1);
 
-describe("startRound", () => {
-    let musicSession: MusicSession;
-    let prepareRoundSpy: sinon.SinonSpy;
-    let voiceChannelStub: Eris.VoiceChannel;
-    let playSongSpy: sinon.SinonSpy;
-    let ensureVoiceConnectionSpy: sinon.SinonSpy;
-    let endSessionStub: sinon.SinonSpy;
-    const sandbox = sinon.createSandbox();
-    beforeEach(() => {
-        sandbox.stub(utils, "delay");
-        guildPreference = getMockGuildPreference();
-        voiceChannelStub = sandbox.createStubInstance(Eris.VoiceChannel);
-        voiceChannelStub.voiceMembers = new Collection(Eris.Member);
-        const x = sandbox.createStubInstance(KmqClient);
-        x.getChannel.callsFake(() => voiceChannelStub);
-        State.client = x;
-        sandbox.stub(discord_utils, "getNumParticipants").callsFake(() => 1);
-        sandbox.stub(discord_utils, "getDebugLogHeader").callsFake(() => "");
+            sandbox
+                .stub(discord_utils, "getDebugLogHeader")
+                .callsFake(() => "");
 
-        musicSession = new MusicSession(
-            guildPreference,
-            "123",
-            "123",
-            "123",
-            new KmqMember("123")
-        );
-
-        sandbox.stub(Session, "getSession").callsFake(() => musicSession);
-        prepareRoundSpy = sandbox.spy(musicSession, <any>"prepareRound");
-        playSongSpy = sandbox.stub(musicSession, <any>"playSong");
-        ensureVoiceConnectionSpy = sandbox.spy(
-            game_utils,
-            "ensureVoiceConnection"
-        );
-
-        endSessionStub = sandbox.stub(musicSession, "endSession");
-    });
-
-    afterEach(() => {
-        sandbox.restore();
-    });
-
-    describe("happy path", () => {
-        it("should start the round successfully", async () => {
-            voiceChannelStub.voiceMembers.add({ id: "1" } as any);
-            await musicSession.startRound(null);
-            assert.ok(prepareRoundSpy.called);
-            assert.ok(ensureVoiceConnectionSpy.called);
-            assert.ok(playSongSpy.called);
-            assert.ok(endSessionStub.notCalled);
-            assert.ok(
-                musicSession.songSelector.getSongs().countBeforeLimit > 0
+            musicSession = new MusicSession(
+                guildPreference,
+                "123",
+                "123",
+                "123",
+                new KmqMember("123")
             );
+
+            sandbox.stub(Session, "getSession").callsFake(() => musicSession);
+            prepareRoundSpy = sandbox.spy(musicSession, <any>"prepareRound");
+            playSongSpy = sandbox.stub(musicSession, <any>"playSong");
+            ensureVoiceConnectionSpy = sandbox.spy(
+                game_utils,
+                "ensureVoiceConnection"
+            );
+
+            endSessionStub = sandbox.stub(musicSession, "endSession");
+        });
+
+        afterEach(() => {
+            sandbox.restore();
+        });
+
+        describe("happy path", () => {
+            it("should start the round successfully", async () => {
+                voiceChannelStub.voiceMembers.add({ id: "1" } as any);
+                await musicSession.startRound(null);
+                assert.ok(prepareRoundSpy.called);
+                assert.ok(ensureVoiceConnectionSpy.called);
+                assert.ok(playSongSpy.called);
+                assert.ok(endSessionStub.notCalled);
+                assert.ok(
+                    musicSession.songSelector.getSongs().countBeforeLimit > 0
+                );
+            });
         });
     });
 });
