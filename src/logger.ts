@@ -35,12 +35,12 @@ export function getInternalLogger(): winston.Logger {
                 format: format.combine(format.timestamp(), consoleFormat),
             }),
             new DailyRotateFile({
-                filename: path.join(__dirname, "../logs/error.log"),
+                filename: path.join(__dirname, "../logs/error-%DATE%.log"),
                 level: "error",
                 maxFiles: "14d",
             }),
             new DailyRotateFile({
-                filename: path.join(__dirname, "../logs/combined.log"),
+                filename: path.join(__dirname, "../logs/combined-%DATE%.log"),
                 maxFiles: "14d",
             }),
         ],
