@@ -13,3 +13,10 @@ for file in $1/*; do
 done
 echo "=============Bad files============"
 printf '%s\n' "${bad_files[@]}"
+
+
+if [ ${#bad_files[@]} -eq 0 ]; then
+    exit 0
+else
+    exit 1
+fi
