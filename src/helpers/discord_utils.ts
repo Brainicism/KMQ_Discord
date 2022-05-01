@@ -409,7 +409,7 @@ export async function sendMessage(
         );
     } catch (e) {
         if (!channel) {
-            logger.error(
+            logger.warn(
                 `Error sending message, and channel not cached. textChannelID = ${textChannelID}`
             );
         } else {
