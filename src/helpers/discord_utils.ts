@@ -409,7 +409,7 @@ export async function sendMessage(
         );
     } catch (e) {
         if (!channel) {
-            logger.error(
+            logger.warn(
                 `Error sending message, and channel not cached. textChannelID = ${textChannelID}`
             );
         } else {
@@ -440,7 +440,7 @@ async function sendDmMessage(
     try {
         dmChannel = await client.getDMChannel(userID);
     } catch (e) {
-        logger.error(
+        logger.warn(
             `Error sending message. Could not get DM channel. userID = ${userID}`
         );
         return null;
