@@ -1088,6 +1088,7 @@ export default class GameSession extends Session {
         messageContext: MessageContext
     ): Promise<void> {
         // update scoreboard
+        const lastGuesserStreak = this.lastGuesser.streak;
         const playerRoundResults = await Promise.all(
             guessResult.correctGuessers.map(async (correctGuesser, idx) => {
                 const guessPosition = idx + 1;
@@ -1095,7 +1096,7 @@ export default class GameSession extends Session {
                     guildPreference,
                     this.round,
                     getNumParticipants(this.voiceChannelID),
-                    this.lastGuesser.streak,
+                    lastGuesserStreak,
                     timePlayed,
                     guessPosition,
                     await userBonusIsActive(correctGuesser.id),
@@ -1104,7 +1105,7 @@ export default class GameSession extends Session {
 
                 let streak = 0;
                 if (idx === 0) {
-                    streak = this.lastGuesser.streak;
+                    streak = lastGuesserStreak;
                     logger.info(
                         `${getDebugLogHeader(messageContext)}, uid: ${
                             correctGuesser.id
