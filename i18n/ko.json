@@ -485,8 +485,8 @@
         },
         "listen": {
             "help": {
-                "description": "현재 옵션에서 노래를 스트리밍합니다. KMQ 프리미엄 사용자만 사용할 수 있습니다.",
-                "example": "현재 음성 채널에서 음악이 재생되기 시작합니다."
+                "description": "현재 옵션에서 음악을 재생합니다. (KMQ 프리미엄 사용자만 사용할 수 있습니다.)",
+                "example": "현재 음성 채널에서 음악 재생을 시작합니다."
             },
             "musicStarting": "🔊 {{voiceChannelName}}의 {{textChannelName}}에서 시작하는 음악"
         },
