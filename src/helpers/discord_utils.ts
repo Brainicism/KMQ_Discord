@@ -898,17 +898,12 @@ export async function generateOptionsMessage(
     footerText?: string
 ): Promise<EmbedPayload> {
     if (guildPreference.gameOptions.forcePlaySongID) {
-        await sendInfoMessage(
-            messageContext,
-            {
-                title: "[DEBUG] Force Play Mode Active",
-                description: `Force playing video ID: ${guildPreference.gameOptions.forcePlaySongID}`,
-                footerText,
-                thumbnailUrl: KmqImages.READING_BOOK,
-            },
-            true
-        );
-        return null;
+        return {
+            title: "[DEBUG] Force Play Mode Active",
+            description: `Force playing video ID: ${guildPreference.gameOptions.forcePlaySongID}`,
+            footerText,
+            thumbnailUrl: KmqImages.READING_BOOK,
+        };
     }
 
     const guildID = messageContext.guildID;
