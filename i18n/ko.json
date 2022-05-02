@@ -207,7 +207,7 @@
         "goal": {
             "failure": {
                 "gameOptionConflict": {
-                    "title": "{{elimination}} 게임이 현재 진행 중입니다. ({{goal}}과 {{elimination}}은(는) 호환되지 않으며 {{goal}}을(를) 사용하려면 {{classic}} 또는 {{teams}} 게임을 플레이하세요.)"
+                    "description": "{{elimination}} 게임이 현재 진행 중입니다. ({{goal}}과 {{elimination}}은(는) 호환되지 않으며 {{goal}}을(를) 사용하려면 {{classic}} 또는 {{teams}} 게임을 플레이하세요.)"
                 },
                 "goalExceeded": {
                     "description": "주어진 목표가 최고 점수를 초과합니다. 목표를 높이거나 새로운 게임을 시작하세요.",
