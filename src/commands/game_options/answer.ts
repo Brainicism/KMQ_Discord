@@ -19,7 +19,7 @@ const logger = new IPCLogger("answer");
 export default class AnswerCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
-        { checkFn: CommandPrechecks.notMusicPrecheck },
+        { checkFn: CommandPrechecks.notListeningPrecheck },
     ];
 
     validations = {

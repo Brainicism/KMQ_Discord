@@ -20,7 +20,7 @@ const logger = new IPCLogger("guessmode");
 export default class GuessModeCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
-        { checkFn: CommandPrechecks.notMusicPrecheck },
+        { checkFn: CommandPrechecks.notListeningPrecheck },
     ];
 
     aliases = ["mode"];

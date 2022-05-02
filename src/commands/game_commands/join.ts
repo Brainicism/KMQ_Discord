@@ -26,7 +26,7 @@ const logger = new IPCLogger("join");
 export default class JoinCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
-        { checkFn: CommandPrechecks.notMusicPrecheck },
+        { checkFn: CommandPrechecks.notListeningPrecheck },
     ];
 
     aliases = ["j"];

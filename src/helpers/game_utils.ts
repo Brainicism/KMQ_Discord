@@ -447,7 +447,7 @@ export function removePremium(userIDs: string[]): void {
 /**
  * @param session - The session
  * @param playerID - The player ID
- * @returns whether the current game is a premium game/music session, or the player is premium
+ * @returns whether the current game is a premium game/listening session, or the player is premium
  */
 export async function isPremiumRequest(
     session: Session,

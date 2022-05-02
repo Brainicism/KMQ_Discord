@@ -26,7 +26,10 @@ export default async function voiceChannelJoinHandler(
         await session.setPlayerInVC(member.id, true);
     }
 
-    if (oldPremiumState !== session.isPremium() || session.isMusicSession()) {
+    if (
+        oldPremiumState !== session.isPremium() ||
+        session.isListeningSession()
+    ) {
         session.updatePremiumStatus();
     }
 }

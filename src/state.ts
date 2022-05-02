@@ -4,12 +4,12 @@ import type { Campaign } from "patreon-discord";
 import type { IPC } from "eris-fleet";
 import type GameSession from "./structures/game_session";
 import type KmqClient from "./kmq_client";
+import type ListeningSession from "./structures/listening_session";
 import type LocaleType from "./enums/locale_type";
-import type MusicSession from "./structures/music_session";
 
 export default class State {
     static gameSessions: { [guildID: string]: GameSession } = {};
-    static musicSessions: { [guildID: string]: MusicSession } = {};
+    static listeningSessions: { [guildID: string]: ListeningSession } = {};
     static client: KmqClient;
     static aliases: {
         artist: { [artistName: string]: Array<string> };

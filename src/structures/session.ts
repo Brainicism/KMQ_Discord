@@ -27,7 +27,7 @@ import fs from "fs";
 import type GameSession from "./game_session";
 import type GuessResult from "../interfaces/guess_result";
 import type KmqMember from "./kmq_member";
-import type MusicSession from "./music_session";
+import type ListeningSession from "./listening_session";
 import type QueriedSong from "../interfaces/queried_song";
 import type Round from "./round";
 
@@ -120,7 +120,7 @@ export default abstract class Session {
     abstract sessionName(): string;
 
     static getSession(guildID: string): Session {
-        return State.gameSessions[guildID] ?? State.musicSessions[guildID];
+        return State.gameSessions[guildID] ?? State.listeningSessions[guildID];
     }
 
     /**
@@ -129,21 +129,21 @@ export default abstract class Session {
      */
     static deleteSession(guildID: string): void {
         const isGameSession = guildID in State.gameSessions;
-        const isMusicSession = guildID in State.musicSessions;
-        if (!isGameSession && !isMusicSession) {
+        const isListeningSession = guildID in State.listeningSessions;
+        if (!isGameSession && !isListeningSession) {
             logger.debug(`gid: ${guildID} | Session already ended`);
             return;
         }
 
         if (isGameSession) {
             delete State.gameSessions[guildID];
-        } else if (isMusicSession) {
-            delete State.musicSessions[guildID];
+        } else if (isListeningSession) {
+            delete State.listeningSessions[guildID];
         }
     }
 
     // eslint-disable-next-line class-methods-use-this
-    isMusicSession(): this is MusicSession {
+    isListeningSession(): this is ListeningSession {
         return false;
     }
 
@@ -408,7 +408,10 @@ export default abstract class Session {
      * @param guildPreference - The GuildPreference
      */
     startGuessTimeout(messageContext: MessageContext): Promise<void> {
-        if (this.isMusicSession() || !this.guildPreference.isGuessTimeoutSet())
+        if (
+            this.isListeningSession() ||
+            !this.guildPreference.isGuessTimeoutSet()
+        )
             return;
 
         const time = this.guildPreference.gameOptions.guessTimeout;
@@ -457,7 +460,7 @@ export default abstract class Session {
 
         await this.songSelector.reloadSongs(
             guildPreference,
-            this.isMusicSession() ||
+            this.isListeningSession() ||
                 (session.isGameSession() && session.isPremium())
         );
     }
@@ -618,7 +621,7 @@ export default abstract class Session {
         const songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${round.song.youtubeLink}.ogg`;
 
         let seekLocation: number;
-        const seekType = this.isMusicSession()
+        const seekType = this.isListeningSession()
             ? SeekType.BEGINNING
             : this.guildPreference.gameOptions.seekType;
 
@@ -655,7 +658,7 @@ export default abstract class Session {
         try {
             let inputArgs = ["-ss", seekLocation.toString()];
             let encoderArgs = [];
-            const specialType = this.isMusicSession()
+            const specialType = this.isListeningSession()
                 ? null
                 : this.guildPreference.gameOptions.specialType;
 

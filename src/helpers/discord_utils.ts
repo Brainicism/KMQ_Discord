@@ -41,10 +41,10 @@ import GameOption from "../enums/game_option_name";
 import GameRound from "../structures/game_round";
 import GameType from "../enums/game_type";
 import GuessModeType from "../enums/option_types/guess_mode_type";
+import ListeningRound from "../structures/listening_round";
 import LocaleType from "../enums/locale_type";
 import LocalizationManager from "./localization_manager";
 import MessageContext from "../structures/message_context";
-import MusicRound from "../structures/music_round";
 import State from "../state";
 import TeamScoreboard from "../structures/team_scoreboard";
 import axios from "axios";
@@ -688,12 +688,12 @@ export async function sendRoundMessage(
     timeRemaining?: number,
     uniqueSongCounter?: UniqueSongCounter
 ): Promise<Eris.Message<Eris.TextableChannel>> {
-    const isMusicSession = session.isMusicSession();
+    const isListeningSession = session.isListeningSession();
     const useLargerScoreboard =
-        !isMusicSession && scoreboard.shouldUseLargerScoreboard();
+        !isListeningSession && scoreboard.shouldUseLargerScoreboard();
 
     let scoreboardTitle = "";
-    if (!isMusicSession && !useLargerScoreboard) {
+    if (!isListeningSession && !useLargerScoreboard) {
         scoreboardTitle = "\n\n";
         scoreboardTitle += bold(
             LocalizationManager.localizer.translate(
@@ -724,7 +724,7 @@ export async function sendRoundMessage(
         roundResultIDs = playerRoundResults.map((x) => x.player.id);
     }
 
-    if (!isMusicSession) {
+    if (!isListeningSession) {
         if (useLargerScoreboard) {
             fields = scoreboard.getScoreboardEmbedThreeFields(
                 MAX_SCOREBOARD_PLAYERS,
@@ -803,7 +803,7 @@ export async function sendRoundMessage(
         }
     }
 
-    if (round instanceof MusicRound) {
+    if (round instanceof ListeningRound) {
         const buttons: Array<Eris.InteractionButton> = [];
         round.interactionSkipUUID = uuid.v4();
         buttons.push({
@@ -1057,8 +1057,8 @@ export async function generateOptionsMessage(
         }
     }
 
-    // Special case: disable these options in a music session
-    if (session?.isMusicSession()) {
+    // Special case: disable these options in a listening session
+    if (session?.isListeningSession()) {
         const disabledOptions = [
             GameOption.GUESS_MODE_TYPE,
             GameOption.SEEK_TYPE,
@@ -1170,10 +1170,10 @@ export async function generateOptionsMessage(
             "command.options.perCommandHelp",
             { helpCommand: `${process.env.BOT_PREFIX}help` }
         );
-    } else if (session?.isMusicSession()) {
+    } else if (session?.isListeningSession()) {
         footerText = LocalizationManager.localizer.translate(
             messageContext.guildID,
-            "command.options.musicSessionNotAvailable"
+            "command.options.listeningSessionNotAvailable"
         );
     }
 

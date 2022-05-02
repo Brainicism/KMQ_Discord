@@ -25,7 +25,7 @@ export default class ForceHintCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.inSessionCommandPrecheck },
         { checkFn: CommandPrechecks.competitionPrecheck },
-        { checkFn: CommandPrechecks.notMusicPrecheck },
+        { checkFn: CommandPrechecks.notListeningPrecheck },
     ];
 
     help = (guildID: string): HelpDocumentation => ({

@@ -47,7 +47,10 @@ export default async function voiceChannelSwitchHandler(
 
     session.updateOwner();
 
-    if (oldPremiumState !== session.isPremium() || session.isMusicSession()) {
+    if (
+        oldPremiumState !== session.isPremium() ||
+        session.isListeningSession()
+    ) {
         session.updatePremiumStatus();
     }
 }

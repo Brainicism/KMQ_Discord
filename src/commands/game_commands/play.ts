@@ -182,7 +182,7 @@ export async function sendBeginGameSessionMessage(
 export default class PlayCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
-        { checkFn: CommandPrechecks.notMusicPrecheck },
+        { checkFn: CommandPrechecks.notListeningPrecheck },
         { checkFn: CommandPrechecks.notRestartingPrecheck },
     ];
 

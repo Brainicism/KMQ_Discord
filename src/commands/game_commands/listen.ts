@@ -13,9 +13,9 @@ import {
 import CommandPrechecks from "../../command_prechecks";
 import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
+import ListeningSession from "../../structures/listening_session";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
-import MusicSession from "../../structures/music_session";
 import Session from "../../structures/session";
 import State from "../../state";
 import dbContext from "../../database_context";
@@ -25,7 +25,7 @@ import type Eris from "eris";
 import type GameInfoMessage from "../../interfaces/game_info_message";
 import type HelpDocumentation from "../../interfaces/help";
 
-const logger = new IPCLogger("music");
+const logger = new IPCLogger("listen");
 
 /**
  * Sends the beginning of game session message
@@ -34,7 +34,7 @@ const logger = new IPCLogger("music");
  * @param messageContext - The original message that triggered the command
  * @param guildPreference - The guild's preferences
  */
-export async function sendBeginMusicSessionMessage(
+export async function sendBeginListeningSessionMessage(
     textChannelName: string,
     voiceChannelName: string,
     messageContext: MessageContext,
@@ -42,7 +42,7 @@ export async function sendBeginMusicSessionMessage(
 ): Promise<void> {
     const startTitle = LocalizationManager.localizer.translate(
         messageContext.guildID,
-        "command.music.musicStarting",
+        "command.listen.musicStarting",
         {
             textChannelName,
             voiceChannelName,
@@ -93,7 +93,7 @@ export async function sendBeginMusicSessionMessage(
     );
 }
 
-export default class MusicCommand implements BaseCommand {
+export default class ListenCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.notRestartingPrecheck },
         { checkFn: CommandPrechecks.premiumPrecheck },
@@ -105,22 +105,22 @@ export default class MusicCommand implements BaseCommand {
         arguments: [],
     };
 
-    aliases = ["radio", "listen"];
+    aliases = ["radio", "music"];
 
     help = (guildID: string): HelpDocumentation => ({
-        name: "music",
+        name: "listen",
         description: LocalizationManager.localizer.translate(
             guildID,
-            "command.music.help.description"
+            "command.listen.help.description"
         ),
-        usage: ",music",
+        usage: ",listen",
         priority: 1040,
         examples: [
             {
-                example: "`,music`",
+                example: "`,listen`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
-                    "command.music.help.example"
+                    "command.listen.help.example"
                 ),
             },
         ],
@@ -135,7 +135,7 @@ export default class MusicCommand implements BaseCommand {
 
         if (!session.isPremium()) {
             logger.info(
-                `gid: ${guildID} | Music session ending, no longer premium.`
+                `gid: ${guildID} | Listening session ending, no longer premium.`
             );
             await session.endSession();
         }
@@ -147,8 +147,8 @@ export default class MusicCommand implements BaseCommand {
         const session = Session.getSession(guildID);
         if (session?.isGameSession()) {
             sendErrorMessage(messageContext, {
-                title: "command.music.failure.existingGameSession.title",
-                description: "command.music.failure.existingGameSession.title",
+                title: "command.listen.failure.existingGameSession.title",
+                description: "command.listen.failure.existingGameSession.title",
             });
             return;
         }
@@ -169,7 +169,7 @@ export default class MusicCommand implements BaseCommand {
                 description: LocalizationManager.localizer.translate(
                     message.guildID,
                     "misc.failure.notInVC.description",
-                    { command: `\`${process.env.BOT_PREFIX}music\`` }
+                    { command: `\`${process.env.BOT_PREFIX}listen\`` }
                 ),
             });
 
@@ -183,7 +183,7 @@ export default class MusicCommand implements BaseCommand {
             return;
         }
 
-        const musicSession = new MusicSession(
+        const listeningSession = new ListeningSession(
             guildPreference,
             textChannel.id,
             voiceChannel.id,
@@ -191,14 +191,14 @@ export default class MusicCommand implements BaseCommand {
             gameOwner
         );
 
-        State.musicSessions[guildID] = musicSession;
-        await sendBeginMusicSessionMessage(
+        State.listeningSessions[guildID] = listeningSession;
+        await sendBeginListeningSessionMessage(
             textChannel.name,
             voiceChannel.name,
             messageContext,
             guildPreference
         );
 
-        musicSession.startRound(messageContext);
+        listeningSession.startRound(messageContext);
     };
 }
