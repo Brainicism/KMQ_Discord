@@ -269,10 +269,12 @@ async function updateNotDownloaded(
 
     await db.kmq.transaction(async (trx) => {
         await db.kmq("not_downloaded").del().transacting(trx);
-        await db
-            .kmq("not_downloaded")
-            .insert(songIDsNotDownloaded)
-            .transacting(trx);
+        if (songIDsNotDownloaded.length > 0) {
+            await db
+                .kmq("not_downloaded")
+                .insert(songIDsNotDownloaded)
+                .transacting(trx);
+        }
     });
 }
 
