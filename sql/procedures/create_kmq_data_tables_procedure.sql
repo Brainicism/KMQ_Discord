@@ -59,6 +59,7 @@ BEGIN
 	INNER JOIN kmq.cached_song_duration USING (vlink)
 	LEFT JOIN kmq.not_downloaded USING (vlink)
 	WHERE kmq.not_downloaded.vlink IS NULL
+	AND vlink NOT IN (SELECT vlink FROM kmq.dead_links)
 	AND vtype = 'main'
 	AND tags NOT LIKE "%c%"
 	AND vlink IN (SELECT vlink FROM kmq.cached_song_duration);
@@ -93,6 +94,7 @@ BEGIN
 		INNER JOIN kmq.cached_song_duration USING (vlink)
 		LEFT JOIN kmq.not_downloaded USING (vlink)
 		WHERE kmq.not_downloaded.vlink IS NULL
+		AND vlink NOT IN (SELECT vlink FROM kmq.dead_links)
 		AND tags NOT LIKE "%c%"
 	) rankedAudioSongs
 	WHERE rank <= maxRank;

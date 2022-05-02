@@ -162,18 +162,17 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
                 cacheStream
             );
         } catch (e) {
+            const errorMessage = `Failed to retrieve video metadata for '${id}'. error = ${e}`;
             await db
                 .kmq("dead_links")
                 .insert({
                     vlink: id,
-                    reason: `Failed to retrieve video metadata. error = ${e}`,
+                    reason: errorMessage,
                 })
                 .onConflict("vlink")
                 .ignore();
 
-            reject(
-                new Error(`Failed to retrieve video metadata. error = ${e}`)
-            );
+            reject(new Error(errorMessage));
             return;
         }
 
@@ -246,6 +245,9 @@ async function getSongsFromDb(db: DatabaseContext): Promise<any> {
                     "=",
                     "kpop_videos.app_kpop_group.id"
                 )
+                .whereNotIn("vlink", function () {
+                    this.select("vlink").from("kmq.dead_links");
+                })
                 .where("vtype", "=", "main")
                 .andWhere("tags", "NOT LIKE", "%c%");
         })
