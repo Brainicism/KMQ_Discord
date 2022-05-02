@@ -483,6 +483,13 @@
                 }
             }
         },
+        "listen": {
+            "help": {
+                "description": "Stream songs from the current options. Only available to KMQ Premium users.",
+                "example": "Music will start playing in the current voice channel."
+            },
+            "musicStarting": "Music Starting in #{{textChannelName}} in 🔊 {{voiceChannelName}}"
+        },
         "locale": {
             "help": {
                 "description": "Change the language of the bot. Options are the following: {{english}}, {{korean}}.",
@@ -528,13 +535,6 @@
                     "reset": "Reset to the default multiguess type of {{defaultMultiguess}}"
                 }
             }
-        },
-        "music": {
-            "help": {
-                "description": "Stream songs from the current options. Only available to KMQ Premium users.",
-                "example": "Music will start playing in the current voice channel."
-            },
-            "musicStarting": "Music Starting in #{{textChannelName}} in 🔊 {{voiceChannelName}}"
         },
         "news": {
             "help": {

@@ -6,8 +6,8 @@ import Eris from "eris";
 import GameSession from "../../structures/game_session";
 import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
+import ListeningSession from "../../structures/listening_session";
 import MessageContext from "../../structures/message_context";
-import MusicSession from "../../structures/music_session";
 import assert from "assert";
 import sinon from "sinon";
 
@@ -39,8 +39,8 @@ describe("command prechecks", () => {
             });
         });
 
-        describe("music session", () => {
-            const musicSession = new MusicSession(
+        describe("listening session", () => {
+            const listeningSession = new ListeningSession(
                 new GuildPreference("12"),
                 "123",
                 "1234",
@@ -56,7 +56,7 @@ describe("command prechecks", () => {
 
                     assert.equal(
                         CommandPrechecks.inSessionCommandPrecheck({
-                            session: musicSession,
+                            session: listeningSession,
                             message: stubMessage,
                             errorMessage: "error",
                         }),
@@ -73,7 +73,7 @@ describe("command prechecks", () => {
 
                     assert.equal(
                         CommandPrechecks.inSessionCommandPrecheck({
-                            session: musicSession,
+                            session: listeningSession,
                             message: stubMessage,
                             errorMessage: "error",
                         }),
@@ -206,8 +206,8 @@ describe("command prechecks", () => {
         });
     });
 
-    describe("notMusicPrecheck", () => {
-        const musicSession = new MusicSession(
+    describe("notListeningPrecheck", () => {
+        const listeningSession = new ListeningSession(
             new GuildPreference("12"),
             "123",
             "1234",
@@ -227,7 +227,7 @@ describe("command prechecks", () => {
         describe("session is null", () => {
             it("should return true", () => {
                 assert.strictEqual(
-                    CommandPrechecks.notMusicPrecheck({
+                    CommandPrechecks.notListeningPrecheck({
                         session: null,
                         message: stubMessage,
                     }),
@@ -236,11 +236,11 @@ describe("command prechecks", () => {
             });
         });
 
-        describe("session is a music session", () => {
+        describe("session is a listening session", () => {
             it("should return false", () => {
                 assert.strictEqual(
-                    CommandPrechecks.notMusicPrecheck({
-                        session: musicSession,
+                    CommandPrechecks.notListeningPrecheck({
+                        session: listeningSession,
                         message: stubMessage,
                     }),
                     false
@@ -248,10 +248,10 @@ describe("command prechecks", () => {
             });
         });
 
-        describe("session is not a music session", () => {
+        describe("session is not a listening session", () => {
             it("should return true", () => {
                 assert.strictEqual(
-                    CommandPrechecks.notMusicPrecheck({
+                    CommandPrechecks.notListeningPrecheck({
                         session: gameSession,
                         message: stubMessage,
                     }),

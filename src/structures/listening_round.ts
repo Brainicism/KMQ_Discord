@@ -6,7 +6,7 @@ import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "../interfaces/queried_song";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
 
-export default class MusicRound extends Round {
+export default class ListeningRound extends Round {
     /** UUID associated with skip interaction custom_id */
     public interactionSkipUUID: string;
 

@@ -10,8 +10,8 @@ import {
 import { isSkipMajority, skipSong } from "../commands/game_commands/skip";
 import { isUserPremium } from "../helpers/game_utils";
 import KmqMember from "./kmq_member";
+import ListeningRound from "./listening_round";
 import LocalizationManager from "../helpers/localization_manager";
-import MusicRound from "./music_round";
 import Session from "./session";
 import type Eris from "eris";
 import type GuessResult from "../interfaces/guess_result";
@@ -20,11 +20,11 @@ import type MessageContext from "./message_context";
 import type QueriedSong from "../interfaces/queried_song";
 import type Round from "./round";
 
-const logger = new IPCLogger("music_session");
+const logger = new IPCLogger("listening_session");
 
-export default class MusicSession extends Session {
-    /** The current MusicRound */
-    public round: MusicRound;
+export default class ListeningSession extends Session {
+    /** The current ListeningRound */
+    public round: ListeningRound;
 
     constructor(
         guildPreference: GuildPreference,
@@ -63,17 +63,17 @@ export default class MusicSession extends Session {
     }
 
     // eslint-disable-next-line class-methods-use-this
-    isMusicSession(): this is MusicSession {
+    isListeningSession(): this is ListeningSession {
         return true;
     }
 
     // eslint-disable-next-line class-methods-use-this
     sessionName(): string {
-        return "Music Session";
+        return "Listening Session";
     }
 
     /**
-     * Starting a new MusicRound
+     * Starting a new ListeningRound
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
     async startRound(messageContext: MessageContext): Promise<void> {
@@ -119,7 +119,7 @@ export default class MusicSession extends Session {
 
         this.finished = true;
         logger.info(
-            `gid: ${this.guildID} | Music session ended. rounds_played = ${this.roundsPlayed}`
+            `gid: ${this.guildID} | Listening session ended. rounds_played = ${this.roundsPlayed}`
         );
         super.endSession();
     }
@@ -191,7 +191,7 @@ export default class MusicSession extends Session {
     }
 
     /**
-     * Whether the current music session has premium features
+     * Whether the current listening session has premium features
      * @returns whether the session is premium
      */
     isPremium(): boolean {
@@ -207,6 +207,6 @@ export default class MusicSession extends Session {
      */
     // eslint-disable-next-line class-methods-use-this
     protected prepareRound(randomSong: QueriedSong): Round {
-        return new MusicRound(randomSong);
+        return new ListeningRound(randomSong);
     }
 }

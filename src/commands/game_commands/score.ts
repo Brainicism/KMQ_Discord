@@ -18,7 +18,7 @@ export default class ScoreCommand implements BaseCommand {
 
     preRunChecks = [
         { checkFn: CommandPrechecks.inSessionCommandPrecheck },
-        { checkFn: CommandPrechecks.notMusicPrecheck },
+        { checkFn: CommandPrechecks.notListeningPrecheck },
     ];
 
     help = (guildID: string): HelpDocumentation => ({

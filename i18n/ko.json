@@ -483,6 +483,13 @@
                 }
             }
         },
+        "listen": {
+            "help": {
+                "description": "현재 옵션에서 노래를 스트리밍합니다. KMQ 프리미엄 사용자만 사용할 수 있습니다.",
+                "example": "현재 음성 채널에서 음악이 재생되기 시작합니다."
+            },
+            "musicStarting": "🔊 {{voiceChannelName}}의 {{textChannelName}}에서 시작하는 음악"
+        },
         "locale": {
             "help": {
                 "description": "봇의 언어를 변경합니다. (옵션은 {{english}}, {{korean}}입니다.)",
@@ -528,13 +535,6 @@
                     "reset": "{{defaultMultiguess}}의 기본 다중 추측 유형으로 재설정합니다."
                 }
             }
-        },
-        "music": {
-            "help": {
-                "description": "현재 옵션에서 노래를 스트리밍합니다. KMQ 프리미엄 사용자만 사용할 수 있습니다.",
-                "example": "현재 음성 채널에서 음악이 재생되기 시작합니다."
-            },
-            "musicStarting": "🔊 {{voiceChannelName}}의 {{textChannelName}}에서 시작하는 음악"
         },
         "news": {
             "help": {

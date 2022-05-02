@@ -33,7 +33,10 @@ export default async function voiceChannelLeaveHandler(
 
     session.updateOwner();
 
-    if (oldPremiumState !== session.isPremium() || session.isMusicSession()) {
+    if (
+        oldPremiumState !== session.isPremium() ||
+        session.isListeningSession()
+    ) {
         await session.updatePremiumStatus();
     }
 }

@@ -19,7 +19,7 @@ const logger = new IPCLogger("multiguess");
 export default class MultiGuessCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
-        { checkFn: CommandPrechecks.notMusicPrecheck },
+        { checkFn: CommandPrechecks.notListeningPrecheck },
     ];
 
     validations = {

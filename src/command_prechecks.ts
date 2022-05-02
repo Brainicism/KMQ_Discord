@@ -22,7 +22,7 @@ export default class CommandPrechecks {
             return false;
         }
 
-        if (session.isMusicSession()) {
+        if (session.isListeningSession()) {
             return areUserAndBotInSameVoiceChannel(message);
         }
 
@@ -61,7 +61,7 @@ export default class CommandPrechecks {
         return true;
     }
 
-    static notMusicPrecheck(precheckArgs: PrecheckArgs): boolean {
+    static notListeningPrecheck(precheckArgs: PrecheckArgs): boolean {
         const { session, message } = precheckArgs;
         if (session && !session.isGameSession()) {
             sendErrorMessage(MessageContext.fromMessage(message), {
@@ -71,7 +71,7 @@ export default class CommandPrechecks {
                 ),
                 description: LocalizationManager.localizer.translate(
                     message.guildID,
-                    "misc.preCheck.notMusicSession"
+                    "misc.preCheck.notListeningSession"
                 ),
             });
 
@@ -140,7 +140,7 @@ export default class CommandPrechecks {
         const gameSession = session as GameSession;
         if (
             !session ||
-            session.isMusicSession() ||
+            session.isListeningSession() ||
             gameSession.gameType !== GameType.COMPETITION
         ) {
             return true;
