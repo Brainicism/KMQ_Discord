@@ -423,6 +423,16 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
     logger.info("Performing data overrides");
     const overrideQueries = await getOverrideQueries(db);
 
+    // update collations of columns that have user-inputted queries
+    logger.info("Updating collation overrides");
+    await db.kpopVideos.raw(
+        "ALTER TABLE app_kpop_group MODIFY name VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+    );
+
+    await db.kpopVideos.raw(
+        "ALTER TABLE app_kpop_group MODIFY kname VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+    );
+
     await Promise.allSettled(
         overrideQueries.map(async (overrideQuery) => {
             await db.kpopVideos.raw(overrideQuery);
