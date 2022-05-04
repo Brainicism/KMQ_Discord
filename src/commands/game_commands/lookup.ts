@@ -47,10 +47,10 @@ const getDaisukiLink = (id: string, isMV: boolean): string => {
 async function lookupByYoutubeID(
     message: GuildTextableMessage,
     videoID: string,
-    guildID: string,
     locale: LocaleType
 ): Promise<void> {
     const messageContext = MessageContext.fromMessage(message);
+    const guildID = message.guildID;
     const kmqSongEntry: QueriedSong = await dbContext
         .kmq("available_songs")
         .select(SongSelector.getQueriedSongFields())
@@ -251,7 +251,7 @@ async function lookupByYoutubeID(
     }
 
     sendInfoMessage(messageContext, {
-        title: `${songName} - ${artistName}`,
+        title: `**${songName}** - ${artistName}`,
         url: `https://youtu.be/${videoID}`,
         description,
         thumbnailUrl: `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`,
@@ -281,20 +281,21 @@ async function lookupBySongName(
 
     if (kmqSongEntries.length === 0) {
         await sendInfoMessage(messageContext, {
-            title: "Lookup Results",
-            description: "Could not find any songs by that name",
+            title: LocalizationManager.localizer.translate(
+                guildID,
+                "command.lookup.songNameSearchResult.title"
+            ),
+            description: LocalizationManager.localizer.translate(
+                guildID,
+                "command.lookup.songNameSearchResult.notFoundDescription"
+            ),
         });
         logger.info(`Could not find song by song name. songName = ${songName}`);
         return;
     }
 
     if (kmqSongEntries.length === 1) {
-        await lookupByYoutubeID(
-            message,
-            kmqSongEntries[0].youtubeLink,
-            guildID,
-            locale
-        );
+        await lookupByYoutubeID(message, kmqSongEntries[0].youtubeLink, locale);
         return;
     }
 
@@ -315,7 +316,7 @@ async function lookupBySongName(
             ),
             description: LocalizationManager.localizer.translate(
                 guildID,
-                "command.lookup.songNameSearchResult.description"
+                "command.lookup.songNameSearchResult.successDescription"
             ),
             fields: embedFieldsSubset,
         })
@@ -366,12 +367,13 @@ export default class LookupCommand implements BaseCommand {
 
         const locale = State.getGuildLocale(guildID);
 
+        if (arg.startsWith("<") && arg.endsWith(">")) {
+            // Trim <> if user didn't want to show YouTube embed
+            arg = arg.slice(1, -1);
+        }
+
         if (isValidURL(arg)) {
             let videoID: string = null;
-            if (arg.startsWith("<") && arg.endsWith(">")) {
-                // Trim <> if user didn't want to show YouTube embed
-                arg = arg.slice(1, -1);
-            }
 
             if (arg.startsWith("youtube.com") || arg.startsWith("youtu.be")) {
                 // ytdl::getVideoID() requires URLs start with "https://"
@@ -399,7 +401,7 @@ export default class LookupCommand implements BaseCommand {
                 return;
             }
 
-            await lookupByYoutubeID(message, videoID, guildID, locale);
+            await lookupByYoutubeID(message, videoID, locale);
         } else {
             await lookupBySongName(
                 parsedMessage.argument,

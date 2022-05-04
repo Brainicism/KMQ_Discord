@@ -523,7 +523,8 @@
             },
             "notInKMQ": "This song has an entry on [Daisuki]({{link}}), but it isn't included in KMQ.",
             "songNameSearchResult": {
-                "description": "The following songs are available in KMQ:",
+                "notFoundDescription": "Could not find any songs by that name",
+                "successDescription": "The following songs are available in KMQ:",
                 "title": "Lookup Results"
             },
             "validation": {
