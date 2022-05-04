@@ -437,3 +437,17 @@ export function isPrimaryInstance(): boolean {
 export function shouldSkipSeed(): boolean {
     return fs.existsSync(path.join(__dirname, "../../data/skip_seed"));
 }
+
+/**
+ * @param url - the URL
+ * @returns whether the URL is valid
+ */
+export function isValidURL(url: string): boolean {
+    try {
+        // eslint-disable-next-line no-new
+        new URL(url);
+        return true;
+    } catch (err) {
+        return false;
+    }
+}
