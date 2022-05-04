@@ -522,6 +522,10 @@
                 "title": "Song Not Found"
             },
             "notInKMQ": "This song has an entry on [Daisuki]({{link}}), but it isn't included in KMQ.",
+            "songNameSearchResult": {
+                "description": "The following songs are available in KMQ:",
+                "title": "Lookup Results"
+            },
             "validation": {
                 "invalidYouTubeID": "Expected a valid YouTube ID or link."
             }
