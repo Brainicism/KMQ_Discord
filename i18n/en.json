@@ -518,7 +518,7 @@
             "inCurrentGameOptions": "In Current Game Options?",
             "inKMQ": "This song is included in KMQ! Here's the link to [Daisuki]({{link}}).",
             "notFound": {
-                "description": "The requested song was not found in KMQ's copy of the Daisuki database. It is not included in KMQ.",
+                "description": "The requested song was not found in KMQ's copy of the Daisuki database, therefore it is not included in KMQ.",
                 "title": "Song Not Found"
             },
             "notInKMQ": "This song has an entry on [Daisuki]({{link}}), but it isn't included in KMQ.",
