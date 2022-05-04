@@ -337,7 +337,7 @@ export default class LookupCommand implements BaseCommand {
             guildID,
             "command.lookup.help.description"
         ),
-        usage: ",lookup [youtube_id]",
+        usage: ",lookup [song_name | youtube_id]",
         examples: [
             {
                 example: "`,lookup love dive`",
