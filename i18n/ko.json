@@ -207,7 +207,7 @@
         "goal": {
             "failure": {
                 "gameOptionConflict": {
-                    "title": "{{elimination}} 게임이 현재 진행 중입니다. ({{goal}}과 {{elimination}}은(는) 호환되지 않으며 {{goal}}을(를) 사용하려면 {{classic}} 또는 {{teams}} 게임을 플레이하세요.)"
+                    "description": "{{elimination}} 게임이 현재 진행 중입니다. ({{goal}}과 {{elimination}}은(는) 호환되지 않으며 {{goal}}을(를) 사용하려면 {{classic}} 또는 {{teams}} 게임을 플레이하세요.)"
                 },
                 "goalExceeded": {
                     "description": "주어진 목표가 최고 점수를 초과합니다. 목표를 높이거나 새로운 게임을 시작하세요.",
@@ -522,6 +522,11 @@
                 "title": "노래를 찾을 수 없음"
             },
             "notInKMQ": "이 노래는 [Daisuki]({{link}})에 항목이 있지만 KMQ에는 포함되어 있지 않습니다.",
+            "songNameSearchResult": {
+                "notFoundDescription": "해당 이름의 노래를 찾을 수 없습니다.",
+                "successDescription": "다음 노래는 KMQ에서 사용할 수 있습니다:",
+                "title": "검색 결과"
+            },
             "validation": {
                 "invalidYouTubeID": "올바른 유튜브 아이디 또는 링크가 필요합니다."
             }
