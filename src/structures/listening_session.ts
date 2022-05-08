@@ -76,12 +76,16 @@ export default class ListeningSession extends Session {
      * Starting a new ListeningRound
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
-    async startRound(messageContext: MessageContext): Promise<void> {
+    async startRound(messageContext: MessageContext): Promise<boolean> {
         if (this.finished || this.round) {
-            return;
+            return false;
         }
 
-        await super.startRound(messageContext);
+        const startRoundResult = await super.startRound(messageContext);
+
+        if (!startRoundResult) {
+            return false;
+        }
 
         if (messageContext) {
             const remainingDuration = this.getRemainingDuration(
@@ -102,6 +106,8 @@ export default class ListeningSession extends Session {
             this.round.roundMessageID = startRoundMessage?.id;
             this.updateBookmarkSongList();
         }
+
+        return true;
     }
 
     async endRound(
