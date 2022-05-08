@@ -152,7 +152,7 @@ export default class GameSession extends Session {
      * Starting a new GameRound
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
-    async startRound(messageContext: MessageContext): Promise<void> {
+    async startRound(messageContext: MessageContext): Promise<boolean> {
         if (this.sessionInitialized) {
             // Only add a delay if the game has already started
             await delay(
@@ -163,10 +163,15 @@ export default class GameSession extends Session {
         }
 
         if (this.finished || this.round) {
-            return;
+            return false;
         }
 
-        await super.startRound(messageContext);
+        const startRoundResult = await super.startRound(messageContext);
+
+        if (!startRoundResult) {
+            return false;
+        }
+
         if (this.guildPreference.isMultipleChoiceMode()) {
             const locale = State.getGuildLocale(this.guildID);
             const randomSong = this.round.song;
@@ -260,6 +265,8 @@ export default class GameSession extends Session {
                 }
             );
         }
+
+        return true;
     }
 
     /**
