@@ -69,6 +69,9 @@ export default abstract class Session {
 
     public songSelector: SongSelector;
 
+    /** Whether the session has premium members */
+    public isPremium: boolean;
+
     /** The guild preference */
     protected guildPreference: GuildPreference;
 
@@ -89,16 +92,10 @@ export default abstract class Session {
         textChannelID: string,
         voiceChannelID: string,
         guildID: string,
-        gameSessionCreator: KmqMember
+        gameSessionCreator: KmqMember,
+        isPremium: boolean
     ) {
         this.guildPreference = guildPreference;
-        this.guildPreference.reloadSongCallback = async () => {
-            logger.info(
-                `gid: ${this.guildID} | Game options modified, songs reloaded`
-            );
-            await this.reloadSongs(this.guildPreference);
-        };
-
         this.textChannelID = textChannelID;
         this.voiceChannelID = voiceChannelID;
         this.guildID = guildID;
@@ -110,6 +107,18 @@ export default abstract class Session {
         this.songMessageIDs = [];
         this.bookmarkedSongs = {};
         this.songSelector = new SongSelector();
+        this.isPremium = isPremium;
+
+        this.guildPreference.reloadSongCallback = async () => {
+            logger.info(
+                `gid: ${this.guildID} | Game options modified, songs reloaded`
+            );
+
+            await this.songSelector.reloadSongs(
+                this.guildPreference,
+                this.isPremium
+            );
+        };
     }
 
     abstract sessionName(): string;
@@ -163,7 +172,10 @@ export default abstract class Session {
         this.sessionInitialized = true;
         if (this.songSelector.getSongs() === null) {
             try {
-                await this.reloadSongs(this.guildPreference);
+                await this.songSelector.reloadSongs(
+                    this.guildPreference,
+                    this.isPremium
+                );
             } catch (err) {
                 await sendErrorMessage(messageContext, {
                     title: LocalizationManager.localizer.translate(
@@ -446,21 +458,6 @@ export default abstract class Session {
             .update({ last_active: new Date() });
     }
 
-    async reloadSongs(guildPreference: GuildPreference): Promise<void> {
-        const session = Session.getSession(guildPreference.guildID);
-        if (!session) {
-            throw new Error(
-                `Session doesn't exist for guild ID: ${guildPreference.guildID}`
-            );
-        }
-
-        await this.songSelector.reloadSongs(
-            guildPreference,
-            this.isListeningSession() ||
-                (session.isGameSession() && (await session.isPremium()))
-        );
-    }
-
     /**
      * Finds the song associated with the endRoundMessage via messageID, if it exists
      * @param messageID - The Discord message ID used to locate the song
@@ -570,13 +567,25 @@ export default abstract class Session {
      * The game has changed its premium state, so update filtered songs and reset premium options if non-premium
      */
     async updatePremiumStatus(): Promise<void> {
+        const oldPremiumStatus = this.isPremium;
+
+        const isPremium = await areUsersPremium(
+            getCurrentVoiceMembers(this.voiceChannelID).map((x) => x.id)
+        );
+
+        if (oldPremiumStatus === isPremium) {
+            return;
+        }
+
+        this.isPremium = isPremium;
+
         const guildPreference = await GuildPreference.getGuildPreference(
             this.guildID
         );
 
-        await this.reloadSongs(guildPreference);
+        await this.songSelector.reloadSongs(guildPreference, isPremium);
 
-        if (!(await this.isPremium())) {
+        if (!isPremium) {
             await Promise.allSettled(
                 Object.entries(State.client.commands).map(
                     async ([commandName, command]) => {
@@ -595,16 +604,6 @@ export default abstract class Session {
                 )
             );
         }
-    }
-
-    /**
-     * Whether the current session has premium features
-     * @returns whether the session is premium
-     */
-    async isPremium(): Promise<boolean> {
-        return areUsersPremium(
-            getCurrentVoiceMembers(this.voiceChannelID).map((x) => x.id)
-        );
     }
 
     abstract handleComponentInteraction(

@@ -110,6 +110,7 @@ export default class GameSession extends Session {
         guildID: string,
         gameSessionCreator: KmqMember,
         gameType: GameType,
+        isPremium: boolean,
         eliminationLives?: number
     ) {
         super(
@@ -117,7 +118,8 @@ export default class GameSession extends Session {
             textChannelID,
             voiceChannelID,
             guildID,
-            gameSessionCreator
+            gameSessionCreator,
+            isPremium
         );
         this.gameType = gameType;
         this.sessionInitialized = false;

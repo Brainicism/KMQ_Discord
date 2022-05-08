@@ -37,7 +37,8 @@ export default class ListeningSession extends Session {
             textChannelID,
             voiceChannelID,
             guildID,
-            gameSessionCreator
+            gameSessionCreator,
+            true
         );
         this.round = null;
     }

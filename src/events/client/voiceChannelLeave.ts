@@ -26,17 +26,10 @@ export default async function voiceChannelLeaveHandler(
         return;
     }
 
-    const oldPremiumState = await session.isPremium();
     if (session.isGameSession()) {
         await session.setPlayerInVC(member.id, false);
     }
 
-    if (
-        oldPremiumState !== (await session.isPremium()) ||
-        session.isListeningSession()
-    ) {
-        await session.updatePremiumStatus();
-    }
-
+    await session.updatePremiumStatus();
     session.updateOwner();
 }

@@ -463,7 +463,7 @@ export async function isPremiumRequest(
     session: Session,
     playerID: string
 ): Promise<boolean> {
-    return (await session?.isPremium()) || (await isUserPremium(playerID));
+    return session?.isPremium || (await isUserPremium(playerID));
 }
 
 /**
