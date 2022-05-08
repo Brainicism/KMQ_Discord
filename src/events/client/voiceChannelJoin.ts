@@ -21,13 +21,13 @@ export default async function voiceChannelJoinHandler(
         return;
     }
 
-    const oldPremiumState = session.isPremium();
+    const oldPremiumState = await session.isPremium();
     if (session.isGameSession()) {
         await session.setPlayerInVC(member.id, true);
     }
 
     if (
-        oldPremiumState !== session.isPremium() ||
+        oldPremiumState !== (await session.isPremium()) ||
         session.isListeningSession()
     ) {
         session.updatePremiumStatus();

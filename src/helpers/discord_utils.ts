@@ -1098,7 +1098,11 @@ export async function generateOptionsMessage(
         .join("\n");
 
     let nonPremiumGameWarning = "";
-    if (premiumRequest && session?.isGameSession() && !session?.isPremium()) {
+    if (
+        premiumRequest &&
+        session?.isGameSession() &&
+        !(await session?.isPremium())
+    ) {
         nonPremiumGameWarning = italicize(
             LocalizationManager.localizer.translate(
                 messageContext.guildID,

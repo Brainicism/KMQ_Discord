@@ -133,7 +133,7 @@ export default class ListenCommand implements BaseCommand {
             return;
         }
 
-        if (!session.isPremium()) {
+        if (!(await session.isPremium())) {
             logger.info(
                 `gid: ${guildID} | Listening session ending, no longer premium.`
             );

@@ -4,6 +4,7 @@ import { bold, friendlyFormattedNumber, getMention } from "../helpers/utils";
 import {
     ensureVoiceConnection,
     getLocalizedSongName,
+    isUserPremium,
 } from "../helpers/game_utils";
 import {
     getCurrentVoiceMembers,
@@ -110,12 +111,6 @@ export default abstract class Session {
         this.bookmarkedSongs = {};
         this.songSelector = new SongSelector();
     }
-
-    /**
-     * Whether the current session has premium features
-     * @returns whether the session is premium
-     */
-    abstract isPremium(): boolean;
 
     abstract sessionName(): string;
 
@@ -462,7 +457,7 @@ export default abstract class Session {
         await this.songSelector.reloadSongs(
             guildPreference,
             this.isListeningSession() ||
-                (session.isGameSession() && session.isPremium())
+                (session.isGameSession() && (await session.isPremium()))
         );
     }
 
@@ -581,10 +576,15 @@ export default abstract class Session {
 
         await this.reloadSongs(guildPreference);
 
-        if (!this.isPremium()) {
+        if (!(await this.isPremium())) {
             await Promise.allSettled(
                 Object.entries(State.client.commands).map(
                     async ([commandName, command]) => {
+                        if (command.aliases.includes(commandName)) {
+                            // Ignore duplicate calls from aliases
+                            return;
+                        }
+
                         if (command.resetPremium) {
                             logger.info(
                                 `gid: ${this.guildID} | Resetting premium for game option: ${commandName}`
@@ -597,10 +597,21 @@ export default abstract class Session {
         }
     }
 
+    /**
+     * Whether the current session has premium features
+     * @returns whether the session is premium
+     */
+    async isPremium(): Promise<boolean> {
+        const members = getCurrentVoiceMembers(this.voiceChannelID);
+        return (
+            await Promise.all(members.map((x) => isUserPremium(x.id)))
+        ).some((x) => x);
+    }
+
     abstract handleComponentInteraction(
         _interaction: Eris.ComponentInteraction,
         _messageContext: MessageContext
-    );
+    ): Promise<void>;
 
     /**
      * Prepares a new Round

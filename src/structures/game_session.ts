@@ -675,17 +675,6 @@ export default class GameSession extends Session {
     }
 
     /**
-     * Whether the current game session has premium features
-     * @returns whether the session is premium
-     */
-    isPremium(): boolean {
-        return this.scoreboard
-            .getPlayers()
-            .filter((x) => x.inVC)
-            .some((x) => x.premium);
-    }
-
-    /**
      * Update whether a player is in VC
      * @param userID - The Discord user ID of the player to update
      * @param inVC - Whether the player is currently in the voice channel
