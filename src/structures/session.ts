@@ -1,11 +1,11 @@
 import { IPCLogger } from "../logger";
 import { KmqImages, specialFfmpegArgs } from "../constants";
-import { bold, friendlyFormattedNumber, getMention } from "../helpers/utils";
 import {
+    areUsersPremium,
     ensureVoiceConnection,
     getLocalizedSongName,
-    isUserPremium,
 } from "../helpers/game_utils";
+import { bold, friendlyFormattedNumber, getMention } from "../helpers/utils";
 import {
     getCurrentVoiceMembers,
     getDebugLogHeader,
@@ -602,10 +602,9 @@ export default abstract class Session {
      * @returns whether the session is premium
      */
     async isPremium(): Promise<boolean> {
-        const members = getCurrentVoiceMembers(this.voiceChannelID);
-        return (
-            await Promise.all(members.map((x) => isUserPremium(x.id)))
-        ).some((x) => x);
+        return areUsersPremium(
+            getCurrentVoiceMembers(this.voiceChannelID).map((x) => x.id)
+        );
     }
 
     abstract handleComponentInteraction(

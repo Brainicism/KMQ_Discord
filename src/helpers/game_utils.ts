@@ -381,15 +381,25 @@ export async function getMultipleChoiceOptions(
 }
 
 /**
+ * @param userIDs - A list of user IDs to check
+ * @returns whether at least one player has premium status
+ */
+export async function areUsersPremium(
+    userIDs: Array<string>
+): Promise<boolean> {
+    return !!(await dbContext
+        .kmq("premium_users")
+        .where("active", "=", true)
+        .whereIn("user_id", userIDs)
+        .first());
+}
+
+/**
  * @param userID - The user ID
  * @returns whether the player has premium status
  */
 export async function isUserPremium(userID: string): Promise<boolean> {
-    return !!(await dbContext
-        .kmq("premium_users")
-        .where("user_id", "=", userID)
-        .andWhere("active", "=", true)
-        .first());
+    return areUsersPremium([userID]);
 }
 
 /**
