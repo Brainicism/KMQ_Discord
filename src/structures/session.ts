@@ -156,7 +156,7 @@ export default abstract class Session {
      * Starting a new Round
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
-    async startRound(messageContext: MessageContext): Promise<void> {
+    async startRound(messageContext: MessageContext): Promise<boolean> {
         if (!this.sessionInitialized) {
             logger.info(
                 `${getDebugLogHeader(
@@ -189,7 +189,7 @@ export default abstract class Session {
                     )}`
                 );
                 await this.endSession();
-                return;
+                return false;
             }
         }
 
@@ -232,7 +232,7 @@ export default abstract class Session {
                 ),
             });
             await this.endSession();
-            return;
+            return false;
         }
 
         // create a new round with randomly chosen song
@@ -244,7 +244,7 @@ export default abstract class Session {
 
         if (!voiceChannel || voiceChannel.voiceMembers.size === 0) {
             await this.endSession();
-            return;
+            return false;
         }
 
         // join voice channel and start round
@@ -268,10 +268,11 @@ export default abstract class Session {
                     "misc.failure.vcJoin.description"
                 ),
             });
-            return;
+            return false;
         }
 
         this.playSong(messageContext);
+        return true;
     }
 
     /**
