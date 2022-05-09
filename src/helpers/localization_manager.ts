@@ -96,4 +96,8 @@ export default class LocalizationManager {
             count,
         });
     }
+
+    hasKey(key: string): boolean {
+        return this.internalLocalizer.exists(key);
+    }
 }
