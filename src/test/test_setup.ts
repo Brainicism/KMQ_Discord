@@ -2,7 +2,6 @@ import { DATABASE_DOWNLOAD_DIR } from "../constants";
 import { IPCLogger } from "../logger";
 import { execSync } from "child_process";
 import EnvType from "../enums/env_type";
-import Session from "../structures/session";
 import dbContext, { getNewConnection } from "../database_context";
 import kmqKnexConfig from "../config/knexfile_kmq";
 import path from "path";
@@ -75,10 +74,6 @@ before(async function () {
     execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test -e "CALL CreateKmqDataTables(1)"`
     );
-
-    sandbox
-        .stub(Session.prototype, "isPremium")
-        .callsFake(() => Promise.resolve(false));
 
     await db.destroy();
     return false;
