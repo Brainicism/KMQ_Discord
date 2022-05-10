@@ -6,6 +6,7 @@ import {
 import { IPCLogger } from "../../logger";
 import {
     activeBonusUsers,
+    areUsersPremium,
     isPowerHour,
     isPremiumRequest,
 } from "../../helpers/game_utils";
@@ -367,6 +368,9 @@ export default class PlayCommand implements BaseCommand {
         const textChannel = channel;
         const gameOwner = new KmqMember(message.author.id);
         let gameSession: GameSession;
+        const isPremium = await areUsersPremium(
+            getCurrentVoiceMembers(voiceChannel.id).map((x) => x.id)
+        );
 
         if (gameType === GameType.TEAMS) {
             // (1) TEAMS game creation
@@ -390,7 +394,8 @@ export default class PlayCommand implements BaseCommand {
                 voiceChannel.id,
                 textChannel.guild.id,
                 gameOwner,
-                gameType
+                gameType,
+                isPremium
             );
 
             logger.info(
@@ -493,6 +498,7 @@ export default class PlayCommand implements BaseCommand {
                 textChannel.guild.id,
                 gameOwner,
                 gameType,
+                isPremium,
                 lives
             );
         }

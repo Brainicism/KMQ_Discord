@@ -38,7 +38,8 @@ describe("begin command", () => {
                 null,
                 null,
                 gameStarter,
-                GameType.CLASSIC
+                GameType.CLASSIC,
+                false
             );
 
             sandbox.restore();
@@ -66,7 +67,8 @@ describe("begin command", () => {
                 null,
                 null,
                 gameStarter,
-                GameType.TEAMS
+                GameType.TEAMS,
+                true
             );
 
             sandbox.restore();

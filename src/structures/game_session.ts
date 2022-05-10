@@ -110,6 +110,7 @@ export default class GameSession extends Session {
         guildID: string,
         gameSessionCreator: KmqMember,
         gameType: GameType,
+        isPremium: boolean,
         eliminationLives?: number
     ) {
         super(
@@ -117,7 +118,8 @@ export default class GameSession extends Session {
             textChannelID,
             voiceChannelID,
             guildID,
-            gameSessionCreator
+            gameSessionCreator,
+            isPremium
         );
         this.gameType = gameType;
         this.sessionInitialized = false;
@@ -672,17 +674,6 @@ export default class GameSession extends Session {
                 ? this.round.song.songName
                 : this.round.song.artistName
         );
-    }
-
-    /**
-     * Whether the current game session has premium features
-     * @returns whether the session is premium
-     */
-    isPremium(): boolean {
-        return this.scoreboard
-            .getPlayers()
-            .filter((x) => x.inVC)
-            .some((x) => x.premium);
     }
 
     /**
