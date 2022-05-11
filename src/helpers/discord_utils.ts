@@ -233,12 +233,16 @@ async function fetchChannel(textChannelID: string): Promise<Eris.TextChannel> {
  * @param textChannelID - the text channel's ID
  * @param guildID - the guild's ID
  * @param authorID - the sender's ID
+ * @param permissions - the permissions to check
  * @returns whether the bot has permissions to message's originating text channel
  */
 export async function textPermissionsCheck(
     textChannelID: string,
     guildID: string,
-    authorID: string
+    authorID: string,
+    permissions: Array<
+        keyof Eris.Constants["Permissions"]
+    > = REQUIRED_TEXT_PERMISSIONS
 ): Promise<boolean> {
     const messageContext = new MessageContext(textChannelID, null, guildID);
     const channel = await fetchChannel(textChannelID);
@@ -265,7 +269,7 @@ export async function textPermissionsCheck(
         return false;
     }
 
-    const missingPermissions = REQUIRED_TEXT_PERMISSIONS.filter(
+    const missingPermissions = permissions.filter(
         (permission) =>
             !channel.permissionsOf(process.env.BOT_CLIENT_ID).has(permission)
     );
@@ -1397,7 +1401,8 @@ export async function sendPaginationedEmbed(
             await textPermissionsCheck(
                 message.channel.id,
                 message.guildID,
-                message.author.id
+                message.author.id,
+                [...REQUIRED_TEXT_PERMISSIONS, "readMessageHistory"]
             )
         ) {
             return EmbedPaginator.createPaginationEmbed(
