@@ -9,7 +9,9 @@ const logger = new IPCLogger("missing_i18n");
 
 const dynamicTranslationKeyAllowlist = [
     "getOrdinalNum(idx + 1)",
+    // eslint-disable-next-line no-template-curly-in-string
     "`command.locale.language.${DEFAULT_LOCALE}`",
+    // eslint-disable-next-line no-template-curly-in-string
     "`command.locale.language.${language}`",
     "highestRankTitle.title",
     "rankTitle.title",
