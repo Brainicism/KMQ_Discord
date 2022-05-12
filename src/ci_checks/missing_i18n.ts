@@ -3,12 +3,11 @@ import { IPCLogger } from "../logger";
 import { ScriptTarget, SyntaxKind, createSourceFile } from "typescript";
 import { readFileSync } from "fs";
 import LocalizationManager from "../helpers/localization_manager";
-import type { Node } from "typescript";
+import type { CallExpression, Node } from "typescript";
 
 const logger = new IPCLogger("missing_i18n");
 
 const dynamicTranslationKeyAllowlist = [
-    "getOrdinalNum(idx + 1)",
     // eslint-disable-next-line no-template-curly-in-string
     "`command.locale.language.${DEFAULT_LOCALE}`",
     // eslint-disable-next-line no-template-curly-in-string
@@ -16,15 +15,12 @@ const dynamicTranslationKeyAllowlist = [
     "highestRankTitle.title",
     "rankTitle.title",
     "RANK_TITLES[0].title",
-    "x[\"badge_name\"]",
+    'x["badge_name"]',
     "endGameMessage.title",
     "endGameMessage.message",
     "chooseRandom(leaderboardQuotes)",
     "gameInfoMessage.message",
     "gameInfoMessage.title",
-    "Number((process.uptime() / (60 * 60)).toFixed(2))",
-    "Math.max(Math.ceil(timeRemaining), 0)",
-    "Math.ceil(timeRemaining)",
 ];
 
 const translationInterfaceFunctions = [
@@ -51,29 +47,26 @@ function getNodeKeys(node: Node): Array<string> {
     const translationNode = interfaceTranslation || internalTranslation;
 
     if (translationNode && node.kind === SyntaxKind.CallExpression) {
-        for (const child of node
-            .getChildren()
-            .flatMap((x) => x.getChildren())) {
-            if (child.kind === SyntaxKind.StringLiteral) {
-                keys.add(child.getText());
-            } else if (
-                [
-                    SyntaxKind.BinaryExpression,
-                    SyntaxKind.ConditionalExpression,
-                ].includes(child.kind)
-            ) {
-                for (const nestedChild of child
-                    .getChildren()
-                    .filter((x) => x.kind === SyntaxKind.StringLiteral)) {
-                    keys.add(nestedChild.getText());
-                }
-            } else if (child.kind === SyntaxKind.CallExpression) {
-                if (!dynamicTranslationKeyAllowlist.includes(child.getText())) {
-                    logger.error(
-                        `"${child.getText()}" is not in the dynamic allow list`
-                    );
-                }
+        const expression = node as CallExpression;
+        const key = interfaceTranslation
+            ? expression.arguments[1]
+            : expression.arguments[0];
+
+        if (key.kind === SyntaxKind.StringLiteral) {
+            keys.add(key.getText());
+        } else if (
+            [
+                SyntaxKind.BinaryExpression,
+                SyntaxKind.ConditionalExpression,
+            ].includes(key.kind)
+        ) {
+            for (const nestedChild of key
+                .getChildren()
+                .filter((x) => x.kind === SyntaxKind.StringLiteral)) {
+                keys.add(nestedChild.getText());
             }
+        } else if (!dynamicTranslationKeyAllowlist.includes(key.getText())) {
+            logger.error(`"${key.getText()}" is not in the dynamic allow list`);
         }
     }
 
