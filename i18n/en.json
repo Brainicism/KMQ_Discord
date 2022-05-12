@@ -691,7 +691,7 @@
                 "noSuchPreset": {
                     "description": "Preset {{presetName}} doesn't exist.",
                     "identifier": {
-                        "description": "Preset identifer {{presetUUID}} doesn't exist."
+                        "description": "Preset identifier {{presetUUID}} doesn't exist."
                     },
                     "title": "No Such Preset"
                 },
