@@ -15,6 +15,7 @@ const dynamicTranslationKeyAllowlist = [
     "highestRankTitle.title",
     "rankTitle.title",
     "RANK_TITLES[0].title",
+    // eslint-disable-next-line @typescript-eslint/quotes
     'x["badge_name"]',
     "endGameMessage.title",
     "endGameMessage.message",
