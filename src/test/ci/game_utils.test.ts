@@ -319,7 +319,8 @@ describe("game utils", () => {
                 null,
                 guildId,
                 null,
-                null
+                null,
+                false
             );
 
             sandbox.restore();

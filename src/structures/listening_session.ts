@@ -8,7 +8,6 @@ import {
     tryCreateInteractionSuccessAcknowledgement,
 } from "../helpers/discord_utils";
 import { isSkipMajority, skipSong } from "../commands/game_commands/skip";
-import { isUserPremium } from "../helpers/game_utils";
 import KmqMember from "./kmq_member";
 import ListeningRound from "./listening_round";
 import LocalizationManager from "../helpers/localization_manager";
@@ -38,7 +37,8 @@ export default class ListeningSession extends Session {
             textChannelID,
             voiceChannelID,
             guildID,
-            gameSessionCreator
+            gameSessionCreator,
+            true
         );
         this.round = null;
     }
@@ -194,16 +194,6 @@ export default class ListeningSession extends Session {
                 );
             }
         }
-    }
-
-    /**
-     * Whether the current listening session has premium features
-     * @returns whether the session is premium
-     */
-    isPremium(): boolean {
-        return getCurrentVoiceMembers(this.voiceChannelID).some((x) =>
-            isUserPremium(x.id)
-        );
     }
 
     /**
