@@ -620,6 +620,7 @@ export default class GameSession extends Session {
         interaction: Eris.ComponentInteraction<Eris.TextableChannel>,
         messageContext: MessageContext
     ): Promise<void> {
+        if (!this.round) return;
         if (
             !this.handleInSessionInteractionFailures(
                 interaction,
@@ -667,7 +668,6 @@ export default class GameSession extends Session {
             messageContext.guildID
         );
 
-        if (!this.round) return;
         this.guessSong(
             messageContext,
             guildPreference.gameOptions.guessModeType !== GuessModeType.ARTIST
