@@ -1,11 +1,11 @@
-// import { KmqImages } from "../../constants";
-// import { sendInfoMessage } from "../../helpers/discord_utils";
-// import { isUserPremium } from "../../helpers/game_utils";
-// import LocalizationManager from "../../helpers/localization_manager";
+import { KmqImages } from "../../constants";
+import { isUserPremium } from "../../helpers/game_utils";
+import { sendInfoMessage } from "../../helpers/discord_utils";
+import LocalizationManager from "../../helpers/localization_manager";
+import MessageContext from "../../structures/message_context";
+import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 // import type HelpDocumentation from "../../interfaces/help";
-// import MessageContext from "../../structures/message_context";
-import type BaseCommand from "../interfaces/base_command";
 
 export default class PremiumCommand implements BaseCommand {
     validations = {
@@ -33,62 +33,58 @@ export default class PremiumCommand implements BaseCommand {
     //     usage: ",premium",
     // });
 
-    // eslint-disable-next-line no-empty-pattern, arrow-body-style
-    call = ({}: CommandArgs): Promise<void> => {
-        return null;
-        // Temporarily disable premium command
-
-        // call = async ({ message }: CommandArgs): Promise<void> => {
-        // const premiumMember = await isUserPremium(message.author.id);
-        // sendInfoMessage(MessageContext.fromMessage(message), {
-        //     description: `${LocalizationManager.localizer.translate(
-        //         message.guildID,
-        //         premiumMember
-        //             ? "command.premium.status.description.premium"
-        //             : "command.premium.status.description.nonPremium"
-        //     )}\n\n${LocalizationManager.localizer.translate(
-        //         message.guildID,
-        //         "command.premium.status.description.connectionReminder"
-        //     )}`,
-        //     fields: [
-        //         {
-        //             name: LocalizationManager.localizer.translate(
-        //                 message.guildID,
-        //                 "command.premium.status.perks.moreSongs.title"
-        //             ),
-        //             value: LocalizationManager.localizer.translate(
-        //                 message.guildID,
-        //                 "command.premium.status.perks.moreSongs.description"
-        //             ),
-        //         },
-        //         {
-        //             name: LocalizationManager.localizer.translate(
-        //                 message.guildID,
-        //                 "command.premium.status.perks.special.title"
-        //             ),
-        //             value: LocalizationManager.localizer.translate(
-        //                 message.guildID,
-        //                 "command.premium.status.perks.special.description"
-        //             ),
-        //         },
-        //         {
-        //             name: LocalizationManager.localizer.translate(
-        //                 message.guildID,
-        //                 "command.premium.status.perks.badge.title"
-        //             ),
-        //             value: LocalizationManager.localizer.translate(
-        //                 message.guildID,
-        //                 "command.premium.status.perks.badge.description"
-        //             ),
-        //         },
-        //     ],
-        //     thumbnailUrl: KmqImages.HAPPY,
-        //     title: LocalizationManager.localizer.translate(
-        //         message.guildID,
-        //         premiumMember
-        //             ? "command.premium.status.title.premium"
-        //             : "command.premium.status.title.nonPremium"
-        //     ),
-        // });
+    call = async ({ message }: CommandArgs): Promise<void> => {
+        return;
+        const premiumMember = await isUserPremium(message.author.id);
+        sendInfoMessage(MessageContext.fromMessage(message), {
+            description: `${LocalizationManager.localizer.translate(
+                message.guildID,
+                premiumMember
+                    ? "command.premium.status.description.premium"
+                    : "command.premium.status.description.nonPremium"
+            )}\n\n${LocalizationManager.localizer.translate(
+                message.guildID,
+                "command.premium.status.description.connectionReminder"
+            )}`,
+            fields: [
+                {
+                    name: LocalizationManager.localizer.translate(
+                        message.guildID,
+                        "command.premium.status.perks.moreSongs.title"
+                    ),
+                    value: LocalizationManager.localizer.translate(
+                        message.guildID,
+                        "command.premium.status.perks.moreSongs.description"
+                    ),
+                },
+                {
+                    name: LocalizationManager.localizer.translate(
+                        message.guildID,
+                        "command.premium.status.perks.special.title"
+                    ),
+                    value: LocalizationManager.localizer.translate(
+                        message.guildID,
+                        "command.premium.status.perks.special.description"
+                    ),
+                },
+                {
+                    name: LocalizationManager.localizer.translate(
+                        message.guildID,
+                        "command.premium.status.perks.badge.title"
+                    ),
+                    value: LocalizationManager.localizer.translate(
+                        message.guildID,
+                        "command.premium.status.perks.badge.description"
+                    ),
+                },
+            ],
+            thumbnailUrl: KmqImages.HAPPY,
+            title: LocalizationManager.localizer.translate(
+                message.guildID,
+                premiumMember
+                    ? "command.premium.status.title.premium"
+                    : "command.premium.status.title.nonPremium"
+            ),
+        });
     };
 }
