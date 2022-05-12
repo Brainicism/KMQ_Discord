@@ -5,7 +5,7 @@ import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
-// import type HelpDocumentation from "../../interfaces/help";
+import type HelpDocumentation from "../../interfaces/help";
 
 export default class PremiumCommand implements BaseCommand {
     validations = {
@@ -14,24 +14,24 @@ export default class PremiumCommand implements BaseCommand {
         minArgCount: 0,
     };
 
-    // help = (guildID: string): HelpDocumentation => ({
-    //     description: LocalizationManager.localizer.translate(
-    //         guildID,
-    //         "command.premium.help.description"
-    //     ),
-    //     examples: [
-    //         {
-    //             example: "`,premium`",
-    //             explanation: LocalizationManager.localizer.translate(
-    //                 guildID,
-    //                 "command.premium.help.example"
-    //             ),
-    //         },
-    //     ],
-    //     name: "premium",
-    //     priority: 50,
-    //     usage: ",premium",
-    // });
+    help = (guildID: string): HelpDocumentation => ({
+        description: LocalizationManager.localizer.translate(
+            guildID,
+            "command.premium.help.description"
+        ),
+        examples: [
+            {
+                example: "`,premium`",
+                explanation: LocalizationManager.localizer.translate(
+                    guildID,
+                    "command.premium.help.example"
+                ),
+            },
+        ],
+        name: "premium",
+        priority: 50,
+        usage: ",premium",
+    });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
         return;
