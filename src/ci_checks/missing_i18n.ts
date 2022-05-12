@@ -1,4 +1,5 @@
 import { IPCLogger } from "../logger";
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { ScriptTarget, SyntaxKind, createSourceFile } from "typescript";
 import { readFileSync } from "fs";
 import LocalizationManager from "../helpers/localization_manager";
