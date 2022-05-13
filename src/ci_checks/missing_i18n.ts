@@ -53,8 +53,15 @@ function getNodeKeys(node: Node): Array<string> {
             ? expression.arguments[1]
             : expression.arguments[0];
 
+        const keyText = key.getText();
+
         if (key.kind === SyntaxKind.StringLiteral) {
-            keys.add(key.getText());
+            if (keyText.includes("plural")) {
+                keys.add(`${keyText.slice(0, -1)}_one"`);
+                keys.add(`${keyText.slice(0, -1)}_other"`);
+            } else {
+                keys.add(keyText);
+            }
         } else if (
             [
                 SyntaxKind.BinaryExpression,
@@ -66,8 +73,8 @@ function getNodeKeys(node: Node): Array<string> {
                 .filter((x) => x.kind === SyntaxKind.StringLiteral)) {
                 keys.add(nestedChild.getText());
             }
-        } else if (!dynamicTranslationKeyAllowlist.includes(key.getText())) {
-            logger.error(`"${key.getText()}" is not in the dynamic allow list`);
+        } else if (!dynamicTranslationKeyAllowlist.includes(keyText)) {
+            logger.error(`"${keyText}" is not in the dynamic allow list`);
         }
     }
 
