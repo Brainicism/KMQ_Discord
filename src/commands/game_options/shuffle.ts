@@ -1,4 +1,4 @@
-import { DEFAULT_SHUFFLE } from "../../constants";
+import { DEFAULT_SHUFFLE, ExpBonusModifierValues } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -7,6 +7,7 @@ import {
 } from "../../helpers/discord_utils";
 import { isUserPremium } from "../../helpers/game_utils";
 import CommandPrechecks from "../../command_prechecks";
+import ExpBonusModifier from "../../enums/exp_bonus_modifier";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
@@ -61,7 +62,14 @@ export default class ShuffleCommand implements BaseCommand {
                 example: "`,shuffle popularity`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
-                    "command.shuffle.help.example.popularity"
+                    "command.shuffle.help.example.popularity",
+                    {
+                        penalty: `${
+                            ExpBonusModifierValues[
+                                ExpBonusModifier.SHUFFLE_POPULARITY
+                            ]
+                        }x`,
+                    }
                 ),
             },
             {
