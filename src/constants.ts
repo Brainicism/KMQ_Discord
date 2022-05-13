@@ -54,8 +54,8 @@ export const SONG_START_DELAY = 3000;
 
 export const specialFfmpegArgs = {
     [SpecialType.REVERSE]: (seek: number) => ({
-        inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "areverse"],
+        inputArgs: [],
+        encoderArgs: ["-af", `atrim=end=${seek},areverse`],
     }),
     [SpecialType.SLOW]: (seek: number) => ({
         inputArgs: ["-ss", seek.toString()],
