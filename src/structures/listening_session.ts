@@ -134,6 +134,7 @@ export default class ListeningSession extends Session {
         interaction: Eris.ComponentInteraction,
         messageContext: MessageContext
     ): Promise<void> {
+        if (!this.round) return;
         if (
             interaction.data.custom_id !== "bookmark" &&
             !this.handleInSessionInteractionFailures(
