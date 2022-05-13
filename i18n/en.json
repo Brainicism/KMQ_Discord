@@ -408,8 +408,6 @@
                 "permanent": "{{level}} {{formattedNumber}} ({{rankName}})",
                 "temporary": "{{formattedNumber}} {{levelPluralized}} gained"
             },
-            "level_one": "level",
-            "level_other": "levels",
             "quote": {
                 "name": "Want your name to show up on the leaderboard? See {{command}}",
                 "nextPage": "Want to see the next page of the leaderboard? See {{command}}"
@@ -1233,6 +1231,8 @@
             "hourAgo_other": "{{count}} hours ago",
             "hour_one": "{{count}} hour",
             "hour_other": "{{count}} hours",
+            "level_one": "level",
+            "level_other": "levels",
             "minuteAgo_one": "{{count}} minute ago",
             "minuteAgo_other": "{{count}} minutes ago",
             "minuteRemaining_one": "{{count}} minute remaining",

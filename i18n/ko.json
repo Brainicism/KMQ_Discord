@@ -408,8 +408,6 @@
                 "permanent": "{{level}} {{formattedNumber}} ({{rankName}})",
                 "temporary": "{{formattedNumber}} {{levelPluralized}}를 획득하셨습니다!"
             },
-            "level_one": "레벨",
-            "level_other": "레벨",
             "quote": {
                 "name": "당신이 리더보드에 표시되기를 원하십니까? (참고: {{command}})",
                 "nextPage": "리더보드의 다음 페이지를 보고 싶으십니까? (참고: {{command}})"
@@ -1233,6 +1231,8 @@
             "hourAgo_other": "{{count}}시간 전",
             "hour_one": "{{count}}시간",
             "hour_other": "{{count}}시간",
+            "level_one": "레벨",
+            "level_other": "레벨",
             "minuteAgo_one": "{{count}}분 전",
             "minuteAgo_other": "{{count}}분 전",
             "minuteRemaining_one": "{{count}}분 남음",
