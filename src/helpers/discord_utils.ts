@@ -1177,7 +1177,7 @@ export async function generateOptionsMessage(
     } else if (session?.isListeningSession()) {
         footerText = LocalizationManager.localizer.translate(
             messageContext.guildID,
-            "command.options.listeningSessionNotAvailable"
+            "command.options.musicSessionNotAvailable"
         );
     }
 
