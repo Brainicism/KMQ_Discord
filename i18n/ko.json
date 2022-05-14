@@ -409,8 +409,6 @@
                 "permanent": "{{level}} {{formattedNumber}} ({{rankName}})",
                 "temporary": "{{formattedNumber}} {{levelPluralized}}를 획득하셨습니다!"
             },
-            "level_one": "레벨",
-            "level_other": "레벨",
             "quote": {
                 "name": "당신이 리더보드에 표시되기를 원하십니까? (참고: {{command}})",
                 "nextPage": "리더보드의 다음 페이지를 보고 싶으십니까? (참고: {{command}})"
@@ -1235,6 +1233,8 @@
             "hourAgo_other": "{{count}}시간 전",
             "hour_one": "{{count}}시간",
             "hour_other": "{{count}}시간",
+            "level_one": "레벨",
+            "level_other": "레벨",
             "minuteAgo_one": "{{count}}분 전",
             "minuteAgo_other": "{{count}}분 전",
             "minuteRemaining_one": "{{count}}분 남음",
@@ -1255,7 +1255,7 @@
             "differentVC": "이 명령어를 사용하려면 봇과 동일한 음성 채널에 있어야 합니다.",
             "notMusicSession": "이 명령어는 음악 세션에서 사용할 수 없습니다.",
             "notPremium": "이 명령을 사용하려면 KMQ Premium이 필요합니다 ({{premium}} 참조).",
-            "premiumOrDebugChannel": "이 명령은 공식 KMQ 서버 또는 KMQ Premium 멤버에 대해서만 작동합니다({{premium}} 참조).",
+            "premiumOrDebugServer": "이 명령은 공식 KMQ 서버 또는 KMQ Premium 멤버에 대해서만 작동합니다({{premium}} 참조).",
             "title": "잠시만 기다려주십시오..."
         },
         "releaseDate": "발매 날짜",
