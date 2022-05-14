@@ -64,6 +64,7 @@ function getNodeKeys(node: Node): void {
                     : translationKeyNode.getText();
 
             if (translationKeyNode.kind === SyntaxKind.StringLiteral) {
+                logger.info(`Found string literal key "${keyText}"`);
                 if (keyText.startsWith("misc.plural")) {
                     translationKeys.add(`${keyText}_one`);
                     translationKeys.add(`${keyText}_other`);
@@ -76,10 +77,22 @@ function getNodeKeys(node: Node): void {
                     SyntaxKind.ConditionalExpression,
                 ].includes(translationKeyNode.kind)
             ) {
-                for (const nestedChild of translationKeyNode.getChildren()) {
-                    getNodeKeys(nestedChild);
+                for (const nestedChild of translationKeyNode
+                    .getChildren()
+                    .filter((x) => x.kind === SyntaxKind.StringLiteral)) {
+                    const nestedChildKeyText = nestedChild
+                        .getText()
+                        .slice(1, -1);
+
+                    logger.info(
+                        `Found string literal key "${nestedChildKeyText}"`
+                    );
+                    translationKeys.add(nestedChildKeyText);
                 }
             } else if (!dynamicTranslationKeyAllowlist.includes(keyText)) {
+                logger.info(
+                    `Found missing dynamic translation key "${keyText}"`
+                );
                 dynamicTranslationKeys.add(keyText);
             }
         }
@@ -99,6 +112,7 @@ function getNodeKeys(node: Node): void {
 
     program.getTypeChecker();
     for (const sourceFile of program.getSourceFiles()) {
+        logger.info(`Parsing ${sourceFile.fileName}...`);
         getNodeKeys(sourceFile);
     }
 
