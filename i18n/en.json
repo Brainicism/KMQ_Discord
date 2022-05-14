@@ -547,7 +547,8 @@
                 "description": "Displays the latest updates to KMQ."
             },
             "updates": {
-                "title": "Updates"
+                "title": "Updates",
+                "footer": "Join the official KMQ server for more detailed updates!"
             }
         },
         "options": {
