@@ -16,6 +16,7 @@ import GameRound from "../../structures/game_round";
 import Gender from "../../enums/option_types/gender";
 import GuessModeType from "../../enums/option_types/guess_mode_type";
 import GuildPreference from "../../structures/guild_preference";
+import ShuffleType from "../../enums/option_types/shuffle_type";
 import assert from "assert";
 import sinon from "sinon";
 
@@ -112,6 +113,27 @@ describe("exp command", () => {
                         assert.strictEqual(
                             modifiers[0].name,
                             ExpBonusModifier.VOTE
+                        );
+                    });
+                });
+
+                describe("shuffle popularity penalty", () => {
+                    it("should return vote bonus modifier", async () => {
+                        await guildPreference.setShuffleType(
+                            ShuffleType.POPULARITY
+                        );
+
+                        const modifiers =
+                            await calculateOptionsExpMultiplierInternal(
+                                guildPreference,
+                                false,
+                                null
+                            );
+
+                        assert.strictEqual(modifiers.length, 1);
+                        assert.strictEqual(
+                            modifiers[0].name,
+                            ExpBonusModifier.SHUFFLE_POPULARITY
                         );
                     });
                 });

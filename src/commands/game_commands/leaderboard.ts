@@ -536,7 +536,7 @@ export default class LeaderboardCommand implements BaseCommand {
                                         const levelPluralized =
                                             LocalizationManager.localizer.translateN(
                                                 messageContext.guildID,
-                                                "command.leaderboard.level",
+                                                "misc.plural.level",
                                                 player.level
                                             );
 

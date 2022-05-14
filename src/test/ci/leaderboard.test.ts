@@ -255,7 +255,8 @@ describe("leaderboard command", () => {
                         "",
                         SERVER_ID,
                         gameStarter,
-                        GameType.CLASSIC
+                        GameType.CLASSIC,
+                        false
                     );
 
                     sandbox.restore();
@@ -611,7 +612,8 @@ describe("leaderboard command", () => {
                         "",
                         SERVER_ID,
                         gameStarter,
-                        GameType.CLASSIC
+                        GameType.CLASSIC,
+                        true
                     );
 
                     sandbox.restore();

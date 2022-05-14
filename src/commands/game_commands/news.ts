@@ -45,7 +45,27 @@ export default class NewsCommand implements BaseCommand {
             ),
             description: news,
             thumbnailUrl: KmqImages.READING_BOOK,
-            footerText: getKmqCurrentVersion(),
+            footerText: `${getKmqCurrentVersion()} | ${LocalizationManager.localizer.translate(
+                message.guildID,
+                "command.news.updates.footer"
+            )}`,
+            components: [
+                {
+                    type: 1,
+                    components: [
+                        {
+                            style: 5,
+                            url: "https://discord.gg/gDdVXvqVUr",
+                            type: 2,
+                            emoji: { name: "🎵" },
+                            label: LocalizationManager.localizer.translate(
+                                message.guildID,
+                                "misc.interaction.officialKmqServer"
+                            ),
+                        },
+                    ],
+                },
+            ],
         });
 
         logger.info(`${getDebugLogHeader(message)} | News retrieved.`);

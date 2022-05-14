@@ -21,15 +21,9 @@ export default async function voiceChannelJoinHandler(
         return;
     }
 
-    const oldPremiumState = session.isPremium();
     if (session.isGameSession()) {
         await session.setPlayerInVC(member.id, true);
     }
 
-    if (
-        oldPremiumState !== session.isPremium() ||
-        session.isListeningSession()
-    ) {
-        session.updatePremiumStatus();
-    }
+    session.updatePremiumStatus();
 }

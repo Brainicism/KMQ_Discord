@@ -381,23 +381,33 @@ export async function getMultipleChoiceOptions(
 }
 
 /**
+ * @param userIDs - A list of user IDs to check
+ * @returns whether at least one player has premium status
+ */
+export async function areUsersPremium(
+    userIDs: Array<string>
+): Promise<boolean> {
+    return !!(await dbContext
+        .kmq("premium_users")
+        .where("active", "=", true)
+        .whereIn("user_id", userIDs)
+        .first());
+}
+
+/**
  * @param userID - The user ID
  * @returns whether the player has premium status
  */
 export async function isUserPremium(userID: string): Promise<boolean> {
-    return !!(await dbContext
-        .kmq("premium_users")
-        .where("user_id", "=", userID)
-        .andWhere("active", "=", true)
-        .first());
+    return areUsersPremium([userID]);
 }
 
 /**
  * @param patrons - The users to grant premium membership
  */
-export function addPremium(patrons: Array<Patron>): void {
-    dbContext.kmq.transaction((trx) => {
-        dbContext
+export async function addPremium(patrons: Array<Patron>): Promise<void> {
+    await dbContext.kmq.transaction(async (trx) => {
+        await dbContext
             .kmq("premium_users")
             .insert(
                 patrons.map((x) => ({
@@ -410,8 +420,8 @@ export function addPremium(patrons: Array<Patron>): void {
             .merge()
             .transacting(trx);
 
-        dbContext
-            .kmq("badges")
+        await dbContext
+            .kmq("badges_players")
             .insert(
                 patrons.map((x) => ({
                     badge_name: PATREON_SUPPORTER_BADGE,
@@ -453,7 +463,7 @@ export async function isPremiumRequest(
     session: Session,
     playerID: string
 ): Promise<boolean> {
-    return session?.isPremium() || (await isUserPremium(playerID));
+    return session?.isPremium || (await isUserPremium(playerID));
 }
 
 /**

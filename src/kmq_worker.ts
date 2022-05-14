@@ -1,5 +1,4 @@
 import { BaseClusterWorker } from "eris-fleet";
-import { Campaign } from "patreon-discord";
 import { config } from "dotenv";
 import path from "path";
 import schedule from "node-schedule";
@@ -112,17 +111,6 @@ export default class BotWorker extends BaseClusterWorker {
             logger.info("Initializing bot stats poster...");
             const botListingManager = new BotListingManager();
             botListingManager.start();
-
-            if (
-                process.env.PATREON_CREATOR_ACCESS_TOKEN &&
-                process.env.PATREON_CAMPAIGN_ID
-            ) {
-                logger.info("Initializing Patreon manager...");
-                State.patreonCampaign = new Campaign({
-                    campaignId: process.env.PATREON_CAMPAIGN_ID,
-                    patreonToken: process.env.PATREON_CREATOR_ACCESS_TOKEN,
-                });
-            }
         }
 
         if (

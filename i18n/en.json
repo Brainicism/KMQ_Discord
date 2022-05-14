@@ -42,11 +42,11 @@
         },
         "answer": {
             "help": {
-                "description": "Choose how to answer: by typing your answer, or via multiple choice. Options are the following: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, and `{{hard}}`. Playing on multiple choice mode reduces EXP by (0.25x, 0.5x, 0.75x) based on difficulty.",
+                "description": "Choose how to answer: by typing your answer, or via multiple choice. Options are the following: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, and `{{hard}}`",
                 "example": {
                     "multipleChoice": "Click on the button from {{optionCount}} multiple choice options to guess. {{penalty}} EXP penalty will be applied",
                     "typing": "Type your answer in the chat to guess",
-                    "typingTypos": "Type your answer in the chat to guess. Small typos will be marked as correct. 0.8x EXP penalty will be applied"
+                    "typingTypos": "Type your answer in the chat to guess. Small typos will be marked as correct. {{penalty}} EXP penalty will be applied"
                 }
             }
         },
@@ -158,6 +158,7 @@
             "lowSongCountPenalty": "Low Song Count Penalty",
             "multipleChoicePenalty": "Multiple Choice Penalty",
             "powerHourBonus": "Power Hour Bonus",
+            "shufflePopularityPenalty": "Shuffle Popularity Penalty",
             "title": "EXP Bonuses",
             "totalModifier": "Total Modifier",
             "typosAllowedPenalty": "Typos Allowed Penalty",
@@ -408,8 +409,6 @@
                 "permanent": "{{level}} {{formattedNumber}} ({{rankName}})",
                 "temporary": "{{formattedNumber}} {{levelPluralized}} gained"
             },
-            "level_one": "level",
-            "level_other": "levels",
             "quote": {
                 "name": "Want your name to show up on the leaderboard? See {{command}}",
                 "nextPage": "Want to see the next page of the leaderboard? See {{command}}"
@@ -546,6 +545,7 @@
                 "description": "Displays the latest updates to KMQ."
             },
             "updates": {
+                "footer": "Join the official KMQ server for more detailed updates!",
                 "title": "Updates"
             }
         },
@@ -691,7 +691,7 @@
                 "noSuchPreset": {
                     "description": "Preset {{presetName}} doesn't exist.",
                     "identifier": {
-                        "description": "Preset identifer {{presetUUID}} doesn't exist."
+                        "description": "Preset identifier {{presetUUID}} doesn't exist."
                     },
                     "title": "No Such Preset"
                 },
@@ -870,7 +870,7 @@
             "help": {
                 "description": "Choose how songs are shuffled.",
                 "example": {
-                    "popularity": "Songs will play based on descending popularity",
+                    "popularity": "Songs will play based on descending popularity. {{penalty}} EXP penalty will be applied",
                     "random": "Songs will play randomly",
                     "reset": "Reset to the default shuffle mode of {{defaultShuffle}}"
                 }
@@ -1233,6 +1233,8 @@
             "hourAgo_other": "{{count}} hours ago",
             "hour_one": "{{count}} hour",
             "hour_other": "{{count}} hours",
+            "level_one": "level",
+            "level_other": "levels",
             "minuteAgo_one": "{{count}} minute ago",
             "minuteAgo_other": "{{count}} minutes ago",
             "minuteRemaining_one": "{{count}} minute remaining",
@@ -1253,7 +1255,7 @@
             "differentVC": "You must be in the same voice channel as the bot to use this command.",
             "notMusicSession": "You can't do that while in a music session.",
             "notPremium": "You need KMQ Premium to use this command (see {{premium}}).",
-            "premiumOrDebugChannel": "This command only works in the official KMQ server or for KMQ Premium members (see {{premium}}).",
+            "premiumOrDebugServer": "This command only works in the official KMQ server or for KMQ Premium members (see {{premium}}).",
             "title": "Wait..."
         },
         "releaseDate": "Release Date",

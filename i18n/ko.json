@@ -42,11 +42,11 @@
         },
         "answer": {
             "help": {
-                "description": "정답 입력 방법을 선택하세요. 정답을 입력하거나 객관식을 사용하세요. 옵션은 `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, `{{hard}}`입니다. 객관식 모드에서 플레이하면 난이도에 따라 경험치 (0.25배, 0.5배, 0.75배)가 감소합니다.",
+                "description": "정답 입력 방법을 선택하세요. 정답을 입력하거나 객관식을 사용하세요. 옵션은 `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, `{{hard}}`입니다.",
                 "example": {
                     "multipleChoice": "{{optionCount}}개의 객관식 옵션에서 버튼을 클릭하여 추측하세요. ({{penalty}} 경험치 패널티가 적용됩니다.)",
                     "typing": "자신이 추측한 것을 채팅에 입력하세요.",
-                    "typingTypos": "추측을 할려면 채팅에 입력하세요. (사소한 오타는 올바른 것으로 표시되며 0.8배 경험치 패널티가 적용됩니다.)"
+                    "typingTypos": "추측을 할려면 채팅에 입력하세요. (사소한 오타는 올바른 것으로 표시되며 {{penalty}} 경험치 패널티가 적용됩니다.)"
                 }
             }
         },
@@ -158,6 +158,7 @@
             "lowSongCountPenalty": "낮은 노래 수 패널티",
             "multipleChoicePenalty": "객관식 패널티",
             "powerHourBonus": "슈퍼 시간 보너스",
+            "shufflePopularityPenalty": "셔플 인기 패널티",
             "title": "경험치 보너스",
             "totalModifier": "총 수정",
             "typosAllowedPenalty": "오타 허용 패널티",
@@ -408,8 +409,6 @@
                 "permanent": "{{level}} {{formattedNumber}} ({{rankName}})",
                 "temporary": "{{formattedNumber}} {{levelPluralized}}를 획득하셨습니다!"
             },
-            "level_one": "레벨",
-            "level_other": "레벨",
             "quote": {
                 "name": "당신이 리더보드에 표시되기를 원하십니까? (참고: {{command}})",
                 "nextPage": "리더보드의 다음 페이지를 보고 싶으십니까? (참고: {{command}})"
@@ -546,6 +545,7 @@
                 "description": "KMQ에 대한 최신 업데이트를 표시합니다."
             },
             "updates": {
+                "footer": "더 자세한 업데이트를 위해 공식 KMQ 서버에 가입하세요!",
                 "title": "업데이트"
             }
         },
@@ -870,7 +870,7 @@
             "help": {
                 "description": "노래가 완전히 무작위로 재생되는지 .",
                 "example": {
-                    "popularity": "조회수 순으로 재생되는 곡.",
+                    "popularity": "조회수 순으로 재생되는 곡. {{penalty}} 경험치 패널티가 적용됩니다",
                     "random": "노래는 무작위로 재생됩니다.",
                     "reset": "{{defaultShuffle}}의 기본 셔플 모드로 재설정합니다."
                 }
@@ -1233,6 +1233,8 @@
             "hourAgo_other": "{{count}}시간 전",
             "hour_one": "{{count}}시간",
             "hour_other": "{{count}}시간",
+            "level_one": "레벨",
+            "level_other": "레벨",
             "minuteAgo_one": "{{count}}분 전",
             "minuteAgo_other": "{{count}}분 전",
             "minuteRemaining_one": "{{count}}분 남음",
@@ -1253,7 +1255,7 @@
             "differentVC": "이 명령어를 사용하려면 봇과 동일한 음성 채널에 있어야 합니다.",
             "notMusicSession": "이 명령어는 음악 세션에서 사용할 수 없습니다.",
             "notPremium": "이 명령을 사용하려면 KMQ Premium이 필요합니다 ({{premium}} 참조).",
-            "premiumOrDebugChannel": "이 명령은 공식 KMQ 서버 또는 KMQ Premium 멤버에 대해서만 작동합니다({{premium}} 참조).",
+            "premiumOrDebugServer": "이 명령은 공식 KMQ 서버 또는 KMQ Premium 멤버에 대해서만 작동합니다({{premium}} 참조).",
             "title": "잠시만 기다려주십시오..."
         },
         "releaseDate": "발매 날짜",

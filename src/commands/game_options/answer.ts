@@ -1,3 +1,4 @@
+import { ExpBonusModifierValues } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
@@ -5,6 +6,7 @@ import {
 } from "../../helpers/discord_utils";
 import AnswerType from "../../enums/option_types/answer_type";
 import CommandPrechecks from "../../command_prechecks";
+import ExpBonusModifier from "../../enums/exp_bonus_modifier";
 import GameOption from "../../enums/game_option_name";
 import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
@@ -60,7 +62,12 @@ export default class AnswerCommand implements BaseCommand {
                 example: "`,answer typingtypos`",
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
-                    "command.answer.help.example.typingTypos"
+                    "command.answer.help.example.typingTypos",
+                    {
+                        penalty: `${
+                            ExpBonusModifierValues[ExpBonusModifier.TYPO]
+                        }x`,
+                    }
                 ),
             },
             {
@@ -68,7 +75,14 @@ export default class AnswerCommand implements BaseCommand {
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
-                    { optionCount: String(4), penalty: "0.25x" }
+                    {
+                        optionCount: String(4),
+                        penalty: `${
+                            ExpBonusModifierValues[
+                                ExpBonusModifier.MC_GUESS_EASY
+                            ]
+                        }x`,
+                    }
                 ),
             },
             {
@@ -76,7 +90,14 @@ export default class AnswerCommand implements BaseCommand {
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
-                    { optionCount: String(6), penalty: "0.5x" }
+                    {
+                        optionCount: String(6),
+                        penalty: `${
+                            ExpBonusModifierValues[
+                                ExpBonusModifier.MC_GUESS_MEDIUM
+                            ]
+                        }x`,
+                    }
                 ),
             },
             {
@@ -84,7 +105,14 @@ export default class AnswerCommand implements BaseCommand {
                 explanation: LocalizationManager.localizer.translate(
                     guildID,
                     "command.answer.help.example.multipleChoice",
-                    { optionCount: String(8), penalty: "0.75x" }
+                    {
+                        optionCount: String(8),
+                        penalty: `${
+                            ExpBonusModifierValues[
+                                ExpBonusModifier.MC_GUESS_HARD
+                            ]
+                        }`,
+                    }
                 ),
             },
         ],

@@ -90,7 +90,8 @@ describe("command prechecks", () => {
                 "123",
                 "1234",
                 null,
-                GameType.ELIMINATION
+                GameType.ELIMINATION,
+                true
             );
 
             const teamGameSession = new GameSession(
@@ -99,7 +100,8 @@ describe("command prechecks", () => {
                 "123",
                 "1234",
                 null,
-                GameType.TEAMS
+                GameType.TEAMS,
+                false
             );
 
             const classicGameSession = new GameSession(
@@ -108,7 +110,8 @@ describe("command prechecks", () => {
                 "123",
                 "1234",
                 null,
-                GameType.CLASSIC
+                GameType.CLASSIC,
+                true
             );
 
             describe("in the same voice channel", () => {
@@ -221,7 +224,8 @@ describe("command prechecks", () => {
             "1234",
             "1235",
             null,
-            GameType.CLASSIC
+            GameType.CLASSIC,
+            true
         );
 
         describe("session is null", () => {
@@ -269,7 +273,8 @@ describe("command prechecks", () => {
             "1234",
             debugServerId,
             null,
-            GameType.CLASSIC
+            GameType.CLASSIC,
+            false
         );
 
         afterEach(() => {
@@ -315,7 +320,8 @@ describe("command prechecks", () => {
             "1234",
             "12345",
             null,
-            GameType.CLASSIC
+            GameType.CLASSIC,
+            true
         );
 
         afterEach(() => {
@@ -366,7 +372,8 @@ describe("command prechecks", () => {
             "1234",
             "12345",
             null,
-            GameType.CLASSIC
+            GameType.CLASSIC,
+            true
         );
 
         describe("restart is scheduled", () => {
@@ -409,7 +416,8 @@ describe("command prechecks", () => {
             "1234",
             "12345",
             null,
-            GameType.CLASSIC
+            GameType.CLASSIC,
+            false
         );
 
         describe("user is premium", () => {
@@ -461,7 +469,8 @@ describe("command prechecks", () => {
             "1234",
             "12345",
             null,
-            GameType.CLASSIC
+            GameType.CLASSIC,
+            false
         );
 
         afterEach(() => {

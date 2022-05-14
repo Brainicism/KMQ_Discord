@@ -20,6 +20,7 @@ import type HelpDocumentation from "../../interfaces/help";
 const logger = new IPCLogger("help");
 const placeholder = /,/g;
 const FIELDS_PER_EMBED = 6;
+const excludedCommands = ["premium"];
 
 const helpMessage = async (
     message: GuildTextableMessage,
@@ -30,6 +31,9 @@ const helpMessage = async (
     let embedFields = [];
     let embedActionRowComponents: Eris.ActionRowComponents[] = null;
     const commandFiles = KmqClient.getCommandFiles(false);
+    for (const command of excludedCommands) {
+        delete commandFiles[command];
+    }
 
     const commandFilesWithAliases: { [commandName: string]: BaseCommand } = {};
     Object.assign(commandFilesWithAliases, commandFiles);

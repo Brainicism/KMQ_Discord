@@ -110,6 +110,7 @@ export default class GameSession extends Session {
         guildID: string,
         gameSessionCreator: KmqMember,
         gameType: GameType,
+        isPremium: boolean,
         eliminationLives?: number
     ) {
         super(
@@ -117,7 +118,8 @@ export default class GameSession extends Session {
             textChannelID,
             voiceChannelID,
             guildID,
-            gameSessionCreator
+            gameSessionCreator,
+            isPremium
         );
         this.gameType = gameType;
         this.sessionInitialized = false;
@@ -618,6 +620,7 @@ export default class GameSession extends Session {
         interaction: Eris.ComponentInteraction<Eris.TextableChannel>,
         messageContext: MessageContext
     ): Promise<void> {
+        if (!this.round) return;
         if (
             !this.handleInSessionInteractionFailures(
                 interaction,
@@ -627,7 +630,10 @@ export default class GameSession extends Session {
             return;
         }
 
-        if (this.round.incorrectMCGuessers.has(interaction.member.id)) {
+        if (
+            this.round.incorrectMCGuessers.has(interaction.member.id) ||
+            !this.guessEligible(messageContext)
+        ) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 LocalizationManager.localizer.translate(
@@ -665,24 +671,12 @@ export default class GameSession extends Session {
             messageContext.guildID
         );
 
-        if (!this.round) return;
         this.guessSong(
             messageContext,
             guildPreference.gameOptions.guessModeType !== GuessModeType.ARTIST
                 ? this.round.song.songName
                 : this.round.song.artistName
         );
-    }
-
-    /**
-     * Whether the current game session has premium features
-     * @returns whether the session is premium
-     */
-    isPremium(): boolean {
-        return this.scoreboard
-            .getPlayers()
-            .filter((x) => x.inVC)
-            .some((x) => x.premium);
     }
 
     /**
