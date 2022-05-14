@@ -405,9 +405,9 @@ export async function isUserPremium(userID: string): Promise<boolean> {
 /**
  * @param patrons - The users to grant premium membership
  */
-export function addPremium(patrons: Array<Patron>): void {
-    dbContext.kmq.transaction((trx) => {
-        dbContext
+export async function addPremium(patrons: Array<Patron>): Promise<void> {
+    await dbContext.kmq.transaction(async (trx) => {
+        await dbContext
             .kmq("premium_users")
             .insert(
                 patrons.map((x) => ({
@@ -420,8 +420,8 @@ export function addPremium(patrons: Array<Patron>): void {
             .merge()
             .transacting(trx);
 
-        dbContext
-            .kmq("badges")
+        await dbContext
+            .kmq("badges_players")
             .insert(
                 patrons.map((x) => ({
                     badge_name: PATREON_SUPPORTER_BADGE,

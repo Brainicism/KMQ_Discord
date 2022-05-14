@@ -25,6 +25,7 @@ import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import ShuffleType from "../../enums/option_types/shuffle_type";
 import State from "../../state";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -96,6 +97,17 @@ export async function calculateOptionsExpMultiplierInternal(
                 "command.exp.typosAllowedPenalty"
             ),
             name: ExpBonusModifier.TYPO,
+            isPenalty: true,
+        });
+    }
+
+    if (guildPreference.gameOptions.shuffleType === ShuffleType.POPULARITY) {
+        modifiers.push({
+            displayName: LocalizationManager.localizer.translate(
+                guildPreference.guildID,
+                "command.exp.shufflePopularityPenalty"
+            ),
+            name: ExpBonusModifier.SHUFFLE_POPULARITY,
             isPenalty: true,
         });
     }

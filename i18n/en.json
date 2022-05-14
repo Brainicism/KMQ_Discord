@@ -42,11 +42,11 @@
         },
         "answer": {
             "help": {
-                "description": "Choose how to answer: by typing your answer, or via multiple choice. Options are the following: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, and `{{hard}}`. Playing on multiple choice mode reduces EXP by (0.25x, 0.5x, 0.75x) based on difficulty.",
+                "description": "Choose how to answer: by typing your answer, or via multiple choice. Options are the following: `{{typing}}`, `{{typingtypos}}`, `{{easy}}`, `{{medium}}`, and `{{hard}}`",
                 "example": {
                     "multipleChoice": "Click on the button from {{optionCount}} multiple choice options to guess. {{penalty}} EXP penalty will be applied",
                     "typing": "Type your answer in the chat to guess",
-                    "typingTypos": "Type your answer in the chat to guess. Small typos will be marked as correct. 0.8x EXP penalty will be applied"
+                    "typingTypos": "Type your answer in the chat to guess. Small typos will be marked as correct. {{penalty}} EXP penalty will be applied"
                 }
             }
         },
@@ -158,6 +158,7 @@
             "lowSongCountPenalty": "Low Song Count Penalty",
             "multipleChoicePenalty": "Multiple Choice Penalty",
             "powerHourBonus": "Power Hour Bonus",
+            "shufflePopularityPenalty": "Shuffle Popularity Penalty",
             "title": "EXP Bonuses",
             "totalModifier": "Total Modifier",
             "typosAllowedPenalty": "Typos Allowed Penalty",
@@ -868,7 +869,7 @@
             "help": {
                 "description": "Choose how songs are shuffled.",
                 "example": {
-                    "popularity": "Songs will play based on descending popularity",
+                    "popularity": "Songs will play based on descending popularity. {{penalty}} EXP penalty will be applied",
                     "random": "Songs will play randomly",
                     "reset": "Reset to the default shuffle mode of {{defaultShuffle}}"
                 }

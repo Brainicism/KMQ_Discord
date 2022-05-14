@@ -54,8 +54,8 @@ export const SONG_START_DELAY = 3000;
 
 export const specialFfmpegArgs = {
     [SpecialType.REVERSE]: (seek: number) => ({
-        inputArgs: ["-ss", seek.toString()],
-        encoderArgs: ["-af", "areverse"],
+        inputArgs: [],
+        encoderArgs: ["-af", `atrim=end=${seek},areverse`],
     }),
     [SpecialType.SLOW]: (seek: number) => ({
         inputArgs: ["-ss", seek.toString()],
@@ -119,6 +119,7 @@ export const ExpBonusModifierValues = {
     [ExpBonusModifier.MC_GUESS_EASY]: 0.25,
     [ExpBonusModifier.MC_GUESS_MEDIUM]: 0.5,
     [ExpBonusModifier.MC_GUESS_HARD]: 0.75,
+    [ExpBonusModifier.SHUFFLE_POPULARITY]: 0.2,
     [ExpBonusModifier.ARTIST_GUESS]: 0.3,
     [ExpBonusModifier.ARTIST_GUESS_GROUPS_SELECTED]: 0,
     [ExpBonusModifier.RANDOM_GUESS_BONUS_COMMON]: 2,
