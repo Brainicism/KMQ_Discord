@@ -33,7 +33,7 @@ interface PatreonResponse {
     included: Array<{
         attributes: {
             social_connections: {
-                discord: {
+                discord?: {
                     user_id: string;
                 };
             };
@@ -67,7 +67,7 @@ function parsePatreonResponse(patreonResponse: PatreonResponse): Array<Patron> {
         patrons.push({
             discordID:
                 matchedPatreonUser.attributes.social_connections.discord
-                    .user_id,
+                    ?.user_id,
             activePatron: data.attributes.patron_status === PatronState.ACTIVE,
             firstSubscribed: new Date(
                 data.attributes.pledge_relationship_start
