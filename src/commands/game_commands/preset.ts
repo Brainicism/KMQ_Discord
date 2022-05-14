@@ -631,7 +631,7 @@ export default class PresetCommand implements BaseCommand {
                 ),
                 description: LocalizationManager.localizer.translate(
                     messageContext.guildID,
-                    "command.preset.failure.noSuchPreset.identifer.description",
+                    "command.preset.failure.noSuchPreset.identifier.description",
                     { presetUUID: `\`${presetUUID}\`` }
                 ),
             });
