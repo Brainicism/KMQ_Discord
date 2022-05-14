@@ -1,15 +1,19 @@
 import { IPCLogger } from "../logger";
 import { addPremium, removePremium } from "./game_utils";
-import State from "../state";
+import Axios from "axios";
 import dbContext from "../database_context";
 import type Patron from "../interfaces/patron";
 
 const logger = new IPCLogger("patreon_manager");
 
 interface PatronResponse {
-    patron_status: string;
-    discord_user_id: string;
-    pledge_relationship_start?: Date;
+    attributes: {
+        patron_status: string;
+        pledge_relationship_start?: Date;
+        social_connections: {
+            discord: string;
+        };
+    };
 }
 
 enum PatronState {
@@ -22,7 +26,6 @@ enum PatronState {
  */
 export default async function updatePremiumUsers(): Promise<void> {
     if (
-        !State.patreonCampaign ||
         !process.env.PATREON_CREATOR_ACCESS_TOKEN ||
         !process.env.PATREON_CAMPAIGN_ID
     ) {
@@ -31,21 +34,35 @@ export default async function updatePremiumUsers(): Promise<void> {
 
     let fetchedPatrons: Array<PatronResponse>;
     try {
-        fetchedPatrons = await State.patreonCampaign.fetchPatrons([
-            PatronState.ACTIVE,
-            PatronState.DECLINED,
-        ]);
+        fetchedPatrons = (
+            await Axios.get(
+                `https://www.patreon.com/api/oauth2/v2/campaigns/${process.env.PATREON_CAMPAIGN_ID}/members`,
+                {
+                    params: {
+                        include: "user,currently_entitled_tiers",
+                        fields: {
+                            member: "patron_status",
+                        },
+                    },
+                    headers: {
+                        Authorization: `Bearer ${process.env.PATREON_CREATOR_ACCESS_TOKEN}`,
+                    },
+                }
+            )
+        ).data.data;
     } catch (err) {
         logger.error(`Failed fetching patrons. err = ${err}`);
         return;
     }
 
     const patrons: Array<Patron> = fetchedPatrons
-        .filter((x: PatronResponse) => !!x.discord_user_id)
+        .filter(
+            (x: PatronResponse) => !!x.attributes.social_connections.discord
+        )
         .map((x: PatronResponse) => ({
-            activePatron: x.patron_status === PatronState.ACTIVE,
-            discordID: x.discord_user_id,
-            firstSubscribed: x.pledge_relationship_start,
+            activePatron: x.attributes.patron_status === PatronState.ACTIVE,
+            discordID: x.attributes.social_connections.discord,
+            firstSubscribed: x.attributes.pledge_relationship_start,
         }));
 
     const activePatronIDs: string[] = patrons
