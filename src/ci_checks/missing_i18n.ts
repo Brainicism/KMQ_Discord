@@ -64,7 +64,6 @@ function getNodeKeys(node: Node): void {
                     : translationKeyNode.getText();
 
             if (translationKeyNode.kind === SyntaxKind.StringLiteral) {
-                logger.info(`Found string literal key "${keyText}"`);
                 if (keyText.startsWith("misc.plural")) {
                     translationKeys.add(`${keyText}_one`);
                     translationKeys.add(`${keyText}_other`);
@@ -84,17 +83,15 @@ function getNodeKeys(node: Node): void {
                         .getText()
                         .slice(1, -1);
 
-                    logger.info(
-                        `Found string literal key "${nestedChildKeyText}"`
-                    );
                     translationKeys.add(nestedChildKeyText);
                 }
             } else if (!dynamicTranslationKeyAllowlist.includes(keyText)) {
-                logger.info(
-                    `Found missing dynamic translation key "${keyText}"`
-                );
                 dynamicTranslationKeys.add(keyText);
             }
+
+            logger.info(
+                `    - ${SyntaxKind[translationKeyNode.kind]} | ${keyText}`
+            );
         }
     }
 
@@ -124,11 +121,15 @@ function getNodeKeys(node: Node): void {
     );
 
     for (const missingKey of missingKeys) {
-        logger.error(`"${missingKey}" is missing`);
+        logger.error(
+            `(!) "${missingKey}" is missing from the translation file.`
+        );
     }
 
     for (const missingKey of dynamicTranslationKeys) {
-        logger.error(`"${missingKey}" is not in the dynamic allow list`);
+        logger.error(
+            `(?) "${missingKey}" is not in the dynamic allow list. Manually verify that the translations are present, then add them to the allow-list.`
+        );
     }
 
     if (missingKeys.length > 0 || dynamicTranslationKeys.size > 0) {
