@@ -630,7 +630,10 @@ export default class GameSession extends Session {
             return;
         }
 
-        if (this.round.incorrectMCGuessers.has(interaction.member.id)) {
+        if (
+            this.round.incorrectMCGuessers.has(interaction.member.id) ||
+            !this.guessEligible(messageContext)
+        ) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 LocalizationManager.localizer.translate(
