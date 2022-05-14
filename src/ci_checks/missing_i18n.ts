@@ -26,6 +26,7 @@ const dynamicTranslationKeyAllowlist = [
     "chooseRandom(leaderboardQuotes)",
     "gameInfoMessage.message",
     "gameInfoMessage.title",
+    "getOrdinalNum(idx + 1)",
 ];
 
 const translationInterfaceFunctions = [
@@ -108,7 +109,9 @@ function getNodeKeys(node: Node): void {
     });
 
     program.getTypeChecker();
-    for (const sourceFile of program.getSourceFiles()) {
+    for (const sourceFile of program
+        .getSourceFiles()
+        .filter((x) => !x.fileName.includes("node_modules"))) {
         logger.info(`Parsing ${sourceFile.fileName}...`);
         getNodeKeys(sourceFile);
     }
