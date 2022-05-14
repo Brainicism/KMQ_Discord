@@ -111,7 +111,9 @@ function getNodeKeys(node: Node): void {
     });
 
     program.getTypeChecker();
-    for (const sourceFile of program.getSourceFiles()) {
+    for (const sourceFile of program
+        .getSourceFiles()
+        .filter((x) => x.fileName.startsWith("src"))) {
         logger.info(`Parsing ${sourceFile.fileName}...`);
         getNodeKeys(sourceFile);
     }
