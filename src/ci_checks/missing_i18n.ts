@@ -36,7 +36,7 @@ const translationInterfaceFunctions = [
 ];
 
 const translationInternalFunctions = [
-    "LocalizationManager.internalLocalizer.t",
+    "LocalizationManager.localizer.internalLocalizer.t",
 ];
 
 const translationKeys = new Set<string>();
@@ -108,9 +108,7 @@ function getNodeKeys(node: Node): void {
     });
 
     program.getTypeChecker();
-    for (const sourceFile of program
-        .getSourceFiles()
-        .filter((x) => x.fileName.startsWith("src"))) {
+    for (const sourceFile of program.getSourceFiles()) {
         logger.info(`Parsing ${sourceFile.fileName}...`);
         getNodeKeys(sourceFile);
     }
