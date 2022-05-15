@@ -105,6 +105,10 @@ BEGIN
 	DROP TABLE old;
 
 	/* de-duplicate conflicting names */
-	UPDATE kpop_videos.app_kpop_group SET name = concat(name, " (", fname, ")") WHERE name in (SELECT LOWER(name) as name FROM kpop_videos.app_kpop_group GROUP BY LOWER(name) HAVING count(*) > 1);
+	UPDATE kpop_videos.app_kpop_group as a
+	RIGHT JOIN
+	(SELECT LOWER(name) as name, count(*) as c FROM kpop_videos.app_kpop_group GROUP BY LOWER(name) HAVING count(*) > 1 AND name NOT LIKE "%(%)%" ) as b USING (name)
+	SET a.name = concat(a.name, " (", a.fname, ")");
+	
 END //
 DELIMITER ;
