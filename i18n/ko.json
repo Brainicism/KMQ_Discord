@@ -974,6 +974,7 @@
         }
     },
     "fact": {
+        "didYouKnow": "알고 계셨나요?",
         "fun": {
             "bigThreeDominance": "재미있는 사실: 방탄소년단, 블랙핑크, 트와이스를 합친 유튜브 조회수는 {{bigThreeViews}}회 ({{proportion}}%)입니다!",
             "birthday": "재미있는 사실: {{name}}의 생일은 이번 달 {{formattedDate}}입니다!",

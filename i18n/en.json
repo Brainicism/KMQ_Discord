@@ -974,6 +974,7 @@
         }
     },
     "fact": {
+        "didYouKnow": "Did you know?",
         "fun": {
             "bigThreeDominance": "Fun Fact: BTS, Blackpink and Twice combined account for {{bigThreeViews}} YouTube views, or {{proportion}}%!",
             "birthday": "Fun Fact: {{name}}'s birthday is this month on {{formattedDate}}!",
