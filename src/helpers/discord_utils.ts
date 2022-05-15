@@ -79,7 +79,7 @@ const REQUIRED_VOICE_PERMISSIONS = [
 const MAX_SCOREBOARD_PLAYERS = 30;
 const MAX_INTERACTION_RESPONSE_TIME = 3 * 1000;
 
-interface GameInfoMessageContent {
+interface GameMessageMultiLocaleContent {
     en: string;
     ko: string;
 }
@@ -1277,7 +1277,7 @@ export async function getGameInfoMessage(
         await dbContext.kmq("game_messages")
     );
 
-    // deprecated case, where translation key is stored as message in db
+    // deprecated case, where message's translation key is stored as message in db
     if (endGameMessage.message.startsWith("misc.gameMessages")) {
         endGameMessage.message = LocalizationManager.localizer.translate(
             guildID,
@@ -1285,13 +1285,12 @@ export async function getGameInfoMessage(
         );
     } else {
         try {
-            const gameInfoMessageContent: GameInfoMessageContent = JSON.parse(
-                endGameMessage.message
-            );
+            const gameInfoMessageContent: GameMessageMultiLocaleContent =
+                JSON.parse(endGameMessage.message);
 
             if (!gameInfoMessageContent.en || !gameInfoMessageContent.ko) {
                 logger.error(
-                    `Game info message content is missing content. en = ${gameInfoMessageContent.en}, ko = ${gameInfoMessageContent.ko}`
+                    `Message's Game info message content is missing content. en = ${gameInfoMessageContent.en}, ko = ${gameInfoMessageContent.ko}`
                 );
                 return null;
             }
@@ -1303,7 +1302,37 @@ export async function getGameInfoMessage(
                     : gameInfoMessageContent.ko;
         } catch (e) {
             logger.error(
-                `Error parsing game info message content, invalid JSON? message = ${endGameMessage.message}`
+                `Error parsing message's game info message content, invalid JSON? message = ${endGameMessage.message}`
+            );
+        }
+    }
+
+    // deprecated case, where title's translation key is stored as message in db
+    if (endGameMessage.title.startsWith("misc.gameMessages")) {
+        endGameMessage.title = LocalizationManager.localizer.translate(
+            guildID,
+            endGameMessage.title
+        );
+    } else {
+        try {
+            const gameInfoMessageContent: GameMessageMultiLocaleContent =
+                JSON.parse(endGameMessage.title);
+
+            if (!gameInfoMessageContent.en || !gameInfoMessageContent.ko) {
+                logger.error(
+                    `Title's game info message content is missing content. en = ${gameInfoMessageContent.en}, ko = ${gameInfoMessageContent.ko}`
+                );
+                return null;
+            }
+
+            const locale = State.getGuildLocale(guildID);
+            endGameMessage.title =
+                locale === LocaleType.EN
+                    ? gameInfoMessageContent.en
+                    : gameInfoMessageContent.ko;
+        } catch (e) {
+            logger.error(
+                `Error parsing title's game info message content, invalid JSON? title = ${endGameMessage.title}`
             );
         }
     }
