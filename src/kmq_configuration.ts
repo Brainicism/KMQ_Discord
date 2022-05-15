@@ -30,6 +30,7 @@ export default class KmqConfiguration {
         logger.info("Reloading feature switches...");
         if (!fs.existsSync(featureSwitchFile)) {
             logger.warn("Feature switch file doesn't exist, ignoring...");
+            return;
         }
 
         let featureSwitches: any;
@@ -65,5 +66,9 @@ export default class KmqConfiguration {
 
     maintenanceModeEnabled(): boolean {
         return this.config["maintenanceModeEnabled"] ?? false;
+    }
+
+    disallowMigrations(): boolean {
+        return this.config["disallowMigrations"] ?? false;
     }
 }
