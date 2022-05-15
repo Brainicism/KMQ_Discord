@@ -17,7 +17,7 @@ import {
     getLocalizedSongName,
     isPremiumRequest,
 } from "../../helpers/game_utils";
-import { getVideoID } from "ytdl-core";
+import { getVideoID, validateID } from "ytdl-core";
 import { sendValidationErrorMessage } from "../../helpers/validate";
 import GuildPreference from "../../structures/guild_preference";
 import LocaleType from "../../enums/locale_type";
@@ -251,7 +251,7 @@ async function lookupByYoutubeID(
     }
 
     sendInfoMessage(messageContext, {
-        title: `**${songName}** - ${artistName}`,
+        title: `${songName} - ${artistName}`,
         url: `https://youtu.be/${videoID}`,
         description,
         thumbnailUrl: `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`,
@@ -372,13 +372,13 @@ export default class LookupCommand implements BaseCommand {
             arg = arg.slice(1, -1);
         }
 
-        if (isValidURL(arg)) {
-            let videoID: string = null;
+        if (arg.startsWith("youtube.com") || arg.startsWith("youtu.be")) {
+            // ytdl::getVideoID() requires URLs start with "https://"
+            arg = `https://${arg}`;
+        }
 
-            if (arg.startsWith("youtube.com") || arg.startsWith("youtu.be")) {
-                // ytdl::getVideoID() requires URLs start with "https://"
-                arg = `https://${arg}`;
-            }
+        if (isValidURL(arg) || validateID(arg)) {
+            let videoID: string = null;
 
             try {
                 videoID = getVideoID(arg);
