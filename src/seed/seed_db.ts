@@ -208,17 +208,17 @@ async function validateDaisukiTableSchema(
 
             const columnNames = _.sortBy(commaSeparatedColumnNames.split(","));
             if (!_.isEqual(frozenSchema[table], columnNames)) {
-                const removedColumns = _.difference(
+                const addedColumns = _.difference(
                     columnNames,
                     frozenSchema[table]
                 );
 
-                const addedColumns = _.difference(
+                const removedColumns = _.difference(
                     frozenSchema[table],
                     columnNames
                 );
 
-                if (removedColumns.length > 0) {
+                if (addedColumns.length > 0 || removedColumns.length > 0) {
                     outputMessages.push(
                         `__${table}__\nAdded columns: ${JSON.stringify(
                             addedColumns
