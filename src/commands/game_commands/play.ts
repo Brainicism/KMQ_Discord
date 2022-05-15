@@ -11,20 +11,17 @@ import {
     isPremiumRequest,
 } from "../../helpers/game_utils";
 import {
-    chooseWeightedRandom,
-    getMention,
-    isWeekend,
-} from "../../helpers/utils";
-import {
     generateEmbed,
     generateOptionsMessage,
     getCurrentVoiceMembers,
     getDebugLogHeader,
+    getGameInfoMessage,
     getUserVoiceChannel,
     sendErrorMessage,
     sendInfoMessage,
     voicePermissionsCheck,
 } from "../../helpers/discord_utils";
+import { getMention, isWeekend } from "../../helpers/utils";
 import { getTimeUntilRestart } from "../../helpers/management_utils";
 import CommandPrechecks from "../../command_prechecks";
 import GameSession from "../../structures/game_session";
@@ -39,7 +36,6 @@ import dbContext from "../../database_context";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type Eris from "eris";
-import type GameInfoMessage from "../../interfaces/game_info_message";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("play");
@@ -127,9 +123,7 @@ export async function sendBeginGameSessionMessage(
         }
     );
 
-    const gameInfoMessage: GameInfoMessage = chooseWeightedRandom(
-        await dbContext.kmq("game_messages")
-    );
+    const gameInfoMessage = await getGameInfoMessage(messageContext.guildID);
 
     const fields: Eris.EmbedField[] = [];
     if (gameInfoMessage) {
@@ -138,10 +132,7 @@ export async function sendBeginGameSessionMessage(
                 guildID,
                 gameInfoMessage.title
             ),
-            value: LocalizationManager.localizer.translate(
-                guildID,
-                gameInfoMessage.message
-            ),
+            value: gameInfoMessage.message,
             inline: false,
         });
     }

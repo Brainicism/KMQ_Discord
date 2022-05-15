@@ -79,6 +79,11 @@ const REQUIRED_VOICE_PERMISSIONS = [
 const MAX_SCOREBOARD_PLAYERS = 30;
 const MAX_INTERACTION_RESPONSE_TIME = 3 * 1000;
 
+interface GameInfoMessageContent {
+    en: string;
+    ko: string;
+}
+
 /**
  * @param context - The object that initiated the workflow
  * @returns a string containing basic debug information
@@ -1262,6 +1267,51 @@ export async function sendOptionsMessage(
 }
 
 /**
+ * @param guildID - The guildID
+ * @returns a random GameInfoMessage
+ */
+export async function getGameInfoMessage(
+    guildID: string
+): Promise<GameInfoMessage> {
+    const endGameMessage: GameInfoMessage = chooseWeightedRandom(
+        await dbContext.kmq("game_messages")
+    );
+
+    // deprecated case, where translation key is stored as message in db
+    if (endGameMessage.message.startsWith("misc.gameMessages")) {
+        endGameMessage.message = LocalizationManager.localizer.translate(
+            guildID,
+            endGameMessage.message
+        );
+    } else {
+        try {
+            const gameInfoMessageContent: GameInfoMessageContent = JSON.parse(
+                endGameMessage.message
+            );
+
+            if (!gameInfoMessageContent.en || !gameInfoMessageContent.ko) {
+                logger.error(
+                    `Game info message content is missing content. en = ${gameInfoMessageContent.en}, ko = ${gameInfoMessageContent.ko}`
+                );
+                return null;
+            }
+
+            const locale = State.getGuildLocale(guildID);
+            endGameMessage.message =
+                locale === LocaleType.EN
+                    ? gameInfoMessageContent.en
+                    : gameInfoMessageContent.ko;
+        } catch (e) {
+            logger.error(
+                `Error parsing game info message content, invalid JSON? message = ${endGameMessage.message}`
+            );
+        }
+    }
+
+    return endGameMessage;
+}
+
+/**
  * Sends an embed displaying the winner of the session as well as the scoreboard
  * @param gameSession - The GameSession that has ended
  */
@@ -1304,9 +1354,7 @@ export async function sendEndGameMessage(
             );
         }
 
-        const endGameMessage: GameInfoMessage = chooseWeightedRandom(
-            await dbContext.kmq("game_messages")
-        );
+        const endGameMessage = await getGameInfoMessage(gameSession.guildID);
 
         if (endGameMessage) {
             fields.push({
@@ -1314,10 +1362,7 @@ export async function sendEndGameMessage(
                     gameSession.guildID,
                     endGameMessage.title
                 ),
-                value: LocalizationManager.localizer.translate(
-                    gameSession.guildID,
-                    endGameMessage.message
-                ),
+                value: endGameMessage.message,
                 inline: false,
             });
         }

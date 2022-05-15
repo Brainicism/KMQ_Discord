@@ -1,10 +1,10 @@
 import { EMBED_SUCCESS_BONUS_COLOR, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { chooseWeightedRandom } from "../../helpers/utils";
 import {
     generateEmbed,
     generateOptionsMessage,
     getDebugLogHeader,
+    getGameInfoMessage,
     getUserVoiceChannel,
     sendErrorMessage,
     sendInfoMessage,
@@ -18,11 +18,9 @@ import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
-import dbContext from "../../database_context";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type Eris from "eris";
-import type GameInfoMessage from "../../interfaces/game_info_message";
 import type HelpDocumentation from "../../interfaces/help";
 
 const logger = new IPCLogger("listen");
@@ -49,9 +47,7 @@ export async function sendBeginListeningSessionMessage(
         }
     );
 
-    const gameInfoMessage: GameInfoMessage = chooseWeightedRandom(
-        await dbContext.kmq("game_messages")
-    );
+    const gameInfoMessage = await getGameInfoMessage(messageContext.guildID);
 
     const fields: Eris.EmbedField[] = [];
     if (gameInfoMessage) {
@@ -60,10 +56,7 @@ export async function sendBeginListeningSessionMessage(
                 messageContext.guildID,
                 gameInfoMessage.title
             ),
-            value: LocalizationManager.localizer.translate(
-                messageContext.guildID,
-                gameInfoMessage.message
-            ),
+            value: gameInfoMessage.message,
             inline: false,
         });
     }
