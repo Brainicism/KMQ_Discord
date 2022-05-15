@@ -756,7 +756,7 @@ export async function sendRoundMessage(
             name: underline(
                 LocalizationManager.localizer.translate(
                     messageContext.guildID,
-                    "misc.gameMessages.didYouKnow.title"
+                    "fact.didYouKnow"
                 )
             ),
             value: fact,

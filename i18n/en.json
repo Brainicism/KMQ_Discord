@@ -974,6 +974,7 @@
         }
     },
     "fact": {
+        "didYouKnow": "Did you know?",
         "fun": {
             "bigThreeDominance": "Fun Fact: BTS, Blackpink and Twice combined account for {{bigThreeViews}} YouTube views, or {{proportion}}%!",
             "birthday": "Fun Fact: {{name}}'s birthday is this month on {{formattedDate}}!",
@@ -1123,57 +1124,6 @@
             }
         },
         "formattedLimit": "{{limitStart}} to {{limitEnd}} ({{songCount}} songs)",
-        "gameMessages": {
-            "beepBoop": {
-                "oss": "Did you know KMQ is open source? [Check us out on GitHub and give us a star!](https://github.com/Brainicism/KMQ_Discord/)",
-                "title": "Beep Boop 🤖"
-            },
-            "didYouKnow": {
-                "artistType": "You can pick whether you want to hear from soloists or groups using `,artisttype`. See `,help artisttype` to learn more.",
-                "bonusArtists": "There's a random selection of 10 artists chosen everyday that provide 2x EXP for their songs. See `,exp` to see the current list!",
-                "cutoff": "You can set which years you want to hear songs from using the `cutoff` game option. See `,help cutoff` for more details.",
-                "duration": "KMQ distracting you from studying? Check out `,duration` to limit the length of each game. See `,help duration` to learn more.",
-                "elimination": "Raise the stakes and try `elimination` mode, where you lose a life for not guessing correctly ☠. See `,help play` for more details.",
-                "exclude": "You can set which groups you *don't* want to hear songs from using the `exclude` game option. See `,help exclude` for more details.",
-                "exp": "Curious how your EXP per round is calculated? See `,exp` for a full breakdown!",
-                "firstGameOfDayBonus": "Your first game of the day will have a 1.5x EXP bonus!",
-                "gender": "You can set what gender groups you want to hear songs from using the `gender` game option. See `,help gender` for more details.",
-                "groups": "You can set which groups you want to exclusively hear songs from using the `groups` game option. See `,help groups` for more details.",
-                "guessmode": "Tired of guessing song names? Switch it up by changing the guess mode to `artist` or `both`. See `,help guessmode` for more details.",
-                "language": "Don't like hearing Japanese/English/Chinese songs? Check out `,language`? See `,help language` to learn more.",
-                "leaderboard": "Think you got what it takes to be a top KMQ player? See `,leaderboard` and `,help leaderboard` to see where you stand.",
-                "limit": "You can limit the number of songs you hear from by popularity. See `,help limit` for more details.",
-                "multiguess": "Slow typer? Allow for multiple correct guesses for a given round using `,multiguess`! See `,help multiguess` to learn more.",
-                "multipleChoice": "Song name on the tip of your tongue every time? Slow typer? Playing on mobile? Check out multiple choice mode! See `,help answer` for more details!",
-                "presets": "Have favorite game option presets? Save and load them with presets! See `,help preset` to learn more.",
-                "profile": "You can see how many games you've played and how many songs you've guessed in total using `,profile`.",
-                "profileInteraction": "You can see a player's profile by right clicking their profile picture, and pressing Apps > Profile!",
-                "reset": "You can reset the game options by using `,reset`.",
-                "seek": "You can pick whether each song starts from the `beginning`, `middle`, or `random` position. See `,help seek` for more details.",
-                "special": "Want to hear songs play in reverse, 2x speed, or 0.5x speed? Try `,special` on the official KMQ server found in `,help`.",
-                "teams": "Ever wanted to team up to defeat that insanely good KMQ player? Start playing with custom teams using `,play teams`! See `,help play` for more details.",
-                "tempLeaderboard": "You can see the daily, weekly, and monthly leaderboard with `,leaderboard`. See `,help leaderboard` to learn more.",
-                "timer": "You can set a time limit for guessing each song by using the `timer` game option. See `,help timer` for more details.",
-                "title": "Did you know?",
-                "typingTypos": "Make a lot of typos? Try out `,answer typingtypos` to allow for minor typos in your guesses! See `,help answer` for more details."
-            },
-            "kmqServer": {
-                "fanArt": "Are you an artist? Draw some KMQ fan art to get an exclusive profile badge! Join the [official KMQ server](https://discord.gg/R55g4CRESW) to share!",
-                "newFriends": "Looking for new friends to play KMQ with, or want to play against the best of the best? Feel free to [come by](https://discord.gg/RCuzwYV) and say hi!",
-                "title": {
-                    "discordServer": "Check out our Discord server!",
-                    "likeKmq": "Like KMQ?"
-                }
-            },
-            "likeKmq": {
-                "title": "Like KMQ?",
-                "vote": "Give us a vote (and get 2x exp, see `,vote`) and leave a review on [top.gg!](https://top.gg/bot/508759831755096074)"
-            },
-            "wrongSongName": {
-                "aliases": "Have a suggestion for an alternate song name? Tell us on the official KMQ server!",
-                "title": "Wrong Song Name?"
-            }
-        },
         "gameOwnerChanged": {
             "description": "The new game owner is {{newGameOwner}}. They are in charge of {{forcehintCommand}} and {{forceskipCommand}}.",
             "title": "Game Owner Changed"
