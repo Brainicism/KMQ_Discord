@@ -7,6 +7,7 @@ import {
 import { getTimeUntilRestart } from "./helpers/management_utils";
 import { isUserPremium } from "./helpers/game_utils";
 import GameType from "./enums/game_type";
+import KmqConfiguration from "./kmq_configuration";
 import LocalizationManager from "./helpers/localization_manager";
 import MessageContext from "./structures/message_context";
 import dbContext from "./database_context";
@@ -104,6 +105,26 @@ export default class CommandPrechecks {
         }
 
         return isDebugServer;
+    }
+
+    static maintenancePrecheck(precheckArgs: PrecheckArgs): boolean {
+        const { message } = precheckArgs;
+        if (KmqConfiguration.Instance.maintenanceModeEnabled()) {
+            sendErrorMessage(MessageContext.fromMessage(message), {
+                title: LocalizationManager.localizer.translate(
+                    message.guildID,
+                    "misc.failure.maintenanceMode.title"
+                ),
+                description: LocalizationManager.localizer.translate(
+                    message.guildID,
+                    "misc.failure.maintenanceMode.description"
+                ),
+            });
+
+            return false;
+        }
+
+        return true;
     }
 
     static debugChannelPrecheck(precheckArgs: PrecheckArgs): boolean {

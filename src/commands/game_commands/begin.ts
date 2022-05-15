@@ -22,6 +22,7 @@ export default class BeginCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },
         { checkFn: CommandPrechecks.notListeningPrecheck },
+        { checkFn: CommandPrechecks.maintenancePrecheck },
     ];
 
     static canStart(

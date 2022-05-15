@@ -10,6 +10,7 @@ import {
 import { reloadFactCache } from "../fact_generator";
 import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
 import EnvType from "../enums/env_type";
+import KmqConfiguration from "../kmq_configuration";
 import MessageContext from "../structures/message_context";
 import SIGINTHandler from "../events/process/SIGINT";
 import State from "../state";
@@ -93,7 +94,11 @@ export async function getTimeUntilRestart(): Promise<number> {
         await dbContext.kmq("restart_notifications").where("id", 1)
     )[0].restart_time;
 
-    if (!restartNotificationTime) return null;
+    if (
+        !restartNotificationTime ||
+        KmqConfiguration.Instance.restartNotificationDisabled()
+    )
+        return null;
     return Math.floor(
         (restartNotificationTime - new Date().getTime()) / (1000 * 60)
     );
@@ -375,6 +380,7 @@ export function registerIntervals(clusterID: number): void {
 
     // Every minute
     schedule.scheduleJob("* * * * *", async () => {
+        KmqConfiguration.reload();
         if (process.env.NODE_ENV !== EnvType.PROD) return;
         // set up check for restart notifications
         const timeUntilRestart = await getTimeUntilRestart();

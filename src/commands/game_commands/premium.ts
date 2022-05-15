@@ -1,6 +1,7 @@
 import { KmqImages } from "../../constants";
 import { isUserPremium } from "../../helpers/game_utils";
 import { sendInfoMessage } from "../../helpers/discord_utils";
+import KmqConfiguration from "../../kmq_configuration";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import type BaseCommand from "../interfaces/base_command";
@@ -34,7 +35,7 @@ export default class PremiumCommand implements BaseCommand {
     });
 
     call = async ({ message }: CommandArgs): Promise<void> => {
-        return;
+        if (!KmqConfiguration.Instance.premiumCommandEnabled()) return;
         const premiumMember = await isUserPremium(message.author.id);
         sendInfoMessage(MessageContext.fromMessage(message), {
             description: `${LocalizationManager.localizer.translate(
