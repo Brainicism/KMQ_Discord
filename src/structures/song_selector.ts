@@ -262,12 +262,19 @@ export default class SongSelector {
 
             collabGroupContainingSubunit = (
                 await dbContext
-                    .kpopVideos("app_kpop_group")
-                    .select("id")
-                    .whereIn("id_artist1", subunits)
-                    .orWhereIn("id_artist2", subunits)
-                    .orWhereIn("id_artist3", subunits)
-                    .orWhereIn("id_artist4", subunits)
+                    // collab matches
+                    .kpopVideos("app_kpop_agrelation")
+                    .select(["id", "name"])
+                    .distinct("id", "name")
+                    .join("app_kpop_group", function join() {
+                        this.on(
+                            "app_kpop_agrelation.id_subgroup",
+                            "=",
+                            "app_kpop_group.id"
+                        );
+                    })
+                    .whereIn("app_kpop_agrelation.id_artist", subunits)
+                    .andWhere("app_kpop_group.is_collab", "y")
             ).map((x) => x["id"]);
         }
 
