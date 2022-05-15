@@ -6,6 +6,7 @@ import Eris from "eris";
 import GameSession from "../../structures/game_session";
 import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
+import KmqConfiguration from "../../kmq_configuration";
 import ListeningSession from "../../structures/listening_session";
 import MessageContext from "../../structures/message_context";
 import assert from "assert";
@@ -307,6 +308,52 @@ describe("command prechecks", () => {
                         message: stubMessage,
                     }),
                     false
+                );
+            });
+        });
+    });
+
+    describe("maintenanceModePrecheck", () => {
+        describe("maintenance mode is on", () => {
+            before(() => {
+                sandbox
+                    .stub(KmqConfiguration.Instance, "maintenanceModeEnabled")
+                    .callsFake(() => true);
+            });
+
+            after(() => {
+                sandbox.restore();
+            });
+
+            it("should return false", () => {
+                assert.strictEqual(
+                    CommandPrechecks.maintenancePrecheck({
+                        session: null,
+                        message: stubMessage,
+                    }),
+                    false
+                );
+            });
+        });
+
+        describe("maintenance mode is off", () => {
+            after(() => {
+                sandbox.restore();
+            });
+
+            before(() => {
+                sandbox
+                    .stub(KmqConfiguration.Instance, "maintenanceModeEnabled")
+                    .callsFake(() => false);
+            });
+
+            it("should return true", () => {
+                assert.strictEqual(
+                    CommandPrechecks.maintenancePrecheck({
+                        session: null,
+                        message: stubMessage,
+                    }),
+                    true
                 );
             });
         });

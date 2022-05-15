@@ -1000,7 +1000,7 @@
             "oldMV": "Fun Fact: {{hyperlink}} was released this week back in {{year}}!",
             "recentGaonWeekly": "Fun Fact: {{songName}} is the {{ordinalNum}} highest charting song on the Gaon Weekly charts last week!",
             "recentMusicShowWin": "Fun Fact: {{hyperlink}} recently won on {{musicShow}} on {{winDate}}",
-            "viewsByArtistType": "Fun Fact: There is a combined total of {{totalViews}} views on all K-Pop music videos on YouTube, {{groupViews}} (${{groupProportion}}%) of which are from groups, while {{soloViews}} (${{soloProportion}}%) are from solo artists.",
+            "viewsByArtistType": "Fun Fact: There is a combined total of {{totalViews}} views on all K-Pop music videos on YouTube, {{groupViews}} ({{groupProportion}}%) of which are from groups, while {{soloViews}} ({{soloProportion}}%) are from solo artists.",
             "viewsByGender": "Fun Fact: There is a combined total of {{totalViews}} views on all K-Pop music videos on YouTube, {{maleViews}} ({{maleProportion}}%) of which are from male groups, {{femaleViews}} ({{femaleProportion}}%) from female groups, and the remaining {{coedViews}} ({{coedProportion}}%) from co-ed groups."
         },
         "kmq": {
@@ -1065,6 +1065,10 @@
                 "eliminated": "You've been eliminated this round.",
                 "invalidBookmark": "You can only bookmark songs recently played in the last {{BOOKMARK_MESSAGE_SIZE}} rounds. You must bookmark the message sent by the bot containing the song.",
                 "optionFromPreviousRound": "You are attempting to pick an option from an already completed round."
+            },
+            "maintenanceMode": {
+                "description": "KMQ is currently under maintance, and new games cannot be started. Check back later!",
+                "title": "Maintenance Mode"
             },
             "messageTooLong": "Response message was too long, report this error to the KMQ help server",
             "missingPermissions": {

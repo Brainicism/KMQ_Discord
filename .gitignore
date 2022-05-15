@@ -9,8 +9,7 @@ news.md
 tmp/
 tsconfig.tsbuildinfo
 version
-data/skip_seed
-data/skip_metrics
+data/
 *.validation.sql
 *.test.sql
 data/group_list.txt

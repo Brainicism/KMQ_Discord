@@ -90,6 +90,7 @@ export default class ListenCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.notRestartingPrecheck },
         { checkFn: CommandPrechecks.premiumPrecheck },
+        { checkFn: CommandPrechecks.maintenancePrecheck },
     ];
 
     validations = {
