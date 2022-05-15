@@ -1123,25 +1123,6 @@
             }
         },
         "formattedLimit": "{{limitStart}} ~ {{limitEnd}} ({{songCount}}곡)",
-        "gameMessages": {
-            "beepBoop": {
-                "title": "🤖 삐뽀 🤖"
-            },
-            "didYouKnow": {
-                "title": "알고 계셨나요?"
-            },
-            "kmqServer": {
-                "title": {
-                    "discordServer": "디스코드 서버를 확인하세요!"
-                }
-            },
-            "likeKmq": {
-                "title": "KMQ처럼?"
-            },
-            "wrongSongName": {
-                "title": "노래 이름이 이상한가요?"
-            }
-        },
         "gameOwnerChanged": {
             "description": "새 게임 소유자는 {{newGameOwner}}입니다. ({{forcehintCommand}} 및 {{forceskipCommand}}를 담당합니다.)",
             "title": "게임 소유자 변경"
