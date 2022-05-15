@@ -130,13 +130,24 @@ export async function getMatchingGroupNames(
 
     const matchingGroups = (
         await dbContext
-            .kpopVideos("app_kpop_group")
+            // collab matches
+            .kpopVideos("app_kpop_agrelation")
             .select(["id", "name"])
-            .whereIn("id", [artistIDQuery])
-            .orWhereIn("id_artist1", [artistIDQuery])
-            .orWhereIn("id_artist2", [artistIDQuery])
-            .orWhereIn("id_artist3", [artistIDQuery])
-            .orWhereIn("id_artist4", [artistIDQuery])
+            .join("app_kpop_group", function join() {
+                this.on(
+                    "app_kpop_agrelation.id_subgroup",
+                    "=",
+                    "app_kpop_group.id"
+                );
+            })
+            .whereIn("app_kpop_agrelation.id_artist", [artistIDQuery])
+            .andWhere("app_kpop_group.is_collab", "y")
+            // artist matches
+            .union(function () {
+                this.select(["id", "name"])
+                    .from("app_kpop_group")
+                    .whereIn("app_kpop_group.id", artistIDQuery);
+            })
             .orderBy("name", "ASC")
     ).map((x) => ({ id: x.id, name: x.name }));
 
