@@ -66,4 +66,8 @@ export default class KmqConfiguration {
     maintenanceModeEnabled(): boolean {
         return this.config["maintenanceModeEnabled"] ?? false;
     }
+
+    disallowMigrations(): boolean {
+        return this.config["disallowMigrations"] ?? false;
+    }
 }

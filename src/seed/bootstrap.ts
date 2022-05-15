@@ -7,11 +7,12 @@ import {
     tableExists,
     updateKpopDatabase,
 } from "./seed_db";
-import { execSync } from "child_process";
 import { getNewConnection } from "../database_context";
 import EnvType from "../enums/env_type";
+import KmqConfiguration from "../kmq_configuration";
 import downloadAndConvertSongs from "../scripts/download-new-songs";
 import fs from "fs";
+import kmqKnexConfig from "../config/knexfile_kmq";
 import path from "path";
 import type { DatabaseContext } from "../database_context";
 
@@ -73,14 +74,31 @@ async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
     );
 }
 
-function performMigrations(): void {
+async function performMigrations(db: DatabaseContext): Promise<void> {
     logger.info("Performing migrations...");
-    const migrationsPath = path.join(__dirname, "../config/knexfile_kmq.js");
-    try {
-        execSync(`npx knex migrate:latest --knexfile ${migrationsPath}`);
-    } catch (e) {
-        logger.error(`Migration failed: ${e}`);
-        process.exit(1);
+    const knexMigrationConfig = {
+        directory: kmqKnexConfig.migrations.directory,
+    };
+
+    const migrationList = await db.kmq.migrate.list(knexMigrationConfig);
+
+    const pendingMigrations: Array<any> = migrationList[1];
+    logger.info(
+        `Pending migrations: [${pendingMigrations.map((x) => x.file)}]`
+    );
+
+    if (pendingMigrations.length > 0) {
+        if (KmqConfiguration.Instance.disallowMigrations()) {
+            logger.error("Migrations are disallowed.");
+            process.exit(1);
+        }
+
+        try {
+            await db.kmq.migrate.latest(knexMigrationConfig);
+        } catch (e) {
+            logger.error(`Migration failed: ${e}`);
+            process.exit(1);
+        }
     }
 }
 
@@ -94,7 +112,7 @@ async function bootstrapDatabases(): Promise<void> {
         await db.agnostic.raw("CREATE DATABASE IF NOT EXISTS kmq_test");
     }
 
-    performMigrations();
+    await performMigrations(db);
 
     if (!(await kpopDataDatabaseExists(db))) {
         logger.info("Seeding K-pop data database");
