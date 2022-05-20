@@ -1089,13 +1089,14 @@ export default class GameSession extends Session {
         messageContext: MessageContext
     ): Promise<void> {
         // update scoreboard
+        const round = this.round;
         const lastGuesserStreak = this.lastGuesser.streak;
         const playerRoundResults = await Promise.all(
             guessResult.correctGuessers.map(async (correctGuesser, idx) => {
                 const guessPosition = idx + 1;
                 const expGain = await calculateTotalRoundExp(
                     guildPreference,
-                    this.round,
+                    round,
                     getNumParticipants(this.voiceChannelID),
                     lastGuesserStreak,
                     timePlayed,
@@ -1111,7 +1112,7 @@ export default class GameSession extends Session {
                         `${getDebugLogHeader(messageContext)}, uid: ${
                             correctGuesser.id
                         } | Song correctly guessed. song = ${
-                            this.round.song.songName
+                            round.song.songName
                         }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
                     );
                 } else {
@@ -1122,7 +1123,7 @@ export default class GameSession extends Session {
                         } | Song correctly guessed ${getOrdinalNum(
                             guessPosition
                         )}. song = ${
-                            this.round.song.songName
+                            round.song.songName
                         }. Multiple choice = ${guildPreference.isMultipleChoiceMode()}. Gained ${expGain} EXP`
                     );
                 }
@@ -1139,7 +1140,7 @@ export default class GameSession extends Session {
             })
         );
 
-        this.round.playerRoundResults = playerRoundResults;
+        round.playerRoundResults = playerRoundResults;
         const scoreboardUpdatePayload: SuccessfulGuessResult[] =
             playerRoundResults.map((x) => ({
                 userID: x.player.id,
