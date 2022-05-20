@@ -174,14 +174,15 @@ export default class GameSession extends Session {
             return false;
         }
 
+        const round = this.round;
         if (this.guildPreference.isMultipleChoiceMode()) {
             const locale = State.getGuildLocale(this.guildID);
-            const randomSong = this.round.song;
+            const randomSong = round.song;
             const correctChoice =
                 this.guildPreference.gameOptions.guessModeType ===
                 GuessModeType.ARTIST
-                    ? getLocalizedArtistName(this.round.song, locale)
-                    : getLocalizedSongName(this.round.song, locale, false);
+                    ? getLocalizedArtistName(round.song, locale)
+                    : getLocalizedSongName(round.song, locale, false);
 
             const wrongChoices = await getMultipleChoiceOptions(
                 this.guildPreference.gameOptions.answerType,
@@ -195,7 +196,7 @@ export default class GameSession extends Session {
             let buttons: Array<Eris.InteractionButton> = [];
             for (const choice of wrongChoices) {
                 const id = uuid.v4();
-                this.round.interactionIncorrectAnswerUUIDs[id] = 0;
+                round.interactionIncorrectAnswerUUIDs[id] = 0;
                 buttons.push({
                     type: 2,
                     style: 1,
@@ -204,12 +205,12 @@ export default class GameSession extends Session {
                 });
             }
 
-            this.round.interactionCorrectAnswerUUID = uuid.v4();
+            round.interactionCorrectAnswerUUID = uuid.v4();
             buttons.push({
                 type: 2,
                 style: 1,
                 label: correctChoice.substring(0, 70),
-                custom_id: this.round.interactionCorrectAnswerUUID,
+                custom_id: round.interactionCorrectAnswerUUID,
             });
 
             buttons = _.shuffle(buttons);
@@ -240,9 +241,9 @@ export default class GameSession extends Session {
                     break;
             }
 
-            this.round.interactionComponents = components;
+            round.interactionComponents = components;
 
-            this.round.interactionMessage = await sendInfoMessage(
+            round.interactionMessage = await sendInfoMessage(
                 new MessageContext(this.textChannelID),
                 {
                     title: LocalizationManager.localizer.translate(
@@ -516,6 +517,7 @@ export default class GameSession extends Session {
         if (!this.round) return;
         if (!this.guessEligible(messageContext)) return;
 
+        const round = this.round;
         const pointsEarned = this.checkGuess(
             messageContext.author.id,
             guess,
@@ -525,22 +527,21 @@ export default class GameSession extends Session {
         );
 
         if (pointsEarned > 0) {
-            if (this.round.finished) {
+            if (round.finished) {
                 return;
             }
 
-            this.round.finished = true;
+            round.finished = true;
             await delay(
                 this.multiguessDelayIsActive(this.guildPreference)
                     ? MULTIGUESS_DELAY
                     : 0
             );
-            if (!this.round) return;
 
             // mark round as complete, so no more guesses can go through
             await this.endRound(messageContext, {
                 correct: true,
-                correctGuessers: this.round.correctGuessers,
+                correctGuessers: round.correctGuessers,
             });
             this.correctGuesses++;
 
@@ -557,7 +558,6 @@ export default class GameSession extends Session {
 
             this.startRound(messageContext);
         } else if (this.guildPreference.isMultipleChoiceMode()) {
-            if (!this.round) return;
             if (
                 setDifference(
                     [
@@ -567,7 +567,7 @@ export default class GameSession extends Session {
                             )
                         ),
                     ],
-                    [...this.round.incorrectMCGuessers]
+                    [...round.incorrectMCGuessers]
                 ).size === 0
             ) {
                 await this.endRound(
@@ -630,8 +630,10 @@ export default class GameSession extends Session {
             return;
         }
 
+        const round = this.round;
+
         if (
-            this.round.incorrectMCGuessers.has(interaction.member.id) ||
+            round.incorrectMCGuessers.has(interaction.member.id) ||
             !this.guessEligible(messageContext)
         ) {
             tryCreateInteractionErrorAcknowledgement(
@@ -644,9 +646,7 @@ export default class GameSession extends Session {
             return;
         }
 
-        if (
-            !this.round.isCorrectInteractionAnswer(interaction.data.custom_id)
-        ) {
+        if (!round.isCorrectInteractionAnswer(interaction.data.custom_id)) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 LocalizationManager.localizer.translate(
@@ -655,10 +655,8 @@ export default class GameSession extends Session {
                 )
             );
 
-            this.round.incorrectMCGuessers.add(interaction.member.id);
-            this.round.interactionIncorrectAnswerUUIDs[
-                interaction.data.custom_id
-            ]++;
+            round.incorrectMCGuessers.add(interaction.member.id);
+            round.interactionIncorrectAnswerUUIDs[interaction.data.custom_id]++;
 
             // Add the user as a participant
             this.guessSong(messageContext, "");
@@ -674,8 +672,8 @@ export default class GameSession extends Session {
         this.guessSong(
             messageContext,
             guildPreference.gameOptions.guessModeType !== GuessModeType.ARTIST
-                ? this.round.song.songName
-                : this.round.song.artistName
+                ? round.song.songName
+                : round.song.artistName
         );
     }
 
@@ -793,17 +791,18 @@ export default class GameSession extends Session {
         typosAllowed = false
     ): number {
         if (!this.round) return 0;
-        if (multipleChoiceMode && this.round.incorrectMCGuessers.has(userID))
+        const round = this.round;
+        if (multipleChoiceMode && round.incorrectMCGuessers.has(userID))
             return 0;
 
-        const pointsAwarded = this.round.checkGuess(
+        const pointsAwarded = round.checkGuess(
             guess,
             guessModeType,
             typosAllowed
         );
 
         if (pointsAwarded) {
-            this.round.userCorrect(userID, pointsAwarded);
+            round.userCorrect(userID, pointsAwarded);
         }
 
         return pointsAwarded;

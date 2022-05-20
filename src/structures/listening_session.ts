@@ -82,11 +82,11 @@ export default class ListeningSession extends Session {
         }
 
         const startRoundResult = await super.startRound(messageContext);
-
         if (!startRoundResult) {
             return false;
         }
 
+        const round = this.round;
         if (messageContext) {
             const remainingDuration = this.getRemainingDuration(
                 this.guildPreference
@@ -102,8 +102,8 @@ export default class ListeningSession extends Session {
                 this.songSelector.getUniqueSongCounter(this.guildPreference)
             );
 
-            this.round.interactionMessage = startRoundMessage;
-            this.round.roundMessageID = startRoundMessage?.id;
+            round.interactionMessage = startRoundMessage;
+            round.roundMessageID = startRoundMessage?.id;
             this.updateBookmarkSongList();
         }
 
@@ -145,15 +145,14 @@ export default class ListeningSession extends Session {
             return;
         }
 
+        const round = this.round;
         const guildID = interaction.guildID;
         if (interaction.data.custom_id === "bookmark") {
             this.handleBookmarkInteraction(interaction);
-        } else if (
-            interaction.data.custom_id === this.round.interactionSkipUUID
-        ) {
-            this.round.userSkipped(interaction.member.id);
+        } else if (interaction.data.custom_id === round.interactionSkipUUID) {
+            round.userSkipped(interaction.member.id);
             if (isSkipMajority(guildID, this)) {
-                await this.round.interactionSuccessfulSkip();
+                await round.interactionSuccessfulSkip();
                 await tryCreateInteractionSuccessAcknowledgement(
                     interaction,
                     LocalizationManager.localizer.translate(
@@ -164,7 +163,7 @@ export default class ListeningSession extends Session {
                         guildID,
                         "command.skip.success.description",
                         {
-                            skipCounter: `${this.round.getSkipCount()}/${getMajorityCount(
+                            skipCounter: `${round.getSkipCount()}/${getMajorityCount(
                                 guildID
                             )}`,
                         }
@@ -183,7 +182,7 @@ export default class ListeningSession extends Session {
                         guildID,
                         "command.skip.vote.description",
                         {
-                            skipCounter: `${this.round.getSkipCount()}/${getMajorityCount(
+                            skipCounter: `${round.getSkipCount()}/${getMajorityCount(
                                 guildID
                             )}`,
                         }

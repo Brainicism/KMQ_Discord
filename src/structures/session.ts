@@ -746,6 +746,7 @@ export default abstract class Session {
             return false;
         }
 
+        const round = this.round;
         if (
             !getCurrentVoiceMembers(this.voiceChannelID)
                 .map((x) => x.id)
@@ -755,7 +756,7 @@ export default abstract class Session {
             return false;
         }
 
-        if (!this.round.isValidInteraction(interaction.data.custom_id)) {
+        if (!round.isValidInteraction(interaction.data.custom_id)) {
             tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 LocalizationManager.localizer.translate(
