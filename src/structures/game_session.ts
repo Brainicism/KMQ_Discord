@@ -168,13 +168,13 @@ export default class GameSession extends Session {
             return false;
         }
 
-        const round = this.round;
         const startRoundResult = await super.startRound(messageContext);
 
         if (!startRoundResult) {
             return false;
         }
 
+        const round = this.round;
         if (this.guildPreference.isMultipleChoiceMode()) {
             const locale = State.getGuildLocale(this.guildID);
             const randomSong = round.song;
