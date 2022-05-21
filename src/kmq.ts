@@ -156,6 +156,19 @@ async function startWebServer(fleet: Fleet): Promise<void> {
 
     httpServer.register(fastifyResponseCaching, { ttl: 5000 });
 
+    httpServer.post("/soft-restart", {}, async (request, reply) => {
+        if (request.ip !== "127.0.0.1") {
+            logger.error("Soft restart attempted by non-allowed IP");
+            return;
+        }
+
+        logger.info("Soft restart initiated");
+        fleet.restartAllClusters(false);
+        reply.code(200).send();
+        logger.info("Clearing existing restart notifications...");
+        await clearRestartNotification();
+    });
+
     httpServer.post("/voted", {}, async (request, reply) => {
         const requestAuthorizationToken = request.headers["authorization"];
         if (requestAuthorizationToken !== process.env.TOP_GG_WEBHOOK_AUTH) {

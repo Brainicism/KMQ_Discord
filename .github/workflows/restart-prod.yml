@@ -1,25 +1,31 @@
 name: restart-prod
 
 on:
-  workflow_dispatch:
-  workflow_call:
-    secrets:
-      SSH_DEPLOY_PRIVATE_KEY:
-        required: true
-      SSH_DEPLOY_KNOWN_HOSTS:
-        required: true
-      PROD_SSH_CONNECTION_STRING:
-        required: true
+    workflow_dispatch:
+    workflow_call:
+        inputs:
+            restart-type:
+                required: true
+                type: string
+        secrets:
+            SSH_DEPLOY_PRIVATE_KEY:
+                required: true
+            SSH_DEPLOY_KNOWN_HOSTS:
+                required: true
+            PROD_SSH_CONNECTION_STRING:
+                required: true
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Install SSH Keys
-        run: |
-          echo "Installing SSH keys"
-          install -m 600 -D /dev/null ~/.ssh/id_rsa
-          echo "${{ secrets.SSH_DEPLOY_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          echo "${{ secrets.SSH_DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-      - name: Redeploy over SSH
-        run: ssh ${{ secrets.PROD_SSH_CONNECTION_STRING }} "source ~/.zshrc; ./.github/workflows/redeploy_prod.sh" 
+    build:
+        env:
+            KMQ_DIR: /home/kmq/prod
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        steps:
+            - name: Install SSH Keys
+              run: |
+                  echo "Installing SSH keys"
+                  install -m 600 -D /dev/null ~/.ssh/id_rsa
+                  echo "${{ secrets.SSH_DEPLOY_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+                  echo "${{ secrets.SSH_DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+            - name: Redeploy over SSH
+              run: ssh ${{ secrets.PROD_SSH_CONNECTION_STRING }} "source ~/.zshrc; ./.github/workflows/redeploy_prod.sh  ${{ inputs.restart-type }} $KMQ_DIR"
