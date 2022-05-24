@@ -214,6 +214,18 @@ export default class Scoreboard {
 
     /**
      * @param userID - The Discord user ID of the player to check
+     * @returns the formatted score of the player
+     */
+    getPlayerDisplayedScore(userID: string): string {
+        if (userID in this.players) {
+            return this.players[userID].getDisplayedScore();
+        }
+
+        return "0";
+    }
+
+    /**
+     * @param userID - The Discord user ID of the player to check
      * @returns the exp gained by the player
      */
     getPlayerExpGain(userID: string): number {
