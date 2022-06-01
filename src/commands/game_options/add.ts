@@ -5,7 +5,10 @@ import {
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import { getMatchingGroupNames } from "../../helpers/game_utils";
+import {
+    getMatchingGroupNames,
+    getSimilarGroupNames,
+} from "../../helpers/game_utils";
 import { setIntersection } from "../../helpers/utils";
 import CommandPrechecks from "../../command_prechecks";
 import GameOption from "../../enums/game_option_name";
@@ -13,6 +16,7 @@ import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import State from "../../state";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
@@ -169,25 +173,43 @@ export default class AddCommand implements BaseCommand {
                 )}`
             );
 
+            let suggestionsText: string = null;
+            if (unmatchedGroups.length === 1) {
+                const suggestions = await getSimilarGroupNames(
+                    unmatchedGroups[0],
+                    State.getGuildLocale(message.guildID)
+                );
+
+                suggestionsText = LocalizationManager.localizer.translate(
+                    message.guildID,
+                    "misc.failure.unrecognizedGroups.didYouMean",
+                    {
+                        suggestions: suggestions.join("\n"),
+                    }
+                );
+            }
+
+            const descriptionText = LocalizationManager.localizer.translate(
+                message.guildID,
+                "misc.failure.unrecognizedGroups.description",
+                {
+                    matchedGroupsAction:
+                        LocalizationManager.localizer.translate(
+                            message.guildID,
+                            "misc.failure.unrecognizedGroups.added"
+                        ),
+                    helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
+                    unmatchedGroups: unmatchedGroups.join(", "),
+                    solution: "",
+                }
+            );
+
             await sendErrorMessage(MessageContext.fromMessage(message), {
                 title: LocalizationManager.localizer.translate(
                     message.guildID,
                     "misc.failure.unrecognizedGroups.title"
                 ),
-                description: LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "misc.failure.unrecognizedGroups.description",
-                    {
-                        matchedGroupsAction:
-                            LocalizationManager.localizer.translate(
-                                message.guildID,
-                                "misc.failure.unrecognizedGroups.added"
-                            ),
-                        helpGroups: `\`${process.env.BOT_PREFIX}help groups\``,
-                        unmatchedGroups: unmatchedGroups.join(", "),
-                        solution: "",
-                    }
-                ),
+                description: `${descriptionText}\n\n${suggestionsText || ""}`,
             });
         }
 

@@ -115,6 +115,30 @@ export async function activeBonusUsers(): Promise<Set<string>> {
 }
 
 /**
+ * Returns a list of similar group names
+ * @param groupName - The group name
+ * @param locale - The locale
+ * @returns - similar group names
+ */
+export async function getSimilarGroupNames(
+    groupName: string,
+    locale: LocaleType
+): Promise<Array<string>> {
+    const similarGroups = await dbContext
+        .kpopVideos("app_kpop_group")
+        .select(["id", "name", "kname"])
+        .whereRaw(`name LIKE "%${groupName}%"`)
+        .orWhereRaw(`kname LIKE "%${groupName}%"`)
+        .orderByRaw("CHAR_LENGTH(name) ASC")
+        .limit(5);
+
+    if (similarGroups.length === 0) return [];
+    return similarGroups.map((x) =>
+        locale === LocaleType.EN ? x["name"] : x["kname"] || x["name"]
+    );
+}
+
+/**
  * @param rawGroupNames - List of user-inputted group names
  * @param aliasApplied - Whether aliases have been applied
  * @returns a list of recognized/unrecognized groups
