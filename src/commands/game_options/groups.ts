@@ -137,13 +137,15 @@ export default class GroupsCommand implements BaseCommand {
                     State.getGuildLocale(message.guildID)
                 );
 
-                suggestionsText = LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "misc.failure.unrecognizedGroups.didYouMean",
-                    {
-                        suggestions: suggestions.join("\n"),
-                    }
-                );
+                if (suggestions.length > 0) {
+                    suggestionsText = LocalizationManager.localizer.translate(
+                        message.guildID,
+                        "misc.failure.unrecognizedGroups.didYouMean",
+                        {
+                            suggestions: suggestions.join("\n"),
+                        }
+                    );
+                }
             }
 
             const descriptionText = LocalizationManager.localizer.translate(
