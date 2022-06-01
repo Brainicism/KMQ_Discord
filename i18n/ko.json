@@ -1095,6 +1095,7 @@
             "unrecognizedGroups": {
                 "added": "추가",
                 "description": "지정된 그룹 이름 중 하나 이상이 인식되지 않습니다. (일치하는 그룹은 {{matchedGroupsAction}}이며 그룹 이름이 {{helpGroups}}에서 제공한 목록과 정확히 일치하는지 확인하세요.)\n\n다음 그룹은 **인식되지 않습니다**.\n\n{{unmatchedGroups}}\n{{solution}}",
+                "didYouMean": "__그런 뜻 이었습니까:__\n {{suggestions}}",
                 "solution": "{{command}}를 사용하여 일치하지 않는 그룹을 추가합니다.",
                 "title": "알 수 없는 그룹 이름"
             },
