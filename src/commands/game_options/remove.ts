@@ -190,13 +190,15 @@ export default class RemoveCommand implements BaseCommand {
                     State.getGuildLocale(message.guildID)
                 );
 
-                suggestionsText = LocalizationManager.localizer.translate(
-                    message.guildID,
-                    "misc.failure.unrecognizedGroups.didYouMean",
-                    {
-                        suggestions: suggestions.join("\n"),
-                    }
-                );
+                if (suggestions.length > 0) {
+                    suggestionsText = LocalizationManager.localizer.translate(
+                        message.guildID,
+                        "misc.failure.unrecognizedGroups.didYouMean",
+                        {
+                            suggestions: suggestions.join("\n"),
+                        }
+                    );
+                }
             }
 
             const descriptionText = LocalizationManager.localizer.translate(
@@ -221,6 +223,11 @@ export default class RemoveCommand implements BaseCommand {
                 ),
                 description: `${descriptionText}\n\n${suggestionsText || ""}`,
             });
+        }
+
+        // if none of the new groups were matched
+        if (unmatchedGroups.length === rawGroupsToRemove.length) {
+            return;
         }
 
         switch (optionListed) {
