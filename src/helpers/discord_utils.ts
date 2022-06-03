@@ -360,7 +360,7 @@ async function sendMessageExceptionHandler(
             case 50007: {
                 // Cannot send messages to this user
                 logger.warn(
-                    `Error sending message. Cannot send messages to this user. userID = ${channelID}.`
+                    `Error sending message. Cannot send messages to this user. userID = ${authorID}.`
                 );
                 break;
             }
