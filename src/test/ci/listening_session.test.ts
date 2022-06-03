@@ -33,7 +33,7 @@ describe("listening session", () => {
             voiceChannelStub = sandbox.createStubInstance(Eris.VoiceChannel);
             voiceChannelStub.voiceMembers = new Collection(Eris.Member);
             const x = sandbox.createStubInstance(KmqClient);
-            x.getChannel.callsFake(() => voiceChannelStub);
+            x.getChannel.callsFake(() => voiceChannelStub as Eris.AnyChannel);
             State.client = x;
             sandbox
                 .stub(discord_utils, "getNumParticipants")
