@@ -1,23 +1,16 @@
 version: "3.8"
 
 services:
-    kmq:
-        image: kmq
+    app:
         build:
-            context: ../
-            dockerfile: docker/kmq/Dockerfile
-            args:
-                NODE_ENV: ${NODE_ENV}
-        env_file: .env
-        environment:
-            SONG_DOWNLOAD_DIR: /songs
+            context: ..
+            dockerfile: .devcontainer/Dockerfile
         volumes:
+            - ..:/workspace:cached
             - songs:/songs
-        depends_on:
-            db:
-                condition: service_healthy
-        ports:
-            - 5858:5858
+        # Overrides default command so things don't shut down after the process ends.
+        command: sleep infinity
+        network_mode: service:db
 
     db:
         image: mariadb:10.3
@@ -35,7 +28,6 @@ services:
             timeout: 20s
             interval: 5s
             retries: 10
-
 volumes:
-    songs:
     mysql:
+    songs:

@@ -1,0 +1,12 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+{
+	"name": "KMQ Dev Container",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "app",
+	"workspaceFolder": "/workspace",
+	"extensions": [
+		"dbaeumer.vscode-eslint",
+		"esbenp.prettier-vscode"
+	],
+	"remoteUser": "node"
+}
