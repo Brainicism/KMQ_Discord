@@ -50,13 +50,13 @@ import TeamScoreboard from "../structures/team_scoreboard";
 import axios from "axios";
 import dbContext from "../database_context";
 import type { EmbedGenerator, GuildTextableMessage } from "../types";
+import type BookmarkedSong from "../interfaces/bookmarked_song";
 import type EliminationScoreboard from "../structures/elimination_scoreboard";
 import type EmbedPayload from "../interfaces/embed_payload";
 import type GameInfoMessage from "../interfaces/game_info_message";
 import type GameOptions from "../interfaces/game_options";
 import type GameSession from "../structures/game_session";
 import type GuildPreference from "../structures/guild_preference";
-import type QueriedSong from "../interfaces/queried_song";
 import type Round from "../structures/round";
 import type Scoreboard from "../structures/scoreboard";
 import type Session from "../structures/session";
@@ -1835,7 +1835,7 @@ export function sendDebugAlertWebhook(
 export async function sendBookmarkedSongs(
     guildID: string,
     bookmarkedSongs: {
-        [userID: string]: Map<string, QueriedSong>;
+        [userID: string]: Map<string, BookmarkedSong>;
     }
 ): Promise<void> {
     const locale = State.getGuildLocale(guildID);
@@ -1844,19 +1844,19 @@ export async function sendBookmarkedSongs(
             name: string;
             value: string;
             inline: boolean;
-        }> = [...songs].map((song) => ({
+        }> = [...songs].map((bookmarkedSong) => ({
             name: `${bold(
                 `"${getLocalizedSongName(
-                    song[1],
+                    bookmarkedSong[1].song,
                     locale
-                )}" - ${getLocalizedArtistName(song[1], locale)}`
-            )} (${standardDateFormat(song[1].publishDate)})`,
+                )}" - ${getLocalizedArtistName(bookmarkedSong[1].song, locale)}`
+            )} (${standardDateFormat(bookmarkedSong[1].song.publishDate)})`,
             value: `[${friendlyFormattedNumber(
-                song[1].views
+                bookmarkedSong[1].song.views
             )} ${LocalizationManager.localizer.translate(
                 guildID,
                 "misc.views"
-            )}](https://youtu.be/${song[1].youtubeLink})`,
+            )}](https://youtu.be/${bookmarkedSong[1].song.youtubeLink})`,
             inline: false,
         }));
 
