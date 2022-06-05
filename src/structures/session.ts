@@ -25,6 +25,7 @@ import SongSelector from "./song_selector";
 import State from "../state";
 import dbContext from "../database_context";
 import fs from "fs";
+import type BookmarkedSong from "../interfaces/bookmarked_song";
 import type GameSession from "./game_session";
 import type GuessResult from "../interfaces/guess_result";
 import type KmqMember from "./kmq_member";
@@ -82,7 +83,9 @@ export default abstract class Session {
     private songMessageIDs: { messageID: string; song: QueriedSong }[];
 
     /** Mapping of user ID to bookmarked songs, uses Map since Set doesn't remove QueriedSong duplicates */
-    private bookmarkedSongs: { [userID: string]: Map<string, QueriedSong> };
+    private bookmarkedSongs: {
+        [userID: string]: Map<string, BookmarkedSong>;
+    };
 
     /** Timer function used to for ,timer command */
     private guessTimeoutFunc: NodeJS.Timer;
@@ -387,18 +390,25 @@ export default abstract class Session {
 
             // Store bookmarked songs
             await dbContext.kmq.transaction(async (trx) => {
-                const idLinkPairs: { user_id: string; vlink: string }[] = [];
+                const idLinkPairs: {
+                    user_id: string;
+                    vlink: string;
+                    bookmarked_at: Date;
+                }[] = [];
+
                 for (const entry of Object.entries(this.bookmarkedSongs)) {
                     for (const song of entry[1]) {
-                        idLinkPairs.push({ user_id: entry[0], vlink: song[0] });
+                        idLinkPairs.push({
+                            user_id: entry[0],
+                            vlink: song[0],
+                            bookmarked_at: song[1].bookmarkedAt,
+                        });
                     }
                 }
 
                 await dbContext
                     .kmq("bookmarked_songs")
                     .insert(idLinkPairs)
-                    .onConflict(["user_id", "vlink"])
-                    .ignore()
                     .transacting(trx);
             });
         }
@@ -474,10 +484,10 @@ export default abstract class Session {
     /**
      * Stores a song with a user so they can receive it later
      * @param userID - The user that wants to bookmark the song
-     * @param song - The song to store
+     * @param bookmarkedSong - The song to store
      */
-    addBookmarkedSong(userID: string, song: QueriedSong): void {
-        if (!userID || !song) {
+    addBookmarkedSong(userID: string, bookmarkedSong: BookmarkedSong): void {
+        if (!userID || !bookmarkedSong) {
             return;
         }
 
@@ -485,7 +495,14 @@ export default abstract class Session {
             this.bookmarkedSongs[userID] = new Map();
         }
 
-        this.bookmarkedSongs[userID].set(song.youtubeLink, song);
+        this.bookmarkedSongs[userID].set(
+            bookmarkedSong.song.youtubeLink,
+            bookmarkedSong
+        );
+
+        logger.info(
+            `User ${userID} bookmarked song ${bookmarkedSong.song.youtubeLink}`
+        );
     }
 
     /** Sends a message notifying who the new owner is */
@@ -556,7 +573,11 @@ export default abstract class Session {
                 }
             )
         );
-        this.addBookmarkedSong(interaction.member?.id, song);
+
+        this.addBookmarkedSong(interaction.member?.id, {
+            song,
+            bookmarkedAt: new Date(),
+        });
     }
 
     getRoundsPlayed(): number {
