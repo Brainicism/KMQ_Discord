@@ -5,7 +5,6 @@ import {
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import EnvType from "../../enums/env_type";
 import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
 import LocalizationManager from "../../helpers/localization_manager";
@@ -129,12 +128,15 @@ export default async function messageCreateHandler(
                 });
             } catch (err) {
                 const debugId = uuid.v4();
-                logger.error(
-                    `Error while invoking command (${parsedMessage.action}) | ${debugId} | Exception Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`
-                );
 
-                if (process.env.NODE_ENV === EnvType.DEV) {
-                    logger.error(err.stack);
+                if (err instanceof Error) {
+                    logger.error(
+                        `Error while invoking command (${parsedMessage.action}) | ${debugId} | Exception Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`
+                    );
+                } else {
+                    logger.error(
+                        `Error while invoking command (${parsedMessage.action}) | ${debugId} | Error: ${err}`
+                    );
                 }
 
                 sendErrorMessage(messageContext, {
