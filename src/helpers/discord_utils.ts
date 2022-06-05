@@ -1277,6 +1277,8 @@ export async function getGameInfoMessage(
         await dbContext.kmq("game_messages")
     );
 
+    if (!endGameMessage) return null;
+
     // deprecated case, where message's translation key is stored as message in db
     if (endGameMessage.message.startsWith("misc.gameMessages")) {
         endGameMessage.message = LocalizationManager.localizer.translate(
