@@ -273,8 +273,8 @@ async function lookupBySongName(
     const kmqSongEntries: QueriedSong[] = await dbContext
         .kmq("available_songs")
         .select(SongSelector.getQueriedSongFields())
-        .whereRaw(`song_name_en LIKE "%${songName}%"`)
-        .orWhereRaw(`song_name_ko LIKE "%${songName}%"`)
+        .whereILike("song_name_en", `%${songName}%`)
+        .orWhereILike("song_name_ko", `%${songName}%`)
         .orderByRaw("CHAR_LENGTH(song_name_en) ASC")
         .orderBy("views", "DESC")
         .limit(100);
