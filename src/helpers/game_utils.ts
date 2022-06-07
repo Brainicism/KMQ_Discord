@@ -127,8 +127,8 @@ export async function getSimilarGroupNames(
     const similarGroups = await dbContext
         .kpopVideos("app_kpop_group")
         .select(["id", "name", "kname"])
-        .whereRaw(`name LIKE "%${groupName}%"`)
-        .orWhereRaw(`kname LIKE "%${groupName}%"`)
+        .whereILike("name", `%${groupName}%`)
+        .orWhereILike("kname", `%${groupName}%`)
         .orderByRaw("CHAR_LENGTH(name) ASC")
         .limit(5);
 
